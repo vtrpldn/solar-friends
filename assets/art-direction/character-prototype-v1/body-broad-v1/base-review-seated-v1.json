@@ -1,0 +1,344 @@
+{
+  "measurements": {
+    "candidate": {
+      "width": 1254,
+      "height": 1254,
+      "uniformScale": 0.42749514563106794,
+      "poses": [
+        {
+          "bounds": [
+            179,
+            109,
+            564,
+            624
+          ],
+          "pivot": 359.5,
+          "area": 117921,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            765,
+            167,
+            1167,
+            624
+          ],
+          "pivot": 959,
+          "area": 108969,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            196,
+            686,
+            598,
+            1183
+          ],
+          "pivot": 383.5,
+          "area": 118163,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            793,
+            697,
+            1191,
+            1178
+          ],
+          "pivot": 979,
+          "area": 113183,
+          "sourceClipped": false
+        }
+      ]
+    },
+    "reference": {
+      "width": 1254,
+      "height": 1254,
+      "uniformScale": 0.7056410256410256,
+      "poses": [
+        {
+          "bounds": [
+            79,
+            16,
+            286,
+            322
+          ],
+          "pivot": 156,
+          "area": 29317,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            386,
+            16,
+            589,
+            323
+          ],
+          "pivot": 465,
+          "area": 28746,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            701,
+            16,
+            909,
+            323
+          ],
+          "pivot": 779.5,
+          "area": 29541,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1027,
+            16,
+            1228,
+            322
+          ],
+          "pivot": 1109.5,
+          "area": 29199,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            90,
+            329,
+            244,
+            632
+          ],
+          "pivot": 159,
+          "area": 29560,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            403,
+            333,
+            578,
+            633
+          ],
+          "pivot": 485.5,
+          "area": 26511,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            723,
+            337,
+            900,
+            632
+          ],
+          "pivot": 807,
+          "area": 27628,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1028,
+            383,
+            1202,
+            632
+          ],
+          "pivot": 1121,
+          "area": 25098,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            94,
+            641,
+            243,
+            953
+          ],
+          "pivot": 158.5,
+          "area": 29831,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            411,
+            641,
+            569,
+            953
+          ],
+          "pivot": 480.5,
+          "area": 30392,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            726,
+            641,
+            882,
+            952
+          ],
+          "pivot": 796,
+          "area": 30191,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1053,
+            641,
+            1207,
+            952
+          ],
+          "pivot": 1121.5,
+          "area": 30238,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            101,
+            960,
+            289,
+            1240
+          ],
+          "pivot": 198,
+          "area": 26773,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            416,
+            975,
+            607,
+            1238
+          ],
+          "pivot": 513.5,
+          "area": 27008,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            730,
+            962,
+            923,
+            1238
+          ],
+          "pivot": 828.5,
+          "area": 27158,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1061,
+            964,
+            1250,
+            1238
+          ],
+          "pivot": 1159,
+          "area": 27030,
+          "sourceClipped": false
+        }
+      ]
+    }
+  },
+  "registration": {
+    "schema": 1,
+    "family": "broad-body-prototype-v1",
+    "sheet": "base",
+    "source": {
+      "sha256": "79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c",
+      "width": 1254,
+      "height": 1254,
+      "columns": 2,
+      "rows": 2
+    },
+    "uniformScale": 0.38,
+    "frames": [
+      {
+        "index": 0,
+        "waist": [
+          350,
+          410
+        ]
+      },
+      {
+        "index": 1,
+        "waist": [
+          950,
+          445
+        ]
+      },
+      {
+        "index": 2,
+        "waist": [
+          370,
+          990
+        ]
+      },
+      {
+        "index": 3,
+        "waist": [
+          985,
+          1000
+        ]
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "index": 0,
+      "sha256": "d94daa9bce41450c619e127e72668757982ff742587990339471936887024ffa"
+    },
+    {
+      "index": 1,
+      "sha256": "72172ba8b4453b9fe10297ab77bae635d810d4998104b18f1db1d51828df663e"
+    },
+    {
+      "index": 2,
+      "sha256": "7707188a0ac33ed2985833346a2979b8c17601ca72ec91c83f14bc8eaedff95c"
+    },
+    {
+      "index": 3,
+      "sha256": "8c990758b8800b186b9e5b65f07615c1dd19f623e448b32e0895625b1c13c442"
+    }
+  ],
+  "worldImages": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/mata-atlantica-day-seated-v1.png"
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/mata-atlantica-night-seated-v1.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/cerrado-day-seated-v1.png"
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/cerrado-night-seated-v1.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/caatinga-day-seated-v1.png"
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/world/caatinga-night-seated-v1.png"
+    }
+  ],
+  "scope": "Internal separately authored four-pose seated candidate with one measured uniform transform. Four normalized comparisons and 24 static world views in three biomes, day and mirrored night. Closed-eye sitting is not a sleeping pose. No complete family, attachment, motion or public appearance acceptance.",
+  "sources": {
+    "candidate": {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/seated-candidate-v1.png",
+      "sha256": "79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c"
+    },
+    "reference": {
+      "path": "web/art/characters/prototype-v1/body-neutral-base.png",
+      "sha256": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f"
+    }
+  },
+  "scriptSha256": "08c03a079421ed8f64a9e47902635484e873bd8014d28c460fc5d424a85ecb4d",
+  "candidateEdgeClear": true
+}

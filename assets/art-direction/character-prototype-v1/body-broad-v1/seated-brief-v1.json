@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "status": "Candidate-only separate seated source; not public artwork",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Create a NEW separate 2 by 2 sprite sheet containing ONLY the four seated poses from the LAST ROW of the supplied broad-body reference. Do not include any standing or walking figures. Four complete independent full-body seated people, same person in every cell, broad soft abdomen and thighs, rounded cheeks, tan skin, bald head, cream sleeveless vest and cream shorts, brown boots. Top left: sitting upright hands on knees; top right: leaning forward elbows on thighs hands loosely together; bottom left: relaxed upright sitting head slightly turned up, hands on knees; bottom right: sitting asleep with eyes closed, hands on knees. Preserve the reference's exact painted identity, anatomy, warm outline, upper-left daylight, camera and clothing. Seat is INVISIBLE: no chair, stool, ground, shadow or props. Each figure centered within a quarter of the image with at least 10% transparent space on every side. Make the four figures SMALLER within the canvas so all boots and hands are fully present, especially the bottom-right boot. True transparent background, no text or grid. The whole image contains exactly FOUR figures in a 2 by 2 layout.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/base-candidate-v3.png",
+      "role": "Painted identity, body shape, seated poses and material reference"
+    }
+  ],
+  "reason": "Three full-sheet attempts failed the seated edge-clearance gate. Author the seated poses on a separate, roomier sheet rather than promote a clipped full atlas.",
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/seated-candidate-v1.png",
+  "remaining": [
+    "Measured native registration and cross-pose scale review",
+    "Dedicated genuine sleep pose; closed-eye sitting does not qualify as sleeping",
+    "Complete family and attachments before public integration"
+  ]
+}

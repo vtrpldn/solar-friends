@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "status": "Partial artwork authoring; no public integration",
+  "why": "The player creator still has one anatomical body shape. A broader body needs authored poses and compatible parts rather than stretching the current sheets.",
+  "fullSheetCandidates": {
+    "base-candidate-v1.png": "Rejected as a complete source: all four seated figures clip the bottom edge and pose 15 also clips the right edge.",
+    "base-candidate-v2.png": "Rejected as a complete source: seated pose 15 leaves only one pixel of right-edge clearance.",
+    "base-candidate-v3.png": "Rejected as a complete source: seated pose 15 reaches the right image edge despite a revised layout guide. Walking phases also need distinct authored gait poses. Unclipped standing/work drawings may be assessed separately later."
+  },
+  "seatedSource": {
+    "path": "seated-candidate-v1.png",
+    "sha256": "79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c",
+    "verdict": "Accepted for further internal family authoring only: four distinct unclipped seated key poses, consistent broader anatomy, warm painted shading and material edges.",
+    "registration": "seated-registration-v1.json",
+    "registrationSha256": "d349bc13afb9ace678215788342c91a4d96198bddb3626f777d70fe54b7ba882",
+    "uniformScale": 0.38,
+    "report": "base-review-seated-v1.json",
+    "reportSha256": "09dad62cc8b01087c9ea3b67862278c156b5b7467fae3834e50cd1c076eeac3f",
+    "visualReview": "Inspected the normalized four-pose comparison and all six final world boards, containing 24 static poses. At the corrected uniform scale, head size and seated height read consistently beside the original neutral body and Bento. Complete boots contact the ground and the broader torso/thigh silhouette remains legible beside the home, shed and road in Mata Atlantica, Cerrado and Caatinga, day and mirrored night. No opaque ground island or guide markup is present.",
+    "excluded": "Closed-eye seated pose is not a genuine sleeping pose. These are static source-body comparisons, without hair, palette masks, clothing overlays, activity equipment, transitions or public recipe availability."
+  },
+  "remaining": [
+    "Distinct complete walking cycle with coherent stride and body registration",
+    "Idle and activity sheets with matching anatomy and scale",
+    "Dedicated lying sleep source and sleep transitions",
+    "Exact per-pose material masks and fitted clothing, hair, facial hair, hat and equipment layers",
+    "Immutable full family bundle, public catalog and recipe validation",
+    "Portrait/world consistency and full animation review across all three biomes"
+  ]
+}

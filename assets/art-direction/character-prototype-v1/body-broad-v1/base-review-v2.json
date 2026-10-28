@@ -1,0 +1,409 @@
+{
+  "measurements": {
+    "candidate": {
+      "width": 1254,
+      "height": 1254,
+      "uniformScale": 0.7387919463087248,
+      "poses": [
+        {
+          "bounds": [
+            73,
+            35,
+            308,
+            340
+          ],
+          "pivot": 165.5,
+          "area": 38032,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            380,
+            33,
+            606,
+            340
+          ],
+          "pivot": 474.5,
+          "area": 37246,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            688,
+            34,
+            920,
+            341
+          ],
+          "pivot": 780,
+          "area": 37975,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1006,
+            35,
+            1225,
+            341
+          ],
+          "pivot": 1097.5,
+          "area": 36904,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            75,
+            364,
+            274,
+            666
+          ],
+          "pivot": 167,
+          "area": 39196,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            401,
+            365,
+            604,
+            665
+          ],
+          "pivot": 495.5,
+          "area": 36026,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            703,
+            364,
+            911,
+            667
+          ],
+          "pivot": 798,
+          "area": 37053,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            998,
+            409,
+            1200,
+            667
+          ],
+          "pivot": 1105,
+          "area": 34896,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            77,
+            691,
+            273,
+            988
+          ],
+          "pivot": 167,
+          "area": 37764,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            397,
+            688,
+            596,
+            988
+          ],
+          "pivot": 489,
+          "area": 38588,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            702,
+            690,
+            903,
+            988
+          ],
+          "pivot": 795,
+          "area": 38573,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1021,
+            690,
+            1218,
+            988
+          ],
+          "pivot": 1111.5,
+          "area": 38354,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            88,
+            997,
+            310,
+            1242
+          ],
+          "pivot": 190,
+          "area": 31491,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            408,
+            999,
+            631,
+            1241
+          ],
+          "pivot": 509.5,
+          "area": 32169,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            712,
+            996,
+            941,
+            1243
+          ],
+          "pivot": 814.5,
+          "area": 32424,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1041,
+            998,
+            1253,
+            1242
+          ],
+          "pivot": 1137.5,
+          "area": 30885,
+          "sourceClipped": true
+        }
+      ]
+    },
+    "reference": {
+      "width": 1254,
+      "height": 1254,
+      "uniformScale": 0.7056410256410256,
+      "poses": [
+        {
+          "bounds": [
+            79,
+            16,
+            286,
+            322
+          ],
+          "pivot": 156,
+          "area": 29317,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            386,
+            16,
+            589,
+            323
+          ],
+          "pivot": 465,
+          "area": 28746,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            701,
+            16,
+            909,
+            323
+          ],
+          "pivot": 779.5,
+          "area": 29541,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1027,
+            16,
+            1228,
+            322
+          ],
+          "pivot": 1109.5,
+          "area": 29199,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            90,
+            329,
+            244,
+            632
+          ],
+          "pivot": 159,
+          "area": 29560,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            403,
+            333,
+            578,
+            633
+          ],
+          "pivot": 485.5,
+          "area": 26511,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            723,
+            337,
+            900,
+            632
+          ],
+          "pivot": 807,
+          "area": 27628,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1028,
+            383,
+            1202,
+            632
+          ],
+          "pivot": 1121,
+          "area": 25098,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            94,
+            641,
+            243,
+            953
+          ],
+          "pivot": 158.5,
+          "area": 29831,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            411,
+            641,
+            569,
+            953
+          ],
+          "pivot": 480.5,
+          "area": 30392,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            726,
+            641,
+            882,
+            952
+          ],
+          "pivot": 796,
+          "area": 30191,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1053,
+            641,
+            1207,
+            952
+          ],
+          "pivot": 1121.5,
+          "area": 30238,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            101,
+            960,
+            289,
+            1240
+          ],
+          "pivot": 198,
+          "area": 26773,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            416,
+            975,
+            607,
+            1238
+          ],
+          "pivot": 513.5,
+          "area": 27008,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            730,
+            962,
+            923,
+            1238
+          ],
+          "pivot": 828.5,
+          "area": 27158,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            1061,
+            964,
+            1250,
+            1238
+          ],
+          "pivot": 1159,
+          "area": 27030,
+          "sourceClipped": false
+        }
+      ]
+    }
+  },
+  "worldImages": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1
+    },
+    {
+      "biome": "cerrado",
+      "night": 0
+    },
+    {
+      "biome": "cerrado",
+      "night": 1
+    },
+    {
+      "biome": "caatinga",
+      "night": 0
+    },
+    {
+      "biome": "caatinga",
+      "night": 1
+    }
+  ],
+  "scope": "Internal base-sheet body candidate only. Sixteen normalized pose comparisons and 24 static world views using four base-sheet clips in three biomes, day and mirrored night. No complete gait, sleep, hair, clothing fit, full animation or public appearance acceptance.",
+  "sources": {
+    "candidate": {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/base-candidate-v2.png",
+      "sha256": "33a9737e93179caa5e59c9bdb71d2ce44cee2db443068102c0ce8c7e63f74c47"
+    },
+    "reference": {
+      "path": "web/art/characters/prototype-v1/body-neutral-base.png",
+      "sha256": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f"
+    }
+  },
+  "scriptSha256": "9be3b7335fad061ae6caeb87aaf76d8a52f84ce40e51d4238b43749348b807cd",
+  "candidateEdgeClear": false
+}

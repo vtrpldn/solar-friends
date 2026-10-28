@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "status": "Candidate-only guided layout correction; review pending",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Image 1 is the edit target: preserve its exact sixteen painted broader-body people, identities, anatomy, poses and clothing. Image 2 is ONLY a geometry/layout guide, NOT artwork to include. Re-layout the entire sheet using the guide: each complete person must fit INSIDE the corresponding numbered safe rectangle. All sixteen figures have the SAME uniform artwork scale; the seated figures will therefore have more headroom. Leave generous transparent gutters and outer margins. Current bottom-right boot nearly touches the right edge: move every pose into its own safe cell, never crop any painted fingertip, head or boot. Output only sixteen people on true transparent background. Remove ALL guide rectangles, numbers, labels and background. Keep cream vest/shorts and brown boots, warm tan skin, broad softer body, bald scalp, warm painted style and upper-left daylight. No added props, platform, hair or text. Do not stretch anatomy or alter the poses.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/base-candidate-v2.png",
+      "role": "Edit target; preserve painted identity and anatomy"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/layout-guide-v3.png",
+      "role": "Layout guide only; not an art reference"
+    }
+  ],
+  "reason": "Version 2 leaves pose 15 one pixel from the right boundary. A new guide specifies larger cell and image margins.",
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/base-candidate-v3.png"
+}

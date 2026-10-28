@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "status": "Candidate-only layout correction; review pending",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Edit the supplied broader-body sprite sheet. Preserve all sixteen residents' identity, broader/softer anatomy, warm tan skin, bald heads, cream vest and shorts, brown boots, painted shading and poses. Correct only the sheet layout: provide generous true transparent margins around EVERY figure and between figures. Use an exact 4 by 4 equally spaced layout, each figure fully contained in its own cell, centered horizontally, at least 12 pixels of clear margin from all cell boundaries and all outer image edges. Entire boots, fingertips and heads must be present and separated from neighbors. Do not stretch anatomy. Uniformly reduce all sixteen complete figures by the same small amount as needed for clearance. Preserve the same relative size across poses. No text, grid, background, ground or added objects. Actual transparent background and internal gaps.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/base-candidate-v1.png",
+      "role": "Edit target; preserve painted identity and broader anatomy"
+    }
+  ],
+  "reason": "Version 1 clipped all four seated bodies at the lower image edge; pose 15 was also clipped at the right edge. The complete sheet needs generous margins without stretching anatomy.",
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/base-candidate-v2.png"
+}

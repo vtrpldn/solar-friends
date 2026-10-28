@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "status": "Candidate authoring in progress; not public artwork",
+  "intent": "Complete additional broad body shape for the player-facing resident creator. This base-sheet candidate is the first authoring step, not a complete body family.",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Asset type: Solar Friends modular resident BASE sprite sheet, a new broad body family candidate. Image 1 is the edit target and exact 4 by 4 pose-layout reference. Image 2 is the style/proportion reference at enlarged scale. Repaint the SAME adult resident in all sixteen cells as a visibly BROADER, SOFTER body build: fuller abdomen, wider hips and thighs, rounded shoulders, fuller cheeks and slightly wider nose. Keep height and head scale equal to the reference; this is a different authored anatomy, not a horizontal stretch. Preserve the exact pose sequence and camera in every cell: row1 four walking phases; row2 standing, hands held near chest, hands raised over shoulder for work, bent reaching; row3 four quiet standing/breathing variations with third looking up and second eyes shut; row4 four seated relaxed variations, last eyes shut. Each complete person stays centered within its own equal cell with generous transparency between cells, no clipping or overlap. Warm painted illustrated Brazilian ecovila style, broad hand-painted shading, crisp warm outlines, upper-left daylight, same tan skin and cream sleeveless vest/cream shorts and brown work boots. Bald scalp, no hair, hat, beard, tools or props. All faces must clearly belong to the same adult person. True transparent background and gaps; no ground, stool, shadow platform, labels, grid, text or watermark. Do not add accessories. This is only one base sheet of an eventual full animation family; preserve the reference's gameplay legibility and proportions.",
+  "references": [
+    {
+      "path": "web/art/characters/prototype-v1/body-neutral-base.png",
+      "role": "Edit target; exact 16-slot base pose layout and painted style"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-walk-cycle-v3/standing.png",
+      "role": "Enlarged style, height and material reference"
+    }
+  ],
+  "worldReference": "assets/art-direction/character-prototype-v1/body-walk-cycle-v3/world/mata-atlantica-day.png",
+  "requirements": [
+    "Different authored anatomy, not stretched source artwork",
+    "All 48 body poses plus dedicated genuine sleeping pose before public availability",
+    "Body-specific clothing, hair, facial hair, hat and activity-equipment registrations",
+    "Matching portraits and all activity/facing/day-night previews",
+    "Ground-contact and scale review through actual renderer in all three biomes",
+    "Immutable old body versions remain available and unchanged"
+  ],
+  "verdict": "Pending generated pixels and visual review"
+}
