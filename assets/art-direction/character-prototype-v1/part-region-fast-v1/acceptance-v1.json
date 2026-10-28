@@ -1,0 +1,24 @@
+{
+  "scope": "Equivalent part-region auditor and short maximum-roster observations; not sustained performance, total memory, broader appearance or complete builder acceptance.",
+  "sourceHashes": {
+    "web/character-parts.js": "fb33ea4235ce5122bf5225e5ec79604fcbfa42e63506b47809256a0396439218",
+    "scripts/verify-character-part-region-fast.mjs": "bb8eab6d3ff98857a3f5187d922fc1db1f5d040025d5b9d7b6d9619072261af9",
+    "scripts/benchmark-mixed-play.mjs": "26ad9ef5a15dcbf273be2cdcd8f8ed6afbc9a49bd8b70b987729ad7cdd8d856c",
+    "scripts/mixed-builder-fixture.mjs": "dd2c02b027577fe626ef8524113eb155a09452b99c2592334324af7c1f3e79d7"
+  },
+  "exactAppearanceBoards": {
+    "curls-0-false.png": "5ef300e5189bda5c5863892f0853f1dbcaea9eb05607e90ef8e65696db2205d9",
+    "curls-0-true.png": "f53034984dbde538322edda9f42fa22aff73b2763974d3fd64be461b465423bd",
+    "curls-1-false.png": "85804ebfd9a79f2d1c59ffc0bde43648a6e57b9fde9316037a49414f3731df93",
+    "curls-1-true.png": "a3ee2c4a77f6195c63ed1a42953d51882db7d82b69f572353a8671b58eb55dfb",
+    "sidepart-0-false.png": "6cbded77d72ecb1dbf54819c64e9957e2552b37b4110f310202ee599806ca00d",
+    "sidepart-0-true.png": "c689626168393c5dbd90c20f131a88be93a7e1554d2e478d36ede1ac318a0ac6",
+    "sidepart-1-false.png": "a0a7201e7411eb95656389938359cc78ffff7ecbda78c51c2e46e3c30762cf15",
+    "sidepart-1-true.png": "c8c1cd3a560ec3f582a55ff640270a6c4144c9fc41362151ab67356bdf2af4d3"
+  },
+  "beforeLoadMs": 35404.587834,
+  "afterLoadMs": 28112.623292000004,
+  "loadingProfileAddsOverhead": true,
+  "nativeCodeChanged": false,
+  "sourcePixelsAndResamplingChanged": false
+}
