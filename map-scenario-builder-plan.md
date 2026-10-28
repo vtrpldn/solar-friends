@@ -2530,3 +2530,12 @@ The complete watering row now passes the mixed appearance library with the water
 The actual 4/5/6/7/6/5 sequence was recorded for both hairstyles in daylight and mirrored night, decoded independently, and reviewed through complete-cycle sample boards plus all six closer transition boards per hairstyle. The native carrying hands remain over the can and sleeves/hem stay attached through the lean and return. Source selections and exact fingerprints: `short-sleeve-relaxed-water-motion-v1/motion-review-v1.json`. Kneeling/tending reference boards are prepared next.
 
 **Why:** character customization must stay coherent while residents carry and tilt equipment. Eight tending/feeding shirt poses, complete public/world outfit integration, broader body/face/clothing choices, dedicated sleep artwork, and all original biome/campaign/performance/memory/storage/recovery/usability requirements remain open.
+
+
+### Tending guide anatomy review in progress
+
+The four kneeling/tending guide intents now declare conservative native face-protection polygons bound to the unchanged body artwork. Guide diagnostics report any face overlap separately from trousers and boots. Final source review checks exact face pixels across all six character compositions and refuses an empty face check. These checks supplement visual anatomy review; they do not establish complete head or neck protection.
+
+The revised activities-8 guide covers all 1,011 opaque original shirt pixels with zero protected face or lower-body overlaps. Its collar and sleeve context was inspected. Activities-9 through 11 still have seam overlaps or coverage gaps and remain unfrozen. No tending paint has been accepted or exposed to players. Existing forty-pose motion acceptance remains unchanged.
+
+**Why:** kneeling poses place the neckline, sleeve and hem close to the face, raised knee and rear boot. Explicit source-bound protection prevents accepting a fitted shirt that paints over those parts. All remaining character, public integration and complete builder release requirements remain open.

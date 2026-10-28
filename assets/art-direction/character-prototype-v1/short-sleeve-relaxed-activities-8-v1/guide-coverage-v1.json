@@ -1,0 +1,15 @@
+{
+  "scope": "Analytical source-shirt coverage and optional inner-arm samples. Current material labels locate suspected original cloth; inspect actual painted seams and anatomy before accepting geometry.",
+  "results": [
+    {
+      "pose": "activities-8",
+      "extent": "full shirt",
+      "requiredGuideAlpha": 240,
+      "protectedOverlap": [],
+      "protectedHeadOverlap": [],
+      "upperShirtPixels": 1011,
+      "uncoveredCount": 0,
+      "uncovered": []
+    }
+  ]
+}
