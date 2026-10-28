@@ -1,0 +1,8 @@
+{
+  "status": "Static tending pose source reviewed; continuous tending and public integration pending",
+  "sourceSha256": "75f8045b7247e8e689ae05c1a03de55d897972678b0826e1d3efcbe943463bd0",
+  "compositionReportSha256": "1746f18d0abebaec02090c3b648e94dc52d2592e30b2275a8463f2463b560457",
+  "paletteReportSha256": "f167dc44c1387dda9a72179a7d3de916f9071b784378d85b09468941f4c55002",
+  "visualFindings": "Reviewed generated paint against first tending source; inspected six-composition character board, enlarged torso, day/night and mirrored guides, plain/equipped colour boards and measured waist detail. Warm broad cream folds and restrained seams match the outfit. Foreground v2 restores the complete near upper arm below the cuff and removes the rectangular cloth notch seen in v1. Face, hands, knee, trousers and boots retain proportions. Cuff continuity across the complete animation remains to be reviewed.",
+  "scope": "One internal static source only; no world, complete motion or public outfit acceptance."
+}

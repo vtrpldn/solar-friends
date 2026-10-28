@@ -2559,3 +2559,12 @@ The selected source covers all 1,011 original opaque shirt pixels. Six compositi
 This work also corrected two review-tool errors: the new face polygon canvas inherited an opaque presentation background and therefore selected the whole body; it now starts transparent. The palette waist detail used a fixed upright crop that showed the neckline on kneeling poses; it now follows measured interior waist landmarks, preserves proportions and records its native crop and tool fingerprint.
 
 **Why:** customizable residents need coherent clothing during gardening, including their bent arms and raised knee. This reaches 41 internal static shirt sources; integrated motion acceptance remains 40. Seven tending/feeding sources, continuous tending/equipment review, full public/world outfit integration, wider resident choices, dedicated sleep art, and all original biome/campaign/performance/memory/storage/recovery/usability requirements remain open.
+
+
+### Second painted tending source
+
+Activities-9 now has a reviewed static source in `short-sleeve-relaxed-activities-9-v1`, source v1/registration v1-owned-arm2. The generated PNG remains byte-identical to its original output. Source-bound foreground revision v2 restores more of the near arm below the cuff, removing a squared cloth notch found in enlarged visual review without changing generated paint.
+
+All 878 original opaque shirt pixels are covered. Six compositions pass 37,704 protected-face channel checks, 101,784 preserved trousers/boots channel checks, 17,184 foreground alpha checks and nine invalid-registration refusals. Forty-eight colour/accessory compositions pass 2,359,296 alpha and 600,768 protected lower-body checks. The generated source, character comparisons, torso, day/night and mirrored guides, plain/equipped palettes and measured waist detail were inspected; exact fingerprints are recorded in `static-review-v1-owned-arm2.json`.
+
+**Why:** the resident creator needs matching clothing through each gardening pose while preserving bent arms and hands. This reaches 42 internal static shirt sources; integrated motion acceptance remains 40. Six tending/feeding sources, complete tending/equipment motion, public/world outfit integration, wider resident choices, dedicated sleep art and all original builder release requirements remain open.

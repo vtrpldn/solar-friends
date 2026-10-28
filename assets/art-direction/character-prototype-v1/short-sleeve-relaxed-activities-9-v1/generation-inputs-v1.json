@@ -1,0 +1,18 @@
+{
+  "prompt": "prompt-v1.txt",
+  "promptSha256": "9eeb0dd418fb77d4177421c07ab91b3843f332d8d0d3e33bc1029632ffa034a4",
+  "anatomyReviewSha256": "c05b5e7c2e8d7134bf2f3fc240328ba84147c79bc17f7361ebf009bf003f46e1",
+  "foregroundIntentSha256": "11306f8418cdd6719ed08a1bd431ce467ad4920f1219534cb4164f0b4ae7112c",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-9-v1/mask.png",
+      "role": "Only generator input: frozen second kneeling tending silhouette",
+      "sha256": "15f58fec79455b22f0fe21543c9c556d40e6e22c648982b506b04d9c507dd2b6"
+    }
+  ],
+  "styleReferenceInspected": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-8-v3/candidate-v1.png",
+    "sha256": "0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20",
+    "role": "Reviewed first tending shirt style described in text; not a generator input"
+  }
+}
