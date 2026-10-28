@@ -1,0 +1,32 @@
+[
+  {
+    "reviewSchema": 1,
+    "part": "short-beard",
+    "clip": "sleep",
+    "sheet": "base",
+    "index": 15,
+    "bodyFrameSha256": "327d529c25e302d4540d3c3f2dbad5ca58b2c3e6f4dcc5dfcc71cbc27edc497a",
+    "source": {
+      "size": 1254,
+      "sha256": "a9cc1acb7d4d77e6dabfcbcaebfdb2c92f7003703f0358de46a8f6dd14ce061a",
+      "rect": [
+        0,
+        0,
+        1254,
+        1254
+      ]
+    },
+    "crop": [
+      24,
+      150,
+      64,
+      64
+    ],
+    "bounds": [
+      446,
+      172,
+      613,
+      750
+    ]
+  }
+]

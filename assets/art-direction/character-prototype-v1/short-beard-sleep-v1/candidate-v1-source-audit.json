@@ -1,0 +1,22 @@
+{
+  "sha256": "a9cc1acb7d4d77e6dabfcbcaebfdb2c92f7003703f0358de46a8f6dd14ce061a",
+  "ok": true,
+  "undeclaredPaint": 0,
+  "poses": [
+    {
+      "sheet": "base",
+      "index": 15,
+      "pixels": 97350,
+      "inside": 97350,
+      "bounds": [
+        469,
+        193,
+        1038,
+        900
+      ],
+      "coverage": 1,
+      "minimumCoverage": 0.98,
+      "ok": true
+    }
+  ]
+}

@@ -3,10 +3,12 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
+const maskFile=process.argv.find(arg=>arg.startsWith('--mask='))?.slice(7)??'mask.png';assert(['mask.png','jaw.png'].includes(maskFile));
 const [name,version]=process.argv.slice(2);assert(/^[a-z0-9-]+$/.test(name??'')&&/^v[1-9][0-9]?$/.test(version??''));
 const root='assets/art-direction/character-prototype-v1/'+name,intent=JSON.parse(await readFile(root+'/registration-intent.json','utf8'));
+assert(Object.hasOwn(intent.guideHashes,maskFile),'The selected silhouette must belong to the frozen guide.');
 for(const [file,hash]of Object.entries(intent.guideHashes))assert.equal(createHash('sha256').update(await readFile(root+'/'+file)).digest('hex'),hash,'Frozen guide changed');
-const source=await readFile(root+'/candidate-'+version+'.png'),mask=await readFile(root+'/mask.png'),sha256=createHash('sha256').update(source).digest('hex');
+const source=await readFile(root+'/candidate-'+version+'.png'),mask=await readFile(root+'/'+maskFile),sha256=createHash('sha256').update(source).digest('hex');
 const server=await serve(0);let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/clothing-source-audit`);

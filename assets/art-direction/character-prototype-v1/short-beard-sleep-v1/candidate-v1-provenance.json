@@ -1,0 +1,9 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-58bd05b2-2067-45df-8654-fd3340b75869.png",
+  "sha256": "a9cc1acb7d4d77e6dabfcbcaebfdb2c92f7003703f0358de46a8f6dd14ce061a",
+  "copyByteIdentical": true,
+  "paintEdited": false,
+  "prompt": "prompt-v1.txt",
+  "inputs": "generation-inputs-v1.json",
+  "status": "Internally reviewed static source and complete-family composition; public world/motion integration pending"
+}

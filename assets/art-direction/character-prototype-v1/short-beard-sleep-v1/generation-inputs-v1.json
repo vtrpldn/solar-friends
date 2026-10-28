@@ -1,0 +1,25 @@
+{
+  "status": "Pre-generation body-bound sleep facial layer",
+  "tool": "built-in image_gen",
+  "transparentBackground": true,
+  "prompt": "prompt-v1.txt",
+  "registrationIntent": "registration-intent.json",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-beard-sleep-v1/jaw.png",
+      "role": "Exact frozen beard/moustache geometry: paint green only",
+      "sha256": "3c24d78591b215778e449e39ad5278d12c05a7ce747250622b1ad24bb05f6e85"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-beard-sleep-v1/faces.png",
+      "role": "Exact sleeping head/camera context only; body not output",
+      "sha256": "b33b4c8b07850897230c2d8753e7584b896d7ed40ab77c880560a8925250c6fe"
+    },
+    {
+      "path": "web/art/characters/prototype-v1/facial-short-chestnut-source-03-v1.png",
+      "role": "Existing chestnut paint vocabulary only; atlas/upright shapes not output",
+      "sha256": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d"
+    }
+  ],
+  "paintEditingAllowed": false
+}

@@ -8,9 +8,11 @@
   "queuedAndInFlightProviderDisposal": true,
   "allOwnedCanvasesReleased": true,
   "borrowedBodiesPreserved": true,
+  "materialRegistrationSha256": "9a762e92d93e30d880dabac0620b3cc60b67ce7310ad30c18ad04ec3666a114f",
+  "reviewToolSha256": "adbf7a476d96915558bad507bf9f9f951b81abb1abb5218c9b45402b36447b27",
   "rendererSha256": {
-    "character-family-appearance.js": "99edb9c19d32259b5a8610431fda8de079fd705d56659206cc3d7ee9ef094e3a",
-    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b",
+    "character-family-appearance.js": "248b6fa0a52f521720dda9faca5e83b711dbf77e6336e1769c3b4a5e4531c5e7",
+    "character-family-accessories.js": "97a01ba25ffdf9e2d7513f5b29537585a4f8fef805c373d26331f5a8e88430df",
     "character-facial-hair.js": "79cc33fdd329f2dc1bf80176ce058a0a12e84cd80cd24fda110e870f6fb1f09b"
   },
   "registrationSha256": "63610a83dd7e486b74522c937305006b8fe1ccda09b425ee9399896133e7ed40"

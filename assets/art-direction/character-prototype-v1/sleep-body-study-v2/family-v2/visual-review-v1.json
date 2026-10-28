@@ -1,0 +1,20 @@
+{
+  "status": "Internal static composition reviewed; not public release acceptance",
+  "files": {
+    "accessory-details-v1.png": "2f35797d0d9a7d835e1adeaf825553bd0bd5b0cfceb1104d6e1ed0ca1bd7c5bb",
+    "accessory-review-v1.png": "d79c3120220e447ab5cf33ec1e016317c9e11569313f79ad4a96b2e1fc2d7167",
+    "accessory-verification-v1.json": "99167aa24965f6bd8bb45f8d4915422707bec18702b9b56d9b7c91ffc2dba5be",
+    "definition-v1.json": "3cb02ac349f69855cb1eb6766ff18e4c58fdced07df6e097c11e1c768df3a68e"
+  },
+  "findings": [
+    "Dedicated reclining beard follows the sleeping jaw; eyes and mouth remain readable.",
+    "Both hairstyles and sleeveless/short-sleeve outfits retain the facial drawing.",
+    "Hat-only sleeping frames match the no-accessory frames; awake hat placements remain unchanged."
+  ],
+  "remaining": [
+    "Actual biome terrain and ground shadows",
+    "Day/night/rain and zoom review through world renderer",
+    "Recorded and visually inspected motion transitions",
+    "Versioned public creator, recipe, save and import integration"
+  ]
+}
