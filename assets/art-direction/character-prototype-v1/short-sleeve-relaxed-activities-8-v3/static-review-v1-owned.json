@@ -1,0 +1,8 @@
+{
+  "status": "Static tending pose source reviewed; complete tending motion and public integration pending",
+  "sourceSha256": "0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20",
+  "compositionReportSha256": "580f1e8dc820ed454db5c77452662f5fab49bbf055b0eb4072b3950e1111deeb",
+  "paletteReportSha256": "93c90ecea6812876a55c2d32ff0819112d4cf693a899f0ab284b8374f406d991",
+  "visualFindings": "Inspected unchanged generated paint, six character compositions, enlarged torso, day/night and mirrored guides, plain/equipped 48-palette boards, and measured waist detail. Broad cream folds and restrained seams match the existing outfit. Collar and armpit fully cover the original shirt. Hands remain visible, face unchanged and trousers/boots preserved. Native pixel steps at arm ownership are visible enlarged; continuous cuff appearance remains a motion/world gate.",
+  "scope": "One internal static source only. Does not accept continuous tending motion, world rendering, or the public outfit."
+}

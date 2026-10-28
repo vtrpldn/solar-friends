@@ -1,0 +1,18 @@
+{
+  "prompt": "prompt-v1.txt",
+  "promptSha256": "ef2bb79a425d562e94c9304b9f687a162ab50483cf2ff3197551022c09cbd042",
+  "anatomyReviewSha256": "d35f1e33f92ad26f5c3f216968dc1e2685829b65ea71d5ac93ae4c0d741c88eb",
+  "foregroundIntentSha256": "6ddb37fbddba13f710fd13a18748f68b13bb909427456ca229a337869183a6a5",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-8-v3/mask.png",
+      "role": "Only generator input: frozen kneeling silhouette with widened collar and armpit margin",
+      "sha256": "08b7a569d2c94139cc9ad8db2e2ed9c39b187c115810104db806a7dac63d957e"
+    }
+  ],
+  "styleReferenceInspected": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-4-v2/candidate-v1.png",
+    "sha256": "2525d552956b314d9f14342caf8e9f02af877aa001bcc7f4f5cd02d894180f2e",
+    "role": "Reviewed cream cotton style described in text, not supplied as second generator image"
+  }
+}

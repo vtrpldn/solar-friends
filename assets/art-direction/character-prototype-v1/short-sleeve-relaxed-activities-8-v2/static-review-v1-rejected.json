@@ -1,0 +1,7 @@
+{
+  "status": "rejected; inactive",
+  "reason": "Native armpit pixel (158,157) alpha228 fails minimum240; collar now covers fully",
+  "faceChecks": 37824,
+  "sourceSha256": "72cbbdcecb662950b021be10e868cbea0d4c16c6038661c5d709a35915ed9a9e",
+  "next": "New activities-8-v3 with widened armpit margin; no generated paint edit"
+}

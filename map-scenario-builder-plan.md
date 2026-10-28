@@ -2548,3 +2548,14 @@ The diagnostic now supports `--strict`: it requires explicit anatomy criteria, m
 Activities-8 and activities-9 pass this gate. Activities-9 now covers all 878 original opaque shirt pixels without protected face or lower-body overlap; its collar, sleeves and kneeling context were inspected. Activities-10 and 11 correctly fail and remain unfrozen. Unsuccessful seam experiments were discarded rather than promoted. JavaScript syntax validation passes.
 
 **Why:** saving a measurement report must not be mistaken for passing anatomy checks. This is an incremental source-guide improvement; no new painted tending pose or public outfit is accepted, and all remaining builder requirements stay open.
+
+
+### First painted tending source
+
+Activities-8 now has a reviewed static shirt source in `short-sleeve-relaxed-activities-8-v3`, source v1/registration v1-owned. Two earlier generated sources remain unchanged and explicitly rejected: the first failed collar coverage and the second failed armpit coverage. New frozen guide revisions added margin before regeneration; no threshold or generated pixels were changed.
+
+The selected source covers all 1,011 original opaque shirt pixels. Six compositions pass 37,824 exact protected-face channel checks, 120,120 preserved trousers/boots channel checks, native foreground checks and nine invalid-registration refusals. Forty-eight colour/accessory compositions pass 2,359,296 alpha checks and 710,352 protected lower-body checks. Source, complete character boards, torso, day/night/mirrored guides, palettes and actual waist detail were inspected. Source and evidence fingerprints are recorded in `static-review-v1-owned.json`.
+
+This work also corrected two review-tool errors: the new face polygon canvas inherited an opaque presentation background and therefore selected the whole body; it now starts transparent. The palette waist detail used a fixed upright crop that showed the neckline on kneeling poses; it now follows measured interior waist landmarks, preserves proportions and records its native crop and tool fingerprint.
+
+**Why:** customizable residents need coherent clothing during gardening, including their bent arms and raised knee. This reaches 41 internal static shirt sources; integrated motion acceptance remains 40. Seven tending/feeding sources, continuous tending/equipment review, full public/world outfit integration, wider resident choices, dedicated sleep art, and all original biome/campaign/performance/memory/storage/recovery/usability requirements remain open.
