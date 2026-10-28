@@ -1,0 +1,104 @@
+{
+  "scope": "One internal pose source, six complete character combinations and static lighting/facing guides. No complete shirt animation or player recipe.",
+  "composed": 6,
+  "outside": 6,
+  "protectedLower": 6,
+  "foregroundChecks": 6,
+  "foregroundAlphaChecks": 16656,
+  "preservedBodyChecks": 106008,
+  "protectedHeadChecks": 36480,
+  "refused": 9,
+  "coverage": [
+    {
+      "sheet": "activities",
+      "index": 13,
+      "extent": "full shirt",
+      "oldTop": 1398,
+      "covered": 1398,
+      "ratio": 1,
+      "collarLeaks": [],
+      "uncovered": []
+    }
+  ],
+  "foregroundVersion": "v1",
+  "sourceHash": "973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809",
+  "anatomyReview": {
+    "sha256": "2694e45feff546c77a579199b2c68b51c78ec3cb793cc0ebce3963abee719148",
+    "criteria": {
+      "status": "pre-paint feeding anatomy criteria",
+      "materialRevision": "v11",
+      "materialSha256": "7fd34f1a834f649e01d142359cc72624afea071f38a458597af50d612feef4db",
+      "measuredWaistLine": [
+        [
+          0,
+          135
+        ],
+        [
+          100,
+          135
+        ],
+        [
+          113,
+          138
+        ],
+        [
+          128,
+          139
+        ],
+        [
+          140,
+          138
+        ],
+        [
+          150,
+          135
+        ],
+        [
+          154,
+          131
+        ],
+        [
+          255,
+          131
+        ]
+      ],
+      "requireFullShirtCoverage": true,
+      "protectedHeadPolygon": [
+        [
+          116,
+          32
+        ],
+        [
+          152,
+          32
+        ],
+        [
+          160,
+          51
+        ],
+        [
+          153,
+          71
+        ],
+        [
+          138,
+          76
+        ],
+        [
+          121,
+          68
+        ]
+      ],
+      "headProtection": "Conservative face interior from original native pose; exact channels must remain unchanged in all six final character compositions. Neck outside polygon may receive collar.",
+      "lowerProtection": "Original trousers at least two pixels below measured waist and all shoes remain unchanged. Exact original trousers/shoes own all their RGBA pixels independently of paint.",
+      "waistMeasurementSource": "body-family-relaxed-v1/materials-v11.json",
+      "guideLayering": "Complete shirt hem may continue under original trousers/boots only with explicitly verified native lower-body ownership; final composition requires exact preservation."
+    }
+  },
+  "reviewToolSha256": "f7e7321bd3d552a81aeb42678195de3f6cd732c56ef7a193055f7053865a594a",
+  "rendererSha256": {
+    "character-clothing.js": "8427bfdb00b0edc7fa8e219a7269c97c98eb028db41160b6c86f4198d33d6a69",
+    "character-hair.js": "0dc7e1557481582e5e40c60d923356ddb00d20e65ca8ffa0a20126b6e7cf0c4a",
+    "character-family-accessories.js": "80cc60a07e4ab1abe36856cfeaa54abcb7a21a8c6fab3ec4bbe9c80b08c6622b"
+  }
+}

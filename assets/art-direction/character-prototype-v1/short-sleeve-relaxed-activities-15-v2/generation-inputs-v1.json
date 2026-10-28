@@ -1,0 +1,19 @@
+{
+  "prompt": "prompt-v1.txt",
+  "promptSha256": "06ba46cf5d726b0b57dfe8130815dbd9c2e1336710eb6f2f6e8d3723eebdf5db",
+  "anatomyReviewSha256": "dd984bbec1ba3b0073f277e95179c500a088d9c54cbe292862bdc78672dff044",
+  "foregroundIntentSha256": "0a5e4c440dc448d8d7583f8d47eef9f1364da030eaefcd473c24f5bba3fcb05c",
+  "preservedBodySha256": "53f9a6169bcfe7e3fe8c9b1625030a7133ec477893fb561ddf64648394f91586",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-15-v2/mask.png",
+      "sha256": "c51ce681569d3dc4963e80ccbc51634ecc5e821244c729a9a61d2f64888d3670",
+      "role": "Only generator input: corrected upper sleeve silhouette frozen against native shoulder"
+    }
+  ],
+  "styleReferenceInspected": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-11-v2/candidate-v1.png",
+    "sha256": "221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0",
+    "role": "Reviewed cream painted shirt style described in text; not generator input"
+  }
+}

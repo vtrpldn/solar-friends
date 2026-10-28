@@ -1,0 +1,10 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-6d7b79e0-5345-4b11-a42b-4f801c57a754.png",
+  "sourceSha256": "4bf53fffde3dfdbb322c281d0cc97b1cefad28a00a98d5be9b3c5b7f1f16b71a",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "prompt-v1.txt",
+  "generationInputs": "generation-inputs-v1.json",
+  "generationInputsSha256": "f918d220ae5dd22015cddae369457aebd3e9e5c17cac9e73c29ab23bf1cd3284",
+  "status": "Unreviewed final feeding source; inactive"
+}

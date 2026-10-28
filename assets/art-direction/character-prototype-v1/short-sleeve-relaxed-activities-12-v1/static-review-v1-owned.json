@@ -1,0 +1,8 @@
+{
+  "status": "Static feeding shirt source reviewed; complete feeding motion and public integration pending",
+  "sourceSha256": "ed39e7d9e2fc4f13eada796bb9d6fa3fac2b5647b575366c909d43bda4268114",
+  "compositionReportSha256": "8b62afa554bf72869adc76861c527dc372699bee7019545e6b5dd954e9b08be7",
+  "paletteReportSha256": "801128ad5a846deb439df4ed28ee962c1fa2d00e17b2c33cdd0921abacaa0815",
+  "visualFindings": "Inspected unchanged source, enlarged native torso and arm layering, plain/equipped palette boards, measured waist, daylight/night and mirrored guides. Warm cream paint and broad folds fit the existing outfit; original hands and forearms remain in front, neckline covers the old shirt, and trousers/boots retain original proportions. Final pose uses a new wider upper sleeve to remove exposed shoulder skin. Complete bucket/grain/feeding-return motion remains a separate gate.",
+  "scope": "One internal static source only; no continuous feeding, world, public outfit or broader resident-creator acceptance."
+}

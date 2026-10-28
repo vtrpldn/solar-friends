@@ -1,0 +1,7 @@
+{
+  "status": "rejected; inactive",
+  "reason": "Numerical full-shirt coverage passes, but painted sleeve leaves exposed upper-arm/shoulder strip behind garment. Native source shoulder outline needs wider upper curve.",
+  "sourceSha256": "4bf53fffde3dfdbb322c281d0cc97b1cefad28a00a98d5be9b3c5b7f1f16b71a",
+  "generatedPaintEdited": false,
+  "next": "New15-v2 frozen upper sleeve curve; repeat generation and full review"
+}

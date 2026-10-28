@@ -1,0 +1,10 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-44bb37cb-9ad9-421a-86d9-c44b24f49706.png",
+  "sourceSha256": "34438ac8a533772f7e4d8b7863b054b883c0f4afd84f2776f97618a0e7f50f75",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "prompt-v1.txt",
+  "generationInputs": "generation-inputs-v1.json",
+  "generationInputsSha256": "3a2f125e3817c2f853497402290d57e0af84643df624bcdcf493534e2f79486b",
+  "status": "Unreviewed final feeding source with corrected shoulder; inactive"
+}

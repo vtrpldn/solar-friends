@@ -1,0 +1,14 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-07448663-b898-4d37-a5a2-ab9cedaa9efc.png",
+  "sourceSha256": "973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809",
+  "copyByteIdentical": true,
+  "generatedPaintEdited": false,
+  "prompt": "prompt-v1.txt",
+  "generationInputs": "generation-inputs-v1.json",
+  "generationInputsSha256": "0c9299209412a46f8d98505f5821e1026ce8967fcd9af93038fb258356c99e15",
+  "status": "Unreviewed feeding source; inactive",
+  "reuseFromCollection": "short-sleeve-relaxed-activities-13-v1",
+  "reuseReason": "Exact same mask and prompt bytes; independent pose-bound native body, hand, face and lower-body review required",
+  "actualGenerationInputs": "../short-sleeve-relaxed-activities-13-v1/generation-inputs-v1.json",
+  "actualGenerationInputsSha256": "3708164c77d8d6e1f55931c463045eb6ab230367274c1df37ea9a3dcfa23b778"
+}

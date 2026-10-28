@@ -2619,3 +2619,14 @@ All four final feeding poses (activities12–15) now have native source referenc
 Full-body references and each foreground/garment context were inspected. Pose13/14 share a byte-identical silhouette, but retain separate exact body/face/arm/waist bindings; any reused generated source still requires independent final composition and palette validation. Exact prompts, reference roles and hashes are saved before generation.
 
 **Why:** feeding combines a held container, a bent arm and several grain-scattering positions. Independent native ownership is required to keep hands visible as clothing changes. These are analytical guides only; no feeding paint or new integrated pose is accepted yet. The current accepted integration remains44, with all original public/world and broader builder release requirements open.
+
+
+### Complete static feeding shirt sources
+
+All four feeding poses now have reviewed static shirt sources: activities12/13/14 collections `short-sleeve-relaxed-activities-12-v1`, `13-v1`, `14-v1`, and activities15 collection `short-sleeve-relaxed-activities-15-v2`; all use source v1/registration v1-owned. Pose13/14 reuse byte-identical generated paint for their identical garment silhouettes, with separate body/arm/face/waist binding and independent reviews. Actual shared-generation provenance is explicit. Every generated PNG remains unchanged from its original output.
+
+The four final sources cover all 5,454 original opaque shirt pixels. Their 24 complete static comparisons pass 146,016 exact protected-face and 425,664 preserved trousers/boot channel checks, plus native foreground checks and nine invalid-registration refusals per pose. The 192 palette/accessory combinations pass 9,437,184 alpha checks and 2,535,264 protected lower-body checks. Paint, enlarged torso/arm layering, plain/equipped palettes, measured waist, day/night and mirrored guides were inspected. Exact fingerprints are recorded beside each selected source in `static-review-v1-owned.json`.
+
+The first activities15 paint remains explicitly rejected despite passing numeric coverage: it exposed a shoulder strip behind the garment. A new frozen guide widened the upper sleeve curve and regeneration removed that visual defect. No generated pixels were retouched and no numerical criterion was relaxed.
+
+**Why:** the resident creator needs coherent clothes through feeding as well as walking, resting and gardening. This reaches48 internal static shirt sources; integrated motion acceptance remains44 until bucket, grain and feeding-return review. Full public/world outfit integration, broader body/face/clothing choices, dedicated sleep art and all original biome/campaign/performance/memory/storage/recovery/usability requirements remain open.
