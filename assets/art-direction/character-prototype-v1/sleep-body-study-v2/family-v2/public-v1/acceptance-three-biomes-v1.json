@@ -1,0 +1,56 @@
+{
+  "status": "Passed the specified public sleep-family player workflows in all three launch biomes",
+  "cases": [
+    {
+      "biome": "mata-atlantica",
+      "assetVersion": "resident-parts-v6",
+      "files": {
+        "mata-report.json": "af1244752090bc6b6c7cc7c2e455ec4d955027f711625c4721b228889b4f82c0",
+        "mata-sleep-preview.png": "f23f2159dd1aedcae88e1f2264d54adf96e3270f3add8694565cfcb1150cf6cd",
+        "mata-custom-village.png": "3f5a65ab4ea28fd3813fe83829b1a0cc1e18012f9206ce529455e743219c2f1b",
+        "mata-live-custom.png": "3bf2678063492f419d1611edc392083cd4c4451cf2be85828c7d1bb7573d2dc5"
+      }
+    },
+    {
+      "biome": "cerrado",
+      "assetVersion": "resident-parts-v5",
+      "files": {
+        "cerrado-report.json": "1c7d18fc8b2ad612f42d8131024874cce9da128c8d6d7ec3769b1f95bf6db908",
+        "cerrado-sleep-preview.png": "6a36c94cd8fcba1ed5efce75798d01a95d30dc583f5678bfb2d36b1d3503b86a",
+        "cerrado-custom-village.png": "c8ac5ebee7ef324d0de5fd79cf50e4eda3c800f9940d69e09b82e174475931bd",
+        "cerrado-live-custom.png": "db96476730923db99dc716d15cfb3172ce848d6dfd4dc244e732bd052d7880eb"
+      }
+    },
+    {
+      "biome": "caatinga",
+      "assetVersion": "resident-parts-v6",
+      "files": {
+        "caatinga-report.json": "ed606f8dd6cf03f5fcb713d2b1f454b3e886ff8d3356db60ac4cd19c2e3abbb4",
+        "caatinga-sleep-preview.png": "aca4cfe3e5f38f1bc87ebd4c361d5a064af4672d573a12777ca0dc7d397c8bc3",
+        "caatinga-custom-village.png": "8089864c3d9b7eaf440570f1a5f0be469449da569a6f1202c7e909cf72c2b9e3",
+        "caatinga-live-custom.png": "3e3639fa48b53d8b336853ca2ad71c944a919455229f2085a2ead59474996edc"
+      }
+    }
+  ],
+  "scriptSha256": "5bc25b34dcb961bfb5bf4bbcd59fcddacb07962b729ee21dccd3fc93e7216072",
+  "classicRegression": {
+    "command": "node scripts/verify-resident-parts.mjs",
+    "poseComparisons": 288,
+    "feedingReturns": 12,
+    "nativeCatalogParity": true
+  },
+  "legacyWorkRegression": {
+    "poseComparisons": 32,
+    "unchangedPoses": 352,
+    "feedingReturns": 16
+  },
+  "inspected": "Sleep preview, custom village and live identity dialog for each biome",
+  "scope": "New v5/v6 public authoring, all pose previews, exact unclipped sleep framing, facing/night/scale preview, undo/redo, resident/scenario export/import, independent duplicate, draft reload, native playtest, cancelled/applied cosmetics and exact checkpoint reload. This completes this artwork-family public integration sweep only.",
+  "remaining": [
+    "Physical lowering/rising sequence is absent; activity changes use discrete poses",
+    "Broader body/face/garment/bottom/shoe options",
+    "Full performance/memory and session lifecycle gates",
+    "Remaining generic browser fixture refresh and regression checks",
+    "Every other unfinished original builder requirement"
+  ]
+}
