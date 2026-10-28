@@ -1,0 +1,13 @@
+{
+  "descriptor": {
+    "id": "relaxed-sleep-v1",
+    "url": "/art/characters/relaxed-sleep-v1/bundle-v1.json",
+    "sha256": "f920cd78f9b736a255a90f2a56299a478bad0b8cf086d12e4f21ed283248412f",
+    "maximumBytes": 6291456
+  },
+  "sourceCount": 136,
+  "newSourceCount": 5,
+  "internalDefinitionSha256": "3cb02ac349f69855cb1eb6766ff18e4c58fdced07df6e097c11e1c768df3a68e",
+  "publicRecipeActivation": false,
+  "scope": "Byte-identical source packaging and closed bundle staging; loader/player integration acceptance pending."
+}

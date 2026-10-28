@@ -2852,3 +2852,12 @@ The hat switches with the body pose, the beard persists, garment/hair layers sta
 `verify-living-land.mjs` also passes and refreshes its current browser fixtures: visible seeded forest and real clearing shade, saved road/extraction disturbance, fifteen restrained soil patches, resident restoration, exact checkpoints, read-only appearance and banana-canopy solar exposure.
 
 **Why:** a still image cannot expose a detached hat, unstable contact or activity handover. The decoded movie makes the remaining hard-switch limitation explicit before public integration. All other unfinished builder requirements remain open.
+
+
+### Staged versioned sleep-family bundle and loader
+
+`prepare-bundled-sleep-family.mjs` packages the complete internal definition as a separate `relaxed-sleep-v1` schema-3 bundle. It preserves all source hashes, copies the five new source PNGs byte-identically and references the existing immutable artwork for the other 131 entries. The bundle keeps all five body sources, forty-eight garment registrations, activity equipment and explicit sleep accessory rules. Its descriptor pins the registration bytes and bounds the response size. No native/JavaScript player appearance catalog selects this revision yet, and older bundles are unchanged.
+
+The dedicated loader uses a closed source catalog, strict schema/field/source counts, streamed registration-size bounds and exact registration/source hashes. It prepares bounded complete-family libraries for both sleeveless and short-sleeve appearances and owns/disposes their source body family. `verify-bundled-sleep-family.mjs` loads it through HTTP and passes 192 exact reviewed-pose comparisons, eight feeding-return comparisons, four retained-provider checks after disposal, five invalid-option refusals and three corrupt/oversized input refusals. Copied sleeping contacts and shadows persist after the library closes. Exact descriptor, source packaging and verifier hashes are recorded in `sleep-body-study-v2/family-v2/bundle-{staging,verification}-v1.json`.
+
+**Why:** a reviewed internal drawing needs a bounded, immutable asset revision before player recipes and saves can safely refer to it. Native/JavaScript recipe revisions, player creator selection, saved/exported/imported residents and scenarios, public world integration and all remaining original release gates still need implementation and verification. The recorded hard pose-switch limitation remains explicit.

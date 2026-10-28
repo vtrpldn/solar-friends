@@ -1,0 +1,14 @@
+{
+  "reviewedPoseComparisons": 192,
+  "feedingReturns": 8,
+  "retainedAfterDisposal": 4,
+  "invalidOptionsRefused": 5,
+  "corruptOrOversizedInputsRefused": 3,
+  "inputs": {
+    "scripts/verify-bundled-sleep-family.mjs": "6d30f6c9104a411ca9c39b9345f9ebddd732d37d4eb041c2a3367562fe08eda7",
+    "web/character-sleep-family-bundle.js": "40a16ce373bde8a0006907aa66317dd41fe3a7317b11c6ba7f396ec495fff6ab",
+    "web/character-sleep-family-bundle-index.js": "b641d88bb793b34820ecca6b466cc81616b8aa2a977ebfc4fba2de50c43d906e",
+    "web/art/characters/relaxed-sleep-v1/bundle-v1.json": "f920cd78f9b736a255a90f2a56299a478bad0b8cf086d12e4f21ed283248412f"
+  },
+  "scope": "Staged immutable sleep bundle loaded over HTTP and compared to the internal complete family, with bounded caches, copied metadata, disposal and malformed-input refusal. Public recipes, native catalog, creator/save/import activation remain pending."
+}
