@@ -1,3 +1,4 @@
+import {createAppearanceLeaseCache} from './appearance-lease-cache.js';
 import {composeClothingPose} from './character-clothing.js';
 import {bodyTransformHasContacts} from './character-contact-atlas.js';
 import {prepareClothingColourSource} from './character-clothing-colour.js';
@@ -19,8 +20,8 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
  if(typeof load!=='function'||typeof family?.frameForPose!=='function'||!Number.isInteger(maxEntries)||maxEntries<1||maxEntries>24||!Number.isInteger(maxConcurrent)||maxConcurrent<1||maxConcurrent>4||!Number.isInteger(maxQueued)||maxQueued<1||maxQueued>128)throw Error('Choose bounded complete-family composition limits.');
  const hasContacts=Object.values(family.binding?.ownership?.sources??{}).some(source=>bodyTransformHasContacts(source.transform));
  if(hasContacts&&typeof family.contactForPose!=='function')throw Error('Contact-registered families must provide their pose contacts.');
- const registrations=structuredClone({materials,owners,equipment,accessories,workEquipment,clothing}),bodyKey=canonical(family.binding),caps=new Map(),underlays=new Map(),sourceWork=new Map(),tools=[],workTools=new Map(),garments=new Map(),records=new Map(),queue=[];
- let model=null,accessoryParts=null,active=0,closed=false,disposing=null;
+ const registrations=structuredClone({materials,owners,equipment,accessories,workEquipment,clothing}),bodyKey=canonical(family.binding),caps=new Map(),underlays=new Map(),sourceWork=new Map(),tools=[],workTools=new Map(),garments=new Map();
+ let model=null,accessoryParts=null,closed=false,disposing=null;
  const alive=()=>{if(closed)throw Error('This character family library has been released.');},source=file=>{
   if(typeof file!=='string'||!/^[a-z0-9-]+\.png$/.test(file))throw Error('Choose registered bundled family artwork.');
   if(!sourceWork.has(file))sourceWork.set(file,Promise.resolve().then(()=>load(file)));return sourceWork.get(file);
@@ -108,26 +109,14 @@ export async function prepareFamilyAppearanceLibrary({family,materials,owners,eq
    completed=true;return {frames,returns};
   }finally{for(const hashes of sharedColours.values())for(const colour of hashes.values())colour.prepared?.dispose();if(completed){for(const frame of [...frames.values(),...returns.values()])scratch.delete(frame);}for(const c of scratch)clear(c);}
  };
- const destroyRecord=record=>{if(record.value){for(const c of [...record.value.frames.values(),...record.value.returns.values()])clear(c);record.value.frames.clear();record.value.returns.clear();record.value=null;}};
- function drain(){while(!closed&&active<maxConcurrent&&queue.length){const job=queue.shift();active++;Promise.resolve().then(()=>compose(job.recipe)).then(job.resolve,job.reject).finally(()=>{active--;drain();});}}
+ const cache=createAppearanceLeaseCache({prepare:compose,destroy(value){for(const c of [...value.frames.values(),...value.returns.values()])clear(c);value.frames.clear();value.returns.clear();},maxEntries,maxConcurrent,maxQueued});
  return Object.freeze({
   async acquire(input){
-   alive();const recipe=validate(input),key=canonical(recipe);let record=records.get(key);
-   if(!record){
-    if(records.size>=maxEntries){const victim=[...records].find(([,r])=>r.value&&!r.users&&!r.waiters);if(!victim)throw Error('Release a character preview before preparing another appearance.');destroyRecord(victim[1]);records.delete(victim[0]);}
-    if(active>=maxConcurrent&&queue.length>=maxQueued)throw Error('Character previews are busy. Try again after preparation finishes.');
-    record={users:0,waiters:0,value:null,promise:null};const current=record;
-    record.promise=new Promise((resolve,reject)=>{queue.push({recipe,resolve,reject});}).then(value=>{current.value=value;return value;},error=>{if(records.get(key)===current)records.delete(key);throw error;});records.set(key,record);drain();
-   }else{records.delete(key);records.set(key,record);}
-   record.waiters++;let value;try{value=await record.promise;alive();}finally{record.waiters--;}
-   record.users++;let released=false;
-   const provider=Object.freeze({interpolation:'keyframes',animationProfile:'neutral-v1',...(hasContacts&&typeof family.shadowForPose==='function'?{shadowForPose(sheet,index,pose){alive();if(released)throw Error('This appearance preview has been released.');return family.shadowForPose(sheet,index,pose);}}:{}),...(hasContacts?{contactForPose(sheet,index,pose){alive();if(released)throw Error('This appearance preview has been released.');return family.contactForPose(sheet,index,pose);}}:{}),frameForPose(sheet,index,pose){alive();if(released)throw Error('This appearance preview has been released.');if(!sheets.includes(sheet)||!Number.isSafeInteger(index)||index<0||index>15)throw Error('Choose a registered family pose.');const normal=value.frames.get(sheet+':'+index);return sheet==='activities'&&pose?.sequenceIndex>=4?value.returns.get(index)??normal:normal;}});
-   return Object.freeze({provider,release(){if(released)return;released=true;record.users--;}});
+   alive();const recipe=validate(input),lease=await cache.acquire(canonical(recipe),recipe),value=lease.value;
+   const provider=Object.freeze({interpolation:'keyframes',animationProfile:'neutral-v1',...(hasContacts&&typeof family.shadowForPose==='function'?{shadowForPose(sheet,index,pose){lease.assertActive();return family.shadowForPose(sheet,index,pose);}}:{}),...(hasContacts?{contactForPose(sheet,index,pose){lease.assertActive();return family.contactForPose(sheet,index,pose);}}:{}),frameForPose(sheet,index,pose){lease.assertActive();if(!sheets.includes(sheet)||!Number.isSafeInteger(index)||index<0||index>15)throw Error('Choose a registered family pose.');const normal=value.frames.get(sheet+':'+index);return sheet==='activities'&&pose?.sequenceIndex>=4?value.returns.get(index)??normal:normal;}});
+   return Object.freeze({provider,release:lease.release});
   },
-  info:()=>({entries:records.size,active,queued:queue.length,leases:[...records.values()].reduce((n,r)=>n+r.users,0),preparedHairFrames:caps.size,underlays:underlays.size,workTools:workTools.size,clothingPoses:garments.size,appearanceFrames:[...records.values()].reduce((n,r)=>n+(r.value?50:0),0),maxEntries,maxConcurrent,maxQueued,closed,accessories:accessoryParts?.info()??null}),
-  dispose(){
-   if(disposing)return disposing;closed=true;for(const job of queue.splice(0))job.reject(Error('This character family library has been released.'));
-   disposing=(async()=>{await Promise.allSettled([...records.values()].map(r=>r.promise));for(const r of records.values())destroyRecord(r);records.clear();destroyParts();})();return disposing;
-  },
+  info:()=>{const {ready,...state}=cache.info();return {...state,preparedHairFrames:caps.size,underlays:underlays.size,workTools:workTools.size,clothingPoses:garments.size,appearanceFrames:ready*50,accessories:accessoryParts?.info()??null};},
+  dispose(){if(disposing)return disposing;closed=true;disposing=cache.dispose().finally(destroyParts);return disposing;},
  });
 }

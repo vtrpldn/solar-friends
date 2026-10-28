@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "status": "Shared lease scheduling regression checks passed",
+  "why": "Bound concurrent appearance preparation and share immutable recipe results without invalidating active previews",
+  "checks": {
+    "scheduler": "Shared jobs, queue/entry limits, leased eviction protection, independent release, disposal during work, retry and exact destruction",
+    "existingFamily": {
+      "pixelComparisons": 192,
+      "returnFrames": 8,
+      "refusals": 31,
+      "activeLeasesSurviveEviction": true,
+      "queuedAndInFlightDisposal": true
+    },
+    "composedFamily": {
+      "availablePoses": 48,
+      "refusals": 13,
+      "sharedRecipeLeases": true,
+      "leasedEvictionProtected": true,
+      "allOwnedCanvasesReleased": true
+    },
+    "legacyLibrary": {
+      "originalPoses": 240,
+      "facingLightingComparisons": 520,
+      "portraits": 10
+    }
+  },
+  "inputs": {
+    "web/appearance-lease-cache.js": "b6ecbf61b76772ea2159c2e7d7f4638428b489769a126e8ff23d24bc46fcb6c2",
+    "web/character-family-appearance.js": "e6b82ac6fa4cec845a1b0d1cf9fc654d4720b8d054e9c4da29efbfe07f4b0e6c",
+    "web/character-composed-family.js": "0361a8e9cf9722d8f18d3be064696319086e596ef37d797bed0af3d1a0e8bef1",
+    "scripts/verify-appearance-lease-cache.mjs": "aa6338e8acff92d248c2895a4182e5901b83702971b4369bfad8ef5f395c682e",
+    "scripts/verify-family-appearance.mjs": "e1c76996c74dad50d6d00faa4b0e95e5c18d6efb7a8c0571672775352908c7b4",
+    "scripts/verify-composed-resident-family.mjs": "f4e81027b24358af313adfd79a7ef4663b648faa4a1980625feb087bfb897c34",
+    "scripts/verify-resident-appearance-library.mjs": "df24ac46fc028e1f221d4b3cd62776a3eecd9070e0ae1089a2722212a9a2ccc4"
+  },
+  "limitations": [
+    "No process RSS improvement claim",
+    "Composed cache retains separate prepared body per distinct recipe; shared body optimization remains",
+    "Maximum population/performance and public creator integration remain open"
+  ]
+}

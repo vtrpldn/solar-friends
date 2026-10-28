@@ -1,3 +1,5 @@
+import {createAppearanceLeaseCache} from './appearance-lease-cache.js';
+import {canonical} from './editor/journal.js';
 import {prepareBodyFamily} from './character-body-family.js';
 import {createFamilyBodyMaterialModel,validateBodyMaterials,tintBodyMaterials} from './character-materials.js';
 import {validateHairColour} from './character-hair-colours.js';
@@ -22,4 +24,12 @@ export async function prepareComposedResidentFamily({definition,sources,recipe})
  const alive=()=>{if(disposed)throw Error('This composed resident family has been released.');};
  const provider=Object.freeze(Object.fromEntries(['frameForPose','frameOriginForPose','contactForPose','shadowForPose'].map(method=>[method,(...args)=>{alive();return appearance[method](...args);}])));
  return Object.freeze({recipe:selected,provider,portrait(canvas,{filter='none'}={}){alive();paintPreparedResidentPortrait(canvas,appearance.frameForPose(d.portrait.sheet,d.portrait.index),{filter,origin:appearance.frameOriginForPose(d.portrait.sheet,d.portrait.index),crop:d.portrait.crop});},info(){return {disposed,...appearance.info()};},dispose(){if(disposed)return;disposed=true;appearance.dispose();body.dispose();}});
+}
+
+// Reuse identical recipes and bound distinct prepared appearances. Active
+// previews hold leases; callers must release them before capacity can be reused.
+export function createComposedResidentLibrary({definition,sources,maxEntries=2,maxConcurrent=1,maxQueued=4}){
+ const data=structuredClone(definition),loaded=Object.fromEntries(Object.entries(sources).map(([id,value])=>[id,{...value}]));
+ const cache=createAppearanceLeaseCache({maxEntries,maxConcurrent,maxQueued,prepare:recipe=>prepareComposedResidentFamily({definition:data,sources:loaded,recipe}),destroy:value=>value.dispose()});
+ return Object.freeze({async acquire(input){const recipe=validateComposedFamilyRecipe(input,data.id),lease=await cache.acquire(canonical(recipe),recipe),value=lease.value;const provider=Object.freeze(Object.fromEntries(['frameForPose','frameOriginForPose','contactForPose','shadowForPose'].map(method=>[method,(...args)=>{lease.assertActive();return value.provider[method](...args);}])));return Object.freeze({recipe:value.recipe,provider,portrait(...args){lease.assertActive();return value.portrait(...args);},release:lease.release});},info:()=>cache.info(),dispose:()=>cache.dispose()});
 }
