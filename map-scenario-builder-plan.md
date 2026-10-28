@@ -2647,3 +2647,11 @@ Both actual feeding recordings were independently decoded. Reviewed whole-cycle 
 The registration file is 649,942 bytes and PNG transfer size is 19,073,941 bytes; this is not decoded memory or performance acceptance. The bundle is separate and not loaded or offered publicly yet. Its source provenance and byte-pinned index support the next loader and saved-recipe integration.
 
 **Why:** the normal game must load a closed, reproducible catalogue rather than development review folders or player-supplied artwork paths. Public outfit choice, world rendering, complete appearance range and all original release gates remain pending.
+
+### Load the packaged shirt through the runtime family adapter
+
+A separate `prepareBundledShirtResidentFamily` factory now loads the complete work-tool family plus the installed shirt bundle. The shirt definition reader bounds streamed registration bytes, checks its installed SHA-256 before parsing, accepts only the closed content-addressed PNG catalog, requires 48 unique sheet/pose registrations and rejects unused sources. Existing family composition validates exact body/foreground ownership and source hashes. Default resident factories do not fetch shirt artwork.
+
+An isolated browser test loads actual packaged HTTP assets and compares all 48 poses of one equipped warm/cream curls appearance against the independent reviewed composition board: 11,599,872 exact channel comparisons below the board's top 20 label rows pass. Changed definition bytes are refused; leases and disposal clear correctly. This is not full appearance-range or performance evidence. `scripts/verify-bundled-shirt.mjs` reproduces the check; `bundled-loader-v1.json` pins its current inputs.
+
+**Why:** the player-facing creator needs the same closed asset and lifecycle pipeline as gameplay. Saved recipe/catalog support, creator controls, world and save/share acceptance remain next; no public outfit choice has been enabled by this loader increment.

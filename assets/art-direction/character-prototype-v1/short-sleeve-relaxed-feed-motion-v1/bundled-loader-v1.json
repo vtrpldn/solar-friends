@@ -1,0 +1,13 @@
+{
+  "poses": 48,
+  "comparedChannels": 11599872,
+  "changedBundleRefused": true,
+  "scope": "Actual HTTP packaged assets, one equipped warm/cream curls appearance, 48 poses. Exact reviewed-board comparison excludes top 20 label rows; not full appearance range, public flow, world or performance acceptance.",
+  "inputs": {
+    "web/character-family-bundle.js": "366fba1ffb4a6d06dac038c59487e0eb0f5bf3280561df4ce3e5283ddac71bb1",
+    "web/character-shirt-bundle.js": "5dddf5f1b98e2e3c66eb55a3937a839d073d552e1dad7d78cd5614d6a1b4676d",
+    "web/character-shirt-bundle-index.js": "2fa062df3aeff7e68b277ad9e4efa714504d2bb5644fb2990411d07676fbe500",
+    "scripts/verify-bundled-shirt.mjs": "0d80526107f0652f3d6017b25aceb25e24b92588586b8912ad36de8cd58218b8",
+    "web/art/characters/relaxed-shirt-v1/bundle-v1.json": "6f7fc99648147ad66449eac4917c50fab46be706845f9963cbae0d6a2a9d6948"
+  }
+}
