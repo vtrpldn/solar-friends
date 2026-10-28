@@ -486,9 +486,11 @@
   "boundedFallback": true,
   "clearAndDispose": true,
   "borrowedTerrainPreserved": true,
+  "sameSizeBufferReused": true,
+  "actualResizeObserved": true,
   "baselineCommit": "7f91902",
   "baselineSha256": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
-  "moduleSha256": "a77500c96b672abba0cb087d4521d7686a70463739680912a2a0981ccf14f3d0",
+  "moduleSha256": "c8db32139dab1cd95024ad58a3e16b49e98bebefa445346952e9ce1fa002b41c",
   "browser": "151.0.7922.34",
   "scope": "Exact frozen ground pixels, cached repeats, camera/zoom/lighting changes, explicit terrain revision and bounded owner lifetime. Not full-frame integration or runtime performance."
 }

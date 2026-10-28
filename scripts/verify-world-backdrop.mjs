@@ -47,7 +47,23 @@ try{
     ground.width=ground.height=0;
    }
   }finally{game.free();}
-  return {cases,hits,revisionInvalidation:true,boundedFallback:true,clearAndDispose:true,borrowedTerrainPreserved:true};
+  const target=document.createElement('canvas');target.width=80;target.height=60;
+  const context=target.getContext('2d'),owner=createWorldBackdrop(context,paintWorldGround),ground=document.createElement('canvas');ground.width=ground.height=32;
+  const create=document.createElement.bind(document),writes=[],owned=[];
+  document.createElement=function(tag,...args){
+   const canvas=create(tag,...args);
+   if(tag==='canvas'){owned.push(canvas);for(const dimension of ['width','height']){const property=Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype,dimension);Object.defineProperty(canvas,dimension,{configurable:true,get(){return property.get.call(this);},set(value){writes.push({dimension,value});property.set.call(this,value);}});}}
+   return canvas;
+  };
+  try{owner.paint(ground,{x:40,y:-10},.1,1);}finally{document.createElement=create;}
+  if(owned.length!==1)throw Error('Backdrop allocated more than one owned surface');
+  const initialWrites=writes.length;
+  for(let step=1;step<=20;step++)owner.paint(ground,{x:40+step*.25,y:-10+step*.5},.1,step);
+  if(writes.length!==initialWrites)throw Error('Camera or terrain revision reset a same-sized canvas buffer');
+  target.width=84;owner.paint(ground,{x:40,y:-10},.1,21);
+  if(writes.length!==initialWrites+1||writes.at(-1).dimension!=='width'||writes.at(-1).value!==84)throw Error('A real viewport resize did not update exactly its changed dimension');
+  owner.dispose();if(owned[0].width||owned[0].height||ground.width!==32)throw Error('Reused buffer disposal changed a borrowed source');target.width=target.height=ground.width=ground.height=0;
+  return {cases,hits,revisionInvalidation:true,boundedFallback:true,clearAndDispose:true,borrowedTerrainPreserved:true,sameSizeBufferReused:true,actualResizeObserved:true};
  });
  const report={...result,baselineCommit:'7f91902',baselineSha256:createHash('sha256').update(baseline).digest('hex'),moduleSha256:createHash('sha256').update(module).digest('hex'),browser:browser.version(),scope:'Exact frozen ground pixels, cached repeats, camera/zoom/lighting changes, explicit terrain revision and bounded owner lifetime. Not full-frame integration or runtime performance.'};
  assert.equal(result.cases.length,48);assert.equal(result.hits,24);await writeFile(output+'/report.json',JSON.stringify(report,null,2)+'\n');console.log('PASS: '+JSON.stringify({cases:result.cases.length,hits:result.hits,revisionInvalidation:true,boundedFallback:true,clearAndDispose:true}));

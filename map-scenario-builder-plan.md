@@ -3063,3 +3063,12 @@ The isolated production benchmark reproduces the improvement on the reference Ap
 The complete `node scripts/dev-check.mjs --browser-only` journey also passes with the integrated cache: 200 captures, no observed browser errors, normal gameplay and terrain edits, scene/mode changes, lifecycle/save isolation, exports, artwork tools and separate Sandbox save/reload groups. Current evidence is `.github/builder-review/world-backdrop-desktop.json` and the refreshed `desktop-game-regression-current.json`.
 
 **Why:** repeating the same affine terrain raster on every frame consumed substantial time even while the camera stood still. Reusing the exact opaque viewport reduces that work without changing artwork, projection, simulation steps or speed budgets. Native simulation cost, sustained high-density panning, broader memory/hardware checks, remaining art/customization coverage and every other unfinished original builder requirement remain open.
+
+
+### Reuse the viewport buffer across camera redraws
+
+Backdrop rebuilds now keep their existing canvas dimensions when the viewport size has not changed. Before repainting the opaque background they reset the local transform explicitly, then apply the current world transform. Real width/height changes still resize the required dimension, and clear/dispose still zero the owned buffer.
+
+The renderer verifier instruments real HTML canvas dimension setters: twenty camera/revision redraws perform no further dimension writes; a real width change performs exactly one width update. Disposal releases the owned surface without changing its borrowed source. All 48 frozen terrain cases and 36 complete game views still match exactly, including warm/cold/reused caches, day/night, both pixel densities and camera/zoom changes. Updated current-module hashes and results are in `.github/builder-review/world-backdrop-{raster,browser}.json`.
+
+**Why:** resetting an unchanged canvas discards its drawing state unnecessarily while panning. Reusing that buffer removes those explicit resets without changing pixels or increasing the viewport budget. This verifies the resource operation and visual invariants; it does not claim an additional measured frame-rate or total-memory improvement. The earlier full desktop regression remains evidence for the preceding integration, while these targeted renderer checks cover this buffer-lifetime adjustment. Remaining original builder release gates stay open.

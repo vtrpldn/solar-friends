@@ -16,9 +16,11 @@ export function createWorldBackdrop(ctx,drawGround,{background='#dfe6c9',maxPixe
    if(source===ground&&key&&next.every((value,index)=>value===key[index]))hits++;
    else{
     key=null;source=null;
-    surface??=document.createElement('canvas');surface.width=width;surface.height=height;
+    surface??=document.createElement('canvas');
+    if(surface.width!==width)surface.width=width;
+    if(surface.height!==height)surface.height=height;
     try{
-     const local=surface.getContext('2d');local.fillStyle=background;local.fillRect(0,0,width,height);
+     const local=surface.getContext('2d');local.setTransform(1,0,0,1,0,0);local.fillStyle=background;local.fillRect(0,0,width,height);
      local.setTransform(m);local.imageSmoothingEnabled=ctx.imageSmoothingEnabled;local.imageSmoothingQuality=ctx.imageSmoothingQuality;
      drawGround(local,ground,origin,scale);
      source=ground;key=next;rebuilds++;
