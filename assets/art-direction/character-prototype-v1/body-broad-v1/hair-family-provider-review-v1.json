@@ -1,0 +1,37 @@
+{
+  "status": "Complete internal side-part ownership verified; art fitting and public integration unfinished",
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-base-v1.png",
+      "sha256": "b6d52877a77c58fa6e74443ee7e0020b6ca0e6f2e6900902b3bb049fa8fdc3e3"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-idle-v1.png",
+      "sha256": "b90fd21f9aedb26b869c71466d0d3cfbe97291da1bb62b947fe760b3bffe18b1"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-activities-v1.png",
+      "sha256": "ce16cf2372c914301ca3e9de1c47086dc2b14c6fb63d5b7ba8a0794d83925aca"
+    }
+  ],
+  "refusals": 11,
+  "ownedReleased": 48,
+  "contactComparisons": 48,
+  "inputs": {
+    "web/character-hair-family.js": "76d855e58fa818a6fcedf83344608b4b2a6f7ab6f5dd44b1e97eeb4fb12e8ee7",
+    "scripts/verify-broad-hair-family.mjs": "70c6cf38852bb88d8eb2e2e8d7cb7955e9b546fe038d9dd6eefef2d8f24262b1",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-draft-v1.json": "ff12cdaabf3c99a43acb068d56f1beed2efd9a3578e3e8ea27f5d88191ab5a5f"
+  },
+  "visualReview": {
+    "inspected": [
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-base-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-idle-v1.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-activities-v1.png"
+    ],
+    "finding": "All48 source-owned side-part slots render, including four looking caps and dedicated lying hair. Some activity poses retain narrow visible scalp edges and need further contact refinement.",
+    "scope": "Static right-facing review. No complete public appearance acceptance."
+  }
+}
