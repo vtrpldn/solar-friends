@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "status": "Correction candidate; native and motion review pending",
+  "why": "Native loop exposes smaller lower-row anatomy; correct painted layout scale",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Correct this exact Solar Friends 2x2 work-body atlas's lower-row scale inconsistency. Keep the TOP TWO figures exactly as they are. Repaint ONLY the BOTTOM TWO figures at about 7 percent larger overall anatomical scale, preserving their same posed anatomy, body proportions, face, garments, boots, upper-left lighting and warm painted style. Their heads must have the same diameter as the upper figures' heads. Keep both lower figures' boots on their existing ground lines, expanding the figures upward and a little sideways with sufficient empty transparent margin; retain complete hands, scalps and boots. Preserve raised-stroke and bent finishing-stroke gestures exactly. Do not straighten the bent figure or enlarge only its head. No local warping, no added objects, no tools or background, no text or grid. Exactly four figures remain in the same 2x2 ordering, true transparent background. Correct lower-row source layout size without changing the body identity.",
+  "references": [
+    {
+      "path": "work-candidate-v1.png",
+      "role": "Exact edit target; preserve top figures and all gesture anatomy"
+    }
+  ],
+  "output": "work-candidate-v2.png"
+}

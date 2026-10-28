@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "scope": "Partial internal provider; native mode/pose selection and ground alignment recording only. No fitted equipment, complete anatomical family, public integration or physical frame pacing claim.",
+  "recordings": [
+    {
+      "night": 0,
+      "offsetMs": 0,
+      "elapsedMs": 5207.799999952316,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "work",
+          "seconds": 0.8071000000238419
+        },
+        {
+          "mode": "breathe",
+          "seconds": 4.207899999976158
+        }
+      ],
+      "seen": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "renderCalls": 627
+    },
+    {
+      "night": 1,
+      "offsetMs": 5207.799999952316,
+      "elapsedMs": 5208.300000071526,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "work",
+          "seconds": 0.8082000000476837
+        },
+        {
+          "mode": "breathe",
+          "seconds": 4.2
+        }
+      ],
+      "seen": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "renderCalls": 625
+    }
+  ],
+  "refusals": 12,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-candidate-v1.png": "a37c91722f1050d942614d796bdaf882ca55d605338489d3b65cd949dc7c9dfb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-registration-v1.json": "0ad1ee6299e0556312bb2f6dd036aee4c0a3cb6c11fc837482fa0d6d558a7918",
+    "scripts/review-broad-work-motion.mjs": "84e87846ecd91f57bdf66df81a8e248616d5d8d81e9f41f60507a231086eb5ca",
+    "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f"
+  },
+  "videoSha256": "95a548cd336db551bcf7a851957d7346b6c33adab894e5f8c9875a0ad5e07463",
+  "errors": [],
+  "status": "V1 diagnostic recording; lower-row body-volume inconsistency confirmed; superseded by V2",
+  "visualReview": "Both decoded 32-frame V1 day/mirrored-night strips inspected. Lower-row body volume changes through work loop; V1 is excluded from final family ownership."
+}

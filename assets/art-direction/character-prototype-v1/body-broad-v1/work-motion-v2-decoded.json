@@ -1,0 +1,31 @@
+{
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "vp9",
+        "width": 800,
+        "height": 360,
+        "nb_read_frames": "313"
+      }
+    ],
+    "format": {
+      "duration": "10.398837"
+    }
+  },
+  "windows": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/work-motion-v2-day.png",
+      "startSeconds": 0.0,
+      "durationSeconds": 5.205100000023842,
+      "frames": 32
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/work-motion-v2-night.png",
+      "startSeconds": 5.205200000047684,
+      "durationSeconds": 5.204100000023842,
+      "frames": 32
+    }
+  ]
+}

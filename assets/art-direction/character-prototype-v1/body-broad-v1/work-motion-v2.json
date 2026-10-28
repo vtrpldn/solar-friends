@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "scope": "Partial internal provider; native mode/pose selection and ground alignment recording only. No fitted equipment, complete anatomical family, public integration or physical frame pacing claim.",
+  "recordings": [
+    {
+      "night": 0,
+      "offsetMs": 0,
+      "elapsedMs": 5205.100000023842,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "work",
+          "seconds": 0.8048000000715255
+        },
+        {
+          "mode": "breathe",
+          "seconds": 4.205100000023842
+        }
+      ],
+      "seen": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "renderCalls": 627
+    },
+    {
+      "night": 1,
+      "offsetMs": 5205.200000047684,
+      "elapsedMs": 5204.100000023842,
+      "modes": [
+        {
+          "mode": "breathe",
+          "seconds": 0
+        },
+        {
+          "mode": "work",
+          "seconds": 0.804
+        },
+        {
+          "mode": "breathe",
+          "seconds": 4.204100000023842
+        }
+      ],
+      "seen": [
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "renderCalls": 624
+    }
+  ],
+  "refusals": 12,
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-candidate-v2.png": "65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-registration-v1.json": "06b85a5c6173937fd9c81103079f26b155f69ee0a89f0881baa4524dde1b399c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-registration-v2.json": "d6f79b58a0b952192a3789aaf0813a1c775222746b2ef88826ed37fe727bcfaf",
+    "scripts/review-broad-work-motion.mjs": "b0c16520e2a4d69f5f701afccc75525030fe83d15b8f43c2ac709aa7ca7fef06",
+    "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f"
+  },
+  "videoSha256": "81f01eb0b4e8720439e8a8a40a27deef5423f684408cd0263f492588800d2a4d",
+  "errors": [],
+  "status": "Corrected work source accepted for further internal family authoring only",
+  "visualReview": "Inspected native enlarged/gameplay comparison and all six biome day/mirrored-night scenes. Full scalp, fingertips and boots fit. V2 corrects the lower-row volume drop observed in V1. Inspected both decoded 32-frame V2 filmstrips covering native breathe/work/breathe, four complete work strokes and return at enlarged and gameplay sizes. Head size and broader body volume remain coherent with standing; intentional knee/hip flexion changes head height. Whole painted key-pose switches remain visible. No fitted equipment or garment/hair acceptance.",
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v2-caatinga-day.png": "adfdf5f846612fb92acf1e0a7b97dfb4daa414e53c465a84c1e8bbbfa0779b76",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v2-caatinga-night.png": "46ec9e413044ccfcefa5e1502b27f15b4e308d27213a9cdbc0db565c126180cf",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v2-cerrado-day.png": "491638790c05ef79b1159f8302205bd14a9c75c5745be41001fcbb0770ad017b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v2-cerrado-night.png": "42f968233e99738ef793b5b86f2236f49d45185169aea2b7b5a3c1975ee698b6",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v2-mata-atlantica-day.png": "77119e632a9fd84389a09d983aee23fb68fea741d3b67772a30e5aeb8c67b0cd",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-world-v2-mata-atlantica-night.png": "251ccc58ad19e31375857f589313f04d2bcc89d28cbb9b22dbd09b51564fda13",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-native-comparison-v2.png": "d63e36e1923ae797421eb28b35e5d82f42635d223b414208ef581525e8ea8f65",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-registration-v2.json": "d6f79b58a0b952192a3789aaf0813a1c775222746b2ef88826ed37fe727bcfaf",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-brief-v2.json": "982906b3bea61908b3a7e96bb5f33c3577ec8a9ad9ba440becb09820b36f7931",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-motion-v2-day.png": "136e362d6b6da81c97bd6e1549a97bcde25a7089017118581bb956f091e4ea36",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-motion-v2-night.png": "bc8a5accee391847d2c2cb76580b7b6ed19f2855bfb728d821458cd5d94355fb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-motion-v2-decoded.json": "13f902d6fd88de07d6d63546235ac008e4826f628ecd46f829d52c039257cac1"
+  },
+  "remaining": [
+    "Activity sources",
+    "Fitted clothing hair facial accessories and equipment",
+    "Intermediate anatomy for transitions",
+    "Matching portrait and public complete-family integration",
+    "Original full builder release gates"
+  ]
+}

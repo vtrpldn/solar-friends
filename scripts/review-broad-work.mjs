@@ -4,7 +4,8 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const root='assets/art-direction/character-prototype-v1/body-broad-v1',hash=b=>createHash('sha256').update(b).digest('hex'),files={work:root+'/work-candidate-v1.png',standing:root+'/breathe-candidate-v1.png'},sources={};
+const revision=process.argv.includes('--revised')?'v2':'v1';
+const root='assets/art-direction/character-prototype-v1/body-broad-v1',hash=b=>createHash('sha256').update(b).digest('hex'),files={work:root+`/work-candidate-${revision}.png`,standing:root+'/breathe-candidate-v1.png'},sources={};
 for(const [key,path]of Object.entries(files)){const b=await readFile(path);sources[key]={path,sha256:hash(b),data:b.toString('base64')};}
 const bytes=await readFile(files.work),registration={schema:1,family:'broad-body-prototype-v1',sheet:'base',source:{sha256:sources.work.sha256,width:bytes.readUInt32BE(16),height:bytes.readUInt32BE(20),columns:2,rows:2},uniformScale:.35,frames:[[350,650],[900,650],[370,1230],[900,1230]].map((sourceContact,index)=>({index,sourceContact,nativeContact:[128,238]}))};
 const standing=JSON.parse(await readFile(root+'/breathe-registration-v1.json')),server=await serve(0);let browser;
@@ -38,9 +39,9 @@ try{
   const pixels=board.toDataURL('image/png').split(',')[1];for(const p of Object.values(prepared))for(const f of p.frames)f.width=f.height=0;scratch.width=scratch.height=0;return {pixels,worldImages,normalized,refusals};
  },{sources,registration,standing});
  assert.deepEqual(errors,[]);assert.equal(result.refusals,12);
- await writeFile(root+'/work-native-comparison-v1.png',Buffer.from(result.pixels,'base64'));delete result.pixels;
- for(const image of result.worldImages){image.path=root+`/work-world-v1-${image.biome}-${image.night?'night':'day'}.png`;await writeFile(image.path,Buffer.from(image.data,'base64'));delete image.data;}
- await writeFile(root+'/work-registration-v1.json',JSON.stringify(registration,null,2)+'\n');
+ await writeFile(root+`/work-native-comparison-${revision}.png`,Buffer.from(result.pixels,'base64'));delete result.pixels;
+ for(const image of result.worldImages){image.path=root+`/work-world-${revision}-${image.biome}-${image.night?'night':'day'}.png`;await writeFile(image.path,Buffer.from(image.data,'base64'));delete image.data;}
+ await writeFile(root+`/work-registration-${revision}.json`,JSON.stringify(registration,null,2)+'\n');
  const inputs={};for(const path of [...Object.values(files),root+'/breathe-registration-v1.json','scripts/review-broad-work.mjs','web/character-contact-atlas.js','web/resident-animation.js','web/world-renderer.js','web/power.js','web/projection.js','web/terrain.js'])inputs[path]=hash(await readFile(path));
- await writeFile(root+'/work-native-review-v1.json',JSON.stringify({schema:1,status:'Candidate; visual verdict pending; no public integration',why:'Check four newly authored work poses at one uniform source scale beside the same standing body',...result,inputs,errors},null,2)+'\n');console.log('Four exact work poses fit; twelve unsupported requests refused; six biome world captures; no browser errors.');
+ await writeFile(root+`/work-native-review-${revision}.json`,JSON.stringify({schema:1,status:'Candidate; visual verdict pending; no public integration',why:'Check four newly authored work poses at one uniform source scale beside the same standing body',...result,inputs,errors},null,2)+'\n');console.log('Four exact work poses fit; twelve unsupported requests refused; six biome world captures; no browser errors.');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
