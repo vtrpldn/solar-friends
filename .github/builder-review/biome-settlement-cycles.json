@@ -1,0 +1,662 @@
+{
+  "passed": true,
+  "population": 5,
+  "maintenance": true,
+  "market": true,
+  "wasm_sha256": "e78fae12869ea3fb20b6f70c5102b58b1919a186a646b27c551d0bc6073d8f2f",
+  "script_sha256": "441de0b9ca831bcd673a28632e64f5b6f156378322f912211e330f32b1bb4946",
+  "scope": "Five residents, three gardens, beds, kitchen, inherited workshop wear, automatic service and finite paid upkeep orders; default Sandbox opening funds. Not an example-difficulty, artwork, maximum-roster or full release approval.",
+  "cases": [
+    {
+      "biome": "mata-atlantica",
+      "seed": 42,
+      "river": true,
+      "days": 42,
+      "definition_sha256": "c8c6e3a6f4d70b1eafc160ec9e0d22f77926b4050faf30af79d6a4b331d6ea99",
+      "profile": {
+        "dry_evaporation": 1.25,
+        "dry_rain_chance": 18,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.8999999761581421,
+        "wet_rain_chance": 70
+      },
+      "opening_funds": 10000000,
+      "service_orders": 1,
+      "service_spending": 7764,
+      "service_receipts": [
+        {
+          "minutes": 30,
+          "parts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "paid": 7764
+        }
+      ],
+      "tools_price": [
+        873,
+        927
+      ],
+      "completed_services": 1,
+      "checks": 43,
+      "continuations": 6,
+      "seasons": {
+        "wet": {
+          "days": 21,
+          "rain_days": 12,
+          "rain_observations": 70,
+          "evaporation": [
+            0.8999999761581421
+          ],
+          "hydro": [
+            1.7100000381469727,
+            2.430000066757202
+          ]
+        },
+        "dry": {
+          "days": 21,
+          "rain_days": 4,
+          "rain_observations": 10,
+          "evaporation": [
+            1.25
+          ],
+          "hydro": [
+            1.0800000429153442,
+            1.4760000705718994
+          ]
+        }
+      },
+      "min_food": 11,
+      "max_hunger": 39.62737274169922,
+      "min_energy": 71.67864227294922,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 3887.9364896666802,
+      "solar_output_max": 5.820000171661377,
+      "rain_caught": true,
+      "harvests": 31,
+      "harvests_when_lonely": null
+    },
+    {
+      "biome": "mata-atlantica",
+      "seed": 73,
+      "river": false,
+      "days": 42,
+      "definition_sha256": "9c4374244313e89dfe870a0a5bf5b7c7df50951fa2a47b6e22dc7bd3ebcaabca",
+      "profile": {
+        "dry_evaporation": 1.25,
+        "dry_rain_chance": 18,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.8999999761581421,
+        "wet_rain_chance": 70
+      },
+      "opening_funds": 10000000,
+      "service_orders": 1,
+      "service_spending": 7854,
+      "service_receipts": [
+        {
+          "minutes": 30,
+          "parts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "paid": 7854
+        }
+      ],
+      "tools_price": [
+        873,
+        927
+      ],
+      "completed_services": 1,
+      "checks": 43,
+      "continuations": 6,
+      "seasons": {
+        "wet": {
+          "days": 21,
+          "rain_days": 14,
+          "rain_observations": 79,
+          "evaporation": [
+            0.8999999761581421
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        },
+        "dry": {
+          "days": 21,
+          "rain_days": 4,
+          "rain_observations": 11,
+          "evaporation": [
+            1.25
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        }
+      },
+      "min_food": 12,
+      "max_hunger": 42.12370681762695,
+      "min_energy": 71.67864227294922,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 1913.8588125191552,
+      "solar_output_max": 4.580462455749512,
+      "rain_caught": true,
+      "harvests": 32,
+      "harvests_when_lonely": null
+    },
+    {
+      "biome": "cerrado",
+      "seed": 42,
+      "river": true,
+      "days": 42,
+      "definition_sha256": "b800f285d76bcfbf8f6e733ce9539c68822b3dbab39296fb20c6f473feef0644",
+      "profile": {
+        "dry_evaporation": 1.399999976158142,
+        "dry_rain_chance": 10,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.949999988079071,
+        "wet_rain_chance": 72
+      },
+      "opening_funds": 10000000,
+      "service_orders": 1,
+      "service_spending": 7764,
+      "service_receipts": [
+        {
+          "minutes": 30,
+          "parts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "paid": 7764
+        }
+      ],
+      "tools_price": [
+        873,
+        927
+      ],
+      "completed_services": 1,
+      "checks": 43,
+      "continuations": 6,
+      "seasons": {
+        "wet": {
+          "days": 21,
+          "rain_days": 14,
+          "rain_observations": 84,
+          "evaporation": [
+            0.949999988079071
+          ],
+          "hydro": [
+            1.7100000381469727,
+            2.430000066757202
+          ]
+        },
+        "dry": {
+          "days": 21,
+          "rain_days": 3,
+          "rain_observations": 7,
+          "evaporation": [
+            1.399999976158142
+          ],
+          "hydro": [
+            1.0800000429153442,
+            1.4760000705718994
+          ]
+        }
+      },
+      "min_food": 8,
+      "max_hunger": 37.61979293823242,
+      "min_energy": 68.87604522705078,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 3883.5078361447568,
+      "solar_output_max": 5.820000171661377,
+      "rain_caught": true,
+      "harvests": 32,
+      "harvests_when_lonely": null
+    },
+    {
+      "biome": "cerrado",
+      "seed": 73,
+      "river": false,
+      "days": 42,
+      "definition_sha256": "ac1bcde38fc8f6529592c0ac03ede271047043c05b068a078fc739447f752afe",
+      "profile": {
+        "dry_evaporation": 1.399999976158142,
+        "dry_rain_chance": 10,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.949999988079071,
+        "wet_rain_chance": 72
+      },
+      "opening_funds": 10000000,
+      "service_orders": 1,
+      "service_spending": 7854,
+      "service_receipts": [
+        {
+          "minutes": 30,
+          "parts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "paid": 7854
+        }
+      ],
+      "tools_price": [
+        873,
+        927
+      ],
+      "completed_services": 1,
+      "checks": 43,
+      "continuations": 6,
+      "seasons": {
+        "wet": {
+          "days": 21,
+          "rain_days": 16,
+          "rain_observations": 89,
+          "evaporation": [
+            0.949999988079071
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        },
+        "dry": {
+          "days": 21,
+          "rain_days": 2,
+          "rain_observations": 5,
+          "evaporation": [
+            1.399999976158142
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        }
+      },
+      "min_food": 8,
+      "max_hunger": 38.27107238769531,
+      "min_energy": 68.87604522705078,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 2266.531988885821,
+      "solar_output_max": 5.820000171661377,
+      "rain_caught": true,
+      "harvests": 36,
+      "harvests_when_lonely": null
+    },
+    {
+      "biome": "caatinga",
+      "seed": 42,
+      "river": true,
+      "days": 56,
+      "definition_sha256": "73726fca4b0b380702b431f6463aeecd4e0945197977b4364feac273bc70cc42",
+      "profile": {
+        "dry_evaporation": 1.600000023841858,
+        "dry_rain_chance": 6,
+        "intro_days": 0,
+        "season_days": 28,
+        "wet_evaporation": 1.0499999523162842,
+        "wet_rain_chance": 45
+      },
+      "opening_funds": 10000000,
+      "service_orders": 1,
+      "service_spending": 7764,
+      "service_receipts": [
+        {
+          "minutes": 30,
+          "parts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "paid": 7764
+        }
+      ],
+      "tools_price": [
+        873,
+        927
+      ],
+      "completed_services": 1,
+      "checks": 57,
+      "continuations": 8,
+      "seasons": {
+        "wet": {
+          "days": 28,
+          "rain_days": 15,
+          "rain_observations": 87,
+          "evaporation": [
+            1.0499999523162842
+          ],
+          "hydro": [
+            1.7100000381469727,
+            2.430000066757202
+          ]
+        },
+        "dry": {
+          "days": 28,
+          "rain_days": 2,
+          "rain_observations": 5,
+          "evaporation": [
+            1.600000023841858
+          ],
+          "hydro": [
+            1.0800000429153442,
+            1.3680000305175781
+          ]
+        }
+      },
+      "min_food": 9,
+      "max_hunger": 39.606117248535156,
+      "min_energy": 68.6961441040039,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 5173.640116761851,
+      "solar_output_max": 5.820000171661377,
+      "rain_caught": true,
+      "harvests": 44,
+      "harvests_when_lonely": null
+    },
+    {
+      "biome": "caatinga",
+      "seed": 73,
+      "river": false,
+      "days": 56,
+      "definition_sha256": "49dc7487a8047d0f5becede8011621e80f174ee6b7448cc8eeb33cf43763ba92",
+      "profile": {
+        "dry_evaporation": 1.600000023841858,
+        "dry_rain_chance": 6,
+        "intro_days": 0,
+        "season_days": 28,
+        "wet_evaporation": 1.0499999523162842,
+        "wet_rain_chance": 45
+      },
+      "opening_funds": 10000000,
+      "service_orders": 1,
+      "service_spending": 7854,
+      "service_receipts": [
+        {
+          "minutes": 30,
+          "parts": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "paid": 7854
+        }
+      ],
+      "tools_price": [
+        873,
+        927
+      ],
+      "completed_services": 1,
+      "checks": 57,
+      "continuations": 8,
+      "seasons": {
+        "wet": {
+          "days": 28,
+          "rain_days": 12,
+          "rain_observations": 73,
+          "evaporation": [
+            1.0499999523162842
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        },
+        "dry": {
+          "days": 28,
+          "rain_days": 2,
+          "rain_observations": 6,
+          "evaporation": [
+            1.600000023841858
+          ],
+          "hydro": [
+            0,
+            0
+          ]
+        }
+      },
+      "min_food": 9,
+      "max_hunger": 37.84979248046875,
+      "min_energy": 69.25004577636719,
+      "soil_moisture": [
+        0,
+        240
+      ],
+      "generated_energy": 3109.558517870755,
+      "solar_output_max": 5.820000171661377,
+      "rain_caught": true,
+      "harvests": 43,
+      "harvests_when_lonely": null
+    }
+  ],
+  "base_commit": "51c5e19a923abf497acc3541454cbdfebd5b77ad",
+  "executed_worktree_harness_sha256": "441de0b9ca831bcd673a28632e64f5b6f156378322f912211e330f32b1bb4946",
+  "dependencies": {
+    "scripts/upkeep-playtest.mjs": "6c564a59b2adc93b5a98767fb3d2eacf4a20af52a039b95ddee01dbcf6007ee4"
+  },
+  "reproduce": [
+    "bash scripts/build.sh",
+    "node scripts/verify-biome-cycles.mjs --settlement"
+  ],
+  "totals": {
+    "simulated_days": 280,
+    "resident_days": 1400,
+    "primary_native_ticks": 537600,
+    "mirrored_continuation_ticks": 3200,
+    "conserved_daily_checkpoints": 286,
+    "exact_continuations": 40,
+    "paid_parts_orders": 6,
+    "paid_parts_cost_cents": 46854
+  },
+  "fixtures": {
+    "mata-atlantica-42": {
+      "definition_sha256": "c8c6e3a6f4d70b1eafc160ec9e0d22f77926b4050faf30af79d6a4b331d6ea99",
+      "cycle_end_snapshot_sha256": "f6436e759a54cfd38cbd677a2c0c4a0b9152a60fc0681675ab02dbf8ab7942d1"
+    },
+    "mata-atlantica-73": {
+      "definition_sha256": "9c4374244313e89dfe870a0a5bf5b7c7df50951fa2a47b6e22dc7bd3ebcaabca",
+      "cycle_end_snapshot_sha256": "0d4709347eaa32261f9d1e0107254a78f6e98107cc6beacae5ae3a49fc823b75"
+    },
+    "cerrado-42": {
+      "definition_sha256": "b800f285d76bcfbf8f6e733ce9539c68822b3dbab39296fb20c6f473feef0644",
+      "cycle_end_snapshot_sha256": "a5f3a177d5af03e6a5cec681d9ea1853c5a4a5fa9e7deba93b453aa257f9ee17"
+    },
+    "cerrado-73": {
+      "definition_sha256": "ac1bcde38fc8f6529592c0ac03ede271047043c05b068a078fc739447f752afe",
+      "cycle_end_snapshot_sha256": "f320dabfa82d87d6bf3a11ca8e23a5f331316400f35f1070ea7196bf4592fef5"
+    },
+    "caatinga-42": {
+      "definition_sha256": "73726fca4b0b380702b431f6463aeecd4e0945197977b4364feac273bc70cc42",
+      "cycle_end_snapshot_sha256": "61deaa6788ac618f9323ab389376b3d1f7c3e5d28ce1a48f35016468202f3ef5"
+    },
+    "caatinga-73": {
+      "definition_sha256": "49dc7487a8047d0f5becede8011621e80f174ee6b7448cc8eeb33cf43763ba92",
+      "cycle_end_snapshot_sha256": "152b99bb444e5f68cd18ff6fb44b103cc6896e94165472ea843474bf32b7d70a"
+    }
+  }
+}
