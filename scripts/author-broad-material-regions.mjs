@@ -1,6 +1,7 @@
 // Authored source-space region draft. Transforms geometry only, never artwork.
 import {readFile,writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
+const revision=process.argv.includes('--edges')?'v3':'v2';
 const root='assets/art-direction/character-prototype-v1/body-broad-v1',read=async name=>JSON.parse(await readFile(root+'/'+name));
 const binding=await read('body-binding-v1.json'),owner=binding.ownership;
 // Each row: head center x/y, shirt start, garment waist, boot start.
@@ -34,6 +35,8 @@ function sourceRegion(id,index){
   return {head:[380+dx,180+dy,100,95],garmentAreas:{shirt:[shift([[175,200],[420,235],[470,300],[450,345],[400,385],[300,430],[135,430],[120,300]])],shorts:[shift([[120,380],[300,420],[420,320],[520,350],[530,450],[350,500],[320,610],[100,610]])]},shoeAreas:[shift(rect(75,430,195,610)),shift(rect(390,510,590,625)),...collars],skinAreas:[shift(hands),...(overlap?[overlap]:[])]};
  }
  const [x,y,shirtTop,waist,shoes]=landmarks[id][index],region={head:[x,y,90,85],shirtTop,waist,shoes};
+ // Bent upper bodies expose a rear shoulder above the former standing cutoff.
+ if(revision==='v3'&&((id==='work'&&index===3)||(id==='water'&&index>=2)||(id==='cook'&&index===3)||id==='seated'))region.shirtTop-=60;
  if(id==='work'&&index===3)region.waistLine=[[740,955],[820,995],[910,1020]];
  if(id==='water'&&index>=2)region.waistLine=[[index===2?245:780,waist-30],[index===2?350:880,waist],[index===2?465:1000,waist+20]];
  return region;
@@ -48,6 +51,6 @@ for(const sheet of ['base','idle','activities']){sheets[sheet]={regions:[]};for(
  if(transformed.garmentAreas)for(const polygons of [...Object.values(transformed.garmentAreas),transformed.shoeAreas])for(const polygon of polygons)for(const p of polygon)for(let i=0;i<2;i++)p[i]=Math.max(0,Math.min(256,p[i]));
  sheets[sheet].regions.push(transformed);
 }assert.equal(sheets[sheet].regions.length,16);}
-await writeFile(root+'/material-source-regions-v2.json',JSON.stringify(draft,null,2)+'\n');
-await writeFile(root+'/body-material-regions-v2.json',JSON.stringify({schema:2,body:binding,sheets},null,2)+'\n');
+await writeFile(root+`/material-source-regions-${revision}.json`,JSON.stringify(draft,null,2)+'\n');
+await writeFile(root+`/body-material-regions-${revision}.json`,JSON.stringify({schema:2,body:binding,sheets},null,2)+'\n');
 console.log('Authored 48 exact-body material region candidates; no artwork pixels modified.');

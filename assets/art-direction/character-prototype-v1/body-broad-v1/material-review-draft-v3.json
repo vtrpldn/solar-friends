@@ -1,0 +1,722 @@
+{
+  "schema": 1,
+  "status": "Internal garment cutoff correction reviewed; no public body promotion",
+  "why": "Review per-pose material separation on the complete exact broader body",
+  "counts": {
+    "base": [
+      [
+        1984,
+        8408,
+        2405,
+        1805,
+        2777
+      ],
+      [
+        1889,
+        7643,
+        2296,
+        2021,
+        1621
+      ],
+      [
+        1784,
+        8356,
+        1005,
+        2687,
+        3199
+      ],
+      [
+        1832,
+        7453,
+        2237,
+        1889,
+        2437
+      ],
+      [
+        2062,
+        7638,
+        2585,
+        2198,
+        2485
+      ],
+      [
+        1886,
+        6863,
+        1680,
+        2434,
+        2445
+      ],
+      [
+        2089,
+        7318,
+        2207,
+        2192,
+        2674
+      ],
+      [
+        2173,
+        8957,
+        2386,
+        813,
+        2929
+      ],
+      [
+        1886,
+        7751,
+        2502,
+        2417,
+        2402
+      ],
+      [
+        1824,
+        7764,
+        2498,
+        2420,
+        2377
+      ],
+      [
+        1878,
+        7276,
+        2603,
+        2267,
+        2346
+      ],
+      [
+        1875,
+        7409,
+        2482,
+        2227,
+        2299
+      ],
+      [
+        1601,
+        8558,
+        2479,
+        1475,
+        2953
+      ],
+      [
+        1657,
+        8961,
+        1451,
+        830,
+        2867
+      ],
+      [
+        1615,
+        8780,
+        2342,
+        1457,
+        2924
+      ],
+      [
+        1352,
+        8125,
+        3544,
+        741,
+        0
+      ]
+    ],
+    "idle": [
+      [
+        2222,
+        8499,
+        2489,
+        3036,
+        2789
+      ],
+      [
+        2324,
+        8426,
+        2499,
+        3095,
+        2758
+      ],
+      [
+        2294,
+        8458,
+        2972,
+        2710,
+        2825
+      ],
+      [
+        2333,
+        8525,
+        2974,
+        2695,
+        2852
+      ],
+      [
+        2148,
+        8389,
+        2639,
+        2491,
+        2639
+      ],
+      [
+        1968,
+        7293,
+        2761,
+        2668,
+        2763
+      ],
+      [
+        2170,
+        8334,
+        3589,
+        2109,
+        2802
+      ],
+      [
+        2281,
+        8444,
+        3079,
+        2187,
+        2676
+      ],
+      [
+        1909,
+        8204,
+        2357,
+        2997,
+        2491
+      ],
+      [
+        1840,
+        7437,
+        2388,
+        3137,
+        2468
+      ],
+      [
+        2142,
+        8153,
+        3012,
+        2648,
+        2789
+      ],
+      [
+        1976,
+        8163,
+        2812,
+        2445,
+        2909
+      ],
+      [
+        2222,
+        8336,
+        2681,
+        2487,
+        2447
+      ],
+      [
+        2125,
+        7907,
+        2670,
+        2401,
+        2403
+      ],
+      [
+        2191,
+        7852,
+        2736,
+        2206,
+        2494
+      ],
+      [
+        2182,
+        8433,
+        2747,
+        2243,
+        2455
+      ]
+    ],
+    "activities": [
+      [
+        1889,
+        7905,
+        1401,
+        2522,
+        2285
+      ],
+      [
+        1772,
+        7737,
+        1448,
+        2592,
+        2359
+      ],
+      [
+        1848,
+        8051,
+        1538,
+        2421,
+        2302
+      ],
+      [
+        1824,
+        7958,
+        1457,
+        2699,
+        2374
+      ],
+      [
+        1827,
+        8181,
+        1833,
+        2378,
+        2743
+      ],
+      [
+        1828,
+        8615,
+        1808,
+        2054,
+        2861
+      ],
+      [
+        1611,
+        8580,
+        1624,
+        1714,
+        2942
+      ],
+      [
+        1678,
+        9028,
+        2010,
+        1202,
+        2936
+      ],
+      [
+        1211,
+        7337,
+        1635,
+        2126,
+        2546
+      ],
+      [
+        1199,
+        7789,
+        1703,
+        2084,
+        1441
+      ],
+      [
+        1252,
+        7122,
+        1951,
+        1549,
+        2414
+      ],
+      [
+        1436,
+        7235,
+        2085,
+        1408,
+        1253
+      ],
+      [
+        1908,
+        8127,
+        1962,
+        2728,
+        2540
+      ],
+      [
+        1987,
+        8670,
+        1996,
+        2713,
+        2493
+      ],
+      [
+        2028,
+        8362,
+        2074,
+        2551,
+        2536
+      ],
+      [
+        2007,
+        8524,
+        2074,
+        2520,
+        2528
+      ]
+    ]
+  },
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-base-draft-v3.png"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-idle-draft-v3.png"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-activities-draft-v3.png"
+    }
+  ],
+  "focus": [
+    {
+      "sheet": "base",
+      "index": 15,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-focus-base-15-v3.png"
+    },
+    {
+      "sheet": "activities",
+      "index": 8,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-focus-activities-8-v3.png"
+    },
+    {
+      "sheet": "activities",
+      "index": 9,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-focus-activities-9-v3.png"
+    },
+    {
+      "sheet": "activities",
+      "index": 10,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-focus-activities-10-v3.png"
+    },
+    {
+      "sheet": "activities",
+      "index": 11,
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/material-focus-activities-11-v3.png"
+    }
+  ],
+  "shoeSkinCandidates": [
+    {
+      "sheet": "activities",
+      "index": 8,
+      "rows": [
+        {
+          "y": 200,
+          "min": 159,
+          "max": 171
+        },
+        {
+          "y": 201,
+          "min": 159,
+          "max": 171
+        },
+        {
+          "y": 202,
+          "min": 162,
+          "max": 168
+        },
+        {
+          "y": 210,
+          "min": 147,
+          "max": 147
+        },
+        {
+          "y": 211,
+          "min": 147,
+          "max": 147
+        },
+        {
+          "y": 212,
+          "min": 147,
+          "max": 148
+        },
+        {
+          "y": 213,
+          "min": 147,
+          "max": 148
+        },
+        {
+          "y": 214,
+          "min": 72,
+          "max": 149
+        },
+        {
+          "y": 215,
+          "min": 149,
+          "max": 150
+        },
+        {
+          "y": 216,
+          "min": 150,
+          "max": 150
+        },
+        {
+          "y": 217,
+          "min": 194,
+          "max": 194
+        }
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 9,
+      "rows": [
+        {
+          "y": 207,
+          "min": 147,
+          "max": 147
+        },
+        {
+          "y": 214,
+          "min": 68,
+          "max": 68
+        },
+        {
+          "y": 218,
+          "min": 165,
+          "max": 165
+        },
+        {
+          "y": 219,
+          "min": 166,
+          "max": 166
+        },
+        {
+          "y": 221,
+          "min": 167,
+          "max": 167
+        },
+        {
+          "y": 222,
+          "min": 168,
+          "max": 168
+        },
+        {
+          "y": 223,
+          "min": 168,
+          "max": 168
+        },
+        {
+          "y": 224,
+          "min": 169,
+          "max": 169
+        },
+        {
+          "y": 226,
+          "min": 170,
+          "max": 170
+        }
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 10,
+      "rows": [
+        {
+          "y": 195,
+          "min": 172,
+          "max": 172
+        },
+        {
+          "y": 196,
+          "min": 169,
+          "max": 170
+        },
+        {
+          "y": 197,
+          "min": 158,
+          "max": 169
+        },
+        {
+          "y": 198,
+          "min": 158,
+          "max": 169
+        },
+        {
+          "y": 210,
+          "min": 69,
+          "max": 70
+        },
+        {
+          "y": 214,
+          "min": 190,
+          "max": 192
+        },
+        {
+          "y": 215,
+          "min": 187,
+          "max": 189
+        },
+        {
+          "y": 216,
+          "min": 184,
+          "max": 187
+        },
+        {
+          "y": 219,
+          "min": 150,
+          "max": 150
+        }
+      ]
+    },
+    {
+      "sheet": "activities",
+      "index": 11,
+      "rows": [
+        {
+          "y": 225,
+          "min": 201,
+          "max": 201
+        }
+      ]
+    }
+  ],
+  "semanticProbes": [
+    [
+      "activities",
+      11,
+      162,
+      205,
+      1,
+      "forearm above hidden boot"
+    ],
+    [
+      "activities",
+      10,
+      65,
+      182,
+      4,
+      "rear boot collar"
+    ],
+    [
+      "activities",
+      10,
+      173,
+      201,
+      4,
+      "front boot collar"
+    ],
+    [
+      "activities",
+      11,
+      64,
+      184,
+      4,
+      "rear boot collar"
+    ],
+    [
+      "activities",
+      9,
+      154,
+      209,
+      1,
+      "hand over boot"
+    ],
+    [
+      "activities",
+      9,
+      165,
+      226,
+      1,
+      "hand fingertip"
+    ],
+    [
+      "activities",
+      11,
+      187,
+      216,
+      1,
+      "extended hand"
+    ],
+    [
+      "activities",
+      11,
+      199,
+      225,
+      1,
+      "extended fingertip"
+    ],
+    [
+      "activities",
+      11,
+      80,
+      150,
+      2,
+      "back vest"
+    ],
+    [
+      "base",
+      15,
+      110,
+      160,
+      2,
+      "sleep vest"
+    ],
+    [
+      "base",
+      15,
+      174,
+      127,
+      3,
+      "sleep upper shorts"
+    ],
+    [
+      "base",
+      15,
+      153,
+      178,
+      3,
+      "sleep lower shorts"
+    ],
+    [
+      "base",
+      15,
+      220,
+      164,
+      1,
+      "bare sleep foot"
+    ]
+  ],
+  "preservedDefaults": 48,
+  "alphaProofs": 48,
+  "isolatedMaterialProofs": 192,
+  "maskCopyProofs": 48,
+  "staleBindingRefused": true,
+  "cache": {
+    "entries": 8,
+    "maximum": 8,
+    "rgbaByteUpperBound": 2097152
+  },
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-ownership-v1.json": "7173359558e12232fff2297568b5cb6a2aa26c325c0be1c0d1d19b124568fe3d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-binding-v1.json": "eacf8ba501610e9246d7e286397cb698c65e6ebf805842cdf8acd7b9ec07f4fb",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/body-material-regions-v3.json": "47c0b8cc298270708090bd098722a62b05d95b43e18d2d9baafc471c6294223c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/material-source-regions-v3.json": "90901b2e4b3df591045f6133047474e3e201c334c43ecd91a17bd74495129b84",
+    "scripts/author-broad-material-regions.mjs": "3e846def1cd5ccf5e3f66369f8b787b74250b3cfbdae59d032faab8f32c02811",
+    "scripts/review-broad-materials.mjs": "7cdda5d52c7d2be07039e6c37d5e2ba195a684ce5b6ded79a25025f79990f14e",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/character-body-family.js": "756ae0fc222f3d3266b32add6522eb57e74165c16889d8b82e8ebed62e6d6ebb",
+    "web/resident-animation.js": "3093573275361eee1c9c4749ae1c7b16985859a77b37160483d17f11d93d1be9"
+  },
+  "errors": [],
+  "visualReview": {
+    "inspected": [
+      "material-base-draft-v3.png",
+      "material-activities-draft-v3.png",
+      "hat-colored-base-v2.png",
+      "hat-colored-activities-v2.png"
+    ],
+    "finding": "Lower source-space shirtTop cutoff includes the exposed rear shoulder/collar in bent work, cooking, watering and seated poses. Broad untreated pale shoulder bands are corrected in the inspected contrasting palette. Source paint and silhouette unchanged.",
+    "remaining": [
+      "Further palette/motion/biome review",
+      "Hairstyles, facial hair, equipment and garment variations",
+      "Portraits and public creator integration",
+      "Original full builder release gates"
+    ]
+  },
+  "artifactHashes": {
+    "material-activities-draft-v3.png": "99d89df20a9127ebdc9dc67b82aaf61d1044c51ea2e9b28e7f05f71db46b2f3d",
+    "material-base-draft-v3.png": "76b29b2d57500f57351a7deb5289a1ae9819a66bcf6d498bb32478c385a69d2d",
+    "material-focus-activities-10-v3.png": "9f0080326c587d1f47ad1b8a374e1c80dcee48680c0ffaedeb520d0756d82990",
+    "material-focus-activities-11-v3.png": "f8d3d15826f330ebcd8c7381fac7e4c5dfe39737959e62f182ea0c0dae58f7fa",
+    "material-focus-activities-8-v3.png": "2911e34c72c2ff8b917f9fe66c6cd98b30c5da48a7f650c14dc89cae1d2fdc9d",
+    "material-focus-activities-9-v3.png": "7eb0e85ab9c79027f2bfb5504338b8b3bb920bc5a17ffb1019c8c7a7ac146038",
+    "material-focus-base-15-v3.png": "825bb6ea6be2b0466a6dd19e4e0b10971f86d3d4fe089cae396b6596953e4c3e",
+    "material-idle-draft-v3.png": "32095f359dd11fd7c059439e157202c3bf8be925af7165413d63eaeebf5e3ba8",
+    "hat-colored-activities-v2.png": "f4a159529aa6b26b9d42456697b2349f54b71901b0360de52e88aa9e06ff2e3c",
+    "hat-colored-base-v2.png": "152e8f9c8f2c6c4899688c12df4115c7210f4f48260e86d776d39fe791071e2f",
+    "hat-colored-idle-v2.png": "988f10d856c3d5dd44d9c052b075be42d7d87c922ff610e143c0a06e26ff4f1f"
+  }
+}
