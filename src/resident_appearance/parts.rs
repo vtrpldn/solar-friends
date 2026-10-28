@@ -7,8 +7,8 @@ macro_rules! part_keys {
         impl $name { pub const KEYS: &'static [&'static str] = &[$($key),+]; }
     };
 }
-part_keys!(PartAssets { V1 => "resident-parts-v1", V2 => "resident-parts-v2", V3 => "resident-parts-v3", V4 => "resident-parts-v4", V5 => "resident-parts-v5", V6 => "resident-parts-v6" });
-part_keys!(BodyPart { Neutral => "neutral-v1", Relaxed => "relaxed-v1" });
+part_keys!(PartAssets { V1 => "resident-parts-v1", V2 => "resident-parts-v2", V3 => "resident-parts-v3", V4 => "resident-parts-v4", V5 => "resident-parts-v5", V6 => "resident-parts-v6", V7 => "resident-parts-v7" });
+part_keys!(BodyPart { Neutral => "neutral-v1", Relaxed => "relaxed-v1", Broad => "broad-v1" });
 part_keys!(HairPart { Curls => "short-curls-v1", SidePart => "side-part-v1" });
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -94,7 +94,8 @@ impl PartsLook {
         self.schema == 2
             && matches!(
                 (self.asset_version, self.body),
-                (PartAssets::V1, BodyPart::Neutral)
+                (PartAssets::V7, BodyPart::Broad)
+                    | (PartAssets::V1, BodyPart::Neutral)
                     | (
                         PartAssets::V2
                             | PartAssets::V3
@@ -104,10 +105,11 @@ impl PartsLook {
                         BodyPart::Relaxed
                     )
             )
+            && (self.body != BodyPart::Broad || self.facial_hair == FacialHairPart::None)
     }
 }
 pub fn parts_catalog() -> serde_json::Value {
-    serde_json::json!({"schema":2,"assetVersion":PartAssets::KEYS[0],"bodies":BodyPart::KEYS,"asset_versions":PartAssets::KEYS,"body_assets":{"neutral-v1":"resident-parts-v1","relaxed-v1":"resident-parts-v5"},"body_revisions":{"neutral-v1":["resident-parts-v1"],"relaxed-v1":["resident-parts-v2","resident-parts-v3","resident-parts-v4","resident-parts-v5","resident-parts-v6"]},"hairstyles":HairPart::KEYS,"hair_colours":HairColour::KEYS,"hats":HatPart::KEYS,"facial_hair":FacialHairPart::KEYS,"materials":{"skin":SkinPalette::KEYS,"shirt":TopPalette::KEYS,"shorts":BottomPalette::KEYS,"shoes":ShoePalette::KEYS}})
+    serde_json::json!({"schema":2,"assetVersion":PartAssets::KEYS[0],"bodies":BodyPart::KEYS,"asset_versions":PartAssets::KEYS,"body_assets":{"neutral-v1":"resident-parts-v1","relaxed-v1":"resident-parts-v5","broad-v1":"resident-parts-v7"},"body_facial_hair":{"neutral-v1":FacialHairPart::KEYS,"relaxed-v1":FacialHairPart::KEYS,"broad-v1":["none"]},"body_revisions":{"broad-v1":["resident-parts-v7"],"neutral-v1":["resident-parts-v1"],"relaxed-v1":["resident-parts-v2","resident-parts-v3","resident-parts-v4","resident-parts-v5","resident-parts-v6"]},"hairstyles":HairPart::KEYS,"hair_colours":HairColour::KEYS,"hats":HatPart::KEYS,"facial_hair":FacialHairPart::KEYS,"materials":{"skin":SkinPalette::KEYS,"shirt":TopPalette::KEYS,"shorts":BottomPalette::KEYS,"shoes":ShoePalette::KEYS}})
 }
 
 #[cfg(test)]
@@ -116,6 +118,36 @@ mod tests {
     fn recipe(hair: &str) -> serde_json::Value {
         serde_json::json!({"schema":2,"assetVersion":"resident-parts-v1","body":"neutral-v1","hair":hair,"materials":{"skin":"copper","shirt":"teal","shorts":"sage","shoes":"graphite"}})
     }
+    #[test]
+    fn broad_build_round_trips_without_changing_the_person_or_village() {
+        let mut game = Game::new();
+        let before: serde_json::Value = serde_json::from_str(&game.snapshot()).unwrap();
+        let mut value = recipe("side-part-v1");
+        value["body"] = "broad-v1".into();
+        value["assetVersion"] = "resident-parts-v7".into();
+        value["hat"] = "straw-v1".into();
+        value["hairColour"] = "silver".into();
+        assert!(game.change_resident_appearance(0, "Iara", &value.to_string()));
+        let saved = game.snapshot();
+        let mut after: serde_json::Value = serde_json::from_str(&saved).unwrap();
+        assert_eq!(after["residents"][0]["appearance"], value);
+        after["residents"][0]["appearance"] = before["residents"][0]["appearance"].clone();
+        assert_eq!(after["residents"], before["residents"]);
+        assert_eq!(after["village"], before["village"]);
+        assert!(game.restore(&saved));
+        assert_eq!(game.snapshot(), saved);
+        for (field, unsupported) in [
+            ("facialHair", "short-chestnut-v1"),
+            ("assetVersion", "resident-parts-v6"),
+            ("body", "relaxed-v1"),
+        ] {
+            let mut bad = value.clone();
+            bad[field] = unsupported.into();
+            assert!(!game.change_resident_appearance(0, "Iara", &bad.to_string()));
+            assert_eq!(game.snapshot(), saved);
+        }
+    }
+
     #[test]
     fn sleeping_family_revisions_preserve_state_and_refuse_wrong_bodies() {
         for revision in ["resident-parts-v5", "resident-parts-v6"] {

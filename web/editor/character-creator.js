@@ -51,7 +51,7 @@ export class CharacterCreator{
   try{
    const sheets=await this.art.appearances.prepare(appearance);if(token!==this.token||!this.dialog.open)return;
    this.sheets=sheets;this.status('Preview only · village time and resident needs stay unchanged.');this.restart();
-  }catch{if(token===this.token)this.status('These character poses could not load. Keep your draft and try again.');}
+  }catch(error){if(token===this.token){console.warn('Resident preview could not load.',error);this.status('These character poses could not load. Keep your draft and try again.');}}
  }
  status(text){this.dialog.querySelector('[data-character-preview-status]').textContent=text;}
  restart(){cancelAnimationFrame(this.frame);this.frame=null;this.start=performance.now();if(this.dialog.open&&this.sheets&&!document.hidden)this.draw(this.start);}

@@ -1,0 +1,125 @@
+{
+  "status": "Public broad-build integration journeys passed; full plan and art acceptance remain incomplete",
+  "biomes": {
+    "mata-atlantica": {
+      "schema": 2,
+      "assetVersion": "resident-parts-v7",
+      "body": "broad-v1",
+      "hair": "side-part-v1",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      },
+      "hairColour": "black",
+      "hat": "straw-v1"
+    },
+    "cerrado": {
+      "schema": 2,
+      "assetVersion": "resident-parts-v7",
+      "body": "broad-v1",
+      "hair": "side-part-v1",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      },
+      "hairColour": "black",
+      "hat": "straw-v1"
+    },
+    "caatinga": {
+      "schema": 2,
+      "assetVersion": "resident-parts-v7",
+      "body": "broad-v1",
+      "hair": "side-part-v1",
+      "materials": {
+        "skin": "copper",
+        "shirt": "teal",
+        "shorts": "sage",
+        "shoes": "graphite"
+      },
+      "hairColour": "black"
+    }
+  },
+  "nativeTests": 787,
+  "strictClippy": true,
+  "runtimeBinding": {
+    "registrationsRebound": 24,
+    "refusals": 5,
+    "sourceOwnershipAndPlacementUnchanged": true
+  },
+  "frameMargins": {
+    "rendererComparisons": 8,
+    "compositions": 5,
+    "refusals": 12
+  },
+  "composedRegression": {
+    "poses": 48,
+    "equippedPoseDifferences": 20,
+    "returnPoseDifferences": 2,
+    "refusals": 25,
+    "partialFailureClean": true,
+    "sharedRecipeLeases": true,
+    "leasedEvictionProtected": true,
+    "libraryCleanup": true,
+    "sharedBodyInFlightCleanup": true,
+    "sharedBodyLive": 193,
+    "liveBefore": 123,
+    "allOwnedReleased": true,
+    "borrowedSources": 37
+  },
+  "inAppBrowser": "Normal saved draft, Broad selector, curls, day, clean shaven: matching sprite and portrait inspected after resolving browser-specific canvas resampling hashes and preserving alpha-1 hair margins.",
+  "visualReview": "Inspected normal creator/sleep/live-edit captures for Mata Atlantica and game scenes in all three biomes.",
+  "limits": [
+    "Public broad build has no beard; explicit per-body catalog restriction is temporary and does not complete facial-hair work.",
+    "Painted transitions and additional wardrobe choices remain unfinished.",
+    "No claim of exhaustive palette/accessory/rain review or maximum-map/cache/performance acceptance.",
+    "Remaining original builder and release gates still require a full requirement audit."
+  ],
+  "inputs": {
+    "src/resident_appearance/parts.rs": "baac04222a8284896511542d96fe474db629018fd0bd79e21478070eb21f79ed",
+    "web/resident-part-recipe.js": "44af0a70cad6a16790a6556d57c6e343bd982085565e3c577bfec9ba065953a1",
+    "web/resident-parts.js": "89b6b094b8595683e44b519c396e4f50b310ef4419a52e5869d9936970ccb0c0",
+    "web/resident-family-parts.js": "48802400c4942128694edec58c665a3fa5ee5461223378095e6e559f4152ede5",
+    "web/resident-appearance-fields.js": "fc7b376b46564b489d21f6fdffc914c1e193d0ab545da028dfdfe4470ecf0f7a",
+    "web/editor/character-choices.js": "da1e9ebb825f391665295bf8191b03afdaf512367d8d35ce780eb0feed09c506",
+    "web/editor/character-creator.js": "d7fbcc2cf831e9136f7146a6a56f1aa13b92fa8ab5d911190dc2fe819f54dd7b",
+    "web/character-composed-family-bundle.js": "4e0eb5d09d7c9342a352bdc23681a24b77842370c5d9d1ea4318b018fd12eb27",
+    "web/character-composed-family.js": "d7cdca2836eb60ef142044b5055479288568c84eb6f3aad12a8129acbefe3dd3",
+    "web/character-runtime-binding.js": "c9847780f2039a44972baa444e4b94caeb4500041a1a6f5664bf3cad70a4b87e",
+    "web/character-hair-family.js": "a1652aa06d60cb4f680bc1c9938a411129d78662dd6aed047f8ea8bab2e96cf7",
+    "web/character-frame-composition.js": "3ab7fd8b02875130c5f41ac30d914ec75cc5e8460d6aad7d742bb00e1f0c88de",
+    "web/character-broad-family-bundle-index.js": "17d264e9080070a930a07efd36683cc4087144b9e233788602cf2d92a966ec23",
+    "web/art/characters/broad-v1/bundle-v1.json": "6d3f334aca027a80296ebc760e5d1214293ea027b3d0503d37e26a27c3c52f42",
+    "web/pkg/solar_friends_bg.wasm": "9a61b739591b2614d3b4e867a1be60e4386338df8924156092c80726b4a8e082",
+    "scripts/verify-part-creator.mjs": "8cf24055ff5a2eb4364b6b9beeaaf27bd732c03b8bc3300ae41714d7725dca48",
+    "scripts/verify-character-runtime-binding.mjs": "016aeaf20deed441a9625b69f02274b0ab9fdb3a008daa13ae131bbddcdaf9a9",
+    "scripts/verify-resident-frame-margins.mjs": "143d3032e9c7c79eaa50cfb0d1648050c6a0947ed4fdf4b2419bf5a36d1e9a3b"
+  },
+  "outputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/mata-atlantica/report.json": "bce4b9dfdd1f9d3c860401a344457d671f4a92f22a38dbde7f345a72c66f1302",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/mata-atlantica/creator-custom.png": "32b2a5e8175ce6b1d1ee2f3a81d49d08728936a7bfbefedb6651b3e45a425007",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/mata-atlantica/sleep-preview.png": "a51bc2d81fe2c795d07bb5510157de21bc2f1b0c6b99b474c913b8b7f02892bf",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/mata-atlantica/custom-village.png": "06748d0f6952ec1d97019baa92f72f14dc4e1e186e6fef1b437b2421f336915c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/mata-atlantica/live-custom.png": "b2b3589940b7d0d90806dc7a277d9da2905bf64c62cd8860d68928976f944c37",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/mata-atlantica/custom.solar-resident": "fc489b92439c0e3a0e099640b863a99f60281e287548324bf84991df4825ddd2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/mata-atlantica/custom.solar-scenario": "8fcc38aaedc643d1748dd45e1f3b0f25d4f4852febbb8a316c56c6ccecd39bef",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/cerrado/report.json": "2539acaac52ebc789e5d10622482f8f73d108e64dc60be5aed12b8a5da5ecfce",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/cerrado/creator-custom.png": "c5907f20a27d575711f037112325bac7938f70196b02cdfd72880588fb9901f4",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/cerrado/sleep-preview.png": "683e29d075fd759699a407cef7823c27d9d06eaa82431bc78c8d648ecb234f89",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/cerrado/custom-village.png": "ae87441cf2d569b5e959b5947b7937e53875ef930ec8b279404c5fd7528a8bb3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/cerrado/live-custom.png": "9a6bb29d1d139c83d35c8ad76d07849e53da257e5854e412cd74a28f56fa44a8",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/cerrado/custom.solar-resident": "99c1931ae579fcd873b0f987ac4ef4e485d78fef0983868ba536367c8beb4157",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/cerrado/custom.solar-scenario": "7baf60997d2b427c36916ee5a8b8278435e73acac160ea68fd6f791a6c5c64e0",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/caatinga/report.json": "60671636d477c05cc7f07feca065a4f3a1976385501bcf18f341652393071cd0",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/caatinga/creator-custom.png": "1069b0fd2b35a71a277e84130a5d6ca5d744f0e1c516cd3a55fadd7c682ab2c5",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/caatinga/sleep-preview.png": "e17a9c2dd0a74cbbc113e2905b5e66acc1a68cbdf3d336d4f3f5b095ab9ffcd3",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/caatinga/custom-village.png": "309fb9b5020ab6fdf5b351bdecb385eb4343db16d36074dafb2cd3c35b083412",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/caatinga/live-custom.png": "0e712ebded7f05f796e3b31993e02e0f123084704075c9d323f89e253bd8d5c0",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/caatinga/custom.solar-resident": "bfddd0f4e6a59c7b86e7ad3f68cfeeb7beb7e8d0600421ff18eecac41752a730",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/caatinga/custom.solar-scenario": "10f1249613bd95876d49e4176c04b492a4eb225e9674b316127e4251d2750879",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/player-integration-v1/in-app-creator.png": "fb8f790d617cdd4cae79cf5c19dcfa69df07896e6a6900f68b2c8def603de9e9"
+  }
+}

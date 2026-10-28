@@ -20,7 +20,7 @@ export async function prepareBundledComposedResidentFamily(descriptor,options={}
    if(!source){source=await loadCharacterImageSource(`/art/characters/${descriptor.id}/source-${s.sha256}.png`,{maximumBytes:4*1024*1024,sha256:s.sha256,signal});owned.set(s.sha256,source);}
    sources[key]=source;
   }
-  signal?.throwIfAborted();library=createComposedResidentLibrary({definition:data,sources,...cacheOptions});
+  signal?.throwIfAborted();library=createComposedResidentLibrary({definition:data,sources,...cacheOptions,runtimeRasterBinding:true});
  }catch(error){await library?.dispose();for(const source of owned.values())source.dispose();owned.clear();throw error;}
  let closing=null;
  return Object.freeze({id:descriptor.id,acquire:recipe=>library.acquire(recipe),info:()=>({...library.info(),decodedSources:owned.size}),dispose(){if(!closing)closing=library.dispose().finally(()=>{for(const source of owned.values())source.dispose();owned.clear();});return closing;}});

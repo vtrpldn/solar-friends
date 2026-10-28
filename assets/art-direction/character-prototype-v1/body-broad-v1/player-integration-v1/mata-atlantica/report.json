@@ -1,0 +1,76 @@
+{
+  "result": "PASS",
+  "biome": "mata-atlantica",
+  "portableScenarioCleanImport": true,
+  "sourceHashes": {
+    "src/resident_appearance/parts.rs": "baac04222a8284896511542d96fe474db629018fd0bd79e21478070eb21f79ed",
+    "web/resident-part-recipe.js": "44af0a70cad6a16790a6556d57c6e343bd982085565e3c577bfec9ba065953a1",
+    "web/resident-parts.js": "89b6b094b8595683e44b519c396e4f50b310ef4419a52e5869d9936970ccb0c0",
+    "web/resident-family-parts.js": "48802400c4942128694edec58c665a3fa5ee5461223378095e6e559f4152ede5",
+    "web/character-family-bundle.js": "9dce0fee17eb5a61aba2c94e71c12cf67b86732562267b7886edef949901ee71",
+    "web/character-broad-family-bundle-index.js": "17d264e9080070a930a07efd36683cc4087144b9e233788602cf2d92a966ec23",
+    "web/character-composed-family-bundle.js": "4e0eb5d09d7c9342a352bdc23681a24b77842370c5d9d1ea4318b018fd12eb27",
+    "web/art/characters/broad-v1/bundle-v1.json": "6d3f334aca027a80296ebc760e5d1214293ea027b3d0503d37e26a27c3c52f42",
+    "web/character-sleep-family-bundle.js": "c625150896514a73506935ec7df33b59f3361314ed5ea6b3ebb6f57dc630a044",
+    "web/character-sleep-family-bundle-index.js": "a8eef990f98b12605c1bc6ffaa8ac6a0ff97d7c3ad8601320704f6073698e49b",
+    "web/art/characters/relaxed-sleep-v1/bundle-v1.json": "f920cd78f9b736a255a90f2a56299a478bad0b8cf086d12e4f21ed283248412f",
+    "web/resident-ground-shadow.js": "016fa5a12a7957c8d0ea6c3d0166979c7c1b51a5723632dd0a289ff69a4642ee",
+    "web/resident-shadow-metadata.js": "8759afa938aace5e88a5989bf1bcd210218106532cc418140ddc779612879f1a",
+    "web/character-shirt-bundle.js": "5dddf5f1b98e2e3c66eb55a3937a839d073d552e1dad7d78cd5614d6a1b4676d",
+    "web/character-shirt-bundle-index.js": "2fa062df3aeff7e68b277ad9e4efa714504d2bb5644fb2990411d07676fbe500",
+    "web/art/characters/relaxed-shirt-v1/bundle-v1.json": "6f7fc99648147ad66449eac4917c50fab46be706845f9963cbae0d6a2a9d6948",
+    "web/character-family-bundle-index.js": "e7060b9a4d83be379fecb8405824b31c56fb437bffee0937a749a5be11be7b64",
+    "web/character-work-family-bundle-index.js": "094a6f8e4220fb1b3a2f81950ab5f43707f121a25bd95a70cffb361d9d43773c",
+    "web/art/characters/relaxed-work-v1/bundle-v1.json": "1292ff5ed50236a7f2f61f28c9e16774d0c9063acdaca3118daa0841894813f4",
+    "web/resident-appearance-fields.js": "fc7b376b46564b489d21f6fdffc914c1e193d0ab545da028dfdfe4470ecf0f7a",
+    "web/art/characters/relaxed-v1/bundle-v1.json": "f4d6aea31fd99f7cddf4705fc6692b0dec94da574e1033c436a84d6c6676fc69",
+    "web/character-facial-hair-parts.js": "b4d9f0da0ad943c440848d0dc52821912e517e50d28d51dae9c73e8921e0a73b",
+    "web/pkg/solar_friends_bg.wasm": "9a61b739591b2614d3b4e867a1be60e4386338df8924156092c80726b4a8e082"
+  },
+  "authored": {
+    "schema": 2,
+    "assetVersion": "resident-parts-v7",
+    "body": "broad-v1",
+    "hair": "side-part-v1",
+    "materials": {
+      "skin": "copper",
+      "shirt": "teal",
+      "shorts": "sage",
+      "shoes": "graphite"
+    },
+    "hairColour": "black",
+    "hat": "straw-v1"
+  },
+  "live": {
+    "schema": 2,
+    "assetVersion": "resident-parts-v7",
+    "body": "broad-v1",
+    "hair": "short-curls-v1",
+    "materials": {
+      "skin": "copper",
+      "shirt": "indigo",
+      "shorts": "sage",
+      "shoes": "graphite"
+    },
+    "hairColour": "black",
+    "hat": "straw-v1"
+  },
+  "presetAppearance": {
+    "assetVersion": "resident-parts-v7",
+    "body": "broad-v1",
+    "hair": "side-part-v1",
+    "hairColour": "black",
+    "hat": "straw-v1",
+    "materials": {
+      "shirt": "teal",
+      "shoes": "graphite",
+      "shorts": "sage",
+      "skin": "copper"
+    },
+    "schema": 2
+  },
+  "portablePresetRoundTrip": true,
+  "authoredResidents": 6,
+  "partResidents": 2,
+  "scope": "Public authored recipe and selected biome journey; broad body supports clean-shaven faces, two hairstyles, palettes and optional straw hat. Full art, wardrobe and transition acceptance remains incomplete"
+}

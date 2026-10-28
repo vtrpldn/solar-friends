@@ -1,3 +1,6 @@
+import {prepareBundledComposedResidentFamily} from './character-composed-family-bundle.js';
+import {bundledBroadFamily} from './character-broad-family-bundle-index.js';
+import {validateResidentPartRecipe} from './resident-part-recipe.js';
 import {prepareBundledSleepResidentFamily,prepareBundledSleepShirtResidentFamily} from './character-sleep-family-bundle.js';
 import {copyResidentFamilyProvider} from './resident-family-provider.js';
 import {prepareBundledResidentFamily,prepareBundledWorkingResidentFamily,prepareBundledShirtResidentFamily} from './character-family-bundle.js';
@@ -32,3 +35,17 @@ export function createBundledShirtPartComposer(){return createComposer(true,true
 
 export function createBundledSleepPartComposer(){return createComposer(true,false,true);}
 export function createBundledSleepShirtPartComposer(){return createComposer(true,true,true);}
+
+// The broad build has authored anatomy for all poses. Its unfinished facial
+// artwork stays outside this published revision rather than using another body.
+export function createBundledBroadPartComposer(){
+ let work=null,prepared=null,closed=false,closing=null;
+ const ready=()=>work??=prepareBundledComposedResidentFamily(bundledBroadFamily,{maxEntries:2,maxConcurrent:2,maxQueued:2}).then(value=>{prepared=value;return value;}).catch(error=>{work=null;throw error;});
+ return Object.freeze({async compose(input){
+  if(closed)throw Error('This resident composer is closed.');const recipe=validateResidentPartRecipe(input);
+  if(recipe.body!=='broad-v1'||recipe.assetVersion!=='resident-parts-v7')throw Error('Choose the bundled broad resident build.');
+  const family=await ready();if(closed)throw Error('This resident composer is closed.');
+  const lease=await family.acquire({schema:2,family:bundledBroadFamily.id,hair:recipe.hair,hairColour:recipe.hairColour??'chestnut',hat:recipe.hat??'none',materials:recipe.materials});
+  try{if(closed)throw Error('This resident composer is closed.');return copyResidentFamilyProvider(lease.provider);}finally{lease.release();}
+ },info:()=>prepared?.info()??null,dispose(){if(!closing){closed=true;closing=(work??Promise.resolve(null)).then(value=>value?.dispose());}return closing;}});
+}

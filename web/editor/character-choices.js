@@ -20,7 +20,7 @@ export function randomizeCharacter(person,locked,catalog,random=Math.random){
    const parts=catalog.resident_parts,body=pick(parts.bodies);
    // Older artwork revisions remain loadable but are not extra outfit choices.
    const assetVersion=pick(parts.body_revisions[body].filter(version=>version===parts.body_assets[body]||version==='resident-parts-v6'));
-   result.appearance=validateResidentPartRecipe({...residentPartRecipe({body,hair:pick(parts.hairstyles),hairColour:pick(parts.hair_colours),hat:pick(parts.hats),facialHair:pick(parts.facial_hair),materials:Object.fromEntries(Object.entries(parts.materials).map(([key,values])=>[key,pick(values)]))}),assetVersion});
+   result.appearance=validateResidentPartRecipe({...residentPartRecipe({body,hair:pick(parts.hairstyles),hairColour:pick(parts.hair_colours),hat:pick(parts.hats),facialHair:pick(parts.body_facial_hair?.[body]??parts.facial_hair),materials:Object.fromEntries(Object.entries(parts.materials).map(([key,values])=>[key,pick(values)]))}),assetVersion});
   }else{const look=pick(catalog.resident_appearances);result.appearance={preset:look.key,version:1};}
  }
  if(!locked.Personality){

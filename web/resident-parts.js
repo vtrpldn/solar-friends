@@ -11,7 +11,7 @@ import {validateResidentPartRecipe} from './resident-part-recipe.js';
 import {composeHatProvider} from './character-hat-provider.js';
 import {hatReviewClips} from './character-hat-poses.js';
 import {prepareFacialHairParts} from './character-facial-hair-parts.js';
-import {createBundledPartComposer,createBundledWorkingPartComposer,createBundledShirtPartComposer,createBundledSleepPartComposer,createBundledSleepShirtPartComposer} from './resident-family-parts.js';
+import {createBundledPartComposer,createBundledWorkingPartComposer,createBundledShirtPartComposer,createBundledSleepPartComposer,createBundledSleepShirtPartComposer,createBundledBroadPartComposer} from './resident-family-parts.js';
 import {canonical} from './editor/journal.js';
 const root='/art/characters/prototype-v1/',sheets=['base','idle','activities'];
 const bodyFiles={base:'body-neutral-base.png',idle:'body-neutral-idle-candidate-v2.png',activities:'body-neutral-activities-candidate-v1.png'};
@@ -20,7 +20,7 @@ const keyFor=recipe=>JSON.stringify(validateResidentPartRecipe(recipe));
 const settledValues=async promises=>{const results=await Promise.allSettled(promises),failure=results.find(r=>r.status==='rejected');if(failure)throw failure.reason;return results.map(r=>r.value);};
 // Sources are bundled, pose-bound and hash-checked. A recipe cannot name a file.
 export function createResidentPartLibrary(){
- const preparedKeys=new WeakMap(),sources=new Map(),hairSets=new Map(),preparedHairCounts=new Map();let bodyWork=null,toolWork=null,hatWork=null,facialWork=null,facialPrepared=null,pinned=new Set(),familyComposer=null,workingFamilyComposer=null,shirtFamilyComposer=null,sleepFamilyComposer=null,sleepShirtFamilyComposer=null,closed=false,closing=null;
+ const preparedKeys=new WeakMap(),sources=new Map(),hairSets=new Map(),preparedHairCounts=new Map();let bodyWork=null,toolWork=null,hatWork=null,facialWork=null,facialPrepared=null,pinned=new Set(),familyComposer=null,workingFamilyComposer=null,shirtFamilyComposer=null,sleepFamilyComposer=null,sleepShirtFamilyComposer=null,broadFamilyComposer=null,closed=false,closing=null;
  const alive=()=>{if(closed)throw Error('This resident part library has been released.');};
  const read=async file=>{if(!/^[a-z0-9-]+\.json$/.test(file))throw Error('Choose bundled resident registrations.');const response=await fetch(root+file);if(!response.ok)throw Error('Cannot load resident part registration.');return response.json();};
  const load=file=>{
@@ -52,6 +52,7 @@ export function createResidentPartLibrary(){
  const hat=()=>{if(!hatWork){const work=(async()=>{const registrations=new Map(await settledValues(Object.keys(hatReviewClips).map(async clip=>[clip,await read(`straw-hat-${clip}-v1-registration.json`)])));const source=registrations.get('breathe').source;return {registrations,...await load(source.file)};})();hatWork=work;work.catch(()=>{if(hatWork===work)hatWork=null;});}return hatWork;};
  const facialParts=()=>{if(!facialWork){const work=(async()=>{const [owner,base]=await Promise.all([read('facial-short-chestnut-v1-registration.json'),body()]);try{const parts=await prepareFacialHairParts({owner,binding:base.binding,load});facialPrepared=parts;return parts;}finally{for(const source of Array.isArray(owner.sources)?owner.sources:[])if(/^facial-short-chestnut-source-\d{2}-v1\.png$/.test(source.file??'')){const pending=sources.get(source.file);const loaded=await pending?.catch(()=>null);loaded?.dispose?.();if(sources.get(source.file)===pending)sources.delete(source.file);}}})();facialWork=work;work.catch(()=>{if(facialWork===work)facialWork=null;});}return facialWork;};
  const cache=createAppearanceCache({maxEntries:16,maxConcurrent:2,maxQueued:24,isPinned:key=>pinned.has(key),compose:async recipe=>{
+  if(recipe.body==='broad-v1')return (broadFamilyComposer??=createBundledBroadPartComposer()).compose(recipe);
   if(recipe.assetVersion==='resident-parts-v5')return (sleepFamilyComposer??=createBundledSleepPartComposer()).compose(recipe);
   if(recipe.assetVersion==='resident-parts-v6')return (sleepShirtFamilyComposer??=createBundledSleepShirtPartComposer()).compose(recipe);
   if(recipe.body==='relaxed-v1')return recipe.assetVersion==='resident-parts-v4'?(shirtFamilyComposer??=createBundledShirtPartComposer()).compose(recipe):recipe.assetVersion==='resident-parts-v3'?(workingFamilyComposer??=createBundledWorkingPartComposer()).compose(recipe):(familyComposer??=createBundledPartComposer()).compose(recipe);
@@ -85,15 +86,15 @@ export function createResidentPartLibrary(){
    closing=cache.dispose().then(async()=>{
     await Promise.allSettled([bodyWork,toolWork,hatWork,facialWork,...hairSets.values()]);
     await Promise.allSettled([...sources.values()]);
-    const results=await Promise.allSettled([familyComposer,workingFamilyComposer,shirtFamilyComposer,sleepFamilyComposer,sleepShirtFamilyComposer].filter(Boolean).map(composer=>composer.dispose()));
+    const results=await Promise.allSettled([familyComposer,workingFamilyComposer,shirtFamilyComposer,sleepFamilyComposer,sleepShirtFamilyComposer,broadFamilyComposer].filter(Boolean).map(composer=>composer.dispose()));
     for(const work of hairSets.values()){const poses=await work.catch(()=>null);for(const part of poses?.values()??[])part.composer.dispose();}
     facialPrepared?.dispose();facialPrepared=null;const base=await bodyWork?.catch(()=>null);base?.materials.clear();
     for(const work of sources.values()){const source=await work.catch(()=>null);source?.dispose?.();}
     sources.clear();hairSets.clear();preparedHairCounts.clear();bodyWork=toolWork=hatWork=facialWork=null;
-    familyComposer=workingFamilyComposer=shirtFamilyComposer=sleepFamilyComposer=sleepShirtFamilyComposer=null;
+    familyComposer=workingFamilyComposer=shirtFamilyComposer=sleepFamilyComposer=sleepShirtFamilyComposer=broadFamilyComposer=null;
     const failure=results.find(r=>r.status==='rejected');if(failure)throw failure.reason;
    });return closing;
   },
-  cacheInfo:()=>({...cache.info(),preparedHairFrames:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0),preparedHairRgbaBytes:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0)*256*256*4,facialOverlayFrames:facialPrepared?.cacheInfo().entries??0,facialOverlayRgbaBytes:facialPrepared?.cacheInfo().rgbaByteUpperBound??0,maximumFrames:16*50,rgbaByteUpperBound:cache.info().entries*50*256*256*4,decodedSources:sources.size,familyCache:familyComposer?.info()??null,workFamilyCache:workingFamilyComposer?.info()??null,shirtFamilyCache:shirtFamilyComposer?.info()??null,sleepFamilyCache:sleepFamilyComposer?.info()??null,sleepShirtFamilyCache:sleepShirtFamilyComposer?.info()??null}),
+  cacheInfo:()=>({...cache.info(),preparedHairFrames:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0),preparedHairRgbaBytes:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0)*256*256*4,facialOverlayFrames:facialPrepared?.cacheInfo().entries??0,facialOverlayRgbaBytes:facialPrepared?.cacheInfo().rgbaByteUpperBound??0,maximumFrames:16*50,rgbaByteUpperBound:cache.info().entries*50*256*256*4,decodedSources:sources.size,familyCache:familyComposer?.info()??null,workFamilyCache:workingFamilyComposer?.info()??null,shirtFamilyCache:shirtFamilyComposer?.info()??null,sleepFamilyCache:sleepFamilyComposer?.info()??null,sleepShirtFamilyCache:sleepShirtFamilyComposer?.info()??null,broadFamilyCache:broadFamilyComposer?.info()??null}),
  });
 }
