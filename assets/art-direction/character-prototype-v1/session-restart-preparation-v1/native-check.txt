@@ -1,0 +1,1 @@
+PASS: native restart stages an independent candidate, preserves the live game through cancellation/preparation failure, serializes restarts, rejects invalid definitions, rolls back native/recovery/artwork on write failure, retries saves and releases candidates on disposal/late completion.

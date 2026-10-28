@@ -1,0 +1,1 @@
+PASS: public challenge authoring, invalid deadline repair with Undo, portable export/reopen, exact failure boundary and freeze, restart from original source, permanent unrestricted continuation and exact checkpoint reload.

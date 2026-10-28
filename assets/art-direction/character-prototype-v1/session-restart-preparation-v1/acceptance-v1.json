@@ -1,0 +1,32 @@
+{
+  "scope": "Scenario/playtest restart preparation and rollback. Not cold-start/mode-transition completion, total memory or full builder acceptance.",
+  "checks": [
+    "independent native candidate compilation",
+    "exact current native state until preparation completes",
+    "cancel before start and during preparation",
+    "no concurrent restart",
+    "invalid definitions/artwork failure leave current state unchanged",
+    "late preparation undo",
+    "session disposal aborts pending preparation",
+    "checkpoint-write failure restores native state, recovery bytes and artwork",
+    "save retry after failure",
+    "same live Game object after commit",
+    "twelve-person public Cancel/retry",
+    "exact saved checkpoint and portrait preservation",
+    "public challenge restart/free-continuation regression",
+    "existing content-library/frozen source/session ownership regression",
+    "prompt cancellation while a prior checkpoint write is blocked",
+    "pending legitimate checkpoint finishes without restarting",
+    "leaving during a pending restart is refused"
+  ],
+  "nativeCodeChanged": false,
+  "inputs": {
+    "web/player-session.js": "118b06a29e5365987c49266d89cf563d6548a7024a7d44734bf9b80e71e6ef00",
+    "web/main.js": "52487804fbf2c221d9ee07e0ff9b26a65fc2117a5847472f235effa7917d367a",
+    "scripts/verify-session-restart-preparation.mjs": "8d15736651243e22ed8f235441892e82510b94a0b9dcc2d454aad08b03564fa2",
+    "scripts/verify-session-restart-ui.mjs": "319d359a58a5d2eb898d823028e02c4c3527f3b2ed778df0b7390325e669648d",
+    "scripts/verify-content-library.mjs": "03efedfbd7dbccce8cae03543f7297ad5f054d84b6d0effdcf83cd623907e341",
+    "scripts/verify-challenge-editor.mjs": "0b4585354087aafc0dbf27a32848e73611e68078706780c7af71985529c91cbb",
+    "web/pkg/solar_friends_bg.wasm": "e78fae12869ea3fb20b6f70c5102b58b1919a186a646b27c551d0bc6073d8f2f"
+  }
+}

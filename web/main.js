@@ -177,19 +177,34 @@ function prepareResidentCast(snapshot,options={}){
     const progress=$('#load-progress');progress.hidden=false;progress.max=Math.max(1,total);progress.value=completed;
   }});
 }
+function beginResidentArtworkLoading(allowCancel=true){
+  const controller=new AbortController(),loading=$('#loading'),cancel=$('#cancel-resident-loading');
+  residentArtworkLoading=true;if(loading.open)loading.close();loading.hidden=false;loading.showModal();cancel.disabled=false;
+  cancel.hidden=!allowCancel;cancel.onclick=()=>controller.abort();loading.oncancel=event=>{event.preventDefault();if(allowCancel&&!cancel.disabled)controller.abort();};if(allowCancel)cancel.focus();
+  return {signal:controller.signal,installing(){cancel.disabled=true;$('#load-status').textContent='Restarting scenario…';},finish(){residentArtworkLoading=false;loading.close();loading.hidden=true;cancel.hidden=true;cancel.disabled=false;cancel.onclick=null;loading.oncancel=null;}};
+}
 function ensureResidentArtwork(snapshot,ready,failed=()=>{},cancelled=failed,allowCancel=true){
   const revision=++residentArtworkRevision,appearances=snapshot.residents.map(p=>p.appearance);
   if(appearances.every(a=>residentAppearances.isReady(a,{sheets:['base','idle','activities']})))return false;
-  const controller=new AbortController(),loading=$('#loading'),cancel=$('#cancel-resident-loading');
-  residentArtworkLoading=true;if(loading.open)loading.close();loading.hidden=false;loading.showModal();
-  cancel.hidden=!allowCancel;cancel.onclick=()=>controller.abort();loading.oncancel=event=>{event.preventDefault();if(allowCancel)controller.abort();};if(allowCancel)cancel.focus();
-  const finish=()=>{residentArtworkLoading=false;loading.close();loading.hidden=true;cancel.hidden=true;cancel.onclick=null;};
-  prepareResidentCast(snapshot,{signal:controller.signal}).then(undo=>{if(revision===residentArtworkRevision){finish();ready(undo);}},error=>{
-    if(revision!==residentArtworkRevision)return;finish();
+  const loading=beginResidentArtworkLoading(allowCancel);
+  prepareResidentCast(snapshot,{signal:loading.signal}).then(undo=>{if(revision===residentArtworkRevision){loading.finish();ready(undo);}},error=>{
+    if(revision!==residentArtworkRevision)return;loading.finish();
     if(error.name==='AbortError'){toast('Resident loading cancelled. Your village is unchanged.');cancelled(error);}
     else{console.error(error);toast('Resident artwork could not load. Your village is unchanged.');failed(error);}
   });
   return true;
+}
+async function restartPlayerSession(test=false){
+  if(!playerSession||residentArtworkLoading)return;
+  const wasPaused=paused;if(!paused)togglePause();const loading=beginResidentArtworkLoading();
+  try{
+    const options={signal:loading.signal,prepare:async(snapshot,{signal})=>{const undo=await prepareResidentCast(snapshot,{signal});if(signal.aborted){undo?.();throw new DOMException('Scenario restart cancelled.','AbortError');}loading.installing();return undo;}};
+    if(test)await playerSession.restartTest(options);else await playerSession.restartScenario(options);
+    refreshDevScene();
+  }catch(error){
+    state=JSON.parse(game.snapshot());if(!wasPaused&&paused)togglePause();updateUI();render();
+    toast(error.name==='AbortError'?'Restart cancelled. Your village is unchanged.':error.message);
+  }finally{loading.finish();}
 }
 const residentAnimations = new Map();
 const residentSurfaces = new Map();
@@ -1003,7 +1018,7 @@ function updateQuests() {
   if(state.village.scenario?.definition?.journal){
     const challengeReport=JSON.parse(game.scenario_journal());
     if(challengeReport.challenge?.status==='failed'&&!challengeFailureShown&&!document.querySelector('dialog[open]')){challengeFailureShown=true;queueMicrotask(openJournal);}
-    journalPage=renderScenarioJournal(JSON.parse(game.scenario_journal()),{title:state.village.scenario.definition.title,page:journalPage,open:openJournal,replace:replaceMarkup,residents:state.residents,avatar,onRestart:async()=>{if(!playerSession)return;try{if(!paused)togglePause();await playerSession.restartScenario();refreshDevScene();updateQuests();}catch(error){toast(error.message);}},onContinue:async()=>{try{if(game.continue_scenario_freely()){state=JSON.parse(game.snapshot());updateQuests();await playerSession?.save();toast('Free continuation · the original challenge remains failed.');}}catch(error){toast(error.message);}},onAction:({action,credited})=>{
+    journalPage=renderScenarioJournal(JSON.parse(game.scenario_journal()),{title:state.village.scenario.definition.title,page:journalPage,open:openJournal,replace:replaceMarkup,residents:state.residents,avatar,onRestart:async()=>{await restartPlayerSession();updateQuests();},onContinue:async()=>{try{if(game.continue_scenario_freely()){state=JSON.parse(game.snapshot());updateQuests();await playerSession?.save();toast('Free continuation · the original challenge remains failed.');}}catch(error){toast(error.message);}},onAction:({action,credited})=>{
       if(action.kind==='goal'){const report=JSON.parse(game.scenario_journal()),index=report.chapters.findIndex(c=>c.goals.some(g=>g.id===action.goal));if(index>=0){journalPage=index;updateQuests();[...document.querySelectorAll('[data-scenario-goal]')].find(el=>el.dataset.scenarioGoal===action.goal)?.scrollIntoView({block:'nearest'});}return;}
       if(['supplies','water','power','housing'].includes(action.kind)){questAction(action.kind==='water'?{type:'supplies',page:'water'}:action.kind==='power'?{type:'power'}:action.kind==='housing'?{type:'build'}:{type:'supplies',page:'pantry'}).run();return;}
       if(action.kind==='people'){questAction({type:'people'}).run();if(Number.isInteger(action.resident)&&state.residents.some(p=>p.id===action.resident))selectPerson(action.resident);return;}
@@ -1970,7 +1985,7 @@ function installCreationSession(){
   if(session.record.definition.start.resident_balance==='unrestricted'){const note=document.createElement('small');note.textContent='Unrestricted starting skills';bar.append(note);}
   const button=(text,action)=>{const b=document.createElement('button');b.textContent=text;b.onclick=async()=>{b.disabled=true;try{await action();}catch(error){toast(error.message);}finally{b.disabled=false;}};bar.append(b);};
   button('Save checkpoint',()=>session.save());
-  if(session.isTest)button('Restart test',async()=>{await session.restartTest();refreshDevScene();if(!paused)togglePause();});
+  if(session.isTest)button('Restart test',()=>restartPlayerSession(true));
   button(session.isTest?'Return to editor':'Scenario library',async()=>{
     if(!paused)togglePause();
     await session.finishTest();

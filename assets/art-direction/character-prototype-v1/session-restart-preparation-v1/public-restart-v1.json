@@ -1,0 +1,21 @@
+{
+  "result": "PASS",
+  "residents": 12,
+  "preparedBeforeNativeReplacement": true,
+  "cancelPreservesNativeAndDurableRecord": true,
+  "portraitPixelsPreserved": true,
+  "retryMatchesFreshCompilation": true,
+  "checkpointFailureRollsBack": true,
+  "retryAfterFailure": true,
+  "sourceHashes": {
+    "web/player-session.js": "118b06a29e5365987c49266d89cf563d6548a7024a7d44734bf9b80e71e6ef00",
+    "web/main.js": "52487804fbf2c221d9ee07e0ff9b26a65fc2117a5847472f235effa7917d367a",
+    "scripts/verify-session-restart-ui.mjs": "319d359a58a5d2eb898d823028e02c4c3527f3b2ed778df0b7390325e669648d"
+  },
+  "scope": "Ordinary scratch playtest restart controls with twelve residents, initial/live outfit differences, cancellation and injected IndexedDB-write failure. Not every session transition or total memory acceptance.",
+  "captures": {
+    "preparing.png": "73510167418b8713fad78ca3ddf9f92c0b09904c757b974403db7cf64aa2ed48",
+    "cancelled.png": "b3e538d12082a236db5998502ea691940d822c653483a1a44d60913562ec7d60",
+    "write-failure.png": "78b11aeeb853bde4005da6b776ade03c4f03b6ff64468ae2a36e5ea3b36cce81"
+  }
+}
