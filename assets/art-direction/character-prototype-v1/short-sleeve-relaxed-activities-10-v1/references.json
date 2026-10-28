@@ -358,12 +358,12 @@
     {
       "key": "activities-10",
       "bounds": [
-        132,
-        165,
-        1166,
-        773
+        96,
+        120,
+        848,
+        562
       ],
-      "painted": 369809
+      "painted": 196635
     }
   ],
   "rowSpans": [
@@ -525,10 +525,10 @@
     }
   ],
   "sourceHashes": {
-    "specs.json": "9c94652ad9f1e9ddc5ea26d849d497413e74c6169875710701974809363e634c",
-    "atlas.png": "0efc6729221b9c7eecfd1ccfaf900a52e10048dc002ae9fdadea0e20504070dc",
-    "mask.png": "772fcbe5149ad29dc762a8d2e1b1eaad51d03ce4d4c6fafeb1af4a2fa724f633",
-    "context.png": "c32b2da684408e687f540740d9c0bbf7573f23c606401a1a6ce6bed75b38add2",
-    "board.png": "cb3021afaca02f92073addf86d53ac08132236482813d547f35049582114d750"
+    "specs.json": "efc72df904d4c5ad53952e4e579130177a1c231232c7a02f32fabe527207377b",
+    "atlas.png": "506c5a506118ede62e08a63ff27b6e5d1bdf0121e59541f78b0ee1a17ef6b1dd",
+    "mask.png": "b9722eede4f0e0b4bf8a46880741ca2de064460837910d69bbc66a64fcc0fffd",
+    "context.png": "b926144ec2c26b866fd058748e39b380a7571f09f4f33069e99c7a2698f8e8f8",
+    "board.png": "bfd7b80db16d08c310d4163c52eb4bd26ef5b0c814e994a8bcef1b47554e5ced"
   }
 }

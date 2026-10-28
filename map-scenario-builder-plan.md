@@ -2568,3 +2568,12 @@ Activities-9 now has a reviewed static source in `short-sleeve-relaxed-activitie
 All 878 original opaque shirt pixels are covered. Six compositions pass 37,704 protected-face channel checks, 101,784 preserved trousers/boots channel checks, 17,184 foreground alpha checks and nine invalid-registration refusals. Forty-eight colour/accessory compositions pass 2,359,296 alpha and 600,768 protected lower-body checks. The generated source, character comparisons, torso, day/night and mirrored guides, plain/equipped palettes and measured waist detail were inspected; exact fingerprints are recorded in `static-review-v1-owned-arm2.json`.
 
 **Why:** the resident creator needs matching clothing through each gardening pose while preserving bent arms and hands. This reaches 42 internal static shirt sources; integrated motion acceptance remains 40. Six tending/feeding sources, complete tending/equipment motion, public/world outfit integration, wider resident choices, dedicated sleep art and all original builder release requirements remain open.
+
+
+### Deep tending guides frozen
+
+Activities-10 and 11 now pass strict guide coverage: all 893 and 885 original opaque shirt pixels are covered, with zero protected face, trousers or boot overlap. Analytical testing identified different edge sampling for live canvases and decoded PNGs; only the real PNG path establishes these results. An exact eight-source-pixels-to-one-native-pixel tile/crop registration removes the tiny boot-edge spill without changing the native body geometry, scaling finished paint or weakening protection criteria. Activities-11 also has an explicitly stepped hem around the rear boot.
+
+Both guides are frozen before paint, with collar/armpit margin, original-material-bound arm foregrounds and independently preserved trousers/boots. Native contexts were inspected. Exact prompts and input hashes are retained for generation. No painted source for either pose has been accepted yet.
+
+**Why:** deep kneeling places the hem directly beside the rear boot, requiring faithful sampling and local clearance before painting. The integrated/static pose counts and all original release requirements remain unchanged.

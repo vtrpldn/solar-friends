@@ -5,29 +5,9 @@
       "pose": "activities-10",
       "extent": "full shirt",
       "requiredGuideAlpha": 240,
-      "protectedOverlap": [
-        [
-          94,
-          175,
-          1
-        ],
-        [
-          101,
-          176,
-          6
-        ],
-        [
-          105,
-          179,
-          1
-        ],
-        [
-          109,
-          180,
-          1
-        ]
-      ],
+      "protectedOverlap": [],
       "protectedHeadOverlap": [],
+      "protectedHeadPixels": 1572,
       "upperShirtPixels": 893,
       "uncoveredCount": 0,
       "uncovered": []

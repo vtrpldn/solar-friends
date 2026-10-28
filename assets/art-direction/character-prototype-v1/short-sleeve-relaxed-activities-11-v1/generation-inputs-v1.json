@@ -1,0 +1,18 @@
+{
+  "prompt": "prompt-v1.txt",
+  "promptSha256": "cdd7f7803f6ea962007a99099ee49fb0b425e887c7aa67a3e975b7592647cc5d",
+  "anatomyReviewSha256": "9b4cdd74817dae78709f44578edd6041be15bafdb9597c68d3d2038896d92fc9",
+  "foregroundIntentSha256": "d400c1748eacd3ea3f5a8d0adccea3764c0bd004b0f1bdf7624fd77f2eb9a721",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-11-v1/mask.png",
+      "role": "Only generator input: frozen deep tending silhouette at eight source pixels per native pixel",
+      "sha256": "fff962b0b9e68fb108839c2498c76989506f9e6d31e027bade9d5380559b8f83"
+    }
+  ],
+  "styleReferenceInspected": {
+    "path": "assets/art-direction/character-prototype-v1/short-sleeve-relaxed-activities-8-v3/candidate-v1.png",
+    "sha256": "0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20",
+    "role": "Reviewed first tending shirt style described in text; not a generator input"
+  }
+}
