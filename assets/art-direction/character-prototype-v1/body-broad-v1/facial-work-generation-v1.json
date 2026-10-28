@@ -1,0 +1,29 @@
+{
+  "prompt": "Use case: precise-object-edit. Asset type: Solar Friends transparent resident facial-hair atlas. Image 1 is the EXACT four-pose body placement and facial geometry guide, not content to retain. Image 2 is beard material/style reference only. Create ONLY four short chestnut beard-and-moustache overlays for the four faces in Image 1. Keep the same square canvas and 2 by 2 pose arrangement, with each beard at the exact face position and scale of Image 1. Preserve each pose's actual head pitch: top left upright, top right upward-looking with hands together, bottom left head raised with forearm crossing under jaw, bottom right head tilted down while bending. The short beard must hug the jaw and chin closely, with a small natural moustache immediately above the existing smiling mouth; avoid long hanging chin, thick horseshoe lip, oversized beard, curled floating end or a protruding mouth ring. Render complete beard hair silhouette behind any foreground arms; arms will be composited separately. Warm chestnut broad painted hair groups, upper-left light, restrained detail consistent with the warm illustrated game body; NOT realistic individual hairs or shiny 3D plastic. Remove all body, skin, eyes, nose, ears, clothes, hands, tools and background. Only facial hair remains, with true transparency between moustache and beard for the mouth. Transparent background, no labels, no grid, no shadows, no text. Do not include full heads or duplicate characters.",
+  "inputs": [
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-candidate-v2.png",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v2.png"
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/facial-work-candidate-v1.png",
+  "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-5a9e2cfa-6e5e-44ff-9815-d37d35dc545d.png",
+  "inputHashes": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/work-candidate-v2.png": "65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-standing-candidate-v2.png": "259a97e5c0aff5bc972813198bc1f26283761725495e5e5a2116f32e9c58f5b2"
+  },
+  "sha256": "133bcca4c3f4a75b55cfdc3a8a961113fcc2dfa64375079df82c4e0a8fb2aeb8",
+  "originalSha256": "133bcca4c3f4a75b55cfdc3a8a961113fcc2dfa64375079df82c4e0a8fb2aeb8",
+  "status": "Needs correction; excluded from public/gameplay catalogs",
+  "review": {
+    "source": "Raw output inspected; copied byte-identically without source repairs.",
+    "runtime": "Composed base V7 and enlarged V6/V7 four-work-pose comparison inspected.",
+    "finding": "Poses 5 and 7 have less protruding mouth gaps. Pose 6 still has an awkward jaw/raised-forearm edge and requires a pose-specific repaint. No full family acceptance.",
+    "registration": "One uniform .12 scale for all four new parts, rigid per-pose offsets only. Pose 6 has authored foreground forearm ownership.",
+    "limits": "Native motion, other palettes/hair/hat combinations, biome scenes and original-cast style acceptance remain incomplete."
+  },
+  "evidence": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-family-draft-v7.json": "cc77878271aa11596b30d1ce3bb11653011ea0edda2387502a368c928fda3564",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/composed-facial-base-v7.png": "dc6679eab1996e9cf7d9fce934e260769d8687f383799b8409412ec7ba3b85ba",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/facial-work-comparison-v1.png": "4f2ed7895004fcf420ee0324853586648e39c07966e4d1c85fd2c67fcccdd80a",
+    "scripts/review-work-facial-fit.mjs": "bd09291bbbdcf697fd633d3183e30ed56758d61c64bfe6e228192b67863c4bc0"
+  }
+}

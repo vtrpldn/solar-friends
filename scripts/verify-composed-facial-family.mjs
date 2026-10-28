@@ -3,7 +3,8 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const root='assets/art-direction/character-prototype-v1/body-broad-v1',hash=b=>createHash('sha256').update(b).digest('hex'),definition=JSON.parse(await readFile(`${root}/composed-family-draft-v6.json`)),sources={};
+const revision=process.argv.includes('--working')?'v7':'v6';
+const root='assets/art-direction/character-prototype-v1/body-broad-v1',hash=b=>createHash('sha256').update(b).digest('hex'),definition=JSON.parse(await readFile(`${root}/composed-family-draft-${revision}.json`)),sources={};
 for(const [id,s]of Object.entries(definition.sources)){const b=await readFile(s.path);assert.equal(hash(b),s.sha256);sources[id]={data:b.toString('base64'),sourceHash:s.sha256};}
 const server=await serve(0);let browser;
 try{browser=await chromium.launch({headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/composed-facial`);
@@ -37,6 +38,6 @@ try{browser=await chromium.launch({headless:true});const page=await browser.newP
    if(Object.values(loaded).some(s=>!s.image.complete||!s.image.naturalWidth))throw Error('Borrowed facial source was disposed');
    return {portrait:portraitData,boards,changed,facialColourAlphaComparisons,refusals,liveBefore,sharedBodyLive,allOwnedReleased:true,borrowedSources:Object.keys(loaded).length,changesConfinedToRegisteredPaint:true};
   }finally{none?.dispose();bundle?.dispose();document.createElement=create;}
- },{definition,sources});assert.equal(result.changed,50);assert.equal(result.facialColourAlphaComparisons,150);assert.equal(result.refusals,10);for(const [sheet,data]of Object.entries(result.boards))await writeFile(`${root}/composed-facial-${sheet}-v6.png`,Buffer.from(data,'base64'));delete result.boards;await writeFile(`${root}/composed-facial-portrait-v6.png`,Buffer.from(result.portrait,'base64'));delete result.portrait;
- const inputs={};for(const p of ['scripts/verify-composed-facial-family.mjs','web/character-composed-family.js','web/character-facial-family.js',`${root}/composed-family-draft-v6.json`])inputs[p]=hash(await readFile(p));await writeFile(`${root}/composed-facial-review-v6.json`,JSON.stringify({status:'Internal runtime checks passed; art review remains incomplete',...result,inputs},null,2)+'\n');console.log(JSON.stringify(result));
+ },{definition,sources});assert.equal(result.changed,50);assert.equal(result.facialColourAlphaComparisons,150);assert.equal(result.refusals,10);for(const [sheet,data]of Object.entries(result.boards))await writeFile(`${root}/composed-facial-${sheet}-${revision}.png`,Buffer.from(data,'base64'));delete result.boards;await writeFile(`${root}/composed-facial-portrait-${revision}.png`,Buffer.from(result.portrait,'base64'));delete result.portrait;
+ const inputs={};for(const p of ['scripts/verify-composed-facial-family.mjs','web/character-composed-family.js','web/character-facial-family.js',`${root}/composed-family-draft-${revision}.json`])inputs[p]=hash(await readFile(p));await writeFile(`${root}/composed-facial-review-${revision}.json`,JSON.stringify({status:'Internal runtime checks passed; art review remains incomplete',...result,inputs},null,2)+'\n');console.log(JSON.stringify(result));
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
