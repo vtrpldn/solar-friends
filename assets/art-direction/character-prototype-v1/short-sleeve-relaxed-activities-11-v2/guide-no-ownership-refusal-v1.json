@@ -1,0 +1,132 @@
+{
+  "scope": "Analytical source-shirt coverage and optional inner-arm samples. Current material labels locate suspected original cloth; inspect actual painted seams and anatomy before accepting geometry.",
+  "results": [
+    {
+      "pose": "activities-11",
+      "extent": "full shirt",
+      "requiredGuideAlpha": 240,
+      "protectedOverlap": [
+        [
+          152,
+          171,
+          103
+        ],
+        [
+          153,
+          171,
+          87
+        ],
+        [
+          154,
+          171,
+          71
+        ],
+        [
+          155,
+          171,
+          55
+        ],
+        [
+          156,
+          171,
+          39
+        ],
+        [
+          157,
+          171,
+          23
+        ],
+        [
+          158,
+          171,
+          7
+        ],
+        [
+          149,
+          172,
+          46
+        ],
+        [
+          147,
+          173,
+          28
+        ],
+        [
+          91,
+          175,
+          17
+        ],
+        [
+          92,
+          175,
+          104
+        ],
+        [
+          94,
+          176,
+          35
+        ],
+        [
+          99,
+          176,
+          255
+        ],
+        [
+          100,
+          176,
+          255
+        ],
+        [
+          101,
+          177,
+          255
+        ],
+        [
+          105,
+          180,
+          10
+        ],
+        [
+          108,
+          181,
+          10
+        ],
+        [
+          109,
+          181,
+          84
+        ],
+        [
+          111,
+          182,
+          10
+        ],
+        [
+          112,
+          182,
+          84
+        ],
+        [
+          113,
+          182,
+          118
+        ],
+        [
+          114,
+          182,
+          100
+        ],
+        [
+          115,
+          182,
+          81
+        ]
+      ],
+      "protectedHeadOverlap": [],
+      "protectedHeadPixels": 1574,
+      "upperShirtPixels": 885,
+      "uncoveredCount": 0,
+      "uncovered": []
+    }
+  ]
+}

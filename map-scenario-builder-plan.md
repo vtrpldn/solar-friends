@@ -2599,3 +2599,14 @@ Activities-11 now has a reviewed static source in `short-sleeve-relaxed-activiti
 The selected paint covers all 885 original opaque shirt pixels and passes six compositions with 37,776 protected-face channel checks, 94,608 exact preserved trousers/boot channel checks and nine invalid-registration refusals. Forty-eight palette/accessory compositions and visual source/torso/day/night/mirrored/palette/waist review pass. Exact hashes are in `static-review-v1-owned.json`; generated paint remains byte-identical to the generator output.
 
 **Why:** clothing naturally continues underneath the layers that visually cover it. Testing exact final layer preservation gives stronger practical evidence than requiring the unseen garment source to reproduce one-pixel boot cutouts. This reaches 44 internal static shirt sources; integrated motion acceptance remains 40. Four feeding sources, complete tending/equipment motion, public/world integration, wider resident choices, sleep artwork and every original builder release requirement remain open.
+
+
+### Complete tending motion integration
+
+All 44 internal registered shirt poses pass the mixed appearance library across eight complete appearances: 352 changed frames, 32 untouched frames, 16 feeding returns, 352 cache reuses and eight released-provider refusals. Thirty-eight distinct loaded paint sources require 304 colour preparations/disposals, peak two temporary sources and zero remaining live sources. These factory counters do not establish total memory or physical display pacing.
+
+The actual tending sequence8/9/10/11/10/9 was recorded through the shared animation renderer for both hairstyles, six seconds of daylight followed by six seconds of mirrored night. Both full-cycle decoded sample boards and all six closer daylight transition boards per hairstyle were inspected. Sleeves, neckline and hem remain attached through reach/return; the near hand stays visible over the trowel, and raised knee/boot proportions stay coherent. Source selections, source/registration hashes, decoder evidence and review scope are pinned in `short-sleeve-relaxed-tend-motion-v1/motion-review-v1.json`. The recording guard refuses tending capture without all four registered poses.
+
+The layered guide gate also refuses all23 protected overlaps when no preserved-body mask is explicitly selected. Its real exact mask passes; removing one boot-owned pixel still fails. The original zero-overlap strict path continues to pass the first tending guide.
+
+**Why:** customizing residents must remain coherent while they work, including held tools and native layer ownership. This reaches 44 internally integrated shirt poses. Four feeding poses, full public/world outfit integration, wider body/face/clothing choices, dedicated sleep artwork, and all original biome/campaign/performance/memory/storage/recovery/usability release requirements remain open.

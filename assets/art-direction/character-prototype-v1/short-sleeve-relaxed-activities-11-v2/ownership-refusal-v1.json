@@ -5,5 +5,9 @@
   "fixtureSha256": "29a348c147d4bf699bf6f6688d71922afe870341f6c40d7e67c9631f37aad93e",
   "report": "guide-missing-ownership-refusal-v1.json",
   "reportSha256": "5eb15d91477b6dbc3450a44f2728e6aa3fb6400a7501035dbfcf06939a0e4471",
-  "realMaskStrictExit": 0
+  "realMaskStrictExit": 0,
+  "noMaskStrictExit": 1,
+  "noMaskReport": "guide-no-ownership-refusal-v1.json",
+  "noMaskReportSha256": "329824813c28b1509a70339346bec4a4ece9bfa94e7cb03952276964523486ba",
+  "legacyStrictExit": 0
 }

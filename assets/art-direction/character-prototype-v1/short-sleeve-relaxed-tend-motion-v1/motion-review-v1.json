@@ -1,0 +1,87 @@
+{
+  "status": "Internal complete tending clip reviewed through recorded and independently decoded evidence",
+  "scope": "44 internal shirt poses and equipment integration. Not full48 outfit, public recipe, world, exhaustive playback, total-memory or physical display pacing acceptance.",
+  "verificationSha256": "d7e97e9c7efd59f19e2e2394d2d0c95a3824d8a82e489f92180fb0f4e67dad85",
+  "decodedSha256": "2be6935072f7142cb5ece3d9a2a5d8bc46c7eb03ee68d06e1fdc800534a58b03",
+  "sources": [
+    {
+      "index": 8,
+      "collection": "short-sleeve-relaxed-activities-8-v3",
+      "sourceVersion": "v1",
+      "registrationTag": "v1-owned",
+      "sourceSha256": "0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20",
+      "registrationSha256": "c11805a138efcab25b7d384c4d1ab1acab3093014f253e99b670608c819e876d"
+    },
+    {
+      "index": 9,
+      "collection": "short-sleeve-relaxed-activities-9-v1",
+      "sourceVersion": "v1",
+      "registrationTag": "v1-owned-arm2",
+      "sourceSha256": "75f8045b7247e8e689ae05c1a03de55d897972678b0826e1d3efcbe943463bd0",
+      "registrationSha256": "e20ef77266a894374e35801999551ec2873e1e28d6ed86836b3f3d34c1f42603"
+    },
+    {
+      "index": 10,
+      "collection": "short-sleeve-relaxed-activities-10-v1",
+      "sourceVersion": "v2",
+      "registrationTag": "v2-owned-arm2",
+      "sourceSha256": "5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3",
+      "registrationSha256": "f49600d90704317c61acdc434c2c6ddff65989d8685be92702eddc4f02180557"
+    },
+    {
+      "index": 11,
+      "collection": "short-sleeve-relaxed-activities-11-v2",
+      "sourceVersion": "v1",
+      "registrationTag": "v1-owned",
+      "sourceSha256": "221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0",
+      "registrationSha256": "29e4f394d5b1b3960fa16e2cdbd1b76ad93f446c318ad0929db2f330b106d15f"
+    }
+  ],
+  "visualFindings": "Inspected both complete-cycle daylight/mirrored-night boards and all six closer daylight transition boards for both hairstyles. Warm cream shading stays consistent through kneel/reach/return; neckline, sleeve and hem remain attached, near hand stays visible over trowel and raised-knee/boot silhouettes retain shape. No obvious detached cloth fragments or tool occlusion. Native keyframe changes remain visible as expected; physical display pacing is not established.",
+  "sequence": [
+    8,
+    9,
+    10,
+    11,
+    10,
+    9
+  ],
+  "recordingGuard": "--record-tend without --include-tend refused with the expected missing-pose assertion",
+  "comparisons": {
+    "changed": 352,
+    "unchanged": 32,
+    "returns": 16,
+    "cacheReuses": 352,
+    "releasedRefusals": 8,
+    "loadedGarmentImages": 38,
+    "colourPreparations": 304,
+    "colourCreations": 304,
+    "colourDisposals": 304,
+    "colourPeakSources": 2,
+    "colourLiveSources": 0
+  },
+  "toolSha256": {
+    "scripts/verify-mixed-family-clothing.mjs": "01026839fd0baac6153302b25e4af9b412797935db4d9762e055fb8a761ac8bd",
+    "scripts/decode-mixed-clothing-motion.mjs": "32a59d3993cc161c67c3f8ee8813cfeb09b0e7e3a0f2404dee941f1f62217d49"
+  },
+  "decodedBoards": {
+    "curls-0-true": {
+      "curls-0-true-decoded.png": "f2ed7c53e4a780f4c06ed03ceed47ef90102d39abcdf980bdd5235e15b1d9274",
+      "curls-0-true-transition-decoded.png": "82dfb67106b322041494b15f27c33523c7e18eb73ebb992705f0d6912427ae3e",
+      "curls-0-true-transition-2-decoded.png": "2b829e92765205e519f747dbabbacdbf60b7830ec7f429462d8599fd25968e0a",
+      "curls-0-true-transition-3-decoded.png": "1088261596c0f2921ea83a8f8f7c96faa1e1ee825a763e2051122ccb19d51a61",
+      "curls-0-true-transition-4-decoded.png": "67f2ae368ee23d946d9d6b832e274f0d423dcbba3975f6f608efe632d656604f",
+      "curls-0-true-transition-5-decoded.png": "0f4f0684329011abe098c89667ff385a125fb2f2d51e7ac9d04d32371bd84ee6",
+      "curls-0-true-transition-6-decoded.png": "4e5d8e284a0c937b572c98af56b95f290f0e899416c542e7c6a30abe3fcf670f"
+    },
+    "sidepart-0-true": {
+      "sidepart-0-true-decoded.png": "d723b20ae2cbe6b17ad8c410bb0019c6e62031440f83c1c13cbc01d6c48460d9",
+      "sidepart-0-true-transition-decoded.png": "96f78e0ea5fa48dab11ca497d1bf75af5e12fcb080cc75102f9646b2d7f88a0c",
+      "sidepart-0-true-transition-2-decoded.png": "6df2cea7c1ac148990e4600f25984e500c3b85b3fdf2b1299a6e4f07d2099418",
+      "sidepart-0-true-transition-3-decoded.png": "75b3c8c9a9c404f2119645620fb34e42b365a3f8d1ae8261e95cd14e2c7870c6",
+      "sidepart-0-true-transition-4-decoded.png": "f10f9fe96a48fa239bcd9b4d4eb0c1b38a27dfed245a328189e634db6d69d3db",
+      "sidepart-0-true-transition-5-decoded.png": "1ec8156eae5271ccaf027e333fec0c7e6f2b3d433836daa3c180eabb4ff3e7c9",
+      "sidepart-0-true-transition-6-decoded.png": "c7700fe2d96f9b67d1524310aacbeb72dcaeda8731805eda8f6fc5f9a7cee49e"
+    }
+  }
+}
