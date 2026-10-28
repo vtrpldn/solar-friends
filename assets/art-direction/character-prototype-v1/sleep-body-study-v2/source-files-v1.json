@@ -1,0 +1,7 @@
+{
+  "base": "web/art/characters/prototype-v1/body-neutral-base.png",
+  "idle": "web/art/characters/prototype-v1/body-neutral-idle-candidate-v2.png",
+  "activities": "web/art/characters/prototype-v1/body-neutral-activities-candidate-v1.png",
+  "walk": "web/art/characters/relaxed-v1/source-11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a.png",
+  "sleep": "assets/art-direction/character-prototype-v1/sleep-body-study-v2/candidate-v1.png"
+}

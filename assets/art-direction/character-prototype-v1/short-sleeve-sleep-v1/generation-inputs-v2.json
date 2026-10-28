@@ -1,0 +1,20 @@
+{
+  "status": "Pre-generation outline-preserving correction",
+  "tool": "built-in image_gen",
+  "transparentBackground": true,
+  "prompt": "prompt-v2.txt",
+  "registration": "registration-intent.json",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-sleep-v1/mask.png",
+      "role": "Exact alpha edit target; all outline coordinates frozen",
+      "sha256": "8af349c6b9db100a48003108c4280959a6cb6c10e91d343c82efbf46947f4dab"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-sleep-v1/context.png",
+      "role": "Paint/camera reference only; body is not output",
+      "sha256": "1496f7b4bd836a2af293fae2351408dfdc87df494ef74f21ba419cc898997642"
+    }
+  ],
+  "paintEditingAllowed": false
+}

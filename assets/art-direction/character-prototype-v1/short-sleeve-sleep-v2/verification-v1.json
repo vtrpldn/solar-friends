@@ -1,0 +1,21 @@
+{
+  "requiredOriginalShirtAlpha": 240,
+  "requiredOriginalShirtPixels": 1094,
+  "coveredOriginalShirtPixels": 1094,
+  "compositions": 24,
+  "outsideChannels": 2626560,
+  "preservedChannels": 1609872,
+  "alphaChecks": 1179648,
+  "protectedPoints": 120,
+  "edgeBlendChecks": 120,
+  "invalidRegistrationsRefused": 7,
+  "bodyUnchanged": true,
+  "scope": "Single-pose short-sleeve sleep composition: 2 hairstyles, 3 skin colours, 4 shirt colours, exact lower-body ownership and diagnostic lighting/facing. No full-family/public/world/motion acceptance.",
+  "inputs": {
+    "scripts/verify-sleep-shirt.mjs": "e2ed9ce629605fae9b574efe04e8102c438e797c5d5f96a229c2d2975a0f3e4f",
+    "web/character-clothing.js": "8427bfdb00b0edc7fa8e219a7269c97c98eb028db41160b6c86f4198d33d6a69",
+    "web/character-hair.js": "aeb90c0c20c310585c5fdef4d72d3b85b311eee360b00b8c703a128be1e493c8",
+    "assets/art-direction/character-prototype-v1/short-sleeve-sleep-v2/candidate-v1.png": "c68b53fa48a6c8edb53aeaddc1f2899b31f87e6de6eea86ece6e1057b734aab8",
+    "assets/art-direction/character-prototype-v1/short-sleeve-sleep-v2/registration-v1.json": "8f20c5ebf0a21fbb45dfdf15cbfa17d590339d7716ae67a11a74452b140c5717"
+  }
+}

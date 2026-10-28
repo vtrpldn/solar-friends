@@ -1,0 +1,20 @@
+{
+  "status": "Pre-generation frozen collar correction",
+  "tool": "built-in image_gen",
+  "transparentBackground": true,
+  "prompt": "prompt-v1.txt",
+  "registration": "registration-intent.json",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-sleep-v2/mask.png",
+      "role": "New frozen silhouette with wider collar; exact edit target",
+      "sha256": "921e00a6625753ce4a8788a831546355969ec67fb182fafbac8f20b05c9ce08b"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-sleep-v2/context.png",
+      "role": "Registered body and paint/camera reference only",
+      "sha256": "c8b2b3d7170197de0b11bea286d08103948c219491ab1ccc3b21ced79d386320"
+    }
+  ],
+  "paintEditingAllowed": false
+}

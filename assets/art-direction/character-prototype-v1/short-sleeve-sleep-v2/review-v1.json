@@ -1,0 +1,45 @@
+{
+  "status": "Reviewed internal static sleep garment; no public or full-family acceptance",
+  "source": {
+    "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-8f170ef6-7920-4741-a688-74266199e6b5.png",
+    "sha256": "c68b53fa48a6c8edb53aeaddc1f2899b31f87e6de6eea86ece6e1057b734aab8",
+    "copyByteIdentical": true,
+    "paintEdited": false,
+    "prompt": "prompt-v1.txt",
+    "inputs": "generation-inputs-v1.json",
+    "status": "Generated source; frozen geometry and runtime review pending"
+  },
+  "checks": {
+    "requiredOriginalShirtAlpha": 240,
+    "requiredOriginalShirtPixels": 1094,
+    "coveredOriginalShirtPixels": 1094,
+    "compositions": 24,
+    "outsideChannels": 2626560,
+    "preservedChannels": 1609872,
+    "alphaChecks": 1179648,
+    "protectedPoints": 120,
+    "edgeBlendChecks": 120,
+    "invalidRegistrationsRefused": 7,
+    "bodyUnchanged": true
+  },
+  "findings": [
+    "The fixed reclining outline, neck opening, short sleeves and compressed torso remain coherent beside both registered hairstyles.",
+    "The cuff ownership follows the bent forearm rather than exposing the earlier squared mask edge.",
+    "Cream, teal, terracotta and indigo remain distinct across three skin palettes; the underlying shorts and feet retain their exact registered appearance.",
+    "Both facings and diagnostic night tint retain the full silhouette. These flat-background views do not prove actual terrain contact or physical nighttime lighting."
+  ],
+  "artifacts": {
+    "candidate-v1.png": "c68b53fa48a6c8edb53aeaddc1f2899b31f87e6de6eea86ece6e1057b734aab8",
+    "registration-v1.json": "8f20c5ebf0a21fbb45dfdf15cbfa17d590339d7716ae67a11a74452b140c5717",
+    "verification-v1.json": "3b982f02d445f0f433067d882ec234810bd08cd21e8edbc38a4bf10d52c6874c",
+    "review-v1-palette.png": "b52ccd62bbba20aa439a7babd804463e38b2f9ec8332a8aed648337a70af4614",
+    "review-v1-waist.png": "e47e3d14076b2f77d9e9e56100b16452849cd72401b7431cbdf6dff142ddb184",
+    "review-v1-lighting.png": "2719517dc798ae2670ba8d2abf485bb0bd0cc96ee9a75a69a0bc68b7a645dca6"
+  },
+  "remaining": [
+    "Complete-family rebinding and contact forwarding",
+    "Sleeping facial-hair artwork and activity accessory rules",
+    "Shadow and actual biome terrain/lighting review",
+    "Recorded transitions and public versioned creation/save/import integration"
+  ]
+}

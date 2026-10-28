@@ -1,0 +1,9 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-cd2aacbd-9078-4ac2-9469-7adecc4ac8e5.png",
+  "sha256": "868015d1b6164f3a95a7e2ad6a3ac8d013f6b770ae3d4b2d1f286dca0014a2f7",
+  "copyByteIdentical": true,
+  "paintEdited": false,
+  "prompt": "prompt-v2.txt",
+  "inputs": "generation-inputs-v2.json",
+  "status": "Generated source; frozen geometry and runtime review pending"
+}

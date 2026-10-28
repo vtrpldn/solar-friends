@@ -1,0 +1,28 @@
+{
+  "status": "Rejected for final composition: incomplete collar coverage",
+  "findings": "The source passes the frozen outline audit but leaves four original opaque shirt pixels partially exposed through its collar edge at runtime. New guide geometry must cover these pixels without relaxing the 240-alpha coverage rule.",
+  "uncoveredNativePixels": [
+    [
+      79,
+      178,
+      228
+    ],
+    [
+      76,
+      179,
+      133
+    ],
+    [
+      77,
+      179,
+      234
+    ],
+    [
+      74,
+      180,
+      209
+    ]
+  ],
+  "generatedPaintEdited": false,
+  "nextCollection": "short-sleeve-sleep-v2"
+}

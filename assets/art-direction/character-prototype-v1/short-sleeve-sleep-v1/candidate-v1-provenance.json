@@ -1,0 +1,9 @@
+{
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-21769e8e-eb71-4f66-8159-bda1cc1e2fa0.png",
+  "sha256": "e3517bd1f8cbbae82d6e55e316ff86198af444c2050f85c28712b00bf7ab24d7",
+  "copyByteIdentical": true,
+  "paintEdited": false,
+  "prompt": "prompt-v1.txt",
+  "inputs": "generation-inputs-v1.json",
+  "status": "Rejected: upright neck opening replaces the fixed reclining outline"
+}
