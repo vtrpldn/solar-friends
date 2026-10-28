@@ -28,7 +28,7 @@
           0
         ]
       },
-      "status": "rejected: broad exterior colored halo remains visible; not registered or integrated"
+      "status": "Transparency gate reopened and passed by inspected browser composite; anatomy, native scale, ground placement and runtime lighting remain unreviewed"
     },
     {
       "source": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v2.png",
@@ -56,7 +56,7 @@
           0
         ]
       },
-      "status": "rejected: broad exterior colored halo remains visible; not registered or integrated"
+      "status": "Transparency gate reopened and passed by inspected browser composite; anatomy, native scale, ground placement and runtime lighting remain unreviewed"
     },
     {
       "source": "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-candidate-v3.png",
@@ -84,8 +84,13 @@
           0
         ]
       },
-      "status": "rejected: broad exterior colored halo remains visible; not registered or integrated"
+      "status": "Transparency gate reopened and passed by inspected browser composite; anatomy, native scale, ground placement and runtime lighting remain unreviewed"
     }
   ],
-  "next": "Revise source/reference strategy and regenerate clean silhouette; no runtime acceptance"
+  "next": "Prefer original v1 for native sleep registration and side-by-side scale review; do not infer final anatomy or runtime acceptance from clean compositing.",
+  "correction": "The initial rejection relied on the image viewer representation. Browser compositing of the original PNGs over green, dry and night backgrounds shows no visible exterior colored halo. The original viewer displayed hidden RGB outside the alpha silhouette. Decoded alpha statistics alone did not justify the earlier rejection.",
+  "evidence": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-source-composite-v1.png": "a5091108f8456d12fe4615f202dadaff00ebae1b21f211e428405c34817fb7d8",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/sleep-source-alpha-v1.json": "bc2c622ba3d7b9f6e607db4e4a47bde1a56ab822deaaa8b4e1b026aa5e089750"
+  }
 }

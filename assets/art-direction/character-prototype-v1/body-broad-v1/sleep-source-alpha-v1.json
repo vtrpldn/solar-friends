@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "why": "Inspect delivered alpha through browser compositing before attributing an image viewer halo to the source",
+  "sources": [
+    {
+      "version": 1,
+      "sha256": "28f4c61bba50f428e2c28613b7d7276cbd79f5fb45b27dc08ad17331f3a9751d",
+      "width": 1536,
+      "height": 1024,
+      "counts": {
+        "zero": 1000769,
+        "low": 9420,
+        "medium": 4458,
+        "solid": 558217
+      },
+      "alpha32Bounds": [
+        96,
+        124,
+        1506,
+        964
+      ]
+    },
+    {
+      "version": 2,
+      "sha256": "2d9b741c8dd7cfede2a1713672d72999666fd8299f3d0bf08d383b43dd8d5802",
+      "width": 1536,
+      "height": 1024,
+      "counts": {
+        "zero": 971855,
+        "low": 9442,
+        "medium": 4479,
+        "solid": 587088
+      },
+      "alpha32Bounds": [
+        61,
+        111,
+        1513,
+        967
+      ]
+    },
+    {
+      "version": 3,
+      "sha256": "341d16c1a9b4cbd0531a68a9a6b97438e933d23120c8c33c2572b4082918cfe5",
+      "width": 1536,
+      "height": 1024,
+      "counts": {
+        "zero": 1047005,
+        "low": 12152,
+        "medium": 4452,
+        "solid": 509255
+      },
+      "alpha32Bounds": [
+        65,
+        134,
+        1497,
+        960
+      ]
+    }
+  ]
+}
