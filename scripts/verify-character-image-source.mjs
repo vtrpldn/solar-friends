@@ -8,7 +8,7 @@ try{
  const first=await readFile('web/art/characters/prototype-v1/hair-curls-activities-8-candidate-v1.png'),second=await readFile('web/art/characters/prototype-v1/hair-curls-activities-9-candidate-v1.png');
  browser=await chromium.launch({headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/`);let requests=0;
  await page.route('**/changing-character.png',route=>route.fulfill({status:200,contentType:'image/png',body:requests++===0?first:second}));
- await page.route('**/invalid-character.png',route=>route.fulfill({status:200,contentType:'image/png',body:'invalid image'}));
+ await page.route('**/invalid-character.png',route=>route.fulfill({status:200,contentType:'image/png',body:first.subarray(0,33)}));
  await page.route('**/missing-character.png',route=>route.fulfill({status:404,body:'missing'}));
  const result=await page.evaluate(async()=>{
   const {loadCharacterImageSource}=await import('/character-image-source.js');
