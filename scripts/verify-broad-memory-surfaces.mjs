@@ -1,0 +1,8 @@
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+const server=await serve(0);let browser;
+try{browser=await chromium.launch({headless:true});const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/memory-surfaces`);const result=await page.evaluate(async()=>{
+ const {createResidentPartLibrary}=await import('/resident-parts.js'),{residentPartRecipe}=await import('/resident-part-recipe.js'),library=createResidentPartLibrary();
+ try{const provider=await library.prepare(residentPartRecipe({body:'broad-v1',hat:'straw-v1'})),unique=new Set();for(const sheet of ['base','idle','activities'])for(let i=0;i<16;i++)unique.add(provider.frameForPose(sheet,i));for(const i of [13,14])unique.add(provider.frameForPose('activities',i,{sequenceIndex:5}));const actual=[...unique].reduce((n,c)=>n+c.width*c.height*4,0),info=library.cacheInfo();if(actual<=50*256*256*4)throw Error('Fixture does not exercise extended surface storage');if(info.rgbaByteUpperBound<actual||info.retainedBytes!==info.rgbaByteUpperBound||info.entries!==1)throw Error('Public diagnostics undercount retained surfaces');await library.dispose();if(library.cacheInfo().rgbaByteUpperBound!==0)throw Error('Closed cache still reports retained preview surfaces');return {uniqueFrames:unique.size,actualSurfaceBytes:actual,reportedUpperBoundBytes:info.rgbaByteUpperBound,oldEstimateBytes:50*256*256*4,closedBytes:0};}finally{await library.dispose();}
+});assert.equal(result.uniqueFrames,50);console.log(JSON.stringify(result));}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

@@ -1,0 +1,30 @@
+{
+  "status": "Internal provider checks pass; rendered review pending",
+  "boards": [
+    {
+      "sheet": "base",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-base-v1.png",
+      "sha256": "b6d52877a77c58fa6e74443ee7e0020b6ca0e6f2e6900902b3bb049fa8fdc3e3"
+    },
+    {
+      "sheet": "idle",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-idle-v1.png",
+      "sha256": "b90fd21f9aedb26b869c71466d0d3cfbe97291da1bb62b947fe760b3bffe18b1"
+    },
+    {
+      "sheet": "activities",
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-activities-v1.png",
+      "sha256": "ce16cf2372c914301ca3e9de1c47086dc2b14c6fb63d5b7ba8a0794d83925aca"
+    }
+  ],
+  "refusals": 11,
+  "ownedReleased": 48,
+  "contactComparisons": 48,
+  "alphaComparisons": 0,
+  "inputs": {
+    "web/character-hair-family.js": "a1652aa06d60cb4f680bc1c9938a411129d78662dd6aed047f8ea8bab2e96cf7",
+    "web/character-hat-family.js": "c32e6b3d455539d51e2856cb6777d7c81ce67f4e307ec54f9c0b8f117137e36d",
+    "scripts/verify-broad-hair-family.mjs": "84728146399d2344485bc88529d59b71229fc787f22f9a5d6f47fe93602fbee8",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/hair-family-sidepart-draft-v1.json": "ff12cdaabf3c99a43acb068d56f1beed2efd9a3578e3e8ea27f5d88191ab5a5f"
+  }
+}

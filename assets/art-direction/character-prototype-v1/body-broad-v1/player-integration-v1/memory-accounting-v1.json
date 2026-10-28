@@ -1,0 +1,22 @@
+{
+  "status": "Cache surface accounting verified; process/GPU memory and maximum-map performance remain unverified",
+  "why": "Extended frames and rollback snapshots cannot be represented by a fixed native-size estimate.",
+  "publicBroad": {
+    "uniqueFrames": 50,
+    "actualSurfaceBytes": 14649332,
+    "reportedUpperBoundBytes": 14649332,
+    "oldEstimateBytes": 13107200,
+    "closedBytes": 0
+  },
+  "regression": "288 reviewed historical pose comparisons, 12 feeding-return comparisons and semantic native/browser catalog parity pass. Both broad clean-shaven and relaxed bearded randomization are checked.",
+  "ownership": "Current and rollback cache records share identity-based accounting. Rollback supersession, undo, clear and close release their diagnostic retention; externally held providers, in-flight work, decoded source images and internal family caches are separate.",
+  "pureCases": "Actual dimensions across 50 pose slots; extended frames; current/rollback alias deduplication; eviction, clear, rollback and close; malformed dimensions and measurements.",
+  "inputs": {
+    "web/appearance-cache.js": "29b45878db3aa395f39fafac3d70c4154be6822d43baf7dc5b60f49ba3c54acb",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631",
+    "web/resident-provider-memory.js": "2feb5a1b937491495ac598a696af8cada41ccbc688cfddb6a5edf19eeabe12d2",
+    "scripts/verify-resident-provider-memory.mjs": "c15ab63cf244a6c1030964f0fd9d124334d73e40608229f85caba0caf6fc047e",
+    "scripts/verify-broad-memory-surfaces.mjs": "41e79b0b37867ea4f9189d6d9f9bf18b816cc3e1b40370ca00feeb7087f75859",
+    "scripts/verify-resident-parts.mjs": "33d6302711e964dec8d8adeebc329dea53080579f55d472e2a41462e7a900dce"
+  }
+}

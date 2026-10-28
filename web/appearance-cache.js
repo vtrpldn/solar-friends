@@ -1,8 +1,8 @@
 // Bound asynchronous frame composition as well as the completed-frame cache.
 // Pending callers share work; clearing never lets old work refill the cache.
-export function createAppearanceCache({compose,maxEntries=12,maxConcurrent=2,maxQueued=48,isPinned=()=>false}){
- if(typeof compose!=='function'||typeof isPinned!=='function'||!Number.isInteger(maxEntries)||maxEntries<1||maxEntries>24||!Number.isInteger(maxConcurrent)||maxConcurrent<1||maxConcurrent>4||!Number.isInteger(maxQueued)||maxQueued<1||maxQueued>128)throw Error('Choose bounded appearance composition limits.');
- const cache=new Map(),pending=new Map(),queue=[];let epoch=0,active=0,installation=0,closed=false,closing=null,finishClose=null,invalidateUndo=null;const running=new Set();
+export function createAppearanceCache({compose,maxEntries=12,maxConcurrent=2,maxQueued=48,isPinned=()=>false,measureBytes}){
+ if(measureBytes!==undefined&&typeof measureBytes!=='function'||typeof compose!=='function'||typeof isPinned!=='function'||!Number.isInteger(maxEntries)||maxEntries<1||maxEntries>24||!Number.isInteger(maxConcurrent)||maxConcurrent<1||maxConcurrent>4||!Number.isInteger(maxQueued)||maxQueued<1||maxQueued>128)throw Error('Choose bounded appearance composition limits.');
+ const cache=new Map(),pending=new Map(),queue=[];let epoch=0,active=0,installation=0,closed=false,closing=null,finishClose=null,invalidateUndo=null,rollback=null;const running=new Set();
  function drain(){
   while(!closed&&active<maxConcurrent&&queue.length){
    const job=queue.shift();active++;running.add(job);
@@ -30,9 +30,9 @@ export function createAppearanceCache({compose,maxEntries=12,maxConcurrent=2,max
    const installed=new Set(entries.map(e=>e[0])),next=new Map(cache);for(const [key,value]of entries){next.delete(key);next.set(key,value);}
    while(next.size>maxEntries){const victim=[...next.keys()].find(key=>!installed.has(key)&&!isPinned(key));if(victim===undefined)throw Error('Prepared appearances exceed protected cache capacity.');next.delete(victim);}
    invalidateUndo?.();
-   const previous=new Map(cache),revision=++installation;invalidateUndo=()=>previous.clear();
+   const previous=new Map(cache),revision=++installation;rollback=previous;invalidateUndo=()=>{previous.clear();rollback=null;};
    cache.clear();for(const [key,value]of next)cache.set(key,value);
-   return ()=>{if(installation!==revision)return false;installation++;cache.clear();for(const [key,value]of previous)cache.set(key,value);previous.clear();invalidateUndo=null;return true;};
+   return ()=>{if(installation!==revision)return false;installation++;cache.clear();for(const [key,value]of previous)cache.set(key,value);previous.clear();rollback=null;invalidateUndo=null;return true;};
   },
   clear(){epoch++;installation++;invalidateUndo?.();invalidateUndo=null;cache.clear();},
   dispose(){
@@ -43,6 +43,6 @@ export function createAppearanceCache({compose,maxEntries=12,maxConcurrent=2,max
    for(const job of running)job.reject(error);
    if(active===0)finishClose();return closing;
   },
-  info:()=>({...(closed?{closed:true}:{}),entries:cache.size,active,queued:queue.length,pending:pending.size,maxEntries,maxConcurrent,maxQueued}),
+  info:()=>({...(closed?{closed:true}:{}),entries:cache.size,active,queued:queue.length,pending:pending.size,maxEntries,maxConcurrent,maxQueued,...(measureBytes?{rollbackEntries:rollback?.size??0,retainedBytes:[...new Set([...cache.values(),...(rollback?.values()??[])])].reduce((sum,value)=>{const bytes=measureBytes(value);if(!Number.isSafeInteger(bytes)||bytes<0||!Number.isSafeInteger(sum+bytes))throw Error('Measure bounded cache surface bytes.');return sum+bytes;},0)}:{})}),
  };
 }

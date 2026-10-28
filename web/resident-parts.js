@@ -1,3 +1,4 @@
+import {residentProviderRgbaUpperBound} from './resident-provider-memory.js';
 import {loadCharacterImageSource} from './character-image-source.js';
 import {preparedFrames} from './sprite-frames.js';
 import {attachmentBinding} from './character-attachments.js';
@@ -51,7 +52,7 @@ export function createResidentPartLibrary(){
  };
  const hat=()=>{if(!hatWork){const work=(async()=>{const registrations=new Map(await settledValues(Object.keys(hatReviewClips).map(async clip=>[clip,await read(`straw-hat-${clip}-v1-registration.json`)])));const source=registrations.get('breathe').source;return {registrations,...await load(source.file)};})();hatWork=work;work.catch(()=>{if(hatWork===work)hatWork=null;});}return hatWork;};
  const facialParts=()=>{if(!facialWork){const work=(async()=>{const [owner,base]=await Promise.all([read('facial-short-chestnut-v1-registration.json'),body()]);try{const parts=await prepareFacialHairParts({owner,binding:base.binding,load});facialPrepared=parts;return parts;}finally{for(const source of Array.isArray(owner.sources)?owner.sources:[])if(/^facial-short-chestnut-source-\d{2}-v1\.png$/.test(source.file??'')){const pending=sources.get(source.file);const loaded=await pending?.catch(()=>null);loaded?.dispose?.();if(sources.get(source.file)===pending)sources.delete(source.file);}}})();facialWork=work;work.catch(()=>{if(facialWork===work)facialWork=null;});}return facialWork;};
- const cache=createAppearanceCache({maxEntries:16,maxConcurrent:2,maxQueued:24,isPinned:key=>pinned.has(key),compose:async recipe=>{
+ const cache=createAppearanceCache({measureBytes:residentProviderRgbaUpperBound,maxEntries:16,maxConcurrent:2,maxQueued:24,isPinned:key=>pinned.has(key),compose:async recipe=>{
   if(recipe.body==='broad-v1')return (broadFamilyComposer??=createBundledBroadPartComposer()).compose(recipe);
   if(recipe.assetVersion==='resident-parts-v5')return (sleepFamilyComposer??=createBundledSleepPartComposer()).compose(recipe);
   if(recipe.assetVersion==='resident-parts-v6')return (sleepShirtFamilyComposer??=createBundledSleepShirtPartComposer()).compose(recipe);
@@ -95,6 +96,6 @@ export function createResidentPartLibrary(){
     const failure=results.find(r=>r.status==='rejected');if(failure)throw failure.reason;
    });return closing;
   },
-  cacheInfo:()=>({...cache.info(),preparedHairFrames:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0),preparedHairRgbaBytes:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0)*256*256*4,facialOverlayFrames:facialPrepared?.cacheInfo().entries??0,facialOverlayRgbaBytes:facialPrepared?.cacheInfo().rgbaByteUpperBound??0,maximumFrames:16*50,rgbaByteUpperBound:cache.info().entries*50*256*256*4,decodedSources:sources.size,familyCache:familyComposer?.info()??null,workFamilyCache:workingFamilyComposer?.info()??null,shirtFamilyCache:shirtFamilyComposer?.info()??null,sleepFamilyCache:sleepFamilyComposer?.info()??null,sleepShirtFamilyCache:sleepShirtFamilyComposer?.info()??null,broadFamilyCache:broadFamilyComposer?.info()??null}),
+  cacheInfo:()=>{const info=cache.info();return {...info,preparedHairFrames:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0),preparedHairRgbaBytes:[...preparedHairCounts.values()].reduce((sum,n)=>sum+n,0)*256*256*4,facialOverlayFrames:facialPrepared?.cacheInfo().entries??0,facialOverlayRgbaBytes:facialPrepared?.cacheInfo().rgbaByteUpperBound??0,maximumFrames:16*50,maximumRetainedFrames:2*16*50,rgbaByteUpperBound:info.retainedBytes,decodedSources:sources.size,familyCache:familyComposer?.info()??null,workFamilyCache:workingFamilyComposer?.info()??null,shirtFamilyCache:shirtFamilyComposer?.info()??null,sleepFamilyCache:sleepFamilyComposer?.info()??null,sleepShirtFamilyCache:sleepShirtFamilyComposer?.info()??null,broadFamilyCache:broadFamilyComposer?.info()??null};},
  });
 }
