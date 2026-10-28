@@ -8,6 +8,13 @@ export function installMaintenanceUI({game,snapshot,changed,notify,openTown,open
   $('#automatic-service').onchange=e=>{game().set_automatic_service(e.target.checked);changed();};
   $('#maintenance-alert').onclick=openUpkeep;
   const bundle=(items,materials)=>items.map((n,i)=>n?`${n} ${materials[i].name.toLowerCase()}`:'').filter(Boolean).join(' · ')||'None';
+  function updateAlert(){
+    const current=JSON.parse(game().maintenance_report()),due=current.equipment.filter(r=>r.service_due),failed=current.equipment.filter(r=>r.failed);
+    const alert=$('#maintenance-alert');alert.hidden=!current.enabled||!due.length;
+    const markup=itemIcon('tools')+`<span>${failed.length?failed.length+' need repair':due.length+' need service'}<small>Village upkeep</small></span>`;
+    if(alert.innerHTML!==markup)alert.innerHTML=markup;
+    return current;
+  }
   function context(key,v){
     if(key.kind==='truck')return 'At the arrival camp';
     if(key.kind==='workshop')return `Workshop ${key.id+1}`;
@@ -34,14 +41,13 @@ export function installMaintenanceUI({game,snapshot,changed,notify,openTown,open
       $('#town-order').focus();
     }
   };
-  return {update(){
-    const s=snapshot(),v=s.village,materials=s.environment.economy.materials;report=JSON.parse(game().maintenance_report());
+  return {updateAlert,update(current){
+    const s=snapshot(),v=s.village,materials=s.environment.economy.materials;report=current??updateAlert();
     const due=report.equipment.filter(r=>r.service_due),active=report.jobs.filter(r=>r.job.finished==null),failed=report.equipment.filter(r=>r.failed);
     $('#equipment-wear').checked=report.enabled;$('#equipment-wear').disabled=v.mode!=='sandbox'&&!developer();
     $('#maintenance-mode-note').textContent=v.mode==='sandbox'?'Optional Sandbox constraint. Turning wear off cancels service orders and preserves condition and used parts.':report.enabled?'Equipment upkeep is part of Story. Prepare supplies before a unit reaches 10% condition.':'This authored test scene has equipment wear disabled.';
     $('#automatic-service').checked=report.automatic;$('#automatic-service').disabled=!report.enabled;
     $('#maintenance-summary').textContent=!report.enabled?'Wear is off. Equipment operates at its usual performance.':`${failed.length?failed.length+' need repair · ':''}${due.length} due for service · ${active.length} saved service orders. Spare parts are bought in Trade; nothing is purchased automatically.`;
-    const alert=$('#maintenance-alert');alert.hidden=!report.enabled||!due.length;const alertMarkup=itemIcon('tools')+`<span>${failed.length?failed.length+' need repair':due.length+' need service'}<small>Village upkeep</small></span>`;if(alert.innerHTML!==alertMarkup)alert.innerHTML=alertMarkup;
     const equipment=[...report.equipment].sort((a,b)=>Number(b.failed)-Number(a.failed)||Number(b.service_due)-Number(a.service_due));
     const rows=equipment.map(row=>{
       const key=JSON.stringify(row.equipment),service=active.find(r=>same(r.job.equipment,row.equipment)),worker=service&&s.residents.find(r=>r.task==='utility'&&r.activity_material===service.job.id);

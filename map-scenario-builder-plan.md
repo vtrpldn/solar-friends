@@ -2950,3 +2950,12 @@ The broader browser regression now passes the refreshed climate/Sandbox season f
 `verify-farming-controls.mjs` runs the existing complete farming control journey independently through the normal Help development entry. It passes both desktop widths, all four icon bindings, crop/production toggles with exact paused restoration, targeted care requests, real resident milk/honey/fruit production and protected Story-save bytes. The 1280-pixel pantry capture was visually reviewed.
 
 **Why:** the builder release must preserve ordinary village controls as native content expands. This fixes a misleading product icon and restores meaningful regression coverage; the full browser journey and original builder release gates remain unfinished.
+
+
+### Equipment alerts outside the management book
+
+The complete browser regression exposed a real alert dependency: equipment-upkeep notifications were only refreshed inside the visible Supplies panel. Worn units therefore remained unannounced when players stayed in the ordinary village view. The main UI refresh now obtains the small maintenance report and updates the global alert independently; visible Supplies reuses that report for its detailed equipment list, avoiding a second query. Hidden detailed rows still are not rebuilt.
+
+`verify-maintenance-controls.mjs` passes actual spare-part purchases, resident local delivery and attended repairs, partial-work pause/resume, restored workshop condition, failed-truck delivery fallback, retained battery charge, automatic-service controls and unchanged Story-save bytes. It also verifies that disabling wear hides the alert, a newly loaded worn village displays it while Supplies stays closed, and clicking it opens Supplies. The closed-panel alert capture was visually inspected at the desktop viewport. All 785 current native library tests pass independently.
+
+**Why:** players must discover service needs before opening a management page; panel rendering optimizations must not suppress global gameplay feedback. The full desktop regression is still advancing beyond this repaired section. This is not completion of the wider builder, art, performance or player-walkthrough gates.

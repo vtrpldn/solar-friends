@@ -1238,8 +1238,8 @@ function updateCircularUI(v) {
   $('#auto-digest').checked=c.auto_feed;$('#filter-greywater').checked=c.filter_water;$('#use-biogas').checked=c.use_biogas;
   $('#auto-digest').disabled=!ready('biodigester');$('#filter-greywater').disabled=!ready('wetland');
 }
-function updateSupplies(v) {
-  maintenanceUI?.update();
+function updateSupplies(v,maintenanceReport) {
+  maintenanceUI?.update(maintenanceReport);
   updateCircularUI(v);
   $('#hen-controls').hidden=!buildingUnlocked(v,'coop');
   $('#egg-control').hidden=!buildingUnlocked(v,'coop');
@@ -1284,6 +1284,7 @@ function openSituations() {
 }
 function updateUI() {
   syncResidentRoster();
+  const maintenanceReport=maintenanceUI?.updateAlert();
   const free = state.village.mode==='sandbox', instant = !usesLogistics(state.village);
   sandboxRulesUI?.update();
   const creation=creationPresentation(playerSession?state.village.scenario?.definition:null,{playtest:playerSession?.isTest});
@@ -1304,7 +1305,7 @@ function updateUI() {
   economyUI?.update({panels:['#projects-panel','#town-panel','#supplies-panel','#power-panel'].some(selector=>!$(selector).hidden)||$('#pickup-dialog').open});
   updateSituations();
   const v = state.village;
-  if(!$('#supplies-panel').hidden)updateSupplies(v);
+  if(!$('#supplies-panel').hidden)updateSupplies(v,maintenanceReport);
   if(!$('#power-panel').hidden)updatePowerUI(state,kinds);
   if(!$('#building-panel').hidden)updateBuildingPanel();
   for (const k of ["wood", "water"])
