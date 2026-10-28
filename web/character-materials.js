@@ -1,4 +1,5 @@
 import {FRAME_ANCHOR} from './sprite-frames.js';
+import {bodyTransformHasContacts,bodyTransformContact} from './character-contact-atlas.js';
 import {validateAttachmentBinding} from './character-attachments.js';
 import {canonical} from './editor/journal.js';
 // Prototype-only material masks. Geometry is authored per pose and evaluated
@@ -94,7 +95,7 @@ export async function createFamilyBodyMaterialModel({frames,binding},registratio
    if(await digest(frame.getContext('2d').getImageData(0,0,256,256).data)!==owner.frames[sheet][index])throw Error('The prepared body pixels changed after colour registration.');
   }
  }
- return materialModel(frames,r.sheets,{maxFrames,sourceKey:await digest(new TextEncoder().encode(canonical(r))),copyMasks:true,...(Object.values(owner.ownership.sources).some(s=>s.transform.method==='contact-v1')?{contactForPose:(sheet,index)=>{const pose=owner.ownership.poses[sheet]?.[index];if(!pose)throw Error('Choose a registered material pose.');const t=owner.ownership.sources[pose.source].transform;return t.method==='contact-v1'?[...t.registration.nativeContact]:undefined;}}:{})});
+ return materialModel(frames,r.sheets,{maxFrames,sourceKey:await digest(new TextEncoder().encode(canonical(r))),copyMasks:true,...(Object.values(owner.ownership.sources).some(s=>bodyTransformHasContacts(s.transform))?{contactForPose:(sheet,index)=>{const pose=owner.ownership.poses[sheet]?.[index];if(!pose)throw Error('Choose a registered material pose.');const t=owner.ownership.sources[pose.source].transform;return bodyTransformContact(t,pose.index);}}:{})});
 }
 function materialModel(frames,sheets,{maxFrames,sourceKey,copyMasks=false,contactForPose}){
  const sources={},masks={},cache=new Map();

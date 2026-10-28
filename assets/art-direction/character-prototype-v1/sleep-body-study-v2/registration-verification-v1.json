@@ -72,9 +72,9 @@
   "scope": "Internal dedicated sleeping source registration and raw-body size/lighting board. No public appearance or visual art acceptance.",
   "inputs": {
     "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
-    "web/character-body-family.js": "608cef22c4eb552d33d48f9d09ce98ff0573ebd1651ed1b77d9db5f9c36b6969",
-    "web/character-body-ownership.js": "880c6a4c5b89c413cb6bdb70833815278255b62d57fb8f4aa6d5ecf2f8c6e4aa",
-    "web/resident-animation.js": "0bac5ccb321354484591ed048134c7bdcfbb89df4d9f0c5468ff3945ef445676",
+    "web/character-body-family.js": "756ae0fc222f3d3266b32add6522eb57e74165c16889d8b82e8ebed62e6d6ebb",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
     "scripts/verify-contact-body-family.mjs": "36777c36e7103912df24c5767d3bf03548448feecd96390e50620421b1e2ff6d"
   }
 }

@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "status": "Roomier gait candidate; measured review pending",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: sketch-to-render. Image 1 is the EXACT four-pose layout/limb guide, NOT the visual style. Image 2 is the painted broad-body walking identity/style reference. Paint four full-body game sprites corresponding to image 1, keeping EVERY figure inside its smaller guide area with the guide's large transparent gutters/outer margins. DO NOT enlarge figures to fill the canvas. Keep the roughly 80-pixel outer clearance and roughly 150-pixel gap between rows. Use the BROAD SOFT adult body and face from image 2: fuller belly, rounded shoulders and cheeks, thicker hips/thighs, same tan skin, bald scalp, cream sleeveless vest and shorts, brown leather boots. Same illustrated warm painted shading, crisp warm outlines and upper-left daylight. All four figures face 3/4 front-right, same height and head size. Near limbs in the guide are terracotta, far limbs blue: those colors indicate which limbs to paint in front, not final skin/clothes colors. EXACT poses: top-left near-leg-forward contact, near-arm back; top-right near-leg planted support with far knee passing raised; bottom-left FAR-leg-forward contact with near-arm forward and near-leg back; bottom-right far-leg planted support with near knee passing raised. Reproduce natural anatomical alternation, full boots/fingertips, relaxed torso and plausible ground support. Exactly FOUR separate figures in a 2x2 sheet; transparent background and gaps; no labels, boxes, ground, shadows, platforms, text, hair, beard, hats, tools or watermark. Keep the safe layout from image 1 rather than the crowded layout in image 2.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/walk-geometry-v2.png",
+      "role": "Exact phase/layout guide with larger transparent margins; not visual style"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v1.png",
+      "role": "Painted identity, broader anatomy and materials only; not crowded layout"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v2.png",
+  "reason": "Version 1 crowds the lower image edge. The new guide reduces source-space occupancy while preserving authored limb alternation; no production pixels are locally stretched or warped."
+}

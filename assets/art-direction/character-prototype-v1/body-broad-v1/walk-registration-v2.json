@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "family": "broad-body-prototype-v1",
+  "sheet": "base",
+  "source": {
+    "sha256": "8e3053babf49e3657a1ec791e899ffdf37e3dc75bfa2dfbc2d250a8b9641cd10",
+    "width": 1254,
+    "height": 1254,
+    "columns": 2,
+    "rows": 2
+  },
+  "uniformScale": 0.45,
+  "frames": [
+    {
+      "index": 0,
+      "waist": [
+        351,
+        343
+      ]
+    },
+    {
+      "index": 1,
+      "waist": [
+        970,
+        342
+      ]
+    },
+    {
+      "index": 2,
+      "waist": [
+        346,
+        977
+      ]
+    },
+    {
+      "index": 3,
+      "waist": [
+        975,
+        977
+      ]
+    }
+  ]
+}

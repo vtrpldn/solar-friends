@@ -1,5 +1,6 @@
 import {validateBodyFrameRegistration} from './character-body-frames.js';
 import {validateContactBodyRegistration} from './character-contact-frame.js';
+import {validateContactAtlasRegistration} from './character-contact-atlas.js';
 const sheets=['base','idle','activities'];
 const exact=(v,keys)=>v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length===keys.length&&keys.every(key=>Object.hasOwn(v,key));
 // A family owns every raw pose explicitly. Source/transform records are part of
@@ -18,6 +19,11 @@ export function validateBodyOwnership(value){
    if(!exact(t,['method','registration']))throw Error('Keep the complete measured waist registration.');
    validateBodyFrameRegistration(t.registration);const r=t.registration;
    if(r.family!==value.family||r.sheet!==s.sheet||r.source.sha256!==s.sha256||r.source.width!==s.width||r.source.height!==s.height)throw Error('Waist registration must own this exact family and source.');
+   counts.set(id,r.frames.length);
+  }else if(t?.method==='contact-atlas-v1'){
+   if(!exact(t,['method','registration']))throw Error('Keep the complete contact-atlas registration.');
+   validateContactAtlasRegistration(t.registration);const r=t.registration;
+   if(r.family!==value.family||r.sheet!==s.sheet||r.source.sha256!==s.sha256||r.source.width!==s.width||r.source.height!==s.height)throw Error('Atlas contacts must own this exact family and source.');
    counts.set(id,r.frames.length);
   }else if(t?.method==='contact-v1'){
    if(!exact(t,['method','registration']))throw Error('Keep the complete measured contact registration.');

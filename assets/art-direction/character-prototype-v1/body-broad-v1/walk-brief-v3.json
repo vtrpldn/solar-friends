@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "status": "Passing-pose correction; measured and decoded motion review pending",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Edit ONLY the two PASSING walking poses in this four-frame broad-body game sprite sheet (top right and bottom right). Their knees are raised too high and boots thrust forward, making them march. Repaint them as a gentle ordinary stroll: support leg nearly straight and under the pelvis; the other knee softly bends as it passes the support leg, with its boot just a few centimeters above the ground near the support ankle. NO high knee lift, NO kicking, NO marching. Top right: NEAR leg planted, far leg passes. Bottom right: FAR leg planted, near leg passes. Keep same adult broad/soft body volume, rounded cheeks, face, bald head, tan skin, cream vest/shorts, brown boots, camera and upper-left painted lighting. Keep the two CONTACT poses (top left and bottom left) unchanged. In all four poses the crown-to-hip distance and crown-to-ground height must match closely; only subtle walking bob. Preserve the same safe 2x2 layout, generous outer margins and transparent gaps. Four entire separate figures including boots/fingers, no cropping, no scaling individual poses, no text/guide/ground/shadow/props. Transparent background.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v2.png",
+      "role": "Edit target; retain identity, broader body, materials, contact poses and margins"
+    }
+  ],
+  "output": "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v3.png",
+  "reason": "Decoded version-2 motion shows exaggerated knee lift and forward boot thrust in the passing poses. Correct those to a gentle stroll with low passing feet and natural support."
+}

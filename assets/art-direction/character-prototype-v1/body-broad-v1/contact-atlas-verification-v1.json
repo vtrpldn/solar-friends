@@ -1,0 +1,24 @@
+{
+  "rejected": 26,
+  "ownershipRefusals": 5,
+  "exactTransforms": 4,
+  "drawComparisons": 16,
+  "unchanged": 44,
+  "materialContactPoses": 4,
+  "invalidContactIndices": 5,
+  "partialFailureReleased": true,
+  "failedFamilyBindingReleased": true,
+  "borrowedSourcesPreserved": true,
+  "disposedFramesReleased": true,
+  "scope": "Actual source atlas transforms and body-family integration, rejection/cleanup, contact-aware rendering and contact propagation through diagnostic recolouring only. Test family mixes old poses with the four new poses and synthetic colour regions for integration coverage; it is not a complete new anatomical family, fitted material art or public appearance.",
+  "inputs": {
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/character-body-family.js": "756ae0fc222f3d3266b32add6522eb57e74165c16889d8b82e8ebed62e6d6ebb",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/character-family-appearance.js": "f51c5acc31bac98624e52337f9f73127200840627406f3564d3d03302be36518",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "scripts/verify-contact-atlas.mjs": "12ba50f04af2ab675d3c0c1cb8134e4b60ef9a285db4df42283ebfbcc9d900b8",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/walk-registration-v3-contacts.json": "05870caff3009fd59e5ca25999e2c23ec1c186b674655c57bccfd76542d7239c"
+  }
+}

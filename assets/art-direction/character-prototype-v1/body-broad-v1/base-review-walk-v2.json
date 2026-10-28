@@ -1,0 +1,332 @@
+{
+  "measurements": {
+    "candidate": {
+      "width": 1254,
+      "height": 1254,
+      "uniformScale": 0.4385657370517928,
+      "poses": [
+        {
+          "bounds": [
+            197,
+            91,
+            523,
+            577
+          ],
+          "pivot": 339,
+          "area": 83801,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            859,
+            94,
+            1087,
+            596
+          ],
+          "pivot": 984,
+          "area": 71668,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            156,
+            718,
+            554,
+            1191
+          ],
+          "pivot": 341,
+          "area": 82524,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            832,
+            720,
+            1126,
+            1207
+          ],
+          "pivot": 996,
+          "area": 80311,
+          "sourceClipped": false
+        }
+      ],
+      "normalized": [
+        {
+          "bounds": [
+            59,
+            24,
+            205,
+            243
+          ],
+          "height": 219,
+          "upperSilhouetteCentroid": [
+            132.06210459511001,
+            50.44797674093402
+          ]
+        },
+        {
+          "bounds": [
+            78,
+            17,
+            181,
+            243
+          ],
+          "height": 226,
+          "upperSilhouetteCentroid": [
+            128.22228617823126,
+            43.6102902862267
+          ]
+        },
+        {
+          "bounds": [
+            43,
+            30,
+            222,
+            243
+          ],
+          "height": 213,
+          "upperSilhouetteCentroid": [
+            131.26772126359478,
+            55.447212507846224
+          ]
+        },
+        {
+          "bounds": [
+            64,
+            24,
+            196,
+            243
+          ],
+          "height": 219,
+          "upperSilhouetteCentroid": [
+            128.84909097272842,
+            50.03034402577264
+          ]
+        }
+      ]
+    },
+    "reference": {
+      "width": 1254,
+      "height": 1254,
+      "uniformScale": 0.3725211505922166,
+      "poses": [
+        {
+          "bounds": [
+            169,
+            25,
+            563,
+            606
+          ],
+          "pivot": 351,
+          "area": 102459,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            823,
+            25,
+            1109,
+            616
+          ],
+          "pivot": 960,
+          "area": 92829,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            178,
+            645,
+            593,
+            1221
+          ],
+          "pivot": 359.5,
+          "area": 96374,
+          "sourceClipped": false
+        },
+        {
+          "bounds": [
+            784,
+            644,
+            1130,
+            1227
+          ],
+          "pivot": 970.5,
+          "area": 97939,
+          "sourceClipped": false
+        }
+      ],
+      "normalized": [
+        {
+          "bounds": [
+            57,
+            27,
+            203,
+            243
+          ],
+          "height": 216,
+          "upperSilhouetteCentroid": [
+            133.42231887085222,
+            51.83350367032705
+          ]
+        },
+        {
+          "bounds": [
+            83,
+            23,
+            189,
+            243
+          ],
+          "height": 220,
+          "upperSilhouetteCentroid": [
+            126.4192437315764,
+            48.40922018272133
+          ]
+        },
+        {
+          "bounds": [
+            62,
+            28,
+            217,
+            243
+          ],
+          "height": 215,
+          "upperSilhouetteCentroid": [
+            138.44090707498947,
+            53.058512237657105
+          ]
+        },
+        {
+          "bounds": [
+            68,
+            26,
+            197,
+            243
+          ],
+          "height": 217,
+          "upperSilhouetteCentroid": [
+            130.79734747120241,
+            50.79764770822183
+          ]
+        }
+      ]
+    }
+  },
+  "registration": {
+    "schema": 1,
+    "family": "broad-body-prototype-v1",
+    "sheet": "base",
+    "source": {
+      "sha256": "8e3053babf49e3657a1ec791e899ffdf37e3dc75bfa2dfbc2d250a8b9641cd10",
+      "width": 1254,
+      "height": 1254,
+      "columns": 2,
+      "rows": 2
+    },
+    "uniformScale": 0.45,
+    "frames": [
+      {
+        "index": 0,
+        "waist": [
+          351,
+          343
+        ]
+      },
+      {
+        "index": 1,
+        "waist": [
+          970,
+          342
+        ]
+      },
+      {
+        "index": 2,
+        "waist": [
+          346,
+          977
+        ]
+      },
+      {
+        "index": 3,
+        "waist": [
+          975,
+          977
+        ]
+      }
+    ]
+  },
+  "normalized": [
+    {
+      "index": 0,
+      "sha256": "0b0a9be3d41f72ab68050ad6ad562c4a1a67510cd5a8b1ab014d82307e0ab6fc"
+    },
+    {
+      "index": 1,
+      "sha256": "f4a376d0c11e5e0aeae751d8105e7e5281b98f350e530a51b3e2407702c22eae"
+    },
+    {
+      "index": 2,
+      "sha256": "d3356bfe094d898ffccb05702320db1a4c34e84ef9140a25eaaf865360c5162b"
+    },
+    {
+      "index": 3,
+      "sha256": "c9a0d8f50a4f9821a5dab207d738bc143d445f4fc6c3a92e8e4565cb306036b6"
+    }
+  ],
+  "recordings": [],
+  "worldImages": [
+    {
+      "biome": "mata-atlantica",
+      "night": 0,
+      "retained": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "night": 1,
+      "retained": false
+    },
+    {
+      "biome": "cerrado",
+      "night": 0,
+      "retained": false
+    },
+    {
+      "biome": "cerrado",
+      "night": 1,
+      "retained": false
+    },
+    {
+      "biome": "caatinga",
+      "night": 0,
+      "retained": false
+    },
+    {
+      "biome": "caatinga",
+      "night": 1,
+      "retained": false
+    }
+  ],
+  "scope": "Internal broader-body four-pose gait candidate. Exact registered reference gait, normalized pose comparison, 24 static world views across three biomes and optional day/mirrored-night encoded motion. No complete body family, clothing, accessories or public availability acceptance.",
+  "sources": {
+    "candidate": {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v2.png",
+      "sha256": "8e3053babf49e3657a1ec791e899ffdf37e3dc75bfa2dfbc2d250a8b9641cd10"
+    },
+    "reference": {
+      "path": "assets/art-direction/character-prototype-v1/body-walk-cycle-v3/candidate-v1.png",
+      "sha256": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a"
+    }
+  },
+  "scriptSha256": "53e78c4061e4487027107283642d81dbc75eca66120f8c228071f4ab3028545d",
+  "candidateEdgeClear": true,
+  "stature": {
+    "heights": [
+      219,
+      226,
+      213,
+      219
+    ],
+    "spread": 13,
+    "maximumSpread": 12
+  },
+  "artifactRetention": "Rejected-normalization world captures removed; exact source, diagnostic report, comparison board and motion recordings retained. No public acceptance."
+}

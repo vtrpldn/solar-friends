@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "status": "Walking source accepted for further internal family authoring only; no public integration",
+  "why": "Additional body shapes require complete authored anatomy and body-owned ground origins. The lowest boot pixel changes during an isometric stride and cannot reliably locate the whole body.",
+  "source": "walk-candidate-v3.png",
+  "registration": "walk-registration-v3-contacts.json",
+  "transform": "contact-atlas-v1",
+  "uniformScale": 0.45,
+  "rejected": {
+    "walk-candidate-v1.png": "Crowded lower image edge; not a complete unclipped source.",
+    "walk-candidate-v2.png": "Decoded passing poses show high-knee marching. Lowest-boot normalization also shifts the torso.",
+    "walk-candidate-v3.png with waist-v1 normalization": "Anatomy has corrected low passing feet, but lowest-boot alignment still shifts the torso. Use only the explicit contact-atlas registration."
+  },
+  "visualReview": {
+    "static": "Inspected the ground-aligned four-pose comparison and six complete biome boards (24 static world poses), beside the current registered gait, original Bento, a home, shed and road. Broader torso and thigh volume, warm painted material edges, full boots/scalp and daytime lighting remain coherent. No opaque ground platform is present.",
+    "motion": "Encoded the actual shared resident painter, decoded representative eight-frame day and eight-frame mirrored-night filmstrips, and inspected both. The passing boots now stay low, contact/passing phases alternate, and head/torso registration remains stable without anatomical stretching or per-pose scaling. Four-key-pose changes remain visible when enlarged.",
+    "biomes": [
+      "mata-atlantica",
+      "cerrado",
+      "caatinga"
+    ],
+    "facingsAndLighting": [
+      "normal/day",
+      "mirrored/night"
+    ],
+    "groundAlignment": {
+      "method": "contact-atlas-v1",
+      "headYFromGround": [
+        -195.6521408683874,
+        -193.4483334591994,
+        -199.07588934885246,
+        -197.89552328516817
+      ],
+      "spread": 5.627555889653053,
+      "maximumSpread": 8,
+      "sourceGroundOffsetFromWaist": 240,
+      "nativeGround": [
+        128,
+        228
+      ],
+      "scope": "Compare rendered upper silhouette relative to the authored ground origin. Full silhouette height varies with projected stride; its lowest boot no longer defines the body origin."
+    },
+    "videoMetadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "codec_name": "vp9",
+          "width": 800,
+          "height": 340,
+          "r_frame_rate": "30/1",
+          "nb_read_frames": "181"
+        }
+      ],
+      "format": {
+        "duration": "5.996432"
+      }
+    },
+    "decodeCommands": [
+      "ffmpeg -i motion-walk-v3-contacts.webm -vf fps=8,scale=400:-1,tile=4x2 -frames:v 1 motion-walk-v3-contacts-day.png",
+      "ffmpeg -ss 3.15 -i motion-walk-v3-contacts.webm -vf fps=8,scale=400:-1,tile=4x2 -frames:v 1 motion-walk-v3-contacts-night.png"
+    ]
+  },
+  "engineering": {
+    "atlas": "Four exact bounded-source affine comparisons, 26 malformed registration and five ownership refusals, five invalid contact-index refusals, sixteen renderer comparisons at two scales/both facings, four recoloured contact checks, 44 unchanged old poses, partial-preparation and failed-binding cleanup, idempotent disposal.",
+    "regressions": "Existing body-family and single reclining-contact verifiers pass. Public sleep-family verifier retains 192 exact poses, eight feeding returns and four ground metadata checks; classic verifier retains 288 exact pose comparisons and twelve feeding returns.",
+    "fixtureLimit": "The atlas integration fixture deliberately mixes new gait poses with old body poses and synthetic colour regions; it proves integration behavior, not a complete new body or fitted material artwork."
+  },
+  "remaining": [
+    "Idle/activity body sheets, standing/work fit and genuine lying sleep",
+    "Dedicated material masks and fitted clothing, hair, facial hair, hats and equipment",
+    "Complete family bundle and public recipe/catalog integration",
+    "Portrait/world consistency and transitions between activities",
+    "Actual translating travel cadence, wider zoom/weather art sweep and hardware frame pacing"
+  ],
+  "rendererInputs": {
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/character-body-frames.js": "d4c94f1074ffc2bcc4798d991c7176a637d9747f3b1d54977427717412f2edd9",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/resident-animation.js": "7880fb2a920089c365dfd365629b2ce7dd013869b9fea61763a41b7d9ee8e5ed",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/world-renderer.js": "e9320cbd69e1d0dc8e848691981117fea212a016dad957ae355f80e86d5974af",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936"
+  },
+  "artifacts": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/walk-candidate-v3.png": "1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/walk-registration-v3-contacts.json": "05870caff3009fd59e5ca25999e2c23ec1c186b674655c57bccfd76542d7239c",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/base-comparison-walk-v3-contacts.png": "60ce8328d849d1e42d05a9089e764649e8a7534397eb58d4b33dddfd94d292ed",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/base-review-walk-v3-contacts.json": "6cbfd9b599d1457a50cda81e4f48458b15ed52f8b08a0669befdc0f25e727b79",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/motion-walk-v3-contacts.webm": "e223fc7c246c75eefd180cc01ea7b7c7ca6bf317498e2e73a22ba4a5e120a709",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/motion-walk-v3-contacts-day.png": "e838c7cac5891eb1738ecc7aec5bc8bf87463d1d7158bfb77a35c4d8979b7dae",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/motion-walk-v3-contacts-night.png": "a131c6706e324cd7aa2f25c9f720ad46d7ecb9394e6f0434017ab2bae97d55fc",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/contact-atlas-verification-v1.json": "192e3d0c292b2be646bcb0cc89b9197e9f4757a28d7761578ff8acb4c516160d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/mata-atlantica-day-walk-v3-contacts.png": "cbfd94b7232f2558896903bb0a6327985be326a993086f7c36407b55a8877f76",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/mata-atlantica-night-walk-v3-contacts.png": "a3604fdc33b6c48f5cb67144ddcbed6021ceca7e43484ba1f1b6ae2b19da2f3e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/cerrado-day-walk-v3-contacts.png": "6baf9c25dc6f3870ac6215191dfad95ecc2cf72a37fefd903d61d6303f60f721",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/cerrado-night-walk-v3-contacts.png": "7b24d7eceb41ac8a6794797059df1c39733d893238bfd7eb31ac9d8e2d82db14",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/caatinga-day-walk-v3-contacts.png": "257e97585d82e76a5360115745bbecea523a7c593b3b54a67f8ad76c800f3d2a",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/world/caatinga-night-walk-v3-contacts.png": "fc39d3393e580dd1f709456988a5ee7fac61cd2cfa8b2370b2850962c358c834"
+  }
+}

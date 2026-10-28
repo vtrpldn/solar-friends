@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "status": "Walking source candidate authoring; not public artwork",
+  "why": "A new body shape needs distinct authored contact and passing poses rather than repeated positions or stretched old artwork.",
+  "tool": "built-in image_gen; transparent background",
+  "prompt": "Use case: precise-object-edit. Asset: Solar Friends broader-body resident four-frame WALK CYCLE. Image 1 is the pose-layout edit target: preserve its EXACT 2x2 four distinct walking poses and adult height/proportions. Image 2 is the identity/anatomy reference for the new broader person: warm tan skin, fuller round cheeks, broad soft abdomen, thicker thighs, rounded shoulders, cream sleeveless vest/cream shorts/brown work boots, bald head. Image 3 is a geometry guide ONLY for limb alternation, not finished art. Repaint all FOUR walking poses from image 1 with the broader anatomy and face from image 2. DO NOT simply widen or stretch the original art. Top left: near leg steps forward and far leg back, near arm back and far arm forward. Top right: near foot supports the body, far knee passes with lifted far boot. Bottom left: FAR leg steps forward and near leg back, NEAR arm swings forward, far arm back. Bottom right: far foot supports body, near knee passes with raised near boot. Each frame must show two anatomically distinct arms and two legs, plausible weight-bearing boots, natural counter-swing and consistent face/body volume. Same 3/4 front-right orthographic game camera in all four. Same height/head size in all frames, no perspective scaling. Warm painted illustrated rural Brazilian game style, upper-left daylight, broad shading, crisp warm edges. Exactly FOUR full figures in equal 2 by 2 cells, centered with 10% clear transparent margin from every cell and outer edge, complete fingertips/boots/scalp. True transparent background including between limbs. No tools, hair, hat, beard, ground, platforms, contact shadows, labels, grid or watermark. Keep silhouettes fully separated.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-walk-cycle-v3/candidate-v1.png",
+      "role": "Edit target; four distinct walking phases and proportions"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/seated-candidate-v1.png",
+      "role": "Broader anatomy, identity, painted shading and clothing reference"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-walk-cycle-v3/geometry.png",
+      "role": "Alternating near/far limb geometry guide only; not final artwork"
+    }
+  ],
+  "requirements": [
+    "Four distinct full unclipped figures",
+    "Alternating contact and passing phases with natural weight and arm counter-swing",
+    "Consistent height, face and broader body volume",
+    "One uniform registration scale with body-owned waist landmarks",
+    "Real renderer review beside old bodies and in all three biomes",
+    "Encoded and decoded motion review before any gait acceptance"
+  ],
+  "excluded": "No public appearance, family bundle or compatibility claim until all body poses and attachments are complete."
+}

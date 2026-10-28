@@ -1,4 +1,5 @@
 import {composeClothingPose} from './character-clothing.js';
+import {bodyTransformHasContacts} from './character-contact-atlas.js';
 import {prepareClothingColourSource} from './character-clothing-colour.js';
 import {intersectBodyForegroundMasks} from './character-foreground.js';
 import {prepareFamilyAccessories} from './character-family-accessories.js';
@@ -16,7 +17,7 @@ const sheets=['base','idle','activities'],exact=(v,keys)=>v&&typeof v==='object'
 // eviction never invalidates a preview that is still in use.
 export async function prepareFamilyAppearanceLibrary({family,materials,owners,equipment,load,accessories=null,workEquipment=null,clothing=null,maxEntries=12,maxConcurrent=2,maxQueued=24}){
  if(typeof load!=='function'||typeof family?.frameForPose!=='function'||!Number.isInteger(maxEntries)||maxEntries<1||maxEntries>24||!Number.isInteger(maxConcurrent)||maxConcurrent<1||maxConcurrent>4||!Number.isInteger(maxQueued)||maxQueued<1||maxQueued>128)throw Error('Choose bounded complete-family composition limits.');
- const hasContacts=Object.values(family.binding?.ownership?.sources??{}).some(source=>source.transform?.method==='contact-v1');
+ const hasContacts=Object.values(family.binding?.ownership?.sources??{}).some(source=>bodyTransformHasContacts(source.transform));
  if(hasContacts&&typeof family.contactForPose!=='function')throw Error('Contact-registered families must provide their pose contacts.');
  const registrations=structuredClone({materials,owners,equipment,accessories,workEquipment,clothing}),bodyKey=canonical(family.binding),caps=new Map(),underlays=new Map(),sourceWork=new Map(),tools=[],workTools=new Map(),garments=new Map(),records=new Map(),queue=[];
  let model=null,accessoryParts=null,active=0,closed=false,disposing=null;

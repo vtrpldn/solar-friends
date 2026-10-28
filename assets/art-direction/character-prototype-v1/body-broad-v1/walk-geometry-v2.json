@@ -1,0 +1,25 @@
+{
+  "status": "Geometry only, not painted character art",
+  "source": {
+    "path": "assets/art-direction/character-prototype-v1/body-walk-cycle-v3/guide-intent.json",
+    "sha256": "da5e94ca46998ff35d62c6dd73d6a9da0e6f273bdaa2250c257b3054bccfb2a8"
+  },
+  "output": {
+    "path": "assets/art-direction/character-prototype-v1/body-broad-v1/walk-geometry-v2.png",
+    "sha256": "101a0e173a60ac9c23eb5dafd6ac710c3fbef8f7eaf474ae77989f42815d70d1"
+  },
+  "layout": [
+    2,
+    2
+  ],
+  "size": [
+    1254,
+    1254
+  ],
+  "cell": 627,
+  "uniformGuideScale": 0.8,
+  "marginFraction": 0.1,
+  "nearLimb": "terracotta",
+  "farLimb": "blue",
+  "scope": "Shared four-phase contact/passing skeleton with a broader torso and limbs. Each guide figure is uniformly reduced within its cell to establish transparent margins; no finished sprite is transformed."
+}
