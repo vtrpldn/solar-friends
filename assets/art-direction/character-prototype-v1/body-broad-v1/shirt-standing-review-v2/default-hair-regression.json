@@ -1,0 +1,20 @@
+{
+  "referenceCommit": "83a45c3",
+  "referenceHairSha256": "a1652aa06d60cb4f680bc1c9938a411129d78662dd6aed047f8ea8bab2e96cf7",
+  "comparisons": 200,
+  "portraits": 4,
+  "allOwnedSurfacesReleased": true,
+  "reference": {
+    "probes": 192,
+    "readbackPixels": 201326592
+  },
+  "current": {
+    "probes": 4,
+    "readbackPixels": 11422020
+  },
+  "inputs": {
+    "scripts/verify-pooled-hair-preparation.mjs": "d69e7675974bae35c60e49b57ca159e24232c94b676ca9c382dbcbb137786b07",
+    "web/character-hair-family.js": "6eef18b08ab108e3d2147a019a74dbd98b75f057c745215cc12ee737a3afe01f",
+    "web/character-composed-family.js": "d7cdca2836eb60ef142044b5055479288568c84eb6f3aad12a8129acbefe3dd3"
+  }
+}

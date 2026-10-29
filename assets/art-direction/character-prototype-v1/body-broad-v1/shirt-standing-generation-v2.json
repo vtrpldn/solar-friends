@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "status": "internal-prototype-needs-full-pose-and-collar-review",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise object edit for Solar Friends. Image 1 is the transparent four-shirt atlas to correct. Image 2 is a diagnostic board only: first column the exact body, second current shirt composition, third shirt alone, fourth cream shirt over indigo tank top and sage shorts revealing unwanted blue slivers. Correct only the garment fit in Image 1: slightly widen the far/right side under the small far sleeve, raise and close the far shoulder/neckline edge enough to cover the old tank strap, and extend the lower hem slightly so the old waist hem is fully covered. Preserve the broad torso shape, four slightly different breathing poses, original 2x2 arrangement and existing source canvas placement/scale, short sleeves above elbows, cream cotton, broad warm painted shading, warm outline, restrained folds, upper-left light. Do not enlarge the entire shirt, slim the waist, change sleeve type, add decoration, or draw the body. Output ONLY the corrected four complete cream garment cutouts on true transparent background, no labels, no diagnostic board, no skin/hair/body/legs/hands/tools. Transparent neck holes. Keep each cutout separate with generous transparent margin. The goal is to remove exposed blue tank edges in the diagnostic while keeping the current body proportions and clean shoulder/waist boundaries.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-candidate-v1.png",
+      "sha256": "b2640415fd0a2b71a60d193558c76212a2f6c5aea7ab7d870033e7d11b4d3721",
+      "role": "Edit target"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-review-v1/standing-fit.png",
+      "sha256": "57b559ab0564681067c1cf3c580fefb0751871a62b3e0f518da21a702f528089",
+      "role": "Body registration and contrasting underlayer diagnostic"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-3a943578-9eac-4d6a-b11c-354a941647e0.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-candidate-v2.png",
+  "sha256": "67b2fce6a938630d153619289dec0dd90cd82eafcbbbfcb14d843e2671fa6d6e",
+  "dimensions": [
+    1254,
+    1254
+  ],
+  "byteIdenticalCopyVerified": true,
+  "review": {
+    "registration": "Uniform 0.21 scale, rigid per-pose offsets; source is not warped or repaired",
+    "inspected": [
+      "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-review-v2/standing-fit.png",
+      "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-review-v2/coloured-composition.png"
+    ],
+    "findings": [
+      "Revised sleeves and side coverage follow the broad standing proportions.",
+      "The refined waist alignment removes the prominent exposed indigo band in these four poses.",
+      "Cream, teal, terracotta and indigo retain garment shading while owned lower-body and hand pixels are unchanged.",
+      "Base 9 still has an awkward collar/neck junction requiring a dedicated review or correction.",
+      "Only base 8-11 are painted. Full pose, accessory, animation, world and palette pairing acceptance remains unfinished."
+    ],
+    "catalogEnrollment": false
+  }
+}

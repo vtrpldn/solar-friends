@@ -3,10 +3,12 @@ import {registeredBodyAppearance} from './character-body-appearance.js';
 import {validateAttachmentBinding} from './character-attachments.js';
 import {validateBodyForegroundMask} from './character-foreground-mask.js';
 import {clothingColourImage} from './character-clothing-colour.js';
+import {composeAtlasClothingPose} from './character-atlas-clothing.js';
 // Clothing changes the silhouette; colour-only body validation must stay strict.
 // Every garment instead inherits a fixed source tile and native body-pose crop.
 // This first source family remains internal until all animation poses exist.
-export function composeClothingPose({body,appearanceBody,binding,image,sourceHash,registration,sheet,index,colourSource}){
+export function composeClothingPose({body,appearanceBody,binding,image,sourceHash,registration,sheet,index,colourSource,atlas,ownership,colour}){
+ if(atlas!==undefined)return composeAtlasClothingPose({body,appearanceBody,binding,atlas,ownership,sheet,index,colour});
  validateAttachmentBinding(binding);
  const r=registration,crop=r?.crop,rect=r?.source?.rect;
  if(r?.reviewSchema!==1||r.part!=='short-sleeve-v1'||r.sheet!==sheet||r.index!==index||!['base','idle','activities'].includes(sheet)||!Number.isInteger(index)||index<0||index>15||r.bodyFrameSha256!==binding.frames[sheet][index])throw Error('Use the garment registered to this original body pose.');

@@ -39,7 +39,7 @@ export async function createBodyForegroundLayers({body,binding,mask,sheet,index,
  const original=body.getContext('2d').getImageData(0,0,256,256),digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',original.data))].map(n=>n.toString(16).padStart(2,'0')).join('');
  if(digest!==binding.frames[sheet][index])throw Error('The prepared body pixels differ from the foreground mask.');
  const ownership=foregroundOwnership(checked);
- const painted=registeredBodyAppearance(body,appearanceBody),dressed=clothing?composeClothingPose({...clothing,body,appearanceBody:painted,binding,sheet,index}).frame:null;
+ const painted=registeredBodyAppearance(body,appearanceBody),dressed=clothing?(await composeClothingPose({...clothing,body,appearanceBody:painted,binding,sheet,index})).frame:null;
  let appearance;try{appearance=(dressed??painted).getContext('2d').getImageData(0,0,256,256);}finally{if(dressed)dressed.width=dressed.height=0;}
  const back=document.createElement('canvas'),front=document.createElement('canvas');back.width=back.height=front.width=front.height=256;
  const backPixels=new ImageData(appearance.data.slice(),256,256),frontPixels=new ImageData(256,256);

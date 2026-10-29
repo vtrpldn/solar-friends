@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "scope": "Internal atlas wardrobe composition prerequisite and four-pose prototype. No catalog or full wardrobe acceptance.",
+  "sha256": {
+    "web/character-atlas-clothing.js": "733fda3ce739c166aceb5de8ad402de1e8f8c293c7e03e1d038eae38353d0200",
+    "web/character-clothing.js": "7db924346690a19dc8c5eca542b6bfb6ebb3f5a12ae2e3a40e526c4a6f5220af",
+    "web/character-foreground.js": "564d5b4b31b379118cc6e5fa4d37a1aacf17fb3c4f3d68a221be62b5510d0e53",
+    "web/character-hair-family.js": "6eef18b08ab108e3d2147a019a74dbd98b75f057c745215cc12ee737a3afe01f",
+    "scripts/verify-atlas-clothing.mjs": "8155ccbf69c2f34ab55507400285603426a79565158d66f5422da1f9d0b03927",
+    "scripts/verify-hair-clothing-order.mjs": "3b6e9384281216baeaf81ee61b715ca6e64193c9e6d43c745c48558a95c1e8c4",
+    "scripts/review-broad-shirt-standing.mjs": "3cda7308ab3f10bb3dbd3f594de475e999ebf00d13e98a48899396cf74ccda93",
+    "scripts/verify-pooled-hair-preparation.mjs": "d69e7675974bae35c60e49b57ca159e24232c94b676ca9c382dbcbb137786b07",
+    "scripts/verify-family-clothing-walk.mjs": "3d463651e7f1d6b55d5eb5cde7de7bb525ff401e33f7b6320d1a647ae053104f",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-review-v2/coloured-composition.png": "4ad80dbda42b2ddc95f80ebd8099be5b653756fbc191965056c17a9d6484069b",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-review-v2/composition-checks.json": "fbd4fb614831fb318c21a4a954b841b68cd2a04490fab27be65de4c8813802e0",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-review-v2/default-hair-regression.json": "7356ab7f846cf4dfac33ea03f2afa9e74326ff608cfcd9ceac9ddce4181affa2",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-review-v2/hair-order-checks.json": "c3d470c5b32663ae16857d4bc8e123a09a728104ccce3244080dd9c763a2c14d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-review-v2/legacy-walk-regression.json": "f2560b30918205a63fe23b4a5848a7edf580179ee42019947571ea95a1290f27",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-review-v2/registration-and-measurements.json": "b949d6b0026b262ff68948a36f3301c5b725c3176a1e23d23cb133091d4e1d5d",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-review-v2/standing-fit.png": "2bad1cafd91e87ea290e96b1fdf20ed1afaea63cee3fb2a867ce2b427820f9e8"
+  }
+}
