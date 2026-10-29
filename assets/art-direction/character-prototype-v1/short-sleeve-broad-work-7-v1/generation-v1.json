@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "status": "rejected-source-size-and-placement",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise object edit: retexture Image 1 IN PLACE. It is a 1254 by 1254 transparent image containing one diagonal green shirt silhouette for a forward-bending work pose. Preserve that exact tilted outline, its narrow asymmetric neckline, sleeve shape, sloping hem, source coordinates, scale and transparent margins. Do NOT stand it upright, recenter it, widen it or enlarge it. Its bounds are approximately x141 through942 and y153 through839 in the original canvas. Image 2 is body-fit context only; the bent adult resident and foreground hands must NOT appear in the output. Replace the green with plain warm cream cotton T-shirt paint, Solar Friends warm illustrated game treatment, broad soft upper-left lighting, restrained folds following the bent torso, short sleeves, simple collar and understated hem. Shade and draw seams INSIDE the original silhouette. This is material painting on locked geometry, not a new shirt design. Preserve coverage across the entire shape and leave the original neck hole empty. Output ONLY one complete garment cutout with real transparency. No body, skin, arms, head, shorts, tools, floor, green, text, numbers, markers, grid, logo, pocket, buttons or background. Keep the sloping lower hem and all blank canvas unchanged.",
+  "references": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-7-v1/mask.png",
+      "role": "Exact frozen diagonal garment shape",
+      "sha256": "b20517874f37d435fd329acb596a5a66194a5f8aa49bbe008d494165f12ef7f0"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-7-v1/foreground-context-v1.png",
+      "role": "Actual bent-body fit and foreground anatomy only",
+      "sha256": "13839111370f519b6f5a185bec1e5deda23d40fa1a4c1ecc791d221a3255b04a"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-a2779efc-3ee1-4954-95e2-bf02e90a0d09.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-7-v1/candidate-v1.png",
+  "sourceEdits": false,
+  "catalogEnrollment": false,
+  "sha256": "efddb80be07be8a6f7f311bb8d75526c36446cce7d5575573fad4b4d283b566b",
+  "byteIdenticalCopyVerified": true,
+  "review": {
+    "sourceAudit": "candidate-v1-audit.json",
+    "findings": [
+      "Source area ratio 1.42456, bounded coverage 0.80406 and guide coverage 0.77023. Excluded."
+    ],
+    "scope": "Internal single pose only; no full outfit, accessory, world or animation acceptance.",
+    "catalogEnrollment": false
+  }
+}

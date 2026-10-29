@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "status": "selected-for-internal-pose-only",
+  "sources": {
+    "candidate-v2.png": "1b1930497b60788061b577677f08a7f629c08d9a958055dc75e93157f244f815",
+    "generation-v2.json": "cf419d4a31eb5075766aa05eef5b91533f24b71c4c37a27b5bedb8f384b45f39",
+    "candidate-v2-audit.json": "1d459ba3bc0f458806204038fbd19b25b290c1f952d55b9c1752dc23a31af078",
+    "registration-intent.json": "430868bfe3d372930d854b884a8b128da171b4826faca42c88a76e2be4155212",
+    "body-review-v2.json": "39938bb05a33ccb502aba8d541f3d4b0d1df827b79296c2135f2a5e46d7836a3",
+    "coloured-body-review-v2.png": "24638cd3d811e994fc0803e402e1fbc18ff990662775acbdf44c288c7b3114fd",
+    "body-foreground-v2.json": "87a5dd344ec36fb6bf9daaa7ec6f45ee197b541d28948934326422c148c023e5",
+    "foreground-intent-v2.json": "83ff0c727ecec5a06821f06fc9eb3c1d85dc72410b0227b7818fa0312f365105",
+    "foreground-polygons-v2.json": "20ff559ef8e886cd34bd4e1e883942f4d1ed6c7dca76c256165b8f8a37fa635d"
+  },
+  "catalogEnrollment": false
+}

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "status": "selected-for-internal-pose-only",
+  "tool": "image_gen.imagegen",
+  "prompt": "Edit the attached existing image by changing ONLY the green surface material. Preserve its exact alpha channel and the exact positions of every edge. Keep the original 1254\u00d71254 canvas, diagonal orientation and empty margins unchanged. The green object begins near x141,y153 and ends near x942,y839. It must stay within those original bounds; do not enlarge it to fill the canvas and do not move it downward. Replace all green surface with warm cream cotton painting for a small illustrated game sprite, simple broad upper-left shading and restrained fabric folds. Keep its unusual asymmetric neckline and every original contour. No extra sleeves or new shape, no body or clothing mannequin. Keep transparent background and neckline cutout. This is an in-place surface retexture of the original pixels, not a newly composed T-shirt product image. No text, decoration, outline outside the shape, extra object, background or ground.",
+  "references": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-7-v1/mask.png",
+      "role": "Exact frozen diagonal garment silhouette, edit target",
+      "sha256": "b20517874f37d435fd329acb596a5a66194a5f8aa49bbe008d494165f12ef7f0"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-efddd886-128d-4f27-8ddb-52c54bca7025.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-7-v1/candidate-v2.png",
+  "sourceEdits": false,
+  "catalogEnrollment": false,
+  "sha256": "1b1930497b60788061b577677f08a7f629c08d9a958055dc75e93157f244f815",
+  "byteIdenticalCopyVerified": true,
+  "review": {
+    "sourceAudit": "candidate-v2-audit.json",
+    "findings": [
+      "Source guide coverage 99.890 percent, area ratio 1.005262, complete bounded coverage.",
+      "Foreground V1 made a square sleeve opening. V2 follows the diagonal upper arm; all four palette compositions inspected.",
+      "207344 protected lower-body channels and 83488 foreground channels restored exactly; contact [128,238]."
+    ],
+    "scope": "Internal single pose only; no full outfit, accessory, world or animation acceptance.",
+    "catalogEnrollment": false
+  }
+}

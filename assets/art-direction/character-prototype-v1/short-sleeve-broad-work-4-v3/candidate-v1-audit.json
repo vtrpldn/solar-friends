@@ -1,0 +1,16 @@
+{
+  "sha256": "89ce4d5854a61b12167fec564f2766c8db389fcf1daf8352a5be7ef1dcbd4d73",
+  "undeclaredPaint": 0,
+  "poses": [
+    {
+      "key": "base-4",
+      "painted": 275549,
+      "expected": 274055,
+      "boundedCoverage": 1,
+      "guideCoverage": 0.9974530659904034,
+      "areaRatio": 1.0054514604732627,
+      "ok": true
+    }
+  ],
+  "ok": true
+}

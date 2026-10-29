@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "status": "selected-for-internal-pose-only",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise object edit: change ONLY the green surface material of Image 1, in place. Preserve its exact silhouette, neckline hole, sleeves, complete lower hem, original position and transparent margins on the original 1254\u00d71254 canvas. Its bounds are approximately x243 through933 and y149 through708. Do not enlarge, recenter or move it. Image 2 is exact body-fit context only and must not appear in the output. Replace green with a plain warm cream cotton crew-neck T-shirt, warm illustrated Solar Friends sprite treatment, broad soft upper-left shading, restrained folds, short sleeves with subtle cuffs and one understated hem. All seams and shading stay INSIDE the original green silhouette, preserving full coverage right to its boundary. This is retexturing a locked geometry guide, not creating a product photo or a new shirt shape. Keep real transparency and empty neck opening. Output shirt cutout only: no person, limbs, hair, shorts, tools, ground, text, numbers, markers, green, logo, pocket, buttons or background. Keep the blank lower canvas unchanged.",
+  "references": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v3/mask.png",
+      "role": "Frozen corrected shoulder and hem geometry",
+      "sha256": "3cf7a9ba57c29334bf1b1e0f2e5bc5e511073d3c71295e4b64cf776f05680dc2"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v3/context.png",
+      "role": "Exact native body for fit only",
+      "sha256": "63ce3fc19fe5bbb1d818a49ce8398e398ceafc2c4c3b6fac0bb476948e463864"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-dbf0af18-9f59-4070-8f42-f91287931b7d.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v3/candidate-v1.png",
+  "sourceEdits": false,
+  "catalogEnrollment": false,
+  "sha256": "89ce4d5854a61b12167fec564f2766c8db389fcf1daf8352a5be7ef1dcbd4d73",
+  "byteIdenticalCopyVerified": true,
+  "review": {
+    "sourceAudit": "candidate-v1-audit.json",
+    "findings": [
+      "Corrected hem and left sleeve guide covers the old tank hem and upper-arm gap in four inspected palette compositions.",
+      "Source guide coverage 99.745 percent, area ratio 1.005451, complete bounded coverage.",
+      "225680 protected lower-body channels restored exactly; contact [128,238]."
+    ],
+    "scope": "Internal single pose only; no full outfit, accessory, world or animation acceptance.",
+    "catalogEnrollment": false
+  }
+}

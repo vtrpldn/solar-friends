@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "status": "selected-for-internal-pose-only",
+  "sources": {
+    "candidate-v1.png": "89ce4d5854a61b12167fec564f2766c8db389fcf1daf8352a5be7ef1dcbd4d73",
+    "generation-v1.json": "c28e19a4cc3a66323258de4440a08496a616af52f5f2c539e0c9c3e3210ca23d",
+    "candidate-v1-audit.json": "818b1fca2f451eca659d84817e923823f02d977e626fb38ef4a6cc3027f4e62a",
+    "registration-intent.json": "bbd8c96ea0692155241cbe0a23e3a8317e30222afe20f4d41f2836609ca92207",
+    "body-review-v1.json": "66234a5fd72072424bfb287c46216d0d0718ad70a1fbd6fd8d2f257b9cdf385a",
+    "coloured-body-review-v1.png": "956551d1a035305e339ba7341a02eff11817dddbd940f4128fa749c840f595ec"
+  },
+  "catalogEnrollment": false
+}
