@@ -49,7 +49,7 @@ export class EditorMap {
     canvas.addEventListener('pointerdown',e=>this.down(e));
     canvas.addEventListener('pointermove',e=>this.motion(e));
     canvas.addEventListener('pointerup',e=>this.up(e));
-    canvas.addEventListener('pointercancel',()=>{this.drag=null;this.stroke=null;this.routeStroke=null;this.render();});
+    canvas.addEventListener('pointercancel',()=>this.cancelGesture());
     canvas.addEventListener('pointerleave',()=>{if(!this.drag){this.pointer=null;this.render();}});
     canvas.addEventListener('wheel',e=>{e.preventDefault();this.setZoom(this.view.zoom-e.deltaY*.001);},{passive:false});
   }
@@ -93,7 +93,14 @@ export class EditorMap {
     return this.ground;
   }
   get state(){return structuredClone({...this.view,brushSize:this.brushSize,natureSpeciesKey:this.natureSpecies?.key,natureSize:this.natureSize||1});}
-  setTool(tool){this.view.tool=tool;this.stroke=null;this.routeStroke=null;this.drag=null;this.render();this.viewChanged(this.state);}
+  cancelGesture({paint=true}={}){
+    const active=!!(this.drag||this.stroke||this.routeStroke);
+    if(this.drag?.pan)this.view.center=[...this.drag.center];
+    this.drag=null;this.stroke=null;this.routeStroke=null;this.strokeLast=null;
+    if(active&&paint)this.render();
+    return active;
+  }
+  setTool(tool){this.cancelGesture({paint:false});this.view.tool=tool;this.render();this.viewChanged(this.state);}
   selection(){return (this.view.selection?.length?this.view.selection:[this.view.selected]).filter(id=>this.document?.start.buildings.some(b=>b.id===id));}
   selectResident(id){this.select(null);this.view.selectedResident=id;this.render();this.viewChanged(this.state);}
   residentAt(cell){const bindings=this.snapshot?.scenario_ref?.residents??{};const person=this.snapshot?.residents.find(p=>Math.hypot(p.x-cell.x,p.y-cell.y)<.8);return person?Object.keys(bindings).find(id=>bindings[id]===person.id):null;}
@@ -147,7 +154,7 @@ export class EditorMap {
     // Use the same interpolation/backtracking rules before the atomic commit.
     this.extendStroke(cell);
     if(this.routeStroke){const cells=this.routeStroke;this.routeStroke=null;this.action({type:'route-path',cells});return;}
-    if(this.stroke){const cells=[...this.stroke.values()];this.stroke=null;this.action({type:this.view.tool,cells,size:this.brushSize});return;}
+    if(this.stroke){const cells=[...this.stroke.values()];this.stroke=null;this.strokeLast=null;this.action({type:this.view.tool,cells,size:this.brushSize});return;}
     if(drag.resident){this.action({type:'resident-start',resident:drag.resident,x:cell.x,y:cell.y});return;}
     if(drag.bank){this.action({type:'move-bank',x:cell.x,y:cell.y});return;}
     if(drag.site){this.action({type:'move-site',x:cell.x,y:cell.y});return;}

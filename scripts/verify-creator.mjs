@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {isDeepStrictEqual} from 'node:util';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 const server=await serve(),base=`http://127.0.0.1:${server.address().port}`;
@@ -126,12 +127,21 @@ try{
  };
  const cancelBefore=await savedCheckpoint();await page.locator('#creator-habitat').selectOption('rocky-woodland');
  const cancelA=await cellPoint(24,34),cancelB=await cellPoint(28,34);
+ await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.keyboard.press(process.platform==='darwin'?'Meta+z':'Control+z');await page.mouse.up();
+ assert(isDeepStrictEqual(await savedCheckpoint(),cancelBefore),'Undo during a live stroke must cancel it without undoing an earlier committed edit');
+ await page.locator('[data-tool=habitat]').click();
+ await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.locator('#creator-undo').focus();await page.keyboard.press('Enter');await page.mouse.up();
+ assert(isDeepStrictEqual(await savedCheckpoint(),cancelBefore),'Keyboard activation of the Undo button must cancel the live gesture consistently');
+ await page.locator('[data-tool=habitat]').click();
+ await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.keyboard.press(process.platform==='darwin'?'Meta+Shift+z':'Control+Shift+z');await page.mouse.up();
+ assert(isDeepStrictEqual(await savedCheckpoint(),cancelBefore),'Redo during a live stroke must cancel it without committing or changing history');
+ await page.locator('[data-tool=habitat]').click();
  await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.keyboard.press('Escape');await page.mouse.up();
- assert.deepEqual(await savedCheckpoint(),cancelBefore,'Cancelled stroke changed the durable document or undo history');
+ assert(isDeepStrictEqual(await savedCheckpoint(),cancelBefore),'Cancelled stroke changed the durable document or undo history');
  await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.mouse.up();
  await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Paint habitat and soil');
- const painted=await savedCheckpoint();assert.notDeepEqual(painted.definition,cancelBefore.definition,'The cancellation control stroke must actually edit land');
- await page.locator('#creator-undo').click();assert.deepEqual((await savedCheckpoint()).definition,cancelBefore.definition,'A land stroke must undo atomically');
+ const painted=await savedCheckpoint();assert(!isDeepStrictEqual(painted.definition,cancelBefore.definition),'The cancellation control stroke must actually edit land');
+ await page.locator('#creator-undo').click();assert(isDeepStrictEqual((await savedCheckpoint()).definition,cancelBefore.definition),'A land stroke must undo atomically');
 
  await page.locator('#creator-land-layer').selectOption('fertility');
  const inspected=await cellPoint(25,34);await page.mouse.move(inspected.x,inspected.y);

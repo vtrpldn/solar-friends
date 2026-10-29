@@ -70,6 +70,7 @@ let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
 function toast(text){$('creator-toast').textContent=text;$('creator-toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('creator-toast').hidden=true,6000);}
 function status(text){$('creator-save-status').textContent=text;}
+function stepHistory(redo=false){if(!current)return false;if(map?.cancelGesture())return true;return redo?current.doc.redo():current.doc.undo();}
 async function download(definition){
   const file=await prepareCreationExport(definition,report.ok?{terrain:terrainBase,snapshot:map.snapshot,catalog}:null);
   const url=URL.createObjectURL(new Blob([file],{type:'application/json'})),a=document.createElement('a');
@@ -449,7 +450,7 @@ function wire(){
     if(e.target.matches('[data-issue-liquids]')){$('creator-liquids').open=true;$('creator-liquids').scrollIntoView({block:'nearest'});}
     if(e.target.matches('[data-issue-supplies]')){$('creator-supplies').open=true;$('creator-supplies').scrollIntoView({block:'nearest'});}
   };
-  $('creator-undo').onclick=()=>current?.doc.undo();$('creator-redo').onclick=()=>current?.doc.redo();
+  $('creator-undo').onclick=()=>stepHistory();$('creator-redo').onclick=()=>stepHistory(true);
   $('creator-release').onclick=()=>{if(!current||busy||!report.ok)return;$('creator-release-status').textContent='';$('creator-release-credits').textContent=(current.record?.attribution??[]).map(c=>`Based on version ${c.revision} by ${c.author}`).join(' · ');$('creator-release-dialog').showModal();};
   $('creator-release-cancel').onclick=()=>{if(releasePublication)releasePublication.abort(new DOMException('Release publication cancelled. Your checked draft is still saved.','AbortError'));else $('creator-release-dialog').close();};
   $('creator-release-dialog').addEventListener('cancel',e=>{if(busy){e.preventDefault();releasePublication?.abort(new DOMException('Release publication cancelled. Your checked draft is still saved.','AbortError'));}});
@@ -538,7 +539,7 @@ function wire(){
   };
   window.addEventListener('keydown',e=>{
     if(busy||document.querySelector('dialog[open]')||!current||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
-    if((e.metaKey||e.ctrlKey)&&e.code==='KeyZ'){e.preventDefault();e.shiftKey?current.doc.redo():current.doc.undo();}
+    if((e.metaKey||e.ctrlKey)&&e.code==='KeyZ'){e.preventDefault();stepHistory(e.shiftKey);}
     else if((e.metaKey||e.ctrlKey)&&e.code==='KeyS'){e.preventDefault();save().catch(()=>{});}
     else if(e.code==='Escape'){e.preventDefault();routesEditor.cancel();setTool('select');map.select(null);}
     else if(['Delete','Backspace'].includes(e.code)&&map.view.selectedRoute){e.preventDefault();const ids=dependentRoutes(current.doc.value,map.view.selectedRoute);change('Remove utility connection',d=>{d.start.routes=d.start.routes.filter(r=>!ids.has(r.id));});map.select(null);}
@@ -567,13 +568,13 @@ try{
   $('creator-biomes').innerHTML=catalog.biomes.map(b=>`<button type="button" data-biome="${b.id}" aria-pressed="${b.id===newBiome}"><img src="./art/${b.id==='mata-atlantica'?'mata-atlantica-atlas.png':b.id==='cerrado'?'cerrado-vegetation-v1.png':'caatinga-vegetation-v1.png'}" alt=""><b>${escape(b.name)}</b><small>${escape(b.summary)}</small></button>`).join('');
   equipmentEditor=new EquipmentEditor($('creator-equipment-fields'),{engine,catalog:catalog.equipment,change,focus:(x,y)=>map.centerAt(x,y)});
   routesEditor=new RoutesEditor($('creator-routes-fields'),{engine,Game,catalog,change,buildingName:title,notify:toast,focus:(x,y)=>map.centerAt(x,y),select:id=>{setTool('select');if(id)map.selectRoute(id);else map.select(null);},preview:plan=>{if(!plan&&!map.utilityPreview)return;map.utilityPreview=plan;map.render();},draw:()=>setTool('route-path')});
-  liquidsEditor=new LiquidsEditor($('creator-liquids-fields'),{catalog,engine,change,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
-  suppliesEditor=new SuppliesEditor($('creator-supply-locations'),{catalog,engine,change,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
+  liquidsEditor=new LiquidsEditor($('creator-liquids-fields'),{catalog,engine,change,undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
+  suppliesEditor=new SuppliesEditor($('creator-supply-locations'),{catalog,engine,change,undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   regionsEditor=new RegionsEditor($('creator-regions-fields'),{change,maximum:catalog.max_regions,draw:()=>setTool('region'),focus:r=>map.centerAt(r.x+(r.width-1)/2,r.y+(r.height-1)/2)});
-  journalEditor=new JournalEditor($('creator-journal-fields'),{catalog,change,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo})});
+  journalEditor=new JournalEditor($('creator-journal-fields'),{catalog,change,undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo})});
   relationshipsEditor=new RelationshipsEditor($('creator-relationships-fields'),{presets:catalog.resident_presets,art,change});
   const residentPresets=new ResidentPresetLibrary({library,engine,art,presets:catalog.resident_presets,maximum:catalog.max_residents,source:()=>({id:current.id,revision:current.doc.revision,definition:current.doc.value}),change,notify:toast});
-  residentsEditor=new ResidentsEditor($('creator-residents-fields'),{presets:catalog.resident_presets,occupations:catalog.occupations,personality:catalog.resident_personality,experience:catalog.resident_experience,appearances:catalog.resident_appearances,maximum:catalog.max_residents,art,catalog,undo:()=>current.doc.undo(),redo:()=>current.doc.redo(),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),change,source:()=>current.doc.value,placeStart:id=>{map.placingResident=id;setTool('resident-start');map.selectResident(id);},locateStart:(id,position)=>{setTool('select');map.selectResident(id);map.centerAt(...position);},savePreset:person=>residentPresets.save(person),openPresets:()=>residentPresets.open()});
+  residentsEditor=new ResidentsEditor($('creator-residents-fields'),{presets:catalog.resident_presets,occupations:catalog.occupations,personality:catalog.resident_personality,experience:catalog.resident_experience,appearances:catalog.resident_appearances,maximum:catalog.max_residents,art,catalog,undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),change,source:()=>current.doc.value,placeStart:id=>{map.placingResident=id;setTool('resident-start');map.selectResident(id);},locateStart:(id,position)=>{setTool('select');map.selectResident(id);map.centerAt(...position);},savePreset:person=>residentPresets.save(person),openPresets:()=>residentPresets.open()});
   weatherEditor=new WeatherEditor($('creator-weather-fields'),{defaults:catalog.weather,biomes:catalog.biomes,change});
   geologyEditor=new GeologyEditor($('creator-geology-fields'),{change,center:()=>map.view.center,defaults:JSON.parse(engine.scenario_template('story')).map.deposits,focus:p=>{map.centerAt(p.x+(p.width-1)/2,p.y+(p.height-1)/2);$('creator-land-layer').value=p.material;$('creator-land-layer').dispatchEvent(new Event('change'));}});
   biomeEditor=new BiomeEditor($('creator-biome-setting-fields'),{catalog,art,Game,change,notify:toast,source:()=>({id:current.id,revision:current.doc.revision,definition:report.ok?freezeCreation(current.doc.value,{terrain:terrainBase,snapshot:map.snapshot,catalog}):current.doc.value})});
