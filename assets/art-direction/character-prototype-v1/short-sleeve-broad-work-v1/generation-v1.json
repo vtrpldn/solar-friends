@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "status": "rejected-enlarged-atlas",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise object edit: Solar Friends transparent four-pose short-sleeved cotton shirt atlas. Image 1 is the exact frozen GREEN ALPHA SILHOUETTE atlas to repaint. Image 2 shows those same four green garments on the exact original body with arms/hands/head restored in front: use it ONLY for pose, cuff direction and occlusion. Image 3 is the previously fitted cream shirt: style and material reference ONLY, never layout or silhouette. Replace ONLY green in Image 1 with warm cream cotton painting, keeping every complete outer contour, neck opening, original source position, original scale, 2x2 arrangement and transparent margins. Top-left is relaxed upright work preparation; top-right has bent arms/hands in front of chest; bottom-left has both arms raised overhead and sleeves lifted/foreshortened; bottom-right is a forward-bent torso so the garment and its hem tilt with the body's actual back, not an upright shirt pasted at an angle. Paint FOUR COMPLETE garment cutouts, including cloth that will be hidden by the original foreground body. Output NO body or skin. Match warm illustrated painted edges, broad soft shading, upper-left daylight, plain crew-neck cotton, restrained folds and one simple hem. Cuffs must follow the posed upper arms shown in Image 2. Do not change body proportions, reposition/recenter/resize parts, add extra sleeve length, enlarge the canvas, add decoration, buttons, pockets or logos, rotate a standing shirt to fake the bent pose, or invent a fifth shirt. No green, skin, hair, hats, hands, arms, legs, tools, ground, labels, guides, grids, text or scene. True transparent background and transparent neck holes. Preserve Image 1's original source canvas dimensions and all four exact painted regions.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-v1/mask.png",
+      "role": "Frozen four-pose alpha geometry",
+      "sha256": "3dbdf1cc288c5f1f3bfaaa875151525ed94f67b8e29a96d6e09d5dc72f421e05"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-v1/foreground-atlas-context-v3.png",
+      "role": "Exact original-body pose and selected foreground ownership",
+      "sha256": "84f275c2e36a91cded7e470979c7afd9463e77a04203620924b7a462c34b2d49"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1.png",
+      "role": "Cloth painting style only",
+      "sha256": "ec31931ab59f33fe7c83fe3a638eeba41dea0d599d37e3ec1cfb2bf9f070ffe1"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-b5398942-ab16-4fbb-b197-fa3458adebac.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-v1/candidate-v1.png",
+  "review": {
+    "sourceAudit": "candidate-v1-audit.json",
+    "findings": [
+      "All four poses fail the predeclared source audit.",
+      "Paint area ratios are 1.3343, 1.3133, 1.2464 and 1.2277; the original upper bound remains 1.15.",
+      "No runtime fitting, warping, clipping or raw-paint edits were used."
+    ],
+    "catalogEnrollment": false
+  },
+  "sha256": "4e230925e56fcb5f97b0781e8b6b85b5a2bcad9cb6a8dcfdae17b2418ddd784d",
+  "byteIdenticalCopyVerified": true,
+  "sourceEdits": false
+}

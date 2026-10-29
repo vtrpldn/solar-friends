@@ -1,0 +1,1220 @@
+{
+  "schema": 1,
+  "status": "geometry and envelopes frozen before paint generation",
+  "part": "short-sleeve-v1",
+  "body": {
+    "normalization": 2,
+    "size": 256,
+    "anchor": 0.95,
+    "ownership": {
+      "schema": 1,
+      "family": "broad-body-prototype-v1",
+      "sources": {
+        "walk": {
+          "sha256": "1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "base",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "base",
+              "source": {
+                "sha256": "1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.45,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    351,
+                    583
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    970,
+                    582
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    346,
+                    1217
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    975,
+                    1217
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "work": {
+          "sha256": "65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "base",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "base",
+              "source": {
+                "sha256": "65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.35,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    350,
+                    650
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    900,
+                    650
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    370,
+                    1230
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    900,
+                    1230
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "standing": {
+          "sha256": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "base",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "base",
+              "source": {
+                "sha256": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.425,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    355,
+                    608
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    912,
+                    608
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    359,
+                    1214
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    912,
+                    1214
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "seated": {
+          "sha256": "79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "base",
+          "transform": {
+            "method": "waist-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "base",
+              "source": {
+                "sha256": "79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.38,
+              "frames": [
+                {
+                  "index": 0,
+                  "waist": [
+                    350,
+                    410
+                  ]
+                },
+                {
+                  "index": 1,
+                  "waist": [
+                    950,
+                    445
+                  ]
+                },
+                {
+                  "index": 2,
+                  "waist": [
+                    370,
+                    990
+                  ]
+                },
+                {
+                  "index": 3,
+                  "waist": [
+                    985,
+                    1000
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "sleep": {
+          "sha256": "e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765",
+          "width": 1536,
+          "height": 1024,
+          "sheet": "base",
+          "transform": {
+            "method": "contact-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "base",
+              "source": {
+                "sha256": "e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765",
+                "width": 1536,
+                "height": 1024
+              },
+              "uniformScale": 0.16,
+              "sourceContact": [
+                760,
+                680
+              ],
+              "nativeContact": [
+                128,
+                164
+              ]
+            }
+          }
+        },
+        "look": {
+          "sha256": "1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "idle",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "idle",
+              "source": {
+                "sha256": "1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.4,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    365,
+                    660
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    893,
+                    660
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    369,
+                    1236
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    894,
+                    1236
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "stretch": {
+          "sha256": "eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "idle",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "idle",
+              "source": {
+                "sha256": "eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.415,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    353,
+                    606
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    901,
+                    608
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    371,
+                    1212
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    895,
+                    1213
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "wave": {
+          "sha256": "29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "idle",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "idle",
+              "source": {
+                "sha256": "29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.38,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    354,
+                    640
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    929,
+                    640
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    367,
+                    1226
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    928,
+                    1226
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "wave-lower": {
+          "sha256": "64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "idle",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "idle",
+              "source": {
+                "sha256": "64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.4,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    354,
+                    640
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    929,
+                    640
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    367,
+                    1226
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    928,
+                    1226
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "relax": {
+          "sha256": "2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "idle",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "idle",
+              "source": {
+                "sha256": "2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.4,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    363,
+                    638
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    898,
+                    638
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    376,
+                    1226
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    895,
+                    1226
+                  ],
+                  "nativeContact": [
+                    128,
+                    243
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "cook": {
+          "sha256": "7fb02e77dde6c4b6eb379f566cd0c68570665893a6a12e266b66cf8ce6e3d27a",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "activities",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "activities",
+              "source": {
+                "sha256": "7fb02e77dde6c4b6eb379f566cd0c68570665893a6a12e266b66cf8ce6e3d27a",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.38,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    352,
+                    640
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    900,
+                    640
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    352,
+                    1230
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    900,
+                    1230
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "water": {
+          "sha256": "184d94663f5131b9e95bb1b605791ab18ecbf01c4904c2697a46fcf33e9d698a",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "activities",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "activities",
+              "source": {
+                "sha256": "184d94663f5131b9e95bb1b605791ab18ecbf01c4904c2697a46fcf33e9d698a",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.4,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    360,
+                    615
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    915,
+                    615
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    365,
+                    1195
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    915,
+                    1195
+                  ],
+                  "nativeContact": [
+                    128,
+                    238
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "tend": {
+          "sha256": "b43a6e224f24fe5c3772fd6087b245828ea60e79c6131a53b93a2c5a9dd18571",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "activities",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "activities",
+              "source": {
+                "sha256": "b43a6e224f24fe5c3772fd6087b245828ea60e79c6131a53b93a2c5a9dd18571",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.31,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    330,
+                    600
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    930,
+                    600
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    340,
+                    1165
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    930,
+                    1165
+                  ],
+                  "nativeContact": [
+                    128,
+                    228
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "feed": {
+          "sha256": "5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d",
+          "width": 1254,
+          "height": 1254,
+          "sheet": "activities",
+          "transform": {
+            "method": "contact-atlas-v1",
+            "registration": {
+              "schema": 1,
+              "family": "broad-body-prototype-v1",
+              "sheet": "activities",
+              "source": {
+                "sha256": "5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d",
+                "width": 1254,
+                "height": 1254,
+                "columns": 2,
+                "rows": 2
+              },
+              "uniformScale": 0.375,
+              "frames": [
+                {
+                  "index": 0,
+                  "sourceContact": [
+                    340,
+                    640
+                  ],
+                  "nativeContact": [
+                    120,
+                    243
+                  ]
+                },
+                {
+                  "index": 1,
+                  "sourceContact": [
+                    900,
+                    640
+                  ],
+                  "nativeContact": [
+                    120,
+                    243
+                  ]
+                },
+                {
+                  "index": 2,
+                  "sourceContact": [
+                    340,
+                    1240
+                  ],
+                  "nativeContact": [
+                    120,
+                    243
+                  ]
+                },
+                {
+                  "index": 3,
+                  "sourceContact": [
+                    900,
+                    1240
+                  ],
+                  "nativeContact": [
+                    120,
+                    243
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+      "poses": {
+        "base": [
+          {
+            "source": "walk",
+            "index": 0
+          },
+          {
+            "source": "walk",
+            "index": 1
+          },
+          {
+            "source": "walk",
+            "index": 2
+          },
+          {
+            "source": "walk",
+            "index": 3
+          },
+          {
+            "source": "work",
+            "index": 0
+          },
+          {
+            "source": "work",
+            "index": 1
+          },
+          {
+            "source": "work",
+            "index": 2
+          },
+          {
+            "source": "work",
+            "index": 3
+          },
+          {
+            "source": "standing",
+            "index": 0
+          },
+          {
+            "source": "standing",
+            "index": 1
+          },
+          {
+            "source": "standing",
+            "index": 2
+          },
+          {
+            "source": "standing",
+            "index": 3
+          },
+          {
+            "source": "seated",
+            "index": 0
+          },
+          {
+            "source": "seated",
+            "index": 1
+          },
+          {
+            "source": "seated",
+            "index": 2
+          },
+          {
+            "source": "sleep",
+            "index": 0
+          }
+        ],
+        "idle": [
+          {
+            "source": "look",
+            "index": 0
+          },
+          {
+            "source": "look",
+            "index": 1
+          },
+          {
+            "source": "look",
+            "index": 2
+          },
+          {
+            "source": "look",
+            "index": 3
+          },
+          {
+            "source": "stretch",
+            "index": 0
+          },
+          {
+            "source": "stretch",
+            "index": 1
+          },
+          {
+            "source": "stretch",
+            "index": 2
+          },
+          {
+            "source": "stretch",
+            "index": 3
+          },
+          {
+            "source": "wave",
+            "index": 0
+          },
+          {
+            "source": "wave",
+            "index": 1
+          },
+          {
+            "source": "wave-lower",
+            "index": 2
+          },
+          {
+            "source": "wave-lower",
+            "index": 3
+          },
+          {
+            "source": "relax",
+            "index": 0
+          },
+          {
+            "source": "relax",
+            "index": 1
+          },
+          {
+            "source": "relax",
+            "index": 2
+          },
+          {
+            "source": "relax",
+            "index": 3
+          }
+        ],
+        "activities": [
+          {
+            "source": "cook",
+            "index": 0
+          },
+          {
+            "source": "cook",
+            "index": 1
+          },
+          {
+            "source": "cook",
+            "index": 2
+          },
+          {
+            "source": "cook",
+            "index": 3
+          },
+          {
+            "source": "water",
+            "index": 0
+          },
+          {
+            "source": "water",
+            "index": 1
+          },
+          {
+            "source": "water",
+            "index": 2
+          },
+          {
+            "source": "water",
+            "index": 3
+          },
+          {
+            "source": "tend",
+            "index": 0
+          },
+          {
+            "source": "tend",
+            "index": 1
+          },
+          {
+            "source": "tend",
+            "index": 2
+          },
+          {
+            "source": "tend",
+            "index": 3
+          },
+          {
+            "source": "feed",
+            "index": 0
+          },
+          {
+            "source": "feed",
+            "index": 1
+          },
+          {
+            "source": "feed",
+            "index": 2
+          },
+          {
+            "source": "feed",
+            "index": 3
+          }
+        ]
+      }
+    },
+    "frames": {
+      "base": [
+        "48257a47b2184075070761fd1ff337546abb4db3735989e8eaab572275979f45",
+        "a1681508953a3d1d94e7953f878ec842eadd81bb2292cc282b9df19d16cd8260",
+        "0764f8d34655487af550ca69659d4017291324abc188fafd777a852f62772204",
+        "9eb877dad03fae7016af26c83f8090c9b230012621dddaeafda47d79d8a730c7",
+        "a89e7dedd4909aaf993ddee0d8d29b4aef7c86d8c0e1364fd3217fa345e6ad94",
+        "fe4947506d212050b7f289f7c6b63af0be8c6e7286e9eac4e76ab4a61e360676",
+        "3db94447c8d4ab54ad0d1307f98088a1640741c3faeb0159929611ac96541e1e",
+        "629cdaf6426c7842cce9d0d11d833954373056b995f572340bee6027bac76cd2",
+        "b5623e44a8eb7869b64f879c3f0f0295116721ee0dda25a9c357a6440e13f13f",
+        "b86054fc0d9295e8a145dfaf62314f438fa55b0ea5c8fe75c54ec2fb1b51c06b",
+        "e8faccedc0978c54cfbdf9fb60224f4c6e69f8e0b9ba7773bf23435d402844d9",
+        "01a667c8923281a4e3ec9294f7dd914fcbec1db73995dc5807795eeb00e54f56",
+        "d94daa9bce41450c619e127e72668757982ff742587990339471936887024ffa",
+        "72172ba8b4453b9fe10297ab77bae635d810d4998104b18f1db1d51828df663e",
+        "7707188a0ac33ed2985833346a2979b8c17601ca72ec91c83f14bc8eaedff95c",
+        "f635289aefdf7a505b8c6f18e990e3fdd44274670bd832c9dd53bd096f4fc029"
+      ],
+      "idle": [
+        "dfae9043b1bea233ed6af22b91127f764969c446d1b1ef703b2fbbedcca474de",
+        "d91179dfa950a129eed406c48f73d762d606131187bd6bb048b965a36dd17b09",
+        "762c4f048fbf8575d37f9787374b96408d2f0634697b73a41ac2ad06cfa8dca9",
+        "3008f2a4e6a18db269ece8052329e55f727a72f1d7b3ffa9c9416c1b25893431",
+        "d5cda8f3179ad9b5f23a4b7aa01c4040b4cdfc997e6e181f80970a507b545f1c",
+        "8f58ee26d2061107574ccdcc2ff5940f3bfa2fa7a2ed5fcf20b7f4c13e2e2a63",
+        "97fdbc58516e7083ea99ee683f55dc1c4ea9322ea41c9c3a42e7bbf2d2a41873",
+        "0bd82a805fca9d562a73f5d804ab398ee47a69cd2db90f5519dfbab45e54d297",
+        "1735a0b614774a8b5a5c7970550b9a219126f0b4ef3ef6f19047cd8e8544324c",
+        "826f148ca7f84850e92889afd224f84cd9b918b79610f6b8b9eae8d9a7a0c052",
+        "646e5fece2a140d339975dfa75a93740d58fa8608bd76f237730e3478a2513be",
+        "ef82c176fcacfbe16c59d20d6a012d9af8809c3c1f2e300d8ea95d2d36061124",
+        "56d9a00ab5bc29063b292fa3293dfbe66108cf6445091a55bd9c5aa757f8553b",
+        "d33cd4a25e14fd26230c1dee88ae415ad38f884e4088edcccb16c295e6621e28",
+        "0d240e52515d5f030afe90b8a4ddc855728c491953edef17ab3d1c3700627e76",
+        "8e93e61fce98cfabe2d6dd85ec68d50b9abe991329ee0d6ba6def789ddb42db1"
+      ],
+      "activities": [
+        "ae47d29aff0d6f8157b846980c970fbdc513ed6fbe96a98f9c588b02281b37d8",
+        "7a3a1a2c6edaf5370687cf877c121ae91fda0ab2eb59e8a5b038ab526a5669ec",
+        "54bdaef5c1edf8f87e298e20be493ca767bcbaa7ee7c43178072e2b7cb30c337",
+        "2109b156a23b4b93d8dac7e746808d533d16191f6baa3a54a6ea4c874dc4e7bd",
+        "27edb84bf7e9dd61976d9ecec2daabde7a138580475f05583a3944ce260f410b",
+        "eca06012a3d8015257b61fd934b12d57577d957fa935fb5f5bc0f78bd3f49a0c",
+        "53f6878e871b7daab4e2d2cd65f9d8c62c63b6cf8635347ffc9c88cb504afdf1",
+        "434309c1f27ff4d8b759a7e38eca840664be069d0f3e486aa69598425bd5db50",
+        "36c1dc4fa95f254b220fc2a8698c8add83e19749462ca6f94a524feeb6a81c42",
+        "666d51dca393564bc0d0ca16474a1339b43ad8d4f6d9cbc1a0f081f7c4d078ba",
+        "e39d5a6321dab2b3bef0ffcb1387961d79d850bac9777d472cd1ca750bcb2342",
+        "32c5fa64e39f4c700a0fbcac0fed45daac2335850b631b7d061fb60a35e6e1ef",
+        "a304f81a1e486947eeea4d3452c59ad6c231170bf0aead05019ceaa06fdb60cc",
+        "942def6f38a620fffbd06a0374ec3ebb5812ea48ba71323e8b9fb53d982b522b",
+        "2ec550986a8a621adf717a7f51561c733196d3750726ddc460a71f1a17b5d883",
+        "6c81cdf6daa010c8137d89de8aee9689a968c32cca32f1d9e75b7aa173a05d49"
+      ]
+    }
+  },
+  "guideHashes": {
+    "specs.json": "a0b590485b808b6a2af579678375bc6c1c0fd9cea65cb59646c0228f85d25970",
+    "atlas.png": "448673faea57a45c6be3ef2fb63e9f70f9ef1feeac0437c0c89d669ac62006a8",
+    "mask.png": "2920f07938af21a91ca862ffc1b88ed16c11ff5525bf90dd12ea4cd901d6c51b",
+    "context.png": "fe780e6d9f92dbd6af30e38ee5d4e320a8665c7832cedf0edd9f6253a4ea2ec7",
+    "board.png": "9df5abdf9909528eb513b717085b616c1f2c1764c19f570b3f03a419e4a30ea9"
+  },
+  "rules": {
+    "sourceSize": [
+      1254,
+      1254
+    ],
+    "alphaThreshold": 32,
+    "minimumBoundedPaint": 0.98,
+    "minimumGuideCoverage": 0.9,
+    "paintAreaRatio": [
+      0.85,
+      1.15
+    ],
+    "undeclaredPaint": 0,
+    "boundsMarginSourcePixels": 36,
+    "paintEditingAllowed": false
+  },
+  "poses": [
+    {
+      "key": "base-6",
+      "sheet": "base",
+      "index": 6,
+      "crop": [
+        48,
+        56,
+        160,
+        160
+      ],
+      "tile": [
+        0,
+        0,
+        1254,
+        1254
+      ],
+      "path": "M104 88 C112 90 119 96 125 100 C133 105 142 106 148 100 L151 96 Q160 98 164 108 L164 120 Q168 126 165 121 L167 139 Q164 147 157 152 Q126 157 95 150 Q89 147 91 137 L98 118 Q89 118 82 110 L82 99 Q90 90 104 88 Z",
+      "protectedFloor": 210,
+      "foregroundRequired": true,
+      "bounds": [
+        230,
+        214,
+        969,
+        805
+      ],
+      "bodyFrameSha256": "3db94447c8d4ab54ad0d1307f98088a1640741c3faeb0159929611ac96541e1e"
+    }
+  ]
+}

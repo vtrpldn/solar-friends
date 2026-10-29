@@ -1,0 +1,29 @@
+{
+  "poses": [
+    {
+      "index": 4,
+      "unchangedNativeGeometry": true,
+      "unchangedBodyBinding": true,
+      "foregroundByteIdentical": null
+    },
+    {
+      "index": 5,
+      "unchangedNativeGeometry": true,
+      "unchangedBodyBinding": true,
+      "foregroundByteIdentical": true
+    },
+    {
+      "index": 6,
+      "unchangedNativeGeometry": true,
+      "unchangedBodyBinding": true,
+      "foregroundByteIdentical": true
+    },
+    {
+      "index": 7,
+      "unchangedNativeGeometry": true,
+      "unchangedBodyBinding": true,
+      "foregroundByteIdentical": true
+    }
+  ],
+  "scope": "One-pose source layout retains native garment geometry and selected foreground ownership; no generated paint acceptance"
+}

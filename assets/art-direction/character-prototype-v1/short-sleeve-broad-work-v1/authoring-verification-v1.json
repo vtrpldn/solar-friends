@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "scope": "Authoring tool regression and source-layout evidence only; no accepted working outfit.",
+  "legacySinglePoseMaskSha256": "a7b37a511ce212a94b1936b99a2d648a0683e59bfd8264f55e8853c06e102f78",
+  "broadSinglePoseMaskSha256": "ec63d2d56aa3846941d43c487ec294755cff11a7e75dd090575529b2b8963a58",
+  "checks": [
+    "Both existing single-pose foreground commands reproduced their immutable mask/context files successfully.",
+    "Explicit atlas pose selection produced the correct base 5, 6 and 7 body-bound masks.",
+    "The v3 foreground atlas guide reproduced byte-identically with all three explicit source selections.",
+    "Three ambiguous/incomplete source selections were refused without changing frozen outputs.",
+    "Four split source layouts retain the same native outline and body binding; all three applicable foreground masks remain byte-identical."
+  ],
+  "artResult": "Both atlas paints fail original fit gates. Single-pose V1 exposes its old hem; V2 fails source fit. All remain excluded."
+}

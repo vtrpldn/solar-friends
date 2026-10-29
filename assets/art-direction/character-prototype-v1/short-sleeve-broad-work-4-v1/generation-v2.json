@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "status": "rejected-whole-garment-enlargement",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise garment fit correction. Image 1 is the exact green silhouette that the finished cream shirt MUST cover. Image 2 is the current cream shirt: preserve its painted style, sleeve/collar detail, shading, scale and placement, but its bottom hem stops too high. Image 3 is the actual body diagnostic: the indigo band under the cream shirt is unwanted exposed old clothing. Extend the painted lower torso/hem DOWN to Image 1's exact green lower boundary, roughly 25-35 source pixels below the current cream hem on the original 1254-square canvas. Do not shift the whole shirt downward, change the neckline or sleeves, widen the torso, add a second hem, or alter any body. Replace green with cream cotton and keep the exact shape, original source position and transparent margin of Image 1. The final shirt must reach the frozen green waist curve so it covers the old indigo top completely, while preserving the existing warm painted outline, upper-left daylight, broad shading and restrained folds. Output ONLY ONE complete corrected cream short-sleeved garment cutout with true transparent background and neck opening, no green, body, skin, arms, hands, legs, shoes, labels, text, grid, pocket, logo or extra pieces.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v1/mask.png",
+      "role": "Frozen target silhouette including required hem",
+      "sha256": "508b3f778bcf33ea2a013a85d7f5377564b3719ada2bf3d4f561e44cd831e229"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v1/candidate-v1.png",
+      "role": "Original paint and short hem to correct",
+      "sha256": "6e64c1d291049c2260b4b60760ce6f5f98d5c0ea0fc48c6c110ba0ce5e90473e"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v1/coloured-body-review-v1.png",
+      "role": "Body diagnostic showing exposed indigo band",
+      "sha256": "d7c9ebb2bafd8f37de2e4a97e7a854a63b01d8204851afa565bab52439957feb"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-f7d3369a-7c6f-4540-aa72-13471d6577cb.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v1/candidate-v2.png",
+  "review": {
+    "sourceAudit": "candidate-v2-audit.json",
+    "findings": [
+      "The requested hem correction enlarges and shifts the entire garment.",
+      "The original source audit fails: bounded coverage 0.64711, guide coverage 0.78248, area ratio 1.78958.",
+      "This candidate is excluded; no source or runtime transform was changed to make it pass."
+    ],
+    "catalogEnrollment": false
+  },
+  "sha256": "277717b098703a9bbfa8cfc583e67d3ec8f65285fa7e6ca8ed861ef4214512c9",
+  "byteIdenticalCopyVerified": true,
+  "sourceEdits": false
+}

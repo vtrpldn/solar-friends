@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "status": "Analytical frozen-layout foreground guide; generated garment paint was not read",
+  "inputs": {
+    "registration-intent.json": "bec109f2f64f6cdc3fdc6f33734db47e74dcd34fbe6a10a435629217e6661c56",
+    "context.png": "0a8a41133686daf7c275bc6e9ae1e47db24ed5f23c1f5552cb6ca1a644291ba5",
+    "body-foreground-base-5-v1.json": "6a364b669dc003f0825a7be5fb74ab8ab889c500ba95a70b210383330d1b42f0",
+    "foreground-intent-base-5-v1.json": "adca054676ef4b50787f69613cb3e997fec5d85e63d62e5a21ae647ac5976a3d",
+    "foreground-context-base-5-v1.png": "e1797adb8a4a1966e5e44042656b4a7499e93faa4c81bda2ef63553dc4007ce0",
+    "body-foreground-base-6-v2.json": "006f80e9660b6b5db0d0173d1d93ece0a93dfe0f5a4c4a34ad9f5c30c1ea2508",
+    "foreground-intent-base-6-v2.json": "3137846ea358870b1282ba207323b306b401864151df52f297f3a0162e49ab3e",
+    "foreground-context-base-6-v2.png": "06adec9dc296bb48be1d6687d70d0ceb408f584761ccf84fa92690ece294e676",
+    "body-foreground-base-7-v3.json": "1c6fe40d05a47c24561d7880e88921d95a12196f6674de653c17974909e93ec0",
+    "foreground-intent-base-7-v3.json": "edfd661eee0c52870c4b6e5ec4a878c014fd7ff1647e18004f6cd2d4af059582",
+    "foreground-context-base-7-v3.png": "058391dbf1a11552143172cd8290ef22f5c08042ae1388ac78c2835569e3e9a2"
+  },
+  "sha256": "84f275c2e36a91cded7e470979c7afd9463e77a04203620924b7a462c34b2d49",
+  "poseCount": 4,
+  "foregroundPoseCount": 3
+}

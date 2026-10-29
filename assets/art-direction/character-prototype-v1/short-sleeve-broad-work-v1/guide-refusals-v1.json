@@ -1,0 +1,9 @@
+{
+  "rejectedCases": 3,
+  "cases": [
+    "missing required pose",
+    "duplicate pose",
+    "empty source selection"
+  ],
+  "frozenOutputsUnchanged": true
+}

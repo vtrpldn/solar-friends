@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "status": "rejected-enlarged-and-shifted-atlas",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise material repaint of the provided flat alpha shapes. IMAGE 1 IS THE EDIT TARGET: four green garment silhouettes at exact registered positions. Keep the existing alpha/outer boundaries EXACTLY unchanged; put every outline stroke and every painted highlight INSIDE those green regions. This is not new garment layout or new clothing geometry. Replace green with plain warm cream cotton shading matching IMAGE 2, which is a material/edge-style reference only. Keep ALL FOUR shapes at exactly the same positions and sizes in the same square canvas. In particular, do NOT expand any upper shirt downward, raise shoulders, enlarge sleeves, widen waists, recenter parts or add a hem outside a green edge. The earlier attempt enlarged every shirt by 23-33 percent and is unusable; exact silhouette adherence matters more than decorative folds or added cloth volume. Use restrained broad hand-painted shading, warm edges drawn INSIDE the outline, upper-left daylight, simple crew necks, short sleeves and no decoration. Preserve the bottom-right bent garment's existing tilt and the bottom-left raised-sleeve shape without replacing either with an upright shirt. Output only four complete cream garment cutouts with the original transparent background/margins and exact neck holes. No green, body, skin, hair, hands, arms, legs, buttons, pockets, logo, labels, guides, text, additional objects, extra garment pieces or ground. Do not use the style reference's canvas placement or proportions; use its cloth painting only.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-v1/mask.png",
+      "role": "Exact frozen geometry; sole shape target",
+      "sha256": "3dbdf1cc288c5f1f3bfaaa875151525ed94f67b8e29a96d6e09d5dc72f421e05"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1.png",
+      "role": "Material style only",
+      "sha256": "ec31931ab59f33fe7c83fe3a638eeba41dea0d599d37e3ec1cfb2bf9f070ffe1"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-09baf206-235f-4702-a4bf-74ee04107b2a.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-v1/candidate-v2.png",
+  "review": {
+    "sourceAudit": "candidate-v2-audit.json",
+    "findings": [
+      "All four poses fail unchanged predeclared gates again.",
+      "The stricter repaint does not improve shape adherence; switch to one pose per source rather than lowering gates."
+    ],
+    "catalogEnrollment": false
+  },
+  "sha256": "b44b7971c740c48d28d3ad337cd3e96ee304ed4424302c4cdc9c22983efba9f0",
+  "byteIdenticalCopyVerified": true,
+  "sourceEdits": false
+}

@@ -1,0 +1,9 @@
+{
+  "status": "both-atlas-paints-rejected",
+  "findings": [
+    "The first generated source enlarges all four silhouettes; all four area ratios exceed the unchanged 1.15 upper gate.",
+    "The stricter second repaint still enlarges and shifts the garments and fails all four frozen source gates.",
+    "Neither paint was scaled, warped, trimmed, masked into compliance or enrolled."
+  ],
+  "next": "Use one pose per source with the same authored native geometry. Atlas pose/ownership tooling remains reusable."
+}

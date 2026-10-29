@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "status": "not-accepted-exposes-old-shirt-at-hem",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise object edit for a Solar Friends garment sprite. Image 1 is the exact frozen green alpha silhouette for ONE shirt. Paint ONLY inside that silhouette, preserving its contour, neck hole, source placement, scale, canvas dimensions and transparent margin. Image 2 shows that exact shirt on the original broad body for fit only. Image 3 is the warm cream cotton painting style only; do not copy its outline or layout. Replace green with a plain short-sleeved crew-neck cotton T-shirt: broad warm painted shading, upper-left daylight, warm edges drawn inside the outline, restrained folds, simple short cuffs and one understated hem. Output ONE COMPLETE cream garment cutout at exactly the green shape's original position. No body, skin, hair, hands, arms, legs, shoes, tools, ground, green, labels, grids, text, extra garment pieces, buttons, pocket, logo or decoration. Do not enlarge, recenter, widen, lengthen, rotate or stretch the shape. Keep the original true transparency and neck opening.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v1/mask.png",
+      "role": "Frozen single-pose geometry",
+      "sha256": "508b3f778bcf33ea2a013a85d7f5377564b3719ada2bf3d4f561e44cd831e229"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v1/context.png",
+      "role": "Exact published working body",
+      "sha256": "d92add29f3363c031c16c459ed81d5db1bf7985bf6af201b6a66b7a34949a284"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1.png",
+      "role": "Painted cotton style only",
+      "sha256": "ec31931ab59f33fe7c83fe3a638eeba41dea0d599d37e3ec1cfb2bf9f070ffe1"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-dcfc9059-a7bc-489d-bf22-d6991a64b7c7.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v1/candidate-v1.png",
+  "review": {
+    "sourceAudit": "candidate-v1-audit.json",
+    "findings": [
+      "The coarse source fit audit passes: 93.88 percent guide coverage and 0.99335 area ratio.",
+      "All four full-body and enlarged palette compositions were inspected. An indigo strip remains below the hem.",
+      "The review verifies 225680 protected channel values and contact [128,238]. This does not override the visible coverage defect."
+    ],
+    "catalogEnrollment": false
+  },
+  "sha256": "6e64c1d291049c2260b4b60760ce6f5f98d5c0ea0fc48c6c110ba0ce5e90473e",
+  "byteIdenticalCopyVerified": true,
+  "sourceEdits": false
+}
