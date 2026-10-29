@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "status": "internal-single-pose-only",
+  "sources": {
+    "specs.json": "561fe08efeb78caba935bf3c6d93b1d2fe151ca82979d0789847debf5c906684",
+    "mask.png": "66a7b00373a39c5cd000d1288c1c6d981011bb2c519af9e848894fb4231fb54f",
+    "context.png": "995e1f17d277a38e32c6fb0087c539aa8f65a2e020a9527911972373b82292b3",
+    "registration-intent.json": "35f4f04bc54ee159946fc555b18fb1c856bc67b8e726527569c9e34674bf3656",
+    "body-foreground-v1.json": "6a364b669dc003f0825a7be5fb74ab8ab889c500ba95a70b210383330d1b42f0",
+    "foreground-intent-v1.json": "f7e0ff4ad0bc87d8f358f9f1a894f4bc2c483a55652e6d0166517af18db657a2",
+    "candidate-v1.png": "edc5e6bdba3ec8b42134ab3abfa03dc5efb74555d9e93b5f9bff0eb3f3712b28",
+    "generation-v1.json": "267bf7efa28bd8067284507cf139a3260fb55ce63105100b4d87728893a17f7a",
+    "candidate-v1-audit.json": "514d851571326bfc66da968400c64b37d67431755bb4d3a9a4c7f6efef26e705",
+    "body-review-v1.json": "f6f4f8335800446c54a5f837a140d7059df7b3dc47ffc8de98bba35874045b4b",
+    "coloured-body-review-v1.png": "8625b06d98427998ab4921f34395b0e6c176365e7f67515954319d4d197d8955"
+  },
+  "publicCatalogEnrollment": false,
+  "remaining": [
+    "Other Broad work poses, standing/idle/activity garment coverage",
+    "Full outfit and accessory layer review",
+    "Animation transitions and world scale, lighting and biome pairings"
+  ]
+}

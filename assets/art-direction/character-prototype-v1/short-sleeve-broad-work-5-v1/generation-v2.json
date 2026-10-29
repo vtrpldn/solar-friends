@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "status": "needs-sleeve-guide-correction",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise object edit: retexture Image 1 in place. It is a 1254 by 1254 transparent image containing one green silhouette. Keep the exact original green alpha silhouette, including its neckline, cuffs, hem and every transparent margin, at its original coordinates. Do NOT redraw at a larger scale or center the garment. The required silhouette occupies approximately x266 through949 and y141 through706 in the original canvas; keep those boundaries. Image 2 is fit context only, showing a bent-arm broad adult resident, and must not appear in the output. Replace the existing flat green fill with a plain cream cotton T-shirt painting, warm illustrated game style, broad soft shading from upper left, restrained folds, small simple crew collar, short sleeves, one understated hem. Draw the shading and seam detail INSIDE the existing silhouette. This is material painting on a locked shape, not a new garment design. Preserve the full green region's coverage and the empty neckline. True transparent background. Output the shirt only; no person, skin, limbs, hair, shorts, tools, floor, text, numbers, border, markers, green or second shirt. In particular do not fill the lower blank half of the canvas or move the hem down.",
+  "references": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v1/mask.png",
+      "role": "Frozen single-pose silhouette",
+      "sha256": "d2ff98a7371cbbc81554cac004b5a1c1de0b0f5ef09c6baaf105814232a4a13a"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v1/context.png",
+      "role": "Exact bent-arm working body, fit only",
+      "sha256": "5b39a2c7584a355b57b6b4838dab33f917e4b395f19e46b9a2d56f9e39911c07"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-e83c0be7-1e3f-4709-b6e2-d5c94c9db414.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v1/candidate-v2.png",
+  "sourceEdits": false,
+  "catalogEnrollment": false,
+  "sha256": "0f1b882e73f874ea9da17e0222b8ed83a8a7b2b7ac7d3a18fb3e20b8f472498c",
+  "byteIdenticalCopyVerified": true,
+  "review": {
+    "findings": [
+      "Raw source matches frozen guide: 99.814 percent coverage, area ratio 1.00633.",
+      "Four-color native compositions inspected: the left upper arm remains exposed behind the sleeve because the frozen sleeve guide is too narrow. Repaint against corrected geometry before acceptance.",
+      "229232 protected lower-body channels and 33280 crossing-arm channels restored exactly; contact [128,238]. These checks do not override the visible sleeve defect."
+    ],
+    "catalogEnrollment": false
+  }
+}

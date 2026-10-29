@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "status": "rejected-oversized",
+  "tool": "image_gen.imagegen",
+  "prompt": "Use case: precise-object-edit. Asset: one Solar Friends resident short-sleeve work-pose garment. Image 1 is the exact green geometry mask to paint; Image 2 is the exact broad-bodied bent-arm work pose, ONLY for fit; Image 3 is cotton paint style ONLY, never its garment shape. Replace every green pixel in Image 1 with a warm cream cotton crew-neck T-shirt painting, retaining that exact silhouette, source position, scale, neck opening and transparent margin. Keep the original canvas and the entire hem silhouette; do not recenter the shirt or enlarge it. Broad, warm illustrated shading under upper-left daylight; restrained soft folds, plain small crew collar and short cuffs, one subtle hem. Follow the slightly sloping bent-work torso from Image 1; no straightening or copying Image 3's pose. Output ONLY the painted shirt cutout on genuine transparent background. Do not include the person, skin, hands, arms, shorts, hair, tools or ground. Preserve the open neck cutout and all original exterior transparency. No green remains, no text, grid, logo, pocket, buttons, duplicate garment, highlights outside the outline, borders or background. Contour shading must sit inside the supplied green mask, without shrinking the coverage at the hem or cuffs.",
+  "references": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v1/mask.png",
+      "role": "Frozen single-pose silhouette",
+      "sha256": "d2ff98a7371cbbc81554cac004b5a1c1de0b0f5ef09c6baaf105814232a4a13a"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v1/context.png",
+      "role": "Exact bent-arm working body, fit only",
+      "sha256": "5b39a2c7584a355b57b6b4838dab33f917e4b395f19e46b9a2d56f9e39911c07"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1.png",
+      "role": "Cotton paint style only",
+      "sha256": "ec31931ab59f33fe7c83fe3a638eeba41dea0d599d37e3ec1cfb2bf9f070ffe1"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-621a8670-133e-4779-8b87-bce9255c6d77.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v1/candidate-v1.png",
+  "sourceEdits": false,
+  "catalogEnrollment": false,
+  "sha256": "d089aaa705a84c767b3a4d0d01f1aefd2bd18a448b51caf1d04ba4be3243d28e",
+  "byteIdenticalCopyVerified": true,
+  "review": {
+    "findings": [
+      "Paint area is 1.46035 times the frozen guide; bounded coverage is 0.83385. Excluded from composition and catalog."
+    ],
+    "catalogEnrollment": false
+  }
+}

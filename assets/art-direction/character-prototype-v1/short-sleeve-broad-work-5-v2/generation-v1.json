@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "status": "selected-for-internal-pose-composition-only",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise object edit: retexture Image 1 in place. It is a 1254 by 1254 transparent image containing one green silhouette. Keep the exact original green alpha silhouette, including its neckline, cuffs, hem and every transparent margin, at its original coordinates. Do NOT redraw at a larger scale or center the garment. The required silhouette occupies approximately x227 through949 and y141 through706 in the original canvas; keep those boundaries. Image 2 is fit context only, showing a bent-arm broad adult resident, and must not appear in the output. Replace the existing flat green fill with a plain cream cotton T-shirt painting, warm illustrated game style, broad soft shading from upper left, restrained folds, small simple crew collar, short sleeves, one understated hem. Draw the shading and seam detail INSIDE the existing silhouette. This is material painting on a locked shape, not a new garment design. Preserve the full green region's coverage and the empty neckline. True transparent background. Output the shirt only; no person, skin, limbs, hair, shorts, tools, floor, text, numbers, border, markers, green or second shirt. In particular do not fill the lower blank half of the canvas or move the hem down.",
+  "references": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v2/mask.png",
+      "role": "Corrected frozen single-pose silhouette, broader left sleeve",
+      "sha256": "66a7b00373a39c5cd000d1288c1c6d981011bb2c519af9e848894fb4231fb54f"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v2/context.png",
+      "role": "Exact bent-arm working body, fit only",
+      "sha256": "995e1f17d277a38e32c6fb0087c539aa8f65a2e020a9527911972373b82292b3"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-4a1b4113-f0d4-494a-b207-07d415fbaecc.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v2/candidate-v1.png",
+  "sourceEdits": false,
+  "catalogEnrollment": false,
+  "sha256": "edc5e6bdba3ec8b42134ab3abfa03dc5efb74555d9e93b5f9bff0eb3f3712b28",
+  "byteIdenticalCopyVerified": true,
+  "review": {
+    "sourceAudit": "candidate-v1-audit.json",
+    "bodyComposition": "body-review-v1.json",
+    "visualBoard": "coloured-body-review-v1.png",
+    "findings": [
+      "Corrected left sleeve covers the exposed upper arm behind the crossed foreground arm. All four native palette compositions inspected.",
+      "Raw paint has 99.144 percent guide coverage, 1.005905 area ratio and complete bounded coverage.",
+      "229232 protected lower-body channels and 33280 crossing-arm channels restored exactly; native contact remains [128,238].",
+      "Plain warm cotton paint, broad shading and restrained folds match the existing internal garment direction at displayed body scale."
+    ],
+    "scope": "One internal base-5 pose, no hair, hat, transition or world acceptance. No public catalog enrollment."
+  }
+}
