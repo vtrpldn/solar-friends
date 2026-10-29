@@ -43,7 +43,10 @@ export class CharacterCreator{
    if(focused)this.fieldHost.querySelector(`[data-resident-field="${focused}"]`)?.focus({preventScroll:true});
   }
   const appearance=person.appearance??{preset:person.preset,version:person.preset_version},key=JSON.stringify(appearance);
-  if(key!==this.appearanceKey){this.appearanceKey=key;this.appearance=appearance;this.look=appearance.preset??'custom';void this.load(appearance);}else this.restart();
+  if(key!==this.appearanceKey){this.appearanceKey=key;this.appearance=appearance;this.look=appearance.preset??'custom';void this.load(appearance);}
+  // Identity, routines and history refreshes do not change the selected pose.
+  // Leave its existing animation loop running instead of resetting its phase.
+  else if(this.frame===null)this.restart();
  }
  select(name){this.page=name;this.dialog.querySelector('.character-choice-actions').hidden=name==='Arrival';this.dialog.querySelector('[data-character-lock]').checked=this.locked[name];this.dialog.querySelector('[data-character-lock-label]').textContent=`Keep ${name.toLowerCase()} when randomizing`;this.dialog.querySelector('[data-character-random]').disabled=Object.values(this.locked).every(Boolean);this.dialog.querySelector('[data-character-random-note]').textContent=Object.values(this.locked).every(Boolean)?'All categories are locked.':`Randomizing: ${Object.keys(characterCategories).filter(page=>!this.locked[page]).join(', ')}. ${this.locked.Identity?'':'Unlocked identity gets a new name and clears pronouns and biography. '}Randomized routines leave outside shifts off.`;const person=this.person();this.dialog.querySelector('[data-character-reset]').disabled=(characterCategories[name]??[]).every(field=>JSON.stringify(person?.[field])===JSON.stringify(this.baseline?.[field]));for(const tab of this.dialog.querySelectorAll('[role=tab]')){const selected=tab.dataset.characterTab===name;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;}for(const panel of this.fieldHost.children)panel.hidden=panel.dataset.characterPage!==name;}
  async load(appearance){
