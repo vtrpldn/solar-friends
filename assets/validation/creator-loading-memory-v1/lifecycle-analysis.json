@@ -1,0 +1,35 @@
+{
+  "rounds": [
+    {
+      "cast": "shared",
+      "cycle": 1,
+      "dom": {
+        "documents": 1,
+        "nodes": 18979,
+        "jsEventListeners": 174
+      },
+      "editorCanvasBytes": 139951428,
+      "returnedPrivateFootprintBytes": 628902912,
+      "playtestPrivateFootprintBytes": 779996160
+    },
+    {
+      "cast": "unique",
+      "cycle": 1,
+      "dom": {
+        "documents": 1,
+        "nodes": 19610,
+        "jsEventListeners": 174
+      },
+      "editorCanvasBytes": 319047404,
+      "returnedPrivateFootprintBytes": 950538240,
+      "playtestPrivateFootprintBytes": 1048678400
+    }
+  ],
+  "emptyCreator": {
+    "baselineCanvasBytes": 11497984,
+    "terminalCanvasBytes": 11497984,
+    "baselinePrivateFootprintBytes": 140821504,
+    "terminalPrivateFootprintBytes": 243077120
+  },
+  "scope": "Exact observed DOM/listener and native canvas round trips for these short editor/playtest cycles. The final library contains the two authored fixture entries, so its total DOM-node count can differ from the initial empty collection. Private footprint is recorded separately; this does not prove a permanent memory plateau, asynchronous-loading peak, 16x performance, all-biome coverage or a release memory budget."
+}

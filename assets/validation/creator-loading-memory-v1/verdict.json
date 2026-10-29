@@ -1,0 +1,71 @@
+{
+  "status": "observed loading allocations; performance release gate remains open",
+  "scope": "Sampled native allocations bracketed by observed loading states, with no forced collection or Network inspection. Observed maxima are lower bounds on true peaks; separate allocator-root maxima are not additive and may occur at different times. Missing measurements remain unknown. Detailed tracing perturbs timing. This does not establish a release memory budget, full-process peak or all-cast/biome acceptance.",
+  "inputs": {
+    "scripts/analyze-creator-loading-memory.mjs": "cd73f7d881b1eb91d8e7d8c82dcc39b892d0b5ae74ca3ea850eb743ce26db2b1",
+    "scripts/verify-creator-loading-memory-analysis.mjs": "bfca5e731b23b9bd7ee63657c4a0ca136fc40e10053c4e0d2c333552d5e3b221",
+    "scripts/analyze-creator-playtest-memory.mjs": "b824f2e3807e3475b0ca98721086c1bff9a673be98c59276baf1ca5c0213a9cf",
+    "scripts/analyze-artwork-native-memory.mjs": "a003631d482de5c4597c23ddd75ff4a7c69dfc185514b10a420347a934e57aa1"
+  },
+  "evidence": {
+    "report.json": "0d0102a845e2850d655ca581b019c5ddbc32f2257e78c4e1ab7d0fb38eeb76ce",
+    "fixture.solar-scenario": "5adc6008ae697b07f14a7d7e431b03ce4dc815c07c3d5b0d9304dea9cc581ebd",
+    "lifecycle-analysis.json": "a2665541f36d54c9fc181113328327a8cea079708705f1ad7ec114fee827c8c5",
+    "shared-1-playtest.png": "b28f6c219defb44efb97db10ba914c2cdaeaca7ec121efeb5d59f1ad056360b1",
+    "loading-analysis.json": "eb43498121de853f211cd7841b337dceeda1bb058d9b2c61382bbd7de657fc68",
+    "memory-trace.json.gz": "dcdbd69cd3fe907b02aa761d19e9ad9667f1ad01fe13c9f19092724d2476f917",
+    "unique-1-playtest.png": "c49591b8853236117f28883f4c4377ef2169b4359f4db22f0183b35e4e50a7db"
+  },
+  "capture": {
+    "biome": "mata-atlantica",
+    "population": 12,
+    "buildings": 256,
+    "castCycles": 2,
+    "loadingSampleCount": 18,
+    "bracketedLoadingSamples": 13,
+    "requestedIntervalMs": 250,
+    "networkInspectionEnabled": false,
+    "loadingForcedGc": false
+  },
+  "observations": {
+    "highestBracketedLoadingPrivateFootprintBytes": 999870464,
+    "loadingCoverage": [
+      {
+        "transition": "shared-1 open editor",
+        "samples": 2
+      },
+      {
+        "transition": "shared-1 start playtest",
+        "samples": 3
+      },
+      {
+        "transition": "shared-1 return editor",
+        "samples": 2
+      },
+      {
+        "transition": "unique-1 open editor",
+        "samples": 2
+      },
+      {
+        "transition": "unique-1 start playtest",
+        "samples": 2
+      },
+      {
+        "transition": "unique-1 return editor",
+        "samples": 2
+      }
+    ],
+    "allSixTransitionsObserved": true
+  },
+  "reviewedCaptures": [
+    "shared-1-playtest.png",
+    "unique-1-playtest.png"
+  ],
+  "limitations": [
+    "One shared and one unique Broad-cast cycle, one regional seed; not all bodies or biomes.",
+    "Detailed dumps perturb loading; observed sampled maxima do not bound unseen allocations.",
+    "Readiness samples use forced GC and cannot be treated as equivalent collection conditions.",
+    "Whole-app peak, persistent-memory plateau, final budgets, 16x and physical-display pacing remain unverified.",
+    "Source fingerprints cover the benchmark declared files; this run did not inventory every fetched bitmap."
+  ]
+}

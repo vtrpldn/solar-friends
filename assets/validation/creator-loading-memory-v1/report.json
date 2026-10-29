@@ -1,0 +1,1112 @@
+{
+  "completed": true,
+  "biome": "mata-atlantica",
+  "cyclesPerCast": 1,
+  "secondsPerSpeed": 1,
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "residentStyle": "broad",
+    "appearanceRevisions": {
+      "resident-parts-v7": 12
+    },
+    "uniqueAppearances": 12,
+    "attempted": 312,
+    "seed": 42
+  },
+  "fixtureDefinitionSha256": "5adc6008ae697b07f14a7d7e431b03ce4dc815c07c3d5b0d9304dea9cc581ebd",
+  "inputs": {
+    "scripts/benchmark-creator-playtest-memory.mjs": "7901c9a0d9b7b7d11172096d5e21dad61e3c277f3748c3d4f6a8ed194ddf3a84",
+    "scripts/raw-memory-browser.mjs": "103bac0c9c56391e382c8bbfdf247823c0393c0f02f5dd38840dfc13592e8890",
+    "scripts/mixed-builder-fixture.mjs": "a0341d8bce537e1106e2828ef55b63fc09645404ad81f59d625b2a4e91218d2b",
+    "web/main.js": "8016457c583299583ffd9be019ca459995ecda57781ea16f1a6b5f322eb63356",
+    "web/editor/index.js": "e19420855c1146d9d1b0d4ed60e16f9a41bc38bc3a71d276a2b16e34da64ef24",
+    "web/editor/map-view.js": "5d1ced57b883db1703ca8732adbc3418a0cb959d18a83fb5b155e07a3086322e",
+    "web/content-library.js": "dec91760869e5023d00798af447ea7a5979117febb2a96f00f0d12465281b49a",
+    "web/player-session.js": "118b06a29e5365987c49266d89cf563d6548a7024a7d44734bf9b80e71e6ef00",
+    "web/resident-appearance-library.js": "e13cd02caa63c8907757dd881335d722fe811e9e5b325bf0fde617afb8ddabfa",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631",
+    "web/resident-family-parts.js": "48802400c4942128694edec58c665a3fa5ee5461223378095e6e559f4152ede5",
+    "web/resident-family-provider.js": "103dbb9287de742970f85bd108541c46848305c54e28f795f9235c5cda105bce",
+    "web/character-composed-family-bundle.js": "423ec62d13a698a87a70bb0d8c5b39a78d950ec71d9aea79287587c13cb91919",
+    "web/character-broad-family-bundle-index.js": "17d264e9080070a930a07efd36683cc4087144b9e233788602cf2d92a966ec23",
+    "web/art/characters/broad-v1/bundle-v1.json": "6d3f334aca027a80296ebc760e5d1214293ea027b3d0503d37e26a27c3c52f42",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/world-backdrop.js": "c8db32139dab1cd95024ad58a3e16b49e98bebefa445346952e9ce1fa002b41c",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/pkg/solar_friends.js": "d4a6c0bb50f2c79862380324e778525dd43971742fad1709bede04bd560abd23",
+    "web/pkg/solar_friends_bg.wasm": "9a61b739591b2614d3b4e867a1be60e4386338df8924156092c80726b4a8e082"
+  },
+  "rawExecutable": "/Users/paladini/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "networkInspectionEnabled": false,
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "environment": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro",
+    "browser": "HeadlessChrome/151.0.7922.34"
+  },
+  "stages": [
+    {
+      "label": "empty creator baseline",
+      "dom": {
+        "documents": 1,
+        "nodes": 1642,
+        "jsEventListeners": 176
+      },
+      "heap": {
+        "usedSize": 1653652,
+        "totalSize": 2359296,
+        "embedderHeapUsedSize": 2683264,
+        "backingStorageSize": 674776
+      },
+      "view": {
+        "url": "http://127.0.0.1:55177/editor.html",
+        "canvasPixels": 857680,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "shared-1 editor ready",
+      "dom": {
+        "documents": 1,
+        "nodes": 18979,
+        "jsEventListeners": 174
+      },
+      "heap": {
+        "usedSize": 9391640,
+        "totalSize": 9994240,
+        "embedderHeapUsedSize": 8926864,
+        "backingStorageSize": 20174506
+      },
+      "view": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "shared-1 playtest paused",
+      "dom": {
+        "documents": 2,
+        "nodes": 12150,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 9567868,
+        "totalSize": 10387456,
+        "embedderHeapUsedSize": 7415944,
+        "backingStorageSize": 20323781
+      },
+      "view": {
+        "url": "http://127.0.0.1:55177/?run=d5180ceb-eafc-489f-bf37-ff6166d7a3b6",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14650360,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14650360,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 913770,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "shared-1 playtest ran",
+      "dom": {
+        "documents": 3,
+        "nodes": 12360,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 10071076,
+        "totalSize": 10649600,
+        "embedderHeapUsedSize": 8498080,
+        "backingStorageSize": 20323845
+      },
+      "view": {
+        "url": "http://127.0.0.1:55177/?run=d5180ceb-eafc-489f-bf37-ff6166d7a3b6",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14650360,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14650360,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 918450,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "shared-1 returned editor",
+      "dom": {
+        "documents": 1,
+        "nodes": 18979,
+        "jsEventListeners": 174
+      },
+      "heap": {
+        "usedSize": 9329944,
+        "totalSize": 9732096,
+        "embedderHeapUsedSize": 9033384,
+        "backingStorageSize": 20175114
+      },
+      "view": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "unique-1 editor ready",
+      "dom": {
+        "documents": 1,
+        "nodes": 19610,
+        "jsEventListeners": 174
+      },
+      "heap": {
+        "usedSize": 15656712,
+        "totalSize": 16547840,
+        "embedderHeapUsedSize": 11287432,
+        "backingStorageSize": 20175250
+      },
+      "view": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "unique-1 playtest paused",
+      "dom": {
+        "documents": 2,
+        "nodes": 12781,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 15795140,
+        "totalSize": 16416768,
+        "embedderHeapUsedSize": 9694152,
+        "backingStorageSize": 20323787
+      },
+      "view": {
+        "url": "http://127.0.0.1:55177/?run=a7c0e46a-1db5-4518-bc9b-ab2b8184024d",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 173852864,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 173852864,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 900224,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "unique-1 playtest ran",
+      "dom": {
+        "documents": 3,
+        "nodes": 12991,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 16285148,
+        "totalSize": 17203200,
+        "embedderHeapUsedSize": 10456408,
+        "backingStorageSize": 20323964
+      },
+      "view": {
+        "url": "http://127.0.0.1:55177/?run=a7c0e46a-1db5-4518-bc9b-ab2b8184024d",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 173852864,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 173852864,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 901962,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "unique-1 returned editor",
+      "dom": {
+        "documents": 1,
+        "nodes": 19610,
+        "jsEventListeners": 174
+      },
+      "heap": {
+        "usedSize": 15596856,
+        "totalSize": 16285696,
+        "embedderHeapUsedSize": 11283768,
+        "backingStorageSize": 20175114
+      },
+      "view": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "empty creator terminal",
+      "dom": {
+        "documents": 1,
+        "nodes": 1682,
+        "jsEventListeners": 176
+      },
+      "heap": {
+        "usedSize": 1826824,
+        "totalSize": 2359296,
+        "embedderHeapUsedSize": 2643864,
+        "backingStorageSize": 675897
+      },
+      "view": {
+        "url": "http://127.0.0.1:55177/editor.html",
+        "canvasPixels": 857680,
+        "artwork": null,
+        "scratch": null
+      }
+    }
+  ],
+  "runs": [
+    {
+      "cast": "shared",
+      "cycle": 1,
+      "initial": {
+        "minutes": 480,
+        "residents": 12,
+        "buildings": 256,
+        "uniqueAppearances": 1,
+        "artworkEntries": 1,
+        "runId": "d5180ceb-eafc-489f-bf37-ff6166d7a3b6"
+      },
+      "timings": [
+        {
+          "requestedSpeed": 1,
+          "wallMs": 1010.1999999999998,
+          "advancedMinutes": 3.055389404296875,
+          "frames": 60,
+          "p95GapMs": 25.299999999999727
+        },
+        {
+          "requestedSpeed": 8,
+          "wallMs": 1006.8999999999996,
+          "advancedMinutes": 25.39599609375,
+          "frames": 60,
+          "p95GapMs": 24.900000000000546
+        }
+      ],
+      "returned": {
+        "draftPreserved": true,
+        "runRemoved": true,
+        "normalStoragePreserved": true,
+        "project": "5432b993-5b09-4259-b222-d2f4d6673ec5"
+      }
+    },
+    {
+      "cast": "unique",
+      "cycle": 1,
+      "initial": {
+        "minutes": 480,
+        "residents": 12,
+        "buildings": 256,
+        "uniqueAppearances": 12,
+        "artworkEntries": 12,
+        "runId": "a7c0e46a-1db5-4518-bc9b-ab2b8184024d"
+      },
+      "timings": [
+        {
+          "requestedSpeed": 1,
+          "wallMs": 1004.7000000476837,
+          "advancedMinutes": 3.025115966796875,
+          "frames": 59,
+          "p95GapMs": 25.100000000000364
+        },
+        {
+          "requestedSpeed": 8,
+          "wallMs": 1018.8999999999996,
+          "advancedMinutes": 25.400787353515625,
+          "frames": 60,
+          "p95GapMs": 25
+        }
+      ],
+      "returned": {
+        "draftPreserved": true,
+        "runRemoved": true,
+        "normalStoragePreserved": true,
+        "project": "28efb2b9-5c20-4fbd-bb55-e37b2da59a1b"
+      }
+    }
+  ],
+  "loadingDumpMs": 250,
+  "loadingObservations": [
+    {
+      "label": "shared-1 open editor loading 1",
+      "transition": "shared-1 open editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 76.87354100000084,
+      "loadingBracketed": true
+    },
+    {
+      "label": "shared-1 open editor loading 2",
+      "transition": "shared-1 open editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 64.45679199999904,
+      "loadingBracketed": true
+    },
+    {
+      "label": "shared-1 open editor loading 3",
+      "transition": "shared-1 open editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "false",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 269.34429099999943,
+      "loadingBracketed": false
+    },
+    {
+      "label": "shared-1 start playtest loading 5",
+      "transition": "shared-1 start playtest",
+      "before": {
+        "url": "http://127.0.0.1:55177/?run=d5180ceb-eafc-489f-bf37-ff6166d7a3b6",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing Vila Aurora…"
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/?run=d5180ceb-eafc-489f-bf37-ff6166d7a3b6",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing Vila Aurora…"
+      },
+      "forcedGc": false,
+      "durationMs": 99.9582500000015,
+      "loadingBracketed": true
+    },
+    {
+      "label": "shared-1 start playtest loading 6",
+      "transition": "shared-1 start playtest",
+      "before": {
+        "url": "http://127.0.0.1:55177/?run=d5180ceb-eafc-489f-bf37-ff6166d7a3b6",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing Vila Aurora…"
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/?run=d5180ceb-eafc-489f-bf37-ff6166d7a3b6",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing Vila Aurora…"
+      },
+      "forcedGc": false,
+      "durationMs": 1292.578834,
+      "loadingBracketed": true
+    },
+    {
+      "label": "shared-1 start playtest loading 7",
+      "transition": "shared-1 start playtest",
+      "before": {
+        "url": "http://127.0.0.1:55177/?run=d5180ceb-eafc-489f-bf37-ff6166d7a3b6",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing residents · 0 of 12"
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/?run=d5180ceb-eafc-489f-bf37-ff6166d7a3b6",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing residents · 0 of 12"
+      },
+      "forcedGc": false,
+      "durationMs": 63.5151249999999,
+      "loadingBracketed": true
+    },
+    {
+      "label": "shared-1 return editor loading 10",
+      "transition": "shared-1 return editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 110.81154099999912,
+      "loadingBracketed": true
+    },
+    {
+      "label": "shared-1 return editor loading 11",
+      "transition": "shared-1 return editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 74.16483300000255,
+      "loadingBracketed": true
+    },
+    {
+      "label": "shared-1 return editor loading 12",
+      "transition": "shared-1 return editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=5432b993-5b09-4259-b222-d2f4d6673ec5",
+        "editorBusy": "false",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 272.4792500000003,
+      "loadingBracketed": false
+    },
+    {
+      "label": "unique-1 open editor loading 14",
+      "transition": "unique-1 open editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 102.2496659999997,
+      "loadingBracketed": true
+    },
+    {
+      "label": "unique-1 open editor loading 15",
+      "transition": "unique-1 open editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 90.38866699999926,
+      "loadingBracketed": true
+    },
+    {
+      "label": "unique-1 open editor loading 16",
+      "transition": "unique-1 open editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "false",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 257.52400000000125,
+      "loadingBracketed": false
+    },
+    {
+      "label": "unique-1 start playtest loading 18",
+      "transition": "unique-1 start playtest",
+      "before": {
+        "url": "http://127.0.0.1:55177/?run=a7c0e46a-1db5-4518-bc9b-ab2b8184024d",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing Vila Aurora…"
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/?run=a7c0e46a-1db5-4518-bc9b-ab2b8184024d",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing Vila Aurora…"
+      },
+      "forcedGc": false,
+      "durationMs": 115.46274999999878,
+      "loadingBracketed": true
+    },
+    {
+      "label": "unique-1 start playtest loading 19",
+      "transition": "unique-1 start playtest",
+      "before": {
+        "url": "http://127.0.0.1:55177/?run=a7c0e46a-1db5-4518-bc9b-ab2b8184024d",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing Vila Aurora…"
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/?run=a7c0e46a-1db5-4518-bc9b-ab2b8184024d",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing Vila Aurora…"
+      },
+      "forcedGc": false,
+      "durationMs": 1341.7277909999975,
+      "loadingBracketed": true
+    },
+    {
+      "label": "unique-1 start playtest loading 20",
+      "transition": "unique-1 start playtest",
+      "before": {
+        "url": "http://127.0.0.1:55177/?run=a7c0e46a-1db5-4518-bc9b-ab2b8184024d",
+        "editorBusy": null,
+        "residentLoading": true,
+        "progress": "Preparing residents · 0 of 12"
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/?run=a7c0e46a-1db5-4518-bc9b-ab2b8184024d",
+        "editorBusy": null,
+        "residentLoading": false,
+        "progress": "Preparing residents · 12 of 12"
+      },
+      "forcedGc": false,
+      "durationMs": 4565.400540999999,
+      "loadingBracketed": false
+    },
+    {
+      "label": "unique-1 return editor loading 23",
+      "transition": "unique-1 return editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 105.39624999999796,
+      "loadingBracketed": true
+    },
+    {
+      "label": "unique-1 return editor loading 24",
+      "transition": "unique-1 return editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 88.16829200000211,
+      "loadingBracketed": true
+    },
+    {
+      "label": "unique-1 return editor loading 25",
+      "transition": "unique-1 return editor",
+      "before": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "true",
+        "residentLoading": false,
+        "progress": null
+      },
+      "after": {
+        "url": "http://127.0.0.1:55177/editor.html?project=28efb2b9-5c20-4fbd-bb55-e37b2da59a1b",
+        "editorBusy": "false",
+        "residentLoading": false,
+        "progress": null
+      },
+      "forcedGc": false,
+      "durationMs": 271.203290999998,
+      "loadingBracketed": false
+    }
+  ],
+  "nativeDumps": {
+    "enabled": true,
+    "requests": [
+      {
+        "label": "empty creator baseline",
+        "beforeMarker": "creator-playtest-memory-0-before",
+        "afterMarker": "creator-playtest-memory-0-after",
+        "dumpGuid": "0x1",
+        "success": true
+      },
+      {
+        "label": "shared-1 open editor loading 1",
+        "beforeMarker": "creator-playtest-memory-1-before",
+        "afterMarker": "creator-playtest-memory-1-after",
+        "dumpGuid": "0x2",
+        "success": true
+      },
+      {
+        "label": "shared-1 open editor loading 2",
+        "beforeMarker": "creator-playtest-memory-2-before",
+        "afterMarker": "creator-playtest-memory-2-after",
+        "dumpGuid": "0x3",
+        "success": true
+      },
+      {
+        "label": "shared-1 open editor loading 3",
+        "beforeMarker": "creator-playtest-memory-3-before",
+        "afterMarker": "creator-playtest-memory-3-after",
+        "dumpGuid": "0x4",
+        "success": true
+      },
+      {
+        "label": "shared-1 editor ready",
+        "beforeMarker": "creator-playtest-memory-4-before",
+        "afterMarker": "creator-playtest-memory-4-after",
+        "dumpGuid": "0x5",
+        "success": true
+      },
+      {
+        "label": "shared-1 start playtest loading 5",
+        "beforeMarker": "creator-playtest-memory-5-before",
+        "afterMarker": "creator-playtest-memory-5-after",
+        "dumpGuid": "0x6",
+        "success": true
+      },
+      {
+        "label": "shared-1 start playtest loading 6",
+        "beforeMarker": "creator-playtest-memory-6-before",
+        "afterMarker": "creator-playtest-memory-6-after",
+        "dumpGuid": "0x7",
+        "success": true
+      },
+      {
+        "label": "shared-1 start playtest loading 7",
+        "beforeMarker": "creator-playtest-memory-7-before",
+        "afterMarker": "creator-playtest-memory-7-after",
+        "dumpGuid": "0x8",
+        "success": true
+      },
+      {
+        "label": "shared-1 playtest paused",
+        "beforeMarker": "creator-playtest-memory-8-before",
+        "afterMarker": "creator-playtest-memory-8-after",
+        "dumpGuid": "0x9",
+        "success": true
+      },
+      {
+        "label": "shared-1 playtest ran",
+        "beforeMarker": "creator-playtest-memory-9-before",
+        "afterMarker": "creator-playtest-memory-9-after",
+        "dumpGuid": "0xa",
+        "success": true
+      },
+      {
+        "label": "shared-1 return editor loading 10",
+        "beforeMarker": "creator-playtest-memory-10-before",
+        "afterMarker": "creator-playtest-memory-10-after",
+        "dumpGuid": "0xb",
+        "success": true
+      },
+      {
+        "label": "shared-1 return editor loading 11",
+        "beforeMarker": "creator-playtest-memory-11-before",
+        "afterMarker": "creator-playtest-memory-11-after",
+        "dumpGuid": "0xc",
+        "success": true
+      },
+      {
+        "label": "shared-1 return editor loading 12",
+        "beforeMarker": "creator-playtest-memory-12-before",
+        "afterMarker": "creator-playtest-memory-12-after",
+        "dumpGuid": "0xd",
+        "success": true
+      },
+      {
+        "label": "shared-1 returned editor",
+        "beforeMarker": "creator-playtest-memory-13-before",
+        "afterMarker": "creator-playtest-memory-13-after",
+        "dumpGuid": "0xe",
+        "success": true
+      },
+      {
+        "label": "unique-1 open editor loading 14",
+        "beforeMarker": "creator-playtest-memory-14-before",
+        "afterMarker": "creator-playtest-memory-14-after",
+        "dumpGuid": "0xf",
+        "success": true
+      },
+      {
+        "label": "unique-1 open editor loading 15",
+        "beforeMarker": "creator-playtest-memory-15-before",
+        "afterMarker": "creator-playtest-memory-15-after",
+        "dumpGuid": "0x10",
+        "success": true
+      },
+      {
+        "label": "unique-1 open editor loading 16",
+        "beforeMarker": "creator-playtest-memory-16-before",
+        "afterMarker": "creator-playtest-memory-16-after",
+        "dumpGuid": "0x11",
+        "success": true
+      },
+      {
+        "label": "unique-1 editor ready",
+        "beforeMarker": "creator-playtest-memory-17-before",
+        "afterMarker": "creator-playtest-memory-17-after",
+        "dumpGuid": "0x12",
+        "success": true
+      },
+      {
+        "label": "unique-1 start playtest loading 18",
+        "beforeMarker": "creator-playtest-memory-18-before",
+        "afterMarker": "creator-playtest-memory-18-after",
+        "dumpGuid": "0x13",
+        "success": true
+      },
+      {
+        "label": "unique-1 start playtest loading 19",
+        "beforeMarker": "creator-playtest-memory-19-before",
+        "afterMarker": "creator-playtest-memory-19-after",
+        "dumpGuid": "0x14",
+        "success": true
+      },
+      {
+        "label": "unique-1 start playtest loading 20",
+        "beforeMarker": "creator-playtest-memory-20-before",
+        "afterMarker": "creator-playtest-memory-20-after",
+        "dumpGuid": "0x15",
+        "success": true
+      },
+      {
+        "label": "unique-1 playtest paused",
+        "beforeMarker": "creator-playtest-memory-21-before",
+        "afterMarker": "creator-playtest-memory-21-after",
+        "dumpGuid": "0x16",
+        "success": true
+      },
+      {
+        "label": "unique-1 playtest ran",
+        "beforeMarker": "creator-playtest-memory-22-before",
+        "afterMarker": "creator-playtest-memory-22-after",
+        "dumpGuid": "0x17",
+        "success": true
+      },
+      {
+        "label": "unique-1 return editor loading 23",
+        "beforeMarker": "creator-playtest-memory-23-before",
+        "afterMarker": "creator-playtest-memory-23-after",
+        "dumpGuid": "0x18",
+        "success": true
+      },
+      {
+        "label": "unique-1 return editor loading 24",
+        "beforeMarker": "creator-playtest-memory-24-before",
+        "afterMarker": "creator-playtest-memory-24-after",
+        "dumpGuid": "0x19",
+        "success": true
+      },
+      {
+        "label": "unique-1 return editor loading 25",
+        "beforeMarker": "creator-playtest-memory-25-before",
+        "afterMarker": "creator-playtest-memory-25-after",
+        "dumpGuid": "0x1a",
+        "success": true
+      },
+      {
+        "label": "unique-1 returned editor",
+        "beforeMarker": "creator-playtest-memory-26-before",
+        "afterMarker": "creator-playtest-memory-26-after",
+        "dumpGuid": "0x1b",
+        "success": true
+      },
+      {
+        "label": "empty creator terminal",
+        "beforeMarker": "creator-playtest-memory-27-before",
+        "afterMarker": "creator-playtest-memory-27-after",
+        "dumpGuid": "0x1c",
+        "success": true
+      }
+    ],
+    "trace": {
+      "path": "artifacts/creator-loading-memory-v2/memory-trace.json",
+      "sha256": "d36f7d7adbca7c98f7d28f14551307c9061d197bd61a80bca739e664a64a8c7e",
+      "bytes": 99493541
+    }
+  },
+  "scope": "Full desktop 64x64 editor and isolated public playtest transitions with 256 mixed buildings and twelve Broad residents, shared/unique appearances. Draft fixtures are installed through the content-library API. Controls use DOM button activation, not trusted input latency. Readiness dumps follow forced GC. Optional loading dumps use no forced GC and sample ongoing preparation; observed maxima are lower bounds on true peaks, not allocation budgets. Detailed tracing perturbs loading timing. Running samples use public 1x/8x controls; 16x, long simulation, full-game budgets and physical-display pacing remain separate gates."
+}

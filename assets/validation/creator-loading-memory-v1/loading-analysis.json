@@ -1,0 +1,136 @@
+{
+  "transitions": [
+    {
+      "transition": "shared-1 open editor",
+      "samples": 3,
+      "loadingBracketed": 2,
+      "missingPrivateFootprint": 0,
+      "maximumObservedPrivateFootprintBytes": 626560000,
+      "highestSample": "shared-1 open editor loading 2",
+      "independentRootSizeMaxima": {
+        "blink_gc": 16777216,
+        "blink_objects": 10839312,
+        "canvas": 72842564,
+        "cc": 575389696,
+        "discardable": 536461312,
+        "malloc": 454051200,
+        "partition_alloc": 95813632,
+        "shared_memory": 593002496,
+        "skia": 1234098,
+        "v8": 50286572,
+        "web_cache": 58357425
+      }
+    },
+    {
+      "transition": "shared-1 start playtest",
+      "samples": 3,
+      "loadingBracketed": 3,
+      "missingPrivateFootprint": 0,
+      "maximumObservedPrivateFootprintBytes": 697781248,
+      "highestSample": "shared-1 start playtest loading 7",
+      "independentRootSizeMaxima": {
+        "blink_gc": 20447232,
+        "blink_objects": 16002712,
+        "cc": 556122112,
+        "discardable": 541114368,
+        "malloc": 367463904,
+        "partition_alloc": 319930368,
+        "shared_memory": 578977792,
+        "skia": 1021790,
+        "v8": 35343300,
+        "web_cache": 95222309,
+        "canvas": 67633152
+      }
+    },
+    {
+      "transition": "shared-1 return editor",
+      "samples": 3,
+      "loadingBracketed": 2,
+      "missingPrivateFootprint": 0,
+      "maximumObservedPrivateFootprintBytes": 674761728,
+      "highestSample": "shared-1 return editor loading 11",
+      "independentRootSizeMaxima": {
+        "blink_gc": 27115520,
+        "blink_objects": 20033464,
+        "canvas": 91908832,
+        "cc": 558579712,
+        "discardable": 541147136,
+        "malloc": 494363936,
+        "partition_alloc": 189071360,
+        "shared_memory": 580894720,
+        "site_storage": 2256741,
+        "skia": 1237420,
+        "v8": 49765236,
+        "web_cache": 95294965
+      }
+    },
+    {
+      "transition": "unique-1 open editor",
+      "samples": 3,
+      "loadingBracketed": 2,
+      "missingPrivateFootprint": 0,
+      "maximumObservedPrivateFootprintBytes": 965365760,
+      "highestSample": "unique-1 open editor loading 15",
+      "independentRootSizeMaxima": {
+        "blink_gc": 25952256,
+        "blink_objects": 20725256,
+        "canvas": 251938540,
+        "cc": 561676288,
+        "discardable": 538050560,
+        "malloc": 796490272,
+        "partition_alloc": 170967040,
+        "shared_memory": 583598080,
+        "site_storage": 2256741,
+        "skia": 1173943,
+        "v8": 88768460,
+        "web_cache": 58366755
+      }
+    },
+    {
+      "transition": "unique-1 start playtest",
+      "samples": 3,
+      "loadingBracketed": 2,
+      "missingPrivateFootprint": 0,
+      "maximumObservedPrivateFootprintBytes": 607621120,
+      "highestSample": "unique-1 start playtest loading 19",
+      "independentRootSizeMaxima": {
+        "blink_gc": 25296896,
+        "blink_objects": 18785128,
+        "cc": 549044224,
+        "discardable": 547094528,
+        "malloc": 394250896,
+        "partition_alloc": 150831104,
+        "shared_memory": 585007104,
+        "site_storage": 2256741,
+        "skia": 1108152,
+        "v8": 40836004,
+        "web_cache": 95222309
+      }
+    },
+    {
+      "transition": "unique-1 return editor",
+      "samples": 3,
+      "loadingBracketed": 2,
+      "missingPrivateFootprint": 0,
+      "maximumObservedPrivateFootprintBytes": 999870464,
+      "highestSample": "unique-1 return editor loading 24",
+      "independentRootSizeMaxima": {
+        "blink_gc": 28901376,
+        "blink_objects": 22617328,
+        "canvas": 251938540,
+        "cc": 555827200,
+        "discardable": 538247168,
+        "malloc": 804188816,
+        "partition_alloc": 200327168,
+        "shared_memory": 578076672,
+        "site_storage": 4513992,
+        "skia": 1300252,
+        "v8": 88840028,
+        "web_cache": 95294965
+      }
+    }
+  ],
+  "sampleCount": 18,
+  "loadingBracketed": 13,
+  "scope": "Sampled native allocations bracketed by observed loading states, with no forced collection or Network inspection. Observed maxima are lower bounds on true peaks; separate allocator-root maxima are not additive and may occur at different times. Missing measurements remain unknown. Detailed tracing perturbs timing. This does not establish a release memory budget, full-process peak or all-cast/biome acceptance."
+}

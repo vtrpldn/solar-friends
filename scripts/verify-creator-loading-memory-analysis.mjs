@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {analyzeCreatorLoadingMemory} from './analyze-creator-loading-memory.mjs';
+const runs=[{cast:'shared',cycle:1},{cast:'unique',cycle:1}],transitions=runs.flatMap(r=>['open editor','start playtest','return editor'].map(p=>`${r.cast}-${r.cycle} ${p}`));
+const report={completed:true,networkInspectionEnabled:false,loadingDumpMs:250,runs,loadingObservations:transitions.map((transition,i)=>({label:'sample-'+i,transition,before:{url:'http://isolated/editor',editorBusy:'true'},after:{url:'http://isolated/editor',editorBusy:'true'},forcedGc:false,durationMs:20,loadingBracketed:true}))};
+const native={stages:transitions.map((_,i)=>({label:'sample-'+i,renderers:[{privateFootprintBytes:(i+1)*100,topLevel:{canvas:{sizeBytes:30},malloc:{sizeBytes:50}}}]}))};
+const result=analyzeCreatorLoadingMemory(report,native);assert.equal(result.loadingBracketed,6);assert.deepEqual(result.transitions.map(t=>t.maximumObservedPrivateFootprintBytes),[100,200,300,400,500,600]);assert.deepEqual(result.transitions[0].independentRootSizeMaxima,{canvas:30,malloc:50});
+const reject=(edit,pattern)=>{const r=structuredClone(report),n=structuredClone(native);edit(r,n);assert.throws(()=>analyzeCreatorLoadingMemory(r,n),pattern);};
+reject(r=>{r.networkInspectionEnabled=true;});reject(r=>{r.loadingObservations[0].forcedGc=true;},/force collection/);
+reject(r=>{r.loadingObservations.push(r.loadingObservations[0]);},/Duplicate/);reject((r,n)=>{n.stages.pop();},/Missing or ambiguous/);
+reject(r=>{r.loadingObservations[0].after.editorBusy='false';},/attribution/);
+reject(r=>{r.loadingObservations[0].after.url='http://different/project';},/attribution/);
+reject((r,n)=>{n.stages[0].renderers.push(n.stages[0].renderers[0]);},/unambiguous renderer/);
+reject(r=>{r.loadingObservations[0].transition='invented phase';},/Unknown preparation/);
+reject(r=>{for(const o of r.loadingObservations){o.after.editorBusy='false';o.loadingBracketed=false;}},/No dump was bracketed/);
+const missing=structuredClone(native);missing.stages[0].renderers[0].privateFootprintBytes=null;delete missing.stages[0].renderers[0].topLevel.canvas;
+const unavailable=analyzeCreatorLoadingMemory(report,missing).transitions[0];assert.equal(unavailable.maximumObservedPrivateFootprintBytes,null);assert.equal(unavailable.missingPrivateFootprint,1);assert.equal(unavailable.independentRootSizeMaxima.canvas,undefined);
+const boundary=structuredClone(report);boundary.loadingObservations[0].after.editorBusy='false';boundary.loadingObservations[0].loadingBracketed=false;const excluded=analyzeCreatorLoadingMemory(boundary,native).transitions[0];assert.equal(excluded.samples,1);assert.equal(excluded.loadingBracketed,0);assert.equal(excluded.maximumObservedPrivateFootprintBytes,null);
+console.log('PASS loading-memory attribution, independently reported roots, unknown measurements and boundary exclusions; rejects forced GC, Network inspection, duplicate/missing/ambiguous samples and forged loading states.');
