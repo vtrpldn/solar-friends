@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "status": "PASS targeted static wetland context review",
+  "reportSha256": "495a7cbba22224be0b15ce189ca665936ae8b93a374b3afcef14622e74cfefb6",
+  "reviewedViews": [
+    {
+      "biome": "mata-atlantica",
+      "zoom": 1,
+      "night": 0,
+      "rain": false,
+      "file": "mata-atlantica-1-day.png",
+      "sha256": "ae6cfdc7e132b78d6342d79f739d207f6c69a4346914e915a8174bd9d6ca5c1f",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "mata-atlantica",
+      "zoom": 1,
+      "night": 1,
+      "rain": false,
+      "file": "mata-atlantica-1-night.png",
+      "sha256": "4eacaab608c00fcf5c299a75f1e74f6c5a88e44646fd85ba6f3b7ab97c173ac3",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "mata-atlantica",
+      "zoom": 1,
+      "night": 0,
+      "rain": true,
+      "file": "mata-atlantica-1-rain.png",
+      "sha256": "e250f6c27baade92bc715962e0b836c3b5f9e03fc88a7137e29d05e55b118636",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "mata-atlantica",
+      "zoom": 1,
+      "night": 1,
+      "rain": true,
+      "file": "mata-atlantica-1-night-rain.png",
+      "sha256": "8f835be79e3ce05a5bd270f98ff67307722181220167cee6484b5883e759b446",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "mata-atlantica",
+      "zoom": 2,
+      "night": 0,
+      "rain": false,
+      "file": "mata-atlantica-2-day.png",
+      "sha256": "1b918a9b2b728b56e8cdcf1c2cb7d86cba58df589b9c34998245d6ae68b3b6b4",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "mata-atlantica",
+      "zoom": 2,
+      "night": 1,
+      "rain": false,
+      "file": "mata-atlantica-2-night.png",
+      "sha256": "3f7b158abaa340cce852270a2039e8886df9f9bd3811108171debd613df151ab",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "mata-atlantica",
+      "zoom": 2,
+      "night": 0,
+      "rain": true,
+      "file": "mata-atlantica-2-rain.png",
+      "sha256": "c0dd9ecd7d036ca5866cfcc9e3f29aa0b93981e42f07c3e471d9dc6c9318a057",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "mata-atlantica",
+      "zoom": 2,
+      "night": 1,
+      "rain": true,
+      "file": "mata-atlantica-2-night-rain.png",
+      "sha256": "254dd7634a2f2e9431b92cfc114d68775d5a7e8d452c19b6043a962891c021c1",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 1,
+      "night": 0,
+      "rain": false,
+      "file": "cerrado-1-day.png",
+      "sha256": "6d46dbfc4e8a84bd1491bee05da030e96c6e11bdb855d9ca1474df89da9c9973",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 1,
+      "night": 1,
+      "rain": false,
+      "file": "cerrado-1-night.png",
+      "sha256": "69d5979f1c2d34b8cdb09843793943c7d52006a4b3cac4352b66bdc3530f0bd0",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 1,
+      "night": 0,
+      "rain": true,
+      "file": "cerrado-1-rain.png",
+      "sha256": "130fefead91097a486fabc2ce20ab3ed3be67fbe51a5a135f8fc97516dbf8f18",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 1,
+      "night": 1,
+      "rain": true,
+      "file": "cerrado-1-night-rain.png",
+      "sha256": "6ac74d83b1fff92204cac750f84762a950f6f6229e5185f768cce6e261616dbc",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 2,
+      "night": 0,
+      "rain": false,
+      "file": "cerrado-2-day.png",
+      "sha256": "c281cd8a96c25daa0e0b274db496a1ad35d57636b1e2284753bb78695194daad",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 2,
+      "night": 1,
+      "rain": false,
+      "file": "cerrado-2-night.png",
+      "sha256": "bccc11d8513d95759ea75cb395decca3f2c1abc54b0e4e4318bb24d0cdf1207e",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 2,
+      "night": 0,
+      "rain": true,
+      "file": "cerrado-2-rain.png",
+      "sha256": "a7c634e5f9c31b86126f6db6e80519a76938c2df34cd86d65717f13b91939a11",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 2,
+      "night": 1,
+      "rain": true,
+      "file": "cerrado-2-night-rain.png",
+      "sha256": "aa318d5c899e0d8226064f6d364fa90b5da0ef5ea55c308e81d6910539dde28b",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 1,
+      "night": 0,
+      "rain": false,
+      "file": "caatinga-1-day.png",
+      "sha256": "a7e1f2c29dd812eec713fcde1b1c184fb6d603b0d83ef619de859a1a9434777a",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 1,
+      "night": 1,
+      "rain": false,
+      "file": "caatinga-1-night.png",
+      "sha256": "d660a8a8056932708088a047d9efb6fb1ce5dacc0df49c7ec1ed2a09cdd43d08",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 1,
+      "night": 0,
+      "rain": true,
+      "file": "caatinga-1-rain.png",
+      "sha256": "9825079a8328e376a810e8ef110d5179c041b938018088d0185b99e0db14f402",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 1,
+      "night": 1,
+      "rain": true,
+      "file": "caatinga-1-night-rain.png",
+      "sha256": "c3202cf2bd322c1f1093df3887f63e826086db100d7e0f57d47958d6fa35cadc",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 2,
+      "night": 0,
+      "rain": false,
+      "file": "caatinga-2-day.png",
+      "sha256": "da37e69ae6e932f0edafbf16657c27681be2a3c54d6a21a039498ae8cd4d3e50",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 2,
+      "night": 1,
+      "rain": false,
+      "file": "caatinga-2-night.png",
+      "sha256": "9ad84695d39daad497c3b00e046867e134e529577bf5d6e0361b9841aff1f813",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 2,
+      "night": 0,
+      "rain": true,
+      "file": "caatinga-2-rain.png",
+      "sha256": "f455cd85198157e6a5c1e093a45d8d2f0bd091806e93c3a8f20bd8a5f054bdf3",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 2,
+      "night": 1,
+      "rain": true,
+      "file": "caatinga-2-night-rain.png",
+      "sha256": "731f680a7c4c2548744ba5f0ecc26f669ba99a06fad309f3061cbf50e3707a94",
+      "finding": "Square bed follows the road boundary with contained barrel and legible planting. No visible clipping, detached platform or night/rain geometry change in this view."
+    }
+  ],
+  "currentRenderEquivalence": "All 24 current PNG hashes exactly match the inspected final active-v1 capture set; six were inspected previously and the remaining eighteen inspected on 2026-10-29.",
+  "checks": {
+    "broadArtworkAudit": "PASS current verify-artwork.mjs: 332 inventoried sources, 142 entries, 19 verified alias groups; inventory is not visual acceptance."
+  },
+  "limitations": [
+    "Static shared-renderer fixture with manually cleared sites and explicit visual rain, not simulated climate progression.",
+    "Does not establish resident service/path completion, all growth/construction states, powered lighting for other buildings, or all building art.",
+    "Full builder release gates remain open."
+  ]
+}
