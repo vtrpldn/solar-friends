@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "status": "internal-cuff-revision-reviewed-not-catalog-enrolled",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise-object-edit: Solar Friends cream cotton short-sleeved shirt for one walking pose. Image 1 is the exact frozen alpha silhouette, with a red strip marking the REQUIRED NEAR SLEEVE CUFF SEAM. Replace green with warm cream cloth; replace that red strip with a restrained warm dark cuff edge and stitch seam, at EXACTLY the red strip's position and diagonal direction. The cuff belongs across the upper arm angled forward, so the source's lower dangling sleeve edge is not the visible cuff. Image 2 shows the original arm passing in front of the cloth, ending its occlusion at that cuff. This is a position/occlusion guide only; output no body or arm. Image 3 is the earlier paint to preserve for style, broad cotton shading, warm edges, upper-left light and folds; its near sleeve seam placement is the specific defect to correct. Preserve Image 1's complete original alpha silhouette, collar opening, source position, source canvas dimensions and transparent margin without recentering or stretching. Paint ONE COMPLETE GARMENT, including the cloth hidden behind the arm. No green or red guide colour, skin, arm, head, hands, body, labels, grid, extra shirts, buttons, pocket, decoration or ground. True transparent background and neck hole. Keep the same broad torso, cream palette, simple crew neck and restrained fold detail. Do not add an extra long sleeve; only move the short near cuff seam to the red guide.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/paint-guide-v1.png",
+      "role": "Exact-alpha silhouette with near cuff marker; primary target",
+      "sha256": "435a2e88d6827dfebf6519a50dba9a746929ba2be243a6dd213618a8815b9c0c"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/foreground-context-v2.png",
+      "role": "Corrected original-arm ownership and occlusion guide",
+      "sha256": "b9ea15f641b65beeb4bf652c69737441adaaa901d4aef309ff1e661aff35a98c"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/candidate-v1.png",
+      "role": "Original paint style and specific misplaced cuff to correct",
+      "sha256": "12562b664d273cc74574d58536fb5cd7fd0044dff92c38a1ed13f2f8d3d7843a"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-eadb36f0-b161-451d-9314-c10e0c2776da.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/candidate-v2.png",
+  "review": {
+    "sourceAudit": "candidate-v2-audit.json",
+    "bodyReview": "body-review-v2.json",
+    "inspected": "coloured-body-review-v2.png",
+    "selectedForeground": "body-foreground-v2.json",
+    "findings": [
+      "The cuff seam sits higher and closer to the preserved upper-arm boundary than the first paint.",
+      "All four colour compositions and enlarged shoulder details were inspected.",
+      "The original forearm is retained exactly at all 1790 owned native pixels across the four palettes.",
+      "Native motion and complete hairstyle/accessory/world pairing require their own review. This is not full outfit approval."
+    ],
+    "catalogEnrollment": false
+  },
+  "sha256": "49294b31c2c08650bfdf98bdee5d4f3143c0211880c013ff25993417f5a5b824",
+  "byteIdenticalCopyVerified": true,
+  "sourceEdits": false
+}

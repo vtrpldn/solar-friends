@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "status": "needs-near-cuff-correction-not-enrolled",
+  "tool": "image_gen.imagegen",
+  "prompt": "Use case: precise-object-edit. Solar Friends game garment sprite. Image 1 is the exact frozen green alpha silhouette to repaint. Keep its complete contour, neck opening, source position, source canvas dimensions and transparent margin unchanged: replace green ONLY with warm cream cotton painting. Image 2 shows the same green silhouette on the actual walking body for pose and fold direction, not output content. Image 3 is the previously fitted walking shirt, used only for cream cotton shading, edge treatment and restrained folds, not shape or layout. Paint a simple short-sleeved crew-neck T-shirt, broad torso, one relaxed lower hem, near sleeve ending high on the upper arm, far sleeve shorter in projection. Use warm dark painted edges, broad soft illustrated shading, restrained folds and upper-left daylight matching Solar Friends. Keep exactly the outline and collar cutout of Image 1; do not recenter, enlarge, shrink, rotate, warp, fill the neck hole or change shirt length. No pocket, buttons, collar, logo, decorative embroidery or extra folds at the hem. Output ONLY ONE complete painted shirt cutout on true transparent background in exactly the original image position. No green, body, skin, head, hair, hands, arms, legs, shoes, ground, labels, grid, guides, text, additional shirts or scenery. Image 2 has the original forearm crossing in front of the green garment. It is ONLY an occlusion and pose reference: paint the COMPLETE cloth silhouette of Image 1 behind that arm, without drawing any arm or skin. The near sleeve is angled forward with a short cuff near the elbow-facing upper-arm edge, rather than a drooping side sleeve. Keep the same restrained cotton style and exact frozen silhouette.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/mask.png",
+      "role": "Exact frozen silhouette",
+      "sha256": "fd73f7b4d00c949ce341ac262a0b1871b7ac05cd8e16e4671c8d06484ed4c3b2"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/foreground-context-v1.png",
+      "role": "Body/forearm occlusion guide",
+      "sha256": "2136fc26337036b343a4425c78aec999ea966971648985d7511b94014a4cecdd"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1.png",
+      "role": "Existing cream cloth painting style only",
+      "sha256": "ec31931ab59f33fe7c83fe3a638eeba41dea0d599d37e3ec1cfb2bf9f070ffe1"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-f532b415-8eb6-474e-8457-24c457073bef.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/candidate-v1.png",
+  "review": {
+    "sourceAudit": "candidate-v1-audit.json",
+    "inspected": "coloured-body-review-v1.png",
+    "bodyReview": "body-review-v1.json",
+    "findings": [
+      "Paint passes the original frozen source gates with 96.82 percent guide overlap and 1.10549 area ratio; neither metric establishes visual approval.",
+      "Widened source-body forearm ownership preserves 1790 native pixels; the narrow earlier mask cut into the forearm.",
+      "The near cuff seam still does not follow the preserved forearm junction. A dedicated exact-alpha cuff marker and repaint are required."
+    ],
+    "catalogEnrollment": false
+  },
+  "sha256": "12562b664d273cc74574d58536fb5cd7fd0044dff92c38a1ed13f2f8d3d7843a",
+  "byteIdenticalCopyVerified": true,
+  "sourceEdits": false
+}

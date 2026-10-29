@@ -1,0 +1,161 @@
+{
+  "recordings": [
+    {
+      "night": 0,
+      "offsetMs": 0.7000000476837158,
+      "elapsedMs": 3001.699999809265
+    },
+    {
+      "night": 1,
+      "offsetMs": 3002.399999856949,
+      "elapsedMs": 3002
+    }
+  ],
+  "renderCalls": 583,
+  "preparedFrames": 16,
+  "scope": "Native walking loop only, four palettes, day/mirrored night at 180px and 48px; no hair, accessories, transitions, world or performance acceptance",
+  "selection": [
+    [
+      "short-sleeve-broad-walk-0-v2",
+      "v1"
+    ],
+    [
+      "short-sleeve-broad-walk-1-v1",
+      "v1"
+    ],
+    [
+      "short-sleeve-broad-walk-2-v2",
+      "v2"
+    ],
+    [
+      "short-sleeve-broad-walk-3-v1",
+      "v1"
+    ]
+  ],
+  "videoSha256": "118e0dfbf0a76281347ddc2fb56d6d9e0c315c67236e92110ab671d64793980e",
+  "metadata": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "vp9",
+        "codec_long_name": "Google VP9",
+        "profile": "Profile 0",
+        "codec_type": "video",
+        "codec_tag_string": "[0][0][0][0]",
+        "codec_tag": "0x0000",
+        "mime_codec_string": "vp09.00.30.08",
+        "width": 800,
+        "height": 360,
+        "coded_width": 800,
+        "coded_height": 360,
+        "has_b_frames": 0,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "20:9",
+        "pix_fmt": "yuv420p",
+        "level": -99,
+        "color_range": "tv",
+        "color_space": "smpte170m",
+        "refs": 1,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "30/1",
+        "time_base": "1/1000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "nb_read_frames": "174",
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "eng",
+          "alpha_mode": "1"
+        }
+      }
+    ],
+    "format": {
+      "filename": "assets/art-direction/character-prototype-v1/body-broad-v1/walking-shirt-review-v1/walk.webm",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "matroska,webm",
+      "format_long_name": "Matroska / WebM",
+      "start_time": "0.000000",
+      "duration": "5.958315",
+      "size": "1266490",
+      "bit_rate": "1700467",
+      "probe_score": 100,
+      "tags": {
+        "encoder": "Chrome"
+      }
+    }
+  },
+  "samples": [
+    {
+      "night": 0,
+      "requestedSeconds": 0.06320000004768371
+    },
+    {
+      "night": 0,
+      "requestedSeconds": 0.18820000004768372
+    },
+    {
+      "night": 0,
+      "requestedSeconds": 0.3132000000476837
+    },
+    {
+      "night": 0,
+      "requestedSeconds": 0.4382000000476837
+    },
+    {
+      "night": 1,
+      "requestedSeconds": 3.064899999856949
+    },
+    {
+      "night": 1,
+      "requestedSeconds": 3.189899999856949
+    },
+    {
+      "night": 1,
+      "requestedSeconds": 3.314899999856949
+    },
+    {
+      "night": 1,
+      "requestedSeconds": 3.439899999856949
+    }
+  ],
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1.png": "ec31931ab59f33fe7c83fe3a638eeba41dea0d599d37e3ec1cfb2bf9f070ffe1",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1-audit.json": "90b95f1cc47c2769c4d068337a46a3f54773aabf01a1fd4fd57c428ae508921d",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/body-review-v1.json": "1fc1d9e47a531e0f1edf69c5e4808c55c644c0587c947cbc82c576566b27c2dd",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/registration-intent.json": "11a60b17e1b78e59b9f60c95368f7f4e67526e26f06b37e98fc654853d10de07",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-1-v1/candidate-v1.png": "4bbab8a430ce7675a11ecfc3a2fc53bad6345e42b4679b7535981375ba32b504",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-1-v1/candidate-v1-audit.json": "cb0428429d5beea0d021f4cc35fbf0e5484bf9da6272cc13ff81b504633825b1",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-1-v1/body-review-v1.json": "565b8a599ddf2518ff47dcdcf05762c796924baf6e400784218b1df9abbe8658",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-1-v1/registration-intent.json": "3ad3117f0fd0687b543df775b88ba84b485d5fcbaca85db1fcf1fe699a4cfb29",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/candidate-v2.png": "49294b31c2c08650bfdf98bdee5d4f3143c0211880c013ff25993417f5a5b824",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/candidate-v2-audit.json": "4ac1096bfc659542740ebf251aac6b9bacba9bfeffc37a17427c1be3c9ba82e7",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/body-review-v2.json": "375f723f74857ef56ecc06d9938664730818b55baed4d6a6e3ae3ae232d443d0",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-2-v2/registration-intent.json": "5fb603f6e737dc79ff7ce2192558c17de5937049d8a9334312291e8aa56ad825",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-3-v1/candidate-v1.png": "f71c95661e54ac5a22dac6494629b4a49d6124c47b298d0c03aba04ce299dccb",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-3-v1/candidate-v1-audit.json": "26365409164481fad94e4de2f06d320481e370137eafb1a48ca9d2c79bc31a76",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-3-v1/body-review-v1.json": "16b4c6c8f4e0881c998c296437fc18613ea423119bbd5f262f68053a46d450ce",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-3-v1/registration-intent.json": "6632befb8ce7e0e8ae20d11adcdf5a537ba6dda50f01c1af6a5a45da8c240bd1"
+  }
+}

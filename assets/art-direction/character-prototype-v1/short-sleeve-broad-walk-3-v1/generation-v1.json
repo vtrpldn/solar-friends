@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "status": "single-pose-fit-reviewed-not-catalog-enrolled",
+  "tool": "image_gen.imagegen",
+  "prompt": "Use case: precise-object-edit. Solar Friends game garment sprite. Image 1 is the exact frozen green alpha silhouette to repaint. Keep its complete contour, neck opening, source position, source canvas dimensions and transparent margin unchanged: replace green ONLY with warm cream cotton painting. Image 2 shows the same green silhouette on the actual walking body for pose and fold direction, not output content. Image 3 is the previously fitted walking shirt, used only for cream cotton shading, edge treatment and restrained folds, not shape or layout. Paint a simple short-sleeved crew-neck T-shirt, broad torso, one relaxed lower hem, near sleeve ending high on the upper arm, far sleeve shorter in projection. Use warm dark painted edges, broad soft illustrated shading, restrained folds and upper-left daylight matching Solar Friends. Keep exactly the outline and collar cutout of Image 1; do not recenter, enlarge, shrink, rotate, warp, fill the neck hole or change shirt length. No pocket, buttons, collar, logo, decorative embroidery or extra folds at the hem. Output ONLY ONE complete painted shirt cutout on true transparent background in exactly the original image position. No green, body, skin, head, hair, hands, arms, legs, shoes, ground, labels, grid, guides, text, additional shirts or scenery.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-3-v1/mask.png",
+      "role": "Frozen silhouette and position; edit target",
+      "sha256": "2abb7f368c0209081f5c83fbeddb8019e9497dff95604bb557e2d0352ea2f32f"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-3-v1/context.png",
+      "role": "Exact walking body and intended garment fit",
+      "sha256": "158aab47fb63462e63a258103eb5b2872ebfbf617e19e65d573b17c140c0652d"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1.png",
+      "role": "Previously fitted cloth style only",
+      "sha256": "ec31931ab59f33fe7c83fe3a638eeba41dea0d599d37e3ec1cfb2bf9f070ffe1"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-c3d42583-59b5-4097-9fe6-9d036f6ed0f2.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-3-v1/candidate-v1.png",
+  "review": {
+    "sourceAudit": "candidate-v1-audit.json",
+    "bodyReview": "body-review-v1.json",
+    "inspected": "coloured-body-review-v1.png",
+    "findings": [
+      "Frozen outline and full-body context were inspected before generation, including closed far collar edge.",
+      "Unmodified delivered paint passes the unchanged frozen source gates.",
+      "All four colour compositions and enlarged collar/shoulder details were inspected; body proportions and original foot contact remain consistent.",
+      "Guide overlap is 93.95 percent, lower than the other poses; this is recorded, not represented as exact silhouette adherence.",
+      "Only a static source pose has been reviewed; native motion, hairstyle/accessory pairings and full wardrobe enrollment remain unfinished."
+    ],
+    "catalogEnrollment": false
+  },
+  "sha256": "f71c95661e54ac5a22dac6494629b4a49d6124c47b298d0c03aba04ce299dccb",
+  "byteIdenticalCopyVerified": true,
+  "sourceEdits": false
+}

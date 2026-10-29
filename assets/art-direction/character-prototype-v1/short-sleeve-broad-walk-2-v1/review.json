@@ -1,0 +1,6 @@
+{
+  "status": "rejected-before-paint",
+  "finding": "Foreground context exposes an original white tank strip beside the far forearm. The shirt body needs a wider far edge.",
+  "replacement": "short-sleeve-broad-walk-2-v2",
+  "generatedPaint": false
+}

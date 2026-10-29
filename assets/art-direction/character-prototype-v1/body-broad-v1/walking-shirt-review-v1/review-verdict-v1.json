@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "status": "internal-walking-source-set-reviewed",
+  "selection": [
+    {
+      "sheet": "base",
+      "index": 0,
+      "collection": "short-sleeve-broad-walk-0-v2",
+      "paintRevision": "v1",
+      "sourceSha256": "ec31931ab59f33fe7c83fe3a638eeba41dea0d599d37e3ec1cfb2bf9f070ffe1",
+      "foregroundRevision": null,
+      "bodyReviewSha256": "1fc1d9e47a531e0f1edf69c5e4808c55c644c0587c947cbc82c576566b27c2dd"
+    },
+    {
+      "sheet": "base",
+      "index": 1,
+      "collection": "short-sleeve-broad-walk-1-v1",
+      "paintRevision": "v1",
+      "sourceSha256": "4bbab8a430ce7675a11ecfc3a2fc53bad6345e42b4679b7535981375ba32b504",
+      "foregroundRevision": null,
+      "bodyReviewSha256": "565b8a599ddf2518ff47dcdcf05762c796924baf6e400784218b1df9abbe8658"
+    },
+    {
+      "sheet": "base",
+      "index": 2,
+      "collection": "short-sleeve-broad-walk-2-v2",
+      "paintRevision": "v2",
+      "sourceSha256": "49294b31c2c08650bfdf98bdee5d4f3143c0211880c013ff25993417f5a5b824",
+      "foregroundRevision": "v2",
+      "bodyReviewSha256": "375f723f74857ef56ecc06d9938664730818b55baed4d6a6e3ae3ae232d443d0"
+    },
+    {
+      "sheet": "base",
+      "index": 3,
+      "collection": "short-sleeve-broad-walk-3-v1",
+      "paintRevision": "v1",
+      "sourceSha256": "f71c95661e54ac5a22dac6494629b4a49d6124c47b298d0c03aba04ce299dccb",
+      "foregroundRevision": null,
+      "bodyReviewSha256": "16b4c6c8f4e0881c998c296437fc18613ea423119bbd5f262f68053a46d450ce"
+    }
+  ],
+  "nativeVideo": {
+    "sha256": "118e0dfbf0a76281347ddc2fb56d6d9e0c315c67236e92110ab671d64793980e",
+    "decodedFrames": 174,
+    "durationSeconds": 5.958315,
+    "inspectedSamples": 8
+  },
+  "findings": [
+    "All sixteen static colour compositions for the selected four walking sources were inspected at full-body and collar-detail sizes.",
+    "The first crossing-arm paint remains excluded because its cuff seam was misplaced. The V2 paint moves the seam toward the preserved upper-arm boundary.",
+    "The selected crossing-arm source retains all 1790 owned forearm pixels; its four-colour verification checks 28640 foreground channels.",
+    "Eight decoded native-loop samples were inspected in day and mirrored night at 180px and 48px. Shirt proportions and foot contact remain consistent in those samples.",
+    "The existing four-keyframe body gait still jumps between drawings; this does not accept anatomical transitions."
+  ],
+  "limits": [
+    "No public catalog enrollment",
+    "No hair/hat/beard combinations in this loop",
+    "No walking-to-other-activity transition acceptance",
+    "No original-cast/building/biome world acceptance for these garments",
+    "No physical-display frame-pacing or total-memory conclusion",
+    "The original full builder plan remains unfinished"
+  ]
+}
