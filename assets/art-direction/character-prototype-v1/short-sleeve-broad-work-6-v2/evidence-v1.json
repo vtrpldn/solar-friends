@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "status": "internal-single-pose-only",
+  "sources": {
+    "specs.json": "77ad6c9a69a7138f81b639b3fe9176cd7e4af5605c39acd03eaa13017eff8af5",
+    "mask.png": "a13967ddbf36d2bf7f7ad2cd2e4571c1f7cc58102b8e3963338ce77f85a88953",
+    "context.png": "4d74b42a137cc13aeca3fd0828230e827baad0a97952b887b33b2c803d6eca16",
+    "registration-intent.json": "cbc2091f7321a392be180f17c59d0b34a8adff84197023416f4ab8d9a80a919d",
+    "body-foreground-v3.json": "2b5e3869b1911b9003d6c4364b2b4126190525063852565226c31e044060e367",
+    "foreground-intent-v3.json": "73503256d2059331862e8b79475007d4d3965ca167fcd94d7a5936dcd3c195fd",
+    "foreground-polygons-v3.json": "7d2e6888bf5793808ff0786446fb34e8ae44311628a63cb852679f4e44c26651",
+    "candidate-v1.png": "4fef51a8215752ac9202283ae9ceae7ffe681dfe8337fa3f288ab9d820045845",
+    "generation-v1.json": "79c2510f31ec2f570d6ea23b1a84560edb41566cdf611540e392be6550fd022d",
+    "candidate-v1-audit.json": "3f64cc0005e1e7901d0bf736e0ab138a0aa9d49babba4092444c0c0079e66e46",
+    "body-review-v1.json": "571c6387c6c5fcb7d4b25dfaea34d6f201abbff043348f5680b808d628306ee1",
+    "coloured-body-review-v1.png": "ec4582385d6ba97941f5d38c2bee207f82f15e0ffd3de11ba132972365fc0207"
+  },
+  "publicCatalogEnrollment": false,
+  "rejectedForegroundRevisions": {
+    "v1": "Hides most of crossing forearm",
+    "v2": "Clips elbow contour"
+  },
+  "remaining": [
+    "Other Broad work poses and full wardrobe",
+    "Hair, hat and other compatible accessory layering",
+    "Decoded motion and transition review",
+    "World scale, day/night/rain and biome pairings"
+  ]
+}

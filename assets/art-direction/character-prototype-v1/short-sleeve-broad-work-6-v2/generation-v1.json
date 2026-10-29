@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "status": "selected-for-internal-pose-composition-only",
+  "tool": "image_gen.imagegen",
+  "prompt": "Precise object edit: retexture Image 1 in place. It is a 1254 by 1254 transparent image containing one green silhouette for a short-sleeved shirt in a raised-arm work pose. Keep the exact original green alpha silhouette, including the asymmetric neckline, cuffs, hem and every transparent margin, at its original coordinates. Do NOT redraw at a larger scale, straighten it or center the garment. The silhouette occupies approximately x266 through982 and y251 through769 in the original canvas; keep those boundaries. Image 2 is fit context only, showing a broad adult resident with raised arms, and must not appear in the output. Replace the green fill with plain warm cream cotton T-shirt painting in the Solar Friends illustrated game style: broad soft shading from upper left, restrained work-pose folds, simple small crew collar and short sleeves, understated hem. Draw shading and seam detail INSIDE the supplied shape. This is material painting on locked geometry, not a new garment design. Preserve the full green region's coverage and the empty neck opening. True transparent background. Output the shirt only: no person, skin, limbs, hair, shorts, tools, floor, text, numbers, border, markers, green or second shirt. Keep the original empty lower canvas; no enlargement, shifting, new pockets, logo or buttons.",
+  "references": [
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-6-v2/mask.png",
+      "role": "Corrected frozen raised-arm garment geometry",
+      "sha256": "a13967ddbf36d2bf7f7ad2cd2e4571c1f7cc58102b8e3963338ce77f85a88953"
+    },
+    {
+      "path": "/Users/paladini/Documents/veeware/solar-friends/assets/art-direction/character-prototype-v1/short-sleeve-broad-work-6-v2/context.png",
+      "role": "Exact published work body, fit only",
+      "sha256": "4d74b42a137cc13aeca3fd0828230e827baad0a97952b887b33b2c803d6eca16"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-d497ae5c-00f6-4034-a692-e5f3a54dfeb9.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-6-v2/candidate-v1.png",
+  "sourceEdits": false,
+  "catalogEnrollment": false,
+  "sha256": "4fef51a8215752ac9202283ae9ceae7ffe681dfe8337fa3f288ab9d820045845",
+  "byteIdenticalCopyVerified": true,
+  "review": {
+    "sourceAudit": "candidate-v1-audit.json",
+    "selectedForeground": "body-foreground-v3.json",
+    "bodyComposition": "body-review-v1.json",
+    "visualBoard": "coloured-body-review-v1.png",
+    "findings": [
+      "Corrected frozen guide removes the folded-back right edge and covers the upper shoulder.",
+      "Raw source passes: 99.392 percent guide coverage, 1.005706 area ratio and complete bounded coverage.",
+      "Initial foreground V1 hid too much of the crossing arm. V2 restored more of the forearm but clipped its elbow. Both diagnostic boards are retained and excluded.",
+      "Foreground V3 preserves the complete crossing forearm and elbow in front of the shirt, leaving the upper sleeve cap behind it. All four palette compositions inspected.",
+      "226288 protected lower-body channels and 40000 crossing-arm channels restored exactly. Foot contact remains [128,238]."
+    ],
+    "scope": "One internal base-6 pose only. Full outfit, hair/accessories, animation transitions, world/biome acceptance and public enrollment remain open."
+  }
+}
