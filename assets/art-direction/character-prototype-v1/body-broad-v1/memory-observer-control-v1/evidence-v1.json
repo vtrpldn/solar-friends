@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "status": "observer-owned-buffer-growth-demonstrated-in-isolated-lifecycle",
+  "files": {
+    "observer-comparison.json": "1ba3e14dca682fff317787e67cc0ff443eca46f4fb45cb8c60282e3393c31f2a",
+    "review-verdict-v1.json": "7c7eb2a81e3462be71945814d6a6faa9164aada5624b428aa6888fafb575b258",
+    "with-network/memory-trace.json.gz": "b856d6f7ed3febfb7b478352a7b599ff7478d43abaa13406832189519d9f18c3",
+    "with-network/native-analysis.json": "88248c66cb28ba094ef1edc3e96470e875f90a71d2f28aa147560ec84901cbdf",
+    "with-network/ownership-analysis.json": "20990f532b61abec4942f52dc497e74cd189fe47cabca2be0c1f8f7a98f361bf",
+    "with-network/report.json": "c2975795e54bd757a562aae86de53e953a23e27281fca69292f5bbd811fb65da",
+    "without-network/memory-trace.json.gz": "f7362cca3794b13b17d96117bc2a3df4e5e9439253e97d727714236ede147c67",
+    "without-network/native-analysis.json": "f059679d9fd514bebc5f977e2f781e7925ec4fde3ae2e56c136b5b456aec19e2",
+    "without-network/ownership-analysis.json": "6850f7e397df9c42c6166cae77f8e4e2fa0691a1bdb28d5d68dbc394d3c5262a",
+    "without-network/report.json": "9d7b8569bc26fa9fba5b1f309475c755d34bf14c0b9eeec37e32736a32757605"
+  },
+  "tools": {
+    "scripts/benchmark-artwork-memory.mjs": "e624414d06d2ac9ecf98e645ec3a7b88fb370edce0ddcc57bfe6667543c4ca14",
+    "scripts/raw-memory-browser.mjs": "103bac0c9c56391e382c8bbfdf247823c0393c0f02f5dd38840dfc13592e8890",
+    "scripts/analyze-artwork-memory.mjs": "8d0c2a39a827eadd219d386bf8566aca959ff233814efaf4d7ac57727bd36ee5",
+    "scripts/analyze-artwork-native-memory.mjs": "ac9cba232e1d81d59e633986e54c342d32f6b02c69acefcc3f252fabc644789d",
+    "scripts/compare-artwork-memory-observers.mjs": "a65c859aeba9cd79bf9b73fae92e8e8acc8052cfe059e36e7ebd8f4adf253720",
+    "scripts/verify-artwork-memory-observers.mjs": "e74fd5bc1409f6a2674a58aa22280010d354839534669129c91d9441dfd483a1"
+  }
+}

@@ -45,7 +45,7 @@ export function analyzeArtworkNativeMemory(report,trace){
   return {label:request.label,requestGuid:request.dumpGuid,markerRange:[before,after],renderers};
  });
  assert(stages.length>=3,'Measure baseline, active cast and release separately');
- return {stages,scope:'Chrome detailed native allocator observations bracketed by explicit clock markers. Roots are not additive totals. Omitted allocators are unreported, not proven zero. Private footprint, process RSS and JavaScript heap are different measurements. This does not establish an allocation leak, a permanent plateau, a full-game memory limit or release readiness.'};
+ return {automation:report.automation??null,networkInspectionEnabled:report.networkInspectionEnabled??null,stages,scope:'Chrome detailed native allocator observations bracketed by explicit clock markers. Roots are not additive totals. Omitted allocators are unreported, not proven zero. Private footprint, process RSS and JavaScript heap are different measurements. This does not establish an allocation leak, a permanent plateau, a full-game memory limit or release readiness.'};
 }
 
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){

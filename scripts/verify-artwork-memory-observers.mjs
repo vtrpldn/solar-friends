@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {compareArtworkMemoryObservers} from './compare-artwork-memory-observers.mjs';
+const stage=(label,n)=>({label,renderers:[{privateFootprintBytes:n*2,topLevel:{partition_alloc:{sizeBytes:n}}}]}),fixture=positive=>({report:{automation:positive?'raw-CDP-with-Network-agent':'raw-CDP-without-Network-agent',networkInspectionEnabled:positive,build:'broad',cyclesPerCast:2,residents:12,rawExecutable:'/isolated/headless-shell',environment:{platform:'darwin',arch:'arm64',cpu:'reference',browser:'same-browser'},inputs:{'provider.js':'same-revision'},results:[{cast:'unique',cycle:1},{cast:'unique',cycle:2}]},analysis:{stages:[stage('unique-1-released-gc',positive?100:10),stage('unique-2-released-gc',positive?200:11),...(positive?[stage('after diagnostic browser cache clear',200),stage('after diagnostic Network disable',12)]:[])]}});
+const control=fixture(false),positive=fixture(true),result=compareArtworkMemoryObservers(control,positive);
+assert.equal(result.controlPartitionGrowthBytes,1);assert.equal(result.observedPartitionGrowthBytes,100);assert.equal(result.networkDisablePartitionDropBytes,188);
+for(const mutate of [
+ p=>p.report.rawExecutable='/different/browser',p=>p.report.environment.browser='different-version',p=>p.report.inputs['provider.js']='different-revision',p=>p.report.networkInspectionEnabled=false,p=>p.report.residents=5,p=>p.report.results[1].cycle=1,p=>p.analysis.stages.pop(),p=>p.analysis.stages[0].renderers.push(structuredClone(p.analysis.stages[0].renderers[0])),
+]){const broken=structuredClone(positive);mutate(broken);assert.throws(()=>compareArtworkMemoryObservers(control,broken));}
+const inconclusive=structuredClone(positive);inconclusive.analysis.stages.at(-1).renderers[0].topLevel.partition_alloc.sizeBytes=200;assert.equal(compareArtworkMemoryObservers(control,inconclusive).networkDisablePartitionDropBytes,0,'An unsuccessful control must not become an invented improvement');
+console.log('PASS observer comparison refuses changed binaries, versions, source revisions, casts, duplicate cycles and missing/ambiguous stages; no-effect controls stay no effect.');

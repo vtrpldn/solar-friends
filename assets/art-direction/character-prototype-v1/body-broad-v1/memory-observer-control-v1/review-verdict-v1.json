@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "status": "observer-owned-buffer-growth-demonstrated-in-isolated-lifecycle",
+  "controls": [
+    "Same headless-shell executable and browser version",
+    "Identical source hashes, cast, cycle count and raw-CDP driver",
+    "Network.enable is the deliberate variable; Network.disable tests release within the same browser"
+  ],
+  "findings": [
+    "Without Network inspection, four released unique-cast partition allocations range from 3538944 to 3686400 bytes; corresponding private footprints range from 59967488 to 65226752 bytes.",
+    "With Network inspection, released partition allocations grow from 141541376 to 217284608 bytes. Neither critical memory pressure nor clearing browser cache releases that allocation.",
+    "Network.disable then releases 213630976 partition bytes and 212451328 private-footprint bytes in the same process.",
+    "The observed growing response-buffer allocation is observer-owned in this controlled study. Process RSS remains a different measure and is not used as proof of an application leak.",
+    "All public appearance caches/borrowed providers drain and isolated DOM counters return to baseline in both controls."
+  ],
+  "excludedExperiment": "The initial regular-Chrome trial used a different binary and extra renderers; excluded from the matched comparison.",
+  "scope": "Four shared and four unique twelve-resident public appearance-library cycles per control. Not full editor/game simulation, indefinite lifetime, all body families, physical-display performance or complete release acceptance.",
+  "remaining": [
+    "Full 64x64 editor/game memory budgets",
+    "Broader roster/body-family combinations and long-duration tests",
+    "Remaining art, usability and release requirements"
+  ]
+}

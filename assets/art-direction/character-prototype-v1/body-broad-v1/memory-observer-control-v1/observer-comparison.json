@@ -1,0 +1,64 @@
+{
+  "build": "broad",
+  "residents": 12,
+  "cyclesPerCast": 4,
+  "rawExecutable": "/Users/paladini/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "browser": "HeadlessChrome/151.0.7922.34",
+  "controlReleases": [
+    {
+      "cycle": 1,
+      "partitionBytes": 3670016,
+      "privateFootprintBytes": 59967488
+    },
+    {
+      "cycle": 2,
+      "partitionBytes": 3653632,
+      "privateFootprintBytes": 64194560
+    },
+    {
+      "cycle": 3,
+      "partitionBytes": 3538944,
+      "privateFootprintBytes": 64194560
+    },
+    {
+      "cycle": 4,
+      "partitionBytes": 3686400,
+      "privateFootprintBytes": 65226752
+    }
+  ],
+  "networkObservedReleases": [
+    {
+      "cycle": 1,
+      "partitionBytes": 141541376,
+      "privateFootprintBytes": 198413312
+    },
+    {
+      "cycle": 2,
+      "partitionBytes": 166395904,
+      "privateFootprintBytes": 223693824
+    },
+    {
+      "cycle": 3,
+      "partitionBytes": 191463424,
+      "privateFootprintBytes": 253283328
+    },
+    {
+      "cycle": 4,
+      "partitionBytes": 217284608,
+      "privateFootprintBytes": 280235008
+    }
+  ],
+  "beforeDisable": {
+    "partitionBytes": 217284608,
+    "privateFootprintBytes": 282020864
+  },
+  "afterDisable": {
+    "partitionBytes": 3653632,
+    "privateFootprintBytes": 69569536
+  },
+  "observedPartitionGrowthBytes": 75743232,
+  "controlPartitionGrowthBytes": 16384,
+  "networkDisablePartitionDropBytes": 213630976,
+  "networkDisablePrivateFootprintDropBytes": 212451328,
+  "scope": "Matched-source, matched-executable isolated lifecycle observations. Network is the deliberate observer variable. These deltas are not a permanent memory plateau, a full-game memory limit or proof that all application allocations are leak-free."
+}
