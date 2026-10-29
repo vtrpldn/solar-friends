@@ -1,0 +1,35 @@
+{
+  "accepted": "Interruption retains the visible source mixture instead of jumping to the unfinished target.",
+  "checks": [
+    "Regression fails before the fix and passes after it.",
+    "312 interrupted clip/profile cases and 10000 rapid switches.",
+    "Actual public classic/Broad draws have identical pose RGBA values at interruption in day and mirrored night, with breath fixed to isolate pose continuity.",
+    "Final four-row board and 16 decoded quarter-second movie samples visually inspected."
+  ],
+  "remaining": [
+    "Classic crossfade ghost silhouettes remain visible.",
+    "Broad painted keyframes still change discretely.",
+    "No full wardrobe, body-family, accessories, biome/world, smoothness or physical-display pacing approval."
+  ],
+  "decodedCommand": "ffmpeg -v error -threads 1 -i transitions.webm -vf 'fps=4,scale=480:160,tile=4x4' -frames:v 1 -y decoded.png",
+  "metadata": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "width": 960,
+        "height": 320,
+        "nb_read_frames": "101"
+      }
+    ],
+    "format": {
+      "duration": "3.966930"
+    }
+  },
+  "evidence": {
+    "board.png": "e6e3b5d1c458ad4de045a0b3ecd71b3b08d94b5ee578bbe44bacf57e4ddb149f",
+    "decoded.png": "e29ed20f9547256f67f3442dbea52cc073dad7df90c561a6d4bc6df72486c74f",
+    "report.json": "8c017bd224a94cd888094a005bb3647987516ddd859fc857d1c173f4325a4222",
+    "transitions.webm": "c875ec2525ed0cdc5eb266564721358001adb3c3596ce3e19f6fe56304c7bb53"
+  }
+}

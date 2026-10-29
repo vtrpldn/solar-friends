@@ -81,7 +81,20 @@ export function advanceResidentAnimation(previous, r, minutes, delta, profile) {
     if (Math.abs(dx) > .00001) facing = dx < 0 ? -1 : 1;
   }
   const transition = changed ? 0 : Math.min(.18, (previous?.transition ?? .18) + delta);
-  const from = changed ? sampleResidentClip(previous.mode, previous.phase, previous.animationProfile??profile) : previous?.from;
+  // A second activity change can interrupt an unfinished fade. Carry the
+  // displayed mixture forward instead of jumping to its unfinished target.
+  // Merge identical native pose keys so repeated interruptions stay bounded.
+  let from = previous?.from;
+  if(changed){
+    const poses=new Map();
+    for(const pose of previous.layers??sampleResidentClip(previous.mode, previous.phase, previous.animationProfile??profile)){
+      if(pose.weight<=0)continue;
+      const key=JSON.stringify([pose.sheet,pose.row,pose.frame,pose.sequenceIndex]),existing=poses.get(key);
+      if(existing)existing.weight+=pose.weight;
+      else poses.set(key,{...pose});
+    }
+    from=[...poses.values()];
+  }
   const mix = ease(transition / .18);
   const layers = sampleResidentClip(mode, phase, profile).map(frame => ({ ...frame, weight: frame.weight * mix }));
   if (from && mix < 1) layers.push(...from.map(frame => ({ ...frame, weight: frame.weight * (1 - mix) })));
