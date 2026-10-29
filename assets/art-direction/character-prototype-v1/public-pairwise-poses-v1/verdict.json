@@ -27,18 +27,13 @@
     }
   ],
   "reviewedBoards": [
-    "batch-9-base.png",
-    "batch-9-idle.png",
-    "batch-10-activities.png",
-    "batch-10-feeding-return.png"
-  ],
-  "visualFindings": "Reviewed rows retain full painted figures, attached hair/hats and visible carried equipment. Broad curls with a straw hat are present in the activity/return board. This is static-board inspection, not motion or complete-art approval.",
-  "pendingVisualReview": [
     "batch-1-activities.png",
     "batch-1-base.png",
     "batch-1-feeding-return.png",
     "batch-1-idle.png",
+    "batch-10-activities.png",
     "batch-10-base.png",
+    "batch-10-feeding-return.png",
     "batch-10-idle.png",
     "batch-11-activities.png",
     "batch-11-base.png",
@@ -77,11 +72,14 @@
     "batch-8-feeding-return.png",
     "batch-8-idle.png",
     "batch-9-activities.png",
-    "batch-9-feeding-return.png"
+    "batch-9-base.png",
+    "batch-9-feeding-return.png",
+    "batch-9-idle.png"
   ],
+  "visualFindings": "All 48 final boards were visually inspected at their native review dimensions: 79 current public recipes, 4108 drawings. Figures, clothing, hair and hats remain complete and attached at 80px draw width; bowls, watering cans and tools remain present in their activity poses. Feeding return poses intentionally differ from forward equipment phases and were checked in day and mirrored night. No new missing layer, floating attachment or cropped figure was found in this static set. Neutral retains its existing seated sleep pose; Relaxed and Broad use reclining sleep poses. This does not establish smooth motion, full-size source-edge perfection, portraits, other lighting states or world/biome consistency.",
+  "pendingVisualReview": [],
   "limits": [
     "The initial 21-case global pair matrix was superseded by the stronger 79-case per-outfit set; its boards are not acceptance evidence for this final set.",
-    "Only the named final boards were visually inspected. Remaining final boards still require review.",
     "Retired loadable revisions are outside selectable-outfit coverage.",
     "All native atlas poses are drawn in day view; only feeding return phases also use mirrored night.",
     "No portrait, transition, world/biome, rain or performance approval."
@@ -141,5 +139,6 @@
     "batch-9-feeding-return.png": "d407b8d301f9d8062d3f4f582a317bfd7055d296fc0af1b53edf5bcddc55d9dd",
     "batch-9-idle.png": "81d6597a1352f9f14fa1aec72b5f41722e0e5b371ced9d556af8fee3016dff81",
     "report.json": "7e53cdd8a17dd319cc2adb146ff1e9b41f16df73178cd69dc3637213101f358a"
-  }
+  },
+  "reviewScope": "Static pairwise boards reviewed; complete resident artwork release acceptance remains open."
 }
