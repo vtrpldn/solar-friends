@@ -1,0 +1,71 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "mode": "sketch-to-render",
+  "transparent_background": true,
+  "promptFile": "prompt.txt",
+  "promptSha256": "95c85282c92e4f716ddb3a9588828379cbe6b71edac978524202703281dc361c",
+  "guideSource": {
+    "file": "guide.svg",
+    "sha256": "acd2a18a05f02c3f02056a9577944cfbdee9254db1c61798a0b8626969e40c86"
+  },
+  "references": [
+    {
+      "role": "authoritative square-plan geometry guide",
+      "path": "assets/art-direction/wetland-square-v2/guide.png",
+      "sha256": "83b5bf7a3e4680cb0cd740db018d381b97de7732c90c4b9086711ade4cee16f8"
+    },
+    {
+      "role": "existing material and plant reference",
+      "path": "web/art/wetland.png",
+      "sha256": "037dec072b3c8cc37d8a25874cbb2ad154f2f54e82cc489fdb7199516936400b"
+    },
+    {
+      "role": "established painted material reference",
+      "path": "web/art/home-gable.png",
+      "sha256": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21"
+    }
+  ],
+  "rawOutput": {
+    "file": "candidate.png",
+    "sha256": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+    "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ee1baace-cecf-4a4a-8154-01929773554b.png"
+  },
+  "status": "promising candidate; not gameplay",
+  "sourceReview": [
+    "Square basin and recessed barrel replace the elongated silhouette.",
+    "No visible colored glow of the rejected candidate.",
+    "Masonry and grouped planting remain in the existing painted material family."
+  ],
+  "contextReview": {
+    "reviewed": [
+      "mata-atlantica-2-day.png"
+    ],
+    "retainedCapture": "candidate-road-context.png",
+    "sha256": "11baaca9ec0a602f19b7f90e0c86a467df30c6db86def342fa5606d77160cfb3",
+    "finding": "Near masonry edge reaches the adjacent road and barrel stays inside square plot; scale reads beside original resident and home.",
+    "pending": [
+      "mata-atlantica-1-day.png",
+      "mata-atlantica-1-night.png",
+      "mata-atlantica-2-night.png",
+      "cerrado-1-day.png",
+      "cerrado-1-night.png",
+      "cerrado-2-day.png",
+      "cerrado-2-night.png",
+      "caatinga-1-day.png",
+      "caatinga-1-night.png",
+      "caatinga-2-day.png",
+      "caatinga-2-night.png"
+    ],
+    "remainingCapturesLocation": "artifacts/wetland-square-v2-context (local generated artifacts; not committed acceptance evidence)"
+  },
+  "openGates": [
+    "Independent held-out wall/cap/post measurements, not just alpha-foot axis fits.",
+    "Inspect remaining biome/zoom/night captures; review relevant rain and states.",
+    "Mechanical artwork/projection/grid checks and final integration after any promotion."
+  ],
+  "invariants": [
+    "Current gameplay sources and acceptance fingerprints remain unchanged.",
+    "Candidate preview mutates imported metadata only inside an isolated browser, never writes game files.",
+    "No raster stretching, local warp or platform patch."
+  ]
+}

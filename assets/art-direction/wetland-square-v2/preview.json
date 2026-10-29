@@ -1,0 +1,78 @@
+{
+  "file": "assets/art-direction/wetland-square-v2/candidate.png",
+  "status": "candidate-only provisional registration; not accepted gameplay",
+  "measurements": {
+    "source": [
+      1254,
+      1254
+    ],
+    "left": {
+      "range": [
+        120,
+        580
+      ],
+      "alphaThreshold": 128,
+      "slope": 0.5701318298790711,
+      "intercept": 746.3237076985074,
+      "maxResidual": 3.218021608684694,
+      "samples": [
+        [
+          120,
+          815
+        ],
+        [
+          580,
+          1078
+        ]
+      ]
+    },
+    "right": {
+      "range": [
+        730,
+        1150
+      ],
+      "alphaThreshold": 128,
+      "slope": -0.5790004133048791,
+      "intercept": 1506.5834288866338,
+      "maxResidual": 3.2720531924985607,
+      "samples": [
+        [
+          730,
+          1084
+        ],
+        [
+          1150,
+          840
+        ]
+      ]
+    }
+  },
+  "art": {
+    "width": 162,
+    "anchor": 0.8,
+    "aspect": 1,
+    "axes": [
+      0.5701318298790711,
+      -0.5790004133048791
+    ],
+    "nightFile": "wetland.png",
+    "nightTint": "brightness(.6) saturate(.72)"
+  },
+  "ground": [
+    1254,
+    [
+      [
+        70,
+        789
+      ],
+      [
+        650,
+        1124
+      ],
+      [
+        1180,
+        810
+      ]
+    ]
+  ]
+}

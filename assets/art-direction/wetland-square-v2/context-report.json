@@ -1,0 +1,407 @@
+{
+  "inputs": {
+    "scripts/review-wetland-context.mjs": "5fe8863112e781035a2fcdddf75e08c1aeec81fa84b3556a9c4a9d3c20741eb9",
+    "assets/art-direction/wetland-square-v2/preview.json": "6d3ca7cc410052c707568abafc0d3b55cc3a32a1b5c93db8585131bcf7850561",
+    "assets/art-direction/wetland-square-v2/candidate.png": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+    "web/pkg/solar_friends.js": "d4a6c0bb50f2c79862380324e778525dd43971742fad1709bede04bd560abd23",
+    "web/editor/map-view.js": "5d1ced57b883db1703ca8732adbc3418a0cb959d18a83fb5b155e07a3086322e",
+    "web/editor/routes.js": "c0f66d587e4ec4bd6047549899472d802814974600ff61f47166761e30dbffdc",
+    "web/utility-lines-art.js": "e1cc662f79b7beab542540ef9a923a7dd8f227dea6791ae48544d08f66fb559e",
+    "web/editor/batteries.js": "505a7fc8d07f09c13381d27e45c8797d6b57ef70a49e39b42b86b7b34839ac04",
+    "web/battery-art.js": "48d2c00ba144080d40c048ea3d3edfe4811e02f456af07c851efbb6487bc2887",
+    "web/resource-site-art.js": "a0601241ab8d107474b2989d16705b1a73a942617eaae3689af8c0485190f47f",
+    "web/chickens.js": "f438c1d08c0ebec511511288b2eef6149825b61509e9dd2809244d055798021a",
+    "web/economy-art.js": "b9a9f15be3bdc0f11dda6de42777b34b0f70b250debe1612b9729c9957a6333a",
+    "web/editor/sites.js": "59b51a11d34a80bf5ab155f4a13128dff228d1e965423063b2029a66271a52e8",
+    "web/crop-art.js": "e75beb185b763eb4f18dc984c6d2b3e12fecc0348b3c91ebe8e349cbb174685c",
+    "web/resident-look.js": "94f94dff5b280b57998d97ef94641e1850cbd5d2946ae61a3ed3b2f10367de5d",
+    "web/resident-appearance-library.js": "e13cd02caa63c8907757dd881335d722fe811e9e5b325bf0fde617afb8ddabfa",
+    "web/regional-art.js": "b7a23c741fcb76ea47d911f9bcd07a9cc8488f81c6a1a18c5232e744b394c3bb",
+    "web/editor/prepare-terrain.js": "2263c3c79dd89d05bab83920966a9354c206cc533b2f464e2c7748e0ac44319d",
+    "web/editor/terrain-cache.js": "89b760d42a330deee375c4ea6775d98d96f371e82406d80f858676a8669a527d",
+    "web/editor/brush.js": "3bf5390061865456479d91f79f17b2b7db5987a6aeb6d5e88dbd06210ecd28c3",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/building-art.js": "b30fc9560fd0bb1ed3681a34dfc04b9c9e6bf58c0e2f5fe00c7a847877eb0d7b",
+    "web/building-footprints.js": "cb538cb0f685cb815e7ba0d721c7ce92d07c0ade4201c9a763e3c561c88c6f22",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/building-state-art.js": "2c66d34e1b2582b1509e6caa69cac0f5907f57ab38160d4d0fffc44f37429bef",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/paint-cache.js": "f070b4e16eeb75c077b26009201fef77ca246a9c202664730bc81dda35cc053c",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f",
+    "web/resource-sites.js": "9a95c65342707d4f07ad8904dd896600d70a94c392962b44d040ef8fd0fc33b8",
+    "web/greenhouse-layout.js": "dce24b4528d6c942c6afcc93e32b810fdac2018aa8a0eebad2d3b2fdcbbb07b8",
+    "web/resident-part-recipe.js": "44af0a70cad6a16790a6556d57c6e343bd982085565e3c577bfec9ba065953a1",
+    "web/habitats.js": "63ebeab1df2ac631ec3b0a3bd250d5f7a2e6372fdd55a70f446e3853947aa5a6",
+    "web/terrain-revision.js": "f6dfcb06898799931676a227689d0a162b3a278525893c07b2d392c91ce90878",
+    "web/building-projection.js": "233f3a9fa62c239c71e6d2dccd849d6768c4c6664583aafac3b552b347d22a4a",
+    "web/building-silhouettes.js": "450f1e06e9c9655dc0a62a28bd4b1e249df084ca05deb848c20533f3bb9746ff",
+    "web/nature-art.js": "389a97d806cbf7d286b3ebedeeabac390770208672529d494444bf1034e255b0",
+    "web/sandbox-rules.js": "c4d708f49592384ed6f6920c85f15f2ef03cc239de08cb8026066c00ffa98b11",
+    "web/battery-plots.js": "327faa1e4c9f97f173eff8f5de53250dbdcc72e845b23aedbbecaa857d9b3e84",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/character-hair-colours.js": "612735bf2a5bb6219d5d68b1b5d187e6662480ecc114ec99d591ac9f91a92dfa",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/character-attachments.js": "2f88fee807c21ced70a762e2a1cb7169e9247a7c6136d81e37b235f1e67ac7cf",
+    "web/editor/journal.js": "e5ee57626eecacd22dda40297c98d25dffe20c7cd667564885a5bb97cf61d9e0",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/character-body-frames.js": "d4c94f1074ffc2bcc4798d991c7176a637d9747f3b1d54977427717412f2edd9",
+    "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
+    "web/art/recovered-battery.png": "9cc9f12a8c414b81d68b45a4348b7ec55735e80c0bb6eaf098dd3681f604a2b6",
+    "web/art/economy-atlas-v2.png": "70c115a50bfffd4b4c6808ebb1375e5bc3c6f74d5507bcb797def54886827e06",
+    "web/pkg/solar_friends_bg.wasm": "9a61b739591b2614d3b4e867a1be60e4386338df8924156092c80726b4a8e082",
+    "web/art/apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+    "web/art/starter-shed-refined.png": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+    "web/art/orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+    "web/art/goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+    "web/art/hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+    "web/art/eco-toilet-tall.png": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+    "web/art/banana-treatment.png": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
+    "web/art/wetland.png": "037dec072b3c8cc37d8a25874cbb2ad154f2f54e82cc489fdb7199516936400b",
+    "web/art/biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+    "web/art/streetlight.png": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+    "web/art/warehouse.png": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+    "web/art/solar-farm.png": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+    "web/art/garden-simple-isometric.png": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+    "web/art/greenhouse-isometric.png": "6bc7925077a4089014e8973979cfaa3e242a12cf400888d27998c6aac0350ee2",
+    "web/art/village-atlas-isometric.png": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+    "web/art/cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+    "web/art/compost-isometric.png": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+    "web/art/square-isometric.png": "76ec6da02bc5b4575b556019ffbfe74c1a092d32c3e5cbd21d74945f2adf2c91",
+    "web/art/workshop-isometric.png": "fc194eb60c86435ae750c13b4bcb5c9a59c5897e63b2debcb29b1cb960eac4a7",
+    "web/art/coop-isometric.png": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+    "web/art/home-veranda.png": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+    "web/art/home-gable.png": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+    "web/art/home-courtyard.png": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+    "web/art/adobe-gable.png": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+    "web/art/goat-pasture-empty-v1.png": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+    "web/art/adobe-veranda.png": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+    "web/art/mata-atlantica-atlas.png": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+    "web/art/landscape-details.png": "a5212211cc3d8bca0250b3990a9dcc90ca3bbd3d27fa9b1007d85b3dc931ae56",
+    "web/art/animations/iara.png": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+    "web/art/terrain-atlas.png": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+    "web/art/animations/bento.png": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+    "web/art/animations/caua.png": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+    "web/art/animations/nina.png": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+    "web/art/animations/luz.png": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+    "web/art/cerrado-vegetation-v1.png": "1542d0c14fa9cfddc83ec0e1a04e5ef5be34fcf1273d93d4eb13c2c8f5f359a6",
+    "web/art/caatinga-vegetation-v1.png": "522999ec80e708b3203cb6f59a2b90067d3d7eb2f7265b82d6e7815854c26290",
+    "web/art/crops.png": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+    "web/art/field-crops.png": "ca755cb0aced1ef12ec69284c915490e59e5207961d5fb0a4d90fdf5913c219e",
+    "web/art/chickens.png": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+    "web/art/regional-ground-v1.png": "acdad558e0db68fb04760f2a27d44beaf79eec89d6b02d583e35586748bbfeb1"
+  },
+  "candidate": {
+    "file": "assets/art-direction/wetland-square-v2/candidate.png",
+    "status": "candidate-only provisional registration; not accepted gameplay",
+    "measurements": {
+      "source": [
+        1254,
+        1254
+      ],
+      "left": {
+        "range": [
+          120,
+          580
+        ],
+        "alphaThreshold": 128,
+        "slope": 0.5701318298790711,
+        "intercept": 746.3237076985074,
+        "maxResidual": 3.218021608684694,
+        "samples": [
+          [
+            120,
+            815
+          ],
+          [
+            580,
+            1078
+          ]
+        ]
+      },
+      "right": {
+        "range": [
+          730,
+          1150
+        ],
+        "alphaThreshold": 128,
+        "slope": -0.5790004133048791,
+        "intercept": 1506.5834288866338,
+        "maxResidual": 3.2720531924985607,
+        "samples": [
+          [
+            730,
+            1084
+          ],
+          [
+            1150,
+            840
+          ]
+        ]
+      }
+    },
+    "art": {
+      "width": 162,
+      "anchor": 0.8,
+      "aspect": 1,
+      "axes": [
+        0.5701318298790711,
+        -0.5790004133048791
+      ],
+      "nightFile": "wetland.png",
+      "nightTint": "brightness(.6) saturate(.72)"
+    },
+    "ground": [
+      1254,
+      [
+        [
+          70,
+          789
+        ],
+        [
+          650,
+          1124
+        ],
+        [
+          1180,
+          810
+        ]
+      ]
+    ],
+    "sha256": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+    "hull": [
+      [
+        0.05741627,
+        0.57416268
+      ],
+      [
+        0.05901116,
+        0.5414673
+      ],
+      [
+        0.05980861,
+        0.53827751
+      ],
+      [
+        0.06060606,
+        0.53668262
+      ],
+      [
+        0.1291866,
+        0.42902711
+      ],
+      [
+        0.35486443,
+        0.20653907
+      ],
+      [
+        0.3891547,
+        0.1953748
+      ],
+      [
+        0.53429027,
+        0.17464115
+      ],
+      [
+        0.53748006,
+        0.17464115
+      ],
+      [
+        0.53987241,
+        0.1754386
+      ],
+      [
+        0.75039872,
+        0.26076555
+      ],
+      [
+        0.91547049,
+        0.40669856
+      ],
+      [
+        0.96012759,
+        0.55582137
+      ],
+      [
+        0.96172249,
+        0.59489633
+      ],
+      [
+        0.96172249,
+        0.60207337
+      ],
+      [
+        0.96092504,
+        0.64274322
+      ],
+      [
+        0.96012759,
+        0.64593301
+      ],
+      [
+        0.9585327,
+        0.64912281
+      ],
+      [
+        0.95454545,
+        0.65151515
+      ],
+      [
+        0.53588517,
+        0.89393939
+      ],
+      [
+        0.53269537,
+        0.89553429
+      ],
+      [
+        0.53110048,
+        0.89633174
+      ],
+      [
+        0.52950558,
+        0.89712919
+      ],
+      [
+        0.52472089,
+        0.89712919
+      ],
+      [
+        0.523126,
+        0.89633174
+      ],
+      [
+        0.5215311,
+        0.89553429
+      ],
+      [
+        0.51834131,
+        0.89393939
+      ],
+      [
+        0.06539075,
+        0.63476874
+      ],
+      [
+        0.06140351,
+        0.6323764
+      ],
+      [
+        0.05980861,
+        0.6307815
+      ],
+      [
+        0.05901116,
+        0.62998405
+      ],
+      [
+        0.05741627,
+        0.62679426
+      ]
+    ]
+  },
+  "views": [
+    {
+      "biome": "mata-atlantica",
+      "zoom": 1,
+      "night": 0,
+      "file": "mata-atlantica-1-day.png",
+      "sha256": "65065ce919a479feec8d0f289975fa1dc506f6d24a14daa6c963aa935cf6204c"
+    },
+    {
+      "biome": "mata-atlantica",
+      "zoom": 1,
+      "night": 1,
+      "file": "mata-atlantica-1-night.png",
+      "sha256": "dd1da2bdd8667daa36ca2a72460a20c04af28a2b7eae374d06517d004f6f3d7c"
+    },
+    {
+      "biome": "mata-atlantica",
+      "zoom": 2,
+      "night": 0,
+      "file": "mata-atlantica-2-day.png",
+      "sha256": "11baaca9ec0a602f19b7f90e0c86a467df30c6db86def342fa5606d77160cfb3"
+    },
+    {
+      "biome": "mata-atlantica",
+      "zoom": 2,
+      "night": 1,
+      "file": "mata-atlantica-2-night.png",
+      "sha256": "57f8e28ba1b524adc288cad0c6969cf7752c3d822fd50546c5b6619be6c15ba3"
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 1,
+      "night": 0,
+      "file": "cerrado-1-day.png",
+      "sha256": "01db96b94ee70d8ea6d433cf893512a7d4ee476e96114b4f8bbab2238c2363df"
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 1,
+      "night": 1,
+      "file": "cerrado-1-night.png",
+      "sha256": "01db329f426cd5cdf266b4649a5bc86ba8d2ec14999f25bfec1c472506bed5e2"
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 2,
+      "night": 0,
+      "file": "cerrado-2-day.png",
+      "sha256": "e8c66430ff4d95be5cc4e6e94cdf628af31e887c08b020395367f8ee6c1ccfac"
+    },
+    {
+      "biome": "cerrado",
+      "zoom": 2,
+      "night": 1,
+      "file": "cerrado-2-night.png",
+      "sha256": "a3d365f3ba2c07fe18170362aa3c26429424f8b2c2c09167814027af047048b4"
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 1,
+      "night": 0,
+      "file": "caatinga-1-day.png",
+      "sha256": "420a05417f6edb691a1248e3d7a604ea4e0e43b5b8764e607e6b98182b6d84be"
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 1,
+      "night": 1,
+      "file": "caatinga-1-night.png",
+      "sha256": "a90887c0a61186d8083cbea2bc1417f85828c36c1e43bcade65e5c1f95976a18"
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 2,
+      "night": 0,
+      "file": "caatinga-2-day.png",
+      "sha256": "29a2a7c88bbf9f6dceae215b409ca6e47ffe15f188a0188e6067fcd684dd3bef"
+    },
+    {
+      "biome": "caatinga",
+      "zoom": 2,
+      "night": 1,
+      "file": "caatinga-2-night.png",
+      "sha256": "57117f2213b8ed0db6f5da30170d1717db72b6adac051eb076c3075cb0a16110"
+    }
+  ],
+  "definitions": [
+    {
+      "biome": "mata-atlantica",
+      "file": "mata-atlantica.solar-scenario",
+      "sha256": "c99939a86fa1c1b6b62bbb817de5d9c9639b014aa34478e643aa00cb194b0654"
+    },
+    {
+      "biome": "cerrado",
+      "file": "cerrado.solar-scenario",
+      "sha256": "7c719da86c86efde14d1c308dae300747523f97f7fa5a2258847aa28ba58a7d3"
+    },
+    {
+      "biome": "caatinga",
+      "file": "caatinga.solar-scenario",
+      "sha256": "f4c68baaac37b6e848a175934a526a02858faf5cfb5c77a2707889b1ea0ccabe"
+    }
+  ],
+  "scope": "Native-validated road-adjacent reed bed in three biomes, shared game painters, original resident and home scale reference. Day and unpowered night, zoom 1 and 2. Static manually cleared review site; not resident path/service completion, rain, all buildings or mathematical geometry acceptance."
+}

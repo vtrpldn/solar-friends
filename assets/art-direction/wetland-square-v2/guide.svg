@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+<path d="M128 622 L512 814 L896 622 L896 678 L512 870 L128 678Z" fill="#c79c75" stroke="#473927" stroke-width="3"/>
+<path d="M128 622 L512 430 L896 622 L512 814Z" fill="#e5cba0" stroke="#473927" stroke-width="4"/>
+<path d="M170 622 L512 451 L854 622 L512 793Z" fill="#74965c" stroke="#473927" stroke-width="3"/>
+<path d="M128 678 L512 870 L896 678 M512 814 L512 870" fill="none" stroke="#473927" stroke-width="4"/>
+<path d="M510 430 V340 L540 355 V445" fill="#ab773e" stroke="#473927" stroke-width="3"/>
+<path d="M525 389 L580 416 L580 442" fill="none" stroke="#287e8b" stroke-width="15"/>
+<path d="M742 600 L742 666 Q785 710 828 666 L828 600" fill="#287e8b" stroke="#473927" stroke-width="3"/>
+<ellipse cx="785" cy="600" rx="43" ry="21.5" fill="#ab773e" stroke="#473927" stroke-width="3"/>
+<path d="M725 629 L742 637" stroke="#287e8b" stroke-width="12"/>
+<g stroke="#365934" stroke-width="6" fill="none"><path d="M350 610V340 M500 670V300 M620 590V320 M470 510V270 M630 710V430 M320 690V470"/></g>
+</svg>
