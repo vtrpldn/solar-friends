@@ -2,7 +2,8 @@
 // observation; no advance(), loadScenario(), direct Game calls or save patches.
 import {MATERIAL_KEYS} from '../web/materials.js';
 import assert from 'node:assert/strict';import {mkdir,readFile,writeFile} from 'node:fs/promises';import {createHash} from 'node:crypto';import {chromium} from 'playwright';import {serve} from './serve.mjs';
-const id=process.argv[2]??'first-clearing',configs={
+const id=process.argv[2]??'first-clearing',postDays=Number(process.argv.find(a=>a.startsWith('--post-days='))?.split('=')[1]??0),output=process.argv.find(a=>a.startsWith('--output='))?.slice(9)??'assets/scenario-reviews';assert(Number.isInteger(postDays)&&postDays>=0&&postDays<=7);
+const configs={
  'first-clearing':{purchase:[[7,2],[12,2],[13,2]],placements:[['home',27,32,'village'],['home',28,36,'village'],['kitchen',32,34,'food'],['garden',35,34,'food']]},
  'before-the-dry-season':{purchase:[[9,1],[14,1]],placements:[['well',27,32,'village'],['kitchen',32,34,'food'],['garden',35,34,'food']]},
  'an-inherited-village':{purchase:[[15,3]],placements:[]},
@@ -22,16 +23,26 @@ try{
   const p=await page.locator('#world').evaluate((canvas,[x,y])=>{const r=canvas.getBoundingClientRect(),center=JSON.parse(canvas.dataset.cameraCenter),scale=Math.max(.18,Math.min(r.width/1900,r.height/1050)*1.3);return {x:r.left+r.width/2+(x-y-center.x+center.y)*34*scale,y:r.top+r.height/2+(x+y-center.x-center.y)*17*scale};},[x,y]);await page.mouse.click(p.x,p.y);assert((await snapshot()).village.buildings.some(b=>b.kind===kind&&b.x===x&&b.y===y),`Public pointer placement failed for ${kind} at ${x},${y}`);
  }
  if(await page.locator('#build-panel').isVisible())await page.locator('#build-panel [data-close-panel]').click();await page.locator('[data-speed="8"]').click();await page.locator('#pause').click();
- await mkdir('assets/scenario-reviews',{recursive:true});const observations=[],started=Date.now();let finished=null;
+ await mkdir(output,{recursive:true});const observations=[],started=Date.now();let finished=null;
  while(Date.now()-started<600000){
   await page.waitForTimeout(5000);const s=await snapshot();finished=s.village.progress.scenario_journal.finished_at;observations.push({elapsedSeconds:(Date.now()-started)/1000,minute:s.village.minutes,finished,construction:s.village.buildings.map(b=>({kind:b.kind,progress:b.progress}))});
   if(observations.length%4===0)console.log(`${id} public controls: minute ${s.village.minutes.toFixed(1)}, ${finished===null?'required goals in progress':'required goals complete'}`);if(finished!==null)break;
  }
  assert(finished!==null,'Normal gameplay controls must reach scenario completion without hidden time advancement');assert.equal(await page.locator('#goal-label').textContent(),'Our story fulfilled');
+ const continuation=[];
+ if(postDays){
+  const startMinute=(await snapshot()).village.minutes,target=startMinute+postDays*1440,deadline=Date.now()+postDays*180000+120000;let lastMinute=startMinute,lastDay=Math.floor(startMinute/1440);
+  while((await snapshot()).village.minutes<target&&Date.now()<deadline){
+   await page.waitForTimeout(5000);const s=await snapshot(),day=Math.floor(s.village.minutes/1440);assert(s.village.minutes>lastMinute,'Post-completion gameplay must keep advancing');lastMinute=s.village.minutes;assert.equal(s.village.progress.scenario_journal.finished_at,finished,'Completion must remain stable during continued play');assert.equal(s.residents.length,definition.start.residents.length);
+   const sample={minutes:s.village.minutes,food:s.village.food,meals:s.village.meals,money:s.village.economy.money,energy:s.residents.map(r=>r.energy),hunger:s.residents.map(r=>r.hunger),tasks:s.residents.map(r=>r.task)};assert([...sample.energy,...sample.hunger,sample.food,sample.meals,sample.money].every(Number.isFinite));continuation.push(sample);
+   if(day!==lastDay){lastDay=day;console.log(`${id}: continued into day ${day+1}, food ${sample.food}, meals ${sample.meals}`);}
+  }
+  assert((await snapshot()).village.minutes>=target,'The public controls must run all requested post-completion days');
+ }
  if(await page.locator('#pause').getAttribute('aria-label')==='Pause simulation')await page.locator('#pause').click();await page.getByRole('button',{name:'Save checkpoint',exact:true}).click();await page.getByRole('button',{name:'Save checkpoint',exact:true}).waitFor({state:'visible'});await page.waitForFunction(()=>[...document.querySelectorAll('.creation-session button')].find(b=>b.textContent==='Save checkpoint')?.disabled===false);
- const completed=await snapshot();await page.screenshot({path:`assets/scenario-reviews/${id}-public-completion.png`});await page.reload();await page.waitForFunction(()=>window.solarDev);assert.deepEqual(await snapshot(),completed);
- await page.locator('[data-panel="goals-panel"]').click();await page.locator('.scenario-completion').waitFor();await page.screenshot({path:`assets/scenario-reviews/${id}-public-journal.png`});await page.locator('#close-journal').click();await page.getByRole('button',{name:'Return to editor',exact:true}).click();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');assert.equal(page.url(),editorURL);
+ const completed=await snapshot();await page.screenshot({path:`${output}/${id}-public-completion.png`});await page.reload();await page.waitForFunction(()=>window.solarDev);assert.deepEqual(await snapshot(),completed);
+ await page.locator('[data-panel="goals-panel"]').click();await page.locator('.scenario-completion').waitFor();await page.screenshot({path:`${output}/${id}-public-journal.png`});await page.locator('#close-journal').click();await page.getByRole('button',{name:'Return to editor',exact:true}).click();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');assert.equal(page.url(),editorURL);
  const retained=await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),l=new ContentLibrary();try{return {definition:(await l.getProject(new URL(location.href).searchParams.get('project'))).checkpoint.definition,runs:await l.listRuns()};}finally{l.close();}});assert.deepEqual(retained.definition,definition);assert.equal(retained.runs.length,0);assert.deepEqual(errors,[]);
- const raw=await readFile(`web/examples/${id}.solar-scenario`,'utf8');await writeFile(`assets/scenario-reviews/${id}-public-controls.json`,JSON.stringify({schema:1,sourceSha256:createHash('sha256').update(raw).digest('hex'),controls:{purchase:Object.fromEntries(config.purchase.map(([id,n])=>[MATERIAL_KEYS[id],n])),placements,preferredSpeed:8},finishedAt:finished,observations,saveReloadExact:true,editorUnchanged:true,scratchRunRemoved:true,scope:'Full completion through public UI; read-only snapshot observation; no direct simulation commands, forced work, stock changes or runtime patches.'},null,2)+'\n');
- console.log(`PASS: ${id}: public picker, paid Town purchase, ${placements.length} pointer-placed blueprints, real resident work, required-goal completion at ordinary speed controls, exact checkpoint reload and unchanged editor return.`);
+ const raw=await readFile(`web/examples/${id}.solar-scenario`,'utf8');await writeFile(`${output}/${id}-public-controls.json`,JSON.stringify({schema:1,sourceSha256:createHash('sha256').update(raw).digest('hex'),controls:{purchase:Object.fromEntries(config.purchase.map(([id,n])=>[MATERIAL_KEYS[id],n])),placements,preferredSpeed:8},finishedAt:finished,observations,postDays,continuation,saveReloadExact:true,editorUnchanged:true,scratchRunRemoved:true,scope:'Full completion and requested later days through public UI; read-only snapshot observation; no direct simulation commands, forced work, stock changes or runtime patches.'},null,2)+'\n');
+ console.log(`PASS: ${id}: public picker, paid Town purchase, ${placements.length} pointer-placed blueprints, real resident work, ${postDays} later days after required-goal completion at ordinary speed controls, exact checkpoint reload and unchanged editor return.`);
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

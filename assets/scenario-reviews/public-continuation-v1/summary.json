@@ -1,0 +1,33 @@
+{
+  "passed": true,
+  "results": [
+    {
+      "id": "first-clearing",
+      "finished": 4682.95166015625,
+      "lastMinute": 9227.9892578125,
+      "continuedMinutes": 4422.16162109375,
+      "minEnergy": 86.73847961425781,
+      "maxHunger": 33.3535041809082,
+      "minFood": 23
+    },
+    {
+      "id": "before-the-dry-season",
+      "finished": 6671.5361328125,
+      "lastMinute": 11123.9794921875,
+      "continuedMinutes": 4439.73681640625,
+      "minEnergy": 90.4952163696289,
+      "maxHunger": 42.048912048339844,
+      "minFood": 18
+    },
+    {
+      "id": "an-inherited-village",
+      "finished": 1234.0013427734375,
+      "lastMinute": 5709.28271484375,
+      "continuedMinutes": 4364.2470703125,
+      "minEnergy": 90.3343505859375,
+      "maxHunger": 32.227516174316406,
+      "minFood": 26
+    }
+  ],
+  "scope": "Current example sources, public completion plus three later days, finite bounded needs, exact reload and editor isolation records. No claim of passive long-term self-sufficiency, unfamiliar-player usability or full release acceptance."
+}

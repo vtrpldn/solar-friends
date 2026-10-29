@@ -1,0 +1,49 @@
+{
+  "accepted": "All three player examples complete through public controls and continue at least three more in-game days, with exact reload, stable completion, unchanged editor draft and scratch-run cleanup.",
+  "reviewedScreenshots": [
+    "an-inherited-village/an-inherited-village-public-completion.png",
+    "an-inherited-village/an-inherited-village-public-journal.png",
+    "before-the-dry-season/before-the-dry-season-public-completion.png",
+    "before-the-dry-season/before-the-dry-season-public-journal.png",
+    "first-clearing/first-clearing-public-completion.png",
+    "first-clearing/first-clearing-public-journal.png"
+  ],
+  "findings": [
+    "Six scene/journal screenshots inspected. Distinct biome scenes render and completion stays credited.",
+    "All sampled needs remain within valid bounds; no food starvation pattern in these three-day samples.",
+    "First clearing journal still displays a completed 60-minute goal as 360 / 60 minutes after later live activity; this presentation issue is identified for a separate fix."
+  ],
+  "limits": [
+    "Three isolated browser sessions ran concurrently; this is not frame-pacing or performance evidence.",
+    "No further purchases or construction after required completion; this short continuation does not prove indefinite self-sufficiency.",
+    "No unfamiliar-player walkthrough or complete art release acceptance.",
+    "Input hashes were recorded during the live tests and rechecked after completion; journal UI and verifier hashes were retained afterward."
+  ],
+  "inputs": {
+    "scripts/playtest-example-public-controls.mjs": "9886c562623f5149d5fbdaaac15682cdf601253d442110dd7e720c11b380557e",
+    "web/main.js": "8016457c583299583ffd9be019ca459995ecda57781ea16f1a6b5f322eb63356",
+    "web/player-session.js": "118b06a29e5365987c49266d89cf563d6548a7024a7d44734bf9b80e71e6ef00",
+    "web/editor/index.js": "cf8dee687f7df26f354b92db6f3b7ac7855ed68cfd1a31be7cc831e41a29e8c8",
+    "web/editor/map-view.js": "dab16e5a8cc5ca33a677e455ac4180493c6889471afc4677b94eb345d8c08a4a",
+    "web/simulation-speed.js": "affd4a3da3593f05dbd3ef31e63cd3d296fcde19350b026d978762eac8108c32",
+    "web/pkg/solar_friends.js": "d4a6c0bb50f2c79862380324e778525dd43971742fad1709bede04bd560abd23",
+    "web/pkg/solar_friends_bg.wasm": "9a61b739591b2614d3b4e867a1be60e4386338df8924156092c80726b4a8e082",
+    "web/examples/an-inherited-village.solar-scenario": "cbd0fdd9381fc893c564da261048cfca78df6b0f15dc169591d179d802ca7309",
+    "web/examples/before-the-dry-season.solar-scenario": "0655ff0e59d13e55bd643855c74f199a2c0c032aa9c45ed493234a596ec4dcc8",
+    "web/examples/first-clearing.solar-scenario": "978c6329d13be74f4a925bab852370ec4de2e5cf839dbde36c994ecbea1a6e78",
+    "web/scenario-journal-ui.js": "5adb385c3a51f2582b378d12bb16a8b758d9e297416c57e67c05520113e3501e",
+    "scripts/verify-public-example-continuation.mjs": "a01bf11d525078333080643332676be96df62a2656bf0326c59e6aed033deefd"
+  },
+  "evidence": {
+    "an-inherited-village/an-inherited-village-public-completion.png": "d8a7f6318fc27aed0689f477e13edc9f0de8dea47d904b910c7ca00f1c4fdab5",
+    "an-inherited-village/an-inherited-village-public-controls.json": "a3c8cfe1b1aaab0f91f2471400c3711d8c9015359f68a0c4b04666d5dd168c22",
+    "an-inherited-village/an-inherited-village-public-journal.png": "ae460f1c0ab6e3ac3947fb7688de268b7e394016d7fa1d7fd836e64a8fa25cf5",
+    "before-the-dry-season/before-the-dry-season-public-completion.png": "72f9a3de9efa212a3a13067c32c3899011e6c1e928b1f3005751dce349176578",
+    "before-the-dry-season/before-the-dry-season-public-controls.json": "8f2f4b561dc6c1b9ac032d545088c7a4b66af18133b135f42bbeecdbbf856716",
+    "before-the-dry-season/before-the-dry-season-public-journal.png": "250e70e9fef23a90ad43cc50684ca3b88e0f9e7bb9d1622126e0dff41997524c",
+    "first-clearing/first-clearing-public-completion.png": "8ae091a8750034b95d238f864c95c8e1107a6e0bbc36989f3902b9e4c47897b1",
+    "first-clearing/first-clearing-public-controls.json": "e5d8ded54db5f7941fc5c69b70b9baffbe6a626da9769578ff60389c8f76ca43",
+    "first-clearing/first-clearing-public-journal.png": "abb0f6512b3f94dfb4435c2cd1f9a45b915282c4892c5c323859f9697535926b",
+    "summary.json": "58893aec5a25d624f7291a4db38f86e8e7d7f8699350ac5af174a7be12795987"
+  }
+}
