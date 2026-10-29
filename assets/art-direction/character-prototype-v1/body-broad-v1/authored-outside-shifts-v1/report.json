@@ -1,0 +1,138 @@
+{
+  "completed": true,
+  "inputs": {
+    "scripts/verify-authored-outside-shifts.mjs": "e879cd9657321730da9d25f249515e20da099a084984556d81d31d06b3fabd71",
+    "scripts/outside-shift-fixture.mjs": "35c771f71c81c31c470049b40551ecdadd999059d2006e6bc2d87de51625325f",
+    "scripts/raw-memory-browser.mjs": "103bac0c9c56391e382c8bbfdf247823c0393c0f02f5dd38840dfc13592e8890",
+    "web/main.js": "8016457c583299583ffd9be019ca459995ecda57781ea16f1a6b5f322eb63356",
+    "web/simulation-speed.js": "affd4a3da3593f05dbd3ef31e63cd3d296fcde19350b026d978762eac8108c32",
+    "web/player-session.js": "118b06a29e5365987c49266d89cf563d6548a7024a7d44734bf9b80e71e6ef00",
+    "web/editor/index.js": "0517ae6819c51c7ed65533dc096476aee06448baae146714ac8cdef46abf9040",
+    "web/pkg/solar_friends.js": "d4a6c0bb50f2c79862380324e778525dd43971742fad1709bede04bd560abd23",
+    "web/pkg/solar_friends_bg.wasm": "9a61b739591b2614d3b4e867a1be60e4386338df8924156092c80726b4a8e082",
+    "web/resident-appearance-library.js": "e13cd02caa63c8907757dd881335d722fe811e9e5b325bf0fde617afb8ddabfa",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631",
+    "web/character-broad-family-bundle-index.js": "17d264e9080070a930a07efd36683cc4087144b9e233788602cf2d92a966ec23",
+    "web/art/characters/broad-v1/bundle-v1.json": "6d3f334aca027a80296ebc760e5d1214293ea027b3d0503d37e26a27c3c52f42",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/creator-playtest-memory-v1/fixture.solar-scenario": "5adc6008ae697b07f14a7d7e431b03ce4dc815c07c3d5b0d9304dea9cc581ebd"
+  },
+  "rawExecutable": "/Users/paladini/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "native": {
+    "allAwayAt": 774.75,
+    "paidAt": 1020,
+    "income": 240000,
+    "baseMinutesPerSecond": 3,
+    "initialFastForward": false,
+    "commuteFastForward": false
+  },
+  "cases": [
+    {
+      "shared": false,
+      "initial": {
+        "residents": 12,
+        "buildings": 256,
+        "money": 10000000,
+        "runId": "c65753e5-becc-4f98-a2cc-ecef5b82b456",
+        "unique": 12
+      },
+      "automatic": {
+        "wasAutomatic": true,
+        "stillAutomatic": true,
+        "preferred": "true",
+        "minutes": 97.99359130859375,
+        "wallMs": 2006.999999904634,
+        "p95GapMs": 25.600000000002183,
+        "away": 12,
+        "money": 10000000,
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "observedMultiplier": 16.27530166305432,
+        "targetMultiplier": 16,
+        "shortWindowTolerance": 2
+      },
+      "awayCheckpoint": {
+        "exactRestore": true,
+        "income": 240000,
+        "onceOnly": true
+      },
+      "returned": {
+        "minutes": 1023.306884765625,
+        "advancedMinutes": 3.1507568359375,
+        "wallMs": 1028,
+        "money": 10240000,
+        "laterMoney": 10240000,
+        "preferred": "true",
+        "autoHidden": true,
+        "paid": 12,
+        "returning": 12,
+        "observedMultiplier": 1.0216461854531453,
+        "targetMultiplier": 1,
+        "shortWindowTolerance": 0.2
+      },
+      "isolation": {
+        "draft": true,
+        "runRemoved": true,
+        "normal": true
+      }
+    },
+    {
+      "shared": true,
+      "initial": {
+        "residents": 12,
+        "buildings": 256,
+        "money": 10000000,
+        "runId": "4004f35b-c9ff-448f-9802-936611a63023",
+        "unique": 1
+      },
+      "automatic": {
+        "wasAutomatic": true,
+        "stillAutomatic": true,
+        "preferred": "true",
+        "minutes": 98.39654541015625,
+        "wallMs": 2015,
+        "p95GapMs": 25.899999999999636,
+        "away": 12,
+        "money": 10000000,
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "observedMultiplier": 16.277344153872,
+        "targetMultiplier": 16,
+        "shortWindowTolerance": 2
+      },
+      "awayCheckpoint": {
+        "exactRestore": true,
+        "income": 240000,
+        "onceOnly": true
+      },
+      "returned": {
+        "minutes": 1023.39453125,
+        "advancedMinutes": 3.12286376953125,
+        "wallMs": 1020.2999999523163,
+        "money": 10240000,
+        "laterMoney": 10240000,
+        "preferred": "true",
+        "autoHidden": true,
+        "paid": 12,
+        "returning": 12,
+        "observedMultiplier": 1.0202436439208065,
+        "targetMultiplier": 1,
+        "shortWindowTolerance": 0.2
+      },
+      "isolation": {
+        "draft": true,
+        "runRemoved": true,
+        "normal": true
+      }
+    }
+  ],
+  "scope": "Public authored-field outside shifts on one dense 64x64 property, twelve shared/unique Broad appearances. Public 8x commute, chosen 1x while automatic 16x runs, then return and once-only pay. No runtime state injection or developer speed override. DOM activation and short rAF timing are not trusted-input latency or physical-display pacing evidence.",
+  "browser": "HeadlessChrome/151.0.7922.34"
+}
