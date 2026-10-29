@@ -1,0 +1,26 @@
+{
+  "scope": "Controlled preparation rejection in an isolated public editor creator; actual retry click and real artwork preparation afterward. Not a production network outage or all creator recovery states.",
+  "inputs": {
+    "web/editor/character-creator.js": "d7556ecba710990dc94a545fa3e8a4bad2e796ec2d83af0965c1e4efd5f728c2",
+    "scripts/verify-character-preview-retry.mjs": "128ee3af26c73449b770bd9d8be5926913ec669737adb6fced7fc00f4cd9d2a0",
+    "scripts/verify-character-preview-lifecycle.mjs": "9134fa426133f43c27513bf251a9f62fa643925241cdf03144275e233deda6c6",
+    "scripts/verify-character-creator.mjs": "c4d0d24bd09782c0f1a9d3dbfe8ae4b3d68601593ac25bd2ad1930ee1d48d163"
+  },
+  "captures": {
+    "recovered.png": "859cbf74f1ccf588ff860db0f5e557218a1c5d6de0e58eb50a4e7ac0809ce7d1",
+    "failure.png": "5347e6892c0a3cb1ff552db5ccfd2ead183b1e3398a3fc0011e8ccd9b88db7f2"
+  },
+  "reviewed": [
+    "failure.png",
+    "recovered.png"
+  ],
+  "findings": [
+    "Failure message and retry are visible beside character controls; footer remains reachable at 1600x1000.",
+    "Successful retry restores matching full-body and portrait previews and hides retry."
+  ],
+  "checks": [
+    "Retry leaves resident and history unchanged.",
+    "Late rejection after close does not show retry or schedule animation.",
+    "Existing lifecycle and full creator journeys pass."
+  ]
+}
