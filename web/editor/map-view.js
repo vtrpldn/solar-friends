@@ -41,7 +41,7 @@ export class EditorMap {
     this.action=action;this.viewChanged=viewChanged;this.hover=hover;this.onArtworkReady=onArtworkReady;
     this.onTerrainReady=onTerrainReady;this.retryButton=retryButton;if(retryButton)retryButton.onclick=()=>{if(this.document&&this.snapshot)this.set(this.document,this.snapshot,null);};
     this.brushSize=3;
-    this.view={center:[32,32],zoom:1.3,selected:null,selection:[],tool:'select',grid:true};
+    this.view={center:[32,32],zoom:1.3,selected:null,selectedResident:null,selectedRoute:null,selectedBank:null,selectedSite:null,selection:[],tool:'select',grid:true};
     this.preview=preview;
     if(preview)return;
     this.observer=new ResizeObserver(()=>this.render());this.observer.observe(canvas);

@@ -1,0 +1,28 @@
+{
+  "status": "PASS owned-browser abrupt-exit recovery for this completed transaction and pending stroke",
+  "scope": "Abrupt SIGKILL of an explicitly owned disposable browser while a trusted road stroke is unfinished. Relaunch same isolated profile/origin, reopen through public library, compare saved checkpoint/view and history. Not power-loss, disk-failure or operating-system focus acceptance.",
+  "evidence": {
+    "report.json": "d84707a618d8edad0ea76dfd6e776f2f5144c8557ead22601f44f13763b777c3",
+    "before-crash.png": "f0a43f1ee253dfb8c086708d8b7ce633780d993f107448e8c873e6ae9e87d280",
+    "recovered.png": "ad50f7a0042facb4f4563227e8622b1954e9b747336b47dc83cd9d477736b285",
+    "committed-project.json": "d23fef3035a9493cdc7ef1d2462a5b6f810a05401d284c8009c42f01d78829e4"
+  },
+  "reviewedCaptures": [
+    "before-crash.png",
+    "recovered.png"
+  ],
+  "observations": [
+    "Before crash: completed road remains visible, second road is only a transient stroke preview.",
+    "After recovery: completed road and saved title/grid/tool survive, transient stroke is absent.",
+    "Exact durable checkpoint and view comparison pass, then Undo/Redo reproduce the completed road transaction."
+  ],
+  "supportingChecks": [
+    "Existing view-save/pending-pan/unload-cache regression passes.",
+    "Existing ten pointercancel/lostpointercapture/tool-switch cases pass."
+  ],
+  "limitations": [
+    "One default Mata Atl\u00e2ntica camp and road transaction, not every editor tool or save-write phase.",
+    "Abrupt browser-process termination, not power loss, filesystem corruption or OS focus validation.",
+    "Saved content recovery does not promise preservation of unfinished edits."
+  ]
+}

@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import {mkdtemp,mkdir,writeFile,readFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {createHash} from 'node:crypto';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+const output=process.argv[2]??'artifacts/editor-browser-crash-recovery',profile=await mkdtemp(join(tmpdir(),'solar-editor-crash-')),server=await serve(0),base=`http://127.0.0.1:${server.address().port}`;
+const sha=b=>createHash('sha256').update(b).digest('hex'),paths=['scripts/verify-editor-browser-crash-recovery.mjs','web/editor/index.js','web/editor/map-view.js','web/editor/document.js','web/content-library.js'];
+const report={completed:false,inputs:Object.fromEntries(await Promise.all(paths.map(async p=>[p,sha(await readFile(p))]))),scope:'Abrupt SIGKILL of an explicitly owned disposable browser while a trusted road stroke is unfinished. Relaunch same isolated profile/origin, reopen through public library, compare saved checkpoint/view and history. Not power-loss, disk-failure or operating-system focus acceptance.'};let context;
+await mkdir(output,{recursive:true});
+try{
+ const launch=()=>chromium.launchPersistentContext(profile,{headless:true,args:['--enable-automation'],viewport:{width:1600,height:1000}});
+ context=await launch();let page=context.pages()[0]??await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.addInitScript(()=>{window.crashProbeInstalled=true;window.addEventListener('beforeunload',()=>localStorage.setItem('solar-crash-test-unload','fired'));});
+ await page.goto(base+'/editor.html');await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.locator('[data-preset=camp]').click();
+ const ready=()=>page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='false'&&document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
+ const saved=()=>page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(undefined,{broadcast:false});try{return await library.getProject(new URL(location.href).searchParams.get('project'));}finally{library.close();}});
+ await ready();await page.locator('#creator-title').fill('Crash recovery clearing');await page.locator('#creator-title').press('Tab');await page.locator('[data-tool=road]').click();await page.locator('#creator-grid').uncheck();await page.locator('#creator-save').click();await ready();const initial=await saved();
+ const point=async(x,y)=>page.locator('#creator-map').evaluate((canvas,{x,y})=>{const origin=JSON.parse(canvas.dataset.origin),scale=Number(canvas.dataset.scale),box=canvas.getBoundingClientRect();return {x:box.x+origin.x+(x-y)*34*scale,y:box.y+origin.y+(x+y)*17*scale};},{x,y});
+ const stroke=async(from,to,release)=>{const a=await point(...from),b=await point(...to);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:6});if(release)await page.mouse.up();};
+ await stroke([30,35],[32,35],true);await page.locator('#creator-save').click();await ready();const committed=await saved();assert(committed.checkpoint.definition.start.roads.length>initial.checkpoint.definition.start.roads.length,'Completed road stroke was not saved');
+ const projectId=new URL(page.url()).searchParams.get('project');await writeFile(output+'/committed-project.json',JSON.stringify(committed,null,2)+'\n');
+ await stroke([30,37],[32,37],false);assert.equal(await page.evaluate(()=>window.crashProbeInstalled),true);assert.deepEqual((await saved()).checkpoint,committed.checkpoint,'Unfinished stroke reached durable history');await page.screenshot({path:output+'/before-crash.png'});
+ const browser=context.browser();assert(browser,'Need an owned persistent browser');const root=await browser.newBrowserCDPSession();const {arguments:args}=await root.send('Browser.getBrowserCommandLine');assert(args.includes('--user-data-dir='+profile),'Refuse to terminate a browser outside this disposable profile');const info=await root.send('SystemInfo.getProcessInfo'),owners=info.processInfo.filter(p=>p.type==='browser');assert.equal(owners.length,1);const pid=owners[0].id;assert(Number.isSafeInteger(pid)&&pid>1&&pid!==process.pid);
+ report.ownedProcess={pid,profile,ownershipConfirmed:true,browserVersion:browser.version()};
+ // Never send this signal to a PID inferred from a port or user browser.
+ process.kill(pid,'SIGKILL');
+ const deadline=Date.now()+10000;let gone=false;while(Date.now()<deadline){try{process.kill(pid,0);}catch(e){if(e.code==='ESRCH'){gone=true;break;}throw e;}await new Promise(r=>setTimeout(r,50));}assert(gone,'Owned browser process has not exited; do not relaunch it');report.processExitConfirmed=true;
+ await context.close().catch(()=>{});context=null;context=await launch();page=context.pages()[0]??await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(base+'/editor.html');await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');assert.equal(await page.evaluate(()=>localStorage.getItem('solar-crash-test-unload')),null,'Crash unexpectedly ran graceful beforeunload handling');
+ await page.locator(`[data-open-project="${projectId}"]`).click();await ready();const restored=await saved();assert.deepEqual(restored.checkpoint,committed.checkpoint,'Last committed document/history did not survive browser termination');assert.deepEqual(restored.view,committed.view,'Saved editor view did not survive browser termination');assert.equal(await page.locator('#creator-grid').isChecked(),false);assert.equal(await page.locator('#creator-title').inputValue(),'Crash recovery clearing');
+ await page.screenshot({path:output+'/recovered.png'});await page.locator('#creator-undo').click();await page.locator('#creator-save').click();await ready();const undone=await saved();assert.deepEqual(undone.checkpoint.definition.start.roads,initial.checkpoint.definition.start.roads,'Recovered undo did not remove exactly the completed stroke');
+ await page.locator('#creator-redo').click();await page.locator('#creator-save').click();await ready();const redone=await saved();assert.deepEqual(redone.checkpoint.definition,committed.checkpoint.definition,'Recovered redo changed the authored scenario');assert.deepEqual(errors,[]);
+ report.projectId=projectId;report.checks={checkpointExact:true,viewExact:true,unfinishedStrokeExcluded:true,noGracefulUnload:true,undoExact:true,redoExact:true};for(const p of paths)assert.equal(sha(await readFile(p)),report.inputs[p]);report.completed=true;await writeFile(output+'/report.json',JSON.stringify(report,null,2)+'\n');console.log('PASS owned-browser SIGKILL, same-profile public-library recovery, exact saved checkpoint/view, omitted unfinished stroke, no graceful unload and exact undo/redo.');
+}finally{await context?.close().catch(()=>{});await new Promise(resolve=>server.close(resolve));await rm(profile,{recursive:true,force:true});}
