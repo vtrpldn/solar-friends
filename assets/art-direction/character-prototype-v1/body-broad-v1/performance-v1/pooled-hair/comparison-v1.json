@@ -1,0 +1,65 @@
+{
+  "status": "Preparation throughput improved with exact prepared-pixel regression; full memory/release acceptance remains open",
+  "why": "Reuse a clipping probe within one family preparation and avoid reading its unused transparent area for every pose.",
+  "controlledCodeDifference": [
+    "web/character-hair-family.js"
+  ],
+  "exactComparison": {
+    "referenceCommit": "83a45c3",
+    "referenceHairSha256": "a1652aa06d60cb4f680bc1c9938a411129d78662dd6aed047f8ea8bab2e96cf7",
+    "comparisons": 200,
+    "portraits": 4,
+    "allOwnedSurfacesReleased": true,
+    "reference": {
+      "probes": 192,
+      "readbackPixels": 201326592
+    },
+    "current": {
+      "probes": 4,
+      "readbackPixels": 11422020
+    },
+    "inputs": {
+      "scripts/verify-pooled-hair-preparation.mjs": "d69e7675974bae35c60e49b57ca159e24232c94b676ca9c382dbcbb137786b07",
+      "web/character-hair-family.js": "4da3281eef01db7974226a01c5a8477220f65d9cfd0e161681288cf5e257325b",
+      "web/character-composed-family.js": "d7cdca2836eb60ef142044b5055479288568c84eb6f3aad12a8129acbefe3dd3"
+    }
+  },
+  "uniquePreparationMs": {
+    "before": [
+      4914,
+      4767.300000190735
+    ],
+    "after": [
+      3759.100000143051,
+      3562.300000190735
+    ]
+  },
+  "rssInterpretation": "Peak and released RSS vary only modestly in this run; no material memory reduction is claimed. The previous native-memory retention finding remains unresolved.",
+  "cleanupRegression": {
+    "poses": 48,
+    "equippedPoseDifferences": 20,
+    "returnPoseDifferences": 2,
+    "refusals": 25,
+    "partialFailureClean": true,
+    "sharedRecipeLeases": true,
+    "leasedEvictionProtected": true,
+    "libraryCleanup": true,
+    "sharedBodyInFlightCleanup": true,
+    "sharedBodyLive": 193,
+    "liveBefore": 123,
+    "allOwnedReleased": true,
+    "borrowedSources": 37
+  },
+  "browserReview": "The in-app Broad/curls preview and matching portrait loaded and were inspected; no captured warning/error logs.",
+  "invalidatedTrial": "The first pool benchmark was invalidated by a concurrent comment edit. Its partial measurements are excluded; this report uses the rerun with stable source fingerprints.",
+  "inputs": {
+    "web/character-hair-family.js": "4da3281eef01db7974226a01c5a8477220f65d9cfd0e161681288cf5e257325b",
+    "scripts/verify-pooled-hair-preparation.mjs": "d69e7675974bae35c60e49b57ca159e24232c94b676ca9c382dbcbb137786b07",
+    "scripts/benchmark-artwork-memory.mjs": "7751ac519c52cca23f27ffb7674cff9464f4453de526af54206f327937a75916"
+  },
+  "outputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/pooled-hair/in-app-preview.png": "39a835948067ea8f1ebcfffa03ce7193e798438e94742b8db39ccf360524693e",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/pooled-hair/exact-comparison.json": "0928fbf1e5b61b1472c6d5421d4761e6d6964fce5b00040d01b4b49928c4ebe0",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/pooled-hair/memory-report.json": "c4c96e5a8469bf6c664da5979c6b6bb06e89ebe9c0a320bb083ec708f47d92fc"
+  }
+}
