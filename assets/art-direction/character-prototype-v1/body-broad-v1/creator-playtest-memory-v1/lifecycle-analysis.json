@@ -1,0 +1,59 @@
+{
+  "rounds": [
+    {
+      "cast": "shared",
+      "cycle": 1,
+      "dom": {
+        "documents": 1,
+        "nodes": 18976,
+        "jsEventListeners": 169
+      },
+      "editorCanvasBytes": 140115268,
+      "returnedPrivateFootprintBytes": 638061568,
+      "playtestPrivateFootprintBytes": 824200192
+    },
+    {
+      "cast": "shared",
+      "cycle": 2,
+      "dom": {
+        "documents": 1,
+        "nodes": 18976,
+        "jsEventListeners": 169
+      },
+      "editorCanvasBytes": 140115268,
+      "returnedPrivateFootprintBytes": 636259328,
+      "playtestPrivateFootprintBytes": 780143616
+    },
+    {
+      "cast": "unique",
+      "cycle": 1,
+      "dom": {
+        "documents": 1,
+        "nodes": 19607,
+        "jsEventListeners": 169
+      },
+      "editorCanvasBytes": 319211244,
+      "returnedPrivateFootprintBytes": 970363904,
+      "playtestPrivateFootprintBytes": 1068979200
+    },
+    {
+      "cast": "unique",
+      "cycle": 2,
+      "dom": {
+        "documents": 1,
+        "nodes": 19607,
+        "jsEventListeners": 169
+      },
+      "editorCanvasBytes": 319211244,
+      "returnedPrivateFootprintBytes": 780702720,
+      "playtestPrivateFootprintBytes": 893326336
+    }
+  ],
+  "emptyCreator": {
+    "baselineCanvasBytes": 11366912,
+    "terminalCanvasBytes": 11366912,
+    "baselinePrivateFootprintBytes": 140329984,
+    "terminalPrivateFootprintBytes": 245485568
+  },
+  "scope": "Exact observed DOM/listener and native canvas round trips for these short editor/playtest cycles. The final library contains the two authored fixture entries, so its total DOM-node count can differ from the initial empty collection. Private footprint is recorded separately; this does not prove a permanent memory plateau, asynchronous-loading peak, 16x performance, all-biome coverage or a release memory budget."
+}

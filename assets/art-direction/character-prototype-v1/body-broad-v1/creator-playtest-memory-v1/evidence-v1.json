@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "status": "short-full-editor-playtest-round-trips-verified-not-release-acceptance",
+  "files": {
+    "fixture.solar-scenario": "5adc6008ae697b07f14a7d7e431b03ce4dc815c07c3d5b0d9304dea9cc581ebd",
+    "lifecycle-analysis.json": "31d8e8e5a34ea12deb774e17c2a591e475a121b6837da244c065bb7cb4e7e526",
+    "memory-trace.json.gz": "12c7f8b18486a5d4edb6fc9f6c2db7c3108ef5b35b24cd64c55c2126ee6fa9a5",
+    "native-analysis.json": "b715b869499780b3f7df45264a7f2e37f2ce1398b3604261599b2b95347d5e78",
+    "report.json": "1b3f8ad8df7fd7f0e3ea25c9f4f26bdad165fb32d75e14533da1f5beb4a9db60",
+    "review-verdict-v1.json": "a05fd49d5ad2051ca8034ce89256943c4e7ed9c35dc43638dea239ee4a139be3",
+    "shared-2-playtest.png": "6d468924009f64f472e827a2453212287a068255f46630ece73c1a959c5b56be",
+    "unique-2-playtest.png": "2baf2af9a7d663ebe4e9ec7b5e59d119c0652f1bcd1003d37f1e7c0b56ffa035"
+  },
+  "tools": {
+    "scripts/benchmark-creator-playtest-memory.mjs": "90019370ee7f6ced9ef14af408c05c179f1e3ca1e43fa12967f90966d60a48a0",
+    "scripts/analyze-creator-playtest-memory.mjs": "b824f2e3807e3475b0ca98721086c1bff9a673be98c59276baf1ca5c0213a9cf",
+    "scripts/verify-creator-memory-analysis.mjs": "cc713d04881ea41bcce0383549b2da1a733399278e2cf466cae559bd3b23513b",
+    "scripts/analyze-artwork-native-memory.mjs": "a003631d482de5c4597c23ddd75ff4a7c69dfc185514b10a420347a934e57aa1",
+    "scripts/verify-artwork-native-memory-analysis.mjs": "4a0abb8625f16eecb33881ee8c1fd979d4ed5626fca7900bd1c2c57aed7dbc7b"
+  }
+}

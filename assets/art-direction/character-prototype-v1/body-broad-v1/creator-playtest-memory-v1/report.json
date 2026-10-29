@@ -1,0 +1,1137 @@
+{
+  "completed": true,
+  "biome": "mata-atlantica",
+  "cyclesPerCast": 2,
+  "secondsPerSpeed": 2,
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "residentStyle": "broad",
+    "appearanceRevisions": {
+      "resident-parts-v7": 12
+    },
+    "uniqueAppearances": 12,
+    "attempted": 312,
+    "seed": 42
+  },
+  "fixtureDefinitionSha256": "5adc6008ae697b07f14a7d7e431b03ce4dc815c07c3d5b0d9304dea9cc581ebd",
+  "inputs": {
+    "scripts/benchmark-creator-playtest-memory.mjs": "90019370ee7f6ced9ef14af408c05c179f1e3ca1e43fa12967f90966d60a48a0",
+    "scripts/raw-memory-browser.mjs": "103bac0c9c56391e382c8bbfdf247823c0393c0f02f5dd38840dfc13592e8890",
+    "scripts/mixed-builder-fixture.mjs": "a0341d8bce537e1106e2828ef55b63fc09645404ad81f59d625b2a4e91218d2b",
+    "web/main.js": "8016457c583299583ffd9be019ca459995ecda57781ea16f1a6b5f322eb63356",
+    "web/editor/index.js": "0517ae6819c51c7ed65533dc096476aee06448baae146714ac8cdef46abf9040",
+    "web/editor/map-view.js": "caf7ff9bd45afc31e87b12c4c866311c79ba6e3ed71c89b12ed38f6cded91398",
+    "web/content-library.js": "dec91760869e5023d00798af447ea7a5979117febb2a96f00f0d12465281b49a",
+    "web/player-session.js": "118b06a29e5365987c49266d89cf563d6548a7024a7d44734bf9b80e71e6ef00",
+    "web/resident-appearance-library.js": "e13cd02caa63c8907757dd881335d722fe811e9e5b325bf0fde617afb8ddabfa",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631",
+    "web/resident-family-parts.js": "48802400c4942128694edec58c665a3fa5ee5461223378095e6e559f4152ede5",
+    "web/resident-family-provider.js": "103dbb9287de742970f85bd108541c46848305c54e28f795f9235c5cda105bce",
+    "web/character-composed-family-bundle.js": "423ec62d13a698a87a70bb0d8c5b39a78d950ec71d9aea79287587c13cb91919",
+    "web/character-broad-family-bundle-index.js": "17d264e9080070a930a07efd36683cc4087144b9e233788602cf2d92a966ec23",
+    "web/art/characters/broad-v1/bundle-v1.json": "6d3f334aca027a80296ebc760e5d1214293ea027b3d0503d37e26a27c3c52f42",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/world-backdrop.js": "c8db32139dab1cd95024ad58a3e16b49e98bebefa445346952e9ce1fa002b41c",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/pkg/solar_friends.js": "d4a6c0bb50f2c79862380324e778525dd43971742fad1709bede04bd560abd23",
+    "web/pkg/solar_friends_bg.wasm": "9a61b739591b2614d3b4e867a1be60e4386338df8924156092c80726b4a8e082"
+  },
+  "rawExecutable": "/Users/paladini/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell",
+  "networkInspectionEnabled": false,
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "environment": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro",
+    "browser": "HeadlessChrome/151.0.7922.34"
+  },
+  "stages": [
+    {
+      "label": "empty creator baseline",
+      "dom": {
+        "documents": 1,
+        "nodes": 1638,
+        "jsEventListeners": 171
+      },
+      "heap": {
+        "usedSize": 1648004,
+        "totalSize": 2359296,
+        "embedderHeapUsedSize": 2659064,
+        "backingStorageSize": 672057
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/editor.html",
+        "canvasPixels": 857680,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "shared-1 editor ready",
+      "dom": {
+        "documents": 1,
+        "nodes": 18976,
+        "jsEventListeners": 169
+      },
+      "heap": {
+        "usedSize": 9314656,
+        "totalSize": 9732096,
+        "embedderHeapUsedSize": 8958504,
+        "backingStorageSize": 20171772
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/editor.html?project=55bee7d4-2a82-457f-aabf-0edd68229618",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "shared-1 playtest paused",
+      "dom": {
+        "documents": 2,
+        "nodes": 12150,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 9645104,
+        "totalSize": 10387456,
+        "embedderHeapUsedSize": 7583320,
+        "backingStorageSize": 20321651
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/?run=db65ce6c-62aa-4c66-a15a-b1ed7a2209f0",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14650360,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14650360,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 913770,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "shared-1 playtest ran",
+      "dom": {
+        "documents": 3,
+        "nodes": 12360,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 10092464,
+        "totalSize": 10911744,
+        "embedderHeapUsedSize": 8753824,
+        "backingStorageSize": 20321829
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/?run=db65ce6c-62aa-4c66-a15a-b1ed7a2209f0",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14650360,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14650360,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 916938,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "shared-1 returned editor",
+      "dom": {
+        "documents": 1,
+        "nodes": 18976,
+        "jsEventListeners": 169
+      },
+      "heap": {
+        "usedSize": 9340080,
+        "totalSize": 9732096,
+        "embedderHeapUsedSize": 9026176,
+        "backingStorageSize": 20172380
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/editor.html?project=55bee7d4-2a82-457f-aabf-0edd68229618",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "shared-2 editor ready",
+      "dom": {
+        "documents": 1,
+        "nodes": 18976,
+        "jsEventListeners": 169
+      },
+      "heap": {
+        "usedSize": 9339800,
+        "totalSize": 9732096,
+        "embedderHeapUsedSize": 9018936,
+        "backingStorageSize": 20172529
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/editor.html?project=55bee7d4-2a82-457f-aabf-0edd68229618",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "shared-2 playtest paused",
+      "dom": {
+        "documents": 2,
+        "nodes": 12150,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 9616348,
+        "totalSize": 10387456,
+        "embedderHeapUsedSize": 7666040,
+        "backingStorageSize": 20321657
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/?run=76b9684a-ba39-4da1-8c62-0c4a035427ce",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14650360,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14650360,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 913770,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "shared-2 playtest ran",
+      "dom": {
+        "documents": 3,
+        "nodes": 12360,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 10169532,
+        "totalSize": 10911744,
+        "embedderHeapUsedSize": 8841672,
+        "backingStorageSize": 20321835
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/?run=76b9684a-ba39-4da1-8c62-0c4a035427ce",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14650360,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14650360,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 910476,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "shared-2 returned editor",
+      "dom": {
+        "documents": 1,
+        "nodes": 18976,
+        "jsEventListeners": 169
+      },
+      "heap": {
+        "usedSize": 9336484,
+        "totalSize": 9732096,
+        "embedderHeapUsedSize": 9031712,
+        "backingStorageSize": 20172380
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/editor.html?project=55bee7d4-2a82-457f-aabf-0edd68229618",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "unique-1 editor ready",
+      "dom": {
+        "documents": 1,
+        "nodes": 19607,
+        "jsEventListeners": 169
+      },
+      "heap": {
+        "usedSize": 15592372,
+        "totalSize": 16023552,
+        "embedderHeapUsedSize": 11286120,
+        "backingStorageSize": 20172376
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/editor.html?project=c44fc997-ddaf-45bf-be1c-12c443b48157",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "unique-1 playtest paused",
+      "dom": {
+        "documents": 2,
+        "nodes": 12781,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 15766560,
+        "totalSize": 16678912,
+        "embedderHeapUsedSize": 9790824,
+        "backingStorageSize": 20321657
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/?run=5bb7c30a-e19f-42ff-8885-a7d1b107aa80",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 173852864,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 173852864,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 900224,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "unique-1 playtest ran",
+      "dom": {
+        "documents": 3,
+        "nodes": 12991,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 16183968,
+        "totalSize": 16941056,
+        "embedderHeapUsedSize": 10796544,
+        "backingStorageSize": 20321835
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/?run=5bb7c30a-e19f-42ff-8885-a7d1b107aa80",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 173852864,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 173852864,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 903218,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "unique-1 returned editor",
+      "dom": {
+        "documents": 1,
+        "nodes": 19607,
+        "jsEventListeners": 169
+      },
+      "heap": {
+        "usedSize": 15574748,
+        "totalSize": 16023552,
+        "embedderHeapUsedSize": 11275704,
+        "backingStorageSize": 20172380
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/editor.html?project=c44fc997-ddaf-45bf-be1c-12c443b48157",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "unique-2 editor ready",
+      "dom": {
+        "documents": 1,
+        "nodes": 19607,
+        "jsEventListeners": 169
+      },
+      "heap": {
+        "usedSize": 15627584,
+        "totalSize": 16023552,
+        "embedderHeapUsedSize": 11275560,
+        "backingStorageSize": 20172529
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/editor.html?project=c44fc997-ddaf-45bf-be1c-12c443b48157",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "unique-2 playtest paused",
+      "dom": {
+        "documents": 2,
+        "nodes": 12781,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 15767832,
+        "totalSize": 16678912,
+        "embedderHeapUsedSize": 9716368,
+        "backingStorageSize": 20321657
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/?run=e49138f3-22e3-40f3-b595-dda857938e07",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 173852864,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 173852864,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 900224,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "unique-2 playtest ran",
+      "dom": {
+        "documents": 3,
+        "nodes": 12991,
+        "jsEventListeners": 257
+      },
+      "heap": {
+        "usedSize": 16320228,
+        "totalSize": 17203200,
+        "embedderHeapUsedSize": 10614200,
+        "backingStorageSize": 20321835
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/?run=e49138f3-22e3-40f3-b595-dda857938e07",
+        "canvasPixels": 2997824,
+        "artwork": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 173852864,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 173852864,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        },
+        "scratch": {
+          "count": 12,
+          "pixels": 902520,
+          "ids": [
+            0,
+            5,
+            1,
+            10,
+            6,
+            2,
+            11,
+            7,
+            3,
+            8,
+            4,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "label": "unique-2 returned editor",
+      "dom": {
+        "documents": 1,
+        "nodes": 19607,
+        "jsEventListeners": 169
+      },
+      "heap": {
+        "usedSize": 15572820,
+        "totalSize": 16023552,
+        "embedderHeapUsedSize": 11284072,
+        "backingStorageSize": 20172380
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/editor.html?project=c44fc997-ddaf-45bf-be1c-12c443b48157",
+        "canvasPixels": 2161984,
+        "artwork": null,
+        "scratch": null
+      }
+    },
+    {
+      "label": "empty creator terminal",
+      "dom": {
+        "documents": 1,
+        "nodes": 1678,
+        "jsEventListeners": 171
+      },
+      "heap": {
+        "usedSize": 1812776,
+        "totalSize": 2359296,
+        "embedderHeapUsedSize": 2726944,
+        "backingStorageSize": 673178
+      },
+      "view": {
+        "url": "http://127.0.0.1:63810/editor.html",
+        "canvasPixels": 857680,
+        "artwork": null,
+        "scratch": null
+      }
+    }
+  ],
+  "runs": [
+    {
+      "cast": "shared",
+      "cycle": 1,
+      "initial": {
+        "minutes": 480,
+        "residents": 12,
+        "buildings": 256,
+        "uniqueAppearances": 1,
+        "artworkEntries": 1,
+        "runId": "db65ce6c-62aa-4c66-a15a-b1ed7a2209f0"
+      },
+      "timings": [
+        {
+          "requestedSpeed": 1,
+          "wallMs": 2005.500000047684,
+          "advancedMinutes": 6.025787353515625,
+          "frames": 119,
+          "p95GapMs": 25
+        },
+        {
+          "requestedSpeed": 8,
+          "wallMs": 2013.300000047684,
+          "advancedMinutes": 49.397674560546875,
+          "frames": 107,
+          "p95GapMs": 25.900000000000546
+        }
+      ],
+      "returned": {
+        "draftPreserved": true,
+        "runRemoved": true,
+        "normalStoragePreserved": true,
+        "project": "55bee7d4-2a82-457f-aabf-0edd68229618"
+      }
+    },
+    {
+      "cast": "shared",
+      "cycle": 2,
+      "initial": {
+        "minutes": 480,
+        "residents": 12,
+        "buildings": 256,
+        "uniqueAppearances": 1,
+        "artworkEntries": 1,
+        "runId": "76b9684a-ba39-4da1-8c62-0c4a035427ce"
+      },
+      "timings": [
+        {
+          "requestedSpeed": 1,
+          "wallMs": 2014.5000000953678,
+          "advancedMinutes": 6.04888916015625,
+          "frames": 116,
+          "p95GapMs": 25
+        },
+        {
+          "requestedSpeed": 8,
+          "wallMs": 2007.2000000476837,
+          "advancedMinutes": 49.22021484375,
+          "frames": 103,
+          "p95GapMs": 33.30000000000018
+        }
+      ],
+      "returned": {
+        "draftPreserved": true,
+        "runRemoved": true,
+        "normalStoragePreserved": true,
+        "project": "55bee7d4-2a82-457f-aabf-0edd68229618"
+      }
+    },
+    {
+      "cast": "unique",
+      "cycle": 1,
+      "initial": {
+        "minutes": 480,
+        "residents": 12,
+        "buildings": 256,
+        "uniqueAppearances": 12,
+        "artworkEntries": 12,
+        "runId": "5bb7c30a-e19f-42ff-8885-a7d1b107aa80"
+      },
+      "timings": [
+        {
+          "requestedSpeed": 1,
+          "wallMs": 2003.6000000953682,
+          "advancedMinutes": 6.023040771484375,
+          "frames": 117,
+          "p95GapMs": 25
+        },
+        {
+          "requestedSpeed": 8,
+          "wallMs": 2019.9000001430504,
+          "advancedMinutes": 49.416717529296875,
+          "frames": 103,
+          "p95GapMs": 33.29999999999927
+        }
+      ],
+      "returned": {
+        "draftPreserved": true,
+        "runRemoved": true,
+        "normalStoragePreserved": true,
+        "project": "c44fc997-ddaf-45bf-be1c-12c443b48157"
+      }
+    },
+    {
+      "cast": "unique",
+      "cycle": 2,
+      "initial": {
+        "minutes": 480,
+        "residents": 12,
+        "buildings": 256,
+        "uniqueAppearances": 12,
+        "artworkEntries": 12,
+        "runId": "e49138f3-22e3-40f3-b595-dda857938e07"
+      },
+      "timings": [
+        {
+          "requestedSpeed": 1,
+          "wallMs": 2014.1999998569481,
+          "advancedMinutes": 6.050537109375,
+          "frames": 120,
+          "p95GapMs": 25
+        },
+        {
+          "requestedSpeed": 8,
+          "wallMs": 2011.0999999523156,
+          "advancedMinutes": 49.40240478515625,
+          "frames": 109,
+          "p95GapMs": 26
+        }
+      ],
+      "returned": {
+        "draftPreserved": true,
+        "runRemoved": true,
+        "normalStoragePreserved": true,
+        "project": "c44fc997-ddaf-45bf-be1c-12c443b48157"
+      }
+    }
+  ],
+  "nativeDumps": {
+    "enabled": true,
+    "requests": [
+      {
+        "label": "empty creator baseline",
+        "beforeMarker": "creator-playtest-memory-0-before",
+        "afterMarker": "creator-playtest-memory-0-after",
+        "dumpGuid": "0x1",
+        "success": true
+      },
+      {
+        "label": "shared-1 editor ready",
+        "beforeMarker": "creator-playtest-memory-1-before",
+        "afterMarker": "creator-playtest-memory-1-after",
+        "dumpGuid": "0x2",
+        "success": true
+      },
+      {
+        "label": "shared-1 playtest paused",
+        "beforeMarker": "creator-playtest-memory-2-before",
+        "afterMarker": "creator-playtest-memory-2-after",
+        "dumpGuid": "0x3",
+        "success": true
+      },
+      {
+        "label": "shared-1 playtest ran",
+        "beforeMarker": "creator-playtest-memory-3-before",
+        "afterMarker": "creator-playtest-memory-3-after",
+        "dumpGuid": "0x4",
+        "success": true
+      },
+      {
+        "label": "shared-1 returned editor",
+        "beforeMarker": "creator-playtest-memory-4-before",
+        "afterMarker": "creator-playtest-memory-4-after",
+        "dumpGuid": "0x5",
+        "success": true
+      },
+      {
+        "label": "shared-2 editor ready",
+        "beforeMarker": "creator-playtest-memory-5-before",
+        "afterMarker": "creator-playtest-memory-5-after",
+        "dumpGuid": "0x6",
+        "success": true
+      },
+      {
+        "label": "shared-2 playtest paused",
+        "beforeMarker": "creator-playtest-memory-6-before",
+        "afterMarker": "creator-playtest-memory-6-after",
+        "dumpGuid": "0x7",
+        "success": true
+      },
+      {
+        "label": "shared-2 playtest ran",
+        "beforeMarker": "creator-playtest-memory-7-before",
+        "afterMarker": "creator-playtest-memory-7-after",
+        "dumpGuid": "0x8",
+        "success": true
+      },
+      {
+        "label": "shared-2 returned editor",
+        "beforeMarker": "creator-playtest-memory-8-before",
+        "afterMarker": "creator-playtest-memory-8-after",
+        "dumpGuid": "0x9",
+        "success": true
+      },
+      {
+        "label": "unique-1 editor ready",
+        "beforeMarker": "creator-playtest-memory-9-before",
+        "afterMarker": "creator-playtest-memory-9-after",
+        "dumpGuid": "0xa",
+        "success": true
+      },
+      {
+        "label": "unique-1 playtest paused",
+        "beforeMarker": "creator-playtest-memory-10-before",
+        "afterMarker": "creator-playtest-memory-10-after",
+        "dumpGuid": "0xb",
+        "success": true
+      },
+      {
+        "label": "unique-1 playtest ran",
+        "beforeMarker": "creator-playtest-memory-11-before",
+        "afterMarker": "creator-playtest-memory-11-after",
+        "dumpGuid": "0xc",
+        "success": true
+      },
+      {
+        "label": "unique-1 returned editor",
+        "beforeMarker": "creator-playtest-memory-12-before",
+        "afterMarker": "creator-playtest-memory-12-after",
+        "dumpGuid": "0xd",
+        "success": true
+      },
+      {
+        "label": "unique-2 editor ready",
+        "beforeMarker": "creator-playtest-memory-13-before",
+        "afterMarker": "creator-playtest-memory-13-after",
+        "dumpGuid": "0xe",
+        "success": true
+      },
+      {
+        "label": "unique-2 playtest paused",
+        "beforeMarker": "creator-playtest-memory-14-before",
+        "afterMarker": "creator-playtest-memory-14-after",
+        "dumpGuid": "0xf",
+        "success": true
+      },
+      {
+        "label": "unique-2 playtest ran",
+        "beforeMarker": "creator-playtest-memory-15-before",
+        "afterMarker": "creator-playtest-memory-15-after",
+        "dumpGuid": "0x10",
+        "success": true
+      },
+      {
+        "label": "unique-2 returned editor",
+        "beforeMarker": "creator-playtest-memory-16-before",
+        "afterMarker": "creator-playtest-memory-16-after",
+        "dumpGuid": "0x11",
+        "success": true
+      },
+      {
+        "label": "empty creator terminal",
+        "beforeMarker": "creator-playtest-memory-17-before",
+        "afterMarker": "creator-playtest-memory-17-after",
+        "dumpGuid": "0x12",
+        "success": true
+      }
+    ],
+    "trace": {
+      "path": "artifacts/creator-playtest-memory-final/memory-trace.json",
+      "sha256": "3bbf82f6e8916c3e6dca4616580e535d687fc36a66c80b725ef8b71cbd9dd941",
+      "bytes": 61916707
+    }
+  },
+  "scope": "Full desktop 64x64 editor and isolated public playtest transitions with 256 mixed buildings and twelve Broad residents, shared/unique appearances. Draft fixtures are installed through the content-library API. Controls use DOM button activation, not trusted input latency. Memory dumps are readiness-state observations, not asynchronous-loading peak allocations. Running samples use public 1x/8x controls; 16x, long simulation, full-game budgets and physical-display pacing remain separate gates."
+}

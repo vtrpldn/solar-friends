@@ -1,0 +1,1394 @@
+{
+  "automation": null,
+  "networkInspectionEnabled": false,
+  "stages": [
+    {
+      "label": "empty creator baseline",
+      "requestGuid": "0x1",
+      "markerRange": [
+        1098554643051,
+        1098554729633
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 140329984,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 4718592,
+              "effectiveSizeBytes": 2169176
+            },
+            "blink_objects": {
+              "sizeBytes": 2549400,
+              "effectiveSizeBytes": 2549400
+            },
+            "canvas": {
+              "sizeBytes": 11366912,
+              "effectiveSizeBytes": 11366912
+            },
+            "cc": {
+              "sizeBytes": 439369728,
+              "effectiveSizeBytes": 424599552
+            },
+            "discardable": {
+              "sizeBytes": 419151872,
+              "effectiveSizeBytes": 9404416
+            },
+            "malloc": {
+              "sizeBytes": 59365424,
+              "effectiveSizeBytes": 46874003
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 72220672,
+              "effectiveSizeBytes": 72014954
+            },
+            "shared_memory": {
+              "sizeBytes": 455868416,
+              "effectiveSizeBytes": 18418892
+            },
+            "site_storage": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "skia": {
+              "sizeBytes": 1045605,
+              "effectiveSizeBytes": 1045605
+            },
+            "v8": {
+              "sizeBytes": 4076532,
+              "effectiveSizeBytes": 4076532
+            },
+            "web_cache": {
+              "sizeBytes": 58050982,
+              "effectiveSizeBytes": 58050982
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "shared-1 editor ready",
+      "requestGuid": "0x2",
+      "markerRange": [
+        1098557706822,
+        1098557791332
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 596659200,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 14663760,
+              "effectiveSizeBytes": 5720418
+            },
+            "blink_objects": {
+              "sizeBytes": 8943304,
+              "effectiveSizeBytes": 8943304
+            },
+            "canvas": {
+              "sizeBytes": 140115268,
+              "effectiveSizeBytes": 140115268
+            },
+            "cc": {
+              "sizeBytes": 480264192,
+              "effectiveSizeBytes": 471244800
+            },
+            "discardable": {
+              "sizeBytes": 534003712,
+              "effectiveSizeBytes": 71942144
+            },
+            "malloc": {
+              "sizeBytes": 514379840,
+              "effectiveSizeBytes": 373584622
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 41598976,
+              "effectiveSizeBytes": 41393275
+            },
+            "shared_memory": {
+              "sizeBytes": 567377920,
+              "effectiveSizeBytes": 16747724
+            },
+            "site_storage": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "skia": {
+              "sizeBytes": 884735,
+              "effectiveSizeBytes": 884735
+            },
+            "v8": {
+              "sizeBytes": 11657148,
+              "effectiveSizeBytes": 11657148
+            },
+            "web_cache": {
+              "sizeBytes": 58050982,
+              "effectiveSizeBytes": 58050982
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "shared-1 playtest paused",
+      "requestGuid": "0x3",
+      "markerRange": [
+        1098561972816,
+        1098562056575
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 745360384,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 14401616,
+              "effectiveSizeBytes": 7282125
+            },
+            "blink_objects": {
+              "sizeBytes": 7119400,
+              "effectiveSizeBytes": 7119400
+            },
+            "canvas": {
+              "sizeBytes": 213346060,
+              "effectiveSizeBytes": 213346060
+            },
+            "cc": {
+              "sizeBytes": 552796160,
+              "effectiveSizeBytes": 548544512
+            },
+            "discardable": {
+              "sizeBytes": 539787264,
+              "effectiveSizeBytes": 2670592
+            },
+            "malloc": {
+              "sizeBytes": 641882688,
+              "effectiveSizeBytes": 427532361
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 71630848,
+              "effectiveSizeBytes": 71267939
+            },
+            "shared_memory": {
+              "sizeBytes": 579567616,
+              "effectiveSizeBytes": 19950796
+            },
+            "site_storage": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "skia": {
+              "sizeBytes": 889643,
+              "effectiveSizeBytes": 889643
+            },
+            "v8": {
+              "sizeBytes": 12091260,
+              "effectiveSizeBytes": 12091260
+            },
+            "web_cache": {
+              "sizeBytes": 96211447,
+              "effectiveSizeBytes": 96211447
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "shared-1 playtest ran",
+      "requestGuid": "0x4",
+      "markerRange": [
+        1098566232270,
+        1098566313819
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 824200192,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 19546272,
+              "effectiveSizeBytes": 11292693
+            },
+            "blink_objects": {
+              "sizeBytes": 8253488,
+              "effectiveSizeBytes": 8253488
+            },
+            "canvas": {
+              "sizeBytes": 213358732,
+              "effectiveSizeBytes": 213358732
+            },
+            "cc": {
+              "sizeBytes": 552796160,
+              "effectiveSizeBytes": 547938304
+            },
+            "discardable": {
+              "sizeBytes": 539803648,
+              "effectiveSizeBytes": 2670592
+            },
+            "malloc": {
+              "sizeBytes": 717940384,
+              "effectiveSizeBytes": 503497171
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 68534272,
+              "effectiveSizeBytes": 68171371
+            },
+            "shared_memory": {
+              "sizeBytes": 580108288,
+              "effectiveSizeBytes": 20212940
+            },
+            "site_storage": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "skia": {
+              "sizeBytes": 923849,
+              "effectiveSizeBytes": 923849
+            },
+            "v8": {
+              "sizeBytes": 12530484,
+              "effectiveSizeBytes": 12530484
+            },
+            "web_cache": {
+              "sizeBytes": 96211447,
+              "effectiveSizeBytes": 96211447
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "shared-1 returned editor",
+      "requestGuid": "0x5",
+      "markerRange": [
+        1098569474984,
+        1098569568351
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 638061568,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 18841680,
+              "effectiveSizeBytes": 9829916
+            },
+            "blink_objects": {
+              "sizeBytes": 9011672,
+              "effectiveSizeBytes": 9011672
+            },
+            "canvas": {
+              "sizeBytes": 140115268,
+              "effectiveSizeBytes": 140115268
+            },
+            "cc": {
+              "sizeBytes": 497238016,
+              "effectiveSizeBytes": 488005632
+            },
+            "discardable": {
+              "sizeBytes": 526139392,
+              "effectiveSizeBytes": 47005696
+            },
+            "malloc": {
+              "sizeBytes": 539217408,
+              "effectiveSizeBytes": 398157474
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 37289984,
+              "effectiveSizeBytes": 34821517
+            },
+            "shared_memory": {
+              "sizeBytes": 559939584,
+              "effectiveSizeBytes": 16960716
+            },
+            "site_storage": {
+              "sizeBytes": 2262767,
+              "effectiveSizeBytes": 2262767
+            },
+            "skia": {
+              "sizeBytes": 1237537,
+              "effectiveSizeBytes": 1237537
+            },
+            "v8": {
+              "sizeBytes": 11683756,
+              "effectiveSizeBytes": 11683756
+            },
+            "web_cache": {
+              "sizeBytes": 58050982,
+              "effectiveSizeBytes": 58050982
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "shared-2 editor ready",
+      "requestGuid": "0x6",
+      "markerRange": [
+        1098572441697,
+        1098572535884
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 622103552,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 19480576,
+              "effectiveSizeBytes": 10473723
+            },
+            "blink_objects": {
+              "sizeBytes": 9006712,
+              "effectiveSizeBytes": 9006712
+            },
+            "canvas": {
+              "sizeBytes": 140115268,
+              "effectiveSizeBytes": 140115268
+            },
+            "cc": {
+              "sizeBytes": 500449280,
+              "effectiveSizeBytes": 491216896
+            },
+            "discardable": {
+              "sizeBytes": 536117248,
+              "effectiveSizeBytes": 53837824
+            },
+            "malloc": {
+              "sizeBytes": 535621472,
+              "effectiveSizeBytes": 394561554
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 34439168,
+              "effectiveSizeBytes": 31970718
+            },
+            "shared_memory": {
+              "sizeBytes": 569917440,
+              "effectiveSizeBytes": 16960716
+            },
+            "site_storage": {
+              "sizeBytes": 2262767,
+              "effectiveSizeBytes": 2262767
+            },
+            "skia": {
+              "sizeBytes": 1172001,
+              "effectiveSizeBytes": 1172001
+            },
+            "v8": {
+              "sizeBytes": 11831212,
+              "effectiveSizeBytes": 11831212
+            },
+            "web_cache": {
+              "sizeBytes": 58050982,
+              "effectiveSizeBytes": 58050982
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "shared-2 playtest paused",
+      "requestGuid": "0x7",
+      "markerRange": [
+        1098576580984,
+        1098576679804
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 754584576,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 16089248,
+              "effectiveSizeBytes": 8969439
+            },
+            "blink_objects": {
+              "sizeBytes": 7119712,
+              "effectiveSizeBytes": 7119712
+            },
+            "canvas": {
+              "sizeBytes": 213346060,
+              "effectiveSizeBytes": 213346060
+            },
+            "cc": {
+              "sizeBytes": 550027264,
+              "effectiveSizeBytes": 542138368
+            },
+            "discardable": {
+              "sizeBytes": 538247168,
+              "effectiveSizeBytes": 3899392
+            },
+            "malloc": {
+              "sizeBytes": 650242912,
+              "effectiveSizeBytes": 435826111
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 68091904,
+              "effectiveSizeBytes": 65466229
+            },
+            "shared_memory": {
+              "sizeBytes": 577748992,
+              "effectiveSizeBytes": 19819724
+            },
+            "site_storage": {
+              "sizeBytes": 2262767,
+              "effectiveSizeBytes": 2262767
+            },
+            "skia": {
+              "sizeBytes": 956130,
+              "effectiveSizeBytes": 956130
+            },
+            "v8": {
+              "sizeBytes": 12074876,
+              "effectiveSizeBytes": 12074876
+            },
+            "web_cache": {
+              "sizeBytes": 96211447,
+              "effectiveSizeBytes": 96211447
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "shared-2 playtest ran",
+      "requestGuid": "0x8",
+      "markerRange": [
+        1098580850533,
+        1098580941942
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 780143616,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 20594928,
+              "effectiveSizeBytes": 12313057
+            },
+            "blink_objects": {
+              "sizeBytes": 8281776,
+              "effectiveSizeBytes": 8281776
+            },
+            "canvas": {
+              "sizeBytes": 213332884,
+              "effectiveSizeBytes": 213332884
+            },
+            "cc": {
+              "sizeBytes": 550027264,
+              "effectiveSizeBytes": 542146560
+            },
+            "discardable": {
+              "sizeBytes": 538263552,
+              "effectiveSizeBytes": 3899392
+            },
+            "malloc": {
+              "sizeBytes": 671341792,
+              "effectiveSizeBytes": 456902425
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 68255744,
+              "effectiveSizeBytes": 65630069
+            },
+            "shared_memory": {
+              "sizeBytes": 577748992,
+              "effectiveSizeBytes": 19803340
+            },
+            "site_storage": {
+              "sizeBytes": 2262767,
+              "effectiveSizeBytes": 2262767
+            },
+            "skia": {
+              "sizeBytes": 981627,
+              "effectiveSizeBytes": 981627
+            },
+            "v8": {
+              "sizeBytes": 12593004,
+              "effectiveSizeBytes": 12593004
+            },
+            "web_cache": {
+              "sizeBytes": 96211447,
+              "effectiveSizeBytes": 96211447
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "shared-2 returned editor",
+      "requestGuid": "0x9",
+      "markerRange": [
+        1098584134897,
+        1098584225659
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 636259328,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 19234896,
+              "effectiveSizeBytes": 10213657
+            },
+            "blink_objects": {
+              "sizeBytes": 9021200,
+              "effectiveSizeBytes": 9021200
+            },
+            "canvas": {
+              "sizeBytes": 140115268,
+              "effectiveSizeBytes": 140115268
+            },
+            "cc": {
+              "sizeBytes": 498663424,
+              "effectiveSizeBytes": 489431040
+            },
+            "discardable": {
+              "sizeBytes": 534052864,
+              "effectiveSizeBytes": 53493760
+            },
+            "malloc": {
+              "sizeBytes": 544766192,
+              "effectiveSizeBytes": 403588048
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 38404096,
+              "effectiveSizeBytes": 33672888
+            },
+            "shared_memory": {
+              "sizeBytes": 567869440,
+              "effectiveSizeBytes": 16968908
+            },
+            "site_storage": {
+              "sizeBytes": 4525526,
+              "effectiveSizeBytes": 4525526
+            },
+            "skia": {
+              "sizeBytes": 1295315,
+              "effectiveSizeBytes": 1295315
+            },
+            "v8": {
+              "sizeBytes": 11826100,
+              "effectiveSizeBytes": 11826100
+            },
+            "web_cache": {
+              "sizeBytes": 58050982,
+              "effectiveSizeBytes": 58050982
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "unique-1 editor ready",
+      "requestGuid": "0xa",
+      "markerRange": [
+        1098589868949,
+        1098589970206
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 943902720,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 21118976,
+              "effectiveSizeBytes": 9912717
+            },
+            "blink_objects": {
+              "sizeBytes": 11206168,
+              "effectiveSizeBytes": 11206168
+            },
+            "canvas": {
+              "sizeBytes": 319211244,
+              "effectiveSizeBytes": 319211244
+            },
+            "cc": {
+              "sizeBytes": 499122176,
+              "effectiveSizeBytes": 490160128
+            },
+            "discardable": {
+              "sizeBytes": 533397504,
+              "effectiveSizeBytes": 52412416
+            },
+            "malloc": {
+              "sizeBytes": 866187648,
+              "effectiveSizeBytes": 545901276
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 40419328,
+              "effectiveSizeBytes": 35688096
+            },
+            "shared_memory": {
+              "sizeBytes": 566673408,
+              "effectiveSizeBytes": 16698572
+            },
+            "site_storage": {
+              "sizeBytes": 4525526,
+              "effectiveSizeBytes": 4525526
+            },
+            "skia": {
+              "sizeBytes": 1264606,
+              "effectiveSizeBytes": 1264606
+            },
+            "v8": {
+              "sizeBytes": 18029476,
+              "effectiveSizeBytes": 18029476
+            },
+            "web_cache": {
+              "sizeBytes": 58050982,
+              "effectiveSizeBytes": 58050982
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "unique-1 playtest paused",
+      "requestGuid": "0xb",
+      "markerRange": [
+        1098596792186,
+        1098596907373
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 1068913664,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 17105056,
+              "effectiveSizeBytes": 7819231
+            },
+            "blink_objects": {
+              "sizeBytes": 9285752,
+              "effectiveSizeBytes": 9285752
+            },
+            "canvas": {
+              "sizeBytes": 392387852,
+              "effectiveSizeBytes": 392387852
+            },
+            "cc": {
+              "sizeBytes": 548536320,
+              "effectiveSizeBytes": 542040064
+            },
+            "discardable": {
+              "sizeBytes": 534118400,
+              "effectiveSizeBytes": 1196032
+            },
+            "malloc": {
+              "sizeBytes": 967231072,
+              "effectiveSizeBytes": 573679559
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 68517888,
+              "effectiveSizeBytes": 63629457
+            },
+            "shared_memory": {
+              "sizeBytes": 570834944,
+              "effectiveSizeBytes": 18418892
+            },
+            "site_storage": {
+              "sizeBytes": 4525526,
+              "effectiveSizeBytes": 4525526
+            },
+            "skia": {
+              "sizeBytes": 1073682,
+              "effectiveSizeBytes": 1073682
+            },
+            "v8": {
+              "sizeBytes": 18325308,
+              "effectiveSizeBytes": 18325308
+            },
+            "web_cache": {
+              "sizeBytes": 96211447,
+              "effectiveSizeBytes": 96211447
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "unique-1 playtest ran",
+      "requestGuid": "0xc",
+      "markerRange": [
+        1098601084951,
+        1098601188013
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 1068979200,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 21610656,
+              "effectiveSizeBytes": 11275193
+            },
+            "blink_objects": {
+              "sizeBytes": 10335328,
+              "effectiveSizeBytes": 10335328
+            },
+            "canvas": {
+              "sizeBytes": 392399828,
+              "effectiveSizeBytes": 392399828
+            },
+            "cc": {
+              "sizeBytes": 548536320,
+              "effectiveSizeBytes": 541728768
+            },
+            "discardable": {
+              "sizeBytes": 534134784,
+              "effectiveSizeBytes": 1196032
+            },
+            "malloc": {
+              "sizeBytes": 967701808,
+              "effectiveSizeBytes": 574077583
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 72679424,
+              "effectiveSizeBytes": 67791002
+            },
+            "shared_memory": {
+              "sizeBytes": 578355200,
+              "effectiveSizeBytes": 22170828
+            },
+            "site_storage": {
+              "sizeBytes": 4525526,
+              "effectiveSizeBytes": 4525526
+            },
+            "skia": {
+              "sizeBytes": 1098618,
+              "effectiveSizeBytes": 1098618
+            },
+            "v8": {
+              "sizeBytes": 18770692,
+              "effectiveSizeBytes": 18770692
+            },
+            "web_cache": {
+              "sizeBytes": 96211447,
+              "effectiveSizeBytes": 96211447
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "unique-1 returned editor",
+      "requestGuid": "0xd",
+      "markerRange": [
+        1098607116515,
+        1098607214087
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 970363904,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 21282896,
+              "effectiveSizeBytes": 10078304
+            },
+            "blink_objects": {
+              "sizeBytes": 11204512,
+              "effectiveSizeBytes": 11204512
+            },
+            "canvas": {
+              "sizeBytes": 319211244,
+              "effectiveSizeBytes": 319211244
+            },
+            "cc": {
+              "sizeBytes": 555909120,
+              "effectiveSizeBytes": 549797888
+            },
+            "discardable": {
+              "sizeBytes": 539459584,
+              "effectiveSizeBytes": 1589248
+            },
+            "malloc": {
+              "sizeBytes": 873424912,
+              "effectiveSizeBytes": 553073623
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 43941888,
+              "effectiveSizeBytes": 36947305
+            },
+            "shared_memory": {
+              "sizeBytes": 566984704,
+              "effectiveSizeBytes": 13831372
+            },
+            "site_storage": {
+              "sizeBytes": 6788879,
+              "effectiveSizeBytes": 6788879
+            },
+            "skia": {
+              "sizeBytes": 1422714,
+              "effectiveSizeBytes": 1422714
+            },
+            "v8": {
+              "sizeBytes": 18018204,
+              "effectiveSizeBytes": 18018204
+            },
+            "web_cache": {
+              "sizeBytes": 58050982,
+              "effectiveSizeBytes": 58050982
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "unique-2 editor ready",
+      "requestGuid": "0xe",
+      "markerRange": [
+        1098612701864,
+        1098612813633
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 961909760,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 22265856,
+              "effectiveSizeBytes": 11061557
+            },
+            "blink_objects": {
+              "sizeBytes": 11204240,
+              "effectiveSizeBytes": 11204240
+            },
+            "canvas": {
+              "sizeBytes": 319211244,
+              "effectiveSizeBytes": 319211244
+            },
+            "cc": {
+              "sizeBytes": 556498944,
+              "effectiveSizeBytes": 547299328
+            },
+            "discardable": {
+              "sizeBytes": 540000256,
+              "effectiveSizeBytes": 1638400
+            },
+            "malloc": {
+              "sizeBytes": 870560848,
+              "effectiveSizeBytes": 550275078
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 42450944,
+              "effectiveSizeBytes": 35456362
+            },
+            "shared_memory": {
+              "sizeBytes": 573767680,
+              "effectiveSizeBytes": 16952524
+            },
+            "site_storage": {
+              "sizeBytes": 6788879,
+              "effectiveSizeBytes": 6788879
+            },
+            "skia": {
+              "sizeBytes": 1324410,
+              "effectiveSizeBytes": 1324410
+            },
+            "v8": {
+              "sizeBytes": 18067356,
+              "effectiveSizeBytes": 18067356
+            },
+            "web_cache": {
+              "sizeBytes": 58050982,
+              "effectiveSizeBytes": 58050982
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "unique-2 playtest paused",
+      "requestGuid": "0xf",
+      "markerRange": [
+        1098619515640,
+        1098619631623
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 884593664,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 17809568,
+              "effectiveSizeBytes": 8517944
+            },
+            "blink_objects": {
+              "sizeBytes": 9291504,
+              "effectiveSizeBytes": 9291504
+            },
+            "canvas": {
+              "sizeBytes": 392387852,
+              "effectiveSizeBytes": 392387852
+            },
+            "cc": {
+              "sizeBytes": 549224448,
+              "effectiveSizeBytes": 541335552
+            },
+            "discardable": {
+              "sizeBytes": 536264704,
+              "effectiveSizeBytes": 2621440
+            },
+            "malloc": {
+              "sizeBytes": 767605824,
+              "effectiveSizeBytes": 373998987
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 57901056,
+              "effectiveSizeBytes": 50749281
+            },
+            "shared_memory": {
+              "sizeBytes": 575782912,
+              "effectiveSizeBytes": 19819724
+            },
+            "site_storage": {
+              "sizeBytes": 6788879,
+              "effectiveSizeBytes": 6788879
+            },
+            "skia": {
+              "sizeBytes": 1161746,
+              "effectiveSizeBytes": 1161746
+            },
+            "v8": {
+              "sizeBytes": 18505532,
+              "effectiveSizeBytes": 18505532
+            },
+            "web_cache": {
+              "sizeBytes": 96211447,
+              "effectiveSizeBytes": 96211447
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "unique-2 playtest ran",
+      "requestGuid": "0x10",
+      "markerRange": [
+        1098623812068,
+        1098623911998
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 893326336,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 22560928,
+              "effectiveSizeBytes": 12413027
+            },
+            "blink_objects": {
+              "sizeBytes": 10147800,
+              "effectiveSizeBytes": 10147800
+            },
+            "canvas": {
+              "sizeBytes": 392397036,
+              "effectiveSizeBytes": 392397036
+            },
+            "cc": {
+              "sizeBytes": 549224448,
+              "effectiveSizeBytes": 541343744
+            },
+            "discardable": {
+              "sizeBytes": 536264704,
+              "effectiveSizeBytes": 2605056
+            },
+            "malloc": {
+              "sizeBytes": 770566880,
+              "effectiveSizeBytes": 376910618
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 58376192,
+              "effectiveSizeBytes": 51224394
+            },
+            "shared_memory": {
+              "sizeBytes": 583335936,
+              "effectiveSizeBytes": 23596236
+            },
+            "site_storage": {
+              "sizeBytes": 6788879,
+              "effectiveSizeBytes": 6788879
+            },
+            "skia": {
+              "sizeBytes": 1186682,
+              "effectiveSizeBytes": 1186682
+            },
+            "v8": {
+              "sizeBytes": 18996004,
+              "effectiveSizeBytes": 18996004
+            },
+            "web_cache": {
+              "sizeBytes": 96211447,
+              "effectiveSizeBytes": 96211447
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "unique-2 returned editor",
+      "requestGuid": "0x11",
+      "markerRange": [
+        1098629811007,
+        1098629923949
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 780702720,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 21282816,
+              "effectiveSizeBytes": 10077814
+            },
+            "blink_objects": {
+              "sizeBytes": 11204912,
+              "effectiveSizeBytes": 11204912
+            },
+            "canvas": {
+              "sizeBytes": 319211244,
+              "effectiveSizeBytes": 319211244
+            },
+            "cc": {
+              "sizeBytes": 550289408,
+              "effectiveSizeBytes": 541057024
+            },
+            "discardable": {
+              "sizeBytes": 534478848,
+              "effectiveSizeBytes": 2195456
+            },
+            "malloc": {
+              "sizeBytes": 675059488,
+              "effectiveSizeBytes": 354647777
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 35897344,
+              "effectiveSizeBytes": 26639961
+            },
+            "shared_memory": {
+              "sizeBytes": 568311808,
+              "effectiveSizeBytes": 16977100
+            },
+            "site_storage": {
+              "sizeBytes": 9051678,
+              "effectiveSizeBytes": 9051678
+            },
+            "skia": {
+              "sizeBytes": 1510778,
+              "effectiveSizeBytes": 1510778
+            },
+            "v8": {
+              "sizeBytes": 18203540,
+              "effectiveSizeBytes": 18203540
+            },
+            "web_cache": {
+              "sizeBytes": 58050982,
+              "effectiveSizeBytes": 58050982
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "empty creator terminal",
+      "requestGuid": "0x12",
+      "markerRange": [
+        1098630806698,
+        1098630895986
+      ],
+      "renderers": [
+        {
+          "pid": 76210,
+          "identityEvidence": "trace-renderer-main-thread",
+          "privateFootprintBytes": 245485568,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 9486336,
+              "effectiveSizeBytes": 6865354
+            },
+            "blink_objects": {
+              "sizeBytes": 2620920,
+              "effectiveSizeBytes": 2620920
+            },
+            "canvas": {
+              "sizeBytes": 11366912,
+              "effectiveSizeBytes": 11366912
+            },
+            "cc": {
+              "sizeBytes": 578551808,
+              "effectiveSizeBytes": 559226880
+            },
+            "discardable": {
+              "sizeBytes": 542457856,
+              "effectiveSizeBytes": 2375680
+            },
+            "malloc": {
+              "sizeBytes": 116789952,
+              "effectiveSizeBytes": 103782623
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 82575360,
+              "effectiveSizeBytes": 73131336
+            },
+            "shared_memory": {
+              "sizeBytes": 598458368,
+              "effectiveSizeBytes": 28060876
+            },
+            "site_storage": {
+              "sizeBytes": 9051678,
+              "effectiveSizeBytes": 9051678
+            },
+            "skia": {
+              "sizeBytes": 1724404,
+              "effectiveSizeBytes": 1724404
+            },
+            "v8": {
+              "sizeBytes": 4159436,
+              "effectiveSizeBytes": 4159436
+            },
+            "web_cache": {
+              "sizeBytes": 58304132,
+              "effectiveSizeBytes": 58304132
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "scope": "Chrome detailed native allocator observations bracketed by explicit clock markers. Roots are not additive totals. Omitted allocators are unreported, not proven zero. Private footprint, process RSS and JavaScript heap are different measurements. This does not establish an allocation leak, a permanent plateau, a full-game memory limit or release readiness.",
+  "traceSha256": "3bbf82f6e8916c3e6dca4616580e535d687fc36a66c80b725ef8b71cbd9dd941"
+}

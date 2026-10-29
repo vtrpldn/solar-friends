@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "status": "short-full-editor-playtest-round-trips-verified-not-release-acceptance",
+  "scope": "64x64 Mata Atlantica seed-42 stress property, 256 completed mixed inland buildings, twelve public Broad residents, two shared-appearance cycles and two unique-appearance cycles. No authored utility routes or explicit crop/animal starting overrides.",
+  "checks": [
+    "Native compiler validated the fixture. Active playtests contain 256 buildings and twelve distinct resident identities.",
+    "Prepared public appearance cache has one shared entry or twelve unique entries as expected.",
+    "Public 1x and 8x controls advance simulation in each short playtest.",
+    "Every return preserves its authored draft, removes the scratch run, and leaves localStorage unchanged in the isolated profile.",
+    "DOM document/node/listener counts match each pre-playtest editor state exactly. Native canvas bytes also match exactly at each return.",
+    "Leaving the projects restores native canvas allocation to 11366912 bytes, identical to the empty-creator baseline.",
+    "Both final shared/unique runtime screenshots inspected for scene rendering. This is not a full art-acceptance sweep."
+  ],
+  "memoryObservations": [
+    "Shared editor canvas allocation: 140115268 bytes. Unique editor canvas allocation: 319211244 bytes.",
+    "Largest captured renderer private footprint: 1068979200 bytes. Dumps are readiness-state samples, not asynchronous-loading peaks.",
+    "Empty-creator private footprint was 140329984 bytes initially and 245485568 bytes at the end; remaining native retention and long-run budgets remain unresolved.",
+    "The terminal library has two additional authored projects, so its total DOM-node count is expected to differ from the initially empty library."
+  ],
+  "limits": [
+    "One biome and one seed, Broad public tank outfit only",
+    "Short 1x/8x intervals, no 16x acceptance",
+    "No panning or physical-display pacing acceptance",
+    "No long-run or all-biome memory budget acceptance",
+    "Remaining art, usability and full release gates remain open"
+  ],
+  "rendererIdentity": "The trace omitted process_name for the renderer; explicit CrRendererMain thread metadata identifies it. The analyzer refuses unrelated generic threads and conflicting explicit process identities."
+}

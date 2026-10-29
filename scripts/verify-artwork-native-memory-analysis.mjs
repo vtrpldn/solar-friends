@@ -28,4 +28,8 @@ for(const mutate of [
  t=>t.traceEvents.push(structuredClone(t.traceEvents.find(e=>e.args?.dumps?.allocators))),
 ]){const broken=structuredClone(trace);mutate(broken);assert.throws(()=>analyzeArtworkNativeMemory(report,broken));}
 const failed=structuredClone(report);failed.nativeDumps.requests[1].success=false;assert.throws(()=>analyzeArtworkNativeMemory(failed,trace));
+const threadOnly=structuredClone(trace);threadOnly.traceEvents=threadOnly.traceEvents.filter(e=>e.name!=='process_name');threadOnly.traceEvents.push({ph:'M',name:'thread_name',pid:42,args:{name:'CrRendererMain'}});
+assert.equal(analyzeArtworkNativeMemory(report,threadOnly).stages[0].renderers[0].identityEvidence,'trace-renderer-main-thread');
+const unrelated=structuredClone(threadOnly);unrelated.traceEvents.at(-1).args.name='Compositor';assert.throws(()=>analyzeArtworkNativeMemory(report,unrelated),'A generic thread cannot identify an unnamed process as the renderer');
+const conflicting=structuredClone(threadOnly);conflicting.traceEvents.push({ph:'M',name:'process_name',pid:42,args:{name:'Browser'}});assert.throws(()=>analyzeArtworkNativeMemory(report,conflicting),'Do not override a different explicit process identity');
 console.log('PASS native stage attribution despite rewritten GUIDs; roots stay separate; omissions stay unknown; malformed, missing, duplicate and failed dump evidence refused.');

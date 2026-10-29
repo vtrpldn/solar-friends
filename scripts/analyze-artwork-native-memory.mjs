@@ -17,6 +17,7 @@ export function analyzeArtworkNativeMemory(report,trace){
  assert.equal(report.completed,true);assert.equal(report.nativeDumps?.enabled,true);
  const events=trace.traceEvents;assert(Array.isArray(events));
  const names=new Map(events.filter(e=>e.ph==='M'&&e.name==='process_name').map(e=>[e.pid,e.args?.name]));
+ const rendererThreads=new Set(events.filter(e=>e.ph==='M'&&e.name==='thread_name'&&e.args?.name==='CrRendererMain').map(e=>e.pid));
  const stages=report.nativeDumps.requests.map(request=>{
   assert.equal(request.success,true,'Native dump request failed');
   const marker=id=>{const matches=events.filter(e=>e.name==='clock_sync'&&e.args?.sync_id===id);assert.equal(matches.length,1,'Missing or ambiguous native dump stage marker');assert(Number.isFinite(matches[0].ts));return matches[0].ts;};
@@ -30,7 +31,7 @@ export function analyzeArtworkNativeMemory(report,trace){
    if(dump.process_totals){assert.equal(group.totals,null,'Multiple process totals in one stage');group.totals=dump.process_totals;}
    for(const [key,value]of Object.entries(dump.allocators??{})){assert(!Object.hasOwn(group.allocators,key),'Duplicate allocator in one stage');group.allocators[key]=value;}
   }
-  const renderers=[...groups.values()].filter(g=>g.name==='Renderer').map(group=>{
+  const renderers=[...groups.values()].filter(g=>g.name==='Renderer'||g.name===null&&rendererThreads.has(g.pid)).map(group=>{
    const topLevel={};
    // Record independent roots; summing parent/child or overlapping allocators
    // would double-count memory. Missing attributes stay null, not zero.
@@ -39,7 +40,7 @@ export function analyzeArtworkNativeMemory(report,trace){
     topLevel[key]={sizeBytes:scalar('size'),effectiveSizeBytes:scalar('effective_size')};
    }
    assert(Object.keys(topLevel).length,'Renderer dump has no allocator evidence');
-   return {pid:group.pid,privateFootprintBytes:traceBytes(group.totals?.private_footprint_bytes),topLevel};
+   return {pid:group.pid,identityEvidence:group.name==='Renderer'?'trace-process-name':'trace-renderer-main-thread',privateFootprintBytes:traceBytes(group.totals?.private_footprint_bytes),topLevel};
   });
   assert(renderers.length,'No renderer native dump in the requested stage');
   return {label:request.label,requestGuid:request.dumpGuid,markerRange:[before,after],renderers};
