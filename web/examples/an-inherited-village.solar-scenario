@@ -1,7 +1,7 @@
 {
   "description": "An established Caatinga property has homes, food plots and useful equipment, but its pump and shared battery have failed. Iara, Bento and Nina welcome Sueli and Otávio. Inspect what is already here, service it with real parts and make everyday water, sanitation and lighting dependable.",
   "format": "solar-friends-scenario",
-  "id": "4cf22245-1469-46cd-89a8-b50fec4457d3",
+  "id": "62e680e1-7362-4ce0-94fd-28e19bab2e40",
   "journal": {
     "chapters": [
       {
@@ -184,7 +184,7 @@
     ],
     "generator": "property-v1",
     "height": 64,
-    "id": "map-4cf22245-1469-46cd-89a8-b50fec4457d3",
+    "id": "map-62e680e1-7362-4ce0-94fd-28e19bab2e40",
     "nature": [
       {
         "id": "nature-3",
@@ -26813,8 +26813,17 @@
       },
       {
         "appearance": {
-          "preset": "luz",
-          "version": 1
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "hat": "straw-v1",
+          "materials": {
+            "shirt": "terracotta",
+            "shoes": "brown",
+            "shorts": "cream",
+            "skin": "copper"
+          },
+          "schema": 2
         },
         "biography": "A grower joining Iara, Bento and Nina to understand the property’s soil and maintain a modest food plot.",
         "experience": {
@@ -26848,8 +26857,16 @@
       },
       {
         "appearance": {
-          "preset": "caua",
-          "version": 1
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "shirt": "indigo",
+            "shoes": "graphite",
+            "shorts": "umber",
+            "skin": "sunlit"
+          },
+          "schema": 2
         },
         "biography": "A repair-minded new neighbour who wants the shared equipment working before the village expands.",
         "experience": {

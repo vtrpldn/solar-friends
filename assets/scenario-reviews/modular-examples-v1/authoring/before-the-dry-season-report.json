@@ -1,0 +1,31 @@
+{
+  "id": "before-the-dry-season",
+  "beforeSha256": "0655ff0e59d13e55bd643855c74f199a2c0c032aa9c45ed493234a596ec4dcc8",
+  "afterSha256": "4792c2949e0b4e943e73ea2ac113dec362bb5fed58d4c5f58f0b029a9369ebf3",
+  "residentIdsPreserved": true,
+  "noncosmeticsPreserved": true,
+  "newCopyDocumentIds": true,
+  "captures": [
+    {
+      "name": "Marina",
+      "file": "before-the-dry-season-1.png"
+    },
+    {
+      "name": "Davi",
+      "file": "before-the-dry-season-2.png"
+    },
+    {
+      "name": "Joana",
+      "file": "before-the-dry-season-3.png"
+    },
+    {
+      "name": "Ravi",
+      "file": "before-the-dry-season-4.png"
+    },
+    {
+      "name": "Cecília",
+      "file": "before-the-dry-season-5.png"
+    }
+  ],
+  "scope": "Public import, character creator appearance controls and export. Import gives the document/map new copy identities; resident IDs and all noncosmetic scenario data remain exact. Completion requires a new playthrough."
+}

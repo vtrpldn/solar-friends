@@ -1,0 +1,19 @@
+{
+  "id": "an-inherited-village",
+  "beforeSha256": "cbd0fdd9381fc893c564da261048cfca78df6b0f15dc169591d179d802ca7309",
+  "afterSha256": "ef038f1ee0f496621decfaa9a61556938f4ab8fd18749cf2dc5e7a758ede5f67",
+  "residentIdsPreserved": true,
+  "noncosmeticsPreserved": true,
+  "newCopyDocumentIds": true,
+  "captures": [
+    {
+      "name": "Sueli",
+      "file": "an-inherited-village-1.png"
+    },
+    {
+      "name": "Otávio",
+      "file": "an-inherited-village-2.png"
+    }
+  ],
+  "scope": "Public import, character creator appearance controls and export. Import gives the document/map new copy identities; resident IDs and all noncosmetic scenario data remain exact. Completion requires a new playthrough."
+}

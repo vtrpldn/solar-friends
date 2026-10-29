@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
+import {applyExampleResidentLooks} from './example-resident-looks.mjs';
 import {exampleAuthoringProfiles} from './example-authoring-profiles.mjs';
 export async function authorExample(id){
 const profile=exampleAuthoringProfiles[id];if(!profile)throw Error('Unknown example profile');
@@ -25,6 +26,7 @@ try{
   }
   for(const identity of profile.removeFounders??['resident-iara','resident-bento','resident-luz','resident-caua','resident-nina']){const row=page.locator(`details[data-resident="${identity}"]`);if(!await row.evaluate(el=>el.open))await row.locator(':scope > summary').click();await row.locator('[data-remove-resident]').click();}
  }
+ await applyExampleResidentLooks(page,id);
  if(profile.inheritedBuildings){
   await page.locator('#creator-zoom-out').click();await page.locator('#creator-zoom-out').click();
   for(const [kind,x,y]of profile.inheritedBuildings){

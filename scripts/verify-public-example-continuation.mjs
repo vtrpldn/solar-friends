@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-const root=process.argv[2]??'assets/scenario-reviews/public-continuation-v1';
+const root=process.argv[2]??'assets/scenario-reviews/modular-examples-v1';
 const results=[];
 for(const id of ['first-clearing','before-the-dry-season','an-inherited-village']){
  const raw=await readFile(`web/examples/${id}.solar-scenario`),definition=JSON.parse(raw),r=JSON.parse(await readFile(`${root}/${id}/${id}-public-controls.json`));

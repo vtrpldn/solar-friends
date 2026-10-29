@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "files": {
+    "assets/scenario-reviews/modular-examples-v1/an-inherited-village/an-inherited-village-public-completion.png": "17a500cce687aa7750e5d03e0a202942c62da5189145b16701afa51bf96a1ba2",
+    "assets/scenario-reviews/modular-examples-v1/an-inherited-village/an-inherited-village-public-controls.json": "5d4fba3f3d1a15ff0a2b5bb9536c8dfb1098ee4be5e654024836ebd7676d6fc4",
+    "assets/scenario-reviews/modular-examples-v1/an-inherited-village/an-inherited-village-public-journal.png": "a64cc6c30df2bca428f9f07994c43e88e3932f6c7743bf7489459e6e047573be",
+    "assets/scenario-reviews/modular-examples-v1/authoring/an-inherited-village-1.png": "bf6a74b6b5c2346c6892cf663ecebbab9fade68be1537276dbab9f456c5e1141",
+    "assets/scenario-reviews/modular-examples-v1/authoring/an-inherited-village-2.png": "1303da3721e59bbb2d5a60404bc1eb5727a087cadc7aa3d0e273d73c27eb25f1",
+    "assets/scenario-reviews/modular-examples-v1/authoring/an-inherited-village-before.solar-scenario": "cbd0fdd9381fc893c564da261048cfca78df6b0f15dc169591d179d802ca7309",
+    "assets/scenario-reviews/modular-examples-v1/authoring/an-inherited-village-report.json": "26a11ae269187ead8d490c8f38291593801aea5a6ce7b9998863f33479ae745d",
+    "assets/scenario-reviews/modular-examples-v1/authoring/before-the-dry-season-1.png": "29bea8aa2dedc7e57953328808649383a70779febf94ab833bb5ad1e060e428d",
+    "assets/scenario-reviews/modular-examples-v1/authoring/before-the-dry-season-2.png": "132c40c01eccb340c436768e051bd325960515163faf26140dad36aa53432bde",
+    "assets/scenario-reviews/modular-examples-v1/authoring/before-the-dry-season-3.png": "5231cec3f7643664f327e3ec6459a0aed34105925929760cc433db0860440f54",
+    "assets/scenario-reviews/modular-examples-v1/authoring/before-the-dry-season-4.png": "d6b839ccbd00fbf6c4940abac8e9aea898ffe1715fa4656bb2f2ffbbac006fd6",
+    "assets/scenario-reviews/modular-examples-v1/authoring/before-the-dry-season-5.png": "70519180b5343a821d5064b6924a68da3359a16bc8596c2cc0d220fc2120498c",
+    "assets/scenario-reviews/modular-examples-v1/authoring/before-the-dry-season-before.solar-scenario": "0655ff0e59d13e55bd643855c74f199a2c0c032aa9c45ed493234a596ec4dcc8",
+    "assets/scenario-reviews/modular-examples-v1/authoring/before-the-dry-season-report.json": "b738288cdf1274ac7a5a9cf578f9761e4193817ee5b4895e5596e62b18c0df6d",
+    "assets/scenario-reviews/modular-examples-v1/before-the-dry-season/before-the-dry-season-public-completion.png": "0ecd602ce0d89cae4a87335f76f0f4303588621b60718a8c9eba546164b64e05",
+    "assets/scenario-reviews/modular-examples-v1/before-the-dry-season/before-the-dry-season-public-controls.json": "59791c99e976e6ebbbc12e7f8a3b5b27f48df2221ed957a128aee393adc01662",
+    "assets/scenario-reviews/modular-examples-v1/before-the-dry-season/before-the-dry-season-public-journal.png": "99a2a721f0220870518c862981b8bcc6bbdd5ecc99c47e9a7ea2196e1f1fe385",
+    "assets/scenario-reviews/modular-examples-v1/first-clearing/first-clearing-public-completion.png": "1a1c623078236211182859fddf68dce9e85973e5afe2c7f23b114201fd3cc973",
+    "assets/scenario-reviews/modular-examples-v1/first-clearing/first-clearing-public-controls.json": "14ba3607f0e3a68adc0dfd2d915c2e9b6fa69f62cfe4eb919ba2a30fb4474d2c",
+    "assets/scenario-reviews/modular-examples-v1/first-clearing/first-clearing-public-journal.png": "817792906db97936f6a25b1a3a6c12719f93272c8117a1f762a9aaa3242cd6ae",
+    "scripts/author-example-modular-looks.mjs": "765e0fdcc928700442b0446b34412a63319aea87c9df44c9cf10b1fa8144dff5",
+    "scripts/author-example-resident-presets.mjs": "c2a290a7f1f871d1cdcdb74d52ce07209b4af21ca0a51da752ab4c9264e96513",
+    "scripts/author-example-scenario.mjs": "a1a2af03dce61db14ce9eadc71ad0f2ddbda60ee2c41e0e7110bb8f74c1cfdba",
+    "scripts/example-resident-looks.mjs": "297e9a2cf991fdc9114afc5e1099664c36037091f7e8f4aa3fad619e1acdf78e",
+    "scripts/playtest-example-public-controls.mjs": "9886c562623f5149d5fbdaaac15682cdf601253d442110dd7e720c11b380557e",
+    "scripts/verify-example-scenarios.mjs": "7236486c8c85bd766a35aa041d244b0c19b8ddb3f26388078a7c2d4cacd5b9e7",
+    "scripts/verify-public-example-continuation.mjs": "a06fb58f9921449d371ad8f99b89e8fd7f3459c81e73bbf0494bb6334b8d8f41",
+    "scripts/verify-public-example-evidence.mjs": "e7660ebbaa1db492d9ca845a862f8f037aaa3d9cd90a6dc48c14f39d0b703ba6",
+    "web/examples/an-inherited-village.solar-scenario": "ef038f1ee0f496621decfaa9a61556938f4ab8fd18749cf2dc5e7a758ede5f67",
+    "web/examples/before-the-dry-season.solar-scenario": "4792c2949e0b4e943e73ea2ac113dec362bb5fed58d4c5f58f0b029a9369ebf3",
+    "web/examples/first-clearing.solar-scenario": "978c6329d13be74f4a925bab852370ec4de2e5cf839dbde36c994ecbea1a6e78",
+    "web/examples/residents/cecilia.solar-resident": "6519a1d5e622bce47ac0c35ed8363527ae366b2af5a9aebb9b7507f21f37fe18",
+    "web/examples/residents/davi.solar-resident": "97d11c93f7b2744df2d84e76ddfa60d9264a854e11366f304098f03ec747229c",
+    "web/examples/residents/marina.solar-resident": "f2cdd4cbfa3da6d5b200e3ce91516634723a774871162b6afeb51d7bf837e9c1"
+  },
+  "authoringReview": {
+    "inspected": [
+      "before-the-dry-season-1.png",
+      "before-the-dry-season-2.png",
+      "before-the-dry-season-3.png",
+      "before-the-dry-season-4.png",
+      "before-the-dry-season-5.png",
+      "an-inherited-village-1.png",
+      "an-inherited-village-2.png"
+    ],
+    "verdict": "Preview and matching portrait show the chosen body, hair, accessories and materials without visible clipping in these standing day views."
+  },
+  "gameReview": {
+    "inspected": [
+      "assets/scenario-reviews/modular-examples-v1/an-inherited-village/an-inherited-village-public-completion.png",
+      "assets/scenario-reviews/modular-examples-v1/an-inherited-village/an-inherited-village-public-journal.png",
+      "assets/scenario-reviews/modular-examples-v1/before-the-dry-season/before-the-dry-season-public-completion.png",
+      "assets/scenario-reviews/modular-examples-v1/before-the-dry-season/before-the-dry-season-public-journal.png",
+      "assets/scenario-reviews/modular-examples-v1/first-clearing/first-clearing-public-completion.png",
+      "assets/scenario-reviews/modular-examples-v1/first-clearing/first-clearing-public-journal.png"
+    ],
+    "verdict": "All six full scene and journal captures inspected; completed chapters, readable controls and matching modular cast portraits visible."
+  },
+  "scope": "Seven modular looks authored via regular controls; exact resident IDs and noncosmetic definitions preserved, except public import assigns new document/map copy IDs. Three reusable presets exported. All three current examples completed with ordinary preferred speed 8, paid purchases and pointer construction, followed by three later game days and exact checkpoint/editor isolation checks. Runs were concurrent, so wall-clock timings are not performance evidence. Static captures do not establish every pose, animation or artwork combination. Historical source-bound reports remain historical. Full builder release gates remain open."
+}

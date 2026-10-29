@@ -1,7 +1,7 @@
 {
   "description": "A new group arrives in a Cerrado clearing with seven wet-season days to prepare. Choose where to catch and store water, start a modest garden and protect a usable reserve before the dry season. The calendar is compressed for this scenario.",
   "format": "solar-friends-scenario",
-  "id": "7f108ae7-2ef8-4636-9d9e-1545478de360",
+  "id": "3b44bc7d-16f2-48d9-b496-d774a38e4c75",
   "journal": {
     "challenge": {
       "deadline": 10080,
@@ -199,7 +199,7 @@
     ],
     "generator": "property-v1",
     "height": 64,
-    "id": "map-7f108ae7-2ef8-4636-9d9e-1545478de360",
+    "id": "map-3b44bc7d-16f2-48d9-b496-d774a38e4c75",
     "nature": [
       {
         "id": "nature-3",
@@ -26661,8 +26661,16 @@
     "residents": [
       {
         "appearance": {
-          "preset": "iara",
-          "version": 1
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "shirt": "teal",
+            "shoes": "brown",
+            "shorts": "sage",
+            "skin": "warm"
+          },
+          "schema": 2
         },
         "biography": "A seed saver who wants a small, well-tended garden before expanding into the clearing.",
         "experience": {
@@ -26696,8 +26704,17 @@
       },
       {
         "appearance": {
-          "preset": "bento",
-          "version": 1
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "side-part-v1",
+          "hat": "straw-v1",
+          "materials": {
+            "shirt": "terracotta",
+            "shoes": "graphite",
+            "shorts": "umber",
+            "skin": "copper"
+          },
+          "schema": 2
         },
         "biography": "A practical builder who checks missing materials and transport before committing the shared fund.",
         "experience": {
@@ -26731,8 +26748,16 @@
       },
       {
         "appearance": {
-          "preset": "luz",
-          "version": 1
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "shirt": "cream",
+            "shoes": "brown",
+            "shorts": "umber",
+            "skin": "copper"
+          },
+          "schema": 2
         },
         "biography": "A cook who plans meals around the food the group can actually grow and store.",
         "experience": {
@@ -26766,8 +26791,17 @@
       },
       {
         "appearance": {
-          "preset": "caua",
-          "version": 1
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "facialHair": "short-chestnut-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "shirt": "indigo",
+            "shoes": "graphite",
+            "shorts": "cream",
+            "skin": "sunlit"
+          },
+          "schema": 2
         },
         "biography": "An experienced mover who wants short, clear routes between storage, water and work.",
         "experience": {
@@ -26801,8 +26835,17 @@
       },
       {
         "appearance": {
-          "preset": "nina",
-          "version": 1
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "hairColour": "silver",
+          "materials": {
+            "shirt": "terracotta",
+            "shoes": "brown",
+            "shorts": "sage",
+            "skin": "sunlit"
+          },
+          "schema": 2
         },
         "biography": "A maintenance-minded neighbour who keeps an eye on tanks, fittings and the water reserve.",
         "experience": {
