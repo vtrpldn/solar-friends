@@ -1,0 +1,73 @@
+{
+  "status": "active sprite installed; targeted source/placement correction reviewed",
+  "reportSha256": "6fd88aaa52df84e926d61e5ae637aabd96b19b3c87e4cc3ae614eb2746a4acb4",
+  "source": "web/art/wetland-square-v2.png",
+  "sourceSha256": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+  "candidateReview": "All twelve provisional day/night/zoom/biome views inspected before integration; final camera measurements include cap edges and held-out course edges.",
+  "reviewedViews": [
+    {
+      "file": "mata-atlantica-2-day.png",
+      "sha256": "1b918a9b2b728b56e8cdcf1c2cb7d86cba58df589b9c34998245d6ae68b3b6b4",
+      "finding": "Active square bed meets adjacent road, contained barrel and complete plants remain visible beside home/resident; night-rain overlay does not detach or clip the sprite."
+    },
+    {
+      "file": "mata-atlantica-2-night-rain.png",
+      "sha256": "254dd7634a2f2e9431b92cfc114d68775d5a7e8d452c19b6043a962891c021c1",
+      "finding": "Active square bed meets adjacent road, contained barrel and complete plants remain visible beside home/resident; night-rain overlay does not detach or clip the sprite."
+    },
+    {
+      "file": "cerrado-2-day.png",
+      "sha256": "c281cd8a96c25daa0e0b274db496a1ad35d57636b1e2284753bb78695194daad",
+      "finding": "Active square bed meets adjacent road, contained barrel and complete plants remain visible beside home/resident; night-rain overlay does not detach or clip the sprite."
+    },
+    {
+      "file": "cerrado-2-night-rain.png",
+      "sha256": "aa318d5c899e0d8226064f6d364fa90b5da0ef5ea55c308e81d6910539dde28b",
+      "finding": "Active square bed meets adjacent road, contained barrel and complete plants remain visible beside home/resident; night-rain overlay does not detach or clip the sprite."
+    },
+    {
+      "file": "caatinga-2-day.png",
+      "sha256": "da37e69ae6e932f0edafbf16657c27681be2a3c54d6a21a039498ae8cd4d3e50",
+      "finding": "Active square bed meets adjacent road, contained barrel and complete plants remain visible beside home/resident; night-rain overlay does not detach or clip the sprite."
+    },
+    {
+      "file": "caatinga-2-night-rain.png",
+      "sha256": "731f680a7c4c2548744ba5f0ecc26f669ba99a06fad309f3061cbf50e3707a94",
+      "finding": "Active square bed meets adjacent road, contained barrel and complete plants remain visible beside home/resident; night-rain overlay does not detach or clip the sprite."
+    }
+  ],
+  "pendingVisualReview": [
+    "mata-atlantica-1-day.png",
+    "mata-atlantica-1-night.png",
+    "mata-atlantica-1-rain.png",
+    "mata-atlantica-1-night-rain.png",
+    "mata-atlantica-2-night.png",
+    "mata-atlantica-2-rain.png",
+    "cerrado-1-day.png",
+    "cerrado-1-night.png",
+    "cerrado-1-rain.png",
+    "cerrado-1-night-rain.png",
+    "cerrado-2-night.png",
+    "cerrado-2-rain.png",
+    "caatinga-1-day.png",
+    "caatinga-1-night.png",
+    "caatinga-1-rain.png",
+    "caatinga-1-night-rain.png",
+    "caatinga-2-night.png",
+    "caatinga-2-rain.png"
+  ],
+  "pendingCapturesLocation": "artifacts/wetland-square-v2-active; not committed accepted visual evidence",
+  "checks": {
+    "projection": "PASS unchanged <=2px tolerance; largest edge diagnostic across all buildings 1.27px",
+    "spriteGrid": "PASS 777664 source-edge checks, all current day/night sources at four zooms",
+    "foundations": "PASS native placement, road adjacency/exclusion and legacy restore across all 27 keys",
+    "previewCoverage": "PASS 81 current building/state previews",
+    "repeatedCaptures": "All 24 PNG hashes identical after fixture scope clarification",
+    "broadArtworkAudit": "FAIL existing duplicate characters/prototype-v1/feed-grains-hold-candidate-v2.png; no blanket artwork audit pass claimed"
+  },
+  "limitations": [
+    "Static shared-renderer fixtures, not resident path/service completion or dynamic weather simulation.",
+    "18 final captures remain pending visual review; six inspected final captures retained here.",
+    "Original overall builder release gates remain open."
+  ]
+}

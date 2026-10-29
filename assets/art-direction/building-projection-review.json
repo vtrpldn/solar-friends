@@ -30,8 +30,6 @@
     "streetlight-night.png": "f898f34ec0a95d3f8f39995b76be5ab8774034c96d73578d020b9e181a83c131",
     "hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
     "hydro-night.png": "27a5839e924ca96e89989e150117b44e2ca5566b504f304f82a62f115bd91cb2",
-    "wetland.png": "037dec072b3c8cc37d8a25874cbb2ad154f2f54e82cc489fdb7199516936400b",
-    "wetland-night.png": "e81b8e41cc5c2d4bc920ede7b62b34d90f0f94b6183b662950d14d7d0c6ebf8b",
     "biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
     "biodigester-night.png": "ff2327fd6479d3682323c0ffc7f2423a009a52547da3d4c145aac9f2b3332a24",
     "warehouse.png": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
@@ -48,7 +46,8 @@
     "starter-shed-refined.png": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
     "eco-toilet-tall.png": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
     "eco-toilet-tall-night.png": "faa4b2a5f11f6e579e4bedadec583b946494b8514c2adde2c8fb8047812c8880",
-    "goat-pasture-empty-v1.png": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b"
+    "goat-pasture-empty-v1.png": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+    "wetland-square-v2.png": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae"
   },
   "banana_treatment_review": {
     "date": "2026-10-14",
@@ -70,5 +69,11 @@
     "date": "2026-10-16",
     "source": "web/art/eco-toilet-tall.png",
     "notes": "Taller door/walls provide adult headroom within unchanged one-cell footprint. Day/night context and independent roof traces reviewed. Day/night alpha IoU 0.9922; installed scene verification follows."
+  },
+  "wetland_square_v2": {
+    "source": "wetland-square-v2.png",
+    "scope": "Twelve candidate road-adjacent views inspected across three biomes, two zooms and day/unpowered night. Same source tinted at night. Final active-renderer verification is separate.",
+    "measurements": "Foot edges and cap edges establish camera; masonry course seams are held out; vertical timber post edge traced at x621. Coordinates sampled from delivered 1254px PNG.",
+    "record": "assets/art-direction/wetland-square-v2/"
   }
 }

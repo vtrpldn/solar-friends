@@ -67,5 +67,10 @@
     "Current gameplay sources and acceptance fingerprints remain unchanged.",
     "Candidate preview mutates imported metadata only inside an isolated browser, never writes game files.",
     "No raster stretching, local warp or platform patch."
-  ]
+  ],
+  "promotion": {
+    "status": "source installed as wetland-square-v2.png",
+    "record": "active-v1/verdict.json",
+    "note": "Historical candidate measurements/review above remain unchanged; final integration uses separately traced cap/course edges."
+  }
 }

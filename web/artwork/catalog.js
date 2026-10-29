@@ -55,3 +55,6 @@ for(const [id,name,file,usage] of [
  ['resident-hair-rejected-2','Rejected hair prototype 2','hair-curls-rejected-v2.png','Rejected prototype'],
  ['resident-head-guide','Resident head position guide','head-position-guide.png','Reference']
 ])add(id,name,'characters/prototype-v1/'+file,'References',{usage});
+
+add('wetland-earlier','Reed bed · earlier elongated plan','wetland.png','References',{usage:'Reference',width:162,anchor:.72,aspect:.5});
+add('wetland-earlier-night','Reed bed · earlier elongated night plan','wetland-night.png','References',{usage:'Reference',width:162,anchor:.72,aspect:.5});
