@@ -1,0 +1,407 @@
+{
+  "status": "all nine boards visually inspected; contextual building acceptance still open",
+  "scope": "Exact live-check canvases, tiled without rescaling artwork at native game scale. Plain ground plus footprint and original resident reference. Not regional terrain, road, motion or all crop/construction/animal states.",
+  "reportSha256": "d5cd3330f5a10a44df688d6566973c8d0f375c9779bfbf86cd16fb17c6dca959",
+  "reviewedBoards": [
+    {
+      "file": "buildings-1.png",
+      "sha256": "6de63c7084a73199e7a9314eee021d55714c423f146376103cf7422343782d17",
+      "finding": "Day: complete silhouettes and scale references visible; shed, orchard and pasture differ in occupied volume. Reed-bed foundation occupies the rear of the guide; requires contextual road/terrain review before footprint acceptance.",
+      "entries": [
+        {
+          "key": "shed",
+          "state": "day"
+        },
+        {
+          "key": "orchard",
+          "state": "day"
+        },
+        {
+          "key": "goat_pasture",
+          "state": "day"
+        },
+        {
+          "key": "apiary",
+          "state": "day"
+        },
+        {
+          "key": "hydro",
+          "state": "day"
+        },
+        {
+          "key": "eco_toilet",
+          "state": "day"
+        },
+        {
+          "key": "banana_treatment",
+          "state": "day"
+        },
+        {
+          "key": "wetland",
+          "state": "day"
+        },
+        {
+          "key": "biodigester",
+          "state": "day"
+        }
+      ]
+    },
+    {
+      "file": "buildings-2.png",
+      "sha256": "5dfb1e7155e8db822a710e263fb0d1ff00311ae40ac7294efcc3995c23504bc5",
+      "finding": "Day: storage, power, light, home, kitchen, grove, garden, greenhouse and cistern are visible with intact silhouettes; crop layers absent by fixture scope.",
+      "entries": [
+        {
+          "key": "warehouse",
+          "state": "day"
+        },
+        {
+          "key": "solar_farm",
+          "state": "day"
+        },
+        {
+          "key": "streetlight",
+          "state": "day"
+        },
+        {
+          "key": "home",
+          "state": "day"
+        },
+        {
+          "key": "kitchen",
+          "state": "day"
+        },
+        {
+          "key": "grove",
+          "state": "day"
+        },
+        {
+          "key": "garden",
+          "state": "day"
+        },
+        {
+          "key": "greenhouse",
+          "state": "day"
+        },
+        {
+          "key": "well",
+          "state": "day"
+        }
+      ]
+    },
+    {
+      "file": "buildings-3.png",
+      "sha256": "3513a38cdfd39a9bbe3d000b55d62c593231073d658d6a10b9fd0385777f7740",
+      "finding": "Day: workshop, compost, square, coop and all six nondefault homes visible; coherent painted material family at this scale. No new geometry verdict from unmeasured edges.",
+      "entries": [
+        {
+          "key": "compost",
+          "state": "day"
+        },
+        {
+          "key": "square",
+          "state": "day"
+        },
+        {
+          "key": "workshop",
+          "state": "day"
+        },
+        {
+          "key": "coop",
+          "state": "day"
+        },
+        {
+          "key": "home-veranda",
+          "state": "day"
+        },
+        {
+          "key": "home-gable",
+          "state": "day"
+        },
+        {
+          "key": "home-courtyard",
+          "state": "day"
+        },
+        {
+          "key": "adobe-gable",
+          "state": "day"
+        },
+        {
+          "key": "adobe-veranda",
+          "state": "day"
+        }
+      ]
+    },
+    {
+      "file": "buildings-4.png",
+      "sha256": "7a3825874766a9c0065ed8f8ee6b4652b28106f99a8b9931c87af52fc7fee728",
+      "finding": "Powered night: shed, orchard, pasture and apiary use tint; treatment/utility sprites use night palette. Reed-bed placement concern unchanged.",
+      "entries": [
+        {
+          "key": "shed",
+          "state": "powered-night"
+        },
+        {
+          "key": "orchard",
+          "state": "powered-night"
+        },
+        {
+          "key": "goat_pasture",
+          "state": "powered-night"
+        },
+        {
+          "key": "apiary",
+          "state": "powered-night"
+        },
+        {
+          "key": "hydro",
+          "state": "powered-night"
+        },
+        {
+          "key": "eco_toilet",
+          "state": "powered-night"
+        },
+        {
+          "key": "banana_treatment",
+          "state": "powered-night"
+        },
+        {
+          "key": "wetland",
+          "state": "powered-night"
+        },
+        {
+          "key": "biodigester",
+          "state": "powered-night"
+        }
+      ]
+    },
+    {
+      "file": "buildings-5.png",
+      "sha256": "d71377d5655b859d9eec0663557be05c509f880a89b935e5ee1d1c708f91f920",
+      "finding": "Powered night: home/storage windows and streetlight illuminate; panel/cistern/garden/grove/greenhouse preserve recognizable silhouettes. No world light halo rendered in this fixture.",
+      "entries": [
+        {
+          "key": "warehouse",
+          "state": "powered-night"
+        },
+        {
+          "key": "solar_farm",
+          "state": "powered-night"
+        },
+        {
+          "key": "streetlight",
+          "state": "powered-night"
+        },
+        {
+          "key": "home",
+          "state": "powered-night"
+        },
+        {
+          "key": "kitchen",
+          "state": "powered-night"
+        },
+        {
+          "key": "grove",
+          "state": "powered-night"
+        },
+        {
+          "key": "garden",
+          "state": "powered-night"
+        },
+        {
+          "key": "greenhouse",
+          "state": "powered-night"
+        },
+        {
+          "key": "well",
+          "state": "powered-night"
+        }
+      ]
+    },
+    {
+      "file": "buildings-6.png",
+      "sha256": "31216097982be771890460f270dae74244089a41584e34a9306b2c26578fb0a1",
+      "finding": "Powered night: workshop, square and home lights appear; footprints remain stable against day guide. Separate raster variants require landmark checks for geometry acceptance.",
+      "entries": [
+        {
+          "key": "compost",
+          "state": "powered-night"
+        },
+        {
+          "key": "square",
+          "state": "powered-night"
+        },
+        {
+          "key": "workshop",
+          "state": "powered-night"
+        },
+        {
+          "key": "coop",
+          "state": "powered-night"
+        },
+        {
+          "key": "home-veranda",
+          "state": "powered-night"
+        },
+        {
+          "key": "home-gable",
+          "state": "powered-night"
+        },
+        {
+          "key": "home-courtyard",
+          "state": "powered-night"
+        },
+        {
+          "key": "adobe-gable",
+          "state": "powered-night"
+        },
+        {
+          "key": "adobe-veranda",
+          "state": "powered-night"
+        }
+      ]
+    },
+    {
+      "file": "buildings-7.png",
+      "sha256": "51181683b617c62af63381dd3f426fe1cfee2fc5e64d7d1ac92370af66fda146",
+      "finding": "Unpowered night: first nine keys use day silhouettes with tint and no artificial light; reed-bed placement concern unchanged.",
+      "entries": [
+        {
+          "key": "shed",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "orchard",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "goat_pasture",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "apiary",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "hydro",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "eco_toilet",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "banana_treatment",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "wetland",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "biodigester",
+          "state": "unpowered-night"
+        }
+      ]
+    },
+    {
+      "file": "buildings-8.png",
+      "sha256": "7a919ad74e177d29393b6f9ca590f78168dbd0faed43bdd9afbaada8775e0361",
+      "finding": "Unpowered night: streetlight, home and storage are visibly off; full silhouettes remain visible.",
+      "entries": [
+        {
+          "key": "warehouse",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "solar_farm",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "streetlight",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "home",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "kitchen",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "grove",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "garden",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "greenhouse",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "well",
+          "state": "unpowered-night"
+        }
+      ]
+    },
+    {
+      "file": "buildings-9.png",
+      "sha256": "b624d0ec952d8b42d63497596e8e2571cdf2135277d255c979cf79e6c07f61db",
+      "finding": "Unpowered night: workshop, square and homes visibly switch off and keep recognizable silhouettes.",
+      "entries": [
+        {
+          "key": "compost",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "square",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "workshop",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "coop",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "home-veranda",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "home-gable",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "home-courtyard",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "adobe-gable",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "adobe-veranda",
+          "state": "unpowered-night"
+        }
+      ]
+    }
+  ],
+  "pendingVisualReview": [],
+  "openFindings": [
+    {
+      "key": "wetland",
+      "finding": "Painted bed sits toward the rear of its square occupied guide. The elongated bed and attached outlet barrel jointly determine full-source registration. A square guide alone cannot establish whether required access/road connections are coherent.",
+      "status": "needs contextual review; no source distortion or scale change authorized by this observation"
+    }
+  ],
+  "limitations": [
+    "Native game scale 1 only; no regional terrain, neighboring road, rain, varied zoom or full growth/construction/animal states.",
+    "No mathematical geometry acceptance based only on these boards.",
+    "No sprite artwork or calibration changed."
+  ]
+}
