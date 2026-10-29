@@ -1,0 +1,75 @@
+{
+  "status": "partial visual review; release gate open",
+  "reportSha256": "a506845a974b0353940f784f67ead2c6094ef7b6d624997631b0bf7e67a0f3b7",
+  "scope": "Static art review through current public appearance providers and shared terrain/building/resident/weather painters. Native-validated generated properties with an authored stage clearing. Visual rain and night are explicit presentation fixtures, not climate-simulation claims. Representative complete characters/poses, not exhaustive combinations, motion, powered-light or performance acceptance.",
+  "reviewedViews": [
+    {
+      "file": "mata-atlantica-1.5-day.png",
+      "sha256": "7ad9cbb2f80c804e118eecbf4434725d59430981642a48708f078038f93438d1",
+      "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
+    },
+    {
+      "file": "mata-atlantica-1.5-night-rain.png",
+      "sha256": "dba9782e72d5bbf85c720552396918213b0c90de085db8d44e5c769c0aa125a8",
+      "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-1.5-day.png",
+      "sha256": "e4bd3badb92a94ac4daf3f2ebcb63017b81f62c4cee785d492f1b38b44aad11a",
+      "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-1.5-night-rain.png",
+      "sha256": "61f52b997653f51c806c1097fd8be1c36bf29495cb456da62bc2cfa7990f17ba",
+      "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-1.5-day.png",
+      "sha256": "3af6e0c687f76f0069c7f774a2840f007fa6445742e060c9797aa4a854c1924a",
+      "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-1.5-night-rain.png",
+      "sha256": "17dca6b4bb496ef26c1eb72eddef781ce66b34b1589fd76d817c562e8281400e",
+      "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
+    }
+  ],
+  "pendingVisualReview": [
+    "mata-atlantica-0.75-day.png",
+    "mata-atlantica-0.75-night.png",
+    "mata-atlantica-0.75-rain.png",
+    "mata-atlantica-0.75-night-rain.png",
+    "mata-atlantica-1.5-night.png",
+    "mata-atlantica-1.5-rain.png",
+    "mata-atlantica-2-day.png",
+    "mata-atlantica-2-night.png",
+    "mata-atlantica-2-rain.png",
+    "mata-atlantica-2-night-rain.png",
+    "cerrado-0.75-day.png",
+    "cerrado-0.75-night.png",
+    "cerrado-0.75-rain.png",
+    "cerrado-0.75-night-rain.png",
+    "cerrado-1.5-night.png",
+    "cerrado-1.5-rain.png",
+    "cerrado-2-day.png",
+    "cerrado-2-night.png",
+    "cerrado-2-rain.png",
+    "cerrado-2-night-rain.png",
+    "caatinga-0.75-day.png",
+    "caatinga-0.75-night.png",
+    "caatinga-0.75-rain.png",
+    "caatinga-0.75-night-rain.png",
+    "caatinga-1.5-night.png",
+    "caatinga-1.5-rain.png",
+    "caatinga-2-day.png",
+    "caatinga-2-night.png",
+    "caatinga-2-rain.png",
+    "caatinga-2-night-rain.png"
+  ],
+  "limitations": [
+    "Six of 36 captures inspected; remaining zooms and separate rain/night views pending.",
+    "Eight representative public recipes, not all pairwise recipes or every pose.",
+    "Static presentation fixtures; no motion, climate simulation, powered lighting, performance or complete building-art acceptance.",
+    "Authored clearing avoids foreground occlusion; does not exercise all navigation or occlusion arrangements."
+  ]
+}
