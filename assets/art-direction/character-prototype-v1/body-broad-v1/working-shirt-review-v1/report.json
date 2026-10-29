@@ -1,0 +1,176 @@
+{
+  "recordings": [
+    {
+      "night": 0,
+      "offsetMs": 0.09999990463256836,
+      "elapsedMs": 3003.5
+    },
+    {
+      "night": 1,
+      "offsetMs": 3003.5999999046326,
+      "elapsedMs": 3000.5
+    }
+  ],
+  "renderCalls": 619,
+  "preparedFrames": 16,
+  "observedFrames": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "clip": "work",
+  "scope": "Native work loop only, four palettes, day/mirrored night at 180px and 48px; no hair, accessories, transitions, world or performance acceptance",
+  "selection": [
+    [
+      "short-sleeve-broad-work-4-v3",
+      "v1"
+    ],
+    [
+      "short-sleeve-broad-work-5-v2",
+      "v1"
+    ],
+    [
+      "short-sleeve-broad-work-6-v2",
+      "v1"
+    ],
+    [
+      "short-sleeve-broad-work-7-v1",
+      "v2"
+    ]
+  ],
+  "videoSha256": "47b9271181b288f7c5bf37df9194e8692cf4ce7f0269c76b10050b7e0ef5231b",
+  "metadata": {
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "vp9",
+        "codec_long_name": "Google VP9",
+        "profile": "Profile 0",
+        "codec_type": "video",
+        "codec_tag_string": "[0][0][0][0]",
+        "codec_tag": "0x0000",
+        "mime_codec_string": "vp09.00.30.08",
+        "width": 800,
+        "height": 360,
+        "coded_width": 800,
+        "coded_height": 360,
+        "has_b_frames": 0,
+        "sample_aspect_ratio": "1:1",
+        "display_aspect_ratio": "20:9",
+        "pix_fmt": "yuv420p",
+        "level": -99,
+        "color_range": "tv",
+        "color_space": "smpte170m",
+        "refs": 1,
+        "r_frame_rate": "30000/1001",
+        "avg_frame_rate": "30000/1001",
+        "time_base": "1/1000",
+        "start_pts": 0,
+        "start_time": "0.000000",
+        "nb_read_frames": "179",
+        "disposition": {
+          "default": 1,
+          "dub": 0,
+          "original": 0,
+          "comment": 0,
+          "lyrics": 0,
+          "karaoke": 0,
+          "forced": 0,
+          "hearing_impaired": 0,
+          "visual_impaired": 0,
+          "clean_effects": 0,
+          "attached_pic": 0,
+          "timed_thumbnails": 0,
+          "non_diegetic": 0,
+          "captions": 0,
+          "descriptions": 0,
+          "metadata": 0,
+          "dependent": 0,
+          "still_image": 0,
+          "multilayer": 0
+        },
+        "tags": {
+          "language": "eng",
+          "alpha_mode": "1"
+        }
+      }
+    ],
+    "format": {
+      "filename": "assets/art-direction/character-prototype-v1/body-broad-v1/working-shirt-review-v1/work.webm",
+      "nb_streams": 1,
+      "nb_programs": 0,
+      "nb_stream_groups": 0,
+      "format_name": "matroska,webm",
+      "format_long_name": "Matroska / WebM",
+      "start_time": "0.000000",
+      "duration": "5.956211",
+      "size": "923726",
+      "bit_rate": "1240689",
+      "probe_score": 100,
+      "tags": {
+        "encoder": "Chrome"
+      }
+    }
+  },
+  "samples": [
+    {
+      "night": 0,
+      "requestedSeconds": 0.10009999990463257
+    },
+    {
+      "night": 0,
+      "requestedSeconds": 0.30009999990463254
+    },
+    {
+      "night": 0,
+      "requestedSeconds": 0.5000999999046326
+    },
+    {
+      "night": 0,
+      "requestedSeconds": 0.7000999999046326
+    },
+    {
+      "night": 1,
+      "requestedSeconds": 3.103599999904633
+    },
+    {
+      "night": 1,
+      "requestedSeconds": 3.3035999999046326
+    },
+    {
+      "night": 1,
+      "requestedSeconds": 3.503599999904633
+    },
+    {
+      "night": 1,
+      "requestedSeconds": 3.7035999999046325
+    }
+  ],
+  "inputs": {
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v3/candidate-v1.png": "89ce4d5854a61b12167fec564f2766c8db389fcf1daf8352a5be7ef1dcbd4d73",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v3/candidate-v1-audit.json": "818b1fca2f451eca659d84817e923823f02d977e626fb38ef4a6cc3027f4e62a",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v3/body-review-v1.json": "66234a5fd72072424bfb287c46216d0d0718ad70a1fbd6fd8d2f257b9cdf385a",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-4-v3/registration-intent.json": "bbd8c96ea0692155241cbe0a23e3a8317e30222afe20f4d41f2836609ca92207",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v2/candidate-v1.png": "edc5e6bdba3ec8b42134ab3abfa03dc5efb74555d9e93b5f9bff0eb3f3712b28",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v2/candidate-v1-audit.json": "514d851571326bfc66da968400c64b37d67431755bb4d3a9a4c7f6efef26e705",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v2/body-review-v1.json": "f6f4f8335800446c54a5f837a140d7059df7b3dc47ffc8de98bba35874045b4b",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-5-v2/registration-intent.json": "35f4f04bc54ee159946fc555b18fb1c856bc67b8e726527569c9e34674bf3656",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-6-v2/candidate-v1.png": "4fef51a8215752ac9202283ae9ceae7ffe681dfe8337fa3f288ab9d820045845",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-6-v2/candidate-v1-audit.json": "3f64cc0005e1e7901d0bf736e0ab138a0aa9d49babba4092444c0c0079e66e46",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-6-v2/body-review-v1.json": "571c6387c6c5fcb7d4b25dfaea34d6f201abbff043348f5680b808d628306ee1",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-6-v2/registration-intent.json": "cbc2091f7321a392be180f17c59d0b34a8adff84197023416f4ab8d9a80a919d",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-7-v1/candidate-v2.png": "1b1930497b60788061b577677f08a7f629c08d9a958055dc75e93157f244f815",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-7-v1/candidate-v2-audit.json": "1d459ba3bc0f458806204038fbd19b25b290c1f952d55b9c1752dc23a31af078",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-7-v1/body-review-v2.json": "39938bb05a33ccb502aba8d541f3d4b0d1df827b79296c2135f2a5e46d7836a3",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-work-7-v1/registration-intent.json": "430868bfe3d372930d854b884a8b128da171b4826faca42c88a76e2be4155212",
+    "scripts/review-broad-shirt-loop.mjs": "062123b178e90dd994200920b3e0d5b545971cb9fb7b8ea03b6ef831b53c9e9d",
+    "web/character-clothing.js": "7db924346690a19dc8c5eca542b6bfb6ebb3f5a12ae2e3a40e526c4a6f5220af",
+    "web/character-atlas-clothing.js": "733fda3ce739c166aceb5de8ad402de1e8f8c293c7e03e1d038eae38353d0200",
+    "web/character-body-family.js": "756ae0fc222f3d3266b32add6522eb57e74165c16889d8b82e8ebed62e6d6ebb",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/resident-animation.js": "3093573275361eee1c9c4749ae1c7b16985859a77b37160483d17f11d93d1be9",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/art/characters/broad-v1/bundle-v1.json": "6d3f334aca027a80296ebc760e5d1214293ea027b3d0503d37e26a27c3c52f42"
+  }
+}

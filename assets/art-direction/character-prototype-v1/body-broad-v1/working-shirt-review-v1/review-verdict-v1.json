@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "status": "internal-work-loop-reviewed-with-open-release-gates",
+  "clip": "work",
+  "profile": "neutral-v1",
+  "reviewed": [
+    "decoded-loop.png"
+  ],
+  "findings": [
+    "All four work poses were decoded and visually inspected in cream, teal, terracotta and indigo, at 180px and 48px. Day and mirrored night views retain the intended garment and foreground arms.",
+    "The first frame no longer exposes the old tank at the hem or shoulder. The raised-arm frame retains its crossing forearm and elbow; the bent frame has a tapered sleeve opening.",
+    "The underlying body makes large discrete keyframe changes. This study does not establish smooth motion or transitions between activities.",
+    "The bent-pose sleeve has simpler seam detail than the other painted frames; retain that style-continuity check for complete outfit review."
+  ],
+  "excluded": [
+    "Full outfit and other poses",
+    "Hair, hats and other accessories",
+    "Inter-activity transitions",
+    "World placement, lighting variants beyond the sampled night tint, rain and biome pairing",
+    "Physical-display frame pacing or performance"
+  ],
+  "publicCatalogEnrollment": false
+}

@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "status": "internal-work-loop-reviewed-with-open-release-gates",
+  "sources": {
+    "work.webm": "47b9271181b288f7c5bf37df9194e8692cf4ce7f0269c76b10050b7e0ef5231b",
+    "decoded-loop.png": "2136063aee369dab5f5e447737fbc0253f6a5603a94ef80692806ca928fe2623",
+    "report.json": "74c25af2a398b970f3793d1205280c0de67539ee4029f9f54490dad09695479f",
+    "review-verdict-v1.json": "7ac90d253d3ba7dd3e45f4b9497feb5977c3f08b1430d5bac1d488c3223a9c79"
+  },
+  "publicCatalogEnrollment": false
+}
