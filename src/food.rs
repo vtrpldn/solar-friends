@@ -284,6 +284,14 @@ pub fn reserved_space(v: &Village, owner: Option<Owner>) -> u32 {
         * 3
 }
 pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
+    meal_choice(v, r, false)
+}
+/// Availability probes need one reachable dated portion, not the best-ranked
+/// store. Share all access/claim/expiry rules with actual meal assignment.
+pub fn can_eat(v: &Village, r: &Resident) -> bool {
+    meal_choice(v, r, true).is_some()
+}
+fn meal_choice(v: &Village, r: &Resident, any: bool) -> Option<(Id, usize, [f32; 2])> {
     let mut choices = vec![];
     for p in &v.logistics.as_ref()?.stores {
         if EDIBLE
@@ -310,6 +318,9 @@ pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
                 })
                 .collect();
             if available_now > 0 && future > 0 {
+                if any {
+                    return Some((p.id, material, point));
+                }
                 let expires = edible.first().map_or(f32::INFINITY, |l| l.expires);
                 choices.push((
                     material != MEALS,
@@ -552,8 +563,10 @@ mod tests {
         b.y = CAMP.1;
         b.task = "eat".into();
         b.remaining = 5.;
+        assert!(can_eat(&v, &a));
         assert!(assign(&mut a, &v));
         v.workforce_peers.insert(0, Some(a));
+        assert!(!can_eat(&v, &b));
         assert!(!assign(&mut b, &v));
         assert_eq!(economy::free(&v, FOOD), 0);
         conserved(&v);
@@ -751,6 +764,7 @@ mod tests {
         }
         let r = resident(&mut g, 0);
         assert!(meal(g.app.world().resource::<Village>(), &r).is_none());
+        assert!(!can_eat(g.app.world().resource::<Village>(), &r));
         for _ in 0..2400 {
             g.tick(0.25);
             if resident(&mut g, 0).hunger < 60. {

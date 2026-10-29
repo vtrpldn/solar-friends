@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "files": {
+    "src/food.rs": "642cf2b880b8b02951742cde6d0b5f73b8f5cf849d9f07c5e527c2c048c60cc1",
+    "src/workforce.rs": "f401bb2ec9ad6dc7e26637a8540b3bd8e555962a8e38df7ebaa14eb5a46e3aa3",
+    "scripts/profile-dense-engine.mjs": "320f955be20915c7547c596f166036d655b5ff74a82486864af6e8464bdf15c0",
+    "scripts/compare-engine-builds.mjs": "bdf1829a486cb366e5dfac7f7e8c6f02ed278d8e1adc12a1b8effb405d550608"
+  },
+  "checks": {
+    "native": "787 tests passed, including reachable food, last-portion claims and blocked-store probes.",
+    "parity": "100 exact snapshots over 2400 quarter-second ticks in the retained maximum Cerrado fixture, equal frame/full reports; matrix adds all three biomes, Story/Sandbox, 1/5/12 residents, with 12 accepted and 6 expected rejected/atomic cases.",
+    "profile": "600 ticks in the named original module replay exactly like the original shipped engine; profiles attribute native cost, not performance timings.",
+    "rendered": "Four unprofiled ten-second 1x/16x still/panning phases complete with exact checkpoint restore, bounded appearance cache and zero browser errors; all four final screens inspected."
+  },
+  "performance": "Engine-only four alternating-order batches improve from 623–632ms to 461–480ms per 240 ticks. Identical-fixture rendered 16x panning frame-gap p95 changes 41.3ms to 33.4ms; requested simulation-rate fraction changes 0.963 to 1.005. These are short sampled comparisons, not universal latency/FPS acceptance.",
+  "implementation": "Existence probes stop at the first reachable unclaimed portion valid through travel/eating. Actual assignment retains the complete existing material/expiry/distance/store ranking. No cache, changed reservations, timers or serialized state.",
+  "limitations": [
+    "Maximum panning remains slower than a 60fps frame budget; physical display and broader release gates remain unproven.",
+    "Prior b2cfbee source-bound performance reports are historical after this engine change; do not rebind their inputs to the new binary.",
+    "Repository-wide cargo fmt --check reports pre-existing unrelated formatting differences. Both changed Rust files pass targeted rustfmt checks."
+  ]
+}

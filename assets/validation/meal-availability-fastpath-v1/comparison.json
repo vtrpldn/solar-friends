@@ -1,0 +1,38 @@
+{
+  "sameFixture": true,
+  "phases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "beforeP95GapMs": 18.700000000000728,
+      "afterP95GapMs": 17.80000000000109,
+      "beforeSimulationRate": 1.0030325066814378,
+      "afterSimulationRate": 1.0035264534988355
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "beforeP95GapMs": 25,
+      "afterP95GapMs": 24.899999999997817,
+      "beforeSimulationRate": 1.003209165444622,
+      "afterSimulationRate": 1.0026388845482408
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "beforeP95GapMs": 34.900000000001455,
+      "afterP95GapMs": 33.30000000000291,
+      "beforeSimulationRate": 0.9785576129632058,
+      "afterSimulationRate": 1.003611727858545
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "beforeP95GapMs": 41.299999999995634,
+      "afterP95GapMs": 33.400000000001455,
+      "beforeSimulationRate": 0.962861515565018,
+      "afterSimulationRate": 1.0047483518701044
+    }
+  ],
+  "scope": "Two separate unprofiled short runs of identical seed-42 maximum Cerrado fixture. Descriptive comparison, not repeated frame-pacing acceptance."
+}

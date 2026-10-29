@@ -285,7 +285,7 @@ pub fn claim_available(
 /// foraging at once.
 pub fn eating(v: &Village, id: usize) -> bool {
     if let Some(r) = v.workforce_peers.get(&id).and_then(Option::as_ref) {
-        return food::meal(v, r).is_some();
+        return food::can_eat(v, r);
     }
     v.food.floor() + (v.meals + food::other_portions(v)) as f32 > count(v, id, "eat")
 }
