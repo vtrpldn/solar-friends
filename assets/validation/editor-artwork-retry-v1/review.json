@@ -1,0 +1,21 @@
+{
+  "scope": "Controlled artwork provider failures in an isolated public editor. Not a production network-outage study.",
+  "inputs": {
+    "web/editor/map-view.js": "5d1ced57b883db1703ca8732adbc3418a0cb959d18a83fb5b155e07a3086322e",
+    "web/editor/index.js": "e19420855c1146d9d1b0d4ed60e16f9a41bc38bc3a71d276a2b16e34da64ef24",
+    "web/editor.html": "1c220ce3ebc57aee04981147585ed558d2df380dd4030242d1a31b68ef4dbbe9",
+    "scripts/verify-editor-artwork-retry.mjs": "015c551ca8ffdd576d8102416ec22890acafbae9828aec81acf03dd4ed4199fb"
+  },
+  "captures": {
+    "recovered.png": "7b83480543349419f0fe1b3b9d859fe533c22511aedf53586eec9b8cbb1d0d62",
+    "failure.png": "a174c0aa7ef1c0f70912a3d169dd9d7e51026cae900357d0689242666c713d6d"
+  },
+  "checks": [
+    "Keyboard retry restores map after real provider preparation.",
+    "Failed preparation has aria-busy false and keeps pointer placement blocked.",
+    "Definition and camera are unchanged by retry.",
+    "Older rejected preparation cannot replace newer successful map.",
+    "Existing view-recovery regression passes."
+  ],
+  "visualScope": "Failure and recovered layout inspected during initial final-runtime run; rerun captures use same UI sources and a newly generated camp."
+}
