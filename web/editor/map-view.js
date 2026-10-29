@@ -93,7 +93,8 @@ export class EditorMap {
     });
     return this.ground;
   }
-  get state(){return structuredClone({...this.view,brushSize:this.brushSize,natureSpeciesKey:this.natureSpecies?.key,natureSize:this.natureSize||1});}
+  // A pan is a preview until pointerup; autosaves keep its starting camera.
+  get state(){return structuredClone({...this.view,center:this.drag?.pan?this.drag.center:this.view.center,brushSize:this.brushSize,natureSpeciesKey:this.natureSpecies?.key,natureSize:this.natureSize||1});}
   cancelGesture({paint=true}={}){
     const active=!!(this.drag||this.stroke||this.routeStroke);
     if(this.drag?.pan)this.view.center=[...this.drag.center];

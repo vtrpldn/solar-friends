@@ -293,6 +293,7 @@ function mapAction(action){
   }
 }
 function attach(definition,{id,revision=null,checkpoint=null,view=null,record=null}={}){
+  map.cancelGesture({paint:false});
   clearTimeout(saveTimer);expandedReview=false;
   const doc=checkpoint?EditorDocument.restore(checkpoint):new EditorDocument(definition);
   current={id:id||definition.id,doc,storageRevision:revision,record,viewDirty:false,conflicted:false};
@@ -310,6 +311,7 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   history.replaceState(null,'',`./editor.html?project=${encodeURIComponent(ctx.id)}`);
   $('creator-library-dialog').close();$('creator-library-title').textContent='Creation library';
   refresh();setTool(map.view.tool);$('creator-land-layer').value=map.view.layer;$('creator-land-legend').textContent=overlayLegend();$('creator-grid').checked=map.view.grid;
+  ctx.viewDirty=revision===null; // Restoring a durable view is not a new player edit.
   status(revision===null?'New creation · save to keep it':'Saved on this device');
   if(doc.historyRecovered)toast('The creation was recovered. Its damaged undo history was cleared.');
 }
@@ -324,7 +326,7 @@ async function openProject(record){
     if(cached?.storageRevision===record.revision){EditorDocument.restore(cached.checkpoint);recovered=JSON.stringify(cached.checkpoint)!==JSON.stringify(checkpoint)||JSON.stringify(cached.view)!==JSON.stringify(view);checkpoint=cached.checkpoint;view=cached.view;}
   }catch{/* Keep the last durable checkpoint. */}
   attach(checkpoint.definition,{id:record.id,revision:record.revision,checkpoint,view,record});
-  if(recovered){status('Recovered your last checkpoint');toast('Your creation was recovered. Save it to keep this checkpoint.');}
+  if(recovered){current.viewDirty=true;status('Recovered your last checkpoint');toast('Your creation was recovered. Save it to keep this checkpoint.');}
 }
 async function newProject(preset,source=null,attribution=[]){
   if(current)await save();
@@ -409,14 +411,14 @@ function wire(){
   $('creator-route-tools').onclick=()=>{const details=$('creator-routes');details.open=true;routesEditor.paint();details.scrollIntoView({block:'start'});};
   $('creator-habitat').onchange=()=>{map.view.habitatPreset=$('creator-habitat').value;setTool('habitat');};
   $('creator-species').onchange=()=>{map.natureSpecies=catalog.nature.find(s=>s.key===$('creator-species').value);$('creator-nature-size').min=map.natureSpecies.min_size;$('creator-nature-size').max=map.natureSpecies.max_size;setTool('nature');};
-  $('creator-nature-size').oninput=e=>{map.natureSize=Number(e.target.value);$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';map.render();};
+  $('creator-nature-size').oninput=e=>{map.natureSize=Number(e.target.value);$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';map.render();map.viewChanged(map.state);};
   $('creator-river-enabled').onchange=e=>change(e.target.checked?'Restore river':'Remove river',d=>{d.map.river=e.target.checked?JSON.parse(engine.scenario_template('story')).map.river:null;});
-  $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;map.landOverlay=overlayTiles();$('creator-land-legend').textContent=overlayLegend();map.render();current.viewDirty=true;scheduleSave();};
+  $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;map.landOverlay=overlayTiles();$('creator-land-legend').textContent=overlayLegend();map.render();map.viewChanged(map.state);};
   $('creator-brush-size').onchange=e=>{map.brushSize=Number(e.target.value);map.viewChanged(map.state);};
   $('creator-toolbelt').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
   $('creator-sites').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
   $('creator-buildings').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
-  $('creator-grid').onchange=()=>{map.view.grid=$('creator-grid').checked;map.render();scheduleSave();};
+  $('creator-grid').onchange=()=>{map.view.grid=$('creator-grid').checked;map.render();map.viewChanged(map.state);};
   $('creator-title').onchange=()=>change('Rename our village',d=>{d.title=$('creator-title').value;});
   for(const [id,path,label]of [['creator-description',['description'],'Edit introduction'],['creator-seed',['map','seed'],'Change landscape seed'],['creator-funds',['start','funds'],'Set the shared fund'],['creator-water',['start','fresh_water'],'Set starting fresh water']])$(id).onchange=()=>{
     const raw=$(id).value,value=id==='creator-description'?raw:id==='creator-funds'?Math.round(Number(raw)*100):Number(raw);
@@ -561,7 +563,7 @@ function wire(){
     else if(['Delete','Backspace'].includes(e.code)&&map.view.selectedSite){e.preventDefault();const id=map.view.selectedSite;change('Remove material plot',d=>{d.start.resource_sites=d.start.resource_sites.filter(s=>s.id!==id);});map.select(null);}
     else if(['Delete','Backspace'].includes(e.code)&&map.view.selected){e.preventDefault();removeBuilding(map.view.selected);}
   });
-  window.addEventListener('beforeunload',e=>{if(current&&(current.doc.dirty||current.conflicted)){cacheRecovery(current,current.doc.checkpoint(),map.state);e.preventDefault();e.returnValue='';}});
+  window.addEventListener('beforeunload',e=>{map?.cancelGesture();if(current&&(current.doc.dirty||current.viewDirty||current.conflicted)){cacheRecovery(current,current.doc.checkpoint(),map.state);e.preventDefault();e.returnValue='';}});
   window.addEventListener('blur',()=>map?.cancelGesture());
   document.addEventListener('visibilitychange',()=>{if(document.hidden){map?.cancelGesture();if(current)save().catch(()=>{});}});
   library.addEventListener('change',e=>{if(e.detail.remote&&current?.id===e.detail.id&&e.detail.revision!==current.storageRevision){current.conflicted=true;status('Changed in another tab · save a copy');toast('Another tab changed this creation. Your edits are kept here; save a copy to retain them.');}});
@@ -571,7 +573,7 @@ try{
   await init({module_or_path:new URL('../pkg/solar_friends_bg.wasm',import.meta.url)});
   outlook=new ScenarioOutlook($('creator-outlook'),{source:()=>({key:current?current.id+':'+current.doc.revision:null,valid:!!current&&report.ok,snapshot:()=>engine.snapshot(),projects:checkpoint=>projectPlaces(checkpoint,current.doc.value.start.buildings,title)}),reviewProject:p=>{if(!current?.doc.value.start.buildings.some(b=>b.id===p.id))return;setTool('select');map.select(p.id);map.centerAt(p.x,p.y);$('creator-selection').scrollIntoView({block:'nearest'});}});
   engine=new Game();catalog=JSON.parse(engine.scenario_catalog());art=await loadEditorArt();
-  map=new EditorMap($('creator-map'),art,{onTerrainReady:()=>{if(current){current.artRevision=(current.artRevision??0)+1;current.thumbnailRevision=null;scheduleSave();}},onArtworkReady:()=>{if(current){current.artRevision=(current.artRevision??0)+1;current.thumbnailRevision=null;scheduleSave();}},action:mapAction,viewChanged:()=>{if(current){current.viewDirty=true;const selection=JSON.stringify([map.selection(),map.view.selectedSite,map.view.selectedBank,map.view.selectedRoute,map.view.selectedResident]);if(selection!==inspectorSelection){inspectorSelection=selection;renderSelection();}scheduleSave();}},hover:inspectGround});
+  map=new EditorMap($('creator-map'),art,{onTerrainReady:()=>{if(current){current.artRevision=(current.artRevision??0)+1;current.thumbnailRevision=null;scheduleSave();}},onArtworkReady:()=>{if(current){current.artRevision=(current.artRevision??0)+1;current.thumbnailRevision=null;scheduleSave();}},action:mapAction,viewChanged:()=>{if(current){const key=JSON.stringify(map.state);if(key===current.viewKey)return;current.viewKey=key;current.viewDirty=true;if(!current.conflicted)status('Changes to save');const selection=JSON.stringify([map.selection(),map.view.selectedSite,map.view.selectedBank,map.view.selectedRoute,map.view.selectedResident]);if(selection!==inspectorSelection){inspectorSelection=selection;renderSelection();}scheduleSave();}},hover:inspectGround});
   minimap=new EditorMinimap($('creator-minimap'),map);map.onRender=()=>minimap.draw();
   $('creator-sites').innerHTML='<button data-tool="battery-bank" aria-pressed="false">Battery bank</button>'+sourceKinds.map((kind,i)=>`<button data-tool="${kind}" aria-pressed="false">${escape(siteNames[i])}</button>`).join('');
   $('creator-buildings').innerHTML=catalog.buildings.map(b=>`<button data-tool="${b.id}" aria-pressed="false"><canvas width="154" height="100" data-palette="${b.id}" aria-hidden="true"></canvas><span>${escape(title(b.id))}</span></button>`).join('');
