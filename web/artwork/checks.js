@@ -1,22 +1,33 @@
 import { catalog } from './catalog.js?v=night-1';
 import { reviewPixels } from './pixel-checks.js';
 import { preparedFrames, animationFrameOptions, FRAME_ANCHOR } from '../sprite-frames.js';
-import { buildingArt, allBuildingArt, homeArtKeys, drawBuildingArt } from '../building-art.js?v=night-1';
+import { buildingArt, allBuildingArt, drawBuildingArt } from '../building-art.js?v=night-1';
 import { drawCrops, loadCropArt, cropTypes } from '../crop-art.js';
+import {paintWorldBuilding} from '../world-renderer.js';
+import {footprintCorners} from '../building-footprints.js';
+import {project} from '../projection.js';
+import {unlitFilter} from '../power.js';
 import { download } from '../dev/tools.js';
-const $=id=>document.getElementById(id),images=new Map(),results=[];
+const $=id=>document.getElementById(id),images=new Map(),results=[],buildingViews=[];
 try {
   await Promise.all([...new Set(catalog.map(s=>s.file))].map(async file=>{const img=new Image();img.src=file;await img.decode();images.set(file,img);}));
   await loadCropArt();
-  for(const night of [false,true])for(const key of homeArtKeys){
-    const art=allBuildingArt[key],figure=document.createElement('figure'),canvas=document.createElement('canvas');
-    canvas.width=440;canvas.height=340;canvas.setAttribute('aria-label',`${art.name} · ${night?'night':'day'} at shared game scale`);
+  const dayImages=Object.fromEntries(Object.entries(allBuildingArt).map(([key,art])=>[key,images.get(`../art/${art.file}`)]));
+  const nightImages=Object.fromEntries(Object.entries(allBuildingArt).map(([key,art])=>[key,images.get(`../art/${art.nightFile}`)]));
+  for(const [state,night,light]of [['day',0,1],['powered-night',1,1],['unpowered-night',1,0]])for(const [key,art]of Object.entries(allBuildingArt)){
+    const figure=document.createElement('figure'),canvas=document.createElement('canvas');
+    figure.dataset.building=key;figure.dataset.lighting=state;
+    canvas.width=640;canvas.height=480;canvas.setAttribute('aria-label',`${art.name} · ${state} · shared placement at scale 1`);
     const ctx=canvas.getContext('2d');ctx.scale(2,2);
-    ctx.fillStyle=night?'#263c4b':'#dde5ca';ctx.fillRect(0,0,220,170);
-    drawBuildingArt(ctx,images.get(`../art/${night?art.nightFile:art.file}`),art,110,125,1);
-    const resident=catalog.find(s=>s.id==='portrait-0');
-    ctx.drawImage(preparedFrames(images.get(resident.file),{referenceRow:2})[8],176,125-48*FRAME_ANCHOR,48,48);
-    figure.append(canvas);const caption=document.createElement('figcaption');caption.textContent=`${art.name} · ${night?'night':'day'}`;figure.append(caption);$('houses').append(figure);
+    ctx.fillStyle=night?'#263c4b':'#dde5ca';ctx.fillRect(0,0,320,240);
+    const position=(x,y)=>project(x,y,{x:150,y:164},1);
+    ctx.strokeStyle=night?'#c8d5b9':'#61734e';ctx.setLineDash([3,3]);ctx.beginPath();
+    footprintCorners(key,0,0).forEach(([x,y],i)=>{const p=position(x,y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y);});ctx.closePath();ctx.stroke();ctx.setLineDash([]);
+    paintWorldBuilding(ctx,{key,x:0,y:0},{project:position,scale:1,images:dayImages,nightImages,night,light});
+    const resident=catalog.find(s=>s.id==='portrait-0');ctx.save();ctx.filter=unlitFilter(night);
+    ctx.drawImage(preparedFrames(images.get(resident.file),{referenceRow:2})[8],254,208-48*FRAME_ANCHOR,48,48);ctx.restore();
+    figure.append(canvas);const caption=document.createElement('figcaption');caption.textContent=`${art.name} · ${state.replaceAll('-',' ')} · footprint guide`;
+    figure.append(caption);$('houses').append(figure);buildingViews.push({key,state,scale:1,renderer:'paintWorldBuilding'});
   }
   for(const sprite of catalog){
     const report=reviewPixels(images.get(sprite.file),images.get(sprite.file),sprite);
@@ -47,6 +58,6 @@ try {
     drawCrops(ctx,{kind,crop:c},120,180,1.5,Number(night));figure.append(canvas);
     const caption=document.createElement('figcaption');caption.textContent=`${kind} · ${crop} · ${phase} · ${night?'night':'day'}`;figure.append(caption);$('crops').append(figure);
   }
-  const failures=results.filter(r=>!r.passed);$('status').textContent=`${results.length} entries · ${results.reduce((n,r)=>n+r.frames,0)} cells · ${failures.length} failures. Pixel checks verify separation, gutters and ground registration; inspect style and motion visually.`;
-  $('export').disabled=false;$('export').onclick=()=>download({capturedAt:new Date().toISOString(),results},'solar-friends-current-art-checks.json');
+  const failures=results.filter(r=>!r.passed);$('status').textContent=`${buildingViews.length} building/state previews · ${results.length} entries · ${results.reduce((n,r)=>n+r.frames,0)} cells · ${failures.length} failures. Pixel checks verify separation, gutters and ground registration; inspect style and motion visually.`;
+  $('export').disabled=false;$('export').onclick=()=>download({capturedAt:new Date().toISOString(),results,buildingViews},'solar-friends-current-art-checks.json');
 }catch(error){$('status').textContent=`Artwork check failed: ${error.message}`;console.error(error);}

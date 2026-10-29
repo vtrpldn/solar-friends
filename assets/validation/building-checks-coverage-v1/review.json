@@ -1,0 +1,35 @@
+{
+  "scope": "Live artwork-check tool coverage, not complete building-art acceptance or regional terrain review.",
+  "inputs": {
+    "web/artwork/checks.js": "b2125667cf64cddf759f91b3c1b649a54a95627bc27326038d9a7e913e701262",
+    "web/artwork/checks.html": "5c0acb09585655e6d563ecbd4fe04508b1dc1372538cf164c099a4a1234949ef",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/building-art.js": "b30fc9560fd0bb1ed3681a34dfc04b9c9e6bf58c0e2f5fe00c7a847877eb0d7b",
+    "web/building-footprints.js": "cb538cb0f685cb815e7ba0d721c7ce92d07c0ade4201c9a763e3c561c88c6f22",
+    "scripts/verify-building-checks-coverage.mjs": "de977fae2643edf1bc060fd4979fa433f38e1abb2634c5a2e34962c676670f8e"
+  },
+  "coverage": {
+    "buildingKeys": 27,
+    "lightingStates": [
+      "day",
+      "powered-night",
+      "unpowered-night"
+    ],
+    "previews": 81
+  },
+  "reviewedCaptures": {
+    "adobe-gable-day.png": "0cfe79ccb2bf9a3ba2694f9af64003ac583e54f4b80280193da3a683c011be89",
+    "shed-unpowered-night.png": "e4a067e1628bc9da540d90e1942c042a877020b8a7b8bf0b4b4343b35c83ec52",
+    "workshop-powered-night.png": "c03ef0e3f2a7dd3a43d52deca71aee58cf9e4645ad1bb2a2b8d42426aaa0a797"
+  },
+  "findings": [
+    "Adobe gable day: complete silhouette and resident visible, occupied-ground guide shown.",
+    "Workshop powered night: lit variant rendered, reference resident remains unlit.",
+    "Shed unpowered night: complete silhouette and tinted artwork rendered, reference resident visible."
+  ],
+  "limitations": [
+    "Only these three sample previews visually inspected in this milestone.",
+    "Plain backgrounds are not terrain or road integration approval.",
+    "No source artwork, proportions, geometry, placement calibration or gameplay changed."
+  ]
+}
