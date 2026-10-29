@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "status": "native-allocation-observations-not-release-acceptance",
+  "command": "node scripts/benchmark-artwork-memory.mjs --broad --cycles=2 --memory-dumps --output=artifacts/broad-memory-native-dumps-v3",
+  "scope": "Two shared and two unique twelve-resident public appearance-library cycles in isolated headless Chromium, not full editor/game simulation.",
+  "findings": [
+    "All public cache and borrowed-provider ownership drains; DOM returns to baseline.",
+    "Timestamp-bracketed native dumps show renderer private footprint 19547136 bytes baseline, 724536320 bytes active and 168119296 bytes released.",
+    "Active canvas root reports 233310792 bytes; it is omitted from the released dump. An omitted allocator is not interpreted as measured zero.",
+    "Released renderer partition allocation remains 114327552 bytes. Native buffer ownership and longer-run bounds remain unresolved.",
+    "Process RSS, private footprint and JavaScript heap are different measurements and must not be substituted for each other."
+  ],
+  "cpuCopyExperiment": {
+    "status": "not-shipped-no-clear-improvement",
+    "baselineReport": "copy-baseline-report.json",
+    "experimentalReport": "cpu-copy-experiment-report.json",
+    "change": "Retained copy canvas getContext used willReadFrequently:true; reverted after similar peak RSS and still high released RSS."
+  },
+  "remaining": [
+    "Native buffer-allocation attribution",
+    "Long repeated-cycle acceptance bounds",
+    "Full-game/editor memory and maximum roster scenarios",
+    "Physical-display pacing and remaining release gates"
+  ],
+  "rawTraceSha256": "1f473c943af8bda247b0b990f6df3999a8fe016451cbab3f42ae86fbad7a849b"
+}

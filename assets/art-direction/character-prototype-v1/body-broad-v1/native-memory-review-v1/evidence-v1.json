@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "status": "native-allocation-observations-not-release-acceptance",
+  "files": {
+    "report.json": "46c3a6bf5cadaf7ef3b6e80eca4a2b4f123cbc160e4cd838b0eab0ad3dfc18dc",
+    "native-analysis.json": "36614a6aa5888a98f32327e6ecd11b352414e9b657d2008068ef4c2ce8a0b2df",
+    "ownership-analysis.json": "e7050b7ec96fa99d82a071e73985a433a8fe4f86ecfa014a002db002bfb331f6",
+    "memory-trace.json.gz": "db81b3af6710bea7340324483c9f4127f76fa7b3bf6e1723fcab5765a5a7def5",
+    "review-verdict-v1.json": "ed9ee9f623b8194d99635480e31d44d0ed7b410c250c06b4c09fb62f9ab0d58e",
+    "copy-baseline-report.json": "a0269d4c634d4c4c0244d931f2ab54d430a4264ff660246574f0f247f5c94f08",
+    "cpu-copy-experiment-report.json": "d1817e730c199f0011412a225c6ba1e3824e50453423469e4c5e619f2437d9d7"
+  },
+  "tools": {
+    "scripts/benchmark-artwork-memory.mjs": "33db7c3bc734cfff228d221a719ef0f6c63ab558565bed7dec0385ee1f31743e",
+    "scripts/analyze-artwork-native-memory.mjs": "3fa6ba54df3753c98d961ee7661d93509ec34c3681585e40e927af899ca70dea",
+    "scripts/verify-artwork-native-memory-analysis.mjs": "841a178a9dffd76ce25799caa1f6b6f23e8f513d86f3f25c30cb120d78ff8c9d"
+  },
+  "rawTraceSha256": "1f473c943af8bda247b0b990f6df3999a8fe016451cbab3f42ae86fbad7a849b"
+}

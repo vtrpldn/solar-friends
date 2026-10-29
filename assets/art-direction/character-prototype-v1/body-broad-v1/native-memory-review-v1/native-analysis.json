@@ -1,0 +1,214 @@
+{
+  "stages": [
+    {
+      "label": "imported modules; no artwork",
+      "requestGuid": "0x1",
+      "markerRange": [
+        1096495912928,
+        1096495940309
+      ],
+      "renderers": [
+        {
+          "pid": 46107,
+          "privateFootprintBytes": 19547136,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 851968,
+              "effectiveSizeBytes": 498705
+            },
+            "blink_objects": {
+              "sizeBytes": 353256,
+              "effectiveSizeBytes": 353256
+            },
+            "cc": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "discardable": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "malloc": {
+              "sizeBytes": 12363792,
+              "effectiveSizeBytes": 12295511
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 1753088,
+              "effectiveSizeBytes": 1753063
+            },
+            "shared_memory": {
+              "sizeBytes": 983040,
+              "effectiveSizeBytes": 552140
+            },
+            "site_storage": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "skia": {
+              "sizeBytes": 1645,
+              "effectiveSizeBytes": 1645
+            },
+            "v8": {
+              "sizeBytes": 2999316,
+              "effectiveSizeBytes": 2999316
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "unique-2-active-gc",
+      "requestGuid": "0x2",
+      "markerRange": [
+        1096505274758,
+        1096505315824
+      ],
+      "renderers": [
+        {
+          "pid": 46107,
+          "privateFootprintBytes": 724536320,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 6258688,
+              "effectiveSizeBytes": 2904963
+            },
+            "blink_objects": {
+              "sizeBytes": 3353704,
+              "effectiveSizeBytes": 3353704
+            },
+            "canvas": {
+              "sizeBytes": 233310792,
+              "effectiveSizeBytes": 233310792
+            },
+            "cc": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "discardable": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "malloc": {
+              "sizeBytes": 580224512,
+              "effectiveSizeBytes": 346766639
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 137723904,
+              "effectiveSizeBytes": 137723830
+            },
+            "shared_memory": {
+              "sizeBytes": 3407872,
+              "effectiveSizeBytes": 1764556
+            },
+            "site_storage": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "skia": {
+              "sizeBytes": 1645,
+              "effectiveSizeBytes": 1645
+            },
+            "v8": {
+              "sizeBytes": 11810764,
+              "effectiveSizeBytes": 11810764
+            }
+          }
+        }
+      ]
+    },
+    {
+      "label": "terminal owner released",
+      "requestGuid": "0x3",
+      "markerRange": [
+        1096505379906,
+        1096505408945
+      ],
+      "renderers": [
+        {
+          "pid": 46107,
+          "privateFootprintBytes": 168119296,
+          "topLevel": {
+            "blink_gc": {
+              "sizeBytes": 3719168,
+              "effectiveSizeBytes": 3064407
+            },
+            "blink_objects": {
+              "sizeBytes": 654736,
+              "effectiveSizeBytes": 654736
+            },
+            "cc": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "discardable": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "malloc": {
+              "sizeBytes": 35538320,
+              "effectiveSizeBytes": 35411724
+            },
+            "mojo": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_images": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "parkable_strings": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "partition_alloc": {
+              "sizeBytes": 114327552,
+              "effectiveSizeBytes": 114327500
+            },
+            "shared_memory": {
+              "sizeBytes": 999424,
+              "effectiveSizeBytes": 560332
+            },
+            "site_storage": {
+              "sizeBytes": null,
+              "effectiveSizeBytes": null
+            },
+            "skia": {
+              "sizeBytes": 1645,
+              "effectiveSizeBytes": 1645
+            },
+            "v8": {
+              "sizeBytes": 4581356,
+              "effectiveSizeBytes": 4581356
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "scope": "Chrome detailed native allocator observations bracketed by explicit clock markers. Roots are not additive totals. Omitted allocators are unreported, not proven zero. Private footprint, process RSS and JavaScript heap are different measurements. This does not establish an allocation leak, a permanent plateau, a full-game memory limit or release readiness.",
+  "traceSha256": "1f473c943af8bda247b0b990f6df3999a8fe016451cbab3f42ae86fbad7a849b"
+}
