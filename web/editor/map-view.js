@@ -130,16 +130,22 @@ export class EditorMap {
       if(this.drag.pan||(this.view.tool==='select'&&this.drag.moved&&!this.drag.toggle)){
         this.drag.pan=true;
         this.view.center=[this.drag.center[0]-(dx/(TILE_HALF_WIDTH*this.scale)+dy/(TILE_HALF_HEIGHT*this.scale))/2,this.drag.center[1]-(dy/(TILE_HALF_HEIGHT*this.scale)-dx/(TILE_HALF_WIDTH*this.scale))/2];
-      }else if(this.routeStroke){const cells=corridorCells(this.routeStroke.at(-1),[this.pointer.x,this.pointer.y]);for(const cell of cells.slice(1)){const back=this.routeStroke.findIndex(p=>p[0]===cell[0]&&p[1]===cell[1]);if(back>=0)this.routeStroke.length=back+1;else this.routeStroke.push(cell);}}
-      else if(this.stroke){const next=[this.pointer.x,this.pointer.y];for(const p of strokeCells(this.strokeLast,next))this.stroke.set(p.join(','),p);this.strokeLast=next;}
+      }else this.extendStroke(this.pointer);
     }
     this.render();
+  }
+  extendStroke(cell){
+    if(this.routeStroke){const cells=corridorCells(this.routeStroke.at(-1),[cell.x,cell.y]);for(const next of cells.slice(1)){const back=this.routeStroke.findIndex(p=>p[0]===next[0]&&p[1]===next[1]);if(back>=0)this.routeStroke.length=back+1;else this.routeStroke.push(next);}}
+    else if(this.stroke){const next=[cell.x,cell.y];for(const p of strokeCells(this.strokeLast,next))this.stroke.set(p.join(','),p);this.strokeLast=next;}
   }
   up(e){
     if(!this.drag)return;
     const drag=this.drag,cell=this.cell(this.point(e));this.drag=null;
     if(this.view.tool==='region'&&!drag.pan){const x=Math.max(0,Math.min(63,Math.min(drag.cell.x,cell.x))),y=Math.max(0,Math.min(63,Math.min(drag.cell.y,cell.y))),right=Math.max(0,Math.min(63,Math.max(drag.cell.x,cell.x))),bottom=Math.max(0,Math.min(63,Math.max(drag.cell.y,cell.y)));this.action({type:'region',rectangle:{x,y,width:right-x+1,height:bottom-y+1}});return;}
     if(drag.pan){this.centerAt(...this.view.center);return;}
+    // Release can carry a newer position than the last delivered move event.
+    // Use the same interpolation/backtracking rules before the atomic commit.
+    this.extendStroke(cell);
     if(this.routeStroke){const cells=this.routeStroke;this.routeStroke=null;this.action({type:'route-path',cells});return;}
     if(this.stroke){const cells=[...this.stroke.values()];this.stroke=null;this.action({type:this.view.tool,cells,size:this.brushSize});return;}
     if(drag.resident){this.action({type:'resident-start',resident:drag.resident,x:cell.x,y:cell.y});return;}

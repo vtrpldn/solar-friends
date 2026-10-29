@@ -117,6 +117,22 @@ try{
  await page.waitForFunction(()=>document.querySelector('#creator-redo').title==='Clear a meadow');
  await page.locator('#creator-redo').click();
 
+ // Escape must cancel a live stroke, including its eventual pointer release.
+ // A matching uncancelled stroke is the positive control against a no-op test.
+ const savedCheckpoint=async()=>{
+  await page.getByRole('button',{name:'Save',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
+  return page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(undefined,{broadcast:false});try{return (await library.getProject(new URL(location.href).searchParams.get('project'))).checkpoint;}finally{library.close();}});
+ };
+ const cancelBefore=await savedCheckpoint();await page.locator('#creator-habitat').selectOption('rocky-woodland');
+ const cancelA=await cellPoint(24,34),cancelB=await cellPoint(28,34);
+ await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.keyboard.press('Escape');await page.mouse.up();
+ assert.deepEqual(await savedCheckpoint(),cancelBefore,'Cancelled stroke changed the durable document or undo history');
+ await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.mouse.up();
+ await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Paint habitat and soil');
+ const painted=await savedCheckpoint();assert.notDeepEqual(painted.definition,cancelBefore.definition,'The cancellation control stroke must actually edit land');
+ await page.locator('#creator-undo').click();assert.deepEqual((await savedCheckpoint()).definition,cancelBefore.definition,'A land stroke must undo atomically');
+
  await page.locator('#creator-land-layer').selectOption('fertility');
  const inspected=await cellPoint(25,34);await page.mouse.move(inspected.x,inspected.y);
  await page.waitForFunction(()=>document.querySelector('#creator-ground-detail').textContent.includes('Solar exposure'));
