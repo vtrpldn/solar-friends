@@ -1,0 +1,1 @@
+{"status":"rejected-before-paint","finding":"The frozen context leaves old white tank-strap pixels visible at both collar edges. Revise the collar in a new collection before generating paint.","replacement":"short-sleeve-broad-walk-0-v2","generatedPaint":false}

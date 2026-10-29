@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "status": "single-pose-fit-reviewed-not-catalog-enrolled",
+  "tool": "image_gen.imagegen",
+  "prompt": "Use case: precise-object-edit. Solar Friends game garment sprite. Image 1 is the exact frozen green alpha silhouette to repaint. Keep its complete contour, neck opening, source position, source canvas dimensions and transparent margin unchanged: replace green ONLY with warm cream cotton painting. Image 2 shows the same green silhouette on the actual walking body for pose and fold direction, not output content. Image 3 is the accepted style direction for cream cloth only, not shape or layout. Paint a simple short-sleeved crew-neck T-shirt, broad torso, one relaxed lower hem, near sleeve ending high on the upper arm, far sleeve shorter in projection. Use warm dark painted edges, broad soft illustrated shading, restrained folds and upper-left daylight matching Solar Friends. Keep exactly the outline and collar cutout of Image 1; do not recenter, enlarge, shrink, rotate, warp, fill the neck hole or change shirt length. No pocket, buttons, collar, logo, decorative embroidery or extra folds at the hem. Output ONLY ONE complete painted shirt cutout on true transparent background in exactly the original image position. No green, body, skin, head, hair, hands, arms, legs, shoes, ground, labels, grid, guides, text, additional shirts or scenery.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/mask.png",
+      "sha256": "48c63d1c318d8730a061dbf5cd514a879e27957b27383b2fbb8cf88c5c107339",
+      "role": "Exact frozen garment contour and position; primary edit target"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/context.png",
+      "sha256": "974267a289711aa00f7638f42271b457134fbe133d9fbfeaea38c686cbfc755d",
+      "role": "Actual published walking body and intended fit"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-candidate-v2.png",
+      "sha256": "67b2fce6a938630d153619289dec0dd90cd82eafcbbbfcb14d843e2671fa6d6e",
+      "role": "Cream cloth painting style only; no shape/layout transfer"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-ebb1b313-de45-4937-8738-fdce76b21471.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1.png",
+  "sha256": "ec31931ab59f33fe7c83fe3a638eeba41dea0d599d37e3ec1cfb2bf9f070ffe1",
+  "byteIdenticalCopyVerified": true,
+  "sourceEdits": false,
+  "review": {
+    "sourceAudit": "candidate-v1-audit.json",
+    "bodyReview": "body-review-v1.json",
+    "inspected": "coloured-body-review-v1.png",
+    "findings": [
+      "The frozen V1 outline was rejected before paint because it exposed tank straps; V2 closes those collar edges.",
+      "The delivered paint passes the unchanged frozen envelope and silhouette rules.",
+      "Four real body compositions were inspected at native scale and enlarged collar/shoulder detail.",
+      "Short sleeves and torso preserve the walking build proportions. The collar follows the actual neck; feet remain at the original contact.",
+      "The body review checks 493152 protected channel values across four palettes. It does not establish complete wardrobe, hair/hat, animation or world acceptance."
+    ],
+    "catalogEnrollment": false,
+    "remaining": "Three other walking poses, remaining outfit poses and full visual/integration gates"
+  }
+}

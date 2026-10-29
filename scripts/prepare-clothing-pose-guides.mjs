@@ -5,7 +5,9 @@ import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 const familyName=process.argv.find(arg=>arg.startsWith('--family='))?.slice(9);assert(familyName===undefined||/^[a-z0-9-]+$/.test(familyName));
+const bundleName=process.argv.find(arg=>arg.startsWith('--bundle='))?.slice(9);assert(bundleName===undefined||/^[a-z0-9-]+$/.test(bundleName));assert(!(familyName&&bundleName),'Choose either an internal body family or a published bundle');
 let familyInput=null;if(familyName){const root='assets/art-direction/character-prototype-v1/'+familyName,ownership=JSON.parse(await readFile(root+'/ownership-v1.json','utf8')),files=JSON.parse(await readFile(root+'/source-files-v1.json','utf8')),sources={};for(const [id,file]of Object.entries(files)){const bytes=await readFile(file),sourceHash=createHash('sha256').update(bytes).digest('hex');assert.equal(sourceHash,ownership.sources[id].sha256);sources[id]={sourceHash,data:bytes.toString('base64')};}familyInput={ownership,sources};}
+if(bundleName){const root='web/art/characters/'+bundleName,definition=JSON.parse(await readFile(root+'/bundle-v1.json','utf8')),sources={};for(const [id,key]of Object.entries(definition.bodySources)){const spec=definition.sources[key],bytes=await readFile(root+'/source-'+spec.sha256+'.png'),sourceHash=createHash('sha256').update(bytes).digest('hex');assert.equal(sourceHash,spec.sha256);assert.equal(sourceHash,definition.ownership.sources[id].sha256);sources[id]={sourceHash,data:bytes.toString('base64')};}familyInput={ownership:definition.ownership,sources,decoder:'bitmap'};}
 const name=process.argv[2];assert(/^[a-z0-9-]+$/.test(name??''));
 const root='assets/art-direction/character-prototype-v1/'+name;await mkdir(root,{recursive:true});
 const priorIntent=await readFile(root+'/registration-intent.json','utf8').catch(error=>{if(error.code==='ENOENT')return null;throw error;});
@@ -19,10 +21,12 @@ try{
  const result=await page.evaluate(async({specs,familyInput})=>{
   const {loadCharacterImageSource}=await import('/character-image-source.js'),{preparedFrames}=await import('/sprite-frames.js'),{attachmentBinding}=await import('/character-attachments.js');
   const files={base:'body-neutral-base.png',idle:'body-neutral-idle-candidate-v2.png',activities:'body-neutral-activities-candidate-v1.png'};let frames={},hashes={},family=null,binding;
-  if(familyInput){const {prepareBodyFamily}=await import('/character-body-family.js'),sources={};for(const [id,source]of Object.entries(familyInput.sources)){const image=new Image();image.src='data:image/png;base64,'+source.data;await image.decode();sources[id]={image,sourceHash:source.sourceHash};}family=await prepareBodyFamily({ownership:familyInput.ownership,sources});frames=family.frames;binding=family.binding;}else{
+  const decoded=[],created=[];
+  try{
+  if(familyInput){const {prepareBodyFamily}=await import('/character-body-family.js'),sources={};for(const [id,source]of Object.entries(familyInput.sources)){if(familyInput.decoder==='bitmap'){const loaded=await loadCharacterImageSource('data:image/png;base64,'+source.data,{sha256:source.sourceHash,decoder:'bitmap'});decoded.push(loaded);sources[id]=loaded;}else{const image=new Image();image.src='data:image/png;base64,'+source.data;await image.decode();sources[id]={image,sourceHash:source.sourceHash};}}family=await prepareBodyFamily({ownership:familyInput.ownership,sources});frames=family.frames;binding=family.binding;}else{
   for(const [sheet,file]of Object.entries(files)){const source=await loadCharacterImageSource('/art/characters/prototype-v1/'+file);frames[sheet]=preparedFrames(source.image,{referenceRow:sheet==='base'?2:0});hashes[sheet]=source.sourceHash;}
   binding=await attachmentBinding(frames,hashes);}
-  const make=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},atlas=make(1254,1254),mask=make(1254,1254),context=make(1254,1254),board=make(1600,Math.ceil(specs.length/4)*640),b=board.getContext('2d'),guides=[],grids={},rowSpans=[];
+  const make=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;created.push(c);return c;},atlas=make(1254,1254),mask=make(1254,1254),context=make(1254,1254),board=make(1600,Math.ceil(specs.length/4)*640),b=board.getContext('2d'),guides=[],grids={},rowSpans=[];
   b.fillStyle='#e8dfbf';b.fillRect(0,0,board.width,board.height);
   for(const [i,s]of specs.entries()){
    const body=frames[s.sheet][s.index],grid=make(650,650),g=grid.getContext('2d'),[cx,cy,cw,ch]=s.crop,[x,y,w,h]=s.tile;
@@ -39,7 +43,8 @@ try{
     if(!painted||bounds[0]<=0||bounds[1]<=0||bounds[2]>=w||bounds[3]>=h)throw Error('A garment guide is empty or leaves its cell');guides.push({key:s.key,bounds,painted});
    }
   }
-  const result={binding,guides,rowSpans,images:{...grids,...Object.fromEntries(Object.entries({atlas,mask,context,board}).map(([key,c])=>[key,c.toDataURL('image/png').split(',')[1]]))}};family?.dispose();return result;
+  const result={binding,guides,rowSpans,images:{...grids,...Object.fromEntries(Object.entries({atlas,mask,context,board}).map(([key,c])=>[key,c.toDataURL('image/png').split(',')[1]]))}};return result;
+  }finally{family?.dispose();for(const source of decoded)source.dispose();for(const canvas of created)canvas.width=canvas.height=0;}
  },{specs,familyInput});
  const outputs=Object.fromEntries(Object.entries(result.images).map(([key,data])=>[key+'.png',Buffer.from(data,'base64')]));delete result.images;
  const sourceHashes={};for(const file of ['specs.json','atlas.png','mask.png','context.png','board.png'])sourceHashes[file]=createHash('sha256').update(outputs[file]??await readFile(root+'/'+file)).digest('hex');

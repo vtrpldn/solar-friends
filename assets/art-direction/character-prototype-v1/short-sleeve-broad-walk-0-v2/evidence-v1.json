@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "scope": "One internally reviewed walking garment pose, not complete wardrobe acceptance.",
+  "sha256": {
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/atlas.png": "80ff0572411990d1c853d094c4415af50801cad1a140fe0a818f23b3efcaae11",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/base-0-grid.png": "2d4d68a71770165028d319116bf66653eaaa847b78ff121939e23bc440a98c2f",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/board.png": "0231a2b8560968e1d8771af432bdee6cb58557912d39535d1d669b7f931bd789",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/body-review-v1.json": "1fc1d9e47a531e0f1edf69c5e4808c55c644c0587c947cbc82c576566b27c2dd",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1-audit.json": "90b95f1cc47c2769c4d068337a46a3f54773aabf01a1fd4fd57c428ae508921d",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/candidate-v1.png": "ec31931ab59f33fe7c83fe3a638eeba41dea0d599d37e3ec1cfb2bf9f070ffe1",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/coloured-body-review-v1.png": "a4972e094a7989677d06c426652bf91c56a168552631fb669478f1a7cc4cb36f",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/context.png": "974267a289711aa00f7638f42271b457134fbe133d9fbfeaea38c686cbfc755d",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/generation-v1.json": "a1cb1bba43fe8e92b857cad9d1539477d8421d28ebd898b1e95f8547b8492435",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/mask.png": "48c63d1c318d8730a061dbf5cd514a879e27957b27383b2fbb8cf88c5c107339",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/references.json": "6033e3ee2654741b4f3819c7012bbddb85e58f05a1d7224d64ce0ba49b0e6c8b",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/registration-intent.json": "11a60b17e1b78e59b9f60c95368f7f4e67526e26f06b37e98fc654853d10de07",
+    "assets/art-direction/character-prototype-v1/short-sleeve-broad-walk-0-v2/specs.json": "4f42f22b0051737e57a9dc4c89c1a8610e4e5ff37039da68f0dfa4f0c4210fa9",
+    "scripts/prepare-clothing-pose-guides.mjs": "ffa44e81e3cf88c544a1d80b8a7b7facc8b7c7bc67959cdf031fcb177f7701a3",
+    "scripts/review-broad-garment-pose.mjs": "9be347906af28dc2c4be2e74612079622d7149536d67e6f17341a552ec4f7366",
+    "scripts/audit-clothing-source.mjs": "cdb4d6da0545e32d930c585c5a46526aa0ed1fbc0a1b2788151d78da7b09da7f",
+    "web/character-atlas-clothing.js": "733fda3ce739c166aceb5de8ad402de1e8f8c293c7e03e1d038eae38353d0200",
+    "web/art/characters/broad-v1/bundle-v1.json": "6d3f334aca027a80296ebc760e5d1214293ea027b3d0503d37e26a27c3c52f42"
+  }
+}
