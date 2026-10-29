@@ -50,6 +50,7 @@ export class EditorMap {
     canvas.addEventListener('pointermove',e=>this.motion(e));
     canvas.addEventListener('pointerup',e=>this.up(e));
     canvas.addEventListener('pointercancel',()=>this.cancelGesture());
+    canvas.addEventListener('lostpointercapture',()=>this.cancelGesture());
     canvas.addEventListener('pointerleave',()=>{if(!this.drag){this.pointer=null;this.render();}});
     canvas.addEventListener('wheel',e=>{e.preventDefault();this.setZoom(this.view.zoom-e.deltaY*.001);},{passive:false});
   }

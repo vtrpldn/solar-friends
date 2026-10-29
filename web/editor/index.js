@@ -562,7 +562,8 @@ function wire(){
     else if(['Delete','Backspace'].includes(e.code)&&map.view.selected){e.preventDefault();removeBuilding(map.view.selected);}
   });
   window.addEventListener('beforeunload',e=>{if(current&&(current.doc.dirty||current.conflicted)){cacheRecovery(current,current.doc.checkpoint(),map.state);e.preventDefault();e.returnValue='';}});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden&&current)save().catch(()=>{});});
+  window.addEventListener('blur',()=>map?.cancelGesture());
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){map?.cancelGesture();if(current)save().catch(()=>{});}});
   library.addEventListener('change',e=>{if(e.detail.remote&&current?.id===e.detail.id&&e.detail.revision!==current.storageRevision){current.conflicted=true;status('Changed in another tab · save a copy');toast('Another tab changed this creation. Your edits are kept here; save a copy to retain them.');}});
 }
 

@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+const server=await serve(0);let browser;
+try{
+ browser=await chromium.launch({headless:true});const context=await browser.newContext({viewport:{width:1600,height:1000}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.locator('[data-preset=camp]').click();await page.waitForFunction(()=>new URL(location.href).searchParams.has('project')&&document.querySelector('#creator-map').getAttribute('aria-busy')==='false');
+ await page.evaluate(async()=>{const {EditorMap}=await import('/editor/map-view.js'),down=EditorMap.prototype.down;window.interruptedInputEvents=[];EditorMap.prototype.down=function(e){window.interruptedInputMap=this;window.interruptedInputPointer=e.pointerId;window.interruptedInputEvents.push({event:'down',trusted:e.isTrusted});return down.call(this,e);};document.querySelector('#creator-map').addEventListener('lostpointercapture',e=>window.interruptedInputEvents.push({event:'lostpointercapture',trusted:e.isTrusted}));});
+ const settle=async()=>{await page.locator('#creator-save').click();await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved')&&document.querySelector('#creator-map').getAttribute('aria-busy')==='false');};
+ const saved=()=>page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),l=new ContentLibrary(undefined,{broadcast:false});try{return (await l.getProject(new URL(location.href).searchParams.get('project'))).checkpoint;}finally{l.close();}});
+ const point=(x,y)=>page.locator('#creator-map').evaluate((c,[x,y])=>{const r=c.getBoundingClientRect(),o=JSON.parse(c.dataset.origin),s=Number(c.dataset.scale);return {x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);
+ await page.locator('#creator-center').click();await page.locator('#creator-habitat').selectOption('rocky-woodland');await settle();const baseline=await saved(),results=[];
+ for(const interrupt of ['capture','blur','visibility'])for(const tool of ['habitat','pan']){
+  console.log('Checking '+interrupt+'/'+tool);
+  await page.locator(`[data-tool=${tool}]`).click();const a=await point(30,31),b=await point(32,31),origin=await page.locator('#creator-map').getAttribute('data-origin');await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});assert(await page.evaluate(()=>!!window.interruptedInputMap.drag),`${interrupt}/${tool}: gesture must start before testing interruption`);
+  if(interrupt==='capture'){await page.evaluate(()=>document.querySelector('#creator-map').releasePointerCapture(window.interruptedInputPointer));await page.mouse.move(b.x+1,b.y);}
+  else if(interrupt==='blur')await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+
+  else await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});try{document.dispatchEvent(new Event('visibilitychange'));}finally{delete document.hidden;}});
+  await page.evaluate(()=>new Promise(requestAnimationFrame));const pending=await page.evaluate(()=>{const m=window.interruptedInputMap;return !!(m.drag||m.stroke||m.routeStroke||m.strokeLast);});assert.equal(pending,false,`${interrupt}/${tool}: abandoned gesture retained pending input`);
+  await page.mouse.up();if(tool==='pan')assert.equal(await page.locator('#creator-map').getAttribute('data-origin'),origin,'Interrupted pan must restore its original camera');await settle();assert.deepEqual(await saved(),baseline,`${interrupt}/${tool}: abandoned gesture changed the saved draft or undo history`);results.push({interrupt,tool});
+ }
+ // A normal capture release after pointerup must still commit exactly one edit.
+ await page.locator('[data-tool=habitat]').click();const a=await point(30,31),b=await point(32,31);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();await settle();const completed=await saved();assert.notDeepEqual(completed.definition,baseline.definition);assert.equal(completed.history.past.length,baseline.history.past.length+1);await page.locator('#creator-undo').click();await settle();assert.deepEqual((await saved()).definition,baseline.definition);
+ const events=await page.evaluate(()=>window.interruptedInputEvents);assert(events.filter(e=>e.event==='down').every(e=>e.trusted));assert(events.some(e=>e.event==='lostpointercapture'&&e.trusted));assert.deepEqual(errors,[]);console.log(JSON.stringify({results,normalRelease:'one edit and exact undo',scope:'Trusted desktop pointer gestures and actual browser lostpointercapture. Isolated blur/visibility cases dispatch to production listeners; actual OS focus loss and hidden-tab behavior are not verified by this harness.'}));
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
