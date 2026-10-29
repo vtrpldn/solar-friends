@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "status": "needs-correction-not-player-eligible",
+  "tool": "image_gen.imagegen",
+  "prompt": "Use case: precise-object-edit. Asset type: Solar Friends transparent short-sleeved garment atlas. Image 1 is the exact four standing body poses and scale/placement guide. Image 2 is gameplay style and scale context only. Paint ONLY a simple cream cotton short-sleeved T-shirt for each of Image 1's four bodies. The body underneath must remain the same broad adult anatomy; do not slim, stretch, enlarge or reposition it. Keep the same square canvas and 2x2 arrangement, with each garment aligned to that body's actual shoulders, chest and waist at exactly the same source-image scale and position. The short sleeves end high on the upper arms, well above the elbows, with a small round neckline around the existing neck and a relaxed hem at the existing waist. Match the source's broad warm illustrated shading, warm dark edges, soft cream cloth and restrained fold detail, upper-left daylight. Each garment should cover the existing tank-top straps and torso but should not cover neck skin, forearms, hands, shorts or belt/waist seam. Output only the FOUR COMPLETE GARMENT CUTOUTS at their original positions, with fully transparent background and transparent neck/arm holes. No skin, heads, faces, hair, hats, arms, hands, legs, shoes, bodies, tools, ground, labels, grid, text or watermarks. Do not draw clothes in the central space just to fill the canvas. No buttons, pocket, logo, collar, embroidery or added accessories. Each shirt must be coherently painted for its own slightly different torso pose rather than changing garment style across cells.",
+  "references": [
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/breathe-candidate-v1.png",
+      "sha256": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+      "role": "Four exact standing body poses"
+    },
+    {
+      "path": "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/runtime/unique-cast-16x.png",
+      "sha256": "997b794644e7c2f5aa8b11227e911d3ed19d4002bc7267abb676bc952f4a9d79",
+      "role": "Gameplay style and scale"
+    }
+  ],
+  "originalOutput": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-4d654de8-ff7f-4674-a6ba-032d8a46d287.png",
+  "copiedOutput": "assets/art-direction/character-prototype-v1/body-broad-v1/shirt-standing-candidate-v1.png",
+  "sha256": "b2640415fd0a2b71a60d193558c76212a2f6c5aea7ab7d870033e7d11b4d3721",
+  "byteIdenticalCopyVerified": true,
+  "dimensions": [
+    1254,
+    1254
+  ],
+  "review": {
+    "script": "scripts/review-broad-shirt-standing.mjs",
+    "poses": "base8-11 only",
+    "sourceEdits": false,
+    "registration": "One uniform scale 0.225 and rigid per-pose translations; initial 0.21 fit was inspected before this refinement",
+    "findings": [
+      "Overall short-sleeved silhouette follows standing body proportions.",
+      "A contrasting indigo tank and sage trousers reveal residual tank paint at the right torso/shoulder and waist edges. The refined uniform scale reduces exposure but does not establish clean replacement ownership.",
+      "Only four standing poses exist. Full wardrobe, palette and foreground ownership are unfinished."
+    ],
+    "next": "Correct hem coverage, confirm palette ownership, then extend across all required poses before catalog enrollment."
+  }
+}
