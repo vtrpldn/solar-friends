@@ -1,12 +1,42 @@
 {
-  "status": "partial visual review; release gate open",
+  "status": "representative static world comparison reviewed; broader release gates open",
   "reportSha256": "a506845a974b0353940f784f67ead2c6094ef7b6d624997631b0bf7e67a0f3b7",
   "scope": "Static art review through current public appearance providers and shared terrain/building/resident/weather painters. Native-validated generated properties with an authored stage clearing. Visual rain and night are explicit presentation fixtures, not climate-simulation claims. Representative complete characters/poses, not exhaustive combinations, motion, powered-light or performance acceptance.",
   "reviewedViews": [
     {
+      "file": "mata-atlantica-0.75-day.png",
+      "sha256": "d6ea8d4dceafe4e319dc7a2708759335bd5965be54082da6b0f977c78053ee1a",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "mata-atlantica-0.75-night.png",
+      "sha256": "3fa939f7b12e181d370575f9691910106c31ea354570d630443ee8cf31512919",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "mata-atlantica-0.75-rain.png",
+      "sha256": "a926ee1b96bfae16feb3b4e0a1cd69bcfccf767588aef3209d3a0a605d3464b7",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "mata-atlantica-0.75-night-rain.png",
+      "sha256": "244c93d6f60dd249cdacfabd582b1cd6117ff27fe157fd2e130e81f65b4e1346",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
       "file": "mata-atlantica-1.5-day.png",
       "sha256": "7ad9cbb2f80c804e118eecbf4434725d59430981642a48708f078038f93438d1",
       "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
+    },
+    {
+      "file": "mata-atlantica-1.5-night.png",
+      "sha256": "5089b5e7e92f8545625694bcd37de208db53825ec503580995ae573ff6e499f0",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "mata-atlantica-1.5-rain.png",
+      "sha256": "2f5d2b805de1b78d5506ad4b25079f10fdeb9f03ad2257d3d591f07f08fc90cc",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
     },
     {
       "file": "mata-atlantica-1.5-night-rain.png",
@@ -14,9 +44,59 @@
       "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
     },
     {
+      "file": "mata-atlantica-2-day.png",
+      "sha256": "f0e0f1e99ae178dbb594a8f53ae477b8f9d2d7914b96e8aee3ffc6e4ef7d41ac",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "mata-atlantica-2-night.png",
+      "sha256": "e82eb27bf23cd3c1724dfc48a7f6d1e2bc7576433a3ac9bea1e7b65ff7153d45",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "mata-atlantica-2-rain.png",
+      "sha256": "49b6aa4c12d32d99e8b06cf41540cfe2267bc43762f49413b0e91f24374627b1",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "mata-atlantica-2-night-rain.png",
+      "sha256": "2326892eba87496badafe23df22d2d81d296db783dab02221a6f4c2ea3fa43e2",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-0.75-day.png",
+      "sha256": "cc267406acc72fb6569be5c9101beca6efbb2d02e3797928197b3ab59999fe7c",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-0.75-night.png",
+      "sha256": "d3005ea28f223702bfad13a937941bddaaf2b33da4e55a23e0bdb29dcafb7fa3",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-0.75-rain.png",
+      "sha256": "bf91076ee662fd8cd99401a3e24f5036d06c3e37d0dfdeb1b4e78112cb8e01ee",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-0.75-night-rain.png",
+      "sha256": "6540f42ee29709aa92f2cf485709173bce7c8a9bde1b1abc1309f8a86704813a",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
       "file": "cerrado-1.5-day.png",
       "sha256": "e4bd3badb92a94ac4daf3f2ebcb63017b81f62c4cee785d492f1b38b44aad11a",
       "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-1.5-night.png",
+      "sha256": "dfdf7a40ca80a77e06871024fac898b9257ba606780f94a33b4489207ee49692",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-1.5-rain.png",
+      "sha256": "f852b4cd3b0d18d9186bd349d636ac04934ce88ac17284b8a669a676ee4924df",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
     },
     {
       "file": "cerrado-1.5-night-rain.png",
@@ -24,50 +104,89 @@
       "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
     },
     {
+      "file": "cerrado-2-day.png",
+      "sha256": "8f54d9c747cb3166fa133ac716b2438a57889f861534ae1c670046bbe0c1a702",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-2-night.png",
+      "sha256": "a3ce10cb442b5cbd259f25049e15f4987fb142b5a7aad091f93dcaf4d2db7b77",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-2-rain.png",
+      "sha256": "633341b4c24dde13dcc71a7f481ddf7f0ad2ca15bfe4173b4fb8014fb4c79750",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "cerrado-2-night-rain.png",
+      "sha256": "44a14cd139b5fabe76d052c0cf4301a57376902b3b58df96490cfb6c967caed8",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-0.75-day.png",
+      "sha256": "1289dc00ef4ad5e829d99940bb1a3fe67612e5d6f66fe28fc1fa7e7c2f45d1f0",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-0.75-night.png",
+      "sha256": "db970b6af6e4ef2396f65804be87cd8b8587d2fb076c6522518ea5d0820c2f0a",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-0.75-rain.png",
+      "sha256": "62db1610c1e4d86f60737e4a682d0948c41699c34b7fc698e1b7f7040bd8744f",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-0.75-night-rain.png",
+      "sha256": "42f436820843eb7503a6b9ae650ae1cc9156cefc27bd5c050b909cb74d374b77",
+      "finding": "All twelve figures remain complete and separated; custom and original silhouettes remain comparable at small scale. Fine face/accessory detail is too small for detailed judgment. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
       "file": "caatinga-1.5-day.png",
       "sha256": "3af6e0c687f76f0069c7f774a2840f007fa6445742e060c9797aa4a854c1924a",
       "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
     },
     {
+      "file": "caatinga-1.5-night.png",
+      "sha256": "5fcca60e1979cd872c7f099501623882c085756846a3f9baaeec840f40607c85",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-1.5-rain.png",
+      "sha256": "de4dc17352286535ad4acf055c5d2f7b059502c97f31ee41b35720e4419916ad",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
       "file": "caatinga-1.5-night-rain.png",
       "sha256": "17dca6b4bb496ef26c1eb72eddef781ce66b34b1589fd76d817c562e8281400e",
       "finding": "Complete figures remain visible at comparable scale to original cast; no visible clipping or detached accessories in this static view. Terrain remains regionally distinct. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-2-day.png",
+      "sha256": "6130fdf7d2a1024ee6814c9b135c457a2d785d52480a72393b6817326c059d18",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-2-night.png",
+      "sha256": "9902b8fd1ae4199a915743964711ec233f6a3b9fe34944fc6a0bc5be7d4f9f09",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-2-rain.png",
+      "sha256": "b2f7eb6c2b4530eb1401f88952846ccb86b11dddf492e570120fcf25eebd4138",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
+    },
+    {
+      "file": "caatinga-2-night-rain.png",
+      "sha256": "a1b783fb42888cbbeec59998ae7c800f6cb9fd08a1ae5353cb2f9106a7882fdc",
+      "finding": "All twelve figures remain complete; custom body and accessory anchors remain coherent beside original cast and regional terrain. No new visible clipping or detached accessories in this static view. Rain overlays and night tint do not introduce visible rectangular sprite backgrounds. This does not accept all building proportions."
     }
   ],
-  "pendingVisualReview": [
-    "mata-atlantica-0.75-day.png",
-    "mata-atlantica-0.75-night.png",
-    "mata-atlantica-0.75-rain.png",
-    "mata-atlantica-0.75-night-rain.png",
-    "mata-atlantica-1.5-night.png",
-    "mata-atlantica-1.5-rain.png",
-    "mata-atlantica-2-day.png",
-    "mata-atlantica-2-night.png",
-    "mata-atlantica-2-rain.png",
-    "mata-atlantica-2-night-rain.png",
-    "cerrado-0.75-day.png",
-    "cerrado-0.75-night.png",
-    "cerrado-0.75-rain.png",
-    "cerrado-0.75-night-rain.png",
-    "cerrado-1.5-night.png",
-    "cerrado-1.5-rain.png",
-    "cerrado-2-day.png",
-    "cerrado-2-night.png",
-    "cerrado-2-rain.png",
-    "cerrado-2-night-rain.png",
-    "caatinga-0.75-day.png",
-    "caatinga-0.75-night.png",
-    "caatinga-0.75-rain.png",
-    "caatinga-0.75-night-rain.png",
-    "caatinga-1.5-night.png",
-    "caatinga-1.5-rain.png",
-    "caatinga-2-day.png",
-    "caatinga-2-night.png",
-    "caatinga-2-rain.png",
-    "caatinga-2-night-rain.png"
-  ],
+  "pendingVisualReview": [],
   "limitations": [
-    "Six of 36 captures inspected; remaining zooms and separate rain/night views pending.",
+    "All 36 captures individually inspected at the delivered viewport. Small-zoom faces and tiny accessories are not detailed art acceptance.",
     "Eight representative public recipes, not all pairwise recipes or every pose.",
     "Static presentation fixtures; no motion, climate simulation, powered lighting, performance or complete building-art acceptance.",
     "Authored clearing avoids foreground occlusion; does not exercise all navigation or occlusion arrangements."
