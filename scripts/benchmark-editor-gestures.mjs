@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
+import {isDeepStrictEqual} from 'node:util';
+import {riverBank} from '../web/terrain.js';
 
 // Trusted desktop input; instrumentation exists only in this benchmark page.
-export async function measureEditorGestures(page,{Game}){
+export async function measureEditorGestures(page,{Game,brushSize=3}){
  const settle=async()=>{await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved'));await page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='false');await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));};
  const saved=()=>page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(undefined,{broadcast:false});try{return (await library.getProject(new URL(location.href).searchParams.get('project'))).checkpoint;}finally{library.close();}});
  await page.locator('#creator-center').click();for(let i=0;i<5;i++)await page.locator('#creator-zoom-out').click();await page.locator('#creator-save').click();await settle();const baseline=await saved(),group=baseline.definition.start.buildings.slice(0,2);assert.equal(group.length,2);
- const validator=new Game();let delta=null;
- try{for(const [dx,dy]of [[1,0],[-1,0],[0,1],[0,-1],[2,0],[-2,0],[0,2],[0,-2]]){const candidate=structuredClone(baseline.definition);for(const b of candidate.start.buildings)if(group.some(p=>p.id===b.id)){b.x+=dx;b.y+=dy;}if(JSON.parse(validator.validate_scenario(JSON.stringify(candidate))).ok){delta=[dx,dy];break;}}}finally{validator.free();}assert(delta,'Gesture fixture needs a natively valid two-building move');
+ const validator=new Game();let delta=null,baseTerrain,preset;
+ try{assert(JSON.parse(validator.load_scenario(JSON.stringify(baseline.definition))).ok);baseTerrain=baseline.definition.map.terrain??JSON.parse(validator.terrain_template());preset=JSON.parse(validator.scenario_catalog()).habitats.find(h=>h.key==='rocky-woodland');for(const [dx,dy]of [[1,0],[-1,0],[0,1],[0,-1],[2,0],[-2,0],[0,2],[0,-2]]){const candidate=structuredClone(baseline.definition);for(const b of candidate.start.buildings)if(group.some(p=>p.id===b.id)){b.x+=dx;b.y+=dy;}if(JSON.parse(validator.validate_scenario(JSON.stringify(candidate))).ok){delta=[dx,dy];break;}}}finally{validator.free();}assert(delta,'Gesture fixture needs a natively valid two-building move');
  await page.evaluate(async()=>{
   const {EditorMap}=await import('/editor/map-view.js');window.builderGestureEvents=[];window.builderGesturePhase=null;
   for(const method of ['down','motion','up']){const original=EditorMap.prototype[method];EditorMap.prototype[method]=function(event){if(!window.builderGesturePhase)return original.call(this,event);const t=performance.now(),start=window.builderCalls.length,sample={phase:window.builderGesturePhase,method,trusted:event.isTrusted,dragging:!!this.drag};try{return original.call(this,event);}finally{sample.handlerMs=performance.now()-t;sample.calls=window.builderCalls.slice(start);window.builderGestureEvents.push(sample);requestAnimationFrame(()=>requestAnimationFrame(()=>{sample.twoFrameMs=performance.now()-t;}));}};}
@@ -15,8 +17,15 @@ export async function measureEditorGestures(page,{Game}){
  const phase=name=>page.evaluate(name=>{window.builderGesturePhase=name;window.builderCalls=[];},name);
  const drag=async(a,b)=>{await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:24});await page.mouse.up();};
  const operations=[];
- await page.locator('#creator-brush-size').selectOption('3');await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.locator('[data-tool=habitat]').click();
+ await page.locator('#creator-brush-size').selectOption(String(brushSize));await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.locator('[data-tool=habitat]').click();
  const a=await point(24,34),b=await point(30,34);await phase('habitat-drag');let t=performance.now();await drag(a,b);await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Paint habitat and soil');await settle();operations.push({action:'habitat-drag',inputThroughSavedMs:performance.now()-t});const painted=await saved();assert(JSON.stringify(painted.definition)!==JSON.stringify(baseline.definition),'Brush performance sample must change land');assert.equal(painted.history.past.length,baseline.history.past.length+1,'One drag must create one undo step');
+ const radius=Math.floor(brushSize/2);let coveredCells=0;
+ for(let y=0;y<64;y++)for(let x=0;x<64;x++){
+  const covered=x>=24-radius&&x<=30+radius&&y>=34-radius&&y<=34+radius&&!riverBank(x,y,baseline.definition.map);
+  const expected=covered?{habitat:preset.key,fertility:preset.fertility,retention:preset.retention,cover:preset.cover}:baseTerrain[y*64+x];
+  assert(isDeepStrictEqual(painted.definition.map.terrain[y*64+x],expected),`Brush width ${brushSize} produced an unexpected terrain cell at ${x},${y}`);
+  if(covered)coveredCells++;
+ }
  await phase('brush-undo');t=performance.now();await page.locator('#creator-undo').click();await settle();operations.push({action:'brush-undo',inputThroughSavedMs:performance.now()-t});assert(JSON.stringify((await saved()).definition)===JSON.stringify(baseline.definition),'Whole brush stroke did not undo exactly');
  await phase('brush-redo');t=performance.now();await page.locator('#creator-redo').click();await settle();operations.push({action:'brush-redo',inputThroughSavedMs:performance.now()-t});assert(JSON.stringify((await saved()).definition)===JSON.stringify(painted.definition),'Whole brush stroke did not redo exactly');
  await page.locator('#creator-undo').click();await settle();
@@ -27,5 +36,5 @@ export async function measureEditorGestures(page,{Game}){
  const events=await page.evaluate(()=>{window.builderGesturePhase=null;return window.builderGestureEvents;});assert(events.filter(e=>e.dragging&&e.method==='motion').length>=24);assert(events.every(e=>e.trusted),'Gesture samples must come from trusted browser input');assert(events.every(e=>Number.isFinite(e.twoFrameMs)));
  for(const event of events.filter(e=>e.phase==='group-move'&&e.method==='up')){assert.equal(event.calls.filter(c=>c.key==='load_scenario').length,1,'Group move must compile once');assert.equal(event.calls.filter(c=>c.key==='validate_scenario').length,0,'Group move must reuse its compiled validation');}
  const summaries=[];for(const phase of ['habitat-drag','group-select','group-move'])for(const method of ['down','motion','up']){const samples=events.filter(e=>e.phase===phase&&e.method===method&&(method!=='motion'||e.dragging));if(!samples.length)continue;const quantile=(key,q)=>{const values=samples.map(s=>s[key]).sort((a,b)=>a-b);return values[Math.min(values.length-1,Math.floor(values.length*q))];};summaries.push({phase,method,count:samples.length,handlerP95Ms:quantile('handlerMs',.95),handlerMaxMs:quantile('handlerMs',1),twoFrameP95Ms:quantile('twoFrameMs',.95),nativeCalls:Object.fromEntries(['load_scenario','land_report','world_geometry','terrain_template'].map(key=>[key,samples.reduce((n,s)=>n+s.calls.filter(c=>c.key===key).length,0)]))});}
- return {scope:'One trusted 24-step brush drag and two-building selection/move, exact durable undo/redo checks, handler and two-rAF latency. Save acknowledgement includes autosave debounce. No physical-display frame pacing, repeated interaction distribution, max brush size or cancellation throughput claim.',delta,operations,summaries,events,checks:{atomicBrush:true,exactBrushUndoRedo:true,exactGroupMoveUndo:true,trustedInput:true}};
+ return {brushSize,coveredCells,scope:'One trusted 24-step brush drag and two-building selection/move, exact durable undo/redo checks, handler and two-rAF latency. Save acknowledgement includes autosave debounce. No physical-display frame pacing, repeated interaction distribution, other brush sizes or cancellation throughput claim.',delta,operations,summaries,events,checks:{exactBrushFootprint:true,atomicBrush:true,exactBrushUndoRedo:true,exactGroupMoveUndo:true,trustedInput:true}};
 }
