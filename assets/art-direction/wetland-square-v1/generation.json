@@ -1,0 +1,58 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "mode": "precise-object-edit",
+  "transparent_background": true,
+  "promptFile": "prompt.txt",
+  "promptSha256": "9a96fc8b4e7bd546048c3aee59d0d75020e4ebae7a29ee569f0d1d4a89123110",
+  "references": [
+    {
+      "role": "edit target",
+      "path": "web/art/wetland.png",
+      "sha256": "037dec072b3c8cc37d8a25874cbb2ad154f2f54e82cc489fdb7199516936400b"
+    },
+    {
+      "role": "style and material reference",
+      "path": "web/art/home-gable.png",
+      "sha256": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21"
+    },
+    {
+      "role": "diagnostic context",
+      "path": "artifacts/wetland-context/mata-atlantica-2-day.png",
+      "sha256": "70dec4f8face1b95e70262edc25878db8c771c7a35b085b51c430c48ae9e6a2a"
+    }
+  ],
+  "rawOutput": {
+    "file": "candidate.png",
+    "sha256": "f17eca668225cb9fc2297f09628c3ff707192d381e7ceac34282c527f5a996de",
+    "original": "/Users/paladini/.codex/generated_images/01a11850-aab0-75a0-b902-a89978581239/exec-e710d6f8-1f9b-490e-bfc3-14bc11c25a0c.png"
+  },
+  "status": "rejected; not gameplay",
+  "visualFindings": [
+    "Still elongated rather than the requested square basin ground plan.",
+    "Outlet barrel still protrudes beyond the bed.",
+    "Unrequested colored glow/background around silhouette."
+  ],
+  "contextReview": {
+    "reviewed": [
+      "mata-atlantica-2-day.png"
+    ],
+    "pending": [
+      "mata-atlantica-1-day.png",
+      "mata-atlantica-1-night.png",
+      "mata-atlantica-2-night.png",
+      "cerrado-1-day.png",
+      "cerrado-1-night.png",
+      "cerrado-2-day.png",
+      "cerrado-2-night.png",
+      "caatinga-1-day.png",
+      "caatinga-1-night.png",
+      "caatinga-2-day.png",
+      "caatinga-2-night.png"
+    ],
+    "retainedCapture": "current-road-context.png",
+    "retainedScenario": "context.solar-scenario",
+    "remainingCapturesLocation": "artifacts/wetland-context (local generated artifacts; not committed acceptance evidence)",
+    "finding": "Visible gap between long bed foundation and adjacent road. Source alpha fits by its protruding barrel; do not enlarge/warp sprite to conceal footprint mismatch."
+  },
+  "nextCorrection": "Use explicit square plan geometry guide and demand no outer glow; retain current active source until style, geometry, proportion, lighting and contextual placement gates pass."
+}
