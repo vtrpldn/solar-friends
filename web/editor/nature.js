@@ -4,7 +4,8 @@ export function resolvedNature(definition,snapshot,catalog){
   return definition.map.nature??snapshot.village.land.vegetation.filter(t=>!t.cleared).map(t=>({id:`nature-${t.index}`,species:catalog[t.species].key,x:t.x,y:t.y,size:t.size}));
 }
 export function plantStroke(definition,existing,catalog,key,size,cells,width,makeId=()=>crypto.randomUUID()){
-  const species=catalog.find(s=>s.key===key);if(!species||size<species.min_size||size>species.max_size)throw Error('Choose a supported plant and size.');
+  const species=catalog.find(s=>s.key===key),nativeSize=Math.fround(size);
+  if(!species||!Number.isFinite(size)||nativeSize<species.min_size||nativeSize>species.max_size)throw Error('Choose a supported plant and size.');
   const points=new Map(),start=Math.floor(width/2),byKey=new Map(catalog.map(s=>[s.key,s]));
   for(const [x,y]of cells)for(let a=x-start;a<x-start+width;a++)for(let b=y-start;b<y-start+width;b++)if(a>=0&&a<64&&b>=0&&b<64)points.set(`${a},${b}`,[a,b]);
   const added=[];
