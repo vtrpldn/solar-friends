@@ -1,0 +1,26 @@
+{
+  "accepted": "Static matching portraits for 79 public custom pairwise recipes and all five original looks at current creator/library sizes in day and unlit-night views.",
+  "reviewedBoards": [
+    "portraits-1.png",
+    "portraits-2.png",
+    "portraits-3.png",
+    "portraits-4.png"
+  ],
+  "pendingVisualReview": [],
+  "visualFindings": "All four final comparison boards inspected. Portraits retain the same hair, hats, skin/clothing palette and body as their standing-world counterpart. Faces and hats remain within the portrait frame; body aspect ratios remain unchanged. The 2x creator view is an enlargement of the actual 64x72 portrait, so its resampling softness is expected rather than new painted detail. No new crop or appearance mismatch found in this static set.",
+  "limits": [
+    "Direct shared painter/provider invocation; this does not exercise character-modal interactions.",
+    "Only standing portraits and matching standing world poses; no motion, rain, biome/terrain or other zoom acceptance.",
+    "The 79 per-outfit pairwise recipes are not exhaustive higher-order combination or retired-revision coverage."
+  ],
+  "inputs": {
+    "scripts/verify-resident-portrait-evidence.mjs": "b7658edc9a46d8a53becd264bf7a414f64ce0224026ebd88ec7cb1ae1c0058c5"
+  },
+  "evidence": {
+    "portraits-1.png": "f2d99c29c7754113cc370f99ef6632927a23628d6cc64f6d5b8b2afe1874b999",
+    "portraits-2.png": "48bb56a39f48a66e32bca115c5b380bf66cd1133e3c1216e4da7f737c395dfde",
+    "portraits-3.png": "e024b1fd65d58da1a6f1e3409e47a024b713d614bc80d31efa98379a4bcebdc4",
+    "portraits-4.png": "55805eab0d0edbdf218c50c626ea3f1b121c4aa09e683ad4ebf6ae84bf3cc299",
+    "report.json": "028e1c56fe040510a7cf641c3404e166a2bc8ed0f7510752c9711e53648311fc"
+  }
+}
