@@ -1,0 +1,2893 @@
+{
+  "completed": true,
+  "build": "broad",
+  "cyclesPerCast": 4,
+  "residents": 12,
+  "environment": {
+    "platform": "darwin",
+    "release": "25.5.0",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro",
+    "totalSystemBytes": 38654705664,
+    "browser": "151.0.7922.34",
+    "gpu": {
+      "devices": [
+        {
+          "vendorId": 65535,
+          "deviceId": 65535,
+          "vendorString": "Google Inc. (Google)",
+          "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+          "driverVendor": "SwANGLE",
+          "driverVersion": "5.0.0"
+        }
+      ],
+      "auxAttributes": {
+        "amdSwitchable": false,
+        "canSupportThreadedTextureMailbox": false,
+        "directRenderingVersion": "",
+        "displayType": "ANGLE_SWIFTSHADER",
+        "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_copy_texture_3d GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_image GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_object_flags GL_ANGLE_memory_size GL_ANGLE_multi_draw GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_read_only_depth_stencil_feedback_loops GL_ANGLE_relaxed_vertex_attribute_type GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_robust_fragment_shader_output GL_ANGLE_robust_resource_initialization GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_texture_usage GL_ANGLE_translated_shader_source GL_ANGLE_vulkan_image GL_ANGLE_yuv_internal_format GL_APPLE_clip_distance GL_ARM_rgba8 GL_ARM_shader_framebuffer_fetch GL_ARM_shader_framebuffer_fetch_depth_stencil GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_compressed_texture GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_EGL_image_array GL_EXT_EGL_image_external_wrap_modes GL_EXT_EGL_image_storage GL_EXT_base_instance GL_EXT_blend_minmax GL_EXT_buffer_storage GL_EXT_clear_texture GL_EXT_clip_control GL_EXT_clip_cull_distance GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_copy_image GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_read_format_bgra GL_EXT_robustness GL_EXT_sRGB GL_EXT_sRGB_write_control GL_EXT_semaphore GL_EXT_separate_shader_objects GL_EXT_shader_framebuffer_fetch GL_EXT_shader_framebuffer_fetch_non_coherent GL_EXT_shader_non_constant_global_initializers GL_EXT_shader_texture_lod GL_EXT_shadow_samplers GL_EXT_texture_border_clamp GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_cube_map_array GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_lod_bias GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_sRGB_decode GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_EXT_texture_type_2_10_10_10_REV GL_EXT_unpack_subimage GL_KHR_blend_equation_advanced GL_KHR_debug GL_KHR_robust_buffer_access_behavior GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_NV_fence GL_NV_framebuffer_blit GL_NV_pack_subimage GL_NV_pixel_buffer_object GL_NV_polygon_mode GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_EGL_image_external_essl3 GL_OES_EGL_sync GL_OES_compressed_EAC_R11_signed_texture GL_OES_compressed_EAC_R11_unsigned_texture GL_OES_compressed_EAC_RG11_signed_texture GL_OES_compressed_EAC_RG11_unsigned_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_compressed_ETC2_RGB8_texture GL_OES_compressed_ETC2_RGBA8_texture GL_OES_compressed_ETC2_punchthroughA_RGBA8_texture GL_OES_compressed_ETC2_punchthroughA_sRGB8_alpha_texture GL_OES_compressed_ETC2_sRGB8_alpha8_texture GL_OES_compressed_ETC2_sRGB8_texture GL_OES_compressed_paletted_texture GL_OES_copy_image GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_depth_texture_cube_map GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_border_clamp GL_OES_texture_cube_map_array GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_vertex_array_object GL_OES_vertex_half_float GL_OES_vertex_type_10_10_10_2 GL_OVR_multiview GL_OVR_multiview2 GL_QCOM_texture_lod_bias ",
+        "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+        "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "glResetNotificationStrategy": 33362,
+        "glVendor": "Google Inc. (Google)",
+        "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28222 git hash: 6dab7c7e742b)",
+        "glWsExtensions": "",
+        "glWsVendor": "",
+        "glWsVersion": "",
+        "inProcessGpu": false,
+        "initializationTime": 0.08944,
+        "isAsan": false,
+        "isClangCoverage": false,
+        "jpegDecodeAcceleratorSupported": false,
+        "maxMsaaSamples": "4",
+        "optimus": false,
+        "passthroughCmdDecoder": true,
+        "pixelShaderVersion": "3.00",
+        "processCrashCount": 0,
+        "sandboxed": false,
+        "skiaBackendType": "None",
+        "subpixelFontRendering": true,
+        "targetCpuBits": 64,
+        "vertexShaderVersion": "3.00",
+        "visibilityCallbackCallCount": 0
+      },
+      "featureStatus": {
+        "2d_canvas": "unavailable_software",
+        "direct_rendering_display_compositor": "disabled_off_ok",
+        "gpu_compositing": "disabled_software",
+        "multiple_raster_threads": "enabled_on",
+        "opengl": "disabled_off",
+        "rasterization": "disabled_software",
+        "raw_draw": "disabled_off_ok",
+        "skia_graphite": "disabled_off",
+        "trees_in_viz": "disabled_off",
+        "video_decode": "disabled_software",
+        "video_encode": "disabled_software",
+        "webgl": "unavailable_software",
+        "webgpu": "unavailable_software",
+        "webnn": "unavailable_software"
+      },
+      "driverBugWorkarounds": [],
+      "videoDecoding": [],
+      "videoEncoding": []
+    }
+  },
+  "inputs": {
+    "scripts/benchmark-artwork-memory.mjs": "7751ac519c52cca23f27ffb7674cff9464f4453de526af54206f327937a75916",
+    "web/resident-artwork-preparation.js": "d81ccd101798de1c53b8e5f084104916d954771652c8193e19c81d545721c8bf",
+    "web/resident-appearance-library.js": "e13cd02caa63c8907757dd881335d722fe811e9e5b325bf0fde617afb8ddabfa",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631",
+    "web/appearance-cache.js": "29b45878db3aa395f39fafac3d70c4154be6822d43baf7dc5b60f49ba3c54acb",
+    "web/resident-family-parts.js": "48802400c4942128694edec58c665a3fa5ee5461223378095e6e559f4152ede5",
+    "web/resident-family-provider.js": "103dbb9287de742970f85bd108541c46848305c54e28f795f9235c5cda105bce",
+    "web/character-image-source.js": "b10649c2b8f08f168db8adc6324fd5f8a09c714f7fef684b6bb0d380d1bbdb03",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/character-sleep-family-bundle.js": "c625150896514a73506935ec7df33b59f3361314ed5ea6b3ebb6f57dc630a044",
+    "web/character-sleep-family-bundle-index.js": "a8eef990f98b12605c1bc6ffaa8ac6a0ff97d7c3ad8601320704f6073698e49b",
+    "web/art/characters/relaxed-sleep-v1/bundle-v1.json": "f920cd78f9b736a255a90f2a56299a478bad0b8cf086d12e4f21ed283248412f",
+    "web/character-hair-family.js": "4da3281eef01db7974226a01c5a8477220f65d9cfd0e161681288cf5e257325b",
+    "web/character-frame-composition.js": "3ab7fd8b02875130c5f41ac30d914ec75cc5e8460d6aad7d742bb00e1f0c88de",
+    "web/character-composed-family.js": "d7cdca2836eb60ef142044b5055479288568c84eb6f3aad12a8129acbefe3dd3",
+    "web/resident-provider-memory.js": "2feb5a1b937491495ac598a696af8cada41ccbc688cfddb6a5edf19eeabe12d2",
+    "web/character-composed-family-bundle.js": "423ec62d13a698a87a70bb0d8c5b39a78d950ec71d9aea79287587c13cb91919",
+    "web/character-runtime-binding.js": "c9847780f2039a44972baa444e4b94caeb4500041a1a6f5664bf3cad70a4b87e",
+    "web/character-broad-family-bundle-index.js": "17d264e9080070a930a07efd36683cc4087144b9e233788602cf2d92a966ec23",
+    "web/art/characters/broad-v1/bundle-v1.json": "6d3f334aca027a80296ebc760e5d1214293ea027b3d0503d37e26a27c3c52f42"
+  },
+  "baseline": {
+    "label": "imported modules; no artwork",
+    "forcedGC": true,
+    "heap": {
+      "usedSize": 863976,
+      "totalSize": 1835008,
+      "embedderHeapUsedSize": 353256,
+      "backingStorageSize": 168556
+    },
+    "dom": {
+      "documents": 1,
+      "nodes": 8,
+      "jsEventListeners": 0
+    },
+    "rss": {
+      "processes": [
+        {
+          "id": 97495,
+          "type": "browser",
+          "rssBytes": 85295104
+        },
+        {
+          "id": 97508,
+          "type": "renderer",
+          "rssBytes": 89915392
+        },
+        {
+          "id": 97506,
+          "type": "GPU",
+          "rssBytes": 56721408
+        },
+        {
+          "id": 97507,
+          "type": "network.mojom.NetworkService",
+          "rssBytes": 44924928
+        }
+      ],
+      "sumBytes": 276856832,
+      "missingPids": []
+    },
+    "rssError": null,
+    "ownership": {
+      "owner": {
+        "closed": false,
+        "partsReady": false,
+        "partsRequested": false,
+        "retiring": 0
+      },
+      "cache": null,
+      "borrowedProviders": 0,
+      "canvasPixels": 0
+    }
+  },
+  "results": [
+    {
+      "cast": "shared",
+      "cycle": 1,
+      "loading": {
+        "prepareMs": 1513,
+        "residents": 12,
+        "uniqueAppearances": 1,
+        "cache": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14650360,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14650360,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        }
+      },
+      "active": {
+        "label": "shared-1-active",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 4877488,
+          "totalSize": 14942208,
+          "embedderHeapUsedSize": 2917096,
+          "backingStorageSize": 190517149
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 355,
+          "jsEventListeners": 24
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 83542016
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 715964416
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 53755904
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41877504
+            }
+          ],
+          "sumBytes": 895139840,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 1,
+            "retainedBytes": 14650360,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 14650360,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 1,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 1,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "activeAfterGC": {
+        "label": "shared-1-active-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 3079244,
+          "totalSize": 3407872,
+          "embedderHeapUsedSize": 1067192,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 182,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 83574784
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 650149888
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 53755904
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41877504
+            }
+          ],
+          "sumBytes": 829358080,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 1,
+            "retainedBytes": 14650360,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 14650360,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 1,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 1,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "released": {
+        "label": "shared-1-released",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 3157364,
+          "totalSize": 3932160,
+          "embedderHeapUsedSize": 1598168,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 182,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 83574784
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 424755200
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 53936128
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41877504
+            }
+          ],
+          "sumBytes": 604143616,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      },
+      "releasedAfterGC": {
+        "label": "shared-1-released-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 1864824,
+          "totalSize": 2359296,
+          "embedderHeapUsedSize": 478704,
+          "backingStorageSize": 345053
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 8,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 83574784
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 422625280
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 53952512
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41877504
+            }
+          ],
+          "sumBytes": 602030080,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      }
+    },
+    {
+      "cast": "shared",
+      "cycle": 2,
+      "loading": {
+        "prepareMs": 1493.2000000476837,
+        "residents": 12,
+        "uniqueAppearances": 1,
+        "cache": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14650360,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14650360,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        }
+      },
+      "active": {
+        "label": "shared-2-active",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 4171916,
+          "totalSize": 13369344,
+          "embedderHeapUsedSize": 1382632,
+          "backingStorageSize": 23464355
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 192,
+          "jsEventListeners": 24
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 89178112
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 765607936
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 51953664
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41877504
+            }
+          ],
+          "sumBytes": 948617216,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 1,
+            "retainedBytes": 14650360,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 14650360,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 1,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 1,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "activeAfterGC": {
+        "label": "shared-2-active-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 3131420,
+          "totalSize": 3670016,
+          "embedderHeapUsedSize": 1084776,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 182,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 89210880
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 713981952
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 54362112
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41877504
+            }
+          ],
+          "sumBytes": 899432448,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 1,
+            "retainedBytes": 14650360,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 14650360,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 1,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 1,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "released": {
+        "label": "shared-2-released",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 3203304,
+          "totalSize": 3932160,
+          "embedderHeapUsedSize": 1416744,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 182,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 89210880
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 475201536
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 54362112
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41877504
+            }
+          ],
+          "sumBytes": 660652032,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      },
+      "releasedAfterGC": {
+        "label": "shared-2-released-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 1950740,
+          "totalSize": 2359296,
+          "embedderHeapUsedSize": 496288,
+          "backingStorageSize": 345053
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 8,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 89210880
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 464568320
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 54362112
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41877504
+            }
+          ],
+          "sumBytes": 650018816,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      }
+    },
+    {
+      "cast": "shared",
+      "cycle": 3,
+      "loading": {
+        "prepareMs": 1343.5,
+        "residents": 12,
+        "uniqueAppearances": 1,
+        "cache": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14650360,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14650360,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        }
+      },
+      "active": {
+        "label": "shared-3-active",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 3884864,
+          "totalSize": 13369344,
+          "embedderHeapUsedSize": 1798456,
+          "backingStorageSize": 22662427
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 266,
+          "jsEventListeners": 24
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 89571328
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 782499840
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 52084736
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41762816
+            }
+          ],
+          "sumBytes": 965918720,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 1,
+            "retainedBytes": 14650360,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 14650360,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 1,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 1,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "activeAfterGC": {
+        "label": "shared-3-active-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 3192464,
+          "totalSize": 3932160,
+          "embedderHeapUsedSize": 1118320,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 182,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 89571328
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 738344960
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 54493184
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41762816
+            }
+          ],
+          "sumBytes": 924172288,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 1,
+            "retainedBytes": 14650360,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 14650360,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 1,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 1,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "released": {
+        "label": "shared-3-released",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 3257028,
+          "totalSize": 4194304,
+          "embedderHeapUsedSize": 1437248,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 182,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 89571328
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 499630080
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 54493184
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41762816
+            }
+          ],
+          "sumBytes": 685457408,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      },
+      "releasedAfterGC": {
+        "label": "shared-3-released-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 1999024,
+          "totalSize": 2621440,
+          "embedderHeapUsedSize": 529832,
+          "backingStorageSize": 345053
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 8,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 89571328
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 488751104
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 54493184
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41762816
+            }
+          ],
+          "sumBytes": 674578432,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      }
+    },
+    {
+      "cast": "shared",
+      "cycle": 4,
+      "loading": {
+        "prepareMs": 1344.2000000476837,
+        "residents": 12,
+        "uniqueAppearances": 1,
+        "cache": {
+          "entries": 1,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 1,
+          "retainedBytes": 14650360,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 14650360,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 1,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        }
+      },
+      "active": {
+        "label": "shared-4-active",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 5968440,
+          "totalSize": 14155776,
+          "embedderHeapUsedSize": 1480720,
+          "backingStorageSize": 34554251
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 208,
+          "jsEventListeners": 24
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 84672512
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 752615424
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 54624256
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41910272
+            }
+          ],
+          "sumBytes": 933822464,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 1,
+            "retainedBytes": 14650360,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 14650360,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 1,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 1,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "activeAfterGC": {
+        "label": "shared-4-active-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 3209004,
+          "totalSize": 3932160,
+          "embedderHeapUsedSize": 1133736,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 182,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 84672512
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 711114752
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 54624256
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41910272
+            }
+          ],
+          "sumBytes": 892321792,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 1,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 1,
+            "retainedBytes": 14650360,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 14650360,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 1,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 1,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "released": {
+        "label": "shared-4-released",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 3266756,
+          "totalSize": 4194304,
+          "embedderHeapUsedSize": 1452056,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 182,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 84672512
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 472334336
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 54624256
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41910272
+            }
+          ],
+          "sumBytes": 653541376,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      },
+      "releasedAfterGC": {
+        "label": "shared-4-released-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 2015920,
+          "totalSize": 2621440,
+          "embedderHeapUsedSize": 545248,
+          "backingStorageSize": 345053
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 8,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 84672512
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 461815808
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 54624256
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41910272
+            }
+          ],
+          "sumBytes": 643022848,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      }
+    },
+    {
+      "cast": "unique",
+      "cycle": 1,
+      "loading": {
+        "prepareMs": 4412,
+        "residents": 12,
+        "uniqueAppearances": 12,
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 175856040,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 175856040,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        }
+      },
+      "active": {
+        "label": "unique-1-active",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 17231724,
+          "totalSize": 44826624,
+          "embedderHeapUsedSize": 4261240,
+          "backingStorageSize": 64958795
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 892,
+          "jsEventListeners": 4
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 80117760
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 1113899008
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 63029248
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41943040
+            }
+          ],
+          "sumBytes": 1298989056,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 12,
+            "retainedBytes": 175856040,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 175856040,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 2,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 2,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "activeAfterGC": {
+        "label": "unique-1-active-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 9408672,
+          "totalSize": 9961472,
+          "embedderHeapUsedSize": 3345632,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 813,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 80117760
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 1064534016
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 63045632
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41943040
+            }
+          ],
+          "sumBytes": 1249640448,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 12,
+            "retainedBytes": 175856040,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 175856040,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 2,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 2,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "released": {
+        "label": "unique-1-released",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 9497720,
+          "totalSize": 10223616,
+          "embedderHeapUsedSize": 4004864,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 813,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 80117760
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 876118016
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 63045632
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41943040
+            }
+          ],
+          "sumBytes": 1061224448,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      },
+      "releasedAfterGC": {
+        "label": "unique-1-released-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 2126124,
+          "totalSize": 2621440,
+          "embedderHeapUsedSize": 647080,
+          "backingStorageSize": 345053
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 8,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 80117760
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 866516992
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 63062016
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 41943040
+            }
+          ],
+          "sumBytes": 1051639808,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      }
+    },
+    {
+      "cast": "unique",
+      "cycle": 2,
+      "loading": {
+        "prepareMs": 4444.899999856949,
+        "residents": 12,
+        "uniqueAppearances": 12,
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 175856040,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 175856040,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        }
+      },
+      "active": {
+        "label": "unique-2-active",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 17378636,
+          "totalSize": 44564480,
+          "embedderHeapUsedSize": 4244736,
+          "backingStorageSize": 64958795
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 996,
+          "jsEventListeners": 4
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 76087296
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 1130348544
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 59293696
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 38273024
+            }
+          ],
+          "sumBytes": 1304002560,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 12,
+            "retainedBytes": 175856040,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 175856040,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 2,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 2,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "activeAfterGC": {
+        "label": "unique-2-active-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 9371296,
+          "totalSize": 9961472,
+          "embedderHeapUsedSize": 3402792,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 813,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 76152832
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 1080623104
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 62930944
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 38273024
+            }
+          ],
+          "sumBytes": 1257979904,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 12,
+            "retainedBytes": 175856040,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 175856040,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 2,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 2,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "released": {
+        "label": "unique-2-released",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 9460136,
+          "totalSize": 10223616,
+          "embedderHeapUsedSize": 3944968,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 813,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 76185600
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 874414080
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 62947328
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 38273024
+            }
+          ],
+          "sumBytes": 1051820032,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      },
+      "releasedAfterGC": {
+        "label": "unique-2-released-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 2130916,
+          "totalSize": 2621440,
+          "embedderHeapUsedSize": 704240,
+          "backingStorageSize": 345053
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 8,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 76201984
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 865206272
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 62947328
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 38273024
+            }
+          ],
+          "sumBytes": 1042628608,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      }
+    },
+    {
+      "cast": "unique",
+      "cycle": 3,
+      "loading": {
+        "prepareMs": 4069.4000000953674,
+        "residents": 12,
+        "uniqueAppearances": 12,
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 175856040,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 175856040,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        }
+      },
+      "active": {
+        "label": "unique-3-active",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 17267228,
+          "totalSize": 44564480,
+          "embedderHeapUsedSize": 4785104,
+          "backingStorageSize": 64668275
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 1043,
+          "jsEventListeners": 4
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 88408064
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 1277263872
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 60801024
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 40878080
+            }
+          ],
+          "sumBytes": 1467351040,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 12,
+            "retainedBytes": 175856040,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 175856040,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 2,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 2,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "activeAfterGC": {
+        "label": "unique-3-active-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 9358940,
+          "totalSize": 9961472,
+          "embedderHeapUsedSize": 3428432,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 813,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 88440832
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 1217085440
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 63275008
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 40878080
+            }
+          ],
+          "sumBytes": 1409679360,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 12,
+            "retainedBytes": 175856040,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 175856040,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 2,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 2,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "released": {
+        "label": "unique-3-released",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 9447640,
+          "totalSize": 10223616,
+          "embedderHeapUsedSize": 4036928,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 813,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 88440832
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 978321408
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 63275008
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 40878080
+            }
+          ],
+          "sumBytes": 1170915328,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      },
+      "releasedAfterGC": {
+        "label": "unique-3-released-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 2132144,
+          "totalSize": 2883584,
+          "embedderHeapUsedSize": 729880,
+          "backingStorageSize": 345053
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 8,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 88440832
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 959660032
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 63291392
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 40878080
+            }
+          ],
+          "sumBytes": 1152270336,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      }
+    },
+    {
+      "cast": "unique",
+      "cycle": 4,
+      "loading": {
+        "prepareMs": 4117.399999856949,
+        "residents": 12,
+        "uniqueAppearances": 12,
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 175856040,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 175856040,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": null,
+          "sleepShirtFamilyCache": null,
+          "broadFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "ready": 2,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedBodyPoses": 48,
+            "decodedSources": 37
+          }
+        }
+      },
+      "active": {
+        "label": "unique-4-active",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 17383544,
+          "totalSize": 44564480,
+          "embedderHeapUsedSize": 4224712,
+          "backingStorageSize": 64958795
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 1043,
+          "jsEventListeners": 4
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 82771968
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 1247985664
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 60735488
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 40878080
+            }
+          ],
+          "sumBytes": 1432371200,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 12,
+            "retainedBytes": 175856040,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 175856040,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 2,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 2,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "activeAfterGC": {
+        "label": "unique-4-active-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 9370060,
+          "totalSize": 9961472,
+          "embedderHeapUsedSize": 3449872,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 813,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 82771968
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 1198489600
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 63209472
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 40878080
+            }
+          ],
+          "sumBytes": 1385349120,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": true,
+            "partsRequested": true,
+            "retiring": 0
+          },
+          "cache": {
+            "entries": 12,
+            "active": 0,
+            "queued": 0,
+            "pending": 0,
+            "maxEntries": 16,
+            "maxConcurrent": 2,
+            "maxQueued": 24,
+            "rollbackEntries": 12,
+            "retainedBytes": 175856040,
+            "preparedHairFrames": 0,
+            "preparedHairRgbaBytes": 0,
+            "facialOverlayFrames": 0,
+            "facialOverlayRgbaBytes": 0,
+            "maximumFrames": 800,
+            "maximumRetainedFrames": 1600,
+            "rgbaByteUpperBound": 175856040,
+            "decodedSources": 0,
+            "familyCache": null,
+            "workFamilyCache": null,
+            "shirtFamilyCache": null,
+            "sleepFamilyCache": null,
+            "sleepShirtFamilyCache": null,
+            "broadFamilyCache": {
+              "entries": 2,
+              "active": 0,
+              "queued": 0,
+              "leases": 0,
+              "ready": 2,
+              "maxEntries": 2,
+              "maxConcurrent": 2,
+              "maxQueued": 2,
+              "closed": false,
+              "preparedBodyPoses": 48,
+              "decodedSources": 37
+            }
+          },
+          "borrowedProviders": 12,
+          "canvasPixels": 600000
+        }
+      },
+      "released": {
+        "label": "unique-4-released",
+        "forcedGC": false,
+        "heap": {
+          "usedSize": 9458724,
+          "totalSize": 10223616,
+          "embedderHeapUsedSize": 4046640,
+          "backingStorageSize": 19665179
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 813,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 82771968
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 959774720
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 63209472
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 40878080
+            }
+          ],
+          "sumBytes": 1146634240,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      },
+      "releasedAfterGC": {
+        "label": "unique-4-released-gc",
+        "forcedGC": true,
+        "heap": {
+          "usedSize": 2133584,
+          "totalSize": 2883584,
+          "embedderHeapUsedSize": 751320,
+          "backingStorageSize": 345053
+        },
+        "dom": {
+          "documents": 1,
+          "nodes": 8,
+          "jsEventListeners": 0
+        },
+        "rss": {
+          "processes": [
+            {
+              "id": 97495,
+              "type": "browser",
+              "rssBytes": 82771968
+            },
+            {
+              "id": 97508,
+              "type": "renderer",
+              "rssBytes": 941621248
+            },
+            {
+              "id": 97506,
+              "type": "GPU",
+              "rssBytes": 63209472
+            },
+            {
+              "id": 97507,
+              "type": "network.mojom.NetworkService",
+              "rssBytes": 40878080
+            }
+          ],
+          "sumBytes": 1128480768,
+          "missingPids": []
+        },
+        "rssError": null,
+        "ownership": {
+          "owner": {
+            "closed": false,
+            "partsReady": false,
+            "partsRequested": false,
+            "retiring": 0
+          },
+          "cache": null,
+          "borrowedProviders": 0,
+          "canvasPixels": 0
+        }
+      }
+    }
+  ],
+  "final": {
+    "label": "terminal owner released",
+    "forcedGC": true,
+    "heap": {
+      "usedSize": 2159992,
+      "totalSize": 2883584,
+      "embedderHeapUsedSize": 750904,
+      "backingStorageSize": 345053
+    },
+    "dom": {
+      "documents": 1,
+      "nodes": 8,
+      "jsEventListeners": 0
+    },
+    "rss": {
+      "processes": [
+        {
+          "id": 97495,
+          "type": "browser",
+          "rssBytes": 82788352
+        },
+        {
+          "id": 97508,
+          "type": "renderer",
+          "rssBytes": 941686784
+        },
+        {
+          "id": 97506,
+          "type": "GPU",
+          "rssBytes": 63209472
+        },
+        {
+          "id": 97507,
+          "type": "network.mojom.NetworkService",
+          "rssBytes": 40878080
+        }
+      ],
+      "sumBytes": 1128562688,
+      "missingPids": []
+    },
+    "rssError": null,
+    "ownership": {
+      "owner": null,
+      "cache": null,
+      "borrowedProviders": 0,
+      "canvasPixels": 0
+    }
+  },
+  "pressure": {
+    "level": "critical",
+    "sample": {
+      "label": "after diagnostic critical memory pressure",
+      "forcedGC": true,
+      "heap": {
+        "usedSize": 2159992,
+        "totalSize": 2883584,
+        "embedderHeapUsedSize": 750904,
+        "backingStorageSize": 345053
+      },
+      "dom": {
+        "documents": 1,
+        "nodes": 8,
+        "jsEventListeners": 0
+      },
+      "rss": {
+        "processes": [
+          {
+            "id": 97495,
+            "type": "browser",
+            "rssBytes": 83099648
+          },
+          {
+            "id": 97508,
+            "type": "renderer",
+            "rssBytes": 941686784
+          },
+          {
+            "id": 97506,
+            "type": "GPU",
+            "rssBytes": 63406080
+          },
+          {
+            "id": 97507,
+            "type": "network.mojom.NetworkService",
+            "rssBytes": 41369600
+          }
+        ],
+        "sumBytes": 1129562112,
+        "missingPids": []
+      },
+      "rssError": null,
+      "ownership": {
+        "owner": null,
+        "cache": null,
+        "borrowedProviders": 0,
+        "canvasPixels": 0
+      }
+    }
+  },
+  "scope": "Isolated real public appearance library and staging path, twelve shared/unique appearances revision specified by build, actual canvas drawing and repeated ownership retirement. Raw active/released snapshots and forced-GC diagnostics are separate. Browser-owned process RSS is measured with ps; shared pages may be counted more than once. GPU process RSS is not dedicated GPU/VRAM usage. This excludes full 64x64 gameplay/editor/native allocations, physical display pacing and a prescribed memory acceptance limit."
+}

@@ -1,0 +1,76 @@
+{
+  "status": "Retirement and isolated DOM checks pass; renderer-native RSS ownership remains unresolved",
+  "why": "Do not infer native leaks or safe release from RSS, or zero allocations from an empty native sampler.",
+  "pressureRun": {
+    "cycles": 8,
+    "residents": 12,
+    "cacheRetirementPassed": true,
+    "releasedDomMatchesBaseline": true,
+    "baselineDom": {
+      "documents": 1,
+      "nodes": 8,
+      "jsEventListeners": 0
+    },
+    "rss": {
+      "baselineBytes": 276856832,
+      "peakObservedBytes": 1467351040,
+      "terminalBytes": 1128562688,
+      "afterPressureBytes": 1129562112
+    },
+    "nativeProfiler": {
+      "requested": false,
+      "methodAccepted": false,
+      "stages": 0,
+      "samples": 0,
+      "usable": false,
+      "limitation": "Native sampling was not requested."
+    },
+    "scope": "Checks cache retirement and isolated DOM/listener recovery. Does not establish native allocation ownership, an RSS acceptance limit, physical display pacing or full release readiness."
+  },
+  "nativeProfileRun": {
+    "cycles": 4,
+    "residents": 12,
+    "cacheRetirementPassed": true,
+    "releasedDomMatchesBaseline": true,
+    "baselineDom": {
+      "documents": 1,
+      "nodes": 8,
+      "jsEventListeners": 0
+    },
+    "rss": {
+      "baselineBytes": 277118976,
+      "peakObservedBytes": 1430159360,
+      "terminalBytes": 1087913984,
+      "afterPressureBytes": 1088438272
+    },
+    "nativeProfiler": {
+      "requested": true,
+      "methodAccepted": true,
+      "stages": 19,
+      "samples": 0,
+      "usable": false,
+      "limitation": "No allocation samples were returned; do not interpret this as zero native allocations."
+    },
+    "scope": "Checks cache retirement and isolated DOM/listener recovery. Does not establish native allocation ownership, an RSS acceptance limit, physical display pacing or full release readiness."
+  },
+  "protocolEvidence": "Installed Playwright Chromium protocol describes Memory.simulatePressureNotification as applying to all processes. The critical notification produced no material RSS decline in these measurements.",
+  "analysisChecks": "Five synthetic retained-object mutations (nodes, listeners, cache, borrowed providers, canvas pixels) were rejected. An empty profile is marked unusable; a synthetic nonempty profile is distinguished.",
+  "limits": [
+    "Eight primary cycles plus four diagnostic cycles do not prove an unbounded leak or a permanent plateau.",
+    "The native profiler accepted the start request but returned zero samples even while artwork was active. It is unusable for ownership attribution in this environment.",
+    "No native-memory release acceptance, physical-display pacing or full plan completion is claimed."
+  ],
+  "inputs": {
+    "scripts/benchmark-artwork-memory.mjs": "d80813f8344bbf38b7ac95091a9b21074acd791f4e2b5c05cdcd72d68e60a2c3",
+    "scripts/analyze-artwork-memory.mjs": "9a4d635ff63d64007ffaaf6a9e084e49a1118ae0d8bdc7dd022a87d3b6e815c4",
+    "web/character-hair-family.js": "4da3281eef01db7974226a01c5a8477220f65d9cfd0e161681288cf5e257325b",
+    "web/character-image-source.js": "b10649c2b8f08f168db8adc6324fd5f8a09c714f7fef684b6bb0d380d1bbdb03",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631"
+  },
+  "outputs": {
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/retirement-pressure-v1/memory-native-profile/report.json": "279b8f0b80ca67ef41f428cb4e10ca3dadf3b14674a604a787ea6f71799b4d17",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/retirement-pressure-v1/memory-native-profile/analysis.json": "f23fcc9eb0d622836ddfa4b881192bca3dc6103d3bf29feb76740c906588da08",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/retirement-pressure-v1/memory-pressure/report.json": "b1b07d3280828fd0e6c1ddf14720225e2cbae678cfcc3f55013c794435cb1d31",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/performance-v1/retirement-pressure-v1/memory-pressure/analysis.json": "85a47a2f02fe661354aaadc2dac5fd9c70f3b61d961c6c2abe622e120c6714c4"
+  }
+}

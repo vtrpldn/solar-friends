@@ -1,0 +1,12 @@
+// Keep ownership evidence separate from browser RSS and unavailable profilers.
+import assert from 'node:assert/strict';
+import {readFile,writeFile} from 'node:fs/promises';
+import {pathToFileURL} from 'node:url';
+export function analyzeArtworkMemory(report){
+ assert.equal(report.completed,true);assert(report.results.length>0);
+ const baseline=report.baseline.dom,stages=[report.baseline,report.final,...report.results.flatMap(r=>[r.active,r.activeAfterGC,r.released,r.releasedAfterGC]),...(report.pressure?.sample?[report.pressure.sample]:[])];
+ for(const cycle of report.results){const released=cycle.releasedAfterGC;assert.equal(released.ownership.cache,null);assert.equal(released.ownership.borrowedProviders,0);assert.equal(released.ownership.canvasPixels,0);assert.deepEqual(released.dom,baseline,'Released DOM nodes/listeners must return to the isolated baseline');}
+ assert.deepEqual(report.final.dom,baseline);const profileStages=stages.filter(s=>s.nativeProfile),samples=profileStages.reduce((n,s)=>n+(s.nativeProfile.samples?.length??0),0);
+ return {cycles:report.results.length,residents:report.residents,cacheRetirementPassed:true,releasedDomMatchesBaseline:true,baselineDom:baseline,rss:{baselineBytes:report.baseline.rss?.sumBytes??null,peakObservedBytes:Math.max(...stages.map(s=>s.rss?.sumBytes??0)),terminalBytes:report.final.rss?.sumBytes??null,afterPressureBytes:report.pressure?.sample?.rss?.sumBytes??null},nativeProfiler:{requested:!!report.nativeSampling,methodAccepted:report.nativeSampling?.enabled===true,stages:profileStages.length,samples,usable:samples>0,limitation:!report.nativeSampling?'Native sampling was not requested.':samples?'Sampled allocations are not total process or GPU memory.':'No allocation samples were returned; do not interpret this as zero native allocations.'},scope:'Checks cache retirement and isolated DOM/listener recovery. Does not establish native allocation ownership, an RSS acceptance limit, physical display pacing or full release readiness.'};
+}
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){const [input,output]=process.argv.slice(2);assert(input&&output,'Pass a completed memory report and an analysis output path.');const result=analyzeArtworkMemory(JSON.parse(await readFile(input,'utf8')));await writeFile(output,JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));}

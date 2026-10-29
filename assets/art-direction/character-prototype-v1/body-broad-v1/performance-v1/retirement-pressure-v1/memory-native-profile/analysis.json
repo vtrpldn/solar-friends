@@ -1,0 +1,26 @@
+{
+  "cycles": 4,
+  "residents": 12,
+  "cacheRetirementPassed": true,
+  "releasedDomMatchesBaseline": true,
+  "baselineDom": {
+    "documents": 1,
+    "nodes": 8,
+    "jsEventListeners": 0
+  },
+  "rss": {
+    "baselineBytes": 277118976,
+    "peakObservedBytes": 1430159360,
+    "terminalBytes": 1087913984,
+    "afterPressureBytes": 1088438272
+  },
+  "nativeProfiler": {
+    "requested": true,
+    "methodAccepted": true,
+    "stages": 19,
+    "samples": 0,
+    "usable": false,
+    "limitation": "No allocation samples were returned; do not interpret this as zero native allocations."
+  },
+  "scope": "Checks cache retirement and isolated DOM/listener recovery. Does not establish native allocation ownership, an RSS acceptance limit, physical display pacing or full release readiness."
+}
