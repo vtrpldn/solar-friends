@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import {mkdir,readFile,writeFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+const server=await serve(0);let browser;
+try{
+ browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:1000}});await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.waitForFunction(()=>window.solarDev);const result=await page.evaluate(async()=>{
+  const {renderScenarioJournal}=await import('/scenario-journal-ui.js'),measure=value=>({kind:'maintain',unit:'duration_minutes',value,target:60,complete:value>=60,description:'Keep the pantry healthy for 60 consecutive observed minutes.'});
+  const scenarios=[{name:'Later healthy streak',status:'complete',condition:measure(360)},{name:'Later lapse',status:'complete',condition:measure(0)},{name:'Still earning',status:'active',condition:measure(45)},{name:'Alternative already earned',status:'complete',condition:{kind:'any',conditions:[{kind:'funds',unit:'cents',value:100,target:100,complete:true,description:'Have the shared funds.'},measure(0)]}},{name:'Frozen service',status:'complete',condition:{kind:'service',unit:'duration_minutes',value:60,target:60,complete:true,description:'Keep water accessible.'}}];
+  const results=[];let firstReport;for(const [index,test]of scenarios.entries()){
+   const complete=test.status==='complete',report={introduction:'A completed goal keeps its credit while village life continues.',completion:'Keep shaping the village.',finished_at:complete?600:null,chapters:[{id:'one',title:'A comfortable rhythm',description:'Observed food and rest.',completed_at:complete?600:null,goals:[{id:'streak',title:test.name,description:'A real-time observation.',optional:false,status:test.status,condition:test.condition}]}]},before=JSON.stringify(report);if(index===0)firstReport=structuredClone(report);
+   renderScenarioJournal(report,{title:'Village journal',page:0,open(){},onAction(){},replace:(node,html)=>{node.innerHTML=html;}});const text=document.querySelector('#quest-list').textContent;
+   if(index===0&&(!text.includes('Goal completed earlier · 60 min required · current streak: 360 min')||text.includes('360 min / 60 min')))throw Error('Completed streak still looks like an overflowing progress counter');
+   if([1,3].includes(index)&&(!text.includes('Goal completed earlier · 60 min required · current streak: 0 min')||text.includes('0 min / 60 min')))throw Error('A later lapse or alternative condition must not erase or fabricate earned goal credit');
+   if(index===2&&!text.includes('45 min / 60 min'))throw Error('Active goal progress changed');if(index===4&&!text.includes('60 min / 60 min'))throw Error('Frozen service duration changed');if(JSON.stringify(report)!==before)throw Error('Journal rendering mutated earned progress');results.push(test.name);
+  }
+  renderScenarioJournal(firstReport,{title:'Journal component review',page:0,open(){},onAction(){},replace:(node,html)=>{node.innerHTML=html;}});document.querySelector('#main-menu').close();document.querySelector('#quest-dialog').showModal();return results;
+ });assert.equal(result.length,5);await mkdir('artifacts/journal-completed-streak',{recursive:true});await page.screenshot({path:'artifacts/journal-completed-streak/review.png'});await writeFile('artifacts/journal-completed-streak/report.json',JSON.stringify({cases:result,inputs:Object.fromEntries(await Promise.all(['web/scenario-journal-ui.js','scripts/verify-journal-completed-streak.mjs'].map(async p=>[p,createHash('sha256').update(await readFile(p)).digest('hex')]))),scope:'Controlled journal component reports, actual stylesheet and DOM. No simulation mutation or full scenario playthrough.'},null,2)+'\n');console.log(JSON.stringify({passed:result,scope:'Actual journal component with controlled native-shaped reports; not a new full scenario playthrough.'}));
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

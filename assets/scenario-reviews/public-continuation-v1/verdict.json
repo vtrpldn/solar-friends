@@ -45,5 +45,6 @@
     "first-clearing/first-clearing-public-controls.json": "e5d8ded54db5f7941fc5c69b70b9baffbe6a626da9769578ff60389c8f76ca43",
     "first-clearing/first-clearing-public-journal.png": "abb0f6512b3f94dfb4435c2cd1f9a45b915282c4892c5c323859f9697535926b",
     "summary.json": "58893aec5a25d624f7291a4db38f86e8e7d7f8699350ac5af174a7be12795987"
-  }
+  },
+  "journalFollowUp": "The identified 360 / 60 presentation issue is corrected separately by the completed-streak-ui-v1 review. These original captures retain the pre-fix UI source and are not relabeled as captures of the corrected display."
 }

@@ -1,0 +1,14 @@
+{
+  "cases": [
+    "Later healthy streak",
+    "Later lapse",
+    "Still earning",
+    "Alternative already earned",
+    "Frozen service"
+  ],
+  "inputs": {
+    "web/scenario-journal-ui.js": "bd9a6fc59df1a60345e25a29b52f49c1460b498fdd633551c80356ce3544adb2",
+    "scripts/verify-journal-completed-streak.mjs": "850e13a086f94d6803b12c655302f67732697597d6599d32fe7f803496020ae5"
+  },
+  "scope": "Controlled journal component reports, actual stylesheet and DOM. No simulation mutation or full scenario playthrough."
+}

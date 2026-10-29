@@ -1,0 +1,18 @@
+{
+  "accepted": "Completed maintained-outcome goals distinguish earlier goal credit, required duration and the current live streak.",
+  "visualReview": "Final styled journal capture inspected; required duration and current streak fit within the existing goal layout.",
+  "checks": [
+    "The controlled component test fails before the fix and passes afterward.",
+    "Later healthy streak, later lapse, active progress, an Any goal completed through another branch and frozen service duration are covered.",
+    "Rendering leaves the supplied reports unchanged.",
+    "Existing full player journal journey passes, including ordinary Story rendering, optional continuation, pantry duration and exact checkpoint reload."
+  ],
+  "limits": [
+    "The retained screenshot is a controlled component fixture, not a replacement for the separately retained three-day public example runs.",
+    "No native goal, event, timer or save semantics changed."
+  ],
+  "evidence": {
+    "report.json": "e1d578ea58be57c39d4b10ff9fc1b84bd70d19a5848fe849e7c67ed838aeec4f",
+    "review.png": "2f5d84974ca0fd6b24a16ba5fd62fa17495a117ed1e6943c9fbf97f089a0c6e0"
+  }
+}
