@@ -93,9 +93,30 @@ try{
  await page.mouse.move(from.x,from.y);await page.mouse.down();await page.mouse.move(to.x,to.y,{steps:4});await page.mouse.up();
  await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Move building group');
  await page.locator('#creator-undo').click();
+ const savedCheckpoint=async()=>{
+  await page.getByRole('button',{name:'Save',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
+  return page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(undefined,{broadcast:false});try{return (await library.getProject(new URL(location.href).searchParams.get('project'))).checkpoint;}finally{library.close();}});
+ };
+ const rejectedCopyBefore=await savedCheckpoint();
  await page.getByRole('button',{name:'Copy group',exact:true}).click();
  await clickCell(26,27);
  await page.getByText('Leave a little room between buildings.',{exact:true}).waitFor();
+ assert(isDeepStrictEqual(await savedCheckpoint(),rejectedCopyBefore),'Rejected copy changed the saved definition or history');
+ // A successful native preflight must roll back if the document cannot commit.
+ await page.evaluate(async()=>{
+  const {EditorDocument}=await import('/editor/document.js'),{Game}=await import('/pkg/solar_friends.js');
+  const transact=EditorDocument.prototype.transact,load=Game.prototype.load_scenario;
+  window.failedCommitLoads=[];
+  Game.prototype.load_scenario=function(...args){const before=this.report_state(),result=load.apply(this,args);window.failedCommitLoads.push({before,after:this.report_state()});return result;};
+  window.restoreCommitProbe=()=>{Game.prototype.load_scenario=load;};
+  EditorDocument.prototype.transact=function(){EditorDocument.prototype.transact=transact;throw Error('Injected document commit refusal');};
+ });
+ await clickCell(30,35);await page.getByText('Injected document commit refusal',{exact:true}).waitFor();
+ const failedCommitLoads=await page.evaluate(()=>{window.restoreCommitProbe();return window.failedCommitLoads;});
+ assert.equal(failedCommitLoads.length,2,'Failed document commit must restore the previously compiled preview');
+ assert.equal(failedCommitLoads[1].after,failedCommitLoads[0].before,'Failed document commit changed native preview state');
+ assert(isDeepStrictEqual(await savedCheckpoint(),rejectedCopyBefore),'Failed document commit changed the saved definition or history');
  await clickCell(30,35);
  await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Copy building group');
  await page.locator('#creator-undo').click();
@@ -120,11 +141,6 @@ try{
 
  // Escape must cancel a live stroke, including its eventual pointer release.
  // A matching uncancelled stroke is the positive control against a no-op test.
- const savedCheckpoint=async()=>{
-  await page.getByRole('button',{name:'Save',exact:true}).click();
-  await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
-  return page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(undefined,{broadcast:false});try{return (await library.getProject(new URL(location.href).searchParams.get('project'))).checkpoint;}finally{library.close();}});
- };
  const cancelBefore=await savedCheckpoint();await page.locator('#creator-habitat').selectOption('rocky-woodland');
  const cancelA=await cellPoint(24,34),cancelB=await cellPoint(28,34);
  await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.keyboard.press(process.platform==='darwin'?'Meta+z':'Control+z');await page.mouse.up();

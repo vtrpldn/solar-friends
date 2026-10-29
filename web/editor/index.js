@@ -65,7 +65,7 @@ const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary 
 let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let expandedReview=false,outlook;
 let landReport=null,landReportKey=null,mapPreviewKey=null,landSampleKey='',hoverCell=null;
-let releasePublication=null;
+let releasePublication=null,preparedEdit=null,engineDefinition=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
 function toast(text){$('creator-toast').textContent=text;$('creator-toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('creator-toast').hidden=true,6000);}
@@ -127,15 +127,29 @@ function save(){
 }
 function change(label,edit,{valid=false}={}){
   if(!current||busy)return false;
-  try{if(valid){const draft=current.doc.value;edit(draft);const result=JSON.parse(engine.validate_scenario(JSON.stringify(draft)));if(!result.ok){toast(result.issues.find(i=>i.severity==='error')?.message||'Choose a clear plot.');return false;}}
-  return current.doc.transact(label,edit);}catch(error){toast(error.message);return false;}
+  let previous,compiled=false,committed=false;
+  try{
+    if(valid){
+      const draft=current.doc.value;previous=engineDefinition;edit(draft);
+      const result=JSON.parse(engine.load_scenario(JSON.stringify(draft)));
+      if(!result.ok){toast(result.issues.find(i=>i.severity==='error')?.message||'Choose a clear plot.');return false;}
+      compiled=true;
+      // Document notifications are synchronous. Refresh consumes this candidate
+      // only when the committed definition exactly matches the validated edit.
+      preparedEdit={key:canonical(draft),report:result};
+    }
+    committed=current.doc.transact(label,edit);return committed;
+  }catch(error){toast(error.message);return false;}
+  finally{preparedEdit=null;if(compiled&&!committed&&previous)engine.load_scenario(previous);}
 }
 function field(id,value){if(document.activeElement!==$(id))$(id).value=value;}
 function refresh(){
   if(!current)return;
   const d=current.doc.value;
-  report=JSON.parse(engine.load_scenario(JSON.stringify(d)));
-  if(report.ok)report.roles=JSON.parse(engine.scenario_journal())?.roles??[];
+  if(preparedEdit&&preparedEdit.key===canonical(d)){
+    report=preparedEdit.report;preparedEdit=null;
+  }else report=JSON.parse(engine.load_scenario(JSON.stringify(d)));
+  if(report.ok){engineDefinition=JSON.stringify(d);report.roles=JSON.parse(engine.scenario_journal())?.roles??[];}
   const snapshot=JSON.parse(engine.report_state());
   const nextMapKey=landPreviewKey(d),nextLandKey=report.ok?nextMapKey:null;
   const landChanged=!landReport||(report.ok&&nextLandKey!==landReportKey);
