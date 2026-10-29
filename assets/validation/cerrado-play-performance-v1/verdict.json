@@ -1,0 +1,11 @@
+{
+  "schema": 1,
+  "files": {
+    "scripts/benchmark-mixed-play.mjs": "b8821f631a8435fc0b31ae6767c910dd45477dceb765c743da37e8a9072649a0",
+    "scripts/verify-mixed-play-evidence.mjs": "2be3cd2e71a4642c9cde3c18bea170ef472b7c8207f9667db1f54a34181d6c4c",
+    "scripts/mixed-builder-fixture.mjs": "a0341d8bce537e1106e2828ef55b63fc09645404ad81f59d625b2a4e91218d2b"
+  },
+  "checks": "PASS native-valid opening snapshot identity, positive measured simulation, exact phase checkpoint reloads, appearance cache entry/queue bounds and browser errors. All eight final screens inspected.",
+  "performance": "NOT accepted as full release performance. Starter shared five-resident fixture stays near requested rate. Maximum unique twelve-resident, 256-building fixture reaches 0.963 of requested 16x simulation rate while panning, with frame interval p95 41.3ms and sample-window paint p95 8.3ms.",
+  "scope": "Two sequential short seed-42 Cerrado runs, four ten-second phases each. Developer import/forced speeds, trusted mouse panning. Starter is two buildings, not a typical established village. No public speed-control, physical-display FPS, full memory, long-run, all-biome/body, editor-action or universal latency-budget claim."
+}
