@@ -1,0 +1,2705 @@
+{
+  "schema": 1,
+  "scope": "Source inventory and declared bundle alias integrity only; no visual acceptance or proof that every retained study is active.",
+  "records": [
+    {
+      "file": "adobe-gable-night.png",
+      "sha256": "471e9510f73406a82124940f2f77cd71f48333adb12f61bc58f9e076cccf9a7a",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "adobe-gable.png",
+      "sha256": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "adobe-veranda-night.png",
+      "sha256": "0ab2a6b62393681e7bc44ff2ea319a6ed60bf84bfcb665db7b8e5be18024e655",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "adobe-veranda.png",
+      "sha256": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/bento-activities.png",
+      "sha256": "37b8f2893285e943edf8c5af8274199362f1e908a129acb4ccf9d09435549530",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/bento-idle.png",
+      "sha256": "b08b98641ea263b717fe3f77476a72e58e4c7cc299adeeaea3b1f9d90df97943",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/bento.png",
+      "sha256": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/caua-activities.png",
+      "sha256": "8234d1c277c528b0a9917da578167c79829de9f80f6c8b289c926c63575bdc6b",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/caua-idle.png",
+      "sha256": "bed9db91f965fcf36585a2bd46257baaff07bd8144bae7b085915e204c90fc97",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/caua.png",
+      "sha256": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/iara-activities.png",
+      "sha256": "29dd26deb5204d648ca37abdb01931db27d05b0b3827e32bf1d944789fcc7711",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/iara-idle.png",
+      "sha256": "3d2510219502ef9b7e11872009672cf6a510ef2341abb6fd90888b8abc1d6849",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/iara.png",
+      "sha256": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/luz-activities.png",
+      "sha256": "5ef0f67c8af7a4f9d0d7d212f5d72495d06f5a4a7ee478840d054367d859da70",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/luz-idle.png",
+      "sha256": "c37a9572fe8d3c0c4085d1c6595adefdbc2c26f70dd016fb0d5ba02e17bdeb52",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/luz.png",
+      "sha256": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/nina-activities.png",
+      "sha256": "f58b8323bade79235a119d25b53d135dfbba844c9ca8cb70867d91ab5058a570",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/nina-idle.png",
+      "sha256": "5a95ba9e25991ea97bb3e7e1e225ab1b6423e5c53449d51195e6877209ea7116",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "animations/nina.png",
+      "sha256": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "apiary.png",
+      "sha256": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "banana-treatment-night.png",
+      "sha256": "fc851ec1f43c2a3294f31253716da061394adc2a7fcc99bfb5508ec93e73e7b4",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "banana-treatment.png",
+      "sha256": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "biodigester-night.png",
+      "sha256": "ff2327fd6479d3682323c0ffc7f2423a009a52547da3d4c145aac9f2b3332a24",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "biodigester.png",
+      "sha256": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "caatinga-vegetation-v1.png",
+      "sha256": "522999ec80e708b3203cb6f59a2b90067d3d7eb2f7265b82d6e7815854c26290",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "cerrado-vegetation-v1.png",
+      "sha256": "1542d0c14fa9cfddc83ec0e1a04e5ef5be34fcf1273d93d4eb13c2c8f5f359a6",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "characters/broad-v1/source-06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5.png",
+      "sha256": "06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954.png",
+      "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1.png",
+      "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-184d94663f5131b9e95bb1b605791ab18ecbf01c4904c2697a46fcf33e9d698a.png",
+      "sha256": "184d94663f5131b9e95bb1b605791ab18ecbf01c4904c2697a46fcf33e9d698a",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287.png",
+      "sha256": "1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c.png",
+      "sha256": "1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9.png",
+      "sha256": "29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93.png",
+      "sha256": "2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41.png",
+      "sha256": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8.png",
+      "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2.png",
+      "sha256": "3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-4c0b583d750f41a609099830daf6360c5355fc05299d480e26d9d4e826524b69.png",
+      "sha256": "4c0b583d750f41a609099830daf6360c5355fc05299d480e26d9d4e826524b69",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f.png",
+      "sha256": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a.png",
+      "sha256": "4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60.png",
+      "sha256": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d.png",
+      "sha256": "5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab.png",
+      "sha256": "64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c.png",
+      "sha256": "65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924.png",
+      "sha256": "739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889.png",
+      "sha256": "78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c.png",
+      "sha256": "79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-7fb02e77dde6c4b6eb379f566cd0c68570665893a6a12e266b66cf8ce6e3d27a.png",
+      "sha256": "7fb02e77dde6c4b6eb379f566cd0c68570665893a6a12e266b66cf8ce6e3d27a",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580.png",
+      "sha256": "81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109.png",
+      "sha256": "8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6.png",
+      "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df.png",
+      "sha256": "a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-afb3a6f26a4e72c81347f6e9bdfe7cb6c11e39ab2fd1926f4c1e72fafa655edf.png",
+      "sha256": "afb3a6f26a4e72c81347f6e9bdfe7cb6c11e39ab2fd1926f4c1e72fafa655edf",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-b07429b349343bbbbb229f17265c7a721b3de263d3a68c5fe76aec2571237cab.png",
+      "sha256": "b07429b349343bbbbb229f17265c7a721b3de263d3a68c5fe76aec2571237cab",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-b0cab447f6473b800312930e5daa7559b5e0a96ea7e6bc2cf4498dcf6b7cf013.png",
+      "sha256": "b0cab447f6473b800312930e5daa7559b5e0a96ea7e6bc2cf4498dcf6b7cf013",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-b43a6e224f24fe5c3772fd6087b245828ea60e79c6131a53b93a2c5a9dd18571.png",
+      "sha256": "b43a6e224f24fe5c3772fd6087b245828ea60e79c6131a53b93a2c5a9dd18571",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c.png",
+      "sha256": "b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-d2aa21547ea0772e53bc314aba5b9c37bd6105ea367b977880d1a9f34ab77c60.png",
+      "sha256": "d2aa21547ea0772e53bc314aba5b9c37bd6105ea367b977880d1a9f34ab77c60",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943.png",
+      "sha256": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6.png",
+      "sha256": "e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765.png",
+      "sha256": "e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633.png",
+      "sha256": "eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/broad-v1/source-ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb.png",
+      "sha256": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/broad-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/body-neutral-activities-candidate-v1.png",
+      "sha256": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/body-neutral-base.png",
+      "sha256": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+      "role": "sprite-catalog",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/body-neutral-idle-candidate-v1.png",
+      "sha256": "bce9067058bc34542deefa3c44bd11f5cbdfed6ee7fd08f9bf8519f82858826b",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/body-neutral-idle-candidate-v2.png",
+      "sha256": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/cooking-pot-pose-0-candidate-v1.png",
+      "sha256": "121deddb1d04d0ce646d63c810e978198e654a823084e00d1cec5af380bc0f02",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/cooking-pot-pose-0-candidate-v2.png",
+      "sha256": "dfbd9dd66793b430e817e93cceeaad29bab6937d2fe3956fd63e7c869e3fb172",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png",
+      "sha256": "5048bea272cef69db0aa863f493c3d5aa341d9908f4295e7628616032fe0aa91",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/cooking-pot-pose-1-candidate-v1.png",
+      "sha256": "f11bf00c9426c64bf97fe0769bc65c235a52e9f3523fd767c3d67eb3ba1d690a",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/cooking-pot-pose-1-candidate-v2.png",
+      "sha256": "73ddfe768da43b5349017dc394291e970dbc9ac5459004ae245543c3e57f0fc4",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/cooking-pot-pose-2-candidate-v1.png",
+      "sha256": "96719487684387cf97b99fe9054297855cd27b9b29b0b4a965a4ba61b371b8fa",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/cooking-pot-pose-2-candidate-v2.png",
+      "sha256": "19912a94d724b6ac9a2ee630260b3f4025d9f9490297b3d6475461b228ac69c4",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/cooking-pot-pose-3-candidate-v1.png",
+      "sha256": "54b0b9ee236659ff55c5fc7f82a275a9a89d1b20e7879a5165384a84e73e5293",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/cooking-pot-pose-3-candidate-v2.png",
+      "sha256": "f0e484002a3987739aa0461b772fb53a901adf29025f90b81d32a674348a49d8",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/facial-short-chestnut-source-01-v1.png",
+      "sha256": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/facial-short-chestnut-source-02-v1.png",
+      "sha256": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/facial-short-chestnut-source-03-v1.png",
+      "sha256": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/facial-short-chestnut-source-04-v1.png",
+      "sha256": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/facial-short-chestnut-source-05-v1.png",
+      "sha256": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/facial-short-chestnut-source-06-v1.png",
+      "sha256": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/facial-short-chestnut-source-07-v1.png",
+      "sha256": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/facial-short-chestnut-source-08-v1.png",
+      "sha256": "e47bc6492bdf1c6ca3f5e3c92e369ebe54bc2de6ace778138c77800043dce585",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/facial-short-chestnut-source-09-v1.png",
+      "sha256": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/feed-grains-hold-candidate-v1.png",
+      "sha256": "3912e6366d56960a3165eb84ea0cb002973dafff5ea4c813899308c6535a4a70",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/feed-grains-hold-candidate-v2.png",
+      "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/feeding-basket-pose-12-candidate-v1.png",
+      "sha256": "7dbe2622315ff0f9d9aef05553c950f7de41fead026d7f49e48e42bd9d9326b4",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/feeding-basket-pose-12-candidate-v2.png",
+      "sha256": "39317848c06c8210fb87ccb43342a36dc5dbcc557ec27fcd67df30926311bdb4",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/feeding-basket-pose-13-candidate-v1.png",
+      "sha256": "1936dbcc09e0965521f9e0890f6b0a8466b13bf5744547f76e988661e68ca681",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/feeding-basket-pose-13-candidate-v2.png",
+      "sha256": "18ad112df73d1b82d2d799c3dc1ce72f89393fe9d67506d5c1b6de1c1fae8bc8",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/feeding-basket-pose-14-candidate-v1.png",
+      "sha256": "db8032b07fe40007e0cc8ffce512ed16f57d8a66a87bbf5a335951442b605978",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/feeding-basket-pose-14-candidate-v2.png",
+      "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/feeding-basket-pose-15-candidate-v1.png",
+      "sha256": "fd42e1e3f0912a39b6394c176829f31ae8d19fa931574544113eec2d3000f02d",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/feeding-basket-pose-15-candidate-v2.png",
+      "sha256": "247110fe39d3ac5fc6f5a327a6ce066302376a1eca74c6b09e1093923b9857c7",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-0-candidate-v1.png",
+      "sha256": "4eabe19abb109f0cdd680966a1d8931bddf6e4739a3cb5b04505ed300df18049",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-0-candidate-v2.png",
+      "sha256": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-1-candidate-v1.png",
+      "sha256": "0181e2f7c070efc66da672e672581f7655d69fd99682afc20d066fe698d9aff6",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-1-candidate-v2.png",
+      "sha256": "c1871890556fd2e02c8b76a53485e5a8ca3ac918218a6be5670406343eec8826",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-10-candidate-v1.png",
+      "sha256": "59412f938465868332c3212d81f2382e21a6984cab8e000bb336a5652db980b0",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-12-candidate-v1.png",
+      "sha256": "5d8dcf7be2b6490a87e77bdced48eedb3fa3b1e5f38e7780b7f9deddec97566f",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-12-candidate-v2.png",
+      "sha256": "2649fb7bd9a25d8181a678b61148b73513362faab55c032cf4d4028a2c527d70",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-12-candidate-v3.png",
+      "sha256": "dd81002401ff7ecb43a8cf88082337bb186c1fe4c8bab59405079ff606bef988",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-12-candidate-v4.png",
+      "sha256": "b484abe997b2081a8ae2f858f0d7aeb71741d10d5ecb118107c64308087f3bd2",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-13-candidate-v1.png",
+      "sha256": "d86ddcbab635cf2133de4ecc86659085075701e455b9531f115bd613eaee5d74",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-14-candidate-v1.png",
+      "sha256": "f6962f0cbdfc14ddc23887df483734da6f1ab4807b16b043c056459325e0a7b1",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-14-candidate-v2.png",
+      "sha256": "0150cfe63d7f93f034e49a9202abdc49f7a0a80e8579743aa06e5494b242b818",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-14-candidate-v3.png",
+      "sha256": "5670529e96376e11d98708e0a8deda1487e0cfaf801e9ca9ad330fe97b947114",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-14-candidate-v4.png",
+      "sha256": "cba096d982bbfa2f72686b80673489f75c058712dfa59269046a9eb1d6a2b0a9",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-15-candidate-v1.png",
+      "sha256": "9df86392c83b2c169c0497f21058a6fff248d120d845e734770045089195fd38",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-5-candidate-v1.png",
+      "sha256": "93e4516a83a7ff9d3b5e55ebeb70635649f1b1fe2b21ae6c0ed88802f4b24541",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-6-candidate-v1.png",
+      "sha256": "5241a9fd741f202821fc5368b7144bfb50a40f668a4cf64b9a447d2e883253a0",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-7-candidate-v1.png",
+      "sha256": "f115bd66fad1e347c2231b00be1992ee56d0784a67e2a899ba91913bf3f625ed",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-7-candidate-v2.png",
+      "sha256": "de0628cab84f54a253d913a6ebb1bd5e9a713aed43d184e35d7f92dbc21344aa",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-8-candidate-v1.png",
+      "sha256": "df710c7eb0554d9aa612fd9de1a293b987eda5d52489167b0b2e4f4a7de243ea",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-activities-9-candidate-v1.png",
+      "sha256": "c3c28b66645235ca1bc170d174d1e46d5b2af23e13ee4e7287248bb414129180",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-0-candidate-v1.png",
+      "sha256": "82d1d03ba88052c7aeb551e97b238e07de28b929406391fd6e1940e5d5c6c7a9",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-1-candidate-v1.png",
+      "sha256": "0afd3bda5cc8980f40c34099a48a02e9f6d4854eda9b4dd9fd0e08d42cc73f4f",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-10-candidate-v1.png",
+      "sha256": "7d88c8d58cefcae645607119949f08457d3ca2a85582b0987522a76ce68dbc99",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-11-candidate-v1.png",
+      "sha256": "31488ef06f2e1995d78dae91da9d76dfc4d7249076aecd0020acd92b8c761cea",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-12-candidate-v2.png",
+      "sha256": "9076356cf9774a029683dc43c6286523465c4d0615e516b7de5dafa4b33a8dcc",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-12-candidate-v3.png",
+      "sha256": "2ccd5ab5836b34014313ed7f9436f41ef4a25cc99e0bb1a75e41a0296c1fcfbc",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-12-candidate-v4.png",
+      "sha256": "51206ccd161acf7921105cc35ce9753245cb2741fb78646b632562f304ef45d2",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-12-candidate-v5.png",
+      "sha256": "31555d1e8bbab8161680e9f331e4362832ca24473064d30547b8e21395c422e0",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-14-candidate-v2.png",
+      "sha256": "8f49e66d8cca01f628a78741221dfc7e4b02de12534e246b5ebb4b46cbe1737c",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-2-candidate-v1.png",
+      "sha256": "9e7b01e855d45698b529198f005bb191140e494ffc5c72225a47490123e637c7",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-2-candidate-v2.png",
+      "sha256": "8d2159f115d826728eed4d67c1fa44c3bd5888ced4da62c6b650b64c3cd4e16a",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-2-candidate-v3.png",
+      "sha256": "4058a2229c974c8fbac5c98da1f43584ccdeae9fad38d2d80bb1bfe9567219b6",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-2-candidate-v4.png",
+      "sha256": "463360590bf3401200e56925c0533d8def9b1ea938872e4b2956ca8d1e17049d",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-3-candidate-v1.png",
+      "sha256": "5ce848edbd095b00c09c0d1283f405e91d093e05890df330111f12a6309d8623",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-3-candidate-v2.png",
+      "sha256": "fc29b64f5db3ac9e1532da28d928ba7be2ffb2a1ee86c98724404e0ced7503b1",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-3-candidate-v3.png",
+      "sha256": "885fcd3c05d6d14791aaf07575375652a1d25909dc4d23c2cb5dc95c884f6ba5",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-3-candidate-v4.png",
+      "sha256": "759bac6eb7113f638a35abd148ead8ef884e5566a80b1a7cd6e2d54e72619f1c",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-3-candidate-v5.png",
+      "sha256": "ae3beac8e8f1717e25a6cd21fdcc3ead818d25212e7a27c03965ad0fcbe28f10",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-3-candidate-v6.png",
+      "sha256": "a23557f24419c86d48a91a79d276b648196e6b98c566666b895bb07cf985780c",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-4-candidate-v1.png",
+      "sha256": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-5-candidate-v1.png",
+      "sha256": "1baa6ecadd22355d407636d6a68b38bb2c638b3af2f5b4775c1ad0d3cd0f81d4",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-5-candidate-v2.png",
+      "sha256": "97b4f8c72ffb933067108cd2862d50fe3174d0aa42ded814cfcf0585417499eb",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-5-candidate-v3.png",
+      "sha256": "0217b4805e01a66079a3a7da633530e9ff5d4f76eb24f2428849b83c9d2f3aa2",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-6-candidate-v1.png",
+      "sha256": "9f810847fd36f3f39eebf5667622aba01a20bedfa1f27b3378ad3bd21b675000",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-6-candidate-v2.png",
+      "sha256": "69999ad73f3049cb65955557ce81433b27868f72b9e04e6496db5a70bcb85e93",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-6-candidate-v3.png",
+      "sha256": "364ecd83aa9229eba483fca6f7fe5d6a78f290667af62a6f39cf129a9c4f5a4c",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-7-candidate-v1.png",
+      "sha256": "7aa0134d5c24e7c06e8968468833fef1602f15ed75c2f6704cbcaa18d695c0a4",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-7-candidate-v2.png",
+      "sha256": "b8949bca52685c39cb23a208bacc1bd33be5241e3150fc05b091cd923827fab7",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-7-candidate-v3.png",
+      "sha256": "a9a3786c6a1dbd5f679628745b1a1b8aac7e19e611ad77e32a80b01f9a913cf2",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-9-candidate-v1.png",
+      "sha256": "7462182486d964402d4686479cbcefc5604d3dae230550742813c37a0de82786",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-base-rejected-v3.png",
+      "sha256": "e3a1559d63c796ec96d6cc1ea0971e968d3c5384da30d74e95c42bcf2031c847",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-breathe-rejected-v1.png",
+      "sha256": "9830ec9bd59e4b7c4d7837f8a61471c943d280b37562f939e6fe109b13fe9755",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-idle-12-candidate-v1.png",
+      "sha256": "253184327e6cce626dde051e178862048a564fda7f91d19256734f303cfdb5a1",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-idle-13-candidate-v1.png",
+      "sha256": "f570c9521d3ca91d737e837559d35933aafe4166b10c56ac029bc5f38c4d1327",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-idle-14-candidate-v1.png",
+      "sha256": "6da0c05a94a3e708059f878fb8d2fe4c7258e173710b67050d8ca3b97b4cc11e",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-idle-5-candidate-v1.png",
+      "sha256": "f41c8a7c24f9b78cc4afe7139477d5a3d0b239c9c7777da53665372fba7c0775",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-idle-6-candidate-v1.png",
+      "sha256": "cc4b31fa7f319c0e425a1ad7402824d8aa48059699a6792e38e0cd25757e0743",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-idle-6-candidate-v2.png",
+      "sha256": "0a50506d4aceb96b36cf1490c984b746f2b937d1306c00e6936500e8dda5d462",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-idle-9-candidate-v1.png",
+      "sha256": "9c4d219582faf4e64eeb3232d73f36664c9568b494b4d1bd8f91a5280b979612",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-idle-9-candidate-v2.png",
+      "sha256": "ec7ccd15ab016288c065046ffbaeb619aafa5687cc6028b671b1475e48c9e331",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-idle-9-candidate-v3.png",
+      "sha256": "6ec966dbb2899069b0bb86ea9c3efcf76882181130959e36bf610f570f2884c9",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-idle-9-candidate-v4.png",
+      "sha256": "51a0eeaf42765be2be66a19a8ec848d4824370e6dfc0f5a346b0f1e90ebb92da",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-rejected-v1.png",
+      "sha256": "895948a50450f8b7187dfdae05e748a6d2f0afb16a7b308a93be738ffaa45d10",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-rejected-v2.png",
+      "sha256": "5c3f5cd3952e3bf8a9ec04240ca7f37583cafbd0868a043041909c5ed5bfafc5",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-single-candidate-v1.png",
+      "sha256": "3f19563cb90e766870f2b87743ea32dfc0aee9d70fbe8f515c725a4306c0eeef",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-single-candidate-v2.png",
+      "sha256": "1e7a3b990868d453cb62d30d095a80fdad0e105602870c98cfd5b6f519a485c5",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-curls-single-candidate-v3.png",
+      "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-seat-base-12-candidate-v1.png",
+      "sha256": "c06d766e4fe6d6e051a489441f85a0e3e421f8f2f9ebf616036aa86957f81854",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-seat-base-13-candidate-v1.png",
+      "sha256": "a22f7b8901ad6c4f3dc2e64bd3e46d72094efe498882a86281707f6a7e9257ec",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-seat-base-14-candidate-v1.png",
+      "sha256": "fe7515d78bc4ed97c44346eb66b075cbf5ce1fa199645c7e3c7a2cb33840def4",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-seat-base-15-candidate-v1.png",
+      "sha256": "39fbf81324795e5818bb5ca24f3b62fb46044ed126597d503130ef9618bbc148",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-0-candidate-v1.png",
+      "sha256": "2505ee1234bbf6be23fac98304b244a881955ca8a5621f227b0df462a98692e0",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-1-candidate-v1.png",
+      "sha256": "b90ff250c7011bd0bbc65a3a3647ea0cfff2d82a13138719c59d631148bdcad7",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-10-candidate-v1.png",
+      "sha256": "652c4645bd1ecc85c09dc8a6a0f548ab34843b185b2395a88fdc0b8c1aa797ba",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-12-candidate-v1.png",
+      "sha256": "92eb897f846e17aeeebdc75dc90ab6c55f7f9b7ae36d4a9b15ee500e3a2eee5e",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-13-candidate-v1.png",
+      "sha256": "ac8f8fcb214fc140cc715c03cf0db791f8f46ef6237acf66599dd657be3d143f",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-14-candidate-v1.png",
+      "sha256": "7b00bcad19c20e5d49f886636ec80aad6e61cd04775732535464cbf6912016d0",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-15-candidate-v1.png",
+      "sha256": "a22c78dfdd8552882ec1806c8c42c0136d1e59cef6c16d5802e2a4366fba76f5",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-5-candidate-v1.png",
+      "sha256": "3d432fa16752dbbee4ef568b326a24a3489fe7c77a2dcf402ec8629c223aa8fb",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-6-candidate-v1.png",
+      "sha256": "014791cea3b7b6cdc14b3de99be15a3714c5f1097da72c3b0ceba51fb317385c",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-7-candidate-v1.png",
+      "sha256": "e92b159dc2259080cc7a849bf977031f0aa1497cca706d01109f52bdffe7a538",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-8-candidate-v1.png",
+      "sha256": "a1345fe33b37c3037f7c9f5acbb349eb1c34812bdbd6ac20d645377dedd04714",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-activities-9-candidate-v1.png",
+      "sha256": "1c1a35056faad9f52ba3becfcdfff349d2844e24135e6e507dc9651b6dcbccd7",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-0-candidate-v1.png",
+      "sha256": "d4f879bb5ae00e3ff2de21953f7cc46fe91aed9b83a8c14722cde4eb1fa3a1ba",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-1-candidate-v1.png",
+      "sha256": "53e8c6f8753d35083558d93f694e51924d899c0ac78dad69bd966e2877a8409b",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-1-candidate-v2.png",
+      "sha256": "b58cd58a6ef99fcd8dd46e534dc7916cd57e0f3c2eaea8e4316b59cc1337f9d5",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-10-candidate-v1.png",
+      "sha256": "21ae9fef806eb61d8e7cab7af9d302c8a54ac231ca478e6b2fd65d353ea7f3c8",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-11-candidate-v1.png",
+      "sha256": "c0cfb05748f163b440bb3b10eb729931c5ded06e9a15b84c3d422e5ad681ad00",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-12-candidate-v1.png",
+      "sha256": "54dda56ccfe6447e793b03dc27b3020d0adcb60349b5cf97cda0fc9861a6133b",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-12-candidate-v2.png",
+      "sha256": "e13d5a9d3679a9bb9a6cac71a6deb12f32a7b1fb2635d3ef3d02ccaa65106766",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-13-candidate-v1.png",
+      "sha256": "41f86408c06f2ba9b46c035b3b03c23f010fbac1041a6e839b6fcfdd88675093",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-13-candidate-v2.png",
+      "sha256": "d083b4edee167a11a1eb7dd70ee288a70b7439fbf0281c2267a3d0d5ebddf465",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-14-candidate-v1.png",
+      "sha256": "e32f8f8aca4c37aaf8c697103dc2e55f7b286eb6e618c418a2977079d9b22656",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-14-candidate-v2.png",
+      "sha256": "f0a8e1ef723684d84bb992a8624960da2dfdb7c457917079543cbafbf10f815f",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-15-candidate-v1.png",
+      "sha256": "fa61c8024a1680435eea88e062c26909beb402612ff8f7b6549bc90b2968b22f",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-15-candidate-v2.png",
+      "sha256": "13df9efb3803a90f053ab248d31256cfe0f90fd88b43078c3c1d4bd432af3d2f",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-2-candidate-v1.png",
+      "sha256": "58c7017d7598dec094f3387a2a3aa3efbadee6a746a0580f2324603beb0682c5",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-3-candidate-v1.png",
+      "sha256": "453b2f2d92d5a086fce8584044ad3f4522199710107af2995507792f0bf432bc",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-4-candidate-v1.png",
+      "sha256": "695348cf1af7bc316f59ce7966b2a807b8e5e3b215012231714a1983b3edf102",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-5-candidate-v1.png",
+      "sha256": "1cb0a2baff79df1dc3b16577e7163c06f6a1d99b0cc322314b327f3fac56b15f",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-6-candidate-v1.png",
+      "sha256": "ce670a638795fbec27de86c5fe7634139ad94321688a1f4b27f5eff05f93afcd",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-7-candidate-v1.png",
+      "sha256": "271573812ec03aa700fdb460de0b3579db12fc22f6a388d0f100e28f570b1898",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-7-candidate-v2.png",
+      "sha256": "9bfe3a29bba212d4505dd16f8516392d1a607a5fcf4a5af948a638afc52b8f97",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-7-candidate-v3.png",
+      "sha256": "bc8a038f244c38c4ae28da13d9437fc17d2a225e54228dcb1146392d98017f0a",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png",
+      "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-base-9-candidate-v1.png",
+      "sha256": "cf6e28944456cadf9825c36de83ae3c2b9cdea8a8ad70c65cb03eb3ed096607c",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-idle-12-candidate-v1.png",
+      "sha256": "e5d4124b36cf5ba08517aa36cd2ecf2645d24455f1cca2dc95f56dc2364644c8",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-idle-13-candidate-v1.png",
+      "sha256": "4bdd18381a6465c0199ecb57581ef987769516ce00d7a6a68c5549714708cc07",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-idle-5-candidate-v1.png",
+      "sha256": "47564c61a75576f0fa4185db289177ce60d7dc968343da5d7a885d36228962af",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-idle-5-candidate-v2.png",
+      "sha256": "4ad997d69ddc90b787b7e108f53b6d53917100a93a5794009e54812b1ee6089e",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-idle-6-candidate-v1.png",
+      "sha256": "a922a98468c01a91aa590bc52e5a16d1a6aacb66ea4ec8d0150fd56a724d866e",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/hair-sidepart-idle-9-candidate-v1.png",
+      "sha256": "71520b1b3f2afa833285715f132b2eef6f5626df5a70aec63a38ce28afbc8dc4",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/head-position-guide.png",
+      "sha256": "300776cc1cf717ae7045bbd9f543ca9eb66bf7c27b4971dc587a613b64c8939e",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/straw-hat-base8-candidate-v3.png",
+      "sha256": "8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/tending-trowel-pose-10-candidate-v1.png",
+      "sha256": "87482f6dc666b75b926d459420029249a1edbdf2b371af98698c132d74303aa7",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/tending-trowel-pose-10-candidate-v2.png",
+      "sha256": "06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/tending-trowel-pose-11-candidate-v1.png",
+      "sha256": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/tending-trowel-pose-8-candidate-v1.png",
+      "sha256": "9c53c5eb833e47317c773d4fb945455aa295f771dcae0f80dc5810644faa5661",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/tending-trowel-pose-8-candidate-v2.png",
+      "sha256": "3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/tending-trowel-pose-9-candidate-v1.png",
+      "sha256": "9b340af676ebc2045b36baa237837e44e0c111f45d400e7a842f058ce0abca31",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/tending-trowel-pose-9-candidate-v2.png",
+      "sha256": "b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/watering-can-pose-4-candidate-v2.png",
+      "sha256": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/watering-can-pose-5-candidate-v1.png",
+      "sha256": "e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/watering-can-pose-6-candidate-v1.png",
+      "sha256": "4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/prototype-v1/watering-can-pose-7-candidate-v1.png",
+      "sha256": "de623da424df993548c634c2ba3b0a01a8915f86473f791b5670bf9a93aacc59",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/watering-can-pose-7-candidate-v2.png",
+      "sha256": "671216453941fdc8f963c9186211d5c41e623496afb081441d3222159d297b3d",
+      "role": "character-source-or-study",
+      "bundles": []
+    },
+    {
+      "file": "characters/prototype-v1/watering-can-pose-7-candidate-v3.png",
+      "sha256": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-042f65abd7e857ece5c7bd249be21a9c6890b2bf690effc2acb6ac8beb701f52.png",
+      "sha256": "042f65abd7e857ece5c7bd249be21a9c6890b2bf690effc2acb6ac8beb701f52",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20.png",
+      "sha256": "0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135.png",
+      "sha256": "1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd.png",
+      "sha256": "12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-1413bd9dd427d42734a82968291a3c0b6de9c83c5eaf84cece463d61fb2758e6.png",
+      "sha256": "1413bd9dd427d42734a82968291a3c0b6de9c83c5eaf84cece463d61fb2758e6",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-15f2ac70eb64cd73e3aa92683100522a5d805d53d452d84b03ac5363bedd35b6.png",
+      "sha256": "15f2ac70eb64cd73e3aa92683100522a5d805d53d452d84b03ac5363bedd35b6",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f.png",
+      "sha256": "18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-1afa7293e71c6d53b0ed122c2c05a18d97d8d83e9d30e5f93bd58feb384262de.png",
+      "sha256": "1afa7293e71c6d53b0ed122c2c05a18d97d8d83e9d30e5f93bd58feb384262de",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0.png",
+      "sha256": "221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-2525d552956b314d9f14342caf8e9f02af877aa001bcc7f4f5cd02d894180f2e.png",
+      "sha256": "2525d552956b314d9f14342caf8e9f02af877aa001bcc7f4f5cd02d894180f2e",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658.png",
+      "sha256": "2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-2ca2aefe8db5f15edb6efaf6163981d9c187fa69ed8f3579e91a223567c13835.png",
+      "sha256": "2ca2aefe8db5f15edb6efaf6163981d9c187fa69ed8f3579e91a223567c13835",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3.png",
+      "sha256": "3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-30fbbaa53287373eb033f6d0da54ea53ef25983c83d47edf0f76da59db73280a.png",
+      "sha256": "30fbbaa53287373eb033f6d0da54ea53ef25983c83d47edf0f76da59db73280a",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-34438ac8a533772f7e4d8b7863b054b883c0f4afd84f2776f97618a0e7f50f75.png",
+      "sha256": "34438ac8a533772f7e4d8b7863b054b883c0f4afd84f2776f97618a0e7f50f75",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96.png",
+      "sha256": "41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227.png",
+      "sha256": "4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-5681ab34eecc9e6e28c83a0f2502767ba061d8e861b9733c416d87835af7c04b.png",
+      "sha256": "5681ab34eecc9e6e28c83a0f2502767ba061d8e861b9733c416d87835af7c04b",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3.png",
+      "sha256": "5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-5b2da30eb051402dcf6d56ff9119340cdf81e82fe9462aaf0bfe7e53f674d2e1.png",
+      "sha256": "5b2da30eb051402dcf6d56ff9119340cdf81e82fe9462aaf0bfe7e53f674d2e1",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-63a6ebe5b3eae40dc5e87a3857a6beb8459e8b0717959270c2558428eb7f27d6.png",
+      "sha256": "63a6ebe5b3eae40dc5e87a3857a6beb8459e8b0717959270c2558428eb7f27d6",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630.png",
+      "sha256": "6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-6e6d04c0098cd8fe7a09f8730a5644df0223a463b31c6f4d9bf95ba568f4b66f.png",
+      "sha256": "6e6d04c0098cd8fe7a09f8730a5644df0223a463b31c6f4d9bf95ba568f4b66f",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476.png",
+      "sha256": "7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-75f8045b7247e8e689ae05c1a03de55d897972678b0826e1d3efcbe943463bd0.png",
+      "sha256": "75f8045b7247e8e689ae05c1a03de55d897972678b0826e1d3efcbe943463bd0",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-7a1011ad56441ae055c085bc5258264e1bea8a45bd1ce1b8642a00b092261b9f.png",
+      "sha256": "7a1011ad56441ae055c085bc5258264e1bea8a45bd1ce1b8642a00b092261b9f",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4.png",
+      "sha256": "7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8.png",
+      "sha256": "877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96.png",
+      "sha256": "908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-9204b45115fa742be0f9fea02cfb62c551493ef33a0d43005f4873d62c8d7b97.png",
+      "sha256": "9204b45115fa742be0f9fea02cfb62c551493ef33a0d43005f4873d62c8d7b97",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809.png",
+      "sha256": "973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-af7603d96cbeb2f9ae8c4b5c6107fbf810813b04572f2f2b0f499b0d7606e913.png",
+      "sha256": "af7603d96cbeb2f9ae8c4b5c6107fbf810813b04572f2f2b0f499b0d7606e913",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-be3a7696380938972149d1213fc082430bc7977b62606d224c578c34e1eeb9d6.png",
+      "sha256": "be3a7696380938972149d1213fc082430bc7977b62606d224c578c34e1eeb9d6",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882.png",
+      "sha256": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d.png",
+      "sha256": "c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-c85ba24d63c76ae298586ea1a14808a4ff808a6af8ecd677a35dbf67e51bc152.png",
+      "sha256": "c85ba24d63c76ae298586ea1a14808a4ff808a6af8ecd677a35dbf67e51bc152",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-d937aed8573df1596d41c31f0eb35c57b1bc10417a30f219f6bdee3e12bbc992.png",
+      "sha256": "d937aed8573df1596d41c31f0eb35c57b1bc10417a30f219f6bdee3e12bbc992",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6.png",
+      "sha256": "e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-ed39e7d9e2fc4f13eada796bb9d6fa3fac2b5647b575366c909d43bda4268114.png",
+      "sha256": "ed39e7d9e2fc4f13eada796bb9d6fa3fac2b5647b575366c909d43bda4268114",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6.png",
+      "sha256": "f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-shirt-v1/source-fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720.png",
+      "sha256": "fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-shirt-v1/bundle-v1.json",
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-sleep-v1/facial-short-chestnut-sleep-v1.png",
+      "sha256": "a9cc1acb7d4d77e6dabfcbcaebfdb2c92f7003703f0358de46a8f6dd14ce061a",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-sleep-v1/sleep-body-v2.png",
+      "sha256": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-sleep-v1/sleep-hair-curls-v6.png",
+      "sha256": "4c0b583d750f41a609099830daf6360c5355fc05299d480e26d9d4e826524b69",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-sleep-v1/sleep-hair-sidepart-v6.png",
+      "sha256": "78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-sleep-v1/sleep-shirt-v2.png",
+      "sha256": "c68b53fa48a6c8edb53aeaddc1f2899b31f87e6de6eea86ece6e1057b734aab8",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-v1/source-0a751e78674eb7b09930bb0ca48c7c2e65ee06e2dbb0d9448fc2373bbca47be5.png",
+      "sha256": "0a751e78674eb7b09930bb0ca48c7c2e65ee06e2dbb0d9448fc2373bbca47be5",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-v1/source-11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a.png",
+      "sha256": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-work-v1/source-739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924.png",
+      "sha256": "739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-work-v1/source-81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580.png",
+      "sha256": "81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-work-v1/source-a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df.png",
+      "sha256": "a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "characters/relaxed-work-v1/source-ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb.png",
+      "sha256": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb",
+      "role": "versioned-character-bundle",
+      "bundles": [
+        "characters/relaxed-sleep-v1/bundle-v1.json",
+        "characters/relaxed-work-v1/bundle-v1.json"
+      ]
+    },
+    {
+      "file": "chickens.png",
+      "sha256": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "cistern-isometric-night.png",
+      "sha256": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "cistern-isometric.png",
+      "sha256": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "compost-isometric-night.png",
+      "sha256": "9171162eaf433946480dcacf7c0ad6db2b51f1a9b1ef1c609209b9344c5754a4",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "compost-isometric.png",
+      "sha256": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "coop-isometric-night.png",
+      "sha256": "c6e5af120dcce0f34414521247b33914c5eeca33ef270e2ceeb74b36f9d2724c",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "coop-isometric.png",
+      "sha256": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "crops.png",
+      "sha256": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "eco-toilet-night.png",
+      "sha256": "6897f45456fafd0357e6043007c44a29baac4a0064636a37af3f8b157dd474fb",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "eco-toilet-tall-night.png",
+      "sha256": "faa4b2a5f11f6e579e4bedadec583b946494b8514c2adde2c8fb8047812c8880",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "eco-toilet-tall.png",
+      "sha256": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "eco-toilet.png",
+      "sha256": "057263ac0ebc03804d83cf60e374abb2e2b337221ac670f9cd79265562d4e2ec",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "economy-atlas-v2.png",
+      "sha256": "70c115a50bfffd4b4c6808ebb1375e5bc3c6f74d5507bcb797def54886827e06",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "economy-atlas.png",
+      "sha256": "94af1f73607fa3ae7710f612fdfb8bae679480fe79e66f778ec4aff990249d4b",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "field-crops.png",
+      "sha256": "ca755cb0aced1ef12ec69284c915490e59e5207961d5fb0a4d90fdf5913c219e",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "garden-simple-isometric-night.png",
+      "sha256": "63f00e1ed22e677d962b506a510ce8c48bc2e1a5bcbc3d3b2cb68f1f59c9e72f",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "garden-simple-isometric.png",
+      "sha256": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "goat-pasture-empty-v1.png",
+      "sha256": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "goat-pasture.png",
+      "sha256": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "greenhouse-isometric-night.png",
+      "sha256": "19a034b2826528e21160a54f6a3c0dec4dd922cfdcf2bcf78b3ba83b980f8f9d",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "greenhouse-isometric.png",
+      "sha256": "6bc7925077a4089014e8973979cfaa3e242a12cf400888d27998c6aac0350ee2",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "home-courtyard-night.png",
+      "sha256": "12aec649596f296dd0904266a2247ee6b78197d476c4e2f61169acca3ec07205",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "home-courtyard.png",
+      "sha256": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "home-gable-night.png",
+      "sha256": "3385f279c694fb380dac3469ea18f36dff26cca0e5720700e88235cb2bde2740",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "home-gable.png",
+      "sha256": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "home-veranda-night.png",
+      "sha256": "3a9e0e11fc2cd8bc81b415007a16b7d012d60e214d5f26782b52327ef51c5e3b",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "home-veranda.png",
+      "sha256": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "hydro-night.png",
+      "sha256": "27a5839e924ca96e89989e150117b44e2ca5566b504f304f82a62f115bd91cb2",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "hydro.png",
+      "sha256": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "landscape-details.png",
+      "sha256": "a5212211cc3d8bca0250b3990a9dcc90ca3bbd3d27fa9b1007d85b3dc931ae56",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "mata-atlantica-atlas.png",
+      "sha256": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "orchard.png",
+      "sha256": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "recovered-battery.png",
+      "sha256": "9cc9f12a8c414b81d68b45a4348b7ec55735e80c0bb6eaf098dd3681f604a2b6",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "regional-ground-v1.png",
+      "sha256": "acdad558e0db68fb04760f2a27d44beaf79eec89d6b02d583e35586748bbfeb1",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "residents-cistern.png",
+      "sha256": "ba083df21043bbca023c9e738974e6613b1b8c9d4774c1cc69138f612d063ad3",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "solar-farm-night.png",
+      "sha256": "02f5502b3f9f67a3876237f16882a2773b702c623b1123b647bf185b51fea92b",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "solar-farm.png",
+      "sha256": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "square-isometric-night.png",
+      "sha256": "fdf9c4d571d2584a530e929d38017128843f3bb33f85c89b4b44ad1cc99c8378",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "square-isometric.png",
+      "sha256": "76ec6da02bc5b4575b556019ffbfe74c1a092d32c3e5cbd21d74945f2adf2c91",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "starter-shed-isometric.png",
+      "sha256": "100e91d809dec8731c7e3095a0f9dc33ce397528b559837aaef376ba04c26ad1",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "starter-shed-model-night.png",
+      "sha256": "31c9f26e4821752f8efcc408974dda500db327e9cc6e376832430cdb6336a752",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "starter-shed-model.png",
+      "sha256": "0c8dbb9862a9e62e044f985ec0f108538ee694d2ed99ae29923c42360f52e67e",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "starter-shed-painted.png",
+      "sha256": "ca06d1412a02251ef110e2aebb3f42c74fe08db549d6cb77a4fcb4fbaa9045b1",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "starter-shed-refined.png",
+      "sha256": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "starter-shed.png",
+      "sha256": "edca1e619b1738a9defc86b2873e3773eddff10a2135a9dcd9aa7ea090fa3e7b",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "streetlight-night.png",
+      "sha256": "f898f34ec0a95d3f8f39995b76be5ab8774034c96d73578d020b9e181a83c131",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "streetlight.png",
+      "sha256": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "terrain-atlas.png",
+      "sha256": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "village-atlas-isometric-night.png",
+      "sha256": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "village-atlas-isometric.png",
+      "sha256": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "warehouse-night.png",
+      "sha256": "a3922fe7eae2cee37991410d89b56a82bba5940a53b2e71c53127efc35447164",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "warehouse.png",
+      "sha256": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "wetland-night.png",
+      "sha256": "e81b8e41cc5c2d4bc920ede7b62b34d90f0f94b6183b662950d14d7d0c6ebf8b",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "wetland-square-v2.png",
+      "sha256": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "wetland.png",
+      "sha256": "037dec072b3c8cc37d8a25874cbb2ad154f2f54e82cc489fdb7199516936400b",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "workshop-isometric-night.png",
+      "sha256": "d52f4e7e2f9b8e71ecf4553583dee4c016ea47a4a1867a13f1a5f9a25c41fd9d",
+      "role": "sprite-catalog",
+      "bundles": []
+    },
+    {
+      "file": "workshop-isometric.png",
+      "sha256": "fc194eb60c86435ae750c13b4bcb5c9a59c5897e63b2debcb29b1cb960eac4a7",
+      "role": "sprite-catalog",
+      "bundles": []
+    }
+  ],
+  "aliases": [
+    {
+      "sha256": "06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5",
+      "files": [
+        "characters/broad-v1/source-06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5.png",
+        "characters/prototype-v1/tending-trowel-pose-10-candidate-v2.png"
+      ]
+    },
+    {
+      "sha256": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+      "files": [
+        "characters/broad-v1/source-11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954.png",
+        "characters/prototype-v1/hair-curls-single-candidate-v3.png"
+      ]
+    },
+    {
+      "sha256": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+      "files": [
+        "characters/broad-v1/source-175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1.png",
+        "characters/prototype-v1/feeding-basket-pose-14-candidate-v2.png"
+      ]
+    },
+    {
+      "sha256": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41",
+      "files": [
+        "characters/broad-v1/source-2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41.png",
+        "characters/prototype-v1/watering-can-pose-4-candidate-v2.png"
+      ]
+    },
+    {
+      "sha256": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+      "files": [
+        "characters/broad-v1/source-38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8.png",
+        "characters/prototype-v1/feed-grains-hold-candidate-v2.png"
+      ]
+    },
+    {
+      "sha256": "3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2",
+      "files": [
+        "characters/broad-v1/source-3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2.png",
+        "characters/prototype-v1/tending-trowel-pose-8-candidate-v2.png"
+      ]
+    },
+    {
+      "sha256": "4c0b583d750f41a609099830daf6360c5355fc05299d480e26d9d4e826524b69",
+      "files": [
+        "characters/broad-v1/source-4c0b583d750f41a609099830daf6360c5355fc05299d480e26d9d4e826524b69.png",
+        "characters/relaxed-sleep-v1/sleep-hair-curls-v6.png"
+      ]
+    },
+    {
+      "sha256": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f",
+      "files": [
+        "characters/broad-v1/source-4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f.png",
+        "characters/prototype-v1/watering-can-pose-7-candidate-v3.png"
+      ]
+    },
+    {
+      "sha256": "4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a",
+      "files": [
+        "characters/broad-v1/source-4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a.png",
+        "characters/prototype-v1/watering-can-pose-6-candidate-v1.png"
+      ]
+    },
+    {
+      "sha256": "739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924",
+      "files": [
+        "characters/broad-v1/source-739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924.png",
+        "characters/relaxed-work-v1/source-739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924.png"
+      ]
+    },
+    {
+      "sha256": "78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889",
+      "files": [
+        "characters/broad-v1/source-78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889.png",
+        "characters/relaxed-sleep-v1/sleep-hair-sidepart-v6.png"
+      ]
+    },
+    {
+      "sha256": "81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580",
+      "files": [
+        "characters/broad-v1/source-81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580.png",
+        "characters/relaxed-work-v1/source-81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580.png"
+      ]
+    },
+    {
+      "sha256": "8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109",
+      "files": [
+        "characters/broad-v1/source-8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109.png",
+        "characters/prototype-v1/straw-hat-base8-candidate-v3.png"
+      ]
+    },
+    {
+      "sha256": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6",
+      "files": [
+        "characters/broad-v1/source-96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6.png",
+        "characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png"
+      ]
+    },
+    {
+      "sha256": "a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df",
+      "files": [
+        "characters/broad-v1/source-a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df.png",
+        "characters/relaxed-work-v1/source-a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df.png"
+      ]
+    },
+    {
+      "sha256": "b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c",
+      "files": [
+        "characters/broad-v1/source-b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c.png",
+        "characters/prototype-v1/tending-trowel-pose-9-candidate-v2.png"
+      ]
+    },
+    {
+      "sha256": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943",
+      "files": [
+        "characters/broad-v1/source-e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943.png",
+        "characters/prototype-v1/tending-trowel-pose-11-candidate-v1.png"
+      ]
+    },
+    {
+      "sha256": "e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6",
+      "files": [
+        "characters/broad-v1/source-e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6.png",
+        "characters/prototype-v1/watering-can-pose-5-candidate-v1.png"
+      ]
+    },
+    {
+      "sha256": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb",
+      "files": [
+        "characters/broad-v1/source-ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb.png",
+        "characters/relaxed-work-v1/source-ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb.png"
+      ]
+    }
+  ]
+}

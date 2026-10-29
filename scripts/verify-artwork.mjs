@@ -1,21 +1,18 @@
 import assert from 'node:assert/strict';
 import { readdirSync, existsSync, readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import {verifyArtworkSourceInventory} from './lib/artwork-source-inventory.mjs';
 import { catalog } from '../web/artwork/catalog.js';
 import { buildingArt, allBuildingArt, homeArtKeys, buildingArtKey, cameraCalibration, drawBuildingArt, nightAmount } from '../web/building-art.js';
 import {economyArt,economyAtlasFile,economyAtlasSize,drawEconomySprite} from '../web/economy-art.js';
 const art = new URL('../web/art/', import.meta.url);
 const files = readdirSync(art, { recursive: true }).filter(file => /\.(png|svg)$/.test(file));
 assert.equal(new Set(catalog.map(sprite => sprite.id)).size, catalog.length, 'Sprite IDs must be unique');
-const fingerprints = new Set();
-for (const file of files) {
-  const hash = createHash('sha256').update(readFileSync(new URL(file, art))).digest('hex');
-  assert(!fingerprints.has(hash), `Duplicate artwork file: ${file}`);
-  fingerprints.add(hash);
-}
+const sourceInventory=verifyArtworkSourceInventory(fileURLToPath(art),catalog,JSON.parse(readFileSync(new URL('../assets/art-direction/source-inventory-v1.json',import.meta.url))));
 const crops = catalog.filter(sprite => sprite.file).map(sprite => `${sprite.file}:${sprite.cell.join(',')}:${sprite.renderFilter||''}`);
 assert.equal(new Set(crops).size, crops.length, 'Source crops must not be listed twice');
-for (const file of files) assert(catalog.some(sprite => sprite.file === `../art/${file}`), `Uncatalogued artwork: ${file}`);
+// Raw character components and retained studies are inventoried separately;
+// loading every component into the sprite gallery would retain unnecessary bitmaps.
 for (const sprite of catalog) {
   if (sprite.procedural) continue;
   assert(existsSync(new URL(`../web/artwork/${sprite.file}`, import.meta.url)), `Missing artwork: ${sprite.file}`);
@@ -57,7 +54,7 @@ assert.deepEqual(calls[0], ['translate', 10, 20]);
 assert.deepEqual(calls[2].slice(0, 5), ['drawImage', 640, 0, 640, 640]);
 assert.equal(calls[2][7], buildingArt.kitchen.width * 2);
 assert.equal(ctx.globalAlpha, .4);
-console.log(`Artwork coverage: ${files.length} source files, ${catalog.length} sprite entries.`);
+console.log(`Artwork coverage: ${files.length} hash-inventoried source files, ${catalog.length} sprite entries, ${sourceInventory.aliases.length} verified bundle alias groups. Inventory is not visual acceptance.`);
 
 // Real source dimensions must agree with the studio and preserve every crop's
 // shape at game zooms. The old workbench compressed tall props into squares.
