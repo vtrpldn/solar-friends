@@ -1,0 +1,2920 @@
+{
+  "completed": true,
+  "coverage": {
+    "schema": 1,
+    "axes": {
+      "outfit": [
+        "neutral-v1:resident-parts-v1",
+        "relaxed-v1:resident-parts-v5",
+        "relaxed-v1:resident-parts-v6",
+        "broad-v1:resident-parts-v7"
+      ],
+      "hair": [
+        "short-curls-v1",
+        "side-part-v1"
+      ],
+      "hairColour": [
+        "chestnut",
+        "espresso",
+        "black",
+        "silver"
+      ],
+      "hat": [
+        "none",
+        "straw-v1"
+      ],
+      "facialHair": [
+        "none",
+        "short-chestnut-v1"
+      ],
+      "shirt": [
+        "cream",
+        "teal",
+        "terracotta",
+        "indigo"
+      ],
+      "shoes": [
+        "brown",
+        "graphite"
+      ],
+      "shorts": [
+        "cream",
+        "sage",
+        "umber"
+      ],
+      "skin": [
+        "warm",
+        "sunlit",
+        "copper"
+      ]
+    },
+    "feasibleCandidates": 8064,
+    "feasiblePairs": 296,
+    "groups": [
+      {
+        "outfit": "neutral-v1:resident-parts-v1",
+        "feasibleCandidates": 2304,
+        "feasiblePairs": 231,
+        "cases": 20
+      },
+      {
+        "outfit": "relaxed-v1:resident-parts-v5",
+        "feasibleCandidates": 2304,
+        "feasiblePairs": 231,
+        "cases": 20
+      },
+      {
+        "outfit": "relaxed-v1:resident-parts-v6",
+        "feasibleCandidates": 2304,
+        "feasiblePairs": 231,
+        "cases": 20
+      },
+      {
+        "outfit": "broad-v1:resident-parts-v7",
+        "feasibleCandidates": 1152,
+        "feasiblePairs": 210,
+        "cases": 19
+      }
+    ],
+    "cases": [
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "side-part-v1",
+          "hairColour": "espresso",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "teal",
+          "shoes": "graphite",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "teal",
+            "shorts": "sage",
+            "shoes": "graphite"
+          },
+          "hairColour": "espresso",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "terracotta",
+          "shoes": "graphite",
+          "shorts": "umber",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "terracotta",
+            "shorts": "umber",
+            "shoes": "graphite"
+          },
+          "hairColour": "black",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "side-part-v1",
+          "hairColour": "silver",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "umber",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "indigo",
+            "shorts": "umber",
+            "shoes": "brown"
+          },
+          "hairColour": "silver",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "terracotta",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "indigo",
+          "shoes": "graphite",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "indigo",
+            "shorts": "cream",
+            "shoes": "graphite"
+          },
+          "hairColour": "silver",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "side-part-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "teal",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "black"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "side-part-v1",
+          "hairColour": "chestnut",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "cream",
+          "shoes": "graphite",
+          "shorts": "sage",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "cream",
+            "shorts": "sage",
+            "shoes": "graphite"
+          },
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "graphite",
+          "shorts": "umber",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "teal",
+            "shorts": "umber",
+            "shoes": "graphite"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "indigo",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "black",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "side-part-v1",
+          "hairColour": "espresso",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "cream",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "umber",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "umber",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "teal",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "black",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "teal",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "indigo",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "indigo",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "neutral-v1:resident-parts-v1",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v1",
+          "body": "neutral-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "side-part-v1",
+          "hairColour": "espresso",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "teal",
+          "shoes": "graphite",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "teal",
+            "shorts": "sage",
+            "shoes": "graphite"
+          },
+          "hairColour": "espresso",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "terracotta",
+          "shoes": "graphite",
+          "shorts": "umber",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "terracotta",
+            "shorts": "umber",
+            "shoes": "graphite"
+          },
+          "hairColour": "black",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "side-part-v1",
+          "hairColour": "silver",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "umber",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "indigo",
+            "shorts": "umber",
+            "shoes": "brown"
+          },
+          "hairColour": "silver",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "terracotta",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "indigo",
+          "shoes": "graphite",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "indigo",
+            "shorts": "cream",
+            "shoes": "graphite"
+          },
+          "hairColour": "silver",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "side-part-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "teal",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "black"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "side-part-v1",
+          "hairColour": "chestnut",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "cream",
+          "shoes": "graphite",
+          "shorts": "sage",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "cream",
+            "shorts": "sage",
+            "shoes": "graphite"
+          },
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "graphite",
+          "shorts": "umber",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "teal",
+            "shorts": "umber",
+            "shoes": "graphite"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "indigo",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "black",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "side-part-v1",
+          "hairColour": "espresso",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "cream",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "umber",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "umber",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "teal",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "black",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "teal",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "indigo",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "indigo",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v5",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v5",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "side-part-v1",
+          "hairColour": "espresso",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "teal",
+          "shoes": "graphite",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "teal",
+            "shorts": "sage",
+            "shoes": "graphite"
+          },
+          "hairColour": "espresso",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "terracotta",
+          "shoes": "graphite",
+          "shorts": "umber",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "terracotta",
+            "shorts": "umber",
+            "shoes": "graphite"
+          },
+          "hairColour": "black",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "side-part-v1",
+          "hairColour": "silver",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "umber",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "indigo",
+            "shorts": "umber",
+            "shoes": "brown"
+          },
+          "hairColour": "silver",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "terracotta",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "indigo",
+          "shoes": "graphite",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "indigo",
+            "shorts": "cream",
+            "shoes": "graphite"
+          },
+          "hairColour": "silver",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "side-part-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "teal",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "black"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "side-part-v1",
+          "hairColour": "chestnut",
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "cream",
+          "shoes": "graphite",
+          "shorts": "sage",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "cream",
+            "shorts": "sage",
+            "shoes": "graphite"
+          },
+          "hat": "straw-v1",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "graphite",
+          "shorts": "umber",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "teal",
+            "shorts": "umber",
+            "shoes": "graphite"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "short-chestnut-v1",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "indigo",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "black",
+          "facialHair": "short-chestnut-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "side-part-v1",
+          "hairColour": "espresso",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "cream",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "umber",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "umber",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "teal",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "black",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "teal",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "indigo",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "indigo",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "relaxed-v1:resident-parts-v6",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v6",
+          "body": "relaxed-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "side-part-v1",
+          "hairColour": "espresso",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "graphite",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "teal",
+            "shorts": "sage",
+            "shoes": "graphite"
+          },
+          "hairColour": "espresso",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "graphite",
+          "shorts": "umber",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "terracotta",
+            "shorts": "umber",
+            "shoes": "graphite"
+          },
+          "hairColour": "black"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "side-part-v1",
+          "hairColour": "silver",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "indigo",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "silver",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "indigo",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "side-part-v1",
+          "hairColour": "chestnut",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "graphite",
+          "shorts": "umber",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "umber",
+            "shoes": "graphite"
+          },
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "umber",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "teal",
+            "shorts": "umber",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "side-part-v1",
+          "hairColour": "black",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "black",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "straw-v1",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "graphite",
+          "shorts": "sage",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "indigo",
+            "shorts": "sage",
+            "shoes": "graphite"
+          },
+          "hairColour": "black",
+          "hat": "straw-v1"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "side-part-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "graphite",
+          "shorts": "sage",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "side-part-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "cream",
+            "shorts": "sage",
+            "shoes": "graphite"
+          },
+          "hairColour": "silver"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "teal",
+            "shorts": "sage",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "graphite",
+          "shorts": "cream",
+          "skin": "copper"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "copper",
+            "shirt": "cream",
+            "shorts": "cream",
+            "shoes": "graphite"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "indigo",
+          "shoes": "brown",
+          "shorts": "umber",
+          "skin": "sunlit"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "sunlit",
+            "shirt": "indigo",
+            "shorts": "umber",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "sage",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "sage",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "teal",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "teal",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "black"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "chestnut",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          }
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "espresso",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "umber",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "umber",
+            "shoes": "brown"
+          },
+          "hairColour": "espresso"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "black",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "cream",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "cream",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "black"
+        }
+      },
+      {
+        "values": {
+          "outfit": "broad-v1:resident-parts-v7",
+          "hair": "short-curls-v1",
+          "hairColour": "silver",
+          "hat": "none",
+          "facialHair": "none",
+          "shirt": "terracotta",
+          "shoes": "brown",
+          "shorts": "cream",
+          "skin": "warm"
+        },
+        "recipe": {
+          "schema": 2,
+          "assetVersion": "resident-parts-v7",
+          "body": "broad-v1",
+          "hair": "short-curls-v1",
+          "materials": {
+            "skin": "warm",
+            "shirt": "terracotta",
+            "shorts": "cream",
+            "shoes": "brown"
+          },
+          "hairColour": "silver"
+        }
+      }
+    ],
+    "scope": "Pair coverage independently within each selectable public outfit; coverage does not establish all higher-order combinations or visual acceptance."
+  },
+  "inputs": {
+    "scripts/resident-pairwise-cases.mjs": "f545e692d5dd85a1c8dd776443bf555d1d39461bc991d258e89992854bf4a42a",
+    "scripts/review-resident-pairwise-poses.mjs": "31b6136d3aad71903938ed912ab5c53ccd6387ca4509a47c88ce55efdd24bb77",
+    "web/pkg/solar_friends_bg.wasm": "9a61b739591b2614d3b4e867a1be60e4386338df8924156092c80726b4a8e082",
+    "web/resident-appearance-library.js": "e13cd02caa63c8907757dd881335d722fe811e9e5b325bf0fde617afb8ddabfa",
+    "web/resident-look.js": "94f94dff5b280b57998d97ef94641e1850cbd5d2946ae61a3ed3b2f10367de5d",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/resident-part-recipe.js": "44af0a70cad6a16790a6556d57c6e343bd982085565e3c577bfec9ba065953a1",
+    "web/paint-cache.js": "f070b4e16eeb75c077b26009201fef77ca246a9c202664730bc81dda35cc053c",
+    "web/character-hair-colours.js": "612735bf2a5bb6219d5d68b1b5d187e6662480ecc114ec99d591ac9f91a92dfa",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/character-attachments.js": "2f88fee807c21ced70a762e2a1cb7169e9247a7c6136d81e37b235f1e67ac7cf",
+    "web/editor/journal.js": "e5ee57626eecacd22dda40297c98d25dffe20c7cd667564885a5bb97cf61d9e0",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/character-body-frames.js": "d4c94f1074ffc2bcc4798d991c7176a637d9747f3b1d54977427717412f2edd9",
+    "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
+    "web/resident-animation.js": "0a1f1b73c14a88d351ee483bd7da397551e1ba4c0de61faa5c0b77ebd01e0c8f",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f",
+    "web/sandbox-rules.js": "c4d708f49592384ed6f6920c85f15f2ef03cc239de08cb8026066c00ffa98b11",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631",
+    "web/resident-provider-memory.js": "2feb5a1b937491495ac598a696af8cada41ccbc688cfddb6a5edf19eeabe12d2",
+    "web/character-image-source.js": "b10649c2b8f08f168db8adc6324fd5f8a09c714f7fef684b6bb0d380d1bbdb03",
+    "web/character-atlas-part.js": "ca287ad3a1647f468b1a28c144d6cb15526c0303f126ded998bf15f16bf1a757",
+    "web/character-hair.js": "aeb90c0c20c310585c5fdef4d72d3b85b311eee360b00b8c703a128be1e493c8",
+    "web/character-equipment.js": "6d377cb763557cd82ac9715e751f16c0091ccddd2eebcda92b0f9ae0cbcdc891",
+    "web/character-equipment-parts.js": "892bda1be66baca5c2c3f168cc3bceaf36e2a12d023b2c30904ccbdea3f2be18",
+    "web/appearance-cache.js": "29b45878db3aa395f39fafac3d70c4154be6822d43baf7dc5b60f49ba3c54acb",
+    "web/character-hat-provider.js": "554373694abc40f6fd007d6ca9fc7e811f8aa3567c48315b3c00284718f8fe6c",
+    "web/character-hat-poses.js": "58d2e8bd65dfa8bf64546cd8fbb19877cb0b0a96b304d787e6a4f1d09703a822",
+    "web/character-facial-hair-parts.js": "b4d9f0da0ad943c440848d0dc52821912e517e50d28d51dae9c73e8921e0a73b",
+    "web/resident-family-parts.js": "48802400c4942128694edec58c665a3fa5ee5461223378095e6e559f4152ede5",
+    "web/character-parts.js": "fb33ea4235ce5122bf5225e5ec79604fcbfa42e63506b47809256a0396439218",
+    "web/character-bundle-response.js": "43682b6efe979d90ebdcdae8d7f115a1347b9fb8b712204f1b8c988b9c34793b",
+    "web/character-foreground.js": "564d5b4b31b379118cc6e5fa4d37a1aacf17fb3c4f3d68a221be62b5510d0e53",
+    "web/character-hair-source.js": "ae094ed4d5f38d97a5aff1ff4cd968745bf4650c15be4b8085bbdfd28ccbb878",
+    "web/character-body-appearance.js": "1ba2ac891c287677c207769719491284389b13feb7be0b32806479c8cad1b64f",
+    "web/character-clothing.js": "7db924346690a19dc8c5eca542b6bfb6ebb3f5a12ae2e3a40e526c4a6f5220af",
+    "web/character-hat.js": "9edadbe59da92b16d19d3acbd3505c3a1ec54de829f38fcbcb209f2003cdc9f8",
+    "web/character-hair-placement.js": "6829af8d50016e6a0307033c31b0bc3e7532d680c99fd5c2009804d3996a4c6e",
+    "web/character-facial-hair.js": "79cc33fdd329f2dc1bf80176ce058a0a12e84cd80cd24fda110e870f6fb1f09b",
+    "web/character-composed-family-bundle.js": "423ec62d13a698a87a70bb0d8c5b39a78d950ec71d9aea79287587c13cb91919",
+    "web/character-broad-family-bundle-index.js": "17d264e9080070a930a07efd36683cc4087144b9e233788602cf2d92a966ec23",
+    "web/character-sleep-family-bundle.js": "c625150896514a73506935ec7df33b59f3361314ed5ea6b3ebb6f57dc630a044",
+    "web/resident-family-provider.js": "103dbb9287de742970f85bd108541c46848305c54e28f795f9235c5cda105bce",
+    "web/character-family-bundle.js": "9dce0fee17eb5a61aba2c94e71c12cf67b86732562267b7886edef949901ee71",
+    "web/character-foreground-mask.js": "e54c44cb05b7a09a9a9ea170c70f98190df71707e2b68f65f1d9a3df64e47639",
+    "web/character-clothing-colour.js": "1e6e4c5d8b80f2927dee53bfa637742ef086f2b96a6e4548f7d0866f2429a6a4",
+    "web/character-atlas-clothing.js": "733fda3ce739c166aceb5de8ad402de1e8f8c293c7e03e1d038eae38353d0200",
+    "web/character-composed-family.js": "d7cdca2836eb60ef142044b5055479288568c84eb6f3aad12a8129acbefe3dd3",
+    "web/character-body-family.js": "756ae0fc222f3d3266b32add6522eb57e74165c16889d8b82e8ebed62e6d6ebb",
+    "web/character-sleep-family-bundle-index.js": "a8eef990f98b12605c1bc6ffaa8ac6a0ff97d7c3ad8601320704f6073698e49b",
+    "web/character-family-appearance.js": "e6b82ac6fa4cec845a1b0d1cf9fc654d4720b8d054e9c4da29efbfe07f4b0e6c",
+    "web/resident-shadow-metadata.js": "8759afa938aace5e88a5989bf1bcd210218106532cc418140ddc779612879f1a",
+    "web/character-family-bundle-index.js": "e7060b9a4d83be379fecb8405824b31c56fb437bffee0937a749a5be11be7b64",
+    "web/character-shirt-bundle.js": "5dddf5f1b98e2e3c66eb55a3937a839d073d552e1dad7d78cd5614d6a1b4676d",
+    "web/character-work-family-bundle-index.js": "094a6f8e4220fb1b3a2f81950ab5f43707f121a25bd95a70cffb361d9d43773c",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "web/character-runtime-binding.js": "c9847780f2039a44972baa444e4b94caeb4500041a1a6f5664bf3cad70a4b87e",
+    "web/appearance-lease-cache.js": "b6ecbf61b76772ea2159c2e7d7f4638428b489769a126e8ff23d24bc46fcb6c2",
+    "web/character-facial-family.js": "59da653c4233191a15a4056fc8dde25ab5ce910c57d2806a26f219b202aa208d",
+    "web/character-hair-family.js": "6eef18b08ab108e3d2147a019a74dbd98b75f057c745215cc12ee737a3afe01f",
+    "web/character-equipped-family.js": "e600e06d18949a3392be2c27a2891738f63bddf4ea781b8813b473b55589d14e",
+    "web/resident-portrait.js": "682c40d41a6dd70b9678d98b6381f0214419fd6f346a65e0c06574ab19bc7211",
+    "web/character-family-accessories.js": "97a01ba25ffdf9e2d7513f5b29537585a4f8fef805c373d26331f5a8e88430df",
+    "web/character-shirt-bundle-index.js": "2fa062df3aeff7e68b277ad9e4efa714504d2bb5644fb2990411d07676fbe500",
+    "web/character-hat-family.js": "c32e6b3d455539d51e2856cb6777d7c81ce67f4e307ec54f9c0b8f117137e36d",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-frame-composition.js": "3ab7fd8b02875130c5f41ac30d914ec75cc5e8460d6aad7d742bb00e1f0c88de",
+    "web/art/characters/prototype-v1/hair-curls-all-v1-registration.json": "6e4d92c849d7ea2e6975127b855f2f925b6381433b7e5b96551d2c4dd933909c",
+    "web/art/characters/prototype-v1/cook-equipment-pose-0-v3.json": "af0a5abc400229028acf57b6cac28b23d293dd8447314b1a7fac51d2f39cc6fa",
+    "web/art/characters/prototype-v1/cook-equipment-pose-1-v2.json": "5c3ff5ab55b8572bb787ce799a60b15d1ffa5f6e8a249b1ca3364c7038ba064d",
+    "web/art/characters/prototype-v1/body-neutral-idle-candidate-v2.png": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+    "web/art/characters/prototype-v1/body-neutral-base.png": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+    "web/art/characters/prototype-v1/body-neutral-activities-candidate-v1.png": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123",
+    "web/art/characters/prototype-v1/cook-equipment-pose-2-v2.json": "cdc55338508a3eb6d291dba0d894c2e915ed7ab19439725ca8b6f60f07cc0de1",
+    "web/art/characters/prototype-v1/water-equipment-pose-4-v1.json": "b7dd4bc18227a3f97e5e44bc935bf8686b65de68a33a8dc1404344bfc59162bc",
+    "web/art/characters/prototype-v1/cook-equipment-pose-3-v2.json": "7eca8ae0e918d3aa398e8ebb8bb00c29fb3396b0ca3b12bfdd77240541e7d7f3",
+    "web/art/characters/prototype-v1/water-equipment-pose-5-v1.json": "202e9123421b0751796ed393b775e21e38f8682042a2780528ba983a5afaf8a1",
+    "web/art/characters/prototype-v1/water-equipment-pose-6-v1.json": "df83582e845ec0a0acc311b2eaa5b3eae4add0c16c67734813473a77aec3a290",
+    "web/art/characters/prototype-v1/water-equipment-pose-7-v3.json": "23aa6e7555ebca7d8d1e6f66257a9dc101f1113e01e9557580a47691a64c929c",
+    "web/art/characters/prototype-v1/tend-equipment-pose-8-v2.json": "7b35f146ee1d39acefb35ab91dc7a351d3ef8d7ae7dfe16de554e270d6d4545e",
+    "web/art/characters/prototype-v1/tend-equipment-pose-9-v2.json": "4571870210e2057f2c491820cf2be0690fcaa2163740b6b23932b030979d0057",
+    "web/art/characters/prototype-v1/tend-equipment-pose-10-v2.json": "83e1ce83c0382edabb255c69380abde5b1150eff2de2f52a3a6eb42d47532565",
+    "web/art/characters/prototype-v1/tend-equipment-pose-11-v1.json": "8066ee993e5efec6ac1e49bd49791946580dc4e37135e27cff3e07b7d3ae2361",
+    "web/art/characters/prototype-v1/feed-equipment-pose-12-v5.json": "363ec7ca391170aca3bd3cacce35478b4ef7e8f5d4e526e43db345fe334aa5ef",
+    "web/art/characters/prototype-v1/feed-equipment-pose-13-v5.json": "ac6d79fc1a1a2ef10eb2a0ebf5383a83e4e26740d600309c2d9d600192ec9aa9",
+    "web/art/characters/prototype-v1/feed-equipment-pose-14-v5.json": "e0d9b1044fa83009b1ce4f0150e7f472208ede074a1ff5b64ebb7161bb0c342f",
+    "web/art/characters/prototype-v1/feed-equipment-pose-15-v5.json": "2c444d6fe0927a0ac0873a43810c7563a25f47be22ff4e3f3d92d2d8c4c274e1",
+    "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png": "5048bea272cef69db0aa863f493c3d5aa341d9908f4295e7628616032fe0aa91",
+    "web/art/characters/prototype-v1/cooking-pot-pose-1-candidate-v2.png": "73ddfe768da43b5349017dc394291e970dbc9ac5459004ae245543c3e57f0fc4",
+    "web/art/characters/prototype-v1/cooking-pot-pose-2-candidate-v2.png": "19912a94d724b6ac9a2ee630260b3f4025d9f9490297b3d6475461b228ac69c4",
+    "web/art/characters/prototype-v1/watering-can-pose-4-candidate-v2.png": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41",
+    "web/art/characters/prototype-v1/cooking-pot-pose-3-candidate-v2.png": "f0e484002a3987739aa0461b772fb53a901adf29025f90b81d32a674348a49d8",
+    "web/art/characters/prototype-v1/watering-can-pose-5-candidate-v1.png": "e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6",
+    "web/art/characters/prototype-v1/watering-can-pose-7-candidate-v3.png": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f",
+    "web/art/characters/prototype-v1/watering-can-pose-6-candidate-v1.png": "4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a",
+    "web/art/characters/prototype-v1/tending-trowel-pose-8-candidate-v2.png": "3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2",
+    "web/art/characters/prototype-v1/tending-trowel-pose-10-candidate-v2.png": "06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5",
+    "web/art/characters/prototype-v1/tending-trowel-pose-9-candidate-v2.png": "b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c",
+    "web/art/characters/prototype-v1/feeding-basket-pose-14-candidate-v2.png": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+    "web/art/characters/prototype-v1/tending-trowel-pose-11-candidate-v1.png": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943",
+    "web/art/characters/prototype-v1/body-materials-v1.json": "805525ce4468b630271873341ba1a18e2787d0072586acbaff813e87b37aac50",
+    "web/art/characters/prototype-v1/feed-grains-hold-candidate-v2.png": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+    "web/art/characters/prototype-v1/hair-curls-base-0-candidate-v1.png": "82d1d03ba88052c7aeb551e97b238e07de28b929406391fd6e1940e5d5c6c7a9",
+    "web/art/characters/prototype-v1/hair-curls-base-1-candidate-v1.png": "0afd3bda5cc8980f40c34099a48a02e9f6d4854eda9b4dd9fd0e08d42cc73f4f",
+    "web/art/characters/prototype-v1/hair-curls-base-2-candidate-v4.png": "463360590bf3401200e56925c0533d8def9b1ea938872e4b2956ca8d1e17049d",
+    "web/art/characters/prototype-v1/hair-curls-base-3-candidate-v6.png": "a23557f24419c86d48a91a79d276b648196e6b98c566666b895bb07cf985780c",
+    "web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507",
+    "web/art/characters/prototype-v1/hair-curls-base-5-candidate-v3.png": "0217b4805e01a66079a3a7da633530e9ff5d4f76eb24f2428849b83c9d2f3aa2",
+    "web/art/characters/prototype-v1/hair-curls-base-6-candidate-v3.png": "364ecd83aa9229eba483fca6f7fe5d6a78f290667af62a6f39cf129a9c4f5a4c",
+    "web/art/characters/prototype-v1/hair-curls-base-7-candidate-v3.png": "a9a3786c6a1dbd5f679628745b1a1b8aac7e19e611ad77e32a80b01f9a913cf2",
+    "web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+    "web/art/characters/prototype-v1/hair-curls-base-9-candidate-v1.png": "7462182486d964402d4686479cbcefc5604d3dae230550742813c37a0de82786",
+    "web/art/characters/prototype-v1/hair-curls-base-10-candidate-v1.png": "7d88c8d58cefcae645607119949f08457d3ca2a85582b0987522a76ce68dbc99",
+    "web/art/characters/prototype-v1/hair-curls-base-11-candidate-v1.png": "31488ef06f2e1995d78dae91da9d76dfc4d7249076aecd0020acd92b8c761cea",
+    "web/art/characters/prototype-v1/hair-curls-base-12-candidate-v5.png": "31555d1e8bbab8161680e9f331e4362832ca24473064d30547b8e21395c422e0",
+    "web/art/characters/prototype-v1/hair-seat-base-12-candidate-v1.png": "c06d766e4fe6d6e051a489441f85a0e3e421f8f2f9ebf616036aa86957f81854",
+    "web/art/characters/prototype-v1/hair-seat-base-13-candidate-v1.png": "a22f7b8901ad6c4f3dc2e64bd3e46d72094efe498882a86281707f6a7e9257ec",
+    "web/art/characters/prototype-v1/hair-curls-base-14-candidate-v2.png": "8f49e66d8cca01f628a78741221dfc7e4b02de12534e246b5ebb4b46cbe1737c",
+    "web/art/characters/prototype-v1/hair-seat-base-14-candidate-v1.png": "fe7515d78bc4ed97c44346eb66b075cbf5ce1fa199645c7e3c7a2cb33840def4",
+    "web/art/characters/prototype-v1/hair-seat-base-15-candidate-v1.png": "39fbf81324795e5818bb5ca24f3b62fb46044ed126597d503130ef9618bbc148",
+    "web/art/characters/prototype-v1/hair-curls-idle-5-candidate-v1.png": "f41c8a7c24f9b78cc4afe7139477d5a3d0b239c9c7777da53665372fba7c0775",
+    "web/art/characters/prototype-v1/hair-curls-idle-6-candidate-v2.png": "0a50506d4aceb96b36cf1490c984b746f2b937d1306c00e6936500e8dda5d462",
+    "web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v4.png": "51a0eeaf42765be2be66a19a8ec848d4824370e6dfc0f5a346b0f1e90ebb92da",
+    "web/art/characters/prototype-v1/hair-curls-idle-12-candidate-v1.png": "253184327e6cce626dde051e178862048a564fda7f91d19256734f303cfdb5a1",
+    "web/art/characters/prototype-v1/hair-curls-idle-13-candidate-v1.png": "f570c9521d3ca91d737e837559d35933aafe4166b10c56ac029bc5f38c4d1327",
+    "web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a",
+    "web/art/characters/prototype-v1/hair-curls-activities-1-candidate-v2.png": "c1871890556fd2e02c8b76a53485e5a8ca3ac918218a6be5670406343eec8826",
+    "web/art/characters/prototype-v1/hair-curls-activities-5-candidate-v1.png": "93e4516a83a7ff9d3b5e55ebeb70635649f1b1fe2b21ae6c0ed88802f4b24541",
+    "web/art/characters/prototype-v1/hair-curls-activities-6-candidate-v1.png": "5241a9fd741f202821fc5368b7144bfb50a40f668a4cf64b9a447d2e883253a0",
+    "web/art/characters/prototype-v1/hair-curls-activities-7-candidate-v2.png": "de0628cab84f54a253d913a6ebb1bd5e9a713aed43d184e35d7f92dbc21344aa",
+    "web/art/characters/prototype-v1/hair-curls-activities-8-candidate-v1.png": "df710c7eb0554d9aa612fd9de1a293b987eda5d52489167b0b2e4f4a7de243ea",
+    "web/art/characters/prototype-v1/hair-curls-activities-9-candidate-v1.png": "c3c28b66645235ca1bc170d174d1e46d5b2af23e13ee4e7287248bb414129180",
+    "web/art/characters/prototype-v1/hair-curls-activities-10-candidate-v1.png": "59412f938465868332c3212d81f2382e21a6984cab8e000bb336a5652db980b0",
+    "web/art/characters/prototype-v1/hair-curls-activities-12-candidate-v4.png": "b484abe997b2081a8ae2f858f0d7aeb71741d10d5ecb118107c64308087f3bd2",
+    "web/art/characters/prototype-v1/hair-curls-activities-13-candidate-v1.png": "d86ddcbab635cf2133de4ecc86659085075701e455b9531f115bd613eaee5d74",
+    "web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v4.png": "cba096d982bbfa2f72686b80673489f75c058712dfa59269046a9eb1d6a2b0a9",
+    "web/art/characters/prototype-v1/hair-curls-activities-15-candidate-v1.png": "9df86392c83b2c169c0497f21058a6fff248d120d845e734770045089195fd38",
+    "web/art/characters/prototype-v1/facial-short-chestnut-v1-registration.json": "038a8f1bf213d519ae46adf1bb1d7944d4010d1d5d4acad9a07d88fb441869bb",
+    "web/art/characters/prototype-v1/hair-sidepart-all-v1-registration.json": "6d9827a68f9df8b3e1293179dc6fa3ad1c50ae9919aca1aa27704414bdff8de4",
+    "web/art/characters/prototype-v1/hair-sidepart-base-0-candidate-v1.png": "d4f879bb5ae00e3ff2de21953f7cc46fe91aed9b83a8c14722cde4eb1fa3a1ba",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-01-v1.png": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+    "web/art/characters/prototype-v1/hair-sidepart-base-1-candidate-v2.png": "b58cd58a6ef99fcd8dd46e534dc7916cd57e0f3c2eaea8e4316b59cc1337f9d5",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-02-v1.png": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+    "web/art/characters/prototype-v1/hair-sidepart-base-2-candidate-v1.png": "58c7017d7598dec094f3387a2a3aa3efbadee6a746a0580f2324603beb0682c5",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-03-v1.png": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+    "web/art/characters/prototype-v1/hair-sidepart-base-3-candidate-v1.png": "453b2f2d92d5a086fce8584044ad3f4522199710107af2995507792f0bf432bc",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-04-v1.png": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+    "web/art/characters/prototype-v1/hair-sidepart-base-4-candidate-v1.png": "695348cf1af7bc316f59ce7966b2a807b8e5e3b215012231714a1983b3edf102",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-05-v1.png": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+    "web/art/characters/prototype-v1/hair-sidepart-base-5-candidate-v1.png": "1cb0a2baff79df1dc3b16577e7163c06f6a1d99b0cc322314b327f3fac56b15f",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-06-v1.png": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+    "web/art/characters/prototype-v1/hair-sidepart-base-6-candidate-v1.png": "ce670a638795fbec27de86c5fe7634139ad94321688a1f4b27f5eff05f93afcd",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-07-v1.png": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+    "web/art/characters/prototype-v1/hair-sidepart-base-7-candidate-v3.png": "bc8a038f244c38c4ae28da13d9437fc17d2a225e54228dcb1146392d98017f0a",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-08-v1.png": "e47bc6492bdf1c6ca3f5e3c92e369ebe54bc2de6ace778138c77800043dce585",
+    "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-09-v1.png": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+    "web/art/characters/prototype-v1/hair-sidepart-base-9-candidate-v1.png": "cf6e28944456cadf9825c36de83ae3c2b9cdea8a8ad70c65cb03eb3ed096607c",
+    "web/art/characters/prototype-v1/hair-sidepart-base-10-candidate-v1.png": "21ae9fef806eb61d8e7cab7af9d302c8a54ac231ca478e6b2fd65d353ea7f3c8",
+    "web/art/characters/prototype-v1/hair-sidepart-base-11-candidate-v1.png": "c0cfb05748f163b440bb3b10eb729931c5ded06e9a15b84c3d422e5ad681ad00",
+    "web/art/characters/prototype-v1/hair-sidepart-base-12-candidate-v2.png": "e13d5a9d3679a9bb9a6cac71a6deb12f32a7b1fb2635d3ef3d02ccaa65106766",
+    "web/art/characters/prototype-v1/hair-sidepart-base-13-candidate-v2.png": "d083b4edee167a11a1eb7dd70ee288a70b7439fbf0281c2267a3d0d5ebddf465",
+    "web/art/characters/prototype-v1/hair-sidepart-base-14-candidate-v2.png": "f0a8e1ef723684d84bb992a8624960da2dfdb7c457917079543cbafbf10f815f",
+    "web/art/characters/prototype-v1/hair-sidepart-base-15-candidate-v2.png": "13df9efb3803a90f053ab248d31256cfe0f90fd88b43078c3c1d4bd432af3d2f",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-5-candidate-v2.png": "4ad997d69ddc90b787b7e108f53b6d53917100a93a5794009e54812b1ee6089e",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-6-candidate-v1.png": "a922a98468c01a91aa590bc52e5a16d1a6aacb66ea4ec8d0150fd56a724d866e",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-9-candidate-v1.png": "71520b1b3f2afa833285715f132b2eef6f5626df5a70aec63a38ce28afbc8dc4",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-12-candidate-v1.png": "e5d4124b36cf5ba08517aa36cd2ecf2645d24455f1cca2dc95f56dc2364644c8",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-13-candidate-v1.png": "4bdd18381a6465c0199ecb57581ef987769516ce00d7a6a68c5549714708cc07",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-0-candidate-v1.png": "2505ee1234bbf6be23fac98304b244a881955ca8a5621f227b0df462a98692e0",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-1-candidate-v1.png": "b90ff250c7011bd0bbc65a3a3647ea0cfff2d82a13138719c59d631148bdcad7",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-5-candidate-v1.png": "3d432fa16752dbbee4ef568b326a24a3489fe7c77a2dcf402ec8629c223aa8fb",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-6-candidate-v1.png": "014791cea3b7b6cdc14b3de99be15a3714c5f1097da72c3b0ceba51fb317385c",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-7-candidate-v1.png": "e92b159dc2259080cc7a849bf977031f0aa1497cca706d01109f52bdffe7a538",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-8-candidate-v1.png": "a1345fe33b37c3037f7c9f5acbb349eb1c34812bdbd6ac20d645377dedd04714",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-9-candidate-v1.png": "1c1a35056faad9f52ba3becfcdfff349d2844e24135e6e507dc9651b6dcbccd7",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-10-candidate-v1.png": "652c4645bd1ecc85c09dc8a6a0f548ab34843b185b2395a88fdc0b8c1aa797ba",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-12-candidate-v1.png": "92eb897f846e17aeeebdc75dc90ab6c55f7f9b7ae36d4a9b15ee500e3a2eee5e",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-13-candidate-v1.png": "ac8f8fcb214fc140cc715c03cf0db791f8f46ef6237acf66599dd657be3d143f",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-14-candidate-v1.png": "7b00bcad19c20e5d49f886636ec80aad6e61cd04775732535464cbf6912016d0",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-15-candidate-v1.png": "a22c78dfdd8552882ec1806c8c42c0136d1e59cef6c16d5802e2a4366fba76f5",
+    "web/art/characters/prototype-v1/straw-hat-breathe-v1-registration.json": "896da35949c473bfd357adbb04535a8410fe81ddc1b530f70159cdcf90ccf4dc",
+    "web/art/characters/prototype-v1/straw-hat-walk-v1-registration.json": "46c5be5c0de60c4eec1737cf25d9f3ab3f7b4d13c8577818e35a8df8802d8fcd",
+    "web/art/characters/prototype-v1/straw-hat-look-v1-registration.json": "78ce0deaa7513bc7c13940f9f2672d549cbeaacc3c3f5a1816578c533e2bf4e7",
+    "web/art/characters/prototype-v1/straw-hat-sit-v1-registration.json": "e4efa84c31fe123991bc71163fd4ad64cfc4f935af6df7ae3496db412b7ce575",
+    "web/art/characters/prototype-v1/straw-hat-relax-v1-registration.json": "be217b9acc959e1d44d912931b695f5eacc1868c1e4235dc0aba0dd28176ced2",
+    "web/art/characters/prototype-v1/straw-hat-stretch-v1-registration.json": "c3754558934a086022624a3024b0e53d75c3f97b890f87b146276513ea32f1d7",
+    "web/art/characters/prototype-v1/straw-hat-wave-v1-registration.json": "384eaac36239b8adb924ede7eadbed8cb5ddeb211a250f2917ffa16df51d9572",
+    "web/art/characters/prototype-v1/straw-hat-work-v1-registration.json": "8981cc25a6bdd63ab311c6539a6bac46486e5d81d92661c152bfa5d328a4e306",
+    "web/art/characters/prototype-v1/straw-hat-cook-v1-registration.json": "1be5e59bfc736fd2b23aa63d5c94fe40dc9f835d47379b7cb3b37a00adaabf87",
+    "web/art/characters/prototype-v1/straw-hat-water-v1-registration.json": "c1a85268c1bc2644d71e752b0af18ff441425aeaa137d3dc5731aac808ebefb0",
+    "web/art/characters/prototype-v1/straw-hat-tend-v1-registration.json": "05e57b3c4b5919ba0c08b67df39af4f15ceb57aafd5f5434d290be1b584c4769",
+    "web/art/characters/prototype-v1/straw-hat-feed-v1-registration.json": "c7d96babf330a61042f56a9faac74596227ea0dd0c2dc580fc3ad781154ebfd0",
+    "web/art/characters/prototype-v1/straw-hat-base8-candidate-v3.png": "8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109",
+    "web/art/characters/relaxed-sleep-v1/bundle-v1.json": "f920cd78f9b736a255a90f2a56299a478bad0b8cf086d12e4f21ed283248412f",
+    "web/art/characters/relaxed-v1/source-11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a.png": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+    "web/art/characters/relaxed-sleep-v1/sleep-body-v2.png": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+    "web/art/characters/relaxed-sleep-v1/sleep-hair-curls-v6.png": "4c0b583d750f41a609099830daf6360c5355fc05299d480e26d9d4e826524b69",
+    "web/art/characters/relaxed-v1/source-0a751e78674eb7b09930bb0ca48c7c2e65ee06e2dbb0d9448fc2373bbca47be5.png": "0a751e78674eb7b09930bb0ca48c7c2e65ee06e2dbb0d9448fc2373bbca47be5",
+    "web/art/characters/relaxed-sleep-v1/sleep-hair-sidepart-v6.png": "78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889",
+    "web/art/characters/relaxed-work-v1/source-81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580.png": "81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580",
+    "web/art/characters/relaxed-work-v1/source-a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df.png": "a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df",
+    "web/art/characters/relaxed-work-v1/source-ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb.png": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb",
+    "web/art/characters/relaxed-work-v1/source-739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924.png": "739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924",
+    "web/art/characters/relaxed-sleep-v1/facial-short-chestnut-sleep-v1.png": "a9cc1acb7d4d77e6dabfcbcaebfdb2c92f7003703f0358de46a8f6dd14ce061a",
+    "web/art/characters/relaxed-shirt-v1/source-877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8.png": "877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8",
+    "web/art/characters/relaxed-shirt-v1/source-41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96.png": "41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96",
+    "web/art/characters/relaxed-shirt-v1/source-6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630.png": "6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630",
+    "web/art/characters/relaxed-shirt-v1/source-e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6.png": "e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6",
+    "web/art/characters/relaxed-shirt-v1/source-4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227.png": "4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227",
+    "web/art/characters/relaxed-shirt-v1/source-15f2ac70eb64cd73e3aa92683100522a5d805d53d452d84b03ac5363bedd35b6.png": "15f2ac70eb64cd73e3aa92683100522a5d805d53d452d84b03ac5363bedd35b6",
+    "web/art/characters/relaxed-shirt-v1/source-c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d.png": "c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d",
+    "web/art/characters/relaxed-shirt-v1/source-3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3.png": "3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3",
+    "web/art/characters/relaxed-shirt-v1/source-18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f.png": "18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f",
+    "web/art/characters/relaxed-shirt-v1/source-1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135.png": "1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135",
+    "web/art/characters/relaxed-shirt-v1/source-2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658.png": "2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658",
+    "web/art/characters/relaxed-shirt-v1/source-7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4.png": "7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4",
+    "web/art/characters/relaxed-shirt-v1/source-7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476.png": "7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476",
+    "web/art/characters/relaxed-shirt-v1/source-12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd.png": "12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd",
+    "web/art/characters/relaxed-shirt-v1/source-1afa7293e71c6d53b0ed122c2c05a18d97d8d83e9d30e5f93bd58feb384262de.png": "1afa7293e71c6d53b0ed122c2c05a18d97d8d83e9d30e5f93bd58feb384262de",
+    "web/art/characters/relaxed-sleep-v1/sleep-shirt-v2.png": "c68b53fa48a6c8edb53aeaddc1f2899b31f87e6de6eea86ece6e1057b734aab8",
+    "web/art/characters/relaxed-shirt-v1/source-908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96.png": "908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96",
+    "web/art/characters/relaxed-shirt-v1/source-c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882.png": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+    "web/art/characters/relaxed-shirt-v1/source-042f65abd7e857ece5c7bd249be21a9c6890b2bf690effc2acb6ac8beb701f52.png": "042f65abd7e857ece5c7bd249be21a9c6890b2bf690effc2acb6ac8beb701f52",
+    "web/art/characters/relaxed-shirt-v1/source-30fbbaa53287373eb033f6d0da54ea53ef25983c83d47edf0f76da59db73280a.png": "30fbbaa53287373eb033f6d0da54ea53ef25983c83d47edf0f76da59db73280a",
+    "web/art/characters/relaxed-shirt-v1/source-fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720.png": "fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720",
+    "web/art/characters/relaxed-shirt-v1/source-9204b45115fa742be0f9fea02cfb62c551493ef33a0d43005f4873d62c8d7b97.png": "9204b45115fa742be0f9fea02cfb62c551493ef33a0d43005f4873d62c8d7b97",
+    "web/art/characters/relaxed-shirt-v1/source-d937aed8573df1596d41c31f0eb35c57b1bc10417a30f219f6bdee3e12bbc992.png": "d937aed8573df1596d41c31f0eb35c57b1bc10417a30f219f6bdee3e12bbc992",
+    "web/art/characters/relaxed-shirt-v1/source-c85ba24d63c76ae298586ea1a14808a4ff808a6af8ecd677a35dbf67e51bc152.png": "c85ba24d63c76ae298586ea1a14808a4ff808a6af8ecd677a35dbf67e51bc152",
+    "web/art/characters/relaxed-shirt-v1/source-2ca2aefe8db5f15edb6efaf6163981d9c187fa69ed8f3579e91a223567c13835.png": "2ca2aefe8db5f15edb6efaf6163981d9c187fa69ed8f3579e91a223567c13835",
+    "web/art/characters/relaxed-shirt-v1/source-1413bd9dd427d42734a82968291a3c0b6de9c83c5eaf84cece463d61fb2758e6.png": "1413bd9dd427d42734a82968291a3c0b6de9c83c5eaf84cece463d61fb2758e6",
+    "web/art/characters/relaxed-shirt-v1/source-f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6.png": "f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6",
+    "web/art/characters/relaxed-shirt-v1/source-5681ab34eecc9e6e28c83a0f2502767ba061d8e861b9733c416d87835af7c04b.png": "5681ab34eecc9e6e28c83a0f2502767ba061d8e861b9733c416d87835af7c04b",
+    "web/art/characters/relaxed-shirt-v1/source-63a6ebe5b3eae40dc5e87a3857a6beb8459e8b0717959270c2558428eb7f27d6.png": "63a6ebe5b3eae40dc5e87a3857a6beb8459e8b0717959270c2558428eb7f27d6",
+    "web/art/characters/relaxed-shirt-v1/source-6e6d04c0098cd8fe7a09f8730a5644df0223a463b31c6f4d9bf95ba568f4b66f.png": "6e6d04c0098cd8fe7a09f8730a5644df0223a463b31c6f4d9bf95ba568f4b66f",
+    "web/art/characters/relaxed-shirt-v1/source-2525d552956b314d9f14342caf8e9f02af877aa001bcc7f4f5cd02d894180f2e.png": "2525d552956b314d9f14342caf8e9f02af877aa001bcc7f4f5cd02d894180f2e",
+    "web/art/characters/relaxed-shirt-v1/source-af7603d96cbeb2f9ae8c4b5c6107fbf810813b04572f2f2b0f499b0d7606e913.png": "af7603d96cbeb2f9ae8c4b5c6107fbf810813b04572f2f2b0f499b0d7606e913",
+    "web/art/characters/relaxed-shirt-v1/source-5b2da30eb051402dcf6d56ff9119340cdf81e82fe9462aaf0bfe7e53f674d2e1.png": "5b2da30eb051402dcf6d56ff9119340cdf81e82fe9462aaf0bfe7e53f674d2e1",
+    "web/art/characters/relaxed-shirt-v1/source-be3a7696380938972149d1213fc082430bc7977b62606d224c578c34e1eeb9d6.png": "be3a7696380938972149d1213fc082430bc7977b62606d224c578c34e1eeb9d6",
+    "web/art/characters/relaxed-shirt-v1/source-0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20.png": "0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20",
+    "web/art/characters/relaxed-shirt-v1/source-75f8045b7247e8e689ae05c1a03de55d897972678b0826e1d3efcbe943463bd0.png": "75f8045b7247e8e689ae05c1a03de55d897972678b0826e1d3efcbe943463bd0",
+    "web/art/characters/relaxed-shirt-v1/source-5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3.png": "5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3",
+    "web/art/characters/relaxed-shirt-v1/source-221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0.png": "221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0",
+    "web/art/characters/relaxed-shirt-v1/source-ed39e7d9e2fc4f13eada796bb9d6fa3fac2b5647b575366c909d43bda4268114.png": "ed39e7d9e2fc4f13eada796bb9d6fa3fac2b5647b575366c909d43bda4268114",
+    "web/art/characters/relaxed-shirt-v1/source-973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809.png": "973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809",
+    "web/art/characters/relaxed-shirt-v1/source-34438ac8a533772f7e4d8b7863b054b883c0f4afd84f2776f97618a0e7f50f75.png": "34438ac8a533772f7e4d8b7863b054b883c0f4afd84f2776f97618a0e7f50f75",
+    "web/art/characters/broad-v1/bundle-v1.json": "6d3f334aca027a80296ebc760e5d1214293ea027b3d0503d37e26a27c3c52f42",
+    "web/art/characters/broad-v1/source-1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287.png": "1984712e32f29ad07093bf109452735b9fd44e1e964801a9997300f57a1cb287",
+    "web/art/characters/broad-v1/source-65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c.png": "65dafb9412c2bab947142d6fededd7cc5d9f8340c04c3dfae864fb55a3c8f58c",
+    "web/art/characters/broad-v1/source-55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60.png": "55df67bd07ea0e3bfb81720824bd201846fbac09a3567b66ab4a40bc505fdc60",
+    "web/art/characters/broad-v1/source-79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c.png": "79f2c05e8a1d4cf9155dbf9f74f80bc8dacd53f2a11fce3f19535ef9b0f4628c",
+    "web/art/characters/broad-v1/source-e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765.png": "e9861ac9271ca1cbb7f714332d10cb6748691525ed9dd58bf7d99ceff2f80765",
+    "web/art/characters/broad-v1/source-1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c.png": "1c983621070364d436daf8dc220dfc7dcd9db8b319ca42fcbea53b75bf2fd37c",
+    "web/art/characters/broad-v1/source-eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633.png": "eb0ff3278dcdb2e64edc8c3777495bd5dcdd7ea0740ebc51239260d25c490633",
+    "web/art/characters/broad-v1/source-29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9.png": "29c1155b428cac02c181d33601eef2884cfe7706eff07c6af4db1de24a9d9ec9",
+    "web/art/characters/broad-v1/source-64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab.png": "64c7f9b6645265623f639a38b6b442d4aebbc378bda9a3d633ac07c0af041fab",
+    "web/art/characters/broad-v1/source-2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93.png": "2ce354e6244376ea6da772bcb2a4a34bc9c0eb027d6825e241f62fba5f5dda93",
+    "web/art/characters/broad-v1/source-7fb02e77dde6c4b6eb379f566cd0c68570665893a6a12e266b66cf8ce6e3d27a.png": "7fb02e77dde6c4b6eb379f566cd0c68570665893a6a12e266b66cf8ce6e3d27a",
+    "web/art/characters/broad-v1/source-184d94663f5131b9e95bb1b605791ab18ecbf01c4904c2697a46fcf33e9d698a.png": "184d94663f5131b9e95bb1b605791ab18ecbf01c4904c2697a46fcf33e9d698a",
+    "web/art/characters/broad-v1/source-b43a6e224f24fe5c3772fd6087b245828ea60e79c6131a53b93a2c5a9dd18571.png": "b43a6e224f24fe5c3772fd6087b245828ea60e79c6131a53b93a2c5a9dd18571",
+    "web/art/characters/broad-v1/source-5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d.png": "5bee879720a2f70478158f76ae8c166a7f55ffcf524dd23af607d60e5c40942d",
+    "web/art/characters/broad-v1/source-96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6.png": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6",
+    "web/art/characters/broad-v1/source-afb3a6f26a4e72c81347f6e9bdfe7cb6c11e39ab2fd1926f4c1e72fafa655edf.png": "afb3a6f26a4e72c81347f6e9bdfe7cb6c11e39ab2fd1926f4c1e72fafa655edf",
+    "web/art/characters/broad-v1/source-78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889.png": "78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889",
+    "web/art/characters/broad-v1/source-8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109.png": "8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109",
+    "web/art/characters/broad-v1/source-11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+    "web/art/characters/broad-v1/source-4c0b583d750f41a609099830daf6360c5355fc05299d480e26d9d4e826524b69.png": "4c0b583d750f41a609099830daf6360c5355fc05299d480e26d9d4e826524b69",
+    "web/art/characters/broad-v1/source-d2aa21547ea0772e53bc314aba5b9c37bd6105ea367b977880d1a9f34ab77c60.png": "d2aa21547ea0772e53bc314aba5b9c37bd6105ea367b977880d1a9f34ab77c60",
+    "web/art/characters/broad-v1/source-b07429b349343bbbbb229f17265c7a721b3de263d3a68c5fe76aec2571237cab.png": "b07429b349343bbbbb229f17265c7a721b3de263d3a68c5fe76aec2571237cab",
+    "web/art/characters/broad-v1/source-b0cab447f6473b800312930e5daa7559b5e0a96ea7e6bc2cf4498dcf6b7cf013.png": "b0cab447f6473b800312930e5daa7559b5e0a96ea7e6bc2cf4498dcf6b7cf013",
+    "web/art/characters/broad-v1/source-2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41.png": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41",
+    "web/art/characters/broad-v1/source-e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6.png": "e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6",
+    "web/art/characters/broad-v1/source-4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a.png": "4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a",
+    "web/art/characters/broad-v1/source-4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f.png": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f",
+    "web/art/characters/broad-v1/source-3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2.png": "3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2",
+    "web/art/characters/broad-v1/source-b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c.png": "b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c",
+    "web/art/characters/broad-v1/source-06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5.png": "06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5",
+    "web/art/characters/broad-v1/source-e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943.png": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943",
+    "web/art/characters/broad-v1/source-175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1.png": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+    "web/art/characters/broad-v1/source-38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8.png": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+    "web/art/characters/broad-v1/source-81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580.png": "81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580",
+    "web/art/characters/broad-v1/source-a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df.png": "a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df",
+    "web/art/characters/broad-v1/source-ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb.png": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb",
+    "web/art/characters/broad-v1/source-739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924.png": "739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924"
+  },
+  "cases": [
+    {
+      "index": 0,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 1,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 2,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 3,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 4,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 5,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 6,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 7,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 8,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 9,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 10,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 11,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 12,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 13,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 14,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 15,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 16,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 17,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 18,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 19,
+      "checked": 52,
+      "body": "neutral-v1",
+      "assetVersion": "resident-parts-v1"
+    },
+    {
+      "index": 20,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 21,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 22,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 23,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 24,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 25,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 26,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 27,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 28,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 29,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 30,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 31,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 32,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 33,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 34,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 35,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 36,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 37,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 38,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 39,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v5"
+    },
+    {
+      "index": 40,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 41,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 42,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 43,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 44,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 45,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 46,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 47,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 48,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 49,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 50,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 51,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 52,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 53,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 54,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 55,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 56,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 57,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 58,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 59,
+      "checked": 52,
+      "body": "relaxed-v1",
+      "assetVersion": "resident-parts-v6"
+    },
+    {
+      "index": 60,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 61,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 62,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 63,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 64,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 65,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 66,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 67,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 68,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 69,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 70,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 71,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 72,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 73,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 74,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 75,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 76,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 77,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    },
+    {
+      "index": 78,
+      "checked": 52,
+      "body": "broad-v1",
+      "assetVersion": "resident-parts-v7"
+    }
+  ],
+  "scope": "All native atlas poses and two feeding return phases for a deterministic pairwise set of current selectable public outfits. Raster existence and pair coverage do not establish art quality; retained boards require separate visual review. No world, biome, activity transitions or performance acceptance."
+}
