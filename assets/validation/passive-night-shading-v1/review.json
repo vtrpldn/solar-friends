@@ -27,8 +27,15 @@
     "Baseline HEAD implementation reproduced passive unlit compost selecting full night lighting"
   ],
   "limits": [
-    "Only six corrected boards inspected so far; remaining corrected boards pending.",
+    "Normal-zoom corrected night inspection complete; remaining close/overview weather and lighting inspection is pending.",
     "No raster artwork, geometry, native power simulation or resource balances changed.",
     "Wider zooms, transitions, lifecycle, customization and other full-plan release gates remain open."
-  ]
+  ],
+  "followupReview": {
+    "allCorrectedNormalZoomBoardsInspected": true,
+    "compositions": 162,
+    "finding": "Passive materials now share ambient darkness with unlit homes; powered windows and lamps retain warm light. No additional blocking silhouette, ground-contact or palette defect observed in these static normal-zoom scenes.",
+    "scope": "27 appearances, three biomes, powered and unpowered night. Not lifecycle, motion, all nature species or complete release acceptance.",
+    "sharedSelectorParity": "All eighteen normal-zoom board hashes unchanged after replacing duplicated light-level logic with gameplay buildingLighting."
+  }
 }
