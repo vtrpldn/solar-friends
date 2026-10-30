@@ -1,0 +1,815 @@
+{
+  "startedAt": "2026-10-30T14:35:39.457Z",
+  "finishedAt": "2026-10-30T14:40:10.839Z",
+  "sourceAndBuildHash": "84ee648380e46b38cee5e9fb322a42db70e6ae1170d5ea485666211f7b616ea0",
+  "scope": "Browser only",
+  "results": [
+    {
+      "label": "Desktop interactions, save isolation, artwork tools and captures",
+      "status": "PASS"
+    }
+  ],
+  "screenshots": [
+    {
+      "label": "Main menu: Story and Sandbox",
+      "file": "main-menu.png"
+    },
+    {
+      "label": "Pantry field-book page at 1600 desktop width",
+      "file": "interface-1600-pantry.png"
+    },
+    {
+      "label": "Stores field-book page at 1600 desktop width",
+      "file": "interface-1600-stores.png"
+    },
+    {
+      "label": "Water field-book page at 1600 desktop width",
+      "file": "interface-1600-water.png"
+    },
+    {
+      "label": "Ecology field-book page at 1600 desktop width",
+      "file": "interface-1600-ecology.png"
+    },
+    {
+      "label": "Trade shares the village control spacing at 1600",
+      "file": "interface-1600-town-panel.png"
+    },
+    {
+      "label": "Construction shares the village control spacing at 1600",
+      "file": "interface-1600-projects-panel.png"
+    },
+    {
+      "label": "Power shares the village control spacing at 1600",
+      "file": "interface-1600-power-panel.png"
+    },
+    {
+      "label": "Resident roster and gathering action at 1600",
+      "file": "interface-1600-residents.png"
+    },
+    {
+      "label": "Iara’s needs and illustrated actions precede work settings at 1600",
+      "file": "interface-1600-character.png"
+    },
+    {
+      "label": "Game settings retain keyboard-operable toggles at 1600",
+      "file": "interface-1600-settings.png"
+    },
+    {
+      "label": "Field guide and key bindings at 1600",
+      "file": "interface-1600-help.png"
+    },
+    {
+      "label": "Parchment development workbench at 1600",
+      "file": "interface-1600-workbench.png"
+    },
+    {
+      "label": "Pantry field-book page at 1280 desktop width",
+      "file": "interface-1280-pantry.png"
+    },
+    {
+      "label": "Stores field-book page at 1280 desktop width",
+      "file": "interface-1280-stores.png"
+    },
+    {
+      "label": "Water field-book page at 1280 desktop width",
+      "file": "interface-1280-water.png"
+    },
+    {
+      "label": "Ecology field-book page at 1280 desktop width",
+      "file": "interface-1280-ecology.png"
+    },
+    {
+      "label": "Trade shares the village control spacing at 1280",
+      "file": "interface-1280-town-panel.png"
+    },
+    {
+      "label": "Construction shares the village control spacing at 1280",
+      "file": "interface-1280-projects-panel.png"
+    },
+    {
+      "label": "Power shares the village control spacing at 1280",
+      "file": "interface-1280-power-panel.png"
+    },
+    {
+      "label": "Resident roster and gathering action at 1280",
+      "file": "interface-1280-residents.png"
+    },
+    {
+      "label": "Iara’s needs and illustrated actions precede work settings at 1280",
+      "file": "interface-1280-character.png"
+    },
+    {
+      "label": "Game settings retain keyboard-operable toggles at 1280",
+      "file": "interface-1280-settings.png"
+    },
+    {
+      "label": "Field guide and key bindings at 1280",
+      "file": "interface-1280-help.png"
+    },
+    {
+      "label": "Parchment development workbench at 1280",
+      "file": "interface-1280-workbench.png"
+    },
+    {
+      "label": "Primary village outcomes and separate optional paths at 1600",
+      "file": "story-paths-1600.png"
+    },
+    {
+      "label": "Primary village outcomes and separate optional paths at 1280",
+      "file": "story-paths-1280.png"
+    },
+    {
+      "label": "Actual observed food and services stay distinct from authored preview resources",
+      "file": "story-observations.png"
+    },
+    {
+      "label": "Saved local stone patches remain visible after resident extraction exhausts one",
+      "file": "land-stone.png"
+    },
+    {
+      "label": "Foundation disturbance survives real resident demolition",
+      "file": "land-disturbed.png"
+    },
+    {
+      "label": "Delivered compost and saved resident labour restore the ground gradually",
+      "file": "soil-restoration.png"
+    },
+    {
+      "label": "A marked grid plot reserves compost and waits for actual resident delivery",
+      "file": "soil-restoration-queued.png"
+    },
+    {
+      "label": "Resident work finishes and its soil improvements remain on the land",
+      "file": "soil-restoration-complete.png"
+    },
+    {
+      "label": "Plantation controls reserve an attended job for the whole timber plot",
+      "file": "soil-restoration-plantation.png"
+    },
+    {
+      "label": "Actual resident-tended crops show persistent soil conditions and adjusted growing time",
+      "file": "cultivation-soil.png"
+    },
+    {
+      "label": "Saved root-zone water and crop potential are inspectable on the actual plot",
+      "file": "cultivation-moisture.png"
+    },
+    {
+      "label": "Visible tree canopy reduces solar exposure beside the generator",
+      "file": "cultivation-shade.png"
+    },
+    {
+      "label": "Residents carry separate timber seedlings and bamboo starts to marked plots",
+      "file": "planting-forestry-cargo.png"
+    },
+    {
+      "label": "Marked forestry plots expose delivered stock and attended planting requirements",
+      "file": "planting-queued.png"
+    },
+    {
+      "label": "A greenhouse seedling travels to an outdoor garden before its planting bonus",
+      "file": "planting-vegetable-cargo.png"
+    },
+    {
+      "label": "Removed roads leave soft soil marks beneath the original meadow texture",
+      "file": "living-ground.png"
+    },
+    {
+      "label": "The same normal-view soil marks expose actual disturbance and a recovery action",
+      "file": "living-ground-inspection.png"
+    },
+    {
+      "label": "Resident restoration retains its soil improvement in the normal game view",
+      "file": "living-ground-restored.png"
+    },
+    {
+      "label": "Standing banana vegetation contributes to the same shade and solar model",
+      "file": "living-banana-shade.png"
+    },
+    {
+      "label": "A seven-day paper forecast opens directly from the village clock",
+      "file": "climate-forecast-wet.png"
+    },
+    {
+      "label": "Seeded wet-season rain shares the existing ground and building palette",
+      "file": "climate-wet.png"
+    },
+    {
+      "label": "Seasonal rain retains cloud and wet-soil cues with reduced motion",
+      "file": "climate-wet-reduced.png"
+    },
+    {
+      "label": "The dry-period forecast explains lower river flow and the next weather window",
+      "file": "climate-forecast-dry.png"
+    },
+    {
+      "label": "Sandbox can opt into the same saved seasonal calendar",
+      "file": "climate-sandbox-option.png"
+    },
+    {
+      "label": "Orchard, dairy pasture and apiary share the village terrain and building scale",
+      "file": "farming-village.png"
+    },
+    {
+      "label": "Readable goat care and local supplies at 1600px",
+      "file": "farming-goats-1600.png"
+    },
+    {
+      "label": "Hive forage and inspection controls at 1600px",
+      "file": "farming-bees-1600.png"
+    },
+    {
+      "label": "Milk, honey and farm records inside the pantry book at 1600px",
+      "file": "farming-pantry-1600.png"
+    },
+    {
+      "label": "Readable goat care and local supplies at 1280px",
+      "file": "farming-goats-1280.png"
+    },
+    {
+      "label": "Hive forage and inspection controls at 1280px",
+      "file": "farming-bees-1280.png"
+    },
+    {
+      "label": "Milk, honey and farm records inside the pantry book at 1280px",
+      "file": "farming-pantry-1280.png"
+    },
+    {
+      "label": "New farm buildings appear with the same illustrated build controls",
+      "file": "farming-build-menu.png"
+    },
+    {
+      "label": "A named resident accepts a saved, targeted animal-care request",
+      "file": "farming-request.png"
+    },
+    {
+      "label": "Resident care and collection advance real farm production",
+      "file": "farming-after-care.png"
+    },
+    {
+      "label": "Equipment condition shares the field book at 1600",
+      "file": "upkeep-1600.png"
+    },
+    {
+      "label": "Equipment condition shares the field book at 1280",
+      "file": "upkeep-1280.png"
+    },
+    {
+      "label": "The service kit enters the normal town basket",
+      "file": "upkeep-spares.png"
+    },
+    {
+      "label": "Paused service retains its consumed kit and partial work",
+      "file": "upkeep-paused.png"
+    },
+    {
+      "label": "Resident work restores workshop condition through the real controls",
+      "file": "upkeep-finished.png"
+    },
+    {
+      "label": "A failed pickup can receive spare parts by town delivery",
+      "file": "upkeep-truck-recovery.png"
+    },
+    {
+      "label": "Night equipment failure preserves charge and exposes recovery",
+      "file": "upkeep-night.png"
+    },
+    {
+      "label": "Resident field notes show earned experience at 1600px",
+      "file": "learning-1600.png"
+    },
+    {
+      "label": "Resident field notes show earned experience at 1280px",
+      "file": "learning-1280.png"
+    },
+    {
+      "label": "Field notes replay experience earned through fourteen days of useful work",
+      "file": "learning-earned.png"
+    },
+    {
+      "label": "Town offer uses the existing trade book at 1600px",
+      "file": "suppliers-board-1600.png"
+    },
+    {
+      "label": "Town offer uses the existing trade book at 1280px",
+      "file": "suppliers-board-1280.png"
+    },
+    {
+      "label": "Seeded restock prices and the freight calendar are visible before buying",
+      "file": "suppliers-forecast.png"
+    },
+    {
+      "label": "Confirmed receipts preserve the partial offer price and arrival date",
+      "file": "suppliers-receipt.png"
+    },
+    {
+      "label": "A resident returns the purchased offer through a real town pickup",
+      "file": "suppliers-pickup.png"
+    },
+    {
+      "label": "A delayed freight date is quoted and retained in the confirmed order",
+      "file": "suppliers-freight.png"
+    },
+    {
+      "label": "A real midnight restock updates prices without replacing the focused basket",
+      "file": "suppliers-midnight.png"
+    },
+    {
+      "label": "Read-only water corridor follows exact ports and existing road cells",
+      "file": "utility-fresh-route.png"
+    },
+    {
+      "label": "River generator uses its integral bank lead before joining safe land corridors",
+      "file": "utility-hydro-route.png"
+    },
+    {
+      "label": "A moving cistern cannot promise an active utility route",
+      "file": "utility-move-blocker.png"
+    },
+    {
+      "label": "Located water shows the actual destination and carried load",
+      "file": "water-in-transit.png"
+    },
+    {
+      "label": "Resident carries a water pail at gameplay scale",
+      "file": "water-carry-art.png"
+    },
+    {
+      "label": "Interrupted water remains in a recoverable container",
+      "file": "water-recovery.png"
+    },
+    {
+      "label": "Recovered water pails follow the village night palette",
+      "file": "water-recovery-night.png"
+    },
+    {
+      "label": "Reclaimed irrigation remains separate from fresh-water loads",
+      "file": "water-irrigation.png"
+    },
+    {
+      "label": "Exact corridor preview and actual installation kit",
+      "file": "pipes-planner.png"
+    },
+    {
+      "label": "Named resident bringing parts to the route",
+      "file": "pipes-kit-delivery.png"
+    },
+    {
+      "label": "An existing installer reports the switch to resident dismantling",
+      "file": "pipes-resident-work.png"
+    },
+    {
+      "label": "Paused corridor work retains progress and priority",
+      "file": "pipes-installation-paused.png"
+    },
+    {
+      "label": "Installed line reports delivered water and battery use",
+      "file": "pipes-running.png"
+    },
+    {
+      "label": "Moving a source queues a newly routed installation",
+      "file": "pipes-replacement.png"
+    },
+    {
+      "label": "Installed water corridors at night",
+      "file": "pipes-night.png"
+    },
+    {
+      "label": "Installed water corridors at outage",
+      "file": "pipes-outage.png"
+    },
+    {
+      "label": "Greywater route has its own compatible receiving port and paid kit",
+      "file": "sanitation-planner.png"
+    },
+    {
+      "label": "Local sanitation buffers, reserved delivery and named closed-container carrier",
+      "file": "sanitation-stores.png"
+    },
+    {
+      "label": "An actual greywater load uses a closed fitted-lid container",
+      "file": "sanitation-carrying.png"
+    },
+    {
+      "label": "Resident describes the actual closed-container sanitation job",
+      "file": "sanitation-resident.png"
+    },
+    {
+      "label": "Filtration retains sealed ownership and protects return space",
+      "file": "sanitation-filtering.png"
+    },
+    {
+      "label": "Resident-installed greywater line reports metered local flow and energy use",
+      "file": "sanitation-pumping.png"
+    },
+    {
+      "label": "Separate fitted-lid service containers at recovered",
+      "file": "sanitation-recovered.png"
+    },
+    {
+      "label": "Separate fitted-lid service containers at recovered-night",
+      "file": "sanitation-recovered-night.png"
+    },
+    {
+      "label": "Separate fitted-lid service containers at sewage-carrying",
+      "file": "sanitation-sewage-carrying.png"
+    },
+    {
+      "label": "Outcome chapters retain optional material paths and a sustained dry-period finale",
+      "file": "story-journal.png"
+    },
+    {
+      "label": "Story care agreement requires actual follow-through",
+      "file": "story-care.png"
+    },
+    {
+      "label": "Resident salvage underway; recovered materials remain pending",
+      "file": "building-salvage.png"
+    },
+    {
+      "label": "Packing complete; crew walks to the new site to rebuild",
+      "file": "building-move.png"
+    },
+    {
+      "label": "Player plants timber trees and chooses harvest settings",
+      "file": "player-planted-timber.png"
+    },
+    {
+      "label": "Resident harvests deliver whole-tree timber and cultivated bamboo",
+      "file": "material-harvest-controls.png"
+    },
+    {
+      "label": "Choose a driver for same-day town pickup",
+      "file": "town-pickup.png"
+    },
+    {
+      "label": "Accepted helping request with paused-time guidance",
+      "file": "helping-request.png"
+    },
+    {
+      "label": "Helping request finishes through real resident work",
+      "file": "helping-request-complete.png"
+    },
+    {
+      "label": "Conditional workweek forecast with unchanged live project",
+      "file": "workweek-forecast.png"
+    },
+    {
+      "label": "Located production identity and committed input diagnostics",
+      "file": "production-diagnostics.png"
+    },
+    {
+      "label": "Paused preparation keeps committed inputs and partial labour",
+      "file": "production-paused.png"
+    },
+    {
+      "label": "Finished workshop preparation and bounded village reserve",
+      "file": "production-finished.png"
+    },
+    {
+      "label": "Tool batch retains committed timber and partial work while paused",
+      "file": "tools-batch.png"
+    },
+    {
+      "label": "Buy tool supplies as an alternative to local crafting",
+      "file": "tools-town.png"
+    },
+    {
+      "label": "Purchased tool supplies belong to the arrival store",
+      "file": "tools-arrival.png"
+    },
+    {
+      "label": "Cooked portions and delivered ingredients remain in the kitchen pantry",
+      "file": "food-pantry.png"
+    },
+    {
+      "label": "Town food purchases use the real trade controls",
+      "file": "food-trade.png"
+    },
+    {
+      "label": "Kitchen pot keeps its labour while the station is paused",
+      "file": "kitchen-paused.png"
+    },
+    {
+      "label": "A cancelled pot returns its ingredients and meal reserves stay bounded",
+      "file": "kitchen-recovery.png"
+    },
+    {
+      "label": "Resumed kitchen work finishes the same pot at its selected pantry",
+      "file": "kitchen-finished.png"
+    },
+    {
+      "label": "Interrupted powered tools keep their committed batch",
+      "file": "workshop-power-outage.png"
+    },
+    {
+      "label": "Hand tools finish the same batch without more electrical consumption",
+      "file": "workshop-power-fallback.png"
+    },
+    {
+      "label": "The Power panel previews a grid-aligned resident-installed cable",
+      "file": "electrical-planner.png"
+    },
+    {
+      "label": "Commissioned cable, local charge, pause and resident dismantling controls",
+      "file": "electrical-installed.png"
+    },
+    {
+      "label": "Battery destination preview with visible resident-work guidance",
+      "file": "battery-move-preview.png"
+    },
+    {
+      "label": "Residents install the same charged bank at its reserved plot",
+      "file": "battery-installed.png"
+    },
+    {
+      "label": "Careful salvage returns one paid unit after attended work",
+      "file": "battery-salvaged.png"
+    },
+    {
+      "label": "A recovered bank is shown with its actual carrier",
+      "file": "battery-carried.png"
+    },
+    {
+      "label": "Recovered equipment uses the shared night shading without a floor platform",
+      "file": "battery-night.png"
+    },
+    {
+      "label": "Planning reserves five meals while neighbours prepare delivery",
+      "file": "gathering-planned.png"
+    },
+    {
+      "label": "Cancelling carried gathering food leaves its portions recoverable",
+      "file": "gathering-recovery.png"
+    },
+    {
+      "label": "Delivered portions are shared once and friendships grow through attendance",
+      "file": "gathering-complete.png"
+    },
+    {
+      "label": "Freshness dates and portions to use soon are visible in Supplies",
+      "file": "freshness-use-soon.png"
+    },
+    {
+      "label": "Spoilage removes real portions and reports the loss",
+      "file": "freshness-spoiled.png"
+    },
+    {
+      "label": "Interrupted pots recover only fresh inputs and allow replacement",
+      "file": "freshness-pot.png"
+    },
+    {
+      "label": "Two digesters retain independent batches while one is paused",
+      "file": "processes-paused.png"
+    },
+    {
+      "label": "Recovering a sealed batch returns its inputs once and pauses that site",
+      "file": "processes-recovered.png"
+    },
+    {
+      "label": "Independent sealed digestate stores keep their full curing period",
+      "file": "processes-curing.png"
+    },
+    {
+      "label": "Scraps and compost use local stores and resident cargo",
+      "file": "organic-supplies.png"
+    },
+    {
+      "label": "Town sells mature compost while kitchen scraps stay in the local loop",
+      "file": "organic-trade.png"
+    },
+    {
+      "label": "Fixed scenario: autonomy",
+      "file": "scenario-autonomy.png"
+    },
+    {
+      "label": "Residents follow their own needs and village commitments",
+      "file": "autonomy-residents.png"
+    },
+    {
+      "label": "Fixed scenario: hungry",
+      "file": "scenario-hungry.png"
+    },
+    {
+      "label": "Fixed scenario: harvest",
+      "file": "scenario-harvest.png"
+    },
+    {
+      "label": "Fixed scenario: cook",
+      "file": "scenario-cook.png"
+    },
+    {
+      "label": "Fixed scenario: coop",
+      "file": "scenario-coop.png"
+    },
+    {
+      "label": "Fixed scenario: night",
+      "file": "scenario-night.png"
+    },
+    {
+      "label": "Fixed scenario: power-outage",
+      "file": "scenario-power-outage.png"
+    },
+    {
+      "label": "Fixed scenario: rain",
+      "file": "scenario-rain.png"
+    },
+    {
+      "label": "Rain with reduced motion: cloud cover and wet ground",
+      "file": "weather-reduced-motion.png"
+    },
+    {
+      "label": "Fixed scenario: after-rain",
+      "file": "scenario-after-rain.png"
+    },
+    {
+      "label": "Fixed scenario: dry-afternoon",
+      "file": "scenario-dry-afternoon.png"
+    },
+    {
+      "label": "Fixed scenario: arrival",
+      "file": "scenario-arrival.png"
+    },
+    {
+      "label": "Fixed scenario: village",
+      "file": "scenario-village.png"
+    },
+    {
+      "label": "Fixed scenario: circular",
+      "file": "scenario-circular.png"
+    },
+    {
+      "label": "Fixed scenario: circular-night",
+      "file": "scenario-circular-night.png"
+    },
+    {
+      "label": "Fixed scenario: art",
+      "file": "scenario-art.png"
+    },
+    {
+      "label": "Fixed scenario: art-night",
+      "file": "scenario-art-night.png"
+    },
+    {
+      "label": "Observed resident time and reconciled material accounts",
+      "file": "simulation-accounting.png"
+    },
+    {
+      "label": "Located storage after two resident deliveries",
+      "file": "physical-storage.png"
+    },
+    {
+      "label": "Resident work preferences in the village",
+      "file": "resident-work.png"
+    },
+    {
+      "label": "Resident routines and locally supplied water and waste processing",
+      "file": "circular-controls.png"
+    },
+    {
+      "label": "Banana bed treatment and player pause control",
+      "file": "banana-treatment.png"
+    },
+    {
+      "label": "Iara at her individual outside occupation",
+      "file": "resident-occupation.png"
+    },
+    {
+      "label": "Simulation workbench and resident diagnostics",
+      "file": "simulation.png"
+    },
+    {
+      "label": "Game canvas exported through its own capture control",
+      "file": "native-scene.png"
+    },
+    {
+      "label": "Fixed desktop village",
+      "file": "village.png"
+    },
+    {
+      "label": "Game HUD at 1280 × 800",
+      "file": "game-hud-1280.png"
+    },
+    {
+      "label": "Dev Tools at 1280 × 800",
+      "file": "dev-tools-1280.png"
+    },
+    {
+      "label": "Artwork calibration with shared game scale",
+      "file": "calibration.png"
+    },
+    {
+      "label": "Replacement review with identical source control",
+      "file": "replacement.png"
+    },
+    {
+      "label": "Replacement silhouette overlay at dusk",
+      "file": "replacement-dusk.png"
+    },
+    {
+      "label": "Recipe cards with saved revision history",
+      "file": "recipes.png"
+    },
+    {
+      "label": "All painted building sprites on their actual grid cells",
+      "file": "sprite-grid-day.png"
+    },
+    {
+      "label": "Shared full-sprite grid fit at night",
+      "file": "sprite-grid-night.png"
+    },
+    {
+      "label": "Real Sandbox seasons survive saving, reloading and Continue sandbox",
+      "file": "climate-sandbox-reload.png"
+    },
+    {
+      "label": "Sandbox wear and automatic service survive Continue sandbox",
+      "file": "upkeep-sandbox-reload.png"
+    },
+    {
+      "label": "Sandbox learning survives Continue sandbox",
+      "file": "learning-sandbox-reload.png"
+    },
+    {
+      "label": "Sandbox supplier variation survives Continue sandbox",
+      "file": "suppliers-sandbox-reload.png"
+    },
+    {
+      "label": "Independent Sandbox simulation rules use the game settings at 1600px",
+      "file": "sandbox-rules-1600.png"
+    },
+    {
+      "label": "Independent Sandbox simulation rules use the game settings at 1280px",
+      "file": "sandbox-rules-1280.png"
+    },
+    {
+      "label": "All Sandbox rules and mixed construction states survive Continue sandbox",
+      "file": "sandbox-rules-reload.png"
+    },
+    {
+      "label": "Sandbox Construction uses delivered materials and real resident work",
+      "file": "sandbox-construction.png"
+    },
+    {
+      "label": "Comfortable night power is separate from owned battery charge",
+      "file": "sandbox-comfortable-power.png"
+    },
+    {
+      "label": "Framed sprite inventory with its own scroll area at 1600",
+      "file": "interface-1600-sprite-library.png"
+    },
+    {
+      "label": "Artwork calibration uses the game workbench at 1600",
+      "file": "interface-1600-art-calibration.png"
+    },
+    {
+      "label": "Artwork replacement uses the game workbench at 1600",
+      "file": "interface-1600-art-replacement.png"
+    },
+    {
+      "label": "Artwork recipe uses the game workbench at 1600",
+      "file": "interface-1600-art-recipe.png"
+    },
+    {
+      "label": "Live sprite checks shares the artwork tool frame at 1600",
+      "file": "interface-1600-checks.png"
+    },
+    {
+      "label": "Building projection shares the artwork tool frame at 1600",
+      "file": "interface-1600-projection.png"
+    },
+    {
+      "label": "Sprite grid fit shares the artwork tool frame at 1600",
+      "file": "interface-1600-grid-fit.png"
+    },
+    {
+      "label": "Framed sprite inventory with its own scroll area at 1280",
+      "file": "interface-1280-sprite-library.png"
+    },
+    {
+      "label": "Artwork calibration uses the game workbench at 1280",
+      "file": "interface-1280-art-calibration.png"
+    },
+    {
+      "label": "Artwork replacement uses the game workbench at 1280",
+      "file": "interface-1280-art-replacement.png"
+    },
+    {
+      "label": "Artwork recipe uses the game workbench at 1280",
+      "file": "interface-1280-art-recipe.png"
+    },
+    {
+      "label": "Live sprite checks shares the artwork tool frame at 1280",
+      "file": "interface-1280-checks.png"
+    },
+    {
+      "label": "Building projection shares the artwork tool frame at 1280",
+      "file": "interface-1280-projection.png"
+    },
+    {
+      "label": "Sprite grid fit shares the artwork tool frame at 1280",
+      "file": "interface-1280-grid-fit.png"
+    }
+  ],
+  "errors": []
+}

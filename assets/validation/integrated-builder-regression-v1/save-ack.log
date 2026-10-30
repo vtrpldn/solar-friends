@@ -1,0 +1,1 @@
+PASS public editor Save after a real committed/lost reply, exact previous checkpoint and view, one commit, cleared confirmed recovery copy, following Save, reload, Undo and unchanged normal saves.

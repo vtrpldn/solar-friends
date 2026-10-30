@@ -1,0 +1,28 @@
+{
+  "why": "Check recent lighting and draft-recovery work together with desktop game flows, real exported creations, durable saves and abrupt browser recovery.",
+  "inputs": {
+    "web/pkg/solar_friends_bg.wasm": "73737d324c82c5707d22d44dde04213c3be60371155bd0e7d280fae848d55ae6",
+    "web/editor/index.js": "081026271914fa6c81ad00fa34376285bf4d724f8c1411e7c3adc5e87cb84af1",
+    "web/editor/draft-checkpoint.js": "d5780a82c3665b51b20f9aa51a0e547bda02a12077ea5ca7ab75e111236dd4e6",
+    "web/power.js": "d37e60fba9e9e9057df3bf0b0fda4e6c4d8914f9d8041673627a7868e8694f0d",
+    "web/world-atmosphere.js": "4241f136222191565c2e7900f0bcb7128df2fed32e497684372ce6a5efd3ddcf",
+    "scripts/verify-creation-sharing.mjs": "681c70412ade4858941a1a498ea699ee7deaca00b2b051a6aaf4e49ec75159f2",
+    "scripts/verify-editor-save-ack-recovery.mjs": "d3ac5f893d9684e7aa86ca3eeec186940b52a1b57fcf7b13afc2ff5cea2ca9ae",
+    "scripts/verify-editor-browser-crash-recovery.mjs": "ad721432dd9f49305f6b5a74c9e814e86bbf33e8ae23fe6fc3c4b7234f665b7e",
+    "scripts/dev-check.mjs": "219e9edfb07cecda6fdef1f66f118e24fd6297f657dfdac7655d8f9b256707de",
+    "scripts/browser-checks.mjs": "6baa16bddb4dc2081769ae0574d2e3596c05ee107ce932111cb652e116a20c8a"
+  },
+  "commands": [
+    "node scripts/dev-check.mjs --browser-only",
+    "node scripts/verify-creation-sharing.mjs",
+    "node scripts/verify-editor-save-ack-recovery.mjs",
+    "node scripts/verify-editor-browser-crash-recovery.mjs"
+  ],
+  "result": "All four commands exited zero. Desktop browser report has no observed browser errors.",
+  "scope": "Existing automated desktop game interactions and save isolation, public creation download/import/playtest/return, real worker commit with lost reply, injected quota rollback, and SIGKILL of an owned disposable browser with same-profile recovery.",
+  "limits": [
+    "Browser-only development check does not rerun Rust, compilation or all verify scripts.",
+    "The desktop check captured 200 screens; capture existence is not individual visual acceptance.",
+    "Does not replace unfamiliar-player walkthroughs, physical-device frame pacing, complete art or other original release gates."
+  ]
+}

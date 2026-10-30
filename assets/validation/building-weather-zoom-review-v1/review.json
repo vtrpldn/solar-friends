@@ -53,7 +53,6 @@
   "parity": "Final current shared-lighting-selector captures are byte-identical to inspected preceding captures.",
   "fullCaptures": "artifacts/building-rain-close-final",
   "pending": {
-    "poweredNightClose": "Captured; only Mata Atlantica group 1 reviewed.",
     "unpoweredNightClose": "Captured; visual inspection pending.",
     "poweredNightOverview": "Captured; visual inspection pending.",
     "unpoweredNightOverview": "Captured; visual inspection pending.",
@@ -63,5 +62,49 @@
     "Controlled static conditions with native rainy-window overrides, not regional climate accuracy.",
     "Does not prove moving weather, transitions, lifecycle states, nature-species coverage, resident customization or full art acceptance.",
     "All original plan requirements remain in force."
-  ]
+  ],
+  "poweredNightCloseReview": {
+    "zoom": 1.8,
+    "compositions": 81,
+    "boards": [
+      {
+        "file": "mata-atlantica-zoom-1.8-powered-night-group-1.png",
+        "sha256": "3e931b8ed6c889e8634bd84e2823a5bbfb8f4d24e3797da4fd921834880af511"
+      },
+      {
+        "file": "mata-atlantica-zoom-1.8-powered-night-group-2.png",
+        "sha256": "0de643902ac8cb7bd3e5c7b167b0df3b3896b88bada3b4e932ea68661280bed1"
+      },
+      {
+        "file": "mata-atlantica-zoom-1.8-powered-night-group-3.png",
+        "sha256": "d907cfeef0edc3f5b0d2e7ecac983d405ca572dc9e42c5949a0aa740f83b0cca"
+      },
+      {
+        "file": "cerrado-zoom-1.8-powered-night-group-1.png",
+        "sha256": "888be32a2f3ff59f17cb0cf6cb139fdb20d77f19c9cdbaada3f49e97552e7a5e"
+      },
+      {
+        "file": "cerrado-zoom-1.8-powered-night-group-2.png",
+        "sha256": "d4e851ece903ae78339304d58fa89a0a4e17d8287fa6af3862723f829542e571"
+      },
+      {
+        "file": "cerrado-zoom-1.8-powered-night-group-3.png",
+        "sha256": "582f8a16e466398e8cbb5116584c236d4906dd749e885bf43f8e15fd7a502e29"
+      },
+      {
+        "file": "caatinga-zoom-1.8-powered-night-group-1.png",
+        "sha256": "d5c314409e75c8f7790202aba18253fb02438e16781e2fe8ea80bd729a1165ec"
+      },
+      {
+        "file": "caatinga-zoom-1.8-powered-night-group-2.png",
+        "sha256": "5997fa45bf2f9d9a04f415d10addb6df4447a5beb5b4e66fb764fd18836c663c"
+      },
+      {
+        "file": "caatinga-zoom-1.8-powered-night-group-3.png",
+        "sha256": "eabdfd6820d53a4d136edda0a66e43062db9a8c0c10e821e26a797c1d9e136bb"
+      }
+    ],
+    "finding": "All nine boards individually reviewed; no additional blocking palette, ground-contact, lamp-origin, silhouette or proportion defect observed in these static scenes. Current-source recapture is byte-identical to reviewed preceding capture.",
+    "fullCaptures": "artifacts/building-powered-night-close-final"
+  }
 }

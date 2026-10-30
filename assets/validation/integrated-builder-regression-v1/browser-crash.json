@@ -1,0 +1,27 @@
+{
+  "completed": true,
+  "inputs": {
+    "scripts/verify-editor-browser-crash-recovery.mjs": "ad721432dd9f49305f6b5a74c9e814e86bbf33e8ae23fe6fc3c4b7234f665b7e",
+    "web/editor/index.js": "081026271914fa6c81ad00fa34376285bf4d724f8c1411e7c3adc5e87cb84af1",
+    "web/editor/map-view.js": "a501342d33f63e1146def06c1291bb54d3291bf753ab4f9a62c5823d85843cd9",
+    "web/editor/document.js": "9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a",
+    "web/content-library.js": "cfae04a458db4e3875c212459acc7f5cbfe89eebb3940dbb24fefb7f53fd2a96"
+  },
+  "scope": "Abrupt SIGKILL of an explicitly owned disposable browser while a trusted road stroke is unfinished. Relaunch same isolated profile/origin, reopen through public library, compare saved checkpoint/view and history. Not power-loss, disk-failure or operating-system focus acceptance.",
+  "ownedProcess": {
+    "pid": 33945,
+    "profile": "/var/folders/23/yt8lx165129_7645g387pfb80000gn/T/solar-editor-crash-4LyvQs",
+    "ownershipConfirmed": true,
+    "browserVersion": "151.0.7922.34"
+  },
+  "processExitConfirmed": true,
+  "projectId": "81ae7e8d-34b5-4841-bccb-3d013bdb4ee9",
+  "checks": {
+    "checkpointExact": true,
+    "viewExact": true,
+    "unfinishedStrokeExcluded": true,
+    "noGracefulUnload": true,
+    "undoExact": true,
+    "redoExact": true
+  }
+}
