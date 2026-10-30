@@ -1,0 +1,7 @@
+{
+  "why": "Immutable body/attachment identities must remain valid when the desktop uses hardware Canvas. GPU resampling of staging frames changed every sleep-family body pose hash and rejected composition before gameplay.",
+  "fix": "Request willReadFrequently on body staging and resampling canvases; preserve exact attachment validation and leave the world rendering context unchanged.",
+  "observedBaseline": "On Metal with the original preparation code, all 48 body frame hashes differed from bundled hair ownership. Complete composition threw Hair ownership differs from the complete body family.",
+  "verification": "Both recorded backends pass 96 immutable hair pose comparisons and 96 complete v5/v6 poses with hat and facial-hair recipes.",
+  "limits": "Not visual approval of all composed pixels, every body family, every browser or every GPU; hardware performance measurement remains separate."
+}

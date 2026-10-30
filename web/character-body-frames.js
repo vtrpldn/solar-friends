@@ -12,6 +12,8 @@ export function validateBodyFrameRegistration(registration){
   if(!exact(f,['index','waist'])||!Number.isSafeInteger(f.index)||f.index!==index||!Array.isArray(f.waist)||f.waist.length!==2||!Array.from(f.waist).every(Number.isSafeInteger))throw Error('Use ordered body poses with measured waist landmarks.');
  }
 }
+// Prepared body pixels are hash-bound to attachments. Use CPU-backed staging
+// and resampling so hardware Canvas does not change those immutable identities.
 export function prepareRegisteredBodyFrames({image,sourceHash},registration){
  validateBodyFrameRegistration(registration);
  const r=registration,s=r.source;
@@ -29,14 +31,14 @@ export function prepareRegisteredBodyFrames({image,sourceHash},registration){
    if(x<0||y<0||x+(right-left)*scale>256||y+(bottom-top)*scale>256)throw Error('The full registered body must fit without cropping.');
    const cut=document.createElement('canvas');cut.width=right-left;cut.height=bottom-top;
    try{
-    const cc=cut.getContext('2d'),part=cc.createImageData(cut.width,cut.height);
+    const cc=cut.getContext('2d',{willReadFrequently:true}),part=cc.createImageData(cut.width,cut.height);
     for(let sy=top;sy<bottom;sy++)for(let sx=left;sx<right;sx++){
      const p=sy*s.width+sx;if(layout.owners[p]!==f.id)continue;
      part.data.set(pixels.data.subarray(p*4,p*4+4),((sy-top)*cut.width+sx-left)*4);
     }
     cc.putImageData(part,0,0);
     const frame=document.createElement('canvas');frame.width=frame.height=256;output.push(frame);
-    frame.getContext('2d').drawImage(cut,x,y,cut.width*scale,cut.height*scale);
+    frame.getContext('2d',{willReadFrequently:true}).drawImage(cut,x,y,cut.width*scale,cut.height*scale);
    }finally{cut.width=cut.height=0;}
   }
   return output;

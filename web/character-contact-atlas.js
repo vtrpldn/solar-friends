@@ -27,6 +27,8 @@ export function bodyTransformContact(transform,index){
  return undefined;
 }
 
+// Prepared body pixels are hash-bound to attachments. Use CPU-backed staging
+// and resampling so hardware Canvas does not change those immutable identities.
 export function prepareContactAtlasFrames({image,sourceHash},registration){
  const r=structuredClone(registration);validateContactAtlasRegistration(r);const s=r.source;
  if(sourceHash!==s.sha256||!image?.complete||image.naturalWidth!==s.width||image.naturalHeight!==s.height)throw Error('Use the exact decoded contact-atlas source.');
@@ -41,14 +43,14 @@ export function prepareContactAtlasFrames({image,sourceHash},registration){
    if(dx<0||dy<0||dx+(right-left)*scale>256||dy+(bottom-top)*scale>256)throw Error('The whole contact-registered atlas pose must fit without cropping.');
    const cut=document.createElement('canvas');cut.width=right-left;cut.height=bottom-top;
    try{
-    const cc=cut.getContext('2d'),part=cc.createImageData(cut.width,cut.height);
+    const cc=cut.getContext('2d',{willReadFrequently:true}),part=cc.createImageData(cut.width,cut.height);
     for(let y=top;y<bottom;y++)for(let x=left;x<right;x++){
      const p=y*s.width+x;if(layout.owners[p]!==f.id)continue;
      part.data.set(pixels.data.subarray(p*4,p*4+4),((y-top)*cut.width+x-left)*4);
     }
     cc.putImageData(part,0,0);
     const frame=document.createElement('canvas');frame.width=frame.height=256;frames.push(frame);
-    frame.getContext('2d').drawImage(cut,dx,dy,cut.width*scale,cut.height*scale);
+    frame.getContext('2d',{willReadFrequently:true}).drawImage(cut,dx,dy,cut.width*scale,cut.height*scale);
    }finally{cut.width=cut.height=0;}
   }
   return {frames,contacts:Object.freeze(r.frames.map(p=>Object.freeze([...p.nativeContact])))};

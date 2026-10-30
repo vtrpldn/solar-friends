@@ -55,6 +55,8 @@ export function locateSpriteFrames(data, width, height, columns = 4, rows = 4, r
   return {frames,owners,scale,width,height,columns,rows};
 }
 
+// Prepared body pixels are hash-bound to attachments. Use CPU-backed staging
+// and resampling so hardware Canvas does not change those immutable identities.
 export function preparedFrames(image, {columns=4,rows=4,referenceRow=0} = {}) {
   if (!image?.complete || !image.naturalWidth) return null;
   const key=`${image.currentSrc || image.src}:${columns}:${rows}:${referenceRow}`;
@@ -69,7 +71,7 @@ export function preparedFrames(image, {columns=4,rows=4,referenceRow=0} = {}) {
       const left=Math.max(0,f.left-2),top=Math.max(0,f.top-2),right=Math.min(source.width,f.right+2),bottom=Math.min(source.height,f.bottom+2);
       const cut=document.createElement('canvas');cut.width=right-left;cut.height=bottom-top;let result=null;
       try{
-        const cutCtx=cut.getContext('2d'),part=cutCtx.createImageData(cut.width,cut.height);
+        const cutCtx=cut.getContext('2d',{willReadFrequently:true}),part=cutCtx.createImageData(cut.width,cut.height);
         for(let y=top;y<bottom;y++)for(let x=left;x<right;x++){
           const p=y*source.width+x;if(layout.owners[p]!==f.id)continue;
           const d=((y-top)*cut.width+x-left)*4;part.data.set(pixels.data.subarray(p*4,p*4+4),d);
@@ -77,7 +79,7 @@ export function preparedFrames(image, {columns=4,rows=4,referenceRow=0} = {}) {
         cutCtx.putImageData(part,0,0);
         result=document.createElement('canvas');result.width=result.height=256;
         const factor=layout.scale*256;
-        result.getContext('2d').drawImage(cut,128+(left-f.pivot)*factor,FRAME_ANCHOR*256+(top-f.bottom)*factor,cut.width*factor,cut.height*factor);
+        result.getContext('2d',{willReadFrequently:true}).drawImage(cut,128+(left-f.pivot)*factor,FRAME_ANCHOR*256+(top-f.bottom)*factor,cut.width*factor,cut.height*factor);
         frames.push(result);
       }catch(error){if(result)result.width=result.height=0;throw error;}
       finally{cut.width=cut.height=0;}
