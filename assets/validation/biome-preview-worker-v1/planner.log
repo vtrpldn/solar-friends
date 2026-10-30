@@ -1,0 +1,1 @@
+PASS all nine biome transitions: explicit unresolved groups, compatible remapping, preserved world setup/identities/soil, optional defaults and removal, native compilation and exact one-step undo/redo.
