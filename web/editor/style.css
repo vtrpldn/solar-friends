@@ -115,3 +115,6 @@
 .creator-workspace-guidance{margin:0 0 14px;font-size:11px!important;line-height:1.5!important}
 [data-workspace-panel]>h2{margin:14px 0}
 [data-workspace-panel]>details:first-of-type{margin-top:0}
+
+.creator-removal-impact{border:1px solid #ac8d56;background:#f2e4be;padding:8px;margin:12px 0}
+.creator-removal-impact ul{padding-left:18px;margin:8px 0}.creator-removal-impact li{margin:0 0 10px;line-height:1.5}

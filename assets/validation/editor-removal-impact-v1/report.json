@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "sources": {
+    "web/editor/removal-impact.js": "8dccaae9b45c6991ee317433d743627c0901d8fb55474635df55639376b8c5e6",
+    "web/editor/index.js": "a34535f69b333d6074090637a1d440986219da37aa0165ffa09e868d0afb4168",
+    "web/editor/regions.js": "d0363748bdb850bf8223c15e157ac98e9974be3671cfe03f020a900f9ca918c3",
+    "web/editor/style.css": "b73c96a9702f462361aec3c695b14b11d7471f8450b14c3fd064edcd233ed0ad",
+    "scripts/verify-editor-removal-impact.mjs": "cde0708ea41468bc2ce1cba8cd2a5aaa7ce97fd3f58c593fd5a64481e7eaf59d",
+    "web/pkg/solar_friends_bg.wasm": "73737d324c82c5707d22d44dde04213c3be60371155bd0e7d280fae848d55ae6"
+  },
+  "checks": {
+    "typedIdentityCollision": true,
+    "namedGoalEventConnectionStockLiquidReferences": true,
+    "dependentPumpCable": true,
+    "groupDeduplication": true,
+    "escapedText": true,
+    "inspectionHistoryUnchanged": true,
+    "missingReferencesRetained": true,
+    "undoReloadExact": true,
+    "browserErrors": []
+  },
+  "scope": "A native-valid derivative of the previously publicly authored scene fixture, imported and inspected/removed/undone through regular player controls. Describes structural references and possible type-goal effects; does not evaluate completion or prove scenario solvability."
+}

@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "visualReview": "Final building, group and region desktop captures inspected. Building/group captures wait for terrain completion. Region-name field now uses the same text-input style as the other controls.",
+  "browserChecks": {
+    "referenceImpact": "PASS session 87591, final source-bound report retained",
+    "journalRegion": "PASS session 70686, actual goal authoring/deletion/repair/undo/gameplay/checkpoint",
+    "deliveryGoals": "PASS session 27196, two named delivery goals before deletion, missing destination/undo and real hauling"
+  },
+  "extraSources": {
+    "scripts/verify-journal-player.mjs": "2654bb5ab118192de140be2f00528bde27d5341a99395a6e6da5c11be5c2272e",
+    "scripts/verify-delivery-goals.mjs": "a77072a0fe8b5b82f46db2785a6b3396c7260fbcae2732f807db7a7d947c284e"
+  },
+  "scope": "Inspector explanations for selected buildings/groups and editable named regions. No confirmation dialog, automatic retargeting, native completion evaluator or new delete semantics. Native engine unchanged."
+}
