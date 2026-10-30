@@ -1,0 +1,34 @@
+{
+  "why": "Passive buildings selected fully brightened night artwork and looked blue compared with unlit homes and terrain. They now use shared ambient day-art shading. Powered roof/grid lighting is unchanged.",
+  "inputs": {
+    "web/power.js": "d37e60fba9e9e9057df3bf0b0fda4e6c4d8914f9d8041673627a7868e8694f0d",
+    "web/main.js": "950bd11f94eceffe11e56ae5fe131a0244d9834863e4ad128bc9c1b2e1191316",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "scripts/verify-power.mjs": "0b734e09b82e73aad223895aa28c10a18b6dee695007225b360dcc5e46f2d214",
+    "scripts/review-building-biome-context.mjs": "807c3b9f4f645e4ac7af345423ef5a1ddf919b08df6f18bd64724c55e06a86e2"
+  },
+  "reviewedCorrectedBoards": {
+    "unpowered-night": [
+      "mata-atlantica-zoom-1-unpowered-night-group-1.png",
+      "mata-atlantica-zoom-1-unpowered-night-group-2.png",
+      "caatinga-zoom-1-unpowered-night-group-3.png"
+    ],
+    "powered-night": [
+      "cerrado-zoom-1-powered-night-group-1.png",
+      "cerrado-zoom-1-powered-night-group-3.png",
+      "caatinga-zoom-1-powered-night-group-2.png"
+    ]
+  },
+  "beforeFix": "All nine unpowered contextual boards visually inspected; passive compost, grove, solar farm, garden and sanitation equipment showed differing blue illumination. Native source categories traced to buildingLighting fallback 1.",
+  "rain": "All nine original normal-zoom rain boards now inspected; no additional blocking geometry or ground-contact issue observed in these static captures.",
+  "checks": [
+    "verify-power.mjs passed including passive native source categories, unknown connection and fractional powered levels",
+    "verify-playtest.mjs passed",
+    "Baseline HEAD implementation reproduced passive unlit compost selecting full night lighting"
+  ],
+  "limits": [
+    "Only six corrected boards inspected so far; remaining corrected boards pending.",
+    "No raster artwork, geometry, native power simulation or resource balances changed.",
+    "Wider zooms, transitions, lifecycle, customization and other full-plan release gates remain open."
+  ]
+}

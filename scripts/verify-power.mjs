@@ -7,6 +7,9 @@ import { advanceGame } from '../web/dev/scenarios.js';
 import { buildingLighting, lightingLayers, powerConnections } from '../web/power.js';
 import {withAuthoredElectricalCircuits} from '../web/dev/electrical-fixture.js';
 
+for(const source of ['none','solar','hydro']) assert.equal(buildingLighting({connections:[{id:42,source,light_level:1}]},42,'compost'),0,'Passive objects use ambient shading');
+for(const source of ['grid','roof']) for(const light_level of [0,.4,1]) assert.equal(buildingLighting({connections:[{id:42,source,light_level}]},42,'home'),light_level);
+assert.equal(buildingLighting({connections:[]},42,'compost'),0);
 await init({module_or_path: await readFile(new URL('../web/pkg/solar_friends_bg.wasm', import.meta.url))});
 const g=new Game(), legacy=JSON.parse(await readFile(new URL('../web/artwork/village-preview.json',import.meta.url),'utf8'));
 const snapshot=()=>JSON.parse(g.snapshot());

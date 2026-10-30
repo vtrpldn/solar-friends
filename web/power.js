@@ -3,7 +3,9 @@ import {usesUtilities} from './sandbox-rules.js';
 export function buildingLighting(power, id, kind, complete = true) {
   if (!complete) return 0;
   const connection=power?.connections.find(c=>c.id===id);
-  return connection?.source==='grid' || connection?.source==='roof' ? connection.light_level : kind==='streetlight'?0:1;
+  // Passive buildings have no interior lighting. Use the same ambient
+  // day-art shading as an unlit home rather than brightened night artwork.
+  return connection?.source==='grid' || connection?.source==='roof' ? connection.light_level : 0;
 }
 export function unlitFilter(night=1, saturation=1) {
   if(night<=0&&saturation===1)return 'none';
