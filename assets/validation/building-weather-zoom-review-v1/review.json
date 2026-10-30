@@ -52,11 +52,6 @@
   },
   "parity": "Final current shared-lighting-selector captures are byte-identical to inspected preceding captures.",
   "fullCaptures": "artifacts/building-rain-close-final",
-  "pending": {
-    "poweredNightOverview": "Captured; visual inspection pending.",
-    "unpoweredNightOverview": "Captured; visual inspection pending.",
-    "rainOverview": "Captured; visual inspection pending."
-  },
   "limits": [
     "Controlled static conditions with native rainy-window overrides, not regional climate accuracy.",
     "Does not prove moving weather, transitions, lifecycle states, nature-species coverage, resident customization or full art acceptance.",
@@ -149,5 +144,141 @@
     ],
     "finding": "All nine boards individually inspected. No additional blocking palette, ground-contact, silhouette or proportion defect observed in these static scenes.",
     "fullCaptures": "artifacts/building-unpowered-close"
+  },
+  "poweredNightOverviewReview": {
+    "zoom": 0.65,
+    "compositions": 81,
+    "boards": [
+      {
+        "file": "mata-atlantica-zoom-0.65-powered-night-group-1.png",
+        "sha256": "b1242c79cc2d190ac8ef3f78d0c3dc985b7a0536ae6632adeec37cf37104ba17"
+      },
+      {
+        "file": "mata-atlantica-zoom-0.65-powered-night-group-2.png",
+        "sha256": "d5fbf7aade32e764044bdd86d2078498275d0e36693bc48ac2bb035f33e1d7fe"
+      },
+      {
+        "file": "mata-atlantica-zoom-0.65-powered-night-group-3.png",
+        "sha256": "2f26993b38b492aeb42b21e0a8029059cc15309b6a92d52e0e42a0d6260717ac"
+      },
+      {
+        "file": "cerrado-zoom-0.65-powered-night-group-1.png",
+        "sha256": "5eb4626940b446cb76c5ed42cb28ecf175462d306e30b2d848c2a5452a30dffe"
+      },
+      {
+        "file": "cerrado-zoom-0.65-powered-night-group-2.png",
+        "sha256": "d43f397e2f6cefd673a5a82f8f1a6a4cc249b48c3135b4f4e1208a73dbc31c40"
+      },
+      {
+        "file": "cerrado-zoom-0.65-powered-night-group-3.png",
+        "sha256": "0f98120f7bb212703112ff7ed3b2d609ef07b8ff9ee520b8583680d8ef828240"
+      },
+      {
+        "file": "caatinga-zoom-0.65-powered-night-group-1.png",
+        "sha256": "f1c932c7ad93045bc62564bb491db7be47c49f55ceaade6ed6185dfa9d24229b"
+      },
+      {
+        "file": "caatinga-zoom-0.65-powered-night-group-2.png",
+        "sha256": "2f0ca5f1a528ad07131a0868761efa802898aa47d2882d50e5eaef07ca22c131"
+      },
+      {
+        "file": "caatinga-zoom-0.65-powered-night-group-3.png",
+        "sha256": "c3a023feb9adc9db498a26548135de7fdbf39a96a070e95ea3feff23fac46744"
+      }
+    ],
+    "finding": "All nine boards individually inspected. No additional blocking palette, ground-contact, silhouette, proportion or lamp-origin defect observed in these static overview scenes. Current-source recapture byte-identical to the inspected preceding capture.",
+    "fullCaptures": "artifacts/building-night-overview-final"
+  },
+  "unpoweredNightOverviewReview": {
+    "zoom": 0.65,
+    "compositions": 81,
+    "boards": [
+      {
+        "file": "mata-atlantica-zoom-0.65-unpowered-night-group-1.png",
+        "sha256": "746d5385d5d529eea1c6cf72f2b7bc0901f2ea96a269669ad76597499140ed31"
+      },
+      {
+        "file": "mata-atlantica-zoom-0.65-unpowered-night-group-2.png",
+        "sha256": "ccfa2e5bebca1b7e29fec6a50bf1116cf4b126b9160145975fa6bf8db11ad47a"
+      },
+      {
+        "file": "mata-atlantica-zoom-0.65-unpowered-night-group-3.png",
+        "sha256": "267af47c880d7eb84895d8105011bd24955fccf23d251525310fbd163074e7bb"
+      },
+      {
+        "file": "cerrado-zoom-0.65-unpowered-night-group-1.png",
+        "sha256": "4f56fc271cae09e5f6a8fac0690cb300557da3c7bbfaa48d72a4a01321bb71fd"
+      },
+      {
+        "file": "cerrado-zoom-0.65-unpowered-night-group-2.png",
+        "sha256": "ea84cd4b8f82beabf6c3901ff4a641eb943ccb3d55111903d0a53669a5f68903"
+      },
+      {
+        "file": "cerrado-zoom-0.65-unpowered-night-group-3.png",
+        "sha256": "541f22791afc6e0d5307fae1687c94361cfbcfe1b1f6c021666c511d46c524a1"
+      },
+      {
+        "file": "caatinga-zoom-0.65-unpowered-night-group-1.png",
+        "sha256": "b826d207e62b946a2d867c666e8af068724ad775d242c482c8f9713aa5c592e0"
+      },
+      {
+        "file": "caatinga-zoom-0.65-unpowered-night-group-2.png",
+        "sha256": "8770936fd0c65581710f282bc03b5b8917adbcec8f0f57cecd89c49b353a050f"
+      },
+      {
+        "file": "caatinga-zoom-0.65-unpowered-night-group-3.png",
+        "sha256": "c24f6f05255b0cff61cf08a22986f80234fb053d751563a6c340cfb1c9805cc7"
+      }
+    ],
+    "finding": "All nine boards individually inspected. No additional blocking palette, ground-contact, silhouette, proportion or lamp-origin defect observed in these static overview scenes. Current-source recapture byte-identical to the inspected preceding capture.",
+    "fullCaptures": "artifacts/building-unpowered-overview-final"
+  },
+  "pending": {
+    "transitionsAndLifecycle": "Not covered by these controlled static views.",
+    "otherOriginalArtGates": "Resident parts/motion, nature/terrain transitions and representative neighbor/state combinations remain separate."
+  },
+  "rainOverviewReview": {
+    "zoom": 0.65,
+    "compositions": 81,
+    "boards": [
+      {
+        "file": "mata-atlantica-zoom-0.65-rain-group-1.png",
+        "sha256": "8778a4cd78872899d46a64f9af07ea6f5675ed675eeb6170869a59987e4a86be"
+      },
+      {
+        "file": "mata-atlantica-zoom-0.65-rain-group-2.png",
+        "sha256": "965c087d9bac5b6cc0d4d4735b30ef5375d716bd3bb8d97c3a468611184b3063"
+      },
+      {
+        "file": "mata-atlantica-zoom-0.65-rain-group-3.png",
+        "sha256": "76b90bda80867ea29c8317f51b27c19a8c0ee36d4345bd26308d712c30188b00"
+      },
+      {
+        "file": "cerrado-zoom-0.65-rain-group-1.png",
+        "sha256": "02c99634dda174f430c12e6a6a5bf4335811dc53f7e1b31d7db355887eb720eb"
+      },
+      {
+        "file": "cerrado-zoom-0.65-rain-group-2.png",
+        "sha256": "bab05a62a4ede4b99633a1385ec1961d7e9ae941c286098477784bd3c472a4e9"
+      },
+      {
+        "file": "cerrado-zoom-0.65-rain-group-3.png",
+        "sha256": "ce8766e4d261b625ad5c1338c57e7cd5d1d6e8bf47aedb058c2d665533ecd568"
+      },
+      {
+        "file": "caatinga-zoom-0.65-rain-group-1.png",
+        "sha256": "e812af5828683c77878bd88700884651e5f1c8fa56720e4904b4c82d390ce479"
+      },
+      {
+        "file": "caatinga-zoom-0.65-rain-group-2.png",
+        "sha256": "49724cda851d9d7f0b9dad90402099e7da8279080d26fda598699bd5398bfe01"
+      },
+      {
+        "file": "caatinga-zoom-0.65-rain-group-3.png",
+        "sha256": "69365719d31899eb62321f1b713782dd70c1021a4b98fcf31f1fee2a7d8702bc"
+      }
+    ],
+    "finding": "All nine boards individually inspected. No additional blocking proportion, silhouette, ground-contact, clipping or static rain-overlay defect observed. Current-source recapture byte-identical to preceding inspected captures.",
+    "fullCaptures": "artifacts/building-rain-overview-final"
   }
 }

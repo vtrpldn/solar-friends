@@ -1,0 +1,60 @@
+{
+  "why": "Separate actual hardware desktop performance from software Canvas diagnostics and verify maximum building/custom resident activation after the frame binding correction.",
+  "backend": [
+    {
+      "vendorId": 4203,
+      "deviceId": 0,
+      "vendorString": "Google Inc. (Apple)",
+      "deviceString": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Version 26.5.2 (Build 25F84))",
+      "driverVendor": "Apple",
+      "driverVersion": "26.5.2"
+    }
+  ],
+  "phases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "frameGapP95Ms": 9.19999999999709,
+      "pauseClickMs": 41.72820800000045,
+      "simulationRateFraction": 1.0003709530363987,
+      "droppedRealSecondsDelta": 0.0,
+      "residentCacheBytes": 157286400
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "frameGapP95Ms": 9.19999999999709,
+      "pauseClickMs": 50.01887500000885,
+      "simulationRateFraction": 1.0003544534024178,
+      "droppedRealSecondsDelta": 0.0,
+      "residentCacheBytes": 157286400
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "frameGapP95Ms": 16.60000000000582,
+      "pauseClickMs": 75.4959160000144,
+      "simulationRateFraction": 0.9964312783505852,
+      "droppedRealSecondsDelta": 0.25625,
+      "residentCacheBytes": 157286400
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "frameGapP95Ms": 16.599999999976717,
+      "pauseClickMs": 45.58670899999561,
+      "simulationRateFraction": 1.0003573448064338,
+      "droppedRealSecondsDelta": 0.0,
+      "residentCacheBytes": 157286400
+    }
+  ],
+  "visualReview": "All four final captures individually inspected. No missing world, obvious corrupt building/resident rendering or blocking HUD overlap observed in these samples. The deliberately dense stress fixture is not landscape design approval.",
+  "finding": "Four 60-second phases completed, browser errors empty, independent source/native/checkpoint verifier passed. Hardware frame gaps are substantially lower than the retained SwiftShader run. No production night-renderer workaround was promoted.",
+  "limits": [
+    "One Mata Atlantica seed-42 maximum-building fixture with twelve distinct v5/v6 resident recipes. Not the whole performance matrix.",
+    "Developer snapshot import and forced 16x are diagnostic setup, not public authoring or speed control verification.",
+    "Cache samples exclude total native/process/GPU memory and do not prove a long-term memory plateau.",
+    "Browser animation frame timing is not external physical-display instrumentation.",
+    "No source-equivalent headless rerun after the body-preparation fix; old software measurement is historical evidence, not a controlled backend-only A/B."
+  ]
+}

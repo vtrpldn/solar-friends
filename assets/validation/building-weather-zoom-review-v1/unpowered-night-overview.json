@@ -1,0 +1,3644 @@
+{
+  "complete": true,
+  "zoom": 0.65,
+  "lighting": "unpowered-night",
+  "inputs": {
+    "scripts/review-building-biome-context.mjs": "26d99798d72d7730ade81f7658c643514ca21293fa78601b18322bf1887afa21",
+    "web/pkg/solar_friends.js": "d277c6ebfda846e79d2d25df61b5c0bfe1f8a45c6e4296e45f669ed9d8e9c9eb",
+    "web/editor/map-view.js": "a501342d33f63e1146def06c1291bb54d3291bf753ab4f9a62c5823d85843cd9",
+    "web/building-art.js": "977312b8c88e4d700fadff2cb654a3e20a35501dd1560779b830dcbfbb6eeace",
+    "web/building-footprints.js": "4437a07f72209817dc197b24314018362f1abf68966de099a062c933525babf1",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/sprite-frames.js": "4a32cbc68b75e90b7c1fe63e139143ff6c1cbd91954276cfd7179eb4f5b44604",
+    "web/paint-cache.js": "f070b4e16eeb75c077b26009201fef77ca246a9c202664730bc81dda35cc053c",
+    "web/building-projection.js": "e64a3306774ed0d6d8aa070a6b91aacc28b129ac3bfbe7c244df0532bf6f76de",
+    "web/editor/scene-layers.js": "045c4bf57886043d243f0cac6722f92bba5f1b505fc4a3da3449bcd9ea05e00e",
+    "web/editor/routes.js": "0d2c83154aa359e8fa508ea285961247a2d7a4487dd8e5ae21608c765386fa9b",
+    "web/utility-lines-art.js": "e1cc662f79b7beab542540ef9a923a7dd8f227dea6791ae48544d08f66fb559e",
+    "web/editor/batteries.js": "505a7fc8d07f09c13381d27e45c8797d6b57ef70a49e39b42b86b7b34839ac04",
+    "web/battery-art.js": "48d2c00ba144080d40c048ea3d3edfe4811e02f456af07c851efbb6487bc2887",
+    "web/chickens.js": "f438c1d08c0ebec511511288b2eef6149825b61509e9dd2809244d055798021a",
+    "web/resource-site-art.js": "a0601241ab8d107474b2989d16705b1a73a942617eaae3689af8c0485190f47f",
+    "web/economy-art.js": "b9a9f15be3bdc0f11dda6de42777b34b0f70b250debe1612b9729c9957a6333a",
+    "web/crop-art.js": "e75beb185b763eb4f18dc984c6d2b3e12fecc0348b3c91ebe8e349cbb174685c",
+    "web/editor/sites.js": "59b51a11d34a80bf5ab155f4a13128dff228d1e965423063b2029a66271a52e8",
+    "web/resident-look.js": "94f94dff5b280b57998d97ef94641e1850cbd5d2946ae61a3ed3b2f10367de5d",
+    "web/resident-appearance-library.js": "518acdb703b9eb9bff55a4c05b6c443761af48a53d905a5ee7d761ddbc409773",
+    "web/regional-art.js": "b7a23c741fcb76ea47d911f9bcd07a9cc8488f81c6a1a18c5232e744b394c3bb",
+    "web/editor/prepare-terrain.js": "2263c3c79dd89d05bab83920966a9354c206cc533b2f464e2c7748e0ac44319d",
+    "web/editor/brush.js": "3bf5390061865456479d91f79f17b2b7db5987a6aeb6d5e88dbd06210ecd28c3",
+    "web/editor/terrain-cache.js": "89b760d42a330deee375c4ea6775d98d96f371e82406d80f858676a8669a527d",
+    "web/building-state-art.js": "2c66d34e1b2582b1509e6caa69cac0f5907f57ab38160d4d0fffc44f37429bef",
+    "web/building-silhouettes.js": "247be59f561d36f2400b68ceb0c1266d5f19c2864254c4d95a52892c9b670a43",
+    "web/habitats.js": "63ebeab1df2ac631ec3b0a3bd250d5f7a2e6372fdd55a70f446e3853947aa5a6",
+    "web/nature-art.js": "389a97d806cbf7d286b3ebedeeabac390770208672529d494444bf1034e255b0",
+    "web/power.js": "d37e60fba9e9e9057df3bf0b0fda4e6c4d8914f9d8041673627a7868e8694f0d",
+    "web/editor/workspaces.js": "14fbe60d5f8c03293678c9fee736eb08ba4cf030b5a5b0c104c07f6486601a82",
+    "web/greenhouse-layout.js": "dce24b4528d6c942c6afcc93e32b810fdac2018aa8a0eebad2d3b2fdcbbb07b8",
+    "web/resource-sites.js": "9a95c65342707d4f07ad8904dd896600d70a94c392962b44d040ef8fd0fc33b8",
+    "web/resident-part-recipe.js": "44af0a70cad6a16790a6556d57c6e343bd982085565e3c577bfec9ba065953a1",
+    "web/terrain-revision.js": "f6dfcb06898799931676a227689d0a162b3a278525893c07b2d392c91ce90878",
+    "web/sandbox-rules.js": "c4d708f49592384ed6f6920c85f15f2ef03cc239de08cb8026066c00ffa98b11",
+    "web/battery-plots.js": "327faa1e4c9f97f173eff8f5de53250dbdcc72e845b23aedbbecaa857d9b3e84",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/character-hair-colours.js": "612735bf2a5bb6219d5d68b1b5d187e6662480ecc114ec99d591ac9f91a92dfa",
+    "web/character-contact-atlas.js": "71880a29ef77436d4cb3f24361eca91b2fd5ceae8342ffd74936ec006d0a3f26",
+    "web/character-attachments.js": "2f88fee807c21ced70a762e2a1cb7169e9247a7c6136d81e37b235f1e67ac7cf",
+    "web/editor/journal.js": "e5ee57626eecacd22dda40297c98d25dffe20c7cd667564885a5bb97cf61d9e0",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/character-body-frames.js": "e64697c8c2d523b8072473420f7a953b4c0b810ef5c837658dbd7e8bc5ebfdfb",
+    "web/character-contact-frame.js": "80362004f1bb2e80db69133b3e881261aed8d5ac645783f3ebe82b596eb25663",
+    "web/art/recovered-battery.png": "9cc9f12a8c414b81d68b45a4348b7ec55735e80c0bb6eaf098dd3681f604a2b6",
+    "web/art/economy-atlas-v2.png": "70c115a50bfffd4b4c6808ebb1375e5bc3c6f74d5507bcb797def54886827e06",
+    "web/pkg/solar_friends_bg.wasm": "73737d324c82c5707d22d44dde04213c3be60371155bd0e7d280fae848d55ae6",
+    "web/art/starter-shed-refined.png": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+    "web/art/orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+    "web/art/apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+    "web/art/goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+    "web/art/hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+    "web/art/eco-toilet-tall.png": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+    "web/art/banana-treatment.png": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
+    "web/art/wetland-square-v2.png": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+    "web/art/biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+    "web/art/streetlight.png": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+    "web/art/solar-farm.png": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+    "web/art/warehouse.png": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+    "web/art/garden-simple-isometric.png": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+    "web/art/village-atlas-isometric.png": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+    "web/art/greenhouse-isometric.png": "6bc7925077a4089014e8973979cfaa3e242a12cf400888d27998c6aac0350ee2",
+    "web/art/compost-isometric.png": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+    "web/art/cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+    "web/art/square-isometric.png": "76ec6da02bc5b4575b556019ffbfe74c1a092d32c3e5cbd21d74945f2adf2c91",
+    "web/art/workshop-isometric.png": "fc194eb60c86435ae750c13b4bcb5c9a59c5897e63b2debcb29b1cb960eac4a7",
+    "web/art/coop-isometric.png": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+    "web/art/home-gable.png": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+    "web/art/home-veranda.png": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+    "web/art/home-courtyard.png": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+    "web/art/adobe-gable.png": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+    "web/art/adobe-veranda.png": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+    "web/art/goat-pasture-empty-v1.png": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+    "web/art/mata-atlantica-atlas.png": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+    "web/art/landscape-details.png": "a5212211cc3d8bca0250b3990a9dcc90ca3bbd3d27fa9b1007d85b3dc931ae56",
+    "web/art/terrain-atlas.png": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+    "web/art/animations/iara.png": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+    "web/art/animations/bento.png": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+    "web/art/animations/caua.png": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+    "web/art/animations/nina.png": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+    "web/art/animations/luz.png": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+    "web/art/cerrado-vegetation-v1.png": "1542d0c14fa9cfddc83ec0e1a04e5ef5be34fcf1273d93d4eb13c2c8f5f359a6",
+    "web/art/caatinga-vegetation-v1.png": "522999ec80e708b3203cb6f59a2b90067d3d7eb2f7265b82d6e7815854c26290",
+    "web/art/crops.png": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+    "web/art/field-crops.png": "ca755cb0aced1ef12ec69284c915490e59e5207961d5fb0a4d90fdf5913c219e",
+    "web/art/chickens.png": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+    "web/art/regional-ground-v1.png": "acdad558e0db68fb04760f2a27d44beaf79eec89d6b02d583e35586748bbfeb1",
+    "web/art/animations/iara-idle.png": "3d2510219502ef9b7e11872009672cf6a510ef2341abb6fd90888b8abc1d6849",
+    "web/art/animations/iara-activities.png": "29dd26deb5204d648ca37abdb01931db27d05b0b3827e32bf1d944789fcc7711",
+    "web/world-atmosphere.js": "4241f136222191565c2e7900f0bcb7128df2fed32e497684372ce6a5efd3ddcf",
+    "web/night-lighting.js": "6f8e92f982122297cbc99b1b23c2e82cd8c9fa34c711f200b1b35bbf4bd9ac8e",
+    "web/weather.js": "0aed62fb10fd022f0e79a21f73ed5fb69cdf0a8003ab577c8415bae654f2da24",
+    "web/art/hydro-night.png": "27a5839e924ca96e89989e150117b44e2ca5566b504f304f82a62f115bd91cb2",
+    "web/art/eco-toilet-tall-night.png": "faa4b2a5f11f6e579e4bedadec583b946494b8514c2adde2c8fb8047812c8880",
+    "web/art/banana-treatment-night.png": "fc851ec1f43c2a3294f31253716da061394adc2a7fcc99bfb5508ec93e73e7b4",
+    "web/art/biodigester-night.png": "ff2327fd6479d3682323c0ffc7f2423a009a52547da3d4c145aac9f2b3332a24",
+    "web/art/warehouse-night.png": "a3922fe7eae2cee37991410d89b56a82bba5940a53b2e71c53127efc35447164",
+    "web/art/solar-farm-night.png": "02f5502b3f9f67a3876237f16882a2773b702c623b1123b647bf185b51fea92b",
+    "web/art/streetlight-night.png": "f898f34ec0a95d3f8f39995b76be5ab8774034c96d73578d020b9e181a83c131",
+    "web/art/village-atlas-isometric-night.png": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+    "web/art/garden-simple-isometric-night.png": "63f00e1ed22e677d962b506a510ce8c48bc2e1a5bcbc3d3b2cb68f1f59c9e72f",
+    "web/art/greenhouse-isometric-night.png": "19a034b2826528e21160a54f6a3c0dec4dd922cfdcf2bcf78b3ba83b980f8f9d",
+    "web/art/cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
+    "web/art/compost-isometric-night.png": "9171162eaf433946480dcacf7c0ad6db2b51f1a9b1ef1c609209b9344c5754a4",
+    "web/art/square-isometric-night.png": "fdf9c4d571d2584a530e929d38017128843f3bb33f85c89b4b44ad1cc99c8378",
+    "web/art/workshop-isometric-night.png": "d52f4e7e2f9b8e71ecf4553583dee4c016ea47a4a1867a13f1a5f9a25c41fd9d",
+    "web/art/coop-isometric-night.png": "c6e5af120dcce0f34414521247b33914c5eeca33ef270e2ceeb74b36f9d2724c",
+    "web/art/home-veranda-night.png": "3a9e0e11fc2cd8bc81b415007a16b7d012d60e214d5f26782b52327ef51c5e3b",
+    "web/art/home-gable-night.png": "3385f279c694fb380dac3469ea18f36dff26cca0e5720700e88235cb2bde2740",
+    "web/art/home-courtyard-night.png": "12aec649596f296dd0904266a2247ee6b78197d476c4e2f61169acca3ec07205",
+    "web/art/adobe-gable-night.png": "471e9510f73406a82124940f2f77cd71f48333adb12f61bc58f9e076cccf9a7a",
+    "web/art/adobe-veranda-night.png": "0ab2a6b62393681e7bc44ff2ea319a6ed60bf84bfcb665db7b8e5be18024e655",
+    "web/dev/art-preview.js": "f6d7b848232873fc3c978904160d99d2c6d13549191a570319c7e9d91358d288",
+    "web/dev/material-fixture.js": "812ecd42fe030b2652ae8830eddef00f00fc9dd60c7db4c69cb6a87ff2fe64be",
+    "web/polish.js": "ba6967e4f65af49206071c134144fd51812ff92d2a312962cae77f50f365a4a9",
+    "web/dev/electrical-fixture.js": "c6db06b3a7269b1de79ea041e3f7248f8c69b2a7c842fcc7f68ee08fe57a2251",
+    "web/relationships.js": "67430c42f420a63a2c6392fd709b451d40f4678297dfc3d90021513cccb014e9"
+  },
+  "scope": "Static controlled building appearances through shared game world painters, depth-masked emissions, atmosphere and weather; native-generated regional terrain and bank eligibility. Reference home, original Iara and adjoining road. Rain uses a native rainy-day window. Power levels are controlled presentation comparisons, not proof of functioning authored circuits. Not scenario feasibility, crop/construction/animal lifecycle, resident motion or automatic visual acceptance.",
+  "boards": [
+    {
+      "file": "mata-atlantica-zoom-0.65-unpowered-night-group-1.png",
+      "sha256": "746d5385d5d529eea1c6cf72f2b7bc0901f2ea96a269669ad76597499140ed31",
+      "entries": [
+        {
+          "key": "shed",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 155.85026923380124,
+            "right": 286.3,
+            "top": 225.31044272313818,
+            "bottom": 340.61587873285197
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "orchard",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 159.23598522254497,
+            "right": 286.3,
+            "top": 205.80487228857714,
+            "bottom": 338.00944394623775
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "goat_pasture",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 156.78119018590206,
+            "right": 286.3,
+            "top": 237.0627801291655,
+            "bottom": 340.579527097296
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "apiary",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 201.36691903252816,
+            "right": 242.1,
+            "top": 272.83993676972,
+            "bottom": 315.24319536053326
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "hydro",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "hydro",
+          "position": [
+            60,
+            25
+          ],
+          "referenceHome": [
+            57,
+            25
+          ],
+          "roads": [
+            [
+              57,
+              26
+            ]
+          ],
+          "targetBounds": {
+            "left": 297.9,
+            "right": 341.98760118155724,
+            "top": 268.47204795026107,
+            "bottom": 317.4831895201304
+          },
+          "referenceBounds": {
+            "left": 211.94520617070174,
+            "right": 297.90000000000003,
+            "top": 199.77969899907674,
+            "bottom": 281.2653376773845
+          }
+        },
+        {
+          "key": "eco_toilet",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 199.5246486162931,
+            "right": 242.1,
+            "top": 254.46209526790878,
+            "bottom": 320.83928880390863
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "banana_treatment",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.76904000618464,
+            "right": 264.2,
+            "top": 260.2621860614793,
+            "bottom": 318.62883180790965
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "wetland",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.9301208563303,
+            "right": 264.2,
+            "top": 258.49265878980765,
+            "bottom": 319.527471062268
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "biodigester",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.15339509272286,
+            "right": 264.2,
+            "top": 246.92651522800736,
+            "bottom": 306.95569622554063
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        }
+      ]
+    },
+    {
+      "file": "mata-atlantica-zoom-0.65-unpowered-night-group-2.png",
+      "sha256": "ccfa2e5bebca1b7e29fec6a50bf1116cf4b126b9160145975fa6bf8db11ad47a",
+      "entries": [
+        {
+          "key": "warehouse",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 180.20033560772885,
+            "right": 264.2,
+            "top": 237.27974643005652,
+            "bottom": 315.78024674550966
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "solar_farm",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "solar",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 158.0793646114852,
+            "right": 286.3,
+            "top": 260.0966720172493,
+            "bottom": 341.47379052782014
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "streetlight",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 214.32503955616156,
+            "right": 242.1,
+            "top": 238.23183136083537,
+            "bottom": 320.44658373697115
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.2452061707017,
+            "right": 264.2,
+            "top": 232.92969899907672,
+            "bottom": 314.41533767738446
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "kitchen",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 181.7162108961137,
+            "right": 264.2,
+            "top": 245.71136988528485,
+            "bottom": 317.09952083360145
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "grove",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 183.70156328044035,
+            "right": 264.2,
+            "top": 232.94497425577248,
+            "bottom": 315.2897050131701
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "garden",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.2634871559621,
+            "right": 264.2,
+            "top": 273.5428102479059,
+            "bottom": 320.1372891106445
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "greenhouse",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.28186524365103,
+            "right": 264.2,
+            "top": 235.49890041371816,
+            "bottom": 319.1404942515677
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "well",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 199.0385353888118,
+            "right": 242.1,
+            "top": 270.8374069991346,
+            "bottom": 319.96677432963884
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        }
+      ]
+    },
+    {
+      "file": "mata-atlantica-zoom-0.65-unpowered-night-group-3.png",
+      "sha256": "267af47c880d7eb84895d8105011bd24955fccf23d251525310fbd163074e7bb",
+      "entries": [
+        {
+          "key": "compost",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 198.39025020218068,
+            "right": 242.1,
+            "top": 287.2687411536939,
+            "bottom": 316.11763585215533
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "square",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 154.37412313390604,
+            "right": 286.3,
+            "top": 253.2319745332424,
+            "bottom": 333.19010437073644
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "workshop",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 176.1416433828927,
+            "right": 264.2,
+            "top": 209.69769268200878,
+            "bottom": 317.51665461373875
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "coop",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 197.9,
+            "right": 240.8178762147131,
+            "top": 267.1580778677653,
+            "bottom": 314.5371327929547
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home-veranda",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.10918556717328,
+            "right": 264.2,
+            "top": 228.24871084325343,
+            "bottom": 314.25550337378047
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home-gable",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.45754348703963,
+            "right": 264.2,
+            "top": 234.27813512425217,
+            "bottom": 317.5138750585279
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home-courtyard",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.20019776157105,
+            "right": 264.2,
+            "top": 231.17815903576474,
+            "bottom": 316.0629361991809
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "adobe-gable",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.21499525563306,
+            "right": 264.2,
+            "top": 224.39574000457964,
+            "bottom": 316.67633989058214
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "adobe-veranda",
+          "biome": "mata-atlantica",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.7205510605948,
+            "right": 264.2,
+            "top": 231.66900004582084,
+            "bottom": 317.65973161931487
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-0.65-unpowered-night-group-1.png",
+      "sha256": "4f56fc271cae09e5f6a8fac0690cb300557da3c7bbfaa48d72a4a01321bb71fd",
+      "entries": [
+        {
+          "key": "shed",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 155.85026923380124,
+            "right": 286.3,
+            "top": 225.31044272313818,
+            "bottom": 340.61587873285197
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "orchard",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 159.23598522254497,
+            "right": 286.3,
+            "top": 205.80487228857714,
+            "bottom": 338.00944394623775
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "goat_pasture",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 156.78119018590206,
+            "right": 286.3,
+            "top": 237.0627801291655,
+            "bottom": 340.579527097296
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "apiary",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 201.36691903252816,
+            "right": 242.1,
+            "top": 272.83993676972,
+            "bottom": 315.24319536053326
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "hydro",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "hydro",
+          "position": [
+            60,
+            25
+          ],
+          "referenceHome": [
+            57,
+            25
+          ],
+          "roads": [
+            [
+              57,
+              26
+            ]
+          ],
+          "targetBounds": {
+            "left": 297.9,
+            "right": 341.98760118155724,
+            "top": 268.47204795026107,
+            "bottom": 317.4831895201304
+          },
+          "referenceBounds": {
+            "left": 211.94520617070174,
+            "right": 297.90000000000003,
+            "top": 199.77969899907674,
+            "bottom": 281.2653376773845
+          }
+        },
+        {
+          "key": "eco_toilet",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 199.5246486162931,
+            "right": 242.1,
+            "top": 254.46209526790878,
+            "bottom": 320.83928880390863
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "banana_treatment",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.76904000618464,
+            "right": 264.2,
+            "top": 260.2621860614793,
+            "bottom": 318.62883180790965
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "wetland",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.9301208563303,
+            "right": 264.2,
+            "top": 258.49265878980765,
+            "bottom": 319.527471062268
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "biodigester",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.15339509272286,
+            "right": 264.2,
+            "top": 246.92651522800736,
+            "bottom": 306.95569622554063
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-0.65-unpowered-night-group-2.png",
+      "sha256": "ea84cd4b8f82beabf6c3901ff4a641eb943ccb3d55111903d0a53669a5f68903",
+      "entries": [
+        {
+          "key": "warehouse",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 180.20033560772885,
+            "right": 264.2,
+            "top": 237.27974643005652,
+            "bottom": 315.78024674550966
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "solar_farm",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "solar",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 158.0793646114852,
+            "right": 286.3,
+            "top": 260.0966720172493,
+            "bottom": 341.47379052782014
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "streetlight",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 214.32503955616156,
+            "right": 242.1,
+            "top": 238.23183136083537,
+            "bottom": 320.44658373697115
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.2452061707017,
+            "right": 264.2,
+            "top": 232.92969899907672,
+            "bottom": 314.41533767738446
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "kitchen",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 181.7162108961137,
+            "right": 264.2,
+            "top": 245.71136988528485,
+            "bottom": 317.09952083360145
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "grove",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 183.70156328044035,
+            "right": 264.2,
+            "top": 232.94497425577248,
+            "bottom": 315.2897050131701
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "garden",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.2634871559621,
+            "right": 264.2,
+            "top": 273.5428102479059,
+            "bottom": 320.1372891106445
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "greenhouse",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.28186524365103,
+            "right": 264.2,
+            "top": 235.49890041371816,
+            "bottom": 319.1404942515677
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "well",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 199.0385353888118,
+            "right": 242.1,
+            "top": 270.8374069991346,
+            "bottom": 319.96677432963884
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-0.65-unpowered-night-group-3.png",
+      "sha256": "541f22791afc6e0d5307fae1687c94361cfbcfe1b1f6c021666c511d46c524a1",
+      "entries": [
+        {
+          "key": "compost",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 198.39025020218068,
+            "right": 242.1,
+            "top": 287.2687411536939,
+            "bottom": 316.11763585215533
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "square",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 154.37412313390604,
+            "right": 286.3,
+            "top": 253.2319745332424,
+            "bottom": 333.19010437073644
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "workshop",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 176.1416433828927,
+            "right": 264.2,
+            "top": 209.69769268200878,
+            "bottom": 317.51665461373875
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "coop",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 197.9,
+            "right": 240.8178762147131,
+            "top": 267.1580778677653,
+            "bottom": 314.5371327929547
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home-veranda",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.10918556717328,
+            "right": 264.2,
+            "top": 228.24871084325343,
+            "bottom": 314.25550337378047
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home-gable",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.45754348703963,
+            "right": 264.2,
+            "top": 234.27813512425217,
+            "bottom": 317.5138750585279
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home-courtyard",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.20019776157105,
+            "right": 264.2,
+            "top": 231.17815903576474,
+            "bottom": 316.0629361991809
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "adobe-gable",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.21499525563306,
+            "right": 264.2,
+            "top": 224.39574000457964,
+            "bottom": 316.67633989058214
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "adobe-veranda",
+          "biome": "cerrado",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.7205510605948,
+            "right": 264.2,
+            "top": 231.66900004582084,
+            "bottom": 317.65973161931487
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-0.65-unpowered-night-group-1.png",
+      "sha256": "b826d207e62b946a2d867c666e8af068724ad775d242c482c8f9713aa5c592e0",
+      "entries": [
+        {
+          "key": "shed",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 155.85026923380124,
+            "right": 286.3,
+            "top": 225.31044272313818,
+            "bottom": 340.61587873285197
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "orchard",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 159.23598522254497,
+            "right": 286.3,
+            "top": 205.80487228857714,
+            "bottom": 338.00944394623775
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "goat_pasture",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 156.78119018590206,
+            "right": 286.3,
+            "top": 237.0627801291655,
+            "bottom": 340.579527097296
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "apiary",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 201.36691903252816,
+            "right": 242.1,
+            "top": 272.83993676972,
+            "bottom": 315.24319536053326
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "hydro",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "hydro",
+          "position": [
+            60,
+            25
+          ],
+          "referenceHome": [
+            57,
+            25
+          ],
+          "roads": [
+            [
+              57,
+              26
+            ]
+          ],
+          "targetBounds": {
+            "left": 297.9,
+            "right": 341.98760118155724,
+            "top": 268.47204795026107,
+            "bottom": 317.4831895201304
+          },
+          "referenceBounds": {
+            "left": 211.94520617070174,
+            "right": 297.90000000000003,
+            "top": 199.77969899907674,
+            "bottom": 281.2653376773845
+          }
+        },
+        {
+          "key": "eco_toilet",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 199.5246486162931,
+            "right": 242.1,
+            "top": 254.46209526790878,
+            "bottom": 320.83928880390863
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "banana_treatment",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.76904000618464,
+            "right": 264.2,
+            "top": 260.2621860614793,
+            "bottom": 318.62883180790965
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "wetland",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.9301208563303,
+            "right": 264.2,
+            "top": 258.49265878980765,
+            "bottom": 319.527471062268
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "biodigester",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.15339509272286,
+            "right": 264.2,
+            "top": 246.92651522800736,
+            "bottom": 306.95569622554063
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-0.65-unpowered-night-group-2.png",
+      "sha256": "8770936fd0c65581710f282bc03b5b8917adbcec8f0f57cecd89c49b353a050f",
+      "entries": [
+        {
+          "key": "warehouse",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 180.20033560772885,
+            "right": 264.2,
+            "top": 237.27974643005652,
+            "bottom": 315.78024674550966
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "solar_farm",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "solar",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 158.0793646114852,
+            "right": 286.3,
+            "top": 260.0966720172493,
+            "bottom": 341.47379052782014
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "streetlight",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 214.32503955616156,
+            "right": 242.1,
+            "top": 238.23183136083537,
+            "bottom": 320.44658373697115
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.2452061707017,
+            "right": 264.2,
+            "top": 232.92969899907672,
+            "bottom": 314.41533767738446
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "kitchen",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 181.7162108961137,
+            "right": 264.2,
+            "top": 245.71136988528485,
+            "bottom": 317.09952083360145
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "grove",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 183.70156328044035,
+            "right": 264.2,
+            "top": 232.94497425577248,
+            "bottom": 315.2897050131701
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "garden",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.2634871559621,
+            "right": 264.2,
+            "top": 273.5428102479059,
+            "bottom": 320.1372891106445
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "greenhouse",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.28186524365103,
+            "right": 264.2,
+            "top": 235.49890041371816,
+            "bottom": 319.1404942515677
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "well",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 199.0385353888118,
+            "right": 242.1,
+            "top": 270.8374069991346,
+            "bottom": 319.96677432963884
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-0.65-unpowered-night-group-3.png",
+      "sha256": "c24f6f05255b0cff61cf08a22986f80234fb053d751563a6c340cfb1c9805cc7",
+      "entries": [
+        {
+          "key": "compost",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "none",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 198.39025020218068,
+            "right": 242.1,
+            "top": 287.2687411536939,
+            "bottom": 316.11763585215533
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "square",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              34
+            ],
+            [
+              32,
+              34
+            ],
+            [
+              33,
+              34
+            ]
+          ],
+          "targetBounds": {
+            "left": 154.37412313390604,
+            "right": 286.3,
+            "top": 253.2319745332424,
+            "bottom": 333.19010437073644
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "workshop",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 176.1416433828927,
+            "right": 264.2,
+            "top": 209.69769268200878,
+            "bottom": 317.51665461373875
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "coop",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "grid",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 197.9,
+            "right": 240.8178762147131,
+            "top": 267.1580778677653,
+            "bottom": 314.5371327929547
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home-veranda",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.10918556717328,
+            "right": 264.2,
+            "top": 228.24871084325343,
+            "bottom": 314.25550337378047
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home-gable",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.45754348703963,
+            "right": 264.2,
+            "top": 234.27813512425217,
+            "bottom": 317.5138750585279
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "home-courtyard",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 178.20019776157105,
+            "right": 264.2,
+            "top": 231.17815903576474,
+            "bottom": 316.0629361991809
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "adobe-gable",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.21499525563306,
+            "right": 264.2,
+            "top": 224.39574000457964,
+            "bottom": 316.67633989058214
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        },
+        {
+          "key": "adobe-veranda",
+          "biome": "caatinga",
+          "zoom": 0.65,
+          "lighting": "unpowered-night",
+          "minutes": 1260,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          },
+          "powerSource": "roof",
+          "position": [
+            32,
+            32
+          ],
+          "referenceHome": [
+            35,
+            32
+          ],
+          "roads": [
+            [
+              31,
+              33
+            ],
+            [
+              32,
+              33
+            ]
+          ],
+          "targetBounds": {
+            "left": 177.7205510605948,
+            "right": 264.2,
+            "top": 231.66900004582084,
+            "bottom": 317.65973161931487
+          },
+          "referenceBounds": {
+            "left": 244.5452061707017,
+            "right": 330.5,
+            "top": 266.0796989990767,
+            "bottom": 347.56533767738443
+          }
+        }
+      ]
+    }
+  ],
+  "browserErrors": []
+}

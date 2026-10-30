@@ -1,0 +1,1517 @@
+{
+  "browserMode": "headed",
+  "snapshotSource": null,
+  "speedScope": "The phase speed is preferred speed. DOM-observed effective-speed wall time includes automatic 16x; changes within a native frame have one-frame sampling uncertainty. Rate fractions are omitted when automatic acceleration mixed speeds.",
+  "memoryScope": "Five-second resident-cache counters and optional Chromium JavaScript heap samples. These exclude native/process/GPU memory and do not prove a long-term plateau.",
+  "benchmarkSha256": "8ba4f525dce437c1e4089b52f31aad63a8101823649a63c6460d3ad894eb3835",
+  "fixtureBuilderSha256": "a0341d8bce537e1106e2828ef55b63fc09645404ad81f59d625b2a4e91218d2b",
+  "fixtureSha256": "8d4f41fed0660849602cb0ea05746962538c7a61d51af99b878bb10ade3fcc12",
+  "fetchedInputs": {
+    "web/main.js": "950bd11f94eceffe11e56ae5fe131a0244d9834863e4ad128bc9c1b2e1191316",
+    "web/world-backdrop.js": "c8db32139dab1cd95024ad58a3e16b49e98bebefa445346952e9ce1fa002b41c",
+    "web/world-atmosphere.js": "4241f136222191565c2e7900f0bcb7128df2fed32e497684372ce6a5efd3ddcf",
+    "web/resident-ground-shadow.js": "016fa5a12a7957c8d0ea6c3d0166979c7c1b51a5723632dd0a289ff69a4642ee",
+    "web/creation-presentation.js": "989adc9aa284f02cca813214de85fee69c8225ca10cbd099cf987bc92a2c5ae3",
+    "web/resource-site-art.js": "a0601241ab8d107474b2989d16705b1a73a942617eaae3689af8c0485190f47f",
+    "web/scenario-journal-ui.js": "bd9a6fc59df1a60345e25a29b52f49c1460b498fdd633551c80356ce3544adb2",
+    "web/resident-look.js": "94f94dff5b280b57998d97ef94641e1850cbd5d2946ae61a3ed3b2f10367de5d",
+    "web/resident-appearance-library.js": "518acdb703b9eb9bff55a4c05b6c443761af48a53d905a5ee7d761ddbc409773",
+    "web/resident-artwork-preparation.js": "d81ccd101798de1c53b8e5f084104916d954771652c8193e19c81d545721c8bf",
+    "web/resident-portrait.js": "682c40d41a6dd70b9678d98b6381f0214419fd6f346a65e0c06574ab19bc7211",
+    "web/resident-identity.js": "8aecfaa31d8c19c979829de1c01a9e8623e06f154deaf5756f2e83003d6c46fe",
+    "web/relationships.js": "67430c42f420a63a2c6392fd709b451d40f4678297dfc3d90021513cccb014e9",
+    "web/resident-story.js": "04aa970a578b51b583b6e9799dc469a080ce3dc1b47bb35b79e611eab81d354b",
+    "web/regional-art.js": "b7a23c741fcb76ea47d911f9bcd07a9cc8488f81c6a1a18c5232e744b394c3bb",
+    "web/terrain-revision.js": "f6dfcb06898799931676a227689d0a162b3a278525893c07b2d392c91ce90878",
+    "web/content-library.js": "cfae04a458db4e3875c212459acc7f5cbfe89eebb3940dbb24fefb7f53fd2a96",
+    "web/player-session.js": "118b06a29e5365987c49266d89cf563d6548a7024a7d44734bf9b80e71e6ef00",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/paint-cache.js": "f070b4e16eeb75c077b26009201fef77ca246a9c202664730bc81dda35cc053c",
+    "web/frame-state.js": "b0f2264005d41528950247c6322dc3bea55301bf0a072a3f93c7af0deb3077f0",
+    "web/building-state-art.js": "2c66d34e1b2582b1509e6caa69cac0f5907f57ab38160d4d0fffc44f37429bef",
+    "web/world-visibility.js": "35dadeba53c888dc1a0c6c63a81fb8e6947235613aec16b32cbd45a664929940",
+    "web/dev/performance.js": "bf9f6a857340e715a22a6622122278473d8be4c7cc49c12981ba9ed1dfed38b3",
+    "web/sandbox-rules.js": "c4d708f49592384ed6f6920c85f15f2ef03cc239de08cb8026066c00ffa98b11",
+    "web/resident-skills.js": "4c80f7ce49a62afe5c02ed73dd8096e6856075b0588a81d9f44349f7f2e0b97c",
+    "web/electricity-ui.js": "d4b4bea8737b9bae05c693baf4942cc0c64d2cbca21f31dc4f1bc77be6bf1007",
+    "web/battery-art.js": "48d2c00ba144080d40c048ea3d3edfe4811e02f456af07c851efbb6487bc2887",
+    "web/water-connections.js": "0f6ed61583acf4f237e2983c12e195d9fec32e344b3b3ebdaeeaa9e72ea95a5d",
+    "web/land-map.js": "8dfa22ca081f0050b5eff361e090c318a0253e7a6999330d5562a94d5840e9fe",
+    "web/gathering-ui.js": "acafb67d83c44d7ca3aa0628e39b4280c6cdbd39baf8cde86d50b9c5d628f426",
+    "web/resource-sites.js": "9a95c65342707d4f07ad8904dd896600d70a94c392962b44d040ef8fd0fc33b8",
+    "web/logistics-art.js": "6b075a8d75d72ab3096e0dd10792c2e43b1549e87cd5d6a7e4860fdc36aacea0",
+    "web/dev/art-preview.js": "f6d7b848232873fc3c978904160d99d2c6d13549191a570319c7e9d91358d288",
+    "web/maintenance-ui.js": "1edf3d8a769d0ee11fdc97db0d49db2ce90339838fbf673b129303facfe998c3",
+    "web/game-ui.js": "2a9ac84a41e0a47abee1eb9ca7e1ba74d0f95d0e7126853c1df115478c69c5bf",
+    "web/simulation-speed.js": "affd4a3da3593f05dbd3ef31e63cd3d296fcde19350b026d978762eac8108c32",
+    "web/economy-art.js": "b9a9f15be3bdc0f11dda6de42777b34b0f70b250debe1612b9729c9957a6333a",
+    "web/economy-ui.js": "0698867a57bbfeefc670c0bcd1e20cc54fe400390502a22f65d5e580c0f0a05d",
+    "web/resident-presence.js": "e4b08216dc0369ab664e1289eb6559888373841e35b538c28cc8f972d325a916",
+    "web/building-footprints.js": "4437a07f72209817dc197b24314018362f1abf68966de099a062c933525babf1",
+    "web/build-menu.js": "3f4983108515a0e8018e3ef4d8fddf2c68e09eaef44e5d9452ea3ce8dce91408",
+    "web/power.js": "d37e60fba9e9e9057df3bf0b0fda4e6c4d8914f9d8041673627a7868e8694f0d",
+    "web/night-lighting.js": "6f8e92f982122297cbc99b1b23c2e82cd8c9fa34c711f200b1b35bbf4bd9ac8e",
+    "web/weather.js": "0aed62fb10fd022f0e79a21f73ed5fb69cdf0a8003ab577c8415bae654f2da24",
+    "web/climate-ui.js": "cb2117dc4d7ddcbba1682ca15eb33ff6cce8bfe727a5c4e1056bf4cc00d963f5",
+    "web/dev/art-draft.js": "90061bafd03a04fc778d8f0fb186ddb1bdbae5022a1c3f47dd5029fb84ecc6d2",
+    "web/dev/tools.js": "5233d3e60272aa951bebd0d3bc5c4b0962f22a5fa5af62c12c3f9407562280d1",
+    "web/dev/scenarios.js": "eaec035f8ebccb6af1f3020447d31d28af02d212344894c210e692250a87c3a3",
+    "web/resident-animation.js": "0a1f1b73c14a88d351ee483bd7da397551e1ba4c0de61faa5c0b77ebd01e0c8f",
+    "web/sprite-frames.js": "4a32cbc68b75e90b7c1fe63e139143ff6c1cbd91954276cfd7179eb4f5b44604",
+    "web/agriculture-ui.js": "f8502409bb0537ff90071df9ebbd5481b2bbb80a3c7b5d41c60dd223cb1928da",
+    "web/crop-art.js": "e75beb185b763eb4f18dc984c6d2b3e12fecc0348b3c91ebe8e349cbb174685c",
+    "web/building-art.js": "977312b8c88e4d700fadff2cb654a3e20a35501dd1560779b830dcbfbb6eeace",
+    "web/situations.js": "ac1fcbeac2fb5dcd8352e996aeac58ccd8d01e8ef651343c0647357a963628c4",
+    "web/chickens.js": "f438c1d08c0ebec511511288b2eef6149825b61509e9dd2809244d055798021a",
+    "web/quests.js": "15fd217638efc60a0b4c36356a49662453d996e5514c169f7913ad3aa7b58b15",
+    "web/settings.js": "30103668bb7270e27ae46a68ddb5bd96121c59bc9bc79d20cd5860ea8b0de22d",
+    "web/polish.js": "ba6967e4f65af49206071c134144fd51812ff92d2a312962cae77f50f365a4a9",
+    "web/village-audio.js": "49b5a3e74bbad13c28d3b1944027661938bee13847ea3fcc4d960edbf823b321",
+    "web/village-storage.js": "7aa967c90cbea802ed7b7ef314d875587b1df9e45bebfbb865404e7363cc1eb2",
+    "web/pkg/solar_friends.js": "d277c6ebfda846e79d2d25df61b5c0bfe1f8a45c6e4296e45f669ed9d8e9c9eb",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/resident-shadow-metadata.js": "8759afa938aace5e88a5989bf1bcd210218106532cc418140ddc779612879f1a",
+    "web/resident-part-recipe.js": "44af0a70cad6a16790a6556d57c6e343bd982085565e3c577bfec9ba065953a1",
+    "web/resident-appearance-fields.js": "fc7b376b46564b489d21f6fdffc914c1e193d0ab545da028dfdfe4470ecf0f7a",
+    "web/save-project-prepared.js": "cf74a19d04439eaea6a30fd2eb5aac3e76865e5c8e02f0324aaf43af5e518fcb",
+    "web/recovery-limits.js": "5441cadbac4803d1dcab20c5aeb8e9a15f5ec81f820d4f607b3362d74432c0a1",
+    "web/map-package.js": "7895d6d124b95721a4e092806201be7b6c5e4fdd12e953c69b7eef8077642b0c",
+    "web/library-migrations.js": "c06f6918a52c147a94a72a4beb71f4607d4e1450bdf251afad72ac60b75cc154",
+    "web/editor/journal.js": "e5ee57626eecacd22dda40297c98d25dffe20c7cd667564885a5bb97cf61d9e0",
+    "web/release-package.js": "185c0feb4586b6918961f43ff31fd1c4335e770257d659de5f2a6d14022a659a",
+    "web/land-layers.js": "7f927c59b493688072f41b088457b1b8ba1822b997e28ae60ce0db60e2a33236",
+    "web/utility-lines-art.js": "e1cc662f79b7beab542540ef9a923a7dd8f227dea6791ae48544d08f66fb559e",
+    "web/nature-art.js": "389a97d806cbf7d286b3ebedeeabac390770208672529d494444bf1034e255b0",
+    "web/dev/material-fixture.js": "812ecd42fe030b2652ae8830eddef00f00fc9dd60c7db4c69cb6a87ff2fe64be",
+    "web/restoration-ui.js": "0c5324efbdbe79f13a2533a10dddfbdb8eba0a4b531b990b1e04dd6e7196a145",
+    "web/battery-plots.js": "327faa1e4c9f97f173eff8f5de53250dbdcc72e845b23aedbbecaa857d9b3e84",
+    "web/materials.js": "cfcdb63ea0359772ca620ef67d84151b23e248955061be6ffd09fbce71d25e17",
+    "web/dev/electrical-fixture.js": "c6db06b3a7269b1de79ea041e3f7248f8c69b2a7c842fcc7f68ee08fe57a2251",
+    "web/habitats.js": "63ebeab1df2ac631ec3b0a3bd250d5f7a2e6372fdd55a70f446e3853947aa5a6",
+    "web/water-ui.js": "0ecefc68f91bd981b2ce6f13868e78b4f5a5f04c85d427e581e99dd0ad258d39",
+    "web/supplier-ui.js": "2f7f8d2e13bf93e66741d8588faf9f836e4c0551dfa88d3ccec1ca13bdfb27df",
+    "web/process-ui.js": "02e0c9d823e0f27713a6412b190dc7e976227bea05e0a3119ee9ce5bb680de9f",
+    "web/freshness-ui.js": "655b3ccb8e50d2d79a5a95c73cd4053e2dd1ff4d4607c63bbb26a8f8f8fefebd",
+    "web/forecasts.js": "6ff0fd942d656446a4404a4997f8d6053f3b54ebe3cfae4525fb5ce5c5c7375e",
+    "web/production-ui.js": "c90d70e7803a01d4b2face7f589c22be68630e5c436a36103b3fe8fee6cf48e4",
+    "web/building-silhouettes.js": "247be59f561d36f2400b68ceb0c1266d5f19c2864254c4d95a52892c9b670a43",
+    "web/artwork/catalog.js": "8fce0843ef17ada205bcce59a8fe1cedc58bb3c213aade5b1fd0706887c756ff",
+    "web/dev/utility-planner.js": "4568d42503a6c96a3ce683ad06ff8c51f3849c2bbebdb50c2c376c303824926f",
+    "web/dev/story-fixture.js": "244d62d10fd3de745b5a58c4536c4c2a071c7198b592fda30529ec77c557370d",
+    "web/dev/sandbox-fixture.js": "051f28d1ddfe1aadb5765d41b4b4ea53eb44612789a9683539eac9877d49ab87",
+    "web/dev/center-layout.js": "4a07ccd7a6de0b821a87e3db64453e8832b1cd3ab183cdd271bcd35640b369e4",
+    "web/dev/autonomy-fixture.js": "91c6bc3a3712710779163da8694e4036d403b9d3be02f1746f2a129a17ed946e",
+    "web/dev/maintenance-fixture.js": "969ee72eb0319da98a1b8b2c378f6cb0a92e99a4268d5a3aceade84f4a919634",
+    "web/dev/climate-fixture.js": "76f1986a9af883764d5252dfe41088a537e031da03aefffffbf09c6aeefc44f5",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/building-projection.js": "e64a3306774ed0d6d8aa070a6b91aacc28b129ac3bfbe7c244df0532bf6f76de",
+    "web/greenhouse-layout.js": "dce24b4528d6c942c6afcc93e32b810fdac2018aa8a0eebad2d3b2fdcbbb07b8",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/character-hair-colours.js": "612735bf2a5bb6219d5d68b1b5d187e6662480ecc114ec99d591ac9f91a92dfa",
+    "web/editor/files.js": "fe0edb7fb8a6782403758d159b111d0867cd50314987acdf4f445b7cf5d16195",
+    "web/planting-ui.js": "9139771ea08b423e7e07fa074cfc736ed5b24ef2f20247b81dd0f2e6fea56c23",
+    "web/character-contact-atlas.js": "71880a29ef77436d4cb3f24361eca91b2fd5ceae8342ffd74936ec006d0a3f26",
+    "web/character-attachments.js": "2f88fee807c21ced70a762e2a1cb7169e9247a7c6136d81e37b235f1e67ac7cf",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/character-body-frames.js": "e64697c8c2d523b8072473420f7a953b4c0b810ef5c837658dbd7e8bc5ebfdfb",
+    "web/character-contact-frame.js": "80362004f1bb2e80db69133b3e881261aed8d5ac645783f3ebe82b596eb25663",
+    "web/art/recovered-battery.png": "9cc9f12a8c414b81d68b45a4348b7ec55735e80c0bb6eaf098dd3681f604a2b6",
+    "web/art/starter-shed-refined.png": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+    "web/art/goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+    "web/art/orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+    "web/art/economy-atlas-v2.png": "70c115a50bfffd4b4c6808ebb1375e5bc3c6f74d5507bcb797def54886827e06",
+    "web/pkg/solar_friends_bg.wasm": "73737d324c82c5707d22d44dde04213c3be60371155bd0e7d280fae848d55ae6",
+    "web/art/apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+    "web/art/hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+    "web/art/eco-toilet-tall.png": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+    "web/art/banana-treatment.png": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
+    "web/art/wetland-square-v2.png": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+    "web/art/biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+    "web/art/streetlight.png": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+    "web/art/solar-farm.png": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+    "web/art/warehouse.png": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+    "web/art/village-atlas-isometric.png": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+    "web/art/garden-simple-isometric.png": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+    "web/art/greenhouse-isometric.png": "6bc7925077a4089014e8973979cfaa3e242a12cf400888d27998c6aac0350ee2",
+    "web/art/compost-isometric.png": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+    "web/art/cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+    "web/art/square-isometric.png": "76ec6da02bc5b4575b556019ffbfe74c1a092d32c3e5cbd21d74945f2adf2c91",
+    "web/art/coop-isometric.png": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+    "web/art/workshop-isometric.png": "fc194eb60c86435ae750c13b4bcb5c9a59c5897e63b2debcb29b1cb960eac4a7",
+    "web/art/home-veranda.png": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+    "web/art/home-courtyard.png": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+    "web/art/home-gable.png": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+    "web/art/adobe-gable.png": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+    "web/art/hydro-night.png": "27a5839e924ca96e89989e150117b44e2ca5566b504f304f82a62f115bd91cb2",
+    "web/art/adobe-veranda.png": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+    "web/art/banana-treatment-night.png": "fc851ec1f43c2a3294f31253716da061394adc2a7fcc99bfb5508ec93e73e7b4",
+    "web/art/biodigester-night.png": "ff2327fd6479d3682323c0ffc7f2423a009a52547da3d4c145aac9f2b3332a24",
+    "web/art/eco-toilet-tall-night.png": "faa4b2a5f11f6e579e4bedadec583b946494b8514c2adde2c8fb8047812c8880",
+    "web/art/warehouse-night.png": "a3922fe7eae2cee37991410d89b56a82bba5940a53b2e71c53127efc35447164",
+    "web/art/solar-farm-night.png": "02f5502b3f9f67a3876237f16882a2773b702c623b1123b647bf185b51fea92b",
+    "web/art/streetlight-night.png": "f898f34ec0a95d3f8f39995b76be5ab8774034c96d73578d020b9e181a83c131",
+    "web/art/garden-simple-isometric-night.png": "63f00e1ed22e677d962b506a510ce8c48bc2e1a5bcbc3d3b2cb68f1f59c9e72f",
+    "web/art/village-atlas-isometric-night.png": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+    "web/art/greenhouse-isometric-night.png": "19a034b2826528e21160a54f6a3c0dec4dd922cfdcf2bcf78b3ba83b980f8f9d",
+    "web/art/cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
+    "web/art/compost-isometric-night.png": "9171162eaf433946480dcacf7c0ad6db2b51f1a9b1ef1c609209b9344c5754a4",
+    "web/art/square-isometric-night.png": "fdf9c4d571d2584a530e929d38017128843f3bb33f85c89b4b44ad1cc99c8378",
+    "web/art/workshop-isometric-night.png": "d52f4e7e2f9b8e71ecf4553583dee4c016ea47a4a1867a13f1a5f9a25c41fd9d",
+    "web/art/coop-isometric-night.png": "c6e5af120dcce0f34414521247b33914c5eeca33ef270e2ceeb74b36f9d2724c",
+    "web/art/home-gable-night.png": "3385f279c694fb380dac3469ea18f36dff26cca0e5720700e88235cb2bde2740",
+    "web/art/home-veranda-night.png": "3a9e0e11fc2cd8bc81b415007a16b7d012d60e214d5f26782b52327ef51c5e3b",
+    "web/art/home-courtyard-night.png": "12aec649596f296dd0904266a2247ee6b78197d476c4e2f61169acca3ec07205",
+    "web/art/adobe-gable-night.png": "471e9510f73406a82124940f2f77cd71f48333adb12f61bc58f9e076cccf9a7a",
+    "web/art/adobe-veranda-night.png": "0ab2a6b62393681e7bc44ff2ea319a6ed60bf84bfcb665db7b8e5be18024e655",
+    "web/art/goat-pasture-empty-v1.png": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+    "web/art/animations/iara.png": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+    "web/art/terrain-atlas.png": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+    "web/art/animations/bento.png": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+    "web/art/animations/luz.png": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+    "web/art/animations/caua.png": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+    "web/art/animations/nina.png": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+    "web/art/animations/iara-idle.png": "3d2510219502ef9b7e11872009672cf6a510ef2341abb6fd90888b8abc1d6849",
+    "web/art/animations/bento-idle.png": "b08b98641ea263b717fe3f77476a72e58e4c7cc299adeeaea3b1f9d90df97943",
+    "web/art/animations/luz-idle.png": "c37a9572fe8d3c0c4085d1c6595adefdbc2c26f70dd016fb0d5ba02e17bdeb52",
+    "web/art/animations/caua-idle.png": "bed9db91f965fcf36585a2bd46257baaff07bd8144bae7b085915e204c90fc97",
+    "web/art/animations/nina-idle.png": "5a95ba9e25991ea97bb3e7e1e225ab1b6423e5c53449d51195e6877209ea7116",
+    "web/art/animations/iara-activities.png": "29dd26deb5204d648ca37abdb01931db27d05b0b3827e32bf1d944789fcc7711",
+    "web/art/animations/bento-activities.png": "37b8f2893285e943edf8c5af8274199362f1e908a129acb4ccf9d09435549530",
+    "web/art/animations/luz-activities.png": "5ef0f67c8af7a4f9d0d7d212f5d72495d06f5a4a7ee478840d054367d859da70",
+    "web/art/animations/caua-activities.png": "8234d1c277c528b0a9917da578167c79829de9f80f6c8b289c926c63575bdc6b",
+    "web/art/animations/nina-activities.png": "f58b8323bade79235a119d25b53d135dfbba844c9ca8cb70867d91ab5058a570",
+    "web/art/mata-atlantica-atlas.png": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+    "web/art/landscape-details.png": "a5212211cc3d8bca0250b3990a9dcc90ca3bbd3d27fa9b1007d85b3dc931ae56",
+    "web/art/cerrado-vegetation-v1.png": "1542d0c14fa9cfddc83ec0e1a04e5ef5be34fcf1273d93d4eb13c2c8f5f359a6",
+    "web/art/caatinga-vegetation-v1.png": "522999ec80e708b3203cb6f59a2b90067d3d7eb2f7265b82d6e7815854c26290",
+    "web/art/crops.png": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+    "web/art/chickens.png": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+    "web/art/field-crops.png": "ca755cb0aced1ef12ec69284c915490e59e5207961d5fb0a4d90fdf5913c219e",
+    "web/art/regional-ground-v1.png": "acdad558e0db68fb04760f2a27d44beaf79eec89d6b02d583e35586748bbfeb1",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631",
+    "web/resident-provider-memory.js": "2feb5a1b937491495ac598a696af8cada41ccbc688cfddb6a5edf19eeabe12d2",
+    "web/character-image-source.js": "b10649c2b8f08f168db8adc6324fd5f8a09c714f7fef684b6bb0d380d1bbdb03",
+    "web/character-atlas-part.js": "ca287ad3a1647f468b1a28c144d6cb15526c0303f126ded998bf15f16bf1a757",
+    "web/character-hair.js": "aeb90c0c20c310585c5fdef4d72d3b85b311eee360b00b8c703a128be1e493c8",
+    "web/character-equipment.js": "6d377cb763557cd82ac9715e751f16c0091ccddd2eebcda92b0f9ae0cbcdc891",
+    "web/character-equipment-parts.js": "892bda1be66baca5c2c3f168cc3bceaf36e2a12d023b2c30904ccbdea3f2be18",
+    "web/appearance-cache.js": "29b45878db3aa395f39fafac3d70c4154be6822d43baf7dc5b60f49ba3c54acb",
+    "web/character-hat-provider.js": "554373694abc40f6fd007d6ca9fc7e811f8aa3567c48315b3c00284718f8fe6c",
+    "web/character-hat-poses.js": "58d2e8bd65dfa8bf64546cd8fbb19877cb0b0a96b304d787e6a4f1d09703a822",
+    "web/character-facial-hair-parts.js": "b4d9f0da0ad943c440848d0dc52821912e517e50d28d51dae9c73e8921e0a73b",
+    "web/resident-family-parts.js": "48802400c4942128694edec58c665a3fa5ee5461223378095e6e559f4152ede5",
+    "web/character-bundle-response.js": "43682b6efe979d90ebdcdae8d7f115a1347b9fb8b712204f1b8c988b9c34793b",
+    "web/character-foreground.js": "564d5b4b31b379118cc6e5fa4d37a1aacf17fb3c4f3d68a221be62b5510d0e53",
+    "web/character-parts.js": "fb33ea4235ce5122bf5225e5ec79604fcbfa42e63506b47809256a0396439218",
+    "web/character-hair-source.js": "ae094ed4d5f38d97a5aff1ff4cd968745bf4650c15be4b8085bbdfd28ccbb878",
+    "web/character-body-appearance.js": "1ba2ac891c287677c207769719491284389b13feb7be0b32806479c8cad1b64f",
+    "web/character-clothing.js": "7db924346690a19dc8c5eca542b6bfb6ebb3f5a12ae2e3a40e526c4a6f5220af",
+    "web/character-hair-placement.js": "6829af8d50016e6a0307033c31b0bc3e7532d680c99fd5c2009804d3996a4c6e",
+    "web/character-hat.js": "9edadbe59da92b16d19d3acbd3505c3a1ec54de829f38fcbcb209f2003cdc9f8",
+    "web/character-facial-hair.js": "79cc33fdd329f2dc1bf80176ce058a0a12e84cd80cd24fda110e870f6fb1f09b",
+    "web/character-composed-family-bundle.js": "423ec62d13a698a87a70bb0d8c5b39a78d950ec71d9aea79287587c13cb91919",
+    "web/character-broad-family-bundle-index.js": "17d264e9080070a930a07efd36683cc4087144b9e233788602cf2d92a966ec23",
+    "web/character-sleep-family-bundle.js": "c625150896514a73506935ec7df33b59f3361314ed5ea6b3ebb6f57dc630a044",
+    "web/resident-family-provider.js": "103dbb9287de742970f85bd108541c46848305c54e28f795f9235c5cda105bce",
+    "web/character-family-bundle.js": "9dce0fee17eb5a61aba2c94e71c12cf67b86732562267b7886edef949901ee71",
+    "web/character-foreground-mask.js": "e54c44cb05b7a09a9a9ea170c70f98190df71707e2b68f65f1d9a3df64e47639",
+    "web/character-clothing-colour.js": "1e6e4c5d8b80f2927dee53bfa637742ef086f2b96a6e4548f7d0866f2429a6a4",
+    "web/character-atlas-clothing.js": "733fda3ce739c166aceb5de8ad402de1e8f8c293c7e03e1d038eae38353d0200",
+    "web/character-composed-family.js": "d7cdca2836eb60ef142044b5055479288568c84eb6f3aad12a8129acbefe3dd3",
+    "web/character-family-appearance.js": "e6b82ac6fa4cec845a1b0d1cf9fc654d4720b8d054e9c4da29efbfe07f4b0e6c",
+    "web/character-body-family.js": "756ae0fc222f3d3266b32add6522eb57e74165c16889d8b82e8ebed62e6d6ebb",
+    "web/character-sleep-family-bundle-index.js": "a8eef990f98b12605c1bc6ffaa8ac6a0ff97d7c3ad8601320704f6073698e49b",
+    "web/character-shirt-bundle.js": "5dddf5f1b98e2e3c66eb55a3937a839d073d552e1dad7d78cd5614d6a1b4676d",
+    "web/character-family-bundle-index.js": "e7060b9a4d83be379fecb8405824b31c56fb437bffee0937a749a5be11be7b64",
+    "web/character-work-family-bundle-index.js": "094a6f8e4220fb1b3a2f81950ab5f43707f121a25bd95a70cffb361d9d43773c",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "web/character-runtime-binding.js": "c9847780f2039a44972baa444e4b94caeb4500041a1a6f5664bf3cad70a4b87e",
+    "web/character-facial-family.js": "59da653c4233191a15a4056fc8dde25ab5ce910c57d2806a26f219b202aa208d",
+    "web/appearance-lease-cache.js": "b6ecbf61b76772ea2159c2e7d7f4638428b489769a126e8ff23d24bc46fcb6c2",
+    "web/character-hair-family.js": "6eef18b08ab108e3d2147a019a74dbd98b75f057c745215cc12ee737a3afe01f",
+    "web/character-equipped-family.js": "e600e06d18949a3392be2c27a2891738f63bddf4ea781b8813b473b55589d14e",
+    "web/character-shirt-bundle-index.js": "2fa062df3aeff7e68b277ad9e4efa714504d2bb5644fb2990411d07676fbe500",
+    "web/character-family-accessories.js": "97a01ba25ffdf9e2d7513f5b29537585a4f8fef805c373d26331f5a8e88430df",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-frame-composition.js": "3ab7fd8b02875130c5f41ac30d914ec75cc5e8460d6aad7d742bb00e1f0c88de",
+    "web/character-hat-family.js": "c32e6b3d455539d51e2856cb6777d7c81ce67f4e307ec54f9c0b8f117137e36d",
+    "web/art/characters/relaxed-sleep-v1/bundle-v1.json": "f920cd78f9b736a255a90f2a56299a478bad0b8cf086d12e4f21ed283248412f",
+    "web/art/characters/prototype-v1/body-neutral-base.png": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+    "web/art/characters/prototype-v1/body-neutral-idle-candidate-v2.png": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+    "web/art/characters/prototype-v1/body-neutral-activities-candidate-v1.png": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123",
+    "web/art/characters/relaxed-v1/source-11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a.png": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+    "web/art/characters/relaxed-sleep-v1/sleep-body-v2.png": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+    "web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+    "web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507",
+    "web/art/characters/prototype-v1/hair-curls-base-5-candidate-v3.png": "0217b4805e01a66079a3a7da633530e9ff5d4f76eb24f2428849b83c9d2f3aa2",
+    "web/art/characters/prototype-v1/hair-curls-base-6-candidate-v3.png": "364ecd83aa9229eba483fca6f7fe5d6a78f290667af62a6f39cf129a9c4f5a4c",
+    "web/art/characters/prototype-v1/hair-curls-base-7-candidate-v3.png": "a9a3786c6a1dbd5f679628745b1a1b8aac7e19e611ad77e32a80b01f9a913cf2",
+    "web/art/characters/prototype-v1/hair-curls-base-9-candidate-v1.png": "7462182486d964402d4686479cbcefc5604d3dae230550742813c37a0de82786",
+    "web/art/characters/prototype-v1/hair-curls-base-10-candidate-v1.png": "7d88c8d58cefcae645607119949f08457d3ca2a85582b0987522a76ce68dbc99",
+    "web/art/characters/prototype-v1/hair-curls-base-11-candidate-v1.png": "31488ef06f2e1995d78dae91da9d76dfc4d7249076aecd0020acd92b8c761cea",
+    "web/art/characters/prototype-v1/hair-curls-base-12-candidate-v5.png": "31555d1e8bbab8161680e9f331e4362832ca24473064d30547b8e21395c422e0",
+    "web/art/characters/prototype-v1/hair-seat-base-12-candidate-v1.png": "c06d766e4fe6d6e051a489441f85a0e3e421f8f2f9ebf616036aa86957f81854",
+    "web/art/characters/prototype-v1/hair-seat-base-13-candidate-v1.png": "a22f7b8901ad6c4f3dc2e64bd3e46d72094efe498882a86281707f6a7e9257ec",
+    "web/art/characters/prototype-v1/hair-curls-base-14-candidate-v2.png": "8f49e66d8cca01f628a78741221dfc7e4b02de12534e246b5ebb4b46cbe1737c",
+    "web/art/characters/prototype-v1/hair-seat-base-14-candidate-v1.png": "fe7515d78bc4ed97c44346eb66b075cbf5ce1fa199645c7e3c7a2cb33840def4",
+    "web/art/characters/relaxed-sleep-v1/sleep-hair-curls-v6.png": "4c0b583d750f41a609099830daf6360c5355fc05299d480e26d9d4e826524b69",
+    "web/art/characters/prototype-v1/hair-curls-idle-5-candidate-v1.png": "f41c8a7c24f9b78cc4afe7139477d5a3d0b239c9c7777da53665372fba7c0775",
+    "web/art/characters/prototype-v1/hair-curls-idle-6-candidate-v2.png": "0a50506d4aceb96b36cf1490c984b746f2b937d1306c00e6936500e8dda5d462",
+    "web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v4.png": "51a0eeaf42765be2be66a19a8ec848d4824370e6dfc0f5a346b0f1e90ebb92da",
+    "web/art/characters/prototype-v1/hair-curls-idle-12-candidate-v1.png": "253184327e6cce626dde051e178862048a564fda7f91d19256734f303cfdb5a1",
+    "web/art/characters/prototype-v1/hair-curls-idle-13-candidate-v1.png": "f570c9521d3ca91d737e837559d35933aafe4166b10c56ac029bc5f38c4d1327",
+    "web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a",
+    "web/art/characters/prototype-v1/hair-curls-activities-1-candidate-v2.png": "c1871890556fd2e02c8b76a53485e5a8ca3ac918218a6be5670406343eec8826",
+    "web/art/characters/prototype-v1/hair-curls-activities-5-candidate-v1.png": "93e4516a83a7ff9d3b5e55ebeb70635649f1b1fe2b21ae6c0ed88802f4b24541",
+    "web/art/characters/prototype-v1/hair-curls-activities-6-candidate-v1.png": "5241a9fd741f202821fc5368b7144bfb50a40f668a4cf64b9a447d2e883253a0",
+    "web/art/characters/prototype-v1/hair-curls-activities-7-candidate-v2.png": "de0628cab84f54a253d913a6ebb1bd5e9a713aed43d184e35d7f92dbc21344aa",
+    "web/art/characters/prototype-v1/hair-curls-activities-8-candidate-v1.png": "df710c7eb0554d9aa612fd9de1a293b987eda5d52489167b0b2e4f4a7de243ea",
+    "web/art/characters/prototype-v1/hair-curls-activities-9-candidate-v1.png": "c3c28b66645235ca1bc170d174d1e46d5b2af23e13ee4e7287248bb414129180",
+    "web/art/characters/prototype-v1/hair-curls-activities-10-candidate-v1.png": "59412f938465868332c3212d81f2382e21a6984cab8e000bb336a5652db980b0",
+    "web/art/characters/prototype-v1/hair-curls-activities-12-candidate-v4.png": "b484abe997b2081a8ae2f858f0d7aeb71741d10d5ecb118107c64308087f3bd2",
+    "web/art/characters/prototype-v1/hair-curls-activities-13-candidate-v1.png": "d86ddcbab635cf2133de4ecc86659085075701e455b9531f115bd613eaee5d74",
+    "web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v4.png": "cba096d982bbfa2f72686b80673489f75c058712dfa59269046a9eb1d6a2b0a9",
+    "web/art/characters/prototype-v1/hair-curls-activities-15-candidate-v1.png": "9df86392c83b2c169c0497f21058a6fff248d120d845e734770045089195fd38",
+    "web/art/characters/relaxed-v1/source-0a751e78674eb7b09930bb0ca48c7c2e65ee06e2dbb0d9448fc2373bbca47be5.png": "0a751e78674eb7b09930bb0ca48c7c2e65ee06e2dbb0d9448fc2373bbca47be5",
+    "web/art/characters/prototype-v1/hair-sidepart-base-4-candidate-v1.png": "695348cf1af7bc316f59ce7966b2a807b8e5e3b215012231714a1983b3edf102",
+    "web/art/characters/prototype-v1/hair-sidepart-base-5-candidate-v1.png": "1cb0a2baff79df1dc3b16577e7163c06f6a1d99b0cc322314b327f3fac56b15f",
+    "web/art/characters/prototype-v1/hair-sidepart-base-6-candidate-v1.png": "ce670a638795fbec27de86c5fe7634139ad94321688a1f4b27f5eff05f93afcd",
+    "web/art/characters/prototype-v1/hair-sidepart-base-7-candidate-v3.png": "bc8a038f244c38c4ae28da13d9437fc17d2a225e54228dcb1146392d98017f0a",
+    "web/art/characters/prototype-v1/hair-sidepart-base-9-candidate-v1.png": "cf6e28944456cadf9825c36de83ae3c2b9cdea8a8ad70c65cb03eb3ed096607c",
+    "web/art/characters/prototype-v1/hair-sidepart-base-10-candidate-v1.png": "21ae9fef806eb61d8e7cab7af9d302c8a54ac231ca478e6b2fd65d353ea7f3c8",
+    "web/art/characters/prototype-v1/hair-sidepart-base-11-candidate-v1.png": "c0cfb05748f163b440bb3b10eb729931c5ded06e9a15b84c3d422e5ad681ad00",
+    "web/art/characters/prototype-v1/hair-sidepart-base-12-candidate-v2.png": "e13d5a9d3679a9bb9a6cac71a6deb12f32a7b1fb2635d3ef3d02ccaa65106766",
+    "web/art/characters/prototype-v1/hair-sidepart-base-13-candidate-v2.png": "d083b4edee167a11a1eb7dd70ee288a70b7439fbf0281c2267a3d0d5ebddf465",
+    "web/art/characters/prototype-v1/hair-sidepart-base-14-candidate-v2.png": "f0a8e1ef723684d84bb992a8624960da2dfdb7c457917079543cbafbf10f815f",
+    "web/art/characters/relaxed-sleep-v1/sleep-hair-sidepart-v6.png": "78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889",
+    "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-5-candidate-v2.png": "4ad997d69ddc90b787b7e108f53b6d53917100a93a5794009e54812b1ee6089e",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-6-candidate-v1.png": "a922a98468c01a91aa590bc52e5a16d1a6aacb66ea4ec8d0150fd56a724d866e",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-9-candidate-v1.png": "71520b1b3f2afa833285715f132b2eef6f5626df5a70aec63a38ce28afbc8dc4",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-12-candidate-v1.png": "e5d4124b36cf5ba08517aa36cd2ecf2645d24455f1cca2dc95f56dc2364644c8",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-13-candidate-v1.png": "4bdd18381a6465c0199ecb57581ef987769516ce00d7a6a68c5549714708cc07",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-0-candidate-v1.png": "2505ee1234bbf6be23fac98304b244a881955ca8a5621f227b0df462a98692e0",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-1-candidate-v1.png": "b90ff250c7011bd0bbc65a3a3647ea0cfff2d82a13138719c59d631148bdcad7",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-5-candidate-v1.png": "3d432fa16752dbbee4ef568b326a24a3489fe7c77a2dcf402ec8629c223aa8fb",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-6-candidate-v1.png": "014791cea3b7b6cdc14b3de99be15a3714c5f1097da72c3b0ceba51fb317385c",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-7-candidate-v1.png": "e92b159dc2259080cc7a849bf977031f0aa1497cca706d01109f52bdffe7a538",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-8-candidate-v1.png": "a1345fe33b37c3037f7c9f5acbb349eb1c34812bdbd6ac20d645377dedd04714",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-9-candidate-v1.png": "1c1a35056faad9f52ba3becfcdfff349d2844e24135e6e507dc9651b6dcbccd7",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-10-candidate-v1.png": "652c4645bd1ecc85c09dc8a6a0f548ab34843b185b2395a88fdc0b8c1aa797ba",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-12-candidate-v1.png": "92eb897f846e17aeeebdc75dc90ab6c55f7f9b7ae36d4a9b15ee500e3a2eee5e",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-13-candidate-v1.png": "ac8f8fcb214fc140cc715c03cf0db791f8f46ef6237acf66599dd657be3d143f",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-14-candidate-v1.png": "7b00bcad19c20e5d49f886636ec80aad6e61cd04775732535464cbf6912016d0",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-15-candidate-v1.png": "a22c78dfdd8552882ec1806c8c42c0136d1e59cef6c16d5802e2a4366fba76f5",
+    "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png": "5048bea272cef69db0aa863f493c3d5aa341d9908f4295e7628616032fe0aa91",
+    "web/art/characters/prototype-v1/cooking-pot-pose-1-candidate-v2.png": "73ddfe768da43b5349017dc394291e970dbc9ac5459004ae245543c3e57f0fc4",
+    "web/art/characters/prototype-v1/cooking-pot-pose-2-candidate-v2.png": "19912a94d724b6ac9a2ee630260b3f4025d9f9490297b3d6475461b228ac69c4",
+    "web/art/characters/prototype-v1/cooking-pot-pose-3-candidate-v2.png": "f0e484002a3987739aa0461b772fb53a901adf29025f90b81d32a674348a49d8",
+    "web/art/characters/prototype-v1/watering-can-pose-4-candidate-v2.png": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41",
+    "web/art/characters/prototype-v1/watering-can-pose-5-candidate-v1.png": "e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6",
+    "web/art/characters/prototype-v1/watering-can-pose-6-candidate-v1.png": "4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a",
+    "web/art/characters/prototype-v1/watering-can-pose-7-candidate-v3.png": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f",
+    "web/art/characters/prototype-v1/tending-trowel-pose-8-candidate-v2.png": "3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2",
+    "web/art/characters/prototype-v1/tending-trowel-pose-9-candidate-v2.png": "b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c",
+    "web/art/characters/prototype-v1/tending-trowel-pose-10-candidate-v2.png": "06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5",
+    "web/art/characters/prototype-v1/tending-trowel-pose-11-candidate-v1.png": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943",
+    "web/art/characters/prototype-v1/feeding-basket-pose-14-candidate-v2.png": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+    "web/art/characters/prototype-v1/feed-grains-hold-candidate-v2.png": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+    "web/art/characters/relaxed-work-v1/source-81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580.png": "81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580",
+    "web/art/characters/relaxed-work-v1/source-a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df.png": "a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df",
+    "web/art/characters/relaxed-work-v1/source-ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb.png": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb",
+    "web/art/characters/relaxed-work-v1/source-739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924.png": "739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924",
+    "web/art/characters/prototype-v1/straw-hat-base8-candidate-v3.png": "8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109",
+    "web/art/characters/relaxed-shirt-v1/source-877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8.png": "877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-02-v1.png": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+    "web/art/characters/relaxed-shirt-v1/source-41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96.png": "41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-01-v1.png": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+    "web/art/characters/relaxed-shirt-v1/source-6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630.png": "6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-04-v1.png": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+    "web/art/characters/relaxed-shirt-v1/source-e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6.png": "e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-03-v1.png": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+    "web/art/characters/relaxed-shirt-v1/source-4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227.png": "4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227",
+    "web/art/characters/relaxed-sleep-v1/facial-short-chestnut-sleep-v1.png": "a9cc1acb7d4d77e6dabfcbcaebfdb2c92f7003703f0358de46a8f6dd14ce061a",
+    "web/art/characters/relaxed-shirt-v1/source-15f2ac70eb64cd73e3aa92683100522a5d805d53d452d84b03ac5363bedd35b6.png": "15f2ac70eb64cd73e3aa92683100522a5d805d53d452d84b03ac5363bedd35b6",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-06-v1.png": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+    "web/art/characters/relaxed-shirt-v1/source-c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d.png": "c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-05-v1.png": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+    "web/art/characters/relaxed-shirt-v1/source-3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3.png": "3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-08-v1.png": "e47bc6492bdf1c6ca3f5e3c92e369ebe54bc2de6ace778138c77800043dce585",
+    "web/art/characters/relaxed-shirt-v1/source-18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f.png": "18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-07-v1.png": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+    "web/art/characters/relaxed-shirt-v1/source-1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135.png": "1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-09-v1.png": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+    "web/art/characters/relaxed-shirt-v1/source-2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658.png": "2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658",
+    "web/art/characters/relaxed-shirt-v1/source-7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4.png": "7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4",
+    "web/art/characters/relaxed-shirt-v1/source-7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476.png": "7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476",
+    "web/art/characters/relaxed-shirt-v1/source-12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd.png": "12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd",
+    "web/art/characters/relaxed-shirt-v1/source-1afa7293e71c6d53b0ed122c2c05a18d97d8d83e9d30e5f93bd58feb384262de.png": "1afa7293e71c6d53b0ed122c2c05a18d97d8d83e9d30e5f93bd58feb384262de",
+    "web/art/characters/relaxed-sleep-v1/sleep-shirt-v2.png": "c68b53fa48a6c8edb53aeaddc1f2899b31f87e6de6eea86ece6e1057b734aab8",
+    "web/art/characters/relaxed-shirt-v1/source-908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96.png": "908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96",
+    "web/art/characters/relaxed-shirt-v1/source-c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882.png": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+    "web/art/characters/relaxed-shirt-v1/source-042f65abd7e857ece5c7bd249be21a9c6890b2bf690effc2acb6ac8beb701f52.png": "042f65abd7e857ece5c7bd249be21a9c6890b2bf690effc2acb6ac8beb701f52",
+    "web/art/characters/relaxed-shirt-v1/source-30fbbaa53287373eb033f6d0da54ea53ef25983c83d47edf0f76da59db73280a.png": "30fbbaa53287373eb033f6d0da54ea53ef25983c83d47edf0f76da59db73280a",
+    "web/art/characters/relaxed-shirt-v1/source-fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720.png": "fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720",
+    "web/art/characters/relaxed-shirt-v1/source-9204b45115fa742be0f9fea02cfb62c551493ef33a0d43005f4873d62c8d7b97.png": "9204b45115fa742be0f9fea02cfb62c551493ef33a0d43005f4873d62c8d7b97",
+    "web/art/characters/relaxed-shirt-v1/source-d937aed8573df1596d41c31f0eb35c57b1bc10417a30f219f6bdee3e12bbc992.png": "d937aed8573df1596d41c31f0eb35c57b1bc10417a30f219f6bdee3e12bbc992",
+    "web/art/characters/relaxed-shirt-v1/source-c85ba24d63c76ae298586ea1a14808a4ff808a6af8ecd677a35dbf67e51bc152.png": "c85ba24d63c76ae298586ea1a14808a4ff808a6af8ecd677a35dbf67e51bc152",
+    "web/art/characters/relaxed-shirt-v1/source-2ca2aefe8db5f15edb6efaf6163981d9c187fa69ed8f3579e91a223567c13835.png": "2ca2aefe8db5f15edb6efaf6163981d9c187fa69ed8f3579e91a223567c13835",
+    "web/art/characters/relaxed-shirt-v1/source-1413bd9dd427d42734a82968291a3c0b6de9c83c5eaf84cece463d61fb2758e6.png": "1413bd9dd427d42734a82968291a3c0b6de9c83c5eaf84cece463d61fb2758e6",
+    "web/art/characters/relaxed-shirt-v1/source-f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6.png": "f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6",
+    "web/art/characters/relaxed-shirt-v1/source-5681ab34eecc9e6e28c83a0f2502767ba061d8e861b9733c416d87835af7c04b.png": "5681ab34eecc9e6e28c83a0f2502767ba061d8e861b9733c416d87835af7c04b",
+    "web/art/characters/relaxed-shirt-v1/source-63a6ebe5b3eae40dc5e87a3857a6beb8459e8b0717959270c2558428eb7f27d6.png": "63a6ebe5b3eae40dc5e87a3857a6beb8459e8b0717959270c2558428eb7f27d6",
+    "web/art/characters/relaxed-shirt-v1/source-6e6d04c0098cd8fe7a09f8730a5644df0223a463b31c6f4d9bf95ba568f4b66f.png": "6e6d04c0098cd8fe7a09f8730a5644df0223a463b31c6f4d9bf95ba568f4b66f",
+    "web/art/characters/relaxed-shirt-v1/source-2525d552956b314d9f14342caf8e9f02af877aa001bcc7f4f5cd02d894180f2e.png": "2525d552956b314d9f14342caf8e9f02af877aa001bcc7f4f5cd02d894180f2e",
+    "web/art/characters/relaxed-shirt-v1/source-af7603d96cbeb2f9ae8c4b5c6107fbf810813b04572f2f2b0f499b0d7606e913.png": "af7603d96cbeb2f9ae8c4b5c6107fbf810813b04572f2f2b0f499b0d7606e913",
+    "web/art/characters/relaxed-shirt-v1/source-5b2da30eb051402dcf6d56ff9119340cdf81e82fe9462aaf0bfe7e53f674d2e1.png": "5b2da30eb051402dcf6d56ff9119340cdf81e82fe9462aaf0bfe7e53f674d2e1",
+    "web/art/characters/relaxed-shirt-v1/source-be3a7696380938972149d1213fc082430bc7977b62606d224c578c34e1eeb9d6.png": "be3a7696380938972149d1213fc082430bc7977b62606d224c578c34e1eeb9d6",
+    "web/art/characters/relaxed-shirt-v1/source-0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20.png": "0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20",
+    "web/art/characters/relaxed-shirt-v1/source-75f8045b7247e8e689ae05c1a03de55d897972678b0826e1d3efcbe943463bd0.png": "75f8045b7247e8e689ae05c1a03de55d897972678b0826e1d3efcbe943463bd0",
+    "web/art/characters/relaxed-shirt-v1/source-5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3.png": "5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3",
+    "web/art/characters/relaxed-shirt-v1/source-221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0.png": "221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0",
+    "web/art/characters/relaxed-shirt-v1/source-ed39e7d9e2fc4f13eada796bb9d6fa3fac2b5647b575366c909d43bda4268114.png": "ed39e7d9e2fc4f13eada796bb9d6fa3fac2b5647b575366c909d43bda4268114",
+    "web/art/characters/relaxed-shirt-v1/source-973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809.png": "973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809",
+    "web/art/characters/relaxed-shirt-v1/source-34438ac8a533772f7e4d8b7863b054b883c0f4afd84f2776f97618a0e7f50f75.png": "34438ac8a533772f7e4d8b7863b054b883c0f4afd84f2776f97618a0e7f50f75"
+  },
+  "controlScope": "Developer snapshot import and forced speeds establish identical stress phases; only camera panning uses trusted pointer input. This is not evidence of the public scenario authoring/start/speed controls.",
+  "backdropModuleSha256": "c8db32139dab1cd95024ad58a3e16b49e98bebefa445346952e9ce1fa002b41c",
+  "mainSourcePath": null,
+  "mainSourceSha256": "950bd11f94eceffe11e56ae5fe131a0244d9834863e4ad128bc9c1b2e1191316",
+  "groundSourcePath": null,
+  "groundSourceSha256": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+  "weatherSiteCache": true,
+  "weatherSourceSha256": "0aed62fb10fd022f0e79a21f73ed5fb69cdf0a8003ab577c8415bae654f2da24",
+  "buildingCulling": true,
+  "machine": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro"
+  },
+  "bindingPath": null,
+  "bindingSha256": "d277c6ebfda846e79d2d25df61b5c0bfe1f8a45c6e4296e45f669ed9d8e9c9eb",
+  "engineSha256": "73737d324c82c5707d22d44dde04213c3be60371155bd0e7d280fae848d55ae6",
+  "engineBytes": 4405842,
+  "profilerOverhead": null,
+  "baselineWasm": null,
+  "baseline": null,
+  "phaseReset": "Each phase restores the same recorded snapshot; native import and warmup excluded from samples.",
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "warehouse": 13,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12,
+      "home": 12
+    },
+    "custom": true,
+    "residentStyle": "sleep-mixed",
+    "appearanceRevisions": {
+      "resident-parts-v5": 6,
+      "resident-parts-v6": 6
+    },
+    "uniqueAppearances": 12,
+    "attempted": 312,
+    "seed": 42,
+    "biome": "mata-atlantica",
+    "sharedAppearances": false,
+    "starter": false
+  },
+  "secondsPerPhase": 60,
+  "compileMs": 42.53204199999982,
+  "snapshotSha256": "7063377b0102edfac8405974091dede736b85b0880f88f693015734ea5f8ffd9",
+  "snapshotBytes": 1010028,
+  "environment": "Headed Chromium, 1440x900; native-validated fixture or retained checkpoint as recorded; real pointer drags while the simulation runs.",
+  "limits": "No authored utility routes or explicit crop/animal starting overrides; no service-sustainability or total GPU memory measurement. This is a stress fixture, not a balanced example.",
+  "phases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "runtime": {
+        "speedSeconds": {
+          "1": 60.004200000051334
+        },
+        "speedChanges": [
+          {
+            "seconds": 0,
+            "speed": 1
+          }
+        ],
+        "clockStart": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.2583999999999992,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "clockEnd": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.2583999999999992,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cacheSamples": [
+          {
+            "seconds": 0,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 129561878
+          },
+          {
+            "seconds": 5.000000000047686,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 136159542
+          },
+          {
+            "seconds": 10.000000000047686,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 137059455
+          },
+          {
+            "seconds": 15.000000000047686,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 175430897
+          },
+          {
+            "seconds": 20.000000000047688,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 140135921
+          },
+          {
+            "seconds": 25.002000000047687,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 134262937
+          },
+          {
+            "seconds": 30.00340000004768,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 177217873
+          },
+          {
+            "seconds": 35.01250000004769,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 139473299
+          },
+          {
+            "seconds": 40.02080000004769,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 167852131
+          },
+          {
+            "seconds": 45.02080000004769,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 139545769
+          },
+          {
+            "seconds": 50.02910000004768,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 139781202
+          },
+          {
+            "seconds": 55.02920000004768,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 153077792
+          },
+          {
+            "seconds": 60.00420000004768,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 149695285
+          }
+        ],
+        "wallSeconds": 60.00420000004768,
+        "advancedMinutes": 180.07937622070312,
+        "frames": 7178,
+        "medianGapMs": 8.30000000000291,
+        "p95GapMs": 9.19999999999709,
+        "maxGapMs": 33.299999999995634,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 1.5,
+            "p95": 1.7000000476837158
+          },
+          "sample": {
+            "median": 1,
+            "p95": 1.1000001430511475
+          },
+          "paint": {
+            "median": 1.2999999523162842,
+            "p95": 1.5
+          },
+          "total": {
+            "median": 3.799999952316284,
+            "p95": 5.199999809265137
+          },
+          "frameInterval": {
+            "median": 8.30000000000291,
+            "p95": 9.30000000000291
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.2583999999999992,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 157286400,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedHairFrames": 96,
+            "underlays": 3,
+            "workTools": 4,
+            "clothingPoses": 0,
+            "appearanceFrames": 100,
+            "accessories": {
+              "hatFrames": 1,
+              "facialSourceFrames": 44,
+              "posePlacements": 96,
+              "unwornHatPoses": 1,
+              "rgbaBytes": 11796480
+            }
+          },
+          "sleepShirtFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedHairFrames": 96,
+            "underlays": 3,
+            "workTools": 4,
+            "clothingPoses": 48,
+            "appearanceFrames": 100,
+            "accessories": {
+              "hatFrames": 1,
+              "facialSourceFrames": 44,
+              "posePlacements": 96,
+              "unwornHatPoses": 1,
+              "rgbaBytes": 11796480
+            }
+          },
+          "broadFamilyCache": null
+        },
+        "backdrop": {
+          "hits": 6354,
+          "rebuilds": 890,
+          "width": 1440,
+          "height": 900,
+          "bytes": 5184000,
+          "maxPixels": 16777216,
+          "closed": false
+        },
+        "pauseClickWallMs": 41.72820800000045,
+        "pointerMoves": 0
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "runtime": {
+        "speedSeconds": {
+          "1": 60.002800000003404
+        },
+        "speedChanges": [
+          {
+            "seconds": 0,
+            "speed": 1
+          }
+        ],
+        "clockStart": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.4667999999999934,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "clockEnd": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.4667999999999934,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cacheSamples": [
+          {
+            "seconds": 0,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 152736932
+          },
+          {
+            "seconds": 5.008,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 143814795
+          },
+          {
+            "seconds": 10.016300000000003,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 177087410
+          },
+          {
+            "seconds": 15.020399999999993,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 156117586
+          },
+          {
+            "seconds": 20.020399999999995,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 114996586
+          },
+          {
+            "seconds": 25.020399999999995,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 157539877
+          },
+          {
+            "seconds": 30.020399999999995,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 138608221
+          },
+          {
+            "seconds": 35.020399999999995,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 179434264
+          },
+          {
+            "seconds": 40.020399999999995,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 150780603
+          },
+          {
+            "seconds": 45.020399999999995,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 123765155
+          },
+          {
+            "seconds": 50.020399999999995,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 164821801
+          },
+          {
+            "seconds": 55.020399999999995,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 146040589
+          },
+          {
+            "seconds": 60.002799999999986,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 180938903
+          }
+        ],
+        "wallSeconds": 60.002799999999986,
+        "advancedMinutes": 180.07220458984375,
+        "frames": 7182,
+        "medianGapMs": 8.30000000000291,
+        "p95GapMs": 9.19999999999709,
+        "maxGapMs": 32.59999999999127,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 1.5,
+            "p95": 1.7000000476837158
+          },
+          "sample": {
+            "median": 1,
+            "p95": 1.1000001430511475
+          },
+          "paint": {
+            "median": 1.5999999046325684,
+            "p95": 1.7999999523162842
+          },
+          "total": {
+            "median": 4.099999904632568,
+            "p95": 5.099999904632568
+          },
+          "frameInterval": {
+            "median": 8.300000000017462,
+            "p95": 9.300000000017462
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.4667999999999934,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 157286400,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedHairFrames": 96,
+            "underlays": 3,
+            "workTools": 4,
+            "clothingPoses": 0,
+            "appearanceFrames": 100,
+            "accessories": {
+              "hatFrames": 1,
+              "facialSourceFrames": 44,
+              "posePlacements": 96,
+              "unwornHatPoses": 1,
+              "rgbaBytes": 11796480
+            }
+          },
+          "sleepShirtFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedHairFrames": 96,
+            "underlays": 3,
+            "workTools": 4,
+            "clothingPoses": 48,
+            "appearanceFrames": 100,
+            "accessories": {
+              "hatFrames": 1,
+              "facialSourceFrames": 44,
+              "posePlacements": 96,
+              "unwornHatPoses": 1,
+              "rgbaBytes": 11796480
+            }
+          },
+          "broadFamilyCache": null
+        },
+        "backdrop": {
+          "hits": 12365,
+          "rebuilds": 2130,
+          "width": 1440,
+          "height": 900,
+          "bytes": 5184000,
+          "maxPixels": 16777216,
+          "closed": false
+        },
+        "pauseClickWallMs": 50.01887500000885,
+        "pointerMoves": 1188
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "runtime": {
+        "speedSeconds": {
+          "16": 60.00370000014584
+        },
+        "speedChanges": [
+          {
+            "seconds": 0,
+            "speed": 16
+          }
+        ],
+        "clockStart": {
+          "pendingSeconds": 0.003049999999988359,
+          "droppedSeconds": 0.6876999999999877,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "clockEnd": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.9439499999999876,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cacheSamples": [
+          {
+            "seconds": 0,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 140996456
+          },
+          {
+            "seconds": 5.007100000143051,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 161634736
+          },
+          {
+            "seconds": 10.007500000143045,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 118783316
+          },
+          {
+            "seconds": 15.008000000143046,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 156598084
+          },
+          {
+            "seconds": 20.008000000143046,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 142947448
+          },
+          {
+            "seconds": 25.01630000014306,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 150600087
+          },
+          {
+            "seconds": 30.02460000014305,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 152624319
+          },
+          {
+            "seconds": 35.03300000014305,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 215719144
+          },
+          {
+            "seconds": 40.03300000014305,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 215131914
+          },
+          {
+            "seconds": 45.03710000014305,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 143163747
+          },
+          {
+            "seconds": 50.03710000014305,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 140889283
+          },
+          {
+            "seconds": 55.04550000014304,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 134430645
+          },
+          {
+            "seconds": 60.003700000143056,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 174133128
+          }
+        ],
+        "wallSeconds": 60.003700000143056,
+        "advancedMinutes": 2869.8990478515625,
+        "frames": 6607,
+        "medianGapMs": 8.300000000017462,
+        "p95GapMs": 16.60000000000582,
+        "maxGapMs": 408.30000000001746,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 2.200000047683716,
+            "p95": 2.5
+          },
+          "sample": {
+            "median": 1,
+            "p95": 1.2000000476837158
+          },
+          "paint": {
+            "median": 1.5999999046325684,
+            "p95": 1.8000001907348633
+          },
+          "total": {
+            "median": 4.8999998569488525,
+            "p95": 9.099999904632568
+          },
+          "frameInterval": {
+            "median": 8.300000000017462,
+            "p95": 9.300000000017462
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 0.9439499999999876,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 157286400,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedHairFrames": 96,
+            "underlays": 3,
+            "workTools": 4,
+            "clothingPoses": 0,
+            "appearanceFrames": 100,
+            "accessories": {
+              "hatFrames": 1,
+              "facialSourceFrames": 44,
+              "posePlacements": 96,
+              "unwornHatPoses": 1,
+              "rgbaBytes": 11796480
+            }
+          },
+          "sleepShirtFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedHairFrames": 96,
+            "underlays": 3,
+            "workTools": 4,
+            "clothingPoses": 48,
+            "appearanceFrames": 100,
+            "accessories": {
+              "hatFrames": 1,
+              "facialSourceFrames": 44,
+              "posePlacements": 96,
+              "unwornHatPoses": 1,
+              "rgbaBytes": 11796480
+            }
+          },
+          "broadFamilyCache": null
+        },
+        "backdrop": {
+          "hits": 19037,
+          "rebuilds": 2132,
+          "width": 1440,
+          "height": 900,
+          "bytes": 5184000,
+          "maxPixels": 16777216,
+          "closed": false
+        },
+        "pauseClickWallMs": 75.4959160000144,
+        "pointerMoves": 0
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "runtime": {
+        "speedSeconds": {
+          "16": 60.000500000049946
+        },
+        "speedChanges": [
+          {
+            "seconds": 0,
+            "speed": 16
+          }
+        ],
+        "clockStart": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 1.173249999999976,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "clockEnd": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 1.173249999999976,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cacheSamples": [
+          {
+            "seconds": 0,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 141998648
+          },
+          {
+            "seconds": 5.000600000047678,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 169084965
+          },
+          {
+            "seconds": 10.008900000047696,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 139478999
+          },
+          {
+            "seconds": 15.008900000047696,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 139804303
+          },
+          {
+            "seconds": 20.008900000047696,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 152202859
+          },
+          {
+            "seconds": 25.017200000047684,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 134208804
+          },
+          {
+            "seconds": 30.017200000047684,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 217316273
+          },
+          {
+            "seconds": 35.02550000004767,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 181799686
+          },
+          {
+            "seconds": 40.02550000004767,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 170875464
+          },
+          {
+            "seconds": 45.03380000004769,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 174143955
+          },
+          {
+            "seconds": 50.04130000004766,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 131209592
+          },
+          {
+            "seconds": 55.042200000047686,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 116064823
+          },
+          {
+            "seconds": 60.00050000004767,
+            "entries": 12,
+            "pending": 0,
+            "queued": 0,
+            "retainedBytes": 157286400,
+            "jsHeapBytes": 182751188
+          }
+        ],
+        "wallSeconds": 60.00050000004767,
+        "advancedMinutes": 2881.0531616210938,
+        "frames": 6686,
+        "medianGapMs": 8.300000000017462,
+        "p95GapMs": 16.599999999976717,
+        "maxGapMs": 42.09999999997672,
+        "meter": {
+          "samples": 240,
+          "simulation": {
+            "median": 1.7000000476837158,
+            "p95": 2.200000047683716
+          },
+          "sample": {
+            "median": 1,
+            "p95": 1.2000000476837158
+          },
+          "paint": {
+            "median": 1.5,
+            "p95": 1.8000001907348633
+          },
+          "total": {
+            "median": 4.300000190734863,
+            "p95": 6.200000047683716
+          },
+          "frameInterval": {
+            "median": 8.300000000046566,
+            "p95": 9.299999999988358
+          }
+        },
+        "clock": {
+          "pendingSeconds": 0,
+          "droppedSeconds": 1.173249999999976,
+          "budgetMs": 8,
+          "maxPendingSeconds": 0.25
+        },
+        "cache": {
+          "entries": 12,
+          "active": 0,
+          "queued": 0,
+          "pending": 0,
+          "maxEntries": 16,
+          "maxConcurrent": 2,
+          "maxQueued": 24,
+          "rollbackEntries": 12,
+          "retainedBytes": 157286400,
+          "preparedHairFrames": 0,
+          "preparedHairRgbaBytes": 0,
+          "facialOverlayFrames": 0,
+          "facialOverlayRgbaBytes": 0,
+          "maximumFrames": 800,
+          "maximumRetainedFrames": 1600,
+          "rgbaByteUpperBound": 157286400,
+          "decodedSources": 0,
+          "familyCache": null,
+          "workFamilyCache": null,
+          "shirtFamilyCache": null,
+          "sleepFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedHairFrames": 96,
+            "underlays": 3,
+            "workTools": 4,
+            "clothingPoses": 0,
+            "appearanceFrames": 100,
+            "accessories": {
+              "hatFrames": 1,
+              "facialSourceFrames": 44,
+              "posePlacements": 96,
+              "unwornHatPoses": 1,
+              "rgbaBytes": 11796480
+            }
+          },
+          "sleepShirtFamilyCache": {
+            "entries": 2,
+            "active": 0,
+            "queued": 0,
+            "leases": 0,
+            "maxEntries": 2,
+            "maxConcurrent": 2,
+            "maxQueued": 2,
+            "closed": false,
+            "preparedHairFrames": 96,
+            "underlays": 3,
+            "workTools": 4,
+            "clothingPoses": 48,
+            "appearanceFrames": 100,
+            "accessories": {
+              "hatFrames": 1,
+              "facialSourceFrames": 44,
+              "posePlacements": 96,
+              "unwornHatPoses": 1,
+              "rgbaBytes": 11796480
+            }
+          },
+          "broadFamilyCache": null
+        },
+        "backdrop": {
+          "hits": 24753,
+          "rebuilds": 3174,
+          "width": 1440,
+          "height": 900,
+          "bytes": 5184000,
+          "maxPixels": 16777216,
+          "closed": false
+        },
+        "pauseClickWallMs": 45.58670899999561,
+        "pointerMoves": 1042
+      },
+      "checkpoint": {
+        "residents": 12,
+        "buildings": 256
+      }
+    }
+  ],
+  "browserVersion": "151.0.7922.34",
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 4203,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Apple)",
+        "deviceString": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Version 26.5.2 (Build 25F84))",
+        "driverVendor": "Apple",
+        "driverVersion": "26.5.2"
+      }
+    ],
+    "auxAttributes": {
+      "amdSwitchable": false,
+      "canSupportThreadedTextureMailbox": false,
+      "directRenderingVersion": "",
+      "displayType": "ANGLE_METAL",
+      "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_size GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_provoking_vertex GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_translated_shader_source GL_APPLE_clip_distance GL_ARM_rgba8 GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_base_instance GL_EXT_blend_func_extended GL_EXT_blend_minmax GL_EXT_clip_control GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_multisampled_render_to_texture GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_pvrtc_sRGB GL_EXT_read_format_bgra GL_EXT_render_snorm GL_EXT_robustness GL_EXT_sRGB GL_EXT_shader_texture_lod GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_norm16 GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_IMG_texture_compression_pvrtc GL_KHR_debug GL_KHR_parallel_shader_compile GL_KHR_robustness GL_KHR_texture_compression_astc_hdr GL_KHR_texture_compression_astc_ldr GL_KHR_texture_compression_astc_sliced_3d GL_MESA_framebuffer_flip_y GL_NV_fence GL_NV_framebuffer_blit GL_NV_pixel_buffer_object GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_sync GL_OES_compressed_EAC_R11_signed_texture GL_OES_compressed_EAC_R11_unsigned_texture GL_OES_compressed_EAC_RG11_signed_texture GL_OES_compressed_EAC_RG11_unsigned_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_compressed_ETC2_RGB8_texture GL_OES_compressed_ETC2_RGBA8_texture GL_OES_compressed_ETC2_punchthroughA_RGBA8_texture GL_OES_compressed_ETC2_punchthroughA_sRGB8_alpha_texture GL_OES_compressed_ETC2_sRGB8_alpha8_texture GL_OES_compressed_ETC2_sRGB8_texture GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_vertex_array_object GL_QCOM_render_shared_exponent ",
+      "glImplementationParts": "(gl=egl-angle,angle=metal)",
+      "glRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Version 26.5.2 (Build 25F84))",
+      "glResetNotificationStrategy": 33362,
+      "glVendor": "Google Inc. (Apple)",
+      "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28222 git hash: 6dab7c7e742b)",
+      "glWsExtensions": "",
+      "glWsVendor": "",
+      "glWsVersion": "",
+      "inProcessGpu": false,
+      "initializationTime": 0.063402,
+      "isAsan": false,
+      "isClangCoverage": false,
+      "jpegDecodeAcceleratorSupported": false,
+      "maxMsaaSamples": "4",
+      "optimus": false,
+      "passthroughCmdDecoder": true,
+      "pixelShaderVersion": "3.00",
+      "processCrashCount": 0,
+      "sandboxed": false,
+      "skiaBackendType": "GraphiteDawnMetal",
+      "subpixelFontRendering": true,
+      "targetCpuBits": 64,
+      "vertexShaderVersion": "3.00",
+      "visibilityCallbackCallCount": 0
+    },
+    "featureStatus": {
+      "2d_canvas": "enabled",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "enabled",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "enabled_on",
+      "rasterization": "enabled",
+      "raw_draw": "disabled_off_ok",
+      "skia_graphite": "enabled_on",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "enabled",
+      "video_encode": "enabled",
+      "webgl": "enabled",
+      "webgpu": "enabled",
+      "webnn": "disabled_off"
+    },
+    "driverBugWorkarounds": [
+      "disable_2d_canvas_auto_flush",
+      "enable_webgl_timer_query_extensions",
+      "disabled_extension_GL_KHR_blend_equation_advanced",
+      "disabled_extension_GL_KHR_blend_equation_advanced_coherent"
+    ],
+    "videoDecoding": [],
+    "videoEncoding": []
+  },
+  "loadMs": 25127.506124999996,
+  "browserErrors": [],
+  "completed": true
+}
