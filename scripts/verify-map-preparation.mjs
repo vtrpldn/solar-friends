@@ -6,7 +6,7 @@ const output=process.argv[2]??'/tmp/solar-map-preparation';await mkdir(output,{r
 const server=await serve(0);let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',error=>errors.push(error.message));
- await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.locator('[data-preset=camp]').click();await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent==='Saved on this device');
+ await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.locator('[data-preset=camp]').click();await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent==='Saved on this device');await page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='false');await page.locator('#creator-save').click();await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent==='Saved on this device');
  const stored=()=>page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js');const l=new ContentLibrary();try{const projects=await l.listProjects();return {projects,runs:await l.listRuns(),maps:await l.listMaps(),records:await Promise.all(projects.map(p=>l.getProject(p.id)))};}finally{l.close();}});
  const before=await stored(),url=page.url();
  await page.route('**/map-prepare-worker.js',async route=>{await new Promise(resolve=>setTimeout(resolve,1200));try{await route.continue();}catch{}});

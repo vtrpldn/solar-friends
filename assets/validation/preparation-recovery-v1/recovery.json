@@ -1,0 +1,137 @@
+{
+  "rows": [
+    {
+      "kind": "messageerror",
+      "terminated": 1,
+      "sent": 1,
+      "error": {
+        "name": "Error",
+        "message": "Please retry preparation."
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    },
+    {
+      "kind": "error",
+      "terminated": 1,
+      "sent": 1,
+      "error": {
+        "name": "Error",
+        "message": "Please retry preparation."
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    },
+    {
+      "kind": "null",
+      "terminated": 1,
+      "sent": 1,
+      "error": {
+        "name": "Error",
+        "message": "Please retry preparation."
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    },
+    {
+      "kind": "unknown",
+      "terminated": 1,
+      "sent": 1,
+      "error": {
+        "name": "Error",
+        "message": "Please retry preparation."
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    },
+    {
+      "kind": "callback",
+      "terminated": 1,
+      "sent": 1,
+      "error": {
+        "name": "Error",
+        "message": "Cannot receive result"
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    },
+    {
+      "kind": "post",
+      "terminated": 1,
+      "sent": 1,
+      "error": {
+        "name": "Error",
+        "message": "Cannot send"
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    },
+    {
+      "kind": "constructor",
+      "terminated": 0,
+      "sent": 0,
+      "error": {
+        "name": "Error",
+        "message": "Cannot start worker"
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    },
+    {
+      "kind": "timeout",
+      "terminated": 1,
+      "sent": 1,
+      "error": {
+        "name": "Error",
+        "message": "Preparation timed out."
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    },
+    {
+      "kind": "cancel",
+      "terminated": 1,
+      "sent": 1,
+      "error": {
+        "name": "AbortError",
+        "message": "Cancelled"
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    },
+    {
+      "kind": "constructor-cancel",
+      "terminated": 1,
+      "sent": 0,
+      "error": {
+        "name": "AbortError",
+        "message": "Cancelled"
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    },
+    {
+      "kind": "success",
+      "terminated": 1,
+      "sent": 1,
+      "value": {
+        "accepted": true
+      },
+      "dialogRemoved": true,
+      "focusRestored": true,
+      "unchanged": true
+    }
+  ],
+  "publicMalformedWorkerFeedback": true,
+  "browserErrors": []
+}

@@ -1,0 +1,55 @@
+{
+  "cancelButton": true,
+  "escape": true,
+  "responsiveWhilePreparing": true,
+  "noLateDownloadAfterCancel": true,
+  "focusRestored": true,
+  "byteExactFrozenExport": true,
+  "byteExactIncompleteExport": true,
+  "realDownload": true,
+  "denseFixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "residentStyle": "classic",
+    "appearanceRevisions": {
+      "resident-parts-v1": 12
+    },
+    "uniqueAppearances": 12,
+    "attempted": 312,
+    "seed": 42
+  },
+  "denseExport": {
+    "exact": true,
+    "bytes": 671885,
+    "elapsedMs": 45,
+    "maximumGapMs": 10.699999809265137,
+    "ticks": 4
+  },
+  "oversizedAndCloneErrorsCleanUp": true,
+  "unchangedDraftHistoryViewAndLibrary": true,
+  "browserErrors": []
+}

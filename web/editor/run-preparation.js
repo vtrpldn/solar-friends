@@ -1,5 +1,5 @@
 // A cancelled worker result must never reach an installation or download step.
-export function runPreparation({workerFactory,request,title,starting,note,cancelMessage,failureMessage,timeoutMessage,result}){
+export function runPreparation({workerFactory,request,title,starting,note,cancelMessage,failureMessage,timeoutMessage,result,timeoutMs=60000}){
  return new Promise((resolve,reject)=>{
   const dialog=document.createElement('dialog');dialog.className='creator-prepare-dialog';dialog.setAttribute('aria-labelledby','creator-prepare-title');
   const heading=document.createElement('h2');heading.id='creator-prepare-title';heading.textContent=title;
@@ -15,12 +15,13 @@ export function runPreparation({workerFactory,request,title,starting,note,cancel
   dialog.addEventListener('cancel',event=>{event.preventDefault();cancel();});button.onclick=cancel;
   document.body.append(dialog);dialog.showModal();
   try{
-   worker=workerFactory();worker.onmessage=({data})=>{
+   worker=workerFactory();if(settled){worker.terminate();return;}worker.onmessage=({data})=>{
     if(settled)return;
-    try{if(data.error){finish(Error(data.error));return;}const value=result(data);if(value!==undefined){finish(null,value);return;}if(data.stage)status.textContent=data.stage;}catch(error){finish(error);}
+    try{if(!data||typeof data!=='object')throw Error(failureMessage);if(data.error){finish(Error(data.error));return;}const value=result(data);if(value!==undefined){finish(null,value);return;}if(typeof data.stage==='string')status.textContent=data.stage;else finish(Error(failureMessage));}catch(error){finish(error);}
    };
-   worker.onerror=event=>{event.preventDefault();finish(Error(failureMessage));};worker.postMessage(request);
-   if(!settled)timer=setTimeout(()=>finish(Error(timeoutMessage)),60000);
+   worker.onerror=event=>{event.preventDefault?.();finish(Error(failureMessage));};
+   worker.onmessageerror=()=>finish(Error(failureMessage));
+   timer=setTimeout(()=>finish(Error(timeoutMessage)),timeoutMs);worker.postMessage(request);
   }catch(error){finish(error);}
  });
 }

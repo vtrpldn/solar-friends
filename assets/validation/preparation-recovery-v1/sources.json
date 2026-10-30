@@ -1,0 +1,8 @@
+{
+  "web/editor/run-preparation.js": "29cffb125f1ca53917e0a1e24aa6fd09ae7926fe15cad03a8fd0df7b654aec0b",
+  "scripts/verify-preparation-recovery.mjs": "3f758ec5b8025cdc399d7ac772a054d65925ed351ec88934a72a039ee2c87cd7",
+  "scripts/verify-map-preparation.mjs": "15143068398015fb95a1926f8d944377f399716016bc939e217cf1d03cfd366a",
+  "scripts/verify-release-preparation.mjs": "c8dbdbd277e7438148844bf2a43ad4cd41042cd2a94995bdd65ef575edd65446",
+  "scripts/verify-creation-export.mjs": "9e23599e30c82797529b7a180df2fe9562efa71049bab74a8d8d5b9d11a4c07f",
+  "scripts/verify-scenario-preparation.mjs": "574e78a7863363d287a6970a3a771789d51cffcd561c1379e2615d4b1f980bd0"
+}
