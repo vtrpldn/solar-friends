@@ -53,7 +53,6 @@
   "parity": "Final current shared-lighting-selector captures are byte-identical to inspected preceding captures.",
   "fullCaptures": "artifacts/building-rain-close-final",
   "pending": {
-    "unpoweredNightClose": "Captured; visual inspection pending.",
     "poweredNightOverview": "Captured; visual inspection pending.",
     "unpoweredNightOverview": "Captured; visual inspection pending.",
     "rainOverview": "Captured; visual inspection pending."
@@ -106,5 +105,49 @@
     ],
     "finding": "All nine boards individually reviewed; no additional blocking palette, ground-contact, lamp-origin, silhouette or proportion defect observed in these static scenes. Current-source recapture is byte-identical to reviewed preceding capture.",
     "fullCaptures": "artifacts/building-powered-night-close-final"
+  },
+  "unpoweredNightCloseReview": {
+    "zoom": 1.8,
+    "compositions": 81,
+    "boards": [
+      {
+        "file": "mata-atlantica-zoom-1.8-unpowered-night-group-1.png",
+        "sha256": "a2b1db6e56e19f3d10f9c0ede3c387f7a4414a50151e0f80a7210cfda8b67706"
+      },
+      {
+        "file": "mata-atlantica-zoom-1.8-unpowered-night-group-2.png",
+        "sha256": "6978b520f453c3fff59e84051bf8e84a5fc85e6cac8dd6968a8c9fdd4510f1bc"
+      },
+      {
+        "file": "mata-atlantica-zoom-1.8-unpowered-night-group-3.png",
+        "sha256": "7d1b6728675cd010d485d3b9525591a0b81a8244be00245e8d68c906b463dc18"
+      },
+      {
+        "file": "cerrado-zoom-1.8-unpowered-night-group-1.png",
+        "sha256": "c4ac57b02a3a9a3421da84a607a0de1ee81fd3389ff03e8943b6804cbb361148"
+      },
+      {
+        "file": "cerrado-zoom-1.8-unpowered-night-group-2.png",
+        "sha256": "4bf66ec2d9fa48b5479562d68281f98be212f956ecec00c0748552ebda555e9d"
+      },
+      {
+        "file": "cerrado-zoom-1.8-unpowered-night-group-3.png",
+        "sha256": "75f180da21a83e5b0076a5935ab70b9b18c14bdcdddb49fcd72d96475accfb11"
+      },
+      {
+        "file": "caatinga-zoom-1.8-unpowered-night-group-1.png",
+        "sha256": "7c5186151247fb48baef415ee8a70c2c80e5f6549d867b2fe04eb7586649c6c9"
+      },
+      {
+        "file": "caatinga-zoom-1.8-unpowered-night-group-2.png",
+        "sha256": "36a30729117b417464262b30b538692be85f9dbb5cd2a58390c046e47725fee0"
+      },
+      {
+        "file": "caatinga-zoom-1.8-unpowered-night-group-3.png",
+        "sha256": "6d2f01dadeb6fe7bc66ad815ecb7113e66d44fc72c19ac0f5523164363ae5173"
+      }
+    ],
+    "finding": "All nine boards individually inspected. No additional blocking palette, ground-contact, silhouette or proportion defect observed in these static scenes.",
+    "fullCaptures": "artifacts/building-unpowered-close"
   }
 }

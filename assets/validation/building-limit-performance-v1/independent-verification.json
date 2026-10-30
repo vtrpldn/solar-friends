@@ -1,0 +1,94 @@
+{
+  "passed": true,
+  "scope": "Source-bound rendered measurements, native-valid fresh or established opening snapshot, bounded appearance cache, positive real simulation progress and exact checkpoint assertions completed by the benchmark. Timings are measurements, not acceptance of a universal budget or physical-display FPS.",
+  "results": [
+    {
+      "root": "artifacts/performance-mata-max-current",
+      "fixture": {
+        "population": 12,
+        "buildings": 256,
+        "types": {
+          "shed": 13,
+          "warehouse": 13,
+          "garden": 13,
+          "well": 13,
+          "kitchen": 12,
+          "grove": 12,
+          "compost": 12,
+          "square": 12,
+          "workshop": 12,
+          "greenhouse": 12,
+          "coop": 12,
+          "solar_farm": 12,
+          "streetlight": 12,
+          "eco_toilet": 12,
+          "wetland": 12,
+          "banana_treatment": 12,
+          "biodigester": 12,
+          "orchard": 12,
+          "goat_pasture": 12,
+          "apiary": 12,
+          "home": 12
+        },
+        "custom": true,
+        "residentStyle": "sleep-mixed",
+        "appearanceRevisions": {
+          "resident-parts-v5": 6,
+          "resident-parts-v6": 6
+        },
+        "uniqueAppearances": 12,
+        "attempted": 312,
+        "seed": 42,
+        "biome": "mata-atlantica",
+        "sharedAppearances": false,
+        "starter": false
+      },
+      "phases": [
+        {
+          "speed": 1,
+          "panning": false,
+          "effectiveSpeedSeconds": {
+            "1": 60.023000000191864
+          },
+          "simulationRateFraction": 1.000584358512254,
+          "frameGapP95Ms": 24.69999999999709,
+          "paintP95Ms": 2.700000047683716,
+          "cacheBytes": 157286400
+        },
+        {
+          "speed": 1,
+          "panning": true,
+          "effectiveSpeedSeconds": {
+            "1": 60.006200000048466
+          },
+          "simulationRateFraction": 1.0006746256546404,
+          "frameGapP95Ms": 25.10000000000582,
+          "paintP95Ms": 7.5,
+          "cacheBytes": 157286400
+        },
+        {
+          "speed": 16,
+          "panning": false,
+          "effectiveSpeedSeconds": {
+            "16": 60.012700000190804
+          },
+          "simulationRateFraction": 0.9467172301621684,
+          "frameGapP95Ms": 66.69999999998254,
+          "paintP95Ms": 30,
+          "cacheBytes": 157286400
+        },
+        {
+          "speed": 16,
+          "panning": true,
+          "effectiveSpeedSeconds": {
+            "16": 60.019400000000026
+          },
+          "simulationRateFraction": 0.9751567892841814,
+          "frameGapP95Ms": 65.70000000001164,
+          "paintP95Ms": 31.299999952316284,
+          "cacheBytes": 157286400
+        }
+      ]
+    }
+  ]
+}

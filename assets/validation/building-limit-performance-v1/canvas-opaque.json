@@ -1,0 +1,238 @@
+{
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "residentStyle": "classic",
+    "appearanceRevisions": {
+      "resident-parts-v1": 12
+    },
+    "uniqueAppearances": 12,
+    "attempted": 312,
+    "seed": 42
+  },
+  "opaqueWorld": true,
+  "softwareLight": false,
+  "noLightOcclusion": false,
+  "unboundedLightMasks": false,
+  "limits": [
+    "Canvas wrappers add overhead; these timings are diagnostic, not a performance acceptance result.",
+    "The no-light-occlusion mode deliberately breaks depth masking and must never be used as a production renderer.",
+    "No moving camera, simulation throughput, total memory or storage acceptance."
+  ],
+  "servedMainSha256": "1153cb9407243489d944590650993ea41f5b383527b839b19eb483a8f0f10083",
+  "sourceHashes": {
+    "web/main.js": "950bd11f94eceffe11e56ae5fe131a0244d9834863e4ad128bc9c1b2e1191316",
+    "web/night-lighting.js": "6f8e92f982122297cbc99b1b23c2e82cd8c9fa34c711f200b1b35bbf4bd9ac8e",
+    "web/paint-cache.js": "f070b4e16eeb75c077b26009201fef77ca246a9c202664730bc81dda35cc053c",
+    "web/world-visibility.js": "35dadeba53c888dc1a0c6c63a81fb8e6947235613aec16b32cbd45a664929940"
+  },
+  "scope": "Fixed paused day/night dense scene; test-only hook invokes the real render function once per animation frame. Canvas method wrappers add overhead; timings identify work, not an acceptance benchmark. No camera movement or simulation advancement.",
+  "phases": [
+    {
+      "minutes": 600,
+      "repeat": 0,
+      "opaqueWorld": true,
+      "softwareLight": false,
+      "noLightOcclusion": false,
+      "unboundedLightMasks": false,
+      "wallMs": 5013.099999904633,
+      "frames": 337,
+      "paint": {
+        "median": 3.1999998092651367,
+        "p95": 4.1000001430511475
+      },
+      "minutesBefore": 600,
+      "minutesAfter": 600,
+      "timings": [
+        {
+          "key": "world/drawImage/source-over",
+          "calls": 137833,
+          "ms": 380.8999993801117
+        },
+        {
+          "key": "world/filter=none/source-over",
+          "calls": 179958,
+          "ms": 117.69999885559082
+        },
+        {
+          "key": "world/restore/source-over",
+          "calls": 235563,
+          "ms": 70.99999809265137
+        },
+        {
+          "key": "world/fillRect/source-over",
+          "calls": 36733,
+          "ms": 21.700000762939453
+        },
+        {
+          "key": "world/createRadialGradient/source-over",
+          "calls": 35722,
+          "ms": 19.60000443458557
+        },
+        {
+          "key": "sprite-sized/drawImage/lighter",
+          "calls": 4044,
+          "ms": 6.9000022411346436
+        },
+        {
+          "key": "sprite-sized/clearRect/source-over",
+          "calls": 4044,
+          "ms": 5.000000476837158
+        },
+        {
+          "key": "world/clearRect/source-over",
+          "calls": 337,
+          "ms": 2.3000004291534424
+        }
+      ]
+    },
+    {
+      "minutes": 1260,
+      "repeat": 0,
+      "opaqueWorld": true,
+      "softwareLight": false,
+      "noLightOcclusion": false,
+      "unboundedLightMasks": false,
+      "wallMs": 5005.899999856949,
+      "frames": 145,
+      "paint": {
+        "median": 21.5,
+        "p95": 24
+      },
+      "minutesBefore": 1260,
+      "minutesAfter": 1260,
+      "timings": [
+        {
+          "key": "world/drawImage/screen",
+          "calls": 145,
+          "ms": 2285.399997472763
+        },
+        {
+          "key": "world/drawImage/source-over",
+          "calls": 54085,
+          "ms": 167.8000009059906
+        },
+        {
+          "key": "world-sized/filter=none/destination-out",
+          "calls": 74820,
+          "ms": 43.199997663497925
+        },
+        {
+          "key": "world-sized/drawImage/destination-out",
+          "calls": 37845,
+          "ms": 40.69999647140503
+        },
+        {
+          "key": "world/filter=none/source-over",
+          "calls": 103530,
+          "ms": 39.00000214576721
+        },
+        {
+          "key": "world/restore/source-over",
+          "calls": 96280,
+          "ms": 29.100000143051147
+        },
+        {
+          "key": "world-sized/restore/destination-out",
+          "calls": 76560,
+          "ms": 21.799999713897705
+        },
+        {
+          "key": "world-sized/filter=none/screen",
+          "calls": 27260,
+          "ms": 16.10000228881836
+        },
+        {
+          "key": "world-sized/drawImage/screen",
+          "calls": 13630,
+          "ms": 15.90000033378601
+        },
+        {
+          "key": "world-sized/restore/source-over",
+          "calls": 52200,
+          "ms": 14.699999809265137
+        },
+        {
+          "key": "world/fillRect/source-over",
+          "calls": 15805,
+          "ms": 12.89999771118164
+        },
+        {
+          "key": "world/createRadialGradient/source-over",
+          "calls": 15370,
+          "ms": 6.90000057220459
+        },
+        {
+          "key": "world-sized/restore/screen",
+          "calls": 13630,
+          "ms": 4.700000762939453
+        },
+        {
+          "key": "world-sized/fillRect/destination-out",
+          "calls": 5655,
+          "ms": 3.8000004291534424
+        },
+        {
+          "key": "sprite-sized/drawImage/lighter",
+          "calls": 1740,
+          "ms": 3.700000047683716
+        },
+        {
+          "key": "sprite-sized/clearRect/source-over",
+          "calls": 1740,
+          "ms": 2.3999993801116943
+        },
+        {
+          "key": "world-sized/createRadialGradient/destination-out",
+          "calls": 5655,
+          "ms": 2.299999952316284
+        },
+        {
+          "key": "world-sized/fillRect/screen",
+          "calls": 1015,
+          "ms": 1.2999992370605469
+        },
+        {
+          "key": "world/clearRect/source-over",
+          "calls": 145,
+          "ms": 1.200000286102295
+        },
+        {
+          "key": "world-sized/createRadialGradient/screen",
+          "calls": 1015,
+          "ms": 1.0999994277954102
+        },
+        {
+          "key": "world-sized/clearRect/source-over",
+          "calls": 145,
+          "ms": 0.19999980926513672
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

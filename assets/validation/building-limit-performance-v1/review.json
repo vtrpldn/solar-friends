@@ -1,0 +1,61 @@
+{
+  "why": "Measure the actual published building limit with twelve distinct current custom looks before accepting the maximum-map performance gate.",
+  "fixture": "64x64 Mata Atlantica, seed 42, 256 mixed inland buildings, twelve distinct residents with six v5 and six v6 recipes. Not all equipment, crops, routes or every entity limit simultaneously.",
+  "phases": [
+    {
+      "speed": 1,
+      "panning": false,
+      "frameGapP95Ms": 24.69999999999709,
+      "simulationRateFraction": 1.000584358512254,
+      "droppedRealSeconds": 0.0,
+      "pauseClickWallMs": 193.88212500000373,
+      "cacheBytes": 157286400
+    },
+    {
+      "speed": 1,
+      "panning": true,
+      "frameGapP95Ms": 25.10000000000582,
+      "simulationRateFraction": 1.0006746256546404,
+      "droppedRealSeconds": 0.0,
+      "pauseClickWallMs": 183.16983400000026,
+      "cacheBytes": 157286400
+    },
+    {
+      "speed": 16,
+      "panning": false,
+      "frameGapP95Ms": 66.69999999998254,
+      "simulationRateFraction": 0.9467172301621684,
+      "droppedRealSeconds": 3.0438499999999644,
+      "pauseClickWallMs": 596.7100419999915,
+      "cacheBytes": 157286400
+    },
+    {
+      "speed": 16,
+      "panning": true,
+      "frameGapP95Ms": 65.70000000001164,
+      "simulationRateFraction": 0.9751567892841814,
+      "droppedRealSeconds": 1.551700000000002,
+      "pauseClickWallMs": 213.7098339999793,
+      "cacheBytes": 157286400
+    }
+  ],
+  "finding": "1x simulation keeps pace; 16x rendering and pause latency remain unacceptable for release. This evidence does not pass the performance gate.",
+  "diagnostics": "Fixed day/night Canvas profiling identifies full-world screen compositing as the largest night draw cost. Software light backing and opaque-world probes have not shown a material improvement; no runtime change promoted.",
+  "rawCpuProfiles": [
+    {
+      "path": "artifacts/performance-mata-max-profile/16x-pan.cpuprofile",
+      "sha256": "e57b1e7b79ab189730f8e6afbdd1aaba665dfaf126015f12f4c3cfe5a26fafeb"
+    },
+    {
+      "path": "artifacts/performance-mata-max-profile/16x-still.cpuprofile",
+      "sha256": "43ec435378497827b09d43dd69752a349df088f509cbbb0a97f626d791049a1c"
+    }
+  ],
+  "limits": [
+    "Each phase is a separate sixty-second window restored from the same opening.",
+    "Profiling adds overhead and is diagnostic only.",
+    "Resident cache bytes exclude total process, GPU and native memory.",
+    "Only 16x-pan final screenshot individually inspected in this run.",
+    "Other biomes, shared looks, representative typical worlds, editor actions and physical-display pacing still need measurement."
+  ]
+}
