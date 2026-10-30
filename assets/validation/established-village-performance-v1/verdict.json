@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "why": "Measure a lived-in public example and distinguish preferred speed from automatic fast-forward.",
+  "publicPlay": {
+    "completed": true,
+    "laterDays": 3,
+    "population": 5,
+    "buildings": 12,
+    "biome": "caatinga",
+    "exactCheckpointReload": true,
+    "unchangedEditor": true,
+    "session": 7793
+  },
+  "measurements": {
+    "sequential": true,
+    "secondsPerPhase": 60,
+    "preferred1xAutomatic16xSeconds": [
+      5.378499999952323,
+      5.367599999809237
+    ],
+    "panningFrameGapP95Ms": [
+      16.70000000001164,
+      16.70000000001164
+    ],
+    "sixteenRateFractions": [
+      0.999815765757232,
+      0.9998163954052901
+    ],
+    "artworkCacheBytes": 27229988,
+    "cacheSamples": 52,
+    "droppedSecondsWithinEachSample": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "session": 19451
+  },
+  "visualReview": "All two public completion/journal and four final measured-phase screenshots inspected. Generated-branch screenshots are functional evidence only.",
+  "verification": {
+    "sourceSnapshotAndCacheVerifier": "passed for both final branches",
+    "verifierSha256": "5eca724ffb19d41059818d9140e8261326b7c83dd51c1d97b24c09ede99b537b",
+    "generatedBranchRegression": "passed session 7626; five-second phases, not performance acceptance"
+  },
+  "limits": [
+    "One established Caatinga village, not every typical layout, biome, body or maximum fixture.",
+    "Diagnostic benchmark imports and forced speeds are separate from the public example journey.",
+    "Effective-speed changes observed from the UI have one-frame uncertainty. Mixed-speed rate fractions are intentionally absent.",
+    "Constant artwork-cache counters and coarse optional JavaScript heap samples do not prove native/process/GPU memory, a long-term plateau, physical display FPS or full performance acceptance.",
+    "Each phase starts from the same checkpoint; the four windows are not one uninterrupted soak.",
+    "The first diagnostic run lacked effective-speed tracing and is not used as final acceptance."
+  ]
+}

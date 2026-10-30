@@ -1,0 +1,1246 @@
+{
+  "schema": 1,
+  "checkpointFile": "an-inherited-village-established.snapshot.json",
+  "checkpointSha256": "e3b9d5248f478185257c0d8c7406553e515b359b9833f1c65022b3606d0eceb1",
+  "producerSha256": "9c5f897a4d300a71c70759a8eb5793e08f92a8448cc611f637df8867356fc5de",
+  "sourceSha256": "ef038f1ee0f496621decfaa9a61556938f4ab8fd18749cf2dc5e7a758ede5f67",
+  "controls": {
+    "purchase": {
+      "tools": 3
+    },
+    "placements": [],
+    "preferredSpeed": 8
+  },
+  "finishedAt": 1234.3297119140625,
+  "observations": [
+    {
+      "elapsedSeconds": 5.167,
+      "minute": 600.0020141601562,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 10.291,
+      "minute": 724.0062255859375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 15.421,
+      "minute": 846.8079223632812,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 20.547,
+      "minute": 970.1107788085938,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 25.682,
+      "minute": 1093.11669921875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 30.834,
+      "minute": 1216.3358154296875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 35.995,
+      "minute": 1339.8017578125,
+      "finished": 1234.3297119140625,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "home",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        },
+        {
+          "kind": "solar_farm",
+          "progress": 100
+        },
+        {
+          "kind": "streetlight",
+          "progress": 100
+        },
+        {
+          "kind": "workshop",
+          "progress": 100
+        },
+        {
+          "kind": "eco_toilet",
+          "progress": 100
+        },
+        {
+          "kind": "banana_treatment",
+          "progress": 100
+        }
+      ]
+    }
+  ],
+  "postDays": 3,
+  "continuation": [
+    {
+      "minutes": 1519.0447998046875,
+      "food": 24,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "hunger": [
+        11.729570388793945,
+        27.476621627807617,
+        13.589204788208008,
+        25.813926696777344,
+        12.739177703857422
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 1743.7822265625,
+      "food": 24,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        99.93931579589844,
+        99.67802429199219,
+        100,
+        100,
+        100
+      ],
+      "hunger": [
+        15.24238109588623,
+        31.620433807373047,
+        16.95999526977539,
+        29.643423080444336,
+        16.110074996948242
+      ],
+      "tasks": [
+        "nature_walk",
+        "eat",
+        "sleep",
+        "socialize",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 1870.5692138671875,
+      "food": 24,
+      "meals": 8,
+      "money": 291354,
+      "energy": [
+        98.49730682373047,
+        99.83930206298828,
+        99.62699127197266,
+        99.80390930175781,
+        99.26131439208984
+      ],
+      "hunger": [
+        20.735984802246094,
+        4.128589153289795,
+        21.38005828857422,
+        3.599538564682007,
+        20.719736099243164
+      ],
+      "tasks": [
+        "eat",
+        "water",
+        "eat",
+        "water",
+        "eat"
+      ]
+    },
+    {
+      "minutes": 1997.5067138671875,
+      "food": 21,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        97.59117889404297,
+        100,
+        100,
+        98.35956573486328,
+        98.4657974243164
+      ],
+      "hunger": [
+        0.08663199096918106,
+        9.628735542297363,
+        3.280363082885742,
+        9.09969711303711,
+        5.273216247558594
+      ],
+      "tasks": [
+        "sanitation",
+        "birdwatch",
+        "daydream",
+        "water",
+        "stretch"
+      ]
+    },
+    {
+      "minutes": 2124.618896484375,
+      "food": 21,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        97.09835815429688,
+        98.57328033447266,
+        98.87508392333984,
+        96.91329193115234,
+        99.47486114501953
+      ],
+      "hunger": [
+        5.594271659851074,
+        15.136236190795898,
+        8.788020133972168,
+        14.607197761535645,
+        10.780815124511719
+      ],
+      "tasks": [
+        "daydream",
+        "daydream",
+        "daydream",
+        "daydream",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 2251.532958984375,
+      "food": 21,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        99.10884857177734,
+        99.82730102539062,
+        99.9813461303711,
+        99.96969604492188,
+        99.8949966430664
+      ],
+      "hunger": [
+        11.093228340148926,
+        20.63528823852539,
+        14.286880493164062,
+        20.106216430664062,
+        16.27968406677246
+      ],
+      "tasks": [
+        "daydream",
+        "eat",
+        "water",
+        "eat",
+        "sanitation"
+      ]
+    },
+    {
+      "minutes": 2378.111328125,
+      "food": 21,
+      "meals": 8,
+      "money": 291354,
+      "energy": [
+        100,
+        99.04338073730469,
+        98.54061126708984,
+        100,
+        100
+      ],
+      "hunger": [
+        16.577442169189453,
+        3.5036563873291016,
+        19.77128028869629,
+        3.3062644004821777,
+        21.764163970947266
+      ],
+      "tasks": [
+        "daydream",
+        "water",
+        "water",
+        "daydream",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 2505.37109375,
+      "food": 21,
+      "meals": 8,
+      "money": 291354,
+      "energy": [
+        100,
+        97.63134765625,
+        97.09195709228516,
+        98.93508911132812,
+        100
+      ],
+      "hunger": [
+        22.091381072998047,
+        9.017395973205566,
+        25.285219192504883,
+        8.8200101852417,
+        27.27810287475586
+      ],
+      "tasks": [
+        "daydream",
+        "water",
+        "daydream",
+        "water",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 2632.686767578125,
+      "food": 18,
+      "meals": 11,
+      "money": 291354,
+      "energy": [
+        99.26405334472656,
+        96.18104553222656,
+        96.09320831298828,
+        97.74248504638672,
+        98.04969024658203
+      ],
+      "hunger": [
+        1.689792275428772,
+        14.533482551574707,
+        30.80167579650879,
+        14.33609676361084,
+        3.23710560798645
+      ],
+      "tasks": [
+        "nature_walk",
+        "water",
+        "eat",
+        "water",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 2759.798828125,
+      "food": 18,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        99.46857452392578,
+        94.69789123535156,
+        100,
+        100,
+        100
+      ],
+      "hunger": [
+        7.197441101074219,
+        20.041149139404297,
+        5.403637886047363,
+        19.843759536743164,
+        8.744733810424805
+      ],
+      "tasks": [
+        "water",
+        "water",
+        "stretch",
+        "stargaze",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 2942.220947265625,
+      "food": 18,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "hunger": [
+        9.939257621765137,
+        22.782730102539062,
+        9.426356315612793,
+        22.58534049987793,
+        11.911550521850586
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 3162.966552734375,
+      "food": 18,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        99.639404296875,
+        100,
+        100,
+        100,
+        100
+      ],
+      "hunger": [
+        14.204354286193848,
+        26.093339920043945,
+        12.737358093261719,
+        25.895950317382812,
+        15.222552299499512
+      ],
+      "tasks": [
+        "water",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 3290.388427734375,
+      "food": 18,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        98.19004821777344,
+        99.30076599121094,
+        100,
+        99.76158905029297,
+        98.99109649658203
+      ],
+      "hunger": [
+        19.725252151489258,
+        31.532060623168945,
+        18.062740325927734,
+        30.606475830078125,
+        20.672590255737305
+      ],
+      "tasks": [
+        "water",
+        "eat",
+        "stretch",
+        "eat",
+        "eat"
+      ]
+    },
+    {
+      "minutes": 3417.367431640625,
+      "food": 15,
+      "meals": 11,
+      "money": 291354,
+      "energy": [
+        96.7083969116211,
+        97.56527709960938,
+        98.9986801147461,
+        98.10763549804688,
+        97.36995697021484
+      ],
+      "hunger": [
+        25.227243423461914,
+        3.872638702392578,
+        1.151280403137207,
+        2.9712741374969482,
+        5.233287811279297
+      ],
+      "tasks": [
+        "eat",
+        "sanitation",
+        "garden",
+        "gather",
+        "haul"
+      ]
+    },
+    {
+      "minutes": 3544.4140625,
+      "food": 15,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        95.50120544433594,
+        95.91088104248047,
+        99.94633483886719,
+        96.39027404785156,
+        99.94633483886719
+      ],
+      "hunger": [
+        3.0419955253601074,
+        9.377366065979004,
+        6.656015872955322,
+        8.476019859313965,
+        10.737974166870117
+      ],
+      "tasks": [
+        "daydream",
+        "daydream",
+        "sanitation",
+        "gather",
+        "sanitation"
+      ]
+    },
+    {
+      "minutes": 3671.41357421875,
+      "food": 27,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        92.67440795898438,
+        94.42901611328125,
+        97.9957046508789,
+        94.39347076416016,
+        97.41377258300781
+      ],
+      "hunger": [
+        8.544651985168457,
+        14.879868507385254,
+        12.15856647491455,
+        13.978522300720215,
+        16.24049186706543
+      ],
+      "tasks": [
+        "haul",
+        "gather",
+        "sanitation",
+        "sanitation",
+        "haul"
+      ]
+    },
+    {
+      "minutes": 3798.442626953125,
+      "food": 27,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        91.07098388671875,
+        92.192138671875,
+        96.5561752319336,
+        93.7457504272461,
+        94.87731170654297
+      ],
+      "hunger": [
+        14.048611640930176,
+        20.38401222229004,
+        17.66259002685547,
+        19.482629776000977,
+        21.744674682617188
+      ],
+      "tasks": [
+        "water",
+        "daydream",
+        "water",
+        "daydream",
+        "haul"
+      ]
+    },
+    {
+      "minutes": 3925.458251953125,
+      "food": 27,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        89.84388732910156,
+        95.62329864501953,
+        95.18614959716797,
+        100,
+        92.87745666503906
+      ],
+      "hunger": [
+        19.551883697509766,
+        25.88736915588379,
+        23.16594696044922,
+        24.985986709594727,
+        27.248031616210938
+      ],
+      "tasks": [
+        "water",
+        "daydream",
+        "water",
+        "nature_walk",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 4052.3828125,
+      "food": 24,
+      "meals": 11,
+      "money": 291354,
+      "energy": [
+        88.28044891357422,
+        98.27115631103516,
+        93.74334716796875,
+        99.51587677001953,
+        95.85873413085938
+      ],
+      "hunger": [
+        1.3823683261871338,
+        1.3219444751739502,
+        28.665416717529297,
+        1.4615123271942139,
+        2.072615385055542
+      ],
+      "tasks": [
+        "idle",
+        "haul",
+        "eat",
+        "water",
+        "water"
+      ]
+    },
+    {
+      "minutes": 4179.73388671875,
+      "food": 24,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        89.56226348876953,
+        97.41890716552734,
+        100,
+        98.1283187866211,
+        94.4453353881836
+      ],
+      "hunger": [
+        6.901242256164551,
+        6.840817451477051,
+        4.808856010437012,
+        6.980387210845947,
+        7.591494560241699
+      ],
+      "tasks": [
+        "stargaze",
+        "stargaze",
+        "stargaze",
+        "water",
+        "water"
+      ]
+    },
+    {
+      "minutes": 4306.65234375,
+      "food": 24,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        97.7123031616211,
+        100,
+        100,
+        96.64704132080078,
+        92.96405792236328
+      ],
+      "hunger": [
+        8.958887100219727,
+        9.326601028442383,
+        8.566865921020508,
+        9.466172218322754,
+        10.499391555786133
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 4539.5146484375,
+      "food": 24,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "hunger": [
+        12.453392028808594,
+        12.82110595703125,
+        12.061370849609375,
+        12.960677146911621,
+        13.993896484375
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 4695.05712890625,
+      "food": 24,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        99.18968200683594,
+        98.84309387207031,
+        100,
+        99.8914566040039,
+        99.98127746582031
+      ],
+      "hunger": [
+        16.74645233154297,
+        17.955791473388672,
+        16.175905227661133,
+        15.55542278289795,
+        16.364974975585938
+      ],
+      "tasks": [
+        "water",
+        "water",
+        "daydream",
+        "nature_walk",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 4822.40576171875,
+      "food": 24,
+      "meals": 9,
+      "money": 291354,
+      "energy": [
+        97.77581024169922,
+        97.43048858642578,
+        99.03186798095703,
+        98.40522766113281,
+        99.9677505493164
+      ],
+      "hunger": [
+        22.265548706054688,
+        23.47488784790039,
+        21.69500160217285,
+        21.074491500854492,
+        0.1197040006518364
+      ],
+      "tasks": [
+        "eat",
+        "eat",
+        "eat",
+        "eat",
+        "water"
+      ]
+    },
+    {
+      "minutes": 4948.64306640625,
+      "food": 21,
+      "meals": 11,
+      "money": 291354,
+      "energy": [
+        96.30269622802734,
+        96.53995513916016,
+        97.59622955322266,
+        98.98117065429688,
+        97.8161392211914
+      ],
+      "hunger": [
+        27.736034393310547,
+        0.6588402986526489,
+        3.163257360458374,
+        4.775370121002197,
+        5.590112686157227
+      ],
+      "tasks": [
+        "eat",
+        "sanitation",
+        "haul",
+        "sanitation",
+        "idle"
+      ]
+    },
+    {
+      "minutes": 5075.447265625,
+      "food": 21,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        95.43608093261719,
+        94.79436492919922,
+        100,
+        100,
+        97.66304779052734
+      ],
+      "hunger": [
+        4.40252161026001,
+        6.1534905433654785,
+        8.657914161682129,
+        10.269974708557129,
+        11.084686279296875
+      ],
+      "tasks": [
+        "water",
+        "water",
+        "daydream",
+        "daydream",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 5202.35302734375,
+      "food": 21,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        93.99250030517578,
+        93.34857177734375,
+        100,
+        99.72459411621094,
+        99.50749969482422
+      ],
+      "hunger": [
+        9.901511192321777,
+        11.65241813659668,
+        14.156769752502441,
+        15.768830299377441,
+        16.583568572998047
+      ],
+      "tasks": [
+        "sanitation",
+        "daydream",
+        "daydream",
+        "water",
+        "sanitation"
+      ]
+    },
+    {
+      "minutes": 5328.7509765625,
+      "food": 21,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        92.51748657226562,
+        91.8735580444336,
+        98.59919738769531,
+        99.47354888916016,
+        100
+      ],
+      "hunger": [
+        15.378634452819824,
+        17.129596710205078,
+        19.6340389251709,
+        21.246166229248047,
+        22.06092071533203
+      ],
+      "tasks": [
+        "sanitation",
+        "water",
+        "water",
+        "nature_walk",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 5455.32177734375,
+      "food": 21,
+      "meals": 9,
+      "money": 291354,
+      "energy": [
+        90.88492584228516,
+        90.50323486328125,
+        97.15782165527344,
+        99.3534927368164,
+        99.38370513916016
+      ],
+      "hunger": [
+        20.864967346191406,
+        22.61595344543457,
+        25.12039566040039,
+        26.73252296447754,
+        0.4684160649776459
+      ],
+      "tasks": [
+        "eat",
+        "eat",
+        "eat",
+        "eat",
+        "water"
+      ]
+    },
+    {
+      "minutes": 5582.46337890625,
+      "food": 18,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        92.48572540283203,
+        89.71712493896484,
+        96.25044250488281,
+        99.91297912597656,
+        98.04698181152344
+      ],
+      "hunger": [
+        4.375487327575684,
+        4.895596504211426,
+        1.2814878225326538,
+        4.75685977935791,
+        5.9790778160095215
+      ],
+      "tasks": [
+        "nature_walk",
+        "water",
+        "stargaze",
+        "idle",
+        "water"
+      ]
+    },
+    {
+      "minutes": 5709.666015625,
+      "food": 18,
+      "meals": 10,
+      "money": 291354,
+      "energy": [
+        96.2311019897461,
+        89.73562622070312,
+        99.96074676513672,
+        100,
+        100
+      ],
+      "hunger": [
+        7.9194183349609375,
+        8.439536094665527,
+        6.097567081451416,
+        8.300797462463379,
+        9.945271492004395
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    }
+  ],
+  "saveReloadExact": true,
+  "editorUnchanged": true,
+  "scratchRunRemoved": true,
+  "scope": "Full completion and requested later days through public UI; read-only snapshot observation; no direct simulation commands, forced work, stock changes or runtime patches."
+}
