@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "accepted": "Existing-property native landscape generation with cancellable preparation, preview before applying, preserved non-land setup and one-step undo/redo.",
+  "visualReview": "All six final desktop captures inspected. Five match the previously inspected final-v3 PNGs byte-for-byte; the changed hydro-conflict view was inspected directly.",
+  "checks": {
+    "publicJourney": "PASS session 63928: all three launch biomes plus a populated draft with five utility classes, a region and journal",
+    "cancellation": "Actual button and Escape, terminated deliberately stalled workers, unchanged durable document/history",
+    "previewNavigation": "Trusted pointer drag and keyboard arrows/zoom/Home leave main editor camera and history unchanged",
+    "nativeParity": "Actual generated terrain/nature/deposits match independent native API output",
+    "conflicts": "A native-valid hydro becomes incompatible with no river; apply stays disabled and draft is unchanged",
+    "noOp": "Same seeded landscape cannot create a redundant history entry",
+    "optionalRiver": "Valid implicit default river remains absent from authored JSON rather than becoming undefined",
+    "baseCreator": "PASS session 58000: create/save/reload/test/restart/return, ordinary saves isolated",
+    "syntaxAndDiff": "pass"
+  },
+  "limits": [
+    "Invalid candidate setups cannot be installed; choose other options or repair the existing setup.",
+    "Native generation uses the existing biome generator and river preset; it does not invent unsupported waterways.",
+    "Saved playthroughs are not regenerated.",
+    "Not maximum-map latency, long-memory, all art-state or unfamiliar-player acceptance."
+  ]
+}

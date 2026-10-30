@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "sources": {
+    "web/landscape-prepare-worker.js": "6a0300097762088455aeb51c8a3f4e5d5d060c7b0c49410e5b701805611434c0",
+    "web/editor/landscape-regeneration.js": "2284c67d9e5fdb4238005d02620ead3625ab6cab8af285c7c95bbb17a407fcdf",
+    "web/editor/run-preparation.js": "8db9b28cb3a1a7a2e7da5bf54176a5475b7c544bf3f406def4b701b8884f2d53",
+    "web/editor/map-view.js": "a501342d33f63e1146def06c1291bb54d3291bf753ab4f9a62c5823d85843cd9",
+    "web/editor/index.js": "948daddd112279a6147802eebb0926994de321509d7e0a7fe00d7c4be80482b6",
+    "web/editor/style.css": "cf373644b204effa31a84abc67a7f96962798f4354a3fb45571f69f79475a14e",
+    "web/pkg/solar_friends_bg.wasm": "73737d324c82c5707d22d44dde04213c3be60371155bd0e7d280fae848d55ae6",
+    "scripts/verify-landscape-regeneration.mjs": "88965893e4c8beea1b1ad3d104f596335dc8e630bfd6e686325747bf4880a54b",
+    "assets/validation/editor-scene-layers-v1/authored.solar-scenario": "5b701bb66d9f1d1fb906c0fc118f8d2ecbfede9b0142a54511e9e84fb73d6a75"
+  },
+  "results": [
+    {
+      "biome": "mata-atlantica",
+      "fixture": "mata-atlantica",
+      "implicitRiverPreserved": null,
+      "nativeGeneratedLandParity": true,
+      "nonLandPreserved": true,
+      "cancelledPreviewPreservesHistory": true,
+      "previewKeyboardAndPointerIsolation": true,
+      "atomicUndoRedo": true,
+      "unchangedPreviewNoHistory": true,
+      "noRiverUndo": true,
+      "reloadExact": true,
+      "playtestReturn": true,
+      "workersTerminated": true,
+      "browserErrors": []
+    },
+    {
+      "biome": "cerrado",
+      "fixture": "cerrado",
+      "implicitRiverPreserved": null,
+      "nativeGeneratedLandParity": true,
+      "nonLandPreserved": true,
+      "cancelledPreviewPreservesHistory": true,
+      "previewKeyboardAndPointerIsolation": true,
+      "atomicUndoRedo": true,
+      "unchangedPreviewNoHistory": true,
+      "noRiverUndo": true,
+      "reloadExact": true,
+      "playtestReturn": true,
+      "workersTerminated": true,
+      "browserErrors": []
+    },
+    {
+      "biome": "caatinga",
+      "fixture": "caatinga",
+      "implicitRiverPreserved": null,
+      "nativeGeneratedLandParity": true,
+      "nonLandPreserved": true,
+      "cancelledPreviewPreservesHistory": true,
+      "previewKeyboardAndPointerIsolation": true,
+      "atomicUndoRedo": true,
+      "unchangedPreviewNoHistory": true,
+      "noRiverUndo": true,
+      "reloadExact": true,
+      "playtestReturn": true,
+      "workersTerminated": true,
+      "browserErrors": []
+    },
+    {
+      "biome": "mata-atlantica",
+      "fixture": "populated",
+      "implicitRiverPreserved": true,
+      "nativeGeneratedLandParity": true,
+      "nonLandPreserved": true,
+      "cancelledPreviewPreservesHistory": true,
+      "previewKeyboardAndPointerIsolation": true,
+      "atomicUndoRedo": true,
+      "unchangedPreviewNoHistory": true,
+      "noRiverUndo": true,
+      "reloadExact": true,
+      "playtestReturn": true,
+      "workersTerminated": true,
+      "browserErrors": []
+    }
+  ],
+  "hydroConflictPreservesDraft": true,
+  "scope": "Public existing-property regeneration with real native workers in all three biomes; deliberate stalled worker only for cancellation, not successful generation. No replacement of a lived-in village."
+}

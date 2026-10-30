@@ -94,6 +94,12 @@ export class EditorMap {
     });
     return this.ground;
   }
+  // Close a temporary comparison without leaving its paint worker or late
+  // artwork callback attached to a discarded proposal. The shared art is borrowed.
+  clearPreview(){
+    this.document=null;this.snapshot=null;this.landPaint=null;this.artRevision=(this.artRevision??0)+1;
+    this.terrainTask?.controller.abort();this.terrainTask=null;this.terrainLoading=false;this.artLoading=false;this.ground=null;this.groundKey=null;this.terrainFailedKey=null;this.artError=null;this.terrainError=null;this.cancelGesture({paint:false});this.updateBusy();this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+  }
   // A pan is a preview until pointerup; autosaves keep its starting camera.
   get state(){return structuredClone({...this.view,center:this.drag?.pan?this.drag.center:this.view.center,brushSize:this.brushSize,natureSpeciesKey:this.natureSpecies?.key,natureSize:this.natureSize||1});}
   cancelGesture({paint=true}={}){

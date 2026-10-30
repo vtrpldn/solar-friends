@@ -1,3 +1,4 @@
+import {LandscapeRegeneration} from './landscape-regeneration.js';
 import {removalMarkup} from './removal-impact.js';
 import {sceneLayers,sceneFilter,sceneSummary,sceneRouteAt} from './scene-layers.js';
 import {Workspaces,workspaceNames,revealWorkspaceSection} from './workspaces.js';
@@ -620,6 +621,7 @@ try{
   weatherEditor=new WeatherEditor($('creator-weather-fields'),{defaults:catalog.weather,biomes:catalog.biomes,change});
   geologyEditor=new GeologyEditor($('creator-geology-fields'),{change,center:()=>map.view.center,defaults:JSON.parse(engine.scenario_template('story')).map.deposits,focus:p=>{map.centerAt(p.x+(p.width-1)/2,p.y+(p.height-1)/2);$('creator-land-layer').value=p.material;$('creator-land-layer').dispatchEvent(new Event('change'));}});
   biomeEditor=new BiomeEditor($('creator-biome-setting-fields'),{catalog,art,Game,change,notify:toast,source:()=>({id:current.id,revision:current.doc.revision,definition:report.ok?freezeCreation(current.doc.value,{terrain:terrainBase,snapshot:map.snapshot,catalog}):current.doc.value})});
+  new LandscapeRegeneration($('creator-biome-setting-fields'),{art,source:()=>({id:current.id,revision:current.doc.revision,definition:current.doc.value}),change,notify:toast});
   workspaces=new Workspaces({change:key=>{if(!current)return;map.cancelGesture();map.view.workspace=key;if(!['select','pan','move','erase'].includes(map.view.tool))setTool('select');map.viewChanged(map.state);}});
   wire();const id=new URLSearchParams(location.search).get('project');
   if(id){const record=await library.getProject(id);if(record)await openProject(record);else{await showLibrary();$('creator-library-status').textContent='This creation is no longer in the library. Independent villages remain available.';}}
