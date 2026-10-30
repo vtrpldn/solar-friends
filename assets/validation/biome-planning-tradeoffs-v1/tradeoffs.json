@@ -1,0 +1,3308 @@
+{
+  "passed": true,
+  "scope": "Controlled authored properties in all three biomes and two seeds. Sixty simulated minutes per crop comparison; moisture is the native crop minute-equivalent summary, not litres; instantaneous solar comparisons. Complements full seasonal-cycle evidence; not a visual, example-difficulty, long-term irrigation logistics or performance approval.",
+  "wasm_sha256": "73737d324c82c5707d22d44dde04213c3be60371155bd0e7d280fae848d55ae6",
+  "script_sha256": "44fbf1ada4a807467f9870dc2bbbed1ec79ea73433912bead013f78a0d5f0047",
+  "cases": [
+    {
+      "biome": "mata-atlantica",
+      "seed": 42,
+      "profile": {
+        "dry_evaporation": 1.25,
+        "dry_rain_chance": 0,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.8999999761581421,
+        "wet_rain_chance": 0
+      },
+      "comparisons": {
+        "wet-open": {
+          "definition_sha256": "d17980369f760cbd78b642c8e24b7f09c1bc55e217c4bb6fa10fe4155a4b7c92",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 143.08566284179688,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 48.914337158203125
+        },
+        "dry-open": {
+          "definition_sha256": "a5d59ebf86c4d5541b9fa52de07c29b403bd2c44e9514c3503f5ace292dc0066",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.25,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 21,
+              "days_until_change": 21,
+              "evaporation": 1.25,
+              "rain_end": 1050,
+              "rain_expected": false,
+              "rain_start": 960,
+              "rain_strength": 1.190000057220459,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.25,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 21,
+              "days_until_change": 21,
+              "evaporation": 1.25,
+              "rain_end": 1050,
+              "rain_expected": false,
+              "rain_start": 960,
+              "rain_strength": 1.190000057220459,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 124.06329345703125,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 67.93670654296875
+        },
+        "wet-shaded": {
+          "definition_sha256": "949041da92a3e8afe93ba0ee36c2e1d01aa645446d96f7429300691f970feb96",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4974358379840851
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 151.60179138183594,
+            "growth": 54.725624084472656,
+            "solar": 0
+          },
+          "moistureLost": 40.39820861816406
+        },
+        "sunny-solar": {
+          "definition_sha256": "86e47833a21896a51e4536ae6633cd8ac16215727f1e9811b001c5b00c517b63",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "moistureLost": 0
+        },
+        "shaded-solar": {
+          "definition_sha256": "413083ad678238a6ed9704ed5dc3cf47e4c332a2551c5573e76c5cb4d8d92b66",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4450055658817291
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "moistureLost": 0
+        },
+        "cloud-window": {
+          "definition_sha256": "cfdf86e73032ed93a8f8b2442a0340476eee7e6aa1fcf0e45f53ad72a5464362",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "moistureLost": 0
+        },
+        "clear-at-rain-window": {
+          "definition_sha256": "1ceabad0ce50b23a9c3dcd0ad5933ee25bc7e6e1a56ef6754afb3a399724ff98",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 4.458378791809082
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 4.458378791809082
+          },
+          "moistureLost": 0
+        },
+        "cloudy-solar": {
+          "definition_sha256": "317c7d754d4c05de9af3ba8966deef2f9d86be408ec9ac9d4117fc49c572bbaa",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 0.8999999761581421,
+              "rain": 0.75,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 2.298133373260498
+          },
+          "after": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 0.8999999761581421,
+              "rain": 0.75,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 2.298133373260498
+          },
+          "moistureLost": 0
+        }
+      }
+    },
+    {
+      "biome": "mata-atlantica",
+      "seed": 73,
+      "profile": {
+        "dry_evaporation": 1.25,
+        "dry_rain_chance": 0,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.8999999761581421,
+        "wet_rain_chance": 0
+      },
+      "comparisons": {
+        "wet-open": {
+          "definition_sha256": "1749ccdbc264cd8c8c501de318f4ce365ee481e33b5cd478cfc7c9945ed54c2c",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 143.08566284179688,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 48.914337158203125
+        },
+        "dry-open": {
+          "definition_sha256": "2e6659342c2bc72b1c56066500a4601f2b8e5894819443b81ce89778aea3771f",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.25,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 21,
+              "days_until_change": 21,
+              "evaporation": 1.25,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 960,
+              "rain_strength": 1.0099999904632568,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.25,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 21,
+              "days_until_change": 21,
+              "evaporation": 1.25,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 960,
+              "rain_strength": 1.0099999904632568,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 124.06329345703125,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 67.93670654296875
+        },
+        "wet-shaded": {
+          "definition_sha256": "6fd19062de6f0291594170c62c30eae419934143dc2506735a68e99cc63e3a1f",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4974358379840851
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 151.60179138183594,
+            "growth": 54.725624084472656,
+            "solar": 0
+          },
+          "moistureLost": 40.39820861816406
+        },
+        "sunny-solar": {
+          "definition_sha256": "7b53814430c63c9ea457f5909d06e7b3cc89dd4a71cfb5b020b8932cbe8e55bb",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "moistureLost": 0
+        },
+        "shaded-solar": {
+          "definition_sha256": "79fdc3c66ff20359be69628b3262267bc485bd5f6b49f151ff35cef97ed67f95",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4450055658817291
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "moistureLost": 0
+        },
+        "cloud-window": {
+          "definition_sha256": "8c214b955c57cf28a4ee50215e45d8564ba74eeec71f6bffd44f7bb23e9e9694",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "moistureLost": 0
+        },
+        "clear-at-rain-window": {
+          "definition_sha256": "2f9b9cfee772d9c122bc962779e6e5ad0805cfe80e08d94640ef3e73d3d645d9",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.338214874267578
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.8999999761581421,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.338214874267578
+          },
+          "moistureLost": 0
+        },
+        "cloudy-solar": {
+          "definition_sha256": "492631ed6646364e147556137275e209788b42b505d40f3a158433fbe1b1e284",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 0.8999999761581421,
+              "rain": 0.7899999618530273,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 1.7207293510437012
+          },
+          "after": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 0.8999999761581421,
+              "rain": 0.7899999618530273,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.8999999761581421,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 1.7207293510437012
+          },
+          "moistureLost": 0
+        }
+      }
+    },
+    {
+      "biome": "cerrado",
+      "seed": 42,
+      "profile": {
+        "dry_evaporation": 1.399999976158142,
+        "dry_rain_chance": 0,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.949999988079071,
+        "wet_rain_chance": 0
+      },
+      "comparisons": {
+        "wet-open": {
+          "definition_sha256": "f6ef1763b61f38a777f6455154faa2ec259e7a00631b7e6b42d024415f4fa3fb",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 140.36883544921875,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 51.63116455078125
+        },
+        "dry-open": {
+          "definition_sha256": "b329801de8b194c00fb354b88c78354cbb983745fce7047420cae538aeced2c4",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.399999976158142,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 21,
+              "days_until_change": 21,
+              "evaporation": 1.399999976158142,
+              "rain_end": 1050,
+              "rain_expected": false,
+              "rain_start": 960,
+              "rain_strength": 1.190000057220459,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.399999976158142,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 21,
+              "days_until_change": 21,
+              "evaporation": 1.399999976158142,
+              "rain_end": 1050,
+              "rain_expected": false,
+              "rain_start": 960,
+              "rain_strength": 1.190000057220459,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 115.91163635253906,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 76.08836364746094
+        },
+        "wet-shaded": {
+          "definition_sha256": "92329b919f4ea7f18da8230ba6a687bec1d408e978e4f71167f66d89e05c7ab6",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4974358379840851
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 149.35760498046875,
+            "growth": 54.725624084472656,
+            "solar": 0
+          },
+          "moistureLost": 42.64239501953125
+        },
+        "sunny-solar": {
+          "definition_sha256": "3427bd31d7f10be6a8a7ee383a2f6b9cac10aef84670b0fe8e8e517f1a653415",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "moistureLost": 0
+        },
+        "shaded-solar": {
+          "definition_sha256": "7072e3cff2d43e7b9497c2cd197771ad4bc2c34e1b91837f22bc8e42df84762e",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4450055658817291
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "moistureLost": 0
+        },
+        "cloud-window": {
+          "definition_sha256": "a6cb240c39e4e975f818e7f122d8c8dda20c3ce92e1b4bfdd7394a6dbd57c1a1",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "moistureLost": 0
+        },
+        "clear-at-rain-window": {
+          "definition_sha256": "f798593052da2eb195df354e6e0c2130cbc2cde666837c9eff6758057cd0cbf4",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 4.458378791809082
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 4.458378791809082
+          },
+          "moistureLost": 0
+        },
+        "cloudy-solar": {
+          "definition_sha256": "9925676a64ba8afa71cb59f46c6358d4a4d03f4891b4415f6873d50e3742faa4",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 0.949999988079071,
+              "rain": 0.75,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 2.298133373260498
+          },
+          "after": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 0.949999988079071,
+              "rain": 0.75,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 2.298133373260498
+          },
+          "moistureLost": 0
+        }
+      }
+    },
+    {
+      "biome": "cerrado",
+      "seed": 73,
+      "profile": {
+        "dry_evaporation": 1.399999976158142,
+        "dry_rain_chance": 0,
+        "intro_days": 0,
+        "season_days": 21,
+        "wet_evaporation": 0.949999988079071,
+        "wet_rain_chance": 0
+      },
+      "comparisons": {
+        "wet-open": {
+          "definition_sha256": "6f85749fd8253c2f8891eeed621e1ffe9a4ba8ce5efb300fc2e075d521f3628c",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 140.36883544921875,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 51.63116455078125
+        },
+        "dry-open": {
+          "definition_sha256": "456724bd3a5d3debc81b239e7a8bb5a51e39adc1e27e41a026f108beeb1acebe",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.399999976158142,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 21,
+              "days_until_change": 21,
+              "evaporation": 1.399999976158142,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 960,
+              "rain_strength": 1.0099999904632568,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.399999976158142,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 21,
+              "days_until_change": 21,
+              "evaporation": 1.399999976158142,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 960,
+              "rain_strength": 1.0099999904632568,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 115.91163635253906,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 76.08836364746094
+        },
+        "wet-shaded": {
+          "definition_sha256": "65a6fed0de85f01c060daad9265e0bce3493ddd0a5a2baec0b97a5cb885b6c8d",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4974358379840851
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 149.35760498046875,
+            "growth": 54.725624084472656,
+            "solar": 0
+          },
+          "moistureLost": 42.64239501953125
+        },
+        "sunny-solar": {
+          "definition_sha256": "93bc42f5af221dbeceb536eeb2fa329e4ff2ee46a09f2059804760f6c6876124",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "moistureLost": 0
+        },
+        "shaded-solar": {
+          "definition_sha256": "ea2e5f5ad91415bdfe387e1063996f7d2f3b1cb9c2ecf0d681fdba74f5afa065",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4450055658817291
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "moistureLost": 0
+        },
+        "cloud-window": {
+          "definition_sha256": "d5533e40ef59ddf9ec8e8456e0da7dfb7601f65f633a87bc5616ab1cac8601b3",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "moistureLost": 0
+        },
+        "clear-at-rain-window": {
+          "definition_sha256": "67159d3b275ac50e0c7db957961b7170ebc4bc0ea7ebc7318b0ce9be30a100eb",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.338214874267578
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 0.949999988079071,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.338214874267578
+          },
+          "moistureLost": 0
+        },
+        "cloudy-solar": {
+          "definition_sha256": "fbf0e6cd67423e570ffa716d90c4a6373ac6bfdda575b0271bc7cc56e796b0a8",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 0.949999988079071,
+              "rain": 0.7899999618530273,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 1.7207293510437012
+          },
+          "after": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 0.949999988079071,
+              "rain": 0.7899999618530273,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 21,
+              "evaporation": 0.949999988079071,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 1.7207293510437012
+          },
+          "moistureLost": 0
+        }
+      }
+    },
+    {
+      "biome": "caatinga",
+      "seed": 42,
+      "profile": {
+        "dry_evaporation": 1.600000023841858,
+        "dry_rain_chance": 0,
+        "intro_days": 0,
+        "season_days": 28,
+        "wet_evaporation": 1.0499999523162842,
+        "wet_rain_chance": 0
+      },
+      "comparisons": {
+        "wet-open": {
+          "definition_sha256": "de21f7a6a4b31ea0084d8bf181bf3dd2227037a8b3e88d85870a76f07c98753d",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 134.93289184570312,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 57.067108154296875
+        },
+        "dry-open": {
+          "definition_sha256": "195bc5451edc3dc4f56049738e4339439d2e1ba373a48e7ee78ba4e4a231c8a9",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.600000023841858,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 28,
+              "days_until_change": 28,
+              "evaporation": 1.600000023841858,
+              "rain_end": 780,
+              "rain_expected": false,
+              "rain_start": 720,
+              "rain_strength": 1.0999999046325684,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.600000023841858,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 28,
+              "days_until_change": 28,
+              "evaporation": 1.600000023841858,
+              "rain_end": 780,
+              "rain_expected": false,
+              "rain_start": 720,
+              "rain_strength": 1.0999999046325684,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 105.04103088378906,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 86.95896911621094
+        },
+        "wet-shaded": {
+          "definition_sha256": "2ff6ddeef3de676039df7a8a4e83f20b3e16869acc0afb88e97db61ca055241d",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4974358379840851
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 144.86865234375,
+            "growth": 54.725624084472656,
+            "solar": 0
+          },
+          "moistureLost": 47.13134765625
+        },
+        "sunny-solar": {
+          "definition_sha256": "4b058665bf6e7c2cecb75860a4a570472505320adb43d0b6e825bc51a79d5c6b",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "moistureLost": 0
+        },
+        "shaded-solar": {
+          "definition_sha256": "2d06a9ab23218de0aa660654df278004ae6500963f4fbb8d853dfcbe2fc3b8d2",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4450055658817291
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "moistureLost": 0
+        },
+        "cloud-window": {
+          "definition_sha256": "8bba9939b783d09bea2aed1467515c0e27c9e9ef2a222fa5ac325e9458f7bea6",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "moistureLost": 0
+        },
+        "clear-at-rain-window": {
+          "definition_sha256": "e7b7cf0d3dfa4a3660eaac66985a7ca130f38291c8523a8a3f1a52a5c73cf010",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 4.458378791809082
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": false,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 4.458378791809082
+          },
+          "moistureLost": 0
+        },
+        "cloudy-solar": {
+          "definition_sha256": "861f5fd480f26b9b11459e6dfdb6ccd8f523826e5d01044b71341406ec73e13c",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 1.0499999523162842,
+              "rain": 0.75,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 2.298133373260498
+          },
+          "after": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 1.0499999523162842,
+              "rain": 0.75,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 960,
+              "rain_expected": true,
+              "rain_start": 840,
+              "rain_strength": 0.75,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 2.298133373260498
+          },
+          "moistureLost": 0
+        }
+      }
+    },
+    {
+      "biome": "caatinga",
+      "seed": 73,
+      "profile": {
+        "dry_evaporation": 1.600000023841858,
+        "dry_rain_chance": 0,
+        "intro_days": 0,
+        "season_days": 28,
+        "wet_evaporation": 1.0499999523162842,
+        "wet_rain_chance": 0
+      },
+      "comparisons": {
+        "wet-open": {
+          "definition_sha256": "a4059d0294b94cfb17848b498c591d063299d20de5c07eebb7e36c05724155a1",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 134.93289184570312,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 57.067108154296875
+        },
+        "dry-open": {
+          "definition_sha256": "4733cbde8804fdcf976dbc3efa07e736530410d57f0dc7a2ddd4f3a1d97e5c1f",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.600000023841858,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 28,
+              "days_until_change": 28,
+              "evaporation": 1.600000023841858,
+              "rain_end": 810,
+              "rain_expected": false,
+              "rain_start": 720,
+              "rain_strength": 0.6899999976158142,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.600000023841858,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.6000000238418579,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 28,
+              "days_until_change": 28,
+              "evaporation": 1.600000023841858,
+              "rain_end": 810,
+              "rain_expected": false,
+              "rain_start": 720,
+              "rain_strength": 0.6899999976158142,
+              "river_factor": 0.6000000238418579,
+              "season": "dry",
+              "season_day": 1
+            },
+            "moisture": 105.04103088378906,
+            "growth": 59.35203552246094,
+            "solar": 0
+          },
+          "moistureLost": 86.95896911621094
+        },
+        "wet-shaded": {
+          "definition_sha256": "4035494edc6e65d7d6a3df7ec57068a0634ffbe8f8b9870a49c196a2b1cf40bd",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.36800000071525574,
+            "disturbance": 0.07999999821186066,
+            "fertility": 0.5856000185012817,
+            "geology": "Mixed loam",
+            "moisture": 0.800000011920929,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4974358379840851
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 192,
+            "growth": 0,
+            "solar": 0
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 144.86865234375,
+            "growth": 54.725624084472656,
+            "solar": 0
+          },
+          "moistureLost": 47.13134765625
+        },
+        "sunny-solar": {
+          "definition_sha256": "b9846617a8622629ad38ec6db094426226fe6fadec6801ec2b1deb3b3a3906e8",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.820000171661377
+          },
+          "moistureLost": 0
+        },
+        "shaded-solar": {
+          "definition_sha256": "f6798669b3a3c105abb2b549fe5132984404fa884e1aeb9a8a5820a8beed6a26",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0.4450055658817291
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.748054027557373
+          },
+          "moistureLost": 0
+        },
+        "cloud-window": {
+          "definition_sha256": "9875b80fec2399f006f405a05f81de88ce8d7aac36b34fc45e086d333dd93b40",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.11999999731779099,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 1.25,
+              "solar_factor": 0.9399999976158142,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 5.639999866485596
+          },
+          "moistureLost": 0
+        },
+        "clear-at-rain-window": {
+          "definition_sha256": "11ffa6f4e875d36ab24f4eaccb8ba19e1f18321d55b3cb544978b88ea16c50f4",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.338214874267578
+          },
+          "after": {
+            "weather": {
+              "clouds": 0.05999999865889549,
+              "evaporation": 1.0499999523162842,
+              "rain": 0,
+              "raining": false,
+              "river_factor": 0.949999988079071,
+              "solar_factor": 0.9700000286102295,
+              "wet": 0
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": false,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 0.949999988079071,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 3.338214874267578
+          },
+          "moistureLost": 0
+        },
+        "cloudy-solar": {
+          "definition_sha256": "479dbdb8f8f36eee792c4a84995cd0e9bf81794afbabaad7ccd3aa4677c0061b",
+          "ground": {
+            "biome": "Flower meadow",
+            "cover": 0.24000000953674316,
+            "disturbance": 0.40000003576278687,
+            "fertility": 0.5279999375343323,
+            "geology": "Mixed loam",
+            "moisture": 0,
+            "nutrients": 1,
+            "retention": 1.100000023841858,
+            "shade": 0
+          },
+          "before": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 1.0499999523162842,
+              "rain": 0.7899999618530273,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 1.7207293510437012
+          },
+          "after": {
+            "weather": {
+              "clouds": 1,
+              "evaporation": 1.0499999523162842,
+              "rain": 0.7899999618530273,
+              "raining": true,
+              "river_factor": 1.350000023841858,
+              "solar_factor": 0.5,
+              "wet": 1
+            },
+            "forecast": {
+              "day": 0,
+              "days_until_change": 28,
+              "evaporation": 1.0499999523162842,
+              "rain_end": 1080,
+              "rain_expected": true,
+              "rain_start": 900,
+              "rain_strength": 0.7899999618530273,
+              "river_factor": 1.25,
+              "season": "wet",
+              "season_day": 1
+            },
+            "moisture": 0,
+            "growth": 0,
+            "solar": 1.7207293510437012
+          },
+          "moistureLost": 0
+        }
+      }
+    }
+  ]
+}
