@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+import init,{Game} from '../web/pkg/solar_friends.js';
+const output=process.argv[2]??'artifacts/editor-water-access-v1';await mkdir(output,{recursive:true});
+await init({module_or_path:await readFile('web/pkg/solar_friends_bg.wasm')});
+const author=new Game(),fixtures=[];
+for(const biome of ['mata-atlantica','cerrado','caatinga']){
+ const d=JSON.parse(author.scenario_template('sandbox'));d.rules.logistics=true;d.rules.utilities=true;d.map=JSON.parse(author.generate_biome_property(biome,42));d.map.nature=[];d.map.camera=[24,24];d.map.river={schema:1,centers:Array(64).fill(20)};
+ d.start.buildings.push({...d.start.buildings[0],id:'isolated-water',kind:'well',x:10,y:15,state:'completed'});
+ d.start.liquids=[{owner:{kind:'camp'},contents:{fresh:2}},{owner:{kind:'building',building:'isolated-water'},contents:{fresh:3.5}}];d.start.fresh_water=5.5;
+ assert(JSON.parse(author.load_scenario(JSON.stringify(d))).ok);const before=author.snapshot(),native=JSON.parse(author.fresh_water_overlay()),setup=JSON.parse(author.scenario_setup_report());assert.equal(native.available,2);assert.equal(native.available,setup.access.fresh_water.value);assert.equal(native.accessible,true);assert.equal(author.snapshot(),before);fixtures.push({biome,definition:d,native});
+}
+author.free();const server=await serve(0);let browser;
+try{
+ browser=await chromium.launch({headless:true});const results=[];
+ for(const {biome,definition,native} of fixtures){
+  const raw=JSON.stringify(definition);await writeFile(`${output}/${biome}.solar-scenario`,raw);const page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>{window.waterProbeReady=import('/pkg/solar_friends.js').then(({Game})=>{window.waterCalls=[];const original=Game.prototype.fresh_water_overlay;Game.prototype.fresh_water_overlay=function(...args){const raw=original.apply(this,args);window.waterCalls.push(JSON.parse(raw));return raw;};});});
+  await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.evaluate(()=>window.waterProbeReady);await page.locator('#creator-library-dialog').waitFor({state:'visible'});await page.locator('#creator-import').setInputFiles({name:'water.solar-scenario',mimeType:'application/json',buffer:Buffer.from(raw)});await page.locator('#creator-library-dialog').waitFor({state:'hidden'});
+  const ready=()=>page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='false'&&document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
+  const saved=()=>page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),l=new ContentLibrary(undefined,{broadcast:false});try{return await l.getProject(new URL(location.href).searchParams.get('project'));}finally{l.close();}});
+  await ready();const baseline=await saved();assert.equal(await page.evaluate(()=>window.waterCalls.length),0);await page.locator('#creator-land-layer').selectOption('water');assert.deepEqual(await page.evaluate(()=>window.waterCalls[0]),native);assert.equal(await page.locator('#creator-map').getAttribute('data-water-sources'),String(native.sources.length));assert((await page.locator('#creator-land-legend').textContent()).includes('2.0 reachable'));
+  const box=await page.locator('#creator-map').boundingBox();for(let i=0;i<5;i++)await page.mouse.move(box.x+box.width/2+i*8,box.y+box.height/2);await page.locator('#creator-land-layer').selectOption('fertility');await page.locator('#creator-land-layer').selectOption('water');assert.equal(await page.evaluate(()=>window.waterCalls.length),1);
+  for(let i=0;i<4;i++)await page.locator('#creator-zoom-out').click();await page.locator('#creator-save').click();await ready();assert.deepEqual((await saved()).checkpoint,baseline.checkpoint);await page.screenshot({path:`${output}/${biome}-separated.png`});
+  await page.locator('#creator-river-enabled').uncheck();await ready();assert.equal(await page.evaluate(()=>window.waterCalls.length),2);assert.equal(await page.evaluate(()=>window.waterCalls.at(-1).available),5.5);await page.screenshot({path:`${output}/${biome}-connected.png`});await page.locator('#creator-undo').click();await ready();assert.equal(await page.evaluate(()=>window.waterCalls.at(-1).available),2);await page.locator('#creator-redo').click();await ready();assert.equal(await page.evaluate(()=>window.waterCalls.at(-1).available),5.5);
+  await page.locator('[data-workspace=village]').click();await page.locator('#creator-funds').fill('-1');await page.locator('#creator-funds').press('Tab');await ready();assert(await page.locator('#creator-test').isDisabled());assert((await page.locator('#creator-land-legend').textContent()).startsWith('Draft incomplete'));assert.equal(await page.evaluate(()=>window.waterCalls.length),4);await page.locator('#creator-undo').click();await ready();assert.equal(await page.evaluate(()=>window.waterCalls.length),4);
+  const checkpoint=await saved();await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await ready();assert.equal(await page.locator('#creator-land-layer').inputValue(),'water');assert.equal(await page.evaluate(()=>window.waterCalls.at(-1).available),5.5);assert.deepEqual((await saved()).checkpoint,checkpoint.checkpoint);assert.deepEqual(errors,[]);
+  results.push({biome,opening:native,exactViewCheckpoint:true,unusedQueries:0,pointerQueries:0,validTransactionQueries:4,invalidRetainsPreview:true,undoRedo:true,reloadExact:true,browserErrors:errors});await page.close();
+ }
+ const sources={};for(const f of ['src/world.rs','src/water.rs','src/scenarios/journal/services.rs','src/scenarios/setup/tests.rs','web/editor/index.js','web/editor/map-view.js','web/editor.html','web/pkg/solar_friends_bg.wasm','scripts/verify-editor-water-access.mjs'])sources[f]=createHash('sha256').update(await readFile(f)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,results,scope:'Three biome fixtures imported through ordinary controls; actual native owned fresh-water access, trusted layer/river/undo/save/reload controls. Source markers, not geographic coverage or a forecast of future rain, treatment or trade.'},null,2)+'\n');console.log('PASS: three-biome owned-water overlay, authoritative quantities/routes, no pointer queries, exact view/history isolation, river edit/undo/redo, last-valid incomplete draft and reload.');
+}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

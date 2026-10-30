@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "visualReview": "All six final captures inspected: 3 launch biomes, separating river and removed river. Source quantities/readiness text legible, camp marker separate.",
+  "nativeTests": {
+    "count": 788,
+    "failed": 0,
+    "terminalSession": 66440
+  },
+  "nativeAccessTest": "opening_service_review_distinguishes_owned_unreachable_and_partial_reserves: query matches existing service reading for unreachable, partial and connected stores and leaves exact snapshot unchanged",
+  "clippy": "--locked --all-targets -- -D warnings: passed, session 70520",
+  "wasmBuild": "release build and web bindings passed, session 84553",
+  "browserChecks": {
+    "waterAccess": "passed, session 4387",
+    "navigationOverlay": "passed, session 87790; before final label offset only",
+    "creator": "passed, session 66257"
+  },
+  "limits": "Owned fresh-water storage at the authored opening, using actual current resident routes. Not a future water-sustainability forecast, arbitrary cell coverage, dense maximum-label acceptance or full utility-network release gate."
+}

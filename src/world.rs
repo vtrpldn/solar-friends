@@ -85,6 +85,37 @@ impl Game {
         serde_json::json!({"schema":1,"width":MAP_SIZE,"height":MAP_SIZE,"origin":[x,y],"origin_clear":navigation::clear(v,x,y),"cells":cells}).to_string()
     }
 
+    /// Owned fresh-water containers and actual resident access; no future supply
+    /// or neighbour service is treated as owned stock. Query after transactions.
+    pub fn fresh_water_overlay(&mut self) -> String {
+        let people: Vec<_> = self
+            .app
+            .world_mut()
+            .query::<&Resident>()
+            .iter(self.app.world())
+            .cloned()
+            .collect();
+        let v = self.app.world().resource::<Village>();
+        let participants = food::service_participants(v, &people);
+        let mut access = vec![false; participants.len()];
+        let mut available = 0.;
+        let sources: Vec<_> = v.water_supply.tanks.iter()
+            .filter(|p| p.owner != water::Owner::Service && p.capacity[water::Class::Fresh.index()] > 0.)
+            .map(|p| {
+                let open = water::open(v, p);
+                let free = water::free(v, p, water::Class::Fresh, None);
+                let reached: Vec<_> = participants.iter().enumerate().filter_map(|(i, r)| {
+                    if water::reachable(v, p, r) {
+                        if open && free > 0. { access[i] = true; }
+                        Some(r.id)
+                    } else { None }
+                }).collect();
+                if open && !reached.is_empty() { available += free; }
+                serde_json::json!({"id":p.id,"owner":p.owner,"x":p.x,"y":p.y,"open":open,"available":free,"reachable_by":reached})
+            }).collect();
+        serde_json::json!({"schema":1,"enabled":sandbox::utilities(v),"sources":sources,"participants":participants.iter().map(|p|p.id).collect::<Vec<_>>(),"available":available,"accessible":!access.is_empty() && access.iter().all(|a|*a),"camp_fallback":people.iter().all(|p|p.trip.is_some())}).to_string()
+    }
+
     /// Canonical map masks for renderers and editor overlays. Callers should
     /// sample these when authored geometry changes, not on pointer movement.
     pub fn world_geometry(&self) -> String {

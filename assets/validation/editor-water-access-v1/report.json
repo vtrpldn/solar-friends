@@ -1,0 +1,185 @@
+{
+  "schema": 1,
+  "sources": {
+    "src/world.rs": "929975e3f0c24b6ac55c9785327a50bb36fd327696e420c6461ec275d96c93e8",
+    "src/water.rs": "8a88b6e83a624dea47f143d8a9665218f430d05c4b733d45289cfe5db664f0a0",
+    "src/scenarios/journal/services.rs": "b5ee861b943f39d12ae013a3fafdaffda9e137f606b4c7c68cd8405593098e32",
+    "src/scenarios/setup/tests.rs": "0f971917ff7a9ceb405bba9231ce29c103cc7f913231f6a52071c9ebd56e3352",
+    "web/editor/index.js": "fba89ea4545402f4f274eae859d19e3bdb320ff8deb8dbe5c93370df3c01d788",
+    "web/editor/map-view.js": "1ee9b002970270571072fb71e6985e9de498a049ccad5c9ed8bc47e78c2d4096",
+    "web/editor.html": "bb5316dd6b7ea5bcf4077c8043f4cde4cd531aeb409baf5c870c94ac91dbb802",
+    "web/pkg/solar_friends_bg.wasm": "73737d324c82c5707d22d44dde04213c3be60371155bd0e7d280fae848d55ae6",
+    "scripts/verify-editor-water-access.mjs": "47e5ca5aac8a8c7a9d80fd1d5368f7cda03b0a321d1756185deeddb6a1d89d97"
+  },
+  "results": [
+    {
+      "biome": "mata-atlantica",
+      "opening": {
+        "accessible": true,
+        "available": 2,
+        "camp_fallback": false,
+        "enabled": true,
+        "participants": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "schema": 1,
+        "sources": [
+          {
+            "available": 2,
+            "id": 18,
+            "open": true,
+            "owner": {
+              "kind": "camp"
+            },
+            "reachable_by": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "x": 32,
+            "y": 32
+          },
+          {
+            "available": 3.5,
+            "id": 20,
+            "open": true,
+            "owner": {
+              "id": 2,
+              "kind": "building"
+            },
+            "reachable_by": [],
+            "x": 10,
+            "y": 15
+          }
+        ]
+      },
+      "exactViewCheckpoint": true,
+      "unusedQueries": 0,
+      "pointerQueries": 0,
+      "validTransactionQueries": 4,
+      "invalidRetainsPreview": true,
+      "undoRedo": true,
+      "reloadExact": true,
+      "browserErrors": []
+    },
+    {
+      "biome": "cerrado",
+      "opening": {
+        "accessible": true,
+        "available": 2,
+        "camp_fallback": false,
+        "enabled": true,
+        "participants": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "schema": 1,
+        "sources": [
+          {
+            "available": 2,
+            "id": 18,
+            "open": true,
+            "owner": {
+              "kind": "camp"
+            },
+            "reachable_by": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "x": 32,
+            "y": 32
+          },
+          {
+            "available": 3.5,
+            "id": 20,
+            "open": true,
+            "owner": {
+              "id": 2,
+              "kind": "building"
+            },
+            "reachable_by": [],
+            "x": 10,
+            "y": 15
+          }
+        ]
+      },
+      "exactViewCheckpoint": true,
+      "unusedQueries": 0,
+      "pointerQueries": 0,
+      "validTransactionQueries": 4,
+      "invalidRetainsPreview": true,
+      "undoRedo": true,
+      "reloadExact": true,
+      "browserErrors": []
+    },
+    {
+      "biome": "caatinga",
+      "opening": {
+        "accessible": true,
+        "available": 2,
+        "camp_fallback": false,
+        "enabled": true,
+        "participants": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "schema": 1,
+        "sources": [
+          {
+            "available": 2,
+            "id": 18,
+            "open": true,
+            "owner": {
+              "kind": "camp"
+            },
+            "reachable_by": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "x": 32,
+            "y": 32
+          },
+          {
+            "available": 3.5,
+            "id": 20,
+            "open": true,
+            "owner": {
+              "id": 2,
+              "kind": "building"
+            },
+            "reachable_by": [],
+            "x": 10,
+            "y": 15
+          }
+        ]
+      },
+      "exactViewCheckpoint": true,
+      "unusedQueries": 0,
+      "pointerQueries": 0,
+      "validTransactionQueries": 4,
+      "invalidRetainsPreview": true,
+      "undoRedo": true,
+      "reloadExact": true,
+      "browserErrors": []
+    }
+  ],
+  "scope": "Three biome fixtures imported through ordinary controls; actual native owned fresh-water access, trusted layer/river/undo/save/reload controls. Source markers, not geographic coverage or a forecast of future rain, treatment or trade."
+}

@@ -62,11 +62,11 @@ const ruleNames={logistics:'Materials, hauling and resident work',land:'Living s
 let newBiome="mata-atlantica";
 let libraryDiscovery,mapSharing,workspaces;
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
-const waterLayers={walkability:{legend:"Green · connected to camp. Gold · clear but disconnected. Red · blocked cell centre. Footprints and riverbanks use native walking rules; this does not reserve space from other residents."},banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
+const waterLayers={water:{legend:'Owned fresh water · green: open, stocked and reachable; gold: empty; red: closed or unreachable. Labels show unclaimed units and friends with a route. Neighbour service and future deliveries are excluded.'},walkability:{legend:"Green · connected to camp. Gold · clear but disconnected. Red · blocked cell centre. Footprints and riverbanks use native walking rules; this does not reserve space from other residents."},banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
 let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let expandedReview=false,outlook;
 let landReport=null,landReportKey=null,mapPreviewKey=null,landSampleKey='',hoverCell=null;
-let accessReport=null,accessReportKey=null;
+let accessReport=null,accessReportKey=null,waterAccessReport=null,waterAccessKey=null;
 let releasePublication=null,preparedEdit=null,engineDefinition=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -190,6 +190,12 @@ function refresh(){
 function overlayTiles(){
   if(!geometry)return [];
   const layer=map.view.layer;
+  map.waterAccess=null;
+  if(layer==='water'){
+    if(!waterAccessReport||waterAccessKey!==engineDefinition){waterAccessReport=JSON.parse(engine.fresh_water_overlay());waterAccessKey=engineDefinition;}
+    map.waterAccess=waterAccessReport;
+    return waterAccessReport.sources.map(p=>({x:p.x,y:p.y,fill:!p.open||!p.reachable_by.length?'#b7564a88':p.available>0?'#528a5d88':'#d4a54888',stroke:'#fff0ad'}));
+  }
   if(layer==='walkability'){
     if(!accessReport||accessReportKey!==landReportKey){accessReport=JSON.parse(engine.navigation_overlay());accessReportKey=landReportKey;}
     return accessReport.cells.map(p=>({x:p.x,y:p.y,fill:!p.walkable?'#b7564a66':p.reachable?'#528a5d66':'#d4a54888',stroke:null}));
@@ -197,7 +203,7 @@ function overlayTiles(){
   if(layer==='banks'||layer==='hydro')return (layer==='banks'?geometry.banks:geometry.hydro_sites).map(([x,y])=>({x,y,fill:layer==='banks'?'#497fbd88':'#e8ba55bb',stroke:layer==='banks'?'#aecfe0':'#fff0ad'}));
   return landTiles(landReport,layer);
 }
-function overlayLegend(){const message=(waterLayers[map.view.layer]||landLayers[map.view.layer])?.legend||'Point at a cell to inspect the land.';return report.ok?message:'Draft incomplete · last valid land preview. '+message;}
+function overlayLegend(){const message=(waterLayers[map.view.layer]||landLayers[map.view.layer])?.legend||'Point at a cell to inspect the land.';const water=map.view.layer==='water'&&waterAccessReport?` ${waterAccessReport.available.toFixed(1)} reachable fresh-water units · ${waterAccessReport.accessible?'everyone checked has access':'some friends lack usable water'}.${waterAccessReport.enabled?'':' Connected local water rules are disabled.'}${waterAccessReport.camp_fallback?' Everyone is away; checking from camp.':''}`:'';return (report.ok?'':'Draft incomplete · last valid land preview. ')+message+water;}
 function inspectGround(point){
   hoverCell=point;if(!current||!point)return;
   const key=[current.doc.revision,point.x,point.y,map.view.tool,map.view.layer].join(':');if(key===landSampleKey)return;landSampleKey=key;

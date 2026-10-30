@@ -709,6 +709,11 @@ pub fn has_work(v: &Village) -> bool {
                     .any(|p| service_source(v, p) && free(v, p, class, None) > EPS)
         })
 }
+/// Uses the same approach and route rules as resident fresh-water access.
+pub(crate) fn reachable(v: &Village, tank: &Tank, resident: &Resident) -> bool {
+    approach(v, tank, resident.id)
+        .is_some_and(|target| navigation::work_route(v, [resident.x, resident.y], target).is_ok())
+}
 pub fn approach(v: &Village, p: &Tank, resident: usize) -> Option<[f32; 2]> {
     match p.owner {
         Owner::Service => tap(v, resident),

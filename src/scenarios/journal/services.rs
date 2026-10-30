@@ -298,7 +298,7 @@ impl<'a> Frame<'a> {
                     }) {
                         let mut reached = false;
                         for (i, p) in participants.iter().enumerate() {
-                            if reach(v, p, water::approach(v, tank, p.id)) {
+                            if water::reachable(v, tank, p) {
                                 access[i] = true;
                                 reached = true;
                             }

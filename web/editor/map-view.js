@@ -237,6 +237,14 @@ export class EditorMap {
     }});
     if(this.pointer&&(view.tool==='resident-start'||this.drag?.resident)){const id=this.drag?.resident??this.placingResident,person=this.snapshot.residents.find(p=>p.id===this.snapshot.scenario_ref?.residents?.[id]);if(person){const p=this.project(this.pointer.x,this.pointer.y),size=RESIDENT_WIDTH*this.scale,frame=art.appearances.portraitFrame(person.appearance);objects.push({depth:this.pointer.x+this.pointer.y+.6,draw:()=>{c.save();c.globalAlpha=.5;c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);c.restore();}});}}
     objects.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());
+    // Water-access labels sit above sprites so a full tank is not hidden by a roof.
+    for(const source of this.waterAccess?.sources??[]){
+      const p=this.project(source.x,source.y),usable=source.open&&source.available>0&&source.reachable_by.length;
+      const label=`${source.available.toFixed(1)} fresh · ${source.reachable_by.length}/${this.waterAccess.participants.length} · ${!source.open?'closed':!source.reachable_by.length?'no route':source.available>0?'ready':'empty'}`;
+      c.save();c.font='bold 12px sans-serif';c.textAlign='center';c.textBaseline='middle';const w=c.measureText(label).width+14;
+      c.fillStyle='#fff5ddee';c.strokeStyle=usable?'#476c44':'#9c6941';c.lineWidth=2;c.beginPath();c.moveTo(p.x,p.y-9);c.lineTo(p.x,p.y-30);c.stroke();c.fillRect(p.x-w/2,p.y-52,w,22);c.strokeRect(p.x-w/2,p.y-52,w,22);c.fillStyle='#3e472d';c.fillText(label,p.x,p.y-41);c.restore();
+    }
+    canvas.dataset.waterSources=String(this.waterAccess?.sources.length??0);
     const selectedRoute=this.document.start.routes?.find(r=>r.id===view.selectedRoute);
     if(selectedRoute)for(const [x,y]of selectedRoute.cells)this.polygon(footprintCorners('road',x,y),'#efc86d55','#ffe39a');
     if(this.utilityPreview){c.save();c.lineJoin='round';c.lineCap='round';paintUtilityRoute(c,this.project,this.scale,this.utilityPreview,this.utilityPreview.allowed===false?'#c65e42':'#fff3a4',true,{pump:this.utilityPreview.kind!=='electricity'});c.restore();}

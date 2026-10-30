@@ -379,6 +379,45 @@ fn opening_service_review_distinguishes_owned_unreachable_and_partial_reserves()
             .iter()
             .any(|i| i.code == "opening_water_access")
     );
+    let compare_overlay = |g: &mut Game| {
+        let before = g.snapshot();
+        let overlay: serde_json::Value = serde_json::from_str(&g.fresh_water_overlay()).unwrap();
+        let setup: serde_json::Value = serde_json::from_str(&g.scenario_setup_report()).unwrap();
+        assert_eq!(overlay["enabled"], true);
+        assert_eq!(
+            overlay["available"],
+            setup["access"]["fresh_water"]["value"]
+        );
+        assert_eq!(
+            overlay["accessible"],
+            setup["access"]["fresh_water"]["accessible"]
+        );
+        assert_eq!(overlay["participants"].as_array().unwrap().len(), 5);
+        assert!(
+            overlay["sources"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|p| p["owner"]["kind"] != "service")
+        );
+        assert_eq!(before, g.snapshot());
+        overlay
+    };
+    let overlay = compare_overlay(&mut game);
+    let isolated = overlay["sources"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|p| p["available"] == 3.5)
+        .unwrap();
+    assert!(isolated["reachable_by"].as_array().unwrap().is_empty());
+    assert!(
+        overlay["sources"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|p| p["available"] == 0.)
+    );
     let before = game.snapshot();
     let reading: serde_json::Value = serde_json::from_str(&game.scenario_setup_report()).unwrap();
     assert_eq!(reading["summary"]["edible_portions"], 10);
@@ -407,6 +446,7 @@ fn opening_service_review_distinguishes_owned_unreachable_and_partial_reserves()
     );
     let reading: serde_json::Value =
         serde_json::from_str(&partial.scenario_setup_report()).unwrap();
+    compare_overlay(&mut partial);
     for kind in ["food", "fresh_water"] {
         assert_eq!(reading["access"][kind]["value"], 2.);
         assert_eq!(reading["access"][kind]["accessible"], true);
@@ -421,6 +461,7 @@ fn opening_service_review_distinguishes_owned_unreachable_and_partial_reserves()
         serde_json::from_str(&connected.scenario_setup_report()).unwrap();
     assert_eq!(reading["access"]["food"]["value"], 12.);
     assert_eq!(reading["access"]["fresh_water"]["value"], 5.5);
+    compare_overlay(&mut connected);
 }
 
 #[test]
