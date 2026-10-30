@@ -1,0 +1,67 @@
+{
+  "why": "Verify all building appearances retain proportions, ground contact, full silhouette and readable painted materials under close rainy presentation across the required regional terrain palettes.",
+  "reviewed": {
+    "mode": "rain",
+    "zoom": 1.8,
+    "biomes": [
+      "mata-atlantica",
+      "cerrado",
+      "caatinga"
+    ],
+    "boards": [
+      {
+        "file": "mata-atlantica-zoom-1.8-rain-group-1.png",
+        "sha256": "897cee425b24d89e16b8805db8d50e4c4b5b05ea6f217c079aeded60e4bcb12d"
+      },
+      {
+        "file": "mata-atlantica-zoom-1.8-rain-group-2.png",
+        "sha256": "eaa439b9ca46b88b7edf88145bcb5f1db50182793791c2d637abb4392d34cdfe"
+      },
+      {
+        "file": "mata-atlantica-zoom-1.8-rain-group-3.png",
+        "sha256": "8dd9fc049c72ca462f35ef897b2128b93839640a43e170c5b6c76d95f64021f4"
+      },
+      {
+        "file": "cerrado-zoom-1.8-rain-group-1.png",
+        "sha256": "bfca8f816da10d33baf648ceb9ea956b8f61a813ab31451d30bb9bc8a437e761"
+      },
+      {
+        "file": "cerrado-zoom-1.8-rain-group-2.png",
+        "sha256": "04a0b6a2adb836cd577ce5ff0da8f4f3e13ef459038f5a0991669ed7c762a16f"
+      },
+      {
+        "file": "cerrado-zoom-1.8-rain-group-3.png",
+        "sha256": "1d8a15bb338bed14844b8d2357a444ee454ef62e5e243d2be7a36eeb52c560e0"
+      },
+      {
+        "file": "caatinga-zoom-1.8-rain-group-1.png",
+        "sha256": "86ee7da5c5addc3b51bd9341ea2c69030430165b4d707b2fc3d24e0e1303fc77"
+      },
+      {
+        "file": "caatinga-zoom-1.8-rain-group-2.png",
+        "sha256": "b0745bb9d2c62cc9e5ea6c16d10f8bcdd727625d52c719de33c8bb9c5c0d3520"
+      },
+      {
+        "file": "caatinga-zoom-1.8-rain-group-3.png",
+        "sha256": "3cff8476bfdedf4ecabe87ef255be6b1115f51bedbf42e07025ca1928ed678cd"
+      }
+    ],
+    "appearancesPerBiome": 27,
+    "compositions": 81,
+    "finding": "All nine boards individually inspected. No additional blocking proportion, ground-contact, clipping or rain-overlay defect observed in these static contexts."
+  },
+  "parity": "Final current shared-lighting-selector captures are byte-identical to inspected preceding captures.",
+  "fullCaptures": "artifacts/building-rain-close-final",
+  "pending": {
+    "poweredNightClose": "Captured; only Mata Atlantica group 1 reviewed.",
+    "unpoweredNightClose": "Captured; visual inspection pending.",
+    "poweredNightOverview": "Captured; visual inspection pending.",
+    "unpoweredNightOverview": "Captured; visual inspection pending.",
+    "rainOverview": "Captured; visual inspection pending."
+  },
+  "limits": [
+    "Controlled static conditions with native rainy-window overrides, not regional climate accuracy.",
+    "Does not prove moving weather, transitions, lifecycle states, nature-species coverage, resident customization or full art acceptance.",
+    "All original plan requirements remain in force."
+  ]
+}
