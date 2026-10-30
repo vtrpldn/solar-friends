@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "sources": {
+    "web/editor/index.js": "2f42759da812239d0014f20e6004a7e558b61890aaeaa3bed510b2b413ee9c2c",
+    "web/editor/scenario-journal.js": "bb57a27d8f16cdf4fdf2365d5e28c07ee0a5b6e5e7fd20835811501c293158cc",
+    "scripts/verify-challenge-editor.mjs": "0654db86db45fc630efbaf4446865206a72dbcb72f8cb424a48c23fb24fa30dd",
+    "scripts/verify-event-creator.mjs": "f4e7af261bc06cf2f840b66f0e656082ae5f58470b2e91e27b7e01499634d503"
+  },
+  "checks": {
+    "challenge": "PASS terminal session 5590: invalid deadline link, later indexed chapter selection and focused title, Undo repair, export/reload and timed challenge lifecycle",
+    "events": "PASS terminal session 5889: missing goal link opens events, Undo repair, event order, export/reload, exactly-once funding and normal Story restoration",
+    "browserErrors": [],
+    "screenshots": "Both retained desktop captures inspected"
+  },
+  "scope": "Public editor controls in isolated browser profiles. Generic native journal paths open their editor and retain the native error text; exact goal targeting requires an indexed native path. No native simulation change."
+}

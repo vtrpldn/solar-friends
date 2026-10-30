@@ -20,8 +20,20 @@ try{
  const defaultDay=Number(await field('challenge.day').inputValue()),defaultTime=await field('challenge.time').inputValue(),[hours,minutes]=defaultTime.split(':').map(Number),start=(defaultDay-2)*1440+hours*60+minutes;
  await set('challenge.day',defaultDay-1);
  assert(await page.locator('#creator-test').isDisabled());
+ await dialog.locator('[data-journal-done]').click();await page.locator('[data-workspace=review]').click();
+ await page.locator('.creator-issue').filter({hasText:'Choose a deadline after arrival'}).locator('[data-issue-journal]').click();
+ assert(await dialog.isVisible());assert.equal(await page.locator('[data-workspace=story]').getAttribute('aria-selected'),'true');
+ assert((await dialog.locator('[data-journal-errors]').textContent()).includes('Choose a deadline after arrival'));
+ await page.screenshot({path:'/private/tmp/solar-review-journal-repair.png'});
  await dialog.locator('[data-journal-undo]').click();
  assert.equal(Number(await field('challenge.day').inputValue()),defaultDay);
+ await dialog.locator('[data-journal-action=add-chapter]').click();await set('chapters.1.title','');
+ await dialog.locator('[data-journal-done]').click();await page.locator('[data-workspace=review]').click();
+ await page.locator('.creator-issue').filter({hasText:'Use a unique chapter identity'}).locator('[data-issue-journal]').click();
+ assert.equal(await field('chapters.1.title').inputValue(),'');assert(await field('chapters.1.title').evaluate(el=>document.activeElement===el));
+ await dialog.locator('[data-journal-undo]').click();await dialog.locator('[data-journal-undo]').click();
+ assert.equal(await dialog.locator('[data-journal-action=choose]').count(),1);
+
  await set('challenge.time',`${String(Math.floor((start+2)%1440/60)).padStart(2,'0')}:${String(Math.floor((start+2)%60)).padStart(2,'0')}`);
  await set('challenge.day',defaultDay-1);
  await set('challenge.failure_message','The deadline passed. We can begin again or keep this village.');

@@ -68,6 +68,17 @@ export class JournalEditor{
   host.onclick=click;this.dialog.addEventListener('click',click);
   this.dialog.addEventListener('close',()=>host.querySelector('[data-journal-action=open]')?.focus());
  }
+ openIssue(path){
+  if(!this.definition.journal)return;
+  if(/^journal\.(events|roles|locked_buildings)(\.|$)/.test(path)){this.events.open(this.definition,this.report);return;}
+  const match=/^journal\.chapters\.(\d+)(?:\.goals\.(\d+))?/.exec(path),chapter=match?this.definition.journal.chapters[Number(match[1])]:null;
+  if(chapter){this.chapter=chapter.id;this.reveal=chapter.goals[Number(match[2])]?.id??null;}
+  if(!this.dialog.open)this.dialog.showModal();this.render(this.definition,this.report);
+  const relative=path.replace(/^journal\.?/,'');
+  const fields=[...this.form.querySelectorAll('[data-journal-path]')],target=fields.find(el=>el.dataset.journalPath===relative)||fields.find(el=>relative&&el.dataset.journalPath.startsWith(relative+'.'));
+  if(target){target.closest('details')?.setAttribute('open','');target.scrollIntoView({block:'center'});target.focus({preventScroll:true});}
+  else this.dialog.querySelector('[data-journal-errors]').scrollIntoView({block:'nearest'});
+ }
  condition(c,path,goal,depth=0){
   const limits=this.catalog.journal.limits,target=this.catalog.journal.target_limits;
   const kinds=this.catalog.journal.conditions.map(option=>`<option value="${option.example.kind}" ${c.kind===option.example.kind?'selected':''} ${depth>=limits.condition_depth&&['all','any'].includes(option.example.kind)?'disabled':''}>${escape(option.name)}</option>`).join('');
