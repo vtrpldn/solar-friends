@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "accepted": "Original-cast providers now present one complete painted key pose, matching the existing custom-provider policy and removing opacity-crossfade double silhouettes. No raster assets, clip timing or simulation fields changed.",
+  "sources": {
+    "web/resident-appearance-library.js": "518acdb703b9eb9bff55a4c05b6c443761af48a53d905a5ee7d761ddbc409773",
+    "scripts/verify-resident-appearance-library.mjs": "63a678d629c7c85118e1e6bee2f1a0f1a3ae98f4f77c9cc763abab3df764f9d7",
+    "scripts/verify-resident-appearance.mjs": "0c5780f3d3572e2d02efbd60e00d11d9f6def9ea68d1741b312e00069ff44ed0",
+    "scripts/verify-interrupted-resident-transitions.mjs": "a92db3966e3fbef6e6c48dbbcd8a621dfa93e831b771c5b3a14959d3b5e044c3",
+    "scripts/verify-resident-animation-profiles.mjs": "6a679e15d194121af9f515ef7b8f42b59946e28485724b1b74a1812534019cf2",
+    "scripts/verify-resident-animation.mjs": "edb8496ad32dd014785c4022a1155f6edab0dcf5192d710f2a89dc7664d5d88f",
+    "web/art/animations/iara.png": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+    "web/art/animations/iara-idle.png": "3d2510219502ef9b7e11872009672cf6a510ef2341abb6fd90888b8abc1d6849",
+    "web/art/animations/iara-activities.png": "29dd26deb5204d648ca37abdb01931db27d05b0b3827e32bf1d944789fcc7711",
+    "web/art/animations/bento.png": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+    "web/art/animations/bento-idle.png": "b08b98641ea263b717fe3f77476a72e58e4c7cc299adeeaea3b1f9d90df97943",
+    "web/art/animations/bento-activities.png": "37b8f2893285e943edf8c5af8274199362f1e908a129acb4ccf9d09435549530",
+    "web/art/animations/luz.png": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+    "web/art/animations/luz-idle.png": "c37a9572fe8d3c0c4085d1c6595adefdbc2c26f70dd016fb0d5ba02e17bdeb52",
+    "web/art/animations/luz-activities.png": "5ef0f67c8af7a4f9d0d7d212f5d72495d06f5a4a7ee478840d054367d859da70",
+    "web/art/animations/caua.png": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+    "web/art/animations/caua-idle.png": "bed9db91f965fcf36585a2bd46257baaff07bd8144bae7b085915e204c90fc97",
+    "web/art/animations/caua-activities.png": "8234d1c277c528b0a9917da578167c79829de9f80f6c8b289c926c63575bdc6b",
+    "web/art/animations/nina.png": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+    "web/art/animations/nina-idle.png": "5a95ba9e25991ea97bb3e7e1e225ab1b6423e5c53449d51195e6877209ea7116",
+    "web/art/animations/nina-activities.png": "f58b8323bade79235a119d25b53d135dfbba844c9ca8cb70867d91ab5058a570"
+  },
+  "checks": [
+    "240 exact original pose objects, 1040 exact single-pose facing/night renderer comparisons, ten unchanged shared portraits, load/decode/refusal/retry/identity checks: passed session 20212",
+    "312 interrupted transitions and 10000 bounded rapid switches: passed",
+    "169 profiled transitions, blink cadence and original clip timing: passed",
+    "156 animation transitions, task boundaries, mirroring and pause: passed",
+    "Public authoring/portrait/cancelled and applied live cosmetic edits/exact checkpoint/normal-save isolation: passed session 91777",
+    "Four interruption comparisons preserve exact displayed pose pixels; all four final board rows inspected",
+    "100-frame 960x320 native-rendered movie decoded independently; sixteen quarter-second samples inspected"
+  ],
+  "movie": {
+    "frames": 100,
+    "width": 960,
+    "height": 320,
+    "seconds": 3.968791
+  },
+  "beforeReference": "../interrupted-transitions-v1/board.png",
+  "remaining": [
+    "Discrete painted pose changes remain, including large changes between different activities.",
+    "No universal smooth-animation, every wardrobe/pose/world-biome review or physical-display pacing acceptance.",
+    "Historical reports pinned to the earlier crossfade provider remain historical."
+  ],
+  "evidence": {
+    "report.json": "eabacebed87c904c118ffc25276f389807285b0894f476417c70bc6b664d83ec",
+    "transitions.webm": "fe6388bec7f6836671596e0310749ebf5a8f7086499e249532e884482e2b6d3c",
+    "decoded.png": "fbb24aefb4ee894eb12c54f42ac9d244d8429f5a1c2612afbbbe73ba54f343d7",
+    "board.png": "e0df44e6f18760ffc3a3e17a21a609d439061aec11371457808a99d5053a28ff"
+  }
+}

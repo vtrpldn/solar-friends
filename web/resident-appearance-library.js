@@ -29,7 +29,9 @@ export function createResidentAppearanceLibrary({base=[],idle=[],activities=[],l
     if(!images.has(sheet))images.set(sheet,supplied[sheet][index]??loadImage(checked.preset,sheet));
     return images.get(sheet);
    };
-   const provider=Object.freeze({interpolation:'crossfade',frameForPose(sheet,index){
+   // Each painted pose is a complete silhouette; opacity mixing creates
+   // duplicate faces, hands and tools rather than an intermediate drawing.
+   const provider=Object.freeze({interpolation:'keyframes',frameForPose(sheet,index){
     if(!Number.isInteger(index)||index<0||index>=16)throw Error('This resident animation pose is unavailable.');
     const frames=preparedFrames(imageFor(sheet),{referenceRow:sheet==='base'?2:0});
     if(!frames)throw Error('These resident poses have not loaded yet.');

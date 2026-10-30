@@ -1,0 +1,39 @@
+{
+  "checks": [
+    {
+      "body": "classic-iara",
+      "night": 0,
+      "exactPixels": 262144
+    },
+    {
+      "body": "classic-iara",
+      "night": 1,
+      "exactPixels": 262144
+    },
+    {
+      "body": "broad-v1",
+      "night": 0,
+      "exactPixels": 262144
+    },
+    {
+      "body": "broad-v1",
+      "night": 1,
+      "exactPixels": 262144
+    }
+  ],
+  "scope": "Two current public providers, fixed breath to isolate pose continuity, enlarged day/mirrored night board and actual native transition recording. Not complete outfit, world, biome or physical-display pacing acceptance.",
+  "inputs": {
+    "web/resident-animation.js": "0a1f1b73c14a88d351ee483bd7da397551e1ba4c0de61faa5c0b77ebd01e0c8f",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/resident-appearance-library.js": "518acdb703b9eb9bff55a4c05b6c443761af48a53d905a5ee7d761ddbc409773",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631",
+    "web/character-broad-family-bundle-index.js": "17d264e9080070a930a07efd36683cc4087144b9e233788602cf2d92a966ec23",
+    "web/art/characters/broad-v1/bundle-v1.json": "6d3f334aca027a80296ebc760e5d1214293ea027b3d0503d37e26a27c3c52f42",
+    "web/art/animations/iara.png": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+    "web/art/animations/iara-idle.png": "3d2510219502ef9b7e11872009672cf6a510ef2341abb6fd90888b8abc1d6849",
+    "web/art/animations/iara-activities.png": "29dd26deb5204d648ca37abdb01931db27d05b0b3827e32bf1d944789fcc7711",
+    "assets/art-direction/character-prototype-v1/body-broad-v1/creator-playtest-memory-v1/fixture.solar-scenario": "5adc6008ae697b07f14a7d7e431b03ce4dc815c07c3d5b0d9304dea9cc581ebd",
+    "scripts/review-interrupted-resident-transitions.mjs": "19e09dd9949642e3bc71cdbb37132ac0164d158fcc3c65ed75aeb37b85a40a02"
+  },
+  "videoSha256": "fe6388bec7f6836671596e0310749ebf5a8f7086499e249532e884482e2b6d3c"
+}

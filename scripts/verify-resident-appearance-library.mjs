@@ -12,13 +12,14 @@ try{
   const canvas=(w=256,h=w)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},equal=(a,b)=>a.every((v,i)=>v===b[i]),pixels=c=>c.getContext('2d').getImageData(0,0,c.width,c.height).data;let frames=0,renders=0,portraits=0;
   for(const key of residentLookKeys){
    const appearance={preset:key,version:1},initial=library.provider(appearance);if(loads.some(s=>s.startsWith(key+':')))throw Error('Provider eagerly requested artwork');
-   const [a,b]=await Promise.all([library.prepare(appearance),library.prepare({...appearance})]);if(a!==b||a!==initial)throw Error('Appearance provider identity changed');
+   const [a,b]=await Promise.all([library.prepare(appearance),library.prepare({...appearance})]);if(a!==b||a!==initial)throw Error('Appearance provider identity changed');if(a.interpolation!=='keyframes')throw Error('Painted original silhouettes must use complete key poses');
    const sheets=Object.fromEntries(['base','idle','activities'].map(sheet=>[sheet,sources.get(key+':'+sheet)]));
    for(const sheet of ['base','idle','activities'])for(let index=0;index<16;index++){if(a.frameForPose(sheet,index)!==preparedFrames(sheets[sheet],{referenceRow:sheet==='base'?2:0})[index])throw Error('Appearance changed the exact original frame selection');frames++;}
    if(library.portraitFrame(appearance)!==a.frameForPose('base',8))throw Error('Portrait and world use different artwork');
-   for(const clip of Object.keys(residentClips))for(const facing of [-1,1])for(const night of [0,1])for(const seconds of [0,.121]){
+   for(const clip of Object.keys(residentClips))for(const facing of [-1,1])for(const night of [0,1])for(const seconds of [0,.1,.121,.187]){
     const actual=canvas(),expected=canvas(),surface=canvas(),legacySurface=canvas(),motion={layers:sampleResidentClip(clip,seconds),facing,breath:1};
-    for(const [target,working,provider]of [[actual,surface,a],[expected,legacySurface,sheets]]){const ctx=target.getContext('2d');ctx.filter=unlitFilter(night);drawResidentAnimation(ctx,working,provider,motion,128,244,256);}
+    const dominant=motion.layers.reduce((best,p)=>!best||p.weight>best.weight?p:best,null);
+    for(const [target,working,provider,state]of [[actual,surface,a,motion],[expected,legacySurface,sheets,{...motion,layers:[{...dominant,weight:1}]}]]){const ctx=target.getContext('2d');ctx.filter=unlitFilter(night);drawResidentAnimation(ctx,working,provider,state,128,244,256);}
     if(!equal(pixels(actual),pixels(expected)))throw Error('Appearance provider changed animation, facing or lighting');renders++;
    }
    for(const night of [0,1]){
@@ -39,5 +40,5 @@ try{
   let relationshipPortraits=0;for(const person of people){const actual=host.querySelector(`[data-bond-resident="${person.id}"]`),expected=canvas(48,54);paintResidentPortrait(expected,person.appearance,library);if(!actual||!equal(pixels(actual),pixels(expected)))throw Error('Relationship portrait followed preset order or person identity');relationshipPortraits++;}if(JSON.stringify(definition)!==original)throw Error('Relationship preview rewrote the creation');
   people[0].appearance.version=999;relationships.render(definition);if(host.querySelectorAll('[aria-label="Resident artwork unavailable"]').length!==1||host.querySelectorAll('canvas').length!==1)throw Error('Relationship preview substituted unsupported artwork');
   return {frames,renders,portraits,loads:loads.length,decodes:decodes.length,denied:denied.length,retryAttempts:attempts,nativeCatalog:catalog.resident_appearances.length,relationshipPortraits,unavailableRelationshipPortraits:1};
- });assert.deepEqual(result,{frames:240,renders:520,portraits:10,loads:15,decodes:15,denied:24,retryAttempts:2,nativeCatalog:5,relationshipPortraits:2,unavailableRelationshipPortraits:1});assert.deepEqual(errors,[]);console.log('PASS: shared resident appearance library: 240 exact original poses, 520 facing/lighting animation comparisons, ten shared portraits, native catalog parity, one load/decode per sheet, strict refusal, retry, input isolation and identity-bound relationship portraits.');
+ });assert.deepEqual(result,{frames:240,renders:1040,portraits:10,loads:15,decodes:15,denied:24,retryAttempts:2,nativeCatalog:5,relationshipPortraits:2,unavailableRelationshipPortraits:1});assert.deepEqual(errors,[]);console.log('PASS: shared resident appearance library: 240 exact original poses, 1040 exact whole-pose facing/lighting comparisons, ten shared portraits, native catalog parity, one load/decode per sheet, strict refusal, retry, input isolation and identity-bound relationship portraits.');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
