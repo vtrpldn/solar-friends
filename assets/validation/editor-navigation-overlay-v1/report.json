@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "sources": {
+    "src/navigation.rs": "268add2604c17608c571104bec7686baf4f33834dc409b5cc859ffb696cf0064",
+    "src/world.rs": "8b0b55b1d6451c47d887eea9125bd46380bca036357285c92a23818e0174161d",
+    "web/editor/index.js": "13d913f64804b906366c7c15a235af80b29c7b7fbf74798533428f590be7a129",
+    "web/editor.html": "b1ed8b011cc741d433c3cf642021aea33037886fd198aef609ce567dddb50234",
+    "web/editor/map-view.js": "873e0138d83c5be2dad796ef6d288fad5036166c03804912d4d01553708c68f4",
+    "web/pkg/solar_friends_bg.wasm": "28cb1127ef68eec468aea6b0ecfd76cc7200111b37e4640d9651fd4af12d4af8",
+    "scripts/verify-editor-navigation-overlay.mjs": "79f1b177dfd7e7864a4e9eb2ffe57cf6a6e43c81f9cbaad421724db3bca11272"
+  },
+  "results": [
+    {
+      "biome": "mata-atlantica",
+      "fixtureFile": "mata-atlantica.solar-scenario",
+      "fixtureSha256": "eb1d76600a38877fe0d0e57046958c73ca75262485ddde7c6b94b2f121a3ea44",
+      "cells": 4096,
+      "unusedQueryCount": 0,
+      "pointerQueries": 0,
+      "committedQueries": 6,
+      "restoredQueries": 1,
+      "exactViewOnlyCheckpoint": true,
+      "exactUndoRedo": true,
+      "reloadExact": true,
+      "invalidDraftRetainsLabelledPreview": true,
+      "queryMs": [
+        3.5999999046325684,
+        2.0999999046325684,
+        3.299999952316284,
+        2.200000047683716,
+        2.1000001430511475,
+        2.0999999046325684
+      ]
+    },
+    {
+      "biome": "cerrado",
+      "fixtureFile": "cerrado.solar-scenario",
+      "fixtureSha256": "55388f22ed7bf5243eb7e7cf02593131b1138b35b997b32812d82365d4597ef9",
+      "cells": 4096,
+      "unusedQueryCount": 0,
+      "pointerQueries": 0,
+      "committedQueries": 6,
+      "restoredQueries": 1,
+      "exactViewOnlyCheckpoint": true,
+      "exactUndoRedo": true,
+      "reloadExact": true,
+      "invalidDraftRetainsLabelledPreview": true,
+      "queryMs": [
+        3.5,
+        2.1999998092651367,
+        3.200000047683716,
+        2,
+        2.200000047683716,
+        2.1000001430511475
+      ]
+    },
+    {
+      "biome": "caatinga",
+      "fixtureFile": "caatinga.solar-scenario",
+      "fixtureSha256": "d82d80ae7b212e18d4a5e4bf94e6aee32626a772d0343b4541d3ed74a146f81b",
+      "cells": 4096,
+      "unusedQueryCount": 0,
+      "pointerQueries": 0,
+      "committedQueries": 6,
+      "restoredQueries": 1,
+      "exactViewOnlyCheckpoint": true,
+      "exactUndoRedo": true,
+      "reloadExact": true,
+      "invalidDraftRetainsLabelledPreview": true,
+      "queryMs": [
+        3.5,
+        2.200000047683716,
+        3.200000047683716,
+        2,
+        2.200000047683716,
+        2.0999999046325684
+      ]
+    }
+  ],
+  "scope": "Three native-valid imported fixtures with an authored separating river; regular layer, river removal, undo/redo, building placement, save/reload and trusted pointer controls. Native query instrumentation observes calls only. Cell-centre graph connectivity ignores temporary pedestrian crowding and does not prove every fractional work approach."
+}

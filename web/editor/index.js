@@ -61,10 +61,11 @@ const ruleNames={logistics:'Materials, hauling and resident work',land:'Living s
 let newBiome="mata-atlantica";
 let libraryDiscovery,mapSharing;
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
-const waterLayers={banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
+const waterLayers={walkability:{legend:"Green · connected to camp. Gold · clear but disconnected. Red · blocked cell centre. Footprints and riverbanks use native walking rules; this does not reserve space from other residents."},banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
 let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let expandedReview=false,outlook;
 let landReport=null,landReportKey=null,mapPreviewKey=null,landSampleKey='',hoverCell=null;
+let accessReport=null,accessReportKey=null;
 let releasePublication=null,preparedEdit=null,engineDefinition=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -188,18 +189,22 @@ function refresh(){
 function overlayTiles(){
   if(!geometry)return [];
   const layer=map.view.layer;
+  if(layer==='walkability'){
+    if(!accessReport||accessReportKey!==landReportKey){accessReport=JSON.parse(engine.navigation_overlay());accessReportKey=landReportKey;}
+    return accessReport.cells.map(p=>({x:p.x,y:p.y,fill:!p.walkable?'#b7564a66':p.reachable?'#528a5d66':'#d4a54888',stroke:null}));
+  }
   if(layer==='banks'||layer==='hydro')return (layer==='banks'?geometry.banks:geometry.hydro_sites).map(([x,y])=>({x,y,fill:layer==='banks'?'#497fbd88':'#e8ba55bb',stroke:layer==='banks'?'#aecfe0':'#fff0ad'}));
   return landTiles(landReport,layer);
 }
 function overlayLegend(){const message=(waterLayers[map.view.layer]||landLayers[map.view.layer])?.legend||'Point at a cell to inspect the land.';return report.ok?message:'Draft incomplete · last valid land preview. '+message;}
 function inspectGround(point){
   hoverCell=point;if(!current||!point)return;
-  const key=[current.doc.revision,point.x,point.y,map.view.tool].join(':');if(key===landSampleKey)return;landSampleKey=key;
+  const key=[current.doc.revision,point.x,point.y,map.view.tool,map.view.layer].join(':');if(key===landSampleKey)return;landSampleKey=key;
   const sample=JSON.parse(engine.land_preview(allBuildingArt[map.view.tool]||sourceKinds.includes(map.view.tool)?map.view.tool:'road',point.x,point.y)),g=sample.ground;
   $('creator-cell').textContent=`Cell ${point.x}, ${point.y}`;
   if(!g){$('creator-ground-detail').textContent='This footprint crosses a protected riverbank or map edge. Choose an inland plot.';return;}
   const deposits=landReport.deposits.filter(d=>point.x>=d.x&&point.x<d.x+d.width&&point.y>=d.y&&point.y<d.y+d.height);
-  $('creator-ground-detail').innerHTML=`<p><b>${escape(g.biome)}</b><br>${escape(g.geology)}</p><dl><dt>Inspected footprint</dt><dd>${sample.cells} ${sample.cells===1?'cell':'cells'}</dd><dt>Fertility</dt><dd>${Math.round(g.fertility*100)}%</dd><dt>Water retention</dt><dd>×${g.retention.toFixed(2)}</dd><dt>Moisture</dt><dd>${Math.round(g.moisture*100)}%</dd><dt>Tree shade</dt><dd>${Math.round(g.shade*100)}%</dd><dt>Solar exposure</dt><dd>${Math.round(sample.solar_exposure*100)}%</dd><dt>Crop growth</dt><dd>×${sample.growth_multiplier.toFixed(2)}</dd><dt>Disturbance</dt><dd>${Math.round(g.disturbance*100)}%</dd></dl>${deposits.map(d=>`<p>${escape(catalog.materials[d.material])}: ${d.remaining} remaining of ${d.maximum}</p>`).join('')}${report.ok?'':'<p>Draft has unresolved issues. Ground preview uses the last valid setup.</p>'}`;
+  $('creator-ground-detail').innerHTML=`<p><b>${escape(g.biome)}</b><br>${escape(g.geology)}</p><dl><dt>Inspected footprint</dt><dd>${sample.cells} ${sample.cells===1?'cell':'cells'}</dd><dt>Fertility</dt><dd>${Math.round(g.fertility*100)}%</dd><dt>Water retention</dt><dd>×${g.retention.toFixed(2)}</dd><dt>Moisture</dt><dd>${Math.round(g.moisture*100)}%</dd><dt>Tree shade</dt><dd>${Math.round(g.shade*100)}%</dd><dt>Solar exposure</dt><dd>${Math.round(sample.solar_exposure*100)}%</dd><dt>Crop growth</dt><dd>×${sample.growth_multiplier.toFixed(2)}</dd><dt>Disturbance</dt><dd>${Math.round(g.disturbance*100)}%</dd></dl>${deposits.map(d=>`<p>${escape(catalog.materials[d.material])}: ${d.remaining} remaining of ${d.maximum}</p>`).join('')}${map.view.layer==='walkability'&&accessReport?`<p><b>Walking access:</b> ${accessReport.cells[point.y*64+point.x]?.walkable?(accessReport.cells[point.y*64+point.x]?.reachable?'Connected to the arrival camp.':'Clear cell centre, but no route from camp.'):'Blocked cell centre.'}</p>`:''}${report.ok?'':'<p>Draft has unresolved issues. Ground preview uses the last valid setup.</p>'}`;
 }
 function renderSelection(){
   if(!current)return;
@@ -413,7 +418,7 @@ function wire(){
   $('creator-species').onchange=()=>{map.natureSpecies=catalog.nature.find(s=>s.key===$('creator-species').value);$('creator-nature-size').min=map.natureSpecies.min_size;$('creator-nature-size').max=map.natureSpecies.max_size;setTool('nature');};
   $('creator-nature-size').oninput=e=>{map.natureSize=Number(e.target.value);$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';map.render();map.viewChanged(map.state);};
   $('creator-river-enabled').onchange=e=>change(e.target.checked?'Restore river':'Remove river',d=>{d.map.river=e.target.checked?JSON.parse(engine.scenario_template('story')).map.river:null;});
-  $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;map.landOverlay=overlayTiles();$('creator-land-legend').textContent=overlayLegend();map.render();map.viewChanged(map.state);};
+  $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;map.landOverlay=overlayTiles();$('creator-land-legend').textContent=overlayLegend();inspectGround(hoverCell);map.render();map.viewChanged(map.state);};
   $('creator-brush-size').onchange=e=>{map.brushSize=Number(e.target.value);map.viewChanged(map.state);};
   $('creator-toolbelt').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
   $('creator-sites').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};

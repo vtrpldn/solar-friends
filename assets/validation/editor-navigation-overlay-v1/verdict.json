@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "hashes": {
+    "caatinga-no-river.png": "7138bb25a1722a3d3c4df69ba76d7030a8ca5146259f9848226d8c7c3db1e364",
+    "caatinga-river.png": "a4b7caccfc9fca93aa3ef26519dcf30c959256cafe7cdb65fe165e207c1f42c5",
+    "caatinga.solar-scenario": "d82d80ae7b212e18d4a5e4bf94e6aee32626a772d0343b4541d3ed74a146f81b",
+    "cerrado-no-river.png": "0febaf343a3b9c68c9b0a3532390ed0ba9fc10168012a7d6fc26056962c143fd",
+    "cerrado-river.png": "d1de8d0605ce1ac579dc11cf383f4f69faaf01204f2cabfc1ed43c5ff4d7405d",
+    "cerrado.solar-scenario": "55388f22ed7bf5243eb7e7cf02593131b1138b35b997b32812d82365d4597ef9",
+    "mata-atlantica-no-river.png": "d380a7e686058f1a3c993066c015106aa543e799587c29c344e97ca7bfbb74e3",
+    "mata-atlantica-river.png": "c858f97e26d573ebe2eca6098bcf5187a92ed1a409d3455d51cd6b07766d57cf",
+    "mata-atlantica.solar-scenario": "eb1d76600a38877fe0d0e57046958c73ca75262485ddde7c6b94b2f121a3ea44",
+    "report.json": "e1d0aff1c75bcab4b5c31d86d88a2f457a6fe9efaa96acd7df7f2becf05470b2",
+    "native-route-comparison/caatinga-dry.solar-scenario": "dca74ef132a24e4e8839b557500176494927729694d109be45136194728bb4fa",
+    "native-route-comparison/caatinga-river.solar-scenario": "3fcd1320fe64b9e500b6fb72cb519ab390fb38e6d5caee63d5b162eea1793c25",
+    "native-route-comparison/cerrado-dry.solar-scenario": "2bb14bf90d472bdd2144d4faca08b7b91eb8bc4d51cae74714e09e9a421c7c3c",
+    "native-route-comparison/cerrado-river.solar-scenario": "76f88a925588273d4989c3fd5183057d5f7b3aee54b2003668888391da9937d6",
+    "native-route-comparison/mata-atlantica-dry.solar-scenario": "b28f9998e87f495619f2a78bb5c69b361dd2c8d09b3741e4acf0b1083b53931b",
+    "native-route-comparison/mata-atlantica-river.solar-scenario": "c6e5d6bb457b3cfa4ff3f7d2c60a7403c982733df7a13475acca74ad3df9a61d",
+    "native-route-comparison/report.json": "e62f464133c96590bd15ca47092d57ed800e77bbbc6324011dd6748f32f2199b"
+  },
+  "checks": {
+    "native": "788 native tests pass, including every cell-centre clearance flag and sampled real-route equivalence on river-free and divided maps, with exact snapshot immutability.",
+    "browser": "All three biomes: regular overlay selection, separating river removal/undo/redo, actual home placement/undo, exact view-only checkpoint preservation and reload; incomplete draft retains explicitly labelled last valid preview.",
+    "cache": "Zero native overlay queries while unused or during pointer movement; layer toggles reuse the same checked definition. Six committed-definition queries and one after reload per biome.",
+    "lint": "Strict all-target Clippy, changed Rust formatting, JavaScript syntax and diff checks pass.",
+    "existingRecovery": "Existing saved nature-size/grid/view/unload/pending-pan recovery regression passes.",
+    "exhaustiveFixtureComparison": "All 24576 cell-centre connectivity answers match actual native route quotes across three biomes, river-free/stepped-river maps and eight extra completed homes per fixture. All snapshots remain exact."
+  },
+  "visual": "Six complete river/no-river editor views inspected. Final endpoint-link implementation reproduces all six PNGs byte-identically.",
+  "limitations": [
+    "Cell-centre static graph connectivity from arrival camp, not transient pedestrian crowding, a worksite capacity reservation or every fractional approach.",
+    "Source fingerprints identify the tested native binary and selected editor source files, not every transitive browser asset.",
+    "Imported native-valid fixtures establish setup; real controls exercise the overlay, river removal, home placement, undo/redo and reload. This does not claim authoring the separating river via a brush.",
+    "Broader original builder release gates remain open."
+  ]
+}

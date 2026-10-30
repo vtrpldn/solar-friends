@@ -70,6 +70,21 @@ pub fn walkable(v: &Village, x: f32, y: f32) -> bool {
 
 #[wasm_bindgen]
 impl Game {
+    /// Read-only cell-centre navigation from the authored arrival camp.
+    /// Sample after an editing transaction, never during a pointer preview.
+    pub fn navigation_overlay(&self) -> String {
+        let v = self.app.world().resource::<Village>();
+        let (x, y) = crate::camp(v);
+        let cells: Vec<_> = navigation::access_cells(v, [x, y])
+            .into_iter()
+            .enumerate()
+            .map(|(i, (walkable, reachable))| {
+                serde_json::json!({"x":i % MAP_SIZE as usize,"y":i / MAP_SIZE as usize,"walkable":walkable,"reachable":reachable})
+            })
+            .collect();
+        serde_json::json!({"schema":1,"width":MAP_SIZE,"height":MAP_SIZE,"origin":[x,y],"origin_clear":navigation::clear(v,x,y),"cells":cells}).to_string()
+    }
+
     /// Canonical map masks for renderers and editor overlays. Callers should
     /// sample these when authored geometry changes, not on pointer movement.
     pub fn world_geometry(&self) -> String {
@@ -95,6 +110,52 @@ mod tests {
         scenarios::compile(d)
             .unwrap_or_else(|r| panic!("{}", serde_json::to_string(&r).unwrap()))
             .0
+    }
+    #[test]
+    fn navigation_overlay_matches_clear_cells_and_real_routes_without_mutation() {
+        for river in [
+            None,
+            Some(River {
+                schema: 1,
+                centers: vec![20.; 64],
+            }),
+        ] {
+            let mut d = definition();
+            d.map.nature = None;
+            d.map.river = river;
+            let mut g = compile(d);
+            assert_eq!(g.place("home", 45, 45), "ok");
+            let before = g.snapshot();
+            let overlay: serde_json::Value = serde_json::from_str(&g.navigation_overlay()).unwrap();
+            assert_eq!(overlay["schema"], 1);
+            assert_eq!(overlay["origin_clear"], true);
+            let cells = overlay["cells"].as_array().unwrap();
+            assert_eq!(cells.len(), 4096);
+            let v = g.app.world().resource::<Village>();
+            let (cx, cy) = crate::camp(v);
+            for (i, cell) in cells.iter().enumerate() {
+                let x = (i % 64) as f32;
+                let y = (i / 64) as f32;
+                assert_eq!(cell["x"], i % 64);
+                assert_eq!(cell["y"], i / 64);
+                let clear = navigation::clear(v, x, y);
+                assert_eq!(cell["walkable"], clear);
+                if !clear || i % 71 == 0 {
+                    assert_eq!(
+                        cell["reachable"],
+                        navigation::route(v, [cx, cy], [x, y]).is_ok(),
+                        "cell {x},{y}"
+                    );
+                }
+            }
+            assert_eq!(cells[45 * 64 + 45]["walkable"], false);
+            assert_eq!(cells[10 * 64 + 10]["walkable"], true);
+            assert_eq!(
+                cells[10 * 64 + 10]["reachable"],
+                v.scenario.as_ref().unwrap().definition.map.river.is_none()
+            );
+            assert_eq!(g.snapshot(), before);
+        }
     }
     #[test]
     fn absent_river_frees_former_banks_and_removes_hydro_and_riparian_ground() {

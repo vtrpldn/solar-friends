@@ -238,6 +238,33 @@ pub fn refresh(v: &mut Village) {
     v.navigation = Some(grid(v));
 }
 
+/// Cell-centre access on the same graph used by resident routes. This is a
+/// read-only editor query, not a promise about transient pedestrian crowding.
+pub(crate) fn access_cells(v: &Village, from: [f32; 2]) -> Vec<(bool, bool)> {
+    let grid = grid(v);
+    let starts = if clear(v, from[0], from[1]) {
+        links(v, from, &grid, &grid.free)
+    } else {
+        vec![]
+    };
+    let paths = search(v, from, &[], &grid, &grid.free, starts, &[]);
+    grid.free
+        .iter()
+        .enumerate()
+        .map(|(i, &walkable)| {
+            // Routing can finish through a fractional endpoint link even when
+            // a conservative diagonal grid edge is absent. Match its goal
+            // links as well as the grid component itself.
+            let reachable = walkable
+                && (paths.distances[i] != u32::MAX
+                    || links(v, point(i), &grid, &grid.free)
+                        .iter()
+                        .any(|&goal| paths.distances[goal] != u32::MAX));
+            (walkable, reachable)
+        })
+        .collect()
+}
+
 pub fn route(v: &Village, from: [f32; 2], to: [f32; 2]) -> Result<Route, &'static str> {
     route_avoiding(v, from, to, &[])
 }

@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "sources": {
+    "web/pkg/solar_friends_bg.wasm": "28cb1127ef68eec468aea6b0ecfd76cc7200111b37e4640d9651fd4af12d4af8",
+    "src/navigation.rs": "268add2604c17608c571104bec7686baf4f33834dc409b5cc859ffb696cf0064",
+    "src/world.rs": "8b0b55b1d6451c47d887eea9125bd46380bca036357285c92a23818e0174161d",
+    "scripts/verify-navigation-overlay.mjs": "15b20a586dbd96b3e31e92ec9da4e285af28bf0828eb50877eb1013997c3d912"
+  },
+  "results": [
+    {
+      "biome": "mata-atlantica",
+      "river": false,
+      "file": "mata-atlantica-dry.solar-scenario",
+      "sha256": "b28f9998e87f495619f2a78bb5c69b361dd2c8d09b3741e4acf0b1083b53931b",
+      "cells": 4096,
+      "counts": {
+        "blocked": 163,
+        "connected": 3933,
+        "disconnected": 0
+      },
+      "snapshotUnchanged": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "river": true,
+      "file": "mata-atlantica-river.solar-scenario",
+      "sha256": "c6e5d6bb457b3cfa4ff3f7d2c60a7403c982733df7a13475acca74ad3df9a61d",
+      "cells": 4096,
+      "counts": {
+        "blocked": 478,
+        "connected": 2515,
+        "disconnected": 1103
+      },
+      "snapshotUnchanged": true
+    },
+    {
+      "biome": "cerrado",
+      "river": false,
+      "file": "cerrado-dry.solar-scenario",
+      "sha256": "2bb14bf90d472bdd2144d4faca08b7b91eb8bc4d51cae74714e09e9a421c7c3c",
+      "cells": 4096,
+      "counts": {
+        "blocked": 163,
+        "connected": 3933,
+        "disconnected": 0
+      },
+      "snapshotUnchanged": true
+    },
+    {
+      "biome": "cerrado",
+      "river": true,
+      "file": "cerrado-river.solar-scenario",
+      "sha256": "76f88a925588273d4989c3fd5183057d5f7b3aee54b2003668888391da9937d6",
+      "cells": 4096,
+      "counts": {
+        "blocked": 478,
+        "connected": 2515,
+        "disconnected": 1103
+      },
+      "snapshotUnchanged": true
+    },
+    {
+      "biome": "caatinga",
+      "river": false,
+      "file": "caatinga-dry.solar-scenario",
+      "sha256": "dca74ef132a24e4e8839b557500176494927729694d109be45136194728bb4fa",
+      "cells": 4096,
+      "counts": {
+        "blocked": 163,
+        "connected": 3933,
+        "disconnected": 0
+      },
+      "snapshotUnchanged": true
+    },
+    {
+      "biome": "caatinga",
+      "river": true,
+      "file": "caatinga-river.solar-scenario",
+      "sha256": "3fcd1320fe64b9e500b6fb72cb519ab390fb38e6d5caee63d5b162eea1793c25",
+      "cells": 4096,
+      "counts": {
+        "blocked": 478,
+        "connected": 2515,
+        "disconnected": 1103
+      },
+      "snapshotUnchanged": true
+    }
+  ],
+  "scope": "Every cell centre in six native-compiled fixtures: three biomes, river-free and stepped dividing river, eight extra completed home obstacles. Compare overlay connectivity with actual native route quotes and require exact snapshot immutability. This does not enumerate all authored geometries or fractional endpoints."
+}
