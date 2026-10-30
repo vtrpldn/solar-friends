@@ -1,3 +1,4 @@
+import {sceneLayers,sceneFilter,sceneSummary,sceneRouteAt} from './scene-layers.js';
 import {Workspaces,workspaceNames,revealWorkspaceSection} from './workspaces.js';
 import {validatePublication} from './validate-publication.js';
 import {prepareRelease} from './prepare-release.js';
@@ -25,7 +26,7 @@ import {ensureStart} from './arrival.js';
 import {startingRecoveryFields} from './recovery.js';
 import {renderOpeningSetup} from './setup.js';
 import {EquipmentEditor} from './equipment.js';
-import {RoutesEditor,routeNames,dependentRoutes,hitStartingRoute} from './routes.js';
+import {RoutesEditor,routeNames,dependentRoutes} from './routes.js';
 import {hitStartingBank,newStartingBank,bankFields,buildingBatteryFields} from './batteries.js';
 import {startingAnimalFields,setStartingAnimalField} from './animals.js';
 import {sourceKinds,siteNames,newStartingSite,siteFields,setSiteField,hitStartingSite} from './sites.js';
@@ -175,7 +176,7 @@ function refresh(){
   relationshipsEditor.render(d);
   biomeEditor.render(d);
   minimap.canvas.title=report.ok?'Native land overview':'Last valid land preview · resolve draft issues before testing';
-  $('creator-land-legend').textContent=overlayLegend();
+  renderSceneFilter();$('creator-land-legend').textContent=overlayLegend();
   inspectGround(hoverCell);
   $('creator-biome-name').textContent='64 × 64 cells · '+(catalog.biomes.find(b=>b.id===d.map.biome?.id)?.name||'Mata Atlântica');
   $('creator-river-enabled').checked=d.map.river!==null;
@@ -201,9 +202,14 @@ function overlayTiles(){
     return accessReport.cells.map(p=>({x:p.x,y:p.y,fill:!p.walkable?'#b7564a66':p.reachable?'#528a5d66':'#d4a54888',stroke:null}));
   }
   if(layer==='banks'||layer==='hydro')return (layer==='banks'?geometry.banks:geometry.hydro_sites).map(([x,y])=>({x,y,fill:layer==='banks'?'#497fbd88':'#e8ba55bb',stroke:layer==='banks'?'#aecfe0':'#fff0ad'}));
+  if(Object.hasOwn(sceneLayers,layer))return [];
   return landTiles(landReport,layer);
 }
-function overlayLegend(){const message=(waterLayers[map.view.layer]||landLayers[map.view.layer])?.legend||'Point at a cell to inspect the land.';const water=map.view.layer==='water'&&waterAccessReport?` ${waterAccessReport.available.toFixed(1)} reachable fresh-water units · ${waterAccessReport.accessible?'everyone checked has access':'some friends lack usable water'}.${waterAccessReport.enabled?'':' Connected local water rules are disabled.'}${waterAccessReport.camp_fallback?' Everyone is away; checking from camp.':''}`:'';return (report.ok?'':'Draft incomplete · last valid land preview. ')+message+water;}
+function overlayLegend(){const message=(sceneLayers[map.view.layer]||waterLayers[map.view.layer]||landLayers[map.view.layer])?.legend||'Point at a cell to inspect the land.';const water=map.view.layer==='water'&&waterAccessReport?` ${waterAccessReport.available.toFixed(1)} reachable fresh-water units · ${waterAccessReport.accessible?'everyone checked has access':'some friends lack usable water'}.${waterAccessReport.enabled?'':' Connected local water rules are disabled.'}${waterAccessReport.camp_fallback?' Everyone is away; checking from camp.':''}`:'';return (report.ok?'':'Draft incomplete · last valid land preview. ')+message+water+(Object.hasOwn(sceneLayers,map.view.layer)?' '+sceneSummary(current.doc.value,map.snapshot,map.view):'');}
+function renderSceneFilter(){
+ const filter=sceneFilter(current.doc.value,map.view),host=$('creator-overlay-filter-field');host.hidden=!filter;if(!filter)return;
+ $('creator-overlay-filter-label').textContent=filter.label;const select=$('creator-overlay-filter');select.innerHTML=filter.options.map(([key,label])=>`<option value="${escape(key)}">${escape(label)}</option>`).join('');select.value=filter.value;
+}
 function inspectGround(point){
   hoverCell=point;if(!current||!point)return;
   const key=[current.doc.revision,point.x,point.y,map.view.tool,map.view.layer].join(':');if(key===landSampleKey)return;landSampleKey=key;
@@ -295,11 +301,11 @@ function mapAction(action){
   else if(action.type==='move')change(action.ids.length>1?'Move building group':'Move building',d=>moveBuildings(d,action.ids,action.dx,action.dy),{valid:true});
   else if(action.type==='duplicate'&&map.copy){const copy=map.copy,anchor=copy.buildings[0];if(change('Copy building group',d=>placeBuildingCopy(d,copy,action.x-anchor.x,action.y-anchor.y),{valid:true})){setTool('select');map.select(null);for(const b of copy.buildings)map.select(b.id,true);map.copy=null;}}
   else if(action.type==='erase'){
-    const bank=hitStartingBank(current.doc.value,action.x,action.y),site=hitStartingSite(current.doc.value,action.x,action.y);
+    const bank=hitStartingBank(current.doc.value,action.x,action.y),site=hitStartingSite(current.doc.value,action.x,action.y),route=sceneRouteAt(current.doc.value,map.view,action.x,action.y);
     if(bank)change('Remove battery bank',d=>{d.start.batteries=d.start.batteries.filter(p=>p.id!==bank.id);});
     else if(site)change('Remove material plot',d=>{d.start.resource_sites=d.start.resource_sites.filter(s=>s.id!==site.id);});
     else if(action.id)removeBuilding(action.id);
-    else if(hitStartingRoute(current.doc.value,action.x,action.y)){const ids=dependentRoutes(current.doc.value,hitStartingRoute(current.doc.value,action.x,action.y).id);change('Remove utility connection',d=>{d.start.routes=d.start.routes.filter(r=>!ids.has(r.id));});}
+    else if(route){const ids=dependentRoutes(current.doc.value,route.id);change('Remove utility connection',d=>{d.start.routes=d.start.routes.filter(r=>!ids.has(r.id));});}
     else change('Remove a road',d=>{d.start.roads=d.start.roads.filter(([x,y])=>x!==action.x||y!==action.y);});
   }else if(action.type==='camp')change('Move arrival camp',d=>{d.map.camp=[action.x,action.y];},{valid:true});
   else if(action.type==='camera')change('Choose starting view',d=>{d.map.camera=[action.x,action.y];},{valid:true});
@@ -315,11 +321,11 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   current={id:id||definition.id,doc,storageRevision:revision,record,viewDirty:false,conflicted:false};
   const ctx=current;
   doc.addEventListener('change',()=>{if(current===ctx){refresh();scheduleSave();}});
-  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selectedResident:null,selectedRoute:null,selectedBank:null,selectedSite:null,selection:[],tool:'select',grid:true,layer:'none',habitatPreset:'flower-meadow',workspace:'land'};
+  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selectedResident:null,selectedRoute:null,selectedBank:null,selectedSite:null,selection:[],tool:'select',grid:true,layer:'none',utilityKind:'all',regionId:'all',habitatPreset:'flower-meadow',workspace:'land'};
   if(view){
     const center=Array.isArray(view.center)&&view.center.length===2&&view.center.every(Number.isFinite)?view.center:map.view.center;
     const tool=['select','pan','move','road','meadow','river','nature','thin-nature','habitat','camp','camera','erase','battery-bank',...sourceKinds,...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
-    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selectedResident:typeof view.selectedResident==='string'?view.selectedResident:null,selectedRoute:typeof view.selectedRoute==='string'?view.selectedRoute:null,selectedBank:typeof view.selectedBank==='string'?view.selectedBank:null,selectedSite:typeof view.selectedSite==='string'?view.selectedSite:null,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,habitatPreset:catalog.habitats.some(h=>h.key===view.habitatPreset)?view.habitatPreset:'flower-meadow',workspace:Object.hasOwn(workspaceNames,view.workspace)?view.workspace:'land',layer:Object.hasOwn(landLayers,view.layer)||Object.hasOwn(waterLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
+    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selectedResident:typeof view.selectedResident==='string'?view.selectedResident:null,selectedRoute:typeof view.selectedRoute==='string'?view.selectedRoute:null,selectedBank:typeof view.selectedBank==='string'?view.selectedBank:null,selectedSite:typeof view.selectedSite==='string'?view.selectedSite:null,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,habitatPreset:catalog.habitats.some(h=>h.key===view.habitatPreset)?view.habitatPreset:'flower-meadow',workspace:Object.hasOwn(workspaceNames,view.workspace)?view.workspace:'land',layer:Object.hasOwn(sceneLayers,view.layer)||Object.hasOwn(landLayers,view.layer)||Object.hasOwn(waterLayers,view.layer)?view.layer:'none',utilityKind:Object.hasOwn(routeNames,view.utilityKind)?view.utilityKind:'all',regionId:doc.value.map.regions?.some(r=>r.id===view.regionId)?view.regionId:'all',grid:view.grid!==false};
   }
   map.brushSize=[1,3,5,9].includes(view?.brushSize)?view.brushSize:3;map.natureSpecies=catalog.nature.find(s=>s.key===view?.natureSpeciesKey)||catalog.nature[0];map.natureSize=Number.isFinite(view?.natureSize)?Math.max(map.natureSpecies.min_size,Math.min(map.natureSpecies.max_size,view.natureSize)):1;
   $('creator-habitat').value=map.view.habitatPreset;
@@ -429,7 +435,8 @@ function wire(){
   $('creator-species').onchange=()=>{map.natureSpecies=catalog.nature.find(s=>s.key===$('creator-species').value);$('creator-nature-size').min=map.natureSpecies.min_size;$('creator-nature-size').max=map.natureSpecies.max_size;setTool('nature');};
   $('creator-nature-size').oninput=e=>{map.natureSize=Number(e.target.value);$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';map.render();map.viewChanged(map.state);};
   $('creator-river-enabled').onchange=e=>change(e.target.checked?'Restore river':'Remove river',d=>{d.map.river=e.target.checked?JSON.parse(engine.scenario_template('story')).map.river:null;});
-  $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;map.landOverlay=overlayTiles();$('creator-land-legend').textContent=overlayLegend();inspectGround(hoverCell);map.render();map.viewChanged(map.state);};
+  $('creator-overlay-filter').onchange=e=>{map.view[map.view.layer==='utilities'?'utilityKind':'regionId']=e.target.value;$('creator-land-legend').textContent=overlayLegend();map.render();map.viewChanged(map.state);};
+  $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;renderSceneFilter();map.landOverlay=overlayTiles();$('creator-land-legend').textContent=overlayLegend();inspectGround(hoverCell);map.render();map.viewChanged(map.state);};
   $('creator-brush-size').onchange=e=>{map.brushSize=Number(e.target.value);map.viewChanged(map.state);};
   $('creator-toolbelt').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
   $('creator-sites').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};

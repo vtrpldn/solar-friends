@@ -1,4 +1,5 @@
-import {hitStartingRoute,corridorCells} from './routes.js';
+import {utilityLines,goalRegions,sceneRouteAt,routeVisible} from './scene-layers.js';
+import {corridorCells} from './routes.js';
 import {paintUtilityRoute} from '../utility-lines-art.js';
 import {hitStartingBank} from './batteries.js';
 import {batteryImage,drawBattery} from '../battery-art.js';
@@ -170,7 +171,7 @@ export class EditorMap {
       }
       return;
     }
-    if(this.view.tool==='select'||this.view.tool==='move'){const resident=this.residentAt(cell);if(resident){this.selectResident(resident);return;}const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.selectBank(bank.id);return;}const site=hitStartingSite(this.document,cell.x,cell.y),route=hitStartingRoute(this.document,cell.x,cell.y);if(site&&!this.hit(cell))this.selectSite(site.id);else if(route&&!this.hit(cell))this.selectRoute(route.id);else this.select(this.hit(cell)?.id||null,drag.toggle);}
+    if(this.view.tool==='select'||this.view.tool==='move'){const resident=this.residentAt(cell);if(resident){this.selectResident(resident);return;}const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.selectBank(bank.id);return;}const site=hitStartingSite(this.document,cell.x,cell.y),route=sceneRouteAt(this.document,this.view,cell.x,cell.y);if(site&&!this.hit(cell))this.selectSite(site.id);else if(route&&!this.hit(cell))this.selectRoute(route.id);else this.select(this.hit(cell)?.id||null,drag.toggle);}
     else this.action({type:this.view.tool,x:cell.x,y:cell.y,id:this.hit(cell)?.id});
   }
   polygon(points,fill,stroke){
@@ -201,14 +202,14 @@ export class EditorMap {
       for(let n=-.5;n<MAP_SIZE;n++)for(const points of [[[n,-.5],[n,MAP_SIZE-.5]],[[-.5,n],[MAP_SIZE-.5,n]]]){const a=this.project(...points[0]),b=this.project(...points[1]);c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);}
       c.stroke();
     }
-    const lines=(this.snapshot.village.pipes?.lines??[]).filter(p=>p.phase!=='retired');
+    const lines=view.layer==='regions'?[]:utilityLines(this.snapshot,view.layer==='utilities'?view.utilityKind:'all');
     c.save();c.lineJoin='round';c.lineCap='round';
     for(const p of lines)paintUtilityRoute(c,this.project,this.scale,p.plan,({fresh:'#7bb8c8',irrigation:'#9dbb68',greywater:'#b99dbb',sewage:'#c6a06a',electricity:'#e0c46b'})[p.plan.kind],p.phase!=='active',{pump:p.plan.kind!=='electricity'});
     c.restore();canvas.dataset.utilityCount=String(lines.length);
-    const regions=this.preview?[]:[...(this.document.map.regions??[])];
+    const regions=this.preview||view.layer==='utilities'?[]:[...(view.layer==='regions'?goalRegions(this.document,view.regionId):this.document.map.regions??[])];
     if(view.tool==='region'&&this.drag&&!this.drag.pan&&this.pointer){const a=this.drag.cell,b=this.pointer;regions.push({title:'New region',x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),width:Math.abs(a.x-b.x)+1,height:Math.abs(a.y-b.y)+1});}
     for(const region of regions){const {x,y,width:w,height:h}=region;this.polygon([[x-.5,y-.5],[x+w-.5,y-.5],[x+w-.5,y+h-.5],[x-.5,y+h-.5]],'#d9af4822','#e8c05a');const p=this.project(x+(w-1)/2,y-.5);c.font='bold 12px sans-serif';c.textAlign='center';c.fillStyle='#4f3920';c.fillText(region.title,p.x,p.y-8);}
-    canvas.dataset.regionCount=String(this.document.map.regions?.length??0);
+    canvas.dataset.regionCount=String(this.document.map.regions?.length??0);canvas.dataset.visibleRegions=String(regions.length);
     if(this.stroke)for(const [x,y]of this.stroke.values()){const size=['meadow','nature','thin-nature','habitat'].includes(view.tool)?this.brushSize:1,left=x-Math.floor(size/2)-.5,top=y-Math.floor(size/2)-.5;this.polygon([[left,top],[left+size,top],[left+size,top+size],[left,top+size]],'#f1c96766','#fff0b4');}
     const structures=this.document.start.buildings.slice(0,256).filter(b=>Number.isFinite(b.x)&&Number.isFinite(b.y)&&allBuildingArt[b.kind]);
     const objects=land.vegetation.filter(t=>!t.cleared).map(t=>({depth:t.x+t.y,draw:()=>paintWorldTree(c,t,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details})}));
@@ -237,6 +238,10 @@ export class EditorMap {
     }});
     if(this.pointer&&(view.tool==='resident-start'||this.drag?.resident)){const id=this.drag?.resident??this.placingResident,person=this.snapshot.residents.find(p=>p.id===this.snapshot.scenario_ref?.residents?.[id]);if(person){const p=this.project(this.pointer.x,this.pointer.y),size=RESIDENT_WIDTH*this.scale,frame=art.appearances.portraitFrame(person.appearance);objects.push({depth:this.pointer.x+this.pointer.y+.6,draw:()=>{c.save();c.globalAlpha=.5;c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);c.restore();}});}}
     objects.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());
+    if(view.layer==='utilities'){
+      c.save();c.lineJoin='round';c.lineCap='round';for(const p of lines)paintUtilityRoute(c,this.project,this.scale,p.plan,({fresh:'#7bb8c8',irrigation:'#9dbb68',greywater:'#b99dbb',sewage:'#c6a06a',electricity:'#e0c46b'})[p.plan.kind],p.phase!=='active',{pump:p.plan.kind!=='electricity'});c.restore();
+    }
+    if(view.layer==='regions')for(const region of regions){const {x,y,width:w,height:h}=region;this.polygon([[x-.5,y-.5],[x+w-.5,y-.5],[x+w-.5,y+h-.5],[x-.5,y+h-.5]],'#d9af4811','#ffe39a');const p=this.project(x+(w-1)/2,y-.5);c.save();c.font='bold 12px sans-serif';c.textAlign='center';c.fillStyle='#fff5dd';const width=c.measureText(region.title).width+12;c.fillRect(p.x-width/2,p.y-25,width,20);c.fillStyle='#4f3920';c.fillText(region.title,p.x,p.y-11);c.restore();}
     // Water-access labels sit above sprites so a full tank is not hidden by a roof.
     for(const source of this.waterAccess?.sources??[]){
       const p=this.project(source.x,source.y),usable=source.open&&source.available>0&&source.reachable_by.length;
@@ -246,7 +251,7 @@ export class EditorMap {
     }
     canvas.dataset.waterSources=String(this.waterAccess?.sources.length??0);
     const selectedRoute=this.document.start.routes?.find(r=>r.id===view.selectedRoute);
-    if(selectedRoute)for(const [x,y]of selectedRoute.cells)this.polygon(footprintCorners('road',x,y),'#efc86d55','#ffe39a');
+    if(selectedRoute&&routeVisible(selectedRoute,view))for(const [x,y]of selectedRoute.cells)this.polygon(footprintCorners('road',x,y),'#efc86d55','#ffe39a');
     if(this.utilityPreview){c.save();c.lineJoin='round';c.lineCap='round';paintUtilityRoute(c,this.project,this.scale,this.utilityPreview,this.utilityPreview.allowed===false?'#c65e42':'#fff3a4',true,{pump:this.utilityPreview.kind!=='electricity'});c.restore();}
     for(const port of this.utilityPreview?.ports??[]){const p=this.project(...port.cell);c.beginPath();c.arc(p.x,p.y,5*this.scale,0,Math.PI*2);c.fillStyle=port.supply?'#f3ca70':'#8bd1e4';c.fill();c.strokeStyle='#3a4b38';c.lineWidth=1;c.stroke();}
     if(this.routeStroke)for(const [x,y]of this.routeStroke)this.polygon(footprintCorners('road',x,y),'#f4df9a66','#fff3c4');
