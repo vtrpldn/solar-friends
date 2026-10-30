@@ -1,0 +1,1 @@
+PASS: actual IndexedDB persistence, history/view reload, atomic stale-tab save/delete rejection, recovery checkpoint, frozen playtest restart, exact run continuation, scratch cleanup, and independent project/run/Story ownership.

@@ -166,16 +166,30 @@ export class ContentLibrary extends EventTarget {
   // For detached editor checkpoints only. Returns compact durable metadata;
   // callers retain the captured checkpoint used to acknowledge the saved edit.
   async savePreparedProject(input,expectedRevision=null,options){
-    const id=input?.id,raw=JSON.stringify(input);
-    try{const saved=await savePreparedProjectBytes(this.name,raw,expectedRevision,options);if(saved.id!==id)throw Error('The saved creation acknowledgement names a different draft.');this.#changed('projects',saved.id,saved.revision);return saved;}
-    catch(error){if(error.name==='LibraryConflict')throw new LibraryConflict();throw error;}
+    const id=input?.id,raw=JSON.stringify(input),receipt=crypto.randomUUID();
+    let saved;
+    try{saved=await savePreparedProjectBytes(this.name,raw,expectedRevision,{...options,receipt});if(saved.id!==id)throw Error('The saved creation acknowledgement names a different draft.');}
+    catch(error){
+      if(error.name==='LibraryConflict')throw new LibraryConflict();
+      // A transaction may commit before its worker's reply is lost. Read back
+      // only on failure; a receipt is atomically stored with that exact commit.
+      // Never retry the write or mistake another tab's newer record for ours.
+      let durable;try{durable=await this.#read('projects',id);}catch{throw error;}
+      if(durable?.revision===(expectedRevision??0)+1&&durable.saveReceipt===receipt){
+        const {id,revision,updatedAt,title,attribution,saveReceipt}=durable;saved={id,revision,updatedAt,title,attribution,saveReceipt};
+      }else if((durable?.revision??null)!==expectedRevision)throw new LibraryConflict();
+      else throw error;
+    }
+    this.#changed('projects',saved.id,saved.revision);return saved;
   }
-  async saveProject({id,checkpoint,view,attribution,thumbnail},expectedRevision=null){
+  async saveProject({id,checkpoint,view,attribution,thumbnail},expectedRevision=null,{receipt}={}){
     if(checkpoint?.schema!==1||!Number.isSafeInteger(checkpoint.revision)||!checkpoint.definition?.start)throw Error('This draft checkpoint is not supported.');
+    if(receipt!==undefined&&(typeof receipt!=='string'||!receipt.length||receipt.length>96))throw Error('This save receipt is invalid.');
     const data=clone({checkpoint,view:safeView(view)});
     return this.#write('projects',id,expectedRevision,previous=>({
       format:'solar-friends-project',schema:1,...data,
       title:checkpoint.definition.title,attribution:clone(attribution??previous?.attribution??[]),
+      ...(receipt===undefined?{}:{saveReceipt:receipt}),
       previous:previous?{checkpoint:{...previous.checkpoint,history:undefined},view:previous.view}:null,
     }),thumbnail);
   }

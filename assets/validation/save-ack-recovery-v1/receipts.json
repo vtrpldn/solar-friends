@@ -1,0 +1,69 @@
+{
+  "rows": [
+    {
+      "fault": "error",
+      "reconciled": true,
+      "conflictPreserved": false,
+      "terminated": 1,
+      "durableRevision": 2,
+      "previousTitle": "Before save"
+    },
+    {
+      "fault": "messageerror",
+      "reconciled": true,
+      "conflictPreserved": false,
+      "terminated": 1,
+      "durableRevision": 2,
+      "previousTitle": "Before save"
+    },
+    {
+      "fault": "invalid",
+      "reconciled": true,
+      "conflictPreserved": false,
+      "terminated": 1,
+      "durableRevision": 2,
+      "previousTitle": "Before save"
+    },
+    {
+      "fault": "timeout",
+      "reconciled": true,
+      "conflictPreserved": false,
+      "terminated": 1,
+      "durableRevision": 2,
+      "previousTitle": "Before save"
+    },
+    {
+      "fault": "new-draft",
+      "reconciled": true,
+      "conflictPreserved": false,
+      "terminated": 1,
+      "durableRevision": 1,
+      "previousTitle": null
+    },
+    {
+      "fault": "other-writer",
+      "reconciled": false,
+      "conflictPreserved": true,
+      "terminated": 1,
+      "durableRevision": 3,
+      "previousTitle": "After save"
+    },
+    {
+      "fault": "lookalike-writer",
+      "reconciled": false,
+      "conflictPreserved": true,
+      "terminated": 1,
+      "durableRevision": 2,
+      "previousTitle": "Before save"
+    },
+    {
+      "fault": "no-commit",
+      "reconciled": false,
+      "conflictPreserved": false,
+      "terminated": 1,
+      "durableRevision": 1,
+      "previousTitle": null
+    }
+  ],
+  "browserErrors": []
+}

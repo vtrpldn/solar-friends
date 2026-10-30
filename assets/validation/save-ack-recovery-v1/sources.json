@@ -1,0 +1,15 @@
+{
+  "sources": {
+    "web/content-library.js": "cfae04a458db4e3875c212459acc7f5cbfe89eebb3940dbb24fefb7f53fd2a96",
+    "web/project-save-worker.js": "856ebd7146ef5621fa94544fdd6e0b9f86c5b9653cd4207060c3a0ba2179a54b",
+    "web/save-project-prepared.js": "cf74a19d04439eaea6a30fd2eb5aac3e76865e5c8e02f0324aaf43af5e518fcb",
+    "scripts/verify-save-ack-recovery.mjs": "731f92ecb7f45a595c2decd8b4dc22b24123c2720cf88fa9f809c82d66b304b8",
+    "scripts/verify-editor-save-ack-recovery.mjs": "d3ac5f893d9684e7aa86ca3eeec186940b52a1b57fcf7b13afc2ff5cea2ca9ae",
+    "scripts/verify-prepared-project-save.mjs": "cc1f37a21d542647a8ef1d190cafe2836478b4e1cfda612c7f32d670f2587abd",
+    "scripts/verify-content-library.mjs": "03efedfbd7dbccce8cae03543f7297ad5f054d84b6d0effdcf83cd623907e341",
+    "scripts/verify-editor-view-recovery.mjs": "a639d306ce88ba1aebddd07e520df71e41b81d6d55b922a14b9b87e801fd4a53"
+  },
+  "exportedUnsavedDraftSha256": "19619b9daa777d4e3254393d06622fd0921adef632b7236eb07f8333a2fdcbcd",
+  "baselineCommit": "c089b2d",
+  "scope": "Actual worker commits and IndexedDB readback. Deliberately intercepted acknowledgements; injected header-put QuotaExceededError aborts the real transaction after the body put is queued. Not physical disk exhaustion, power loss or all crash phases."
+}

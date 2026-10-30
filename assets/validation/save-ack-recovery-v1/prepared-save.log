@@ -1,0 +1,10 @@
+{
+  snapshotIsolation: true,
+  compactAcknowledgement: true,
+  ownChangeIsLocal: true,
+  otherTabNotified: true,
+  staleConflictPreserved: true,
+  transportRefusals: 5,
+  failedWorkersTerminated: 4,
+  durableRecordPreserved: true
+}
