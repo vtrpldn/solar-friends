@@ -105,3 +105,13 @@
 .creator-prepare-dialog{max-width:32rem;padding:1.5rem;color:var(--ink,#344b38);background:var(--paper,#fff8df);border:3px solid #8c7047;border-radius:12px;box-shadow:0 12px 40px #152b2670}
 .creator-prepare-dialog::backdrop{background:#142b2566}
 .creator-prepare-dialog p{line-height:1.5}
+
+/* Workshop chapters share one map and draft; tabs do not gate progress. */
+.creator-workspace-tabs{position:absolute;top:76px;left:0;right:0;height:48px;display:flex;align-items:stretch;justify-content:center;gap:6px;padding:6px 18px;background:linear-gradient(#bda170,#a18455);border-bottom:3px solid #795734;box-sizing:border-box;z-index:2}
+.creator-workspace-tabs [role=tab]{white-space:nowrap;min-width:130px;padding:5px 18px;min-height:30px}
+.creator-workspace-tabs [aria-selected=true]{background:linear-gradient(#b9c78b,#8fa663);border-color:#637b40;color:#29391e}
+.creator-workspace{top:124px}
+.creator-page [hidden]{display:none!important}
+.creator-workspace-guidance{margin:0 0 14px;font-size:11px!important;line-height:1.5!important}
+[data-workspace-panel]>h2{margin:14px 0}
+[data-workspace-panel]>details:first-of-type{margin-top:0}

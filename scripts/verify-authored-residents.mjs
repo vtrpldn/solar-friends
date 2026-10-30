@@ -11,7 +11,7 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);
  await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
  await page.locator('[data-preset=camp]').click();
- await page.locator('#creator-residents > summary').click();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();
  const person=page.locator('[data-resident="resident-iara"]');
  await person.locator(':scope > summary').click();
  const name='João <vizinho>',bio='<img src=x onerror=alert(1)> Trouxe sementes.';

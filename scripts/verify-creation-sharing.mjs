@@ -12,8 +12,8 @@ try{
  const downloadReady=page.waitForEvent('download');await page.locator('#creator-export').click();const download=await downloadReady;
  const file=directory+'/creation.solar-scenario';await download.saveAs(file);const exported=JSON.parse(await readFile(file,'utf8'));
  assert.equal(exported.map.terrain.length,4096);assert(exported.map.nature.length>100);assert.equal(exported.map.deposits.length,9);
- await page.locator('#creator-library').click();await page.locator('#creator-import').setInputFiles(file);
- await page.waitForFunction(id=>new URL(location.href).searchParams.get('project')!==id,originalId);
+ await page.locator('#creator-library').click();await page.locator('#creator-library-dialog').waitFor({state:'visible'});await page.locator('#creator-import').setInputFiles(file);
+ await page.waitForFunction(id=>new URL(location.href).searchParams.get('project')!==id,originalId);await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
  const importedId=new URL(page.url()).searchParams.get('project');
  const records=await page.evaluate(async({originalId,importedId})=>{
   const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary();

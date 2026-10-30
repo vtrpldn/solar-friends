@@ -15,7 +15,7 @@ export const exampleResidentLooks={
 
 export async function applyExampleResidentLooks(page,id,{capture=async()=>{}}={}){
  const looks=exampleResidentLooks[id];if(!looks)return;
- const roster=page.locator('#creator-residents');if(!await roster.evaluate(el=>el.open))await roster.locator(':scope > summary').click();
+ await page.locator('[data-workspace=people]').click();const roster=page.locator('#creator-residents');if(!await roster.evaluate(el=>el.open))await roster.locator(':scope > summary').click();
  for(const [name,choices]of Object.entries(looks)){
   const row=page.locator('details[data-resident]').filter({has:page.locator(':scope > summary',{hasText:name})});if(!await row.evaluate(el=>el.open))await row.locator(':scope > summary').click();await row.locator('[data-open-character]').click();
   const dialog=page.locator('#character-creator');await dialog.getByRole('tab',{name:'Appearance',exact:true}).click();

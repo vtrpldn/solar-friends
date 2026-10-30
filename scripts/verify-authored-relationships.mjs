@@ -10,13 +10,13 @@ try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
  await page.locator('[data-preset=camp]').click();
- await page.locator('#creator-residents > summary').click();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();
  for(const id of ['iara','bento']){
   const person=page.locator(`[data-resident="resident-${id}"]`);await person.locator(':scope > summary').click();
   await person.locator('[data-resident-field=name]').fill('Sam');await person.locator('[data-resident-field=name]').dispatchEvent('change');
  }
- await page.locator('#creator-residents > summary').click();
- await page.locator('#creator-relationships > summary').click();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-relationships > summary').click();
  const bond=page.locator('[data-bond-from="resident-iara"][data-bond-to="resident-bento"]');
  await bond.fill('8');await bond.dispatchEvent('change');assert.equal(await bond.inputValue(),'8');
  await page.locator('#creator-undo').click();assert.equal(await bond.inputValue(),'0');
@@ -31,7 +31,7 @@ try{
  const downloadPromise=page.waitForEvent('download');await page.locator('#creator-export').click();
  const download=await downloadPromise,path='/private/tmp/solar-shared-history.solar-scenario';await download.saveAs(path);
  const shared=JSON.parse(await readFile(path,'utf8'));assert.deepEqual(shared.start.relationships,[{from:'resident-iara',to:'resident-bento',memories:8}]);
- const previousUrl=page.url();await page.locator('#creator-library').click();await page.locator('#creator-import').setInputFiles(path);
+ const previousUrl=page.url();await page.locator('#creator-library').click();await page.locator('#creator-library-dialog').waitFor({state:'visible'});await page.locator('#creator-import').setInputFiles(path);
  await page.waitForFunction(previous=>location.href!==previous,previousUrl);await page.waitForFunction(()=>!document.querySelector('#creator-test').disabled&&document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
  assert.equal(await bond.inputValue(),'8');
  await page.locator('#creator-test').click();await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));

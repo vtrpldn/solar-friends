@@ -25,7 +25,7 @@ try{
  });
  assert.notDeepEqual(terrainPixels.before,terrainPixels.after,'A single authored cell between coarse terrain samples is visible');
 
- await page.locator('#creator-geology summary').click();
+ await page.locator('[data-workspace=land]').click();await page.locator('#creator-geology summary').click();
  await page.locator('#geology-0-x').fill('2');await page.locator('#geology-0-x').blur();
  await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Edit geological patch');
  await page.locator('#creator-undo').click();
@@ -40,7 +40,7 @@ try{
  assert.equal(await page.locator('#creator-land-layer').inputValue(),'stone');
  assert.equal(await page.locator('#creator-new-patch').inputValue(),'stone');
  await page.screenshot({path:'/private/tmp/solar-geology-editor.png'});
- await page.locator('#creator-center').click();await page.locator('#creator-geology summary').click();
+ await page.locator('#creator-center').click();await page.locator('[data-workspace=land]').click();await page.locator('#creator-geology summary').click();
 
  const overview=page.locator('#creator-minimap');await overview.click({position:{x:120,y:60}});
  await page.waitForFunction(()=>JSON.parse(document.querySelector('#creator-map').dataset.center)[0]>40);
@@ -54,28 +54,28 @@ try{
 
  const cellPoint=async(x,y)=>page.locator('#creator-map').evaluate((canvas,[x,y])=>{const o=JSON.parse(canvas.dataset.origin),s=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();return {x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);
  const clickCell=async(x,y)=>{const p=await cellPoint(x,y);await page.mouse.click(p.x,p.y);};
- await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.locator('#creator-brush-size').selectOption('1');
+ await page.locator('[data-workspace=land]').click();await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.locator('[data-workspace=land]').click();await page.locator('#creator-brush-size').selectOption('1');
  await clickCell(35,36);await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Paint habitat and soil');
  await page.waitForFunction(()=>document.querySelector('#creator-ground-detail').textContent.includes('Rocky woodland'));
  assert.match(await page.locator('#creator-ground-detail').innerText(),/×0.70/);
  await page.locator('#creator-undo').click();await page.locator('#creator-redo').click();
  await page.screenshot({path:'/private/tmp/solar-terrain-editor.png'});
 
- await page.locator('#creator-species').selectOption('jucara');await page.locator('#creator-brush-size').selectOption('1');
- await page.locator('#creator-nature-size').focus();for(let n=0;n<3;n++)await page.locator('#creator-nature-size').press('ArrowLeft');
+ await page.locator('[data-workspace=land]').click();await page.locator('#creator-species').selectOption('jucara');await page.locator('[data-workspace=land]').click();await page.locator('#creator-brush-size').selectOption('1');
+ await page.locator('[data-workspace=land]').click();await page.locator('#creator-nature-size').focus();for(let n=0;n<3;n++)await page.locator('#creator-nature-size').press('ArrowLeft');
  assert.equal(await page.locator('#creator-nature-scale').innerText(),'0.85×');
  await clickCell(34,35);await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Plant natural cluster');
- await page.locator('[data-tool=thin-nature]').click();await clickCell(34,35);
+ await page.locator('[data-workspace=land]').click();await page.locator('[data-tool=thin-nature]').click();await clickCell(34,35);
  await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Thin natural vegetation');
  await page.locator('#creator-undo').click();
  await page.screenshot({path:'/private/tmp/solar-nature-editor.png'});
- await page.locator('#creator-brush-size').selectOption('3');
+ await page.locator('[data-workspace=land]').click();await page.locator('#creator-brush-size').selectOption('3');
 
- await page.locator('#creator-river-enabled').uncheck();
+ await page.locator('[data-workspace=land]').click();await page.locator('#creator-river-enabled').uncheck();
  await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Remove river');
  assert.equal(await overview.getAttribute('data-bank-cells'),'0');
  await page.locator('#creator-undo').click();
- await page.locator('[data-tool=river]').click();
+ await page.locator('[data-workspace=land]').click();await page.locator('[data-tool=river]').click();
  for(let n=0;n<6;n++)await page.locator('#creator-zoom-out').click();
  const riverA=await cellPoint(45,15),riverB=await cellPoint(45,20);
  await page.mouse.move(riverA.x,riverA.y);await page.mouse.down();await page.mouse.move(riverB.x,riverB.y,{steps:8});await page.mouse.up();
@@ -127,7 +127,7 @@ try{
  await page.getByRole('heading',{name:'2 buildings',exact:true}).waitFor();await page.keyboard.press('Escape');
 
 
- await page.locator('[data-tool=meadow]').click();
+ await page.locator('[data-workspace=land]').click();await page.locator('[data-tool=meadow]').click();
  const brushPoints=await page.locator('#creator-map').evaluate(canvas=>{
   const origin=JSON.parse(canvas.dataset.origin),scale=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();
   return [[25,34],[27,34]].map(([x,y])=>({x:r.left+origin.x+(x-y)*34*scale,y:r.top+origin.y+(x+y)*17*scale}));
@@ -141,20 +141,20 @@ try{
 
  // Escape must cancel a live stroke, including its eventual pointer release.
  // A matching uncancelled stroke is the positive control against a no-op test.
- const cancelBefore=await savedCheckpoint();await page.locator('#creator-habitat').selectOption('rocky-woodland');
+ const cancelBefore=await savedCheckpoint();await page.locator('[data-workspace=land]').click();await page.locator('#creator-habitat').selectOption('rocky-woodland');
  const cancelA=await cellPoint(24,34),cancelB=await cellPoint(28,34);
  await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.keyboard.press(process.platform==='darwin'?'Meta+z':'Control+z');await page.mouse.up();
  assert(isDeepStrictEqual(await savedCheckpoint(),cancelBefore),'Undo during a live stroke must cancel it without undoing an earlier committed edit');
- await page.locator('[data-tool=habitat]').click();
+ await page.locator('[data-workspace=land]').click();await page.locator('[data-tool=habitat]').click();
  await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.locator('#creator-undo').focus();await page.keyboard.press('Enter');await page.mouse.up();
  assert(isDeepStrictEqual(await savedCheckpoint(),cancelBefore),'Keyboard activation of the Undo button must cancel the live gesture consistently');
- await page.locator('[data-tool=habitat]').click();
+ await page.locator('[data-workspace=land]').click();await page.locator('[data-tool=habitat]').click();
  await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.keyboard.press(process.platform==='darwin'?'Meta+Shift+z':'Control+Shift+z');await page.mouse.up();
  assert(isDeepStrictEqual(await savedCheckpoint(),cancelBefore),'Redo during a live stroke must cancel it without committing or changing history');
- await page.locator('[data-tool=habitat]').click();
+ await page.locator('[data-workspace=land]').click();await page.locator('[data-tool=habitat]').click();
  await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.keyboard.press('Escape');await page.mouse.up();
  assert(isDeepStrictEqual(await savedCheckpoint(),cancelBefore),'Cancelled stroke changed the durable document or undo history');
- await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.mouse.up();
+ await page.locator('[data-workspace=land]').click();await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.mouse.move(cancelA.x,cancelA.y);await page.mouse.down();await page.mouse.move(cancelB.x,cancelB.y,{steps:4});await page.mouse.up();
  await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Paint habitat and soil');
  const painted=await savedCheckpoint();assert(!isDeepStrictEqual(painted.definition,cancelBefore.definition),'The cancellation control stroke must actually edit land');
  await page.locator('#creator-undo').click();assert(isDeepStrictEqual((await savedCheckpoint()).definition,cancelBefore.definition),'A land stroke must undo atomically');

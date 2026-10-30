@@ -1,3 +1,4 @@
+import {revealWorkspaceSection} from './workspaces.js';
 import {powerMarkup} from './outlook-power.js';
 import {projectMarkup} from './outlook-projects.js';
 import {monitoringMarkup} from './outlook-monitor.js';
@@ -7,7 +8,7 @@ const time=t=>`Day ${Math.floor(t/1440)+1} ${String(Math.floor(t%1440/60)).padSt
 export class ScenarioOutlook{
  constructor(root,{source,reviewProject=()=>{},workerFactory=()=>new Worker(new URL('../forecast-worker.js',import.meta.url),{type:'module'})}){
   Object.assign(this,{root,source,workerFactory,reviewProject});this.generation=0;this.key=null;this.days=1;this.message='';this.report=null;this.projectPlaces=new Map();
-  root.onclick=e=>{const project=e.target.closest('[data-outlook-project]')?.dataset.outlookProject;if(this.report?.projects.some(p=>String(p.building)===project)&&this.projectPlaces.has(project))this.reviewProject(this.projectPlaces.get(project));if(e.target.closest('[data-outlook-start]'))this.start();if(e.target.closest('[data-outlook-cancel]')){this.stop();this.message='Outlook cancelled. Your draft is unchanged.';this.render();}const target=e.target.closest('[data-outlook-open]')?.dataset.outlookOpen;if(['creator-residents','creator-supplies','creator-liquids','creator-routes','creator-equipment'].includes(target)){const section=document.getElementById(target);if(section){section.open=true;section.scrollIntoView({block:'nearest'});}}};
+  root.onclick=e=>{const project=e.target.closest('[data-outlook-project]')?.dataset.outlookProject;if(this.report?.projects.some(p=>String(p.building)===project)&&this.projectPlaces.has(project))this.reviewProject(this.projectPlaces.get(project));if(e.target.closest('[data-outlook-start]'))this.start();if(e.target.closest('[data-outlook-cancel]')){this.stop();this.message='Outlook cancelled. Your draft is unchanged.';this.render();}const target=e.target.closest('[data-outlook-open]')?.dataset.outlookOpen;if(['creator-residents','creator-supplies','creator-liquids','creator-routes','creator-equipment'].includes(target)){const section=document.getElementById(target);if(section){revealWorkspaceSection(section);section.open=true;section.scrollIntoView({block:'nearest'});}}};
   root.onchange=e=>{if(e.target.matches('[data-outlook-days]')){this.days=Number(e.target.value);this.stop();this.report=null;this.message='';this.render();}};
  }
  stop(){this.generation++;this.worker?.terminate();this.worker=null;clearTimeout(this.timer);}

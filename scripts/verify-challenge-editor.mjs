@@ -10,9 +10,9 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);
  await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
  await page.locator('[data-preset=camp]').click();
- await page.locator('#creator-journal > summary').click();
+ await page.locator('[data-workspace=story]').click();await page.locator('#creator-journal > summary').click();
  await page.locator('[data-journal-action=enable]').click();
- await page.locator('[data-journal-action=open]').click();
+ await page.locator('[data-workspace=story]').click();await page.locator('[data-journal-action=open]').click();
  const dialog=page.locator('#creator-journal-dialog'),field=p=>dialog.locator(`[data-journal-path="${p}"]`),set=async(p,v)=>{await field(p).fill(String(v));await field(p).press('Tab');};
  await field('chapters.0.goals.0.condition.kind').selectOption('date');
  await set('chapters.0.goals.0.condition.day',10);
@@ -60,7 +60,7 @@ try{
  assert.deepEqual(await snapshot(),checkpoint);
  await page.getByRole('button',{name:'Return to editor',exact:true}).click();
  await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
- await page.locator('#creator-library').click();await page.locator('[data-play-project]').first().click();
+ await page.locator('#creator-library').click();await page.locator('#creator-library-dialog').waitFor({state:'visible'});await page.locator('[data-play-project]').first().click();
  await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
  assert(!((await page.locator('.creation-session').textContent()).includes('Playtest ·')));
  await failure();

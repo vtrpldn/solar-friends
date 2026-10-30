@@ -13,7 +13,7 @@ try{
    return open.apply(this,args);
   };
  });
- await page.locator('#creator-residents > summary').click();const person=page.locator('[data-resident="resident-iara"]');await person.locator(':scope > summary').click();await person.locator('[data-open-character]').click();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();const person=page.locator('[data-resident="resident-iara"]');await person.locator(':scope > summary').click();await person.locator('[data-open-character]').click();
  const dialog=page.locator('#character-creator'),retry=dialog.getByRole('button',{name:'Retry preview',exact:true});await retry.waitFor({state:'visible'});
  await mkdir('artifacts/character-preview-retry',{recursive:true});await page.screenshot({path:'artifacts/character-preview-retry/failure.png'});
  const before=await page.evaluate(()=>({person:structuredClone(window.creator.person()),history:window.creator.history()}));assert.equal(await page.evaluate(()=>window.creator.sheets),null);assert.equal(await page.evaluate(()=>window.creator.frame),null);

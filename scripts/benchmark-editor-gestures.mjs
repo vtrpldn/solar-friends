@@ -17,7 +17,7 @@ export async function measureEditorGestures(page,{Game,brushSize=3}){
  const phase=name=>page.evaluate(name=>{window.builderGesturePhase=name;window.builderCalls=[];},name);
  const drag=async(a,b)=>{await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:24});await page.mouse.up();};
  const operations=[];
- await page.locator('#creator-brush-size').selectOption(String(brushSize));await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.locator('[data-tool=habitat]').click();
+ await page.locator('[data-workspace=land]').click();await page.locator('#creator-brush-size').selectOption(String(brushSize));await page.locator('[data-workspace=land]').click();await page.locator('#creator-habitat').selectOption('rocky-woodland');await page.locator('[data-workspace=land]').click();await page.locator('[data-tool=habitat]').click();
  const a=await point(24,34),b=await point(30,34);await phase('habitat-drag');let t=performance.now();await drag(a,b);await page.waitForFunction(()=>document.querySelector('#creator-undo').title==='Paint habitat and soil');await settle();operations.push({action:'habitat-drag',inputThroughSavedMs:performance.now()-t});const painted=await saved();assert(JSON.stringify(painted.definition)!==JSON.stringify(baseline.definition),'Brush performance sample must change land');assert.equal(painted.history.past.length,baseline.history.past.length+1,'One drag must create one undo step');
  const radius=Math.floor(brushSize/2);let coveredCells=0;
  for(let y=0;y<64;y++)for(let x=0;x<64;x++){

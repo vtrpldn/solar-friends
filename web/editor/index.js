@@ -1,3 +1,4 @@
+import {Workspaces,workspaceNames,revealWorkspaceSection} from './workspaces.js';
 import {validatePublication} from './validate-publication.js';
 import {prepareRelease} from './prepare-release.js';
 import {prepareCreationExport} from './prepare-export.js';
@@ -59,7 +60,7 @@ const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 const clone=value=>structuredClone(value),title=kind=>allBuildingArt[kind]?.name||kind;
 const ruleNames={logistics:'Materials, hauling and resident work',land:'Living soil and finite land resources',utilities:'Connected local water and power',climate:'Seasonal weather',maintenance:'Equipment condition and repairs',learning:'Learning through useful work',market:'Changing town prices and offers'};
 let newBiome="mata-atlantica";
-let libraryDiscovery,mapSharing;
+let libraryDiscovery,mapSharing,workspaces;
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={walkability:{legend:"Green · connected to camp. Gold · clear but disconnected. Red · blocked cell centre. Footprints and riverbanks use native walking rules; this does not reserve space from other residents."},banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
 let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
@@ -208,6 +209,7 @@ function inspectGround(point){
 }
 function renderSelection(){
   if(!current)return;
+  workspaces?.context(map.selection().length||map.view.selectedResident||map.view.selectedRoute||map.view.selectedBank||map.view.selectedSite);
   const d=current.doc.value,b=d.start.buildings.find(b=>b.id===map.view.selected),panel=$('creator-selection');
   const person=(d.start.residents??catalog.resident_presets).find(p=>p.id===map.view.selectedResident);
   if(person){panel.innerHTML=`<h2>${escape(person.name)}</h2><p>Starting circumstances belong to this scenario. Needs and routines govern their actions when playing.</p><button data-edit-start>Edit arrival</button>`;return;}
@@ -230,14 +232,17 @@ function renderSelection(){
 }
 function renderSupplies(){suppliesEditor.render(current.doc.value,report);}
 function renderReview(){
+  workspaces?.review(report);
   renderOpeningSetup($('creator-opening-setup'),engine,report.ok);
   $('creator-review-title').textContent=report.ok?'Ready to test':'Before we can begin';
   $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,expandedReview?report.issues.length:40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity?`<button data-issue="${n}">Show on map</button>`:''}${i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':i.path.startsWith('start.liquids')||i.path==='start.fresh_water'?'<button data-issue-liquids>Review starting liquids</button>':''}</div>`).join('')+(report.issues.length>40&&!expandedReview?`<button data-issue-more>Show all ${report.issues.length} review notes</button>`:''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
 }
 function setTool(tool){
+  const workspace=['road','route-path','battery-bank','move-bank','copy-bank','move-site','copy-site','duplicate',...sourceKinds].includes(tool)||allBuildingArt[tool]?'village':['habitat','nature','thin-nature','river','meadow','camp','camera'].includes(tool)?'land':tool==='region'?'story':tool==='resident-start'?'people':null;
+  if(workspace)workspaces?.select(workspace);
   map.setTool(tool);landSampleKey='';inspectGround(hoverCell);
   const sourceMaterial=sourceKinds.indexOf(tool);if(sourceMaterial>=2){$('creator-land-layer').value=catalog.resource_sites.materials[sourceMaterial];$('creator-land-layer').dispatchEvent(new Event('change'));}
-  if(tool==='habitat'){$('creator-ground').open=true;$('creator-ground').scrollIntoView({block:'nearest'});}
+  if(tool==='habitat'){revealWorkspaceSection($('creator-ground'));$('creator-ground').open=true;$('creator-ground').scrollIntoView({block:'nearest'});}
   for(const b of document.querySelectorAll('[data-tool]'))b.setAttribute('aria-pressed',String(b.dataset.tool===tool));
   $('creator-hint').textContent=tool==='route-path'?'Drag from a supply port to a destination port · each stroke replaces the proposed corridor · Esc cancels':['battery-bank','move-bank','copy-bank'].includes(tool)?'Click a clear inland cell for the battery bank · Esc cancels':sourceKinds.includes(tool)?`Place ${siteNames[sourceKinds.indexOf(tool)].toLowerCase()} · click a cell · Esc to select`:['move-site','copy-site'].includes(tool)?'Click a cell to place this material plot · Esc cancels':allBuildingArt[tool]?`Place ${title(tool).toLowerCase()} · click a cell · Esc to select`:({'resident-start':'Choose clear ground with space from other residents · click to place · Esc cancels',select:'Select · Shift-click or Shift-drag to add buildings · drag to pan · Delete removes the group',pan:'Drag to move around the property',move:'Drag a building group, battery bank or material plot to move it',duplicate:'Click a cell to place the copied group and its starting supplies · Esc cancels',road:'Drag to paint one path · the whole stroke can be undone',habitat:'Drag to paint habitat and baseline soil · existing plants stay in place · one undo step',nature:'Drag to plant a spaced cluster · brush width controls its area · one undo step','thin-nature':'Drag to remove natural objects · no materials are granted · one undo step',river:'Drag to shape the channel · steep bends cannot host hydro · one undo step',meadow:'Drag to clear vegetation · soil disturbance stays low · one undo step',erase:'Click a building, battery bank, material plot, connection or road to remove it',camp:'Click to move the arrival camp',camera:'Click to choose the starting camera view'})[tool];
 }
@@ -245,8 +250,8 @@ function removeBuilding(id){
   const ids=map.selection().includes(id)?map.selection():[id];
   change(ids.length>1?'Remove building group':'Remove building',d=>{d.start.buildings=d.start.buildings.filter(b=>!ids.includes(b.id));});
   map.select(null);
-  if(current.doc.value.start.liquids?.some(p=>ids.includes(p.owner.building))){$('creator-liquids').open=true;toast('Starting liquids still reference removed containers. Choose compatible storage before testing.');}
-  if(current.doc.value.start.inventories.some(p=>ids.includes(p.owner.building))){$('creator-supplies').open=true;toast('Starting supplies still reference removed buildings. Choose new supply locations before testing.');}
+  if(current.doc.value.start.liquids?.some(p=>ids.includes(p.owner.building))){revealWorkspaceSection($('creator-liquids'));$('creator-liquids').open=true;toast('Starting liquids still reference removed containers. Choose compatible storage before testing.');}
+  if(current.doc.value.start.inventories.some(p=>ids.includes(p.owner.building))){revealWorkspaceSection($('creator-supplies'));$('creator-supplies').open=true;toast('Starting supplies still reference removed buildings. Choose new supply locations before testing.');}
 }
 function mapAction(action){
   if(!current||busy)return;
@@ -267,7 +272,7 @@ function mapAction(action){
     const site=clone(source);site.x=action.x;site.y=action.y;if(action.type==='copy-site')site.id=crypto.randomUUID();
     if(change(action.type==='copy-site'?'Copy material plot':'Move material plot',d=>{if(action.type==='copy-site')(d.start.resource_sites??=[]).push(site);else Object.assign(d.start.resource_sites.find(s=>s.id===site.id),site);},{valid:true})){setTool('select');map.selectSite(site.id);map.siteCopy=null;}
   }
-  else if(action.type==='region'){if((current.doc.value.map.regions?.length??0)>=catalog.max_regions){toast('Use up to 32 named regions.');return;}change('Draw named region',d=>{(d.map.regions??=[]).push({id:'region-'+crypto.randomUUID(),title:'New region',...action.rectangle});});$('creator-regions').open=true;}
+  else if(action.type==='region'){if((current.doc.value.map.regions?.length??0)>=catalog.max_regions){toast('Use up to 32 named regions.');return;}change('Draw named region',d=>{(d.map.regions??=[]).push({id:'region-'+crypto.randomUUID(),title:'New region',...action.rectangle});});revealWorkspaceSection($('creator-regions'));$('creator-regions').open=true;}
   else if(action.type==='road')change('Paint a road',d=>{const cells=new Map(d.start.roads.map(p=>[p.join(','),p]));for(const cell of action.cells)cells.set(cell.join(','),cell);d.start.roads=[...cells.values()];},{valid:true});
   else if(action.type==='habitat'){
     const preset=catalog.habitats.find(h=>h.key===$('creator-habitat').value),start=Math.floor(action.size/2);
@@ -304,18 +309,18 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   current={id:id||definition.id,doc,storageRevision:revision,record,viewDirty:false,conflicted:false};
   const ctx=current;
   doc.addEventListener('change',()=>{if(current===ctx){refresh();scheduleSave();}});
-  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selectedResident:null,selectedRoute:null,selectedBank:null,selectedSite:null,selection:[],tool:'select',grid:true,layer:'none',habitatPreset:'flower-meadow'};
+  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selectedResident:null,selectedRoute:null,selectedBank:null,selectedSite:null,selection:[],tool:'select',grid:true,layer:'none',habitatPreset:'flower-meadow',workspace:'land'};
   if(view){
     const center=Array.isArray(view.center)&&view.center.length===2&&view.center.every(Number.isFinite)?view.center:map.view.center;
     const tool=['select','pan','move','road','meadow','river','nature','thin-nature','habitat','camp','camera','erase','battery-bank',...sourceKinds,...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
-    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selectedResident:typeof view.selectedResident==='string'?view.selectedResident:null,selectedRoute:typeof view.selectedRoute==='string'?view.selectedRoute:null,selectedBank:typeof view.selectedBank==='string'?view.selectedBank:null,selectedSite:typeof view.selectedSite==='string'?view.selectedSite:null,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,habitatPreset:catalog.habitats.some(h=>h.key===view.habitatPreset)?view.habitatPreset:'flower-meadow',layer:Object.hasOwn(landLayers,view.layer)||Object.hasOwn(waterLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
+    map.view={center:clone(center),zoom:Number.isFinite(view.zoom)?Math.max(.3,Math.min(3,view.zoom)):1.3,selectedResident:typeof view.selectedResident==='string'?view.selectedResident:null,selectedRoute:typeof view.selectedRoute==='string'?view.selectedRoute:null,selectedBank:typeof view.selectedBank==='string'?view.selectedBank:null,selectedSite:typeof view.selectedSite==='string'?view.selectedSite:null,selected:typeof view.selected==='string'?view.selected:null,selection:Array.isArray(view.selection)?view.selection.filter(id=>typeof id==='string').slice(0,256):[],tool,habitatPreset:catalog.habitats.some(h=>h.key===view.habitatPreset)?view.habitatPreset:'flower-meadow',workspace:Object.hasOwn(workspaceNames,view.workspace)?view.workspace:'land',layer:Object.hasOwn(landLayers,view.layer)||Object.hasOwn(waterLayers,view.layer)?view.layer:'none',grid:view.grid!==false};
   }
   map.brushSize=[1,3,5,9].includes(view?.brushSize)?view.brushSize:3;map.natureSpecies=catalog.nature.find(s=>s.key===view?.natureSpeciesKey)||catalog.nature[0];map.natureSize=Number.isFinite(view?.natureSize)?Math.max(map.natureSpecies.min_size,Math.min(map.natureSpecies.max_size,view.natureSize)):1;
   $('creator-habitat').value=map.view.habitatPreset;
   $('creator-brush-size').value=map.brushSize;$('creator-species').value=map.natureSpecies.key;$('creator-nature-size').value=map.natureSize;$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';
   history.replaceState(null,'',`./editor.html?project=${encodeURIComponent(ctx.id)}`);
   $('creator-library-dialog').close();$('creator-library-title').textContent='Creation library';
-  refresh();setTool(map.view.tool);$('creator-land-layer').value=map.view.layer;$('creator-land-legend').textContent=overlayLegend();$('creator-grid').checked=map.view.grid;
+  refresh();setTool(map.view.tool);workspaces.select(map.view.workspace,{notify:false});$('creator-land-layer').value=map.view.layer;$('creator-land-legend').textContent=overlayLegend();$('creator-grid').checked=map.view.grid;
   ctx.viewDirty=revision===null; // Restoring a durable view is not a new player edit.
   status(revision===null?'New creation · save to keep it':'Saved on this device');
   if(doc.historyRecovered)toast('The creation was recovered. Its damaged undo history was cleared.');
@@ -413,7 +418,7 @@ function wire(){
 
   mapSharing=new MapSharingControls({library,catalog,engine,Game,art,save,newProject,showLibrary,notify:toast,source:()=>current?{id:current.id,revision:current.doc.revision,definition:current.doc.value,valid:report.ok,attribution:current.record?.attribution??[]}:null,resolve:prepared=>current.doc.transact('Resolve landscape for map sharing',d=>{d.map=prepared.map;d.rules.weather=prepared.weather;}),setBusy:value=>{busy=value;$('creator-test').disabled=busy||!report.ok;$('creator-release').disabled=busy||!report.ok;$('creator-save-map').disabled=busy;}});
 
-  $('creator-route-tools').onclick=()=>{const details=$('creator-routes');details.open=true;routesEditor.paint();details.scrollIntoView({block:'start'});};
+  $('creator-route-tools').onclick=()=>{const details=$('creator-routes');revealWorkspaceSection(details);details.open=true;routesEditor.paint();details.scrollIntoView({block:'start'});};
   $('creator-habitat').onchange=()=>{map.view.habitatPreset=$('creator-habitat').value;setTool('habitat');};
   $('creator-species').onchange=()=>{map.natureSpecies=catalog.nature.find(s=>s.key===$('creator-species').value);$('creator-nature-size').min=map.natureSpecies.min_size;$('creator-nature-size').max=map.natureSpecies.max_size;setTool('nature');};
   $('creator-nature-size').oninput=e=>{map.natureSize=Number(e.target.value);$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';map.render();map.viewChanged(map.state);};
@@ -468,8 +473,8 @@ function wire(){
     if(e.target.closest('[data-issue-more]')){expandedReview=true;renderReview();return;}
     const button=e.target.closest('[data-issue]');
     if(button){const issue=report.issues[Number(button.dataset.issue)];if(issue.at)map.centerAt(...issue.at);if(issue.entity){if((current.doc.value.start.residents??catalog.resident_presets).some(p=>p.id===issue.entity)){map.selectResident(issue.entity);residentsEditor.openArrival(issue.entity);}else if(current.doc.value.start.routes?.some(r=>r.id===issue.entity)){map.selectRoute(issue.entity);routesEditor.edit(issue.entity);}else if(current.doc.value.start.batteries?.some(b=>b.id===issue.entity))map.selectBank(issue.entity);else if(current.doc.value.start.resource_sites?.some(s=>s.id===issue.entity))map.selectSite(issue.entity);else map.select(issue.entity);}}
-    if(e.target.matches('[data-issue-liquids]')){$('creator-liquids').open=true;$('creator-liquids').scrollIntoView({block:'nearest'});}
-    if(e.target.matches('[data-issue-supplies]')){$('creator-supplies').open=true;$('creator-supplies').scrollIntoView({block:'nearest'});}
+    if(e.target.matches('[data-issue-liquids]')){revealWorkspaceSection($('creator-liquids'));$('creator-liquids').open=true;$('creator-liquids').scrollIntoView({block:'nearest'});}
+    if(e.target.matches('[data-issue-supplies]')){revealWorkspaceSection($('creator-supplies'));$('creator-supplies').open=true;$('creator-supplies').scrollIntoView({block:'nearest'});}
   };
   $('creator-undo').onclick=()=>stepHistory();$('creator-redo').onclick=()=>stepHistory(true);
   $('creator-release').onclick=()=>{if(!current||busy||!report.ok)return;$('creator-release-status').textContent='';$('creator-release-credits').textContent=(current.record?.attribution??[]).map(c=>`Based on version ${c.revision} by ${c.author}`).join(' · ');$('creator-release-dialog').showModal();};
@@ -576,7 +581,7 @@ function wire(){
 
 try{
   await init({module_or_path:new URL('../pkg/solar_friends_bg.wasm',import.meta.url)});
-  outlook=new ScenarioOutlook($('creator-outlook'),{source:()=>({key:current?current.id+':'+current.doc.revision:null,valid:!!current&&report.ok,snapshot:()=>engine.snapshot(),projects:checkpoint=>projectPlaces(checkpoint,current.doc.value.start.buildings,title)}),reviewProject:p=>{if(!current?.doc.value.start.buildings.some(b=>b.id===p.id))return;setTool('select');map.select(p.id);map.centerAt(p.x,p.y);$('creator-selection').scrollIntoView({block:'nearest'});}});
+  outlook=new ScenarioOutlook($('creator-outlook'),{source:()=>({key:current?current.id+':'+current.doc.revision:null,valid:!!current&&report.ok,snapshot:()=>engine.snapshot(),projects:checkpoint=>projectPlaces(checkpoint,current.doc.value.start.buildings,title)}),reviewProject:p=>{if(!current?.doc.value.start.buildings.some(b=>b.id===p.id))return;setTool('select');map.select(p.id);map.centerAt(p.x,p.y);workspaces.select('village');$('creator-selection').scrollIntoView({block:'nearest'});}});
   engine=new Game();catalog=JSON.parse(engine.scenario_catalog());art=await loadEditorArt();
   map=new EditorMap($('creator-map'),art,{retryButton:$('creator-art-retry'),onTerrainReady:()=>{if(current){current.artRevision=(current.artRevision??0)+1;current.thumbnailRevision=null;scheduleSave();}},onArtworkReady:()=>{if(current){current.artRevision=(current.artRevision??0)+1;current.thumbnailRevision=null;scheduleSave();}},action:mapAction,viewChanged:()=>{if(current){const key=JSON.stringify(map.state);if(key===current.viewKey)return;current.viewKey=key;current.viewDirty=true;if(!current.conflicted)status('Changes to save');const selection=JSON.stringify([map.selection(),map.view.selectedSite,map.view.selectedBank,map.view.selectedRoute,map.view.selectedResident]);if(selection!==inspectorSelection){inspectorSelection=selection;renderSelection();}scheduleSave();}},hover:inspectGround});
   minimap=new EditorMinimap($('creator-minimap'),map);map.onRender=()=>minimap.draw();
@@ -600,6 +605,7 @@ try{
   weatherEditor=new WeatherEditor($('creator-weather-fields'),{defaults:catalog.weather,biomes:catalog.biomes,change});
   geologyEditor=new GeologyEditor($('creator-geology-fields'),{change,center:()=>map.view.center,defaults:JSON.parse(engine.scenario_template('story')).map.deposits,focus:p=>{map.centerAt(p.x+(p.width-1)/2,p.y+(p.height-1)/2);$('creator-land-layer').value=p.material;$('creator-land-layer').dispatchEvent(new Event('change'));}});
   biomeEditor=new BiomeEditor($('creator-biome-setting-fields'),{catalog,art,Game,change,notify:toast,source:()=>({id:current.id,revision:current.doc.revision,definition:report.ok?freezeCreation(current.doc.value,{terrain:terrainBase,snapshot:map.snapshot,catalog}):current.doc.value})});
+  workspaces=new Workspaces({change:key=>{if(!current)return;map.cancelGesture();map.view.workspace=key;if(!['select','pan','move','erase'].includes(map.view.tool))setTool('select');map.viewChanged(map.state);}});
   wire();const id=new URLSearchParams(location.search).get('project');
   if(id){const record=await library.getProject(id);if(record)await openProject(record);else{await showLibrary();$('creator-library-status').textContent='This creation is no longer in the library. Independent villages remain available.';}}
   else await showLibrary();

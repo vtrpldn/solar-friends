@@ -9,8 +9,8 @@ try{
  // actual player controls, project transactions and native compiler.
  await page.addInitScript(()=>{Math.random=()=>.99;});
  await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.locator('[data-preset=camp]').click();
- await page.locator('#creator-relationships > summary').click();const bond=page.locator('[data-bond-from="resident-iara"][data-bond-to="resident-bento"]');await bond.fill('7');await bond.press('Tab');await page.locator('#creator-relationships > summary').click();
- await page.locator('#creator-residents > summary').click();const person=page.locator('[data-resident="resident-iara"]');await person.locator(':scope > summary').click();await person.locator('[data-resident-field=biography]').fill('Minha história.');await person.locator('[data-resident-field=biography]').press('Tab');await person.locator('[data-open-character]').click();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-relationships > summary').click();const bond=page.locator('[data-bond-from="resident-iara"][data-bond-to="resident-bento"]');await bond.fill('7');await bond.press('Tab');await page.locator('[data-workspace=people]').click();await page.locator('#creator-relationships > summary').click();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();const person=page.locator('[data-resident="resident-iara"]');await person.locator(':scope > summary').click();await person.locator('[data-resident-field=biography]').fill('Minha história.');await person.locator('[data-resident-field=biography]').press('Tab');await person.locator('[data-open-character]').click();
  const dialog=page.locator('#character-creator'),lock=dialog.locator('[data-character-lock]');
  assert(await lock.isChecked());const lockBounds=await lock.boundingBox();assert(lockBounds.width>=16&&lockBounds.height>=16);
  for(const tab of ['Personality','Experience']){await dialog.getByRole('tab',{name:tab,exact:true}).click();await lock.check();}

@@ -15,9 +15,9 @@ try{
   await page.locator('#creator-grid').uncheck();
   // Place each regional species through ordinary authoring controls for scale review.
   const species=id==='cerrado'?['pequi','barbatimao','cerrado-bunchgrass','campo-shrub']:id==='caatinga'?['umbuzeiro','jurema-preta','mandacaru','macambira']:[];
-  await page.locator('#creator-brush-size').selectOption('1');
+  await page.locator('[data-workspace=land]').click();await page.locator('#creator-brush-size').selectOption('1');
   for(const [index,key]of species.entries()){
-   await page.locator('#creator-species').selectOption(key);await page.locator('[data-tool=nature]').click();
+   await page.locator('[data-workspace=land]').click();await page.locator('#creator-species').selectOption(key);await page.locator('[data-workspace=land]').click();await page.locator('[data-tool=nature]').click();
    const x=28+index*2,y=35;
    const p=await page.locator('#creator-map').evaluate((canvas,[x,y])=>{const o=JSON.parse(canvas.dataset.origin),s=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();return {x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);
    await page.mouse.click(p.x,p.y);
@@ -31,7 +31,7 @@ try{
   assert.equal(new URL(page.url()).searchParams.get('project'),project);
   if(species.length){
    const night=structuredClone(d);night.title+=' · night review';night.start.minutes=1260;
-   await page.locator('#creator-library').click();await page.locator('#creator-import').setInputFiles({name:'night.solar-scenario',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(night))});
+   await page.locator('#creator-library').click();await page.locator('#creator-library-dialog').waitFor({state:'visible'});await page.locator('#creator-import').setInputFiles({name:'night.solar-scenario',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(night))});
    await page.waitForFunction(()=>!document.querySelector('#creator-test').disabled&&document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
    await page.locator('#creator-test').click();await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
    assert.equal(await page.evaluate(()=>window.solarDev.snapshot().village.minutes),1260);

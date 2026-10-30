@@ -6,11 +6,11 @@ const server=await serve();let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:900}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);
- await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.locator('[data-preset=camp]').click();await page.locator('#creator-rule-learning').check();
- await page.locator('#creator-residents > summary').click();const person=page.locator('[data-resident="resident-iara"]');await person.locator(':scope > summary').click();
+ await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.locator('[data-preset=camp]').click();await page.locator('[data-workspace=village]').click();await page.locator('#creator-rule-learning').check();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();const person=page.locator('[data-resident="resident-iara"]');await person.locator(':scope > summary').click();
  await person.locator('[data-resident-field=name]').fill('Rita <horta>');await person.locator('[data-resident-field=name]').press('Tab');
  await person.locator('.creator-experience > summary').click();await person.locator('[data-resident-field="skill:growing"]').selectOption('2');
- await page.locator('#creator-journal > summary').click();await page.locator('[data-journal-action=enable]').click();await page.locator('[data-journal-action=events]').click();
+ await page.locator('[data-workspace=story]').click();await page.locator('#creator-journal > summary').click();await page.locator('[data-journal-action=enable]').click();await page.locator('[data-workspace=story]').click();await page.locator('[data-journal-action=events]').click();
  const dialog=page.locator('#creator-events-dialog'),field=p=>dialog.locator(`[data-journal-path="${p}"]`),set=async(p,value)=>{await field(p).fill(String(value));await field(p).press('Tab');};
  await dialog.locator('[data-story-roles] > summary').click();await dialog.locator('[data-role-action=add]').click();
  assert((await dialog.locator('[data-role-resolution]').textContent()).includes('Rita <horta>'));
@@ -23,7 +23,7 @@ try{
  await dialog.locator('[data-role-action=remove]').click();assert(await page.locator('#creator-test').isDisabled());assert((await speaker.locator('option:checked').textContent()).includes('Missing speaker'));
  await dialog.locator('[data-events-undo]').click();assert.equal(await speaker.inputValue(),roleValue);assert(await page.locator('#creator-test').isEnabled());
  await page.screenshot({path:'/private/tmp/solar-story-roles-editor.png'});await dialog.locator('[data-events-done]').click();
- await person.locator('[data-remove-resident]').click();assert(await page.locator('#creator-test').isDisabled());await page.locator('#creator-undo').click();assert(await page.locator('#creator-test').isEnabled());
+ await page.locator('[data-workspace=people]').click();await person.locator('[data-remove-resident]').click();assert(await page.locator('#creator-test').isDisabled());await page.locator('#creator-undo').click();assert(await page.locator('#creator-test').isEnabled());
  const downloading=page.waitForEvent('download');await page.locator('#creator-export').click();const d=JSON.parse(await readFile(await (await downloading).path(),'utf8'));assert.equal(d.journal.roles[0].binding.kind,'capability');assert.equal(d.journal.events[0].speaker.role,d.journal.roles[0].id);
  await page.locator('#creator-save').click();await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
  await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.locator('#creator-test').click();await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));

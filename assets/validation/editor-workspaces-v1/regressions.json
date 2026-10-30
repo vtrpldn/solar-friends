@@ -1,0 +1,480 @@
+{
+  "schema": 1,
+  "scope": "Functional regressions, batch runs with three isolated checks concurrently, resident attribution separately. Not performance acceptance. Latest successful source-matched results.",
+  "sources": {
+    "web/editor/workspaces.js": "14fbe60d5f8c03293678c9fee736eb08ba4cf030b5a5b0c104c07f6486601a82",
+    "web/editor/index.js": "a422944d087ff4d15f1370ad79e6dd693011990634d739e07e5aa8e2962b6bb6",
+    "web/editor.html": "b5269a92aca48c922c8ffbe46fbec2f41a4873ec13f6059d62a7df915b515737",
+    "web/editor/style.css": "f03c56dd9a19231a6eaa108599643a7015025c6d2f9437531ee1f77d1067dc45",
+    "web/editor/routes.js": "0d2c83154aa359e8fa508ea285961247a2d7a4487dd8e5ae21608c765386fa9b",
+    "web/editor/setup.js": "9c8efb63568986b81e57dc8eb5b8b98e6c87207ef90150372dd8161f18b45cb4",
+    "web/editor/outlook.js": "c9c9b25da575a46ff67e18854538a949088634fe3026ec79c020c26314263324"
+  },
+  "total": 58,
+  "results": [
+    {
+      "file": "scripts/verify-authored-relationships.mjs",
+      "sha256": "8328e21ddec3cbc4013578bcfc857ae96008acf98911f8caa9714ad861b3451e",
+      "exitCode": 0,
+      "stdout": "PASS stable-ID shared-history controls, duplicate names, undo/redo/clear, durable editor reload, native playtest and real People memories.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-authored-residents.mjs",
+      "sha256": "f3a70dbc74ee8ecf73eb2d2f8f62efc39dbb6f27c1a7a60a71abccbc4153f6a3",
+      "exitCode": 0,
+      "stdout": "Authored resident controls, durable reload, native identity, metadata and routines passed.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-challenge-editor.mjs",
+      "sha256": "e055ec8905736f2024206023ffdd94c2a26c4dd28f393097ad6c67c05f130e5d",
+      "exitCode": 0,
+      "stdout": "PASS: public challenge authoring, invalid deadline repair with Undo, portable export/reopen, exact failure boundary and freeze, restart from original source, permanent unrestricted continuation and exact checkpoint reload.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-character-choice-controls.mjs",
+      "sha256": "39f4f1ae42285bea50a129864a40955c239b8bde406359428d19c2270158942b",
+      "exitCode": 0,
+      "stdout": "PASS: selected-category locks, disabled all-locked randomization, identity disclosure, optional-field reset, category isolation, undo/redo, durable choices and actual native playtest.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-character-creator.mjs",
+      "sha256": "f9ffef3c7e309e1d99e044be0a5b7b628a86f272c127989889c94dea9806caac",
+      "exitCode": 0,
+      "stdout": "PASS: animated full-pose preview, mirrored facing, day/night, shared scale reference, matching portrait, reduced motion, bounded sheet reuse, keyboard tabs, actual editing, undo/reload and native playtest settings.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v4"
+    },
+    {
+      "file": "scripts/verify-character-preview-lifecycle.mjs",
+      "sha256": "a3a062bba20deb0af2387dc8399eba94d7bc8bde058e713165f4c8bb97228aed",
+      "exitCode": 0,
+      "stdout": "PASS continuous preview phase across identity/personality/experience edits, intentional activity restart, no closed-dialog animation work, correct reopen and reduced-motion stability. Internal phase observation supports this lifecycle check, not smooth-motion or frame-pacing acceptance.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-character-preview-retry.mjs",
+      "sha256": "d7629843b22730cf7c138a5f19bd8ea9a9ce6a01ed1eca7570456fa974a4ef07",
+      "exitCode": 0,
+      "stdout": "PASS visible retry after controlled preview failure, successful real artwork reload, unchanged character/history, and ignored late closed-dialog failure.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-creation-sharing.mjs",
+      "sha256": "681c70412ade4858941a1a498ea699ee7deaca00b2b051a6aaf4e49ec75159f2",
+      "exitCode": 0,
+      "stdout": "PASS real creation download \u2192 independent import \u2192 native playtest \u2192 editor return; resolved map contents and original project preserved.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-creator-biomes.mjs",
+      "sha256": "37683dc6a472ad1f29f082c9a0e38c10508bba03e6a79941a4e07be98b6fba20",
+      "exitCode": 0,
+      "stdout": "PASS all three player-selected biomes \u2192 frozen saved maps \u2192 regional planting \u2192 native playtest weather \u2192 editor return, without browser errors.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-creator-casts.mjs",
+      "sha256": "857967f4550cd2bbf1f20c79c78a6543ee14e1faa543c19e6e8319d72d3e2d9f",
+      "exitCode": 0,
+      "stdout": "{\n  \"result\": \"PASS\",\n  \"journey\": \"Create/rename/duplicate/remove, friendship cleanup and undo/redo, twelve-person limit, durable reload, actual twelve- and one-person playtests, saved empty draft\",\n  \"browserFrameInterval\": {\n    \"median\": 8.300000000000182,\n    \"p95\": 9.5,\n    \"note\": \"Headless Chromium, 1600\u00d7900, 90 frames of the twelve-person arrival; not a player-device guarantee.\"\n  }\n}\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-creator-weather.mjs",
+      "sha256": "fb88a877a417700cb82deec767bd7875105a66760999c8257973f00b4e82b736",
+      "exitCode": 0,
+      "stdout": "PASS player weather controls, rule enablement, invalid-profile repair, undo/redo, durable reload, native playtest forecasts and default reset.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-creator.mjs",
+      "sha256": "a45dc6c32f966297584e6a381184320e40349bb41e22a7d4bcdcc98155f7f523",
+      "exitCode": 0,
+      "stdout": "PASS player menu \u2192 create \u2192 save \u2192 reload \u2192 test \u2192 restart \u2192 return; Story/Sandbox storage unchanged.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v4"
+    },
+    {
+      "file": "scripts/verify-delivery-goals.mjs",
+      "sha256": "5a0240ecc471b3bc49d7a6c2dc42e255d10bc0c310eab7f03a23e7377ec7bba4",
+      "exitCode": 0,
+      "stdout": "PASS: actual authored storage placement and eligible destinations, missing-target repair/undo, native delivery actions, reserve requests excluded, real resident hauling, independent chapter credit and exact checkpoint restoration.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-editor-browser-crash-recovery.mjs",
+      "sha256": "ad721432dd9f49305f6b5a74c9e814e86bbf33e8ae23fe6fc3c4b7234f665b7e",
+      "exitCode": 0,
+      "stdout": "PASS owned-browser SIGKILL, same-profile public-library recovery, exact saved checkpoint/view, omitted unfinished stroke, no graceful unload and exact undo/redo.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-editor-interrupted-input.mjs",
+      "sha256": "6a116a53530bdcee654f06f3cc4aadbd713579128e67e8239d4732902dd60afd",
+      "exitCode": 0,
+      "stdout": "Checking capture/habitat\nChecking capture/pan\nChecking blur/habitat\nChecking blur/pan\nChecking visibility/habitat\nChecking visibility/pan\n{\"results\":[{\"interrupt\":\"capture\",\"tool\":\"habitat\"},{\"interrupt\":\"capture\",\"tool\":\"pan\"},{\"interrupt\":\"blur\",\"tool\":\"habitat\"},{\"interrupt\":\"blur\",\"tool\":\"pan\"},{\"interrupt\":\"visibility\",\"tool\":\"habitat\"},{\"interrupt\":\"visibility\",\"tool\":\"pan\"}],\"normalRelease\":\"one edit and exact undo\",\"scope\":\"Trusted desktop pointer gestures and actual browser lostpointercapture. Isolated blur/visibility cases dispatch to production listeners; actual OS focus loss and hidden-tab behavior are not verified by this harness.\"}\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-editor-navigation-overlay.mjs",
+      "sha256": "860956890bfb687327d4ff165000740a22c6dc2dd6c4e3b389e0c23e94bc7198",
+      "exitCode": 0,
+      "stdout": "PASS: three-biome public navigation overlay, disconnected river component, native building obstruction, exact undo/redo/reload, view-only isolation and no pointer-time graph recomputation.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v4"
+    },
+    {
+      "file": "scripts/verify-editor-view-recovery.mjs",
+      "sha256": "a639d306ce88ba1aebddd07e520df71e41b81d6d55b922a14b9b87e801fd4a53",
+      "exitCode": 0,
+      "stdout": "PASS plant-size-only autosave and reload, view-only unload recovery, retained grid, committed camera during a pending pan, exact cancellation and unchanged authoring history. Unload guard is invoked directly before an actual reload; this is not OS crash automation.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-event-creator.mjs",
+      "sha256": "1f6ec8c61e00c9e6399009a1729b012dd6507c81bf7a3b6e42ab7650d5827c50",
+      "exitCode": 0,
+      "stdout": "PASS: actual When/If/Then event authoring, triggers/guards/messages/funding, native reference validation, authored order and undo/redo, durable reload/export, isolated startup grants, hidden future messages, native conditional effects, escaped journal/history, checkpoint restoration, no replay, read-only paused history and same-session ordinary Story restoration.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-example-picker.mjs",
+      "sha256": "48e58a1ada59743c65f337dd743e1fb1d0ca69d04c4922a0bd0e130e17688198",
+      "exitCode": 0,
+      "stdout": "PASS: public example picker opens independent editable copies, preserves prior edits and launches the real isolated playtest with all four chapters; Cerrado example opens its custom cast and bundled resident presets create independent reusable people; inherited Caatinga village enters the real game with mixed cast, installed routes and failed equipment.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-food-batches-editor.mjs",
+      "sha256": "9a41ebe44da308da9363426cc9ce0260b56a01b0ddb46c1c0bc36e126bb9818d",
+      "exitCode": 0,
+      "stdout": "PASS: player-authored mixed-age food, implicit fresh units, lossless store merges/undo, quantity trimming, freshening without changing quantities, native over-allocation/expiry errors, age-preserving distribution/export/reload and exact physical pre-day-one food dates/checkpoints.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-inherited-recovery-editor.mjs",
+      "sha256": "6b0d2f96306bd214e30017047d534f81b6f09d0bf15f96114f74d7b2829d2149",
+      "exitCode": 0,
+      "stdout": "PASS: player structural-recovery policy, native recipe preview, blueprint repair, independent copy editing, export/reopen, actual resident salvage through normal gameplay controls, one-time structural materials, separately retained owned battery and exact checkpoint.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-journal-player.mjs",
+      "sha256": "46d8530e7b17c3ea2a002c68133d18c21a0d83e95ca0ffeb56ff3ca4db3a240e",
+      "exitCode": 0,
+      "stdout": "PASS: real region drawing, named full-footprint goals, missing-region repair, focused placement guidance, public chapter/goal authoring, nested conditions, stable references, reorder/delete repair and undo, durable export, escaped player journal, real build action, observed completion, optional continuation, real accelerated pantry-duration completion, exact checkpoint reload and ordinary Story journal.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-land-use-goals-editor.mjs",
+      "sha256": "c77d50d359165c5c388d278ec437451f35e67dd94e781ee5731875caac9f68cf",
+      "exitCode": 0,
+      "stdout": "PASS: public land-condition authoring, region selection, bounded targets and undo, compatible extraction stages, portable export/reopen, native gameplay measurements, real Land & materials action and exact checkpoint.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-large-history-save.mjs",
+      "sha256": "cfdacdfc9dc553b084eeff790c5beeaaede1a03fde0813d06ae7bde7f2c5ecad",
+      "exitCode": 0,
+      "stdout": "{\"scope\":\"Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.\",\"largeRecoveryParses\":0,\"historyBytes\":8078050,\"historySteps\":16,\"openElapsedMs\":2778,\"sample\":{\"synchronousMs\":0.20000004768371582,\"saveElapsedMs\":291.30000019073486,\"elapsedWithDurableReadMs\":349.5,\"maxTimerGapMs\":37.80000019073486,\"calls\":[{\"name\":\"checkpointAsyncElapsed\",\"ms\":29.700000047683716},{\"name\":\"markSaved\",\"ms\":2.5999999046325684},{\"name\":\"markSaved\",\"ms\":2.5999999046325684}],\"phases\":[{\"name\":\"JSON.stringify\",\"ms\":2.3999998569488525},{\"name\":\"JSON.stringify\",\"ms\":8},{\"name\":\"JSON.stringify\",\"ms\":7.400000095367432},{\"name\":\"JSON.stringify\",\"ms\":2.299999952316284}]},\"exactCheckpointReload\":true,\"coalescedRequests\":{\"extraClicks\":2,\"extraPreparations\":0},\"concurrentSave\":{\"writes\":[{\"revision\":97,\"funds\":900100},{\"revision\":100,\"funds\":900200},{\"revision\":101,\"funds\":900300}],\"current\":900300,\"previous\":900200},\"preparationFailure\":{\"preservedFunds\":900300,\"retriedFunds\":900400,\"liveEditPreserved\":true},\"errors\":[],\"sourceHashes\":{\"web/editor/document.js\":\"9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a\",\"web/editor/index.js\":\"a422944d087ff4d15f1370ad79e6dd693011990634d739e07e5aa8e2962b6bb6\",\"web/content-library.js\":\"dec91760869e5023d00798af447ea7a5979117febb2a96f00f0d12465281b49a\",\"web/save-project-prepared.js\":\"1f808d42fe71ee72032f6f0bcb924a833c5f0d0b0bbd2465af42b2c50ca01f48\",\"web/project-save-worker.js\":\"8eb12548a4aa4c341ade93e3bca4fa76c009594d2b33d3e782ca53e0f48e727c\",\"web/pkg/solar_friends_bg.wasm\":\"28cb1127ef68eec468aea6b0ecfd76cc7200111b37e4640d9651fd4af12d4af8\"}}\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-liquids-editor.mjs",
+      "sha256": "b04a9db7e530df7f70ce2e8bb8add8759ff2f76741929863bf4f829d3925ef66",
+      "exitCode": 0,
+      "stdout": "PASS: public liquid allocation and cancellation, four separate classes, compatible compartments, capacity/removed-container repair, merge and real building-copy undo/redo, explicit shortage preview, lossless distribution/export/reopen and exact physical tank contents/accounting/checkpoint.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-map-controls.mjs",
+      "sha256": "2fbc650b781d417236120028731b3515e38d7212971a8dc8fddc9cd685b547bd",
+      "exitCode": 0,
+      "stdout": "PASS: all three biomes through public map save/search/export/import/reuse/playtest, land-only previews, invalid-settlement independence, separate map titles, versioning and immutable old exports, new scenario isolation, retained authorship, independent deletion, atomic incompatible imports and desktop toolbar fit.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-opening-housing-sanitation.mjs",
+      "sha256": "ad1a15b463132bd01f11dc92497e7aa14d5eee2e64df76f0ac150d8545491b1e",
+      "exitCode": 0,
+      "stdout": "PASS: assigned home access versus capacity, located warnings, public toilet water repair, river route repair, read-only inspection and durable reload.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-opening-service-access.mjs",
+      "sha256": "22ff454f751392cb2b649bf82bee2f36a6cbfe9da3995c69788c767f02c52fa2",
+      "exitCode": 0,
+      "stdout": "PASS: owned versus reachable reserves, native read-only service readings, fractional water warning, working supply/liquid links, route repair and reload durability.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-opening-setup-editor.mjs",
+      "sha256": "ef15155cbc720e2da9150b69d16ea5009f642fd07383d62b3c4c54f1f2dbb636",
+      "exitCode": 0,
+      "stdout": "PASS: player-authored twelve-person setup, quantitative housing/food/water/feed feedback, actionable map/supply links, non-blocking challenge warnings, rule-dependent information, invalid-draft stale-preview protection, undo/export/reopen and unchanged paused playtest inputs.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-operations-editor.mjs",
+      "sha256": "2e1430f8b14ac4323f0d29f9f586640ae64b54b5bf281d645d88068354c596b8",
+      "exitCode": 0,
+      "stdout": "PASS: all four operation states through public authoring, native target/rule repair and Undo, region selection, threshold event, portable export/reopen, actual building action, real supplied and underway work/treatment/generation/night lighting, one-time support and exact checkpoint reload.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-outlook-projects.mjs",
+      "sha256": "bd3d98eea3e42b7fe0863acf9884c5f4fa8b23a7c160ccdb4ebf0685d7451512",
+      "exitCode": 0,
+      "stdout": "PASS: publicly authored unfunded home, native outlook blocker, named worksite, map/inspector navigation and unchanged edit history.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-part-creator.mjs",
+      "sha256": "16e138bc2b036eee02af8cbed7d4ac895e940fb4322d054ac89a8e7050a563cc",
+      "exitCode": 0,
+      "stdout": "PASS: public custom-part authoring, all pose previews, facing/night/scale, undo/redo, preset save/export/import, independent duplicate, draft reload, native playtest, cancelled and applied live cosmetics, unchanged noncosmetic state and exact checkpoint reload.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-production-goals.mjs",
+      "sha256": "3fa06316cd32a87b62926d1412baea08a78f97b587e38ffb76b647f7f2808c84",
+      "exitCode": 0,
+      "stdout": "PASS: public produced-material controls, supported products and rule validation, starting stock excluded, actual preparation action/target/hauling/resident batch completion, native goal credit and exact checkpoint restoration.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-public-blink-timing.mjs",
+      "sha256": "44b4e027a7dd1dc853493cb70ec0e5e2d81c1803aa479c555684d6700284fc79",
+      "exitCode": 0,
+      "stdout": "PASS: public creator and live dialog share the brief blink and five-second loop; reduced-motion freeze/resume, cancelled edits and resident state remain correct.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-resident-appearance.mjs",
+      "sha256": "0c5780f3d3572e2d02efbd60e00d11d9f6def9ea68d1741b312e00069ff44ed0",
+      "exitCode": 0,
+      "stdout": "PASS authored repeated looks, undo/redo, matching portraits, cancelled preview, live cosmetic-only edit, strip/list refresh, exact checkpoint reload and normal-save isolation.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-resident-arrival-editor.mjs",
+      "sha256": "8b594bc6e0de516176afab7c0f7ea1bf10842d9f0f40d67d193d999033e5e28d",
+      "exitCode": 0,
+      "stdout": "PASS: authored needs, invalid draft repair, scenario-only position, public map placement/selection, independent duplicates, export/reopen and native isolated playtest.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-resident-attribution.mjs",
+      "sha256": "9f4d2c741e51352ee5e2d05a8f0517e27dd76c8b6d8808b39450a60ed9f0aacd",
+      "exitCode": 0,
+      "stdout": "PASS: public resident reuse and duplication retain original credits; resaving names a new author without erasing earlier authors; draft reload/export, frozen release export, real play and saved-village reload retain the complete chain.\n",
+      "stderr": "",
+      "evidenceRun": "individual terminal session 93321"
+    },
+    {
+      "file": "scripts/verify-resident-presets.mjs",
+      "sha256": "082def02ca8b44e82651f79be70a2eb3b1c08ccfd76f201830ae9bf623dff8c5",
+      "exitCode": 0,
+      "stdout": "PASS: versioned resident metadata, authorship search, independent copies, all three incompatible-version rejections, old project/run library upgrade, stale deletion rejection, reusable character controls, export/import, fresh identities, undo/reload, cross-project reuse, budget enforcement, actual playtest and lossless export of unavailable artwork.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-scenario-access-review.mjs",
+      "sha256": "a19c12599d35b450f7f43fdc221a9fcfc34ab17381136aa6226d5af0d0aca8b9",
+      "exitCode": 0,
+      "stdout": "PASS: native route warning preserves live state and playable challenge; public review locates the authored building, repairs through river control and persists the correction.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-scenario-outlook.mjs",
+      "sha256": "6a56d3c6c8f4c69b7f74610ef4154473d34f8edaa2a2f8d45f8684cf8f4f295f",
+      "exitCode": 0,
+      "stdout": "PASS: real worker outlook, 25 hourly and 1921 per-step resident observations matching independent native replay, unchanged source, invalidation on edits, cancellation and visible result table.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v4"
+    },
+    {
+      "file": "scripts/verify-service-goals-editor.mjs",
+      "sha256": "93ec60711d13bb8a6a0d82b94d0cf89bd0dc82d734904d3a6c469de7d8d3cc35",
+      "exitCode": 0,
+      "stdout": "PASS: public five-service authoring, default target changes, bounded amounts and population repair, rule validation, service event creation, portable export/reopen, genuine partial periods, exact checkpoint, all four management shortcuts and observed completion with one-time support.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-starting-animals-editor.mjs",
+      "sha256": "1c60cb064090ed75f6d002109c35e3c16d60063d5b7405e65b71be8f3ea7f0a7",
+      "exitCode": 0,
+      "stdout": "PASS: public animal occupancy/care/produce configuration, validation/undo/copy, delivered stock, cancel/requeue controls, actual resident stocking and exact checkpoint.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-starting-batteries-editor.mjs",
+      "sha256": "323ee0e18281cc24941b7c4dd4431b9a0e7c3a72c8a7b91a946c52979346cbdf",
+      "exitCode": 0,
+      "stdout": "PASS: player battery placement, independent copies/moves, invalid charge/capacity/project repair, removal undo, saved selection, export, conserved playtest assets and exact checkpoint.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-starting-crops-editor.mjs",
+      "sha256": "4e85fc818aa88caab874318830a2f7d3889ebd9b0e420ca9710665e5f40a45f7",
+      "exitCode": 0,
+      "stdout": "PASS: real garden/greenhouse crop authoring, rotation/replant controls, native wetness/project validation, lossless reset/undo, independent copy editing, durable export/reopen, pixel-verified mature preview through the shared game renderer, no inherited harvest credit and exact crop/soil checkpoints.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-starting-equipment-editor.mjs",
+      "sha256": "f288e4105e96e54d40b11e9269558dfdf82f7591c0d2e9d48fe87b4be1e84025",
+      "exitCode": 0,
+      "stdout": "PASS: player condition controls for every supported asset, automatic/manual policy, per-asset deferral, invalid-value repair, healthy reset/undo, disabled-rule persistence, portable export/reopen, exact opening wear without work/material grants and exact checkpoints.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v4"
+    },
+    {
+      "file": "scripts/verify-starting-experience.mjs",
+      "sha256": "eda6351e07a7a87e68722da0f50986d787d61e87081249087aa2a7170aef10ae",
+      "exitCode": 0,
+      "stdout": "PASS real background/skill/preference authoring, budgets, undo/redo, unrestricted disclosure, durable reload, public sharing, native abilities, People and live preference preservation.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-starting-orchards-editor.mjs",
+      "sha256": "137c34785ff7cf95853a299040fbda752b31dca63ac30c86159552800601cf6e",
+      "exitCode": 0,
+      "stdout": "PASS: public orchard phase/activity/wetness controls, native validation, reset/undo, independent copies, export/reopen, real playtest state without inherited collection credit and exact checkpoints.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-starting-poultry-editor.mjs",
+      "sha256": "f2ff5a8d1b6cb88b60aa3524de7019c01df7ab2cd6167bc7576c25323498cf91",
+      "exitCode": 0,
+      "stdout": "PASS: public empty/fed coop authoring, validation/undo, independent copies, owned hen supplies, flock visibility, cancel/requeue, actual resident stocking and exact checkpoint.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-starting-routes-editor.mjs",
+      "sha256": "d1d2bfd4ae8cad05efb041ed4201c1a8d67f1b0489354a8349b2698e52851404",
+      "exitCode": 0,
+      "stdout": "PASS: public five-class route authoring, portable endpoint selection, alternative-port corridor drawing, invalid stroke rejection, installed/planned state, dependent cable removal/undo, export/reopen, isolated playtest and exact checkpoints.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v4"
+    },
+    {
+      "file": "scripts/verify-starting-sites-editor.mjs",
+      "sha256": "ef3f623cc5464c135a094ef4a92e9fc4f50bfbc11639b29ff1bc007308e56081",
+      "exitCode": 0,
+      "stdout": "PASS: public resource-site placement, phases/policies/wetness, invalid setup repair, copies/moves/removal undo, mapped extraction, export/reopen, native playtest and exact checkpoints.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-story-opening-player.mjs",
+      "sha256": "e4c7c3d5b691b6e25f6e74d23f6055577157bfab5de9184f168fa58b1ebd60b4",
+      "exitCode": 0,
+      "stdout": "PASS: public milestone authoring with bounds/Undo/export, ordinary Story adapter initial native goals, real resident harvest/cooking requests at 8\u00d7, correct one-home/no-morning completion, unchanged next chapter/unlock guidance and exact checkpoint reload.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-story-roles-editor.mjs",
+      "sha256": "5663e26dba48b87d43282cabe89d176dc4a98f7e59c203200dedcbe0bb995fff",
+      "exitCode": 0,
+      "stdout": "PASS: public story-role and speaker authoring, native capability assignment, missing-role/person repair and Undo, portable draft export/reopen, actual message attribution and person action, live renamed appearance, escaped names and exact checkpoint reload.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-supplies-editor.mjs",
+      "sha256": "fc279794a20b33096e9bf2c7bb4db359e9651444f970c2b218b105a4b80299b1",
+      "exitCode": 0,
+      "stdout": "PASS: public exact quantity/location editing, empty starts, native capacity errors, lossless overflow preview, owner merging/undo, food distribution preview/apply, one-step undo/redo, durable export/reload and actual fresh located inventories/accounting in an isolated playtest and checkpoint.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-supply-creator.mjs",
+      "sha256": "a6e48d88ff9e8bd29367f58ec8501ee91c507e6ad4a7143f52124d2c2bb8cc49",
+      "exitCode": 0,
+      "stdout": "PASS: public supply event authoring, native capacity validation and undo, export, queued destination feedback, actual sale to free receiving space, paused delivery, applied gift/accounting/history and exact checkpoint restoration.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-terrain-save.mjs",
+      "sha256": "5fee25bd765bd2aa0e8dc09432f306357b5e46a305201c709da4f6bc756e485e",
+      "exitCode": 0,
+      "stdout": "{\"saveSynchronousMs\":0.10000014305114746,\"savedAuthoredRoadWhilePainting\":true,\"previousPreviewPreserved\":true,\"completedPreviewUpdatedAutomatically\":true,\"definitionUnchangedByPreview\":true,\"reloadExact\":true}\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v2"
+    },
+    {
+      "file": "scripts/verify-trade-goals.mjs",
+      "sha256": "6164a538a5cf987614e93b8a8a4e040502d923f40ca8a93ed52c24feb6c0a2ce",
+      "exitCode": 0,
+      "stdout": "PASS: public purchase/sale authoring, supported products, starting stock and cancelled orders excluded, actual town sales and resident pickup, later-chapter sale baseline, native completion and exact checkpoint restoration.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-unlock-creator.mjs",
+      "sha256": "8472904b44479d26f5b9ce9aadc5c3b6abef8e68e7a6ed19d3a9823ed1b704e1",
+      "exitCode": 0,
+      "stdout": "PASS: public initial availability controls, undo/redo, unlock event authoring/export, locked-card journal navigation, native goal unlock, actual newly unlocked Home placement, history and exact checkpoint reload without browser errors.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    },
+    {
+      "file": "scripts/verify-wellbeing-goals-editor.mjs",
+      "sha256": "50cc860beeee601164712ad0eaa855b3ef9cc56992a92971fb012d7bed74680d",
+      "exitCode": 0,
+      "stdout": "PASS: public wellbeing authoring, fullness conversion, bounded thresholds and Undo, missing-resident repair without retargeting, portable export/reopen, real accelerated partial period, exact checkpoint, actual person action and observed completion.\n",
+      "stderr": "",
+      "evidenceRun": "artifacts/workspace-regressions-v3"
+    }
+  ]
+}

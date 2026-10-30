@@ -45,7 +45,7 @@ try{
  const openStart=Date.now();await page.goto(`http://127.0.0.1:${server.address().port}/editor.html?project=large-history`);
  await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='false');
  const openElapsedMs=Date.now()-openStart;
- await page.locator('#creator-funds').fill('9001');await page.locator('#creator-funds').dispatchEvent('change');
+ await page.locator('[data-workspace=village]').click();await page.locator('#creator-funds').fill('9001');await page.locator('#creator-funds').dispatchEvent('change');
  const sample=await page.evaluate(async()=>{
   await window.historyProbeReady;window.historySaveProbe=[];window.savePhaseProbe=[];window.trackSavePhases=true;let maxTimerGapMs=0,last=performance.now();
   const timer=setInterval(()=>{const now=performance.now();maxTimerGapMs=Math.max(maxTimerGapMs,now-last);last=now;},5);
@@ -68,11 +68,11 @@ try{
  await page.locator('#creator-redo').click();assert.equal(await page.locator('#creator-funds').inputValue(),'9001');
  let concurrentSave=null,preparationFailure=null,coalescedRequests=null;
  if(await page.evaluate(async()=>{const {EditorDocument}=await import('/editor/document.js');return typeof EditorDocument.prototype.checkpointAsync==='function';})){
-  await page.locator('#creator-funds').fill('9002');await page.locator('#creator-funds').dispatchEvent('change');
+  await page.locator('[data-workspace=village]').click();await page.locator('#creator-funds').fill('9002');await page.locator('#creator-funds').dispatchEvent('change');
   await page.evaluate(()=>{window.historySaveWrites=[];window.holdNextCheckpoint=true;});
   await page.locator('#creator-save').click();await page.waitForFunction(()=>window.checkpointHeld);
   coalescedRequests=await page.evaluate(()=>{const before=window.checkpointStarts;document.querySelector('#creator-save').click();document.querySelector('#creator-save').click();return {extraClicks:2,extraPreparations:window.checkpointStarts-before};});if(!baselineEditor)assert.equal(coalescedRequests.extraPreparations,0,'Identical pending saves repeated checkpoint preparation');
-  await page.locator('#creator-funds').fill('9003');await page.locator('#creator-funds').dispatchEvent('change');
+  await page.locator('[data-workspace=village]').click();await page.locator('#creator-funds').fill('9003');await page.locator('#creator-funds').dispatchEvent('change');
   await page.evaluate(()=>window.releaseCheckpoint());
   await page.waitForFunction(()=>window.historySaveWrites.some(w=>w.funds===900200));
   assert.equal(await page.locator('#creator-funds').inputValue(),'9003');
@@ -80,7 +80,7 @@ try{
   concurrentSave=await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js');const record=await new ContentLibrary().getProject('large-history');return {writes:window.historySaveWrites,current:record.checkpoint.definition.start.funds,previous:record.previous.checkpoint.definition.start.funds};});
   assert.equal(concurrentSave.current,900300);assert.equal(concurrentSave.previous,900200);
   assert(concurrentSave.writes.find(w=>w.funds===900300).revision>concurrentSave.writes.find(w=>w.funds===900200).revision);
-  await page.locator('#creator-funds').fill('9004');await page.locator('#creator-funds').dispatchEvent('change');
+  await page.locator('[data-workspace=village]').click();await page.locator('#creator-funds').fill('9004');await page.locator('#creator-funds').dispatchEvent('change');
   await page.evaluate(()=>{window.failNextCheckpoint=true;});await page.locator('#creator-save').click();
   await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent==='Could not save · export a copy');
   assert.equal(await page.locator('#creator-funds').inputValue(),'9004');

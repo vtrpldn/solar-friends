@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "sources": {
+    "web/editor/workspaces.js": "14fbe60d5f8c03293678c9fee736eb08ba4cf030b5a5b0c104c07f6486601a82",
+    "web/editor/index.js": "a422944d087ff4d15f1370ad79e6dd693011990634d739e07e5aa8e2962b6bb6",
+    "web/editor/style.css": "f03c56dd9a19231a6eaa108599643a7015025c6d2f9437531ee1f77d1067dc45",
+    "web/editor.html": "b5269a92aca48c922c8ffbe46fbec2f41a4873ec13f6059d62a7df915b515737",
+    "web/editor/setup.js": "9c8efb63568986b81e57dc8eb5b8b98e6c87207ef90150372dd8161f18b45cb4",
+    "web/editor/routes.js": "0d2c83154aa359e8fa508ea285961247a2d7a4487dd8e5ae21608c765386fa9b",
+    "web/editor/outlook.js": "c9c9b25da575a46ff67e18854538a949088634fe3026ec79c020c26314263324",
+    "scripts/verify-editor-workspaces.mjs": "887b1735584794c001e7eb58012ebaf701016fb6cf5608bd416bc136c8521b14"
+  },
+  "checks": {
+    "fiveWorkspaces": true,
+    "keyboard": true,
+    "typingUnaffected": true,
+    "pendingStrokeCancelled": true,
+    "viewOnlyIsolation": true,
+    "peopleVillageStoryEdits": true,
+    "contextLinks": true,
+    "blockingIssueDiscovery": true,
+    "reload": true,
+    "playtestReturn": true,
+    "independentExportImport": true,
+    "browserErrors": []
+  },
+  "scope": "Regular creator controls in an isolated browser; desktop 1600×1000 and 1280×800. No unfamiliar-player or mobile usability claim."
+}

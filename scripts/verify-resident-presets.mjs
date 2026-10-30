@@ -20,13 +20,13 @@ try{
   a.close();b.close();return {legacy,legacyRun,rejected,current,heads,projects,revision:updated.revision};
  });
  assert.equal(migration.legacy.checkpoint.proof,7);assert.equal(migration.legacyRun.snapshot,'Preserve the running village');assert(migration.rejected);assert.equal(migration.current.title,'Updated friend');assert.equal(migration.heads.length,1);assert.equal(migration.projects.length,1);
- await page.locator('[data-preset=camp]').click();await page.locator('#creator-residents > summary').click();
+ await page.locator('[data-preset=camp]').click();await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();
  const person=page.locator('[data-resident="resident-iara"]');await person.locator(':scope > summary').click();
  for(const [field,value]of [['name','Júlia <amiga>'],['pronouns','ela/dela'],['biography','Trouxe sementes.']]){await person.locator(`[data-resident-field=${field}]`).fill(value);await person.locator(`[data-resident-field=${field}]`).dispatchEvent('change');}
  await person.locator('[data-resident-field=appearance]').selectOption('nina');await person.locator('[data-resident-field=occupation]').selectOption('none');
  await person.locator('[data-resident-field=favourite_hobby]').selectOption('stretch');
  await person.locator('[data-save-resident-preset]').click();await page.locator('#creator-resident-save-dialog [name=title]').fill('Seed keeper');await page.locator('#creator-resident-save-dialog [name=author]').fill('João <criador>');await page.screenshot({path:'/private/tmp/solar-resident-package-save.png'});await page.locator('#creator-resident-save-dialog button[type=submit]').click();await page.getByText('Júlia <amiga> saved to resident presets.',{exact:true}).waitFor();
- await page.locator('[data-open-resident-presets]').click();const dialog=page.locator('#creator-resident-presets-dialog');await dialog.locator('[data-use-resident]').waitFor();await dialog.locator('[data-preset-portrait] canvas').waitFor();
+ await page.locator('[data-workspace=people]').click();await page.locator('[data-open-resident-presets]').click();const dialog=page.locator('#creator-resident-presets-dialog');await dialog.locator('[data-use-resident]').waitFor();await dialog.locator('[data-preset-portrait] canvas').waitFor();
  assert.equal(await dialog.locator('.creator-resident-preset b').textContent(),'Seed keeper');assert.equal(await dialog.locator('b amiga').count(),0);
  const downloadPromise=page.waitForEvent('download');await dialog.locator('[data-export-resident]').click();const download=await downloadPromise;
  assert(download.suggestedFilename().endsWith('.solar-resident'));const raw=await readFile(await download.path(),'utf8'),file=JSON.parse(raw);
@@ -40,8 +40,8 @@ try{
  await page.locator('#creator-undo').click();assert.equal(await page.locator('#creator-residents-fields > details').count(),5);await page.locator('#creator-redo').click();
  await page.locator('#creator-save').click();await page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved'));
  await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');assert.equal(await page.locator('#creator-residents-fields > details').count(),6);
- await page.locator('#creator-library').click();await page.locator('#creator-new-options > summary').click();await page.locator('[data-preset=camp]').click();await page.locator('#creator-residents').evaluate(el=>el.open=true);
- await page.locator('[data-open-resident-presets]').click();await dialog.locator('[data-use-resident]').waitFor();
+ await page.locator('#creator-library').click();await page.locator('#creator-library-dialog').waitFor({state:'visible'});await page.locator('#creator-new-options > summary').click();await page.locator('[data-preset=camp]').click();await page.locator('#creator-residents').evaluate(el=>el.open=true);
+ await page.locator('[data-workspace=people]').click();await page.locator('[data-open-resident-presets]').click();await dialog.locator('[data-use-resident]').waitFor();
  const invalid={...file,schema:999};await upload.setInputFiles({name:'future.solar-resident',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(invalid))});
  await page.waitForFunction(()=>document.querySelector('[data-resident-preset-status]').textContent.includes('different format version'));
  assert.equal(await dialog.locator('[data-use-resident]').count(),1);for(const key of ['game','ruleset','assets']){const future=structuredClone(file);future.compatibility[key]=999;await upload.setInputFiles({name:'future.solar-resident',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(future))});await page.waitForFunction(()=>document.querySelector('[data-resident-preset-status]').textContent.includes('different game'));assert.equal(await dialog.locator('[data-use-resident]').count(),1);}
@@ -51,7 +51,7 @@ try{
  await dialog.locator('[data-use-resident]').first().click();await page.waitForFunction(()=>document.querySelector('[data-resident-preset-status]').textContent.includes('Balanced setup'));
  assert.equal(await page.locator('#creator-residents-fields > details').count(),5);
  await dialog.locator('[data-close-residents]').click();await page.locator('[data-resident-policy]').selectOption('unrestricted');
- await page.locator('[data-open-resident-presets]').click();await dialog.locator('[data-use-resident]').first().click();await dialog.waitFor({state:'hidden'});
+ await page.locator('[data-workspace=people]').click();await page.locator('[data-open-resident-presets]').click();await dialog.locator('[data-use-resident]').first().click();await dialog.waitFor({state:'hidden'});
  assert.equal(await page.locator('#creator-residents-fields > details').count(),6);
  await page.locator('#creator-test').click();await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
  const state=await page.evaluate(()=>window.solarDev.snapshot()),bindings=state.village.scenario.residents;
@@ -61,7 +61,7 @@ try{
  await page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(),heads=await library.listResidentPresets(),record=await library.getResidentPreset(heads[0].id);record.file.resident.appearance.version=999;await library.saveResidentPreset({id:record.id,file:record.file},record.revision);library.close();});
  assert.equal((await page.evaluate(()=>window.solarDev.snapshot())).residents.find(p=>p.id===newPerson.id).appearance.version,1);
  await page.getByRole('button',{name:'Return to editor',exact:true}).click();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
- await page.locator('#creator-residents').evaluate(el=>el.open=true);await page.locator('[data-open-resident-presets]').click();await dialog.locator('[data-use-resident]').first().click();
+ await page.locator('#creator-residents').evaluate(el=>el.open=true);await page.locator('[data-workspace=people]').click();await page.locator('[data-open-resident-presets]').click();await dialog.locator('[data-use-resident]').first().click();
  await page.waitForFunction(()=>document.querySelector('[data-resident-preset-status]').textContent.includes('unavailable'));
  assert.equal(await dialog.locator('[data-preset-portrait]').first().locator('canvas').count(),0);const preservedDownload=page.waitForEvent('download');await dialog.locator('[data-export-resident]').first().click();const preserved=JSON.parse(await readFile(await (await preservedDownload).path(),'utf8'));assert.equal(preserved.resident.appearance.version,999);await dialog.locator('[data-close-residents]').click();assert(await page.locator('#creator-test').isEnabled());
  assert.deepEqual(errors,[]);console.log('PASS: versioned resident metadata, authorship search, independent copies, all three incompatible-version rejections, old project/run library upgrade, stale deletion rejection, reusable character controls, export/import, fresh identities, undo/reload, cross-project reuse, budget enforcement, actual playtest and lossless export of unavailable artwork.');

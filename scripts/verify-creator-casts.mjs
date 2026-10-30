@@ -10,7 +10,7 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);
  await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
  await page.locator('[data-preset=camp]').click();
- await page.locator('#creator-residents > summary').click();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();
  const cards=page.locator('#creator-residents-fields > details');
  await page.locator('[data-add-resident]').click();assert.equal(await cards.count(),6);
  const created=await cards.last().getAttribute('data-resident'),person=page.locator(`[data-resident="${created}"]`);
@@ -18,7 +18,7 @@ try{
  await person.locator('[data-resident-field=name]').fill('João da Mata');
  await person.locator('[data-resident-field=name]').dispatchEvent('change');
  await person.locator('[data-duplicate-resident]').click();assert.equal(await cards.count(),7);
- await page.locator('#creator-relationships > summary').click();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-relationships > summary').click();
  const bond=page.locator(`[data-bond-from="resident-iara"][data-bond-to="${created}"]`);
  await bond.fill('9');await bond.dispatchEvent('change');
  await person.locator('[data-remove-resident]').click();assert.equal(await cards.count(),6);
@@ -26,7 +26,7 @@ try{
  await page.locator('#creator-undo').click();assert.equal(await cards.count(),7);assert.equal(await bond.inputValue(),'9');
  await page.locator('#creator-redo').click();assert.equal(await cards.count(),6);
  await page.locator('#creator-undo').click();
- await page.locator('#creator-relationships > summary').click();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-relationships > summary').click();
  for(let i=7;i<12;i++)await page.locator('[data-add-resident]').click();
  assert.equal(await cards.count(),12);assert(await page.locator('[data-add-resident]').isDisabled());
  assert.equal(await page.locator('[data-duplicate-resident]:enabled').count(),0);
@@ -34,7 +34,7 @@ try{
  const editorURL=page.url();await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
  assert.equal(await cards.count(),12);assert.equal(await person.locator('[data-resident-field=name]').inputValue(),'João da Mata');
  await page.locator('#creator-residents').evaluate(el=>el.open=true);
- await page.locator('#creator-residents').scrollIntoViewIfNeeded();
+ await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents').scrollIntoViewIfNeeded();
  await page.screenshot({path:'/private/tmp/solar-custom-cast-editor.png'});
  await page.locator('#creator-test').click();await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session')).catch(async error=>{console.error('PLAYTEST FAILURE',page.url(),await page.locator('body').innerText());throw error;});
  const state=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(state.residents.length,12);assert.equal(await page.locator('#community-count').textContent(),'12');assert.equal(await page.locator('#happiness').textContent(),'75%');

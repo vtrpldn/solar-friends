@@ -14,9 +14,9 @@ try{
  await page.locator(`[data-biome="${profile.biome}"]`).click();await page.locator('[data-preset="camp"]').click();await page.locator('#creator-library-dialog').waitFor({state:'hidden'});
  const edit=async(selector,value)=>{await page.locator(selector).fill(String(value));await page.locator(selector).blur();};
  await edit('#creator-title',profile.title);await edit('#creator-description',profile.description);
- if(profile.weather){await page.locator('#creator-weather > summary').click();for(const [key,value]of Object.entries(profile.weather))await edit('#creator-weather-'+key,value);}
+ if(profile.weather){await page.locator('[data-workspace=land]').click();await page.locator('#creator-weather > summary').click();for(const [key,value]of Object.entries(profile.weather))await edit('#creator-weather-'+key,value);}
  if(profile.cast){
-  await page.locator('#creator-residents > summary').click();
+  await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();
   for(const person of profile.cast){
    await page.locator('[data-add-resident]').click();let row=page.locator('details[data-resident]').last();if(!await row.evaluate(el=>el.open))await row.locator(':scope > summary').click();
    const name=row.locator('[data-resident-field="name"]');await name.fill(person.name);await name.blur();
@@ -35,17 +35,17 @@ try{
  }
  if(profile.freshWater!==undefined)await edit('#creator-water',profile.freshWater);
  if(profile.routes){
-  await page.locator('#creator-route-tools').click();
+  await page.locator('[data-workspace=village]').click();await page.locator('#creator-route-tools').click();
   for(const route of profile.routes){
    await page.locator('[data-route-action=new]').click();
    await page.locator('[data-route-field=kind]').selectOption(route.kind);
    for(const key of ['from','to']){const input=page.locator(`[data-route-field="${key}"]`),options=await input.locator('option').evaluateAll(options=>options.map(o=>({text:o.textContent,value:o.value}))),choice=options.filter(o=>o.text.includes(route[key]))[route[key+'Occurrence']??0];assert(choice,route[key]);await input.selectOption(choice.value);}
    await page.locator('[data-route-action=preview]').click();await page.locator('[data-route-action=apply]').click();
   }
-  await page.locator('#creator-routes > summary').click();
+  await page.locator('[data-workspace=village]').click();await page.locator('#creator-routes > summary').click();
  }
- if(profile.equipment){await page.locator('#creator-equipment > summary').click();for(const item of profile.equipment){const input=page.locator('[data-equipment-asset]').filter({hasText:item.label}).nth(item.occurrence??0).locator('[data-equipment-field=condition]');await input.fill(String(item.condition));await input.blur();}await page.locator('#creator-equipment > summary').click();}
- await page.locator('#creator-journal > summary').click();
+ if(profile.equipment){await page.locator('[data-workspace=village]').click();await page.locator('#creator-equipment > summary').click();for(const item of profile.equipment){const input=page.locator('[data-equipment-asset]').filter({hasText:item.label}).nth(item.occurrence??0).locator('[data-equipment-field=condition]');await input.fill(String(item.condition));await input.blur();}await page.locator('[data-workspace=village]').click();await page.locator('#creator-equipment > summary').click();}
+ await page.locator('[data-workspace=story]').click();await page.locator('#creator-journal > summary').click();
  if(await page.locator('[data-journal-action="disable"]').count())await page.locator('[data-journal-action="disable"]').click();
  await page.locator('[data-journal-action="enable"]').click();await page.locator('[data-journal-action="open"]').click();
  const field=async(path,value)=>edit(`[data-journal-path="${path}"]`,value);

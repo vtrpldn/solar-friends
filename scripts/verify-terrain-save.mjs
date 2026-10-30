@@ -11,7 +11,7 @@ try{
  const read=()=>page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(),id=new URLSearchParams(location.search).get('project');try{const project=await library.getProject(id);return {definition:project.checkpoint.definition,preview:await library.getPreview('project',id)};}finally{library.close();}});
  const readUntil=async test=>{const deadline=Date.now()+30000;while(Date.now()<deadline){const value=await read();if(test(value))return value;await new Promise(resolve=>setTimeout(resolve,50));}throw Error('Stored preview did not become ready');};
  const before=await readUntil(value=>!!value.preview);
- delay=true;await page.locator('[data-tool=road]').click();
+ delay=true;await page.locator('[data-workspace=village]').click();await page.locator('[data-tool=road]').click();
  const point=await page.locator('#creator-map').evaluate((canvas,[x,y])=>{const o=JSON.parse(canvas.dataset.origin),s=Number(canvas.dataset.scale),r=canvas.getBoundingClientRect();return {x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[before.definition.map.camp[0]+1,before.definition.map.camp[1]+3]);
  await page.mouse.click(point.x,point.y);await page.waitForFunction(()=>document.querySelector('#creator-map').getAttribute('aria-busy')==='true');
  const saveMs=await page.evaluate(()=>{const start=performance.now();document.querySelector('#creator-save').click();return performance.now()-start;});
