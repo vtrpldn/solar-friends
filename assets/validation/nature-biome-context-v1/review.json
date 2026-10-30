@@ -18,16 +18,43 @@
   "initialFailure": "Close reference home raster was clipped in initial layout. Camera moved from (245,340) to (190,310); both target and home raster checks pass after recapture. No runtime sprite registration changed.",
   "visuallyReviewed": {
     "mode": "day-close",
+    "zoom": 1.8,
     "boards": [
       "mata-atlantica-zoom-1.8-day-group-1.png",
+      "mata-atlantica-zoom-1.8-day-group-2.png",
+      "mata-atlantica-zoom-1.8-day-group-3.png",
+      "mata-atlantica-zoom-1.8-day-group-4.png",
+      "mata-atlantica-zoom-1.8-day-group-5.png",
+      "mata-atlantica-zoom-1.8-day-group-6.png",
+      "mata-atlantica-zoom-1.8-day-group-7.png",
+      "cerrado-zoom-1.8-day-group-1.png",
+      "cerrado-zoom-1.8-day-group-2.png",
+      "cerrado-zoom-1.8-day-group-3.png",
+      "cerrado-zoom-1.8-day-group-4.png",
       "cerrado-zoom-1.8-day-group-5.png",
+      "cerrado-zoom-1.8-day-group-6.png",
+      "cerrado-zoom-1.8-day-group-7.png",
+      "caatinga-zoom-1.8-day-group-1.png",
+      "caatinga-zoom-1.8-day-group-2.png",
+      "caatinga-zoom-1.8-day-group-3.png",
+      "caatinga-zoom-1.8-day-group-4.png",
+      "caatinga-zoom-1.8-day-group-5.png",
       "caatinga-zoom-1.8-day-group-6.png",
       "caatinga-zoom-1.8-day-group-7.png"
     ],
-    "finding": "These four boards have coherent painted vegetation, plausible comparative scale and attached ground contact. This is a limited initial review, not catalog-wide acceptance."
+    "compositions": 180,
+    "finding": "All 21 boards individually inspected, covering twenty entries at native minimum, unit and maximum sizes in all three ground palettes. No additional blocking painted-style, scale, clipping or ground-contact mismatch observed in these controlled static scenes.",
+    "families": [
+      "Original forest trees",
+      "Ferns, bromeliads, wildflowers and dry grasses",
+      "Granite, quartz, clay/ironstone and mossy rocks",
+      "Cerrado trees, bunchgrass and shrub",
+      "Caatinga trees, mandacaru and macambira"
+    ],
+    "identity": "Every board and all recorded source inputs were rehashed and match day-close.json."
   },
   "remaining": [
-    "Other normal/close/day/night/rain boards need individual visual inspection.",
+    "Normal day, night and rain boards still require visual inspection; close daylight is complete.",
     "Overview capture and inspection remain.",
     "Mixed habitat transitions, representative neighboring nature clusters, runtime movement and resident customization coverage remain.",
     "Other building reviews and original release requirements remain in force."
