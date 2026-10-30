@@ -17,6 +17,7 @@ import {exampleScenarios,loadExampleScenario} from './example-scenarios.js';
 import {hydrateLibraryPreviews} from './library-previews.js';
 import {chooseRecoveryCheckpoint} from './recovery-dialog.js';
 import {draftImportIssue} from './draft-import.js';
+import {restoreEditableCheckpoint} from './draft-checkpoint.js';
 import {downloadRecoveryRecord} from './record-recovery.js';
 import {MAP_FORMAT,validateMapPackage} from '../map-package.js';
 import {MapSharingControls} from './map-sharing-controls.js';
@@ -82,12 +83,15 @@ async function download(definition){
   a.href=url;a.download=(definition.title||'our-village').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.solar-scenario';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function cacheRecovery(ctx,checkpoint,view){try{const raw=JSON.stringify({storageRevision:ctx.storageRevision,checkpoint,view});sessionStorage.setItem(recoveryKey(ctx.id),raw);return raw;}catch{/* The durable library remains the primary save. */return null;}}
-function scheduleSave(){clearTimeout(saveTimer);if(!current?.conflicted)saveTimer=setTimeout(()=>{save().catch(()=>{});},450);}
+function scheduleSave(){clearTimeout(saveTimer);if(!current?.conflicted)saveTimer=setTimeout(()=>{save({automatic:true}).catch(()=>{});},450);}
 function previewOf(definition,snapshot){try{return creationThumbnail(definition,snapshot,art);}catch{return null;}}
 function previewMarkup(kind,id){return `<span class="creator-preview" data-preview-kind="${kind}" data-preview-id="${escape(id)}"><span>No preview yet</span></span>`;}
-function save(){
+function save({automatic=false}={}){
   clearTimeout(saveTimer);
   if(!current)return Promise.resolve();
+  // Terrain/portrait completion and backgrounding must not replace the damaged
+  // record before the player can inspect or back it up. A user save clears it.
+  if(automatic&&current.preserveDamagedRecord)return Promise.resolve(current.record);
   const ctx=current,view=map.state,snapshot=map.snapshot,terrainLoading=map.terrainLoading,valid=report.ok;
   const requestKey=JSON.stringify([ctx.doc.revision,view,ctx.artRevision??0,terrainLoading]);
   const pending=ctx.pendingSaves??=new Map();
@@ -107,7 +111,7 @@ function save(){
     const thumbnail=ctx.thumbnail,recoveryBytes=cacheRecovery(ctx,checkpoint,view);
     if(ctx.conflicted)throw new LibraryConflict();
     const record=await library.savePreparedProject({id:ctx.id,checkpoint,view,attribution:ctx.record?.attribution,thumbnail},ctx.storageRevision);
-    ctx.storageRevision=record.revision;ctx.record=record;ctx.doc.markSaved(checkpoint);
+    ctx.storageRevision=record.revision;ctx.record=record;ctx.doc.markSaved(checkpoint);ctx.preserveDamagedRecord=false;
     try{
       const key=recoveryKey(ctx.id),raw=sessionStorage.getItem(key);
       // The common case is the exact recovery copy written by this save.
@@ -340,16 +344,18 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   if(doc.historyRecovered)toast('The creation was recovered. Its damaged undo history was cleared.');
 }
 async function openProject(record){
-  let checkpoint=record.checkpoint,view=record.view,recovered=false;
-  try{EditorDocument.restore(checkpoint);}catch{
+  const restore=checkpoint=>restoreEditableCheckpoint(checkpoint,raw=>JSON.parse(engine.validate_scenario(raw)));
+  let checkpoint=record.checkpoint,view=record.view,recovered=false,previousRecovered=false;
+  try{restore(checkpoint);}catch{
     if(!record.previous?.checkpoint)throw Error('This creation could not load. Export its original data before replacing it.');
-    checkpoint=record.previous.checkpoint;view=record.previous.view;recovered=true;
+    checkpoint=record.previous.checkpoint;view=record.previous.view;restore(checkpoint);recovered=true;previousRecovered=true;
   }
   try{
     const cached=JSON.parse(sessionStorage.getItem(recoveryKey(record.id))||'null');
-    if(cached?.storageRevision===record.revision){EditorDocument.restore(cached.checkpoint);recovered=JSON.stringify(cached.checkpoint)!==JSON.stringify(checkpoint)||JSON.stringify(cached.view)!==JSON.stringify(view);checkpoint=cached.checkpoint;view=cached.view;}
+    if(cached?.storageRevision===record.revision){restore(cached.checkpoint);recovered=JSON.stringify(cached.checkpoint)!==JSON.stringify(checkpoint)||JSON.stringify(cached.view)!==JSON.stringify(view);checkpoint=cached.checkpoint;view=cached.view;}
   }catch{/* Keep the last durable checkpoint. */}
   attach(checkpoint.definition,{id:record.id,revision:record.revision,checkpoint,view,record});
+  current.preserveDamagedRecord=previousRecovered;
   if(recovered){current.viewDirty=true;status('Recovered your last checkpoint');toast('Your creation was recovered. Save it to keep this checkpoint.');}
 }
 async function newProject(preset,source=null,attribution=[]){
@@ -591,7 +597,7 @@ function wire(){
   });
   window.addEventListener('beforeunload',e=>{map?.cancelGesture();if(current&&(current.doc.dirty||current.viewDirty||current.conflicted)){cacheRecovery(current,current.doc.checkpoint(),map.state);e.preventDefault();e.returnValue='';}});
   window.addEventListener('blur',()=>map?.cancelGesture());
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){map?.cancelGesture();if(current)save().catch(()=>{});}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){map?.cancelGesture();if(current)save({automatic:true}).catch(()=>{});}});
   library.addEventListener('change',e=>{if(e.detail.remote&&current?.id===e.detail.id&&e.detail.revision!==current.storageRevision){current.conflicted=true;status('Changed in another tab · save a copy');toast('Another tab changed this creation. Your edits are kept here; save a copy to retain them.');}});
 }
 

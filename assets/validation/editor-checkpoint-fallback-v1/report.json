@@ -1,0 +1,18 @@
+{
+  "inputs": {
+    "web/editor/index.js": "081026271914fa6c81ad00fa34376285bf4d724f8c1411e7c3adc5e87cb84af1",
+    "web/editor/draft-checkpoint.js": "d5780a82c3665b51b20f9aa51a0e547bda02a12077ea5ca7ab75e111236dd4e6",
+    "web/editor/draft-import.js": "6f62e1b32a7d471d3181126d32c4ead28b386debb4bbdee396db3e2ad13e4c99",
+    "web/editor/document.js": "9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a",
+    "scripts/verify-editor-checkpoint-fallback.mjs": "2fc7ac3bde613a503215caf8f7d2edb94170dc193076ec275cd90757685bd7ef"
+  },
+  "cases": [
+    "unsupported",
+    "incomplete",
+    "bad-cache"
+  ],
+  "damagedOriginalUnchangedUntilExplicitSave": true,
+  "normalCurrentContentAndHistoryPreserved": true,
+  "browserErrors": [],
+  "scope": "Public editor reload of a native-incompatible current checkpoint, intact incomplete current draft, and native-incompatible same-revision session recovery copy. Real terrain debounce and background save exercised; explicit Save acknowledges recovery. Previous valid view preserved. Does not simulate physical storage corruption or every crash phase."
+}

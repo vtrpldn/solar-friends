@@ -1,0 +1,27 @@
+{
+  "why": "Native-incompatible durable/session checkpoints passed the shallow document check. The valid previous draft was not chosen, and asynchronous thumbnail saves could overwrite a damaged record after fallback.",
+  "baseline": {
+    "commit": "63d072c",
+    "publicFlowFailure": {
+      "expectedTitle": "Earlier unsupported",
+      "actualTitle": "Current unsupported"
+    },
+    "secondFailure": "After native validation was added, waiting for terrain completion exposed automatic overwrite of the damaged original."
+  },
+  "fix": "Native structural/version gate on current, previous and cached checkpoints; native gameplay constraints remain editable. Background/thumbnail saves preserve a record recovered from previous until a user save succeeds.",
+  "checks": [
+    "Public checkpoint-fallback regression passes after real terrain completion and 650ms debounce.",
+    "Simulated hidden-document event exercises automatic background-save path.",
+    "Explicit Save writes recovered schema/title at exactly next durable revision.",
+    "Incomplete current draft and its history preserved, Test remains disabled.",
+    "Unsupported same-revision session copy cannot replace supported durable draft.",
+    "verify-record-recovery.mjs passes.",
+    "verify-editor-view-recovery.mjs passes.",
+    "JavaScript syntax and git diff whitespace checks pass."
+  ],
+  "limits": [
+    "Unsupported schema is injected data, not physical disk corruption.",
+    "Background visibility event is simulated; no operating-system power loss.",
+    "Broader crash phases, art, performance, player walkthrough and full original plan acceptance remain open."
+  ]
+}
