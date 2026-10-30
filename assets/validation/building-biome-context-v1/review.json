@@ -1,0 +1,248 @@
+{
+  "status": "Reviewed static scope; no additional blocking sprite defect observed",
+  "daylightContexts": 243,
+  "buildingAppearances": 27,
+  "biomes": [
+    "mata-atlantica",
+    "cerrado",
+    "caatinga"
+  ],
+  "zooms": [
+    0.65,
+    1,
+    1.8
+  ],
+  "plainLightingViews": 81,
+  "reviewedBoards": [
+    {
+      "file": "artifacts/building-biome-context-final/mata-atlantica-zoom-1-group-1.png",
+      "sha256": "28435f960b2b551b6065a1d0a80083d39406b9371472e4fc576f93ae81286406",
+      "zoom": 1,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": false
+    },
+    {
+      "file": "artifacts/building-biome-context-final/mata-atlantica-zoom-1-group-2.png",
+      "sha256": "2ced7e395d3b2334a501656d2da4eb1048319469eb6ef797f87f30897590fe75",
+      "zoom": 1,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-final/mata-atlantica-zoom-1-group-3.png",
+      "sha256": "d5f0ddfb02fa2b2c293680b78fb67d5e75034fa6cdfe24424d56cd6066edb5cd",
+      "zoom": 1,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-final/cerrado-zoom-1-group-1.png",
+      "sha256": "90ce5ad5d9ea9c36cdf485d925bd1065144517021a31aab95233b736217638fa",
+      "zoom": 1,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": false
+    },
+    {
+      "file": "artifacts/building-biome-context-final/cerrado-zoom-1-group-2.png",
+      "sha256": "68671a9ba5e33976720ca3383ce9543da0f5ff255d14e3442de2c073e087b73c",
+      "zoom": 1,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-final/cerrado-zoom-1-group-3.png",
+      "sha256": "7cf20e87f5c0f873276ea45ef651ca85c06206d2ea64931b5afb75c34751b2b5",
+      "zoom": 1,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-final/caatinga-zoom-1-group-1.png",
+      "sha256": "9cf91af1763becdb4debce139e073a0778bb6016daa51ee0a01cc05359911571",
+      "zoom": 1,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": false
+    },
+    {
+      "file": "artifacts/building-biome-context-final/caatinga-zoom-1-group-2.png",
+      "sha256": "68c3e9e987efb0af388aab4d95296bb938d724bd31ef71659927da9163ff880e",
+      "zoom": 1,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-final/caatinga-zoom-1-group-3.png",
+      "sha256": "bcf6ec37d73904cab2624c223466966beb43fc26abe78f408dc0a826fd6e0963",
+      "zoom": 1,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-close-final/mata-atlantica-zoom-1.8-group-1.png",
+      "sha256": "6f6b77b109339e2e6289c45f070530f6cc9c540d24a36ca13881f13358114164",
+      "zoom": 1.8,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": false
+    },
+    {
+      "file": "artifacts/building-biome-context-close-final/mata-atlantica-zoom-1.8-group-2.png",
+      "sha256": "b4a72a14ca0bbc65e68878ef8ee4b87f29d9a11b0981773bedad8ac19e54eec0",
+      "zoom": 1.8,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-close-final/mata-atlantica-zoom-1.8-group-3.png",
+      "sha256": "28e99d25e56104a6154d6b605ec4b01f19cdea67e591790d3442ee3ed04fa430",
+      "zoom": 1.8,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-close-final/cerrado-zoom-1.8-group-1.png",
+      "sha256": "d2f9bd3ceb8201e47d0fbb0b0c75bb11da51f990f23b87ddfa02b2b47b75330e",
+      "zoom": 1.8,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": false
+    },
+    {
+      "file": "artifacts/building-biome-context-close-final/cerrado-zoom-1.8-group-2.png",
+      "sha256": "822eb26464209f9a80cdba8f4f8a01588b21c63e8f83529fb0f9f25545404cd5",
+      "zoom": 1.8,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-close-final/cerrado-zoom-1.8-group-3.png",
+      "sha256": "f155c57e8bcc956a0b9b8f0fc2ea02d5b85678a69fcfac2afeb19802d79a76d8",
+      "zoom": 1.8,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-close-final/caatinga-zoom-1.8-group-1.png",
+      "sha256": "72ead2458f11cc65223830e5e28ca65809823495e1d25b192c3b345c8da88dec",
+      "zoom": 1.8,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": false
+    },
+    {
+      "file": "artifacts/building-biome-context-close-final/caatinga-zoom-1.8-group-2.png",
+      "sha256": "eb62889a304a13848901bda6408c9a35a2cfbd27d4a2bdc07cce2d84af9d2063",
+      "zoom": 1.8,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-close-final/caatinga-zoom-1.8-group-3.png",
+      "sha256": "3cc50c24e1b9e9ef49ad5264002c9a73f5f85f7eebfe9937adb30d716f077bc4",
+      "zoom": 1.8,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-overview-final/mata-atlantica-zoom-0.65-group-1.png",
+      "sha256": "4cdef6401d2a52e9866f1586ec5c8dd367f5d734b7370bce58e7e474b8a2f50f",
+      "zoom": 0.65,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": false
+    },
+    {
+      "file": "artifacts/building-biome-context-overview-final/mata-atlantica-zoom-0.65-group-2.png",
+      "sha256": "3ea425aef948aeb4c5c4c3e162e5af84f66ff70679035eccb63fea9e64737aaa",
+      "zoom": 0.65,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-overview-final/mata-atlantica-zoom-0.65-group-3.png",
+      "sha256": "a5df9780e5c8f97cfc02a5f69e9236713080883a2dd84019591367cb9841666b",
+      "zoom": 0.65,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-overview-final/cerrado-zoom-0.65-group-1.png",
+      "sha256": "f8d38a7739829984c0234a3e84cab47b1e89da1ed607ad5e42c191e49aafc372",
+      "zoom": 0.65,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": false
+    },
+    {
+      "file": "artifacts/building-biome-context-overview-final/cerrado-zoom-0.65-group-2.png",
+      "sha256": "774e3bd0062c1342197e1d4675b27c113c680c6fb20f0761f972e89bd6068a2a",
+      "zoom": 0.65,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-overview-final/cerrado-zoom-0.65-group-3.png",
+      "sha256": "655a1c4e8489d1230fee1cbabef93ab616f0204f36fdbc1ab3713545bbcbdca6",
+      "zoom": 0.65,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-overview-final/caatinga-zoom-0.65-group-1.png",
+      "sha256": "a843581802b6f1abb981923f468bc4629f18c7514ba273d0d3ad8be430f6e4b1",
+      "zoom": 0.65,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": false
+    },
+    {
+      "file": "artifacts/building-biome-context-overview-final/caatinga-zoom-0.65-group-2.png",
+      "sha256": "4d30778983838aab4cff98a16e6abe9bb6d4301dcdb62b843c4d4afa3ae2adee",
+      "zoom": 0.65,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    },
+    {
+      "file": "artifacts/building-biome-context-overview-final/caatinga-zoom-0.65-group-3.png",
+      "sha256": "3763f11f287710ccef41e8838c52ef60ec11ddc9693848cd511adbf76d054f18",
+      "zoom": 0.65,
+      "entries": 9,
+      "inspected": true,
+      "samePixelsAsEarlierCapture": true
+    }
+  ],
+  "findings": [
+    "Painted clay, timber, plaster and equipment remain coherent beside the reference home; silhouettes are distinct at overview scale.",
+    "Doorways, shed headroom, workshop worktop, streetlight height and small utility/compost scale remain plausible beside Iara at the three reviewed zooms.",
+    "Road and ground contacts show no added opaque foundation platform or newly observed gap requiring artwork replacement in these controlled daylight views.",
+    "Hydro uses a native eligible bank; the capture camera was corrected to keep the entire reference home visible. Every target/reference silhouette now passes explicit scene bounds.",
+    "Plain night views preserve geometry and separate lit windows/fixtures from unpowered states; they do not establish whole-scene night palette acceptance."
+  ],
+  "limits": [
+    "Controlled static shared-renderer compositions, not authored-scenario feasibility or all neighbor layouts.",
+    "Daylight terrain only; contextual night/rain and lighting transitions remain open.",
+    "Crops, empty/stocked animal variations, construction/relocation states, nature-species sweep and resident customization/motion remain separate required reviews.",
+    "Original source approval is not inferred from installed assets or this agent review."
+  ],
+  "runtimeArtworkChanged": false
+}

@@ -1,0 +1,514 @@
+{
+  "scope": "Exact live-check canvases, tiled without rescaling artwork at native game scale. Plain ground plus footprint and original resident reference. Not regional terrain, road, motion or all crop/construction/animal states.",
+  "inputs": {
+    "scripts/review-building-checks-boards.mjs": "e003dc2e4ec8a6d014398fdd30d8d1c239bc398b534288e9ecd15705a8eccbd8",
+    "web/artwork/checks.html": "5c0acb09585655e6d563ecbd4fe04508b1dc1372538cf164c099a4a1234949ef",
+    "web/artwork/studio.css": "fca1cd0d1e4779b587101b97f1fd55d5c1900d9fd125bbed1048d010a6f1564b",
+    "web/artwork/checks.js": "b2125667cf64cddf759f91b3c1b649a54a95627bc27326038d9a7e913e701262",
+    "web/artwork/catalog.js": "8fce0843ef17ada205bcce59a8fe1cedc58bb3c213aade5b1fd0706887c756ff",
+    "web/artwork/pixel-checks.js": "ce9d86667e89468e9a3bb6cc8907df1d0fc17ce33e5aa6986358dc7fbf139c75",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/building-art.js": "977312b8c88e4d700fadff2cb654a3e20a35501dd1560779b830dcbfbb6eeace",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/crop-art.js": "e75beb185b763eb4f18dc984c6d2b3e12fecc0348b3c91ebe8e349cbb174685c",
+    "web/building-footprints.js": "4437a07f72209817dc197b24314018362f1abf68966de099a062c933525babf1",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/power.js": "b2c35f578b2b8d8200fcd1d4c8d66638dbc9397e46422c9e8cf643f9cf77940f",
+    "web/dev/tools.js": "5233d3e60272aa951bebd0d3bc5c4b0962f22a5fa5af62c12c3f9407562280d1",
+    "web/regional-art.js": "b7a23c741fcb76ea47d911f9bcd07a9cc8488f81c6a1a18c5232e744b394c3bb",
+    "web/nature-art.js": "389a97d806cbf7d286b3ebedeeabac390770208672529d494444bf1034e255b0",
+    "web/battery-art.js": "48d2c00ba144080d40c048ea3d3edfe4811e02f456af07c851efbb6487bc2887",
+    "web/paint-cache.js": "f070b4e16eeb75c077b26009201fef77ca246a9c202664730bc81dda35cc053c",
+    "web/economy-art.js": "b9a9f15be3bdc0f11dda6de42777b34b0f70b250debe1612b9729c9957a6333a",
+    "web/chickens.js": "f438c1d08c0ebec511511288b2eef6149825b61509e9dd2809244d055798021a",
+    "web/building-projection.js": "e64a3306774ed0d6d8aa070a6b91aacc28b129ac3bfbe7c244df0532bf6f76de",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf",
+    "web/greenhouse-layout.js": "dce24b4528d6c942c6afcc93e32b810fdac2018aa8a0eebad2d3b2fdcbbb07b8",
+    "web/building-silhouettes.js": "247be59f561d36f2400b68ceb0c1266d5f19c2864254c4d95a52892c9b670a43",
+    "web/sandbox-rules.js": "c4d708f49592384ed6f6920c85f15f2ef03cc239de08cb8026066c00ffa98b11",
+    "web/dev/scenarios.js": "eaec035f8ebccb6af1f3020447d31d28af02d212344894c210e692250a87c3a3",
+    "web/dev/utility-planner.js": "4568d42503a6c96a3ce683ad06ff8c51f3849c2bbebdb50c2c376c303824926f",
+    "web/habitats.js": "63ebeab1df2ac631ec3b0a3bd250d5f7a2e6372fdd55a70f446e3853947aa5a6",
+    "web/dev/center-layout.js": "4a07ccd7a6de0b821a87e3db64453e8832b1cd3ab183cdd271bcd35640b369e4",
+    "web/dev/story-fixture.js": "244d62d10fd3de745b5a58c4536c4c2a071c7198b592fda30529ec77c557370d",
+    "web/dev/autonomy-fixture.js": "91c6bc3a3712710779163da8694e4036d403b9d3be02f1746f2a129a17ed946e",
+    "web/dev/maintenance-fixture.js": "969ee72eb0319da98a1b8b2c378f6cb0a92e99a4268d5a3aceade84f4a919634",
+    "web/dev/sandbox-fixture.js": "051f28d1ddfe1aadb5765d41b4b4ea53eb44612789a9683539eac9877d49ab87",
+    "web/dev/material-fixture.js": "812ecd42fe030b2652ae8830eddef00f00fc9dd60c7db4c69cb6a87ff2fe64be",
+    "web/dev/art-preview.js": "f6d7b848232873fc3c978904160d99d2c6d13549191a570319c7e9d91358d288",
+    "web/dev/electrical-fixture.js": "c6db06b3a7269b1de79ea041e3f7248f8c69b2a7c842fcc7f68ee08fe57a2251",
+    "web/dev/climate-fixture.js": "76f1986a9af883764d5252dfe41088a537e031da03aefffffbf09c6aeefc44f5",
+    "web/pkg/solar_friends.js": "d277c6ebfda846e79d2d25df61b5c0bfe1f8a45c6e4296e45f669ed9d8e9c9eb",
+    "web/polish.js": "ba6967e4f65af49206071c134144fd51812ff92d2a312962cae77f50f365a4a9",
+    "web/battery-plots.js": "327faa1e4c9f97f173eff8f5de53250dbdcc72e845b23aedbbecaa857d9b3e84",
+    "web/relationships.js": "67430c42f420a63a2c6392fd709b451d40f4678297dfc3d90021513cccb014e9",
+    "web/resource-sites.js": "9a95c65342707d4f07ad8904dd896600d70a94c392962b44d040ef8fd0fc33b8",
+    "web/art/recovered-battery.png": "9cc9f12a8c414b81d68b45a4348b7ec55735e80c0bb6eaf098dd3681f604a2b6",
+    "web/art/starter-shed-refined.png": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+    "web/art/orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+    "web/art/apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+    "web/art/goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+    "web/art/economy-atlas-v2.png": "70c115a50bfffd4b4c6808ebb1375e5bc3c6f74d5507bcb797def54886827e06",
+    "web/art/hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+    "web/art/hydro-night.png": "27a5839e924ca96e89989e150117b44e2ca5566b504f304f82a62f115bd91cb2",
+    "web/art/eco-toilet-tall.png": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+    "web/art/eco-toilet-tall-night.png": "faa4b2a5f11f6e579e4bedadec583b946494b8514c2adde2c8fb8047812c8880",
+    "web/art/banana-treatment.png": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
+    "web/art/banana-treatment-night.png": "fc851ec1f43c2a3294f31253716da061394adc2a7fcc99bfb5508ec93e73e7b4",
+    "web/art/wetland-square-v2.png": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+    "web/art/biodigester-night.png": "ff2327fd6479d3682323c0ffc7f2423a009a52547da3d4c145aac9f2b3332a24",
+    "web/art/biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+    "web/art/warehouse-night.png": "a3922fe7eae2cee37991410d89b56a82bba5940a53b2e71c53127efc35447164",
+    "web/art/warehouse.png": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+    "web/art/solar-farm.png": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+    "web/art/streetlight.png": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+    "web/art/streetlight-night.png": "f898f34ec0a95d3f8f39995b76be5ab8774034c96d73578d020b9e181a83c131",
+    "web/art/solar-farm-night.png": "02f5502b3f9f67a3876237f16882a2773b702c623b1123b647bf185b51fea92b",
+    "web/art/garden-simple-isometric.png": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+    "web/art/village-atlas-isometric.png": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+    "web/art/village-atlas-isometric-night.png": "b9ce6e18a78cfcf33b68b104b0891b7e525835ae8df3bb9a61ea4ef235fe8b01",
+    "web/art/garden-simple-isometric-night.png": "63f00e1ed22e677d962b506a510ce8c48bc2e1a5bcbc3d3b2cb68f1f59c9e72f",
+    "web/art/greenhouse-isometric-night.png": "19a034b2826528e21160a54f6a3c0dec4dd922cfdcf2bcf78b3ba83b980f8f9d",
+    "web/art/greenhouse-isometric.png": "6bc7925077a4089014e8973979cfaa3e242a12cf400888d27998c6aac0350ee2",
+    "web/art/cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+    "web/art/compost-isometric.png": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+    "web/art/cistern-isometric-night.png": "17cbfc815a1e73d0fff621483e390f02fc77fdc4e033e11ec5329e34c71bc78e",
+    "web/art/compost-isometric-night.png": "9171162eaf433946480dcacf7c0ad6db2b51f1a9b1ef1c609209b9344c5754a4",
+    "web/art/square-isometric.png": "76ec6da02bc5b4575b556019ffbfe74c1a092d32c3e5cbd21d74945f2adf2c91",
+    "web/art/square-isometric-night.png": "fdf9c4d571d2584a530e929d38017128843f3bb33f85c89b4b44ad1cc99c8378",
+    "web/art/workshop-isometric.png": "fc194eb60c86435ae750c13b4bcb5c9a59c5897e63b2debcb29b1cb960eac4a7",
+    "web/art/coop-isometric.png": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+    "web/art/workshop-isometric-night.png": "d52f4e7e2f9b8e71ecf4553583dee4c016ea47a4a1867a13f1a5f9a25c41fd9d",
+    "web/art/home-veranda-night.png": "3a9e0e11fc2cd8bc81b415007a16b7d012d60e214d5f26782b52327ef51c5e3b",
+    "web/art/coop-isometric-night.png": "c6e5af120dcce0f34414521247b33914c5eeca33ef270e2ceeb74b36f9d2724c",
+    "web/art/home-veranda.png": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+    "web/art/home-gable.png": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+    "web/art/home-gable-night.png": "3385f279c694fb380dac3469ea18f36dff26cca0e5720700e88235cb2bde2740",
+    "web/art/home-courtyard.png": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+    "web/art/home-courtyard-night.png": "12aec649596f296dd0904266a2247ee6b78197d476c4e2f61169acca3ec07205",
+    "web/art/adobe-gable.png": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+    "web/art/adobe-gable-night.png": "471e9510f73406a82124940f2f77cd71f48333adb12f61bc58f9e076cccf9a7a",
+    "web/art/adobe-veranda.png": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+    "web/art/adobe-veranda-night.png": "0ab2a6b62393681e7bc44ff2ea319a6ed60bf84bfcb665db7b8e5be18024e655",
+    "web/art/goat-pasture-empty-v1.png": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+    "web/art/mata-atlantica-atlas.png": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+    "web/art/animations/iara.png": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+    "web/art/terrain-atlas.png": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+    "web/art/animations/bento.png": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+    "web/art/animations/luz.png": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+    "web/art/animations/caua.png": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+    "web/art/animations/nina.png": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+    "web/art/residents-cistern.png": "ba083df21043bbca023c9e738974e6613b1b8c9d4774c1cc69138f612d063ad3",
+    "web/art/chickens.png": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+    "web/art/animations/iara-idle.png": "3d2510219502ef9b7e11872009672cf6a510ef2341abb6fd90888b8abc1d6849",
+    "web/art/animations/bento-idle.png": "b08b98641ea263b717fe3f77476a72e58e4c7cc299adeeaea3b1f9d90df97943",
+    "web/art/animations/luz-idle.png": "c37a9572fe8d3c0c4085d1c6595adefdbc2c26f70dd016fb0d5ba02e17bdeb52",
+    "web/art/animations/caua-idle.png": "bed9db91f965fcf36585a2bd46257baaff07bd8144bae7b085915e204c90fc97",
+    "web/art/animations/bento-activities.png": "37b8f2893285e943edf8c5af8274199362f1e908a129acb4ccf9d09435549530",
+    "web/art/animations/nina-idle.png": "5a95ba9e25991ea97bb3e7e1e225ab1b6423e5c53449d51195e6877209ea7116",
+    "web/art/animations/iara-activities.png": "29dd26deb5204d648ca37abdb01931db27d05b0b3827e32bf1d944789fcc7711",
+    "web/art/animations/caua-activities.png": "8234d1c277c528b0a9917da578167c79829de9f80f6c8b289c926c63575bdc6b",
+    "web/art/animations/luz-activities.png": "5ef0f67c8af7a4f9d0d7d212f5d72495d06f5a4a7ee478840d054367d859da70",
+    "web/art/animations/nina-activities.png": "f58b8323bade79235a119d25b53d135dfbba844c9ca8cb70867d91ab5058a570",
+    "web/art/crops.png": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+    "web/art/field-crops.png": "ca755cb0aced1ef12ec69284c915490e59e5207961d5fb0a4d90fdf5913c219e",
+    "web/art/landscape-details.png": "a5212211cc3d8bca0250b3990a9dcc90ca3bbd3d27fa9b1007d85b3dc931ae56",
+    "web/art/starter-shed-isometric.png": "100e91d809dec8731c7e3095a0f9dc33ce397528b559837aaef376ba04c26ad1",
+    "web/art/economy-atlas.png": "94af1f73607fa3ae7710f612fdfb8bae679480fe79e66f778ec4aff990249d4b",
+    "web/art/starter-shed.png": "edca1e619b1738a9defc86b2873e3773eddff10a2135a9dcd9aa7ea090fa3e7b",
+    "web/art/starter-shed-model.png": "0c8dbb9862a9e62e044f985ec0f108538ee694d2ed99ae29923c42360f52e67e",
+    "web/art/starter-shed-model-night.png": "31c9f26e4821752f8efcc408974dda500db327e9cc6e376832430cdb6336a752",
+    "web/art/starter-shed-painted.png": "ca06d1412a02251ef110e2aebb3f42c74fe08db549d6cb77a4fcb4fbaa9045b1",
+    "web/art/eco-toilet.png": "057263ac0ebc03804d83cf60e374abb2e2b337221ac670f9cd79265562d4e2ec",
+    "web/art/eco-toilet-night.png": "6897f45456fafd0357e6043007c44a29baac4a0064636a37af3f8b157dd474fb",
+    "web/art/cerrado-vegetation-v1.png": "1542d0c14fa9cfddc83ec0e1a04e5ef5be34fcf1273d93d4eb13c2c8f5f359a6",
+    "web/art/caatinga-vegetation-v1.png": "522999ec80e708b3203cb6f59a2b90067d3d7eb2f7265b82d6e7815854c26290",
+    "web/art/characters/prototype-v1/hair-curls-rejected-v1.png": "895948a50450f8b7187dfdae05e748a6d2f0afb16a7b308a93be738ffaa45d10",
+    "web/art/characters/prototype-v1/body-neutral-base.png": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+    "web/art/characters/prototype-v1/hair-curls-rejected-v2.png": "5c3f5cd3952e3bf8a9ec04240ca7f37583cafbd0868a043041909c5ed5bfafc5",
+    "web/art/regional-ground-v1.png": "acdad558e0db68fb04760f2a27d44beaf79eec89d6b02d583e35586748bbfeb1",
+    "web/art/characters/prototype-v1/head-position-guide.png": "300776cc1cf717ae7045bbd9f543ca9eb66bf7c27b4971dc587a613b64c8939e",
+    "web/art/wetland.png": "037dec072b3c8cc37d8a25874cbb2ad154f2f54e82cc489fdb7199516936400b",
+    "web/art/wetland-night.png": "e81b8e41cc5c2d4bc920ede7b62b34d90f0f94b6183b662950d14d7d0c6ebf8b"
+  },
+  "boards": [
+    {
+      "file": "buildings-1.png",
+      "sha256": "42be6f0c85a2644c1d96555fbbf21a2b7cba00ecd1bc2d46a293e55c4df01c06",
+      "entries": [
+        {
+          "key": "shed",
+          "state": "day"
+        },
+        {
+          "key": "orchard",
+          "state": "day"
+        },
+        {
+          "key": "goat_pasture",
+          "state": "day"
+        },
+        {
+          "key": "apiary",
+          "state": "day"
+        },
+        {
+          "key": "hydro",
+          "state": "day"
+        },
+        {
+          "key": "eco_toilet",
+          "state": "day"
+        },
+        {
+          "key": "banana_treatment",
+          "state": "day"
+        },
+        {
+          "key": "wetland",
+          "state": "day"
+        },
+        {
+          "key": "biodigester",
+          "state": "day"
+        }
+      ]
+    },
+    {
+      "file": "buildings-2.png",
+      "sha256": "5dfb1e7155e8db822a710e263fb0d1ff00311ae40ac7294efcc3995c23504bc5",
+      "entries": [
+        {
+          "key": "warehouse",
+          "state": "day"
+        },
+        {
+          "key": "solar_farm",
+          "state": "day"
+        },
+        {
+          "key": "streetlight",
+          "state": "day"
+        },
+        {
+          "key": "home",
+          "state": "day"
+        },
+        {
+          "key": "kitchen",
+          "state": "day"
+        },
+        {
+          "key": "grove",
+          "state": "day"
+        },
+        {
+          "key": "garden",
+          "state": "day"
+        },
+        {
+          "key": "greenhouse",
+          "state": "day"
+        },
+        {
+          "key": "well",
+          "state": "day"
+        }
+      ]
+    },
+    {
+      "file": "buildings-3.png",
+      "sha256": "3513a38cdfd39a9bbe3d000b55d62c593231073d658d6a10b9fd0385777f7740",
+      "entries": [
+        {
+          "key": "compost",
+          "state": "day"
+        },
+        {
+          "key": "square",
+          "state": "day"
+        },
+        {
+          "key": "workshop",
+          "state": "day"
+        },
+        {
+          "key": "coop",
+          "state": "day"
+        },
+        {
+          "key": "home-veranda",
+          "state": "day"
+        },
+        {
+          "key": "home-gable",
+          "state": "day"
+        },
+        {
+          "key": "home-courtyard",
+          "state": "day"
+        },
+        {
+          "key": "adobe-gable",
+          "state": "day"
+        },
+        {
+          "key": "adobe-veranda",
+          "state": "day"
+        }
+      ]
+    },
+    {
+      "file": "buildings-4.png",
+      "sha256": "51b641a744ae94438ed718f6cb530b5c89d1a4cd344ca8da2f62b3466f561180",
+      "entries": [
+        {
+          "key": "shed",
+          "state": "powered-night"
+        },
+        {
+          "key": "orchard",
+          "state": "powered-night"
+        },
+        {
+          "key": "goat_pasture",
+          "state": "powered-night"
+        },
+        {
+          "key": "apiary",
+          "state": "powered-night"
+        },
+        {
+          "key": "hydro",
+          "state": "powered-night"
+        },
+        {
+          "key": "eco_toilet",
+          "state": "powered-night"
+        },
+        {
+          "key": "banana_treatment",
+          "state": "powered-night"
+        },
+        {
+          "key": "wetland",
+          "state": "powered-night"
+        },
+        {
+          "key": "biodigester",
+          "state": "powered-night"
+        }
+      ]
+    },
+    {
+      "file": "buildings-5.png",
+      "sha256": "d71377d5655b859d9eec0663557be05c509f880a89b935e5ee1d1c708f91f920",
+      "entries": [
+        {
+          "key": "warehouse",
+          "state": "powered-night"
+        },
+        {
+          "key": "solar_farm",
+          "state": "powered-night"
+        },
+        {
+          "key": "streetlight",
+          "state": "powered-night"
+        },
+        {
+          "key": "home",
+          "state": "powered-night"
+        },
+        {
+          "key": "kitchen",
+          "state": "powered-night"
+        },
+        {
+          "key": "grove",
+          "state": "powered-night"
+        },
+        {
+          "key": "garden",
+          "state": "powered-night"
+        },
+        {
+          "key": "greenhouse",
+          "state": "powered-night"
+        },
+        {
+          "key": "well",
+          "state": "powered-night"
+        }
+      ]
+    },
+    {
+      "file": "buildings-6.png",
+      "sha256": "31216097982be771890460f270dae74244089a41584e34a9306b2c26578fb0a1",
+      "entries": [
+        {
+          "key": "compost",
+          "state": "powered-night"
+        },
+        {
+          "key": "square",
+          "state": "powered-night"
+        },
+        {
+          "key": "workshop",
+          "state": "powered-night"
+        },
+        {
+          "key": "coop",
+          "state": "powered-night"
+        },
+        {
+          "key": "home-veranda",
+          "state": "powered-night"
+        },
+        {
+          "key": "home-gable",
+          "state": "powered-night"
+        },
+        {
+          "key": "home-courtyard",
+          "state": "powered-night"
+        },
+        {
+          "key": "adobe-gable",
+          "state": "powered-night"
+        },
+        {
+          "key": "adobe-veranda",
+          "state": "powered-night"
+        }
+      ]
+    },
+    {
+      "file": "buildings-7.png",
+      "sha256": "ec814ae99b767b54eb91954cd888b3f0bfdb27d27901685c6a2dccdff6c787d7",
+      "entries": [
+        {
+          "key": "shed",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "orchard",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "goat_pasture",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "apiary",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "hydro",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "eco_toilet",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "banana_treatment",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "wetland",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "biodigester",
+          "state": "unpowered-night"
+        }
+      ]
+    },
+    {
+      "file": "buildings-8.png",
+      "sha256": "7a919ad74e177d29393b6f9ca590f78168dbd0faed43bdd9afbaada8775e0361",
+      "entries": [
+        {
+          "key": "warehouse",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "solar_farm",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "streetlight",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "home",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "kitchen",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "grove",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "garden",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "greenhouse",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "well",
+          "state": "unpowered-night"
+        }
+      ]
+    },
+    {
+      "file": "buildings-9.png",
+      "sha256": "b624d0ec952d8b42d63497596e8e2571cdf2135277d255c979cf79e6c07f61db",
+      "entries": [
+        {
+          "key": "compost",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "square",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "workshop",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "coop",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "home-veranda",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "home-gable",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "home-courtyard",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "adobe-gable",
+          "state": "unpowered-night"
+        },
+        {
+          "key": "adobe-veranda",
+          "state": "unpowered-night"
+        }
+      ]
+    }
+  ]
+}

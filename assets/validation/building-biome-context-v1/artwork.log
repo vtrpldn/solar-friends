@@ -1,0 +1,3 @@
+Artwork coverage: 332 hash-inventoried source files, 142 sprite entries, 19 verified bundle alias groups. Inventory is not visual acceptance.
+PASS: economy crop proportions and ground anchors match the rectangular source at three game zooms.
+PASS: 27 night variants, shared geometry, alpha, continuous day/night timing, and stable home variation previews
