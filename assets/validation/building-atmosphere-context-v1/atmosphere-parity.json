@@ -1,0 +1,88 @@
+{
+  "baselineCommit": "9b1cd94",
+  "baselineSha256": "c7af4afff0fb6e504344beb4b09468506e727bdf1e84606abd9f89d026525c0b",
+  "inputs": {
+    "web/main.js": "950bd11f94eceffe11e56ae5fe131a0244d9834863e4ad128bc9c1b2e1191316",
+    "web/world-atmosphere.js": "4241f136222191565c2e7900f0bcb7128df2fed32e497684372ce6a5efd3ddcf",
+    "web/night-lighting.js": "6f8e92f982122297cbc99b1b23c2e82cd8c9fa34c711f200b1b35bbf4bd9ac8e",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "scripts/verify-world-atmosphere.mjs": "f04b18b675a25b8b5239e96915d019c3054bebe63f126bbfa71686bca3378932"
+  },
+  "syntheticComparisons": 776,
+  "worlds": [
+    {
+      "biome": "mata-atlantica",
+      "minutes": 600,
+      "buildings": 256,
+      "residents": 12,
+      "exactWorldPng": true,
+      "sha256": "80bffa7f8aa8cb137262e96813a3c768ded7a9488735dd2d3e0e7f5ee42acd54"
+    },
+    {
+      "biome": "mata-atlantica",
+      "minutes": 1080,
+      "buildings": 256,
+      "residents": 12,
+      "exactWorldPng": true,
+      "sha256": "80cae7fd353bb4b3bbfe60831a1200536ce74739ad79ead3eabb6bdcea95f64e"
+    },
+    {
+      "biome": "mata-atlantica",
+      "minutes": 1260,
+      "buildings": 256,
+      "residents": 12,
+      "exactWorldPng": true,
+      "sha256": "a0b64e220b1d68fbaa88999fbe71256b7cad2310446b181e2e28d68821969ff5"
+    },
+    {
+      "biome": "cerrado",
+      "minutes": 600,
+      "buildings": 256,
+      "residents": 12,
+      "exactWorldPng": true,
+      "sha256": "8fa96230a79e70b424f84e7f55d28990f0be8315c974c45a7f2e29b83099bcf9"
+    },
+    {
+      "biome": "cerrado",
+      "minutes": 1080,
+      "buildings": 256,
+      "residents": 12,
+      "exactWorldPng": true,
+      "sha256": "0784d94ffdcd3c44beb9f76d3812785fc2a5080c37f079e2a0104fdfbbbfc0eb"
+    },
+    {
+      "biome": "cerrado",
+      "minutes": 1260,
+      "buildings": 256,
+      "residents": 12,
+      "exactWorldPng": true,
+      "sha256": "7c76b32a5dbb574f74872d9787bc3cb2a954b8645c1bb72b5c062f6c0e6273ce"
+    },
+    {
+      "biome": "caatinga",
+      "minutes": 600,
+      "buildings": 256,
+      "residents": 12,
+      "exactWorldPng": true,
+      "sha256": "e745f5938986038fba72ac4dfb2a7c7e26e8c6167539ef7f28c49f1a4dd0f319"
+    },
+    {
+      "biome": "caatinga",
+      "minutes": 1080,
+      "buildings": 256,
+      "residents": 12,
+      "exactWorldPng": true,
+      "sha256": "f8c48614d3f1c9a11040c4e377265ee878457383a61c17b639dde0ef2be78825"
+    },
+    {
+      "biome": "caatinga",
+      "minutes": 1260,
+      "buildings": 256,
+      "residents": 12,
+      "exactWorldPng": true,
+      "sha256": "5e2aec51daeb0a24e4ae2f878b1ccfcc88cdcf8bfcb5ac9053a4eb468e9554df"
+    }
+  ],
+  "browserErrors": [],
+  "scope": "Exact static before/after pixels for extracted final atmosphere shading. Real game maximum mixed fixtures across three biomes, day/twilight/night. Not visual art acceptance, animation continuity or performance."
+}

@@ -1,0 +1,14 @@
+{
+  "scope": "Shared final atmosphere extraction and source-bound controlled building context capture tooling. Not complete visual acceptance.",
+  "visualReview": {
+    "poweredNight": "Nine normal-zoom boards reviewed; final captures byte-identical to reviewed captures.",
+    "rain": "Mata Atlantica groups 1-3 and Cerrado groups 1-2 reviewed; remaining boards pending.",
+    "unpoweredNight": "Captured; contextual visual review pending."
+  },
+  "limitations": [
+    "Static normal zoom only for night and rain.",
+    "Controlled power appearance does not verify authored circuit operation.",
+    "Rain uses explicit native rainy-day overrides.",
+    "Lifecycle, motion, wider zooms and other original release gates remain open."
+  ]
+}

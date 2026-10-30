@@ -1,3 +1,4 @@
+import {paintWorldAtmosphere} from './world-atmosphere.js';
 import {createWorldBackdrop} from './world-backdrop.js';
 import {paintResidentShadow} from './resident-ground-shadow.js';
 import {creationPresentation} from './creation-presentation.js';
@@ -811,15 +812,7 @@ function render() {
     }
   }
   drawWeatherAir(ctx,weatherView);
-  const hour = (state.village.minutes % 1440) / 60;
-  // Continuous tropical daylight: sunrise around 06:00, sunset around 18:00.
-  const altitude = Math.sin(((hour - 6) / 12) * Math.PI);
-  const twilight = Math.max(0, 1 - Math.abs(altitude) / 0.3) * 0.16;
-  ctx.fillStyle = `rgba(237,150,84,${twilight})`;
-  ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = `rgba(17,31,65,${darkness * 0.62})`;
-  ctx.fillRect(0, 0, width, height);
-  if(darkness>0){ctx.save();ctx.globalCompositeOperation='screen';ctx.drawImage(lightLayer,0,0,lightLayer.width,lightLayer.height,0,0,width,height);ctx.restore();}
+  paintWorldAtmosphere(ctx,{minutes:state.village.minutes,darkness,width,height,lightLayer});
   if (darkness > 0) {
     for (const b of state.village.buildings.filter(
       (b) => b.progress >= 100 && ["home", "kitchen"].includes(b.kind),
