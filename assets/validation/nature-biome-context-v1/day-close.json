@@ -1,0 +1,6351 @@
+{
+  "complete": true,
+  "zoom": 1.8,
+  "lighting": "day",
+  "inputs": {
+    "scripts/review-nature-biome-context.mjs": "e76024547fb75a7d94976f8f600dda5b0e7add28737d61de235609a0c82b32e9",
+    "web/pkg/solar_friends.js": "d277c6ebfda846e79d2d25df61b5c0bfe1f8a45c6e4296e45f669ed9d8e9c9eb",
+    "web/editor/map-view.js": "a501342d33f63e1146def06c1291bb54d3291bf753ab4f9a62c5823d85843cd9",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/world-atmosphere.js": "4241f136222191565c2e7900f0bcb7128df2fed32e497684372ce6a5efd3ddcf",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/building-art.js": "977312b8c88e4d700fadff2cb654a3e20a35501dd1560779b830dcbfbb6eeace",
+    "web/power.js": "d37e60fba9e9e9057df3bf0b0fda4e6c4d8914f9d8041673627a7868e8694f0d",
+    "web/weather.js": "0aed62fb10fd022f0e79a21f73ed5fb69cdf0a8003ab577c8415bae654f2da24",
+    "web/sprite-frames.js": "0d31cabadb81a609ddc2f6fde08fd63b719440494d060b882e42d2b2d4c731af",
+    "web/regional-art.js": "b7a23c741fcb76ea47d911f9bcd07a9cc8488f81c6a1a18c5232e744b394c3bb",
+    "web/habitats.js": "63ebeab1df2ac631ec3b0a3bd250d5f7a2e6372fdd55a70f446e3853947aa5a6",
+    "web/editor/scene-layers.js": "045c4bf57886043d243f0cac6722f92bba5f1b505fc4a3da3449bcd9ea05e00e",
+    "web/editor/routes.js": "0d2c83154aa359e8fa508ea285961247a2d7a4487dd8e5ae21608c765386fa9b",
+    "web/utility-lines-art.js": "e1cc662f79b7beab542540ef9a923a7dd8f227dea6791ae48544d08f66fb559e",
+    "web/editor/batteries.js": "505a7fc8d07f09c13381d27e45c8797d6b57ef70a49e39b42b86b7b34839ac04",
+    "web/battery-art.js": "48d2c00ba144080d40c048ea3d3edfe4811e02f456af07c851efbb6487bc2887",
+    "web/chickens.js": "f438c1d08c0ebec511511288b2eef6149825b61509e9dd2809244d055798021a",
+    "web/resource-site-art.js": "a0601241ab8d107474b2989d16705b1a73a942617eaae3689af8c0485190f47f",
+    "web/economy-art.js": "b9a9f15be3bdc0f11dda6de42777b34b0f70b250debe1612b9729c9957a6333a",
+    "web/editor/sites.js": "59b51a11d34a80bf5ab155f4a13128dff228d1e965423063b2029a66271a52e8",
+    "web/crop-art.js": "e75beb185b763eb4f18dc984c6d2b3e12fecc0348b3c91ebe8e349cbb174685c",
+    "web/resident-look.js": "94f94dff5b280b57998d97ef94641e1850cbd5d2946ae61a3ed3b2f10367de5d",
+    "web/resident-appearance-library.js": "518acdb703b9eb9bff55a4c05b6c443761af48a53d905a5ee7d761ddbc409773",
+    "web/editor/prepare-terrain.js": "2263c3c79dd89d05bab83920966a9354c206cc533b2f464e2c7748e0ac44319d",
+    "web/editor/terrain-cache.js": "89b760d42a330deee375c4ea6775d98d96f371e82406d80f858676a8669a527d",
+    "web/editor/brush.js": "3bf5390061865456479d91f79f17b2b7db5987a6aeb6d5e88dbd06210ecd28c3",
+    "web/building-footprints.js": "4437a07f72209817dc197b24314018362f1abf68966de099a062c933525babf1",
+    "web/building-state-art.js": "2c66d34e1b2582b1509e6caa69cac0f5907f57ab38160d4d0fffc44f37429bef",
+    "web/nature-art.js": "389a97d806cbf7d286b3ebedeeabac390770208672529d494444bf1034e255b0",
+    "web/paint-cache.js": "f070b4e16eeb75c077b26009201fef77ca246a9c202664730bc81dda35cc053c",
+    "web/sandbox-rules.js": "c4d708f49592384ed6f6920c85f15f2ef03cc239de08cb8026066c00ffa98b11",
+    "web/building-projection.js": "e64a3306774ed0d6d8aa070a6b91aacc28b129ac3bfbe7c244df0532bf6f76de",
+    "web/editor/workspaces.js": "14fbe60d5f8c03293678c9fee736eb08ba4cf030b5a5b0c104c07f6486601a82",
+    "web/resource-sites.js": "9a95c65342707d4f07ad8904dd896600d70a94c392962b44d040ef8fd0fc33b8",
+    "web/resident-part-recipe.js": "44af0a70cad6a16790a6556d57c6e343bd982085565e3c577bfec9ba065953a1",
+    "web/greenhouse-layout.js": "dce24b4528d6c942c6afcc93e32b810fdac2018aa8a0eebad2d3b2fdcbbb07b8",
+    "web/terrain-revision.js": "f6dfcb06898799931676a227689d0a162b3a278525893c07b2d392c91ce90878",
+    "web/building-silhouettes.js": "247be59f561d36f2400b68ceb0c1266d5f19c2864254c4d95a52892c9b670a43",
+    "web/battery-plots.js": "327faa1e4c9f97f173eff8f5de53250dbdcc72e845b23aedbbecaa857d9b3e84",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/character-hair-colours.js": "612735bf2a5bb6219d5d68b1b5d187e6662480ecc114ec99d591ac9f91a92dfa",
+    "web/character-contact-atlas.js": "f0a232788518fd8151b1f42ba68d0b4586085a29b2dbfa4fb5eea204d43ad730",
+    "web/editor/journal.js": "e5ee57626eecacd22dda40297c98d25dffe20c7cd667564885a5bb97cf61d9e0",
+    "web/character-attachments.js": "2f88fee807c21ced70a762e2a1cb7169e9247a7c6136d81e37b235f1e67ac7cf",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/character-body-frames.js": "d4c94f1074ffc2bcc4798d991c7176a637d9747f3b1d54977427717412f2edd9",
+    "web/character-contact-frame.js": "c3353066c77f461d5f0158a09af24ccc9fcd18204818854621b24d00f84f9f42",
+    "web/art/recovered-battery.png": "9cc9f12a8c414b81d68b45a4348b7ec55735e80c0bb6eaf098dd3681f604a2b6",
+    "web/art/economy-atlas-v2.png": "70c115a50bfffd4b4c6808ebb1375e5bc3c6f74d5507bcb797def54886827e06",
+    "web/pkg/solar_friends_bg.wasm": "73737d324c82c5707d22d44dde04213c3be60371155bd0e7d280fae848d55ae6",
+    "web/art/starter-shed-refined.png": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+    "web/art/orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+    "web/art/apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+    "web/art/goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+    "web/art/hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+    "web/art/eco-toilet-tall.png": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+    "web/art/banana-treatment.png": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
+    "web/art/biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+    "web/art/wetland-square-v2.png": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+    "web/art/streetlight.png": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+    "web/art/warehouse.png": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+    "web/art/solar-farm.png": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+    "web/art/garden-simple-isometric.png": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+    "web/art/village-atlas-isometric.png": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+    "web/art/greenhouse-isometric.png": "6bc7925077a4089014e8973979cfaa3e242a12cf400888d27998c6aac0350ee2",
+    "web/art/compost-isometric.png": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+    "web/art/square-isometric.png": "76ec6da02bc5b4575b556019ffbfe74c1a092d32c3e5cbd21d74945f2adf2c91",
+    "web/art/cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+    "web/art/coop-isometric.png": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+    "web/art/workshop-isometric.png": "fc194eb60c86435ae750c13b4bcb5c9a59c5897e63b2debcb29b1cb960eac4a7",
+    "web/art/home-veranda.png": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+    "web/art/home-gable.png": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+    "web/art/home-courtyard.png": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+    "web/art/adobe-gable.png": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+    "web/art/adobe-veranda.png": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+    "web/art/goat-pasture-empty-v1.png": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+    "web/art/mata-atlantica-atlas.png": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+    "web/art/terrain-atlas.png": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+    "web/art/landscape-details.png": "a5212211cc3d8bca0250b3990a9dcc90ca3bbd3d27fa9b1007d85b3dc931ae56",
+    "web/art/animations/iara.png": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+    "web/art/animations/bento.png": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+    "web/art/animations/luz.png": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+    "web/art/animations/caua.png": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+    "web/art/animations/nina.png": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+    "web/art/caatinga-vegetation-v1.png": "522999ec80e708b3203cb6f59a2b90067d3d7eb2f7265b82d6e7815854c26290",
+    "web/art/cerrado-vegetation-v1.png": "1542d0c14fa9cfddc83ec0e1a04e5ef5be34fcf1273d93d4eb13c2c8f5f359a6",
+    "web/art/crops.png": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+    "web/art/regional-ground-v1.png": "acdad558e0db68fb04760f2a27d44beaf79eec89d6b02d583e35586748bbfeb1",
+    "web/art/field-crops.png": "ca755cb0aced1ef12ec69284c915490e59e5207961d5fb0a4d90fdf5913c219e",
+    "web/art/chickens.png": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+    "web/art/animations/iara-idle.png": "3d2510219502ef9b7e11872009672cf6a510ef2341abb6fd90888b8abc1d6849",
+    "web/art/animations/iara-activities.png": "29dd26deb5204d648ca37abdb01931db27d05b0b3827e32bf1d944789fcc7711"
+  },
+  "boards": [
+    {
+      "file": "mata-atlantica-zoom-1.8-day-group-1.png",
+      "sha256": "9e98b8aa3900f8a4af170f784ed3e4a5910541c5eecb7978a026e1cab8a420af",
+      "entries": [
+        {
+          "key": "jequitiba-rosa",
+          "artIndex": 0,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 101.17500311136246,
+            "top": 161.79750528931618,
+            "right": 278.82499688863754,
+            "bottom": 339.44749906659126
+          },
+          "treePixels": {
+            "left": 136,
+            "right": 264,
+            "top": 201,
+            "bottom": 334,
+            "alphaPixels": 9755
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jequitiba-rosa",
+          "artIndex": 0,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 55.5,
+            "top": 84.15,
+            "right": 324.5,
+            "bottom": 353.15
+          },
+          "treePixels": {
+            "left": 106,
+            "right": 305,
+            "top": 123,
+            "bottom": 348,
+            "alphaPixels": 22954
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jequitiba-rosa",
+          "artIndex": 0,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 35.92500311136246,
+            "top": 50.872505289316194,
+            "right": 344.07499688863754,
+            "bottom": 359.02249906659125
+          },
+          "treePixels": {
+            "left": 94,
+            "right": 322,
+            "top": 95,
+            "bottom": 354,
+            "alphaPixels": 30329
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jucara",
+          "artIndex": 1,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 120.48000240325928,
+            "top": 194.6160040855408,
+            "right": 259.5199975967407,
+            "bottom": 333.65599927902224
+          },
+          "treePixels": {
+            "left": 152,
+            "right": 226,
+            "top": 225,
+            "bottom": 326,
+            "alphaPixels": 4331
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jucara",
+          "artIndex": 1,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 85.2,
+            "top": 134.64000000000001,
+            "right": 294.8,
+            "bottom": 344.24
+          },
+          "treePixels": {
+            "left": 131,
+            "right": 261,
+            "top": 180,
+            "bottom": 338,
+            "alphaPixels": 10075
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jucara",
+          "artIndex": 1,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 70.08000240325927,
+            "top": 108.93600408554076,
+            "right": 309.9199975967407,
+            "bottom": 348.77599927902224
+          },
+          "treePixels": {
+            "left": 122,
+            "right": 271,
+            "top": 161,
+            "bottom": 344,
+            "alphaPixels": 13305
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "embauba",
+          "artIndex": 2,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 119.89500242471695,
+            "top": 193.62150412201882,
+            "right": 260.10499757528305,
+            "bottom": 333.8314992725849
+          },
+          "treePixels": {
+            "left": 149,
+            "right": 241,
+            "top": 216,
+            "bottom": 326,
+            "alphaPixels": 6011
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "embauba",
+          "artIndex": 2,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 84.3,
+            "top": 133.11,
+            "right": 295.7,
+            "bottom": 344.51
+          },
+          "treePixels": {
+            "left": 126,
+            "right": 281,
+            "top": 137,
+            "bottom": 340,
+            "alphaPixels": 14015
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "embauba",
+          "artIndex": 2,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 69.04500242471694,
+            "top": 107.1765041220188,
+            "right": 310.9549975752831,
+            "bottom": 349.08649927258494
+          },
+          "treePixels": {
+            "left": 117,
+            "right": 294,
+            "top": 111,
+            "bottom": 336,
+            "alphaPixels": 18480
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-day-group-2.png",
+      "sha256": "f407a02bb352bc4999287b7faf1e7d960f8edbe94ec2ae87db877f0338316e6b",
+      "entries": [
+        {
+          "key": "pau-brasil",
+          "artIndex": 3,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 112.87500268220901,
+            "top": 181.68750455975533,
+            "right": 267.124997317791,
+            "bottom": 335.9374991953373
+          },
+          "treePixels": {
+            "left": 136,
+            "right": 239,
+            "top": 208,
+            "bottom": 326,
+            "alphaPixels": 7565
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pau-brasil",
+          "artIndex": 3,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 73.5,
+            "top": 114.75,
+            "right": 306.5,
+            "bottom": 347.75
+          },
+          "treePixels": {
+            "left": 107,
+            "right": 280,
+            "top": 122,
+            "bottom": 333,
+            "alphaPixels": 17771
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pau-brasil",
+          "artIndex": 3,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 56.625002682209015,
+            "top": 86.06250455975533,
+            "right": 323.374997317791,
+            "bottom": 352.8124991953373
+          },
+          "treePixels": {
+            "left": 95,
+            "right": 293,
+            "top": 94,
+            "bottom": 336,
+            "alphaPixels": 23441
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "forest-ferns",
+          "artIndex": 4,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 171.3750005364418,
+            "top": 279.12327942894603,
+            "right": 208.6249994635582,
+            "bottom": 316.02297896771375
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 204,
+            "top": 287,
+            "bottom": 311,
+            "alphaPixels": 518
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "forest-ferns",
+          "artIndex": 4,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.5,
+            "top": 264.6511976047904,
+            "right": 216.5,
+            "bottom": 317.1122754491018
+          },
+          "treePixels": {
+            "left": 169,
+            "right": 212,
+            "top": 274,
+            "bottom": 312,
+            "alphaPixels": 1214
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "forest-ferns",
+          "artIndex": 4,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 160.1250005364418,
+            "top": 258.44887823134127,
+            "right": 219.8749994635582,
+            "bottom": 317.5791166922646
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 215,
+            "top": 269,
+            "bottom": 312,
+            "alphaPixels": 1596
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "bromeliads",
+          "artIndex": 5,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 173.1300004720688,
+            "top": 279.75546275666386,
+            "right": 206.8699995279312,
+            "bottom": 315.97539527638014
+          },
+          "treePixels": {
+            "left": 177,
+            "right": 202,
+            "top": 288,
+            "bottom": 311,
+            "alphaPixels": 404
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "bromeliads",
+          "artIndex": 5,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 166.2,
+            "top": 265.6237873754153,
+            "right": 213.8,
+            "bottom": 317.03906976744184
+          },
+          "treePixels": {
+            "left": 170,
+            "right": 209,
+            "top": 276,
+            "bottom": 312,
+            "alphaPixels": 968
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "bromeliads",
+          "artIndex": 5,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.23000047206878,
+            "top": 259.5673564443715,
+            "right": 216.76999952793122,
+            "bottom": 317.4949301601011
+          },
+          "treePixels": {
+            "left": 167,
+            "right": 212,
+            "top": 270,
+            "bottom": 312,
+            "alphaPixels": 1269
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-day-group-3.png",
+      "sha256": "15d4f18552ea5045695a3832e3eacc032b9f86eb76aafafee44000c5ee7cefdc",
+      "entries": [
+        {
+          "key": "meadow-wildflowers",
+          "artIndex": 6,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 170.20500057935715,
+            "top": 274.72590114712716,
+            "right": 209.79499942064285,
+            "bottom": 316.3539644297861
+          },
+          "treePixels": {
+            "left": 174,
+            "right": 204,
+            "top": 289,
+            "bottom": 311,
+            "alphaPixels": 507
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "meadow-wildflowers",
+          "artIndex": 6,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 161.7,
+            "top": 257.88599999999997,
+            "right": 218.3,
+            "bottom": 317.6214838709677
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 212,
+            "top": 278,
+            "bottom": 313,
+            "alphaPixels": 1193
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "meadow-wildflowers",
+          "artIndex": 6,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 158.05500057935714,
+            "top": 250.66890114712714,
+            "right": 221.94499942064286,
+            "bottom": 318.16470636527
+          },
+          "treePixels": {
+            "left": 162,
+            "right": 215,
+            "top": 273,
+            "bottom": 313,
+            "alphaPixels": 1583
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "dry-grasses",
+          "artIndex": 7,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 168.45000064373016,
+            "top": 271.138544968031,
+            "right": 211.54999935626984,
+            "bottom": 316.6239804862772
+          },
+          "treePixels": {
+            "left": 173,
+            "right": 206,
+            "top": 278,
+            "bottom": 312,
+            "alphaPixels": 827
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "dry-grasses",
+          "artIndex": 7,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 159,
+            "top": 252.36699029126214,
+            "right": 221,
+            "bottom": 318.0368932038835
+          },
+          "treePixels": {
+            "left": 163,
+            "right": 215,
+            "top": 261,
+            "bottom": 313,
+            "alphaPixels": 1967
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "dry-grasses",
+          "artIndex": 7,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 154.95000064373016,
+            "top": 244.32204011366207,
+            "right": 225.04999935626984,
+            "bottom": 318.642427088219
+          },
+          "treePixels": {
+            "left": 159,
+            "right": 219,
+            "top": 254,
+            "bottom": 314,
+            "alphaPixels": 2597
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "granite-outcrop",
+          "artIndex": 8,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 160.8450009226799,
+            "top": 256.9703461097743,
+            "right": 219.1549990773201,
+            "bottom": 317.69040405625356
+          },
+          "treePixels": {
+            "left": 165,
+            "right": 214,
+            "top": 269,
+            "bottom": 311,
+            "alphaPixels": 1421
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "granite-outcrop",
+          "artIndex": 8,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 147.3,
+            "top": 230.56976047904192,
+            "right": 232.7,
+            "bottom": 319.6775449101796
+          },
+          "treePixels": {
+            "left": 151,
+            "right": 228,
+            "top": 246,
+            "bottom": 312,
+            "alphaPixels": 3379
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "granite-outcrop",
+          "artIndex": 8,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 141.4950009226799,
+            "top": 219.25522634929524,
+            "right": 238.5049990773201,
+            "bottom": 320.52917651134334
+          },
+          "treePixels": {
+            "left": 145,
+            "right": 234,
+            "top": 237,
+            "bottom": 313,
+            "alphaPixels": 4475
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-day-group-4.png",
+      "sha256": "dd723f1513cacb874694625763f817c2c86ca287b8522bbf096cc758b8e360b2",
+      "entries": [
+        {
+          "key": "quartz-stones",
+          "artIndex": 9,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 165.52500075101852,
+            "top": 261.71686208941213,
+            "right": 214.47499924898148,
+            "bottom": 317.3331394126249
+          },
+          "treePixels": {
+            "left": 170,
+            "right": 208,
+            "top": 281,
+            "bottom": 310,
+            "alphaPixels": 795
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "quartz-stones",
+          "artIndex": 9,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 154.5,
+            "top": 237.87209302325581,
+            "right": 225.5,
+            "bottom": 319.12790697674416
+          },
+          "treePixels": {
+            "left": 159,
+            "right": 219,
+            "top": 266,
+            "bottom": 310,
+            "alphaPixels": 1870
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "quartz-stones",
+          "artIndex": 9,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 149.77500075101852,
+            "top": 227.65290860104005,
+            "right": 230.22499924898148,
+            "bottom": 319.897092900997
+          },
+          "treePixels": {
+            "left": 154,
+            "right": 223,
+            "top": 259,
+            "bottom": 311,
+            "alphaPixels": 2484
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "clay-ironstone",
+          "artIndex": 10,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 160.8450009226799,
+            "top": 253.17450193762778,
+            "right": 219.1549990773201,
+            "bottom": 317.97611275738285
+          },
+          "treePixels": {
+            "left": 165,
+            "right": 213,
+            "top": 273,
+            "bottom": 311,
+            "alphaPixels": 1378
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "clay-ironstone",
+          "artIndex": 10,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 147.3,
+            "top": 224.72999999999996,
+            "right": 232.7,
+            "bottom": 320.11709677419356
+          },
+          "treePixels": {
+            "left": 152,
+            "right": 225,
+            "top": 253,
+            "bottom": 313,
+            "alphaPixels": 3268
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "clay-ironstone",
+          "artIndex": 10,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 141.4950009226799,
+            "top": 212.5395019376278,
+            "right": 238.5049990773201,
+            "bottom": 321.0346611444796
+          },
+          "treePixels": {
+            "left": 147,
+            "right": 231,
+            "top": 245,
+            "bottom": 313,
+            "alphaPixels": 4315
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mossy-stones",
+          "artIndex": 11,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 164.9400007724762,
+            "top": 261.6308754138576,
+            "right": 215.0599992275238,
+            "bottom": 317.33961152798923
+          },
+          "treePixels": {
+            "left": 169,
+            "right": 210,
+            "top": 272,
+            "bottom": 311,
+            "alphaPixels": 1099
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mossy-stones",
+          "artIndex": 11,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 153.6,
+            "top": 237.7398058252427,
+            "right": 226.4,
+            "bottom": 319.1378640776699
+          },
+          "treePixels": {
+            "left": 158,
+            "right": 221,
+            "top": 251,
+            "bottom": 313,
+            "alphaPixels": 2598
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mossy-stones",
+          "artIndex": 11,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 148.7400007724762,
+            "top": 227.50077832647895,
+            "right": 231.2599992275238,
+            "bottom": 319.90854356682416
+          },
+          "treePixels": {
+            "left": 153,
+            "right": 226,
+            "top": 242,
+            "bottom": 314,
+            "alphaPixels": 3452
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-day-group-5.png",
+      "sha256": "2d15ca1fede067d05c1f9c5d6ff7402df49a98e70f0ecbc9a4e32e2061e071a8",
+      "entries": [
+        {
+          "key": "pequi",
+          "artIndex": 12,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 107.07538894493759,
+            "top": 173.03984299694966,
+            "right": 251.9653839238423,
+            "bottom": 325.11499959230423
+          },
+          "treePixels": {
+            "left": 118,
+            "right": 246,
+            "top": 191,
+            "bottom": 320,
+            "alphaPixels": 7336
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pequi",
+          "artIndex": 12,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 64.577517,
+            "top": 101.4459048,
+            "right": 283.17751699999997,
+            "bottom": 331.1
+          },
+          "treePixels": {
+            "left": 77,
+            "right": 276,
+            "top": 126,
+            "bottom": 326,
+            "alphaPixels": 17364
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pequi",
+          "artIndex": 12,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 46.36414744493757,
+            "top": 70.76279539694966,
+            "right": 296.55414242384234,
+            "bottom": 333.66499959230424
+          },
+          "treePixels": {
+            "left": 60,
+            "right": 289,
+            "top": 98,
+            "bottom": 328,
+            "alphaPixels": 22955
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "barbatimao",
+          "artIndex": 13,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 120.81125747110892,
+            "top": 181.31762194332254,
+            "right": 256.34125279333637,
+            "bottom": 323.9449996352196
+          },
+          "treePixels": {
+            "left": 140,
+            "right": 233,
+            "top": 221,
+            "bottom": 319,
+            "alphaPixels": 5425
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "barbatimao",
+          "artIndex": 13,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 85.7096232,
+            "top": 114.18094979999998,
+            "right": 289.9096232,
+            "bottom": 329.3
+          },
+          "treePixels": {
+            "left": 93,
+            "right": 268,
+            "top": 144,
+            "bottom": 324,
+            "alphaPixels": 12897
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "barbatimao",
+          "artIndex": 13,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 70.66606907110892,
+            "top": 85.40809684332257,
+            "right": 304.2960643933364,
+            "bottom": 331.59499963521955
+          },
+          "treePixels": {
+            "left": 79,
+            "right": 281,
+            "top": 119,
+            "bottom": 326,
+            "alphaPixels": 17099
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 166.38337121953367,
+            "top": 276.8321104998719,
+            "right": 208.3133699749887,
+            "bottom": 318.7621092553269
+          },
+          "treePixels": {
+            "left": 176,
+            "right": 202,
+            "top": 286,
+            "bottom": 309,
+            "alphaPixels": 429
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 155.82057,
+            "top": 261.1263222,
+            "right": 216.02057,
+            "bottom": 321.3263222
+          },
+          "treePixels": {
+            "left": 169,
+            "right": 209,
+            "top": 273,
+            "bottom": 309,
+            "alphaPixels": 1016
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 151.2936562195337,
+            "top": 254.39527159987188,
+            "right": 219.3236549749887,
+            "bottom": 322.42527035532686
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 212,
+            "top": 267,
+            "bottom": 310,
+            "alphaPixels": 1355
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-day-group-6.png",
+      "sha256": "12f32c94bef1a7a1e4514554e0d0fb0e0a93ced81ef23576a3a12ac28923efc2",
+      "entries": [
+        {
+          "key": "campo-shrub",
+          "artIndex": 15,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.00307403352224,
+            "top": 267.7930441714228,
+            "right": 216.6330723598238,
+            "bottom": 321.4230424977244
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 205,
+            "top": 285,
+            "bottom": 312,
+            "alphaPixels": 546
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "campo-shrub",
+          "artIndex": 15,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 150.6201126,
+            "top": 247.2200658,
+            "right": 228.82011260000002,
+            "bottom": 325.4200658
+          },
+          "treePixels": {
+            "left": 167,
+            "right": 214,
+            "top": 272,
+            "bottom": 313,
+            "alphaPixels": 1283
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "campo-shrub",
+          "artIndex": 15,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 145.31313033352225,
+            "top": 238.40307707142284,
+            "right": 234.04312865982382,
+            "bottom": 327.13307539772444
+          },
+          "treePixels": {
+            "left": 164,
+            "right": 218,
+            "top": 266,
+            "bottom": 314,
+            "alphaPixels": 1694
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "umbuzeiro",
+          "artIndex": 16,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 103.93021261030196,
+            "top": 171.00022419176244,
+            "right": 254.67020737462997,
+            "bottom": 325.69999957084656
+          },
+          "treePixels": {
+            "left": 122,
+            "right": 248,
+            "top": 205,
+            "bottom": 320,
+            "alphaPixels": 8447
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "umbuzeiro",
+          "artIndex": 16,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 59.738783999999995,
+            "top": 98.3080296,
+            "right": 287.338784,
+            "bottom": 332
+          },
+          "treePixels": {
+            "left": 86,
+            "right": 280,
+            "top": 110,
+            "bottom": 327,
+            "alphaPixels": 20002
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "umbuzeiro",
+          "artIndex": 16,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 40.79960461030197,
+            "top": 67.15423899176244,
+            "right": 301.33959937463,
+            "bottom": 334.69999957084656
+          },
+          "treePixels": {
+            "left": 70,
+            "right": 294,
+            "top": 124,
+            "bottom": 329,
+            "alphaPixels": 26373
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jurema-preta",
+          "artIndex": 17,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 117.44957147441482,
+            "top": 181.43888424887467,
+            "right": 256.48956666789627,
+            "bottom": 323.9449996352196
+          },
+          "treePixels": {
+            "left": 144,
+            "right": 241,
+            "top": 215,
+            "bottom": 319,
+            "alphaPixels": 5739
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jurema-preta",
+          "artIndex": 17,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 80.53779840000001,
+            "top": 114.3675072,
+            "right": 290.1377984,
+            "bottom": 329.3
+          },
+          "treePixels": {
+            "left": 119,
+            "right": 268,
+            "top": 157,
+            "bottom": 324,
+            "alphaPixels": 13593
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jurema-preta",
+          "artIndex": 17,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 64.71847067441482,
+            "top": 85.62263784887466,
+            "right": 304.5584658678963,
+            "bottom": 331.59499963521955
+          },
+          "treePixels": {
+            "left": 108,
+            "right": 280,
+            "top": 96,
+            "bottom": 326,
+            "alphaPixels": 17982
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-day-group-7.png",
+      "sha256": "dec931938024597323869cf6426d97c743524be655910eefead482822647efae",
+      "entries": [
+        {
+          "key": "mandacaru",
+          "artIndex": 18,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 144.70013641487003,
+            "top": 241.4727181168467,
+            "right": 228.75013362537265,
+            "bottom": 325.5227153273493
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 206,
+            "top": 260,
+            "bottom": 313,
+            "alphaPixels": 1183
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mandacaru",
+          "artIndex": 18,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 122.461746,
+            "top": 206.727255,
+            "right": 247.461746,
+            "bottom": 331.727255
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 215,
+            "top": 232,
+            "bottom": 315,
+            "alphaPixels": 2799
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mandacaru",
+          "artIndex": 18,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 112.93100941487002,
+            "top": 191.83634561684667,
+            "right": 255.48100662537263,
+            "bottom": 334.3863428273493
+          },
+          "treePixels": {
+            "left": 161,
+            "right": 219,
+            "top": 221,
+            "bottom": 316,
+            "alphaPixels": 3721
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "macambira",
+          "artIndex": 19,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.7980012543645,
+            "top": 270.66490149608376,
+            "right": 213.9179997094121,
+            "bottom": 320.78489995113137
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 203,
+            "top": 291,
+            "bottom": 309,
+            "alphaPixels": 393
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "macambira",
+          "artIndex": 19,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 151.84307760000002,
+            "top": 251.638308,
+            "right": 224.6430776,
+            "bottom": 324.438308
+          },
+          "treePixels": {
+            "left": 167,
+            "right": 210,
+            "top": 281,
+            "bottom": 310,
+            "alphaPixels": 939
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "macambira",
+          "artIndex": 19,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 146.71954005436447,
+            "top": 243.48405549608373,
+            "right": 229.2395385094121,
+            "bottom": 326.00405395113137
+          },
+          "treePixels": {
+            "left": 164,
+            "right": 213,
+            "top": 276,
+            "bottom": 310,
+            "alphaPixels": 1238
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-1.8-day-group-1.png",
+      "sha256": "af201804df460cbb9d9c1e3f5940bca9c1340656fa75df5e0eaea77ef3f34417",
+      "entries": [
+        {
+          "key": "jequitiba-rosa",
+          "artIndex": 0,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 101.17500311136246,
+            "top": 161.79750528931618,
+            "right": 278.82499688863754,
+            "bottom": 339.44749906659126
+          },
+          "treePixels": {
+            "left": 136,
+            "right": 264,
+            "top": 201,
+            "bottom": 334,
+            "alphaPixels": 9755
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jequitiba-rosa",
+          "artIndex": 0,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 55.5,
+            "top": 84.15,
+            "right": 324.5,
+            "bottom": 353.15
+          },
+          "treePixels": {
+            "left": 106,
+            "right": 305,
+            "top": 123,
+            "bottom": 348,
+            "alphaPixels": 22954
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jequitiba-rosa",
+          "artIndex": 0,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 35.92500311136246,
+            "top": 50.872505289316194,
+            "right": 344.07499688863754,
+            "bottom": 359.02249906659125
+          },
+          "treePixels": {
+            "left": 94,
+            "right": 322,
+            "top": 95,
+            "bottom": 354,
+            "alphaPixels": 30329
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jucara",
+          "artIndex": 1,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 120.48000240325928,
+            "top": 194.6160040855408,
+            "right": 259.5199975967407,
+            "bottom": 333.65599927902224
+          },
+          "treePixels": {
+            "left": 152,
+            "right": 226,
+            "top": 225,
+            "bottom": 326,
+            "alphaPixels": 4331
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jucara",
+          "artIndex": 1,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 85.2,
+            "top": 134.64000000000001,
+            "right": 294.8,
+            "bottom": 344.24
+          },
+          "treePixels": {
+            "left": 131,
+            "right": 261,
+            "top": 180,
+            "bottom": 338,
+            "alphaPixels": 10075
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jucara",
+          "artIndex": 1,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 70.08000240325927,
+            "top": 108.93600408554076,
+            "right": 309.9199975967407,
+            "bottom": 348.77599927902224
+          },
+          "treePixels": {
+            "left": 122,
+            "right": 271,
+            "top": 161,
+            "bottom": 344,
+            "alphaPixels": 13305
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "embauba",
+          "artIndex": 2,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 119.89500242471695,
+            "top": 193.62150412201882,
+            "right": 260.10499757528305,
+            "bottom": 333.8314992725849
+          },
+          "treePixels": {
+            "left": 149,
+            "right": 241,
+            "top": 216,
+            "bottom": 326,
+            "alphaPixels": 6011
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "embauba",
+          "artIndex": 2,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 84.3,
+            "top": 133.11,
+            "right": 295.7,
+            "bottom": 344.51
+          },
+          "treePixels": {
+            "left": 126,
+            "right": 281,
+            "top": 137,
+            "bottom": 340,
+            "alphaPixels": 14015
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "embauba",
+          "artIndex": 2,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 69.04500242471694,
+            "top": 107.1765041220188,
+            "right": 310.9549975752831,
+            "bottom": 349.08649927258494
+          },
+          "treePixels": {
+            "left": 117,
+            "right": 294,
+            "top": 111,
+            "bottom": 336,
+            "alphaPixels": 18480
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-1.8-day-group-2.png",
+      "sha256": "412634daedbcd7c84f8cc06290290d2fc824c2ea0deccf41ca37724ee9860380",
+      "entries": [
+        {
+          "key": "pau-brasil",
+          "artIndex": 3,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 112.87500268220901,
+            "top": 181.68750455975533,
+            "right": 267.124997317791,
+            "bottom": 335.9374991953373
+          },
+          "treePixels": {
+            "left": 136,
+            "right": 239,
+            "top": 208,
+            "bottom": 326,
+            "alphaPixels": 7565
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pau-brasil",
+          "artIndex": 3,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 73.5,
+            "top": 114.75,
+            "right": 306.5,
+            "bottom": 347.75
+          },
+          "treePixels": {
+            "left": 107,
+            "right": 280,
+            "top": 122,
+            "bottom": 333,
+            "alphaPixels": 17771
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pau-brasil",
+          "artIndex": 3,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 56.625002682209015,
+            "top": 86.06250455975533,
+            "right": 323.374997317791,
+            "bottom": 352.8124991953373
+          },
+          "treePixels": {
+            "left": 95,
+            "right": 293,
+            "top": 94,
+            "bottom": 336,
+            "alphaPixels": 23441
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "forest-ferns",
+          "artIndex": 4,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 171.3750005364418,
+            "top": 279.12327942894603,
+            "right": 208.6249994635582,
+            "bottom": 316.02297896771375
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 204,
+            "top": 287,
+            "bottom": 311,
+            "alphaPixels": 518
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "forest-ferns",
+          "artIndex": 4,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.5,
+            "top": 264.6511976047904,
+            "right": 216.5,
+            "bottom": 317.1122754491018
+          },
+          "treePixels": {
+            "left": 169,
+            "right": 212,
+            "top": 274,
+            "bottom": 312,
+            "alphaPixels": 1214
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "forest-ferns",
+          "artIndex": 4,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 160.1250005364418,
+            "top": 258.44887823134127,
+            "right": 219.8749994635582,
+            "bottom": 317.5791166922646
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 215,
+            "top": 269,
+            "bottom": 312,
+            "alphaPixels": 1596
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "bromeliads",
+          "artIndex": 5,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 173.1300004720688,
+            "top": 279.75546275666386,
+            "right": 206.8699995279312,
+            "bottom": 315.97539527638014
+          },
+          "treePixels": {
+            "left": 177,
+            "right": 202,
+            "top": 288,
+            "bottom": 311,
+            "alphaPixels": 404
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "bromeliads",
+          "artIndex": 5,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 166.2,
+            "top": 265.6237873754153,
+            "right": 213.8,
+            "bottom": 317.03906976744184
+          },
+          "treePixels": {
+            "left": 170,
+            "right": 209,
+            "top": 276,
+            "bottom": 312,
+            "alphaPixels": 968
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "bromeliads",
+          "artIndex": 5,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.23000047206878,
+            "top": 259.5673564443715,
+            "right": 216.76999952793122,
+            "bottom": 317.4949301601011
+          },
+          "treePixels": {
+            "left": 167,
+            "right": 212,
+            "top": 270,
+            "bottom": 312,
+            "alphaPixels": 1269
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-1.8-day-group-3.png",
+      "sha256": "2c4ed95bfb76e31c3962575b27d672dfaeef873646914fcf10189794c0e3d8c8",
+      "entries": [
+        {
+          "key": "meadow-wildflowers",
+          "artIndex": 6,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 170.20500057935715,
+            "top": 274.72590114712716,
+            "right": 209.79499942064285,
+            "bottom": 316.3539644297861
+          },
+          "treePixels": {
+            "left": 174,
+            "right": 204,
+            "top": 289,
+            "bottom": 311,
+            "alphaPixels": 507
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "meadow-wildflowers",
+          "artIndex": 6,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 161.7,
+            "top": 257.88599999999997,
+            "right": 218.3,
+            "bottom": 317.6214838709677
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 212,
+            "top": 278,
+            "bottom": 313,
+            "alphaPixels": 1193
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "meadow-wildflowers",
+          "artIndex": 6,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 158.05500057935714,
+            "top": 250.66890114712714,
+            "right": 221.94499942064286,
+            "bottom": 318.16470636527
+          },
+          "treePixels": {
+            "left": 162,
+            "right": 215,
+            "top": 273,
+            "bottom": 313,
+            "alphaPixels": 1583
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "dry-grasses",
+          "artIndex": 7,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 168.45000064373016,
+            "top": 271.138544968031,
+            "right": 211.54999935626984,
+            "bottom": 316.6239804862772
+          },
+          "treePixels": {
+            "left": 173,
+            "right": 206,
+            "top": 278,
+            "bottom": 312,
+            "alphaPixels": 827
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "dry-grasses",
+          "artIndex": 7,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 159,
+            "top": 252.36699029126214,
+            "right": 221,
+            "bottom": 318.0368932038835
+          },
+          "treePixels": {
+            "left": 163,
+            "right": 215,
+            "top": 261,
+            "bottom": 313,
+            "alphaPixels": 1967
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "dry-grasses",
+          "artIndex": 7,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 154.95000064373016,
+            "top": 244.32204011366207,
+            "right": 225.04999935626984,
+            "bottom": 318.642427088219
+          },
+          "treePixels": {
+            "left": 159,
+            "right": 219,
+            "top": 254,
+            "bottom": 314,
+            "alphaPixels": 2597
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "granite-outcrop",
+          "artIndex": 8,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 160.8450009226799,
+            "top": 256.9703461097743,
+            "right": 219.1549990773201,
+            "bottom": 317.69040405625356
+          },
+          "treePixels": {
+            "left": 165,
+            "right": 214,
+            "top": 269,
+            "bottom": 311,
+            "alphaPixels": 1421
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "granite-outcrop",
+          "artIndex": 8,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 147.3,
+            "top": 230.56976047904192,
+            "right": 232.7,
+            "bottom": 319.6775449101796
+          },
+          "treePixels": {
+            "left": 151,
+            "right": 228,
+            "top": 246,
+            "bottom": 312,
+            "alphaPixels": 3379
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "granite-outcrop",
+          "artIndex": 8,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 141.4950009226799,
+            "top": 219.25522634929524,
+            "right": 238.5049990773201,
+            "bottom": 320.52917651134334
+          },
+          "treePixels": {
+            "left": 145,
+            "right": 234,
+            "top": 237,
+            "bottom": 313,
+            "alphaPixels": 4475
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-1.8-day-group-4.png",
+      "sha256": "e4c036ac640b185f1fc6367b80fb711cb143dc5a2ef2b7e41c4b9f8c2ffda1b7",
+      "entries": [
+        {
+          "key": "quartz-stones",
+          "artIndex": 9,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 165.52500075101852,
+            "top": 261.71686208941213,
+            "right": 214.47499924898148,
+            "bottom": 317.3331394126249
+          },
+          "treePixels": {
+            "left": 170,
+            "right": 208,
+            "top": 281,
+            "bottom": 310,
+            "alphaPixels": 795
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "quartz-stones",
+          "artIndex": 9,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 154.5,
+            "top": 237.87209302325581,
+            "right": 225.5,
+            "bottom": 319.12790697674416
+          },
+          "treePixels": {
+            "left": 159,
+            "right": 219,
+            "top": 266,
+            "bottom": 310,
+            "alphaPixels": 1870
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "quartz-stones",
+          "artIndex": 9,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 149.77500075101852,
+            "top": 227.65290860104005,
+            "right": 230.22499924898148,
+            "bottom": 319.897092900997
+          },
+          "treePixels": {
+            "left": 154,
+            "right": 223,
+            "top": 259,
+            "bottom": 311,
+            "alphaPixels": 2484
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "clay-ironstone",
+          "artIndex": 10,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 160.8450009226799,
+            "top": 253.17450193762778,
+            "right": 219.1549990773201,
+            "bottom": 317.97611275738285
+          },
+          "treePixels": {
+            "left": 165,
+            "right": 213,
+            "top": 273,
+            "bottom": 311,
+            "alphaPixels": 1378
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "clay-ironstone",
+          "artIndex": 10,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 147.3,
+            "top": 224.72999999999996,
+            "right": 232.7,
+            "bottom": 320.11709677419356
+          },
+          "treePixels": {
+            "left": 152,
+            "right": 225,
+            "top": 253,
+            "bottom": 313,
+            "alphaPixels": 3268
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "clay-ironstone",
+          "artIndex": 10,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 141.4950009226799,
+            "top": 212.5395019376278,
+            "right": 238.5049990773201,
+            "bottom": 321.0346611444796
+          },
+          "treePixels": {
+            "left": 147,
+            "right": 231,
+            "top": 245,
+            "bottom": 313,
+            "alphaPixels": 4315
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mossy-stones",
+          "artIndex": 11,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 164.9400007724762,
+            "top": 261.6308754138576,
+            "right": 215.0599992275238,
+            "bottom": 317.33961152798923
+          },
+          "treePixels": {
+            "left": 169,
+            "right": 210,
+            "top": 272,
+            "bottom": 311,
+            "alphaPixels": 1099
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mossy-stones",
+          "artIndex": 11,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 153.6,
+            "top": 237.7398058252427,
+            "right": 226.4,
+            "bottom": 319.1378640776699
+          },
+          "treePixels": {
+            "left": 158,
+            "right": 221,
+            "top": 251,
+            "bottom": 313,
+            "alphaPixels": 2598
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mossy-stones",
+          "artIndex": 11,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 148.7400007724762,
+            "top": 227.50077832647895,
+            "right": 231.2599992275238,
+            "bottom": 319.90854356682416
+          },
+          "treePixels": {
+            "left": 153,
+            "right": 226,
+            "top": 242,
+            "bottom": 314,
+            "alphaPixels": 3452
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-1.8-day-group-5.png",
+      "sha256": "3c6c7f3432eb9b719877f17bafb3f537d992261fc420024bad89158c0de2a493",
+      "entries": [
+        {
+          "key": "pequi",
+          "artIndex": 12,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 107.07538894493759,
+            "top": 173.03984299694966,
+            "right": 251.9653839238423,
+            "bottom": 325.11499959230423
+          },
+          "treePixels": {
+            "left": 118,
+            "right": 246,
+            "top": 191,
+            "bottom": 320,
+            "alphaPixels": 7336
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pequi",
+          "artIndex": 12,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 64.577517,
+            "top": 101.4459048,
+            "right": 283.17751699999997,
+            "bottom": 331.1
+          },
+          "treePixels": {
+            "left": 77,
+            "right": 276,
+            "top": 126,
+            "bottom": 326,
+            "alphaPixels": 17364
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pequi",
+          "artIndex": 12,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 46.36414744493757,
+            "top": 70.76279539694966,
+            "right": 296.55414242384234,
+            "bottom": 333.66499959230424
+          },
+          "treePixels": {
+            "left": 60,
+            "right": 289,
+            "top": 98,
+            "bottom": 328,
+            "alphaPixels": 22955
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "barbatimao",
+          "artIndex": 13,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 120.81125747110892,
+            "top": 181.31762194332254,
+            "right": 256.34125279333637,
+            "bottom": 323.9449996352196
+          },
+          "treePixels": {
+            "left": 140,
+            "right": 233,
+            "top": 221,
+            "bottom": 319,
+            "alphaPixels": 5425
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "barbatimao",
+          "artIndex": 13,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 85.7096232,
+            "top": 114.18094979999998,
+            "right": 289.9096232,
+            "bottom": 329.3
+          },
+          "treePixels": {
+            "left": 93,
+            "right": 268,
+            "top": 144,
+            "bottom": 324,
+            "alphaPixels": 12897
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "barbatimao",
+          "artIndex": 13,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 70.66606907110892,
+            "top": 85.40809684332257,
+            "right": 304.2960643933364,
+            "bottom": 331.59499963521955
+          },
+          "treePixels": {
+            "left": 79,
+            "right": 281,
+            "top": 119,
+            "bottom": 326,
+            "alphaPixels": 17099
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 166.38337121953367,
+            "top": 276.8321104998719,
+            "right": 208.3133699749887,
+            "bottom": 318.7621092553269
+          },
+          "treePixels": {
+            "left": 176,
+            "right": 202,
+            "top": 286,
+            "bottom": 309,
+            "alphaPixels": 429
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 155.82057,
+            "top": 261.1263222,
+            "right": 216.02057,
+            "bottom": 321.3263222
+          },
+          "treePixels": {
+            "left": 169,
+            "right": 209,
+            "top": 273,
+            "bottom": 309,
+            "alphaPixels": 1016
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 151.2936562195337,
+            "top": 254.39527159987188,
+            "right": 219.3236549749887,
+            "bottom": 322.42527035532686
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 212,
+            "top": 267,
+            "bottom": 310,
+            "alphaPixels": 1355
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-1.8-day-group-6.png",
+      "sha256": "bd3bbca9968340b021c029a65dd5eed62fe54eb61d847a700aa4be2de78a72f5",
+      "entries": [
+        {
+          "key": "campo-shrub",
+          "artIndex": 15,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.00307403352224,
+            "top": 267.7930441714228,
+            "right": 216.6330723598238,
+            "bottom": 321.4230424977244
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 205,
+            "top": 285,
+            "bottom": 312,
+            "alphaPixels": 546
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "campo-shrub",
+          "artIndex": 15,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 150.6201126,
+            "top": 247.2200658,
+            "right": 228.82011260000002,
+            "bottom": 325.4200658
+          },
+          "treePixels": {
+            "left": 167,
+            "right": 214,
+            "top": 272,
+            "bottom": 313,
+            "alphaPixels": 1283
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "campo-shrub",
+          "artIndex": 15,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 145.31313033352225,
+            "top": 238.40307707142284,
+            "right": 234.04312865982382,
+            "bottom": 327.13307539772444
+          },
+          "treePixels": {
+            "left": 164,
+            "right": 218,
+            "top": 266,
+            "bottom": 314,
+            "alphaPixels": 1694
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "umbuzeiro",
+          "artIndex": 16,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 103.93021261030196,
+            "top": 171.00022419176244,
+            "right": 254.67020737462997,
+            "bottom": 325.69999957084656
+          },
+          "treePixels": {
+            "left": 122,
+            "right": 248,
+            "top": 205,
+            "bottom": 320,
+            "alphaPixels": 8447
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "umbuzeiro",
+          "artIndex": 16,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 59.738783999999995,
+            "top": 98.3080296,
+            "right": 287.338784,
+            "bottom": 332
+          },
+          "treePixels": {
+            "left": 86,
+            "right": 280,
+            "top": 110,
+            "bottom": 327,
+            "alphaPixels": 20002
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "umbuzeiro",
+          "artIndex": 16,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 40.79960461030197,
+            "top": 67.15423899176244,
+            "right": 301.33959937463,
+            "bottom": 334.69999957084656
+          },
+          "treePixels": {
+            "left": 70,
+            "right": 294,
+            "top": 124,
+            "bottom": 329,
+            "alphaPixels": 26373
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jurema-preta",
+          "artIndex": 17,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 117.44957147441482,
+            "top": 181.43888424887467,
+            "right": 256.48956666789627,
+            "bottom": 323.9449996352196
+          },
+          "treePixels": {
+            "left": 144,
+            "right": 241,
+            "top": 215,
+            "bottom": 319,
+            "alphaPixels": 5739
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jurema-preta",
+          "artIndex": 17,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 80.53779840000001,
+            "top": 114.3675072,
+            "right": 290.1377984,
+            "bottom": 329.3
+          },
+          "treePixels": {
+            "left": 119,
+            "right": 268,
+            "top": 157,
+            "bottom": 324,
+            "alphaPixels": 13593
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jurema-preta",
+          "artIndex": 17,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 64.71847067441482,
+            "top": 85.62263784887466,
+            "right": 304.5584658678963,
+            "bottom": 331.59499963521955
+          },
+          "treePixels": {
+            "left": 108,
+            "right": 280,
+            "top": 96,
+            "bottom": 326,
+            "alphaPixels": 17982
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-1.8-day-group-7.png",
+      "sha256": "f197524264ddcb7c71a6260a59ec012e292c9a2f8a1aca883df96579943d5a22",
+      "entries": [
+        {
+          "key": "mandacaru",
+          "artIndex": 18,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 144.70013641487003,
+            "top": 241.4727181168467,
+            "right": 228.75013362537265,
+            "bottom": 325.5227153273493
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 206,
+            "top": 260,
+            "bottom": 313,
+            "alphaPixels": 1183
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mandacaru",
+          "artIndex": 18,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 122.461746,
+            "top": 206.727255,
+            "right": 247.461746,
+            "bottom": 331.727255
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 215,
+            "top": 232,
+            "bottom": 315,
+            "alphaPixels": 2799
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mandacaru",
+          "artIndex": 18,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 112.93100941487002,
+            "top": 191.83634561684667,
+            "right": 255.48100662537263,
+            "bottom": 334.3863428273493
+          },
+          "treePixels": {
+            "left": 161,
+            "right": 219,
+            "top": 221,
+            "bottom": 316,
+            "alphaPixels": 3721
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "macambira",
+          "artIndex": 19,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.7980012543645,
+            "top": 270.66490149608376,
+            "right": 213.9179997094121,
+            "bottom": 320.78489995113137
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 203,
+            "top": 291,
+            "bottom": 309,
+            "alphaPixels": 393
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "macambira",
+          "artIndex": 19,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 151.84307760000002,
+            "top": 251.638308,
+            "right": 224.6430776,
+            "bottom": 324.438308
+          },
+          "treePixels": {
+            "left": 167,
+            "right": 210,
+            "top": 281,
+            "bottom": 310,
+            "alphaPixels": 939
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "macambira",
+          "artIndex": 19,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 146.71954005436447,
+            "top": 243.48405549608373,
+            "right": 229.2395385094121,
+            "bottom": 326.00405395113137
+          },
+          "treePixels": {
+            "left": 164,
+            "right": 213,
+            "top": 276,
+            "bottom": 310,
+            "alphaPixels": 1238
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-1.8-day-group-1.png",
+      "sha256": "ee706a353d04fc6053c3953a44f5f954c5ece599622e2c5af92dc30980ff4f85",
+      "entries": [
+        {
+          "key": "jequitiba-rosa",
+          "artIndex": 0,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 101.17500311136246,
+            "top": 161.79750528931618,
+            "right": 278.82499688863754,
+            "bottom": 339.44749906659126
+          },
+          "treePixels": {
+            "left": 136,
+            "right": 264,
+            "top": 201,
+            "bottom": 334,
+            "alphaPixels": 9755
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jequitiba-rosa",
+          "artIndex": 0,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 55.5,
+            "top": 84.15,
+            "right": 324.5,
+            "bottom": 353.15
+          },
+          "treePixels": {
+            "left": 106,
+            "right": 305,
+            "top": 123,
+            "bottom": 348,
+            "alphaPixels": 22954
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jequitiba-rosa",
+          "artIndex": 0,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 35.92500311136246,
+            "top": 50.872505289316194,
+            "right": 344.07499688863754,
+            "bottom": 359.02249906659125
+          },
+          "treePixels": {
+            "left": 94,
+            "right": 322,
+            "top": 95,
+            "bottom": 354,
+            "alphaPixels": 30329
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jucara",
+          "artIndex": 1,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 120.48000240325928,
+            "top": 194.6160040855408,
+            "right": 259.5199975967407,
+            "bottom": 333.65599927902224
+          },
+          "treePixels": {
+            "left": 152,
+            "right": 226,
+            "top": 225,
+            "bottom": 326,
+            "alphaPixels": 4331
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jucara",
+          "artIndex": 1,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 85.2,
+            "top": 134.64000000000001,
+            "right": 294.8,
+            "bottom": 344.24
+          },
+          "treePixels": {
+            "left": 131,
+            "right": 261,
+            "top": 180,
+            "bottom": 338,
+            "alphaPixels": 10075
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jucara",
+          "artIndex": 1,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 70.08000240325927,
+            "top": 108.93600408554076,
+            "right": 309.9199975967407,
+            "bottom": 348.77599927902224
+          },
+          "treePixels": {
+            "left": 122,
+            "right": 271,
+            "top": 161,
+            "bottom": 344,
+            "alphaPixels": 13305
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "embauba",
+          "artIndex": 2,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 119.89500242471695,
+            "top": 193.62150412201882,
+            "right": 260.10499757528305,
+            "bottom": 333.8314992725849
+          },
+          "treePixels": {
+            "left": 149,
+            "right": 241,
+            "top": 216,
+            "bottom": 326,
+            "alphaPixels": 6011
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "embauba",
+          "artIndex": 2,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 84.3,
+            "top": 133.11,
+            "right": 295.7,
+            "bottom": 344.51
+          },
+          "treePixels": {
+            "left": 126,
+            "right": 281,
+            "top": 137,
+            "bottom": 340,
+            "alphaPixels": 14015
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "embauba",
+          "artIndex": 2,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 69.04500242471694,
+            "top": 107.1765041220188,
+            "right": 310.9549975752831,
+            "bottom": 349.08649927258494
+          },
+          "treePixels": {
+            "left": 117,
+            "right": 294,
+            "top": 111,
+            "bottom": 336,
+            "alphaPixels": 18480
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-1.8-day-group-2.png",
+      "sha256": "f688a4db0101e85e43ddb13979746af299f9e38f89c1ac110194b4c22b84a063",
+      "entries": [
+        {
+          "key": "pau-brasil",
+          "artIndex": 3,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 112.87500268220901,
+            "top": 181.68750455975533,
+            "right": 267.124997317791,
+            "bottom": 335.9374991953373
+          },
+          "treePixels": {
+            "left": 136,
+            "right": 239,
+            "top": 208,
+            "bottom": 326,
+            "alphaPixels": 7565
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pau-brasil",
+          "artIndex": 3,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 73.5,
+            "top": 114.75,
+            "right": 306.5,
+            "bottom": 347.75
+          },
+          "treePixels": {
+            "left": 107,
+            "right": 280,
+            "top": 122,
+            "bottom": 333,
+            "alphaPixels": 17771
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pau-brasil",
+          "artIndex": 3,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 56.625002682209015,
+            "top": 86.06250455975533,
+            "right": 323.374997317791,
+            "bottom": 352.8124991953373
+          },
+          "treePixels": {
+            "left": 95,
+            "right": 293,
+            "top": 94,
+            "bottom": 336,
+            "alphaPixels": 23441
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "forest-ferns",
+          "artIndex": 4,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 171.3750005364418,
+            "top": 279.12327942894603,
+            "right": 208.6249994635582,
+            "bottom": 316.02297896771375
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 204,
+            "top": 287,
+            "bottom": 311,
+            "alphaPixels": 518
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "forest-ferns",
+          "artIndex": 4,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.5,
+            "top": 264.6511976047904,
+            "right": 216.5,
+            "bottom": 317.1122754491018
+          },
+          "treePixels": {
+            "left": 169,
+            "right": 212,
+            "top": 274,
+            "bottom": 312,
+            "alphaPixels": 1214
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "forest-ferns",
+          "artIndex": 4,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 160.1250005364418,
+            "top": 258.44887823134127,
+            "right": 219.8749994635582,
+            "bottom": 317.5791166922646
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 215,
+            "top": 269,
+            "bottom": 312,
+            "alphaPixels": 1596
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "bromeliads",
+          "artIndex": 5,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 173.1300004720688,
+            "top": 279.75546275666386,
+            "right": 206.8699995279312,
+            "bottom": 315.97539527638014
+          },
+          "treePixels": {
+            "left": 177,
+            "right": 202,
+            "top": 288,
+            "bottom": 311,
+            "alphaPixels": 404
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "bromeliads",
+          "artIndex": 5,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 166.2,
+            "top": 265.6237873754153,
+            "right": 213.8,
+            "bottom": 317.03906976744184
+          },
+          "treePixels": {
+            "left": 170,
+            "right": 209,
+            "top": 276,
+            "bottom": 312,
+            "alphaPixels": 968
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "bromeliads",
+          "artIndex": 5,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.23000047206878,
+            "top": 259.5673564443715,
+            "right": 216.76999952793122,
+            "bottom": 317.4949301601011
+          },
+          "treePixels": {
+            "left": 167,
+            "right": 212,
+            "top": 270,
+            "bottom": 312,
+            "alphaPixels": 1269
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-1.8-day-group-3.png",
+      "sha256": "dd0da7d630b0f115c4f7bcbc38e2a637fb323da1e528d14a8033f5a801bb8ca8",
+      "entries": [
+        {
+          "key": "meadow-wildflowers",
+          "artIndex": 6,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 170.20500057935715,
+            "top": 274.72590114712716,
+            "right": 209.79499942064285,
+            "bottom": 316.3539644297861
+          },
+          "treePixels": {
+            "left": 174,
+            "right": 204,
+            "top": 289,
+            "bottom": 311,
+            "alphaPixels": 507
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "meadow-wildflowers",
+          "artIndex": 6,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 161.7,
+            "top": 257.88599999999997,
+            "right": 218.3,
+            "bottom": 317.6214838709677
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 212,
+            "top": 278,
+            "bottom": 313,
+            "alphaPixels": 1193
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "meadow-wildflowers",
+          "artIndex": 6,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 158.05500057935714,
+            "top": 250.66890114712714,
+            "right": 221.94499942064286,
+            "bottom": 318.16470636527
+          },
+          "treePixels": {
+            "left": 162,
+            "right": 215,
+            "top": 273,
+            "bottom": 313,
+            "alphaPixels": 1583
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "dry-grasses",
+          "artIndex": 7,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 168.45000064373016,
+            "top": 271.138544968031,
+            "right": 211.54999935626984,
+            "bottom": 316.6239804862772
+          },
+          "treePixels": {
+            "left": 173,
+            "right": 206,
+            "top": 278,
+            "bottom": 312,
+            "alphaPixels": 827
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "dry-grasses",
+          "artIndex": 7,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 159,
+            "top": 252.36699029126214,
+            "right": 221,
+            "bottom": 318.0368932038835
+          },
+          "treePixels": {
+            "left": 163,
+            "right": 215,
+            "top": 261,
+            "bottom": 313,
+            "alphaPixels": 1967
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "dry-grasses",
+          "artIndex": 7,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 154.95000064373016,
+            "top": 244.32204011366207,
+            "right": 225.04999935626984,
+            "bottom": 318.642427088219
+          },
+          "treePixels": {
+            "left": 159,
+            "right": 219,
+            "top": 254,
+            "bottom": 314,
+            "alphaPixels": 2597
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "granite-outcrop",
+          "artIndex": 8,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 160.8450009226799,
+            "top": 256.9703461097743,
+            "right": 219.1549990773201,
+            "bottom": 317.69040405625356
+          },
+          "treePixels": {
+            "left": 165,
+            "right": 214,
+            "top": 269,
+            "bottom": 311,
+            "alphaPixels": 1421
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "granite-outcrop",
+          "artIndex": 8,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 147.3,
+            "top": 230.56976047904192,
+            "right": 232.7,
+            "bottom": 319.6775449101796
+          },
+          "treePixels": {
+            "left": 151,
+            "right": 228,
+            "top": 246,
+            "bottom": 312,
+            "alphaPixels": 3379
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "granite-outcrop",
+          "artIndex": 8,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 141.4950009226799,
+            "top": 219.25522634929524,
+            "right": 238.5049990773201,
+            "bottom": 320.52917651134334
+          },
+          "treePixels": {
+            "left": 145,
+            "right": 234,
+            "top": 237,
+            "bottom": 313,
+            "alphaPixels": 4475
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-1.8-day-group-4.png",
+      "sha256": "664fd7ae0d76176fa65c151e84415287e8da90a3d7d6deaf11c90238389397bd",
+      "entries": [
+        {
+          "key": "quartz-stones",
+          "artIndex": 9,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 165.52500075101852,
+            "top": 261.71686208941213,
+            "right": 214.47499924898148,
+            "bottom": 317.3331394126249
+          },
+          "treePixels": {
+            "left": 170,
+            "right": 208,
+            "top": 281,
+            "bottom": 310,
+            "alphaPixels": 795
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "quartz-stones",
+          "artIndex": 9,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 154.5,
+            "top": 237.87209302325581,
+            "right": 225.5,
+            "bottom": 319.12790697674416
+          },
+          "treePixels": {
+            "left": 159,
+            "right": 219,
+            "top": 266,
+            "bottom": 310,
+            "alphaPixels": 1870
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "quartz-stones",
+          "artIndex": 9,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 149.77500075101852,
+            "top": 227.65290860104005,
+            "right": 230.22499924898148,
+            "bottom": 319.897092900997
+          },
+          "treePixels": {
+            "left": 154,
+            "right": 223,
+            "top": 259,
+            "bottom": 311,
+            "alphaPixels": 2484
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "clay-ironstone",
+          "artIndex": 10,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 160.8450009226799,
+            "top": 253.17450193762778,
+            "right": 219.1549990773201,
+            "bottom": 317.97611275738285
+          },
+          "treePixels": {
+            "left": 165,
+            "right": 213,
+            "top": 273,
+            "bottom": 311,
+            "alphaPixels": 1378
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "clay-ironstone",
+          "artIndex": 10,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 147.3,
+            "top": 224.72999999999996,
+            "right": 232.7,
+            "bottom": 320.11709677419356
+          },
+          "treePixels": {
+            "left": 152,
+            "right": 225,
+            "top": 253,
+            "bottom": 313,
+            "alphaPixels": 3268
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "clay-ironstone",
+          "artIndex": 10,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 141.4950009226799,
+            "top": 212.5395019376278,
+            "right": 238.5049990773201,
+            "bottom": 321.0346611444796
+          },
+          "treePixels": {
+            "left": 147,
+            "right": 231,
+            "top": 245,
+            "bottom": 313,
+            "alphaPixels": 4315
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mossy-stones",
+          "artIndex": 11,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 164.9400007724762,
+            "top": 261.6308754138576,
+            "right": 215.0599992275238,
+            "bottom": 317.33961152798923
+          },
+          "treePixels": {
+            "left": 169,
+            "right": 210,
+            "top": 272,
+            "bottom": 311,
+            "alphaPixels": 1099
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mossy-stones",
+          "artIndex": 11,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 153.6,
+            "top": 237.7398058252427,
+            "right": 226.4,
+            "bottom": 319.1378640776699
+          },
+          "treePixels": {
+            "left": 158,
+            "right": 221,
+            "top": 251,
+            "bottom": 313,
+            "alphaPixels": 2598
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mossy-stones",
+          "artIndex": 11,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 148.7400007724762,
+            "top": 227.50077832647895,
+            "right": 231.2599992275238,
+            "bottom": 319.90854356682416
+          },
+          "treePixels": {
+            "left": 153,
+            "right": 226,
+            "top": 242,
+            "bottom": 314,
+            "alphaPixels": 3452
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-1.8-day-group-5.png",
+      "sha256": "7d9bf8a721ceda6bea9c08b2d3cf937f752bdbfe8a744e16ad4593f5f2fced17",
+      "entries": [
+        {
+          "key": "pequi",
+          "artIndex": 12,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 107.07538894493759,
+            "top": 173.03984299694966,
+            "right": 251.9653839238423,
+            "bottom": 325.11499959230423
+          },
+          "treePixels": {
+            "left": 118,
+            "right": 246,
+            "top": 191,
+            "bottom": 320,
+            "alphaPixels": 7336
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pequi",
+          "artIndex": 12,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 64.577517,
+            "top": 101.4459048,
+            "right": 283.17751699999997,
+            "bottom": 331.1
+          },
+          "treePixels": {
+            "left": 77,
+            "right": 276,
+            "top": 126,
+            "bottom": 326,
+            "alphaPixels": 17364
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "pequi",
+          "artIndex": 12,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 46.36414744493757,
+            "top": 70.76279539694966,
+            "right": 296.55414242384234,
+            "bottom": 333.66499959230424
+          },
+          "treePixels": {
+            "left": 60,
+            "right": 289,
+            "top": 98,
+            "bottom": 328,
+            "alphaPixels": 22955
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "barbatimao",
+          "artIndex": 13,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 120.81125747110892,
+            "top": 181.31762194332254,
+            "right": 256.34125279333637,
+            "bottom": 323.9449996352196
+          },
+          "treePixels": {
+            "left": 140,
+            "right": 233,
+            "top": 221,
+            "bottom": 319,
+            "alphaPixels": 5425
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "barbatimao",
+          "artIndex": 13,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 85.7096232,
+            "top": 114.18094979999998,
+            "right": 289.9096232,
+            "bottom": 329.3
+          },
+          "treePixels": {
+            "left": 93,
+            "right": 268,
+            "top": 144,
+            "bottom": 324,
+            "alphaPixels": 12897
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "barbatimao",
+          "artIndex": 13,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 70.66606907110892,
+            "top": 85.40809684332257,
+            "right": 304.2960643933364,
+            "bottom": 331.59499963521955
+          },
+          "treePixels": {
+            "left": 79,
+            "right": 281,
+            "top": 119,
+            "bottom": 326,
+            "alphaPixels": 17099
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 166.38337121953367,
+            "top": 276.8321104998719,
+            "right": 208.3133699749887,
+            "bottom": 318.7621092553269
+          },
+          "treePixels": {
+            "left": 176,
+            "right": 202,
+            "top": 286,
+            "bottom": 309,
+            "alphaPixels": 429
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 155.82057,
+            "top": 261.1263222,
+            "right": 216.02057,
+            "bottom": 321.3263222
+          },
+          "treePixels": {
+            "left": 169,
+            "right": 209,
+            "top": 273,
+            "bottom": 309,
+            "alphaPixels": 1016
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 151.2936562195337,
+            "top": 254.39527159987188,
+            "right": 219.3236549749887,
+            "bottom": 322.42527035532686
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 212,
+            "top": 267,
+            "bottom": 310,
+            "alphaPixels": 1355
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-1.8-day-group-6.png",
+      "sha256": "f754e62d9580009c037f40f7b1b3f4639d71f3eab622a8271dccb87379058bf7",
+      "entries": [
+        {
+          "key": "campo-shrub",
+          "artIndex": 15,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.00307403352224,
+            "top": 267.7930441714228,
+            "right": 216.6330723598238,
+            "bottom": 321.4230424977244
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 205,
+            "top": 285,
+            "bottom": 312,
+            "alphaPixels": 546
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "campo-shrub",
+          "artIndex": 15,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 150.6201126,
+            "top": 247.2200658,
+            "right": 228.82011260000002,
+            "bottom": 325.4200658
+          },
+          "treePixels": {
+            "left": 167,
+            "right": 214,
+            "top": 272,
+            "bottom": 313,
+            "alphaPixels": 1283
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "campo-shrub",
+          "artIndex": 15,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 145.31313033352225,
+            "top": 238.40307707142284,
+            "right": 234.04312865982382,
+            "bottom": 327.13307539772444
+          },
+          "treePixels": {
+            "left": 164,
+            "right": 218,
+            "top": 266,
+            "bottom": 314,
+            "alphaPixels": 1694
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "umbuzeiro",
+          "artIndex": 16,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 103.93021261030196,
+            "top": 171.00022419176244,
+            "right": 254.67020737462997,
+            "bottom": 325.69999957084656
+          },
+          "treePixels": {
+            "left": 122,
+            "right": 248,
+            "top": 205,
+            "bottom": 320,
+            "alphaPixels": 8447
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "umbuzeiro",
+          "artIndex": 16,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 59.738783999999995,
+            "top": 98.3080296,
+            "right": 287.338784,
+            "bottom": 332
+          },
+          "treePixels": {
+            "left": 86,
+            "right": 280,
+            "top": 110,
+            "bottom": 327,
+            "alphaPixels": 20002
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "umbuzeiro",
+          "artIndex": 16,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 40.79960461030197,
+            "top": 67.15423899176244,
+            "right": 301.33959937463,
+            "bottom": 334.69999957084656
+          },
+          "treePixels": {
+            "left": 70,
+            "right": 294,
+            "top": 124,
+            "bottom": 329,
+            "alphaPixels": 26373
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jurema-preta",
+          "artIndex": 17,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 117.44957147441482,
+            "top": 181.43888424887467,
+            "right": 256.48956666789627,
+            "bottom": 323.9449996352196
+          },
+          "treePixels": {
+            "left": 144,
+            "right": 241,
+            "top": 215,
+            "bottom": 319,
+            "alphaPixels": 5739
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jurema-preta",
+          "artIndex": 17,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 80.53779840000001,
+            "top": 114.3675072,
+            "right": 290.1377984,
+            "bottom": 329.3
+          },
+          "treePixels": {
+            "left": 119,
+            "right": 268,
+            "top": 157,
+            "bottom": 324,
+            "alphaPixels": 13593
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "jurema-preta",
+          "artIndex": 17,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 64.71847067441482,
+            "top": 85.62263784887466,
+            "right": 304.5584658678963,
+            "bottom": 331.59499963521955
+          },
+          "treePixels": {
+            "left": 108,
+            "right": 280,
+            "top": 96,
+            "bottom": 326,
+            "alphaPixels": 17982
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-1.8-day-group-7.png",
+      "sha256": "e0d4aebe8fd341b7ab9906f6d95fafe2f02ce0ca75f584d88f80d932764b7544",
+      "entries": [
+        {
+          "key": "mandacaru",
+          "artIndex": 18,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 144.70013641487003,
+            "top": 241.4727181168467,
+            "right": 228.75013362537265,
+            "bottom": 325.5227153273493
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 206,
+            "top": 260,
+            "bottom": 313,
+            "alphaPixels": 1183
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mandacaru",
+          "artIndex": 18,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 122.461746,
+            "top": 206.727255,
+            "right": 247.461746,
+            "bottom": 331.727255
+          },
+          "treePixels": {
+            "left": 166,
+            "right": 215,
+            "top": 232,
+            "bottom": 315,
+            "alphaPixels": 2799
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "mandacaru",
+          "artIndex": 18,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 112.93100941487002,
+            "top": 191.83634561684667,
+            "right": 255.48100662537263,
+            "bottom": 334.3863428273493
+          },
+          "treePixels": {
+            "left": 161,
+            "right": 219,
+            "top": 221,
+            "bottom": 316,
+            "alphaPixels": 3721
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "macambira",
+          "artIndex": 19,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 163.7980012543645,
+            "top": 270.66490149608376,
+            "right": 213.9179997094121,
+            "bottom": 320.78489995113137
+          },
+          "treePixels": {
+            "left": 175,
+            "right": 203,
+            "top": 291,
+            "bottom": 309,
+            "alphaPixels": 393
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "macambira",
+          "artIndex": 19,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 151.84307760000002,
+            "top": 251.638308,
+            "right": 224.6430776,
+            "bottom": 324.438308
+          },
+          "treePixels": {
+            "left": 167,
+            "right": 210,
+            "top": 281,
+            "bottom": 310,
+            "alphaPixels": 939
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "macambira",
+          "artIndex": 19,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1.8,
+          "bounds": {
+            "left": 146.71954005436447,
+            "top": 243.48405549608373,
+            "right": 229.2395385094121,
+            "bottom": 326.00405395113137
+          },
+          "treePixels": {
+            "left": 164,
+            "right": 213,
+            "top": 276,
+            "bottom": 310,
+            "alphaPixels": 1238
+          },
+          "referencePixels": {
+            "left": 257,
+            "right": 495,
+            "top": 188,
+            "bottom": 413,
+            "alphaPixels": 37850
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    }
+  ],
+  "scope": "All native nature catalog entries at native minimum, unit and maximum size against three regional terrain palettes. Shared world painters, ambient night shading and native rainy-window conditions. Controlled artwork comparisons, not claims that every species is locally appropriate, navigation-safe or automatically visually accepted.",
+  "browserErrors": []
+}

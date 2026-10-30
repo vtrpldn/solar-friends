@@ -1,0 +1,35 @@
+{
+  "why": "Provide complete native-catalog nature coverage with real shared game scale, ground palettes and weather instead of assuming biome generation samples exercise every artwork entry.",
+  "captures": {
+    "day": "artifacts/nature-biome-context-day-final",
+    "day-close": "artifacts/nature-biome-context-close-final",
+    "night": "artifacts/nature-biome-context-night-final",
+    "rain": "artifacts/nature-biome-context-rain-final"
+  },
+  "compositions": 720,
+  "nativeCatalogEntries": 20,
+  "sizes": "Native minimum, unit and native maximum",
+  "checks": [
+    "All 720 target rasters and reference-home rasters have nonzero alpha and fit within their scene.",
+    "World bounds checked for every target.",
+    "No browser page errors in four capture runs.",
+    "200 editor/native size boundary comparisons pass."
+  ],
+  "initialFailure": "Close reference home raster was clipped in initial layout. Camera moved from (245,340) to (190,310); both target and home raster checks pass after recapture. No runtime sprite registration changed.",
+  "visuallyReviewed": {
+    "mode": "day-close",
+    "boards": [
+      "mata-atlantica-zoom-1.8-day-group-1.png",
+      "cerrado-zoom-1.8-day-group-5.png",
+      "caatinga-zoom-1.8-day-group-6.png",
+      "caatinga-zoom-1.8-day-group-7.png"
+    ],
+    "finding": "These four boards have coherent painted vegetation, plausible comparative scale and attached ground contact. This is a limited initial review, not catalog-wide acceptance."
+  },
+  "remaining": [
+    "Other normal/close/day/night/rain boards need individual visual inspection.",
+    "Overview capture and inspection remain.",
+    "Mixed habitat transitions, representative neighboring nature clusters, runtime movement and resident customization coverage remain.",
+    "Other building reviews and original release requirements remain in force."
+  ]
+}
