@@ -121,4 +121,6 @@
 
 #creator-regenerate{margin-top:10px}#creator-landscape-dialog{width:1000px;max-width:calc(100vw - 100px);max-height:calc(100vh - 80px);overflow:auto;box-sizing:border-box;padding:24px 28px}#creator-landscape-dialog>h2{padding-right:28px}#creator-landscape-dialog p{font-size:12px;line-height:1.5}#creator-landscape-map{display:block;width:100%;height:360px;border:2px solid #a98b55;border-radius:4px;background:#dfe6c9}
 
-#creator-landscape-status{margin:12px 0}#creator-landscape-camera{align-items:center;margin:8px 0}#creator-landscape-map:focus-visible{outline:3px solid #b88b32;outline-offset:2px}
+#creator-landscape-status{margin:12px 0}#creator-landscape-camera,#creator-biome-camera{align-items:center;margin:8px 0}#creator-landscape-map:focus-visible,#creator-biome-map:focus-visible{outline:3px solid #b88b32;outline-offset:2px}
+
+#creator-biome-dialog .dialog-actions{position:sticky;bottom:0;z-index:1;background:#e8d9b2;border-top:1px solid #b39866;padding:12px 0 0;box-shadow:0 -7px 9px #e8d9b2}

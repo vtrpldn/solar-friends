@@ -1,3 +1,4 @@
+import {bindPreviewCamera} from './preview-camera.js';
 import {canonical} from './journal.js';
 import {prepareBiomePreview} from './prepare-biome-preview.js';
 import {compatibleSpecies,regionalSpecies,suggestedReplacement} from './biome-change.js';
@@ -11,14 +12,14 @@ export class BiomeEditor{
   root.innerHTML='<label for="creator-biome-target">Regional setting</label><select id="creator-biome-target"></select><button type="button" id="creator-biome-preview">Preview biome change</button>';
   this.select=root.querySelector('select');for(const b of catalog.biomes)this.select.append(new Option(b.name,b.id));
   this.dialog=document.getElementById('creator-biome-dialog');
-  this.dialog.innerHTML='<button class="dialog-close" aria-label="Cancel biome change" data-biome-cancel>×</button><h2 id="creator-biome-change-title">Reshape our landscape</h2><p>Buildings, roads, people, supplies, goals, river and reserve locations stay in place. This changes the draft, not any saved playthrough.</p><div class="creator-biome-options"><label>Weather<select id="creator-biome-weather"><option value="destination">Use destination weather</option><option value="keep">Keep current weather</option></select></label><label>Existing regional habitats<select id="creator-biome-ground"><option value="labels">Remap habitat names, keep soil values</option><option value="keep">Keep all authored habitats and soil</option><option value="defaults">Remap and use destination soil defaults</option></select></label></div><p id="creator-biome-weather-summary"></p><div id="creator-biome-plants"></div><button type="button" id="creator-biome-suggest">Suggest plant replacements</button><p>Plant identities and positions stay in place unless you explicitly remove a group. Larger replacements may need more room.</p><p id="creator-biome-summary" role="status"></p><div class="creator-selection-actions"><button type="button" id="creator-biome-cancel-preview" hidden>Cancel preview preparation</button><button type="button" id="creator-biome-refresh" hidden>Refresh preview</button></div><canvas hidden id="creator-biome-map" aria-label="Proposed biome landscape"></canvas><p id="creator-biome-validation" role="status"></p><div class="dialog-actions"><button type="button" data-biome-cancel>Keep current landscape</button><button type="button" id="creator-biome-apply">Apply biome change</button></div>';
+  this.dialog.innerHTML='<button class="dialog-close" aria-label="Cancel biome change" data-biome-cancel>×</button><h2 id="creator-biome-change-title">Reshape our landscape</h2><p>Buildings, roads, people, supplies, goals, river and reserve locations stay in place. This changes the draft, not any saved playthrough.</p><div class="creator-biome-options"><label>Weather<select id="creator-biome-weather"><option value="destination">Use destination weather</option><option value="keep">Keep current weather</option></select></label><label>Existing regional habitats<select id="creator-biome-ground"><option value="labels">Remap habitat names, keep soil values</option><option value="keep">Keep all authored habitats and soil</option><option value="defaults">Remap and use destination soil defaults</option></select></label></div><p id="creator-biome-weather-summary"></p><div id="creator-biome-plants"></div><button type="button" id="creator-biome-suggest">Suggest plant replacements</button><p>Plant identities and positions stay in place unless you explicitly remove a group. Larger replacements may need more room.</p><p id="creator-biome-summary" role="status"></p><div class="creator-selection-actions"><button type="button" id="creator-biome-cancel-preview" hidden>Cancel preview preparation</button><button type="button" id="creator-biome-refresh" hidden>Refresh preview</button></div><div id="creator-biome-camera" class="creator-selection-actions" hidden><button type="button" data-preview-zoom="-1" aria-label="Zoom biome preview out">−</button><button type="button" data-preview-camp>Camp</button><button type="button" data-preview-zoom="1" aria-label="Zoom biome preview in">+</button><span id="creator-biome-camera-help" class="creator-map-note">Drag or use arrow keys to pan · +/− zoom · Home returns to camp</span></div><canvas hidden id="creator-biome-map" tabindex="0" aria-label="Proposed biome landscape" aria-describedby="creator-biome-camera-help"></canvas><p id="creator-biome-validation" role="status"></p><div class="dialog-actions"><button type="button" data-biome-cancel>Keep current landscape</button><button type="button" id="creator-biome-apply">Apply biome change</button></div>';
   this.apply=this.dialog.querySelector('#creator-biome-apply');this.validation=this.dialog.querySelector('#creator-biome-validation');this.cancel=this.dialog.querySelector('#creator-biome-cancel-preview');this.refresh=this.dialog.querySelector('#creator-biome-refresh');
-  this.preview=new EditorMap(this.dialog.querySelector('canvas'),art,{action:()=>{},viewChanged:()=>{},onTerrainReady:()=>this.ready(),onArtworkReady:()=>this.ready()});this.preview.onRender=()=>this.ready();
+  this.preview=new EditorMap(this.dialog.querySelector('canvas'),art,{action:()=>{},viewChanged:view=>{this.previewView={center:[...view.center],zoom:view.zoom};},onTerrainReady:()=>this.ready(),onArtworkReady:()=>this.ready()});this.preview.onRender=()=>this.ready();this.camera=this.dialog.querySelector('#creator-biome-camera');bindPreviewCamera({preview:this.preview,controls:this.camera,camp:()=>this.result?.candidate.map.camp});
   this.cancel.onclick=()=>{this.stop();this.validation.textContent='Preview cancelled. Your draft is unchanged. Refresh the preview to continue.';this.refresh.hidden=false;};this.refresh.onclick=()=>this.update();
-  root.querySelector('button').onclick=()=>this.open();
+  this.openButton=root.querySelector('button');this.openButton.onclick=()=>this.open();
   for(const b of this.dialog.querySelectorAll('[data-biome-cancel]'))b.onclick=()=>this.dialog.close();
   this.dialog.onchange=()=>this.update();
-  this.dialog.addEventListener('close',()=>{this.stop();this.original=null;this.render(this.source().definition);});
+  this.dialog.addEventListener('close',()=>{this.stop();this.original=null;this.previewView=null;this.render(this.source().definition);this.openButton.focus({preventScroll:true});});
   this.dialog.querySelector('#creator-biome-suggest').onclick=()=>{for(const input of this.dialog.querySelectorAll('[data-species-from]'))input.value=suggestedReplacement(input.dataset.speciesFrom,this.target,catalog)||'';this.update();};
   this.dialog.querySelector('#creator-biome-apply').onclick=()=>{
    if(this.apply.disabled||!this.result||!this.result.report.ok||this.result.unresolved.length)return;
@@ -30,7 +31,7 @@ export class BiomeEditor{
  render(d){if(!this.dialog.open)this.select.value=d.map.biome?.id||'mata-atlantica';}
  open(){
   try{
-   const {definition,revision,id}=this.source();this.original=definition;this.revision=revision;this.project=id;this.target=this.select.value;
+   const {definition,revision,id}=this.source();this.original=definition;this.revision=revision;this.project=id;this.target=this.select.value;this.previewView={center:[...definition.map.camera],zoom:1.1};
    this.dialog.querySelector('#creator-biome-weather').value='destination';this.dialog.querySelector('#creator-biome-ground').value='labels';
    if(!Array.isArray(definition.map.terrain)||!Array.isArray(definition.map.nature)||!Array.isArray(definition.map.deposits))throw Error('Resolve the current property before changing its biome.');
    const known=new Set(this.catalog.nature.map(s=>s.key)),groups=new Map();for(const plant of definition.map.nature)if(!known.has(plant.species)||!compatibleSpecies(plant.species,this.target))groups.set(plant.species,(groups.get(plant.species)??0)+1);
@@ -40,7 +41,7 @@ export class BiomeEditor{
   }catch(error){this.notify(error.message);}
  }
  stop(){
-  this.generation++;this.controller?.abort();this.controller=null;this.result=null;this.apply.disabled=true;this.cancel.hidden=true;this.preview.clearPreview();this.preview.canvas.hidden=true;
+  this.generation++;this.controller?.abort();this.controller=null;this.result=null;this.apply.disabled=true;this.cancel.hidden=true;this.preview.clearPreview();this.preview.canvas.hidden=true;this.camera.hidden=true;
  }
  ready(){
   if(!this.dialog.open||!this.result)return;
@@ -59,7 +60,7 @@ export class BiomeEditor{
    this.dialog.querySelector('#creator-biome-weather-summary').textContent='Current: '+weatherText(result.before)+'. Proposed: '+weatherText(result.after)+'.';
    this.dialog.querySelector('#creator-biome-summary').textContent=`${result.groundChanged} habitat cells remapped · ${result.replaced} plants replaced · ${result.removed} removed · ${result.resized} sizes adjusted · ${result.unresolved.length} plant groups need a decision.`;
    this.validation.textContent=result.report.ok?'Painting the proposed landscape…':result.report.issues.find(i=>i.severity==='error')?.message||'Review this draft.';
-   this.preview.canvas.hidden=!result.report.ok;if(result.report.ok)this.preview.set(result.candidate,result.snapshot,{center:result.candidate.map.camera,zoom:1.1,grid:false,tool:'pan'});this.ready();
+   this.preview.canvas.hidden=this.camera.hidden=!result.report.ok;if(result.report.ok)this.preview.set(result.candidate,result.snapshot,{...this.previewView,grid:false,tool:'pan'});this.ready();
   }catch(error){if(token!==this.generation||!this.dialog.open)return;this.controller=null;this.cancel.hidden=true;this.refresh.hidden=false;this.validation.textContent=error.message;}
  }
 }

@@ -1,0 +1,8 @@
+{
+  "web/editor/preview-camera.js": "71b1d719d2b91c9f473d2797a1ff5ddad708c8a8f585043b98e42d30ece32119",
+  "web/editor/biome-editor.js": "1b74a2d0f9d031050bfde1c2f182995132b3df1997c6ef64b01978a58eeaf73c",
+  "web/editor/landscape-regeneration.js": "a25d8bf06a775731ba6ca30eabf932a3a97ff364d84e59692c0c1511bd183c1d",
+  "web/editor/style.css": "279589935fa7c12607630c3285bcebc8ac79024ef36d2cbd9e398f6035659cd2",
+  "scripts/verify-creator-biome-change.mjs": "d1fce9805ecffe572b22fed98603fce7628bd5fb568378b4df214d3b790ff89f",
+  "scripts/verify-landscape-regeneration.mjs": "95f0a2f608f35685d4e5a5b48a6264622cb81752ce46d5b538256cb73c8fb765"
+}
