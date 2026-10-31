@@ -16,9 +16,9 @@
   "coverage": {
     "recordedSegments": 50,
     "decodedBoards": 74,
-    "individuallyReviewedBoards": 42,
-    "pendingBoards": 32
+    "individuallyReviewedBoards": 74,
+    "pendingBoards": 0
   },
   "runtimeChanges": "None. Sprite source images and production animation are unchanged.",
-  "remaining": "Sleeveless board inspection, large sleep/sit pose changes and remaining world/wardrobe/biome/animation release review stay open."
+  "remaining": "Large sleep/sit pose changes and remaining world/wardrobe/biome/animation release review stay open. All retained boards are inspected; this does not approve all encoded frames or the full motion gate."
 }

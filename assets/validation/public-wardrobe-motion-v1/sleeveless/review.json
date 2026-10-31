@@ -5,9 +5,7 @@
     "decoded/18-boundaries-sit.png",
     "decoded/20-boundaries-sleep.png",
     "decoded/22-boundaries-stretch.png",
-    "decoded/23-boundaries-wave.png"
-  ],
-  "pending": [
+    "decoded/23-boundaries-wave.png",
     "decoded/00-clip-cook.png",
     "decoded/01-clip-water.png",
     "decoded/02-clip-tend.png",
@@ -41,14 +39,16 @@
     "decoded/24-transition-relax.png",
     "decoded/24-boundaries-relax.png"
   ],
+  "pending": [],
   "findings": [
     "Inspected reclining figures now fit completely within their own day/night rows.",
     "Inspected task entry/exit samples show complete bodies without opacity ghosts or detached hats, sleeves or tools.",
     "Sleep and seated activity changes remain abrupt painted pose switches, including stool appearance/removal. No lowering/rising or sitting-down artwork sequence is demonstrated.",
-    "Hat omission in reclining sleep is preserved; no resting hat placement is shown."
+    "Hat omission in reclining sleep is preserved; no resting hat placement is shown.",
+    "All 37 retained sleeveless boards individually inspected: no additional blocking clipping, detached parts, body ghosting or equipment-layer defect observed in these decoded samples. Existing abrupt pose and stool changes remain unresolved."
   ],
   "limits": [
-    "Only the listed decoded boards have been individually inspected; the remaining boards are pending.",
+    "All retained sleeveless boards have been individually inspected, but each board contains only eight decoded movie samples.",
     "Eight samples per board are not every encoded frame or a physical-display smoothness assessment.",
     "MediaRecorder can omit a short final tail; decoder metadata records it and samples only available frames. Encoded-frame rounding may include an adjacent segment at a boundary.",
     "No village travel, biome terrain, shadows, rain, portraits, all cosmetic combinations or broad/classic family acceptance."
