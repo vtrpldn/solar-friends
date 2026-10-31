@@ -1,15 +1,15 @@
 [
   {
-    "root": "artifacts/public-shirt-motion-cycle",
+    "root": "assets/validation/public-wardrobe-motion-v1/shirt",
     "shirt": true,
     "segments": 25,
     "decodedFrames": "2599",
-    "reviewed": 6,
-    "pending": 31,
+    "reviewed": 37,
+    "pending": 0,
     "scope": "Evidence integrity and declared inspection coverage only; no automated judgement of visual quality or physical display pacing."
   },
   {
-    "root": "artifacts/public-sleeveless-motion-cycle",
+    "root": "assets/validation/public-wardrobe-motion-v1/sleeveless",
     "shirt": false,
     "segments": 25,
     "decodedFrames": "2608",
