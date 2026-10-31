@@ -1,0 +1,24 @@
+{
+  "why": "Prevent misleading resident motion evidence from cropped sleep silhouettes or too-short activity transitions.",
+  "changes": [
+    "Configurable recording output and explicit v5/v6 wardrobe selection.",
+    "Source/asset fingerprints for fetched code and artwork.",
+    "Whole prepared-frame slot bounds checked at each render.",
+    "Full activity cycles during task transitions and actual painted target-pose coverage.",
+    "Independent movie decoding with full-cycle and targeted entry/exit boards; explicit unencoded-tail metadata.",
+    "Evidence verifier checks source/movie/report/board identities and inspected versus pending inventory."
+  ],
+  "observedHarnessFailures": [
+    "Earlier row ground origin cropped reclining bodies when the following row was painted.",
+    "Earlier 0.85-second transition returned to walking before slower target gestures were visible.",
+    "Wall-clock segment duration exceeded the encoded movie tail; decoder now requires requested sample centers inside available video and records the omitted tail."
+  ],
+  "coverage": {
+    "recordedSegments": 50,
+    "decodedBoards": 74,
+    "individuallyReviewedBoards": 11,
+    "pendingBoards": 63
+  },
+  "runtimeChanges": "None. Sprite source images and production animation are unchanged.",
+  "remaining": "Large sleep/sit pose changes and remaining board/world/wardrobe/biome/animation release review stay open."
+}

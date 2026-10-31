@@ -1,0 +1,57 @@
+{
+  "why": "Review the actual current public wardrobe providers through production animation, using complete silhouettes and visible target poses instead of state labels alone.",
+  "reviewed": [
+    "decoded/08-clip-sleep.png",
+    "decoded/18-transition-sit.png",
+    "decoded/18-boundaries-sit.png",
+    "decoded/20-boundaries-sleep.png",
+    "decoded/22-boundaries-stretch.png",
+    "decoded/23-boundaries-wave.png"
+  ],
+  "pending": [
+    "decoded/00-clip-cook.png",
+    "decoded/01-clip-water.png",
+    "decoded/02-clip-tend.png",
+    "decoded/03-clip-feed.png",
+    "decoded/04-clip-walk.png",
+    "decoded/05-clip-work.png",
+    "decoded/06-clip-sit.png",
+    "decoded/07-clip-breathe.png",
+    "decoded/09-clip-look.png",
+    "decoded/10-clip-stretch.png",
+    "decoded/11-clip-wave.png",
+    "decoded/12-clip-relax.png",
+    "decoded/13-transition-cook.png",
+    "decoded/13-boundaries-cook.png",
+    "decoded/14-transition-water.png",
+    "decoded/14-boundaries-water.png",
+    "decoded/15-transition-tend.png",
+    "decoded/15-boundaries-tend.png",
+    "decoded/16-transition-feed.png",
+    "decoded/16-boundaries-feed.png",
+    "decoded/17-transition-work.png",
+    "decoded/17-boundaries-work.png",
+    "decoded/19-transition-breathe.png",
+    "decoded/19-boundaries-breathe.png",
+    "decoded/20-transition-sleep.png",
+    "decoded/21-transition-look.png",
+    "decoded/21-boundaries-look.png",
+    "decoded/22-transition-stretch.png",
+    "decoded/23-transition-wave.png",
+    "decoded/24-transition-relax.png",
+    "decoded/24-boundaries-relax.png"
+  ],
+  "findings": [
+    "Inspected reclining figures now fit completely within their own day/night rows.",
+    "Inspected task entry/exit samples show complete bodies without opacity ghosts or detached hats, sleeves or tools.",
+    "Sleep and seated activity changes remain abrupt painted pose switches, including stool appearance/removal. No lowering/rising or sitting-down artwork sequence is demonstrated.",
+    "Hat omission in reclining sleep is preserved; no resting hat placement is shown."
+  ],
+  "limits": [
+    "Only the listed decoded boards have been individually inspected; the remaining boards are pending.",
+    "Eight samples per board are not every encoded frame or a physical-display smoothness assessment.",
+    "MediaRecorder can omit a short final tail; decoder metadata records it and samples only available frames. Encoded-frame rounding may include an adjacent segment at a boundary.",
+    "No village travel, biome terrain, shadows, rain, portraits, all cosmetic combinations or broad/classic family acceptance."
+  ],
+  "fullGoalComplete": false
+}
