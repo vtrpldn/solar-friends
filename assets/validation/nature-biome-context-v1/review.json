@@ -54,9 +54,10 @@
     "identity": "Every board and all recorded source inputs were rehashed and match day-close.json."
   },
   "remaining": [
-    "Normal day, night and rain boards still require visual inspection; close daylight is complete.",
+    "Normal daylight remains uninspected. Current-source normal night and rain boards individually inspected; see additionalReview. Close daylight inspection remains recorded above.",
     "Overview capture and inspection remain.",
     "Mixed habitat transitions, representative neighboring nature clusters, runtime movement and resident customization coverage remain.",
     "Other building reviews and original release requirements remain in force."
-  ]
+  ],
+  "additionalReview": "../nature-weather-review-v1/review.json"
 }

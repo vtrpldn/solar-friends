@@ -1,0 +1,73 @@
+{
+  "why": "Complete direct visual inspection of the native nature catalog in current-source normal-scale night and rain scenes across all three launch ground palettes.",
+  "reviewed": {
+    "night": {
+      "directory": "artifacts/nature-biome-context-night-current",
+      "zoom": 1,
+      "boards": [
+        "mata-atlantica-zoom-1-night-group-1.png",
+        "mata-atlantica-zoom-1-night-group-2.png",
+        "mata-atlantica-zoom-1-night-group-3.png",
+        "mata-atlantica-zoom-1-night-group-4.png",
+        "mata-atlantica-zoom-1-night-group-5.png",
+        "mata-atlantica-zoom-1-night-group-6.png",
+        "mata-atlantica-zoom-1-night-group-7.png",
+        "cerrado-zoom-1-night-group-1.png",
+        "cerrado-zoom-1-night-group-2.png",
+        "cerrado-zoom-1-night-group-3.png",
+        "cerrado-zoom-1-night-group-4.png",
+        "cerrado-zoom-1-night-group-5.png",
+        "cerrado-zoom-1-night-group-6.png",
+        "cerrado-zoom-1-night-group-7.png",
+        "caatinga-zoom-1-night-group-1.png",
+        "caatinga-zoom-1-night-group-2.png",
+        "caatinga-zoom-1-night-group-3.png",
+        "caatinga-zoom-1-night-group-4.png",
+        "caatinga-zoom-1-night-group-5.png",
+        "caatinga-zoom-1-night-group-6.png",
+        "caatinga-zoom-1-night-group-7.png"
+      ],
+      "compositions": 180
+    },
+    "rain": {
+      "directory": "artifacts/nature-biome-context-rain-current",
+      "zoom": 1,
+      "boards": [
+        "mata-atlantica-zoom-1-rain-group-1.png",
+        "mata-atlantica-zoom-1-rain-group-2.png",
+        "mata-atlantica-zoom-1-rain-group-3.png",
+        "mata-atlantica-zoom-1-rain-group-4.png",
+        "mata-atlantica-zoom-1-rain-group-5.png",
+        "mata-atlantica-zoom-1-rain-group-6.png",
+        "mata-atlantica-zoom-1-rain-group-7.png",
+        "cerrado-zoom-1-rain-group-1.png",
+        "cerrado-zoom-1-rain-group-2.png",
+        "cerrado-zoom-1-rain-group-3.png",
+        "cerrado-zoom-1-rain-group-4.png",
+        "cerrado-zoom-1-rain-group-5.png",
+        "cerrado-zoom-1-rain-group-6.png",
+        "cerrado-zoom-1-rain-group-7.png",
+        "caatinga-zoom-1-rain-group-1.png",
+        "caatinga-zoom-1-rain-group-2.png",
+        "caatinga-zoom-1-rain-group-3.png",
+        "caatinga-zoom-1-rain-group-4.png",
+        "caatinga-zoom-1-rain-group-5.png",
+        "caatinga-zoom-1-rain-group-6.png",
+        "caatinga-zoom-1-rain-group-7.png"
+      ],
+      "compositions": 180
+    }
+  },
+  "sourceIdentity": "All inputs and board pixels independently rehashed after inspection.",
+  "findings": [
+    "All forty-two boards individually inspected; twenty catalog entries at minimum, unit and maximum sizes in each of three biomes, in night and rain (360 compositions).",
+    "No additional blocking clipping, scale mismatch, detached ground contact, opaque sprite ground island or inconsistent night brightness observed in these controlled static compositions.",
+    "Small grasses and low plants blend into finer Cerrado and Caatinga ground texture at minimum size, especially at night. Retain this as a readability concern for overview and mixed-landscape review."
+  ],
+  "limits": [
+    "Static normal zoom only; no animation or physical-display pacing claim.",
+    "Every catalog entry compared against each ground palette does not mean every species is ecologically appropriate in each biome.",
+    "Normal daylight inspection, overview captures/inspection, close weather views, mixed habitats, neighboring nature clusters, transitions, custom resident world coverage and full original release gates remain open."
+  ],
+  "runtimeChanges": false
+}
