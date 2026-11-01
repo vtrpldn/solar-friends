@@ -1,0 +1,445 @@
+{
+  "why": "Measure the actual desktop GPU path for maximum-sized authored editor gestures; distinguish responsive previews from slow commits and cold resident preparation.",
+  "browserMode": "headed",
+  "runs": [
+    {
+      "biome": "mata-atlantica",
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Version 26.5.2 (Build 25F84))",
+      "coldImportReadyMs": 47688.639583000004,
+      "fundEditMedianMs": 193.5,
+      "gestures": [
+        {
+          "phase": "habitat-drag",
+          "method": "down",
+          "count": 1,
+          "handlerP95Ms": 0.7000000476837158,
+          "handlerMaxMs": 0.7000000476837158,
+          "twoFrameP95Ms": 85,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "habitat-drag",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 5.5,
+          "handlerMaxMs": 6.1000001430511475,
+          "twoFrameP95Ms": 14.299999952316284,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "habitat-drag",
+          "method": "up",
+          "count": 1,
+          "handlerP95Ms": 172.89999985694885,
+          "handlerMaxMs": 172.89999985694885,
+          "twoFrameP95Ms": 177,
+          "nativeCalls": {
+            "load_scenario": 1,
+            "land_report": 1,
+            "world_geometry": 1,
+            "terrain_template": 1
+          }
+        },
+        {
+          "phase": "group-select",
+          "method": "down",
+          "count": 2,
+          "handlerP95Ms": 0.20000004768371582,
+          "handlerMaxMs": 0.20000004768371582,
+          "twoFrameP95Ms": 7.099999904632568,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-select",
+          "method": "up",
+          "count": 2,
+          "handlerP95Ms": 4.5,
+          "handlerMaxMs": 4.5,
+          "twoFrameP95Ms": 7,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "down",
+          "count": 1,
+          "handlerP95Ms": 0.2999999523162842,
+          "handlerMaxMs": 0.2999999523162842,
+          "twoFrameP95Ms": 15,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 3.799999952316284,
+          "handlerMaxMs": 4.200000047683716,
+          "twoFrameP95Ms": 13.099999904632568,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "up",
+          "count": 1,
+          "handlerP95Ms": 218.29999995231628,
+          "handlerMaxMs": 218.29999995231628,
+          "twoFrameP95Ms": 224.20000004768372,
+          "nativeCalls": {
+            "load_scenario": 1,
+            "land_report": 1,
+            "world_geometry": 1,
+            "terrain_template": 1
+          }
+        }
+      ],
+      "operations": [
+        {
+          "action": "habitat-drag",
+          "inputThroughSavedMs": 1116.9817089999997
+        },
+        {
+          "action": "brush-undo",
+          "inputThroughSavedMs": 829.4260000000068
+        },
+        {
+          "action": "brush-redo",
+          "inputThroughSavedMs": 722.469082999989
+        },
+        {
+          "action": "group-select",
+          "inputThroughSelectionMs": 42.688584000003175
+        },
+        {
+          "action": "group-move",
+          "inputThroughSavedMs": 1036.8422080000018
+        }
+      ],
+      "visualReview": "Complete desktop capture inspected; map, twelve resident cast, selected buildings and editor panels render without missing artwork or HUD corruption in this sample."
+    },
+    {
+      "biome": "cerrado",
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Version 26.5.2 (Build 25F84))",
+      "coldImportReadyMs": 47721.524958,
+      "fundEditMedianMs": 197.59999990463257,
+      "gestures": [
+        {
+          "phase": "habitat-drag",
+          "method": "down",
+          "count": 1,
+          "handlerP95Ms": 0.5,
+          "handlerMaxMs": 0.5,
+          "twoFrameP95Ms": 13.099999904632568,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "habitat-drag",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 6.5,
+          "handlerMaxMs": 7,
+          "twoFrameP95Ms": 15.900000095367432,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "habitat-drag",
+          "method": "up",
+          "count": 1,
+          "handlerP95Ms": 193.70000004768372,
+          "handlerMaxMs": 193.70000004768372,
+          "twoFrameP95Ms": 198,
+          "nativeCalls": {
+            "load_scenario": 1,
+            "land_report": 1,
+            "world_geometry": 1,
+            "terrain_template": 1
+          }
+        },
+        {
+          "phase": "group-select",
+          "method": "down",
+          "count": 2,
+          "handlerP95Ms": 0.20000004768371582,
+          "handlerMaxMs": 0.20000004768371582,
+          "twoFrameP95Ms": 12.400000095367432,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-select",
+          "method": "up",
+          "count": 2,
+          "handlerP95Ms": 3.200000047683716,
+          "handlerMaxMs": 3.200000047683716,
+          "twoFrameP95Ms": 12.200000047683716,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "down",
+          "count": 1,
+          "handlerP95Ms": 0.39999985694885254,
+          "handlerMaxMs": 0.39999985694885254,
+          "twoFrameP95Ms": 13.399999856948853,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 3,
+          "handlerMaxMs": 3.0999999046325684,
+          "twoFrameP95Ms": 12.400000095367432,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "up",
+          "count": 1,
+          "handlerP95Ms": 93.5,
+          "handlerMaxMs": 93.5,
+          "twoFrameP95Ms": 95,
+          "nativeCalls": {
+            "load_scenario": 1,
+            "land_report": 1,
+            "world_geometry": 1,
+            "terrain_template": 1
+          }
+        }
+      ],
+      "operations": [
+        {
+          "action": "habitat-drag",
+          "inputThroughSavedMs": 1144.2316670000073
+        },
+        {
+          "action": "brush-undo",
+          "inputThroughSavedMs": 706.9407080000092
+        },
+        {
+          "action": "brush-redo",
+          "inputThroughSavedMs": 657.9835840000014
+        },
+        {
+          "action": "group-select",
+          "inputThroughSelectionMs": 29.50283300000592
+        },
+        {
+          "action": "group-move",
+          "inputThroughSavedMs": 854.9490420000075
+        }
+      ],
+      "visualReview": "Complete desktop capture inspected; map, twelve resident cast, selected buildings and editor panels render without missing artwork or HUD corruption in this sample."
+    },
+    {
+      "biome": "caatinga",
+      "gpu": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Version 26.5.2 (Build 25F84))",
+      "coldImportReadyMs": 47429.091834000006,
+      "fundEditMedianMs": 199.09999990463257,
+      "gestures": [
+        {
+          "phase": "habitat-drag",
+          "method": "down",
+          "count": 1,
+          "handlerP95Ms": 0.5999999046325684,
+          "handlerMaxMs": 0.5999999046325684,
+          "twoFrameP95Ms": 13.400000095367432,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "habitat-drag",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 6.300000190734863,
+          "handlerMaxMs": 7,
+          "twoFrameP95Ms": 16.200000047683716,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "habitat-drag",
+          "method": "up",
+          "count": 1,
+          "handlerP95Ms": 205.60000014305115,
+          "handlerMaxMs": 205.60000014305115,
+          "twoFrameP95Ms": 209.90000009536743,
+          "nativeCalls": {
+            "load_scenario": 1,
+            "land_report": 1,
+            "world_geometry": 1,
+            "terrain_template": 1
+          }
+        },
+        {
+          "phase": "group-select",
+          "method": "down",
+          "count": 2,
+          "handlerP95Ms": 0.10000014305114746,
+          "handlerMaxMs": 0.10000014305114746,
+          "twoFrameP95Ms": 13.5,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-select",
+          "method": "up",
+          "count": 2,
+          "handlerP95Ms": 3.299999952316284,
+          "handlerMaxMs": 3.299999952316284,
+          "twoFrameP95Ms": 13.199999809265137,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "down",
+          "count": 1,
+          "handlerP95Ms": 0.20000004768371582,
+          "handlerMaxMs": 0.20000004768371582,
+          "twoFrameP95Ms": 14.900000095367432,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 2.3999998569488525,
+          "handlerMaxMs": 2.5,
+          "twoFrameP95Ms": 11.5,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "up",
+          "count": 1,
+          "handlerP95Ms": 120.70000004768372,
+          "handlerMaxMs": 120.70000004768372,
+          "twoFrameP95Ms": 124.5,
+          "nativeCalls": {
+            "load_scenario": 1,
+            "land_report": 1,
+            "world_geometry": 1,
+            "terrain_template": 1
+          }
+        }
+      ],
+      "operations": [
+        {
+          "action": "habitat-drag",
+          "inputThroughSavedMs": 1132.6731670000008
+        },
+        {
+          "action": "brush-undo",
+          "inputThroughSavedMs": 728.0778329999885
+        },
+        {
+          "action": "brush-redo",
+          "inputThroughSavedMs": 705.2472080000007
+        },
+        {
+          "action": "group-select",
+          "inputThroughSelectionMs": 31.877542000001995
+        },
+        {
+          "action": "group-move",
+          "inputThroughSavedMs": 899.3791670000064
+        }
+      ],
+      "visualReview": "Complete desktop capture inspected; map, twelve resident cast, selected buildings and editor panels render without missing artwork or HUD corruption in this sample."
+    }
+  ],
+  "verdict": "Correctness checks pass for these interactions; maximum-fixture feedback latency and cold-load polish remain open performance findings.",
+  "limits": [
+    "One 24-step stroke and one two-building move per biome, five scalar/zoom samples; not a sustained or statistical interaction distribution.",
+    "Scalar/zoom controls use dispatched DOM events; brush and group selection/move use trusted browser input.",
+    "Two animation frames are browser presentation timing, not physical display pacing.",
+    "Only 9x9 brush and twelve unique v5/v6 appearances at 256 buildings and seed42 measured here.",
+    "Does not cover typical maps, shared appearances, full history pressure, public Test village compile/cancel, memory plateau, GPU/process memory or full performance acceptance."
+  ],
+  "initialFailure": "A 30-second readiness wait expired while the map explicitly showed Preparing resident artwork. Extended observation reached readiness in all three separate runs. No runtime source was changed or performance threshold relaxed; --ready-timeout only controls benchmark observation.",
+  "nextWork": "Profile and reduce cold appearance preparation and synchronous native load/refresh commit costs; retain current exact-state regressions."
+}

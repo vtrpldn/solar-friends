@@ -1,0 +1,9 @@
+{
+  "error": "TimeoutError: page.waitForFunction: Timeout 30000ms exceeded.",
+  "state": {
+    "url": "http://127.0.0.1:53213/editor.html?project=616cd56e-8503-4d6a-8a91-f4d91b37060c",
+    "status": "Saved on this device",
+    "busy": "true",
+    "body": "☀ Solar Friends\nVillage creator\nSaved on this device\nUndo\nRedo\nLibrary\nExport\nSave\nSave map\nSave release\nTest village\nLand\nFriends\nVillage\nJournal\nCheck & share\nLand\n\nShape the property, choose its plants and inspect the ground.\n\nSelect\nPan\nMove\nArrival\nStart view\nHabitat & soil\nNature\nThin nature\nRiver\nClear meadow\nErase\nShow cell grid\nBrush width · cells\n1 × 1\n3 × 3\n5 × 5\n9 × 9\nLand overlay\nNatural view\nUtility corridors\nGoal regions\nOwned fresh-water access\nWalking access from camp\nProtected riverbanks\nHydro alignment\nHabitats\nFertility\nWater retention\nTree shade\nSoil moisture\nDisturbance\nEarth deposits\nStone deposits\nReclaimed deposits\n\nPoint at a cell to inspect the land.\n\nPerennial river\n\nDraw a course with River. Removing it disables hydro; provide another attainable water source.\n\nHabitat and soil preset\nRiver meadow\nRocky woodland\nClay terraces\nAtlantic forest\nDry woodland\nFlower meadow\nCerrado savanna\nCaatinga woodland\nNatural plants and details\nJequitibá-rosa\nJuçara\nEmbaúba\nPau-brasil\nForest ferns\nBromeliads\nMeadow wildflowers\nDry grasses\nGranite outcrop\nQuartz stones\nClay and ironstone\nMossy river stones\nPequi\nBarbatimão\nCerrado bunchgrass\nCampo shrub\nUmbuzeiro\nJurema-preta\nMandacaru\nMacambira\nSize 1.00×\n−\nCamp\n+\nOur property\nSelect · Shift-click or Shift-drag to add buildings · drag to pan · Delete removes the group\nLand\nGround beneath our feet\n\nPoint at a cell to inspect its growing conditions.\n\nRegional landscape\nRegional setting\nMata Atlântica\nCerrado\nCaatinga\nPreview biome change\nRegenerate this property…\nWeather and seasons\nGeological reserves"
+  }
+}
