@@ -1,0 +1,45 @@
+{
+  "why": "Reduce measured cold editor loading without skipping source bounds checks or changing rendered resident artwork.",
+  "change": "Cache ImageData dimensions outside the pixel loop; make discarded hair and garment audit-only probes CPU-backed. Final composition canvases unchanged.",
+  "measurements": [
+    {
+      "biome": "mata-atlantica",
+      "beforeMs": 47688.639583000004,
+      "afterMs": 31720.228999999996,
+      "reductionPercent": 33.484726598685384,
+      "baselineReport": "../editor-metal-gestures-v1/mata-atlantica.json",
+      "afterReport": "mata-atlantica.json"
+    },
+    {
+      "biome": "cerrado",
+      "beforeMs": 47721.524958,
+      "afterMs": 34876.716917000005,
+      "reductionPercent": 26.9161726334286,
+      "baselineReport": "../editor-metal-gestures-v1/cerrado.json",
+      "afterReport": "cerrado.json"
+    },
+    {
+      "biome": "caatinga",
+      "beforeMs": 47429.091834000006,
+      "afterMs": 40248.655125000005,
+      "reductionPercent": 15.13930887424801,
+      "baselineReport": "../editor-metal-gestures-v1/caatinga.json",
+      "afterReport": "caatinga.json"
+    }
+  ],
+  "correctness": [
+    "1804 differential region-audit cases pass against the shipped reference, including alpha thresholds, fractional regions, offset arrays and unchanged inputs.",
+    "Fixed 98 percent coverage and invalid/sparse input checks pass.",
+    "200 before/after Metal resident frame RGBA hashes and contact/shadow metadata match exactly for four v5/v6 looks, including all poses and two feeding-return variants.",
+    "All three maximum-fixture trusted brush/group-move exact saved undo/redo checks pass; no page errors."
+  ],
+  "visualReview": [
+    "All three final desktop captures individually inspected; no missing/corrupt map, cast or editor panels in these samples."
+  ],
+  "limits": [
+    "One before/after cold run per biome, not repeated distributions or controlled physical-display measurements.",
+    "Cold times vary and remain long. Native compile/refresh commit latency is not fixed by this change.",
+    "Four complete resident looks are not every supported material combination, backend or full art acceptance.",
+    "Broader original release requirements remain open."
+  ]
+}

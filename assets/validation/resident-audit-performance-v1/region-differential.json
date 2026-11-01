@@ -1,0 +1,11 @@
+{
+  "checked": 1804,
+  "channels": 60381948,
+  "seed": 193871,
+  "scope": "Exact differential region audit, threshold boundaries, full/empty alpha, fractional regions, offset typed-array views, borrowed input and invalid arguments. Not full rendering or performance acceptance.",
+  "baseline": {
+    "commit": "463b723",
+    "sha256": "36667377f02e78d00f63af964e51c3dacae943492cbf3f85e9dce52eeab11073"
+  },
+  "currentSha256": "da4b24a48bea1913372fe89f62a8f9880e14a83bc87ad3cc2245e23361ba5747"
+}

@@ -22,7 +22,7 @@ export function composeClothingPose({body,appearanceBody,binding,image,sourceHas
  if(preserved&&preserved.schema!==2)throw Error('Preserved body parts require registered native pixel ownership.');
  const painted=registeredBodyAppearance(body,appearanceBody),probe=document.createElement('canvas');probe.width=probe.height=1254;
  try{
-  const context=probe.getContext('2d');context.drawImage(image,0,0);
+  const context=probe.getContext('2d',{willReadFrequently:true});context.drawImage(image,0,0);
   const audit=auditCharacterPartRegion(context.getImageData(...rect),r.bounds);if(!audit.ok)throw Error('Garment paint leaves its authored region.');
   const frame=document.createElement('canvas');frame.width=frame.height=256;const ctx=frame.getContext('2d');
   let front=null;

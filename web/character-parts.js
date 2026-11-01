@@ -3,13 +3,13 @@ import {locateSpriteFrames,preparedFrames,FRAME_ANCHOR} from './sprite-frames.js
 export const CHARACTER_PART_MINIMUM_COVERAGE=.98;
 export function auditCharacterPartRegion(pixels,region){
  if(!Number.isInteger(pixels?.width)||!Number.isInteger(pixels?.height)||pixels.width<1||pixels.height<1||pixels.data?.length!==pixels.width*pixels.height*4||!Array.isArray(region)||region.length!==4||Array.from(region).some(n=>!Number.isFinite(n))||region[0]<0||region[1]<0||region[2]<=0||region[3]<=0||region[0]+region[2]>pixels.width||region[1]+region[3]>pixels.height)throw Error('Provide pixels and a valid authored part region.');
- const [rx,ry,rw,rh]=region,right=rx+rw,bottom=ry+rh,data=pixels.data;
+ const [rx,ry,rw,rh]=region,right=rx+rw,bottom=ry+rh,data=pixels.data,width=pixels.width,height=pixels.height;
  let painted=0,inside=0;const bounds=[Infinity,Infinity,-Infinity,-Infinity];
  // Alpha is still inspected in source order at every pixel. Bounds need only
  // the first/last painted pixel in each row, not four updates per painted pixel.
- for(let y=0,offset=3;y<pixels.height;y++){
+ for(let y=0,offset=3;y<height;y++){
   let first=-1,last=-1,rowPainted=0,rowInside=0;const insideY=y>=ry&&y<bottom;
-  for(let x=0;x<pixels.width;x++,offset+=4)if(data[offset]>=32){
+  for(let x=0;x<width;x++,offset+=4)if(data[offset]>=32){
    rowPainted++;if(first<0)first=x;last=x;
    if(insideY&&x>=rx&&x<right)rowInside++;
   }

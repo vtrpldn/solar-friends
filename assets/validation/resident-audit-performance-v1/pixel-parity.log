@@ -1,0 +1,3 @@
+baseline: 200 complete pose/return rasters recorded.
+current: 200 complete pose/return rasters recorded.
+PASS: 200 actual resident rasters and contact/shadow records match the pre-optimization runtime exactly.

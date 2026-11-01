@@ -14,7 +14,7 @@ import {registeredHairPlacement,verifyHairPlacementBodies} from './character-hai
 export function prepareRegisteredHair({registration,image,sourceHash}){
  if(registration.schema!==1||!['base','idle','activities'].includes(registration.sheet)||!Number.isInteger(registration.index)||registration.index<0||registration.index>15||registration.size!==1254||!/^[a-f0-9]{64}$/.test(sourceHash??'')||registration.partSha256!==sourceHash||image.width!==1254||image.height!==1254)throw Error('Review the changed hair/body registration before composing this pose.');
  const checked=structuredClone(registration),placement=registeredHairPlacement(checked),sourceTransform=registeredHairSourceTransform(checked),raw=document.createElement('canvas');raw.width=raw.height=1254;let audit;
- try{const context=raw.getContext('2d');context.drawImage(image,0,0);audit=auditCharacterPartRegion(context.getImageData(0,0,1254,1254),checked.bounds);}finally{raw.width=raw.height=0;}
+ try{const context=raw.getContext('2d',{willReadFrequently:true});context.drawImage(image,0,0);audit=auditCharacterPartRegion(context.getImageData(0,0,1254,1254),checked.bounds);}finally{raw.width=raw.height=0;}
  if(!audit.ok)throw Error('This hair layer fails its authored pose bounds.');
  const normalized=document.createElement('canvas');normalized.width=normalized.height=256;let disposed=false;
  try{
