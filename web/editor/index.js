@@ -1,3 +1,4 @@
+import {parseImportObject} from './import-object.js';
 import {LandscapeRegeneration} from './landscape-regeneration.js';
 import {removalMarkup} from './removal-impact.js';
 import {sceneLayers,sceneFilter,sceneSummary,sceneRouteAt} from './scene-layers.js';
@@ -567,7 +568,7 @@ function wire(){
     $('creator-library-status').textContent='Reading creation…';
     try{
       if(file.size>MAX_RECOVERY_FILE_BYTES)throw Error('This backup or creation file exceeds 96 MiB. Keep the original file.');
-      const raw=await file.text();let content;try{content=JSON.parse(raw);}catch{throw Error('This file is not a readable creation.');}
+      const raw=await file.text(),content=parseImportObject(raw);
       if(content.format==='solar-friends-recovery'){
         if(['map','release','resident'].includes(content.kind)){
           const recovered=recoveredPackage(content,{validateMap:mapSharing.validate,validateScenario:raw=>JSON.parse(engine.validate_scenario(raw)),validateResident:raw=>JSON.parse(engine.validate_resident_preset(raw,true))});

@@ -1,0 +1,24 @@
+{
+  "sourceHashes": {
+    "web/editor/index.js": "1ea36c3a03ee680c291f86175afa923e5f78dde743427b7fa5b4d9360ffeb4c9",
+    "web/editor/resident-presets.js": "bdf6be076a272069bbbd5508873b7bfa9973138ab83323e80b6739174182b825",
+    "web/editor/import-object.js": "ccd2c6b80a5192dc9e972315973ba9e2ee6de31d403504bac8b92dc2de784d8e",
+    "scripts/verify-authored-import-errors.mjs": "7d515889073d33d47c93698f1ff884ebb69e330dc293234e9cf7fa51d4e8ba51",
+    "scripts/verify-creation-sharing.mjs": "681c70412ade4858941a1a498ea699ee7deaca00b2b051a6aaf4e49ec75159f2",
+    "scripts/verify-resident-presets.mjs": "082def02ca8b44e82651f79be70a2eb3b1c08ccfd76f201830ae9bf623dff8c5"
+  },
+  "visuallyReviewed": [
+    "creation-error.png",
+    "resident-error.png"
+  ],
+  "observed": "Readable error messages fit both complete desktop dialogs. No parser excerpts visible.",
+  "passed": [
+    "14 public malformed-file cases preserve exact saved project and collection heads",
+    "valid creation download/import/native playtest/editor return",
+    "valid resident preset sharing, independent reuse, version rejection and native playtest"
+  ],
+  "limits": [
+    "Not all malformed native schemas, storage failures, file sizes, browsers or disk failure phases.",
+    "No broad builder release acceptance."
+  ]
+}

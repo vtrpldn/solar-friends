@@ -1,0 +1,18 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The input did not match the regular expression /readable creation/i. Input:
+
+"Cannot read properties of null (reading 'format')"
+
+    at file:///Users/paladini/Documents/veeware/solar-friends/scripts/verify-authored-import-errors.mjs:18:84 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: "Cannot read properties of null (reading 'format')",
+  expected: /readable creation/i,
+  operator: 'match',
+  diff: 'simple'
+}
+
+Node.js v24.10.0
