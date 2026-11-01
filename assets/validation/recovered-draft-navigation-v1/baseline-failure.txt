@@ -1,0 +1,24 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Opening Library to back up the damaged original must not overwrite it
++ actual - expected
+... Skipped lines
+
+  {
+    attribution: [],
+    checkpoint: {
+      definition: {
+        description: 'Five friends arrive with supplies, a shared shed and a storage house. Homes are still needed for overnight stays.',
+...
+        },
++       schema: 1,
+-       schema: 999,
+        start: {
+          buildings: [
+            {
+              appearance: null,
+              id: 'starting-shed',
+...
+        },

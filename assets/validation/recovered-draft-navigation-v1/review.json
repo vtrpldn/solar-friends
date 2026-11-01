@@ -1,0 +1,48 @@
+{
+  "why": "Opening Library to back up a damaged recovered draft must not replace that original, and the suggested Save a copy action must be visible in the current workspace.",
+  "baseline": "The added public Library regression failed on the prior editor: the implicit save rewrote the damaged original before backup. Retained assertion excerpt is baseline-failure.txt.",
+  "changes": [
+    "Implicit saves keep recovered draft edits and view in a separate session checkpoint while preserving the damaged durable record.",
+    "Explicit Save and Ctrl/Cmd+S acknowledge replacement; their pending request cannot be coalesced into an implicit recovery request.",
+    "Session-recovery quota errors and concurrent edits stop navigation.",
+    "A directly visible Save a copy action appears beside recovered/conflicted status. Normal saves retain their existing durable path."
+  ],
+  "verified": [
+    "Exact damaged record retained before and after Library, background saves and reload.",
+    "Actual original-record download preserves the JSON-serializable current and previous record.",
+    "Recovered title edits survive session reload without replacing the damaged original.",
+    "Injected session-recovery quota blocks navigation and keeps the current edits.",
+    "Explicit button and keyboard Save replace the original once.",
+    "Concurrent remote save is preserved; visible Save a copy creates an independent draft with local edits.",
+    "Incomplete current draft and unsupported cached draft handling remain intact.",
+    "Normal committed/lost worker replies, quota rollback, export/retry, reload/Undo and ordinary view-only recovery pass in separate final runs."
+  ],
+  "visualReview": "Recovered and conflicted 1600x1000 desktop captures individually inspected. Status and Save a copy fit in the header and remain available in the Land workspace.",
+  "inputs": {
+    "web/editor/index.js": "cf2b4fb5d91e36299770c133e3d6c9320a915db8e820ef616662ef1ace1b4eeb",
+    "web/editor.html": "f387ffbb436ee6c9c25fba01ae90de1f5c7bdcb9a0f887b0757dd86bde8d7f45",
+    "web/editor/style.css": "323a4eb6badd71e8fc14496a090fc13cf9ea03b186dabc329d31e98f3f308db2",
+    "web/content-library.js": "cfae04a458db4e3875c212459acc7f5cbfe89eebb3940dbb24fefb7f53fd2a96",
+    "web/editor/document.js": "9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a",
+    "scripts/verify-editor-checkpoint-fallback.mjs": "e32157b0e1556e1de7883cea39534918b5ca7f6ecb1016deddd6aa9111c5c617",
+    "scripts/verify-editor-save-ack-recovery.mjs": "d3ac5f893d9684e7aa86ca3eeec186940b52a1b57fcf7b13afc2ff5cea2ca9ae",
+    "scripts/verify-editor-view-recovery.mjs": "a639d306ce88ba1aebddd07e520df71e41b81d6d55b922a14b9b87e801fd4a53"
+  },
+  "artifacts": {
+    "baseline-failure.txt": "db7666bb336a6fc8d8742ade35e7e2adeb00ff827c098b1d530d6a472f16f618",
+    "report.json": "0adab7fdf9c6776379770ae0ab1dc4040be640854c70e07717e4f31a5f17fd49",
+    "conflicted-recovery.png": "bb5ec515392100730168fb34addf7beb362ca480a078f58ac4efc1fe864a6bc1",
+    "original-damaged-backup.json": "2ae6c47ffcf8a3f42fe011fd70c6b596c17de0b5d46dfe2bf245e845bd0b2e32",
+    "view-recovery-run.log": "f1deb627d41c51c94640a9c1483062f11b8372eca7af1c528cda0482ae8b6ce9",
+    "ordinary-save-report.json": "d274bde9629123b51bb542cbe520f85f25fd9b8338c1b8528d09fe63e04c46c3",
+    "ordinary-save-run.log": "344f4f2bfcc37de9f7bc51dd80db3feb4f7fc1388ebad545f572f5d22f14d6c5",
+    "previous-recovered.png": "d38ce7f23daba0d6d6a1dac694f14c8f4c2655275dbf2702fb5649608de3707d",
+    "recovery-run.log": "4e85f24e8b2f25bd07cfa1b6ae1c5fc127735988113af6f86df6a83f755798bf"
+  },
+  "limits": [
+    "Controlled unsupported-schema, session quota and remote-write cases; not physical corruption, disk failure or every crash/write phase.",
+    "Session recovery is scoped to the browser session; durable preservation requires explicit Save, Save a copy or exported backup.",
+    "Concurrent initial test runs hit rendering timeouts; the final retained runs were executed separately and all completed successfully.",
+    "The complete original builder objective and remaining release gates are unchanged."
+  ]
+}

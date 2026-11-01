@@ -1,0 +1,1 @@
+PASS native-incompatible current draft falls back without rewriting originals; incomplete current drafts remain editable; incompatible session recovery cannot replace a supported durable checkpoint.

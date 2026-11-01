@@ -1,0 +1,1 @@
+PASS plant-size-only autosave and reload, view-only unload recovery, retained grid, committed camera during a pending pan, exact cancellation and unchanged authoring history. Unload guard is invoked directly before an actual reload; this is not OS crash automation.

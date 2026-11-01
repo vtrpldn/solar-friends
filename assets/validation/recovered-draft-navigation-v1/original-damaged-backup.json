@@ -1,0 +1,4740 @@
+{
+  "format": "solar-friends-recovery",
+  "schema": 1,
+  "kind": "project",
+  "record": {
+    "format": "solar-friends-project",
+    "schema": 1,
+    "checkpoint": {
+      "schema": 1,
+      "revision": 1,
+      "definition": {
+        "description": "Five friends arrive with supplies, a shared shed and a storage house. Homes are still needed for overnight stays.",
+        "format": "solar-friends-scenario",
+        "id": "fallback-unsupported-conflict",
+        "map": {
+          "camera": [
+            32,
+            32
+          ],
+          "camp": [
+            32,
+            32
+          ],
+          "clearings": [
+            {
+              "disturbance": 0.05,
+              "size": 10,
+              "x": 32,
+              "y": 32
+            }
+          ],
+          "deposits": [
+            {
+              "height": 11,
+              "id": "earth-1",
+              "material": "earth",
+              "quantity": 49,
+              "width": 16,
+              "x": 1,
+              "y": 1
+            },
+            {
+              "height": 12,
+              "id": "earth-2",
+              "material": "earth",
+              "quantity": 52,
+              "width": 9,
+              "x": 12,
+              "y": 14
+            },
+            {
+              "height": 7,
+              "id": "earth-3",
+              "material": "earth",
+              "quantity": 39,
+              "width": 11,
+              "x": 1,
+              "y": 24
+            },
+            {
+              "height": 7,
+              "id": "stone-1",
+              "material": "stone",
+              "quantity": 24,
+              "width": 4,
+              "x": 17,
+              "y": 17
+            },
+            {
+              "height": 7,
+              "id": "stone-2",
+              "material": "stone",
+              "quantity": 34,
+              "width": 5,
+              "x": 22,
+              "y": 20
+            },
+            {
+              "height": 6,
+              "id": "stone-3",
+              "material": "stone",
+              "quantity": 38,
+              "width": 7,
+              "x": 17,
+              "y": 25
+            },
+            {
+              "height": 16,
+              "id": "salvage-1",
+              "material": "salvage",
+              "quantity": 7,
+              "width": 9,
+              "x": 1,
+              "y": 8
+            },
+            {
+              "height": 6,
+              "id": "salvage-2",
+              "material": "salvage",
+              "quantity": 9,
+              "width": 10,
+              "x": 17,
+              "y": 1
+            },
+            {
+              "height": 5,
+              "id": "salvage-3",
+              "material": "salvage",
+              "quantity": 8,
+              "width": 8,
+              "x": 10,
+              "y": 26
+            }
+          ],
+          "generator": "property-v1",
+          "height": 64,
+          "id": "founding-property",
+          "nature": [
+            {
+              "id": "nature-0",
+              "size": 1.0556301,
+              "species": "meadow-wildflowers",
+              "x": 5.32554,
+              "y": 1.0947745
+            },
+            {
+              "id": "nature-1",
+              "size": 0.73404455,
+              "species": "clay-ironstone",
+              "x": 37.074253,
+              "y": 60.595673
+            },
+            {
+              "id": "nature-8",
+              "size": 0.68506694,
+              "species": "embauba",
+              "x": 37.064106,
+              "y": 35.587578
+            },
+            {
+              "id": "nature-9",
+              "size": 1.0220296,
+              "species": "pau-brasil",
+              "x": 12.401801,
+              "y": -1.234491
+            },
+            {
+              "id": "nature-15",
+              "size": 0.8980191,
+              "species": "dry-grasses",
+              "x": 35.74717,
+              "y": -0.9364039
+            },
+            {
+              "id": "nature-20",
+              "size": 0.91111887,
+              "species": "dry-grasses",
+              "x": 17.119686,
+              "y": -0.30575186
+            },
+            {
+              "id": "nature-33",
+              "size": 0.7702121,
+              "species": "pau-brasil",
+              "x": 44.101017,
+              "y": 24.596876
+            },
+            {
+              "id": "nature-48",
+              "size": 0.8329087,
+              "species": "jequitiba-rosa",
+              "x": 43.199326,
+              "y": 36.79648
+            },
+            {
+              "id": "nature-49",
+              "size": 0.67500424,
+              "species": "jequitiba-rosa",
+              "x": 18.049948,
+              "y": 28.162458
+            },
+            {
+              "id": "nature-52",
+              "size": 1.0549307,
+              "species": "jucara",
+              "x": 43.286522,
+              "y": 59.96913
+            },
+            {
+              "id": "nature-58",
+              "size": 0.92892265,
+              "species": "pau-brasil",
+              "x": 48.52959,
+              "y": 22.713902
+            },
+            {
+              "id": "nature-59",
+              "size": 0.94560283,
+              "species": "pau-brasil",
+              "x": 49.482037,
+              "y": 57.91896
+            },
+            {
+              "id": "nature-63",
+              "size": 1.0363945,
+              "species": "jucara",
+              "x": 33.46256,
+              "y": 65.75539
+            },
+            {
+              "id": "nature-66",
+              "size": 1.090624,
+              "species": "forest-ferns",
+              "x": 6.1012716,
+              "y": 64.37351
+            },
+            {
+              "id": "nature-74",
+              "size": 0.7956671,
+              "species": "jequitiba-rosa",
+              "x": 19.30723,
+              "y": 0.56275225
+            },
+            {
+              "id": "nature-76",
+              "size": 0.70053667,
+              "species": "dry-grasses",
+              "x": 31.552862,
+              "y": 63.296204
+            },
+            {
+              "id": "nature-80",
+              "size": 0.97134334,
+              "species": "forest-ferns",
+              "x": 2.991785,
+              "y": 60.306625
+            },
+            {
+              "id": "nature-91",
+              "size": 1.1300858,
+              "species": "clay-ironstone",
+              "x": 32.8469,
+              "y": 59.544025
+            },
+            {
+              "id": "nature-96",
+              "size": 0.99566704,
+              "species": "dry-grasses",
+              "x": 37.281628,
+              "y": 31.608356
+            },
+            {
+              "id": "nature-99",
+              "size": 0.670308,
+              "species": "jucara",
+              "x": 40.69128,
+              "y": 61.57011
+            },
+            {
+              "id": "nature-102",
+              "size": 1.0853754,
+              "species": "embauba",
+              "x": 41.25476,
+              "y": 63.933624
+            },
+            {
+              "id": "nature-105",
+              "size": 1.0566546,
+              "species": "clay-ironstone",
+              "x": 42.45422,
+              "y": 52.166794
+            },
+            {
+              "id": "nature-109",
+              "size": 1.0243764,
+              "species": "jequitiba-rosa",
+              "x": 8.660912,
+              "y": 1.3680781
+            },
+            {
+              "id": "nature-110",
+              "size": 0.78285015,
+              "species": "dry-grasses",
+              "x": 41.69883,
+              "y": 52.773495
+            },
+            {
+              "id": "nature-120",
+              "size": 1.1440195,
+              "species": "forest-ferns",
+              "x": 12.916029,
+              "y": 57.34406
+            },
+            {
+              "id": "nature-124",
+              "size": 0.9417416,
+              "species": "jucara",
+              "x": 16.867275,
+              "y": 31.460474
+            },
+            {
+              "id": "nature-127",
+              "size": 1.0293359,
+              "species": "embauba",
+              "x": 7.0264287,
+              "y": 0.33659372
+            },
+            {
+              "id": "nature-129",
+              "size": 1.0665057,
+              "species": "pau-brasil",
+              "x": 15.317533,
+              "y": 31.148325
+            },
+            {
+              "id": "nature-133",
+              "size": 0.92051774,
+              "species": "jequitiba-rosa",
+              "x": 13.258318,
+              "y": 49.878006
+            },
+            {
+              "id": "nature-140",
+              "size": 0.91292346,
+              "species": "forest-ferns",
+              "x": 8.879524,
+              "y": 61.881542
+            },
+            {
+              "id": "nature-142",
+              "size": 0.9484581,
+              "species": "pau-brasil",
+              "x": 17.852108,
+              "y": 34.18664
+            },
+            {
+              "id": "nature-145",
+              "size": 0.92603314,
+              "species": "meadow-wildflowers",
+              "x": 41.52063,
+              "y": 21.097153
+            },
+            {
+              "id": "nature-147",
+              "size": 0.921536,
+              "species": "jucara",
+              "x": 6.516023,
+              "y": 29.232393
+            },
+            {
+              "id": "nature-148",
+              "size": 0.7082689,
+              "species": "jucara",
+              "x": 44.809753,
+              "y": 3.7741754
+            },
+            {
+              "id": "nature-151",
+              "size": 0.99602944,
+              "species": "clay-ironstone",
+              "x": 35.515953,
+              "y": 22.42693
+            },
+            {
+              "id": "nature-154",
+              "size": 1.0060987,
+              "species": "pau-brasil",
+              "x": 33.8177,
+              "y": 59.381657
+            },
+            {
+              "id": "nature-157",
+              "size": 0.8593272,
+              "species": "jequitiba-rosa",
+              "x": 45.229256,
+              "y": 18.11202
+            },
+            {
+              "id": "nature-160",
+              "size": 1.0349233,
+              "species": "forest-ferns",
+              "x": 13.280909,
+              "y": 35.649548
+            },
+            {
+              "id": "nature-162",
+              "size": 1.0732826,
+              "species": "embauba",
+              "x": 45.73044,
+              "y": 34.673077
+            },
+            {
+              "id": "nature-163",
+              "size": 0.9501069,
+              "species": "embauba",
+              "x": 16.193333,
+              "y": 34.55266
+            },
+            {
+              "id": "nature-165",
+              "size": 0.9656519,
+              "species": "clay-ironstone",
+              "x": 46.28765,
+              "y": 56.90695
+            },
+            {
+              "id": "nature-166",
+              "size": 0.9303326,
+              "species": "granite-outcrop",
+              "x": 39.79728,
+              "y": 16.059706
+            },
+            {
+              "id": "nature-168",
+              "size": 0.83216137,
+              "species": "jequitiba-rosa",
+              "x": 39.552723,
+              "y": 34.94476
+            },
+            {
+              "id": "nature-170",
+              "size": 0.74132675,
+              "species": "dry-grasses",
+              "x": 15.208571,
+              "y": 51.30162
+            },
+            {
+              "id": "nature-178",
+              "size": 0.9027103,
+              "species": "pau-brasil",
+              "x": 20.529451,
+              "y": 61.247
+            },
+            {
+              "id": "nature-180",
+              "size": 1.0878114,
+              "species": "meadow-wildflowers",
+              "x": 8.870825,
+              "y": 0.7060433
+            },
+            {
+              "id": "nature-185",
+              "size": 1.0712112,
+              "species": "clay-ironstone",
+              "x": 43.867905,
+              "y": 29.714127
+            },
+            {
+              "id": "nature-186",
+              "size": 0.85782474,
+              "species": "meadow-wildflowers",
+              "x": 7.2726684,
+              "y": 1.9025451
+            },
+            {
+              "id": "nature-187",
+              "size": 0.8876738,
+              "species": "embauba",
+              "x": 15.009309,
+              "y": 53.89632
+            },
+            {
+              "id": "nature-190",
+              "size": 1.092903,
+              "species": "meadow-wildflowers",
+              "x": 42.80477,
+              "y": 20.854626
+            },
+            {
+              "id": "nature-192",
+              "size": 0.7624397,
+              "species": "jequitiba-rosa",
+              "x": 21.206627,
+              "y": 62.719696
+            },
+            {
+              "id": "nature-194",
+              "size": 0.9902168,
+              "species": "jequitiba-rosa",
+              "x": 40.81568,
+              "y": 17.172503
+            },
+            {
+              "id": "nature-195",
+              "size": 1.0724074,
+              "species": "clay-ironstone",
+              "x": 41.233635,
+              "y": 36.976048
+            },
+            {
+              "id": "nature-196",
+              "size": 0.99659896,
+              "species": "dry-grasses",
+              "x": 37.287426,
+              "y": 22.234304
+            },
+            {
+              "id": "nature-200",
+              "size": 1.1381073,
+              "species": "dry-grasses",
+              "x": 46.515335,
+              "y": 27.93156
+            },
+            {
+              "id": "nature-201",
+              "size": 0.7355195,
+              "species": "mossy-stones",
+              "x": 59.79794,
+              "y": 62.30882
+            },
+            {
+              "id": "nature-202",
+              "size": 0.800275,
+              "species": "pau-brasil",
+              "x": 45.89243,
+              "y": 27.315016
+            },
+            {
+              "id": "nature-208",
+              "size": 0.65965205,
+              "species": "jucara",
+              "x": 10.836708,
+              "y": 64.97559
+            },
+            {
+              "id": "nature-211",
+              "size": 0.76759285,
+              "species": "clay-ironstone",
+              "x": 17.430838,
+              "y": 26.301188
+            },
+            {
+              "id": "nature-213",
+              "size": 0.8667981,
+              "species": "pau-brasil",
+              "x": 32.49044,
+              "y": 25.04934
+            },
+            {
+              "id": "nature-215",
+              "size": 0.7750367,
+              "species": "clay-ironstone",
+              "x": 19.101048,
+              "y": 62.47249
+            },
+            {
+              "id": "nature-222",
+              "size": 0.88521284,
+              "species": "embauba",
+              "x": 5.0442514,
+              "y": 28.80764
+            },
+            {
+              "id": "nature-227",
+              "size": 0.71401906,
+              "species": "pau-brasil",
+              "x": 42.93921,
+              "y": 56.711975
+            },
+            {
+              "id": "nature-230",
+              "size": 0.9848827,
+              "species": "dry-grasses",
+              "x": 19.997915,
+              "y": 31.685581
+            },
+            {
+              "id": "nature-235",
+              "size": 0.93587774,
+              "species": "clay-ironstone",
+              "x": 37.40476,
+              "y": 54.179222
+            },
+            {
+              "id": "nature-236",
+              "size": 0.9386514,
+              "species": "dry-grasses",
+              "x": 37.26014,
+              "y": 65.836
+            },
+            {
+              "id": "nature-237",
+              "size": 0.7934532,
+              "species": "pau-brasil",
+              "x": 12.899473,
+              "y": -0.85775137
+            },
+            {
+              "id": "nature-238",
+              "size": 1.0188351,
+              "species": "pau-brasil",
+              "x": 12.464519,
+              "y": 30.429274
+            },
+            {
+              "id": "nature-245",
+              "size": 1.1259458,
+              "species": "clay-ironstone",
+              "x": 14.82138,
+              "y": 28.412485
+            },
+            {
+              "id": "nature-248",
+              "size": 0.8828121,
+              "species": "embauba",
+              "x": 38.98621,
+              "y": 27.028982
+            },
+            {
+              "id": "nature-250",
+              "size": 1.1196885,
+              "species": "dry-grasses",
+              "x": 15.087619,
+              "y": 25.0432
+            },
+            {
+              "id": "nature-251",
+              "size": 0.8225078,
+              "species": "dry-grasses",
+              "x": 46.99178,
+              "y": 1.5239952
+            },
+            {
+              "id": "nature-256",
+              "size": 1.042367,
+              "species": "dry-grasses",
+              "x": 33.997463,
+              "y": 25.394835
+            },
+            {
+              "id": "nature-257",
+              "size": 0.85069233,
+              "species": "jucara",
+              "x": 34.880043,
+              "y": 59.60773
+            },
+            {
+              "id": "nature-260",
+              "size": 1.1193333,
+              "species": "dry-grasses",
+              "x": 49.34684,
+              "y": 58.094902
+            },
+            {
+              "id": "nature-267",
+              "size": 1.0905814,
+              "species": "jucara",
+              "x": 42.378963,
+              "y": -1.240283
+            },
+            {
+              "id": "nature-272",
+              "size": 0.9606433,
+              "species": "embauba",
+              "x": 6.5134573,
+              "y": 26.168417
+            },
+            {
+              "id": "nature-273",
+              "size": 0.9723888,
+              "species": "pau-brasil",
+              "x": 36.098568,
+              "y": 55.773006
+            },
+            {
+              "id": "nature-276",
+              "size": 1.007603,
+              "species": "dry-grasses",
+              "x": 38.785336,
+              "y": 1.1295736
+            },
+            {
+              "id": "nature-282",
+              "size": 0.75364536,
+              "species": "embauba",
+              "x": 41.352425,
+              "y": 56.042847
+            },
+            {
+              "id": "nature-285",
+              "size": 0.8115741,
+              "species": "quartz-stones",
+              "x": 37.51339,
+              "y": 19.260973
+            },
+            {
+              "id": "nature-295",
+              "size": 0.9518507,
+              "species": "clay-ironstone",
+              "x": 45.84338,
+              "y": 64.69635
+            },
+            {
+              "id": "nature-298",
+              "size": 0.7549919,
+              "species": "pau-brasil",
+              "x": 46.492825,
+              "y": 0.30791453
+            },
+            {
+              "id": "nature-300",
+              "size": 0.90493387,
+              "species": "dry-grasses",
+              "x": 47.787186,
+              "y": 0.52415836
+            },
+            {
+              "id": "nature-301",
+              "size": 0.841878,
+              "species": "clay-ironstone",
+              "x": 32.277283,
+              "y": 65.33706
+            },
+            {
+              "id": "nature-311",
+              "size": 0.9316113,
+              "species": "dry-grasses",
+              "x": 43.150955,
+              "y": 3.838482
+            },
+            {
+              "id": "nature-313",
+              "size": 0.71669006,
+              "species": "jequitiba-rosa",
+              "x": 14.205962,
+              "y": 58.912025
+            },
+            {
+              "id": "nature-314",
+              "size": 0.6904454,
+              "species": "jequitiba-rosa",
+              "x": 18.34251,
+              "y": 31.913538
+            },
+            {
+              "id": "nature-318",
+              "size": 0.8560775,
+              "species": "embauba",
+              "x": 11.612522,
+              "y": 0.4776213
+            },
+            {
+              "id": "nature-321",
+              "size": 0.9115864,
+              "species": "bromeliads",
+              "x": 13.359683,
+              "y": 57.194504
+            },
+            {
+              "id": "nature-322",
+              "size": 1.0724376,
+              "species": "pau-brasil",
+              "x": 42.848644,
+              "y": 60.353714
+            },
+            {
+              "id": "nature-324",
+              "size": 0.712945,
+              "species": "jequitiba-rosa",
+              "x": 34.102104,
+              "y": 20.834135
+            },
+            {
+              "id": "nature-327",
+              "size": 0.67724466,
+              "species": "jucara",
+              "x": 45.037853,
+              "y": 28.084606
+            },
+            {
+              "id": "nature-330",
+              "size": 1.0099385,
+              "species": "forest-ferns",
+              "x": 4.7218256,
+              "y": 56.438637
+            },
+            {
+              "id": "nature-331",
+              "size": 0.7461523,
+              "species": "clay-ironstone",
+              "x": 17.446775,
+              "y": 62.257626
+            },
+            {
+              "id": "nature-334",
+              "size": 0.96265495,
+              "species": "pau-brasil",
+              "x": 20.147625,
+              "y": 65.780075
+            },
+            {
+              "id": "nature-335",
+              "size": 1.0547128,
+              "species": "clay-ironstone",
+              "x": 15.014867,
+              "y": 38.210884
+            },
+            {
+              "id": "nature-336",
+              "size": 0.88306534,
+              "species": "dry-grasses",
+              "x": 16.998314,
+              "y": 33.964687
+            },
+            {
+              "id": "nature-339",
+              "size": 0.8439932,
+              "species": "jucara",
+              "x": 37.395184,
+              "y": 57.950882
+            },
+            {
+              "id": "nature-340",
+              "size": 1.1250885,
+              "species": "forest-ferns",
+              "x": 6.255012,
+              "y": 28.5917
+            },
+            {
+              "id": "nature-349",
+              "size": 0.7403146,
+              "species": "jequitiba-rosa",
+              "x": 10.074364,
+              "y": 28.43857
+            },
+            {
+              "id": "nature-350",
+              "size": 1.0022665,
+              "species": "dry-grasses",
+              "x": 32.465656,
+              "y": 64.191666
+            },
+            {
+              "id": "nature-352",
+              "size": 0.8597577,
+              "species": "jucara",
+              "x": 5.646205,
+              "y": 28.785604
+            },
+            {
+              "id": "nature-359",
+              "size": 0.665854,
+              "species": "pau-brasil",
+              "x": 45.161777,
+              "y": 24.125162
+            },
+            {
+              "id": "nature-360",
+              "size": 0.8830862,
+              "species": "dry-grasses",
+              "x": 18.142334,
+              "y": 65.556885
+            },
+            {
+              "id": "nature-363",
+              "size": 1.0859255,
+              "species": "jucara",
+              "x": 3.3129046,
+              "y": 26.357872
+            },
+            {
+              "id": "nature-365",
+              "size": 1.0579429,
+              "species": "quartz-stones",
+              "x": 38.024292,
+              "y": 16.732649
+            },
+            {
+              "id": "nature-368",
+              "size": 0.9777689,
+              "species": "embauba",
+              "x": 2.6352262,
+              "y": 59.95842
+            },
+            {
+              "id": "nature-372",
+              "size": 0.92845,
+              "species": "jequitiba-rosa",
+              "x": 7.023209,
+              "y": 63.775032
+            },
+            {
+              "id": "nature-373",
+              "size": 0.79693955,
+              "species": "jequitiba-rosa",
+              "x": 15.84492,
+              "y": 29.851162
+            },
+            {
+              "id": "nature-376",
+              "size": 0.8255653,
+              "species": "forest-ferns",
+              "x": 9.569706,
+              "y": 26.165895
+            },
+            {
+              "id": "nature-378",
+              "size": 0.6949597,
+              "species": "embauba",
+              "x": 49.535713,
+              "y": 29.031828
+            },
+            {
+              "id": "nature-385",
+              "size": 0.7567831,
+              "species": "clay-ironstone",
+              "x": 38.07451,
+              "y": 52.300583
+            },
+            {
+              "id": "nature-389",
+              "size": 0.944523,
+              "species": "jucara",
+              "x": 48.7437,
+              "y": 31.819046
+            },
+            {
+              "id": "nature-394",
+              "size": 1.0666965,
+              "species": "pau-brasil",
+              "x": 4.226228,
+              "y": 63.50988
+            },
+            {
+              "id": "nature-395",
+              "size": 0.98243034,
+              "species": "bromeliads",
+              "x": 7.7595243,
+              "y": 29.080622
+            },
+            {
+              "id": "nature-397",
+              "size": 0.9701836,
+              "species": "jequitiba-rosa",
+              "x": 17.749386,
+              "y": 26.356995
+            },
+            {
+              "id": "nature-399",
+              "size": 0.77835166,
+              "species": "jucara",
+              "x": 16.43864,
+              "y": 61.631905
+            },
+            {
+              "id": "nature-403",
+              "size": 0.9285073,
+              "species": "embauba",
+              "x": 36.543915,
+              "y": 24.901205
+            },
+            {
+              "id": "nature-404",
+              "size": 0.90078855,
+              "species": "embauba",
+              "x": 40.093346,
+              "y": 52.864647
+            },
+            {
+              "id": "nature-407",
+              "size": 0.9347704,
+              "species": "pau-brasil",
+              "x": 45.349083,
+              "y": 55.73133
+            },
+            {
+              "id": "nature-409",
+              "size": 0.7119535,
+              "species": "jequitiba-rosa",
+              "x": 10.878366,
+              "y": 55.81782
+            },
+            {
+              "id": "nature-410",
+              "size": 1.109279,
+              "species": "dry-grasses",
+              "x": 43.373253,
+              "y": 53.70638
+            },
+            {
+              "id": "nature-413",
+              "size": 0.7578484,
+              "species": "jucara",
+              "x": 10.703648,
+              "y": 35.645287
+            },
+            {
+              "id": "nature-423",
+              "size": 0.6668378,
+              "species": "jucara",
+              "x": 21.170929,
+              "y": 56.568146
+            },
+            {
+              "id": "nature-424",
+              "size": 0.8202611,
+              "species": "jucara",
+              "x": 14.907624,
+              "y": 56.503296
+            },
+            {
+              "id": "nature-425",
+              "size": 0.87079406,
+              "species": "clay-ironstone",
+              "x": 45.939987,
+              "y": 55.986786
+            },
+            {
+              "id": "nature-428",
+              "size": 0.7171558,
+              "species": "embauba",
+              "x": 14.286006,
+              "y": 31.46936
+            },
+            {
+              "id": "nature-436",
+              "size": 1.103315,
+              "species": "forest-ferns",
+              "x": 9.648086,
+              "y": 33.44725
+            },
+            {
+              "id": "nature-437",
+              "size": 0.7918335,
+              "species": "jucara",
+              "x": 42.297874,
+              "y": 58.13529
+            },
+            {
+              "id": "nature-441",
+              "size": 0.93993366,
+              "species": "dry-grasses",
+              "x": 40.550606,
+              "y": -1.4701566
+            },
+            {
+              "id": "nature-449",
+              "size": 0.7874687,
+              "species": "jucara",
+              "x": 47.123775,
+              "y": -1.395675
+            },
+            {
+              "id": "nature-452",
+              "size": 0.8599222,
+              "species": "embauba",
+              "x": 34.080734,
+              "y": -0.76430774
+            },
+            {
+              "id": "nature-456",
+              "size": 1.0722125,
+              "species": "meadow-wildflowers",
+              "x": 13.492056,
+              "y": -1.1623241
+            },
+            {
+              "id": "nature-458",
+              "size": 0.96222806,
+              "species": "jequitiba-rosa",
+              "x": 44.825237,
+              "y": 65.30893
+            },
+            {
+              "id": "nature-463",
+              "size": 0.70933545,
+              "species": "embauba",
+              "x": 38.75776,
+              "y": 29.766676
+            },
+            {
+              "id": "nature-465",
+              "size": 1.1353312,
+              "species": "clay-ironstone",
+              "x": 17.950283,
+              "y": 54.026215
+            },
+            {
+              "id": "nature-468",
+              "size": 0.95945716,
+              "species": "jequitiba-rosa",
+              "x": 48.892563,
+              "y": 23.784931
+            },
+            {
+              "id": "nature-469",
+              "size": 0.8130637,
+              "species": "jequitiba-rosa",
+              "x": 37.699593,
+              "y": 49.821503
+            },
+            {
+              "id": "nature-475",
+              "size": 0.90757877,
+              "species": "clay-ironstone",
+              "x": 31.037876,
+              "y": 62.208805
+            },
+            {
+              "id": "nature-479",
+              "size": 0.9589763,
+              "species": "pau-brasil",
+              "x": 37.16839,
+              "y": 24.973858
+            },
+            {
+              "id": "nature-480",
+              "size": 1.0264213,
+              "species": "dry-grasses",
+              "x": 50.40881,
+              "y": 59.578705
+            },
+            {
+              "id": "nature-483",
+              "size": 1.0171899,
+              "species": "jucara",
+              "x": 4.783167,
+              "y": 29.239214
+            },
+            {
+              "id": "nature-485",
+              "size": 0.82455635,
+              "species": "clay-ironstone",
+              "x": 43.911198,
+              "y": 63.029682
+            },
+            {
+              "id": "nature-486",
+              "size": 1.0739129,
+              "species": "forest-ferns",
+              "x": 10.307824,
+              "y": 27.70344
+            },
+            {
+              "id": "nature-487",
+              "size": 0.6778979,
+              "species": "embauba",
+              "x": 2.2200234,
+              "y": 61.898655
+            },
+            {
+              "id": "nature-489",
+              "size": 1.0340174,
+              "species": "pau-brasil",
+              "x": 16.073126,
+              "y": 35.7166
+            },
+            {
+              "id": "nature-495",
+              "size": 0.9852668,
+              "species": "clay-ironstone",
+              "x": 39.70598,
+              "y": 50.32463
+            },
+            {
+              "id": "nature-496",
+              "size": 0.9233354,
+              "species": "dry-grasses",
+              "x": 34.79272,
+              "y": 63.476093
+            },
+            {
+              "id": "nature-499",
+              "size": 0.7301598,
+              "species": "embauba",
+              "x": 14.021683,
+              "y": 60.988792
+            },
+            {
+              "id": "nature-501",
+              "size": 1.0274613,
+              "species": "clay-ironstone",
+              "x": 20.26933,
+              "y": 64.42093
+            },
+            {
+              "id": "nature-506",
+              "size": 0.95537966,
+              "species": "dry-grasses",
+              "x": 37.841007,
+              "y": 1.5282108
+            },
+            {
+              "id": "nature-507",
+              "size": 0.87574416,
+              "species": "jucara",
+              "x": 39.22054,
+              "y": 36.855442
+            },
+            {
+              "id": "nature-514",
+              "size": 0.77392316,
+              "species": "pau-brasil",
+              "x": 20.416286,
+              "y": 62.750626
+            },
+            {
+              "id": "nature-518",
+              "size": 0.95885015,
+              "species": "jequitiba-rosa",
+              "x": 38.29811,
+              "y": 35.602005
+            },
+            {
+              "id": "nature-519",
+              "size": 0.7517254,
+              "species": "jucara",
+              "x": 44.621876,
+              "y": 35.463478
+            },
+            {
+              "id": "nature-521",
+              "size": 1.1190238,
+              "species": "meadow-wildflowers",
+              "x": 8.138681,
+              "y": 1.0272876
+            },
+            {
+              "id": "nature-523",
+              "size": 1.0325606,
+              "species": "embauba",
+              "x": 9.486872,
+              "y": -1.8418741
+            },
+            {
+              "id": "nature-528",
+              "size": 0.81238884,
+              "species": "jequitiba-rosa",
+              "x": 30.562899,
+              "y": 60.168106
+            },
+            {
+              "id": "nature-534",
+              "size": 0.92637193,
+              "species": "embauba",
+              "x": 41.993767,
+              "y": 55.28192
+            },
+            {
+              "id": "nature-538",
+              "size": 0.9575839,
+              "species": "pau-brasil",
+              "x": 44.259476,
+              "y": 53.935474
+            },
+            {
+              "id": "nature-540",
+              "size": 0.8290967,
+              "species": "dry-grasses",
+              "x": 43.935703,
+              "y": 26.416857
+            },
+            {
+              "id": "nature-545",
+              "size": 1.095547,
+              "species": "clay-ironstone",
+              "x": 18.454624,
+              "y": 54.71158
+            },
+            {
+              "id": "nature-547",
+              "size": 0.6634117,
+              "species": "embauba",
+              "x": 45.25213,
+              "y": 3.0912626
+            },
+            {
+              "id": "nature-560",
+              "size": 1.0023866,
+              "species": "dry-grasses",
+              "x": 41.14106,
+              "y": 26.651667
+            },
+            {
+              "id": "nature-563",
+              "size": 0.70870894,
+              "species": "pau-brasil",
+              "x": 36.134983,
+              "y": 54.195198
+            },
+            {
+              "id": "nature-566",
+              "size": 0.7115215,
+              "species": "dry-grasses",
+              "x": 33.1506,
+              "y": 58.178127
+            },
+            {
+              "id": "nature-573",
+              "size": 0.94630307,
+              "species": "pau-brasil",
+              "x": 47.31234,
+              "y": 62.97355
+            },
+            {
+              "id": "nature-574",
+              "size": 0.86395395,
+              "species": "pau-brasil",
+              "x": 41.624313,
+              "y": 55.767056
+            },
+            {
+              "id": "nature-583",
+              "size": 1.0671047,
+              "species": "embauba",
+              "x": 46.452538,
+              "y": 57.1549
+            },
+            {
+              "id": "nature-589",
+              "size": 0.91480595,
+              "species": "jequitiba-rosa",
+              "x": 15.020937,
+              "y": 58.291935
+            },
+            {
+              "id": "nature-595",
+              "size": 0.8934416,
+              "species": "quartz-stones",
+              "x": 45.159832,
+              "y": 19.439848
+            },
+            {
+              "id": "nature-600",
+              "size": 0.8064708,
+              "species": "forest-ferns",
+              "x": 11.920189,
+              "y": 62.69361
+            },
+            {
+              "id": "nature-603",
+              "size": 0.947547,
+              "species": "jucara",
+              "x": 11.946072,
+              "y": 50.183147
+            },
+            {
+              "id": "nature-604",
+              "size": 0.92085594,
+              "species": "jucara",
+              "x": 48.672287,
+              "y": 29.708256
+            },
+            {
+              "id": "nature-611",
+              "size": 1.078713,
+              "species": "clay-ironstone",
+              "x": 34.706593,
+              "y": 25.470007
+            },
+            {
+              "id": "nature-614",
+              "size": 0.9690773,
+              "species": "jequitiba-rosa",
+              "x": 17.648153,
+              "y": 27.492043
+            },
+            {
+              "id": "nature-615",
+              "size": 1.1410657,
+              "species": "dry-grasses",
+              "x": 39.76535,
+              "y": -1.687778
+            },
+            {
+              "id": "nature-616",
+              "size": 0.7522837,
+              "species": "forest-ferns",
+              "x": 5.290571,
+              "y": 29.240364
+            },
+            {
+              "id": "nature-618",
+              "size": 0.6794031,
+              "species": "embauba",
+              "x": 43.15604,
+              "y": 30.167051
+            },
+            {
+              "id": "nature-623",
+              "size": 0.9522243,
+              "species": "pau-brasil",
+              "x": 41.006477,
+              "y": 5.7893925
+            },
+            {
+              "id": "nature-624",
+              "size": 1.0146468,
+              "species": "jequitiba-rosa",
+              "x": 14.726489,
+              "y": 55.989616
+            },
+            {
+              "id": "nature-626",
+              "size": 0.9297578,
+              "species": "dry-grasses",
+              "x": 40.634224,
+              "y": 35.118145
+            },
+            {
+              "id": "nature-634",
+              "size": 0.6610087,
+              "species": "pau-brasil",
+              "x": 9.601834,
+              "y": 37.970913
+            },
+            {
+              "id": "nature-643",
+              "size": 0.858104,
+              "species": "embauba",
+              "x": 41.275932,
+              "y": 39.553154
+            },
+            {
+              "id": "nature-644",
+              "size": 0.99132377,
+              "species": "embauba",
+              "x": 30.654463,
+              "y": 59.11064
+            },
+            {
+              "id": "nature-648",
+              "size": 0.8009518,
+              "species": "jequitiba-rosa",
+              "x": 44.66213,
+              "y": 26.18068
+            },
+            {
+              "id": "nature-653",
+              "size": 0.9488067,
+              "species": "jucara",
+              "x": 7.0162745,
+              "y": 61.094986
+            },
+            {
+              "id": "nature-661",
+              "size": 0.71226925,
+              "species": "dry-grasses",
+              "x": 17.349562,
+              "y": -1.0579895
+            },
+            {
+              "id": "nature-663",
+              "size": 0.84431,
+              "species": "jucara",
+              "x": 35.7263,
+              "y": 20.062033
+            },
+            {
+              "id": "nature-666",
+              "size": 0.80487424,
+              "species": "meadow-wildflowers",
+              "x": 49.200283,
+              "y": 23.283484
+            },
+            {
+              "id": "nature-669",
+              "size": 0.96847856,
+              "species": "pau-brasil",
+              "x": 35.79285,
+              "y": 60.798687
+            },
+            {
+              "id": "nature-670",
+              "size": 0.95241237,
+              "species": "dry-grasses",
+              "x": 35.006874,
+              "y": 59.182125
+            },
+            {
+              "id": "nature-675",
+              "size": 0.91614395,
+              "species": "meadow-wildflowers",
+              "x": 41.094208,
+              "y": 20.006845
+            },
+            {
+              "id": "nature-676",
+              "size": 1.0594666,
+              "species": "dry-grasses",
+              "x": 18.375498,
+              "y": 27.362432
+            },
+            {
+              "id": "nature-681",
+              "size": 0.82848185,
+              "species": "clay-ironstone",
+              "x": 38.58554,
+              "y": 61.561516
+            },
+            {
+              "id": "nature-689",
+              "size": 0.82024467,
+              "species": "jucara",
+              "x": 14.104597,
+              "y": 56.2069
+            },
+            {
+              "id": "nature-690",
+              "size": 1.128952,
+              "species": "dry-grasses",
+              "x": 44.535126,
+              "y": 57.405014
+            },
+            {
+              "id": "nature-691",
+              "size": 0.9966495,
+              "species": "bromeliads",
+              "x": 6.6534925,
+              "y": 60.627766
+            },
+            {
+              "id": "nature-693",
+              "size": 1.0372103,
+              "species": "pau-brasil",
+              "x": 20.842577,
+              "y": 26.28814
+            },
+            {
+              "id": "nature-696",
+              "size": 1.082345,
+              "species": "dry-grasses",
+              "x": 32.253963,
+              "y": -0.5900904
+            },
+            {
+              "id": "nature-710",
+              "size": 0.99574786,
+              "species": "forest-ferns",
+              "x": 8.127667,
+              "y": 35.649837
+            },
+            {
+              "id": "nature-712",
+              "size": 0.71539444,
+              "species": "jucara",
+              "x": 12.003773,
+              "y": 27.586044
+            },
+            {
+              "id": "nature-713",
+              "size": 1.000775,
+              "species": "jucara",
+              "x": 42.529736,
+              "y": -0.06569675
+            },
+            {
+              "id": "nature-715",
+              "size": 0.7216971,
+              "species": "clay-ironstone",
+              "x": 35.03366,
+              "y": 52.405643
+            },
+            {
+              "id": "nature-720",
+              "size": 0.97695464,
+              "species": "dry-grasses",
+              "x": 18.783403,
+              "y": 65.59492
+            },
+            {
+              "id": "nature-721",
+              "size": 0.80202043,
+              "species": "dry-grasses",
+              "x": 45.893333,
+              "y": 0.23546009
+            },
+            {
+              "id": "nature-723",
+              "size": 0.8844114,
+              "species": "jucara",
+              "x": 13.802093,
+              "y": -0.8701852
+            },
+            {
+              "id": "nature-725",
+              "size": 0.8713505,
+              "species": "meadow-wildflowers",
+              "x": 15.115752,
+              "y": 1.1261342
+            },
+            {
+              "id": "nature-726",
+              "size": 0.7769094,
+              "species": "forest-ferns",
+              "x": 12.625033,
+              "y": 63.00919
+            },
+            {
+              "id": "nature-729",
+              "size": 0.8914324,
+              "species": "pau-brasil",
+              "x": 39.255,
+              "y": 38.28085
+            },
+            {
+              "id": "nature-731",
+              "size": 1.0851485,
+              "species": "dry-grasses",
+              "x": 43.90897,
+              "y": 1.8874048
+            },
+            {
+              "id": "nature-737",
+              "size": 0.65532744,
+              "species": "jucara",
+              "x": 42.921455,
+              "y": 25.971338
+            },
+            {
+              "id": "nature-738",
+              "size": 0.75498235,
+              "species": "embauba",
+              "x": 33.467346,
+              "y": 57.76061
+            },
+            {
+              "id": "nature-739",
+              "size": 0.72100765,
+              "species": "embauba",
+              "x": 21.341839,
+              "y": 25.634636
+            },
+            {
+              "id": "nature-740",
+              "size": 1.0907595,
+              "species": "dry-grasses",
+              "x": 38.502968,
+              "y": 62.94535
+            },
+            {
+              "id": "nature-744",
+              "size": 0.6558758,
+              "species": "jequitiba-rosa",
+              "x": 34.435028,
+              "y": 58.14819
+            },
+            {
+              "id": "nature-746",
+              "size": 0.97056925,
+              "species": "dry-grasses",
+              "x": 45.23281,
+              "y": 65.527695
+            },
+            {
+              "id": "nature-748",
+              "size": 0.8503814,
+              "species": "jucara",
+              "x": 46.46048,
+              "y": 26.014624
+            },
+            {
+              "id": "nature-755",
+              "size": 0.96170694,
+              "species": "clay-ironstone",
+              "x": 14.0508,
+              "y": 63.389797
+            },
+            {
+              "id": "nature-757",
+              "size": 0.82341444,
+              "species": "jequitiba-rosa",
+              "x": 39.074734,
+              "y": 27.389593
+            },
+            {
+              "id": "nature-760",
+              "size": 1.0908052,
+              "species": "dry-grasses",
+              "x": 46.64658,
+              "y": 57.640564
+            },
+            {
+              "id": "nature-778",
+              "size": 0.8145819,
+              "species": "pau-brasil",
+              "x": 42.2746,
+              "y": 19.973577
+            },
+            {
+              "id": "nature-780",
+              "size": 1.1071017,
+              "species": "dry-grasses",
+              "x": 39.980568,
+              "y": 23.26077
+            },
+            {
+              "id": "nature-783",
+              "size": 0.92284375,
+              "species": "jucara",
+              "x": 45.021698,
+              "y": 29.45693
+            },
+            {
+              "id": "nature-791",
+              "size": 0.9451789,
+              "species": "clay-ironstone",
+              "x": 40.55035,
+              "y": 51.84589
+            },
+            {
+              "id": "nature-795",
+              "size": 0.71389085,
+              "species": "bromeliads",
+              "x": 8.379033,
+              "y": 60.547726
+            },
+            {
+              "id": "nature-796",
+              "size": 1.1266578,
+              "species": "dry-grasses",
+              "x": 45.80825,
+              "y": 31.428558
+            },
+            {
+              "id": "nature-797",
+              "size": 0.7097254,
+              "species": "jucara",
+              "x": 9.590316,
+              "y": 29.515417
+            },
+            {
+              "id": "nature-800",
+              "size": 0.84124994,
+              "species": "dry-grasses",
+              "x": 14.792767,
+              "y": 26.810541
+            },
+            {
+              "id": "nature-808",
+              "size": 1.0628911,
+              "species": "jucara",
+              "x": 47.870678,
+              "y": 30.410378
+            },
+            {
+              "id": "nature-811",
+              "size": 0.7462999,
+              "species": "dry-grasses",
+              "x": 35.981304,
+              "y": -0.32215467
+            },
+            {
+              "id": "nature-818",
+              "size": 0.6546985,
+              "species": "jequitiba-rosa",
+              "x": 19.221336,
+              "y": 63.73728
+            },
+            {
+              "id": "nature-819",
+              "size": 0.855337,
+              "species": "jucara",
+              "x": 36.61883,
+              "y": 25.643051
+            },
+            {
+              "id": "nature-821",
+              "size": 0.78060514,
+              "species": "dry-grasses",
+              "x": 40.565643,
+              "y": -1.9321966
+            },
+            {
+              "id": "nature-827",
+              "size": 0.8579945,
+              "species": "pau-brasil",
+              "x": 41.276073,
+              "y": 61.443092
+            },
+            {
+              "id": "nature-833",
+              "size": 1.0928288,
+              "species": "jucara",
+              "x": 8.337413,
+              "y": 28.929401
+            },
+            {
+              "id": "nature-837",
+              "size": 0.8309705,
+              "species": "pau-brasil",
+              "x": 16.24847,
+              "y": 53.202656
+            },
+            {
+              "id": "nature-840",
+              "size": 0.9119024,
+              "species": "forest-ferns",
+              "x": 12.422837,
+              "y": 29.806627
+            },
+            {
+              "id": "nature-841",
+              "size": 0.9824231,
+              "species": "meadow-wildflowers",
+              "x": 44.660145,
+              "y": 21.639019
+            },
+            {
+              "id": "nature-842",
+              "size": 0.6689401,
+              "species": "jequitiba-rosa",
+              "x": 21.923998,
+              "y": 25.619642
+            },
+            {
+              "id": "nature-852",
+              "size": 0.9280152,
+              "species": "jequitiba-rosa",
+              "x": 12.98426,
+              "y": 38.676228
+            },
+            {
+              "id": "nature-854",
+              "size": 0.80522656,
+              "species": "jequitiba-rosa",
+              "x": 20.170256,
+              "y": 59.88363
+            },
+            {
+              "id": "nature-858",
+              "size": 1.0027536,
+              "species": "embauba",
+              "x": 9.390582,
+              "y": 34.285576
+            },
+            {
+              "id": "nature-859",
+              "size": 0.97943944,
+              "species": "embauba",
+              "x": 44.456097,
+              "y": 64.76778
+            },
+            {
+              "id": "nature-862",
+              "size": 1.0343673,
+              "species": "pau-brasil",
+              "x": 4.333605,
+              "y": 64.84159
+            },
+            {
+              "id": "nature-867",
+              "size": 0.78990203,
+              "species": "jucara",
+              "x": 19.058018,
+              "y": 65.1834
+            },
+            {
+              "id": "nature-869",
+              "size": 1.0344505,
+              "species": "jucara",
+              "x": 4.94378,
+              "y": 31.820017
+            },
+            {
+              "id": "nature-874",
+              "size": 0.74543256,
+              "species": "pau-brasil",
+              "x": 6.34259,
+              "y": 61.446766
+            },
+            {
+              "id": "nature-875",
+              "size": 0.9354009,
+              "species": "bromeliads",
+              "x": 10.900521,
+              "y": 29.453066
+            },
+            {
+              "id": "nature-877",
+              "size": 1.0876169,
+              "species": "jequitiba-rosa",
+              "x": 48.483604,
+              "y": -1.8109418
+            },
+            {
+              "id": "nature-882",
+              "size": 1.0353404,
+              "species": "embauba",
+              "x": 11.011964,
+              "y": 36.81558
+            },
+            {
+              "id": "nature-885",
+              "size": 0.81400174,
+              "species": "clay-ironstone",
+              "x": 14.812857,
+              "y": 61.433228
+            },
+            {
+              "id": "nature-886",
+              "size": 0.9219746,
+              "species": "granite-outcrop",
+              "x": 37.28826,
+              "y": 17.682695
+            },
+            {
+              "id": "nature-893",
+              "size": 0.9166829,
+              "species": "jucara",
+              "x": 46.812458,
+              "y": 21.608387
+            },
+            {
+              "id": "nature-901",
+              "size": 1.1005323,
+              "species": "bromeliads",
+              "x": 6.030845,
+              "y": 60.569668
+            },
+            {
+              "id": "nature-906",
+              "size": 0.9256778,
+              "species": "meadow-wildflowers",
+              "x": 36.617935,
+              "y": 20.191853
+            },
+            {
+              "id": "nature-909",
+              "size": 0.8293909,
+              "species": "pau-brasil",
+              "x": 8.198017,
+              "y": 35.247463
+            },
+            {
+              "id": "nature-910",
+              "size": 1.0643827,
+              "species": "forest-ferns",
+              "x": 58.851654,
+              "y": 26.35188
+            },
+            {
+              "id": "nature-912",
+              "size": 0.7697922,
+              "species": "jequitiba-rosa",
+              "x": 5.7334332,
+              "y": 59.324306
+            },
+            {
+              "id": "nature-913",
+              "size": 0.7316322,
+              "species": "jequitiba-rosa",
+              "x": 40.937275,
+              "y": 27.464994
+            },
+            {
+              "id": "nature-922",
+              "size": 1.0183376,
+              "species": "pau-brasil",
+              "x": 13.881987,
+              "y": 63.625877
+            },
+            {
+              "id": "nature-923",
+              "size": 1.047682,
+              "species": "pau-brasil",
+              "x": 11.246091,
+              "y": 59.317062
+            },
+            {
+              "id": "nature-924",
+              "size": 1.0686256,
+              "species": "jequitiba-rosa",
+              "x": 40.33888,
+              "y": 36.70527
+            },
+            {
+              "id": "nature-929",
+              "size": 0.8548089,
+              "species": "jucara",
+              "x": 41.70607,
+              "y": 24.839155
+            },
+            {
+              "id": "nature-930",
+              "size": 0.8464759,
+              "species": "dry-grasses",
+              "x": 14.581722,
+              "y": 26.916676
+            },
+            {
+              "id": "nature-932",
+              "size": 1.07126,
+              "species": "embauba",
+              "x": 44.946842,
+              "y": 21.135536
+            },
+            {
+              "id": "nature-933",
+              "size": 0.71309906,
+              "species": "pau-brasil",
+              "x": 15.901153,
+              "y": 50.518814
+            },
+            {
+              "id": "nature-939",
+              "size": 0.6914165,
+              "species": "jucara",
+              "x": 5.9155803,
+              "y": 60.5183
+            },
+            {
+              "id": "nature-944",
+              "size": 0.6982695,
+              "species": "embauba",
+              "x": 40.051952,
+              "y": 30.701052
+            },
+            {
+              "id": "nature-946",
+              "size": 0.9816366,
+              "species": "dry-grasses",
+              "x": 40.7829,
+              "y": 59.446533
+            },
+            {
+              "id": "nature-950",
+              "size": 1.1014378,
+              "species": "forest-ferns",
+              "x": 1.856821,
+              "y": 28.477404
+            },
+            {
+              "id": "nature-960",
+              "size": 0.7506611,
+              "species": "dry-grasses",
+              "x": 41.311344,
+              "y": 6.2361913
+            },
+            {
+              "id": "nature-961",
+              "size": 1.1113434,
+              "species": "clay-ironstone",
+              "x": 45.283146,
+              "y": 26.600248
+            },
+            {
+              "id": "nature-965",
+              "size": 1.073458,
+              "species": "clay-ironstone",
+              "x": 36.922245,
+              "y": 35.331173
+            },
+            {
+              "id": "nature-967",
+              "size": 0.8829682,
+              "species": "embauba",
+              "x": 39.284058,
+              "y": 54.98233
+            },
+            {
+              "id": "nature-970",
+              "size": 1.0901234,
+              "species": "forest-ferns",
+              "x": 58.868618,
+              "y": 25.6903
+            },
+            {
+              "id": "nature-974",
+              "size": 0.88275576,
+              "species": "jequitiba-rosa",
+              "x": 7.3819203,
+              "y": 29.806927
+            },
+            {
+              "id": "nature-976",
+              "size": 0.82229155,
+              "species": "dry-grasses",
+              "x": 45.595863,
+              "y": 35.057877
+            },
+            {
+              "id": "nature-982",
+              "size": 1.0367312,
+              "species": "pau-brasil",
+              "x": 41.553925,
+              "y": 29.430096
+            },
+            {
+              "id": "nature-984",
+              "size": 1.0230783,
+              "species": "jequitiba-rosa",
+              "x": 35.110874,
+              "y": 62.27249
+            },
+            {
+              "id": "nature-989",
+              "size": 1.0557349,
+              "species": "jucara",
+              "x": 16.549332,
+              "y": 1.8614807
+            },
+            {
+              "id": "nature-990",
+              "size": 0.8369233,
+              "species": "meadow-wildflowers",
+              "x": 15.802631,
+              "y": -0.85753804
+            },
+            {
+              "id": "nature-992",
+              "size": 0.7532155,
+              "species": "embauba",
+              "x": 9.490784,
+              "y": 50.86805
+            },
+            {
+              "id": "nature-999",
+              "size": 0.9627222,
+              "species": "jucara",
+              "x": 42.46713,
+              "y": 30.874239
+            }
+          ],
+          "revision": 1,
+          "river": {
+            "centers": [
+              61.8,
+              61.94185,
+              62.07686,
+              62.198524,
+              62.30098,
+              62.379284,
+              62.429665,
+              62.44969,
+              62.4384,
+              62.396336,
+              62.325523,
+              62.229378,
+              62.112534,
+              61.980625,
+              61.840008,
+              61.697464,
+              61.559864,
+              61.433838,
+              61.325462,
+              61.23996,
+              61.181458,
+              61.15277,
+              61.155285,
+              61.188877,
+              61.251926,
+              61.341396,
+              61.452976,
+              61.581284,
+              61.72013,
+              61.86283,
+              62.002502,
+              62.132412,
+              62.246296,
+              62.338665,
+              62.40507,
+              62.44231,
+              62.44858,
+              62.42359,
+              62.36854,
+              62.286083,
+              62.180195,
+              62.05598,
+              61.919422,
+              61.77711,
+              61.6359,
+              61.5026,
+              61.383636,
+              61.284744,
+              61.21069,
+              61.165043,
+              61.150005,
+              61.1663,
+              61.213142,
+              61.288273,
+              61.388073,
+              61.50773,
+              61.64147,
+              61.78286,
+              61.92507,
+              62.061256,
+              62.18485,
+              62.289886,
+              62.371307,
+              62.42519
+            ],
+            "schema": 1
+          },
+          "seed": 78593,
+          "terrain": null,
+          "width": 64
+        },
+        "revision": 1,
+        "rules": {
+          "climate": false,
+          "land": false,
+          "learning": false,
+          "logistics": false,
+          "maintenance": false,
+          "market": false,
+          "mode": "sandbox",
+          "utilities": false
+        },
+        "schema": 999,
+        "start": {
+          "buildings": [
+            {
+              "appearance": null,
+              "id": "starting-shed",
+              "kind": "shed",
+              "recipe": "standard",
+              "state": "completed",
+              "x": 30,
+              "y": 29
+            },
+            {
+              "appearance": null,
+              "id": "starting-warehouse",
+              "kind": "warehouse",
+              "recipe": "standard",
+              "state": "completed",
+              "x": 36,
+              "y": 29
+            }
+          ],
+          "fresh_water": 40,
+          "funds": 10000000,
+          "inventories": [
+            {
+              "items": {
+                "bamboo": 24,
+                "earth": 24,
+                "food": 80,
+                "frames": 4,
+                "meals": 20,
+                "salvage": 24,
+                "stone": 24,
+                "timber": 100
+              },
+              "owner": {
+                "building": "starting-warehouse",
+                "kind": "building"
+              }
+            },
+            {
+              "items": {
+                "bamboo_starts": 2,
+                "batteries": 24,
+                "covering": 24,
+                "electrical": 24,
+                "fittings": 24,
+                "frames": 20,
+                "panels": 24,
+                "plumbing": 24,
+                "pumps": 24,
+                "tiles": 24,
+                "tools": 36,
+                "tree_starts": 8,
+                "walls": 24
+              },
+              "owner": {
+                "kind": "camp"
+              }
+            }
+          ],
+          "minutes": 480,
+          "residents": [
+            {
+              "biography": "",
+              "id": "resident-iara",
+              "name": "Iara",
+              "occupation": "nursery_assistant",
+              "outside_shifts": false,
+              "preset": "iara",
+              "preset_version": 1,
+              "pronouns": "",
+              "routine_preferences": {
+                "alternate_hobby": "birdwatch",
+                "favourite_hobby": "nature_walk",
+                "preferred_bedtime": 1290
+              }
+            },
+            {
+              "biography": "",
+              "id": "resident-bento",
+              "name": "Bento",
+              "occupation": "bamboo_carpenter",
+              "outside_shifts": false,
+              "preset": "bento",
+              "preset_version": 1,
+              "pronouns": "",
+              "routine_preferences": {
+                "alternate_hobby": "daydream",
+                "favourite_hobby": "stretch",
+                "preferred_bedtime": 1335
+              }
+            },
+            {
+              "biography": "",
+              "id": "resident-luz",
+              "name": "Luz",
+              "occupation": "school_cook",
+              "outside_shifts": false,
+              "preset": "luz",
+              "preset_version": 1,
+              "pronouns": "",
+              "routine_preferences": {
+                "alternate_hobby": "stretch",
+                "favourite_hobby": "daydream",
+                "preferred_bedtime": 1260
+              }
+            },
+            {
+              "biography": "",
+              "id": "resident-caua",
+              "name": "Cauã",
+              "occupation": "nature_guide",
+              "outside_shifts": false,
+              "preset": "caua",
+              "preset_version": 1,
+              "pronouns": "",
+              "routine_preferences": {
+                "alternate_hobby": "nature_walk",
+                "favourite_hobby": "birdwatch",
+                "preferred_bedtime": 1380
+              }
+            },
+            {
+              "biography": "",
+              "id": "resident-nina",
+              "name": "Nina",
+              "occupation": "water_technician",
+              "outside_shifts": false,
+              "preset": "nina",
+              "preset_version": 1,
+              "pronouns": "",
+              "routine_preferences": {
+                "alternate_hobby": "stretch",
+                "favourite_hobby": "daydream",
+                "preferred_bedtime": 1305
+              }
+            }
+          ],
+          "roads": []
+        },
+        "title": "Current unsupported-conflict"
+      },
+      "history": {
+        "format": 2,
+        "past": [
+          {
+            "label": "Change current title",
+            "before": [
+              29224,
+              3575021940,
+              2797777360
+            ],
+            "after": [
+              29224,
+              1024365883,
+              4251134859
+            ],
+            "changes": [
+              {
+                "path": [
+                  "title"
+                ],
+                "before": {
+                  "exists": true,
+                  "value": "Earlier unsupported-conflict"
+                },
+                "after": {
+                  "exists": true,
+                  "value": "Current unsupported-conflict"
+                }
+              }
+            ]
+          }
+        ],
+        "future": []
+      }
+    },
+    "view": {
+      "center": [
+        32,
+        32
+      ],
+      "zoom": 1.3,
+      "grid": true
+    },
+    "title": "Current unsupported-conflict",
+    "attribution": [],
+    "previous": {
+      "checkpoint": {
+        "schema": 1,
+        "revision": 0,
+        "definition": {
+          "description": "Five friends arrive with supplies, a shared shed and a storage house. Homes are still needed for overnight stays.",
+          "format": "solar-friends-scenario",
+          "id": "fallback-unsupported-conflict",
+          "map": {
+            "camera": [
+              32,
+              32
+            ],
+            "camp": [
+              32,
+              32
+            ],
+            "clearings": [
+              {
+                "disturbance": 0.05,
+                "size": 10,
+                "x": 32,
+                "y": 32
+              }
+            ],
+            "deposits": [
+              {
+                "height": 11,
+                "id": "earth-1",
+                "material": "earth",
+                "quantity": 49,
+                "width": 16,
+                "x": 1,
+                "y": 1
+              },
+              {
+                "height": 12,
+                "id": "earth-2",
+                "material": "earth",
+                "quantity": 52,
+                "width": 9,
+                "x": 12,
+                "y": 14
+              },
+              {
+                "height": 7,
+                "id": "earth-3",
+                "material": "earth",
+                "quantity": 39,
+                "width": 11,
+                "x": 1,
+                "y": 24
+              },
+              {
+                "height": 7,
+                "id": "stone-1",
+                "material": "stone",
+                "quantity": 24,
+                "width": 4,
+                "x": 17,
+                "y": 17
+              },
+              {
+                "height": 7,
+                "id": "stone-2",
+                "material": "stone",
+                "quantity": 34,
+                "width": 5,
+                "x": 22,
+                "y": 20
+              },
+              {
+                "height": 6,
+                "id": "stone-3",
+                "material": "stone",
+                "quantity": 38,
+                "width": 7,
+                "x": 17,
+                "y": 25
+              },
+              {
+                "height": 16,
+                "id": "salvage-1",
+                "material": "salvage",
+                "quantity": 7,
+                "width": 9,
+                "x": 1,
+                "y": 8
+              },
+              {
+                "height": 6,
+                "id": "salvage-2",
+                "material": "salvage",
+                "quantity": 9,
+                "width": 10,
+                "x": 17,
+                "y": 1
+              },
+              {
+                "height": 5,
+                "id": "salvage-3",
+                "material": "salvage",
+                "quantity": 8,
+                "width": 8,
+                "x": 10,
+                "y": 26
+              }
+            ],
+            "generator": "property-v1",
+            "height": 64,
+            "id": "founding-property",
+            "nature": [
+              {
+                "id": "nature-0",
+                "size": 1.0556301,
+                "species": "meadow-wildflowers",
+                "x": 5.32554,
+                "y": 1.0947745
+              },
+              {
+                "id": "nature-1",
+                "size": 0.73404455,
+                "species": "clay-ironstone",
+                "x": 37.074253,
+                "y": 60.595673
+              },
+              {
+                "id": "nature-8",
+                "size": 0.68506694,
+                "species": "embauba",
+                "x": 37.064106,
+                "y": 35.587578
+              },
+              {
+                "id": "nature-9",
+                "size": 1.0220296,
+                "species": "pau-brasil",
+                "x": 12.401801,
+                "y": -1.234491
+              },
+              {
+                "id": "nature-15",
+                "size": 0.8980191,
+                "species": "dry-grasses",
+                "x": 35.74717,
+                "y": -0.9364039
+              },
+              {
+                "id": "nature-20",
+                "size": 0.91111887,
+                "species": "dry-grasses",
+                "x": 17.119686,
+                "y": -0.30575186
+              },
+              {
+                "id": "nature-33",
+                "size": 0.7702121,
+                "species": "pau-brasil",
+                "x": 44.101017,
+                "y": 24.596876
+              },
+              {
+                "id": "nature-48",
+                "size": 0.8329087,
+                "species": "jequitiba-rosa",
+                "x": 43.199326,
+                "y": 36.79648
+              },
+              {
+                "id": "nature-49",
+                "size": 0.67500424,
+                "species": "jequitiba-rosa",
+                "x": 18.049948,
+                "y": 28.162458
+              },
+              {
+                "id": "nature-52",
+                "size": 1.0549307,
+                "species": "jucara",
+                "x": 43.286522,
+                "y": 59.96913
+              },
+              {
+                "id": "nature-58",
+                "size": 0.92892265,
+                "species": "pau-brasil",
+                "x": 48.52959,
+                "y": 22.713902
+              },
+              {
+                "id": "nature-59",
+                "size": 0.94560283,
+                "species": "pau-brasil",
+                "x": 49.482037,
+                "y": 57.91896
+              },
+              {
+                "id": "nature-63",
+                "size": 1.0363945,
+                "species": "jucara",
+                "x": 33.46256,
+                "y": 65.75539
+              },
+              {
+                "id": "nature-66",
+                "size": 1.090624,
+                "species": "forest-ferns",
+                "x": 6.1012716,
+                "y": 64.37351
+              },
+              {
+                "id": "nature-74",
+                "size": 0.7956671,
+                "species": "jequitiba-rosa",
+                "x": 19.30723,
+                "y": 0.56275225
+              },
+              {
+                "id": "nature-76",
+                "size": 0.70053667,
+                "species": "dry-grasses",
+                "x": 31.552862,
+                "y": 63.296204
+              },
+              {
+                "id": "nature-80",
+                "size": 0.97134334,
+                "species": "forest-ferns",
+                "x": 2.991785,
+                "y": 60.306625
+              },
+              {
+                "id": "nature-91",
+                "size": 1.1300858,
+                "species": "clay-ironstone",
+                "x": 32.8469,
+                "y": 59.544025
+              },
+              {
+                "id": "nature-96",
+                "size": 0.99566704,
+                "species": "dry-grasses",
+                "x": 37.281628,
+                "y": 31.608356
+              },
+              {
+                "id": "nature-99",
+                "size": 0.670308,
+                "species": "jucara",
+                "x": 40.69128,
+                "y": 61.57011
+              },
+              {
+                "id": "nature-102",
+                "size": 1.0853754,
+                "species": "embauba",
+                "x": 41.25476,
+                "y": 63.933624
+              },
+              {
+                "id": "nature-105",
+                "size": 1.0566546,
+                "species": "clay-ironstone",
+                "x": 42.45422,
+                "y": 52.166794
+              },
+              {
+                "id": "nature-109",
+                "size": 1.0243764,
+                "species": "jequitiba-rosa",
+                "x": 8.660912,
+                "y": 1.3680781
+              },
+              {
+                "id": "nature-110",
+                "size": 0.78285015,
+                "species": "dry-grasses",
+                "x": 41.69883,
+                "y": 52.773495
+              },
+              {
+                "id": "nature-120",
+                "size": 1.1440195,
+                "species": "forest-ferns",
+                "x": 12.916029,
+                "y": 57.34406
+              },
+              {
+                "id": "nature-124",
+                "size": 0.9417416,
+                "species": "jucara",
+                "x": 16.867275,
+                "y": 31.460474
+              },
+              {
+                "id": "nature-127",
+                "size": 1.0293359,
+                "species": "embauba",
+                "x": 7.0264287,
+                "y": 0.33659372
+              },
+              {
+                "id": "nature-129",
+                "size": 1.0665057,
+                "species": "pau-brasil",
+                "x": 15.317533,
+                "y": 31.148325
+              },
+              {
+                "id": "nature-133",
+                "size": 0.92051774,
+                "species": "jequitiba-rosa",
+                "x": 13.258318,
+                "y": 49.878006
+              },
+              {
+                "id": "nature-140",
+                "size": 0.91292346,
+                "species": "forest-ferns",
+                "x": 8.879524,
+                "y": 61.881542
+              },
+              {
+                "id": "nature-142",
+                "size": 0.9484581,
+                "species": "pau-brasil",
+                "x": 17.852108,
+                "y": 34.18664
+              },
+              {
+                "id": "nature-145",
+                "size": 0.92603314,
+                "species": "meadow-wildflowers",
+                "x": 41.52063,
+                "y": 21.097153
+              },
+              {
+                "id": "nature-147",
+                "size": 0.921536,
+                "species": "jucara",
+                "x": 6.516023,
+                "y": 29.232393
+              },
+              {
+                "id": "nature-148",
+                "size": 0.7082689,
+                "species": "jucara",
+                "x": 44.809753,
+                "y": 3.7741754
+              },
+              {
+                "id": "nature-151",
+                "size": 0.99602944,
+                "species": "clay-ironstone",
+                "x": 35.515953,
+                "y": 22.42693
+              },
+              {
+                "id": "nature-154",
+                "size": 1.0060987,
+                "species": "pau-brasil",
+                "x": 33.8177,
+                "y": 59.381657
+              },
+              {
+                "id": "nature-157",
+                "size": 0.8593272,
+                "species": "jequitiba-rosa",
+                "x": 45.229256,
+                "y": 18.11202
+              },
+              {
+                "id": "nature-160",
+                "size": 1.0349233,
+                "species": "forest-ferns",
+                "x": 13.280909,
+                "y": 35.649548
+              },
+              {
+                "id": "nature-162",
+                "size": 1.0732826,
+                "species": "embauba",
+                "x": 45.73044,
+                "y": 34.673077
+              },
+              {
+                "id": "nature-163",
+                "size": 0.9501069,
+                "species": "embauba",
+                "x": 16.193333,
+                "y": 34.55266
+              },
+              {
+                "id": "nature-165",
+                "size": 0.9656519,
+                "species": "clay-ironstone",
+                "x": 46.28765,
+                "y": 56.90695
+              },
+              {
+                "id": "nature-166",
+                "size": 0.9303326,
+                "species": "granite-outcrop",
+                "x": 39.79728,
+                "y": 16.059706
+              },
+              {
+                "id": "nature-168",
+                "size": 0.83216137,
+                "species": "jequitiba-rosa",
+                "x": 39.552723,
+                "y": 34.94476
+              },
+              {
+                "id": "nature-170",
+                "size": 0.74132675,
+                "species": "dry-grasses",
+                "x": 15.208571,
+                "y": 51.30162
+              },
+              {
+                "id": "nature-178",
+                "size": 0.9027103,
+                "species": "pau-brasil",
+                "x": 20.529451,
+                "y": 61.247
+              },
+              {
+                "id": "nature-180",
+                "size": 1.0878114,
+                "species": "meadow-wildflowers",
+                "x": 8.870825,
+                "y": 0.7060433
+              },
+              {
+                "id": "nature-185",
+                "size": 1.0712112,
+                "species": "clay-ironstone",
+                "x": 43.867905,
+                "y": 29.714127
+              },
+              {
+                "id": "nature-186",
+                "size": 0.85782474,
+                "species": "meadow-wildflowers",
+                "x": 7.2726684,
+                "y": 1.9025451
+              },
+              {
+                "id": "nature-187",
+                "size": 0.8876738,
+                "species": "embauba",
+                "x": 15.009309,
+                "y": 53.89632
+              },
+              {
+                "id": "nature-190",
+                "size": 1.092903,
+                "species": "meadow-wildflowers",
+                "x": 42.80477,
+                "y": 20.854626
+              },
+              {
+                "id": "nature-192",
+                "size": 0.7624397,
+                "species": "jequitiba-rosa",
+                "x": 21.206627,
+                "y": 62.719696
+              },
+              {
+                "id": "nature-194",
+                "size": 0.9902168,
+                "species": "jequitiba-rosa",
+                "x": 40.81568,
+                "y": 17.172503
+              },
+              {
+                "id": "nature-195",
+                "size": 1.0724074,
+                "species": "clay-ironstone",
+                "x": 41.233635,
+                "y": 36.976048
+              },
+              {
+                "id": "nature-196",
+                "size": 0.99659896,
+                "species": "dry-grasses",
+                "x": 37.287426,
+                "y": 22.234304
+              },
+              {
+                "id": "nature-200",
+                "size": 1.1381073,
+                "species": "dry-grasses",
+                "x": 46.515335,
+                "y": 27.93156
+              },
+              {
+                "id": "nature-201",
+                "size": 0.7355195,
+                "species": "mossy-stones",
+                "x": 59.79794,
+                "y": 62.30882
+              },
+              {
+                "id": "nature-202",
+                "size": 0.800275,
+                "species": "pau-brasil",
+                "x": 45.89243,
+                "y": 27.315016
+              },
+              {
+                "id": "nature-208",
+                "size": 0.65965205,
+                "species": "jucara",
+                "x": 10.836708,
+                "y": 64.97559
+              },
+              {
+                "id": "nature-211",
+                "size": 0.76759285,
+                "species": "clay-ironstone",
+                "x": 17.430838,
+                "y": 26.301188
+              },
+              {
+                "id": "nature-213",
+                "size": 0.8667981,
+                "species": "pau-brasil",
+                "x": 32.49044,
+                "y": 25.04934
+              },
+              {
+                "id": "nature-215",
+                "size": 0.7750367,
+                "species": "clay-ironstone",
+                "x": 19.101048,
+                "y": 62.47249
+              },
+              {
+                "id": "nature-222",
+                "size": 0.88521284,
+                "species": "embauba",
+                "x": 5.0442514,
+                "y": 28.80764
+              },
+              {
+                "id": "nature-227",
+                "size": 0.71401906,
+                "species": "pau-brasil",
+                "x": 42.93921,
+                "y": 56.711975
+              },
+              {
+                "id": "nature-230",
+                "size": 0.9848827,
+                "species": "dry-grasses",
+                "x": 19.997915,
+                "y": 31.685581
+              },
+              {
+                "id": "nature-235",
+                "size": 0.93587774,
+                "species": "clay-ironstone",
+                "x": 37.40476,
+                "y": 54.179222
+              },
+              {
+                "id": "nature-236",
+                "size": 0.9386514,
+                "species": "dry-grasses",
+                "x": 37.26014,
+                "y": 65.836
+              },
+              {
+                "id": "nature-237",
+                "size": 0.7934532,
+                "species": "pau-brasil",
+                "x": 12.899473,
+                "y": -0.85775137
+              },
+              {
+                "id": "nature-238",
+                "size": 1.0188351,
+                "species": "pau-brasil",
+                "x": 12.464519,
+                "y": 30.429274
+              },
+              {
+                "id": "nature-245",
+                "size": 1.1259458,
+                "species": "clay-ironstone",
+                "x": 14.82138,
+                "y": 28.412485
+              },
+              {
+                "id": "nature-248",
+                "size": 0.8828121,
+                "species": "embauba",
+                "x": 38.98621,
+                "y": 27.028982
+              },
+              {
+                "id": "nature-250",
+                "size": 1.1196885,
+                "species": "dry-grasses",
+                "x": 15.087619,
+                "y": 25.0432
+              },
+              {
+                "id": "nature-251",
+                "size": 0.8225078,
+                "species": "dry-grasses",
+                "x": 46.99178,
+                "y": 1.5239952
+              },
+              {
+                "id": "nature-256",
+                "size": 1.042367,
+                "species": "dry-grasses",
+                "x": 33.997463,
+                "y": 25.394835
+              },
+              {
+                "id": "nature-257",
+                "size": 0.85069233,
+                "species": "jucara",
+                "x": 34.880043,
+                "y": 59.60773
+              },
+              {
+                "id": "nature-260",
+                "size": 1.1193333,
+                "species": "dry-grasses",
+                "x": 49.34684,
+                "y": 58.094902
+              },
+              {
+                "id": "nature-267",
+                "size": 1.0905814,
+                "species": "jucara",
+                "x": 42.378963,
+                "y": -1.240283
+              },
+              {
+                "id": "nature-272",
+                "size": 0.9606433,
+                "species": "embauba",
+                "x": 6.5134573,
+                "y": 26.168417
+              },
+              {
+                "id": "nature-273",
+                "size": 0.9723888,
+                "species": "pau-brasil",
+                "x": 36.098568,
+                "y": 55.773006
+              },
+              {
+                "id": "nature-276",
+                "size": 1.007603,
+                "species": "dry-grasses",
+                "x": 38.785336,
+                "y": 1.1295736
+              },
+              {
+                "id": "nature-282",
+                "size": 0.75364536,
+                "species": "embauba",
+                "x": 41.352425,
+                "y": 56.042847
+              },
+              {
+                "id": "nature-285",
+                "size": 0.8115741,
+                "species": "quartz-stones",
+                "x": 37.51339,
+                "y": 19.260973
+              },
+              {
+                "id": "nature-295",
+                "size": 0.9518507,
+                "species": "clay-ironstone",
+                "x": 45.84338,
+                "y": 64.69635
+              },
+              {
+                "id": "nature-298",
+                "size": 0.7549919,
+                "species": "pau-brasil",
+                "x": 46.492825,
+                "y": 0.30791453
+              },
+              {
+                "id": "nature-300",
+                "size": 0.90493387,
+                "species": "dry-grasses",
+                "x": 47.787186,
+                "y": 0.52415836
+              },
+              {
+                "id": "nature-301",
+                "size": 0.841878,
+                "species": "clay-ironstone",
+                "x": 32.277283,
+                "y": 65.33706
+              },
+              {
+                "id": "nature-311",
+                "size": 0.9316113,
+                "species": "dry-grasses",
+                "x": 43.150955,
+                "y": 3.838482
+              },
+              {
+                "id": "nature-313",
+                "size": 0.71669006,
+                "species": "jequitiba-rosa",
+                "x": 14.205962,
+                "y": 58.912025
+              },
+              {
+                "id": "nature-314",
+                "size": 0.6904454,
+                "species": "jequitiba-rosa",
+                "x": 18.34251,
+                "y": 31.913538
+              },
+              {
+                "id": "nature-318",
+                "size": 0.8560775,
+                "species": "embauba",
+                "x": 11.612522,
+                "y": 0.4776213
+              },
+              {
+                "id": "nature-321",
+                "size": 0.9115864,
+                "species": "bromeliads",
+                "x": 13.359683,
+                "y": 57.194504
+              },
+              {
+                "id": "nature-322",
+                "size": 1.0724376,
+                "species": "pau-brasil",
+                "x": 42.848644,
+                "y": 60.353714
+              },
+              {
+                "id": "nature-324",
+                "size": 0.712945,
+                "species": "jequitiba-rosa",
+                "x": 34.102104,
+                "y": 20.834135
+              },
+              {
+                "id": "nature-327",
+                "size": 0.67724466,
+                "species": "jucara",
+                "x": 45.037853,
+                "y": 28.084606
+              },
+              {
+                "id": "nature-330",
+                "size": 1.0099385,
+                "species": "forest-ferns",
+                "x": 4.7218256,
+                "y": 56.438637
+              },
+              {
+                "id": "nature-331",
+                "size": 0.7461523,
+                "species": "clay-ironstone",
+                "x": 17.446775,
+                "y": 62.257626
+              },
+              {
+                "id": "nature-334",
+                "size": 0.96265495,
+                "species": "pau-brasil",
+                "x": 20.147625,
+                "y": 65.780075
+              },
+              {
+                "id": "nature-335",
+                "size": 1.0547128,
+                "species": "clay-ironstone",
+                "x": 15.014867,
+                "y": 38.210884
+              },
+              {
+                "id": "nature-336",
+                "size": 0.88306534,
+                "species": "dry-grasses",
+                "x": 16.998314,
+                "y": 33.964687
+              },
+              {
+                "id": "nature-339",
+                "size": 0.8439932,
+                "species": "jucara",
+                "x": 37.395184,
+                "y": 57.950882
+              },
+              {
+                "id": "nature-340",
+                "size": 1.1250885,
+                "species": "forest-ferns",
+                "x": 6.255012,
+                "y": 28.5917
+              },
+              {
+                "id": "nature-349",
+                "size": 0.7403146,
+                "species": "jequitiba-rosa",
+                "x": 10.074364,
+                "y": 28.43857
+              },
+              {
+                "id": "nature-350",
+                "size": 1.0022665,
+                "species": "dry-grasses",
+                "x": 32.465656,
+                "y": 64.191666
+              },
+              {
+                "id": "nature-352",
+                "size": 0.8597577,
+                "species": "jucara",
+                "x": 5.646205,
+                "y": 28.785604
+              },
+              {
+                "id": "nature-359",
+                "size": 0.665854,
+                "species": "pau-brasil",
+                "x": 45.161777,
+                "y": 24.125162
+              },
+              {
+                "id": "nature-360",
+                "size": 0.8830862,
+                "species": "dry-grasses",
+                "x": 18.142334,
+                "y": 65.556885
+              },
+              {
+                "id": "nature-363",
+                "size": 1.0859255,
+                "species": "jucara",
+                "x": 3.3129046,
+                "y": 26.357872
+              },
+              {
+                "id": "nature-365",
+                "size": 1.0579429,
+                "species": "quartz-stones",
+                "x": 38.024292,
+                "y": 16.732649
+              },
+              {
+                "id": "nature-368",
+                "size": 0.9777689,
+                "species": "embauba",
+                "x": 2.6352262,
+                "y": 59.95842
+              },
+              {
+                "id": "nature-372",
+                "size": 0.92845,
+                "species": "jequitiba-rosa",
+                "x": 7.023209,
+                "y": 63.775032
+              },
+              {
+                "id": "nature-373",
+                "size": 0.79693955,
+                "species": "jequitiba-rosa",
+                "x": 15.84492,
+                "y": 29.851162
+              },
+              {
+                "id": "nature-376",
+                "size": 0.8255653,
+                "species": "forest-ferns",
+                "x": 9.569706,
+                "y": 26.165895
+              },
+              {
+                "id": "nature-378",
+                "size": 0.6949597,
+                "species": "embauba",
+                "x": 49.535713,
+                "y": 29.031828
+              },
+              {
+                "id": "nature-385",
+                "size": 0.7567831,
+                "species": "clay-ironstone",
+                "x": 38.07451,
+                "y": 52.300583
+              },
+              {
+                "id": "nature-389",
+                "size": 0.944523,
+                "species": "jucara",
+                "x": 48.7437,
+                "y": 31.819046
+              },
+              {
+                "id": "nature-394",
+                "size": 1.0666965,
+                "species": "pau-brasil",
+                "x": 4.226228,
+                "y": 63.50988
+              },
+              {
+                "id": "nature-395",
+                "size": 0.98243034,
+                "species": "bromeliads",
+                "x": 7.7595243,
+                "y": 29.080622
+              },
+              {
+                "id": "nature-397",
+                "size": 0.9701836,
+                "species": "jequitiba-rosa",
+                "x": 17.749386,
+                "y": 26.356995
+              },
+              {
+                "id": "nature-399",
+                "size": 0.77835166,
+                "species": "jucara",
+                "x": 16.43864,
+                "y": 61.631905
+              },
+              {
+                "id": "nature-403",
+                "size": 0.9285073,
+                "species": "embauba",
+                "x": 36.543915,
+                "y": 24.901205
+              },
+              {
+                "id": "nature-404",
+                "size": 0.90078855,
+                "species": "embauba",
+                "x": 40.093346,
+                "y": 52.864647
+              },
+              {
+                "id": "nature-407",
+                "size": 0.9347704,
+                "species": "pau-brasil",
+                "x": 45.349083,
+                "y": 55.73133
+              },
+              {
+                "id": "nature-409",
+                "size": 0.7119535,
+                "species": "jequitiba-rosa",
+                "x": 10.878366,
+                "y": 55.81782
+              },
+              {
+                "id": "nature-410",
+                "size": 1.109279,
+                "species": "dry-grasses",
+                "x": 43.373253,
+                "y": 53.70638
+              },
+              {
+                "id": "nature-413",
+                "size": 0.7578484,
+                "species": "jucara",
+                "x": 10.703648,
+                "y": 35.645287
+              },
+              {
+                "id": "nature-423",
+                "size": 0.6668378,
+                "species": "jucara",
+                "x": 21.170929,
+                "y": 56.568146
+              },
+              {
+                "id": "nature-424",
+                "size": 0.8202611,
+                "species": "jucara",
+                "x": 14.907624,
+                "y": 56.503296
+              },
+              {
+                "id": "nature-425",
+                "size": 0.87079406,
+                "species": "clay-ironstone",
+                "x": 45.939987,
+                "y": 55.986786
+              },
+              {
+                "id": "nature-428",
+                "size": 0.7171558,
+                "species": "embauba",
+                "x": 14.286006,
+                "y": 31.46936
+              },
+              {
+                "id": "nature-436",
+                "size": 1.103315,
+                "species": "forest-ferns",
+                "x": 9.648086,
+                "y": 33.44725
+              },
+              {
+                "id": "nature-437",
+                "size": 0.7918335,
+                "species": "jucara",
+                "x": 42.297874,
+                "y": 58.13529
+              },
+              {
+                "id": "nature-441",
+                "size": 0.93993366,
+                "species": "dry-grasses",
+                "x": 40.550606,
+                "y": -1.4701566
+              },
+              {
+                "id": "nature-449",
+                "size": 0.7874687,
+                "species": "jucara",
+                "x": 47.123775,
+                "y": -1.395675
+              },
+              {
+                "id": "nature-452",
+                "size": 0.8599222,
+                "species": "embauba",
+                "x": 34.080734,
+                "y": -0.76430774
+              },
+              {
+                "id": "nature-456",
+                "size": 1.0722125,
+                "species": "meadow-wildflowers",
+                "x": 13.492056,
+                "y": -1.1623241
+              },
+              {
+                "id": "nature-458",
+                "size": 0.96222806,
+                "species": "jequitiba-rosa",
+                "x": 44.825237,
+                "y": 65.30893
+              },
+              {
+                "id": "nature-463",
+                "size": 0.70933545,
+                "species": "embauba",
+                "x": 38.75776,
+                "y": 29.766676
+              },
+              {
+                "id": "nature-465",
+                "size": 1.1353312,
+                "species": "clay-ironstone",
+                "x": 17.950283,
+                "y": 54.026215
+              },
+              {
+                "id": "nature-468",
+                "size": 0.95945716,
+                "species": "jequitiba-rosa",
+                "x": 48.892563,
+                "y": 23.784931
+              },
+              {
+                "id": "nature-469",
+                "size": 0.8130637,
+                "species": "jequitiba-rosa",
+                "x": 37.699593,
+                "y": 49.821503
+              },
+              {
+                "id": "nature-475",
+                "size": 0.90757877,
+                "species": "clay-ironstone",
+                "x": 31.037876,
+                "y": 62.208805
+              },
+              {
+                "id": "nature-479",
+                "size": 0.9589763,
+                "species": "pau-brasil",
+                "x": 37.16839,
+                "y": 24.973858
+              },
+              {
+                "id": "nature-480",
+                "size": 1.0264213,
+                "species": "dry-grasses",
+                "x": 50.40881,
+                "y": 59.578705
+              },
+              {
+                "id": "nature-483",
+                "size": 1.0171899,
+                "species": "jucara",
+                "x": 4.783167,
+                "y": 29.239214
+              },
+              {
+                "id": "nature-485",
+                "size": 0.82455635,
+                "species": "clay-ironstone",
+                "x": 43.911198,
+                "y": 63.029682
+              },
+              {
+                "id": "nature-486",
+                "size": 1.0739129,
+                "species": "forest-ferns",
+                "x": 10.307824,
+                "y": 27.70344
+              },
+              {
+                "id": "nature-487",
+                "size": 0.6778979,
+                "species": "embauba",
+                "x": 2.2200234,
+                "y": 61.898655
+              },
+              {
+                "id": "nature-489",
+                "size": 1.0340174,
+                "species": "pau-brasil",
+                "x": 16.073126,
+                "y": 35.7166
+              },
+              {
+                "id": "nature-495",
+                "size": 0.9852668,
+                "species": "clay-ironstone",
+                "x": 39.70598,
+                "y": 50.32463
+              },
+              {
+                "id": "nature-496",
+                "size": 0.9233354,
+                "species": "dry-grasses",
+                "x": 34.79272,
+                "y": 63.476093
+              },
+              {
+                "id": "nature-499",
+                "size": 0.7301598,
+                "species": "embauba",
+                "x": 14.021683,
+                "y": 60.988792
+              },
+              {
+                "id": "nature-501",
+                "size": 1.0274613,
+                "species": "clay-ironstone",
+                "x": 20.26933,
+                "y": 64.42093
+              },
+              {
+                "id": "nature-506",
+                "size": 0.95537966,
+                "species": "dry-grasses",
+                "x": 37.841007,
+                "y": 1.5282108
+              },
+              {
+                "id": "nature-507",
+                "size": 0.87574416,
+                "species": "jucara",
+                "x": 39.22054,
+                "y": 36.855442
+              },
+              {
+                "id": "nature-514",
+                "size": 0.77392316,
+                "species": "pau-brasil",
+                "x": 20.416286,
+                "y": 62.750626
+              },
+              {
+                "id": "nature-518",
+                "size": 0.95885015,
+                "species": "jequitiba-rosa",
+                "x": 38.29811,
+                "y": 35.602005
+              },
+              {
+                "id": "nature-519",
+                "size": 0.7517254,
+                "species": "jucara",
+                "x": 44.621876,
+                "y": 35.463478
+              },
+              {
+                "id": "nature-521",
+                "size": 1.1190238,
+                "species": "meadow-wildflowers",
+                "x": 8.138681,
+                "y": 1.0272876
+              },
+              {
+                "id": "nature-523",
+                "size": 1.0325606,
+                "species": "embauba",
+                "x": 9.486872,
+                "y": -1.8418741
+              },
+              {
+                "id": "nature-528",
+                "size": 0.81238884,
+                "species": "jequitiba-rosa",
+                "x": 30.562899,
+                "y": 60.168106
+              },
+              {
+                "id": "nature-534",
+                "size": 0.92637193,
+                "species": "embauba",
+                "x": 41.993767,
+                "y": 55.28192
+              },
+              {
+                "id": "nature-538",
+                "size": 0.9575839,
+                "species": "pau-brasil",
+                "x": 44.259476,
+                "y": 53.935474
+              },
+              {
+                "id": "nature-540",
+                "size": 0.8290967,
+                "species": "dry-grasses",
+                "x": 43.935703,
+                "y": 26.416857
+              },
+              {
+                "id": "nature-545",
+                "size": 1.095547,
+                "species": "clay-ironstone",
+                "x": 18.454624,
+                "y": 54.71158
+              },
+              {
+                "id": "nature-547",
+                "size": 0.6634117,
+                "species": "embauba",
+                "x": 45.25213,
+                "y": 3.0912626
+              },
+              {
+                "id": "nature-560",
+                "size": 1.0023866,
+                "species": "dry-grasses",
+                "x": 41.14106,
+                "y": 26.651667
+              },
+              {
+                "id": "nature-563",
+                "size": 0.70870894,
+                "species": "pau-brasil",
+                "x": 36.134983,
+                "y": 54.195198
+              },
+              {
+                "id": "nature-566",
+                "size": 0.7115215,
+                "species": "dry-grasses",
+                "x": 33.1506,
+                "y": 58.178127
+              },
+              {
+                "id": "nature-573",
+                "size": 0.94630307,
+                "species": "pau-brasil",
+                "x": 47.31234,
+                "y": 62.97355
+              },
+              {
+                "id": "nature-574",
+                "size": 0.86395395,
+                "species": "pau-brasil",
+                "x": 41.624313,
+                "y": 55.767056
+              },
+              {
+                "id": "nature-583",
+                "size": 1.0671047,
+                "species": "embauba",
+                "x": 46.452538,
+                "y": 57.1549
+              },
+              {
+                "id": "nature-589",
+                "size": 0.91480595,
+                "species": "jequitiba-rosa",
+                "x": 15.020937,
+                "y": 58.291935
+              },
+              {
+                "id": "nature-595",
+                "size": 0.8934416,
+                "species": "quartz-stones",
+                "x": 45.159832,
+                "y": 19.439848
+              },
+              {
+                "id": "nature-600",
+                "size": 0.8064708,
+                "species": "forest-ferns",
+                "x": 11.920189,
+                "y": 62.69361
+              },
+              {
+                "id": "nature-603",
+                "size": 0.947547,
+                "species": "jucara",
+                "x": 11.946072,
+                "y": 50.183147
+              },
+              {
+                "id": "nature-604",
+                "size": 0.92085594,
+                "species": "jucara",
+                "x": 48.672287,
+                "y": 29.708256
+              },
+              {
+                "id": "nature-611",
+                "size": 1.078713,
+                "species": "clay-ironstone",
+                "x": 34.706593,
+                "y": 25.470007
+              },
+              {
+                "id": "nature-614",
+                "size": 0.9690773,
+                "species": "jequitiba-rosa",
+                "x": 17.648153,
+                "y": 27.492043
+              },
+              {
+                "id": "nature-615",
+                "size": 1.1410657,
+                "species": "dry-grasses",
+                "x": 39.76535,
+                "y": -1.687778
+              },
+              {
+                "id": "nature-616",
+                "size": 0.7522837,
+                "species": "forest-ferns",
+                "x": 5.290571,
+                "y": 29.240364
+              },
+              {
+                "id": "nature-618",
+                "size": 0.6794031,
+                "species": "embauba",
+                "x": 43.15604,
+                "y": 30.167051
+              },
+              {
+                "id": "nature-623",
+                "size": 0.9522243,
+                "species": "pau-brasil",
+                "x": 41.006477,
+                "y": 5.7893925
+              },
+              {
+                "id": "nature-624",
+                "size": 1.0146468,
+                "species": "jequitiba-rosa",
+                "x": 14.726489,
+                "y": 55.989616
+              },
+              {
+                "id": "nature-626",
+                "size": 0.9297578,
+                "species": "dry-grasses",
+                "x": 40.634224,
+                "y": 35.118145
+              },
+              {
+                "id": "nature-634",
+                "size": 0.6610087,
+                "species": "pau-brasil",
+                "x": 9.601834,
+                "y": 37.970913
+              },
+              {
+                "id": "nature-643",
+                "size": 0.858104,
+                "species": "embauba",
+                "x": 41.275932,
+                "y": 39.553154
+              },
+              {
+                "id": "nature-644",
+                "size": 0.99132377,
+                "species": "embauba",
+                "x": 30.654463,
+                "y": 59.11064
+              },
+              {
+                "id": "nature-648",
+                "size": 0.8009518,
+                "species": "jequitiba-rosa",
+                "x": 44.66213,
+                "y": 26.18068
+              },
+              {
+                "id": "nature-653",
+                "size": 0.9488067,
+                "species": "jucara",
+                "x": 7.0162745,
+                "y": 61.094986
+              },
+              {
+                "id": "nature-661",
+                "size": 0.71226925,
+                "species": "dry-grasses",
+                "x": 17.349562,
+                "y": -1.0579895
+              },
+              {
+                "id": "nature-663",
+                "size": 0.84431,
+                "species": "jucara",
+                "x": 35.7263,
+                "y": 20.062033
+              },
+              {
+                "id": "nature-666",
+                "size": 0.80487424,
+                "species": "meadow-wildflowers",
+                "x": 49.200283,
+                "y": 23.283484
+              },
+              {
+                "id": "nature-669",
+                "size": 0.96847856,
+                "species": "pau-brasil",
+                "x": 35.79285,
+                "y": 60.798687
+              },
+              {
+                "id": "nature-670",
+                "size": 0.95241237,
+                "species": "dry-grasses",
+                "x": 35.006874,
+                "y": 59.182125
+              },
+              {
+                "id": "nature-675",
+                "size": 0.91614395,
+                "species": "meadow-wildflowers",
+                "x": 41.094208,
+                "y": 20.006845
+              },
+              {
+                "id": "nature-676",
+                "size": 1.0594666,
+                "species": "dry-grasses",
+                "x": 18.375498,
+                "y": 27.362432
+              },
+              {
+                "id": "nature-681",
+                "size": 0.82848185,
+                "species": "clay-ironstone",
+                "x": 38.58554,
+                "y": 61.561516
+              },
+              {
+                "id": "nature-689",
+                "size": 0.82024467,
+                "species": "jucara",
+                "x": 14.104597,
+                "y": 56.2069
+              },
+              {
+                "id": "nature-690",
+                "size": 1.128952,
+                "species": "dry-grasses",
+                "x": 44.535126,
+                "y": 57.405014
+              },
+              {
+                "id": "nature-691",
+                "size": 0.9966495,
+                "species": "bromeliads",
+                "x": 6.6534925,
+                "y": 60.627766
+              },
+              {
+                "id": "nature-693",
+                "size": 1.0372103,
+                "species": "pau-brasil",
+                "x": 20.842577,
+                "y": 26.28814
+              },
+              {
+                "id": "nature-696",
+                "size": 1.082345,
+                "species": "dry-grasses",
+                "x": 32.253963,
+                "y": -0.5900904
+              },
+              {
+                "id": "nature-710",
+                "size": 0.99574786,
+                "species": "forest-ferns",
+                "x": 8.127667,
+                "y": 35.649837
+              },
+              {
+                "id": "nature-712",
+                "size": 0.71539444,
+                "species": "jucara",
+                "x": 12.003773,
+                "y": 27.586044
+              },
+              {
+                "id": "nature-713",
+                "size": 1.000775,
+                "species": "jucara",
+                "x": 42.529736,
+                "y": -0.06569675
+              },
+              {
+                "id": "nature-715",
+                "size": 0.7216971,
+                "species": "clay-ironstone",
+                "x": 35.03366,
+                "y": 52.405643
+              },
+              {
+                "id": "nature-720",
+                "size": 0.97695464,
+                "species": "dry-grasses",
+                "x": 18.783403,
+                "y": 65.59492
+              },
+              {
+                "id": "nature-721",
+                "size": 0.80202043,
+                "species": "dry-grasses",
+                "x": 45.893333,
+                "y": 0.23546009
+              },
+              {
+                "id": "nature-723",
+                "size": 0.8844114,
+                "species": "jucara",
+                "x": 13.802093,
+                "y": -0.8701852
+              },
+              {
+                "id": "nature-725",
+                "size": 0.8713505,
+                "species": "meadow-wildflowers",
+                "x": 15.115752,
+                "y": 1.1261342
+              },
+              {
+                "id": "nature-726",
+                "size": 0.7769094,
+                "species": "forest-ferns",
+                "x": 12.625033,
+                "y": 63.00919
+              },
+              {
+                "id": "nature-729",
+                "size": 0.8914324,
+                "species": "pau-brasil",
+                "x": 39.255,
+                "y": 38.28085
+              },
+              {
+                "id": "nature-731",
+                "size": 1.0851485,
+                "species": "dry-grasses",
+                "x": 43.90897,
+                "y": 1.8874048
+              },
+              {
+                "id": "nature-737",
+                "size": 0.65532744,
+                "species": "jucara",
+                "x": 42.921455,
+                "y": 25.971338
+              },
+              {
+                "id": "nature-738",
+                "size": 0.75498235,
+                "species": "embauba",
+                "x": 33.467346,
+                "y": 57.76061
+              },
+              {
+                "id": "nature-739",
+                "size": 0.72100765,
+                "species": "embauba",
+                "x": 21.341839,
+                "y": 25.634636
+              },
+              {
+                "id": "nature-740",
+                "size": 1.0907595,
+                "species": "dry-grasses",
+                "x": 38.502968,
+                "y": 62.94535
+              },
+              {
+                "id": "nature-744",
+                "size": 0.6558758,
+                "species": "jequitiba-rosa",
+                "x": 34.435028,
+                "y": 58.14819
+              },
+              {
+                "id": "nature-746",
+                "size": 0.97056925,
+                "species": "dry-grasses",
+                "x": 45.23281,
+                "y": 65.527695
+              },
+              {
+                "id": "nature-748",
+                "size": 0.8503814,
+                "species": "jucara",
+                "x": 46.46048,
+                "y": 26.014624
+              },
+              {
+                "id": "nature-755",
+                "size": 0.96170694,
+                "species": "clay-ironstone",
+                "x": 14.0508,
+                "y": 63.389797
+              },
+              {
+                "id": "nature-757",
+                "size": 0.82341444,
+                "species": "jequitiba-rosa",
+                "x": 39.074734,
+                "y": 27.389593
+              },
+              {
+                "id": "nature-760",
+                "size": 1.0908052,
+                "species": "dry-grasses",
+                "x": 46.64658,
+                "y": 57.640564
+              },
+              {
+                "id": "nature-778",
+                "size": 0.8145819,
+                "species": "pau-brasil",
+                "x": 42.2746,
+                "y": 19.973577
+              },
+              {
+                "id": "nature-780",
+                "size": 1.1071017,
+                "species": "dry-grasses",
+                "x": 39.980568,
+                "y": 23.26077
+              },
+              {
+                "id": "nature-783",
+                "size": 0.92284375,
+                "species": "jucara",
+                "x": 45.021698,
+                "y": 29.45693
+              },
+              {
+                "id": "nature-791",
+                "size": 0.9451789,
+                "species": "clay-ironstone",
+                "x": 40.55035,
+                "y": 51.84589
+              },
+              {
+                "id": "nature-795",
+                "size": 0.71389085,
+                "species": "bromeliads",
+                "x": 8.379033,
+                "y": 60.547726
+              },
+              {
+                "id": "nature-796",
+                "size": 1.1266578,
+                "species": "dry-grasses",
+                "x": 45.80825,
+                "y": 31.428558
+              },
+              {
+                "id": "nature-797",
+                "size": 0.7097254,
+                "species": "jucara",
+                "x": 9.590316,
+                "y": 29.515417
+              },
+              {
+                "id": "nature-800",
+                "size": 0.84124994,
+                "species": "dry-grasses",
+                "x": 14.792767,
+                "y": 26.810541
+              },
+              {
+                "id": "nature-808",
+                "size": 1.0628911,
+                "species": "jucara",
+                "x": 47.870678,
+                "y": 30.410378
+              },
+              {
+                "id": "nature-811",
+                "size": 0.7462999,
+                "species": "dry-grasses",
+                "x": 35.981304,
+                "y": -0.32215467
+              },
+              {
+                "id": "nature-818",
+                "size": 0.6546985,
+                "species": "jequitiba-rosa",
+                "x": 19.221336,
+                "y": 63.73728
+              },
+              {
+                "id": "nature-819",
+                "size": 0.855337,
+                "species": "jucara",
+                "x": 36.61883,
+                "y": 25.643051
+              },
+              {
+                "id": "nature-821",
+                "size": 0.78060514,
+                "species": "dry-grasses",
+                "x": 40.565643,
+                "y": -1.9321966
+              },
+              {
+                "id": "nature-827",
+                "size": 0.8579945,
+                "species": "pau-brasil",
+                "x": 41.276073,
+                "y": 61.443092
+              },
+              {
+                "id": "nature-833",
+                "size": 1.0928288,
+                "species": "jucara",
+                "x": 8.337413,
+                "y": 28.929401
+              },
+              {
+                "id": "nature-837",
+                "size": 0.8309705,
+                "species": "pau-brasil",
+                "x": 16.24847,
+                "y": 53.202656
+              },
+              {
+                "id": "nature-840",
+                "size": 0.9119024,
+                "species": "forest-ferns",
+                "x": 12.422837,
+                "y": 29.806627
+              },
+              {
+                "id": "nature-841",
+                "size": 0.9824231,
+                "species": "meadow-wildflowers",
+                "x": 44.660145,
+                "y": 21.639019
+              },
+              {
+                "id": "nature-842",
+                "size": 0.6689401,
+                "species": "jequitiba-rosa",
+                "x": 21.923998,
+                "y": 25.619642
+              },
+              {
+                "id": "nature-852",
+                "size": 0.9280152,
+                "species": "jequitiba-rosa",
+                "x": 12.98426,
+                "y": 38.676228
+              },
+              {
+                "id": "nature-854",
+                "size": 0.80522656,
+                "species": "jequitiba-rosa",
+                "x": 20.170256,
+                "y": 59.88363
+              },
+              {
+                "id": "nature-858",
+                "size": 1.0027536,
+                "species": "embauba",
+                "x": 9.390582,
+                "y": 34.285576
+              },
+              {
+                "id": "nature-859",
+                "size": 0.97943944,
+                "species": "embauba",
+                "x": 44.456097,
+                "y": 64.76778
+              },
+              {
+                "id": "nature-862",
+                "size": 1.0343673,
+                "species": "pau-brasil",
+                "x": 4.333605,
+                "y": 64.84159
+              },
+              {
+                "id": "nature-867",
+                "size": 0.78990203,
+                "species": "jucara",
+                "x": 19.058018,
+                "y": 65.1834
+              },
+              {
+                "id": "nature-869",
+                "size": 1.0344505,
+                "species": "jucara",
+                "x": 4.94378,
+                "y": 31.820017
+              },
+              {
+                "id": "nature-874",
+                "size": 0.74543256,
+                "species": "pau-brasil",
+                "x": 6.34259,
+                "y": 61.446766
+              },
+              {
+                "id": "nature-875",
+                "size": 0.9354009,
+                "species": "bromeliads",
+                "x": 10.900521,
+                "y": 29.453066
+              },
+              {
+                "id": "nature-877",
+                "size": 1.0876169,
+                "species": "jequitiba-rosa",
+                "x": 48.483604,
+                "y": -1.8109418
+              },
+              {
+                "id": "nature-882",
+                "size": 1.0353404,
+                "species": "embauba",
+                "x": 11.011964,
+                "y": 36.81558
+              },
+              {
+                "id": "nature-885",
+                "size": 0.81400174,
+                "species": "clay-ironstone",
+                "x": 14.812857,
+                "y": 61.433228
+              },
+              {
+                "id": "nature-886",
+                "size": 0.9219746,
+                "species": "granite-outcrop",
+                "x": 37.28826,
+                "y": 17.682695
+              },
+              {
+                "id": "nature-893",
+                "size": 0.9166829,
+                "species": "jucara",
+                "x": 46.812458,
+                "y": 21.608387
+              },
+              {
+                "id": "nature-901",
+                "size": 1.1005323,
+                "species": "bromeliads",
+                "x": 6.030845,
+                "y": 60.569668
+              },
+              {
+                "id": "nature-906",
+                "size": 0.9256778,
+                "species": "meadow-wildflowers",
+                "x": 36.617935,
+                "y": 20.191853
+              },
+              {
+                "id": "nature-909",
+                "size": 0.8293909,
+                "species": "pau-brasil",
+                "x": 8.198017,
+                "y": 35.247463
+              },
+              {
+                "id": "nature-910",
+                "size": 1.0643827,
+                "species": "forest-ferns",
+                "x": 58.851654,
+                "y": 26.35188
+              },
+              {
+                "id": "nature-912",
+                "size": 0.7697922,
+                "species": "jequitiba-rosa",
+                "x": 5.7334332,
+                "y": 59.324306
+              },
+              {
+                "id": "nature-913",
+                "size": 0.7316322,
+                "species": "jequitiba-rosa",
+                "x": 40.937275,
+                "y": 27.464994
+              },
+              {
+                "id": "nature-922",
+                "size": 1.0183376,
+                "species": "pau-brasil",
+                "x": 13.881987,
+                "y": 63.625877
+              },
+              {
+                "id": "nature-923",
+                "size": 1.047682,
+                "species": "pau-brasil",
+                "x": 11.246091,
+                "y": 59.317062
+              },
+              {
+                "id": "nature-924",
+                "size": 1.0686256,
+                "species": "jequitiba-rosa",
+                "x": 40.33888,
+                "y": 36.70527
+              },
+              {
+                "id": "nature-929",
+                "size": 0.8548089,
+                "species": "jucara",
+                "x": 41.70607,
+                "y": 24.839155
+              },
+              {
+                "id": "nature-930",
+                "size": 0.8464759,
+                "species": "dry-grasses",
+                "x": 14.581722,
+                "y": 26.916676
+              },
+              {
+                "id": "nature-932",
+                "size": 1.07126,
+                "species": "embauba",
+                "x": 44.946842,
+                "y": 21.135536
+              },
+              {
+                "id": "nature-933",
+                "size": 0.71309906,
+                "species": "pau-brasil",
+                "x": 15.901153,
+                "y": 50.518814
+              },
+              {
+                "id": "nature-939",
+                "size": 0.6914165,
+                "species": "jucara",
+                "x": 5.9155803,
+                "y": 60.5183
+              },
+              {
+                "id": "nature-944",
+                "size": 0.6982695,
+                "species": "embauba",
+                "x": 40.051952,
+                "y": 30.701052
+              },
+              {
+                "id": "nature-946",
+                "size": 0.9816366,
+                "species": "dry-grasses",
+                "x": 40.7829,
+                "y": 59.446533
+              },
+              {
+                "id": "nature-950",
+                "size": 1.1014378,
+                "species": "forest-ferns",
+                "x": 1.856821,
+                "y": 28.477404
+              },
+              {
+                "id": "nature-960",
+                "size": 0.7506611,
+                "species": "dry-grasses",
+                "x": 41.311344,
+                "y": 6.2361913
+              },
+              {
+                "id": "nature-961",
+                "size": 1.1113434,
+                "species": "clay-ironstone",
+                "x": 45.283146,
+                "y": 26.600248
+              },
+              {
+                "id": "nature-965",
+                "size": 1.073458,
+                "species": "clay-ironstone",
+                "x": 36.922245,
+                "y": 35.331173
+              },
+              {
+                "id": "nature-967",
+                "size": 0.8829682,
+                "species": "embauba",
+                "x": 39.284058,
+                "y": 54.98233
+              },
+              {
+                "id": "nature-970",
+                "size": 1.0901234,
+                "species": "forest-ferns",
+                "x": 58.868618,
+                "y": 25.6903
+              },
+              {
+                "id": "nature-974",
+                "size": 0.88275576,
+                "species": "jequitiba-rosa",
+                "x": 7.3819203,
+                "y": 29.806927
+              },
+              {
+                "id": "nature-976",
+                "size": 0.82229155,
+                "species": "dry-grasses",
+                "x": 45.595863,
+                "y": 35.057877
+              },
+              {
+                "id": "nature-982",
+                "size": 1.0367312,
+                "species": "pau-brasil",
+                "x": 41.553925,
+                "y": 29.430096
+              },
+              {
+                "id": "nature-984",
+                "size": 1.0230783,
+                "species": "jequitiba-rosa",
+                "x": 35.110874,
+                "y": 62.27249
+              },
+              {
+                "id": "nature-989",
+                "size": 1.0557349,
+                "species": "jucara",
+                "x": 16.549332,
+                "y": 1.8614807
+              },
+              {
+                "id": "nature-990",
+                "size": 0.8369233,
+                "species": "meadow-wildflowers",
+                "x": 15.802631,
+                "y": -0.85753804
+              },
+              {
+                "id": "nature-992",
+                "size": 0.7532155,
+                "species": "embauba",
+                "x": 9.490784,
+                "y": 50.86805
+              },
+              {
+                "id": "nature-999",
+                "size": 0.9627222,
+                "species": "jucara",
+                "x": 42.46713,
+                "y": 30.874239
+              }
+            ],
+            "revision": 1,
+            "river": {
+              "centers": [
+                61.8,
+                61.94185,
+                62.07686,
+                62.198524,
+                62.30098,
+                62.379284,
+                62.429665,
+                62.44969,
+                62.4384,
+                62.396336,
+                62.325523,
+                62.229378,
+                62.112534,
+                61.980625,
+                61.840008,
+                61.697464,
+                61.559864,
+                61.433838,
+                61.325462,
+                61.23996,
+                61.181458,
+                61.15277,
+                61.155285,
+                61.188877,
+                61.251926,
+                61.341396,
+                61.452976,
+                61.581284,
+                61.72013,
+                61.86283,
+                62.002502,
+                62.132412,
+                62.246296,
+                62.338665,
+                62.40507,
+                62.44231,
+                62.44858,
+                62.42359,
+                62.36854,
+                62.286083,
+                62.180195,
+                62.05598,
+                61.919422,
+                61.77711,
+                61.6359,
+                61.5026,
+                61.383636,
+                61.284744,
+                61.21069,
+                61.165043,
+                61.150005,
+                61.1663,
+                61.213142,
+                61.288273,
+                61.388073,
+                61.50773,
+                61.64147,
+                61.78286,
+                61.92507,
+                62.061256,
+                62.18485,
+                62.289886,
+                62.371307,
+                62.42519
+              ],
+              "schema": 1
+            },
+            "seed": 78593,
+            "terrain": null,
+            "width": 64
+          },
+          "revision": 1,
+          "rules": {
+            "climate": false,
+            "land": false,
+            "learning": false,
+            "logistics": false,
+            "maintenance": false,
+            "market": false,
+            "mode": "sandbox",
+            "utilities": false
+          },
+          "schema": 1,
+          "start": {
+            "buildings": [
+              {
+                "appearance": null,
+                "id": "starting-shed",
+                "kind": "shed",
+                "recipe": "standard",
+                "state": "completed",
+                "x": 30,
+                "y": 29
+              },
+              {
+                "appearance": null,
+                "id": "starting-warehouse",
+                "kind": "warehouse",
+                "recipe": "standard",
+                "state": "completed",
+                "x": 36,
+                "y": 29
+              }
+            ],
+            "fresh_water": 40,
+            "funds": 10000000,
+            "inventories": [
+              {
+                "items": {
+                  "bamboo": 24,
+                  "earth": 24,
+                  "food": 80,
+                  "frames": 4,
+                  "meals": 20,
+                  "salvage": 24,
+                  "stone": 24,
+                  "timber": 100
+                },
+                "owner": {
+                  "building": "starting-warehouse",
+                  "kind": "building"
+                }
+              },
+              {
+                "items": {
+                  "bamboo_starts": 2,
+                  "batteries": 24,
+                  "covering": 24,
+                  "electrical": 24,
+                  "fittings": 24,
+                  "frames": 20,
+                  "panels": 24,
+                  "plumbing": 24,
+                  "pumps": 24,
+                  "tiles": 24,
+                  "tools": 36,
+                  "tree_starts": 8,
+                  "walls": 24
+                },
+                "owner": {
+                  "kind": "camp"
+                }
+              }
+            ],
+            "minutes": 480,
+            "residents": [
+              {
+                "biography": "",
+                "id": "resident-iara",
+                "name": "Iara",
+                "occupation": "nursery_assistant",
+                "outside_shifts": false,
+                "preset": "iara",
+                "preset_version": 1,
+                "pronouns": "",
+                "routine_preferences": {
+                  "alternate_hobby": "birdwatch",
+                  "favourite_hobby": "nature_walk",
+                  "preferred_bedtime": 1290
+                }
+              },
+              {
+                "biography": "",
+                "id": "resident-bento",
+                "name": "Bento",
+                "occupation": "bamboo_carpenter",
+                "outside_shifts": false,
+                "preset": "bento",
+                "preset_version": 1,
+                "pronouns": "",
+                "routine_preferences": {
+                  "alternate_hobby": "daydream",
+                  "favourite_hobby": "stretch",
+                  "preferred_bedtime": 1335
+                }
+              },
+              {
+                "biography": "",
+                "id": "resident-luz",
+                "name": "Luz",
+                "occupation": "school_cook",
+                "outside_shifts": false,
+                "preset": "luz",
+                "preset_version": 1,
+                "pronouns": "",
+                "routine_preferences": {
+                  "alternate_hobby": "stretch",
+                  "favourite_hobby": "daydream",
+                  "preferred_bedtime": 1260
+                }
+              },
+              {
+                "biography": "",
+                "id": "resident-caua",
+                "name": "Cauã",
+                "occupation": "nature_guide",
+                "outside_shifts": false,
+                "preset": "caua",
+                "preset_version": 1,
+                "pronouns": "",
+                "routine_preferences": {
+                  "alternate_hobby": "nature_walk",
+                  "favourite_hobby": "birdwatch",
+                  "preferred_bedtime": 1380
+                }
+              },
+              {
+                "biography": "",
+                "id": "resident-nina",
+                "name": "Nina",
+                "occupation": "water_technician",
+                "outside_shifts": false,
+                "preset": "nina",
+                "preset_version": 1,
+                "pronouns": "",
+                "routine_preferences": {
+                  "alternate_hobby": "stretch",
+                  "favourite_hobby": "daydream",
+                  "preferred_bedtime": 1305
+                }
+              }
+            ],
+            "roads": []
+          },
+          "title": "Earlier unsupported-conflict"
+        }
+      },
+      "view": {
+        "center": [
+          28,
+          30
+        ],
+        "zoom": 1.65,
+        "grid": false
+      }
+    },
+    "id": "fallback-unsupported-conflict",
+    "revision": 2,
+    "updatedAt": 1793513642126
+  }
+}

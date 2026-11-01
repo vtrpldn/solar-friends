@@ -75,7 +75,7 @@ let releasePublication=null,preparedEdit=null,engineDefinition=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
 function toast(text){$('creator-toast').textContent=text;$('creator-toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('creator-toast').hidden=true,6000);}
-function status(text){$('creator-save-status').textContent=text;}
+function status(text){$('creator-save-status').textContent=text;$('creator-recovery-copy').hidden=!(current?.conflicted||current?.preserveDamagedRecord);}
 function stepHistory(redo=false){if(!current)return false;if(map?.cancelGesture())return true;return redo?current.doc.redo():current.doc.undo();}
 async function download(definition){
   const file=await prepareCreationExport(definition,report.ok?{terrain:terrainBase,snapshot:map.snapshot,catalog}:null);
@@ -86,14 +86,14 @@ function cacheRecovery(ctx,checkpoint,view){try{const raw=JSON.stringify({storag
 function scheduleSave(){clearTimeout(saveTimer);if(!current?.conflicted)saveTimer=setTimeout(()=>{save({automatic:true}).catch(()=>{});},450);}
 function previewOf(definition,snapshot){try{return creationThumbnail(definition,snapshot,art);}catch{return null;}}
 function previewMarkup(kind,id){return `<span class="creator-preview" data-preview-kind="${kind}" data-preview-id="${escape(id)}"><span>No preview yet</span></span>`;}
-function save({automatic=false}={}){
+function save({automatic=true}={}){
   clearTimeout(saveTimer);
   if(!current)return Promise.resolve();
-  // Terrain/portrait completion and backgrounding must not replace the damaged
-  // record before the player can inspect or back it up. A user save clears it.
-  if(automatic&&current.preserveDamagedRecord)return Promise.resolve(current.record);
+  // Only explicit Save controls acknowledge replacement of a damaged
+  // original. Navigation, previews and other implicit saves keep a separate
+  // session checkpoint so the original remains available for backup.
   const ctx=current,view=map.state,snapshot=map.snapshot,terrainLoading=map.terrainLoading,valid=report.ok;
-  const requestKey=JSON.stringify([ctx.doc.revision,view,ctx.artRevision??0,terrainLoading]);
+  const requestKey=JSON.stringify([ctx.doc.revision,view,ctx.artRevision??0,terrainLoading,automatic&&ctx.preserveDamagedRecord===true]);
   const pending=ctx.pendingSaves??=new Map();
   if(pending.has(requestKey))return pending.get(requestKey);
   const preparation=ctx.doc.checkpointAsync();
@@ -102,6 +102,12 @@ function save({automatic=false}={}){
   if(current===ctx)status('Saving…');
   const operation=saving.catch(()=>{}).then(async()=>{
     const checkpoint=await preparation;
+    if(automatic&&ctx.preserveDamagedRecord){
+      if(cacheRecovery(ctx,checkpoint,view)===null)throw Error('Could not keep recovered edits separately. Export or save a copy before leaving this creation.');
+      if(ctx.conflicted)throw new LibraryConflict();
+      if(current===ctx)status('Recovered checkpoint · original preserved');
+      return ctx.record;
+    }
     if(ctx.thumbnailRevision!==checkpoint.revision){
       // Snapshot and terrain readiness belong to the captured revision. Edits
       // made while preparation yields must not paint a newer world into it.
@@ -517,8 +523,8 @@ function wire(){
       $('creator-release-dialog').close();await showLibrary({reset:true});toast(`Version ${record.package.content_revision} is saved independently.`);
     }catch(error){$('creator-release-status').textContent=error.message;}finally{releasePublication=null;busy=false;author.disabled=false;$('creator-release-cancel').textContent='Keep editing';$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current&&current.doc.revision!==revision)refresh();if($('creator-release-dialog').open)$('creator-release-confirm').focus();}
   };
-  $('creator-save').onclick=()=>save().then(()=>toast('Your creation is saved.')).catch(()=>{});
-  $('creator-save-copy').onclick=()=>copyCurrent().catch(e=>toast(e.message));
+  $('creator-save').onclick=()=>save({automatic:false}).then(()=>toast('Your creation is saved.')).catch(()=>{});
+  $('creator-recovery-copy').onclick=$('creator-save-copy').onclick=()=>copyCurrent().catch(e=>toast(e.message));
   $('creator-export').onclick=async()=>{if(!current||busy)return;busy=true;try{await download(current.doc.value);}catch(error){toast(error.message);}finally{busy=false;$('creator-export').focus();}};
   $('creator-library').onclick=()=>showLibrary().catch(e=>toast(e.message));
   $('creator-library-close').onclick=()=>{if(current)$('creator-library-dialog').close();else location.assign('./');};
@@ -588,7 +594,7 @@ function wire(){
   window.addEventListener('keydown',e=>{
     if(busy||document.querySelector('dialog[open]')||!current||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
     if((e.metaKey||e.ctrlKey)&&e.code==='KeyZ'){e.preventDefault();stepHistory(e.shiftKey);}
-    else if((e.metaKey||e.ctrlKey)&&e.code==='KeyS'){e.preventDefault();save().catch(()=>{});}
+    else if((e.metaKey||e.ctrlKey)&&e.code==='KeyS'){e.preventDefault();save({automatic:false}).catch(()=>{});}
     else if(e.code==='Escape'){e.preventDefault();routesEditor.cancel();setTool('select');map.select(null);}
     else if(['Delete','Backspace'].includes(e.code)&&map.view.selectedRoute){e.preventDefault();const ids=dependentRoutes(current.doc.value,map.view.selectedRoute);change('Remove utility connection',d=>{d.start.routes=d.start.routes.filter(r=>!ids.has(r.id));});map.select(null);}
     else if(['Delete','Backspace'].includes(e.code)&&map.view.selectedBank){e.preventDefault();const id=map.view.selectedBank;change('Remove battery bank',d=>{d.start.batteries=d.start.batteries.filter(b=>b.id!==id);});map.select(null);}
