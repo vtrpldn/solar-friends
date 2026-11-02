@@ -1,0 +1,26 @@
+   Compiling solar-friends v0.1.0 (/Users/paladini/Documents/veeware/solar-friends)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 23.94s
+     Running unittests src/lib.rs (target/debug/deps/solar_friends-15cba7ae300c01c2)
+
+running 18 tests
+test navigation::geometry::tests::open_footprints_allow_tangency_but_reject_any_interior_crossing ... ok
+test navigation::geometry::tests::river_cell_checks_cover_short_and_diagonal_crossings ... ok
+test navigation::tests::nearby_destination_does_not_search_the_entire_reachable_map ... ok
+test navigation::tests::fractional_approaches_and_zero_distance_remain_walkable ... ok
+test navigation::tests::river_and_enclosed_clearings_have_honest_blockers ... ok
+test navigation::geometry::tests::adjacent_broad_phase_matches_every_exact_segment_across_the_property ... ok
+test navigation::tests::routes_detour_around_foundations_and_never_cut_a_corner ... ok
+test navigation::tests::derived_graph_reuse_and_invalidation_preserve_queries_and_exact_routes ... ok
+test navigation::tests::a_fractional_route_cannot_clip_a_cistern_corner_between_samples ... ok
+test navigation::tests::standing_neighbours_do_not_trap_a_route_at_an_occupied_grid_corner ... ok
+test navigation::tests::roads_improve_the_same_route_without_spending_goods_or_time ... ok
+test navigation::tests::a_source_plot_changes_access_and_road_edits_change_cost_immediately ... ok
+test navigation::tests::an_occupied_origin_can_exit_but_cannot_cross_another_building ... ok
+test navigation::tests::fractional_grid_links_match_the_original_segment_checks ... ok
+test navigation::tests::indexed_grid_occupancy_matches_exhaustive_clear_and_segments ... ok
+test navigation::geometry::tests::bounded_crossings_match_exhaustive_points_at_boundaries_and_random_segments ... ok
+test navigation::tests::opening_route_batch_matches_individual_quotes_including_fractional_and_blocked_goals ... ok
+test navigation::tests::bounded_destination_search_matches_exhaustive_routes_with_roads_crowds_and_obstacles ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 772 filtered out; finished in 3.52s
+

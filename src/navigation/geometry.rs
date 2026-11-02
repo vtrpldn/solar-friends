@@ -109,7 +109,13 @@ pub(super) fn land_points(a: [f32; 2], b: [f32; 2]) -> Vec<[f32; 2]> {
         if delta == 0. {
             continue;
         }
-        for edge in 1..MAP_SIZE {
+        let low = f64::from(a[axis]).min(f64::from(b[axis]));
+        let high = f64::from(a[axis]).max(f64::from(b[axis]));
+        // Only integer boundaries strictly between the endpoints can cross.
+        // Clamp before converting so even extreme finite inputs cannot overflow.
+        let first = low.floor().clamp(0., f64::from(MAP_SIZE - 1)) as i32 + 1;
+        let end = high.ceil().clamp(1., f64::from(MAP_SIZE)) as i32;
+        for edge in first..end {
             let t = (f64::from(edge) - f64::from(a[axis])) / delta;
             if t > 0. && t < 1. {
                 cuts.push(t);
@@ -134,6 +140,78 @@ pub(super) fn land_points(a: [f32; 2], b: [f32; 2]) -> Vec<[f32; 2]> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn exhaustive_land_points(a: [f32; 2], b: [f32; 2]) -> Vec<[f32; 2]> {
+        let mut cuts = vec![0_f64, 1_f64];
+        for axis in 0..2 {
+            let delta = f64::from(b[axis]) - f64::from(a[axis]);
+            if delta == 0. {
+                continue;
+            }
+            for edge in 1..MAP_SIZE {
+                let t = (f64::from(edge) - f64::from(a[axis])) / delta;
+                if t > 0. && t < 1. {
+                    cuts.push(t);
+                }
+            }
+        }
+        cuts.sort_by(f64::total_cmp);
+        cuts.dedup();
+        let point = |t: f64| {
+            std::array::from_fn(|axis| {
+                (f64::from(a[axis]) + (f64::from(b[axis]) - f64::from(a[axis])) * t) as f32
+            })
+        };
+        let mut points = vec![a];
+        for pair in cuts.windows(2) {
+            points.push(point((pair[0] + pair[1]) / 2.));
+            points.push(point(pair[1]));
+        }
+        points
+    }
+
+    #[test]
+    fn bounded_crossings_match_exhaustive_points_at_boundaries_and_random_segments() {
+        let check = |a, b| {
+            assert_eq!(
+                land_points(a, b),
+                exhaustive_land_points(a, b),
+                "{a:?} -> {b:?}"
+            );
+            assert_eq!(
+                land_points(b, a),
+                exhaustive_land_points(b, a),
+                "{b:?} -> {a:?}"
+            );
+        };
+        for edge in -2..=MAP_SIZE + 2 {
+            let n = edge as f32;
+            for x in [n.next_down(), n, n.next_up()] {
+                check([x, 3.5], [n + 0.5, 4.5]);
+                check([x, x], [n + 1., n + 1.]);
+                check([x, 3.5], [x, 3.5]);
+                check([-3., x], [MAP_SIZE as f32 + 3., n]);
+            }
+        }
+        for (a, b) in [
+            ([-f32::MAX, 0.], [f32::MAX, 64.]),
+            ([f32::MAX, 32.], [f32::MAX, 33.]),
+            ([-f32::MAX, -f32::MAX], [0., 0.]),
+            ([0., 0.], [f32::from_bits(1), f32::from_bits(1)]),
+        ] {
+            check(a, b);
+        }
+        let mut seed = 813_u32;
+        for _ in 0..20000 {
+            let mut coordinate = || {
+                seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
+                (seed % 72000) as f32 / 1000. - 4.
+            };
+            let a = [coordinate(), coordinate()];
+            let b = [coordinate(), coordinate()];
+            check(a, b);
+        }
+    }
+
     #[test]
     fn open_footprints_allow_tangency_but_reject_any_interior_crossing() {
         let box_ = Bounds {

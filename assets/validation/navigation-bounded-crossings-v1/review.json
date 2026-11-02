@@ -1,0 +1,22 @@
+{
+  "why": "Bound grid-boundary enumeration to the coordinates actually crossed, instead of testing every map boundary for every short route edge.",
+  "sourceHashes": {
+    "src/navigation/geometry.rs": "7573796015a097c997a3b2d53c4d80a8413dc73f3aad96fccb828dcf8c879c95",
+    "scripts/compare-engine-builds.mjs": "bdf1829a486cb366e5dfac7f7e8c6f02ed278d8e1adc12a1b8effb405d550608"
+  },
+  "baselineCommit": "578fc4d",
+  "baselineWasmSha256": "ab67027383fad71215b6f00c20c2d97cbb5771e2aa718e388af6145a3cb6ee36",
+  "candidateWasmSha256": "41433e3913d33a5b015be57b00c510278c77f200993fa3fbde2e41934f80ae2f",
+  "correctness": [
+    "18 focused navigation checks pass.",
+    "New exhaustive-reference test compares both directions of 20000 generated segments plus all exact boundaries and neighboring f32 values, zero-length and extreme finite endpoints.",
+    "790 native tests pass; strict all-target Clippy and release build pass.",
+    "Maximum mixed opening, 240 fixed ticks with ten snapshots, frame/full-report parity; three-biome Story/Sandbox roster matrix keeps twelve accepted and six rejected cases with exact state preservation."
+  ],
+  "performance": "Candidate enumerates only integer boundaries strictly between endpoint coordinates; no desktop latency or timing improvement is claimed from this structural change. Timing checks remain pending while the Mac is in repeated maintenance sleep cycles.",
+  "limits": [
+    "Finite-input differential coverage is broad but not every f32 pair.",
+    "No new desktop capture, physical-display timing, or whole performance-matrix acceptance.",
+    "Other original art, performance, recovery, memory and unfamiliar-player release requirements remain open."
+  ]
+}
