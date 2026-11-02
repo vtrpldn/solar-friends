@@ -1,0 +1,216 @@
+{
+  "complete": true,
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "residentStyle": "sleep-mixed",
+    "appearanceRevisions": {
+      "resident-parts-v5": 6,
+      "resident-parts-v6": 6
+    },
+    "uniqueAppearances": 12,
+    "attempted": 312,
+    "seed": 42
+  },
+  "binding": "/private/tmp/solar-native-named/solar_friends.js",
+  "bindingSha256": "25ecdbd2a6bc373bec316862589ad2c4e67a54525dd64c577d8950a4003cf763",
+  "wasmSha256": "57f146d38b74956f68ce6f2bec4c48fd5bd95cbce9b12aa2187f790ac4677843",
+  "fixtureSha256": "5e7dd1636d7d80a23711cefa6df2006434d6f7f886cc7fed41f2c631d8058ebb",
+  "snapshotSha256": "7063377b0102edfac8405974091dede736b85b0880f88f693015734ea5f8ffd9",
+  "scriptSha256": "5194608052544c7837a6e2cebb528f399ec12de2e8911a5527d1bf7b90f25685",
+  "warmSamplesMs": [
+    69.96933399999944,
+    69.69833300000028,
+    69.84499999999935,
+    73.61833299999853,
+    89.78795899999932
+  ],
+  "profiledCompiles": 12,
+  "topSelfSamples": [
+    {
+      "name": "solar_friends[533e20cf47091407]::spacing::clear_plot wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 163
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::navigation::geometry::land_points wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 62
+    },
+    {
+      "name": "<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[533e20cf47091407]::Building>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#0}>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#1}>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[533e20cf47091407]::economy::Source>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#2}>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#3}>>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[533e20cf47091407]::electricity::Node>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#4}>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#5}>> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::next wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 45
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::navigation::departure_path wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 44
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::navigation::search wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 43
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::interactions::footprint_size wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 31
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::navigation::clear wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 25
+    },
+    {
+      "name": "<dlmalloc[c66ed5ba1f893f92]::dlmalloc::Dlmalloc<dlmalloc[c66ed5ba1f893f92]::sys::System>>::malloc wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 12
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::land::ground wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 12
+    },
+    {
+      "name": "<dlmalloc[c66ed5ba1f893f92]::dlmalloc::Dlmalloc<dlmalloc[c66ed5ba1f893f92]::sys::System>>::free wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 11
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::land::disturb_soil wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 11
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::navigation::finish_route wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 11
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::navigation::links wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 10
+    },
+    {
+      "name": "passStringToWasm0 file:///private/tmp/solar-native-named/solar_friends.js",
+      "hits": 8
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::navigation::grid wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 8
+    },
+    {
+      "name": "__rustc[9d087a5ab36ea756]::__rdl_realloc wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 8
+    },
+    {
+      "name": "<serde_json[7481d977bda14392]::value::Value as serde_core[cd9ad9be4bb9d4a1]::de::Deserialize>::deserialize::<&mut serde_json[7481d977bda14392]::de::Deserializer<serde_json[7481d977bda14392]::read::StrRead>> wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 7
+    },
+    {
+      "name": "hypotf wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 6
+    },
+    {
+      "name": "core[608f92abc48d28da]::slice::sort::stable::drift::sort::<solar_friends[533e20cf47091407]::land::Soil, <[solar_friends[533e20cf47091407]::land::Soil]>::sort_by_key<(i32, i32), solar_friends[533e20cf47091407]::land::disturb_soil::{closure#1}>::{closure#0}> wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 6
+    },
+    {
+      "name": "<dlmalloc[c66ed5ba1f893f92]::dlmalloc::Dlmalloc<dlmalloc[c66ed5ba1f893f92]::sys::System>>::insert_large_chunk wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 5
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::land::vegetation::rebuild wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 5
+    },
+    {
+      "name": "<serde_json[7481d977bda14392]::de::Deserializer<serde_json[7481d977bda14392]::read::StrRead>>::parse_number wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 3
+    },
+    {
+      "name": "<alloc[cb2b8d99256f33df]::raw_vec::RawVecInner>::finish_grow wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 3
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::land::disturb wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 3
+    },
+    {
+      "name": "core[608f92abc48d28da]::slice::sort::shared::smallsort::insertion_sort_shift_left::<f64, <[f64]>::sort_by<<f64>::total_cmp>::{closure#0}> wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 3
+    },
+    {
+      "name": "<alloc[cb2b8d99256f33df]::vec::Vec<solar_friends[533e20cf47091407]::navigation::geometry::Bounds> as alloc[cb2b8d99256f33df]::vec::spec_from_iter_nested::SpecFromIterNested<solar_friends[533e20cf47091407]::navigation::geometry::Bounds, core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::chain::Chain<core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[533e20cf47091407]::Building>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#0}>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#1}>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[533e20cf47091407]::economy::Source>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#2}>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#3}>>, core[608f92abc48d28da]::iter::adapters::map::Map<core[608f92abc48d28da]::iter::adapters::filter::Filter<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[533e20cf47091407]::electricity::Node>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#4}>, solar_friends[533e20cf47091407]::navigation::geometry::obstacles::{closure#5}>>>>::from_iter wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 3
+    },
+    {
+      "name": "<serde_json[7481d977bda14392]::read::SliceRead>::skip_to_escape wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "<alloc[cb2b8d99256f33df]::collections::btree::map::BTreeMap<alloc[cb2b8d99256f33df]::string::String, serde_json[7481d977bda14392]::value::Value>>::insert wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "__rustc[9d087a5ab36ea756]::__rdl_dealloc wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "<alloc[cb2b8d99256f33df]::raw_vec::RawVec<[f32; 2usize]>>::grow_one wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "<core[608f92abc48d28da]::slice::iter::Iter<solar_friends[533e20cf47091407]::scenarios::definition::Structure> as core[608f92abc48d28da]::iter::traits::iterator::Iterator>::all::<solar_friends[533e20cf47091407]::scenarios::valid_origin::{closure#1}> wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::scenarios::map_validation::check wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "core[608f92abc48d28da]::slice::sort::stable::quicksort::quicksort::<solar_friends[533e20cf47091407]::simulation::Id, <[solar_friends[533e20cf47091407]::simulation::Id]>::sort_by_key<(i32, bool), solar_friends[533e20cf47091407]::water::stage::{closure#4}>::{closure#0}> wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::scenarios::setup::review wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "<dlmalloc[c66ed5ba1f893f92]::dlmalloc::Dlmalloc<dlmalloc[c66ed5ba1f893f92]::sys::System>>::unlink_chunk wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "<std[359a46decee746ed]::hash::random::RandomState as core[608f92abc48d28da]::hash::BuildHasher>::hash_one::<&solar_friends[533e20cf47091407]::simulation::Id> wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "solar_friends[533e20cf47091407]::interactions::radius wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "<solar_friends[533e20cf47091407]::scenarios::definition::Definition as core[608f92abc48d28da]::clone::Clone>::clone wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 2
+    },
+    {
+      "name": "<alloc[cb2b8d99256f33df]::collections::btree::map::entry::VacantEntry<alloc[cb2b8d99256f33df]::string::String, serde_json[7481d977bda14392]::value::Value>>::insert wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 1
+    },
+    {
+      "name": "<serde_json[7481d977bda14392]::de::Deserializer<serde_json[7481d977bda14392]::read::StrRead>>::end_map wasm://wasm/solar_friends.wasm-01403d02",
+      "hits": 1
+    }
+  ],
+  "scope": "Node native-WASM load_scenario CPU profile and five unprofiled warm compile samples. Identical opening snapshots checked across twenty compiles. Diagnostic named build when binding points outside web/pkg; not browser UI, cold art, cancellation, or release acceptance."
+}

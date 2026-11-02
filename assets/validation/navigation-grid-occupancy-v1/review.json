@@ -1,0 +1,34 @@
+{
+  "why": "The named CPU profile identifies exhaustive building-footprint scans during 4096-cell route-grid construction. Reuse the existing nearby obstacle index with the same exact open bounds.",
+  "sourceHashes": {
+    "src/navigation.rs": "6750bad3af99f7a874102132e25016bd7cf10c51daaf8fa71dd8d9952d08ff67",
+    "src/navigation/geometry.rs": "17a15de9d9d0454141c60d0f8cd536e51652bbb2ccf283f80bcab397a696a5a5",
+    "scripts/benchmark-scenario-compile.mjs": "5194608052544c7837a6e2cebb528f399ec12de2e8911a5527d1bf7b90f25685",
+    "scripts/benchmark-builder.mjs": "e2f529583b3d41fee00d72067ae52e2c5d581c1102a36dc72431057bd4821539",
+    "web/pkg/solar_friends_bg.wasm": "ab67027383fad71215b6f00c20c2d97cbb5771e2aa718e388af6145a3cb6ee36"
+  },
+  "nativeTests": "789 passed; strict all-target Clippy passed; release build passed.",
+  "compileMeasurement": {
+    "beforeMedianMs": 83.39204199996311,
+    "afterMedianMs": 65.09729200000038,
+    "scope": "Five warm Node-WASM samples per build; sequential batches, not randomized repeated distributions or browser timing."
+  },
+  "parity": {
+    "maximumSnapshots": 10,
+    "acceptedMatrixCases": 12,
+    "rejectedMatrixCases": 6,
+    "scope": "Exact maximum mixed opening/tick/frame/report and three-biome Story/Sandbox one/five/twelve-person matrix. Rejected cases retain state; not every authored world."
+  },
+  "desktop": "Awake M3 Pro/Metal maximum fixture, trusted 9x9 brush and group move with exact saved undo/redo; final complete screen individually inspected.",
+  "interruptedRuns": [
+    "artifacts/editor-navigation-indexed-final",
+    "artifacts/editor-navigation-indexed-final-retry"
+  ],
+  "interruptionEvidence": "Power log shows maintenance sleep/dark wakes at the exact failure-log timestamps, followed by actual lid-open wake at 09:57:51 on November 2. Timings excluded.",
+  "limits": [
+    "One final desktop biome/fixture, not the entire editor performance matrix.",
+    "Group-move two-frame presentation was 103.9ms; all feedback paths are not established below 100ms.",
+    "Cold loading remains a separate concern; no universal loading-time or physical-display pacing claim.",
+    "Art, memory, recovery, unfamiliar-player walkthroughs and other original release requirements remain open."
+  ]
+}

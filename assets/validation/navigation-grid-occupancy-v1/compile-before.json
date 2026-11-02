@@ -1,0 +1,216 @@
+{
+  "complete": true,
+  "fixture": {
+    "population": 12,
+    "buildings": 256,
+    "types": {
+      "shed": 13,
+      "home": 12,
+      "garden": 13,
+      "well": 13,
+      "kitchen": 12,
+      "grove": 12,
+      "warehouse": 13,
+      "compost": 12,
+      "square": 12,
+      "workshop": 12,
+      "greenhouse": 12,
+      "coop": 12,
+      "solar_farm": 12,
+      "streetlight": 12,
+      "eco_toilet": 12,
+      "wetland": 12,
+      "banana_treatment": 12,
+      "biodigester": 12,
+      "orchard": 12,
+      "goat_pasture": 12,
+      "apiary": 12
+    },
+    "custom": true,
+    "residentStyle": "sleep-mixed",
+    "appearanceRevisions": {
+      "resident-parts-v5": 6,
+      "resident-parts-v6": 6
+    },
+    "uniqueAppearances": 12,
+    "attempted": 312,
+    "seed": 42
+  },
+  "binding": "/private/tmp/solar-navigation-baseline/solar_friends.js",
+  "bindingSha256": "d277c6ebfda846e79d2d25df61b5c0bfe1f8a45c6e4296e45f669ed9d8e9c9eb",
+  "wasmSha256": "73737d324c82c5707d22d44dde04213c3be60371155bd0e7d280fae848d55ae6",
+  "fixtureSha256": "5e7dd1636d7d80a23711cefa6df2006434d6f7f886cc7fed41f2c631d8058ebb",
+  "snapshotSha256": "7063377b0102edfac8405974091dede736b85b0880f88f693015734ea5f8ffd9",
+  "scriptSha256": "5194608052544c7837a6e2cebb528f399ec12de2e8911a5527d1bf7b90f25685",
+  "warmSamplesMs": [
+    82.23916599992663,
+    83.39204199996311,
+    94.83345899998676,
+    89.06687500001863,
+    81.37520899996161
+  ],
+  "profiledCompiles": 12,
+  "topSelfSamples": [
+    {
+      "name": "wasm-function[2451] wasm://wasm/010ce94a",
+      "hits": 143
+    },
+    {
+      "name": "wasm-function[812] wasm://wasm/010ce94a",
+      "hits": 54
+    },
+    {
+      "name": "wasm-function[511] wasm://wasm/010ce94a",
+      "hits": 50
+    },
+    {
+      "name": "wasm-function[422] wasm://wasm/010ce94a",
+      "hits": 41
+    },
+    {
+      "name": "wasm-function[1432] wasm://wasm/010ce94a",
+      "hits": 36
+    },
+    {
+      "name": "wasm-function[1275] wasm://wasm/010ce94a",
+      "hits": 32
+    },
+    {
+      "name": "wasm-function[2429] wasm://wasm/010ce94a",
+      "hits": 17
+    },
+    {
+      "name": "wasm-function[558] wasm://wasm/010ce94a",
+      "hits": 15
+    },
+    {
+      "name": "wasm-function[931] wasm://wasm/010ce94a",
+      "hits": 14
+    },
+    {
+      "name": "wasm-function[1393] wasm://wasm/010ce94a",
+      "hits": 14
+    },
+    {
+      "name": "wasm-function[1883] wasm://wasm/010ce94a",
+      "hits": 14
+    },
+    {
+      "name": "wasm-function[1134] wasm://wasm/010ce94a",
+      "hits": 13
+    },
+    {
+      "name": "wasm-function[157] wasm://wasm/010ce94a",
+      "hits": 12
+    },
+    {
+      "name": "wasm-function[379] wasm://wasm/010ce94a",
+      "hits": 12
+    },
+    {
+      "name": "wasm-function[576] wasm://wasm/010ce94a",
+      "hits": 11
+    },
+    {
+      "name": "wasm-function[1966] wasm://wasm/010ce94a",
+      "hits": 11
+    },
+    {
+      "name": "wasm-function[227] wasm://wasm/010ce94a",
+      "hits": 10
+    },
+    {
+      "name": "wasm-function[350] wasm://wasm/010ce94a",
+      "hits": 8
+    },
+    {
+      "name": "passStringToWasm0 file:///private/tmp/solar-navigation-baseline/solar_friends.js",
+      "hits": 5
+    },
+    {
+      "name": "wasm-function[290] wasm://wasm/010ce94a",
+      "hits": 4
+    },
+    {
+      "name": "wasm-function[1937] wasm://wasm/010ce94a",
+      "hits": 4
+    },
+    {
+      "name": "wasm-function[2741] wasm://wasm/010ce94a",
+      "hits": 4
+    },
+    {
+      "name": "wasm-function[1100] wasm://wasm/010ce94a",
+      "hits": 4
+    },
+    {
+      "name": "wasm-function[2564] wasm://wasm/010ce94a",
+      "hits": 4
+    },
+    {
+      "name": "wasm-function[1812] wasm://wasm/010ce94a",
+      "hits": 3
+    },
+    {
+      "name": "wasm-function[1304] wasm://wasm/010ce94a",
+      "hits": 3
+    },
+    {
+      "name": "(anonymous) file:///Users/paladini/Documents/veeware/solar-friends/scripts/benchmark-scenario-compile.mjs",
+      "hits": 2
+    },
+    {
+      "name": "wasm-function[152] wasm://wasm/010ce94a",
+      "hits": 2
+    },
+    {
+      "name": "wasm-function[3194] wasm://wasm/010ce94a",
+      "hits": 2
+    },
+    {
+      "name": "wasm-function[3016] wasm://wasm/010ce94a",
+      "hits": 2
+    },
+    {
+      "name": "wasm-function[609] wasm://wasm/010ce94a",
+      "hits": 2
+    },
+    {
+      "name": "wasm-function[170] wasm://wasm/010ce94a",
+      "hits": 2
+    },
+    {
+      "name": "wasm-function[2389] wasm://wasm/010ce94a",
+      "hits": 2
+    },
+    {
+      "name": "wasm-function[289] wasm://wasm/010ce94a",
+      "hits": 2
+    },
+    {
+      "name": "wasm-function[592] wasm://wasm/010ce94a",
+      "hits": 2
+    },
+    {
+      "name": "load_scenario file:///private/tmp/solar-navigation-baseline/solar_friends.js",
+      "hits": 1
+    },
+    {
+      "name": "wasm-function[1541] wasm://wasm/010ce94a",
+      "hits": 1
+    },
+    {
+      "name": "wasm-function[1382] wasm://wasm/010ce94a",
+      "hits": 1
+    },
+    {
+      "name": "wasm-function[23] wasm://wasm/010ce94a",
+      "hits": 1
+    },
+    {
+      "name": "wasm-function[1445] wasm://wasm/010ce94a",
+      "hits": 1
+    }
+  ],
+  "scope": "Node native-WASM load_scenario CPU profile and five unprofiled warm compile samples. Identical opening snapshots checked across twenty compiles. Diagnostic named build when binding points outside web/pkg; not browser UI, cold art, cancellation, or release acceptance."
+}

@@ -1,0 +1,1 @@
+{"population":12,"buildings":256,"actions":{"funds":{"median_ms":68,"p95_ms":80},"undo":{"median_ms":66,"p95_ms":72},"redo":{"median_ms":64,"p95_ms":67},"zoom":{"median_ms":15,"p95_ms":55},"pan":{"median_ms":3,"p95_ms":4}}}

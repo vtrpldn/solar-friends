@@ -182,13 +182,15 @@ pub struct Grid {
 impl Grid {
     fn new(v: &Village, layout: u32) -> Self {
         let size = (MAP_SIZE * MAP_SIZE) as usize;
+        let obstacles = geometry::LocalObstacles::new(geometry::obstacles(v).collect());
         let free: Vec<_> = (0..size)
             .map(|i| {
                 let p = point(i);
-                clear(v, p[0], p[1])
+                // Integer grid centres use the same open plot bounds as clear(),
+                // with the existing nearby index instead of a full object scan.
+                world::walkable(v, p[0], p[1]) && !obstacles.contains(i, p)
             })
             .collect();
-        let obstacles = geometry::LocalObstacles::new(geometry::obstacles(v).collect());
         let mut edges = vec![vec![]; size];
         for current in 0..size {
             if !free[current] {
@@ -519,6 +521,95 @@ impl Game {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn indexed_grid_occupancy_matches_exhaustive_clear_and_segments() {
+        let kinds = [
+            "home",
+            "shed",
+            "garden",
+            "hydro",
+            "warehouse",
+            "streetlight",
+            "banana_treatment",
+            "greenhouse",
+        ];
+        let mut seed = 719_u32;
+        for scene in 0..12 {
+            let mut v = Village::default();
+            for id in 0..(scene % 5) * 64 {
+                seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
+                let x = (seed % MAP_SIZE as u32) as i32;
+                seed = seed.wrapping_mul(1664525).wrapping_add(1013904223);
+                let y = (seed % MAP_SIZE as u32) as i32;
+                v.buildings.push(Building {
+                    id,
+                    kind: kinds[(id + scene) % kinds.len()].into(),
+                    x,
+                    y,
+                    progress: if id % 3 == 0 { 0. } else { 100. },
+                    contributors: Default::default(),
+                    next_visit: 0.,
+                    visits: 0,
+                    crop: Default::default(),
+                    poultry: Default::default(),
+                    agriculture: Default::default(),
+                });
+            }
+            for material in 0..5 {
+                v.economy.sources.push(economy::Source {
+                    material,
+                    x: 6 + scene as i32 * 3,
+                    y: 4 + material as i32 * 11,
+                    active: (scene + material) % 3 != 0,
+                    ..Default::default()
+                });
+            }
+            for i in 0..8 {
+                v.power.network.nodes.push(electricity::Node {
+                    id: simulation::Id(i + 1),
+                    owner: if i % 2 == 0 {
+                        electricity::Owner::Ground
+                    } else {
+                        electricity::Owner::Carrier(0)
+                    },
+                    kind: electricity::Kind::Battery,
+                    x: 4 + i as i32 * 7,
+                    y: 5 + scene as i32 * 4,
+                    size: 1,
+                    capacity: 4.,
+                    charge: 0.,
+                    equipment: 0,
+                });
+            }
+            v.roads = (2..50).map(|x| (x, 2 + scene as i32)).collect();
+            let grid = Grid::new(&v, 0);
+            for (i, &free) in grid.free.iter().enumerate() {
+                let p = point(i);
+                assert_eq!(free, clear(&v, p[0], p[1]), "scene {scene}, cell {i}");
+                if i % 17 != 0 {
+                    continue;
+                }
+                let [x, y] = p.map(|n| n as i32);
+                let expected: Vec<_> = DIRECTIONS
+                    .into_iter()
+                    .filter_map(|(dx, dy)| {
+                        let next = cell(x + dx, y + dy)?;
+                        let q = point(next);
+                        (free
+                            && clear(&v, q[0], q[1])
+                            && (dx == 0
+                                || dy == 0
+                                || (clear(&v, (x + dx) as f32, y as f32)
+                                    && clear(&v, x as f32, (y + dy) as f32)))
+                            && segment(&v, p, q))
+                        .then(|| (next, (cost(&v, p, q) * 1000.).round() as u32))
+                    })
+                    .collect();
+                assert_eq!(grid.edges[i], expected, "scene {scene}, edges {i}");
+            }
+        }
+    }
+
     #[test]
     fn bounded_destination_search_matches_exhaustive_routes_with_roads_crowds_and_obstacles() {
         let mut g = Game::new();

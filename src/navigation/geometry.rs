@@ -88,6 +88,11 @@ impl LocalObstacles {
         }
         Self { bounds, nearby }
     }
+    pub fn contains(&self, cell: usize, point: [f32; 2]) -> bool {
+        self.nearby[cell]
+            .iter()
+            .any(|i| self.bounds[*i].contains(point))
+    }
     pub fn blocks(&self, cell: usize, from: [f32; 2], to: [f32; 2]) -> bool {
         self.nearby[cell]
             .iter()
@@ -190,6 +195,11 @@ mod tests {
         let index = LocalObstacles::new(bounds.clone());
         for y in 0..MAP_SIZE {
             for x in 0..MAP_SIZE {
+                let centre = [x as f32, y as f32];
+                assert_eq!(
+                    index.contains((y * MAP_SIZE + x) as usize, centre),
+                    bounds.iter().any(|b| b.contains(centre))
+                );
                 for (dx, dy) in super::super::DIRECTIONS {
                     let to = [x + dx, y + dy];
                     if to.iter().any(|n| !(0..MAP_SIZE).contains(n)) {

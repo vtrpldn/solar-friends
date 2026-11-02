@@ -1,0 +1,1899 @@
+{
+  "complete": true,
+  "browserMode": "headed",
+  "readyTimeout": 120000,
+  "fetchedInputs": {
+    "web/editor/index.js": "1ea36c3a03ee680c291f86175afa923e5f78dde743427b7fa5b4d9360ffeb4c9",
+    "web/editor/map-view.js": "a501342d33f63e1146def06c1291bb54d3291bf753ab4f9a62c5823d85843cd9",
+    "web/pkg/solar_friends.js": "d277c6ebfda846e79d2d25df61b5c0bfe1f8a45c6e4296e45f669ed9d8e9c9eb",
+    "web/editor/scene-layers.js": "045c4bf57886043d243f0cac6722f92bba5f1b505fc4a3da3449bcd9ea05e00e",
+    "web/editor/import-object.js": "ccd2c6b80a5192dc9e972315973ba9e2ee6de31d403504bac8b92dc2de784d8e",
+    "web/editor/removal-impact.js": "8dccaae9b45c6991ee317433d743627c0901d8fb55474635df55639376b8c5e6",
+    "web/editor/landscape-regeneration.js": "a25d8bf06a775731ba6ca30eabf932a3a97ff364d84e59692c0c1511bd183c1d",
+    "web/editor/workspaces.js": "14fbe60d5f8c03293678c9fee736eb08ba4cf030b5a5b0c104c07f6486601a82",
+    "web/editor/validate-publication.js": "f85ff689232b45a189c44ec8de3e622eea57d313418b50269fc05f4fdec73159",
+    "web/editor/prepare-release.js": "0f2e03aedc2a46a0e0799f75a9bb722bebd56b0b19e9d6b70de6faf323e54bbb",
+    "web/editor/prepare-scenario.js": "197f94d9927257ffe2ba7f3818c3f4fc3a13dbdff78504bddd509773186e68f1",
+    "web/editor/land-preview-key.js": "31248e85559d9ffc701551c00e44cb0dc00a2e9657583f9b88041f90e320c5e6",
+    "web/editor/outlook-projects.js": "7f802b828bbd2a0218c40698f7c503ee04a147eb77c241f641bfa967667a6c1e",
+    "web/editor/prepare-export.js": "bc434f11185cdd6f4221c34a0a774a900f633c922a3ba20d7a5c49fbb77e2685",
+    "web/editor/outlook.js": "c9c9b25da575a46ff67e18854538a949088634fe3026ec79c020c26314263324",
+    "web/recovery-limits.js": "5441cadbac4803d1dcab20c5aeb8e9a15f5ec81f820d4f607b3362d74432c0a1",
+    "web/editor/stored-package-export.js": "0b5420515643e50dd4150f85bccdebbbf22df20200b3d043bc8ea9730efc2e5b",
+    "web/editor/package-recovery.js": "165c7a8a7559258a6cebf705d1a9fac5797a95dd9faf70c761854ae97572822b",
+    "web/editor/missing-library-entry.js": "1a87d9735a427c5c517a26f9b845251cf2afdd6339346c4149d4b5a435170bec",
+    "web/editor/library-previews.js": "a6396f0141585c47119da8d2f1bc190f70ab7912ee692c33e65cc5b8462b1652",
+    "web/editor/example-scenarios.js": "1e3122a8fc6dd42759d08e401fbb1c921cef3bdca801ff7d852361594074df2d",
+    "web/editor/recovery-dialog.js": "48cead933907a5e806934654346912c854f8eea96005969349d53fe1f3acc290",
+    "web/editor/draft-checkpoint.js": "d5780a82c3665b51b20f9aa51a0e547bda02a12077ea5ca7ab75e111236dd4e6",
+    "web/editor/draft-import.js": "6f62e1b32a7d471d3181126d32c4ead28b386debb4bbdee396db3e2ad13e4c99",
+    "web/editor/record-recovery.js": "714d83df2c88a325c6d475fb4c821d53df979a7774d154196c21941517db37c7",
+    "web/map-package.js": "7895d6d124b95721a4e092806201be7b6c5e4fdd12e953c69b7eef8077642b0c",
+    "web/editor/map-sharing-controls.js": "18901c322fb726c44288f9f2e5372082f53314578c65bc6e41db8ade35586bea",
+    "web/editor/thumbnail.js": "bec95459d85e741f51cf35c9af3ef78537c9b25db61bfb36377f9a39d4d33313",
+    "web/editor/journal.js": "e5ee57626eecacd22dda40297c98d25dffe20c7cd667564885a5bb97cf61d9e0",
+    "web/release-package.js": "185c0feb4586b6918961f43ff31fd1c4335e770257d659de5f2a6d14022a659a",
+    "web/editor/library-discovery.js": "ca1f82ea205ebf1866a58e42d0ac264d7bf0f1b2e03450c584fce273cfe2b6b9",
+    "web/editor/arrival.js": "5604790ad1add8584babaed3b0de6163afb670c4845acce7290c8fa46e70c422",
+    "web/editor/recovery.js": "af0fa4ab952b6898e996f5eb6881a56c1dfc06592fdafb279b619ffa93381826",
+    "web/editor/routes.js": "0d2c83154aa359e8fa508ea285961247a2d7a4487dd8e5ae21608c765386fa9b",
+    "web/editor/batteries.js": "505a7fc8d07f09c13381d27e45c8797d6b57ef70a49e39b42b86b7b34839ac04",
+    "web/editor/setup.js": "9c8efb63568986b81e57dc8eb5b8b98e6c87207ef90150372dd8161f18b45cb4",
+    "web/editor/equipment.js": "9f59a3768620a9f184da87ac9ec18680a80333f0e34a64720b32bdf6f64709b0",
+    "web/editor/animals.js": "f510e345438f5c2965fdbba70576443510e5972a833f7928159405ce780c0833",
+    "web/editor/sites.js": "59b51a11d34a80bf5ab155f4a13128dff228d1e965423063b2029a66271a52e8",
+    "web/editor/orchards.js": "9a1b17788062b19aaa52cab33fd5fd460baca0dc4dbb50fe095f7c03ce2ffe54",
+    "web/editor/farming.js": "845120ea773613a047ccdb53a1b361792ed7fb132a546dfe5b02de786f1daf4a",
+    "web/editor/supplies.js": "ad3d1b723ea2288fb44956a7391976d4007e1c3460bdb7d65e7c8096fa158ab7",
+    "web/editor/liquids.js": "8ca05361e3f65fbd52cabacda39d05639d104809e29affd126242fe910293547",
+    "web/editor/scenario-journal.js": "bb57a27d8f16cdf4fdf2365d5e28c07ee0a5b6e5e7fd20835811501c293158cc",
+    "web/editor/regions.js": "d0363748bdb850bf8223c15e157ac98e9974be3671cfe03f020a900f9ca918c3",
+    "web/editor/resident-presets.js": "bdf6be076a272069bbbd5508873b7bfa9973138ab83323e80b6739174182b825",
+    "web/editor/relationships.js": "ce6fe7c4faddc01993cc2f69dbf5fdfb9fe7b02285a8171cbb1dcc2467f4eb8c",
+    "web/editor/residents.js": "6686394cc55e811e970d9683c614d97c99af334d5175647df2ffe3d444f0b1ce",
+    "web/editor/biome-editor.js": "1b74a2d0f9d031050bfde1c2f182995132b3df1997c6ef64b01978a58eeaf73c",
+    "web/editor/weather.js": "7bdec512a7e6a868110d69ce1988b2cab8b152da7c1df62e80f77939f1ea1824",
+    "web/editor/files.js": "fe0edb7fb8a6782403758d159b111d0867cd50314987acdf4f445b7cf5d16195",
+    "web/editor/nature.js": "100d215680adef601b6d38d1396f197750312a5dfd5a0de1c972eff2d21c9254",
+    "web/editor/geology.js": "5b696731787b8e7e0e5a319734f45d19e42f758317236a69881b8b47a90b5e04",
+    "web/terrain.js": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf",
+    "web/land-layers.js": "7f927c59b493688072f41b088457b1b8ba1822b997e28ae60ce0db60e2a33236",
+    "web/editor/minimap.js": "b38166af28847a51db57eb1a9bfd631ec1b22d0dabddaba223680bcd6268fb5c",
+    "web/editor/objects.js": "5c319df55e47860d7baf0646088beb253aba11b5d40eab0c43128ea765384d34",
+    "web/editor/brush.js": "3bf5390061865456479d91f79f17b2b7db5987a6aeb6d5e88dbd06210ecd28c3",
+    "web/content-library.js": "cfae04a458db4e3875c212459acc7f5cbfe89eebb3940dbb24fefb7f53fd2a96",
+    "web/editor/document.js": "9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a",
+    "web/utility-lines-art.js": "e1cc662f79b7beab542540ef9a923a7dd8f227dea6791ae48544d08f66fb559e",
+    "web/building-art.js": "977312b8c88e4d700fadff2cb654a3e20a35501dd1560779b830dcbfbb6eeace",
+    "web/build-menu.js": "3f4983108515a0e8018e3ef4d8fddf2c68e09eaef44e5d9452ea3ce8dce91408",
+    "web/resource-site-art.js": "a0601241ab8d107474b2989d16705b1a73a942617eaae3689af8c0485190f47f",
+    "web/chickens.js": "f438c1d08c0ebec511511288b2eef6149825b61509e9dd2809244d055798021a",
+    "web/battery-art.js": "48d2c00ba144080d40c048ea3d3edfe4811e02f456af07c851efbb6487bc2887",
+    "web/economy-art.js": "b9a9f15be3bdc0f11dda6de42777b34b0f70b250debe1612b9729c9957a6333a",
+    "web/crop-art.js": "e75beb185b763eb4f18dc984c6d2b3e12fecc0348b3c91ebe8e349cbb174685c",
+    "web/resident-look.js": "94f94dff5b280b57998d97ef94641e1850cbd5d2946ae61a3ed3b2f10367de5d",
+    "web/resident-appearance-library.js": "518acdb703b9eb9bff55a4c05b6c443761af48a53d905a5ee7d761ddbc409773",
+    "web/regional-art.js": "b7a23c741fcb76ea47d911f9bcd07a9cc8488f81c6a1a18c5232e744b394c3bb",
+    "web/editor/prepare-terrain.js": "2263c3c79dd89d05bab83920966a9354c206cc533b2f464e2c7748e0ac44319d",
+    "web/editor/terrain-cache.js": "89b760d42a330deee375c4ea6775d98d96f371e82406d80f858676a8669a527d",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/building-footprints.js": "4437a07f72209817dc197b24314018362f1abf68966de099a062c933525babf1",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/building-state-art.js": "2c66d34e1b2582b1509e6caa69cac0f5907f57ab38160d4d0fffc44f37429bef",
+    "web/sprite-frames.js": "4a32cbc68b75e90b7c1fe63e139143ff6c1cbd91954276cfd7179eb4f5b44604",
+    "web/editor/preview-camera.js": "71b1d719d2b91c9f473d2797a1ff5ddad708c8a8f585043b98e42d30ece32119",
+    "web/editor/run-preparation.js": "29cffb125f1ca53917e0a1e24aa6fd09ae7926fe15cad03a8fd0df7b654aec0b",
+    "web/editor/outlook-monitor.js": "99f5a63ed3d5706a8e5a75e0518fd1dee4df672d035ba9088ce57b0cd9bdbc74",
+    "web/editor/outlook-power.js": "144163979e59e471498b1fe8e051c4f2717e07b25c07d4ceaa29bb66f595b3cf",
+    "web/editor/prepare-map.js": "1ab59bdb8df8485e0d73dec61a4511bcdbb11cdc03a0e8de10a25573b87ec8f7",
+    "web/editor/map-sharing.js": "21665f56ac48568ebf4cd7a571ca74797a4284146d3ca7a8f0b1cf9c34766aa1",
+    "web/editor/food.js": "cbeb80c24981d19ff8ee5014b187195449be7f02a9294717b193ae7bc9d80753",
+    "web/resource-sites.js": "9a95c65342707d4f07ad8904dd896600d70a94c392962b44d040ef8fd0fc33b8",
+    "web/resident-portrait.js": "682c40d41a6dd70b9678d98b6381f0214419fd6f346a65e0c06574ab19bc7211",
+    "web/editor/resident-provenance.js": "5ed99c2db1932a748bad57d949a5c7b50b6769c7bc2da0de9caba77c0faa3895",
+    "web/editor/liquid-data.js": "1dbec1233121b8732a53734d5f4d46f0b9a2f45d4857ff6e4eb317e3f8acce3e",
+    "web/editor/events.js": "34655564b1d0c336b96b4b1647675758ecff657e32ac87fad73d6ff93fe216fc",
+    "web/editor/character-creator.js": "d7556ecba710990dc94a545fa3e8a4bad2e796ec2d83af0965c1e4efd5f728c2",
+    "web/resident-appearance-fields.js": "fc7b376b46564b489d21f6fdffc914c1e193d0ab545da028dfdfe4470ecf0f7a",
+    "web/editor/roster.js": "9d4d6026c5c016086de701016d7b389342d65aab1499de7b9bdb7f8a7e4aebd3",
+    "web/editor/prepare-biome-preview.js": "ddff3e5e474937e006c158f0fa32c6a8e09ba7624858fabb5ec5afa9b61c29a1",
+    "web/editor/biome-change.js": "1f382f16fdf8484aadc1bd2bcdb78f5ac722766c9b0e011bac2e9b35bb3c5c33",
+    "web/habitats.js": "63ebeab1df2ac631ec3b0a3bd250d5f7a2e6372fdd55a70f446e3853947aa5a6",
+    "web/building-projection.js": "e64a3306774ed0d6d8aa070a6b91aacc28b129ac3bfbe7c244df0532bf6f76de",
+    "web/paint-cache.js": "f070b4e16eeb75c077b26009201fef77ca246a9c202664730bc81dda35cc053c",
+    "web/save-project-prepared.js": "cf74a19d04439eaea6a30fd2eb5aac3e76865e5c8e02f0324aaf43af5e518fcb",
+    "web/library-migrations.js": "c06f6918a52c147a94a72a4beb71f4607d4e1450bdf251afad72ac60b75cc154",
+    "web/power.js": "d37e60fba9e9e9057df3bf0b0fda4e6c4d8914f9d8041673627a7868e8694f0d",
+    "web/resident-part-recipe.js": "44af0a70cad6a16790a6556d57c6e343bd982085565e3c577bfec9ba065953a1",
+    "web/building-silhouettes.js": "247be59f561d36f2400b68ceb0c1266d5f19c2864254c4d95a52892c9b670a43",
+    "web/terrain-revision.js": "f6dfcb06898799931676a227689d0a162b3a278525893c07b2d392c91ce90878",
+    "web/nature-art.js": "389a97d806cbf7d286b3ebedeeabac390770208672529d494444bf1034e255b0",
+    "web/greenhouse-layout.js": "dce24b4528d6c942c6afcc93e32b810fdac2018aa8a0eebad2d3b2fdcbbb07b8",
+    "web/sandbox-rules.js": "c4d708f49592384ed6f6920c85f15f2ef03cc239de08cb8026066c00ffa98b11",
+    "web/battery-plots.js": "327faa1e4c9f97f173eff8f5de53250dbdcc72e845b23aedbbecaa857d9b3e84",
+    "web/resident-ground-shadow.js": "016fa5a12a7957c8d0ea6c3d0166979c7c1b51a5723632dd0a289ff69a4642ee",
+    "web/editor/story-roles.js": "55664194e4450fdef200da240c5fd2315b3fbab2c00fc78bfb0ce74b0760c173",
+    "web/editor/character-choices.js": "da1e9ebb825f391665295bf8191b03afdaf512367d8d35ce780eb0feed09c506",
+    "web/resident-animation.js": "0a1f1b73c14a88d351ee483bd7da397551e1ba4c0de61faa5c0b77ebd01e0c8f",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/resident-shadow-metadata.js": "8759afa938aace5e88a5989bf1bcd210218106532cc418140ddc779612879f1a",
+    "web/character-hair-colours.js": "612735bf2a5bb6219d5d68b1b5d187e6662480ecc114ec99d591ac9f91a92dfa",
+    "web/character-contact-atlas.js": "71880a29ef77436d4cb3f24361eca91b2fd5ceae8342ffd74936ec006d0a3f26",
+    "web/resident-animation-profiles.js": "3b41e55fd149ed3eb301d951e5817e2e08668c4b48f001768b5a1fb520392b90",
+    "web/character-attachments.js": "2f88fee807c21ced70a762e2a1cb7169e9247a7c6136d81e37b235f1e67ac7cf",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/character-body-frames.js": "e64697c8c2d523b8072473420f7a953b4c0b810ef5c837658dbd7e8bc5ebfdfb",
+    "web/character-contact-frame.js": "80362004f1bb2e80db69133b3e881261aed8d5ac645783f3ebe82b596eb25663",
+    "web/art/recovered-battery.png": "9cc9f12a8c414b81d68b45a4348b7ec55735e80c0bb6eaf098dd3681f604a2b6",
+    "web/art/economy-atlas-v2.png": "70c115a50bfffd4b4c6808ebb1375e5bc3c6f74d5507bcb797def54886827e06",
+    "web/pkg/solar_friends_bg.wasm": "ab67027383fad71215b6f00c20c2d97cbb5771e2aa718e388af6145a3cb6ee36",
+    "web/art/starter-shed-refined.png": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+    "web/art/apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+    "web/art/goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+    "web/art/orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+    "web/art/hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+    "web/art/eco-toilet-tall.png": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+    "web/art/streetlight.png": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+    "web/art/banana-treatment.png": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
+    "web/art/biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+    "web/art/wetland-square-v2.png": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+    "web/art/solar-farm.png": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+    "web/art/warehouse.png": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+    "web/art/village-atlas-isometric.png": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+    "web/art/garden-simple-isometric.png": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+    "web/art/greenhouse-isometric.png": "6bc7925077a4089014e8973979cfaa3e242a12cf400888d27998c6aac0350ee2",
+    "web/art/cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+    "web/art/compost-isometric.png": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+    "web/art/square-isometric.png": "76ec6da02bc5b4575b556019ffbfe74c1a092d32c3e5cbd21d74945f2adf2c91",
+    "web/art/workshop-isometric.png": "fc194eb60c86435ae750c13b4bcb5c9a59c5897e63b2debcb29b1cb960eac4a7",
+    "web/art/coop-isometric.png": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+    "web/art/home-veranda.png": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+    "web/art/home-gable.png": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+    "web/art/home-courtyard.png": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+    "web/art/adobe-gable.png": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+    "web/art/adobe-veranda.png": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+    "web/art/goat-pasture-empty-v1.png": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+    "web/art/mata-atlantica-atlas.png": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+    "web/art/terrain-atlas.png": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+    "web/art/landscape-details.png": "a5212211cc3d8bca0250b3990a9dcc90ca3bbd3d27fa9b1007d85b3dc931ae56",
+    "web/art/animations/iara.png": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+    "web/art/animations/bento.png": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+    "web/art/animations/luz.png": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+    "web/art/animations/caua.png": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+    "web/art/animations/nina.png": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+    "web/art/cerrado-vegetation-v1.png": "1542d0c14fa9cfddc83ec0e1a04e5ef5be34fcf1273d93d4eb13c2c8f5f359a6",
+    "web/art/caatinga-vegetation-v1.png": "522999ec80e708b3203cb6f59a2b90067d3d7eb2f7265b82d6e7815854c26290",
+    "web/art/crops.png": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+    "web/art/regional-ground-v1.png": "acdad558e0db68fb04760f2a27d44beaf79eec89d6b02d583e35586748bbfeb1",
+    "web/art/field-crops.png": "ca755cb0aced1ef12ec69284c915490e59e5207961d5fb0a4d90fdf5913c219e",
+    "web/art/chickens.png": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+    "web/resident-parts.js": "4082fa9323bf8957bbac201ffc464fe6c275fd82eae5940e2873935f92c72631",
+    "web/resident-provider-memory.js": "2feb5a1b937491495ac598a696af8cada41ccbc688cfddb6a5edf19eeabe12d2",
+    "web/character-atlas-part.js": "ca287ad3a1647f468b1a28c144d6cb15526c0303f126ded998bf15f16bf1a757",
+    "web/character-hair.js": "93fc5e921e3abeddebce79b0c46b5bee8dba523c6a45aa84432fdc2cc3e27067",
+    "web/character-equipment.js": "6d377cb763557cd82ac9715e751f16c0091ccddd2eebcda92b0f9ae0cbcdc891",
+    "web/character-image-source.js": "b10649c2b8f08f168db8adc6324fd5f8a09c714f7fef684b6bb0d380d1bbdb03",
+    "web/character-equipment-parts.js": "892bda1be66baca5c2c3f168cc3bceaf36e2a12d023b2c30904ccbdea3f2be18",
+    "web/appearance-cache.js": "29b45878db3aa395f39fafac3d70c4154be6822d43baf7dc5b60f49ba3c54acb",
+    "web/character-hat-provider.js": "554373694abc40f6fd007d6ca9fc7e811f8aa3567c48315b3c00284718f8fe6c",
+    "web/character-hat-poses.js": "58d2e8bd65dfa8bf64546cd8fbb19877cb0b0a96b304d787e6a4f1d09703a822",
+    "web/character-facial-hair-parts.js": "b4d9f0da0ad943c440848d0dc52821912e517e50d28d51dae9c73e8921e0a73b",
+    "web/resident-family-parts.js": "48802400c4942128694edec58c665a3fa5ee5461223378095e6e559f4152ede5",
+    "web/character-bundle-response.js": "43682b6efe979d90ebdcdae8d7f115a1347b9fb8b712204f1b8c988b9c34793b",
+    "web/project-save-worker.js": "856ebd7146ef5621fa94544fdd6e0b9f86c5b9653cd4207060c3a0ba2179a54b",
+    "web/character-hat.js": "9edadbe59da92b16d19d3acbd3505c3a1ec54de829f38fcbcb209f2003cdc9f8",
+    "web/character-parts.js": "da4b24a48bea1913372fe89f62a8f9880e14a83bc87ad3cc2245e23361ba5747",
+    "web/character-body-appearance.js": "1ba2ac891c287677c207769719491284389b13feb7be0b32806479c8cad1b64f",
+    "web/character-hair-source.js": "ae094ed4d5f38d97a5aff1ff4cd968745bf4650c15be4b8085bbdfd28ccbb878",
+    "web/character-hair-placement.js": "6829af8d50016e6a0307033c31b0bc3e7532d680c99fd5c2009804d3996a4c6e",
+    "web/character-clothing.js": "dacc0789242aba5d8e406800b98130ebc2090f073b8d09116ff4ce0b89fcd6d0",
+    "web/character-composed-family-bundle.js": "423ec62d13a698a87a70bb0d8c5b39a78d950ec71d9aea79287587c13cb91919",
+    "web/character-foreground.js": "564d5b4b31b379118cc6e5fa4d37a1aacf17fb3c4f3d68a221be62b5510d0e53",
+    "web/character-sleep-family-bundle.js": "c625150896514a73506935ec7df33b59f3361314ed5ea6b3ebb6f57dc630a044",
+    "web/character-broad-family-bundle-index.js": "17d264e9080070a930a07efd36683cc4087144b9e233788602cf2d92a966ec23",
+    "web/character-family-bundle.js": "9dce0fee17eb5a61aba2c94e71c12cf67b86732562267b7886edef949901ee71",
+    "web/resident-family-provider.js": "103dbb9287de742970f85bd108541c46848305c54e28f795f9235c5cda105bce",
+    "web/character-facial-hair.js": "79cc33fdd329f2dc1bf80176ce058a0a12e84cd80cd24fda110e870f6fb1f09b",
+    "web/character-foreground-mask.js": "e54c44cb05b7a09a9a9ea170c70f98190df71707e2b68f65f1d9a3df64e47639",
+    "web/character-clothing-colour.js": "1e6e4c5d8b80f2927dee53bfa637742ef086f2b96a6e4548f7d0866f2429a6a4",
+    "web/character-atlas-clothing.js": "733fda3ce739c166aceb5de8ad402de1e8f8c293c7e03e1d038eae38353d0200",
+    "web/character-body-family.js": "756ae0fc222f3d3266b32add6522eb57e74165c16889d8b82e8ebed62e6d6ebb",
+    "web/character-family-appearance.js": "e6b82ac6fa4cec845a1b0d1cf9fc654d4720b8d054e9c4da29efbfe07f4b0e6c",
+    "web/character-composed-family.js": "d7cdca2836eb60ef142044b5055479288568c84eb6f3aad12a8129acbefe3dd3",
+    "web/character-sleep-family-bundle-index.js": "a8eef990f98b12605c1bc6ffaa8ac6a0ff97d7c3ad8601320704f6073698e49b",
+    "web/character-shirt-bundle.js": "5dddf5f1b98e2e3c66eb55a3937a839d073d552e1dad7d78cd5614d6a1b4676d",
+    "web/character-work-family-bundle-index.js": "094a6f8e4220fb1b3a2f81950ab5f43707f121a25bd95a70cffb361d9d43773c",
+    "web/character-family-bundle-index.js": "e7060b9a4d83be379fecb8405824b31c56fb437bffee0937a749a5be11be7b64",
+    "web/appearance-lease-cache.js": "b6ecbf61b76772ea2159c2e7d7f4638428b489769a126e8ff23d24bc46fcb6c2",
+    "web/character-equipment-atlas.js": "a5773242ac21d1a4c370c76bba521e51d6d341a8d4319e3429b1b21deba716d3",
+    "web/character-family-accessories.js": "97a01ba25ffdf9e2d7513f5b29537585a4f8fef805c373d26331f5a8e88430df",
+    "web/character-runtime-binding.js": "c9847780f2039a44972baa444e4b94caeb4500041a1a6f5664bf3cad70a4b87e",
+    "web/character-facial-family.js": "59da653c4233191a15a4056fc8dde25ab5ce910c57d2806a26f219b202aa208d",
+    "web/character-hair-family.js": "6eef18b08ab108e3d2147a019a74dbd98b75f057c745215cc12ee737a3afe01f",
+    "web/character-shirt-bundle-index.js": "2fa062df3aeff7e68b277ad9e4efa714504d2bb5644fb2990411d07676fbe500",
+    "web/character-equipped-family.js": "e600e06d18949a3392be2c27a2891738f63bddf4ea781b8813b473b55589d14e",
+    "web/character-equipment-appearance.js": "2834a7e76789e21dcab86cb225095b0d283248a87c7884c1d412aa90901f8107",
+    "web/character-frame-composition.js": "3ab7fd8b02875130c5f41ac30d914ec75cc5e8460d6aad7d742bb00e1f0c88de",
+    "web/character-hat-family.js": "c32e6b3d455539d51e2856cb6777d7c81ce67f4e307ec54f9c0b8f117137e36d",
+    "web/art/characters/relaxed-sleep-v1/bundle-v1.json": "f920cd78f9b736a255a90f2a56299a478bad0b8cf086d12e4f21ed283248412f",
+    "web/art/characters/prototype-v1/body-neutral-base.png": "7b0a9859131c9c42df181d5af31fa7dc847abebe90b726ada20006b74d49e75f",
+    "web/art/characters/prototype-v1/body-neutral-idle-candidate-v2.png": "6ec160865b23cc55036993c5765a3b37c4165ae3710145eceb917b7905438432",
+    "web/art/characters/prototype-v1/body-neutral-activities-candidate-v1.png": "6d1beda2fa24b6864208b2f43ca15490e32aa8cb391bd63e9b9e3f6a13603123",
+    "web/art/characters/relaxed-v1/source-11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a.png": "11b1641759042e0dfce77a88bd21e22f207b46e65409d26c938768debe57116a",
+    "web/art/characters/relaxed-sleep-v1/sleep-body-v2.png": "50958453c8bf8c12defcacb2c75943be77a57b0ff17c72793040186dd9621f5e",
+    "web/art/characters/prototype-v1/hair-curls-single-candidate-v3.png": "11dd30493f791a10cdc51373f427e4ada80f3da3b6e7e3d3648cc2ecf7489954",
+    "web/art/characters/prototype-v1/hair-curls-base-4-candidate-v1.png": "a86d3314b8befdbb37b46913458197f20597998ebc8855a831c0bbcf937d1507",
+    "web/art/characters/prototype-v1/hair-curls-base-5-candidate-v3.png": "0217b4805e01a66079a3a7da633530e9ff5d4f76eb24f2428849b83c9d2f3aa2",
+    "web/art/characters/prototype-v1/hair-curls-base-6-candidate-v3.png": "364ecd83aa9229eba483fca6f7fe5d6a78f290667af62a6f39cf129a9c4f5a4c",
+    "web/art/characters/prototype-v1/hair-curls-base-7-candidate-v3.png": "a9a3786c6a1dbd5f679628745b1a1b8aac7e19e611ad77e32a80b01f9a913cf2",
+    "web/art/characters/prototype-v1/hair-curls-base-9-candidate-v1.png": "7462182486d964402d4686479cbcefc5604d3dae230550742813c37a0de82786",
+    "web/art/characters/prototype-v1/hair-curls-base-10-candidate-v1.png": "7d88c8d58cefcae645607119949f08457d3ca2a85582b0987522a76ce68dbc99",
+    "web/art/characters/prototype-v1/hair-curls-base-11-candidate-v1.png": "31488ef06f2e1995d78dae91da9d76dfc4d7249076aecd0020acd92b8c761cea",
+    "web/art/characters/prototype-v1/hair-curls-base-12-candidate-v5.png": "31555d1e8bbab8161680e9f331e4362832ca24473064d30547b8e21395c422e0",
+    "web/art/characters/prototype-v1/hair-seat-base-12-candidate-v1.png": "c06d766e4fe6d6e051a489441f85a0e3e421f8f2f9ebf616036aa86957f81854",
+    "web/art/characters/prototype-v1/hair-seat-base-13-candidate-v1.png": "a22f7b8901ad6c4f3dc2e64bd3e46d72094efe498882a86281707f6a7e9257ec",
+    "web/art/characters/prototype-v1/hair-curls-base-14-candidate-v2.png": "8f49e66d8cca01f628a78741221dfc7e4b02de12534e246b5ebb4b46cbe1737c",
+    "web/art/characters/prototype-v1/hair-seat-base-14-candidate-v1.png": "fe7515d78bc4ed97c44346eb66b075cbf5ce1fa199645c7e3c7a2cb33840def4",
+    "web/art/characters/relaxed-sleep-v1/sleep-hair-curls-v6.png": "4c0b583d750f41a609099830daf6360c5355fc05299d480e26d9d4e826524b69",
+    "web/art/characters/prototype-v1/hair-curls-idle-5-candidate-v1.png": "f41c8a7c24f9b78cc4afe7139477d5a3d0b239c9c7777da53665372fba7c0775",
+    "web/art/characters/prototype-v1/hair-curls-idle-6-candidate-v2.png": "0a50506d4aceb96b36cf1490c984b746f2b937d1306c00e6936500e8dda5d462",
+    "web/art/characters/prototype-v1/hair-curls-idle-9-candidate-v4.png": "51a0eeaf42765be2be66a19a8ec848d4824370e6dfc0f5a346b0f1e90ebb92da",
+    "web/art/characters/prototype-v1/hair-curls-idle-12-candidate-v1.png": "253184327e6cce626dde051e178862048a564fda7f91d19256734f303cfdb5a1",
+    "web/art/characters/prototype-v1/hair-curls-idle-13-candidate-v1.png": "f570c9521d3ca91d737e837559d35933aafe4166b10c56ac029bc5f38c4d1327",
+    "web/art/characters/prototype-v1/hair-curls-activities-0-candidate-v2.png": "5e627625f54b0d60eeda7ec342e9ee9deef32b7821de44afdd01f6256181f43a",
+    "web/art/characters/prototype-v1/hair-curls-activities-1-candidate-v2.png": "c1871890556fd2e02c8b76a53485e5a8ca3ac918218a6be5670406343eec8826",
+    "web/art/characters/prototype-v1/hair-curls-activities-5-candidate-v1.png": "93e4516a83a7ff9d3b5e55ebeb70635649f1b1fe2b21ae6c0ed88802f4b24541",
+    "web/art/characters/prototype-v1/hair-curls-activities-6-candidate-v1.png": "5241a9fd741f202821fc5368b7144bfb50a40f668a4cf64b9a447d2e883253a0",
+    "web/art/characters/prototype-v1/hair-curls-activities-7-candidate-v2.png": "de0628cab84f54a253d913a6ebb1bd5e9a713aed43d184e35d7f92dbc21344aa",
+    "web/art/characters/prototype-v1/hair-curls-activities-8-candidate-v1.png": "df710c7eb0554d9aa612fd9de1a293b987eda5d52489167b0b2e4f4a7de243ea",
+    "web/art/characters/prototype-v1/hair-curls-activities-9-candidate-v1.png": "c3c28b66645235ca1bc170d174d1e46d5b2af23e13ee4e7287248bb414129180",
+    "web/art/characters/prototype-v1/hair-curls-activities-10-candidate-v1.png": "59412f938465868332c3212d81f2382e21a6984cab8e000bb336a5652db980b0",
+    "web/art/characters/prototype-v1/hair-curls-activities-12-candidate-v4.png": "b484abe997b2081a8ae2f858f0d7aeb71741d10d5ecb118107c64308087f3bd2",
+    "web/art/characters/prototype-v1/hair-curls-activities-13-candidate-v1.png": "d86ddcbab635cf2133de4ecc86659085075701e455b9531f115bd613eaee5d74",
+    "web/art/characters/prototype-v1/hair-curls-activities-14-candidate-v4.png": "cba096d982bbfa2f72686b80673489f75c058712dfa59269046a9eb1d6a2b0a9",
+    "web/art/characters/prototype-v1/hair-curls-activities-15-candidate-v1.png": "9df86392c83b2c169c0497f21058a6fff248d120d845e734770045089195fd38",
+    "web/art/characters/relaxed-v1/source-0a751e78674eb7b09930bb0ca48c7c2e65ee06e2dbb0d9448fc2373bbca47be5.png": "0a751e78674eb7b09930bb0ca48c7c2e65ee06e2dbb0d9448fc2373bbca47be5",
+    "web/art/characters/prototype-v1/hair-sidepart-base-4-candidate-v1.png": "695348cf1af7bc316f59ce7966b2a807b8e5e3b215012231714a1983b3edf102",
+    "web/art/characters/prototype-v1/hair-sidepart-base-5-candidate-v1.png": "1cb0a2baff79df1dc3b16577e7163c06f6a1d99b0cc322314b327f3fac56b15f",
+    "web/art/characters/prototype-v1/hair-sidepart-base-6-candidate-v1.png": "ce670a638795fbec27de86c5fe7634139ad94321688a1f4b27f5eff05f93afcd",
+    "web/art/characters/prototype-v1/hair-sidepart-base-7-candidate-v3.png": "bc8a038f244c38c4ae28da13d9437fc17d2a225e54228dcb1146392d98017f0a",
+    "web/art/characters/prototype-v1/hair-sidepart-base-9-candidate-v1.png": "cf6e28944456cadf9825c36de83ae3c2b9cdea8a8ad70c65cb03eb3ed096607c",
+    "web/art/characters/prototype-v1/hair-sidepart-base-10-candidate-v1.png": "21ae9fef806eb61d8e7cab7af9d302c8a54ac231ca478e6b2fd65d353ea7f3c8",
+    "web/art/characters/prototype-v1/hair-sidepart-base-11-candidate-v1.png": "c0cfb05748f163b440bb3b10eb729931c5ded06e9a15b84c3d422e5ad681ad00",
+    "web/art/characters/prototype-v1/hair-sidepart-base-12-candidate-v2.png": "e13d5a9d3679a9bb9a6cac71a6deb12f32a7b1fb2635d3ef3d02ccaa65106766",
+    "web/art/characters/prototype-v1/hair-sidepart-base-13-candidate-v2.png": "d083b4edee167a11a1eb7dd70ee288a70b7439fbf0281c2267a3d0d5ebddf465",
+    "web/art/characters/prototype-v1/hair-sidepart-base-14-candidate-v2.png": "f0a8e1ef723684d84bb992a8624960da2dfdb7c457917079543cbafbf10f815f",
+    "web/art/characters/relaxed-sleep-v1/sleep-hair-sidepart-v6.png": "78621fe885d2470f8a2ce1db1e2f9ebba5f761fc3d8e5505dc4882f4f9b0d889",
+    "web/art/characters/prototype-v1/hair-sidepart-base-8-candidate-v1.png": "96f0c0df7420ade26129facc6077777648e98a33e4cdd592ad0d1a2890d34ec6",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-5-candidate-v2.png": "4ad997d69ddc90b787b7e108f53b6d53917100a93a5794009e54812b1ee6089e",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-6-candidate-v1.png": "a922a98468c01a91aa590bc52e5a16d1a6aacb66ea4ec8d0150fd56a724d866e",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-9-candidate-v1.png": "71520b1b3f2afa833285715f132b2eef6f5626df5a70aec63a38ce28afbc8dc4",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-12-candidate-v1.png": "e5d4124b36cf5ba08517aa36cd2ecf2645d24455f1cca2dc95f56dc2364644c8",
+    "web/art/characters/prototype-v1/hair-sidepart-idle-13-candidate-v1.png": "4bdd18381a6465c0199ecb57581ef987769516ce00d7a6a68c5549714708cc07",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-0-candidate-v1.png": "2505ee1234bbf6be23fac98304b244a881955ca8a5621f227b0df462a98692e0",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-1-candidate-v1.png": "b90ff250c7011bd0bbc65a3a3647ea0cfff2d82a13138719c59d631148bdcad7",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-5-candidate-v1.png": "3d432fa16752dbbee4ef568b326a24a3489fe7c77a2dcf402ec8629c223aa8fb",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-6-candidate-v1.png": "014791cea3b7b6cdc14b3de99be15a3714c5f1097da72c3b0ceba51fb317385c",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-7-candidate-v1.png": "e92b159dc2259080cc7a849bf977031f0aa1497cca706d01109f52bdffe7a538",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-8-candidate-v1.png": "a1345fe33b37c3037f7c9f5acbb349eb1c34812bdbd6ac20d645377dedd04714",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-9-candidate-v1.png": "1c1a35056faad9f52ba3becfcdfff349d2844e24135e6e507dc9651b6dcbccd7",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-10-candidate-v1.png": "652c4645bd1ecc85c09dc8a6a0f548ab34843b185b2395a88fdc0b8c1aa797ba",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-12-candidate-v1.png": "92eb897f846e17aeeebdc75dc90ab6c55f7f9b7ae36d4a9b15ee500e3a2eee5e",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-13-candidate-v1.png": "ac8f8fcb214fc140cc715c03cf0db791f8f46ef6237acf66599dd657be3d143f",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-14-candidate-v1.png": "7b00bcad19c20e5d49f886636ec80aad6e61cd04775732535464cbf6912016d0",
+    "web/art/characters/prototype-v1/hair-sidepart-activities-15-candidate-v1.png": "a22c78dfdd8552882ec1806c8c42c0136d1e59cef6c16d5802e2a4366fba76f5",
+    "web/art/characters/prototype-v1/cooking-pot-pose-0-candidate-v3.png": "5048bea272cef69db0aa863f493c3d5aa341d9908f4295e7628616032fe0aa91",
+    "web/art/characters/prototype-v1/cooking-pot-pose-1-candidate-v2.png": "73ddfe768da43b5349017dc394291e970dbc9ac5459004ae245543c3e57f0fc4",
+    "web/art/characters/prototype-v1/cooking-pot-pose-2-candidate-v2.png": "19912a94d724b6ac9a2ee630260b3f4025d9f9490297b3d6475461b228ac69c4",
+    "web/art/characters/prototype-v1/cooking-pot-pose-3-candidate-v2.png": "f0e484002a3987739aa0461b772fb53a901adf29025f90b81d32a674348a49d8",
+    "web/art/characters/prototype-v1/watering-can-pose-4-candidate-v2.png": "2d36b9f6af49ce3480f0837ac0b4835b9392578bf4a30add3ba87cc689eccb41",
+    "web/art/characters/prototype-v1/watering-can-pose-5-candidate-v1.png": "e7a82c5c22ff32d52bd562562b07f56709417894ea1b7ba785d3ec5abc95d6c6",
+    "web/art/characters/prototype-v1/watering-can-pose-6-candidate-v1.png": "4de9e81762d3b30a73ec54e8dd805c9e32058eca02ccac6f11399cff59d97f0a",
+    "web/art/characters/prototype-v1/watering-can-pose-7-candidate-v3.png": "4c9c15d5c243e066d28241cb2c1b5068374f68f8fe584d5deb4d7c089a6e231f",
+    "web/art/characters/prototype-v1/tending-trowel-pose-8-candidate-v2.png": "3a33c1633f2bd5226173d2c8a5d181999cb563b17672e529a270b3c412e206e2",
+    "web/art/characters/prototype-v1/tending-trowel-pose-9-candidate-v2.png": "b97d6568df5b20787cbc23bef2ffeb11ab4cef9fb690d0bd34abcdfdf8d9e68c",
+    "web/art/characters/prototype-v1/tending-trowel-pose-10-candidate-v2.png": "06874801605d86dcddb216a1948499bf5d1ffa76fda33a3c5419fd88df1bb7d5",
+    "web/art/characters/prototype-v1/tending-trowel-pose-11-candidate-v1.png": "e4b6598a8a41ff20aeb988d4a5f2fca4926f70b0e1f374fa7c0cd23defb1e943",
+    "web/art/characters/prototype-v1/feeding-basket-pose-14-candidate-v2.png": "175bd0d346a22b358627a783691cfeb94123937d3bbf5fd9e58c0169339615e1",
+    "web/art/characters/prototype-v1/feed-grains-hold-candidate-v2.png": "38ab75e31f90c1ca5d029879443dbb14ab55af17fb1baf75960dceffcbafbac8",
+    "web/art/characters/relaxed-work-v1/source-81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580.png": "81e0fb80a11ce9dea75e93574e5c74bd8a8aa1fa28c8790fd423ffc83127e580",
+    "web/art/characters/relaxed-work-v1/source-a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df.png": "a09acc88922114e13bacf2efb49d1a00ba9732c6809b3f35d78ef3bb4aa3e3df",
+    "web/art/characters/relaxed-work-v1/source-ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb.png": "ed80742b219d4cc25e908d0c7a490183731f27dce1612a5feabddecbba36b1fb",
+    "web/art/characters/relaxed-work-v1/source-739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924.png": "739dfc81a7db4f51a9ab1499f6e3b43b2cd23e0ed9e251c965b6316cfce00924",
+    "web/art/characters/prototype-v1/straw-hat-base8-candidate-v3.png": "8d9889ef79ee8918d29e08e5acf2759c33395e854445c4403475c182d8e0a109",
+    "web/art/characters/relaxed-shirt-v1/source-877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8.png": "877e1bd8759b2291cd1d262700a83bd443dd73704fb6a98719f2c7ce74ced5e8",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-02-v1.png": "cb557f68dc18a3655a32e373b06e4ee686bdd9c6ef1fc778bf46b27a670dba74",
+    "web/art/characters/relaxed-shirt-v1/source-41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96.png": "41cb154174f9e5818b3ad317a73e5e3b78bf84a470338df313791788b5689b96",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-01-v1.png": "d5f8b6428d4ba472f9e20d08b2b98d65d8d22d4386602a317cb8afea0750acc4",
+    "web/art/characters/relaxed-shirt-v1/source-6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630.png": "6d26f07315134e76378f00c6306dfc299fd4e6b6df8d92b38c2a99295d546630",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-04-v1.png": "547739ed7022aedd96e183e009367ca380e0a491968eb52ce46e626c84968352",
+    "web/art/characters/relaxed-shirt-v1/source-e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6.png": "e8640d72978f950dc709030a96f04023235c4ed0d478b8210b65c9615fa3f9a6",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-03-v1.png": "8e6d59d286416559268752ddc27740a639e056e12a63b451ac67724e7d88476d",
+    "web/art/characters/relaxed-shirt-v1/source-4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227.png": "4b38afc876e3ba6701cd1876cdeacc95cd5364244158d255a7a0fd3739fe7227",
+    "web/art/characters/relaxed-sleep-v1/facial-short-chestnut-sleep-v1.png": "a9cc1acb7d4d77e6dabfcbcaebfdb2c92f7003703f0358de46a8f6dd14ce061a",
+    "web/art/characters/relaxed-shirt-v1/source-15f2ac70eb64cd73e3aa92683100522a5d805d53d452d84b03ac5363bedd35b6.png": "15f2ac70eb64cd73e3aa92683100522a5d805d53d452d84b03ac5363bedd35b6",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-06-v1.png": "9acb2b3ecbc45e45760811fdd41ad2d229f16a67e8dd6e05c0fcd279fbb40934",
+    "web/art/characters/relaxed-shirt-v1/source-c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d.png": "c2c27a7a6b11a24842b60c6409b32aa338daad787811c9f2a24829e69791565d",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-05-v1.png": "1a2652bfdbfad3209616fc9e1fa5802690adfb0a20c0ed1e0b28a7524e130fcb",
+    "web/art/characters/relaxed-shirt-v1/source-3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3.png": "3079fc6f5ebda51e5a9f71d9e4d8f132dbeb93604a3bd1a89900f8698dac36d3",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-08-v1.png": "e47bc6492bdf1c6ca3f5e3c92e369ebe54bc2de6ace778138c77800043dce585",
+    "web/art/characters/relaxed-shirt-v1/source-18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f.png": "18a2b05f175f9594f2b6594efa36f72fe95bff2bfb3d5f2a12bd5d7229ceeb9f",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-07-v1.png": "5baa23df0e5aa46a815205f7f818ddd39994b0c20f6ccd586b3e71a6f7ca0d12",
+    "web/art/characters/relaxed-shirt-v1/source-1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135.png": "1137292b5395be37ab3c50c97163b020d84c1049396251cd61cbcd8785f0f135",
+    "web/art/characters/prototype-v1/facial-short-chestnut-source-09-v1.png": "667b39e06940e4ab7ca399af027a99c4328d8bf58c1ffc28e84707fd53855fbd",
+    "web/art/characters/relaxed-shirt-v1/source-2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658.png": "2a73a1cd003141b3d06a9cd648806fd72fc1688910c6f494aedc083e5f74f658",
+    "web/art/characters/relaxed-shirt-v1/source-7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4.png": "7b199f5eb49cd4535b2427c38d3fb7fe422ba2948675e5a4bc1652aff2966ed4",
+    "web/art/characters/relaxed-shirt-v1/source-7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476.png": "7443c5d837d86a03f0285c135b919e735a4503111c13942b0f2b84498e790476",
+    "web/art/characters/relaxed-shirt-v1/source-12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd.png": "12a49de892d4f674bbeb4989e903c2d1093028842cfeb842542c2ca4a8b0fdcd",
+    "web/art/characters/relaxed-shirt-v1/source-1afa7293e71c6d53b0ed122c2c05a18d97d8d83e9d30e5f93bd58feb384262de.png": "1afa7293e71c6d53b0ed122c2c05a18d97d8d83e9d30e5f93bd58feb384262de",
+    "web/art/characters/relaxed-sleep-v1/sleep-shirt-v2.png": "c68b53fa48a6c8edb53aeaddc1f2899b31f87e6de6eea86ece6e1057b734aab8",
+    "web/art/characters/relaxed-shirt-v1/source-908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96.png": "908ad03330229256a49eb469c360127dcee975a8860f8446c61658828d82af96",
+    "web/art/characters/relaxed-shirt-v1/source-c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882.png": "c0c840a172a100fe2880cddf1ebdf297f8bed6628c6aa82801b253cdd4745882",
+    "web/art/characters/relaxed-shirt-v1/source-042f65abd7e857ece5c7bd249be21a9c6890b2bf690effc2acb6ac8beb701f52.png": "042f65abd7e857ece5c7bd249be21a9c6890b2bf690effc2acb6ac8beb701f52",
+    "web/art/characters/relaxed-shirt-v1/source-30fbbaa53287373eb033f6d0da54ea53ef25983c83d47edf0f76da59db73280a.png": "30fbbaa53287373eb033f6d0da54ea53ef25983c83d47edf0f76da59db73280a",
+    "web/art/characters/relaxed-shirt-v1/source-fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720.png": "fdb70f040952f4ebe2cf8e3e00e4d013bf66db7e0ffef015020864dea2897720",
+    "web/art/characters/relaxed-shirt-v1/source-9204b45115fa742be0f9fea02cfb62c551493ef33a0d43005f4873d62c8d7b97.png": "9204b45115fa742be0f9fea02cfb62c551493ef33a0d43005f4873d62c8d7b97",
+    "web/art/characters/relaxed-shirt-v1/source-d937aed8573df1596d41c31f0eb35c57b1bc10417a30f219f6bdee3e12bbc992.png": "d937aed8573df1596d41c31f0eb35c57b1bc10417a30f219f6bdee3e12bbc992",
+    "web/art/characters/relaxed-shirt-v1/source-c85ba24d63c76ae298586ea1a14808a4ff808a6af8ecd677a35dbf67e51bc152.png": "c85ba24d63c76ae298586ea1a14808a4ff808a6af8ecd677a35dbf67e51bc152",
+    "web/art/characters/relaxed-shirt-v1/source-2ca2aefe8db5f15edb6efaf6163981d9c187fa69ed8f3579e91a223567c13835.png": "2ca2aefe8db5f15edb6efaf6163981d9c187fa69ed8f3579e91a223567c13835",
+    "web/art/characters/relaxed-shirt-v1/source-1413bd9dd427d42734a82968291a3c0b6de9c83c5eaf84cece463d61fb2758e6.png": "1413bd9dd427d42734a82968291a3c0b6de9c83c5eaf84cece463d61fb2758e6",
+    "web/art/characters/relaxed-shirt-v1/source-f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6.png": "f01680374ed258ac593042e34e13d5f3035607bb38812a2623f9a4abcf8887b6",
+    "web/art/characters/relaxed-shirt-v1/source-5681ab34eecc9e6e28c83a0f2502767ba061d8e861b9733c416d87835af7c04b.png": "5681ab34eecc9e6e28c83a0f2502767ba061d8e861b9733c416d87835af7c04b",
+    "web/art/characters/relaxed-shirt-v1/source-63a6ebe5b3eae40dc5e87a3857a6beb8459e8b0717959270c2558428eb7f27d6.png": "63a6ebe5b3eae40dc5e87a3857a6beb8459e8b0717959270c2558428eb7f27d6",
+    "web/art/characters/relaxed-shirt-v1/source-6e6d04c0098cd8fe7a09f8730a5644df0223a463b31c6f4d9bf95ba568f4b66f.png": "6e6d04c0098cd8fe7a09f8730a5644df0223a463b31c6f4d9bf95ba568f4b66f",
+    "web/art/characters/relaxed-shirt-v1/source-2525d552956b314d9f14342caf8e9f02af877aa001bcc7f4f5cd02d894180f2e.png": "2525d552956b314d9f14342caf8e9f02af877aa001bcc7f4f5cd02d894180f2e",
+    "web/art/characters/relaxed-shirt-v1/source-af7603d96cbeb2f9ae8c4b5c6107fbf810813b04572f2f2b0f499b0d7606e913.png": "af7603d96cbeb2f9ae8c4b5c6107fbf810813b04572f2f2b0f499b0d7606e913",
+    "web/art/characters/relaxed-shirt-v1/source-5b2da30eb051402dcf6d56ff9119340cdf81e82fe9462aaf0bfe7e53f674d2e1.png": "5b2da30eb051402dcf6d56ff9119340cdf81e82fe9462aaf0bfe7e53f674d2e1",
+    "web/art/characters/relaxed-shirt-v1/source-be3a7696380938972149d1213fc082430bc7977b62606d224c578c34e1eeb9d6.png": "be3a7696380938972149d1213fc082430bc7977b62606d224c578c34e1eeb9d6",
+    "web/art/characters/relaxed-shirt-v1/source-0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20.png": "0fee485f14fc4e378ec515da78b9396a18a27a0859f3084e1949578d8c3e7d20",
+    "web/art/characters/relaxed-shirt-v1/source-75f8045b7247e8e689ae05c1a03de55d897972678b0826e1d3efcbe943463bd0.png": "75f8045b7247e8e689ae05c1a03de55d897972678b0826e1d3efcbe943463bd0",
+    "web/art/characters/relaxed-shirt-v1/source-5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3.png": "5b07e8ea61b58a9f4ce20ada9cc089362f906fd735227ccfe54bf4fc7e34a3f3",
+    "web/art/characters/relaxed-shirt-v1/source-221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0.png": "221e54ca2337a33240e73000130a533322005c7ef0c21adb992f51a220b413f0",
+    "web/art/characters/relaxed-shirt-v1/source-ed39e7d9e2fc4f13eada796bb9d6fa3fac2b5647b575366c909d43bda4268114.png": "ed39e7d9e2fc4f13eada796bb9d6fa3fac2b5647b575366c909d43bda4268114",
+    "web/art/characters/relaxed-shirt-v1/source-973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809.png": "973a0a540ad1abb0152c5e8b536070d752c88668d04fd2957b0aa295db0c8809",
+    "web/art/characters/relaxed-shirt-v1/source-34438ac8a533772f7e4d8b7863b054b883c0f4afd84f2776f97618a0e7f50f75.png": "34438ac8a533772f7e4d8b7863b054b883c0f4afd84f2776f97618a0e7f50f75",
+    "web/terrain-paint-worker.js": "a95fe15f84b23ed8220d14122dca99004892dbdf12255e4f6ad77cb0d6a517be"
+  },
+  "biome": "mata-atlantica",
+  "brushSize": 9,
+  "landCacheBaseline": null,
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "dense_fixture": "256 completed buildings across 21 inland types, clear arrival area, 12 unique custom residents with mixed hats; no authored utility routes or explicit crop/animal starting overrides.",
+  "wasm_sha256": "ab67027383fad71215b6f00c20c2d97cbb5771e2aa718e388af6145a3cb6ee36",
+  "scope": "Desktop editor synchronous handlers and two-rAF latency, plus trusted brush and two-building selection/move samples with exact saved undo/redo. Interaction save acknowledgement includes debounce; this is not physical-display frame pacing, sustained simulation, GPU memory, other brush sizes or cancel throughput evidence.",
+  "machine": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro"
+  },
+  "cases": [
+    {
+      "population": 12,
+      "buildings": 256,
+      "browserErrors": [],
+      "fixture": {
+        "population": 12,
+        "buildings": 256,
+        "types": {
+          "shed": 13,
+          "home": 12,
+          "garden": 13,
+          "well": 13,
+          "kitchen": 12,
+          "grove": 12,
+          "warehouse": 13,
+          "compost": 12,
+          "square": 12,
+          "workshop": 12,
+          "greenhouse": 12,
+          "coop": 12,
+          "solar_farm": 12,
+          "streetlight": 12,
+          "eco_toilet": 12,
+          "wetland": 12,
+          "banana_treatment": 12,
+          "biodigester": 12,
+          "orchard": 12,
+          "goat_pasture": 12,
+          "apiary": 12
+        },
+        "custom": true,
+        "residentStyle": "sleep-mixed",
+        "appearanceRevisions": {
+          "resident-parts-v5": 6,
+          "resident-parts-v6": 6
+        },
+        "uniqueAppearances": 12,
+        "attempted": 312,
+        "seed": 42
+      },
+      "importReadyMs": 16326.3815,
+      "loadingProfile": null,
+      "samples": [
+        {
+          "action": "funds",
+          "synchronousMs": 79.79999995231628,
+          "presentationMs": 83.89999985694885,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 40.59999990463257
+            },
+            {
+              "key": "report_state",
+              "ms": 4.8999998569488525
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 71.79999995231628,
+          "presentationMs": 73.09999990463257,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 39.299999952316284
+            },
+            {
+              "key": "report_state",
+              "ms": 4.699999809265137
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 66.20000004768372,
+          "presentationMs": 68.10000014305115,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 36.299999952316284
+            },
+            {
+              "key": "report_state",
+              "ms": 4.5
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 67.90000009536743,
+          "presentationMs": 70.90000009536743,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 37
+            },
+            {
+              "key": "report_state",
+              "ms": 4.6000001430511475
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 68.20000004768372,
+          "presentationMs": 69.40000009536743,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 38.09999990463257
+            },
+            {
+              "key": "report_state",
+              "ms": 4.799999952316284
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 67.5,
+          "presentationMs": 71.09999990463257,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 38.90000009536743
+            },
+            {
+              "key": "report_state",
+              "ms": 4.699999809265137
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 66.20000004768372,
+          "presentationMs": 69.20000004768372,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 38.59999990463257
+            },
+            {
+              "key": "report_state",
+              "ms": 4.400000095367432
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 64,
+          "presentationMs": 67.09999990463257,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 36.5
+            },
+            {
+              "key": "report_state",
+              "ms": 4.599999904632568
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 65.30000019073486,
+          "presentationMs": 68.80000019073486,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 37.40000009536743
+            },
+            {
+              "key": "report_state",
+              "ms": 4.5
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 71.70000004768372,
+          "presentationMs": 75,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 37.10000014305115
+            },
+            {
+              "key": "report_state",
+              "ms": 4.3999998569488525
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 66.79999995231628,
+          "presentationMs": 69.89999985694885,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 38.200000047683716
+            },
+            {
+              "key": "report_state",
+              "ms": 4.400000095367432
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 66.40000009536743,
+          "presentationMs": 70,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 38.19999980926514
+            },
+            {
+              "key": "report_state",
+              "ms": 4.400000095367432
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 63.200000047683716,
+          "presentationMs": 66.20000004768372,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 36.09999990463257
+            },
+            {
+              "key": "report_state",
+              "ms": 4.3999998569488525
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 63.69999980926514,
+          "presentationMs": 67.19999980926514,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 36.799999952316284
+            },
+            {
+              "key": "report_state",
+              "ms": 4.299999952316284
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 64.09999990463257,
+          "presentationMs": 67.59999990463257,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 36.700000047683716
+            },
+            {
+              "key": "report_state",
+              "ms": 4.199999809265137
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 54.89999985694885,
+          "presentationMs": 55.700000047683716,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 54.799999952316284
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 12.100000143051147,
+          "presentationMs": 12.799999952316284,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 12
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 20.600000143051147,
+          "presentationMs": 21.40000009536743,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 20.5
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 11.299999952316284,
+          "presentationMs": 15.399999856948853,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 11.199999809265137
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 14.800000190734863,
+          "presentationMs": 15.800000190734863,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 14.700000047683716
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 3.5,
+          "presentationMs": 15.899999856948853,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 2.4000000953674316
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 2.5,
+          "presentationMs": 16,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 2.4000000953674316
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 2.5,
+          "presentationMs": 15.199999809265137,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 2.3999998569488525
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 2.6000001430511475,
+          "presentationMs": 16.799999952316284,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 2.5
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 2.5,
+          "presentationMs": 16.09999990463257,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 2.5
+            }
+          ]
+        }
+      ],
+      "gestures": {
+        "brushSize": 9,
+        "coveredCells": 135,
+        "scope": "One trusted 24-step brush drag and two-building selection/move, exact durable undo/redo checks, handler and two-rAF latency. Save acknowledgement includes autosave debounce. No physical-display frame pacing, repeated interaction distribution, other brush sizes or cancellation throughput claim.",
+        "delta": [
+          1,
+          0
+        ],
+        "operations": [
+          {
+            "action": "habitat-drag",
+            "inputThroughSavedMs": 879.6514580000003
+          },
+          {
+            "action": "brush-undo",
+            "inputThroughSavedMs": 668.8833330000016
+          },
+          {
+            "action": "brush-redo",
+            "inputThroughSavedMs": 666.453125
+          },
+          {
+            "action": "group-select",
+            "inputThroughSelectionMs": 49.853415999998106
+          },
+          {
+            "action": "group-move",
+            "inputThroughSavedMs": 884.9254169999986
+          }
+        ],
+        "summaries": [
+          {
+            "phase": "habitat-drag",
+            "method": "down",
+            "count": 1,
+            "handlerP95Ms": 0.5,
+            "handlerMaxMs": 0.5,
+            "twoFrameP95Ms": 14.5,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "count": 24,
+            "handlerP95Ms": 2.8000001907348633,
+            "handlerMaxMs": 3,
+            "twoFrameP95Ms": 11.700000047683716,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "up",
+            "count": 1,
+            "handlerP95Ms": 94.5,
+            "handlerMaxMs": 94.5,
+            "twoFrameP95Ms": 98.29999995231628,
+            "nativeCalls": {
+              "load_scenario": 1,
+              "land_report": 1,
+              "world_geometry": 1,
+              "terrain_template": 1
+            }
+          },
+          {
+            "phase": "group-select",
+            "method": "down",
+            "count": 2,
+            "handlerP95Ms": 0.20000004768371582,
+            "handlerMaxMs": 0.20000004768371582,
+            "twoFrameP95Ms": 10.900000095367432,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "group-select",
+            "method": "up",
+            "count": 2,
+            "handlerP95Ms": 4.200000047683716,
+            "handlerMaxMs": 4.200000047683716,
+            "twoFrameP95Ms": 10.600000143051147,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "group-move",
+            "method": "down",
+            "count": 1,
+            "handlerP95Ms": 0.5,
+            "handlerMaxMs": 0.5,
+            "twoFrameP95Ms": 14.099999904632568,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "count": 24,
+            "handlerP95Ms": 2.799999952316284,
+            "handlerMaxMs": 3.5,
+            "twoFrameP95Ms": 12.400000095367432,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "group-move",
+            "method": "up",
+            "count": 1,
+            "handlerP95Ms": 98.39999985694885,
+            "handlerMaxMs": 98.39999985694885,
+            "twoFrameP95Ms": 103.89999985694885,
+            "nativeCalls": {
+              "load_scenario": 1,
+              "land_report": 1,
+              "world_geometry": 1,
+              "terrain_template": 1
+            }
+          }
+        ],
+        "events": [
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 3.6999998092651367,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.2999999523162842
+              },
+              {
+                "key": "map-render",
+                "ms": 3
+              }
+            ],
+            "twoFrameMs": 11.199999809265137
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "down",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 0.5,
+            "calls": [],
+            "twoFrameMs": 14.5
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5999999046325684,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5999999046325684
+              }
+            ],
+            "twoFrameMs": 10.799999952316284
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.4000000953674316,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.4000000953674316
+              }
+            ],
+            "twoFrameMs": 11.099999904632568
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.799999952316284,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.10000014305114746
+              },
+              {
+                "key": "map-render",
+                "ms": 2.5
+              }
+            ],
+            "twoFrameMs": 10.599999904632568
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5
+              }
+            ],
+            "twoFrameMs": 11.100000143051147
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.4000000953674316,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.4000000953674316
+              }
+            ],
+            "twoFrameMs": 10.700000047683716
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.299999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.299999952316284
+              }
+            ],
+            "twoFrameMs": 11.100000143051147
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.8000001907348633,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.10000014305114746
+              },
+              {
+                "key": "map-render",
+                "ms": 2.6000001430511475
+              }
+            ],
+            "twoFrameMs": 10.700000047683716
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.3999998569488525,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.299999952316284
+              }
+            ],
+            "twoFrameMs": 10.699999809265137
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.3999998569488525,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.299999952316284
+              }
+            ],
+            "twoFrameMs": 11.200000047683716
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.700000047683716,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.10000014305114746
+              },
+              {
+                "key": "map-render",
+                "ms": 2.5
+              }
+            ],
+            "twoFrameMs": 10.900000095367432
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.4000000953674316
+              }
+            ],
+            "twoFrameMs": 10.700000047683716
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.4000000953674316,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.4000000953674316
+              }
+            ],
+            "twoFrameMs": 10.600000143051147
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.3000001907348633,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.3000001907348633
+              }
+            ],
+            "twoFrameMs": 10.900000095367432
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5999999046325684,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5999999046325684
+              }
+            ],
+            "twoFrameMs": 11.399999856948853
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 3,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.10000014305114746
+              },
+              {
+                "key": "map-render",
+                "ms": 2.700000047683716
+              }
+            ],
+            "twoFrameMs": 9.799999952316284
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5
+              }
+            ],
+            "twoFrameMs": 11.700000047683716
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.299999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.299999952316284
+              }
+            ],
+            "twoFrameMs": 11.099999904632568
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.700000047683716,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.10000014305114746
+              },
+              {
+                "key": "map-render",
+                "ms": 2.5999999046325684
+              }
+            ],
+            "twoFrameMs": 10.799999952316284
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5
+              }
+            ],
+            "twoFrameMs": 10.5
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.3000001907348633,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.3000001907348633
+              }
+            ],
+            "twoFrameMs": 11.200000047683716
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.4000000953674316,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.4000000953674316
+              }
+            ],
+            "twoFrameMs": 10.900000095367432
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.6000001430511475,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.6000001430511475
+              }
+            ],
+            "twoFrameMs": 11.300000190734863
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.799999952316284,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0
+              },
+              {
+                "key": "map-render",
+                "ms": 2.700000047683716
+              }
+            ],
+            "twoFrameMs": 9.799999952316284
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5
+              }
+            ],
+            "twoFrameMs": 99.20000004768372
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "up",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 94.5,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 38.299999952316284
+              },
+              {
+                "key": "report_state",
+                "ms": 4.5
+              },
+              {
+                "key": "terrain_template",
+                "ms": 2.8999998569488525
+              },
+              {
+                "key": "land_report",
+                "ms": 13.400000095367432
+              },
+              {
+                "key": "world_geometry",
+                "ms": 0.09999990463256836
+              },
+              {
+                "key": "map-render",
+                "ms": 3.3000001907348633
+              },
+              {
+                "key": "land_preview",
+                "ms": 0
+              }
+            ],
+            "twoFrameMs": 98.29999995231628
+          },
+          {
+            "phase": "group-select",
+            "method": "motion",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 3.8000001907348633,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0
+              },
+              {
+                "key": "map-render",
+                "ms": 3.3000001907348633
+              }
+            ],
+            "twoFrameMs": 15.5
+          },
+          {
+            "phase": "group-select",
+            "method": "down",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 0.20000004768371582,
+            "calls": [],
+            "twoFrameMs": 10.900000095367432
+          },
+          {
+            "phase": "group-select",
+            "method": "up",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 3.700000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 1.7999999523162842
+              }
+            ],
+            "twoFrameMs": 10.600000143051147
+          },
+          {
+            "phase": "group-select",
+            "method": "motion",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 2.700000047683716,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0
+              },
+              {
+                "key": "map-render",
+                "ms": 2.3999998569488525
+              }
+            ],
+            "twoFrameMs": 12.700000047683716
+          },
+          {
+            "phase": "group-select",
+            "method": "down",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 0.09999990463256836,
+            "calls": [],
+            "twoFrameMs": 9.799999952316284
+          },
+          {
+            "phase": "group-select",
+            "method": "up",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 4.200000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5999999046325684
+              }
+            ],
+            "twoFrameMs": 9.700000047683716
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 3.3000001907348633,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.19999980926513672
+              },
+              {
+                "key": "map-render",
+                "ms": 2.6000001430511475
+              }
+            ],
+            "twoFrameMs": 10.600000143051147
+          },
+          {
+            "phase": "group-move",
+            "method": "down",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 0.5,
+            "calls": [],
+            "twoFrameMs": 14.099999904632568
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5
+              }
+            ],
+            "twoFrameMs": 11.200000047683716
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.6000001430511475,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5
+              }
+            ],
+            "twoFrameMs": 11.200000047683716
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.700000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.700000047683716
+              }
+            ],
+            "twoFrameMs": 11.099999904632568
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.700000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.700000047683716
+              }
+            ],
+            "twoFrameMs": 10.799999952316284
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.4000000953674316,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.3000001907348633
+              }
+            ],
+            "twoFrameMs": 10.700000047683716
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5999999046325684,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5
+              }
+            ],
+            "twoFrameMs": 11.099999904632568
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.3999998569488525
+              }
+            ],
+            "twoFrameMs": 11
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.4000000953674316
+              }
+            ],
+            "twoFrameMs": 11
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.3999998569488525,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.299999952316284
+              }
+            ],
+            "twoFrameMs": 10.899999856948853
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.6000001430511475,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.5
+              }
+            ],
+            "twoFrameMs": 10
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.4000000953674316,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.4000000953674316
+              }
+            ],
+            "twoFrameMs": 12.400000095367432
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 3.5,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.10000014305114746
+              },
+              {
+                "key": "map-render",
+                "ms": 3.200000047683716
+              }
+            ],
+            "twoFrameMs": 11.900000095367432
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.799999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.700000047683716
+              }
+            ],
+            "twoFrameMs": 10.399999856948853
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.799999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.799999952316284
+              }
+            ],
+            "twoFrameMs": 10.700000047683716
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.299999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.299999952316284
+              }
+            ],
+            "twoFrameMs": 11.5
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.200000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.1000001430511475
+              }
+            ],
+            "twoFrameMs": 9.700000047683716
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.200000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.200000047683716
+              }
+            ],
+            "twoFrameMs": 10.5
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.0999999046325684,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2
+              }
+            ],
+            "twoFrameMs": 11.599999904632568
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.1000001430511475,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2.1000001430511475
+              }
+            ],
+            "twoFrameMs": 10.299999952316284
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2.0999999046325684,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2
+              }
+            ],
+            "twoFrameMs": 10.299999952316284
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2
+              }
+            ],
+            "twoFrameMs": 9.5
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2
+              }
+            ],
+            "twoFrameMs": 10.399999856948853
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2
+              }
+            ],
+            "twoFrameMs": 11.299999952316284
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 2,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 2
+              }
+            ],
+            "twoFrameMs": 103
+          },
+          {
+            "phase": "group-move",
+            "method": "up",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 98.39999985694885,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 40.200000047683716
+              },
+              {
+                "key": "report_state",
+                "ms": 4.799999952316284
+              },
+              {
+                "key": "terrain_template",
+                "ms": 3
+              },
+              {
+                "key": "land_report",
+                "ms": 10.400000095367432
+              },
+              {
+                "key": "world_geometry",
+                "ms": 0
+              },
+              {
+                "key": "map-render",
+                "ms": 3.1000001430511475
+              },
+              {
+                "key": "land_preview",
+                "ms": 0
+              }
+            ],
+            "twoFrameMs": 103.89999985694885
+          }
+        ],
+        "checks": {
+          "exactBrushFootprint": true,
+          "atomicBrush": true,
+          "exactBrushUndoRedo": true,
+          "exactGroupMoveUndo": true,
+          "trustedInput": true
+        }
+      }
+    }
+  ],
+  "sources": {
+    "scripts/benchmark-builder.mjs": "e2f529583b3d41fee00d72067ae52e2c5d581c1102a36dc72431057bd4821539",
+    "scripts/benchmark-editor-gestures.mjs": "08429d6647c119c2a974716cdc39d6a170e3764c7be73acf7534ad497547fbff",
+    "web/editor/index.js": "1ea36c3a03ee680c291f86175afa923e5f78dde743427b7fa5b4d9360ffeb4c9",
+    "web/editor/map-view.js": "a501342d33f63e1146def06c1291bb54d3291bf753ab4f9a62c5823d85843cd9",
+    "web/editor/document.js": "9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a"
+  },
+  "browserVersion": "151.0.7922.34",
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 4203,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Apple)",
+        "deviceString": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Version 26.5.2 (Build 25F84))",
+        "driverVendor": "Apple",
+        "driverVersion": "26.5.2"
+      }
+    ],
+    "auxAttributes": {
+      "amdSwitchable": false,
+      "canSupportThreadedTextureMailbox": false,
+      "directRenderingVersion": "",
+      "displayType": "ANGLE_METAL",
+      "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_size GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_provoking_vertex GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_translated_shader_source GL_APPLE_clip_distance GL_ARM_rgba8 GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_base_instance GL_EXT_blend_func_extended GL_EXT_blend_minmax GL_EXT_clip_control GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_multisampled_render_to_texture GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_pvrtc_sRGB GL_EXT_read_format_bgra GL_EXT_render_snorm GL_EXT_robustness GL_EXT_sRGB GL_EXT_shader_texture_lod GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_norm16 GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_IMG_texture_compression_pvrtc GL_KHR_debug GL_KHR_parallel_shader_compile GL_KHR_robustness GL_KHR_texture_compression_astc_hdr GL_KHR_texture_compression_astc_ldr GL_KHR_texture_compression_astc_sliced_3d GL_MESA_framebuffer_flip_y GL_NV_fence GL_NV_framebuffer_blit GL_NV_pixel_buffer_object GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_sync GL_OES_compressed_EAC_R11_signed_texture GL_OES_compressed_EAC_R11_unsigned_texture GL_OES_compressed_EAC_RG11_signed_texture GL_OES_compressed_EAC_RG11_unsigned_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_compressed_ETC2_RGB8_texture GL_OES_compressed_ETC2_RGBA8_texture GL_OES_compressed_ETC2_punchthroughA_RGBA8_texture GL_OES_compressed_ETC2_punchthroughA_sRGB8_alpha_texture GL_OES_compressed_ETC2_sRGB8_alpha8_texture GL_OES_compressed_ETC2_sRGB8_texture GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_vertex_array_object GL_QCOM_render_shared_exponent ",
+      "glImplementationParts": "(gl=egl-angle,angle=metal)",
+      "glRenderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Version 26.5.2 (Build 25F84))",
+      "glResetNotificationStrategy": 33362,
+      "glVendor": "Google Inc. (Apple)",
+      "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28222 git hash: 6dab7c7e742b)",
+      "glWsExtensions": "",
+      "glWsVendor": "",
+      "glWsVersion": "",
+      "inProcessGpu": false,
+      "initializationTime": 0.074563,
+      "isAsan": false,
+      "isClangCoverage": false,
+      "jpegDecodeAcceleratorSupported": false,
+      "maxMsaaSamples": "4",
+      "optimus": false,
+      "passthroughCmdDecoder": true,
+      "pixelShaderVersion": "3.00",
+      "processCrashCount": 0,
+      "sandboxed": false,
+      "skiaBackendType": "GraphiteDawnMetal",
+      "subpixelFontRendering": true,
+      "targetCpuBits": 64,
+      "vertexShaderVersion": "3.00",
+      "visibilityCallbackCallCount": 0
+    },
+    "featureStatus": {
+      "2d_canvas": "enabled",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "enabled",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "enabled_on",
+      "rasterization": "enabled",
+      "raw_draw": "disabled_off_ok",
+      "skia_graphite": "enabled_on",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "enabled",
+      "video_encode": "enabled",
+      "webgl": "enabled",
+      "webgpu": "enabled",
+      "webnn": "disabled_off"
+    },
+    "driverBugWorkarounds": [
+      "disable_2d_canvas_auto_flush",
+      "enable_webgl_timer_query_extensions",
+      "disabled_extension_GL_KHR_blend_equation_advanced",
+      "disabled_extension_GL_KHR_blend_equation_advanced_coherent"
+    ],
+    "videoDecoding": [],
+    "videoEncoding": []
+  },
+  "browser": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+    "dpr": 1
+  }
+}

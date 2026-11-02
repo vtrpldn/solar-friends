@@ -1,0 +1,13 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.waitForFunction: Timeout 30000ms exceeded.
+    at settle (/Users/paladini/Documents/veeware/solar-friends/scripts/benchmark-editor-gestures.mjs:7:36)
+    at measureEditorGestures (/Users/paladini/Documents/veeware/solar-friends/scripts/benchmark-editor-gestures.mjs:35:77)
+    at async file:///Users/paladini/Documents/veeware/solar-friends/scripts/benchmark-builder.mjs:34:31 {
+  log: [],
+  name: 'TimeoutError'
+}
+
+Node.js v24.10.0
