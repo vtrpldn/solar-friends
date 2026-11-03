@@ -1,0 +1,60 @@
+{
+  "boards": [
+    {
+      "file": "caatinga-zoom-1-rain-group-1.png",
+      "sha256": "280ee998d272b761428a4b496c8402a97fdb8db19d53919681e59b7f88b7874f",
+      "individuallyInspected": true,
+      "finding": "No additional visible clipping, grounding or obvious proportion mismatch at normal zoom."
+    },
+    {
+      "file": "caatinga-zoom-1-rain-group-2.png",
+      "sha256": "dfc6110cc3db3854686bec16b0c7ab1e0d64b39c5cba600b43803ef761dcdf12",
+      "individuallyInspected": true,
+      "finding": "No additional visible clipping, grounding or obvious proportion mismatch at normal zoom."
+    },
+    {
+      "file": "caatinga-zoom-1-rain-group-3.png",
+      "sha256": "c33ac0a3c6d81d3bf9d35c0ed516e8e59319177d5aad549feb819891da869e46",
+      "individuallyInspected": true,
+      "finding": "No additional visible clipping, grounding or obvious proportion mismatch at normal zoom."
+    },
+    {
+      "file": "cerrado-zoom-1-rain-group-1.png",
+      "sha256": "33a420d9cb239a15fbdf0a365dedd860584452e5e3f4ed466542d819c81f2426",
+      "individuallyInspected": true,
+      "finding": "No additional visible clipping, grounding or obvious proportion mismatch at normal zoom."
+    },
+    {
+      "file": "cerrado-zoom-1-rain-group-2.png",
+      "sha256": "f5dc4706601faddb1444be278911cedab2be78618f33b20200f3f9fba22d9a49",
+      "individuallyInspected": true,
+      "finding": "No additional visible clipping, grounding or obvious proportion mismatch at normal zoom."
+    },
+    {
+      "file": "cerrado-zoom-1-rain-group-3.png",
+      "sha256": "5673616bcd2f9ce1d23635d8ff64812c8d2b2d13725f971d034453f1ffa12ab3",
+      "individuallyInspected": true,
+      "finding": "No additional visible clipping, grounding or obvious proportion mismatch at normal zoom."
+    },
+    {
+      "file": "mata-atlantica-zoom-1-rain-group-1.png",
+      "sha256": "8a2feb9268d56f63823654a702b6ab6d23d26542d11fe12cdc089c2987d11bac",
+      "individuallyInspected": true,
+      "finding": "No additional visible clipping, grounding or obvious proportion mismatch at normal zoom."
+    },
+    {
+      "file": "mata-atlantica-zoom-1-rain-group-2.png",
+      "sha256": "1996e5518270c0939394491ec5f2d4e46d9c1f962be866597770b72ea0d19d36",
+      "individuallyInspected": true,
+      "finding": "No additional visible clipping, grounding or obvious proportion mismatch at normal zoom."
+    },
+    {
+      "file": "mata-atlantica-zoom-1-rain-group-3.png",
+      "sha256": "f5fdcdf295277dfb096b38ad55bc4cf496559890b24b9da15be95d5fb5a10b6b",
+      "individuallyInspected": true,
+      "finding": "No additional visible clipping, grounding or obvious proportion mismatch at normal zoom."
+    }
+  ],
+  "compositions": 81,
+  "scope": "All nine boards individually inspected. Native rainy-day window with forced rain probability; shared building/world/weather painters. Static completed appearances in three regional ground contexts with the same home, Iara and road references. Not measured geometry, new artist/user approval, animation/transitions, rain intensity distribution, night rain, other zooms or construction/crop/animal lifecycle acceptance."
+}
