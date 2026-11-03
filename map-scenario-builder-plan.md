@@ -351,3 +351,7 @@ An inherited village passed with the authored five: ordinary tool purchase and r
 ### Close-rain nature inspection
 
 All 21 current close-rain boards were individually inspected: 20 nature entries × 3 supported sizes × 3 biome terrains, 180 compositions at zoom 1.8, using shared game painters and native rain with home/road/Iara references. No additional clipping, detached bases or obvious scale mismatch observed in those controlled scenes. Minimum bunchgrass blends into all three detailed ground palettes; low-grass readability remains **needs correction**. Evidence: `assets/validation/nature-close-rain-review-v1/`, full local boards `artifacts/nature-close-rain-current/`. This closes the missing inspection, not overall nature-art acceptance or moving-rain/mixed-neighbor coverage.
+
+### Rejected low-grass contact-shadow trial
+
+A focused 18-composition close-rain comparison added contact shadows to dry grasses and Cerrado bunchgrass. All three biome boards were individually inspected; base grounding changed slightly but minimum bunchgrass remained difficult to separate. The runtime trial was reverted exactly; it does not close readability. Evidence: `assets/validation/grass-contact-shadow-trial-v1/`. Next correction should address the painted tuft contrast while preserving size and anchor, followed by day/night/rain and gameplay zoom review. The review harness now accepts explicit catalog-key filtering and rejects unknown keys.

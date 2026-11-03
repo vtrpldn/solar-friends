@@ -1,0 +1,10 @@
+{
+  "why": "Test whether contact shadows resolve the observed small-grass readability issue before changing the painted source.",
+  "verdict": "rejected",
+  "scope": "Dry grasses and Cerrado bunchgrass, all three sizes and biome terrains, close-rain zoom 1.8; all three boards individually inspected.",
+  "trial": "Add contact shadows: dry grasses radius 8, bunchgrass radius 6, opacity .28; include them in bounds.",
+  "finding": "Base grounding changes slightly but the minimum bunchgrass remains hard to separate from ground. This does not resolve silhouette contrast.",
+  "runtimeStatus": "All three runtime metadata/renderer trial edits reverted exactly. No visual behavior change shipped. Capture input hashes describe the rejected candidate, not final runtime.",
+  "next": "Correct painted bunchgrass silhouette contrast, preserving size/anchor/style, then repeat day/night/rain and gameplay zoom review.",
+  "toolChange": "Catalog-key filtering added to existing review harness for focused repeated comparisons; unknown keys fail rather than silently omit entries."
+}

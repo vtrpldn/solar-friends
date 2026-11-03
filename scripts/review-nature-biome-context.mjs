@@ -7,6 +7,7 @@ import {serve} from './serve.mjs';
 
 const output=process.argv[2]??'artifacts/nature-biome-context';
 const zoom=Number(process.argv.find(a=>a.startsWith('--zoom='))?.slice(7)??1);
+const selectedKeys=process.argv.find(a=>a.startsWith('--keys='))?.slice(7).split(',')??null;
 const lighting=process.argv.find(a=>a.startsWith('--lighting='))?.slice(11)??'day';
 assert([.65,1,1.8].includes(zoom));assert(['day','night','rain'].includes(lighting));
 await mkdir(output,{recursive:true});
@@ -16,7 +17,7 @@ const server=await serve(0,{async handle(_req,res,path){
  if(path==='/nature-context-review'){res.writeHead(200,{'Content-Type':'text/html'}).end('<!doctype html><title>Nature context review</title>');return true;}
  if(/\.(js|png|wasm)$/.test(path))inputs['web'+path]=sha(await readFile('web'+path));return false;
 }});
-const report={complete:false,zoom,lighting,inputs,boards:[],scope:'All native nature catalog entries at native minimum, unit and maximum size against three regional terrain palettes. Shared world painters, ambient night shading and native rainy-window conditions. Controlled artwork comparisons, not claims that every species is locally appropriate, navigation-safe or automatically visually accepted.'};
+const report={complete:false,zoom,lighting,selectedKeys,inputs,boards:[],scope:'All native nature catalog entries at native minimum, unit and maximum size against three regional terrain palettes. Shared world painters, ambient night shading and native rainy-window conditions. Controlled artwork comparisons, not claims that every species is locally appropriate, navigation-safe or automatically visually accepted.'};
 let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -37,6 +38,7 @@ try{
    r.conditions=lighting==='rain'?r.weatherConditions(snapshot.environment,r.minutes):{rain:0,wet:0,clouds:0};if(lighting==='rain'&&!r.conditions.rain)throw Error('Expected native rain');
    r.ground=r.paintTerrain(r.art.terrain,[[32,33],[33,33],[34,33]],[],[],42,r.map);
   },{biome,lighting});
+  if(selectedKeys)await page.evaluate(keys=>{const r=window.natureReview;for(const key of keys)if(!r.catalog.nature.some(s=>s.key===key))throw Error('Unknown review species '+key);r.catalog.nature=r.catalog.nature.filter(s=>keys.includes(s.key));},selectedKeys);
   for(let start=0;;start+=3){
    const capture=await page.evaluate(({start,zoom,lighting})=>{
     const r=window.natureReview,species=r.catalog.nature.slice(start,start+3);if(!species.length)return null;
