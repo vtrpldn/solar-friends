@@ -1,0 +1,79 @@
+{
+  "why": "Measure current authored-cast gameplay with process memory observations rather than retired creator-cache counters.",
+  "scope": "Established Caatinga public-playthrough checkpoint, five authored residents, twelve mixed buildings, 1440x900 headless Chromium, four reset 60-second still/panning preferred 1x/diagnostic16x phases.",
+  "verdict": "observations complete; desktop hardware performance and long plateau unproven",
+  "screensIndividuallyReviewed": [
+    "1x-still.png",
+    "1x-pan.png",
+    "16x-still.png",
+    "16x-pan.png"
+  ],
+  "observations": {
+    "p95FrameGapMs": [
+      9.39999999999418,
+      9.400000000008731,
+      16.60000000000582,
+      16.699999999982538
+    ],
+    "phaseDroppedSeconds": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "exactNativeCheckpointRestores": 4,
+    "processSamples": 50,
+    "processRSS": {
+      "renderer": {
+        "firstMiB": 1469.234375,
+        "maxMiB": 1888.671875,
+        "lastMiB": 1770.375,
+        "lastSixMiB": [
+          1765.234375,
+          1765.234375,
+          1763.375,
+          1763.671875,
+          1765.390625,
+          1770.375
+        ]
+      },
+      "GPU": {
+        "firstMiB": 44.234375,
+        "maxMiB": 101.078125,
+        "lastMiB": 92.765625,
+        "lastSixMiB": [
+          92.265625,
+          92.09375,
+          92.296875,
+          91.890625,
+          91.890625,
+          92.765625
+        ]
+      },
+      "browser": {
+        "firstMiB": 66.515625,
+        "maxMiB": 98.765625,
+        "lastMiB": 98.765625,
+        "lastSixMiB": [
+          98.765625,
+          98.765625,
+          98.765625,
+          98.765625,
+          98.765625,
+          98.765625
+        ]
+      }
+    },
+    "cleanup": {
+      "ok": true
+    }
+  },
+  "limits": [
+    "SwiftShader software renderer, not Metal desktop baseline.",
+    "RSS includes shared pages; process RSS totals are not unique allocations. GPU process host RSS is not GPU allocation/VRAM.",
+    "Renderer RSS grows over loading/phase resets and final samples vary. Four reset minutes cannot prove long-run plateau.",
+    "JavaScript performance.memory samples are constant/quantized here and cannot prove heap stability.",
+    "1x phases include automatic 16x intervals; no pure 1x throughput claim.",
+    "Developer import/forced-speed fixture, not public authoring or speed-control evidence."
+  ]
+}
