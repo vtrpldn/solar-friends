@@ -1,0 +1,36 @@
+{
+  "complete": true,
+  "densityCounts": [
+    25,
+    41,
+    81
+  ],
+  "inputs": {
+    "web/editor.html": "2ffbe17bf72d36c89a06944ea277c854c5eec0908109b462e310e2a4f21f5a89",
+    "web/editor/nature.js": "4d4d45c96fdc1690a1587d262f1c00670d8a43b10fa08698a0b35d8d43497231",
+    "web/editor/map-view.js": "bba93f111f9f0bcab42f08db558c55a6b4cc055f62e6c2264ea9a97fb280fcfc",
+    "web/editor/index.js": "d8dc34081432f64cf86a65dab5e4924f6686c3f7f9b776adcbd754a07f5f50a7",
+    "scripts/verify-editor-nature-selection.mjs": "527ccf70f38222791edb319c81a9d574bd035f81f5cc5edfa824de2a7e6bddda",
+    "web/pkg/solar_friends_bg.wasm": "41433e3913d33a5b015be57b00c510278c77f200993fa3fbde2e41934f80ae2f"
+  },
+  "browserErrors": [],
+  "checks": [
+    "density spacing, native validity and deterministic output",
+    "cluster density survives reload",
+    "trusted sparse brush matches plan with exact atomic undo/redo",
+    "fractional-anchor picking",
+    "independent copy identity",
+    "bounds, spacing, camp and size rejection",
+    "selected tiny plant inspector",
+    "blank numeric edit preserves draft",
+    "resize exact undo/redo",
+    "move retains identity and neighbors",
+    "rejected move preserves draft",
+    "copy and Delete with exact undo",
+    "typing guard",
+    "erase tool removes only one object",
+    "reload preserves selection",
+    "trusted drag move and Escape cancellation",
+    "native playtest and editor return"
+  ]
+}

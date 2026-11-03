@@ -42,7 +42,7 @@ export class EditorMap {
     this.canvas=canvas;this.ctx=canvas.getContext('2d');this.art=art;
     this.action=action;this.viewChanged=viewChanged;this.hover=hover;this.onArtworkReady=onArtworkReady;
     this.onTerrainReady=onTerrainReady;this.retryButton=retryButton;if(retryButton)retryButton.onclick=()=>{if(this.document&&this.snapshot)this.set(this.document,this.snapshot,null);};
-    this.brushSize=3;
+    this.brushSize=3;this.natureDensity=1;
     this.view={center:[32,32],zoom:1.3,selected:null,selectedResident:null,selectedRoute:null,selectedBank:null,selectedSite:null,selectedNature:null,selection:[],tool:'select',grid:true};
     this.preview=preview;
     if(preview)return;
@@ -106,7 +106,7 @@ export class EditorMap {
     this.terrainTask?.controller.abort();this.terrainTask=null;this.terrainLoading=false;this.artLoading=false;this.ground=null;this.groundKey=null;this.terrainFailedKey=null;this.artError=null;this.terrainError=null;this.cancelGesture({paint:false});this.updateBusy();this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
   }
   // A pan is a preview until pointerup; autosaves keep its starting camera.
-  get state(){return structuredClone({...this.view,center:this.drag?.pan?this.drag.center:this.view.center,brushSize:this.brushSize,natureSpeciesKey:this.natureSpecies?.key,natureSize:this.natureSize||1});}
+  get state(){return structuredClone({...this.view,center:this.drag?.pan?this.drag.center:this.view.center,brushSize:this.brushSize,natureDensity:this.natureDensity,natureSpeciesKey:this.natureSpecies?.key,natureSize:this.natureSize||1});}
   cancelGesture({paint=true}={}){
     const active=!!(this.drag||this.stroke||this.routeStroke);
     if(this.drag?.pan)this.view.center=[...this.drag.center];

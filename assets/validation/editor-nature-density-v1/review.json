@@ -1,0 +1,44 @@
+{
+  "baseline": "3f728f2",
+  "why": "Let authors create more open vegetation with the nature brush instead of individually thinning dense clusters.",
+  "controls": [
+    "Sparse",
+    "Open",
+    "Full"
+  ],
+  "semantics": "Full preserves previous catalog spacing. Open and Sparse increase separation, with a one-cell baseline before multiplying so low ground plants also change density. Existing plants are never removed or rescaled.",
+  "checks": [
+    "density spacing, native validity and deterministic output",
+    "cluster density survives reload",
+    "trusted sparse brush matches plan with exact atomic undo/redo",
+    "fractional-anchor picking",
+    "independent copy identity",
+    "bounds, spacing, camp and size rejection",
+    "selected tiny plant inspector",
+    "blank numeric edit preserves draft",
+    "resize exact undo/redo",
+    "move retains identity and neighbors",
+    "rejected move preserves draft",
+    "copy and Delete with exact undo",
+    "typing guard",
+    "erase tool removes only one object",
+    "reload preserves selection",
+    "trusted drag move and Escape cancellation",
+    "native playtest and editor return"
+  ],
+  "densityCounts": [
+    25,
+    41,
+    81
+  ],
+  "inspected": [
+    "sparse-cluster.png",
+    "inspector-reloaded.png"
+  ],
+  "visualObservation": "The actual sparse macambira brush result leaves clear gaps, avoids the existing camp/buildings and keeps normal sprite scale. Density control fits the desktop tool panel and is restored after reload.",
+  "limits": [
+    "Counts are fixture-specific, not promised density percentages.",
+    "Brush still uses cell-aligned anchors; this does not establish natural irregular cluster composition or complete landscape-art acceptance.",
+    "No new raster artwork, simulation rules, automatic generation density or release-wide performance claim."
+  ]
+}

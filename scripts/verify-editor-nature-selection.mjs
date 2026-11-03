@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 import init,{Game} from '../web/pkg/solar_friends.js';
-import {natureAt,placeNatureObject} from '../web/editor/nature.js';
+import {natureAt,placeNatureObject,plantStroke} from '../web/editor/nature.js';
 
 const output=process.argv[2]??'artifacts/editor-nature-selection';await mkdir(output,{recursive:true});
 await init({module_or_path:await readFile('web/pkg/solar_friends_bg.wasm')});
@@ -20,15 +20,28 @@ assert.equal(moved[0].id,source.id);assert.deepEqual(moved[1],other);assert.deep
 const copied=placeNatureObject(definition,[source,other],catalog.nature,source,25,37,source.size,{copy:true,makeId:()=> 'independent-copy'});
 assert.equal(copied.length,3);assert.equal(copied.at(-1).id,'independent-copy');assert.deepEqual(copied[0],source);
 for(const [x,y,size]of [[-1,35,.65],[64,35,.65],[other.x,other.y,.65],[28,35,NaN],[28,35,2],[...definition.map.camp,.65]])assert.throws(()=>placeNatureObject(definition,[source,other],catalog.nature,source,x,y,size));
+const densityCounts=[];
+for(const density of [.25,.5,1]){
+ let next=0;const plants=plantStroke(definition,[],catalog.nature,'macambira',1,[[20,25]],9,()=>`density-${next++}`,density);densityCounts.push(plants.length);
+ assert(plants.length>0);assert(JSON.parse(game.validate_scenario(JSON.stringify({...definition,map:{...definition.map,nature:plants}}))).ok);
+ for(const a of plants)for(const b of plants)if(a!==b)assert(Math.hypot(a.x-b.x,a.y-b.y)>=catalog.nature.find(s=>s.key==='macambira').spacing/Math.sqrt(density));
+ assert.deepEqual(plantStroke(definition,[],catalog.nature,'macambira',1,[[20,25]],9,(()=>{let id=0;return()=>`density-${id++}`;})(),density),plants);
+}
+assert(densityCounts[0]<densityCounts[1]&&densityCounts[1]<densityCounts[2],JSON.stringify(densityCounts));
+for(const density of [0,.1,2,NaN])assert.throws(()=>plantStroke(definition,[],catalog.nature,'macambira',1,[[20,25]],9,undefined,density));
 game.free();
 const server=await serve(0);let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
  await page.locator('#creator-import').setInputFiles({name:'nature.solar-scenario',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(definition))});
- const saved=()=>page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved')&&document.querySelector('#creator-map').getAttribute('aria-busy')==='false');await saved();
+ const saved=()=>page.waitForFunction(()=>document.querySelector('#creator-save-status').textContent.startsWith('Saved')&&document.querySelector('#creator-map').getAttribute('aria-busy')==='false');await saved();await page.locator('#creator-nature-density').selectOption('0.25');await saved();
  const read=()=>page.evaluate(async()=>{const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary();try{return(await library.getProject(new URL(location.href).searchParams.get('project'))).checkpoint.definition;}finally{library.close();}});
  const click=async(x,y)=>{const p=await page.locator('#creator-map').evaluate((c,[x,y])=>{const o=JSON.parse(c.dataset.origin),s=Number(c.dataset.scale),r=c.getBoundingClientRect();return{x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);assert.equal(await page.evaluate(p=>document.elementFromPoint(p.x,p.y)?.id,p),'creator-map',JSON.stringify(p));await page.mouse.click(p.x,p.y);};
+ const beforeCluster=await read();await page.locator('#creator-species').selectOption('macambira');await page.locator('#creator-brush-size').selectOption('9');await click(28,35);await saved();
+ const sparseCluster=await read(),expectedCluster=plantStroke(beforeCluster,beforeCluster.map.nature,catalog.nature,'macambira',1,[[28,35]],9,()=>'',.25);
+ assert.deepEqual(sparseCluster.map.nature.slice(beforeCluster.map.nature.length).map(({id,...p})=>p),expectedCluster.map(({id,...p})=>p));assert(expectedCluster.length>0);await page.screenshot({path:`${output}/sparse-cluster.png`});
+ await page.locator('#creator-undo').click();await saved();assert.deepEqual(await read(),beforeCluster);await page.locator('#creator-redo').click();await saved();assert.deepEqual(await read(),sparseCluster);await page.locator('#creator-undo').click();await saved();await page.locator('[data-tool=select]').click();
  await click(28,35);await page.locator('[data-nature-action=move]').waitFor({state:'visible'});assert.match(await page.locator('#creator-selection').innerText(),/Macambira/);
  const original=await read();await page.screenshot({path:`${output}/small-plant-selected.png`});
  await page.locator('[data-natural-field=x]').fill('');await page.locator('[data-natural-field=x]').press('Tab');assert.deepEqual(await read(),original);assert.equal(await page.locator('[data-natural-field=x]').inputValue(),'28');
@@ -40,7 +53,7 @@ try{
  await page.locator('[data-natural-field=size]').focus();await page.keyboard.press('Delete');assert.deepEqual(await read(),duplicate,'Delete while typing does not remove a selected object');
  await click(copy.x,copy.y);await page.keyboard.press('Delete');await saved();assert.deepEqual(await read(),relocated);await page.locator('#creator-undo').click();await saved();assert.deepEqual(await read(),duplicate);
  await page.locator('[data-tool=erase]').click();await click(copy.x,copy.y);await saved();assert.deepEqual(await read(),relocated);await page.locator('#creator-undo').click();await saved();assert.deepEqual(await read(),duplicate);
- await page.locator('[data-tool=select]').click();await click(30,36);await saved();await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await saved();await page.locator('[data-nature-action=move]').waitFor({state:'visible'});assert.deepEqual(await read(),duplicate);
+ await page.locator('[data-tool=select]').click();await click(30,36);await saved();await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await saved();assert.equal(await page.locator('#creator-nature-density').inputValue(),'0.25');await page.locator('[data-nature-action=move]').waitFor({state:'visible'});assert.deepEqual(await read(),duplicate);
  await page.locator('[data-tool=move]').click();
  const point=async(x,y)=>page.locator('#creator-map').evaluate((c,[x,y])=>{const o=JSON.parse(c.dataset.origin),s=Number(c.dataset.scale),r=c.getBoundingClientRect();return{x:r.left+o.x+(x-y)*34*s,y:r.top+o.y+(x+y)*17*s};},[x,y]);
  const from=await point(30,36),to=await point(31,37);await page.mouse.move(from.x,from.y);await page.mouse.down();await page.mouse.move(to.x,to.y,{steps:5});await page.mouse.up();await saved();assert.deepEqual((await read()).map.nature[0],{...duplicate.map.nature[0],x:31,y:37});
@@ -48,7 +61,7 @@ try{
  await page.screenshot({path:`${output}/inspector-reloaded.png`});
  await page.locator('#creator-test').click();await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
  const playable=await page.evaluate(()=>window.solarDev.snapshot().village.scenario.definition.map.nature);assert.equal(playable.length,3);assert.equal(playable[0].id,source.id);assert.equal(playable[0].x,30);assert.equal(playable[0].y,36);assert.equal(Math.fround(playable[0].size),Math.fround(1.05));
- await page.getByRole('button',{name:'Return to editor',exact:true}).click();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await saved();await page.locator('[data-nature-action=move]').waitFor({state:'visible'});assert.deepEqual(await read(),duplicate);assert.deepEqual(errors,[]);
- const inputs=Object.fromEntries(await Promise.all(['web/editor/nature.js','web/editor/map-view.js','web/editor/index.js','scripts/verify-editor-nature-selection.mjs','web/pkg/solar_friends_bg.wasm'].map(async path=>[path,createHash('sha256').update(await readFile(path)).digest('hex')])));
- await writeFile(`${output}/report.json`,JSON.stringify({complete:true,inputs,browserErrors:errors,checks:['fractional-anchor picking','independent copy identity','bounds, spacing, camp and size rejection','selected tiny plant inspector','blank numeric edit preserves draft','resize exact undo/redo','move retains identity and neighbors','rejected move preserves draft','copy and Delete with exact undo','typing guard','erase tool removes only one object','reload preserves selection','trusted drag move and Escape cancellation','native playtest and editor return']},null,2)+'\n');console.log('PASS individual natural-object selection, editing, isolation, exact history, saved selection and native playtest.');
+ await page.getByRole('button',{name:'Return to editor',exact:true}).click();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await saved();assert.equal(await page.locator('#creator-nature-density').inputValue(),'0.25');await page.locator('[data-nature-action=move]').waitFor({state:'visible'});assert.deepEqual(await read(),duplicate);assert.deepEqual(errors,[]);
+ const inputs=Object.fromEntries(await Promise.all(['web/editor.html','web/editor/nature.js','web/editor/map-view.js','web/editor/index.js','scripts/verify-editor-nature-selection.mjs','web/pkg/solar_friends_bg.wasm'].map(async path=>[path,createHash('sha256').update(await readFile(path)).digest('hex')])));
+ await writeFile(`${output}/report.json`,JSON.stringify({complete:true,densityCounts,inputs,browserErrors:errors,checks:['density spacing, native validity and deterministic output','cluster density survives reload','trusted sparse brush matches plan with exact atomic undo/redo','fractional-anchor picking','independent copy identity','bounds, spacing, camp and size rejection','selected tiny plant inspector','blank numeric edit preserves draft','resize exact undo/redo','move retains identity and neighbors','rejected move preserves draft','copy and Delete with exact undo','typing guard','erase tool removes only one object','reload preserves selection','trusted drag move and Escape cancellation','native playtest and editor return']},null,2)+'\n');console.log('PASS individual natural-object selection, editing, isolation, exact history, saved selection and native playtest.');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
