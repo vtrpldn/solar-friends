@@ -1,0 +1,6 @@
+import assert from 'node:assert/strict';import http from 'node:http';import{closeValidationBrowser}from'./close-validation-browser.mjs';
+const server=async()=>{const s=http.createServer((_req,res)=>res.end('ok'));await new Promise(r=>s.listen(0,'127.0.0.1',r));return s;};
+let s=await server(),order=[];await closeValidationBrowser({contexts:()=>[{async close(){assert(!s.listening);order.push('context');}}],async close(){order.push('browser');}},s);assert.deepEqual(order,['context','browser']);
+s=await server();let browserClosed=false;await assert.rejects(closeValidationBrowser({contexts:()=>[{close:()=>new Promise(()=>{})}],async close(){browserClosed=true;}},s,{timeoutMs:20}),/context shutdown timed out/);assert(!s.listening&&browserClosed);
+s=await server();await assert.rejects(closeValidationBrowser({contexts:()=>[],close:()=>new Promise(()=>{})},s,{timeoutMs:20}),/browser shutdown timed out/);assert(!s.listening);
+s=await server();await closeValidationBrowser(null,s);assert(!s.listening);console.log('PASS validation server-first shutdown, context/browser order, surfaced timeouts and absent-browser cleanup.');
