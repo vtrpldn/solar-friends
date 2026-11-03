@@ -4,7 +4,7 @@ import {resolvedNature,natureAt} from './nature.js';
 import {utilityLines,goalRegions,sceneRouteAt,routeVisible} from './scene-layers.js';
 import {corridorCells} from './routes.js';
 import {paintUtilityRoute} from '../utility-lines-art.js';
-import {hitStartingBank} from './batteries.js';
+import {hitStartingBank,newStartingBank} from './batteries.js';
 import {batteryImage,drawBattery} from '../battery-art.js';
 import {loadChickenArt,flock,drawChicken} from '../chickens.js';
 import {paintResourceSite} from '../resource-site-art.js';
@@ -119,10 +119,16 @@ export class EditorMap {
     if((active||hadPreview)&&paint)this.render();
     return active;
   }
-  setTool(tool){this.cancelGesture({paint:false});this.view.tool=tool;this.placementBuilding=allBuildingArt[tool]?newStartingBuilding(tool,0,0):null;this.updateGroupPreview();this.render();this.viewChanged(this.state);}
+  setTool(tool){this.cancelGesture({paint:false});this.view.tool=tool;this.assetPreviewContext=null;this.placementAsset=tool==='battery-bank'?{collection:'batteries',asset:newStartingBank(0,0)}:sourceKinds.includes(tool)?{collection:'resource_sites',asset:newStartingSite(tool.slice(7),0,0)}:null;this.placementBuilding=allBuildingArt[tool]?newStartingBuilding(tool,0,0):null;this.updateGroupPreview();this.render();this.viewChanged(this.state);}
   updateGroupPreview(){
     if(!this.groupPreview||!this.pointer||!this.document)return;
     if(this.placementBuilding?.kind===this.view.tool){this.groupPreview.observe(this.document,'place',this.placementBuilding,[],this.pointer.x,this.pointer.y);return;}
+    if(this.placementAsset){this.groupPreview.observe(this.document,'asset',this.placementAsset,[],this.pointer.x,this.pointer.y);return;}
+    const tool=this.view.tool,bank=this.drag?.bank??(tool==='copy-bank'?this.bankCopy:tool==='move-bank'?this.document.start.batteries?.find(b=>b.id===this.view.selectedBank):null),site=this.drag?.site??(tool==='copy-site'?this.siteCopy:tool==='move-site'?this.document.start.resource_sites?.find(s=>s.id===this.view.selectedSite):null),source=bank??site;
+    if(source){
+      if(this.assetPreviewContext?.source!==source||this.assetPreviewContext.tool!==tool){const copying=tool.startsWith('copy-'),asset=structuredClone(source);if(copying)asset.id=crypto.randomUUID();this.assetPreviewContext={source,tool,proposal:{collection:bank?'batteries':'resource_sites',asset,replace:!copying,copyFrom:copying&&bank?source.id:null}};}
+      this.groupPreview.observe(this.document,'asset',this.assetPreviewContext.proposal,[],this.pointer.x,this.pointer.y);return;
+    }
     const copy=this.view.tool==='duplicate'?this.copy:null,anchor=copy?.buildings[0]??this.drag?.building;
     if(!anchor){if(this.groupPlacement)this.groupPreview.clear();return;}
     this.groupPreview.observe(this.document,copy?'copy':'move',copy,copy?[]:this.selection(),this.pointer.x-anchor.x,this.pointer.y-anchor.y);
@@ -175,7 +181,7 @@ export class EditorMap {
   }
   up(e){
     if(!this.drag)return;
-    const drag=this.drag,cell=this.cell(this.point(e));this.drag=null;if(this.view.tool!=='duplicate'&&!allBuildingArt[this.view.tool])this.groupPreview?.clear();
+    const drag=this.drag,cell=this.cell(this.point(e));this.drag=null;if(this.view.tool!=='duplicate'&&!allBuildingArt[this.view.tool]&&!this.placementAsset&&!['move-bank','copy-bank','move-site','copy-site'].includes(this.view.tool))this.groupPreview?.clear();
     if(this.view.tool==='region'&&!drag.pan){const x=Math.max(0,Math.min(63,Math.min(drag.cell.x,cell.x))),y=Math.max(0,Math.min(63,Math.min(drag.cell.y,cell.y))),right=Math.max(0,Math.min(63,Math.max(drag.cell.x,cell.x))),bottom=Math.max(0,Math.min(63,Math.max(drag.cell.y,cell.y)));this.action({type:'region',rectangle:{x,y,width:right-x+1,height:bottom-y+1}});return;}
     if(drag.pan){this.centerAt(...this.view.center);return;}
     // Release can carry a newer position than the last delivered move event.
@@ -243,6 +249,7 @@ export class EditorMap {
     for(const region of regions){const {x,y,width:w,height:h}=region;this.polygon([[x-.5,y-.5],[x+w-.5,y-.5],[x+w-.5,y+h-.5],[x-.5,y+h-.5]],'#d9af4822','#e8c05a');const p=this.project(x+(w-1)/2,y-.5);c.font='bold 12px sans-serif';c.textAlign='center';c.fillStyle='#4f3920';c.fillText(region.title,p.x,p.y-8);}
     canvas.dataset.regionCount=String(this.document.map.regions?.length??0);canvas.dataset.visibleRegions=String(regions.length);
     if(this.stroke)for(const [x,y]of this.stroke.values()){const size=['meadow','nature','thin-nature','habitat'].includes(view.tool)?this.brushSize:1,left=x-Math.floor(size/2)-.5,top=y-Math.floor(size/2)-.5;this.polygon([[left,top],[left+size,top],[left+size,top+size],[left,top+size]],'#f1c96766','#fff0b4');}
+    const groupBlocked=this.groupPlacement?.allowed===false,groupFill=groupBlocked?'#c65e4266':'#f4df9a66',groupStroke=groupBlocked?'#f39b80':'#fff3c4';
     const structures=this.document.start.buildings.slice(0,256).filter(b=>Number.isFinite(b.x)&&Number.isFinite(b.y)&&allBuildingArt[b.kind]);
     const objects=land.vegetation.filter(t=>!t.cleared).map(t=>({depth:t.x+t.y,draw:()=>paintWorldTree(c,t,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details})}));
     for(const b of structures)objects.push({depth:b.x+b.y,draw:()=>{
@@ -259,7 +266,7 @@ export class EditorMap {
       if(!native||native.x!==site.x||native.y!==site.y||catalogMaterial(site.material)!==native.material)continue;
       objects.push({depth:site.x+site.y,draw:()=>{if(view.selectedSite===site.id)this.polygon(footprintCorners(sourceKinds[native.material],site.x,site.y),'#efc86d55','#ffe39a');paintResourceSite(c,native,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details});}});
     }
-    if(this.pointer&&(sourceKinds.includes(view.tool)||['move-site','copy-site'].includes(view.tool))){const source=this.siteCopy||this.document.start.resource_sites?.find(s=>s.id===view.selectedSite),kind=sourceKinds.includes(view.tool)?view.tool:sourceKinds[catalogMaterial(source?.material)];if(kind){this.polygon(footprintCorners(kind,this.pointer.x,this.pointer.y),'#f4df9a66','#fff3c4');const preview=sitePreview(sourceKinds.includes(view.tool)?newStartingSite(kind.slice(7),this.pointer.x,this.pointer.y,'preview'):{...source,x:this.pointer.x,y:this.pointer.y});paintResourceSite(c,preview,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details,alpha:.45});}}
+    if(this.pointer&&(sourceKinds.includes(view.tool)||['move-site','copy-site'].includes(view.tool))){const source=this.siteCopy||this.document.start.resource_sites?.find(s=>s.id===view.selectedSite),kind=sourceKinds.includes(view.tool)?view.tool:sourceKinds[catalogMaterial(source?.material)];if(kind){this.polygon(footprintCorners(kind,this.pointer.x,this.pointer.y),groupFill,groupStroke);const preview=sitePreview(sourceKinds.includes(view.tool)?newStartingSite(kind.slice(7),this.pointer.x,this.pointer.y,'preview'):{...source,x:this.pointer.x,y:this.pointer.y});paintResourceSite(c,preview,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details,alpha:.45});}}
     for(const bank of this.snapshot.village.power.network.nodes.filter(n=>n.owner.kind==='ground'&&n.kind==='battery'))objects.push({depth:bank.x+bank.y+.1,draw:()=>{if(hitStartingBank(this.document,bank.x,bank.y)?.id===view.selectedBank)this.polygon(footprintCorners('battery',bank.x,bank.y),'#efc86d55','#ffe39a');drawBattery(c,this.project(bank.x,bank.y),this.scale);}});
     for(const hen of flock(this.snapshot.village))objects.push({depth:hen.x+hen.y+.2,draw:()=>drawChicken(c,this.project(hen.x,hen.y),this.scale,hen)});
     for(const resident of this.snapshot.residents)objects.push({depth:resident.x+resident.y+.6,draw:()=>{
@@ -294,9 +301,8 @@ export class EditorMap {
       this.polygon(footprintCorners(view.tool,this.pointer.x,this.pointer.y),this.groupPlacement?.allowed===false?'#c65e4266':'#f4df9a66',this.groupPlacement?.allowed===false?'#f39b80':'#fff3c4');
       paintWorldBuilding(c,{key:view.tool,x:this.pointer.x,y:this.pointer.y,alpha:.45},{project:this.project,scale:this.scale,images:art.images});
     }
-    if(this.pointer&&(this.drag?.bank||['battery-bank','move-bank','copy-bank'].includes(view.tool))){this.polygon(footprintCorners('battery',this.pointer.x,this.pointer.y),'#f4df9a66','#fff3c4');drawBattery(c,this.project(this.pointer.x,this.pointer.y),this.scale,0,.45);}
-    if(this.drag?.site&&this.pointer)this.polygon(footprintCorners(sourceKinds[catalogMaterial(this.drag.site.material)],this.pointer.x,this.pointer.y),'#f4df9a66','#fff3c4');
-    const groupBlocked=this.groupPlacement?.allowed===false,groupFill=groupBlocked?'#c65e4266':'#f4df9a66',groupStroke=groupBlocked?'#f39b80':'#fff3c4';
+    if(this.pointer&&(this.drag?.bank||['battery-bank','move-bank','copy-bank'].includes(view.tool))){this.polygon(footprintCorners('battery',this.pointer.x,this.pointer.y),groupFill,groupStroke);drawBattery(c,this.project(this.pointer.x,this.pointer.y),this.scale,0,.45);}
+    if(this.drag?.site&&this.pointer)this.polygon(footprintCorners(sourceKinds[catalogMaterial(this.drag.site.material)],this.pointer.x,this.pointer.y),groupFill,groupStroke);
     if(this.drag?.building&&this.pointer){const anchor=this.drag.building;for(const b of structures.filter(b=>this.selection().includes(b.id)))this.polygon(footprintCorners(b.kind,b.x+this.pointer.x-anchor.x,b.y+this.pointer.y-anchor.y),groupFill,groupStroke);}
     if(view.tool==='duplicate'&&this.copy&&this.pointer){const anchor=this.copy.buildings[0];for(const b of this.copy.buildings){const x=b.x+this.pointer.x-anchor.x,y=b.y+this.pointer.y-anchor.y;this.polygon(footprintCorners(b.kind,x,y),groupFill,groupStroke);paintWorldBuilding(c,{key:keyFor(b),x,y,alpha:.45,emptyAnimals:b.state!=='completed'||b.animals?.stocked===false},{project:this.project,scale:this.scale,images:art.images});const crop=this.copy.cropViews?.[b.id];if(b.state==='completed'&&crop)paintWorldCrops(c,{kind:b.kind,x,y,crop},{project:this.project,scale:this.scale,alpha:.45});}}
     if(this.pointer&&this.groupPlacement?.allowed){c.save();c.lineJoin='round';c.lineCap='round';for(const plan of this.groupPlacement.routes??[])paintUtilityRoute(c,this.project,this.scale,plan,'#fff3a4',true,{pump:plan.kind!=='electricity'});c.restore();}

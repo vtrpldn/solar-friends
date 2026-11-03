@@ -1,3 +1,4 @@
+import {applyAssetPlacement} from './asset-placement.js';
 import {wrapDialogTab} from './dialog-focus.js';
 import {parseImportObject} from './import-object.js';
 import {LandscapeRegeneration} from './landscape-regeneration.js';
@@ -303,19 +304,19 @@ function mapAction(action){
   if(action.type==='resident-start'){const id=action.resident??map.placingResident;if(!id)return;if(change('Choose resident starting place',d=>{ensureStart(d,id).position=[action.x,action.y];},{valid:true})){map.placingResident=null;setTool('select');map.selectResident(id);residentsEditor.openArrival(id);}return;}
   if(action.type==='route-path'){routesEditor.stroke(action.cells);return;}
   if(action.type==='battery-bank'){
-    const bank=newStartingBank(action.x,action.y);if(change('Place battery bank',d=>{(d.start.batteries??=[]).push(bank);},{valid:true}))map.selectBank(bank.id);
+    const bank=newStartingBank(action.x,action.y);if(change('Place battery bank',d=>{applyAssetPlacement(d,{collection:'batteries',asset:bank},action.x,action.y);},{valid:true}))map.selectBank(bank.id);
   }else if(['move-bank','copy-bank'].includes(action.type)){
     const original=action.type==='copy-bank'?map.bankCopy:current.doc.value.start.batteries?.find(b=>b.id===map.view.selectedBank);if(!original)return;
     const bank={...clone(original),x:action.x,y:action.y};if(action.type==='copy-bank')bank.id=crypto.randomUUID();
-    if(change(action.type==='copy-bank'?'Copy battery bank':'Move battery bank',d=>{if(action.type==='copy-bank')(d.start.batteries??=[]).push(bank);else Object.assign(d.start.batteries.find(b=>b.id===bank.id),bank);},{valid:true})){map.bankCopy=null;setTool('select');map.selectBank(bank.id);}
+    if(change(action.type==='copy-bank'?'Copy battery bank':'Move battery bank',d=>{applyAssetPlacement(d,{collection:'batteries',asset:bank,replace:action.type==='move-bank',copyFrom:action.type==='copy-bank'?original.id:null},action.x,action.y);},{valid:true})){map.bankCopy=null;setTool('select');map.selectBank(bank.id);}
   }else if(sourceKinds.includes(action.type)){
     const material=catalog.resource_sites.materials[sourceKinds.indexOf(action.type)],site=newStartingSite(material,action.x,action.y);
-    if(change('Place '+siteNames[sourceKinds.indexOf(action.type)],d=>{(d.start.resource_sites??=[]).push(site);},{valid:true}))map.selectSite(site.id);
+    if(change('Place '+siteNames[sourceKinds.indexOf(action.type)],d=>{applyAssetPlacement(d,{collection:'resource_sites',asset:site},action.x,action.y);},{valid:true}))map.selectSite(site.id);
   }
   else if(['move-site','copy-site'].includes(action.type)){
     const source=action.type==='copy-site'?map.siteCopy:current.doc.value.start.resource_sites?.find(s=>s.id===map.view.selectedSite);if(!source)return;
     const site=clone(source);site.x=action.x;site.y=action.y;if(action.type==='copy-site')site.id=crypto.randomUUID();
-    if(change(action.type==='copy-site'?'Copy material plot':'Move material plot',d=>{if(action.type==='copy-site')(d.start.resource_sites??=[]).push(site);else Object.assign(d.start.resource_sites.find(s=>s.id===site.id),site);},{valid:true})){setTool('select');map.selectSite(site.id);map.siteCopy=null;}
+    if(change(action.type==='copy-site'?'Copy material plot':'Move material plot',d=>{applyAssetPlacement(d,{collection:'resource_sites',asset:site,replace:action.type==='move-site'},action.x,action.y);},{valid:true})){setTool('select');map.selectSite(site.id);map.siteCopy=null;}
   }
   else if(action.type==='region'){if((current.doc.value.map.regions?.length??0)>=catalog.max_regions){toast('Use up to 32 named regions.');return;}const id='region-'+crypto.randomUUID();if(change('Draw named region',d=>{(d.map.regions??=[]).push({id,title:'New region',...action.rectangle});})){revealWorkspaceSection($('creator-regions'));$('creator-regions').open=true;regionsEditor.open(id);}}
   else if(action.type==='road')change('Paint a road',d=>{const cells=new Map(d.start.roads.map(p=>[p.join(','),p]));for(const cell of action.cells)cells.set(cell.join(','),cell);d.start.roads=[...cells.values()];},{valid:true});

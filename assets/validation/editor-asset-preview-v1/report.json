@@ -1,0 +1,152 @@
+{
+  "sources": {
+    "scripts/verify-editor-asset-preview.mjs": "ff306438cc31060312eafe2722a18723e2b00a10046a160713338d430a312ccf",
+    "web/editor/asset-placement.js": "a5fa93d3635bc424aed90a0f8ba018bf86f6eda9ab26eb6a06aa43fb5423737d",
+    "web/editor/index.js": "0af94b70e762a64e499551736f78e834386c217a4ac432edd84582107c6603e8",
+    "web/editor/map-view.js": "79033538ba80787f9f019e60b3bdc9e5374cf4f2755928fccaa197c0c6d84a13",
+    "web/group-preview-worker.js": "dc1df5f2f8194677d4ae4988d422174afaa9ca901b2ad8d69f680ab3bca45459",
+    "web/editor/group-preview.js": "33ce210ffc9724a4553af321136b2e93f82411e10d69a2250b60c5a7690facd5",
+    "web/pkg/solar_friends_bg.wasm": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1"
+  },
+  "cases": [
+    {
+      "tool": "battery-bank",
+      "collection": "batteries",
+      "asset": {
+        "id": "probe-bank",
+        "x": 0,
+        "y": 0,
+        "capacity": 18,
+        "charge": 0
+      },
+      "site": [
+        32,
+        31
+      ],
+      "verified": true
+    },
+    {
+      "tool": "source_timber",
+      "collection": "resource_sites",
+      "asset": {
+        "id": "probe-timber",
+        "material": "timber",
+        "x": 0,
+        "y": 0,
+        "stage": "empty",
+        "auto_replant": true,
+        "auto_harvest": true,
+        "soil_wetness": 0
+      },
+      "site": [
+        29,
+        32
+      ],
+      "verified": true
+    },
+    {
+      "tool": "source_bamboo",
+      "collection": "resource_sites",
+      "asset": {
+        "id": "probe-bamboo",
+        "material": "bamboo",
+        "x": 0,
+        "y": 0,
+        "stage": "empty",
+        "auto_replant": true,
+        "auto_harvest": true,
+        "soil_wetness": 0
+      },
+      "site": [
+        30,
+        32
+      ],
+      "verified": true
+    },
+    {
+      "tool": "source_earth",
+      "collection": "resource_sites",
+      "asset": {
+        "id": "probe-earth",
+        "material": "earth",
+        "x": 0,
+        "y": 0,
+        "stage": "extraction",
+        "auto_replant": false,
+        "auto_harvest": true,
+        "soil_wetness": 0
+      },
+      "site": [
+        21,
+        26
+      ],
+      "verified": true
+    },
+    {
+      "tool": "source_stone",
+      "collection": "resource_sites",
+      "asset": {
+        "id": "probe-stone",
+        "material": "stone",
+        "x": 0,
+        "y": 0,
+        "stage": "extraction",
+        "auto_replant": false,
+        "auto_harvest": true,
+        "soil_wetness": 0
+      },
+      "site": [
+        24,
+        31
+      ],
+      "verified": true
+    },
+    {
+      "tool": "source_salvage",
+      "collection": "resource_sites",
+      "asset": {
+        "id": "probe-salvage",
+        "material": "salvage",
+        "x": 0,
+        "y": 0,
+        "stage": "extraction",
+        "auto_replant": false,
+        "auto_harvest": true,
+        "soil_wetness": 0
+      },
+      "site": [
+        18,
+        31
+      ],
+      "verified": true
+    }
+  ],
+  "bankCopySite": [
+    32,
+    31
+  ],
+  "bankMoveSite": [
+    31,
+    32
+  ],
+  "timberCopySite": [
+    29,
+    32
+  ],
+  "timberMoveSite": [
+    35,
+    32
+  ],
+  "checks": {
+    "sixAssetTools": true,
+    "nativeAllowedBlockedAgreement": true,
+    "blockedClickIsolation": true,
+    "exactUndoRedo": true,
+    "batteryCopyPreservesChargeConditionPolicy": true,
+    "batteryMovePreservesIdentityAndWear": true,
+    "timberCopyPreservesStageWetnessPolicies": true,
+    "timberMoveAndReloadExact": true,
+    "browserErrors": []
+  },
+  "scope": "One eligible and one occupied site per new asset tool, configured bank and mature timber copies plus inspector-driven moves. Not every geology/surface combination or drag-move path."
+}
