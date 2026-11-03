@@ -1,0 +1,18 @@
+{
+  "realWorkerCommitted": true,
+  "lostReplyReconciled": true,
+  "oneCommitOnly": true,
+  "previousCheckpointPreserved": true,
+  "viewUnchanged": true,
+  "recoveryCopyClearedOnlyAfterConfirmation": true,
+  "noFalseConflictOrError": true,
+  "followingSave": true,
+  "injectedQuotaAfterBodyPut": true,
+  "injectedQuotaPreservesDurableRecord": true,
+  "failedSaveRecoveryCopyRetained": true,
+  "unsavedDraftExported": true,
+  "quotaRetry": true,
+  "reloadAndUndo": true,
+  "normalSavesUnchanged": true,
+  "browserErrors": []
+}

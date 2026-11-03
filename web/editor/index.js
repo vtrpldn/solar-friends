@@ -83,11 +83,12 @@ async function download(definition){
   a.href=url;a.download=(definition.title||'our-village').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.solar-scenario';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function cacheRecovery(ctx,checkpoint,view){try{const raw=JSON.stringify({storageRevision:ctx.storageRevision,checkpoint,view});sessionStorage.setItem(recoveryKey(ctx.id),raw);return raw;}catch{/* The durable library remains the primary save. */return null;}}
-function scheduleSave(){clearTimeout(saveTimer);if(!current?.conflicted)saveTimer=setTimeout(()=>{save({automatic:true}).catch(()=>{});},450);}
+function clearSavedToast(){if($('creator-toast').textContent==='Your creation is saved.'){$('creator-toast').hidden=true;clearTimeout(toastTimer);}}
+function scheduleSave(){clearSavedToast();clearTimeout(saveTimer);if(!current?.conflicted)saveTimer=setTimeout(()=>{save({automatic:true}).catch(()=>{});},450);}
 function previewOf(definition,snapshot){try{return creationThumbnail(definition,snapshot,art);}catch{return null;}}
 function previewMarkup(kind,id){return `<span class="creator-preview" data-preview-kind="${kind}" data-preview-id="${escape(id)}"><span>No preview yet</span></span>`;}
 function save({automatic=true}={}){
-  clearTimeout(saveTimer);
+  clearSavedToast();clearTimeout(saveTimer);
   if(!current)return Promise.resolve();
   // Only explicit Save controls acknowledge replacement of a damaged
   // original. Navigation, previews and other implicit saves keep a separate
@@ -545,7 +546,7 @@ function wire(){
       $('creator-release-dialog').close();await showLibrary({reset:true});toast(`Version ${record.package.content_revision} is saved independently.`);
     }catch(error){$('creator-release-status').textContent=error.message;}finally{releasePublication=null;busy=false;author.disabled=false;$('creator-release-cancel').textContent='Keep editing';$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current&&current.doc.revision!==revision)refresh();if($('creator-release-dialog').open)$('creator-release-confirm').focus();}
   };
-  $('creator-save').onclick=()=>save({automatic:false}).then(()=>toast('Your creation is saved.')).catch(()=>{});
+  $('creator-save').onclick=()=>save({automatic:false}).then(()=>{if($('creator-save-status').textContent==='Saved on this device')toast('Your creation is saved.');}).catch(()=>{});
   $('creator-recovery-copy').onclick=$('creator-save-copy').onclick=()=>copyCurrent().catch(e=>toast(e.message));
   $('creator-export').onclick=async()=>{if(!current||busy)return;busy=true;try{await download(current.doc.value);}catch(error){toast(error.message);}finally{busy=false;$('creator-export').focus();}};
   $('creator-library').onclick=()=>showLibrary().catch(e=>toast(e.message));

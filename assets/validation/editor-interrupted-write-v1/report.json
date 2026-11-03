@@ -1,0 +1,34 @@
+{
+  "completed": true,
+  "inputs": {
+    "scripts/verify-editor-interrupted-write.mjs": "ceaf5e6e35a2795d2ed7346b8ad87c3303d57ec8d7710988f59c4d938993f7c1",
+    "web/editor/index.js": "291043a14fe9ef2f3cd022c1f646572a80d9935bfa05786587c66de940a8eda9",
+    "web/editor/map-view.js": "bba93f111f9f0bcab42f08db558c55a6b4cc055f62e6c2264ea9a97fb280fcfc",
+    "web/editor/document.js": "9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a",
+    "web/content-library.js": "9b050abaac96e6cdec99a93fced1e26409cabd3511ad57807b16c7afb726a7bc"
+  },
+  "scope": "Abrupt SIGKILL of an explicitly owned disposable browser after a real project put succeeds inside a deliberately held-open IndexedDB transaction. Relaunch same isolated profile/origin and compare the last committed project/history. No power-loss or disk-failure claim.",
+  "writePhase": {
+    "projectPutSucceeded": true,
+    "transactionKeptAlive": true,
+    "saveAcknowledged": false
+  },
+  "ownedProcess": {
+    "pid": 92661,
+    "profile": "/var/folders/23/yt8lx165129_7645g387pfb80000gn/T/solar-editor-write-crash-K3ioEr",
+    "ownershipConfirmed": true,
+    "browserVersion": "151.0.7922.34"
+  },
+  "processExitConfirmed": true,
+  "projectId": "c1a89994-bcb3-4d05-bd7c-e67b6461fc52",
+  "checks": {
+    "noStaleSavedToast": true,
+    "wholeRecordExact": true,
+    "checkpointExact": true,
+    "viewExact": true,
+    "uncommittedWriteExcluded": true,
+    "noGracefulUnload": true,
+    "undoExact": true,
+    "redoExact": true
+  }
+}

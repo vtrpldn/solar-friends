@@ -1,0 +1,30 @@
+{
+  "why": "Prove the save transaction boundary survives abrupt owned-browser termination and avoid misleading saved feedback during newer writes.",
+  "verdict": "pass for the exercised interruption and save failure cases",
+  "scope": "Real worker project put succeeds, transaction deliberately kept open, browser ownership checked using its command line/profile and PID, SIGKILL, confirmed exit, same-profile relaunch. Whole durable record compared before editor opens; checkpoint/view/history compared after opening.",
+  "screensIndividuallyReviewed": [
+    "before-crash.png",
+    "recovered.png"
+  ],
+  "uiFix": "Clear old saved toast when saves are scheduled/started; only show explicit Save confirmation if current save status is Saved on this device.",
+  "regressions": [
+    "Real committed save with lost reply reconciled exactly once",
+    "Quota fault after body put preserves previous durable record",
+    "Unsaved export, retry, reload and Undo",
+    "Normal game localStorage unchanged"
+  ],
+  "testRefinement": "An initial whole-record comparison after opening observed normal editor revision metadata updates. Final test compares whole durable record before opening, then compares editor checkpoint/view/history afterward.",
+  "limits": [
+    "One held project-write phase; not all transaction boundaries",
+    "No power-loss, filesystem corruption, physical disk failure or full concurrent-tab acceptance claim",
+    "Only explicitly owned disposable profile/browser terminated"
+  ],
+  "sourceSha256": {
+    "web/project-save-worker.js": "856ebd7146ef5621fa94544fdd6e0b9f86c5b9653cd4207060c3a0ba2179a54b",
+    "web/content-library.js": "9b050abaac96e6cdec99a93fced1e26409cabd3511ad57807b16c7afb726a7bc",
+    "web/editor/index.js": "291043a14fe9ef2f3cd022c1f646572a80d9935bfa05786587c66de940a8eda9",
+    "scripts/verify-editor-interrupted-write.mjs": "ceaf5e6e35a2795d2ed7346b8ad87c3303d57ec8d7710988f59c4d938993f7c1",
+    "scripts/verify-editor-save-ack-recovery.mjs": "d3ac5f893d9684e7aa86ca3eeec186940b52a1b57fcf7b13afc2ff5cea2ca9ae",
+    "scripts/close-validation-browser.mjs": "fbb92c0920ddd4fe4d56c5ca4b8bb68a47d27ca40029bfb97f83b0529b2e09cd"
+  }
+}
