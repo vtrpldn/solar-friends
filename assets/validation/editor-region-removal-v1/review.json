@@ -1,0 +1,22 @@
+{
+  "why": "Removing a goal region must show its consequences without silently redirecting its goals.",
+  "verdict": "pass for exercised region deletion/repair path plus existing building/group regression",
+  "inputSha256": "e51931c828f9e5527552823560c4cfe095bd313088eb17291c5363b0151ecb82",
+  "inputFixture": "Native-valid derivative of tracked assets/validation/editor-scene-layers-v1/authored.solar-scenario; verifier records its exact modifications.",
+  "screensIndividuallyReviewed": [
+    "region-impact.png",
+    "region-unresolved.png"
+  ],
+  "observations": [
+    "Region inspector names Our beginning / A place to stay before removal.",
+    "Removal leaves the exact journal untouched and blocks playtesting.",
+    "Review offers Open journal and a plain-language missing-region error.",
+    "Journal selector retains the removed region ID instead of selecting another target.",
+    "Undo and reload restore the full exact authored definition and enable playtesting.",
+    "Existing typed building identity, grouped removal, utility dependency and stock/liquid reference checks also pass."
+  ],
+  "limits": [
+    "One directly referenced building-count goal; not every nested event/goal condition or release solvability.",
+    "No runtime change needed in this step."
+  ]
+}

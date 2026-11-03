@@ -407,3 +407,7 @@ A real keyboard check found Shift+Tab leaving the first map-save field for body.
 ### Draw-to-name region flow
 
 Newly drawn named regions now open their inspector and focus/select the name field immediately. Open region details remain expanded during rerenders/saving. Trusted pointer draw, real naming, exact inclusive coordinates, two-step undo/redo, Escape cancellation with unchanged current history and exact reload pass. Updated full desktop inspector capture individually inspected. Evidence: `assets/validation/editor-region-flow-v1/`. Goal dependency deletion, additional boundary cases and unfamiliar-player checks remain separate.
+
+### Referenced region removal and repair
+
+Extended public removal checks to a region referenced by a goal. The inspector names its affected chapter/goal before deletion; removal preserves the journal exactly, blocks testing and exposes an Open journal repair action. The journal retains the missing target ID without retargeting. Undo/reload restore the exact definition and valid test state. Existing building/group/utility/stock/liquid dependency regression also passes. Both region consequence/error captures individually inspected. Evidence: `assets/validation/editor-region-removal-v1/`. Nested event/goal combinations and broader release gates remain separate.
