@@ -59,10 +59,10 @@ export function paintWorldBuilding(ctx,{key,x,y,alpha=1,emptyAnimals=false},{pro
   }
 }
 
-export function paintWorldCrops(ctx,building,{project,scale,night=0,health=1,alpha=1}){
+export function paintWorldCrops(ctx,building,{project,scale,night=0,health=1,alpha=1,light=0}){
   if(!building?.crop||!['garden','greenhouse'].includes(building.kind))return;
   const p=project(building.x,building.y),registration=placementArt(building.kind,allBuildingArt[building.kind]);
   ctx.save();ctx.globalAlpha*=alpha;
-  drawCrops(ctx,building,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,night,health);
+  drawCrops(ctx,building,p.x+registration.x*scale,p.y+registration.y*scale,scale*registration.scale,night,health,light);
   ctx.restore();
 }

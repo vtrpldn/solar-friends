@@ -613,7 +613,7 @@ function building(b) {
   buildingSprite(b.kind,b.x,b.y,constructionOpacity(complete,work,project?.stage||0,stages),b.id);
   if (complete && ['garden','greenhouse'].includes(b.kind)) {
     ctx.save();if(work?.stage==='rebuild')ctx.globalAlpha*=.45;
-    paintWorldCrops(ctx,b,{project:iso,scale,night:nightAmount(state.village.minutes),health:state.environment.economy.processes.growing.find(plot=>plot.building===b.id)?.health??1});
+    paintWorldCrops(ctx,b,{project:iso,scale,light:buildingLighting(state.environment.power,b.id,b.kind,complete),night:nightAmount(state.village.minutes),health:state.environment.economy.processes.growing.find(plot=>plot.building===b.id)?.health??1});
     ctx.restore();
   }
   if(complete&&!work)return;

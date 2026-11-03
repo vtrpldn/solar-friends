@@ -1,0 +1,262 @@
+{
+  "sources": {
+    "scripts/verify-greenhouse-crop-lighting.mjs": "c3d5c46e3a5bbac9a77c3d2ed46d07d49d08e74ea3c658d099aa08ff81823c58",
+    "web/crop-art.js": "7bc17ec81eff066368d24a2e480d83af2ec516644c21e6a8eea4926a36c326ba",
+    "web/world-renderer.js": "04bdee7abe756d42e8465c69fcb4e66a61a9dd9d05d5dc607979a90586bcccd2",
+    "web/main.js": "da0693bf1e62bc2dc62586cbe3b7de2a6b4e3e8106f480ffb1646d6622c86a5e"
+  },
+  "baselineCommit": "308b61d",
+  "baselineCropSha256": "e75beb185b763eb4f18dc984c6d2b3e12fecc0348b3c91ebe8e349cbb174685c",
+  "result": {
+    "exactDay": 144,
+    "exactUnpowered": 48,
+    "exactOutdoor": 72,
+    "geometry": 24,
+    "dimming": 24,
+    "emptySoilUnchanged": true,
+    "differences": [
+      {
+        "kind": "maize",
+        "state": "young",
+        "rgbSum": {
+          "unpowered": 79945,
+          "dim": 91092,
+          "powered": 101772
+        },
+        "changedChannels": 549
+      },
+      {
+        "kind": "maize",
+        "state": "maturing",
+        "rgbSum": {
+          "unpowered": 121897,
+          "dim": 153416,
+          "powered": 184056
+        },
+        "changedChannels": 1497
+      },
+      {
+        "kind": "maize",
+        "state": "ready",
+        "rgbSum": {
+          "unpowered": 165794,
+          "dim": 218684,
+          "powered": 269965
+        },
+        "changedChannels": 2373
+      },
+      {
+        "kind": "maize",
+        "state": "dry-stressed",
+        "rgbSum": {
+          "unpowered": 367565,
+          "dim": 410953,
+          "powered": 452243
+        },
+        "changedChannels": 1868
+      },
+      {
+        "kind": "cassava",
+        "state": "young",
+        "rgbSum": {
+          "unpowered": 78402,
+          "dim": 90213,
+          "powered": 101625
+        },
+        "changedChannels": 676
+      },
+      {
+        "kind": "cassava",
+        "state": "maturing",
+        "rgbSum": {
+          "unpowered": 122377,
+          "dim": 155807,
+          "powered": 187803
+        },
+        "changedChannels": 2019
+      },
+      {
+        "kind": "cassava",
+        "state": "ready",
+        "rgbSum": {
+          "unpowered": 160491,
+          "dim": 212224,
+          "powered": 262432
+        },
+        "changedChannels": 3252
+      },
+      {
+        "kind": "cassava",
+        "state": "dry-stressed",
+        "rgbSum": {
+          "unpowered": 366243,
+          "dim": 412594,
+          "powered": 457001
+        },
+        "changedChannels": 2237
+      },
+      {
+        "kind": "fodder",
+        "state": "young",
+        "rgbSum": {
+          "unpowered": 72810,
+          "dim": 79911,
+          "powered": 86642
+        },
+        "changedChannels": 424
+      },
+      {
+        "kind": "fodder",
+        "state": "maturing",
+        "rgbSum": {
+          "unpowered": 96800,
+          "dim": 120605,
+          "powered": 143725
+        },
+        "changedChannels": 1453
+      },
+      {
+        "kind": "fodder",
+        "state": "ready",
+        "rgbSum": {
+          "unpowered": 138619,
+          "dim": 183115,
+          "powered": 226040
+        },
+        "changedChannels": 2591
+      },
+      {
+        "kind": "fodder",
+        "state": "dry-stressed",
+        "rgbSum": {
+          "unpowered": 306921,
+          "dim": 339730,
+          "powered": 371247
+        },
+        "changedChannels": 1588
+      },
+      {
+        "kind": "lettuce",
+        "state": "young",
+        "rgbSum": {
+          "unpowered": 73788,
+          "dim": 80447,
+          "powered": 86806
+        },
+        "changedChannels": 258
+      },
+      {
+        "kind": "lettuce",
+        "state": "maturing",
+        "rgbSum": {
+          "unpowered": 96361,
+          "dim": 118537,
+          "powered": 139793
+        },
+        "changedChannels": 873
+      },
+      {
+        "kind": "lettuce",
+        "state": "ready",
+        "rgbSum": {
+          "unpowered": 122345,
+          "dim": 159843,
+          "powered": 195925
+        },
+        "changedChannels": 1518
+      },
+      {
+        "kind": "lettuce",
+        "state": "dry-stressed",
+        "rgbSum": {
+          "unpowered": 310356,
+          "dim": 340147,
+          "powered": 369136
+        },
+        "changedChannels": 1090
+      },
+      {
+        "kind": "beans",
+        "state": "young",
+        "rgbSum": {
+          "unpowered": 78601,
+          "dim": 88617,
+          "powered": 98164
+        },
+        "changedChannels": 486
+      },
+      {
+        "kind": "beans",
+        "state": "maturing",
+        "rgbSum": {
+          "unpowered": 109675,
+          "dim": 135604,
+          "powered": 160791
+        },
+        "changedChannels": 1489
+      },
+      {
+        "kind": "beans",
+        "state": "ready",
+        "rgbSum": {
+          "unpowered": 145694,
+          "dim": 190631,
+          "powered": 234097
+        },
+        "changedChannels": 2480
+      },
+      {
+        "kind": "beans",
+        "state": "dry-stressed",
+        "rgbSum": {
+          "unpowered": 352445,
+          "dim": 386924,
+          "powered": 420222
+        },
+        "changedChannels": 1563
+      },
+      {
+        "kind": "tomatoes",
+        "state": "young",
+        "rgbSum": {
+          "unpowered": 77785,
+          "dim": 88568,
+          "powered": 99035
+        },
+        "changedChannels": 610
+      },
+      {
+        "kind": "tomatoes",
+        "state": "maturing",
+        "rgbSum": {
+          "unpowered": 125017,
+          "dim": 159655,
+          "powered": 192900
+        },
+        "changedChannels": 2021
+      },
+      {
+        "kind": "tomatoes",
+        "state": "ready",
+        "rgbSum": {
+          "unpowered": 143816,
+          "dim": 189868,
+          "powered": 234045
+        },
+        "changedChannels": 2759
+      },
+      {
+        "kind": "tomatoes",
+        "state": "dry-stressed",
+        "rgbSum": {
+          "unpowered": 353247,
+          "dim": 399782,
+          "powered": 444012
+        },
+        "changedChannels": 2146
+      }
+    ]
+  },
+  "browserErrors": [],
+  "scope": "Decoded canvas pixels across all six crop types, three growth stages and dry stress: daylight/outdoor/unpowered byte identity, greenhouse alpha identity and monotonic powered brightness. Shared painter scenes and live native power behavior remain separate checks."
+}

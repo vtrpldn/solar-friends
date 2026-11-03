@@ -1,0 +1,20 @@
+{
+  "boards": [
+    {
+      "file": "mata-atlantica-zoom-1-powered-night-group-1.png",
+      "sha256": "3ef3bf8b534c5eae90506a473190b21ad1efcf03b46830fff90f8548bf4d2935",
+      "inspection": "individually inspected; coherent crop placement and frame alignment; young plants remain subtle behind glass"
+    },
+    {
+      "file": "mata-atlantica-zoom-1-powered-night-group-2.png",
+      "sha256": "d3028c105d185dae2e1f04b792cf57e402a614b53cc9bd3a316bf6ecda6021fb",
+      "inspection": "individually inspected; coherent crop placement and frame alignment; young plants remain subtle behind glass"
+    },
+    {
+      "file": "mata-atlantica-zoom-1-powered-night-group-3.png",
+      "sha256": "b970e4860c2697163d999f53a41874d119356d80639e43a861cc68c4f0033d2b",
+      "inspection": "individually inspected; coherent crop placement and frame alignment; young plants remain subtle behind glass"
+    }
+  ],
+  "scope": "25 controlled powered-night greenhouse crop states in Mata Atlantica at normal zoom. Other two biome captures are not yet visually inspected. Pixel checks cover all six crops with dimming; not a live native power-switch test. Outdoor and unpowered night readability remains open."
+}
