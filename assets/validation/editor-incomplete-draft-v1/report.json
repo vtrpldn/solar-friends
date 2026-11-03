@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "sources": {
+    "scripts/verify-editor-incomplete-draft.mjs": "42ee05caf9a3dccd1f3af1942879e54ddd7db64d336eb9f01bfca62aa5ca784f",
+    "web/editor/index.js": "52830141ff655279287c1fb1b642f042a9e4be4518841894804532f6823c2d6b",
+    "web/editor/draft-import.js": "6f62e1b32a7d471d3181126d32c4ead28b386debb4bbdee396db3e2ad13e4c99",
+    "web/creation-export-worker.js": "4a1ea48c44b122f8809a9ad1c3a7874af79b45d580a833e8505869d82fdac157",
+    "web/pkg/solar_friends_bg.wasm": "58d3c662a05d2590ad5a744e17ffb4a3280d7125cb97581ad2aae14a957c0086"
+  },
+  "checks": {
+    "exactIncompleteExport": true,
+    "cleanStorageImport": true,
+    "independentIdentity": true,
+    "missingTargetRetained": true,
+    "testAndReleaseBlocked": true,
+    "publicJournalRepair": true,
+    "repairReloadExact": true,
+    "sourceUnchanged": true,
+    "browserErrors": []
+  },
+  "scope": "Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay."
+}

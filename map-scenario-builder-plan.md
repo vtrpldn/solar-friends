@@ -411,3 +411,7 @@ Newly drawn named regions now open their inspector and focus/select the name fie
 ### Referenced region removal and repair
 
 Extended public removal checks to a region referenced by a goal. The inspector names its affected chapter/goal before deletion; removal preserves the journal exactly, blocks testing and exposes an Open journal repair action. The journal retains the missing target ID without retargeting. Undo/reload restore the exact definition and valid test state. Existing building/group/utility/stock/liquid dependency regression also passes. Both region consequence/error captures individually inspected. Evidence: `assets/validation/editor-region-removal-v1/`. Nested event/goal combinations and broader release gates remain separate.
+
+### Incomplete draft sharing and repair
+
+Public export preserves an unfinished scenario exactly after removing a goal's referenced region. Import into isolated storage creates an independent project, preserves the missing target and keeps Test village / Save release disabled. Expanding the goal in the journal and choosing Anywhere on the map repairs readiness; saving/reloading preserves the exact repaired definition and leaves the source unchanged. Browser check passed with no page errors and completed cleanup. Evidence: `assets/validation/editor-incomplete-draft-v1/`. The current issue opens the chapter with the goal collapsed; more precise navigation, other invalid draft classes and broader acceptance remain open.

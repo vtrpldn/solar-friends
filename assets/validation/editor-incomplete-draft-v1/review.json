@@ -1,0 +1,6 @@
+{
+  "scope": "An otherwise valid authored scenario with its referenced goal region removed through player controls.",
+  "result": "Pass: exact draft export, import into isolated storage with independent project identity, retained missing target, blocked test/release, public journal repair, exact repaired reload and original project isolation.",
+  "visual_review": "Individually inspected imported-missing-region.png. Journal shows the unresolved region message; the affected goal is collapsed because the current validation issue targets its chapter. The test expands it using its visible summary before repairing.",
+  "limitations": "Does not cover every invalid draft class, gameplay launch, release publication or unfamiliar-player acceptance. More precise issue navigation remains a polish opportunity."
+}
