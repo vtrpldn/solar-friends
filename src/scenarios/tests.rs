@@ -779,3 +779,27 @@ fn appearance_choices_can_repeat_without_retargeting_authored_residents() {
     assert!(g.restore(&saved));
     assert_eq!(g.snapshot(), saved);
 }
+
+#[test]
+fn road_rejections_explain_the_site_and_preserve_the_running_village() {
+    let original = Definition::builtin(modes::Mode::Sandbox);
+    let mut g = Game::new();
+    let before = g.snapshot();
+    for (cells, index, message) in [
+        (vec![[0, 32]], 0, "map edge"),
+        (vec![[61, 32]], 0, "riverbank"),
+        (vec![[30, 29]], 0, "beside buildings"),
+        (vec![[28, 30], [28, 30]], 1, "more than once"),
+    ] {
+        let mut d = original.clone();
+        d.start.roads = cells.clone();
+        let result = report(&g.load_scenario(&encoded(&d)));
+        assert_eq!(result["ok"], false);
+        let issue = &result["issues"][0];
+        assert_eq!(issue["code"], "invalid_road");
+        assert_eq!(issue["path"], format!("start.roads.{index}"));
+        assert_eq!(issue["at"], serde_json::json!(cells[index]));
+        assert!(issue["message"].as_str().unwrap().contains(message), "{issue}");
+        assert_eq!(g.snapshot(), before);
+    }
+}

@@ -309,16 +309,22 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
     }
     let mut roads = HashSet::new();
     for (i, &[x, y]) in d.start.roads.iter().enumerate() {
-        if !(1..MAP_SIZE - 1).contains(&x)
-            || !(1..MAP_SIZE - 1).contains(&y)
-            || world::bank(&v, x, y)
-            || !roads.insert([x, y])
-            || v.buildings.iter().any(|b| interactions::occupies(b, x, y))
-        {
+        let reason = if !(1..MAP_SIZE - 1).contains(&x) || !(1..MAP_SIZE - 1).contains(&y) {
+            Some("Keep road tiles inside the property, one cell away from the map edge.")
+        } else if world::bank(&v, x, y) {
+            Some("Choose dry land away from the riverbank for this road.")
+        } else if !roads.insert([x, y]) {
+            Some("This road cell is listed more than once. Keep one tile per cell.")
+        } else if v.buildings.iter().any(|b| interactions::occupies(b, x, y)) {
+            Some("Keep each road tile on clear land beside buildings.")
+        } else {
+            None
+        };
+        if let Some(reason) = reason {
             let mut error = Report::error(
                 &format!("start.roads.{i}"),
                 "invalid_road",
-                "Keep each road tile on clear land beside buildings.",
+                reason,
             );
             error.issues[0].at = Some([x, y]);
             return Err(error);

@@ -1,0 +1,29 @@
+{
+  "screenshots": [
+    {
+      "file": "map-edge.png",
+      "sha256": "b38503cd7461ee9ba258b8425b0c43dd804359a7ce71b77c119b4bcda9b69625",
+      "individuallyInspected": true
+    },
+    {
+      "file": "river-bank.png",
+      "sha256": "0adbdf3868e2e775f546a22134c53a3afd42433982773ca3db8ccbd6c5eaeef1",
+      "individuallyInspected": true
+    }
+  ],
+  "nativeChecks": {
+    "cargoTest": {
+      "passed": 792,
+      "failed": 0
+    },
+    "strictClippy": "passed",
+    "releaseWasmBuild": "passed",
+    "focusedRejectionTest": "four reasons, exact path/cell and unchanged running snapshot"
+  },
+  "sources": {
+    "src/scenarios/compile.rs": "45647a3ea2d194d25b46ffdb029a13f318b03d3874761233a44770dd9d2e3899",
+    "src/scenarios/tests.rs": "6ff85057314ccace02f711bf2f96bc89952ad017a7df43831ff142f7c31a9704",
+    "scripts/verify-editor-road-preview.mjs": "cf1c9b480513ccc21c1d5c3e3fa71ffbef451f724d441a279d4b49cfe655247b"
+  },
+  "scope": "One outer-edge and one riverbank/inland pair via public desktop brush, plus existing stroke/history/reload regression. Native duplicate/import message covered by focused unit test. Not all seeds/river shapes/maximal strokes or all art/performance acceptance."
+}
