@@ -1,0 +1,44 @@
+{
+  "why": "Complete normal daylight visual inspection from current assets, rendering modules and rebuilt native engine rather than inheriting older uninspected capture records.",
+  "captureDirectory": "artifacts/nature-day-release-current",
+  "visuallyReviewed": [
+    "mata-atlantica-zoom-1-day-group-1.png",
+    "mata-atlantica-zoom-1-day-group-2.png",
+    "mata-atlantica-zoom-1-day-group-3.png",
+    "mata-atlantica-zoom-1-day-group-4.png",
+    "mata-atlantica-zoom-1-day-group-5.png",
+    "mata-atlantica-zoom-1-day-group-6.png",
+    "mata-atlantica-zoom-1-day-group-7.png",
+    "cerrado-zoom-1-day-group-1.png",
+    "cerrado-zoom-1-day-group-2.png",
+    "cerrado-zoom-1-day-group-3.png",
+    "cerrado-zoom-1-day-group-4.png",
+    "cerrado-zoom-1-day-group-5.png",
+    "cerrado-zoom-1-day-group-6.png",
+    "cerrado-zoom-1-day-group-7.png",
+    "caatinga-zoom-1-day-group-1.png",
+    "caatinga-zoom-1-day-group-2.png",
+    "caatinga-zoom-1-day-group-3.png",
+    "caatinga-zoom-1-day-group-4.png",
+    "caatinga-zoom-1-day-group-5.png",
+    "caatinga-zoom-1-day-group-6.png",
+    "caatinga-zoom-1-day-group-7.png"
+  ],
+  "zoom": 1,
+  "lighting": "day",
+  "boards": 21,
+  "compositions": 180,
+  "catalogEntries": 20,
+  "identity": "All board pixels and every recorded input independently rehashed after individual inspection.",
+  "findings": [
+    "No additional target clipping, detached ground contact, opaque sprite ground islands or disproportionate target relative to the home/resident was observed in these controlled static scenes.",
+    "Native minimum/unit/maximum sizes remain consistent within each catalog family.",
+    "Minimum-size low grasses have weak separation from the finer Cerrado/Caatinga ground texture; retain the readability concern for overview and mixed-landscape review."
+  ],
+  "limits": [
+    "No overall art acceptance or claim of ecological suitability for every displayed species/biome combination.",
+    "Overview capture/inspection, close weather, neighboring clusters, mixed habitat transitions, broader resident world/portrait/motion and other original release gates remain open.",
+    "Static headless capture is not hardware/display pacing evidence."
+  ],
+  "runtimeChanges": false
+}
