@@ -1,0 +1,16 @@
+{
+  "why": "An author repairing a removed region should land on its goal field rather than hunt inside a collapsed chapter.",
+  "implementation": "Native missing-region validation emits a distinct exact field path for every missing reference, including nested all/any groups. The existing journal navigation reveals and focuses that field.",
+  "browser": "Public incomplete-draft export/import, visible and focused missing-region selector without manual expansion, repair, exact reload and original project isolation pass with no page errors and completed cleanup.",
+  "visual_review": "Individually inspected imported-missing-region.png: expanded goal, visible missing-region selector with focus ring, readable repair message and footer.",
+  "limits": "Nested paths are covered natively; this browser fixture covers one direct regional goal. Other validation categories and unfamiliar-player acceptance remain separate.",
+  "checks": {
+    "native_tests": 791,
+    "native_failures": 0,
+    "strict_clippy": "passed",
+    "release_wasm_build": "passed",
+    "public_removal_undo_reload_regression": "passed",
+    "javascript_syntax": "passed",
+    "diff_whitespace": "passed"
+  }
+}

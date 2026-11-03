@@ -415,3 +415,7 @@ Extended public removal checks to a region referenced by a goal. The inspector n
 ### Incomplete draft sharing and repair
 
 Public export preserves an unfinished scenario exactly after removing a goal's referenced region. Import into isolated storage creates an independent project, preserves the missing target and keeps Test village / Save release disabled. Expanding the goal in the journal and choosing Anywhere on the map repairs readiness; saving/reloading preserves the exact repaired definition and leaves the source unchanged. Browser check passed with no page errors and completed cleanup. Evidence: `assets/validation/editor-incomplete-draft-v1/`. The current issue opens the chapter with the goal collapsed; more precise navigation, other invalid draft classes and broader acceptance remain open.
+
+### Direct navigation to missing regional goal targets
+
+Missing-region validation now provides the exact goal/condition field path, including each nested all/any reference. Open journal reveals the goal and focuses its missing region selector without a manual expansion step. The public incomplete-draft sharing/repair/reload check passes against the rebuilt game, and the focused desktop capture was individually inspected. Evidence: `assets/validation/editor-region-navigation-v1/`. Native nested-path coverage complements the single direct-goal browser fixture; other validation categories and broader acceptance remain open.

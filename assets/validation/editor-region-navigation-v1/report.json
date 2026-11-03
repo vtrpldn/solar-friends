@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "sources": {
+    "scripts/verify-editor-incomplete-draft.mjs": "f731813a4c46c87461da024c2b928eb4cc016e3b758eb49062c60c88dce01ee5",
+    "web/editor/index.js": "52830141ff655279287c1fb1b642f042a9e4be4518841894804532f6823c2d6b",
+    "web/editor/scenario-journal.js": "bb57a27d8f16cdf4fdf2365d5e28c07ee0a5b6e5e7fd20835811501c293158cc",
+    "src/scenarios/journal/validation.rs": "91acae9efca485ad2451ef507b5f8068b7da5b12f9f2d77d508bbd7c19109f8e",
+    "web/editor/draft-import.js": "6f62e1b32a7d471d3181126d32c4ead28b386debb4bbdee396db3e2ad13e4c99",
+    "web/creation-export-worker.js": "4a1ea48c44b122f8809a9ad1c3a7874af79b45d580a833e8505869d82fdac157",
+    "web/pkg/solar_friends_bg.wasm": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1"
+  },
+  "checks": {
+    "exactIncompleteExport": true,
+    "cleanStorageImport": true,
+    "independentIdentity": true,
+    "missingTargetRetained": true,
+    "testAndReleaseBlocked": true,
+    "publicJournalRepair": true,
+    "missingRegionRevealedAndFocused": true,
+    "repairReloadExact": true,
+    "sourceUnchanged": true,
+    "browserErrors": []
+  },
+  "scope": "Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay."
+}

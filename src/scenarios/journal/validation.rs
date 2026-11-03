@@ -5,7 +5,12 @@ pub fn check(d: &Definition, report: &mut Report) {
     };
     roles::check(d, report);
     events::check(d, report);
-    if journal.challenge.as_ref().is_some_and(|c| !c.deadline.is_finite() || c.deadline <= d.start.minutes || c.deadline > 5_000_000. || !text(&c.failure_message, 1000)) {
+    if journal.challenge.as_ref().is_some_and(|c| {
+        !c.deadline.is_finite()
+            || c.deadline <= d.start.minutes
+            || c.deadline > 5_000_000.
+            || !text(&c.failure_message, 1000)
+    }) {
         report.push("journal.challenge", "invalid_challenge", "Choose a deadline after arrival and no later than minute 5,000,000, with a failure message of 1–1,000 characters.");
     }
     if journal.schema != 1
@@ -17,7 +22,11 @@ pub fn check(d: &Definition, report: &mut Report) {
         report.push("journal", "invalid_journal", "Use journal version 1, 1–16 chapters, an introduction up to 2,000 characters and completion text up to 1,000 characters.");
     }
     if d.rules.mode != modes::Mode::Sandbox {
-        report.push("journal", "unsupported_story_adapter", "Use Sandbox rules for a custom journal. The official Story uses its campaign adapter.");
+        report.push(
+            "journal",
+            "unsupported_story_adapter",
+            "Use Sandbox rules for a custom journal. The official Story uses its campaign adapter.",
+        );
     }
     let mut chapters = HashSet::new();
     let mut ids = BTreeMap::new();
@@ -33,7 +42,7 @@ pub fn check(d: &Definition, report: &mut Report) {
         {
             report.push(&format!("journal.chapters.{index}"), "invalid_chapter", "Use a unique chapter identity, a title, at most sixteen goals and at least one required goal.");
         }
-        for goal in &chapter.goals {
+        for (goal_index, goal) in chapter.goals.iter().enumerate() {
             if !valid_key(&goal.id)
                 || ids.insert(goal.id.clone(), index).is_some()
                 || !text(&goal.title, 100)
@@ -63,13 +72,12 @@ pub fn check(d: &Definition, report: &mut Report) {
                     "Enable seasonal weather before requiring a dry-season outcome.",
                 );
             }
-            if !regions_exist(&goal.condition, d) {
-                report.push(
-                    "journal.chapters",
-                    "missing_goal_region",
-                    "Choose an existing named region for each regional goal.",
-                );
-            }
+            report_missing_regions(
+                &goal.condition,
+                d,
+                &format!("journal.chapters.{index}.goals.{goal_index}.condition"),
+                report,
+            );
             if !condition(&goal.condition, 0, &mut nodes) {
                 report.push("journal.chapters", "invalid_condition", "Use supported goal conditions, positive bounded targets and nonempty groups nested at most four levels.");
             }
@@ -219,6 +227,22 @@ pub(super) fn needs_climate(condition: &GoalCondition) -> bool {
             conditions.iter().any(needs_climate)
         }
         _ => false,
+    }
+}
+
+fn report_missing_regions(c: &GoalCondition, d: &Definition, path: &str, report: &mut Report) {
+    match c {
+        GoalCondition::All { conditions } | GoalCondition::Any { conditions } => {
+            for (index, child) in conditions.iter().enumerate() {
+                report_missing_regions(child, d, &format!("{path}.conditions.{index}"), report);
+            }
+        }
+        _ if !regions_exist(c, d) => report.push(
+            &format!("{path}.region"),
+            "missing_goal_region",
+            "Choose an existing named region for this regional goal.",
+        ),
+        _ => {}
     }
 }
 

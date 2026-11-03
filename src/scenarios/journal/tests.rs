@@ -1048,3 +1048,42 @@ fn morning_milestone_observes_sunrise_not_the_authored_start_date() {
     d.start.minutes=600.;let mut g=game(d.clone());assert!(state(&mut g)["finished_at"].is_null());let saved=g.snapshot();g.tick(0.);assert_eq!(g.snapshot(),saved);
     d.start.minutes=359.5;let mut g=game(d);g.tick(0.25);assert!(state(&mut g)["finished_at"].is_number());let saved=g.snapshot();assert!(g.restore(&saved));assert_eq!(g.snapshot(),saved);
 }
+
+#[test]
+fn missing_regions_identify_each_nested_goal_field() {
+    let regional = |id: &str| GoalCondition::Buildings {
+        building: "home".into(),
+        count: 1,
+        credit: BuildingCredit::Present,
+        region: Some(id.into()),
+    };
+    let d = scenario(vec![chapter(
+        "first",
+        vec![goal(
+            "nested",
+            GoalCondition::All {
+                conditions: vec![
+                    regional("missing-a"),
+                    GoalCondition::Any {
+                        conditions: vec![regional("missing-b")],
+                    },
+                ],
+            },
+        )],
+    )]);
+    let mut report = Report::default();
+    validation::check(&d, &mut report);
+    let paths: Vec<_> = report
+        .issues
+        .iter()
+        .filter(|i| i.code == "missing_goal_region")
+        .map(|i| i.path.as_str())
+        .collect();
+    assert_eq!(
+        paths,
+        vec![
+            "journal.chapters.0.goals.0.condition.conditions.0.region",
+            "journal.chapters.0.goals.0.condition.conditions.1.conditions.0.region",
+        ]
+    );
+}
