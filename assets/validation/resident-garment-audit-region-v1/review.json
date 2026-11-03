@@ -1,0 +1,178 @@
+{
+  "baseline": "05b7588",
+  "why": "Reduce temporary raster allocation for registered garment cells without weakening ownership audits or changing rendered art.",
+  "change": "Audit probe uses the exact source rectangle dimensions and integer translation instead of allocating the entire 1254-square atlas. Six current shirt registrations use 1024-square regions; 42 full-size regions remain unchanged.",
+  "allocation": "Applicable temporary RGBA surface decreases from 6,290,064 to 4,194,304 bytes (2,095,760 bytes). This is surface capacity, not measured total process memory.",
+  "oracle": {
+    "exactPixelRegions": 6,
+    "exactAuditComparisons": 18,
+    "source": "scripts/verify-clothing-audit-crop.mjs",
+    "coverage": "Seeded alpha values including 31/32 thresholds, opaque and antialiased pixels; whole, corner and middle source rectangles."
+  },
+  "parity": "200 complete v5/v6 pose/return rasters and contact/shadow metadata match the committed baseline byte-for-byte on Metal.",
+  "profile": {
+    "scope": "One-millisecond CPU sampling adds overhead. Profiled loading time is not an unprofiled benchmark.",
+    "topSelfSamples": [
+      {
+        "name": "getImageData ",
+        "hits": 4544
+      },
+      {
+        "name": "auditCharacterPartRegion http://127.0.0.1:59173/character-parts.js",
+        "hits": 1028
+      },
+      {
+        "name": "(program) ",
+        "hits": 960
+      },
+      {
+        "name": "drawImage ",
+        "hits": 819
+      },
+      {
+        "name": "(idle) ",
+        "hits": 580
+      },
+      {
+        "name": "tintClothingPixels http://127.0.0.1:59173/character-clothing-colour.js",
+        "hits": 570
+      },
+      {
+        "name": "tintBodyMaterials http://127.0.0.1:59173/character-materials.js",
+        "hits": 255
+      },
+      {
+        "name": "locateSpriteFrames http://127.0.0.1:59173/sprite-frames.js",
+        "hits": 222
+      },
+      {
+        "name": "prepareClothingColourSource http://127.0.0.1:59173/character-clothing-colour.js",
+        "hits": 182
+      },
+      {
+        "name": "toBlob ",
+        "hits": 170
+      },
+      {
+        "name": "preparedFrames http://127.0.0.1:59173/sprite-frames.js",
+        "hits": 145
+      },
+      {
+        "name": "(garbage collector) ",
+        "hits": 127
+      },
+      {
+        "name": "compose http://127.0.0.1:59173/character-family-appearance.js",
+        "hits": 92
+      },
+      {
+        "name": "composeClothingPose http://127.0.0.1:59173/character-clothing.js",
+        "hits": 88
+      },
+      {
+        "name": "canonical http://127.0.0.1:59173/editor/journal.js",
+        "hits": 54
+      },
+      {
+        "name": "registeredBodyAppearance http://127.0.0.1:59173/character-body-appearance.js",
+        "hits": 53
+      },
+      {
+        "name": "compose http://127.0.0.1:59173/character-hair.js",
+        "hits": 52
+      },
+      {
+        "name": "bodyMaterialMask http://127.0.0.1:59173/character-materials.js",
+        "hits": 48
+      },
+      {
+        "name": "(anonymous) http://127.0.0.1:59173/editor/journal.js",
+        "hits": 47
+      },
+      {
+        "name": "validateBodyForegroundMask http://127.0.0.1:59173/character-foreground-mask.js",
+        "hits": 46
+      },
+      {
+        "name": "loadCharacterImageSource http://127.0.0.1:59173/character-image-source.js",
+        "hits": 45
+      },
+      {
+        "name": "putImageData ",
+        "hits": 42
+      },
+      {
+        "name": "prepareContactBodyFrame http://127.0.0.1:59173/character-contact-frame.js",
+        "hits": 38
+      },
+      {
+        "name": "createBodyForegroundLayers http://127.0.0.1:59173/character-foreground.js",
+        "hits": 38
+      },
+      {
+        "name": "prepareRegisteredHair http://127.0.0.1:59173/character-hair.js",
+        "hits": 33
+      },
+      {
+        "name": "creamComponents http://127.0.0.1:59173/character-materials.js",
+        "hits": 32
+      },
+      {
+        "name": "tintHairPixels http://127.0.0.1:59173/character-hair-colours.js",
+        "hits": 31
+      },
+      {
+        "name": "(anonymous) http://127.0.0.1:59173/character-materials.js",
+        "hits": 29
+      },
+      {
+        "name": "getContext ",
+        "hits": 28
+      },
+      {
+        "name": "prepareRegisteredBodyFrames http://127.0.0.1:59173/character-body-frames.js",
+        "hits": 27
+      },
+      {
+        "name": "registeredEquipmentFrame http://127.0.0.1:59173/character-equipment.js",
+        "hits": 25
+      },
+      {
+        "name": "readCharacterBundleBytes http://127.0.0.1:59173/character-bundle-response.js",
+        "hits": 15
+      },
+      {
+        "name": "createObjectURL ",
+        "hits": 14
+      },
+      {
+        "name": "inside http://127.0.0.1:59173/character-materials.js",
+        "hits": 13
+      },
+      {
+        "name": "wasm-function[2451] http://127.0.0.1:59173/pkg/solar_friends_bg.wasm",
+        "hits": 12
+      }
+    ],
+    "localTrace": "artifacts/editor-current-loading-profile/12-256-loading.cpuprofile"
+  },
+  "performance": {
+    "beforeUnprofiledMs": 16162.109999999999,
+    "afterUnprofiledMs": 16127.600749999998,
+    "verdict": "No demonstrated end-to-end loading improvement from these single runs; approximately 16 seconds remains unresolved."
+  },
+  "inspected": [
+    "editor.png"
+  ],
+  "rejectedTrials": [
+    {
+      "change": "Also use CPU-backed whole-frame atlas audit canvases",
+      "result": "Combined trial failed equipment-foreground ownership validation. Reverted atlas module; no root-cause or parity claim for that rejected trial."
+    },
+    {
+      "change": "First crop benchmark",
+      "result": "Excluded: source hash guard detected a comment edit during execution. Final unchanged-source run completed successfully."
+    }
+  ],
+  "limits": "Sampled complete appearances, not every recipe or all browser backends. No broader art, memory plateau, physical pacing or full release acceptance."
+}

@@ -4,8 +4,8 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const output=process.argv[2]??'artifacts/resident-audit-parity',headed=process.argv.includes('--headed'),baseline='55b7768';
-const files=['web/character-parts.js','web/character-hair.js','web/character-clothing.js'];
+const output=process.argv[2]??'artifacts/resident-audit-parity',headed=process.argv.includes('--headed'),baseline=process.argv.find(a=>a.startsWith('--baseline='))?.slice(11)??'55b7768';
+const files=['web/character-parts.js','web/character-hair.js','web/character-clothing.js','web/character-atlas-part.js'];
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 await mkdir(output,{recursive:true});let browser;const results={},inputs={};
 try{

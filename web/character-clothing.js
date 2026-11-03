@@ -20,10 +20,12 @@ export function composeClothingPose({body,appearanceBody,binding,image,sourceHas
  if(foreground&&foreground.schema!==2)throw Error('Garment foreground requires registered native pixel ownership.');
  const preserved=r.preservedBody===undefined?null:validateBodyForegroundMask(r.preservedBody,binding,sheet,index);
  if(preserved&&preserved.schema!==2)throw Error('Preserved body parts require registered native pixel ownership.');
- const painted=registeredBodyAppearance(body,appearanceBody),probe=document.createElement('canvas');probe.width=probe.height=1254;
+ // Audit exactly the registered source cell; painting the unused atlas
+ // area only increases temporary allocation and CPU raster work.
+ const painted=registeredBodyAppearance(body,appearanceBody),probe=document.createElement('canvas');probe.width=rect[2];probe.height=rect[3];
  try{
-  const context=probe.getContext('2d',{willReadFrequently:true});context.drawImage(image,0,0);
-  const audit=auditCharacterPartRegion(context.getImageData(...rect),r.bounds);if(!audit.ok)throw Error('Garment paint leaves its authored region.');
+  const context=probe.getContext('2d',{willReadFrequently:true});context.drawImage(image,-rect[0],-rect[1]);
+  const audit=auditCharacterPartRegion(context.getImageData(0,0,rect[2],rect[3]),r.bounds);if(!audit.ok)throw Error('Garment paint leaves its authored region.');
   const frame=document.createElement('canvas');frame.width=frame.height=256;const ctx=frame.getContext('2d');
   let front=null;
   try{
