@@ -1,0 +1,26 @@
+{
+  "screenshot": {
+    "file": "cancel-preparation.png",
+    "sha256": "c0df3c5afd299be2656ca831681db29a486704c899d23b443fcb284b2e913f92",
+    "individuallyInspected": true
+  },
+  "motivation": "Native compilation blocked the combined maximum-map move release for about 226 ms inside a 305 ms handler.",
+  "change": "Large building moves prepare in a disposable worker with modal progress and Cancel, verify the source draft identity/revision, restore the validated checkpoint, and commit exactly one history entry. A failed transaction restores the prior preview.",
+  "observations": {
+    "pointerReleaseMs": 3,
+    "nativeRestoreMs": 18.9,
+    "nativeSnapshotForRollbackMs": 18.1,
+    "nativeReportStateMs": 15,
+    "nativeLandReportMs": 10.6,
+    "nativeCompilationInMainMovePhase": false
+  },
+  "checks": [
+    "delayed real preparation worker cancelled through public button",
+    "checkpoint/history exact immediately and after late-result window",
+    "aborted real worker load preserves checkpoint/history",
+    "normal retry exact move/internal routes, one-step undo/redo/reload",
+    "shared authored-cast public playtest regression",
+    "bounded cleanup"
+  ],
+  "limits": "Two successful headless combined move samples, not physical display pacing or total end-to-end latency. Large undo/redo and other edit types still compile synchronously. Installation, sustained memory and full performance release acceptance remain open."
+}

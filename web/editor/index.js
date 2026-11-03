@@ -1,3 +1,4 @@
+import {prepareEdit} from './prepare-edit.js';
 import {applyRoadStroke} from './road-placement.js';
 import {applyAssetPlacement} from './asset-placement.js';
 import {wrapDialogTab} from './dialog-focus.js';
@@ -161,6 +162,29 @@ function change(label,edit,{valid=false}={}){
     committed=current.doc.transact(label,edit);return committed;
   }catch(error){toast(error.message);return false;}
   finally{preparedEdit=null;if(compiled&&!committed&&previous)engine.load_scenario(previous);}
+}
+// Large group moves compile separately; only a validated opening checkpoint is
+// installed after checking that the originating draft is still current.
+async function changePrepared(label,edit){
+  if(!current||busy)return false;
+  const ctx=current,revision=ctx.doc.revision,draft=ctx.doc.value;
+  busy=true;status('Preparing edit…');
+  let previous,installed=false,committed=false;
+  try{
+    edit(draft);
+    const prepared=await prepareEdit(draft);
+    if(current!==ctx||ctx.doc.revision!==revision)throw Error('The draft changed. Try this edit again.');
+    previous=engine.snapshot();
+    if(!engine.restore(prepared.snapshot))throw Error('The prepared edit could not be installed. Your draft is unchanged.');
+    installed=true;busy=false;
+    preparedEdit={key:canonical(draft),report:prepared.validation};
+    committed=ctx.doc.transact(label,d=>Object.assign(d,draft));return committed;
+  }catch(error){toast(error.message);return false;}
+  finally{
+    preparedEdit=null;busy=false;
+    if(installed&&!committed&&previous&&!engine.restore(previous))throw Error('The previous preview could not be restored. Reload the saved draft.');
+    if(current===ctx&&!committed)status(ctx.doc.dirty||ctx.viewDirty?'Changes to save':'Saved on this device');
+  }
 }
 function field(id,value){if(document.activeElement!==$(id))$(id).value=value;}
 function refresh(){
@@ -333,7 +357,11 @@ function mapAction(action){
   else if(action.type==='thin-nature'){const objects=resolvedNature(current.doc.value,map.snapshot,catalog.nature);change('Thin natural vegetation',d=>{d.map.nature=thinStroke(objects,action.cells,action.size);});}
   else if(action.type==='river')change('Shape river course',d=>{d.map.river=riverStroke(d.map.river,action.cells);if(d.map.nature)d.map.nature=d.map.nature.filter(p=>!riverBank(Math.floor(p.x),Math.floor(p.y),d.map));});
   else if(action.type==='meadow')change('Clear a meadow',d=>{d.map.clearings=clearingStroke(d.map.clearings,action.cells,action.size);if(d.map.nature)d.map.nature=d.map.nature.filter(p=>!action.cells.some(([x,y])=>{const left=x-Math.floor(action.size/2)-.5,top=y-Math.floor(action.size/2)-.5;return p.x>=left&&p.x<left+action.size&&p.y>=top&&p.y<top+action.size;}));},{valid:true});
-  else if(action.type==='move')change(action.ids.length>1?'Move building group':'Move building',d=>moveBuildings(d,action.ids,action.dx,action.dy),{valid:true});
+  else if(action.type==='move'){
+    const label=action.ids.length>1?'Move building group':'Move building',edit=d=>moveBuildings(d,action.ids,action.dx,action.dy);
+    if(action.ids.length>32||(current.doc.value.start.routes?.length??0)>=32||(current.doc.value.map.nature?.length??0)>=500)void changePrepared(label,edit);
+    else change(label,edit,{valid:true});
+  }
   else if(action.type==='duplicate'&&map.copy){const copy=map.copy,anchor=copy.buildings[0];if(change('Copy building group',d=>placeBuildingCopy(d,copy,action.x-anchor.x,action.y-anchor.y),{valid:true})){setTool('select');map.select(null);for(const b of copy.buildings)map.select(b.id,true);map.copy=null;}}
   else if(action.type==='erase'){
     const bank=hitStartingBank(current.doc.value,action.x,action.y),site=hitStartingSite(current.doc.value,action.x,action.y),route=sceneRouteAt(current.doc.value,map.view,action.x,action.y);
