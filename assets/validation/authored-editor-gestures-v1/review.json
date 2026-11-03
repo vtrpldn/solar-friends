@@ -1,0 +1,8 @@
+{
+  "why": "The old editor benchmark measured retired custom appearances instead of the public authored cast and used mostly streetlights for its default dense case.",
+  "change": "Current benchmark uses one and five original authored friends without renaming or replacing their definitions, then five friends and 256 completed mixed inland buildings. Mixed fixture preserves the supplied cast when custom artwork is disabled, and counts preset identity when reporting unique appearances.",
+  "checks": "Native-valid imports; 9x9 trusted brush over 135 eligible cells; one history step per drag; exact brush undo/redo; exact two-building move and undo; one compile per committed group move; no native compilation during drag; no browser page errors; successful bounded cleanup.",
+  "measurements": "Final headless SwiftShader dense run: 1317 ms import-to-ready; brush motion handler p95 7.1 ms, release 87.7 ms; group motion p95 6.2 ms, release 88.7 ms. Two-frame observations about 97.6/95.3 ms for the two releases. Autosave acknowledgement includes debounce and is recorded separately.",
+  "visual_review": "Individually inspected 5-256-editor.png. Full desktop editor is ready with original cast, normal map, group inspector and saved state. This is not full art approval of the synthetic layout.",
+  "limits": "One brush and two-object gesture per fixture, five simple-action repetitions. No large-group distribution, history-limit memory, terrain worst case, live gameplay, full supported-engine roster capacity, hardware display pacing or GPU memory gate. Current player interface offers the authored five; legacy larger saved rosters are separate capacity coverage."
+}
