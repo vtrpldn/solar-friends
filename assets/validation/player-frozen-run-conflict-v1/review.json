@@ -1,0 +1,21 @@
+{
+  "why": "Run recovery must preserve frozen release authorship even after the source package is removed.",
+  "verdict": "pass",
+  "scope": "Public example, first release by Original storytellers, Edit a copy, derivative release by Our friends, Play, delete derivative source release, two-tab checkpoint conflict, storage-full copy failure/retry, reload.",
+  "screensIndividuallyReviewed": [
+    "conflict.png",
+    "independent-copy.png"
+  ],
+  "observations": [
+    "Independent copy retains exact definition, snapshot, author Our friends, release content revision 1 and nonempty credit chain including Original storytellers.",
+    "Source release deleted through ordinary library controls before continuing the run in the second tab.",
+    "Original newer run remains unchanged; the copied run restores exactly before first simulation frame.",
+    "Session bar retains version and author after copying.",
+    "Direct draft-started scenario conflict/copy regression passes too."
+  ],
+  "limits": [
+    "No new runtime changes in this step.",
+    "Reload observation holds only simulation-frame callbacks until public Pause, as documented in the verifier.",
+    "Concurrent restart/active autosave and broader release gates remain open."
+  ]
+}
