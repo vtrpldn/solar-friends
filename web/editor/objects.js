@@ -1,4 +1,5 @@
 import {syncStartingFresh} from './liquid-data.js';
+export const newStartingBuilding=(kind,x,y,id=crypto.randomUUID())=>({id,kind,x,y,state:'completed',recipe:'standard',appearance:null});
 // Draft transforms retain references on moves and allocate identities once for
 // copies, before a transaction is replayed for native validation and commit.
 // A pump endpoint refers to a route, not a building with the same text ID.

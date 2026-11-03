@@ -51,7 +51,7 @@ import {riverBank} from '../terrain.js';
 import {GeologyEditor} from './geology.js';
 import {EditorMinimap} from './minimap.js';
 import {landLayers,landTiles} from '../land-layers.js';
-import {planBuildingCopy,moveBuildings,placeBuildingCopy} from './objects.js';
+import {newStartingBuilding,planBuildingCopy,moveBuildings,placeBuildingCopy} from './objects.js';
 import {clearingStroke,riverStroke} from './brush.js';
 import init,{Game} from '../pkg/solar_friends.js';
 import {ContentLibrary,LibraryConflict} from '../content-library.js';
@@ -345,7 +345,7 @@ function mapAction(action){
   else if(action.type==='camera')change('Choose starting view',d=>{d.map.camera=[action.x,action.y];},{valid:true});
   else if(allBuildingArt[action.type]){
     const id=crypto.randomUUID();
-    if(change('Place '+title(action.type),d=>{d.start.buildings.push({id,kind:action.type,x:action.x,y:action.y,state:'completed',recipe:'standard',appearance:null});},{valid:true}))map.select(id);
+    if(change('Place '+title(action.type),d=>{d.start.buildings.push(newStartingBuilding(action.type,action.x,action.y,id));},{valid:true}))map.select(id);
   }
 }
 function attach(definition,{id,revision=null,checkpoint=null,view=null,record=null}={}){

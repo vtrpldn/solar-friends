@@ -1,3 +1,4 @@
+import {newStartingBuilding} from './objects.js';
 import {GroupPreview} from './group-preview.js';
 import {resolvedNature,natureAt} from './nature.js';
 import {utilityLines,goalRegions,sceneRouteAt,routeVisible} from './scene-layers.js';
@@ -49,7 +50,7 @@ export class EditorMap {
     if(preview)return;
     this.placementNotice=document.createElement('p');this.placementNotice.className='creator-placement-status';this.placementNotice.setAttribute('role','status');this.placementNotice.hidden=true;canvas.after(this.placementNotice);
     canvas.dataset.placementState='none';canvas.dataset.placementRoutes='0';
-    this.groupPreview=new GroupPreview(result=>{if(!result&&!this.groupPlacement)return;this.groupPlacement=result;this.placementNotice.hidden=!result;this.placementNotice.textContent=result?(result.pending?'Checking this group’s site…':result.message):'';canvas.dataset.placementState=!result?'none':result.pending?'checking':result.unavailable?'unavailable':result.allowed?'allowed':'blocked';canvas.dataset.placementRoutes=String(result?.routes?.length??0);if(this.document&&result&&!result.pending)this.render();});
+    this.groupPreview=new GroupPreview(result=>{if(!result&&!this.groupPlacement)return;this.groupPlacement=result;this.placementNotice.hidden=!result;this.placementNotice.textContent=result?(result.pending?'Checking this site…':result.message):'';canvas.dataset.placementState=!result?'none':result.pending?'checking':result.unavailable?'unavailable':result.allowed?'allowed':'blocked';canvas.dataset.placementRoutes=String(result?.routes?.length??0);if(this.document&&result&&!result.pending)this.render();});
     this.observer=new ResizeObserver(()=>this.render());this.observer.observe(canvas);
     canvas.addEventListener('contextmenu',e=>e.preventDefault());
     canvas.addEventListener('pointerdown',e=>this.down(e));
@@ -118,9 +119,10 @@ export class EditorMap {
     if((active||hadPreview)&&paint)this.render();
     return active;
   }
-  setTool(tool){this.cancelGesture({paint:false});this.view.tool=tool;this.updateGroupPreview();this.render();this.viewChanged(this.state);}
+  setTool(tool){this.cancelGesture({paint:false});this.view.tool=tool;this.placementBuilding=allBuildingArt[tool]?newStartingBuilding(tool,0,0):null;this.updateGroupPreview();this.render();this.viewChanged(this.state);}
   updateGroupPreview(){
     if(!this.groupPreview||!this.pointer||!this.document)return;
+    if(this.placementBuilding?.kind===this.view.tool){this.groupPreview.observe(this.document,'place',this.placementBuilding,[],this.pointer.x,this.pointer.y);return;}
     const copy=this.view.tool==='duplicate'?this.copy:null,anchor=copy?.buildings[0]??this.drag?.building;
     if(!anchor){if(this.groupPlacement)this.groupPreview.clear();return;}
     this.groupPreview.observe(this.document,copy?'copy':'move',copy,copy?[]:this.selection(),this.pointer.x-anchor.x,this.pointer.y-anchor.y);
@@ -173,7 +175,7 @@ export class EditorMap {
   }
   up(e){
     if(!this.drag)return;
-    const drag=this.drag,cell=this.cell(this.point(e));this.drag=null;if(this.view.tool!=='duplicate')this.groupPreview?.clear();
+    const drag=this.drag,cell=this.cell(this.point(e));this.drag=null;if(this.view.tool!=='duplicate'&&!allBuildingArt[this.view.tool])this.groupPreview?.clear();
     if(this.view.tool==='region'&&!drag.pan){const x=Math.max(0,Math.min(63,Math.min(drag.cell.x,cell.x))),y=Math.max(0,Math.min(63,Math.min(drag.cell.y,cell.y))),right=Math.max(0,Math.min(63,Math.max(drag.cell.x,cell.x))),bottom=Math.max(0,Math.min(63,Math.max(drag.cell.y,cell.y)));this.action({type:'region',rectangle:{x,y,width:right-x+1,height:bottom-y+1}});return;}
     if(drag.pan){this.centerAt(...this.view.center);return;}
     // Release can carry a newer position than the last delivered move event.
@@ -289,7 +291,7 @@ export class EditorMap {
       const p=this.project(...point),same=this.document.map.camp.every((n,i)=>n===this.document.map.camera[i]);c.strokeStyle=colour;c.fillStyle='#f5e5ba';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,7,0,Math.PI*2);c.fill();c.stroke();c.font='bold 11px Trebuchet MS';c.textAlign='center';c.fillStyle=colour;c.fillText(label,p.x,p.y+(same&&label==='Camp'?-15:22));
     }
     if(this.pointer&&allBuildingArt[view.tool]){
-      this.polygon(footprintCorners(view.tool,this.pointer.x,this.pointer.y),'#f4df9a66','#fff3c4');
+      this.polygon(footprintCorners(view.tool,this.pointer.x,this.pointer.y),this.groupPlacement?.allowed===false?'#c65e4266':'#f4df9a66',this.groupPlacement?.allowed===false?'#f39b80':'#fff3c4');
       paintWorldBuilding(c,{key:view.tool,x:this.pointer.x,y:this.pointer.y,alpha:.45},{project:this.project,scale:this.scale,images:art.images});
     }
     if(this.pointer&&(this.drag?.bank||['battery-bank','move-bank','copy-bank'].includes(view.tool))){this.polygon(footprintCorners('battery',this.pointer.x,this.pointer.y),'#f4df9a66','#fff3c4');drawBattery(c,this.project(this.pointer.x,this.pointer.y),this.scale,0,.45);}

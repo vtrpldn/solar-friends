@@ -1,0 +1,222 @@
+{
+  "sources": {
+    "scripts/verify-editor-palette-preview.mjs": "fe7000715cef2fe7ca5c30418e0adc1e462e8b0cf9d7b9d160209f4bf2d4c1b5",
+    "web/editor/objects.js": "9e0dbbe3589de9f3147b8892a12e4060dc4f8dcca32fbef771143d0a78b70508",
+    "web/editor/index.js": "8bf60a40108dcf272cfbde575a2168da1a12daa1328f3e808da257be5696bd30",
+    "web/editor/map-view.js": "28e5245c44d4b60402cec101ec616cb6b3437dcaf1213d3a730c624ec92b1fa9",
+    "web/group-preview-worker.js": "a0d5affb21c9e2f1f9f23fa8a379f3eb9fb2df6b8e327483514443401fe0e0ce",
+    "web/editor/group-preview.js": "33ce210ffc9724a4553af321136b2e93f82411e10d69a2250b60c5a7690facd5",
+    "web/pkg/solar_friends_bg.wasm": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1"
+  },
+  "cases": [
+    {
+      "kind": "shed",
+      "site": [
+        35,
+        32
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "home",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "garden",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "well",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "kitchen",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "grove",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "warehouse",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "compost",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "square",
+      "site": [
+        32,
+        35
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "workshop",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "greenhouse",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "coop",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "solar_farm",
+      "site": [
+        32,
+        35
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "streetlight",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "eco_toilet",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "wetland",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "banana_treatment",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "biodigester",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "hydro",
+      "site": [
+        60,
+        25
+      ],
+      "blockedReason": "Place the generator in the shallow village side of the river. Workers approach from the bank.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "orchard",
+      "site": [
+        32,
+        35
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "goat_pasture",
+      "site": [
+        32,
+        35
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    },
+    {
+      "kind": "apiary",
+      "site": [
+        32,
+        34
+      ],
+      "blockedReason": "Leave a little room between buildings.",
+      "commitAndHistoryExact": true
+    }
+  ],
+  "checks": {
+    "allNativePaletteKinds": 22,
+    "blockedClickIsolation": true,
+    "sharedConstructionDefaults": true,
+    "nativePreviewCommitAgreement": true,
+    "exactUndoRedo": true,
+    "escapeAndReload": true,
+    "realWorkerFailureFallback": true,
+    "browserErrors": []
+  },
+  "scope": "Each current palette building kind, one natively eligible site and one occupied inland site, ordinary player controls. Includes hydro bank eligibility; not every surface/boundary combination or appearance variant."
+}
