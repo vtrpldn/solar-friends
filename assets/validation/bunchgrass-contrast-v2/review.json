@@ -1,0 +1,200 @@
+{
+  "why": "Improve bunchgrass silhouette separation without changing its human scale or adding a ground island.",
+  "status": "accepted incremental improvement; broad low-plant readability remains open",
+  "asset": "web/art/cerrado-bunchgrass-v2.png",
+  "assetSha256": "e7cdd05d327663486036d29f88fda052436eb34f6a96c8809504b9a76758a3c7",
+  "reference": "web/art/cerrado-vegetation-v1.png; original atlas unchanged",
+  "sourceAlphaBoundsAbove16": [
+    155,
+    169,
+    1060,
+    996
+  ],
+  "originalCropAlphaBoundsAbove16": [
+    115,
+    99,
+    594,
+    539
+  ],
+  "displayWidthCalibration": "29*(479/627)/(905/1254) = 30.697238; new normalized base y 996/1254, root x 624/1254",
+  "observations": [
+    "All 27 boards individually inspected: 81 combinations of three sizes, three biome grounds, three lighting states and three zooms.",
+    "Darker olive leaf groups make the tuft base more coherent against yellow-green terrain. Golden seed heads and painted treatment remain consistent with the source reference.",
+    "No clipped silhouette, added ground island, detached base or oversized clump observed.",
+    "Minimum overview tufts remain subtle, especially at night; broader low-grass readability, mixed clusters and habitat transitions are not accepted as complete."
+  ],
+  "inspectedBoards": [
+    {
+      "file": "artifacts/grass-v2-0.65-day/mata-atlantica-zoom-0.65-day-group-1.png",
+      "sha256": "ea031504d8926db31062875ea245ec20d6799e022ea1970f3f6024b09d911c9c",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-0.65-day/cerrado-zoom-0.65-day-group-1.png",
+      "sha256": "ae5771ec4f3c0fa1c372f53aa044ce8cbfed0d5abbdae4b99a79ea94e255954b",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-0.65-day/caatinga-zoom-0.65-day-group-1.png",
+      "sha256": "9be1db01adebb6a20ff51f99057c6a5ae650fe59937441550de505591d4722d9",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-0.65-night/mata-atlantica-zoom-0.65-night-group-1.png",
+      "sha256": "970e446d0f7840a3144ab894d1aff3cfda2494a159d487abc2e71b5d804c40a3",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-0.65-night/cerrado-zoom-0.65-night-group-1.png",
+      "sha256": "826e46083bed52ddcc3a56d25d9bad7b609e1dc7877938a53f4065308e5c82e2",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-0.65-night/caatinga-zoom-0.65-night-group-1.png",
+      "sha256": "7f9887df3863e7d7116721ff0c7f6b5f519b9cad007cd3d2929ebe514a34d63f",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-0.65-rain/mata-atlantica-zoom-0.65-rain-group-1.png",
+      "sha256": "d53d6a20ae24c80031f8c9714972d4b332461fb9a1a9bc1dd34dd50c412112e2",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-0.65-rain/cerrado-zoom-0.65-rain-group-1.png",
+      "sha256": "a263671fc835f2121937470119947cbb0fcdca177c727a9f954b329ddfe03974",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-0.65-rain/caatinga-zoom-0.65-rain-group-1.png",
+      "sha256": "bece26b8c4468e6d4f9b0fc46ce8357694969e35ca6c6a5e1c40edde5ca891d7",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-1-day/mata-atlantica-zoom-1-day-group-1.png",
+      "sha256": "78182edc8bb41f8b50ec6a84862254d6b26dce18cb5a445b19f42b0e7c29206c",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-1-day/cerrado-zoom-1-day-group-1.png",
+      "sha256": "b5e8b0d1e40a354669a4954fce0980eafe5cfb7a1346ed7807b623d20240db79",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-1-day/caatinga-zoom-1-day-group-1.png",
+      "sha256": "ae6818ef721c14cd4ce94f3e56c629f719b977428dd1f893661de492b174c822",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-1-night/mata-atlantica-zoom-1-night-group-1.png",
+      "sha256": "6954090b1a7c77afe79f22f839094b92ce0ceab7f3c892e50d5d4e6cc3d3e457",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-1-night/cerrado-zoom-1-night-group-1.png",
+      "sha256": "435b0bc59d2700772fe88ef42b8413a0faa0a6739719e3d71f715d830b7a17dc",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-1-night/caatinga-zoom-1-night-group-1.png",
+      "sha256": "330d809210d17ea8179030dcc545c19c5489a87839a1cf56aad5d1c99d7ae848",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-1-rain/mata-atlantica-zoom-1-rain-group-1.png",
+      "sha256": "1e9b83a3ebc0da070a797e8a75777016365a5a6ff1895fd068af28f921ec2a56",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-1-rain/cerrado-zoom-1-rain-group-1.png",
+      "sha256": "1fbea965e5149a35b26c73e273881989ebeb943cb598d667dabae042952b8e71",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-1-rain/caatinga-zoom-1-rain-group-1.png",
+      "sha256": "250b44bb80a83938f6719dd0228b2b24af03af104b47556de1c6d16b64370353",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-day/mata-atlantica-zoom-1.8-day-group-1.png",
+      "sha256": "7c6432eb52efff997248ec753fa7d114e34741e3e38d0fb755e6b36765aa1748",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-day/cerrado-zoom-1.8-day-group-1.png",
+      "sha256": "208e76c82633c6b27d385468c520fae8077f4f1ecc415b770fce2c1aae916090",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-day/caatinga-zoom-1.8-day-group-1.png",
+      "sha256": "adc3a8bdc0fae91ff389736e905dd1e76b1c989f4a6e7e562e977340899c6aa7",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-night/mata-atlantica-zoom-1.8-night-group-1.png",
+      "sha256": "2be0022dd532aab7ff88e4fcb4ba09da9e1628913d38168b0150656ac3fafa67",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-night/cerrado-zoom-1.8-night-group-1.png",
+      "sha256": "e1542eed7a36e5ccfaf4f5665682a88e01f931943b919f96fe20deac0a75ce7d",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-night/caatinga-zoom-1.8-night-group-1.png",
+      "sha256": "712a138209bd3d8dbe5fa613b68e0aa546abd580e22511fde8c3131dc05dc992",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-rain/mata-atlantica-zoom-1.8-rain-group-1.png",
+      "sha256": "cf58356fd7e6cac1d847ee99b3298a3156b1463c40b439ec7f624ca7cc32ebfa",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-rain/cerrado-zoom-1.8-rain-group-1.png",
+      "sha256": "612334d304069e6d3a9cb746acee39698b1e19220a511cb21b08f119f1389986",
+      "visuallyInspected": true,
+      "compositions": 3
+    },
+    {
+      "file": "artifacts/grass-v2-rain/caatinga-zoom-1.8-rain-group-1.png",
+      "sha256": "5f447463f73435125911006c5a30dab34c2a444eba0b1f1d1c554bb3378e37fb",
+      "visuallyInspected": true,
+      "compositions": 3
+    }
+  ],
+  "checks": [
+    "verify-regional-art.mjs passed all eight regional silhouettes and ground baselines",
+    "node --check web/regional-art.js passed",
+    "git diff --check passed"
+  ],
+  "limits": [
+    "Controlled game-painter scenes, not full game UI interaction or moving weather.",
+    "Other dry grasses remain unchanged.",
+    "Original full-catalog review hashes remain historical and are not refreshed by this one-species correction."
+  ]
+}

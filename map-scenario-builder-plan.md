@@ -355,3 +355,7 @@ All 21 current close-rain boards were individually inspected: 20 nature entries 
 ### Rejected low-grass contact-shadow trial
 
 A focused 18-composition close-rain comparison added contact shadows to dry grasses and Cerrado bunchgrass. All three biome boards were individually inspected; base grounding changed slightly but minimum bunchgrass remained difficult to separate. The runtime trial was reverted exactly; it does not close readability. Evidence: `assets/validation/grass-contact-shadow-trial-v1/`. Next correction should address the painted tuft contrast while preserving size and anchor, followed by day/night/rain and gameplay zoom review. The review harness now accepts explicit catalog-key filtering and rejects unknown keys.
+
+### Bunchgrass painted contrast correction
+
+Replaced only the bunchgrass atlas registration with a separate painted tuft using darker olive leaf groups and golden seed heads. Uniform display calibration preserves the original visible width and ground base; the original atlas and other species remain unchanged. All 27 focused boards were individually inspected (81 size/biome/light/zoom combinations), and regional silhouette/ground-baseline checks pass. Evidence: `assets/validation/bunchgrass-contrast-v2/`; prompt/provenance: `assets/art-direction/bunchgrass-contrast-v2/`. Accepted as an incremental improvement: minimum overview tufts remain subtle at night, other dry grasses and broader mixed-ground readability remain open.

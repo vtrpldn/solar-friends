@@ -1,0 +1,434 @@
+{
+  "complete": true,
+  "zoom": 1,
+  "lighting": "day",
+  "selectedKeys": [
+    "cerrado-bunchgrass"
+  ],
+  "inputs": {
+    "scripts/review-nature-biome-context.mjs": "10bdb4ff8c5996a631b2040d1405d5f803eb76210d6f8183ac0b94b12079ac8b",
+    "web/pkg/solar_friends.js": "05d95aabfe7cefba69038ba0a83983ae3c353160051726ee9c962bec77a61e3d",
+    "web/editor/map-view.js": "bba93f111f9f0bcab42f08db558c55a6b4cc055f62e6c2264ea9a97fb280fcfc",
+    "web/terrain.js": "90cd477ddcc8cdd3f13a959553e2ea67a377e5101b74965fbcad364c7ce81235",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/world-atmosphere.js": "4241f136222191565c2e7900f0bcb7128df2fed32e497684372ce6a5efd3ddcf",
+    "web/building-art.js": "977312b8c88e4d700fadff2cb654a3e20a35501dd1560779b830dcbfbb6eeace",
+    "web/power.js": "d37e60fba9e9e9057df3bf0b0fda4e6c4d8914f9d8041673627a7868e8694f0d",
+    "web/weather.js": "0aed62fb10fd022f0e79a21f73ed5fb69cdf0a8003ab577c8415bae654f2da24",
+    "web/sprite-frames.js": "4a32cbc68b75e90b7c1fe63e139143ff6c1cbd91954276cfd7179eb4f5b44604",
+    "web/regional-art.js": "6d531e08223996e044f91bb64a0e26c9e56756d1c7adc2e7b3676b7d7433f178",
+    "web/habitats.js": "63ebeab1df2ac631ec3b0a3bd250d5f7a2e6372fdd55a70f446e3853947aa5a6",
+    "web/editor/nature.js": "0e7135a7f5175c00c68e941ebc09a386a168679db3bf5e4e89288de5b0a58c87",
+    "web/editor/scene-layers.js": "045c4bf57886043d243f0cac6722f92bba5f1b505fc4a3da3449bcd9ea05e00e",
+    "web/editor/routes.js": "0d2c83154aa359e8fa508ea285961247a2d7a4487dd8e5ae21608c765386fa9b",
+    "web/utility-lines-art.js": "e1cc662f79b7beab542540ef9a923a7dd8f227dea6791ae48544d08f66fb559e",
+    "web/editor/batteries.js": "505a7fc8d07f09c13381d27e45c8797d6b57ef70a49e39b42b86b7b34839ac04",
+    "web/battery-art.js": "48d2c00ba144080d40c048ea3d3edfe4811e02f456af07c851efbb6487bc2887",
+    "web/chickens.js": "f438c1d08c0ebec511511288b2eef6149825b61509e9dd2809244d055798021a",
+    "web/resource-site-art.js": "a0601241ab8d107474b2989d16705b1a73a942617eaae3689af8c0485190f47f",
+    "web/economy-art.js": "b9a9f15be3bdc0f11dda6de42777b34b0f70b250debe1612b9729c9957a6333a",
+    "web/editor/sites.js": "59b51a11d34a80bf5ab155f4a13128dff228d1e965423063b2029a66271a52e8",
+    "web/crop-art.js": "e75beb185b763eb4f18dc984c6d2b3e12fecc0348b3c91ebe8e349cbb174685c",
+    "web/resident-look.js": "94f94dff5b280b57998d97ef94641e1850cbd5d2946ae61a3ed3b2f10367de5d",
+    "web/resident-appearance-library.js": "518acdb703b9eb9bff55a4c05b6c443761af48a53d905a5ee7d761ddbc409773",
+    "web/editor/prepare-terrain.js": "2263c3c79dd89d05bab83920966a9354c206cc533b2f464e2c7748e0ac44319d",
+    "web/editor/terrain-cache.js": "89b760d42a330deee375c4ea6775d98d96f371e82406d80f858676a8669a527d",
+    "web/editor/brush.js": "3bf5390061865456479d91f79f17b2b7db5987a6aeb6d5e88dbd06210ecd28c3",
+    "web/building-footprints.js": "4437a07f72209817dc197b24314018362f1abf68966de099a062c933525babf1",
+    "web/building-state-art.js": "2c66d34e1b2582b1509e6caa69cac0f5907f57ab38160d4d0fffc44f37429bef",
+    "web/nature-art.js": "389a97d806cbf7d286b3ebedeeabac390770208672529d494444bf1034e255b0",
+    "web/paint-cache.js": "f070b4e16eeb75c077b26009201fef77ca246a9c202664730bc81dda35cc053c",
+    "web/sandbox-rules.js": "c4d708f49592384ed6f6920c85f15f2ef03cc239de08cb8026066c00ffa98b11",
+    "web/building-projection.js": "e64a3306774ed0d6d8aa070a6b91aacc28b129ac3bfbe7c244df0532bf6f76de",
+    "web/editor/workspaces.js": "7ad930e7cab0dc396a374662536742920a05c72462d46e4120e5dd4607fd55d0",
+    "web/resource-sites.js": "9a95c65342707d4f07ad8904dd896600d70a94c392962b44d040ef8fd0fc33b8",
+    "web/greenhouse-layout.js": "dce24b4528d6c942c6afcc93e32b810fdac2018aa8a0eebad2d3b2fdcbbb07b8",
+    "web/resident-part-recipe.js": "44af0a70cad6a16790a6556d57c6e343bd982085565e3c577bfec9ba065953a1",
+    "web/terrain-revision.js": "f6dfcb06898799931676a227689d0a162b3a278525893c07b2d392c91ce90878",
+    "web/building-silhouettes.js": "247be59f561d36f2400b68ceb0c1266d5f19c2864254c4d95a52892c9b670a43",
+    "web/battery-plots.js": "327faa1e4c9f97f173eff8f5de53250dbdcc72e845b23aedbbecaa857d9b3e84",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/character-hair-colours.js": "612735bf2a5bb6219d5d68b1b5d187e6662480ecc114ec99d591ac9f91a92dfa",
+    "web/character-attachments.js": "2f88fee807c21ced70a762e2a1cb7169e9247a7c6136d81e37b235f1e67ac7cf",
+    "web/character-contact-atlas.js": "71880a29ef77436d4cb3f24361eca91b2fd5ceae8342ffd74936ec006d0a3f26",
+    "web/editor/journal.js": "e5ee57626eecacd22dda40297c98d25dffe20c7cd667564885a5bb97cf61d9e0",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/character-body-frames.js": "e64697c8c2d523b8072473420f7a953b4c0b810ef5c837658dbd7e8bc5ebfdfb",
+    "web/character-contact-frame.js": "80362004f1bb2e80db69133b3e881261aed8d5ac645783f3ebe82b596eb25663",
+    "web/art/recovered-battery.png": "9cc9f12a8c414b81d68b45a4348b7ec55735e80c0bb6eaf098dd3681f604a2b6",
+    "web/art/economy-atlas-v2.png": "70c115a50bfffd4b4c6808ebb1375e5bc3c6f74d5507bcb797def54886827e06",
+    "web/pkg/solar_friends_bg.wasm": "58d3c662a05d2590ad5a744e17ffb4a3280d7125cb97581ad2aae14a957c0086",
+    "web/art/starter-shed-refined.png": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+    "web/art/apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+    "web/art/hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+    "web/art/orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+    "web/art/eco-toilet-tall.png": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+    "web/art/goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+    "web/art/biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+    "web/art/banana-treatment.png": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
+    "web/art/streetlight.png": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+    "web/art/wetland-square-v2.png": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+    "web/art/solar-farm.png": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+    "web/art/warehouse.png": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+    "web/art/garden-simple-isometric.png": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+    "web/art/village-atlas-isometric.png": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+    "web/art/greenhouse-isometric.png": "6bc7925077a4089014e8973979cfaa3e242a12cf400888d27998c6aac0350ee2",
+    "web/art/cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+    "web/art/compost-isometric.png": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+    "web/art/square-isometric.png": "76ec6da02bc5b4575b556019ffbfe74c1a092d32c3e5cbd21d74945f2adf2c91",
+    "web/art/workshop-isometric.png": "fc194eb60c86435ae750c13b4bcb5c9a59c5897e63b2debcb29b1cb960eac4a7",
+    "web/art/coop-isometric.png": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+    "web/art/home-veranda.png": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+    "web/art/home-gable.png": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+    "web/art/home-courtyard.png": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+    "web/art/adobe-gable.png": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+    "web/art/goat-pasture-empty-v1.png": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+    "web/art/adobe-veranda.png": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+    "web/art/mata-atlantica-atlas.png": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+    "web/art/terrain-atlas.png": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+    "web/art/animations/iara.png": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+    "web/art/landscape-details.png": "a5212211cc3d8bca0250b3990a9dcc90ca3bbd3d27fa9b1007d85b3dc931ae56",
+    "web/art/animations/luz.png": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+    "web/art/animations/bento.png": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+    "web/art/animations/caua.png": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+    "web/art/animations/nina.png": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+    "web/art/cerrado-vegetation-v1.png": "1542d0c14fa9cfddc83ec0e1a04e5ef5be34fcf1273d93d4eb13c2c8f5f359a6",
+    "web/art/cerrado-bunchgrass-v2.png": "e7cdd05d327663486036d29f88fda052436eb34f6a96c8809504b9a76758a3c7",
+    "web/art/crops.png": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+    "web/art/caatinga-vegetation-v1.png": "522999ec80e708b3203cb6f59a2b90067d3d7eb2f7265b82d6e7815854c26290",
+    "web/art/regional-ground-v1.png": "acdad558e0db68fb04760f2a27d44beaf79eec89d6b02d583e35586748bbfeb1",
+    "web/art/field-crops.png": "ca755cb0aced1ef12ec69284c915490e59e5207961d5fb0a4d90fdf5913c219e",
+    "web/art/chickens.png": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+    "web/art/animations/iara-idle.png": "3d2510219502ef9b7e11872009672cf6a510ef2341abb6fd90888b8abc1d6849",
+    "web/art/animations/iara-activities.png": "29dd26deb5204d648ca37abdb01931db27d05b0b3827e32bf1d944789fcc7711"
+  },
+  "boards": [
+    {
+      "file": "mata-atlantica-zoom-1-day-group-1.png",
+      "sha256": "78182edc8bb41f8b50ec6a84862254d6b26dce18cb5a445b19f42b0e7c29206c",
+      "entries": [
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 0.6499999761581421,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1,
+          "bounds": {
+            "left": 176.07112607983134,
+            "top": 290.1520081226883,
+            "right": 204.02433004795216,
+            "bottom": 318.1052120908091
+          },
+          "treePixels": {
+            "left": 183,
+            "right": 196,
+            "top": 297,
+            "bottom": 309,
+            "alphaPixels": 130
+          },
+          "referencePixels": {
+            "left": 227,
+            "right": 359,
+            "top": 242,
+            "bottom": 367,
+            "alphaPixels": 11768
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1,
+          "bounds": {
+            "left": 170.724808793296,
+            "top": 281.618473140596,
+            "right": 209.422046793296,
+            "bottom": 320.315711140596
+          },
+          "treePixels": {
+            "left": 178,
+            "right": 200,
+            "top": 290,
+            "bottom": 309,
+            "alphaPixels": 304
+          },
+          "referencePixels": {
+            "left": 227,
+            "right": 359,
+            "top": 242,
+            "bottom": 367,
+            "alphaPixels": 11768
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1.149999976158142,
+          "biome": "mata-atlantica",
+          "lighting": "day",
+          "zoom": 1,
+          "bounds": {
+            "left": 168.43353047647935,
+            "top": 277.9612446929863,
+            "right": 211.73535344460015,
+            "bottom": 321.26306766110713
+          },
+          "treePixels": {
+            "left": 177,
+            "right": 202,
+            "top": 287,
+            "bottom": 309,
+            "alphaPixels": 413
+          },
+          "referencePixels": {
+            "left": 227,
+            "right": 359,
+            "top": 242,
+            "bottom": 367,
+            "alphaPixels": 11768
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "cerrado-zoom-1-day-group-1.png",
+      "sha256": "b5e8b0d1e40a354669a4954fce0980eafe5cfb7a1346ed7807b623d20240db79",
+      "entries": [
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 0.6499999761581421,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1,
+          "bounds": {
+            "left": 176.07112607983134,
+            "top": 290.1520081226883,
+            "right": 204.02433004795216,
+            "bottom": 318.1052120908091
+          },
+          "treePixels": {
+            "left": 183,
+            "right": 196,
+            "top": 297,
+            "bottom": 309,
+            "alphaPixels": 130
+          },
+          "referencePixels": {
+            "left": 227,
+            "right": 359,
+            "top": 242,
+            "bottom": 367,
+            "alphaPixels": 11768
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1,
+          "bounds": {
+            "left": 170.724808793296,
+            "top": 281.618473140596,
+            "right": 209.422046793296,
+            "bottom": 320.315711140596
+          },
+          "treePixels": {
+            "left": 178,
+            "right": 200,
+            "top": 290,
+            "bottom": 309,
+            "alphaPixels": 304
+          },
+          "referencePixels": {
+            "left": 227,
+            "right": 359,
+            "top": 242,
+            "bottom": 367,
+            "alphaPixels": 11768
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1.149999976158142,
+          "biome": "cerrado",
+          "lighting": "day",
+          "zoom": 1,
+          "bounds": {
+            "left": 168.43353047647935,
+            "top": 277.9612446929863,
+            "right": 211.73535344460015,
+            "bottom": 321.26306766110713
+          },
+          "treePixels": {
+            "left": 177,
+            "right": 202,
+            "top": 287,
+            "bottom": 309,
+            "alphaPixels": 413
+          },
+          "referencePixels": {
+            "left": 227,
+            "right": 359,
+            "top": 242,
+            "bottom": 367,
+            "alphaPixels": 11768
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    },
+    {
+      "file": "caatinga-zoom-1-day-group-1.png",
+      "sha256": "ae6818ef721c14cd4ce94f3e56c629f719b977428dd1f893661de492b174c822",
+      "entries": [
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 0.6499999761581421,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1,
+          "bounds": {
+            "left": 176.07112607983134,
+            "top": 290.1520081226883,
+            "right": 204.02433004795216,
+            "bottom": 318.1052120908091
+          },
+          "treePixels": {
+            "left": 183,
+            "right": 196,
+            "top": 297,
+            "bottom": 309,
+            "alphaPixels": 130
+          },
+          "referencePixels": {
+            "left": 227,
+            "right": 359,
+            "top": 242,
+            "bottom": 367,
+            "alphaPixels": 11768
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1,
+          "bounds": {
+            "left": 170.724808793296,
+            "top": 281.618473140596,
+            "right": 209.422046793296,
+            "bottom": 320.315711140596
+          },
+          "treePixels": {
+            "left": 178,
+            "right": 200,
+            "top": 290,
+            "bottom": 309,
+            "alphaPixels": 304
+          },
+          "referencePixels": {
+            "left": 227,
+            "right": 359,
+            "top": 242,
+            "bottom": 367,
+            "alphaPixels": 11768
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        },
+        {
+          "key": "cerrado-bunchgrass",
+          "artIndex": 14,
+          "size": 1.149999976158142,
+          "biome": "caatinga",
+          "lighting": "day",
+          "zoom": 1,
+          "bounds": {
+            "left": 168.43353047647935,
+            "top": 277.9612446929863,
+            "right": 211.73535344460015,
+            "bottom": 321.26306766110713
+          },
+          "treePixels": {
+            "left": 177,
+            "right": 202,
+            "top": 287,
+            "bottom": 309,
+            "alphaPixels": 413
+          },
+          "referencePixels": {
+            "left": 227,
+            "right": 359,
+            "top": 242,
+            "bottom": 367,
+            "alphaPixels": 11768
+          },
+          "minutes": 720,
+          "conditions": {
+            "rain": 0,
+            "wet": 0,
+            "clouds": 0
+          }
+        }
+      ]
+    }
+  ],
+  "scope": "All native nature catalog entries at native minimum, unit and maximum size against three regional terrain palettes. Shared world painters, ambient night shading and native rainy-window conditions. Controlled artwork comparisons, not claims that every species is locally appropriate, navigation-safe or automatically visually accepted.",
+  "browserErrors": []
+}

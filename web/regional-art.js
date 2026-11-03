@@ -3,7 +3,7 @@
 export const regionalNatureArt=[
  {name:'Pequi',file:'cerrado-vegetation-v1.png',cell:[0,0,.5,.5],width:117,anchorX:0.576555,anchor:0.971292,aspect:1,shadow:19},
  {name:'Barbatimão',file:'cerrado-vegetation-v1.png',cell:[.5,0,.5,.5],width:109,anchorX:0.511164,anchor:0.977671,aspect:1,shadow:17},
- {name:'Cerrado bunchgrass',file:'cerrado-vegetation-v1.png',cell:[0,.5,.5,.5],width:29,anchorX:0.57815,anchor:0.859649,aspect:1,shadow:0},
+ {name:'Cerrado bunchgrass',file:'cerrado-bunchgrass-v2.png',cell:[0,0,1,1],width:30.697238,anchorX:0.497608,anchor:0.794258,aspect:1,shadow:0},
  {name:'Campo shrub',file:'cerrado-vegetation-v1.png',cell:[.5,.5,.5,.5],width:39,anchorX:0.503987,anchor:0.837321,aspect:1,shadow:5},
  {name:'Umbuzeiro',file:'caatinga-vegetation-v1.png',cell:[0,0,.5,.5],width:122,anchorX:0.57496,anchor:0.945774,aspect:1,shadow:20},
  {name:'Jurema-preta',file:'caatinga-vegetation-v1.png',cell:[.5,0,.5,.5],width:112,anchorX:0.523126,anchor:0.950558,aspect:1,shadow:17},
