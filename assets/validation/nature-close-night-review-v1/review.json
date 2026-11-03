@@ -1,0 +1,147 @@
+{
+  "sourceCommit": "5b3ceb6",
+  "why": "Close the missing close-zoom night nature catalog inspection without extending historical source identities.",
+  "scope": "Twenty native catalog entries at minimum, unit and maximum size across three regional terrain palettes, zoom 1.8, native 21:00 ambient darkness. Iara and an unlit home/road provide scale and lighting references.",
+  "inspectedBoards": [
+    {
+      "file": "mata-atlantica-zoom-1.8-night-group-1.png",
+      "sha256": "2fbde688dc0cea7e38e8703d7236f1db649d3567885785657f815ec813e7d5bb",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-night-group-2.png",
+      "sha256": "78061d7d816c246e3d83deaef16d06df3da7acd1c75a69c98092997bbe694fe2",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-night-group-3.png",
+      "sha256": "b05ecb00aca30bde167dbb23be4ad706f7b7135b16199532ba15534d5d4f6471",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-night-group-4.png",
+      "sha256": "f90309420708bc38f67bcbcf5ad84de6195d33133a37450241732bbf1e67d134",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-night-group-5.png",
+      "sha256": "d6b35e5944e5e0ace864bf35f507aa5514fdd5b458470aa2d477e0afab4f349c",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-night-group-6.png",
+      "sha256": "d823153b293e167ccbb691bf5e7ae4882e4438c94c3034b1386bd1d8855f9e1e",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-night-group-7.png",
+      "sha256": "71d79936a4b5f58ad8b8c81d32a66df49d5cc3bd5466d845b3594700e6ae93fb",
+      "compositions": 6,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-night-group-1.png",
+      "sha256": "65701444863e6da1299e7dd65d2df5bce813a7f3e5cd7db213b1c31583fa5a1d",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-night-group-2.png",
+      "sha256": "facb25a84f43efb12bf68d20c17328abb5c4ebded651dedf5e4cbc1167e6e194",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-night-group-3.png",
+      "sha256": "4d212b680c0e9fd998739b509ed623d8fbfe8b2a4490eae34107188334f76478",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-night-group-4.png",
+      "sha256": "7f013f92336d591861c7bc6a82d02d067d827217474efe0d26573f6096041484",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-night-group-5.png",
+      "sha256": "bd17e49010c3e95ab10d12d7e0aa5b6fb7870759f36a546bbb6e8ebfd0155db7",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-night-group-6.png",
+      "sha256": "ffc8f06964cf17d2a95d8c7022f41901ea2ee1572cf0c716077440ae0a4be99d",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-night-group-7.png",
+      "sha256": "5dd3fd5d8555aff06b83701e302aeb1953b0e5eca312c71128366a4926aae412",
+      "compositions": 6,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-night-group-1.png",
+      "sha256": "8d7ce1f3120b39c58f2a5af3f52ae8ec1b43edb748b671401e533c416d00ab41",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-night-group-2.png",
+      "sha256": "bcab22d02ad4bb8f44d05a4edcaee0da84f7dcd6872d2b7905e7cbaef04f942d",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-night-group-3.png",
+      "sha256": "31c8b89319f6b59ec4c8136c4e369a3ee54ba72baad40f103f1d1e7f0d133299",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-night-group-4.png",
+      "sha256": "f7c3e630a8b0b99261bd380c6c99dff81c3c2043584329ffb11df676d76a4e41",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-night-group-5.png",
+      "sha256": "6d41e40b05048760d7a8da42805b2c5387f55b99a55dcb2d4e7860679cd08aa5",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-night-group-6.png",
+      "sha256": "f0d262b81f87925ddd0e07d51f722f24ec8f140a3629d69bc218c2e9b432e152",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-night-group-7.png",
+      "sha256": "1d3f2b2bae267df8a794ab6139f56953736896e4b70d0f615c82cd4cb3b7abd1",
+      "compositions": 6,
+      "visuallyInspected": true
+    }
+  ],
+  "observations": [
+    "All twenty-one boards individually inspected, 180 compositions.",
+    "No additional clipping, detached bases, opaque sprite ground islands or proportion mismatch observed relative to home and resident references in these controlled static scenes.",
+    "Trees, rocks and larger shrubs have coherent ambient shading with the unlit references.",
+    "Minimum low grasses and some low plants remain difficult to separate from detailed ground at night; readability is not accepted as resolved."
+  ],
+  "limits": [
+    "Not mixed clusters, habitat transitions, species suitability, all neighboring objects or selection usability.",
+    "No animation, physical display pacing, desktop performance or memory claim.",
+    "Close rain coverage and broader resident/building art and all original release gates remain open.",
+    "Historical zoom/day/weather reports retain their original source identities; this review does not refresh them."
+  ],
+  "fullBoardsLocal": "artifacts/nature-close-night-current",
+  "retainedScreens": "Three representative group-3 boards; full inspected inventory and exact hashes retained above."
+}
