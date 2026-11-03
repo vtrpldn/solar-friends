@@ -247,10 +247,10 @@ export class ContentLibrary extends EventTarget {
     const data=clone({definition,snapshot,projectId,sessionKind,sourceRevision,...(release?{release}:{})});
     return this.#write('runs',crypto.randomUUID(),null,()=>({format:'solar-friends-run',schema:1,title:definition.title,...data}),thumbnail);
   }
-  async importRecoveredRun({definition,snapshot,release=null}){
+  async importRecoveredRun({definition,snapshot,release=null,title=definition?.title}){
     if(typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS||!definition?.start)throw Error('This recovered village cannot be stored.');
     const data=clone({definition,snapshot,release});
-    return this.#write('runs',crypto.randomUUID(),null,()=>({format:'solar-friends-run',schema:1,title:definition.title,projectId:null,sessionKind:'scenario',sourceRevision:null,...data}));
+    return this.#write('runs',crypto.randomUUID(),null,()=>({format:'solar-friends-run',schema:1,title:typeof title==='string'?title.slice(0,100):definition.title,projectId:null,sessionKind:'scenario',sourceRevision:null,...data}));
   }
   saveRun(id,snapshot,expectedRevision){
     if(typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS)throw Error('This playthrough is too large to save.');

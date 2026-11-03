@@ -49,7 +49,17 @@ export class PlayerSession {
       return record;
     });
     this.#writes=operation;
-    return operation.catch(error=>{if(this.#lastRequested===raw)this.#lastRequested=null;throw error;});
+    return operation.catch(error=>{if(this.#lastRequested===raw)this.#lastRequested=null;if(error.name==='LibraryConflict'){this.conflicted=true;this.onConflict?.();}throw error;});
+  }
+  saveCopy(){
+    const raw=this.game.snapshot(),oldId=this.id;
+    const operation=this.#writes.catch(()=>{}).then(async()=>{
+      const record=await this.library.importRecoveredRun({definition:this.record.definition,snapshot:raw,release:this.record.release??null,title:(this.record.title+' · copy').slice(0,100)});
+      this.record=record;this.#lastRequested=raw;this.conflicted=false;
+      try{const storage=this.#recovery(),key=`solar-friends-run-recovery:${oldId}`,cached=JSON.parse(storage.getItem(key)||'null');if(cached?.snapshot===raw)storage.removeItem(key);}catch{/* The independent durable copy is saved. */}
+      return record;
+    });
+    this.#writes=operation;return operation;
   }
   async restartTest(options){
     if(!this.isTest)throw Error('Only a playtest can be restarted here.');

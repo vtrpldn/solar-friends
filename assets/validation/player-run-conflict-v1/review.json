@@ -1,0 +1,21 @@
+{
+  "why": "A scenario checkpoint conflict must offer the copy recovery action promised by its error message.",
+  "verdict": "pass for two-tab scenario checkpoint conflict and independent copy",
+  "screensIndividuallyReviewed": [
+    "conflict.png",
+    "independent-copy.png"
+  ],
+  "observations": [
+    "Conflict exposes Save independent copy in the scenario session bar.",
+    "Stale Save preserves the newer durable run and retains the exact local snapshot in recovery.",
+    "Copy storage-full fault preserves local state, original run identity and newer durable checkpoint; retry succeeds.",
+    "Copied run has a fresh ID, copied metadata title, same frozen definition and exact local snapshot. The original run remains unchanged.",
+    "Reload is exact when observed before the first simulation frame; normal scenario time advances immediately after loading.",
+    "Native session restart preparation/cancellation/write-failure regressions pass."
+  ],
+  "limits": [
+    "Direct draft-started scenario tested; frozen-release credit transfer is preserved by code but not exercised in this browser case.",
+    "Reload observer holds only named simulation frame callbacks until the public Pause control; startup/artwork callbacks proceed.",
+    "Not all autosave/concurrent restart/scratch session races or full release acceptance."
+  ]
+}

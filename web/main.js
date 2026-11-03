@@ -1968,6 +1968,9 @@ function installCreationSession(){
   if(session.record.definition.start.resident_balance==='unrestricted'){const note=document.createElement('small');note.textContent='Unrestricted starting skills';bar.append(note);}
   const button=(text,action)=>{const b=document.createElement('button');b.textContent=text;b.onclick=async()=>{b.disabled=true;try{await action();}catch(error){toast(error.message);}finally{b.disabled=false;}};bar.append(b);};
   button('Save checkpoint',()=>session.save());
+  const copy=document.createElement('button');copy.textContent='Save independent copy';copy.hidden=!session.conflicted;bar.append(copy);
+  session.onConflict=()=>{copy.hidden=false;};
+  copy.onclick=async()=>{copy.disabled=true;try{await session.saveCopy();history.replaceState(null,'','?run='+encodeURIComponent(session.id));bar.remove();installCreationSession();toast('Your village is saved as an independent copy.');}catch(error){toast(error.message);}finally{copy.disabled=false;}};
   if(session.isTest)button('Restart test',()=>restartPlayerSession(true));
   button(session.isTest?'Return to editor':'Scenario library',async()=>{
     if(!paused)togglePause();
