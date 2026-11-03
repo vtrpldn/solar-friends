@@ -1,0 +1,61 @@
+{
+  "boards": [
+    {
+      "file": "caatinga-zoom-1-unpowered-night-group-1.png",
+      "sha256": "2a8b98127b7c955423b2f9bf897c9b560dd6dc188b14f86bab5dac2902ab2865",
+      "individuallyInspected": true,
+      "finding": "No additional visible silhouette/grounding or obvious proportion mismatch at normal zoom; dark small details remain subdued."
+    },
+    {
+      "file": "caatinga-zoom-1-unpowered-night-group-2.png",
+      "sha256": "ff25e382165279c50eeecc1f9f5dd1c113acf09e7bfde4f0c9d5f758b855dff6",
+      "individuallyInspected": true,
+      "finding": "No additional visible silhouette/grounding or obvious proportion mismatch at normal zoom; dark small details remain subdued."
+    },
+    {
+      "file": "caatinga-zoom-1-unpowered-night-group-3.png",
+      "sha256": "c04cb1fc1fcaece7a3c0844e0b64f19e56acab50a9741b81aafca461a9d75a4e",
+      "individuallyInspected": true,
+      "finding": "No additional visible silhouette/grounding or obvious proportion mismatch at normal zoom; dark small details remain subdued."
+    },
+    {
+      "file": "cerrado-zoom-1-unpowered-night-group-1.png",
+      "sha256": "1c9c566350202f8b40e20ee896e95aa4cac5f8df31c5b37f830cdecf7d737268",
+      "individuallyInspected": true,
+      "finding": "No additional visible silhouette/grounding or obvious proportion mismatch at normal zoom; dark small details remain subdued."
+    },
+    {
+      "file": "cerrado-zoom-1-unpowered-night-group-2.png",
+      "sha256": "7ecd83affb04a6af6edae0084edc04b4a992c063d152902eeb97dc376efe5122",
+      "individuallyInspected": true,
+      "finding": "No additional visible silhouette/grounding or obvious proportion mismatch at normal zoom; dark small details remain subdued."
+    },
+    {
+      "file": "cerrado-zoom-1-unpowered-night-group-3.png",
+      "sha256": "f819bad6ba1ec8b2aa817c545e24d0cd715d18043aa74455176c18af372b6a20",
+      "individuallyInspected": true,
+      "finding": "No additional visible silhouette/grounding or obvious proportion mismatch at normal zoom; dark small details remain subdued."
+    },
+    {
+      "file": "mata-atlantica-zoom-1-unpowered-night-group-1.png",
+      "sha256": "edd287696e0921cdc92fb7005a13f37123e6ac7e2be4e2730111d62cab4b5e90",
+      "individuallyInspected": true,
+      "finding": "No additional visible silhouette/grounding or obvious proportion mismatch at normal zoom; dark small details remain subdued."
+    },
+    {
+      "file": "mata-atlantica-zoom-1-unpowered-night-group-2.png",
+      "sha256": "cd1d0498a651f3e094e8dcdc066a0f5d0ad1e80191fee3db71caff97b91fceff",
+      "individuallyInspected": true,
+      "finding": "No additional visible silhouette/grounding or obvious proportion mismatch at normal zoom; dark small details remain subdued."
+    },
+    {
+      "file": "mata-atlantica-zoom-1-unpowered-night-group-3.png",
+      "sha256": "92cc784679a9ffd976fd2ca453e1ddb44595ce6d65d0a60c7a43b609574957be",
+      "individuallyInspected": true,
+      "finding": "No additional visible silhouette/grounding or obvious proportion mismatch at normal zoom; dark small details remain subdued."
+    }
+  ],
+  "compositions": 81,
+  "review": "All nine boards individually inspected. Unpowered lamps/windows appear dark; broad building silhouettes remain recognizable beside the same home, Iara and roads. No additional visible grounding or obvious proportion mismatch observed. Not a geometric measurement or artist/user approval.",
+  "scope": "Controlled unpowered night, 27 appearances in three biomes, normal zoom. Power loss supplied to shared painters, not actual failing circuits. Empty crop plots/static animal states. Rain, other zooms, construction/animal/crop lifecycles, full current resident motion, fine-detail night readability and complete release acceptance remain open."
+}
