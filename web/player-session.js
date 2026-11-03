@@ -36,6 +36,14 @@ export class PlayerSession {
   #cacheSnapshot(raw,onlyIfMissing=false){
     try{const storage=this.#recovery(),key=`solar-friends-run-recovery:${this.id}`;if(!onlyIfMissing||!storage.getItem(key))storage.setItem(key,JSON.stringify({revision:this.record.revision,snapshot:raw}));}catch{/* Saving to IndexedDB can still succeed. */}
   }
+  #moveRecovery(oldId,raw){
+    if(oldId===this.id)return;
+    try{
+      const storage=this.#recovery(),key=`solar-friends-run-recovery:${oldId}`,cached=JSON.parse(storage.getItem(key)||'null');
+      if(cached&&cached.snapshot!==raw)storage.setItem(`solar-friends-run-recovery:${this.id}`,JSON.stringify({revision:this.record.revision,snapshot:cached.snapshot}));
+      storage.removeItem(key);
+    }catch{/* Preserve the old recovery and retry when the queued write starts. */}
+  }
   save(){
     const raw=this.game.snapshot(),requestedId=this.id;
     this.#cacheSnapshot(raw);
@@ -43,7 +51,7 @@ export class PlayerSession {
     this.#lastRequested=raw;
     const operation=this.#writes.catch(()=>{}).then(async()=>{
       // A preceding copy may have changed the target since this was queued.
-      if(this.id!==requestedId)this.#cacheSnapshot(raw,true);
+      if(this.id!==requestedId){this.#moveRecovery(requestedId,raw);this.#cacheSnapshot(raw,true);}
       const record=await this.library.saveRun(this.id,raw,this.record.revision);
       this.record=record;
       try{
@@ -57,11 +65,11 @@ export class PlayerSession {
     return operation.catch(error=>{if(this.#lastRequested===raw)this.#lastRequested=null;if(error.name==='LibraryConflict'){this.conflicted=true;this.onConflict?.();}throw error;});
   }
   saveCopy(){
-    const raw=this.game.snapshot(),oldId=this.id;
+    const raw=this.game.snapshot(),oldId=this.id,requestedBeforeCopy=this.#lastRequested;
     const operation=this.#writes.catch(()=>{}).then(async()=>{
       const record=await this.library.importRecoveredRun({definition:this.record.definition,snapshot:raw,release:this.record.release??null,title:(this.record.title+' · copy').slice(0,100)});
-      this.record=record;this.#lastRequested=raw;this.conflicted=false;
-      try{const storage=this.#recovery(),key=`solar-friends-run-recovery:${oldId}`,cached=JSON.parse(storage.getItem(key)||'null');if(cached&&cached.snapshot!==raw)storage.setItem(`solar-friends-run-recovery:${record.id}`,JSON.stringify({revision:record.revision,snapshot:cached.snapshot}));storage.removeItem(key);}catch{/* Keep the old recovery if its transfer could not be stored. */}
+      this.record=record;if(this.#lastRequested===requestedBeforeCopy||this.#lastRequested===null)this.#lastRequested=raw;this.conflicted=false;
+      this.#moveRecovery(oldId,raw);
       return record;
     });
     this.#writes=operation;return operation;

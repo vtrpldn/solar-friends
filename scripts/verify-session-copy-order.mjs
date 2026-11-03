@@ -19,4 +19,14 @@ for(const priorConflict of [false,true])for(const failLater of [false,true]){
  else assert.equal(result.snapshot,latestRaw);
  assert.equal(records.get('copy').snapshot,latestRaw);assert.equal(data.get('solar-friends-run-recovery:copy'),undefined);session.dispose();
 }
-console.log('PASS native session copy ordering: preceding save/conflict, later checkpoint to new identity, frozen credits, original isolation, new-ID recovery on queued storage failure and retry.');
+for(const transferQuota of [false,true]){
+ const game=new Game(),definition=JSON.parse(game.scenario_template('sandbox'));assert(JSON.parse(game.load_scenario(JSON.stringify(definition))).ok);
+ const original={id:'original',title:'Queue',revision:1,definition,snapshot:game.snapshot(),sessionKind:'scenario'},data=new Map(),events=[];let quota=transferQuota,releaseCopy,releaseWrite,enterWrite;
+ const copyGate=new Promise(r=>{releaseCopy=r;}),writeGate=new Promise(r=>{releaseWrite=r;}),entered=new Promise(r=>{enterWrite=r;});let durableCopy;
+ const storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>{if(k.endsWith(':copy')&&quota){quota=false;throw Error('Recovery storage full once');}data.set(k,v);},removeItem:k=>data.delete(k)};
+ const library={async importRecoveredRun(values){events.push('copy');await copyGate;durableCopy={...original,...values,id:'copy',revision:1};return structuredClone(durableCopy);},async saveRun(id,raw,revision){assert.equal(id,'copy');events.push('save');if(events.length===2){enterWrite();await writeGate;}assert.equal(revision,durableCopy.revision);durableCopy={...durableCopy,snapshot:raw,revision:revision+1};return structuredClone(durableCopy);}};
+ const session=new PlayerSession(library,structuredClone(original),game,()=>storage);game.tick(.1);const copying=session.saveCopy();await flush();game.tick(.1);const middle=game.snapshot(),first=session.save();game.tick(.1);const latest=game.snapshot(),second=session.save();assert.notEqual(middle,latest);releaseCopy();await copying;await entered;
+ assert(!data.has('solar-friends-run-recovery:original'),'Pending newer recovery remained attached to original after transfer retry');assert.equal(JSON.parse(data.get('solar-friends-run-recovery:copy')).snapshot,latest,'Older queued checkpoint replaced the latest recovery');
+ releaseWrite();await first;await second;assert.equal(durableCopy.snapshot,latest);assert.equal(original.revision,1);assert.equal(data.size,0);const count=events.length;await session.save();assert.equal(events.length,count,'Already saved latest checkpoint was written twice');session.dispose();
+}
+console.log('PASS native session copy ordering: preceding save/conflict, later checkpoint to new identity, frozen credits, original isolation, failed-write retry, multiple queued checkpoints preserve newest recovery, transfer-quota retry and duplicate-save coalescing.');

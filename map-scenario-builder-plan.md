@@ -383,3 +383,7 @@ Extended the public run-conflict test to create a derivative through Edit a copy
 ### Queued checkpoint ownership after copying
 
 A controlled native session ordering test reproduced pending recovery bytes left under the original ID after Save independent copy. Fixed transfer to the new ID/revision and refreshed queued-write recovery only when its target identity changed, preserving an already newer recovery copy. Four preceding-save/conflict × later-success/failure cases pass, including exact original isolation, new-ID recovery, retry and frozen credit preservation. Existing restart preparation/cancellation/write-failure checks and the real frozen-release conflict/copy browser regression pass. Evidence: `assets/validation/session-copy-order-v1/`. Recovery-storage quota boundaries and broader simultaneous restart/crash timing remain open.
+
+### Multiple queued post-copy checkpoints
+
+Expanded native ordering coverage to two queued post-copy checkpoints, including a held earlier write and temporary recovery-storage quota failure. Fixed copy completion resetting the newer request marker (which caused an unnecessary duplicate save), and reused recovery migration when changed-identity queued writes begin so a failed transfer can retry. Six controlled cases, native restart regressions and the real frozen-release browser conflict/copy regression pass. Evidence: `assets/validation/session-multiple-copy-queue-v1/`. Sustained unavailable recovery storage, all crash microtask boundaries and simultaneous restart combinations remain outside this result.

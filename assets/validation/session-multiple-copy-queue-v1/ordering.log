@@ -1,0 +1,1 @@
+PASS native session copy ordering: preceding save/conflict, later checkpoint to new identity, frozen credits, original isolation, failed-write retry, multiple queued checkpoints preserve newest recovery, transfer-quota retry and duplicate-save coalescing.

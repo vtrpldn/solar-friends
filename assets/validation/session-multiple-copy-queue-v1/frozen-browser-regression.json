@@ -1,0 +1,25 @@
+{
+  "completed": true,
+  "inputs": {
+    "scripts/verify-player-run-conflict.mjs": "7c503a32b5203eee2d85997cde09b73cc50ab9e06b9192e5ac141a686e9d009b",
+    "web/player-session.js": "7168e65173ffbb856ea2d3b88fb86c278dc5a4cb332ac0c1c5bc52f3b63dfce7",
+    "web/content-library.js": "7868edc580b44e984f556559133f4c5467ddbffdf19f121455f30e6c757a2b9b",
+    "web/main.js": "8fdec42cdc0753cd28d0eb3f2d8024ea7e986ba97ed5b5970199098453872fef"
+  },
+  "frozenRelease": true,
+  "checks": {
+    "publicScenarioStart": true,
+    "realTwoTabRunConflict": true,
+    "newerRunExact": true,
+    "localRecoveryExact": true,
+    "copyQuotaFailurePreservesIdentityAndState": true,
+    "independentCopySnapshotExact": true,
+    "frozenDefinitionPreserved": true,
+    "sourceReleaseDeleted": true,
+    "embeddedReleaseAuthorVersionCreditsExact": true,
+    "newRunId": true,
+    "copyReloadExact": true,
+    "browserErrors": []
+  },
+  "scope": "Two real paused scenario run tabs with ordinary time controls, checkpoint Save, independent-copy quota failure/retry and reload. Reload first-animation callbacks held until public Pause to observe exact installed checkpoint before time advances. No direct game mutation or run record writes."
+}

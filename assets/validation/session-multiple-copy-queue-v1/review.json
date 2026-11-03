@@ -1,0 +1,26 @@
+{
+  "why": "Keep the newest recovery snapshot and avoid redundant checkpoint writes when several saves queue across independent copying.",
+  "verdict": "pass for six controlled native ordering cases plus frozen browser regression",
+  "reproducedFailure": "After two queued post-copy checkpoints completed, saving the exact latest snapshot performed another write because copy completion had reset the request marker to its older captured snapshot.",
+  "fix": [
+    "Copy completion preserves a newer queued save request marker.",
+    "Recovery migration is shared between copy completion and changed-identity queued writes, so a temporary transfer quota failure can retry before saving."
+  ],
+  "verified": [
+    "Original four preceding-save/conflict and later-success/failure cases",
+    "Two queued post-copy checkpoints retain the newest snapshot while the first write is held",
+    "Successful transfer and temporary recovery-storage-full transfer retry",
+    "Latest committed snapshot save coalesces without another write",
+    "Native restart preparation/cancellation/write-failure regression",
+    "Real public frozen-release two-tab conflict/copy quota retry and exact pre-first-frame reload"
+  ],
+  "limits": [
+    "Controlled recovery quota fails once; sustained unavailable storage remains outside this result.",
+    "No process-termination at every microtask boundary or all simultaneous restart combinations."
+  ],
+  "sourceSha256": {
+    "web/player-session.js": "7168e65173ffbb856ea2d3b88fb86c278dc5a4cb332ac0c1c5bc52f3b63dfce7",
+    "scripts/verify-session-copy-order.mjs": "e953430c229ebc06c29b125ed0d8f4e0ef674ba25161c5aca05d86d43a7a5ff6",
+    "web/pkg/solar_friends_bg.wasm": "58d3c662a05d2590ad5a744e17ffb4a3280d7125cb97581ad2aae14a957c0086"
+  }
+}
