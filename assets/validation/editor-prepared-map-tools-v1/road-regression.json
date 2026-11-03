@@ -1,0 +1,77 @@
+{
+  "complete": true,
+  "boundaries": [
+    {
+      "name": "map-edge",
+      "blocked": [
+        0,
+        32
+      ],
+      "allowed": [
+        1,
+        32
+      ],
+      "verified": true
+    },
+    {
+      "name": "river-bank",
+      "blocked": [
+        60,
+        32
+      ],
+      "allowed": [
+        59,
+        32
+      ],
+      "verified": true
+    }
+  ],
+  "checks": [
+    "native whole-stroke allowed and blocked feedback",
+    "four-cell stroke exact single-step undo/redo",
+    "mixed clear/building stroke rejected without definition/history change",
+    "Escape cancels whole stroke and feedback",
+    "exact reload",
+    "map-edge and river-bank blocked click isolation and neighboring valid placement with exact undo/redo",
+    "no page errors"
+  ],
+  "scope": "Public road pointer strokes on default sandbox map; includes one map-edge/interior pair and one river-bank/inland pair. Not all river geometries, maximum stroke size or hardware timing.",
+  "inputs": {
+    "scripts/verify-editor-road-preview.mjs": "cf1c9b480513ccc21c1d5c3e3fa71ffbef451f724d441a279d4b49cfe655247b",
+    "web/editor/road-placement.js": "4d41088d3eb82b94a10af5fe35061bfbe25dbec6441249a7c67d45b6ac18703b",
+    "web/editor/index.js": "1163bb9d9661a81b22ac25748b1e18896edb1c9fa30922079efa1b9bf4712746",
+    "web/editor/map-view.js": "5d38b26e482ee6091de7b11823479459ea573bcfb72acbc6e7c8e44bc5314e24",
+    "web/editor/group-preview.js": "1bee0c775c2de17488be52215e9f3f2a23a0cfbee033d7683081ee521f6f0661",
+    "web/group-preview-worker.js": "d60c36203f3893097513a9ca13722305e89f96225bc6a41c971896c3290a9cf9",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.34991599999921164
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 2.8222080000014103
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 35.21499999999651
+    }
+  ]
+}

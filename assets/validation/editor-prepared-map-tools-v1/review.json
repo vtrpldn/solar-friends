@@ -1,0 +1,70 @@
+{
+  "change": "Heavy map actions share cancellable preparation. Follow-up selection/tool changes happen only after a successful commit. Operations that intentionally permit unfinished drafts retain validation errors and the last valid preview.",
+  "checks": [
+    "eleven tool actions each cancel without checkpoint/history changes",
+    "road, habitat, meadow, river, camp, camera, battery bank, timber plot, thinning, planting and home placement commit one step with exact undo/redo",
+    "building removal cancellation preserves selected source and checkpoint",
+    "independent home replacement and exact removal/replacement undo",
+    "whole-group/internal-route move and exact reload",
+    "ordinary roads/nature, all six asset tools, connected groups and inherited wear regressions",
+    "no page errors; all runs terminal exit 0 with cleanup"
+  ],
+  "timings": [
+    {
+      "tool": "road",
+      "releaseHandlerMs": 3.5,
+      "mainThreadCompiles": 0
+    },
+    {
+      "tool": "habitat",
+      "releaseHandlerMs": 3.700000047683716,
+      "mainThreadCompiles": 0
+    },
+    {
+      "tool": "meadow",
+      "releaseHandlerMs": 3.6999998092651367,
+      "mainThreadCompiles": 0
+    },
+    {
+      "tool": "river",
+      "releaseHandlerMs": 3.4000000953674316,
+      "mainThreadCompiles": 0
+    },
+    {
+      "tool": "camp",
+      "releaseHandlerMs": 3.6000001430511475,
+      "mainThreadCompiles": 0
+    },
+    {
+      "tool": "camera",
+      "releaseHandlerMs": 3.5999999046325684,
+      "mainThreadCompiles": 0
+    },
+    {
+      "tool": "battery-bank",
+      "releaseHandlerMs": 3.6000001430511475,
+      "mainThreadCompiles": 0
+    },
+    {
+      "tool": "source_timber",
+      "releaseHandlerMs": 3.200000047683716,
+      "mainThreadCompiles": 0
+    },
+    {
+      "tool": "thin-nature",
+      "releaseHandlerMs": 3.799999952316284,
+      "mainThreadCompiles": 0
+    },
+    {
+      "tool": "nature",
+      "releaseHandlerMs": 4.099999904632568,
+      "mainThreadCompiles": 0
+    },
+    {
+      "tool": "home",
+      "releaseHandlerMs": 3.1000001430511475,
+      "mainThreadCompiles": 0
+    }
+  ],
+  "scope": "One combined 256-building/1000-object/64-route fixture and selected ordinary-map regressions. Heavy building removal sampled on one unreferenced home; other asset copy/move families exercised on ordinary maps. Not all invalid dependencies, every brush/species/placement site, maximum brush/history, sustained pacing/memory or all inspector families."
+}
