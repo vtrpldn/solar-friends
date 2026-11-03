@@ -24,7 +24,7 @@ const densityCounts=[];
 for(const density of [.25,.5,1]){
  let next=0;const plants=plantStroke(definition,[],catalog.nature,'macambira',1,[[20,25]],9,()=>`density-${next++}`,density);densityCounts.push(plants.length);
  assert(plants.length>0);assert(JSON.parse(game.validate_scenario(JSON.stringify({...definition,map:{...definition.map,nature:plants}}))).ok);
- for(const a of plants)for(const b of plants)if(a!==b)assert(Math.hypot(a.x-b.x,a.y-b.y)>=catalog.nature.find(s=>s.key==='macambira').spacing/Math.sqrt(density));
+ for(const a of plants)for(const b of plants)if(a!==b)assert(Math.hypot(a.x-b.x,a.y-b.y)>=catalog.nature.find(s=>s.key==='macambira').spacing*Math.min(a.size,b.size)/Math.sqrt(density));
  assert.deepEqual(plantStroke(definition,[],catalog.nature,'macambira',1,[[20,25]],9,(()=>{let id=0;return()=>`density-${id++}`;})(),density),plants);
 }
 assert(densityCounts[0]<densityCounts[1]&&densityCounts[1]<densityCounts[2],JSON.stringify(densityCounts));

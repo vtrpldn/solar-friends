@@ -1,0 +1,22 @@
+{
+  "nativeValidatedCases": 1080,
+  "catalogEntries": 20,
+  "biomes": 3,
+  "seeds": 2,
+  "densities": 3,
+  "baseSizes": 3,
+  "checks": [
+    "bounded offsets and scale",
+    "repeatable exact data",
+    "source definition unchanged",
+    "spacing and camp clearance",
+    "edge cells",
+    "precise single-object placement"
+  ],
+  "sources": {
+    "web/editor/nature.js": "0e7135a7f5175c00c68e941ebc09a386a168679db3bf5e4e89288de5b0a58c87",
+    "scripts/verify-nature-cluster-variation.mjs": "42baf914ac5e9c3274dfcb52e92f2390d3d92e5ff663109a65fe2ffaa1e560e4",
+    "scripts/verify-authored-nature.mjs": "583314b5aa72fca095d056ec0d4779a492ef654ecab977ea5df8b56c0a648d79",
+    "web/pkg/solar_friends_bg.wasm": "41433e3913d33a5b015be57b00c510278c77f200993fa3fbde2e41934f80ae2f"
+  }
+}

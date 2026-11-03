@@ -10,8 +10,8 @@ try{
  const original=game.snapshot(),generated=game.generate_property(42);assert.equal(game.generate_property(42),generated);assert.notEqual(game.generate_property(43),generated);assert.equal(game.snapshot(),original);
  d.map.nature=[];
  const plants=plantStroke(d,[],catalog,'jequitiba-rosa',1,[[26,34],[26,35],[26,36]],3);
- assert(plants.length>1);assert(plants.every(p=>p.size===1));
- for(const a of plants)for(const b of plants)if(a!==b)assert(Math.hypot(a.x-b.x,a.y-b.y)>=1.7);
+ assert(plants.length>1);assert(plants.every(p=>p.size>=.94&&p.size<=1.06));assert(plants.some(p=>p.x%1!==0&&p.y%1!==0));
+ for(const a of plants)for(const b of plants)if(a!==b)assert(Math.hypot(a.x-b.x,a.y-b.y)>=1.7*Math.min(a.size,b.size));
  assert.equal(plantStroke(d,[],catalog,'jucara',1,[[32,32]],1).length,0);
  assert.equal(plantStroke(d,[],catalog,'jucara',1,[[61,10]],1).length,0);
  d.map.nature=plants;assert.equal(JSON.parse(game.load_scenario(JSON.stringify(d))).ok,true);

@@ -1,0 +1,34 @@
+{
+  "baseline": "91b38e8",
+  "why": "Replace visibly regular cluster rows with restrained deterministic placement and scale variation required by the ecology tools.",
+  "semantics": "Cluster anchors vary by at most .22 cells per axis; sizes vary by at most six percent around the selected base, clamped to native species limits. Existing authored objects remain untouched. Single-cell placement and moves remain exact. No sprites are warped or recolored.",
+  "inspected": [
+    "sparse-cluster.png"
+  ],
+  "visualObservation": "The actual sparse macambira brush result is less rigidly aligned, keeps open ground and coherent small-plant proportions against the existing resident/building references.",
+  "nativeValidation": 1080,
+  "browserChecks": [
+    "density spacing, native validity and deterministic output",
+    "cluster density survives reload",
+    "trusted sparse brush matches plan with exact atomic undo/redo",
+    "fractional-anchor picking",
+    "independent copy identity",
+    "bounds, spacing, camp and size rejection",
+    "selected tiny plant inspector",
+    "blank numeric edit preserves draft",
+    "resize exact undo/redo",
+    "move retains identity and neighbors",
+    "rejected move preserves draft",
+    "copy and Delete with exact undo",
+    "typing guard",
+    "erase tool removes only one object",
+    "reload preserves selection",
+    "trusted drag move and Escape cancellation",
+    "native playtest and editor return"
+  ],
+  "limits": [
+    "Only the pictured sparse macambira composition was visually inspected for this change; native checks do not approve every species composition.",
+    "The brush remains based on nearby cell candidates; arbitrary organic cluster shapes and mixed habitat/neighbor artwork are not accepted by this evidence.",
+    "No new raster artwork, altered automatic generation, or full release acceptance."
+  ]
+}
