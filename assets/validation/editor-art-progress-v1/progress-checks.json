@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "sources": {
+    "web/editor/map-view.js": "b1f897ccce97b9e855f2c56ca993b0f6603547bd9032f4d09bae0ad6eae9be21",
+    "scripts/verify-editor-art-progress.mjs": "60972ade626019dbe95799aa7d0d076891d7b6c07d9f36e92582e26783a469d7"
+  },
+  "checks": {
+    "initial": true,
+    "increment": true,
+    "successfulCompletion": true,
+    "staleCompletionIgnored": true,
+    "staleFailureIgnored": true,
+    "retry": true,
+    "failureStopsProgress": true,
+    "discardedPreviewIgnored": true
+  },
+  "scope": "Real EditorMap loading renderer and controlled appearance promises, native scenario snapshot. This isolates progress/revision/failure/retry/discard handling; it does not test actual raster preparation or cancellation of the underlying composer."
+}

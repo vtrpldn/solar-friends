@@ -63,13 +63,15 @@ export class EditorMap {
     if(this.terrainTask&&this.terrainTask.key!==this.landPaint.key){this.terrainTask.controller.abort();this.terrainTask=null;this.terrainLoading=false;this.terrainError=null;}
     const appearances=snapshot.residents.map(p=>p.appearance);if(!this.preview)this.art.appearances.setActive(appearances);
     const revision=this.artRevision=(this.artRevision??0)+1;this.artLoading=appearances.some(a=>!this.art.appearances.isReady(a));this.artError=null;
+    const pending=appearances.filter(a=>!this.art.appearances.isReady(a));this.artProgress={completed:appearances.length-pending.length,total:appearances.length};
     this.updateBusy();
-    if(this.artLoading)Promise.all(appearances.filter(a=>!this.art.appearances.isReady(a)).map(a=>this.art.appearances.prepare(a))).then(()=>{if(revision===this.artRevision){this.artLoading=false;this.updateBusy();this.render();this.onArtworkReady();}},error=>{if(revision===this.artRevision){this.artError=error.message;this.updateBusy();this.render();}});
+    if(this.artLoading)Promise.all(pending.map(async a=>{await this.art.appearances.prepare(a);if(revision===this.artRevision&&!this.artError){this.artProgress.completed++;this.updateBusy();this.render();}})).then(()=>{if(revision===this.artRevision){this.artLoading=false;this.updateBusy();this.render();this.onArtworkReady();}},error=>{if(revision===this.artRevision){this.artError=error.message;this.updateBusy();this.render();}});
     if(view)this.view={...this.view,...view,center:[...view.center]};
     if(this.view.selectedNature&&!this.naturalObjects.some(p=>p.id===this.view.selectedNature))this.view.selectedNature=null;
     if(paint||view||this.artLoading)this.render();
   }
-  updateBusy(){this.canvas.setAttribute('aria-busy',String(!!(this.artLoading&&!this.artError||this.terrainLoading)));this.canvas.setAttribute('aria-description',this.artError??this.terrainError??(this.terrainLoading?'Updating landscape. You can keep editing.':''));this.canvas.style.pointerEvents=this.artLoading?'none':'';if(this.retryButton){this.retryButton.hidden=!this.artError;this.retryButton.disabled=!!(this.artLoading&&!this.artError);}}
+  artworkStatus(){return `Preparing friends · ${this.artProgress?.completed??0} of ${this.artProgress?.total??0} ready`; }
+  updateBusy(){this.canvas.setAttribute('aria-busy',String(!!(this.artLoading&&!this.artError||this.terrainLoading)));this.canvas.setAttribute('aria-description',this.artError??(this.artLoading?this.artworkStatus():null)??this.terrainError??(this.terrainLoading?'Updating landscape. You can keep editing.':''));this.canvas.style.pointerEvents=this.artLoading?'none':'';if(this.retryButton){this.retryButton.hidden=!this.artError;this.retryButton.disabled=!!(this.artLoading&&!this.artError);}}
   groundFor(key,request){
     if(this.groundKey===key){
       // Undo may return to the displayed land while a newer paint is pending.
@@ -197,7 +199,13 @@ export class EditorMap {
     const dpr=this.preview?1:Math.min(devicePixelRatio,2),w=Math.round(width*dpr),h=Math.round(height*dpr);
     if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
     c.setTransform(dpr,0,0,dpr,0,0);
-    if(this.artLoading){c.fillStyle='#dfe6c9';c.fillRect(0,0,width,height);c.fillStyle='#304435';c.font='16px sans-serif';c.fillText(this.artError?'Resident artwork could not load. Choose Retry resident artwork.':'Preparing resident artwork…',20,32);return;}
+    if(this.artLoading){
+      c.fillStyle='#efe3bc';c.fillRect(0,0,width,height);c.fillStyle='#483a27';c.font='bold 20px Georgia';c.textAlign='center';
+      c.fillText(this.artError?'Your friends could not be prepared':this.artworkStatus(),width/2,height/2-24);
+      c.font='14px sans-serif';c.fillText(this.artError?'Choose Retry resident artwork to try again.':'Preparing their appearances for this village.',width/2,height/2+4);
+      if(!this.artError){const barWidth=Math.min(280,width-40),fraction=this.artProgress.total?this.artProgress.completed/this.artProgress.total:0;c.fillStyle='#b7a77a';c.fillRect((width-barWidth)/2,height/2+24,barWidth,8);c.fillStyle='#708445';c.fillRect((width-barWidth)/2,height/2+24,barWidth*fraction,8);}
+      c.textAlign='start';return;
+    }
     this.scale=Math.max(.18,Math.min(width/1000,height/800)*view.zoom);
     const anchor=project(...view.center,{x:0,y:0},this.scale);
     this.origin={x:width/2-anchor.x,y:height/2-anchor.y};

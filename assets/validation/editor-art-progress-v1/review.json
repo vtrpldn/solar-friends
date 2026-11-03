@@ -1,0 +1,26 @@
+{
+  "baseline": "6d5ffcc",
+  "why": "Show visible cast-preparation progress during long editor loading and preserve correct progress under stale/rejected work.",
+  "inspected": [
+    "loading.png",
+    "editor.png"
+  ],
+  "checks": {
+    "initial": true,
+    "increment": true,
+    "successfulCompletion": true,
+    "staleCompletionIgnored": true,
+    "staleFailureIgnored": true,
+    "retry": true,
+    "failureStopsProgress": true,
+    "discardedPreviewIgnored": true
+  },
+  "realArtwork": "Complete source-pinned Caatinga maximum fixture report: 256 buildings, twelve custom v5/v6 looks, trusted 9x9 brush and two-building move with exact durable undo/redo, no page errors, Metal M3 Pro. Cold readiness 16.3 seconds; no speedup claimed.",
+  "processCleanup": "The real-art benchmark wrote complete=true after source rechecks and closed its browser children, but the Node/caffeinate wrapper remained live beyond four minutes. Its exact two owned PIDs were terminated (exit143). Completion claims concern recorded assertions, not a clean process exit. Controlled progress verifier exited0.",
+  "limits": [
+    "Controlled progress test uses deferred appearance promises with real EditorMap renderer and native snapshot, not actual raster-preparation cancellation.",
+    "Underlying appearance work is not cancelled by this feature; revision guards prevent obsolete UI updates.",
+    "Loading screenshot is the isolated renderer over the editor, not a normal public import capture.",
+    "No full release, all-art, performance or recovery acceptance."
+  ]
+}
