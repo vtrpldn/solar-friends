@@ -1,0 +1,41 @@
+{
+  "change": "Heavy title, introduction, seed, fund, water and rule edits use cancellable preparation. Cancellation/failure restores the visible field from the current document. Invalid numeric drafts remain editable.",
+  "checks": [
+    "five fields each cancel without checkpoint/history changes and restore original input",
+    "successful field edit creates one step with exact undo/redo",
+    "climate toggle cancellation restores checkbox and checkpoint",
+    "successful climate toggle and exact undo",
+    "aborted real worker on fund edit restores both checkpoint/history and visible value",
+    "combined move and history cancellation/unfinished-target regressions",
+    "small-map authored-cast history/playtest regression",
+    "bounded cleanup"
+  ],
+  "timings": [
+    {
+      "field": "creator-title",
+      "handlerMs": 2.6999998092651367,
+      "mainThreadCompiles": 0
+    },
+    {
+      "field": "creator-description",
+      "handlerMs": 2.5999999046325684,
+      "mainThreadCompiles": 0
+    },
+    {
+      "field": "creator-seed",
+      "handlerMs": 2.799999952316284,
+      "mainThreadCompiles": 0
+    },
+    {
+      "field": "creator-funds",
+      "handlerMs": 2.799999952316284,
+      "mainThreadCompiles": 0
+    },
+    {
+      "field": "creator-water",
+      "handlerMs": 2.8999998569488525,
+      "mainThreadCompiles": 0
+    }
+  ],
+  "scope": "One headless combined 256-building/1000-object/64-route fixture. Timings wrap real trusted onchange handlers, not end-to-end completion or physical display pacing. No layout styling changed. Other inspector families, heavy brush/placement/deletion operations, maximum history and broad release acceptance remain open."
+}

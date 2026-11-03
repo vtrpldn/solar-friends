@@ -195,6 +195,14 @@ async function changePrepared(label,edit,{target=null,history=null,allowInvalid=
     if(current===ctx&&!committed)status(ctx.doc.dirty||ctx.viewDirty?'Changes to save':'Saved on this device');
   }
 }
+// Inspector handlers do not depend on an immediate placement result. Keep their
+// old field values visible if a heavy preparation is cancelled or fails.
+function changeInspector(label,edit,restore){
+  if(!current||busy)return;
+  const ctx=current;
+  if(heavyDraft(ctx.doc.value))void changePrepared(label,edit,{allowInvalid:true}).then(committed=>{if(!committed&&current===ctx)restore?.();});
+  else if(!change(label,edit))restore?.();
+}
 function field(id,value){if(document.activeElement!==$(id))$(id).value=value;}
 function refresh(){
   if(!current)return;
@@ -518,13 +526,13 @@ function wire(){
   $('creator-sites').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
   $('creator-buildings').onclick=e=>{const b=e.target.closest('[data-tool]');if(b)setTool(b.dataset.tool);};
   $('creator-grid').onchange=()=>{map.view.grid=$('creator-grid').checked;map.render();map.viewChanged(map.state);};
-  $('creator-title').onchange=()=>change('Rename our village',d=>{d.title=$('creator-title').value;});
+  $('creator-title').onchange=()=>{const value=$('creator-title').value;changeInspector('Rename our village',d=>{d.title=value;},()=>{$('creator-title').value=current.doc.value.title;});};
   for(const [id,path,label]of [['creator-description',['description'],'Edit introduction'],['creator-seed',['map','seed'],'Change landscape seed'],['creator-funds',['start','funds'],'Set the shared fund'],['creator-water',['start','fresh_water'],'Set starting fresh water']])$(id).onchange=()=>{
     const raw=$(id).value,value=id==='creator-description'?raw:id==='creator-funds'?Math.round(Number(raw)*100):Number(raw);
-    change(label,d=>{if(path.length===1)d[path[0]]=value;else d[path[0]][path[1]]=value;});
+    changeInspector(label,d=>{if(path.length===1)d[path[0]]=value;else d[path[0]][path[1]]=value;},()=>{const d=current.doc.value,stored=path.length===1?d[path[0]]:d[path[0]][path[1]];$(id).value=id==='creator-funds'?stored/100:stored;});
   };
   $('creator-biomes').onclick=e=>{const b=e.target.closest('[data-biome]');if(!b)return;newBiome=b.dataset.biome;for(const choice of $('creator-biomes').querySelectorAll('button'))choice.setAttribute('aria-pressed',String(choice===b));};
-  $('creator-rules').onchange=e=>{if(e.target.dataset.rule)change('Change village rules',d=>{d.rules[e.target.dataset.rule]=e.target.checked;});};
+  $('creator-rules').onchange=e=>{const rule=e.target.dataset.rule,value=e.target.checked;if(rule)changeInspector('Change village rules',d=>{d.rules[rule]=value;},()=>{e.target.checked=current.doc.value.rules[rule];});};
   $('creator-selection').onchange=e=>{
     if(e.target.dataset.naturalField){if(e.target.value===''){toast('Enter a position or size before applying this change.');renderSelection();return;}const source=map.naturalObjects?.find(p=>p.id===map.view.selectedNature);if(source){const field=e.target.dataset.naturalField,next={...source,[field]:Number(e.target.value)};editNatureObject('move-nature',next.x,next.y,next.size);}return;}
     if(e.target.matches('[data-start-recovery]')){const value=e.target.value,id=map.view.selected;change('Set inherited structure recovery',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(value==='none')delete b.material_recovery;else b.material_recovery=value;});return;}

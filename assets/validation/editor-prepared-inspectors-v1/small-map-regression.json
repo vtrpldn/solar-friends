@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "sources": {
+    "web/editor/residents.js": "615bfc149748ea424fcf1315eb89ec95d478cf3cb0054c08486dd1c8e12f40c6",
+    "web/editor/index.js": "09c043beb62a73f8144a758be1970e30b040b0f0a4ea731613fbaf1b42333152",
+    "web/main.js": "da0693bf1e62bc2dc62586cbe3b7de2a6b4e3e8106f480ffb1646d6622c86a5e",
+    "web/content-library.js": "7868edc580b44e984f556559133f4c5467ddbffdf19f121455f30e6c757a2b9b",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6",
+    "scripts/verify-resident-creator-removed.mjs": "192252ad0ef944cdbf88e5f9ccb74b2aa378a2311a7b0ac548380bd18a593e58"
+  },
+  "checks": [
+    "removed creator modules and public mutation/package APIs",
+    "all three examples use authored friends",
+    "no creation/customization/preset controls",
+    "arrival needs preserve identity",
+    "existing friend removal/re-add and exact undo/redo",
+    "resident package import rejected without changing draft",
+    "reload and playtest return preserve draft",
+    "game resident details remain usable without appearance editor",
+    "no creator module requests or browser errors"
+  ]
+}
