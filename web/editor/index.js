@@ -81,7 +81,13 @@ const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
 function toast(text){$('creator-toast').textContent=text;$('creator-toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('creator-toast').hidden=true,6000);}
 function status(text){$('creator-save-status').textContent=text;$('creator-recovery-copy').hidden=!(current?.conflicted||current?.preserveDamagedRecord);}
 function markPublicationConflict(id){if(current?.id===id){current.conflicted=true;status('Changed in another tab · save a copy');}}
-function stepHistory(redo=false){if(!current)return false;if(map?.cancelGesture())return true;return redo?current.doc.redo():current.doc.undo();}
+function heavyDraft(d){return d.start.buildings.length>128||(d.start.routes?.length??0)>=32||(d.map.nature?.length??0)>=500;}
+function stepHistory(redo=false){
+  if(!current||busy)return false;if(map?.cancelGesture())return true;
+  const target=current.doc.historyTarget(redo);if(!target)return false;
+  if(heavyDraft(current.doc.value)||heavyDraft(target)){void changePrepared(redo?'Redo edit':'Undo edit',null,{target,history:redo?'redo':'undo',allowInvalid:true});return true;}
+  return redo?current.doc.redo():current.doc.undo();
+}
 async function download(definition){
   const file=await prepareCreationExport(definition,report.ok?{terrain:terrainBase,snapshot:map.snapshot,catalog}:null);
   const url=URL.createObjectURL(new Blob([file],{type:'application/json'})),a=document.createElement('a');
@@ -163,22 +169,25 @@ function change(label,edit,{valid=false}={}){
   }catch(error){toast(error.message);return false;}
   finally{preparedEdit=null;if(compiled&&!committed&&previous)engine.load_scenario(previous);}
 }
-// Large group moves compile separately; only a validated opening checkpoint is
-// installed after checking that the originating draft is still current.
-async function changePrepared(label,edit){
+// Heavy edits and history prepare separately. Invalid history targets retain
+// the last valid preview; valid checkpoints install only for the same revision.
+async function changePrepared(label,edit,{target=null,history=null,allowInvalid=false}={}){
   if(!current||busy)return false;
-  const ctx=current,revision=ctx.doc.revision,draft=ctx.doc.value;
-  busy=true;status('Preparing edit…');
+  const ctx=current,revision=ctx.doc.revision,draft=target??ctx.doc.value;
+  busy=true;clearTimeout(toastTimer);$('creator-toast').hidden=true;status('Preparing edit…');
   let previous,installed=false,committed=false;
   try{
-    edit(draft);
-    const prepared=await prepareEdit(draft);
+    edit?.(draft);
+    const prepared=await prepareEdit(draft,{allowInvalid});
     if(current!==ctx||ctx.doc.revision!==revision)throw Error('The draft changed. Try this edit again.');
-    previous=engine.snapshot();
-    if(!engine.restore(prepared.snapshot))throw Error('The prepared edit could not be installed. Your draft is unchanged.');
-    installed=true;busy=false;
+    if(prepared.validation.ok){
+      previous=engine.snapshot();
+      if(!engine.restore(prepared.snapshot))throw Error('The prepared edit could not be installed. Your draft is unchanged.');
+      installed=true;
+    }
+    busy=false;
     preparedEdit={key:canonical(draft),report:prepared.validation};
-    committed=ctx.doc.transact(label,d=>Object.assign(d,draft));return committed;
+    committed=history?ctx.doc[history]():ctx.doc.transact(label,d=>Object.assign(d,draft));return committed;
   }catch(error){toast(error.message);return false;}
   finally{
     preparedEdit=null;busy=false;

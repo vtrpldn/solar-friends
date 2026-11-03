@@ -71,6 +71,12 @@ export class EditorDocument extends EventTarget{
     this.#changed();
     return true;
   }
+  // Inspect one history target without mutating the document or copying its
+  // complete journal. Preparation may be cancelled before the real step runs.
+  historyTarget(redo=false){
+    const step=(redo?this.#future:this.#past).at(-1);
+    return step?definition(applyStep(this.#raw,step,redo)):null;
+  }
   undo(){
     const step=this.#past.at(-1);
     if(!step)return false;

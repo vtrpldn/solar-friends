@@ -17,10 +17,11 @@ try{
   assert.deepEqual(doc.checkpoint(),before);assert.equal(changes,0,'Failed edits are atomic');
   doc.transact('Paint a road',draft=>draft.start.roads.push([28,31],[29,31],[30,31]));
   assert.equal(changes,1,'One complete brush stroke is one transaction');
+  const previewBefore=doc.checkpoint(),undoTarget=doc.historyTarget();assert.deepEqual(undoTarget,initial);undoTarget.title='External history target';assert.deepEqual(doc.checkpoint(),previewBefore);assert.equal(doc.historyTarget(true),null);
   const saved=doc.checkpoint();doc.markSaved(saved);assert(!doc.dirty);
   doc.transact('Move the shed',draft=>{draft.start.buildings[0].x=26;draft.start.buildings[0].y=29;});
   assert(doc.dirty);doc.markSaved(saved);assert(doc.dirty,'A slow save cannot acknowledge a newer edit');
-  assert(doc.undo());assert(!doc.dirty);assert(doc.canRedo);
+  assert(doc.undo());assert(!doc.dirty);assert(doc.canRedo);const historyBefore=doc.checkpoint(),redoTarget=doc.historyTarget(true);assert.equal(redoTarget.start.buildings[0].x,26);assert.deepEqual(doc.checkpoint(),historyBefore);
   const reopened=EditorDocument.restore(doc.checkpoint());
   assert.deepEqual(reopened.value,doc.value);assert.equal(reopened.redoLabel,'Move the shed');
   assert(reopened.redo());assert.equal(reopened.value.start.buildings[0].x,26);

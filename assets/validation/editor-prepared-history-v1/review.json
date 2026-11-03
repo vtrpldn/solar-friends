@@ -1,0 +1,27 @@
+{
+  "screenshot": {
+    "file": "unfinished-history.png",
+    "sha256": "f5dd6c5b5b42e4f535ae03eef1dc481956cba9262b035b1c305cca2f6f7000ad",
+    "individuallyInspected": true
+  },
+  "change": "Non-mutating one-step history targets avoid copying the full journal. Heavy undo/redo prepares in a worker. Invalid targets restore the definition/history and keep the last valid preview; playable targets install a validated checkpoint. New preparations clear stale cancellation feedback.",
+  "checks": [
+    "public Cancel on delayed undo and Escape on delayed redo",
+    "exact checkpoint immediately and after late-result window",
+    "normal whole-group/internal-route undo/redo and reload",
+    "invalid negative starting funds restored by redo and repaired by undo",
+    "test readiness matches validation after every history target",
+    "no stale cancellation toast after successful history",
+    "document target isolation and existing history contracts",
+    "shared authored-cast playtest round trip",
+    "bounded cleanup"
+  ],
+  "timing": {
+    "undoHandlerMs": 11.5,
+    "redoHandlerMs": 11.4,
+    "undoRestoreMs": 8.9,
+    "redoRestoreMs": 9,
+    "mainThreadScenarioCompilationDuringHistory": false
+  },
+  "scope": "One combined maximum fixture, two successful history/failure runs; final handler timing wraps the actual trusted button handlers. Not total completion latency, every invalid draft class, maximum history bytes/steps or physical display pacing. Other heavy edit types remain synchronous."
+}

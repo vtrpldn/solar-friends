@@ -8,6 +8,7 @@ self.onmessage=async({data})=>{
   game=new Game();
   self.postMessage({stage:'Checking the land, residents and starting supplies…'});
   const checked=JSON.parse(game.load_scenario(JSON.stringify(data.definition)));
+  if(!checked.ok&&data.allowInvalid){self.postMessage({validation:checked});return;}
   if(!checked.ok)throw Error(checked.issues.find(issue=>issue.severity==='error')?.message||'This creation cannot start.');
   self.postMessage({stage:'Preparing the opening village…'});
   self.postMessage({snapshot:game.snapshot(),validation:checked,report:JSON.parse(game.report_state())});
