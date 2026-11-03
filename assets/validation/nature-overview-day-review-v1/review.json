@@ -1,0 +1,44 @@
+{
+  "why": "Resolve the low-vegetation readability concern at overview scale using the actual shared renderer and all native nature entries.",
+  "captureDirectory": "artifacts/nature-overview-day-current",
+  "visuallyReviewed": [
+    "mata-atlantica-zoom-0.65-day-group-1.png",
+    "mata-atlantica-zoom-0.65-day-group-2.png",
+    "mata-atlantica-zoom-0.65-day-group-3.png",
+    "mata-atlantica-zoom-0.65-day-group-4.png",
+    "mata-atlantica-zoom-0.65-day-group-5.png",
+    "mata-atlantica-zoom-0.65-day-group-6.png",
+    "mata-atlantica-zoom-0.65-day-group-7.png",
+    "cerrado-zoom-0.65-day-group-1.png",
+    "cerrado-zoom-0.65-day-group-2.png",
+    "cerrado-zoom-0.65-day-group-3.png",
+    "cerrado-zoom-0.65-day-group-4.png",
+    "cerrado-zoom-0.65-day-group-5.png",
+    "cerrado-zoom-0.65-day-group-6.png",
+    "cerrado-zoom-0.65-day-group-7.png",
+    "caatinga-zoom-0.65-day-group-1.png",
+    "caatinga-zoom-0.65-day-group-2.png",
+    "caatinga-zoom-0.65-day-group-3.png",
+    "caatinga-zoom-0.65-day-group-4.png",
+    "caatinga-zoom-0.65-day-group-5.png",
+    "caatinga-zoom-0.65-day-group-6.png",
+    "caatinga-zoom-0.65-day-group-7.png"
+  ],
+  "zoom": 0.65,
+  "lighting": "day",
+  "boards": 21,
+  "compositions": 180,
+  "catalogEntries": 20,
+  "identity": "All 21 board pixels and all recorded sources independently rehashed after individual inspection.",
+  "findings": [
+    "No additional target clipping, detached ground contact, opaque sprite ground island or proportion mismatch was observed against the original home, road and Iara references in these controlled static scenes.",
+    "Minimum low vegetation is difficult to distinguish at overview zoom. Fine repeated Cerrado and Caatinga ground detail competes with target vegetation, establishing a terrain visual-hierarchy correction to pursue.",
+    "A renderer-only sixteen-cell regional texture trial made painted grass oversized; reverted. A separately generated calmer texture reduced grain but introduced visible repeated diagonal bands; excluded from gameplay pending refinement."
+  ],
+  "limits": [
+    "No overall visual acceptance. Overview night/rain, close weather, mixed habitats and neighboring clusters remain open.",
+    "Source captures are controlled static art comparisons, not ecological suitability or desktop performance evidence.",
+    "A small low plant need not be individually identifiable at overview distance; do not distort native plant scale to compensate for terrain noise."
+  ],
+  "runtimeChanges": false
+}

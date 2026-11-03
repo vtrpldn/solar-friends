@@ -1,0 +1,43 @@
+{
+  "why": "Correct regional terrain visual hierarchy without changing native vegetation size or silently promoting a flawed replacement.",
+  "runtimeAccepted": false,
+  "trials": [
+    {
+      "captureDirectory": "artifacts/nature-overview-scale16-trial",
+      "report": "assets/art-direction/regional-ground-calm-v2/nature-overview-scale16-trial/report.json",
+      "visuallyReviewed": [
+        "cerrado-zoom-0.65-day-group-3.png",
+        "caatinga-zoom-0.65-day-group-3.png"
+      ],
+      "verdict": "rejected",
+      "reason": "Oversized painted grass and persistent ground competition."
+    },
+    {
+      "captureDirectory": "artifacts/nature-overview-calm-v2",
+      "report": "assets/art-direction/regional-ground-calm-v2/nature-overview-calm-v2/report.json",
+      "visuallyReviewed": [
+        "cerrado-zoom-0.65-day-group-3.png",
+        "caatinga-zoom-0.65-day-group-3.png"
+      ],
+      "verdict": "rejected",
+      "reason": "Reduced grain but conspicuous repeated diagonal color bands."
+    },
+    {
+      "captureDirectory": "artifacts/nature-overview-calm-v2-second",
+      "report": "assets/art-direction/regional-ground-calm-v2/nature-overview-calm-v2-second/report.json",
+      "visuallyReviewed": [
+        "cerrado-zoom-0.65-day-group-1.png",
+        "cerrado-zoom-0.65-day-group-3.png",
+        "caatinga-zoom-0.65-day-group-1.png",
+        "caatinga-zoom-0.65-day-group-3.png"
+      ],
+      "verdict": "needs correction",
+      "reason": "Improved sprite separation, but visible repetitive ground pattern and overly smooth/muddy appearance; not accepted for gameplay."
+    }
+  ],
+  "candidateHashes": {
+    "candidate.png": "f14576898d355b16ca0c2baba32fc4232e0dd7e442378245276e93e2a4ed2acd",
+    "candidate-2.png": "4b2cf437ca219013e6f04a20d00050d9e0eda87c52194f9c93fafd0e418a2f23"
+  },
+  "next": "Revise the texture/tiling reference to retain a painted surface with quiet, nonrepetitive ground; inspect normal/close scales, weather, mixed habitat edges and full scenes before integration."
+}
