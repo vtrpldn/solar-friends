@@ -403,3 +403,7 @@ Cleanup now records server/context/browser start, completion/failure and elapsed
 ### Editor keyboard focus and cancellation
 
 A real keyboard check found Shift+Tab leaving the first map-save field for body. Added modal-boundary Tab wrapping over visible enabled controls. Public map/release/library keyboard open, repeated Tab/Shift+Tab, Escape focus return, title text-undo isolation, exact pending habitat-stroke cancellation, and journal opener focus all pass. Real busy publication dialogs also retain focus with disabled fields, and their race/retry regression passes. Journal focus capture individually inspected. Evidence: `assets/validation/editor-keyboard-focus-v1/`. This is specific desktop keyboard coverage, not all dialogs/assistive technology or unfamiliar-player acceptance.
+
+### Draw-to-name region flow
+
+Newly drawn named regions now open their inspector and focus/select the name field immediately. Open region details remain expanded during rerenders/saving. Trusted pointer draw, real naming, exact inclusive coordinates, two-step undo/redo, Escape cancellation with unchanged current history and exact reload pass. Updated full desktop inspector capture individually inspected. Evidence: `assets/validation/editor-region-flow-v1/`. Goal dependency deletion, additional boundary cases and unfamiliar-player checks remain separate.

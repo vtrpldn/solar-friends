@@ -1,0 +1,23 @@
+{
+  "why": "Drawing a goal region should lead directly into naming it, without losing the inspector during saves.",
+  "verdict": "pass for exercised region draw/name/history flow",
+  "changes": [
+    "Successful drawing opens the new region and focuses/selects its name.",
+    "Region details retain their current expanded state during rerenders."
+  ],
+  "observations": [
+    "Trusted pointer drag produces exact inclusive 4 by 3 cell region at 25,33.",
+    "Name field receives focus and public typing sets its title.",
+    "Save retains expanded inspector.",
+    "Two undo steps remove name edit then draw; redo restores the exact authored definition.",
+    "Escape cancels a second unfinished rectangle without changing the current checkpoint or history.",
+    "Reload preserves exact checkpoint and one rendered region."
+  ],
+  "screensIndividuallyReviewed": [
+    "named-region.png"
+  ],
+  "limits": [
+    "Rectangle flow only; not goal dependency deletion, all region-boundary conditions or unfamiliar-player walkthrough.",
+    "Expanded details preserved during the editing session, not promised across reload."
+  ]
+}

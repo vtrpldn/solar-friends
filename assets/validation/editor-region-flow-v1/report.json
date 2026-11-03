@@ -1,0 +1,19 @@
+{
+  "completed": true,
+  "inputs": {
+    "scripts/verify-editor-region-flow.mjs": "54d4a1f4754a64aecda7003ffca4fa8f0b250093b9bfb5aaa89eca0e2d346e34",
+    "web/editor/regions.js": "26475117d3040fd6fd47b2c06dffb72d226d8ac002cd1fa9355aa2e0d9a868ca",
+    "web/editor/index.js": "52830141ff655279287c1fb1b642f042a9e4be4518841894804532f6823c2d6b",
+    "web/editor/map-view.js": "bba93f111f9f0bcab42f08db558c55a6b4cc055f62e6c2264ea9a97fb280fcfc"
+  },
+  "checks": {
+    "trustedRectangle": true,
+    "automaticNameFocus": true,
+    "expandedInspectorSurvivesSave": true,
+    "namedCoordinatesExact": true,
+    "twoStepUndoRedoExact": true,
+    "escapeCancellationHistoryExact": true,
+    "reloadExact": true,
+    "browserErrors": []
+  }
+}
