@@ -1,0 +1,21 @@
+{
+  "why": "Verify desktop Metal renderer and distinguish game timing from browser cadence while keeping failed shutdown visible.",
+  "verdict": "not accepted as a completed performance baseline",
+  "observations": [
+    "Apple M3 Pro Metal renderer confirmed in headed Chromium.",
+    "Four 60-second phases each restore exact checkpoints; median gaps 33.3 ms and p95 34.2 ms, but browser shutdown timed out.",
+    "A short repeat closed successfully. Another short repeat had median 8.3 ms/p95 9.3 ms in all phases but shutdown timed out.",
+    "Empty visible focused page showed median 8.8 ms/p95 34.1 ms. This supports non-game pacing variability but does not establish its cause.",
+    "Detaching the memory-sampling CDP session is explicit now, but did not reliably resolve shutdown.",
+    "Benchmark success message moved after cleanup so a timeout cannot follow a premature PASS."
+  ],
+  "limits": [
+    "Failed-cleanup measurements remain diagnostic observations, not passing runs.",
+    "No visual acceptance from these retained report files; screenshots remain local, not newly reviewed here.",
+    "No physical display pacing, hardware 60fps baseline or sustained RSS plateau acceptance."
+  ],
+  "next": [
+    "Investigate owned-browser shutdown, retaining bounded failure reporting.",
+    "Record foreground/visibility with timings and repeat hardware-rendered sustained runs."
+  ]
+}
