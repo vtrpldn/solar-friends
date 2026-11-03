@@ -363,3 +363,7 @@ Replaced only the bunchgrass atlas registration with a separate painted tuft usi
 ### Interrupted project-write recovery
 
 Added an ownership-checked disposable-browser interruption test after the real save worker project put succeeds while its IndexedDB transaction is deliberately held open. SIGKILL/confirmed exit, same-profile relaunch and public-library reopen preserve the whole durable project before opening, and exact checkpoint/view/undo/redo afterward. A stale saved toast found in the before-crash capture is fixed: new saves clear it and explicit confirmation requires current saved status. Current lost-reply, quota preservation, export/retry/reload/Undo checks pass. Evidence: `assets/validation/editor-interrupted-write-v1/`. This covers one interrupted transaction phase; broader write boundaries, corruption and concurrency gates remain open.
+
+### Concurrent editor tabs
+
+Two real editor tabs now have current-source coverage for same-project title conflicts, with BroadcastChannel available and unavailable. Stale Save cannot overwrite the newer durable record. The local recovery checkpoint survives, public Save a copy preserves its definition except deliberate new identity/title/revision fields, and both independent checkpoints reload exactly. Four conflict/copy desktop captures were individually inspected. Evidence: `assets/validation/editor-concurrent-tabs-v1/`. No runtime change was needed. This covers the ordinary project conflict/copy path; simultaneous regeneration, publication and run-write concurrency remain separate gates.

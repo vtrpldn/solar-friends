@@ -1,0 +1,22 @@
+{
+  "why": "Verify player-facing concurrent editor conflict recovery with two real tabs, independently of cross-tab notifications.",
+  "verdict": "pass for the exercised same-project title-edit conflict",
+  "screensIndividuallyReviewed": [
+    "broadcast-conflict.png",
+    "broadcast-copy.png",
+    "unavailable-conflict.png",
+    "unavailable-copy.png"
+  ],
+  "observations": [
+    "Conflict is visible in the header with Save a copy available.",
+    "The newer durable project remains byte-for-byte unchanged through the stale Save and subsequent copy operation.",
+    "The stale local definition is preserved exactly in the new project except deliberate copy ID/map ID/title/revision changes.",
+    "Both project checkpoints reload exactly in their own tabs.",
+    "No console errors or changes to normal-game localStorage."
+  ],
+  "limits": [
+    "Title edits on one shared draft, not simultaneous landscape regeneration, releases or run writes.",
+    "No collaboration/merge behavior is promised.",
+    "Opening another editor tab can itself save view/thumbnail state and trigger a conservative conflict; this test accepts preserving both definitions, not seamless co-editing."
+  ]
+}
