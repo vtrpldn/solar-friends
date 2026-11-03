@@ -129,6 +129,11 @@ export class EditorMap {
       if(this.assetPreviewContext?.source!==source||this.assetPreviewContext.tool!==tool){const copying=tool.startsWith('copy-'),asset=structuredClone(source);if(copying)asset.id=crypto.randomUUID();this.assetPreviewContext={source,tool,proposal:{collection:bank?'batteries':'resource_sites',asset,replace:!copying,copyFrom:copying&&bank?source.id:null}};}
       this.groupPreview.observe(this.document,'asset',this.assetPreviewContext.proposal,[],this.pointer.x,this.pointer.y);return;
     }
+    const natural=this.drag?.nature??(tool==='copy-nature'?this.natureCopy:tool==='move-nature'?this.naturalObjects?.find(p=>p.id===this.view.selectedNature):null);
+    if(natural){
+      if(this.naturePreviewContext?.source!==natural||this.naturePreviewContext.tool!==tool||this.naturePreviewContext.objects!==this.naturalObjects)this.naturePreviewContext={source:natural,tool,objects:this.naturalObjects,proposal:{source:natural,objects:this.naturalObjects,catalog:this.natureCatalog,copy:tool==='copy-nature'}};
+      this.groupPreview.observe(this.document,'nature',this.naturePreviewContext.proposal,[],this.pointer.x,this.pointer.y);return;
+    }
     const copy=this.view.tool==='duplicate'?this.copy:null,anchor=copy?.buildings[0]??this.drag?.building;
     if(!anchor){if(this.groupPlacement)this.groupPreview.clear();return;}
     this.groupPreview.observe(this.document,copy?'copy':'move',copy,copy?[]:this.selection(),this.pointer.x-anchor.x,this.pointer.y-anchor.y);
@@ -181,7 +186,7 @@ export class EditorMap {
   }
   up(e){
     if(!this.drag)return;
-    const drag=this.drag,cell=this.cell(this.point(e));this.drag=null;if(this.view.tool!=='duplicate'&&!allBuildingArt[this.view.tool]&&!this.placementAsset&&!['move-bank','copy-bank','move-site','copy-site'].includes(this.view.tool))this.groupPreview?.clear();
+    const drag=this.drag,cell=this.cell(this.point(e));this.drag=null;if(this.view.tool!=='duplicate'&&!allBuildingArt[this.view.tool]&&!this.placementAsset&&!['move-bank','copy-bank','move-site','copy-site','move-nature','copy-nature'].includes(this.view.tool))this.groupPreview?.clear();
     if(this.view.tool==='region'&&!drag.pan){const x=Math.max(0,Math.min(63,Math.min(drag.cell.x,cell.x))),y=Math.max(0,Math.min(63,Math.min(drag.cell.y,cell.y))),right=Math.max(0,Math.min(63,Math.max(drag.cell.x,cell.x))),bottom=Math.max(0,Math.min(63,Math.max(drag.cell.y,cell.y)));this.action({type:'region',rectangle:{x,y,width:right-x+1,height:bottom-y+1}});return;}
     if(drag.pan){this.centerAt(...this.view.center);return;}
     // Release can carry a newer position than the last delivered move event.
@@ -318,7 +323,7 @@ export class EditorMap {
       c.font='bold 12px Trebuchet MS';c.textAlign='center';const label=name+' · '+Number(chosenNature.x.toFixed(1))+', '+Number(chosenNature.y.toFixed(1)),w=c.measureText(label).width+14,x=Math.max(w/2+4,Math.min(width-w/2-4,p.x));
       c.fillStyle='#f5e5ba';c.fillRect(x-w/2,top,w,23);c.strokeStyle='#665134';c.lineWidth=1;c.strokeRect(x-w/2,top,w,23);c.fillStyle='#344b35';c.fillText(label,x,top+16);c.restore();
     }
-    if(this.pointer&&(this.drag?.nature||['move-nature','copy-nature'].includes(view.tool))){const source=view.tool==='copy-nature'?this.natureCopy:(this.drag?.nature??chosenNature),entry=this.natureCatalog?.find(s=>s.key===source?.species);if(entry){this.polygon(footprintCorners('road',this.pointer.x,this.pointer.y),'#f4df9a66','#fff3c4');c.save();c.globalAlpha=.5;paintWorldTree(c,{x:this.pointer.x,y:this.pointer.y,size:source.size,species:entry.art_index},{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details});c.restore();}}
+    if(this.pointer&&(this.drag?.nature||['move-nature','copy-nature'].includes(view.tool))){const source=view.tool==='copy-nature'?this.natureCopy:(this.drag?.nature??chosenNature),entry=this.natureCatalog?.find(s=>s.key===source?.species);if(entry){this.polygon(footprintCorners('road',this.pointer.x,this.pointer.y),this.groupPlacement?.allowed===false?'#b94f4f66':'#f4df9a66',this.groupPlacement?.allowed===false?'#ffb3a3':'#fff3c4');c.save();c.globalAlpha=.5;paintWorldTree(c,{x:this.pointer.x,y:this.pointer.y,size:source.size,species:entry.art_index},{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details});c.restore();}}
     if(this.pointer&&view.tool==='nature'&&this.natureSpecies){c.save();c.globalAlpha=.5;paintWorldTree(c,{x:this.pointer.x,y:this.pointer.y,size:this.natureSize||1,species:this.natureSpecies.art_index},{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details});c.restore();}
     if(this.terrainLoading||this.terrainError){c.save();c.font='bold 13px Trebuchet MS';c.textAlign='left';const message=this.terrainError??'Updating landscape… You can keep editing.',noticeWidth=Math.min(width-24,c.measureText(message).width+20);c.fillStyle='#f5e5ba';c.fillRect(12,52,noticeWidth,32);c.fillStyle='#4f3920';c.fillText(message,22,73,noticeWidth-20);c.restore();}
     this.onRender?.();

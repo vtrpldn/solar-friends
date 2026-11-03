@@ -1,0 +1,15 @@
+{
+  "screenshots": [
+    {
+      "file": "allowed-move.png",
+      "sha256": "9883fbc07c4fe78c4174b03ea0c6bd842fd4f9c4013f05361c5944f39479494e",
+      "individuallyInspected": true
+    },
+    {
+      "file": "blocked-move.png",
+      "sha256": "1845bc3de8dc222cebda52bf0ba0f91296f4634b824aabe1f3ac02132d080aaa",
+      "individuallyInspected": true
+    }
+  ],
+  "scope": "Caatinga macambira object: move/copy preview and existing complete editing regression. Native validation after shared spacing/camp/building/road checks. Not all species, surfaces, densities or brush tools."
+}
