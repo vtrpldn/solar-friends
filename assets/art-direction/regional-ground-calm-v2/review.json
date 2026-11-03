@@ -33,6 +33,18 @@
       ],
       "verdict": "needs correction",
       "reason": "Improved sprite separation, but visible repetitive ground pattern and overly smooth/muddy appearance; not accepted for gameplay."
+    },
+    {
+      "captureDirectory": "artifacts/nature-calm-first-isolated-scale16",
+      "report": "assets/art-direction/regional-ground-calm-v2/nature-calm-first-isolated-scale16/report.json",
+      "baseRevision": "ae1bdd6",
+      "configuration": "First painted candidate, 16-cell regional tile, corrected atlas isolation; exact temporary source changes retained in trial.patch.",
+      "visuallyReviewed": [
+        "cerrado-zoom-1-day-group-3.png",
+        "caatinga-zoom-1-day-group-3.png"
+      ],
+      "verdict": "needs correction",
+      "reason": "Small sprites separate more clearly, but broad repeated bands and decorative ground leaves remain prominent. Not accepted; production atlas and tile scale restored."
     }
   ],
   "candidateHashes": {

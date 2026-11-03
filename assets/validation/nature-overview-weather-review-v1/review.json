@@ -1,0 +1,79 @@
+{
+  "why": "Complete the pending overview night/rain nature review against the actual source after atlas isolation rather than inherit old uninspected captures.",
+  "zoom": 0.65,
+  "boards": 42,
+  "compositions": 360,
+  "catalogEntries": 20,
+  "inventory": [
+    {
+      "lighting": "night",
+      "captureDirectory": "artifacts/nature-overview-night-isolated",
+      "visuallyReviewed": [
+        "mata-atlantica-zoom-0.65-night-group-1.png",
+        "mata-atlantica-zoom-0.65-night-group-2.png",
+        "mata-atlantica-zoom-0.65-night-group-3.png",
+        "mata-atlantica-zoom-0.65-night-group-4.png",
+        "mata-atlantica-zoom-0.65-night-group-5.png",
+        "mata-atlantica-zoom-0.65-night-group-6.png",
+        "mata-atlantica-zoom-0.65-night-group-7.png",
+        "cerrado-zoom-0.65-night-group-1.png",
+        "cerrado-zoom-0.65-night-group-2.png",
+        "cerrado-zoom-0.65-night-group-3.png",
+        "cerrado-zoom-0.65-night-group-4.png",
+        "cerrado-zoom-0.65-night-group-5.png",
+        "cerrado-zoom-0.65-night-group-6.png",
+        "cerrado-zoom-0.65-night-group-7.png",
+        "caatinga-zoom-0.65-night-group-1.png",
+        "caatinga-zoom-0.65-night-group-2.png",
+        "caatinga-zoom-0.65-night-group-3.png",
+        "caatinga-zoom-0.65-night-group-4.png",
+        "caatinga-zoom-0.65-night-group-5.png",
+        "caatinga-zoom-0.65-night-group-6.png",
+        "caatinga-zoom-0.65-night-group-7.png"
+      ],
+      "boards": 21,
+      "compositions": 180
+    },
+    {
+      "lighting": "rain",
+      "captureDirectory": "artifacts/nature-overview-rain-isolated",
+      "visuallyReviewed": [
+        "mata-atlantica-zoom-0.65-rain-group-1.png",
+        "mata-atlantica-zoom-0.65-rain-group-2.png",
+        "mata-atlantica-zoom-0.65-rain-group-3.png",
+        "mata-atlantica-zoom-0.65-rain-group-4.png",
+        "mata-atlantica-zoom-0.65-rain-group-5.png",
+        "mata-atlantica-zoom-0.65-rain-group-6.png",
+        "mata-atlantica-zoom-0.65-rain-group-7.png",
+        "cerrado-zoom-0.65-rain-group-1.png",
+        "cerrado-zoom-0.65-rain-group-2.png",
+        "cerrado-zoom-0.65-rain-group-3.png",
+        "cerrado-zoom-0.65-rain-group-4.png",
+        "cerrado-zoom-0.65-rain-group-5.png",
+        "cerrado-zoom-0.65-rain-group-6.png",
+        "cerrado-zoom-0.65-rain-group-7.png",
+        "caatinga-zoom-0.65-rain-group-1.png",
+        "caatinga-zoom-0.65-rain-group-2.png",
+        "caatinga-zoom-0.65-rain-group-3.png",
+        "caatinga-zoom-0.65-rain-group-4.png",
+        "caatinga-zoom-0.65-rain-group-5.png",
+        "caatinga-zoom-0.65-rain-group-6.png",
+        "caatinga-zoom-0.65-rain-group-7.png"
+      ],
+      "boards": 21,
+      "compositions": 180
+    }
+  ],
+  "identity": "All 42 boards and every recorded input independently rehashed after individual visual inspection and restoration of temporary trial changes.",
+  "findings": [
+    "No additional clipping, detached target contact, opaque target ground islands, inconsistent target proportion or isolated over-bright vegetation was observed in these controlled static comparisons.",
+    "Night tints are consistent with the unlit reference home and original resident.",
+    "Rain overlays preserve the larger silhouettes; low vegetation remains difficult to distinguish, particularly against finer Cerrado and Caatinga texture. Terrain readability correction remains required."
+  ],
+  "limits": [
+    "No full landscape, ecological suitability, mixed habitat/neighbor, animation or performance acceptance.",
+    "Close night/rain, broader resident motion/appearance, terrain hierarchy correction and all other original release gates remain open.",
+    "Only the exact listed overview boards were individually reviewed in this milestone; old captures are not silently reclassified."
+  ],
+  "runtimeChanges": false
+}

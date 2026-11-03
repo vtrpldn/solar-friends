@@ -1,0 +1,40 @@
+diff --git a/web/regional-art.js b/web/regional-art.js
+index f912d6f..2f36a74 100644
+--- a/web/regional-art.js
++++ b/web/regional-art.js
+@@ -12,11 +12,11 @@ export const regionalNatureArt=[
+ ];
+ export const regionalImages={};let loading;
+ export function loadRegionalArt(){
+- return loading??=Promise.all([...new Set([...regionalNatureArt.map(a=>a.file),'regional-ground-v1.png'])].map(async file=>{
++ return loading??=Promise.all([...new Set([...regionalNatureArt.map(a=>a.file),'regional-ground-calm-v2.png'])].map(async file=>{
+   const image=new Image();image.src=new URL('./art/'+file,import.meta.url);await image.decode();regionalImages[file]=image;
+  }));
+ }
+ export function regionalGround(map){
+  const id=map?.biome?.id,row=id==='cerrado'?0:id==='caatinga'?1:null;
+- return row===null?null:{image:regionalImages['regional-ground-v1.png'],row};
++ return row===null?null:{image:regionalImages['regional-ground-calm-v2.png'],row};
+ }
+diff --git a/web/terrain.js b/web/terrain.js
+index 063fb5b..ec2946f 100644
+--- a/web/terrain.js
++++ b/web/terrain.js
+@@ -143,7 +143,7 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
+   const g = ground.getContext("2d");
+   if(regional?.image)texture=regional.image;
+   const row=regional?.image?regional.row:0,rows=regional?.image?2:1;
+-  paintedTexture(g,texture,0,row,rows,regional?.image?8:32,makeSurface);
++  paintedTexture(g,texture,0,row,rows,regional?.image?16:32,makeSurface);
+   // Quiet the repeated leaf texture so buildings and planted plots stay legible.
+   g.fillStyle="rgba(167,178,105,0.24)";g.fillRect(0,0,RESOLUTION,RESOLUTION);
+   paintHabitats(g,seed,map);
+@@ -161,7 +161,7 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
+       g.rect(px - unit / 2, py - unit / 2, unit, unit);
+     }
+     g.clip();
+-    paintedTexture(g,texture,1,row,rows,regional?.image?8:32,makeSurface);
++    paintedTexture(g,texture,1,row,rows,regional?.image?16:32,makeSurface);
+     g.restore();
+   }
+   paintRiver(g,map);
