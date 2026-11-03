@@ -1,0 +1,1107 @@
+{
+  "sources": {
+    "scripts/verify-editor-maximum-group.mjs": "ba012391593c02566fb4b4c54463c03953631dad53c7006f195d77ce8536c595",
+    "web/editor/objects.js": "9e0dbbe3589de9f3147b8892a12e4060dc4f8dcca32fbef771143d0a78b70508",
+    "web/editor/map-view.js": "2cb836ba3f554a6323456985cbab4fafa216657bb373d4bead2a3db7e8dc0371",
+    "web/editor/minimap.js": "3bf1cc2c5a7f0e072db4e320b1d93d242b9dac8aca41bf9c28b2f6db42c2efbf",
+    "web/group-preview-worker.js": "dc1df5f2f8194677d4ae4988d422174afaa9ca901b2ad8d69f680ab3bca45459",
+    "web/pkg/solar_friends_bg.wasm": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1"
+  },
+  "delta": [
+    1,
+    0
+  ],
+  "buildings": 256,
+  "limitReason": "This property contains more buildings or roads than this game version supports.",
+  "events": [
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.6000001430511475,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "down",
+      "trusted": true,
+      "handlerMs": 0.2999999523162842,
+      "selectionCalls": 0,
+      "renderCalls": 0
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.6000001430511475,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.8999998569488525,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.700000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.199999809265137,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.099999904632568,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.200000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.700000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.199999809265137,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.900000095367432,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.599999904632568,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.400000095367432,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.199999809265137,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.8999998569488525,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.099999904632568,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.8999998569488525,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.099999904632568,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "up",
+      "trusted": true,
+      "handlerMs": 7.300000190734863,
+      "selectionCalls": 8,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.6000001430511475,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "down",
+      "trusted": true,
+      "handlerMs": 0.19999980926513672,
+      "selectionCalls": 0,
+      "renderCalls": 0
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.200000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.3999998569488525,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.700000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.3999998569488525,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.599999904632568,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.300000190734863,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.3999998569488525,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.199999809265137,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.200000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.3999998569488525,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.200000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.200000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "up",
+      "trusted": true,
+      "handlerMs": 6.3999998569488525,
+      "selectionCalls": 8,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "down",
+      "trusted": true,
+      "handlerMs": 0.09999990463256836,
+      "selectionCalls": 0,
+      "renderCalls": 0
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.599999904632568,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.700000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.099999904632568,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.6000001430511475,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.800000190734863,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.400000095367432,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.6000001430511475,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.6000001430511475,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.699999809265137,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.200000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.1000001430511475,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "up",
+      "trusted": true,
+      "handlerMs": 7.3999998569488525,
+      "selectionCalls": 8,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.299999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "down",
+      "trusted": true,
+      "handlerMs": 0.09999990463256836,
+      "selectionCalls": 0,
+      "renderCalls": 0
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.1000001430511475,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.900000095367432,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.1000001430511475,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.1000001430511475,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.900000095367432,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.8999998569488525,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.900000095367432,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.900000095367432,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.3999998569488525,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.700000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.599999904632568,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.799999952316284,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.700000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.599999904632568,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.700000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 5.700000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "marquee",
+      "method": "up",
+      "trusted": true,
+      "handlerMs": 5.5,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.700000047683716,
+      "selectionCalls": 2,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "down",
+      "trusted": true,
+      "handlerMs": 0.2999999523162842,
+      "selectionCalls": 1,
+      "renderCalls": 0
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 7.400000095367432,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 7,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.799999952316284,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.599999904632568,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.599999904632568,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.700000047683716,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.5,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.400000095367432,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.299999952316284,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.3999998569488525,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.599999904632568,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.5,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.5,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.299999952316284,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.299999952316284,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.5,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.5,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.699999809265137,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.599999904632568,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.200000047683716,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.5,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.700000047683716,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.5,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "motion",
+      "trusted": true,
+      "handlerMs": 6.200000047683716,
+      "selectionCalls": 3,
+      "renderCalls": 1
+    },
+    {
+      "phase": "whole-group-move",
+      "method": "up",
+      "trusted": true,
+      "handlerMs": 93.39999985694885,
+      "selectionCalls": 8,
+      "renderCalls": 1
+    }
+  ],
+  "checks": {
+    "allBuildingsSelected": true,
+    "selectionHistoryUnchanged": true,
+    "overLimitCopyRejected": true,
+    "oneMoveTransaction": true,
+    "exactMoveUndoRedoReload": true,
+    "browserErrors": []
+  },
+  "scope": "256 mixed inland completed buildings on a no-river 64x64 property, authored five. Trusted multi-view marquee and one whole-group move; not maximum nature/routes/history or sustained performance."
+}

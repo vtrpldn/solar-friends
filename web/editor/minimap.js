@@ -27,7 +27,8 @@ export class EditorMinimap {
     const c=canvas.getContext('2d');c.clearRect(0,0,canvas.width,canvas.height);c.drawImage(this.ground,0,0,canvas.width,canvas.height);
     c.save();c.scale(canvas.width/64,canvas.height/64);
     c.fillStyle='#d6b176';for(const [x,y]of map.document.start.roads)c.fillRect(x-.4,y-.4,.8,.8);
-    for(const b of map.document.start.buildings){c.fillStyle=map.selection().includes(b.id)?'#ffe28b':'#efe1ad';c.fillRect(b.x-.8,b.y-.8,1.6,1.6);}
+    const selected=new Set(map.selection());
+    for(const b of map.document.start.buildings){c.fillStyle=selected.has(b.id)?'#ffe28b':'#efe1ad';c.fillRect(b.x-.8,b.y-.8,1.6,1.6);}
     const [x,y]=map.document.map.camp;c.fillStyle='#fbefc6';c.beginPath();c.arc(x,y,.8,0,Math.PI*2);c.fill();
     const rect=map.canvas.getBoundingClientRect();c.strokeStyle='#fff4c7';c.lineWidth=.45;c.beginPath();
     for(const [i,p]of [[0,0],[rect.width,0],[rect.width,rect.height],[0,rect.height]].entries()){

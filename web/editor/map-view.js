@@ -133,7 +133,7 @@ export class EditorMap {
     if(!anchor){if(this.groupPlacement)this.groupPreview.clear();return;}
     this.groupPreview.observe(this.document,copy?'copy':'move',copy,copy?[]:this.selection(),this.pointer.x-anchor.x,this.pointer.y-anchor.y);
   }
-  selection(){return (this.view.selection?.length?this.view.selection:[this.view.selected]).filter(id=>this.document?.start.buildings.some(b=>b.id===id));}
+  selection(){const existing=new Set((this.document?.start.buildings??[]).map(b=>b.id));return (this.view.selection?.length?this.view.selection:[this.view.selected]).filter(id=>existing.has(id));}
   selectResident(id){this.select(null);this.view.selectedResident=id;this.render();this.viewChanged(this.state);}
   residentAt(cell){const bindings=this.snapshot?.scenario_ref?.residents??{};const person=this.snapshot?.residents.find(p=>Math.hypot(p.x-cell.x,p.y-cell.y)<.8);return person?Object.keys(bindings).find(id=>bindings[id]===person.id):null;}
   selectRoute(id){this.view.selectedNature=null;this.view.selectedResident=null;this.view.selectedRoute=id;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
@@ -250,10 +250,11 @@ export class EditorMap {
     canvas.dataset.regionCount=String(this.document.map.regions?.length??0);canvas.dataset.visibleRegions=String(regions.length);
     if(this.stroke)for(const [x,y]of this.stroke.values()){const size=['meadow','nature','thin-nature','habitat'].includes(view.tool)?this.brushSize:1,left=x-Math.floor(size/2)-.5,top=y-Math.floor(size/2)-.5;this.polygon([[left,top],[left+size,top],[left+size,top+size],[left,top+size]],'#f1c96766','#fff0b4');}
     const groupBlocked=this.groupPlacement?.allowed===false,groupFill=groupBlocked?'#c65e4266':'#f4df9a66',groupStroke=groupBlocked?'#f39b80':'#fff3c4';
+    const selectedBuildings=new Set(this.selection());
     const structures=this.document.start.buildings.slice(0,256).filter(b=>Number.isFinite(b.x)&&Number.isFinite(b.y)&&allBuildingArt[b.kind]);
     const objects=land.vegetation.filter(t=>!t.cleared).map(t=>({depth:t.x+t.y,draw:()=>paintWorldTree(c,t,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details})}));
     for(const b of structures)objects.push({depth:b.x+b.y,draw:()=>{
-      if(this.selection().includes(b.id))this.polygon(footprintCorners(b.kind,b.x,b.y),'#efc86d55','#ffe39a');
+      if(selectedBuildings.has(b.id))this.polygon(footprintCorners(b.kind,b.x,b.y),'#efc86d55','#ffe39a');
       paintWorldBuilding(c,{key:keyFor(b),x:b.x,y:b.y,alpha:b.state==='completed'?1:.2,emptyAnimals:b.state!=='completed'||b.animals?.stocked===false},{project:this.project,scale:this.scale,images:art.images});
       if(b.state==='completed'){
         const resolved=this.snapshot.village.buildings.find(p=>p.kind===b.kind&&p.x===b.x&&p.y===b.y);
@@ -303,7 +304,7 @@ export class EditorMap {
     }
     if(this.pointer&&(this.drag?.bank||['battery-bank','move-bank','copy-bank'].includes(view.tool))){this.polygon(footprintCorners('battery',this.pointer.x,this.pointer.y),groupFill,groupStroke);drawBattery(c,this.project(this.pointer.x,this.pointer.y),this.scale,0,.45);}
     if(this.drag?.site&&this.pointer)this.polygon(footprintCorners(sourceKinds[catalogMaterial(this.drag.site.material)],this.pointer.x,this.pointer.y),groupFill,groupStroke);
-    if(this.drag?.building&&this.pointer){const anchor=this.drag.building;for(const b of structures.filter(b=>this.selection().includes(b.id)))this.polygon(footprintCorners(b.kind,b.x+this.pointer.x-anchor.x,b.y+this.pointer.y-anchor.y),groupFill,groupStroke);}
+    if(this.drag?.building&&this.pointer){const anchor=this.drag.building;for(const b of structures.filter(b=>selectedBuildings.has(b.id)))this.polygon(footprintCorners(b.kind,b.x+this.pointer.x-anchor.x,b.y+this.pointer.y-anchor.y),groupFill,groupStroke);}
     if(view.tool==='duplicate'&&this.copy&&this.pointer){const anchor=this.copy.buildings[0];for(const b of this.copy.buildings){const x=b.x+this.pointer.x-anchor.x,y=b.y+this.pointer.y-anchor.y;this.polygon(footprintCorners(b.kind,x,y),groupFill,groupStroke);paintWorldBuilding(c,{key:keyFor(b),x,y,alpha:.45,emptyAnimals:b.state!=='completed'||b.animals?.stocked===false},{project:this.project,scale:this.scale,images:art.images});const crop=this.copy.cropViews?.[b.id];if(b.state==='completed'&&crop)paintWorldCrops(c,{kind:b.kind,x,y,crop},{project:this.project,scale:this.scale,alpha:.45});}}
     if(this.pointer&&this.groupPlacement?.allowed){c.save();c.lineJoin='round';c.lineCap='round';for(const plan of this.groupPlacement.routes??[])paintUtilityRoute(c,this.project,this.scale,plan,'#fff3a4',true,{pump:plan.kind!=='electricity'});c.restore();}
     if(this.drag?.toggle&&this.drag.moved&&view.tool==='select'&&this.pointer){
