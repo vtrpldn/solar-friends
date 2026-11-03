@@ -3,7 +3,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const files=['scripts/verify-resident-shadows.mjs','web/resident-ground-shadow.js','web/resident-shadow-metadata.js','web/character-body-family.js','web/character-family-appearance.js','web/resident-family-provider.js','web/main.js','web/editor/character-creator.js'];
+const files=['scripts/verify-resident-shadows.mjs','web/resident-ground-shadow.js','web/resident-shadow-metadata.js','web/character-body-family.js','web/character-family-appearance.js','web/resident-family-provider.js','web/main.js'];
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex'),inputs=Object.fromEntries(await Promise.all(files.map(async file=>[file,sha(await readFile(file))])));
 const server=await serve(0);let browser;
 try{

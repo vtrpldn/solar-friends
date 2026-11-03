@@ -8,7 +8,6 @@ import {residentAppearanceInfo,residentLookKeys} from './resident-look.js';
 import {createResidentAppearanceLibrary} from './resident-appearance-library.js';
 import {prepareResidentArtwork} from './resident-artwork-preparation.js';
 import {paintPreparedResidentPortrait} from './resident-portrait.js';
-import {installResidentIdentity} from './resident-identity.js';
 import {relationshipStrength} from './relationships.js';
 import {residentStory} from './resident-story.js';
 import {loadRegionalArt} from './regional-art.js';
@@ -88,7 +87,7 @@ const residentPreview = previewParams.has("resident-preview");
 const nightPreview = previewParams.has("night-preview");
 const artworkPreview = nightPreview || residentPreview || previewParams.has("artwork-preview");
 const directScenario = previewParams.get('dev-scenario');
-let sandboxRulesUI,residentIdentity;
+let sandboxRulesUI;
 let sandbox = null, sandboxName = '', devTools, loadingScenario = false;
 const canvas = $("#world");
 let ctx = canvas.getContext("2d");
@@ -871,7 +870,7 @@ function selectPerson(id) {
   const p = iso(r.x, r.y);
   cameraTarget = residentIsAway(r)?null:{ x: pan.x + width * 0.4 - p.x, y: pan.y + height * 0.47 - p.y, dt: 1 / 60 };
   $("#person").innerHTML =
-    `<div class="resident-book-tools"><b>${escapeHtml(r.name)}</b><button class="close-person" aria-label="Close resident details">×</button></div><button class="edit-resident-identity" type="button">Name and appearance</button><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2>${r.pronouns?`<p>${escapeHtml(r.pronouns)}</p>`:""}<p class="traits">${escapeHtml(r.trait_name)}</p></div></div>${r.biography?`<p class="person-biography">${escapeHtml(r.biography)}</p>`:""}<p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection", "Wellbeing"].map((n) => `<div class="stat" data-stat="${n}"><span${n==='Wellbeing'?' title="Reflects needs, home comfort and current worries."':''}>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">Ask for a hand</p><p class="request-guide">Choose one chore. They’ll help once, then return to their own routine. Meals, rest and outside commitments still come first.</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="resume-request" hidden>Resume time</button><button class="cancel-help">Cancel this request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><div class="requests">${[
+    `<div class="resident-book-tools"><b>${escapeHtml(r.name)}</b><button class="close-person" aria-label="Close resident details">×</button></div><span class="eyebrow">A NEIGHBOUR, NOT A NUMBER</span><div class="person-heading"><div class="person-portrait">${avatar(r.id)}</div><div><h2>${escapeHtml(r.name)}</h2>${r.pronouns?`<p>${escapeHtml(r.pronouns)}</p>`:""}<p class="traits">${escapeHtml(r.trait_name)}</p></div></div>${r.biography?`<p class="person-biography">${escapeHtml(r.biography)}</p>`:""}<p class="person-activity"></p><p class="quote"></p>${["Energy", "Fullness", "Connection", "Wellbeing"].map((n) => `<div class="stat" data-stat="${n}"><span${n==='Wellbeing'?' title="Reflects needs, home comfort and current worries."':''}>${n}</span><div class="meter"><i></i></div><span class="value"></span></div>`).join("")}<p class="request-title">Ask for a hand</p><p class="request-guide">Choose one chore. They’ll help once, then return to their own routine. Meals, rest and outside commitments still come first.</p><section class="help-order" aria-label="Your request" hidden><b class="help-phase" role="status"></b><small class="help-task"></small><p class="help-reason"></p><small class="help-time"></small><button class="resume-request" hidden>Resume time</button><button class="cancel-help">Cancel this request</button></section><div class="response" role="status" hidden></div><button class="persuade" hidden>Explain why the community needs help</button><p class="request-pause" hidden></p><div class="requests">${[
       ["garden", "Tend the farm"],
       ["build", "Help build"],
       ["building_work", "Help building crew"],
@@ -889,7 +888,6 @@ function selectPerson(id) {
       .join(
         "",
       )}</div><section class="resident-occupation"><b class="occupation-title"></b><small class="occupation-income"></small><p class="occupation-description"></p><label><input class="occupation-toggle" type="checkbox"> Take outside shifts</label><small class="occupation-schedule-note"></small></section><details class="resident-learning"><summary>Learning by doing</summary><div class="skill-journal"></div><label class="sandbox-learning"><input class="learning-toggle" type="checkbox"> Residents learn through useful work</label></details><details class="work-preferences"><summary>Community work</summary><p>Guide future chores. Meals, rest and outside shifts come first.</p>${[["construction","Building"],["hauling","Hauling"],["food","Food"],["materials","Materials"],["care","Water & compost"]].map(([key,label])=>`<label><span>${label}</span><select data-work-preference="${key}" aria-label="${escapeHtml(r.name)}: ${label} preference"><option value="0">Less often</option><option value="1">Share equally</option><option value="2">Prefer</option></select></label>`).join("")}<small class="work-today"></small><small class="work-preference-response" role="status"></small></details><p class="friendship-note"></p>`;
-  $("#person .edit-resident-identity").onclick=()=>residentIdentity.open(id);
   $(".close-person").onclick = () => {
     selected = null;
     $("#person").hidden = true;
@@ -1674,13 +1672,6 @@ function setup() {
       $(villagePanels.has(id)?'#open-village':`[data-panel="${id}"]`).focus();
     };
   }
-  residentIdentity=installResidentIdentity({onClose:retireInactiveResidentArtwork,appearances:residentAppearances,catalog:JSON.parse(game.scenario_catalog()).resident_appearances,game:()=>game,snapshot:()=>state,changed:id=>{
-    state=JSON.parse(game.snapshot());residentAnimations.delete(id);releaseResidentSurface(id);
-    retireInactiveResidentArtwork();
-    const person=state.residents.find(p=>p.id===id),button=$(`#residents [data-resident="${id}"]`);
-    if(button){button.querySelector('.avatar').outerHTML=avatar(id);button.querySelector('b').textContent=person.name;button.setAttribute('aria-label',`Meet ${person.name}`);}
-    selectPerson(id);updateUI();paintPortraits();render();save();
-  }});
   syncResidentRoster();
   paintPortraits();
   $("#residents").onclick = (e) => {

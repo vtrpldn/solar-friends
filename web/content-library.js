@@ -155,12 +155,6 @@ export class ContentLibrary extends EventTarget {
   listRuns(){return this.#list('run');}
   listResidentPresets(){return this.#list('resident');}
   getResidentPreset(id){return this.#read('residents',id);}
-  saveResidentPreset({id,file},expectedRevision=null){
-    if(file?.format!=='solar-friends-resident'||![1,2].includes(file.schema)||typeof file.resident?.name!=='string'||'id' in file.resident||new TextEncoder().encode(JSON.stringify(file)).length>64*1024)throw Error('This resident preset cannot be stored.');
-    const data=clone(file);
-    return this.#write('residents',id,expectedRevision,()=>({format:'solar-friends-resident-preset',schema:1,title:data.title??data.resident.name,file:data}));
-  }
-  deleteResidentPreset(id,expectedRevision){return this.#write('residents',id,expectedRevision,()=>null);}
   getProject(id){return this.#read('projects',id);}
   getRun(id){return this.#read('runs',id);}
   // For detached editor checkpoints only. Returns compact durable metadata;

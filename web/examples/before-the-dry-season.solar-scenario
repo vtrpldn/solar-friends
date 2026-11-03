@@ -90,7 +90,7 @@
       }
     ],
     "completion": "Our first reserve is ready. The dry season will still test our choices: keep watching water levels, soil moisture and the food reserve before expanding.",
-    "introduction": "Marina, Davi, Joana, Ravi and Cecília have pooled their savings. Rain will not last. A cistern is only useful if it contains reachable fresh water; a growing plot needs a water route too. Keep the cultivated area small until storage and daily routines work.",
+    "introduction": "Iara, Bento, Luz, Cauã and Nina have pooled their savings. Rain will not last. A cistern is only useful if it contains reachable fresh water; a growing plot needs a water route too. Keep the cultivated area small until storage and daily routines work.",
     "schema": 1
   },
   "map": {
@@ -26660,38 +26660,11 @@
     "resident_setup": [],
     "residents": [
       {
-        "appearance": {
-          "assetVersion": "resident-parts-v6",
-          "body": "relaxed-v1",
-          "hair": "short-curls-v1",
-          "materials": {
-            "shirt": "teal",
-            "shoes": "brown",
-            "shorts": "sage",
-            "skin": "warm"
-          },
-          "schema": 2
-        },
-        "biography": "A seed saver who wants a small, well-tended garden before expanding into the clearing.",
-        "experience": {
-          "background": "grower",
-          "levels": {
-            "building": 0,
-            "cooking": 1,
-            "equipment_care": 0,
-            "growing": 2,
-            "hauling": 1,
-            "making": 0
-          }
-        },
-        "id": "resident-c7af070c-15fb-4cf5-99f0-06853cca2040",
-        "name": "Marina",
-        "occupation": "none",
+        "biography": "",
+        "id": "resident-iara",
+        "name": "Iara",
+        "occupation": "nursery_assistant",
         "outside_shifts": false,
-        "personality": {
-          "social_style": "balanced",
-          "work_interest": "gardening"
-        },
         "preset": "iara",
         "preset_version": 1,
         "pronouns": "",
@@ -26699,183 +26672,67 @@
           "alternate_hobby": "birdwatch",
           "favourite_hobby": "nature_walk",
           "preferred_bedtime": 1290
-        },
-        "work_preferences": {}
+        }
       },
       {
-        "appearance": {
-          "assetVersion": "resident-parts-v7",
-          "body": "broad-v1",
-          "hair": "side-part-v1",
-          "hat": "straw-v1",
-          "materials": {
-            "shirt": "terracotta",
-            "shoes": "graphite",
-            "shorts": "umber",
-            "skin": "copper"
-          },
-          "schema": 2
-        },
-        "biography": "A practical builder who checks missing materials and transport before committing the shared fund.",
-        "experience": {
-          "background": "builder",
-          "levels": {
-            "building": 2,
-            "cooking": 0,
-            "equipment_care": 0,
-            "growing": 0,
-            "hauling": 1,
-            "making": 1
-          }
-        },
-        "id": "resident-c19bef98-eddc-40f5-a03e-979af20ddf57",
-        "name": "Davi",
-        "occupation": "none",
+        "biography": "",
+        "id": "resident-bento",
+        "name": "Bento",
+        "occupation": "bamboo_carpenter",
         "outside_shifts": false,
-        "personality": {
-          "social_style": "balanced",
-          "work_interest": "gardening"
-        },
-        "preset": "iara",
+        "preset": "bento",
         "preset_version": 1,
         "pronouns": "",
         "routine_preferences": {
-          "alternate_hobby": "birdwatch",
-          "favourite_hobby": "nature_walk",
-          "preferred_bedtime": 1290
-        },
-        "work_preferences": {}
+          "alternate_hobby": "daydream",
+          "favourite_hobby": "stretch",
+          "preferred_bedtime": 1335
+        }
       },
       {
-        "appearance": {
-          "assetVersion": "resident-parts-v1",
-          "body": "neutral-v1",
-          "hair": "side-part-v1",
-          "materials": {
-            "shirt": "cream",
-            "shoes": "brown",
-            "shorts": "umber",
-            "skin": "copper"
-          },
-          "schema": 2
-        },
-        "biography": "A cook who plans meals around the food the group can actually grow and store.",
-        "experience": {
-          "background": "cook",
-          "levels": {
-            "building": 0,
-            "cooking": 2,
-            "equipment_care": 0,
-            "growing": 1,
-            "hauling": 1,
-            "making": 0
-          }
-        },
-        "id": "resident-08c67746-86ce-4f21-8de5-1c949ef571c8",
-        "name": "Joana",
-        "occupation": "none",
+        "biography": "",
+        "id": "resident-luz",
+        "name": "Luz",
+        "occupation": "school_cook",
         "outside_shifts": false,
-        "personality": {
-          "social_style": "balanced",
-          "work_interest": "gardening"
-        },
-        "preset": "iara",
+        "preset": "luz",
         "preset_version": 1,
         "pronouns": "",
         "routine_preferences": {
-          "alternate_hobby": "birdwatch",
-          "favourite_hobby": "nature_walk",
-          "preferred_bedtime": 1290
-        },
-        "work_preferences": {}
+          "alternate_hobby": "stretch",
+          "favourite_hobby": "daydream",
+          "preferred_bedtime": 1260
+        }
       },
       {
-        "appearance": {
-          "assetVersion": "resident-parts-v5",
-          "body": "relaxed-v1",
-          "facialHair": "short-chestnut-v1",
-          "hair": "short-curls-v1",
-          "materials": {
-            "shirt": "indigo",
-            "shoes": "graphite",
-            "shorts": "cream",
-            "skin": "sunlit"
-          },
-          "schema": 2
-        },
-        "biography": "An experienced mover who wants short, clear routes between storage, water and work.",
-        "experience": {
-          "background": "hauler",
-          "levels": {
-            "building": 1,
-            "cooking": 0,
-            "equipment_care": 1,
-            "growing": 0,
-            "hauling": 2,
-            "making": 0
-          }
-        },
-        "id": "resident-dce2fa8e-b03c-4b28-afb7-ebc22ded1585",
-        "name": "Ravi",
-        "occupation": "none",
+        "biography": "",
+        "id": "resident-caua",
+        "name": "Cauã",
+        "occupation": "nature_guide",
         "outside_shifts": false,
-        "personality": {
-          "social_style": "balanced",
-          "work_interest": "gardening"
-        },
-        "preset": "iara",
+        "preset": "caua",
         "preset_version": 1,
         "pronouns": "",
         "routine_preferences": {
-          "alternate_hobby": "birdwatch",
-          "favourite_hobby": "nature_walk",
-          "preferred_bedtime": 1290
-        },
-        "work_preferences": {}
+          "alternate_hobby": "nature_walk",
+          "favourite_hobby": "birdwatch",
+          "preferred_bedtime": 1380
+        }
       },
       {
-        "appearance": {
-          "assetVersion": "resident-parts-v6",
-          "body": "relaxed-v1",
-          "hair": "side-part-v1",
-          "hairColour": "silver",
-          "materials": {
-            "shirt": "terracotta",
-            "shoes": "brown",
-            "shorts": "sage",
-            "skin": "sunlit"
-          },
-          "schema": 2
-        },
-        "biography": "A maintenance-minded neighbour who keeps an eye on tanks, fittings and the water reserve.",
-        "experience": {
-          "background": "caretaker",
-          "levels": {
-            "building": 0,
-            "cooking": 0,
-            "equipment_care": 2,
-            "growing": 0,
-            "hauling": 1,
-            "making": 1
-          }
-        },
-        "id": "resident-128bbb4f-7f4d-44ca-9fdd-a09b9a0f92d6",
-        "name": "Cecília",
-        "occupation": "none",
+        "biography": "",
+        "id": "resident-nina",
+        "name": "Nina",
+        "occupation": "water_technician",
         "outside_shifts": false,
-        "personality": {
-          "social_style": "balanced",
-          "work_interest": "gardening"
-        },
-        "preset": "iara",
+        "preset": "nina",
         "preset_version": 1,
         "pronouns": "",
         "routine_preferences": {
-          "alternate_hobby": "birdwatch",
-          "favourite_hobby": "nature_walk",
-          "preferred_bedtime": 1290
-        },
-        "work_preferences": {}
+          "alternate_hobby": "stretch",
+          "favourite_hobby": "daydream",
+          "preferred_bedtime": 1305
+        }
       }
     ],
     "roads": []

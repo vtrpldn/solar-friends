@@ -1,5 +1,5 @@
 {
-  "description": "An established Caatinga property has homes, food plots and useful equipment, but its pump and shared battery have failed. Iara, Bento and Nina welcome Sueli and Otávio. Inspect what is already here, service it with real parts and make everyday water, sanitation and lighting dependable.",
+  "description": "An established Caatinga property has homes, food plots and useful equipment, but its pump and shared battery have failed. Iara, Bento and Nina welcome Luz and Cauã. Inspect what is already here, service it with real parts and make everyday water, sanitation and lighting dependable.",
   "format": "solar-friends-scenario",
   "id": "62e680e1-7362-4ce0-94fd-28e19bab2e40",
   "journal": {
@@ -26812,91 +26812,34 @@
         }
       },
       {
-        "appearance": {
-          "assetVersion": "resident-parts-v1",
-          "body": "neutral-v1",
-          "hair": "short-curls-v1",
-          "hat": "straw-v1",
-          "materials": {
-            "shirt": "terracotta",
-            "shoes": "brown",
-            "shorts": "cream",
-            "skin": "copper"
-          },
-          "schema": 2
-        },
-        "biography": "A grower joining Iara, Bento and Nina to understand the property’s soil and maintain a modest food plot.",
-        "experience": {
-          "background": "grower",
-          "levels": {
-            "building": 0,
-            "cooking": 1,
-            "equipment_care": 0,
-            "growing": 2,
-            "hauling": 1,
-            "making": 0
-          }
-        },
-        "id": "resident-0c27ca67-12da-49da-96c9-fa85a1e21580",
-        "name": "Sueli",
-        "occupation": "none",
+        "biography": "",
+        "id": "resident-luz",
+        "name": "Luz",
+        "occupation": "school_cook",
         "outside_shifts": false,
-        "personality": {
-          "social_style": "balanced",
-          "work_interest": "gardening"
-        },
-        "preset": "iara",
+        "preset": "luz",
         "preset_version": 1,
         "pronouns": "",
         "routine_preferences": {
-          "alternate_hobby": "birdwatch",
-          "favourite_hobby": "nature_walk",
-          "preferred_bedtime": 1290
-        },
-        "work_preferences": {}
+          "alternate_hobby": "stretch",
+          "favourite_hobby": "daydream",
+          "preferred_bedtime": 1260
+        }
       },
       {
-        "appearance": {
-          "assetVersion": "resident-parts-v7",
-          "body": "broad-v1",
-          "hair": "side-part-v1",
-          "materials": {
-            "shirt": "indigo",
-            "shoes": "graphite",
-            "shorts": "umber",
-            "skin": "sunlit"
-          },
-          "schema": 2
-        },
-        "biography": "A repair-minded new neighbour who wants the shared equipment working before the village expands.",
-        "experience": {
-          "background": "maker",
-          "levels": {
-            "building": 1,
-            "cooking": 0,
-            "equipment_care": 1,
-            "growing": 0,
-            "hauling": 0,
-            "making": 2
-          }
-        },
-        "id": "resident-0c89eafd-9546-4ad9-8326-61edf77d5cf8",
-        "name": "Otávio",
-        "occupation": "none",
+        "biography": "",
+        "id": "resident-caua",
+        "name": "Cauã",
+        "occupation": "nature_guide",
         "outside_shifts": false,
-        "personality": {
-          "social_style": "balanced",
-          "work_interest": "gardening"
-        },
-        "preset": "iara",
+        "preset": "caua",
         "preset_version": 1,
         "pronouns": "",
         "routine_preferences": {
-          "alternate_hobby": "birdwatch",
-          "favourite_hobby": "nature_walk",
-          "preferred_bedtime": 1290
-        },
-        "work_preferences": {}
+          "alternate_hobby": "nature_walk",
+          "favourite_hobby": "birdwatch",
+          "preferred_bedtime": 1380
+        }
       }
     ],
     "roads": [],

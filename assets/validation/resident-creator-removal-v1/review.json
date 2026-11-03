@@ -1,0 +1,51 @@
+{
+  "why": "The player explicitly removed resident creation/customization and wants new residents authored only when needed.",
+  "removed": [
+    "Character creator, appearance/identity editor, randomization and category controls",
+    "New/duplicate character actions and preset save/import/export collection",
+    "Public WASM identity/appearance mutation and resident-package validation APIs",
+    "Resident-preset write methods and example resident packages",
+    "Creator-only verification scripts and example authoring automation",
+    "Creator requirements from the active plan"
+  ],
+  "retained": [
+    "Existing authored friends, original sprites and normal gameplay",
+    "Scenario arrival position/needs and outside-job participation",
+    "Stable IDs, relationship/role/work/history data and frozen existing saves",
+    "Lazy legacy appearance rendering and read-only old storage records, so existing saved people are not discarded"
+  ],
+  "validation": {
+    "native": "790 tests pass; strict all-target Clippy and release WASM build pass.",
+    "browser": [
+      "removed creator modules and public mutation/package APIs",
+      "all three examples use authored friends",
+      "no creation/customization/preset controls",
+      "arrival needs preserve identity",
+      "existing friend removal/re-add and exact undo/redo",
+      "resident package import rejected without changing draft",
+      "reload and playtest return preserve draft",
+      "game resident details remain usable without appearance editor",
+      "no creator module requests or browser errors"
+    ],
+    "additional": [
+      "Full map/scenario workspace keyboard/save/test/export/import journey",
+      "All three example picker openings with authored friends",
+      "Map/release package recovery",
+      "Four supported record backup collections",
+      "Missing-body preservation, including legacy resident storage",
+      "Story role missing-capability feedback and authored-friend speaker assignment",
+      "Shared relationship history and real gameplay memories",
+      "Changed JavaScript syntax and whitespace checks"
+    ]
+  },
+  "inspected": [
+    "authored-cast.png",
+    "resident-details.png"
+  ],
+  "notes": [
+    "One old story-role verifier initially assumed editable starting skills; it was updated to test missing-skill feedback and repair with an existing friend. Its initial failure remains in the retained recovery log; the separate final story-role log passes.",
+    "The changed example casts compile, load and restore and the public picker works. Their full completion/continuation must be revalidated under the remaining builder goal.",
+    "Historical creator implementation notes moved to map-scenario-builder-history-2026-11-03.md; they are not active requirements.",
+    "This completes removal of the player creator, not all remaining map/scenario release gates."
+  ]
+}

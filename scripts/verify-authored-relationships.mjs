@@ -11,10 +11,6 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
  await page.locator('[data-preset=camp]').click();
  await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();
- for(const id of ['iara','bento']){
-  const person=page.locator(`[data-resident="resident-${id}"]`);await person.locator(':scope > summary').click();
-  await person.locator('[data-resident-field=name]').fill('Sam');await person.locator('[data-resident-field=name]').dispatchEvent('change');
- }
  await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();
  await page.locator('[data-workspace=people]').click();await page.locator('#creator-relationships > summary').click();
  const bond=page.locator('[data-bond-from="resident-iara"][data-bond-to="resident-bento"]');
@@ -39,8 +35,8 @@ try{
  assert.deepEqual(state.village.progress.friendships,{0:{1:8},1:{0:8}});
  assert.equal(state.village.scenario.definition.start.relationships[0].from,'resident-iara');
  await page.locator('[data-panel=community-panel]').click();await page.locator('#residents [data-resident="0"]').click();
- assert.equal(await page.locator('#person .friendship-note').textContent(),'Shared memories: Sam (8)');
+ assert.equal(await page.locator('#person .friendship-note').textContent(),'Shared memories: Bento (8)');
  await page.screenshot({path:'/private/tmp/solar-shared-history-person.png'});
  assert.deepEqual(errors,[]);
- console.log('PASS stable-ID shared-history controls, duplicate names, undo/redo/clear, durable editor reload, native playtest and real People memories.');
+ console.log('PASS stable-ID shared-history controls, authored friends, undo/redo/clear, durable editor reload, native playtest and real People memories.');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

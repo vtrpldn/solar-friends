@@ -85,7 +85,7 @@ pub fn migrate(raw: &mut serde_json::Value) -> bool {
 pub fn catalog() -> serde_json::Value {
     serde_json::json!(FOUNDERS.map(|preset|serde_json::json!({"key":preset,"version":1,"name":match preset{Preset::Iara=>"Iara's look",Preset::Bento=>"Bento's look",Preset::Luz=>"Luz's look",Preset::Caua=>"Cauã's look",Preset::Nina=>"Nina's look"}})))
 }
-#[wasm_bindgen]
+#[cfg(test)]
 impl Game {
     pub fn change_resident_identity(
         &mut self,
@@ -109,6 +109,7 @@ impl Game {
         self.apply_resident_identity(id, name, appearance)
     }
 }
+#[cfg(test)]
 impl Game {
     fn apply_resident_identity(&mut self, id: usize, name: &str, appearance: Look) -> bool {
         if !appearance.valid() || name.trim().is_empty() || name.chars().count() > 80 {

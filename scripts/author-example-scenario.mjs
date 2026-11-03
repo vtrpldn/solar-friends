@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-import {applyExampleResidentLooks} from './example-resident-looks.mjs';
 import {exampleAuthoringProfiles} from './example-authoring-profiles.mjs';
 export async function authorExample(id){
 const profile=exampleAuthoringProfiles[id];if(!profile)throw Error('Unknown example profile');
@@ -15,18 +14,6 @@ try{
  const edit=async(selector,value)=>{await page.locator(selector).fill(String(value));await page.locator(selector).blur();};
  await edit('#creator-title',profile.title);await edit('#creator-description',profile.description);
  if(profile.weather){await page.locator('[data-workspace=land]').click();await page.locator('#creator-weather > summary').click();for(const [key,value]of Object.entries(profile.weather))await edit('#creator-weather-'+key,value);}
- if(profile.cast){
-  await page.locator('[data-workspace=people]').click();await page.locator('#creator-residents > summary').click();
-  for(const person of profile.cast){
-   await page.locator('[data-add-resident]').click();let row=page.locator('details[data-resident]').last();if(!await row.evaluate(el=>el.open))await row.locator(':scope > summary').click();
-   const name=row.locator('[data-resident-field="name"]');await name.fill(person.name);await name.blur();
-   await row.locator('[data-resident-field="appearance"]').selectOption(person.look);
-   const biography=row.locator('[data-resident-field="biography"]');await biography.fill(person.biography);await biography.blur();
-   await row.locator('.creator-experience > summary').click();await row.locator('[data-resident-field="background"]').selectOption(person.background);
-  }
-  for(const identity of profile.removeFounders??['resident-iara','resident-bento','resident-luz','resident-caua','resident-nina']){const row=page.locator(`details[data-resident="${identity}"]`);if(!await row.evaluate(el=>el.open))await row.locator(':scope > summary').click();await row.locator('[data-remove-resident]').click();}
- }
- await applyExampleResidentLooks(page,id);
  if(profile.inheritedBuildings){
   await page.locator('#creator-zoom-out').click();await page.locator('#creator-zoom-out').click();
   for(const [kind,x,y]of profile.inheritedBuildings){

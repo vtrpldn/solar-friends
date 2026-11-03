@@ -7,7 +7,7 @@ const sections={
  story:['creator-regions','creator-journal'],
  review:['creator-opening-setup','creator-outlook','creator-validation','creator-save-copy'],
 };
-const guidance={land:'Shape the property, choose its plants and inspect the ground.',people:'Create the friends, their routines and their shared history.',village:'Place buildings and paths, then choose supplies and utilities.',story:'Write the journal, draw goal regions and set up events.',review:'Review the opening, test village life and prepare a creation to share.'};
+const guidance={land:'Shape the property, choose its plants and inspect the ground.',people:'Choose the arriving friends and their starting circumstances.',village:'Place buildings and paths, then choose supplies and utilities.',story:'Write the journal, draw goal regions and set up events.',review:'Review the opening, test village life and prepare a creation to share.'};
 let activeNavigation;
 export function revealWorkspaceSection(element){activeNavigation?.reveal(element);}
 export class Workspaces {
@@ -20,7 +20,7 @@ export class Workspaces {
    const heading=document.createElement('h2');heading.textContent=workspaceNames[key];panel.append(heading);for(const id of ids){const element=document.getElementById(id);if(!element)throw Error('Missing creation section: '+id);panel.append(element);}this.inspector.append(panel);
   }
   const note=document.createElement('p');note.className='creator-workspace-guidance';this.tools.querySelector('h2').after(note);this.note=note;
-  const landFields=['creator-brush-size','creator-habitat','creator-species','creator-nature-size'];for(const id of landFields)document.getElementById(id).closest('.creator-field').dataset.workspaceTools='land';
+  const landFields=['creator-brush-size','creator-habitat','creator-species','creator-nature-size','creator-nature-density'];document.getElementById('creator-density-note').dataset.workspaceTools='land';for(const id of landFields)document.getElementById(id).closest('.creator-field').dataset.workspaceTools='land';
   const river=document.getElementById('creator-river-enabled').closest('label');river.dataset.workspaceTools='land';river.nextElementSibling.dataset.workspaceTools='land';
   for(const id of ['creator-sites','creator-buildings']){const el=document.getElementById(id);el.dataset.workspaceTools='village';el.previousElementSibling.dataset.workspaceTools='village';}document.getElementById('creator-route-tools').dataset.workspaceTools='village';
   for(const tool of ['road','region','camp','camera','habitat','nature','thin-nature','river','meadow']){const button=this.tools.querySelector(`[data-tool="${tool}"]`);button.dataset.workspaceTools=tool==='road'?'village':tool==='region'?'story':'land';}

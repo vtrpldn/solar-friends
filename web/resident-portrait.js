@@ -1,7 +1,7 @@
 import {createResidentAppearanceLibrary} from './resident-appearance-library.js';
 const legacyLibraries=new WeakMap();
 
-// Crop the same approved standing frame as the character creator. Fit the
+// Crop the same approved standing frame for resident details. Fit the
 // portrait without changing the painted face/body proportions.
 export function paintResidentPortrait(canvas,appearance,source,{filter='none'}={}){
   let library=source;

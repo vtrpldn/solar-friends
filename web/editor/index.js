@@ -40,7 +40,6 @@ import {LiquidsEditor} from './liquids.js';
 import {SuppliesEditor} from './supplies.js';
 import {RegionsEditor} from './regions.js';
 import {JournalEditor} from './scenario-journal.js';
-import {ResidentPresetLibrary} from './resident-presets.js';
 import {RelationshipsEditor} from './relationships.js';
 import {ResidentsEditor} from './residents.js';
 import {BiomeEditor} from './biome-editor.js';
@@ -411,8 +410,8 @@ async function launch(definition,record,sessionKind,releaseId=null,releasePackag
 }
 async function showLibrary({reset=false}={}){
   if(current)await save();
-  const [projects,runs,releases,maps,residentPresets]=await Promise.all([library.listProjects(),library.listRuns(),library.listReleases(),library.listMaps(),library.listResidentPresets()]);
-  const backupSelect=$('creator-backup-entry'),selectedBackup=backupSelect.value,backupEntries=[['project',projects],['run',runs],['release',releases],['map',maps],['resident',residentPresets]].flatMap(([kind,entries])=>entries.filter(entry=>!entry.missingBody).map(entry=>new Option(`${{project:'Draft',run:'Village',release:'Scenario release',map:'Map',resident:'Resident preset'}[kind]} · ${entry.title??'Untitled'}`,JSON.stringify([kind,entry.id]))));
+  const [projects,runs,releases,maps]=await Promise.all([library.listProjects(),library.listRuns(),library.listReleases(),library.listMaps()]);
+  const backupSelect=$('creator-backup-entry'),selectedBackup=backupSelect.value,backupEntries=[['project',projects],['run',runs],['release',releases],['map',maps]].flatMap(([kind,entries])=>entries.filter(entry=>!entry.missingBody).map(entry=>new Option(`${{project:'Draft',run:'Village',release:'Scenario release',map:'Map'}[kind]} · ${entry.title??'Untitled'}`,JSON.stringify([kind,entry.id]))));
   backupSelect.replaceChildren(...(backupEntries.length?backupEntries:[new Option('No saved records available','')]));if(backupEntries.some(option=>option.value===selectedBackup))backupSelect.value=selectedBackup;$('creator-backup-record').disabled=!backupSelect.value;
   $('creator-project-list').innerHTML=projects.length?projects.map(p=>p.missingBody?missingLibraryEntry('project',p):`<div class="creator-library-row">${previewMarkup('project',p.id)}<div><b>${escape(p.title)}</b><small>Saved ${escape(new Date(p.updatedAt).toLocaleString())}</small>${p.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-open-project="${escape(p.id)}">Edit</button><button data-play-project="${escape(p.id)}">Play</button><button data-copy-project="${escape(p.id)}">Copy</button><button data-backup-project="${escape(p.id)}" title="Keep the original draft, history and previous checkpoint">Backup</button><button class="creator-remove" data-remove-project="${escape(p.id)}" aria-label="Remove ${escape(p.title)}">×</button></div>`).join(''):'<p>No creations yet. Choose a beginning above.</p>';
   $('creator-releases-heading').hidden=!releases.length;
@@ -452,7 +451,7 @@ function wire(){
   $('creator-backup-entry').onchange=()=>{$('creator-backup-record').disabled=!$('creator-backup-entry').value;};
   $('creator-backup-record').onclick=async event=>{
     event.stopPropagation();const button=event.currentTarget;button.disabled=true;
-    try{const [kind,id]=JSON.parse($('creator-backup-entry').value),get={project:()=>library.getProject(id),run:()=>library.getRun(id),release:()=>library.getRelease(id),map:()=>library.getMap(id),resident:()=>library.getResidentPreset(id)}[kind];if(!get)throw Error('Choose a saved entry to back up.');downloadRecoveryRecord(kind,await get());$('creator-library-status').textContent='Original record backup downloaded. Saved content is unchanged; keep this file even if this game cannot open it.';}
+    try{const [kind,id]=JSON.parse($('creator-backup-entry').value),get={project:()=>library.getProject(id),run:()=>library.getRun(id),release:()=>library.getRelease(id),map:()=>library.getMap(id)}[kind];if(!get)throw Error('Choose a saved entry to back up.');downloadRecoveryRecord(kind,await get());$('creator-library-status').textContent='Original record backup downloaded. Saved content is unchanged; keep this file even if this game cannot open it.';}
     catch(error){$('creator-library-status').textContent=error.message;}finally{button.disabled=!$('creator-backup-entry').value;}
   };
 
@@ -591,14 +590,15 @@ function wire(){
     try{
       if(file.size>MAX_RECOVERY_FILE_BYTES)throw Error('This backup or creation file exceeds 96 MiB. Keep the original file.');
       const raw=await file.text(),content=parseImportObject(raw);
+      if(content.format==='solar-friends-resident')throw Error('Resident packages are no longer supported. Import a map or scenario instead.');
       if(content.format==='solar-friends-recovery'){
-        if(['map','release','resident'].includes(content.kind)){
-          const recovered=recoveredPackage(content,{validateMap:mapSharing.validate,validateScenario:raw=>JSON.parse(engine.validate_scenario(raw)),validateResident:raw=>JSON.parse(engine.validate_resident_preset(raw,true))});
+        if(content.kind==='resident')throw Error('Resident creation and resident packages have been removed. Your original file is unchanged.');
+        if(['map','release'].includes(content.kind)){
+          const recovered=recoveredPackage(content,{validateMap:mapSharing.validate,validateScenario:raw=>JSON.parse(engine.validate_scenario(raw))});
           if(current)await save();
           if(recovered.kind==='map')await library.importMap(recovered.file,mapSharing.validate,mapSharing.preview(recovered.file));
           else if(recovered.kind==='release')await library.importRelease(recovered.file,raw=>JSON.parse(engine.validate_scenario(raw)));
-          else await library.saveResidentPreset({id:crypto.randomUUID(),file:recovered.file});
-          await showLibrary({reset:true});$('creator-library-status').textContent=`Recovered a separate ${recovered.kind==='resident'?'resident preset':recovered.kind==='release'?'scenario release':'reusable map'}. The original backup and saved entries are unchanged.${recovered.kind==='resident'?' Find the recovered person under Founding cast → Resident presets.':''}`;return;
+          await showLibrary({reset:true});$('creator-library-status').textContent=`Recovered a separate ${recovered.kind==='release'?'scenario release':'reusable map'}. The original backup and saved entries are unchanged.`;return;
         }
 
         const recovered=await chooseRecoveryCheckpoint(content,{Game,validate:data=>JSON.parse(engine.validate_scenario(data))});if(!recovered)return;
@@ -653,8 +653,7 @@ try{
   regionsEditor=new RegionsEditor($('creator-regions-fields'),{change,maximum:catalog.max_regions,draw:()=>setTool('region'),focus:r=>map.centerAt(r.x+(r.width-1)/2,r.y+(r.height-1)/2)});
   journalEditor=new JournalEditor($('creator-journal-fields'),{catalog,change,undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo})});
   relationshipsEditor=new RelationshipsEditor($('creator-relationships-fields'),{presets:catalog.resident_presets,art,change});
-  const residentPresets=new ResidentPresetLibrary({library,engine,art,presets:catalog.resident_presets,maximum:catalog.max_residents,source:()=>({id:current.id,revision:current.doc.revision,definition:current.doc.value}),change,notify:toast});
-  residentsEditor=new ResidentsEditor($('creator-residents-fields'),{presets:catalog.resident_presets,occupations:catalog.occupations,personality:catalog.resident_personality,experience:catalog.resident_experience,appearances:catalog.resident_appearances,maximum:catalog.max_residents,art,catalog,undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),change,source:()=>current.doc.value,placeStart:id=>{map.placingResident=id;setTool('resident-start');map.selectResident(id);},locateStart:(id,position)=>{setTool('select');map.selectResident(id);map.centerAt(...position);},savePreset:person=>residentPresets.save(person),openPresets:()=>residentPresets.open()});
+  residentsEditor=new ResidentsEditor($('creator-residents-fields'),{presets:catalog.resident_presets,occupations:catalog.occupations,catalog,change,source:()=>current.doc.value,placeStart:id=>{map.placingResident=id;setTool('resident-start');map.selectResident(id);},locateStart:(id,position)=>{setTool('select');map.selectResident(id);map.centerAt(...position);}});
   weatherEditor=new WeatherEditor($('creator-weather-fields'),{defaults:catalog.weather,biomes:catalog.biomes,change});
   geologyEditor=new GeologyEditor($('creator-geology-fields'),{change,center:()=>map.view.center,defaults:JSON.parse(engine.scenario_template('story')).map.deposits,focus:p=>{map.centerAt(p.x+(p.width-1)/2,p.y+(p.height-1)/2);$('creator-land-layer').value=p.material;$('creator-land-layer').dispatchEvent(new Event('change'));}});
   biomeEditor=new BiomeEditor($('creator-biome-setting-fields'),{catalog,art,change,notify:toast,source:()=>({id:current.id,revision:current.doc.revision,definition:report.ok?freezeCreation(current.doc.value,{terrain:terrainBase,snapshot:map.snapshot,catalog}):current.doc.value})});

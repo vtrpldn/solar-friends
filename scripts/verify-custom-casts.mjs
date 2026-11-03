@@ -3,14 +3,14 @@ import {readFile} from 'node:fs/promises';
 import {performance} from 'node:perf_hooks';
 import init,{Game} from '../web/pkg/solar_friends.js';
 import {advanceSimulation} from '../web/simulation-speed.js';
-import {addResident,removeResident} from '../web/editor/roster.js';
+import {removeResident} from '../web/editor/roster.js';
 import {EditorDocument} from '../web/editor/document.js';
 await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const g=new Game(),catalog=JSON.parse(g.scenario_catalog()),results=[];
 const summary=a=>{a.sort((a,b)=>a-b);return {median:a[Math.floor(a.length/2)],p95:a[Math.floor(a.length*.95)]};};
 try{
  const draft=JSON.parse(g.scenario_template('sandbox')),doc=new EditorDocument(draft);
- doc.transact('duplicate',d=>addResident(d,catalog.resident_presets,catalog.max_residents,{source:d.start.residents[0].id,id:'duplicate'}));
+ doc.transact('authored cast fixture',d=>{d.start.residents.push({...structuredClone(d.start.residents[0]),id:'duplicate'});});
  assert.equal(doc.value.start.residents.length,6);assert.equal((doc.value.start.relationships??[]).length,0);
  doc.undo();assert.deepEqual(doc.value,draft);doc.redo();assert.equal(doc.value.start.residents.length,6);
  doc.transact('history',d=>{d.start.relationships=[{from:'duplicate',to:d.start.residents[0].id,memories:7}];});

@@ -8,16 +8,9 @@ export const exampleAuthoringProfiles={
  'before-the-dry-season':{
   id:'before-the-dry-season',title:'Before the dry season',biome:'cerrado',
   description:'A new group arrives in a Cerrado clearing with seven wet-season days to prepare. Choose where to catch and store water, start a modest garden and protect a usable reserve before the dry season. The calendar is compressed for this scenario.',
-  introduction:'Marina, Davi, Joana, Ravi and Cecília have pooled their savings. Rain will not last. A cistern is only useful if it contains reachable fresh water; a growing plot needs a water route too. Keep the cultivated area small until storage and daily routines work.',
+  introduction:'Iara, Bento, Luz, Cauã and Nina have pooled their savings. Rain will not last. A cistern is only useful if it contains reachable fresh water; a growing plot needs a water route too. Keep the cultivated area small until storage and daily routines work.',
   completion:'Our first reserve is ready. The dry season will still test our choices: keep watching water levels, soil moisture and the food reserve before expanding.',
   weather:{season_days:7,intro_days:0},deadline:{day:8,time:'00:00'},
-  cast:[
-   {name:'Marina',look:'iara',background:'grower',biography:'A seed saver who wants a small, well-tended garden before expanding into the clearing.'},
-   {name:'Davi',look:'bento',background:'builder',biography:'A practical builder who checks missing materials and transport before committing the shared fund.'},
-   {name:'Joana',look:'luz',background:'cook',biography:'A cook who plans meals around the food the group can actually grow and store.'},
-   {name:'Ravi',look:'caua',background:'hauler',biography:'An experienced mover who wants short, clear routes between storage, water and work.'},
-   {name:'Cecília',look:'nina',background:'caretaker',biography:'A maintenance-minded neighbour who keeps an eye on tanks, fittings and the water reserve.'},
-  ],
   chapters:[
    {title:'Catch the wet season',description:'Place water storage early enough to catch rain. Short walking routes matter as much as nominal tank capacity.',goals:[
     {title:'A cistern for the clearing',description:'Complete a cistern near the camp and future plots. Its tank needs a pump and plumbing from town. Check material stages and order missing parts through Supplies before spending the fund elsewhere. A kitchen also needs plumbing.',kind:'buildings',building:'well',count:1},
@@ -34,14 +27,10 @@ export const exampleAuthoringProfiles={
  },
  'an-inherited-village':{
   id:'an-inherited-village',title:'An inherited village',biome:'caatinga',
-  description:'An established Caatinga property has homes, food plots and useful equipment, but its pump and shared battery have failed. Iara, Bento and Nina welcome Sueli and Otávio. Inspect what is already here, service it with real parts and make everyday water, sanitation and lighting dependable.',
+  description:'An established Caatinga property has homes, food plots and useful equipment, but its pump and shared battery have failed. The founding friends have taken responsibility for the property. Inspect what is already here, service it with real parts and make everyday water, sanitation and lighting dependable.',
   introduction:'We inherited buildings, not a working system. The cistern holds water but its pump needs service; the solar battery is also failed. Open Buildings to inspect equipment jobs, and Supplies to obtain tools and missing service parts. Keep the paths and utility lines clear before expanding.',
   completion:'The inherited village works again: reachable water, usable sanitation, food and a lit path. Keep watching equipment condition and the water reserve as dry weather continues. Repair and care remain part of daily life.',
-  freshWater:100,removeFounders:['resident-luz','resident-caua'],
-  cast:[
-   {name:'Sueli',look:'luz',background:'grower',biography:'A grower joining Iara, Bento and Nina to understand the property’s soil and maintain a modest food plot.'},
-   {name:'Otávio',look:'caua',background:'maker',biography:'A repair-minded new neighbour who wants the shared equipment working before the village expands.'},
-  ],
+  freshWater:100,
   inheritedBuildings:[['home',27,32],['home',28,36],['well',35,33],['kitchen',32,36],['garden',35,36],['solar_farm',25,29],['streetlight',31,34],['workshop',25,36],['eco_toilet',39,34],['banana_treatment',39,37]],
   routes:[{kind:'fresh',from:'35, 33',to:'32, 36'},{kind:'fresh',from:'35, 33',to:'39, 34'},{kind:'sewage',from:'39, 34',to:'39, 37'},{kind:'electricity',from:'25, 29',to:'31, 34'},{kind:'electricity',from:'25, 29',to:'Fresh water pump',toOccurrence:0},{kind:'electricity',from:'25, 29',to:'Fresh water pump',toOccurrence:1}],
   equipment:[{label:'Water pump',condition:0,occurrence:0},{label:'Water pump',condition:0,occurrence:1},{label:'Battery system · 25, 29',condition:0}],
