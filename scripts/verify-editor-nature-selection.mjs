@@ -7,7 +7,7 @@ import {closeValidationBrowser} from './close-validation-browser.mjs';
 import init,{Game} from '../web/pkg/solar_friends.js';
 import {natureAt,placeNatureObject,plantStroke} from '../web/editor/nature.js';
 
-const output=process.argv[2]??'artifacts/editor-nature-selection';await mkdir(output,{recursive:true});
+const output=process.argv[2]??'artifacts/editor-nature-selection';await mkdir(output,{recursive:true});await writeFile(output+'/report.json',JSON.stringify({complete:false,phase:'running'})+'\n');
 await init({module_or_path:await readFile('web/pkg/solar_friends_bg.wasm')});
 const game=new Game(),catalog=JSON.parse(game.scenario_catalog()),definition=JSON.parse(game.scenario_template('sandbox'));
 definition.title='Natural object editing';definition.map=JSON.parse(game.generate_biome_property('caatinga',42));
@@ -31,7 +31,7 @@ for(const density of [.25,.5,1]){
 assert(densityCounts[0]<densityCounts[1]&&densityCounts[1]<densityCounts[2],JSON.stringify(densityCounts));
 for(const density of [0,.1,2,NaN])assert.throws(()=>plantStroke(definition,[],catalog.nature,'macambira',1,[[20,25]],9,undefined,density));
 game.free();
-const server=await serve(0);let browser;
+const server=await serve(0);let browser,report;const cleanup=[];
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
@@ -65,5 +65,6 @@ try{
  const playable=await page.evaluate(()=>window.solarDev.snapshot().village.scenario.definition.map.nature);assert.equal(playable.length,3);assert.equal(playable[0].id,source.id);assert.equal(playable[0].x,30);assert.equal(playable[0].y,36);assert.equal(Math.fround(playable[0].size),Math.fround(1.05));
  await page.getByRole('button',{name:'Return to editor',exact:true}).click();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await saved();assert.equal(await page.locator('#creator-nature-density').inputValue(),'0.25');await page.locator('[data-nature-action=move]').waitFor({state:'visible'});assert.deepEqual(await read(),duplicate);assert.deepEqual(errors,[]);
  const inputs=Object.fromEntries(await Promise.all(['web/editor.html','web/editor/nature.js','web/editor/map-view.js','web/editor/index.js','web/group-preview-worker.js','scripts/verify-editor-nature-selection.mjs','web/pkg/solar_friends_bg.wasm'].map(async path=>[path,createHash('sha256').update(await readFile(path)).digest('hex')])));
- await writeFile(`${output}/report.json`,JSON.stringify({complete:true,densityCounts,inputs,browserErrors:errors,checks:['density spacing, native validity and deterministic output','cluster density survives reload','trusted sparse brush matches plan with exact atomic undo/redo','fractional-anchor picking','independent copy identity','bounds, spacing, camp and size rejection','selected tiny plant inspector','blank numeric edit preserves draft','resize exact undo/redo','move retains identity and neighbors','native move/copy allowed and blocked preview, rejected move preserves draft, Escape clears preview','copy and Delete with exact undo','typing guard','erase tool removes only one object','reload preserves selection','trusted drag move and Escape cancellation','native playtest and editor return']},null,2)+'\n');console.log('PASS individual natural-object selection, editing, isolation, exact history, saved selection and native playtest.');
-}finally{await closeValidationBrowser(browser,server);}
+ report={complete:false,densityCounts,inputs,browserErrors:errors,checks:['density spacing, native validity and deterministic output','cluster density survives reload','trusted sparse brush matches plan with exact atomic undo/redo','fractional-anchor picking','independent copy identity','bounds, spacing, camp and size rejection','selected tiny plant inspector','blank numeric edit preserves draft','resize exact undo/redo','move retains identity and neighbors','native move/copy allowed and blocked preview, rejected move preserves draft, Escape clears preview','copy and Delete with exact undo','typing guard','erase tool removes only one object','reload preserves selection','trusted drag move and Escape cancellation','native playtest and editor return']};
+}finally{await closeValidationBrowser(browser,server,{onStage:stage=>cleanup.push(stage)});}
+report.complete=true;report.cleanup=cleanup;await writeFile(output+'/report.json',JSON.stringify(report,null,2)+'\n');console.log('PASS natural-object placement previews, complete editing regression and bounded cleanup.');

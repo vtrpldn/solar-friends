@@ -1,0 +1,184 @@
+{
+  "sources": {
+    "web/main.js": "da0693bf1e62bc2dc62586cbe3b7de2a6b4e3e8106f480ffb1646d6622c86a5e",
+    "web/world-renderer.js": "04bdee7abe756d42e8465c69fcb4e66a61a9dd9d05d5dc607979a90586bcccd2",
+    "web/crop-art.js": "7bc17ec81eff066368d24a2e480d83af2ec516644c21e6a8eea4926a36c326ba",
+    "web/power.js": "d37e60fba9e9e9057df3bf0b0fda4e6c4d8914f9d8041673627a7868e8694f0d",
+    "web/pkg/solar_friends_bg.wasm": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1",
+    "scripts/verify-greenhouse-live-lighting.mjs": "9141f19cde626287917f4f814260e47ad5f56d2aa0e8c781b4c8ba82dede01ed"
+  },
+  "passed": true,
+  "observations": [
+    {
+      "painter": {
+        "id": 2,
+        "night": 1,
+        "light": 1
+      },
+      "power": {
+        "capacity": 0,
+        "comfortable": true,
+        "connections": [
+          {
+            "connected": false,
+            "enabled": true,
+            "id": 0,
+            "light_level": 0,
+            "load": 0,
+            "source": "none"
+          },
+          {
+            "connected": true,
+            "enabled": true,
+            "id": 1,
+            "light_level": 1,
+            "load": 0.20000000298023224,
+            "source": "grid"
+          },
+          {
+            "connected": true,
+            "enabled": true,
+            "id": 2,
+            "light_level": 1,
+            "load": 0.5,
+            "source": "grid"
+          }
+        ],
+        "darkness": 1,
+        "demand": 0.699999988079071,
+        "farms": 0,
+        "generation": 0,
+        "grid_level": 1,
+        "hydro_generation": 0,
+        "hydros": 0,
+        "pump_demand": 0,
+        "solar_generation": 0,
+        "stored": 0
+      }
+    },
+    {
+      "painter": {
+        "id": 2,
+        "night": 1,
+        "light": 0
+      },
+      "power": {
+        "capacity": 0,
+        "comfortable": true,
+        "connections": [
+          {
+            "connected": false,
+            "enabled": true,
+            "id": 0,
+            "light_level": 0,
+            "load": 0,
+            "source": "none"
+          },
+          {
+            "connected": true,
+            "enabled": true,
+            "id": 1,
+            "light_level": 1,
+            "load": 0.20000000298023224,
+            "source": "grid"
+          },
+          {
+            "connected": true,
+            "enabled": false,
+            "id": 2,
+            "light_level": 0,
+            "load": 0.5,
+            "source": "grid"
+          }
+        ],
+        "darkness": 1,
+        "demand": 0.20000000298023224,
+        "farms": 0,
+        "generation": 0,
+        "grid_level": 1,
+        "hydro_generation": 0,
+        "hydros": 0,
+        "pump_demand": 0,
+        "solar_generation": 0,
+        "stored": 0
+      }
+    },
+    {
+      "painter": {
+        "id": 2,
+        "night": 1,
+        "light": 1
+      },
+      "power": {
+        "capacity": 0,
+        "comfortable": true,
+        "connections": [
+          {
+            "connected": false,
+            "enabled": true,
+            "id": 0,
+            "light_level": 0,
+            "load": 0,
+            "source": "none"
+          },
+          {
+            "connected": true,
+            "enabled": true,
+            "id": 1,
+            "light_level": 1,
+            "load": 0.20000000298023224,
+            "source": "grid"
+          },
+          {
+            "connected": true,
+            "enabled": true,
+            "id": 2,
+            "light_level": 1,
+            "load": 0.5,
+            "source": "grid"
+          }
+        ],
+        "darkness": 1,
+        "demand": 0.699999988079071,
+        "farms": 0,
+        "generation": 0,
+        "grid_level": 1,
+        "hydro_generation": 0,
+        "hydros": 0,
+        "pump_demand": 0,
+        "solar_generation": 0,
+        "stored": 0
+      }
+    }
+  ],
+  "scope": "Public imported sandbox at night, public Test village and Power checkbox off/on; real main caller and shared crop painter, diagnostic argument observation only. Utilities disabled comfortable Sandbox supply; not a wired-grid or battery depletion test.",
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.34204199999931006
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 2.4088339999998425
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 37.011708
+    }
+  ]
+}

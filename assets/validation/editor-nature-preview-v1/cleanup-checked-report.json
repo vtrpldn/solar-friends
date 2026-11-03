@@ -1,0 +1,66 @@
+{
+  "complete": true,
+  "densityCounts": [
+    17,
+    26,
+    80
+  ],
+  "inputs": {
+    "web/editor.html": "d6ce8ea23ce48264d7e8235642580fdc944578721acb194ff2ca7d8fc118db53",
+    "web/editor/nature.js": "0e7135a7f5175c00c68e941ebc09a386a168679db3bf5e4e89288de5b0a58c87",
+    "web/editor/map-view.js": "6c0b5d1ed1f01420923b228724256653e499860e754eae2662c6321ffe4d9887",
+    "web/editor/index.js": "0af94b70e762a64e499551736f78e834386c217a4ac432edd84582107c6603e8",
+    "web/group-preview-worker.js": "7aaf5f6c26d357f375bbd80616fede6ced60fcee458ed3cb9a4d6cbf8d8766cc",
+    "scripts/verify-editor-nature-selection.mjs": "753a6134046858ad4f5d405e7df619a9746ba03e612c7a077d412c961d0e9f6b",
+    "web/pkg/solar_friends_bg.wasm": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1"
+  },
+  "browserErrors": [],
+  "checks": [
+    "density spacing, native validity and deterministic output",
+    "cluster density survives reload",
+    "trusted sparse brush matches plan with exact atomic undo/redo",
+    "fractional-anchor picking",
+    "independent copy identity",
+    "bounds, spacing, camp and size rejection",
+    "selected tiny plant inspector",
+    "blank numeric edit preserves draft",
+    "resize exact undo/redo",
+    "move retains identity and neighbors",
+    "native move/copy allowed and blocked preview, rejected move preserves draft, Escape clears preview",
+    "copy and Delete with exact undo",
+    "typing guard",
+    "erase tool removes only one object",
+    "reload preserves selection",
+    "trusted drag move and Escape cancellation",
+    "native playtest and editor return"
+  ],
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.38262500000200816
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 2.5473329999986163
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 37.92812500000218
+    }
+  ]
+}
