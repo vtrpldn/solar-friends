@@ -1,0 +1,323 @@
+{
+  "cases": [
+    {
+      "workerSurface": false,
+      "rows": 1,
+      "row": 0,
+      "road": false,
+      "before": {
+        "mismatches": 156000,
+        "maxDelta": 86,
+        "oracle": [
+          234,
+          43,
+          25,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          234,
+          43,
+          25,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": false,
+      "rows": 1,
+      "row": 0,
+      "road": true,
+      "before": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          0,
+          255,
+          0,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          0,
+          255,
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": false,
+      "rows": 2,
+      "row": 0,
+      "road": false,
+      "before": {
+        "mismatches": 232479,
+        "maxDelta": 96,
+        "oracle": [
+          234,
+          43,
+          25,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          234,
+          43,
+          25,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": false,
+      "rows": 2,
+      "row": 0,
+      "road": true,
+      "before": {
+        "mismatches": 250245,
+        "maxDelta": 128,
+        "oracle": [
+          0,
+          255,
+          0,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          0,
+          255,
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": false,
+      "rows": 2,
+      "row": 1,
+      "road": false,
+      "before": {
+        "mismatches": 250245,
+        "maxDelta": 140,
+        "oracle": [
+          40,
+          43,
+          219,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          40,
+          43,
+          219,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": false,
+      "rows": 2,
+      "row": 1,
+      "road": true,
+      "before": {
+        "mismatches": 267975,
+        "maxDelta": 128,
+        "oracle": [
+          255,
+          255,
+          0,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          255,
+          255,
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": true,
+      "rows": 1,
+      "row": 0,
+      "road": false,
+      "before": {
+        "mismatches": 156000,
+        "maxDelta": 86,
+        "oracle": [
+          234,
+          43,
+          25,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          234,
+          43,
+          25,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": true,
+      "rows": 1,
+      "row": 0,
+      "road": true,
+      "before": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          0,
+          255,
+          0,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          0,
+          255,
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": true,
+      "rows": 2,
+      "row": 0,
+      "road": false,
+      "before": {
+        "mismatches": 232479,
+        "maxDelta": 96,
+        "oracle": [
+          234,
+          43,
+          25,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          234,
+          43,
+          25,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": true,
+      "rows": 2,
+      "row": 0,
+      "road": true,
+      "before": {
+        "mismatches": 250245,
+        "maxDelta": 128,
+        "oracle": [
+          0,
+          255,
+          0,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          0,
+          255,
+          0,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": true,
+      "rows": 2,
+      "row": 1,
+      "road": false,
+      "before": {
+        "mismatches": 250245,
+        "maxDelta": 140,
+        "oracle": [
+          40,
+          43,
+          219,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          40,
+          43,
+          219,
+          255
+        ]
+      }
+    },
+    {
+      "workerSurface": true,
+      "rows": 2,
+      "row": 1,
+      "road": true,
+      "before": {
+        "mismatches": 267975,
+        "maxDelta": 128,
+        "oracle": [
+          255,
+          255,
+          0,
+          255
+        ]
+      },
+      "after": {
+        "mismatches": 0,
+        "maxDelta": 0,
+        "oracle": [
+          255,
+          255,
+          0,
+          255
+        ]
+      }
+    }
+  ],
+  "sourceHashes": {
+    "baseline": "99c39e675631800700276dc05a47f35394b53b5556ca08af1d631b8d0f2f8aaf",
+    "candidate": "3cb12a180d3b0f659c28c993d4ca384048639ec9e99ad9fb680cd43ebd920613",
+    "script": "3a1d9258a9acbc2410f89b801d396463e7d0b154d949d366094d2fe8156344d2"
+  },
+  "browserErrors": [],
+  "complete": true
+}

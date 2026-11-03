@@ -106,13 +106,19 @@ function paintSoil(g,soil){
     }
   }
 }
-function paintedTexture(g,texture,side,row=0,rows=1,tileCells=32){
+function paintedTexture(g,texture,side,row=0,rows=1,tileCells=32,makeSurface=surface){
   const tile=tileCells*RESOLUTION/GROUND_SIZE,half=texture.width/2;
-  for(let y=0;y<RESOLUTION;y+=tile)for(let x=0;x<RESOLUTION;x+=tile){
-    const flipX=Math.round(x/tile)%2,flipY=Math.round(y/tile)%2;
-    g.save();g.translate(x+(flipX?tile:0),y+(flipY?tile:0));g.scale(flipX?-1:1,flipY?-1:1);
-    g.drawImage(texture,side*half,row*texture.height/rows,half,texture.height/rows,0,0,tile,tile);g.restore();
-  }
+  // Isolate the atlas cell before scaling. Canvas filtering can otherwise
+  // sample the neighboring road or biome across a source rectangle's edges.
+  const patch=makeSurface(half);patch.height=texture.height/rows;
+  patch.getContext('2d').drawImage(texture,-side*half,-row*patch.height);
+  try{
+    for(let y=0;y<RESOLUTION;y+=tile)for(let x=0;x<RESOLUTION;x+=tile){
+      const flipX=Math.round(x/tile)%2,flipY=Math.round(y/tile)%2;
+      g.save();g.translate(x+(flipX?tile:0),y+(flipY?tile:0));g.scale(flipX?-1:1,flipY?-1:1);
+      g.drawImage(patch,0,0,tile,tile);g.restore();
+    }
+  }finally{patch.width=patch.height=0;}
 }
 function paintHabitats(g,seed,map){
   const unit=RESOLUTION/GROUND_SIZE;
@@ -137,7 +143,7 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
   const g = ground.getContext("2d");
   if(regional?.image)texture=regional.image;
   const row=regional?.image?regional.row:0,rows=regional?.image?2:1;
-  paintedTexture(g,texture,0,row,rows,regional?.image?8:32);
+  paintedTexture(g,texture,0,row,rows,regional?.image?8:32,makeSurface);
   // Quiet the repeated leaf texture so buildings and planted plots stay legible.
   g.fillStyle="rgba(167,178,105,0.24)";g.fillRect(0,0,RESOLUTION,RESOLUTION);
   paintHabitats(g,seed,map);
@@ -155,7 +161,7 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
       g.rect(px - unit / 2, py - unit / 2, unit, unit);
     }
     g.clip();
-    paintedTexture(g,texture,1,row,rows,regional?.image?8:32);
+    paintedTexture(g,texture,1,row,rows,regional?.image?8:32,makeSurface);
     g.restore();
   }
   paintRiver(g,map);

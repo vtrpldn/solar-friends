@@ -1,0 +1,54 @@
+{
+  "why": "Prevent texture filtering from sampling adjacent road/biome cells when the terrain atlas is scaled.",
+  "implementation": "Copy the selected atlas cell at native size into a temporary isolated canvas before repeated scaled draws; release it after painting and use the caller surface factory for worker compatibility.",
+  "runtimeArtworkReplacements": false,
+  "sourceHashes": {
+    "web/terrain.js": "3cb12a180d3b0f659c28c993d4ca384048639ec9e99ad9fb680cd43ebd920613",
+    "scripts/verify-terrain-atlas-isolation.mjs": "3a1d9258a9acbc2410f89b801d396463e7d0b154d949d366094d2fe8156344d2",
+    "scripts/verify-terrain-worker.mjs": "224943b3a50d9e930c124420c6919c660bb9d9aac94aca8397b16a02be8d741b",
+    "scripts/verify-creator-biomes.mjs": "37683dc6a472ad1f29f082c9a0e38c10508bba03e6a79941a4e07be98b6fba20"
+  },
+  "pixelOracle": {
+    "cases": 12,
+    "surfaces": [
+      "explicit HTMLCanvasElement",
+      "explicit OffscreenCanvas"
+    ],
+    "atlases": [
+      "classic one-row/two-column",
+      "regional two-row/two-column"
+    ],
+    "coverage": "Both land and road selections; all regional rows. Nine million fully opaque central pixels per case compared against independently rendered flat expected quadrant color and established land tint.",
+    "baseline": "015ef44; neighboring atlas contamination reproduced.",
+    "candidate": "Zero unexpected pixels in each case."
+  },
+  "workerRegression": "Six actual-art pixel comparisons across all three biomes, roads/no-roads and river variants; obsolete task cancellation, undo/reuse, late result rejection, thumbnail reuse, capability fallback and nine worker lifecycle/error paths pass.",
+  "publicJourney": {
+    "command": "node scripts/verify-creator-biomes.mjs",
+    "exitCode": 0,
+    "observed": "Three regular-player biome selections, frozen saved maps, regional planting, native playtest climate and return to editor; no page errors.",
+    "screensVisuallyReviewed": [
+      "solar-biome-mata-atlantica-game.png",
+      "solar-biome-cerrado-game.png",
+      "solar-biome-cerrado-night.png",
+      "solar-biome-caatinga-game.png",
+      "solar-biome-caatinga-night.png"
+    ]
+  },
+  "natureReview": {
+    "captureDirectory": "artifacts/nature-atlas-isolation-day",
+    "capturedBoards": 21,
+    "visuallyReviewed": [
+      "mata-atlantica-zoom-1-day-group-3.png",
+      "cerrado-zoom-1-day-group-3.png",
+      "caatinga-zoom-1-day-group-3.png"
+    ],
+    "reviewedCompositions": 27,
+    "findings": "No additional clipping, displaced targets or scale mismatch noticed in these three boards. Existing fine-ground competition persists."
+  },
+  "limits": [
+    "Atlas isolation fixes sampled-color contamination, not the broader terrain artwork hierarchy, tiling repetition or all landscape art gates.",
+    "Only listed boards and five full gameplay scenes were visually inspected after this source change.",
+    "No new performance or memory acceptance claim; no raster replacement integrated."
+  ]
+}

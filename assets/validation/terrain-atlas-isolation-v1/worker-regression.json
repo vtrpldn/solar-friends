@@ -1,0 +1,80 @@
+{
+  "cases": [
+    {
+      "biome": "mata-atlantica",
+      "roads": 0,
+      "river": false,
+      "pixelHash": "f8a7ba5a43db9e83304e1fbd88a8ffce7f130b60a5dac867238dbc21545eca25",
+      "elapsedMs": 472.5,
+      "maxTimerGapMs": 6.599999904632568
+    },
+    {
+      "biome": "mata-atlantica",
+      "roads": 3,
+      "river": true,
+      "pixelHash": "72ac55f3df959babb13733bdf87ca8bc2ada721de49b39f4a1e60d711aee8135",
+      "elapsedMs": 466.5,
+      "maxTimerGapMs": 7.199999809265137
+    },
+    {
+      "biome": "cerrado",
+      "roads": 0,
+      "river": false,
+      "pixelHash": "f2c4c40fcc4e9facf2522892d5ecf388c183eaabe9048e06840383d156deaba7",
+      "elapsedMs": 556.4000000953674,
+      "maxTimerGapMs": 7.700000047683716
+    },
+    {
+      "biome": "cerrado",
+      "roads": 3,
+      "river": true,
+      "pixelHash": "e33059abeec1f7544ed88af946c83e7e6e38c98cac85cdaabd990deebbead958",
+      "elapsedMs": 560.5,
+      "maxTimerGapMs": 9.5
+    },
+    {
+      "biome": "caatinga",
+      "roads": 0,
+      "river": false,
+      "pixelHash": "6b16d5b1b26597433a87bf42d95c3670afd5bfc181a5f012ed5f2dbf973fcd04",
+      "elapsedMs": 507.7999999523163,
+      "maxTimerGapMs": 8
+    },
+    {
+      "biome": "caatinga",
+      "roads": 3,
+      "river": true,
+      "pixelHash": "3af82f5f4ec997ce527abe083e1e948d5f4838fc223f5373064ee2eb87e91dd2",
+      "elapsedMs": 514.9000000953674,
+      "maxTimerGapMs": 6.799999952316284
+    }
+  ],
+  "interactive": {
+    "initialSetMs": 11.299999952316284,
+    "supersededPaintAborted": true,
+    "latestLandInstalled": true,
+    "undoCancelsPending": true,
+    "lateResultsIgnored": true,
+    "thumbnailSharesCompletedGround": true,
+    "synchronousCapabilityFallback": true
+  },
+  "lifecycle": [
+    "pre-abort",
+    "factory-abort",
+    "abort",
+    "invalid",
+    "empty-response",
+    "worker-error",
+    "message-error",
+    "clone-error",
+    "timeout"
+  ],
+  "sourceHashes": {
+    "web/terrain.js": "3cb12a180d3b0f659c28c993d4ca384048639ec9e99ad9fb680cd43ebd920613",
+    "web/terrain-paint-worker.js": "a95fe15f84b23ed8220d14122dca99004892dbdf12255e4f6ad77cb0d6a517be",
+    "web/editor/prepare-terrain.js": "2263c3c79dd89d05bab83920966a9354c206cc533b2f464e2c7748e0ac44319d",
+    "web/editor/terrain-cache.js": "89b760d42a330deee375c4ea6775d98d96f371e82406d80f858676a8669a527d",
+    "web/editor/map-view.js": "a501342d33f63e1146def06c1291bb54d3291bf753ab4f9a62c5823d85843cd9",
+    "web/editor/index.js": "1ea36c3a03ee680c291f86175afa923e5f78dde743427b7fa5b4d9360ffeb4c9"
+  }
+}
