@@ -5,7 +5,7 @@ import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 import {closeValidationBrowser} from './close-validation-browser.mjs';
 const output=process.argv[2]??'artifacts/editor-publication-race';await mkdir(output,{recursive:true});
-const paths=['scripts/verify-editor-publication-race.mjs','web/editor/index.js','web/editor/map-sharing-controls.js','web/editor/validate-publication.js','web/content-library.js','web/publication-validation-worker.js'];
+const paths=['scripts/verify-editor-publication-race.mjs','web/editor/index.js','web/editor/map-sharing-controls.js','web/editor/validate-publication.js','web/editor/dialog-focus.js','web/content-library.js','web/publication-validation-worker.js'];
 const sha=b=>createHash('sha256').update(b).digest('hex'),inputs=Object.fromEntries(await Promise.all(paths.map(async p=>[p,sha(await readFile(p))])));
 const server=await serve(0),url=`http://127.0.0.1:${server.address().port}/editor.html`;let browser;const rows=[];
 try{
@@ -22,6 +22,7 @@ try{
   await a.route('**/publication-validation-worker.js',async route=>{reached();await gate;await route.continue();});
   await a.locator(ui.open).click();await a.locator(ui.author).fill('Our friends');await a.locator(ui.confirm).click();
   let timer;try{await Promise.race([entered,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Publication did not reach the real validation worker')),30000);})]);}finally{clearTimeout(timer);}
+  for(let i=0;i<8;i++){await a.keyboard.press(i%2?'Tab':'Shift+Tab');assert(await a.locator(ui.dialog).evaluate(d=>d.contains(document.activeElement)),'Busy publication lost modal focus');}
   // The first tab has captured its source revision and is awaiting validation.
   // The other tab now opens that durable revision and performs a public edit.
   await b.goto(url+'?project='+id);await ready(b);await saved(b);await b.locator('#creator-title').fill('Newer shared '+kind);await b.locator('#creator-title').press('Tab');await b.locator('#creator-save').click();await saved(b);
@@ -34,7 +35,7 @@ try{
   const frozen=await a.evaluate(async({kind,id})=>{const {ContentLibrary}=await import('/content-library.js'),l=new ContentLibrary(undefined,{broadcast:false});try{return await l[kind==='map'?'getMap':'getRelease'](id);}finally{l.close();}},{kind,id:after.packages[0].id});
   assert.equal(frozen.package.title,'Newer shared '+kind);assert.equal(frozen.package.content_revision,1);
   assert.equal(after.project.checkpoint.definition.title,'Newer shared '+kind);assert.equal(await a.evaluate(()=>JSON.stringify({...localStorage})),normal);assert.deepEqual(errors,[]);await a.screenshot({path:`${output}/${kind}-retry.png`});
-  rows.push({kind,heldRealValidationWorker:true,secondTabPublicEdit:true,stalePublicationRefused:true,durableWinnerAndLibraryUnchanged:true,dialogRecoverable:true,headerConflictAndCopyAvailable:true,reloadedNewerDraft:true,retryVersion:1,frozenTitle:frozen.package.title,normalSavesUnchanged:true,browserErrors:errors});await context.close();
+  rows.push({kind,heldRealValidationWorker:true,secondTabPublicEdit:true,stalePublicationRefused:true,durableWinnerAndLibraryUnchanged:true,dialogRecoverable:true,busyDialogTabContained:true,headerConflictAndCopyAvailable:true,reloadedNewerDraft:true,retryVersion:1,frozenTitle:frozen.package.title,normalSavesUnchanged:true,browserErrors:errors});await context.close();
  }
  for(const p of paths)assert.equal(sha(await readFile(p)),inputs[p]);await writeFile(output+'/report.json',JSON.stringify({completed:true,inputs,rows,scope:'Public Save map/release, delayed worker loading, real second-tab title edit, native validation and atomic publication conflict, public reload/retry. Notifications unavailable to exercise commit-time source comparison.'},null,2)+'\n');console.log('PASS public map and release publication refuse newer second-tab drafts; dialogs recover, library remains unchanged and retries publish version 1 from the newer source.');
 }finally{await closeValidationBrowser(browser,server);}

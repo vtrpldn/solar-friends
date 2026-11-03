@@ -399,3 +399,7 @@ Headed Chromium confirms Apple M3 Pro Metal. Four 60-second phases had median 33
 ### Bounded, staged benchmark shutdown
 
 Cleanup now records server/context/browser start, completion/failure and elapsed time; server shutdown is bounded too. A simulated stalled server still attempts later context/browser cleanup and surfaces failure. The real staged headed Metal repeat closed in about .24/8/94 ms, with Chromium exit code 0. Lifecycle-logged repeats did not reproduce the earlier timeout, so its root cause and reliability gate remain open. Evidence: `assets/validation/validation-cleanup-stages-v1/`. These short diagnostics do not close performance or visual acceptance.
+
+### Editor keyboard focus and cancellation
+
+A real keyboard check found Shift+Tab leaving the first map-save field for body. Added modal-boundary Tab wrapping over visible enabled controls. Public map/release/library keyboard open, repeated Tab/Shift+Tab, Escape focus return, title text-undo isolation, exact pending habitat-stroke cancellation, and journal opener focus all pass. Real busy publication dialogs also retain focus with disabled fields, and their race/retry regression passes. Journal focus capture individually inspected. Evidence: `assets/validation/editor-keyboard-focus-v1/`. This is specific desktop keyboard coverage, not all dialogs/assistive technology or unfamiliar-player acceptance.

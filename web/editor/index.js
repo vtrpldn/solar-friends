@@ -1,3 +1,4 @@
+import {wrapDialogTab} from './dialog-focus.js';
 import {parseImportObject} from './import-object.js';
 import {LandscapeRegeneration} from './landscape-regeneration.js';
 import {removalMarkup} from './removal-impact.js';
@@ -617,6 +618,7 @@ function wire(){
     }catch(error){$('creator-library-status').textContent=error.message;}finally{e.target.value='';}
   };
   window.addEventListener('keydown',e=>{
+    if(wrapDialogTab(e))return;
     if(busy||document.querySelector('dialog[open]')||!current||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
     if((e.metaKey||e.ctrlKey)&&e.code==='KeyZ'){e.preventDefault();stepHistory(e.shiftKey);}
     else if((e.metaKey||e.ctrlKey)&&e.code==='KeyS'){e.preventDefault();save({automatic:false}).catch(()=>{});}

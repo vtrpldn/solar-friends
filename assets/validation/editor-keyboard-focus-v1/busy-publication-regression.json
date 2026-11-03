@@ -1,0 +1,45 @@
+{
+  "completed": true,
+  "inputs": {
+    "scripts/verify-editor-publication-race.mjs": "20873a3f9b225b93885fc6f2c5035400d79250294aea42ff1dd68463369df6e7",
+    "web/editor/index.js": "5874ab2fa8d2e0a2514c04a6c55bd9f8dbf70d301a2271730b24c9b8064e4273",
+    "web/editor/map-sharing-controls.js": "53ca21c8fbc4c904180aca0fc44cfa9f028eab2ec200bff3333c66f29e1de684",
+    "web/editor/validate-publication.js": "f85ff689232b45a189c44ec8de3e622eea57d313418b50269fc05f4fdec73159",
+    "web/editor/dialog-focus.js": "990d58e8cea2c9b35e87d9d47c6296409097b13507698557f26425426a939b4f",
+    "web/content-library.js": "7868edc580b44e984f556559133f4c5467ddbffdf19f121455f30e6c757a2b9b",
+    "web/publication-validation-worker.js": "c301e0c3d06153fd4e46cd453534d54a1020ed3c8118d06776d08f132510e60d"
+  },
+  "rows": [
+    {
+      "kind": "map",
+      "heldRealValidationWorker": true,
+      "secondTabPublicEdit": true,
+      "stalePublicationRefused": true,
+      "durableWinnerAndLibraryUnchanged": true,
+      "dialogRecoverable": true,
+      "busyDialogTabContained": true,
+      "headerConflictAndCopyAvailable": true,
+      "reloadedNewerDraft": true,
+      "retryVersion": 1,
+      "frozenTitle": "Newer shared map",
+      "normalSavesUnchanged": true,
+      "browserErrors": []
+    },
+    {
+      "kind": "release",
+      "heldRealValidationWorker": true,
+      "secondTabPublicEdit": true,
+      "stalePublicationRefused": true,
+      "durableWinnerAndLibraryUnchanged": true,
+      "dialogRecoverable": true,
+      "busyDialogTabContained": true,
+      "headerConflictAndCopyAvailable": true,
+      "reloadedNewerDraft": true,
+      "retryVersion": 1,
+      "frozenTitle": "Newer shared release",
+      "normalSavesUnchanged": true,
+      "browserErrors": []
+    }
+  ],
+  "scope": "Public Save map/release, delayed worker loading, real second-tab title edit, native validation and atomic publication conflict, public reload/retry. Notifications unavailable to exercise commit-time source comparison."
+}

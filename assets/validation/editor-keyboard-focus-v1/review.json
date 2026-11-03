@@ -1,0 +1,20 @@
+{
+  "why": "Keyboard navigation should stay inside the active editor modal and recover usable focus without changing authored content.",
+  "verdict": "pass for exercised editor dialogs and input cancellation",
+  "reproducedFailure": "Shift+Tab from the first map-save input moved document focus to body.",
+  "fix": "Wrap Tab/Shift+Tab at modal boundaries using visible enabled focusable controls, including busy dialogs whose authoring fields are disabled.",
+  "observations": [
+    "Map/release/library modal keyboard opening, repeated Tab navigation and Escape focus return pass.",
+    "Text undo while editing title leaves scenario history unchanged.",
+    "Escape during a trusted unfinished habitat stroke cancels it with exact durable checkpoint/history equality.",
+    "Journal Escape returns visible focus to Edit village journal.",
+    "Busy real map/release validation retains focus while fields are disabled; conflict and publication retry regressions pass."
+  ],
+  "screensIndividuallyReviewed": [
+    "journal-focus.png"
+  ],
+  "limits": [
+    "Not every nested dialog, assistive technology or operating-system keyboard configuration.",
+    "Not an unfamiliar-player walkthrough or full accessibility acceptance."
+  ]
+}
