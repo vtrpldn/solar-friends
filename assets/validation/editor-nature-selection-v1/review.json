@@ -1,0 +1,60 @@
+{
+  "why": "Give small natural objects the same explicit selection and editing affordances as other map objects, without enlarging their artwork or requiring a destructive thinning brush.",
+  "changes": [
+    "Select a plant/rock at its ground anchor; inspector names the species and exposes position and size.",
+    "A two-tone ground ring and above-sprite text label identify the exact object.",
+    "Inspector placement and general Move drag, independent duplication, Remove, Delete and erase act on one stable natural identity.",
+    "Placement respects the existing protected-ground, spacing, size and population limits and native scenario validation.",
+    "Selection persists in the editor view across reload and isolated playtest return; invalid and canceled edits preserve the draft."
+  ],
+  "sourceHashes": {
+    "web/editor/nature.js": "a16451766a35b69dc8caa6fbe899df8c746fc520429494448e627694be6d99b8",
+    "web/editor/map-view.js": "ee9c7113b622c0f71926f373993e75ffd13e22f354bbfaba38cad6b6d145ecba",
+    "web/editor/index.js": "8a04fc307489829c8b71a460ac9b82da66e67c8cfdd77988b5f8b7a1bc92e3de",
+    "scripts/verify-editor-nature-selection.mjs": "3ab14ea118ff2ee5ff76fcd0f860d6995d0baa01f34809b42757ff2c394b285d",
+    "web/pkg/solar_friends_bg.wasm": "41433e3913d33a5b015be57b00c510278c77f200993fa3fbde2e41934f80ae2f"
+  },
+  "browserChecks": [
+    "fractional-anchor picking",
+    "independent copy identity",
+    "bounds, spacing, camp and size rejection",
+    "selected tiny plant inspector",
+    "blank numeric edit preserves draft",
+    "resize exact undo/redo",
+    "move retains identity and neighbors",
+    "rejected move preserves draft",
+    "copy and Delete with exact undo",
+    "typing guard",
+    "erase tool removes only one object",
+    "reload preserves selection",
+    "trusted drag move and Escape cancellation",
+    "native playtest and editor return"
+  ],
+  "regressions": [
+    {
+      "command": "node scripts/verify-authored-nature.mjs",
+      "exitCode": 0,
+      "observed": "Frozen generated nature, native catalog, spaced placement, protected ground, real shade, exact saves, material-free thinning, atomic unknown-species rejection."
+    },
+    {
+      "command": "node scripts/verify-editor-objects.mjs",
+      "exitCode": 0,
+      "observed": "Group copy uses independent identities and remapped stores; move retains ownership; exact group undo/redo."
+    },
+    {
+      "command": "node scripts/verify-editor-interrupted-input.mjs",
+      "exitCode": 0,
+      "observed": "Six capture/blur/visibility habitat/pan cancellation cases and normal release exact undo. OS focus loss and actual hidden-tab behavior remain outside this harness."
+    }
+  ],
+  "visuallyReviewed": [
+    "small-plant-selected.png",
+    "inspector-reloaded.png"
+  ],
+  "visualFindings": "The smallest Macambira can be located by the marker and named inspector. The final label sits above the sprite rather than covering a resident below it. Existing game controls and spacing remain readable in the inspected desktop view.",
+  "limits": [
+    "Single natural-object selection; existing multi-building selection remains separate.",
+    "Ground-anchor picking is not per-pixel canopy picking.",
+    "This improves editor feedback but does not replace the required broader terrain artwork correction, all-pose resident review or full release performance/persistence/player gates."
+  ]
+}

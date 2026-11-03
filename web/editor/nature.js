@@ -22,3 +22,15 @@ export function thinStroke(objects,cells,width){
   const start=Math.floor(width/2);
   return objects.filter(p=>!cells.some(([x,y])=>p.x>=x-start-.5&&p.x<x-start+width-.5&&p.y>=y-start-.5&&p.y<y-start+width-.5));
 }
+// Select at the ground anchor, including small plants and fractional generated
+// positions. Resolve overlapping anchors to the nearest, then frontmost object.
+export function natureAt(objects,x,y){
+  return objects.filter(p=>Math.hypot(p.x-x,p.y-y)<=.8).sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y)||(b.x+b.y)-(a.x+a.y))[0]??null;
+}
+export function placeNatureObject(definition,objects,catalog,source,x,y,size=source.size,{copy=false,makeId=()=>crypto.randomUUID()}={}){
+  const existing=copy?objects:objects.filter(p=>p.id!==source.id);
+  const added=plantStroke(definition,existing,catalog,source.species,size,[[x,y]],1,()=>copy?makeId():source.id);
+  if(!added.length)throw Error('Choose clear inland ground with room between plants, away from buildings, roads and the arrival camp.');
+  const replacement={...source,...added[0]};
+  return copy?[...objects,replacement]:objects.map(p=>p.id===source.id?replacement:p);
+}

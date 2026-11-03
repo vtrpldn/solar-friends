@@ -1,3 +1,4 @@
+import {resolvedNature,natureAt} from './nature.js';
 import {utilityLines,goalRegions,sceneRouteAt,routeVisible} from './scene-layers.js';
 import {corridorCells} from './routes.js';
 import {paintUtilityRoute} from '../utility-lines-art.js';
@@ -18,7 +19,7 @@ import {project,unproject,TILE_HALF_WIDTH,TILE_HALF_HEIGHT} from '../projection.
 import {paintTerrain,MAP_SIZE} from '../terrain.js';
 import {allBuildingArt} from '../building-art.js?v=night-1';
 import {footprintCorners,occupies} from '../building-footprints.js';
-import {paintWorldGround,paintWorldTree,paintWorldBuilding,paintWorldCrops,paintContactShadow} from '../world-renderer.js';
+import {paintWorldGround,paintWorldTree,worldTreeBounds,paintWorldBuilding,paintWorldCrops,paintContactShadow} from '../world-renderer.js';
 import {drawBuildingState} from '../building-state-art.js';
 import {FRAME_ANCHOR,RESIDENT_WIDTH} from '../sprite-frames.js';
 
@@ -42,7 +43,7 @@ export class EditorMap {
     this.action=action;this.viewChanged=viewChanged;this.hover=hover;this.onArtworkReady=onArtworkReady;
     this.onTerrainReady=onTerrainReady;this.retryButton=retryButton;if(retryButton)retryButton.onclick=()=>{if(this.document&&this.snapshot)this.set(this.document,this.snapshot,null);};
     this.brushSize=3;
-    this.view={center:[32,32],zoom:1.3,selected:null,selectedResident:null,selectedRoute:null,selectedBank:null,selectedSite:null,selection:[],tool:'select',grid:true};
+    this.view={center:[32,32],zoom:1.3,selected:null,selectedResident:null,selectedRoute:null,selectedBank:null,selectedSite:null,selectedNature:null,selection:[],tool:'select',grid:true};
     this.preview=preview;
     if(preview)return;
     this.observer=new ResizeObserver(()=>this.render());this.observer.observe(canvas);
@@ -57,6 +58,7 @@ export class EditorMap {
   }
   set(document,snapshot,view,{paint=true}={}){
     this.document=document;this.snapshot=snapshot;
+    this.naturalObjects=this.natureCatalog?resolvedNature(document,snapshot,this.natureCatalog):[];
     this.landPaint=terrainInputs(document,snapshot);
     if(this.terrainTask&&this.terrainTask.key!==this.landPaint.key){this.terrainTask.controller.abort();this.terrainTask=null;this.terrainLoading=false;this.terrainError=null;}
     const appearances=snapshot.residents.map(p=>p.appearance);if(!this.preview)this.art.appearances.setActive(appearances);
@@ -64,6 +66,7 @@ export class EditorMap {
     this.updateBusy();
     if(this.artLoading)Promise.all(appearances.filter(a=>!this.art.appearances.isReady(a)).map(a=>this.art.appearances.prepare(a))).then(()=>{if(revision===this.artRevision){this.artLoading=false;this.updateBusy();this.render();this.onArtworkReady();}},error=>{if(revision===this.artRevision){this.artError=error.message;this.updateBusy();this.render();}});
     if(view)this.view={...this.view,...view,center:[...view.center]};
+    if(this.view.selectedNature&&!this.naturalObjects.some(p=>p.id===this.view.selectedNature))this.view.selectedNature=null;
     if(paint||view||this.artLoading)this.render();
   }
   updateBusy(){this.canvas.setAttribute('aria-busy',String(!!(this.artLoading&&!this.artError||this.terrainLoading)));this.canvas.setAttribute('aria-description',this.artError??this.terrainError??(this.terrainLoading?'Updating landscape. You can keep editing.':''));this.canvas.style.pointerEvents=this.artLoading?'none':'';if(this.retryButton){this.retryButton.hidden=!this.artError;this.retryButton.disabled=!!(this.artLoading&&!this.artError);}}
@@ -113,16 +116,18 @@ export class EditorMap {
   selection(){return (this.view.selection?.length?this.view.selection:[this.view.selected]).filter(id=>this.document?.start.buildings.some(b=>b.id===id));}
   selectResident(id){this.select(null);this.view.selectedResident=id;this.render();this.viewChanged(this.state);}
   residentAt(cell){const bindings=this.snapshot?.scenario_ref?.residents??{};const person=this.snapshot?.residents.find(p=>Math.hypot(p.x-cell.x,p.y-cell.y)<.8);return person?Object.keys(bindings).find(id=>bindings[id]===person.id):null;}
-  selectRoute(id){this.view.selectedResident=null;this.view.selectedRoute=id;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
-  selectBank(id){this.view.selectedResident=null;this.view.selectedRoute=null;this.view.selectedBank=id;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
-  selectSite(id){this.view.selectedResident=null;this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=id;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
+  selectRoute(id){this.view.selectedNature=null;this.view.selectedResident=null;this.view.selectedRoute=id;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
+  selectBank(id){this.view.selectedNature=null;this.view.selectedResident=null;this.view.selectedRoute=null;this.view.selectedBank=id;this.view.selectedSite=null;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
+  selectSite(id){this.view.selectedNature=null;this.view.selectedResident=null;this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=id;this.view.selected=null;this.view.selection=[];this.render();this.viewChanged(this.state);}
   select(id,toggle=false){
-    this.view.selectedResident=null;
+    this.view.selectedNature=null;this.view.selectedResident=null;
     this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=null;
     const ids=toggle?new Set(this.selection()):new Set();
     if(id){if(toggle&&ids.has(id))ids.delete(id);else ids.add(id);}
     this.view.selection=[...ids];this.view.selected=this.view.selection.at(-1)||null;this.render();this.viewChanged(this.state);
   }
+  selectNature(id){this.select(null);this.view.selectedNature=id;this.render();this.viewChanged(this.state);}
+  natureAt(cell){return natureAt(this.naturalObjects??[],cell.x,cell.y);}
   centerAt(x,y){this.view.center=[Math.max(0,Math.min(63,x)),Math.max(0,Math.min(63,y))];this.render();this.viewChanged(this.state);}
   setZoom(zoom){this.view.zoom=Math.max(.32,Math.min(2.7,zoom));this.render();this.viewChanged(this.state);}
   point(event){const r=this.canvas.getBoundingClientRect();return {x:event.clientX-r.left,y:event.clientY-r.top};}
@@ -135,7 +140,7 @@ export class EditorMap {
     this.drag={cell,point:p,center:[...this.view.center],moved:false,pan,toggle:e.shiftKey};
     if(!pan&&this.view.tool==='route-path')this.routeStroke=[[cell.x,cell.y]];
     if(!pan&&['road','meadow','river','nature','thin-nature','habitat'].includes(this.view.tool)){this.stroke=new Map();this.strokeLast=[cell.x,cell.y];for(const p of strokeCells(this.strokeLast,this.strokeLast))this.stroke.set(p.join(','),p);}
-    if(!pan&&this.view.tool==='move'){const resident=this.residentAt(cell);if(resident){this.drag.resident=resident;this.selectResident(resident);return;}const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.drag.bank=bank;this.selectBank(bank.id);return;}const b=this.hit(cell);if(b){this.drag.building=b;if(!this.selection().includes(b.id))this.select(b.id);}else{const site=hitStartingSite(this.document,cell.x,cell.y);if(site){this.drag.site=site;this.selectSite(site.id);}}}
+    if(!pan&&this.view.tool==='move'){const resident=this.residentAt(cell);if(resident){this.drag.resident=resident;this.selectResident(resident);return;}const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.drag.bank=bank;this.selectBank(bank.id);return;}const b=this.hit(cell);if(b){this.drag.building=b;if(!this.selection().includes(b.id))this.select(b.id);}else{const site=hitStartingSite(this.document,cell.x,cell.y);if(site){this.drag.site=site;this.selectSite(site.id);}else{const nature=this.natureAt(cell);if(nature){this.drag.nature=nature;this.selectNature(nature.id);}}}}
   }
   motion(e){
     if(!this.origin)return;
@@ -166,6 +171,7 @@ export class EditorMap {
     if(this.stroke){const cells=[...this.stroke.values()];this.stroke=null;this.strokeLast=null;this.action({type:this.view.tool,cells,size:this.brushSize});return;}
     if(drag.resident){this.action({type:'resident-start',resident:drag.resident,x:cell.x,y:cell.y});return;}
     if(drag.bank){this.action({type:'move-bank',x:cell.x,y:cell.y});return;}
+    if(drag.nature){this.action({type:'move-nature',x:cell.x,y:cell.y});return;}
     if(drag.site){this.action({type:'move-site',x:cell.x,y:cell.y});return;}
     if(drag.building){this.action({type:'move',id:drag.building.id,ids:this.selection(),dx:cell.x-drag.building.x,dy:cell.y-drag.building.y,x:cell.x,y:cell.y});return;}
     if(drag.moved){
@@ -173,12 +179,12 @@ export class EditorMap {
         const end=this.point(e),left=Math.min(drag.point.x,end.x),right=Math.max(drag.point.x,end.x),top=Math.min(drag.point.y,end.y),bottom=Math.max(drag.point.y,end.y);
         const ids=new Set(this.selection());
         for(const b of this.document.start.buildings){const p=this.project(b.x,b.y);if(p.x>=left&&p.x<=right&&p.y>=top&&p.y<=bottom)ids.add(b.id);}
-        this.view.selectedResident=null;this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selection=[...ids];this.view.selected=this.view.selection.at(-1)||null;this.render();this.viewChanged(this.state);
+        this.view.selectedNature=null;this.view.selectedResident=null;this.view.selectedRoute=null;this.view.selectedBank=null;this.view.selectedSite=null;this.view.selection=[...ids];this.view.selected=this.view.selection.at(-1)||null;this.render();this.viewChanged(this.state);
       }
       return;
     }
-    if(this.view.tool==='select'||this.view.tool==='move'){const resident=this.residentAt(cell);if(resident){this.selectResident(resident);return;}const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.selectBank(bank.id);return;}const site=hitStartingSite(this.document,cell.x,cell.y),route=sceneRouteAt(this.document,this.view,cell.x,cell.y);if(site&&!this.hit(cell))this.selectSite(site.id);else if(route&&!this.hit(cell))this.selectRoute(route.id);else this.select(this.hit(cell)?.id||null,drag.toggle);}
-    else this.action({type:this.view.tool,x:cell.x,y:cell.y,id:this.hit(cell)?.id});
+    if(this.view.tool==='select'||this.view.tool==='move'){const resident=this.residentAt(cell);if(resident){this.selectResident(resident);return;}const bank=hitStartingBank(this.document,cell.x,cell.y);if(bank){this.selectBank(bank.id);return;}const site=hitStartingSite(this.document,cell.x,cell.y),route=sceneRouteAt(this.document,this.view,cell.x,cell.y);if(site&&!this.hit(cell))this.selectSite(site.id);else if(route&&!this.hit(cell))this.selectRoute(route.id);else if(!this.hit(cell)&&this.natureAt(cell))this.selectNature(this.natureAt(cell).id);else this.select(this.hit(cell)?.id||null,drag.toggle);}
+    else this.action({type:this.view.tool,x:cell.x,y:cell.y,id:this.hit(cell)?.id,natureId:this.natureAt(cell)?.id});
   }
   polygon(points,fill,stroke){
     const c=this.ctx;c.beginPath();points.forEach(([x,y],i)=>{const p=this.project(x,y);i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y);});c.closePath();
@@ -275,6 +281,15 @@ export class EditorMap {
     if(this.drag?.toggle&&this.drag.moved&&view.tool==='select'&&this.pointer){
       const end=this.project(this.pointer.x,this.pointer.y),start=this.drag.point;c.fillStyle='#f4df9a33';c.strokeStyle='#fff3c4';c.lineWidth=2;c.fillRect(start.x,start.y,end.x-start.x,end.y-start.y);c.strokeRect(start.x,start.y,end.x-start.x,end.y-start.y);
     }
+    const chosenNature=this.naturalObjects?.find(p=>p.id===view.selectedNature);
+    if(chosenNature&&!this.preview){
+      const p=this.project(chosenNature.x,chosenNature.y),name=this.natureCatalog.find(s=>s.key===chosenNature.species)?.name??'Natural object';
+      c.save();c.lineWidth=4;c.strokeStyle='#344b35';c.beginPath();c.ellipse(p.x,p.y,13,7,0,0,Math.PI*2);c.stroke();c.lineWidth=2;c.strokeStyle='#fff3c4';c.stroke();
+      const entry=this.natureCatalog.find(s=>s.key===chosenNature.species),bounds=entry?worldTreeBounds({...chosenNature,species:entry.art_index},{project:this.project,scale:this.scale}):null,top=Math.max(4,(bounds?.top??p.y)-30);
+      c.font='bold 12px Trebuchet MS';c.textAlign='center';const label=name+' · '+Number(chosenNature.x.toFixed(1))+', '+Number(chosenNature.y.toFixed(1)),w=c.measureText(label).width+14,x=Math.max(w/2+4,Math.min(width-w/2-4,p.x));
+      c.fillStyle='#f5e5ba';c.fillRect(x-w/2,top,w,23);c.strokeStyle='#665134';c.lineWidth=1;c.strokeRect(x-w/2,top,w,23);c.fillStyle='#344b35';c.fillText(label,x,top+16);c.restore();
+    }
+    if(this.pointer&&(this.drag?.nature||['move-nature','copy-nature'].includes(view.tool))){const source=view.tool==='copy-nature'?this.natureCopy:(this.drag?.nature??chosenNature),entry=this.natureCatalog?.find(s=>s.key===source?.species);if(entry){this.polygon(footprintCorners('road',this.pointer.x,this.pointer.y),'#f4df9a66','#fff3c4');c.save();c.globalAlpha=.5;paintWorldTree(c,{x:this.pointer.x,y:this.pointer.y,size:source.size,species:entry.art_index},{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details});c.restore();}}
     if(this.pointer&&view.tool==='nature'&&this.natureSpecies){c.save();c.globalAlpha=.5;paintWorldTree(c,{x:this.pointer.x,y:this.pointer.y,size:this.natureSize||1,species:this.natureSpecies.art_index},{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details});c.restore();}
     if(this.terrainLoading||this.terrainError){c.save();c.font='bold 13px Trebuchet MS';c.textAlign='left';const message=this.terrainError??'Updating landscape… You can keep editing.',noticeWidth=Math.min(width-24,c.measureText(message).width+20);c.fillStyle='#f5e5ba';c.fillRect(12,52,noticeWidth,32);c.fillStyle='#4f3920';c.fillText(message,22,73,noticeWidth-20);c.restore();}
     this.onRender?.();
