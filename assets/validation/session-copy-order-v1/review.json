@@ -1,0 +1,37 @@
+{
+  "why": "Queued checkpoints must migrate recovery ownership when an independent copy changes the active run ID.",
+  "verdict": "pass for four controlled native session ordering cases and frozen UI regression",
+  "reproducedFailure": "Before the fix, queued post-copy recovery remained attached to the original run ID. The new ordering test failed on that exact invariant.",
+  "fix": [
+    "Transfer a newer pending recovery snapshot to the committed copy ID/revision before removing its old key.",
+    "At queued-write execution, if the target ID changed, establish recovery under the new ID without replacing an already newer recovery copy."
+  ],
+  "cases": {
+    "precedingCheckpoint": [
+      "success",
+      "revision conflict"
+    ],
+    "followingCheckpoint": [
+      "success",
+      "storage failure then retry"
+    ]
+  },
+  "verified": [
+    "Native Game snapshots stay exact while writes serialize",
+    "Original durable snapshot remains its own preceding checkpoint",
+    "New run receives later checkpoints and keeps frozen credits",
+    "Queued failed write retains new-ID recovery and retries",
+    "Existing native restart cancellation/preparation/write-failure regressions",
+    "Real frozen-release two-tab conflict/copy, quota retry and pre-first-frame restore"
+  ],
+  "limits": [
+    "Controlled library scheduling proves order; browser regression separately exercises real IndexedDB/UI.",
+    "Not all recovery-storage quota boundaries, process termination timings or simultaneous restart combinations."
+  ],
+  "sourceSha256": {
+    "scripts/verify-session-copy-order.mjs": "99458050e582393b9a9f3ccc8d76bb0cef81cf9b80d3d4ff4489cc1e41a3bebf",
+    "web/player-session.js": "28d36a5c8962f27816a656b8f73f21e037f319177eaea9f6db3f284a02d93844",
+    "web/content-library.js": "7868edc580b44e984f556559133f4c5467ddbffdf19f121455f30e6c757a2b9b",
+    "web/pkg/solar_friends_bg.wasm": "58d3c662a05d2590ad5a744e17ffb4a3280d7125cb97581ad2aae14a957c0086"
+  }
+}

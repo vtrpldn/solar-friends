@@ -33,12 +33,17 @@ export class PlayerSession {
   }
   get isTest(){return this.record.sessionKind==='playtest';}
   get id(){return this.record.id;}
+  #cacheSnapshot(raw,onlyIfMissing=false){
+    try{const storage=this.#recovery(),key=`solar-friends-run-recovery:${this.id}`;if(!onlyIfMissing||!storage.getItem(key))storage.setItem(key,JSON.stringify({revision:this.record.revision,snapshot:raw}));}catch{/* Saving to IndexedDB can still succeed. */}
+  }
   save(){
-    const raw=this.game.snapshot();
-    try{this.#recovery().setItem(`solar-friends-run-recovery:${this.id}`,JSON.stringify({revision:this.record.revision,snapshot:raw}));}catch{/* Saving to IndexedDB can still succeed. */}
+    const raw=this.game.snapshot(),requestedId=this.id;
+    this.#cacheSnapshot(raw);
     if(raw===this.#lastRequested)return this.#writes;
     this.#lastRequested=raw;
     const operation=this.#writes.catch(()=>{}).then(async()=>{
+      // A preceding copy may have changed the target since this was queued.
+      if(this.id!==requestedId)this.#cacheSnapshot(raw,true);
       const record=await this.library.saveRun(this.id,raw,this.record.revision);
       this.record=record;
       try{
@@ -56,7 +61,7 @@ export class PlayerSession {
     const operation=this.#writes.catch(()=>{}).then(async()=>{
       const record=await this.library.importRecoveredRun({definition:this.record.definition,snapshot:raw,release:this.record.release??null,title:(this.record.title+' · copy').slice(0,100)});
       this.record=record;this.#lastRequested=raw;this.conflicted=false;
-      try{const storage=this.#recovery(),key=`solar-friends-run-recovery:${oldId}`,cached=JSON.parse(storage.getItem(key)||'null');if(cached?.snapshot===raw)storage.removeItem(key);}catch{/* The independent durable copy is saved. */}
+      try{const storage=this.#recovery(),key=`solar-friends-run-recovery:${oldId}`,cached=JSON.parse(storage.getItem(key)||'null');if(cached&&cached.snapshot!==raw)storage.setItem(`solar-friends-run-recovery:${record.id}`,JSON.stringify({revision:record.revision,snapshot:cached.snapshot}));storage.removeItem(key);}catch{/* Keep the old recovery if its transfer could not be stored. */}
       return record;
     });
     this.#writes=operation;return operation;
