@@ -339,3 +339,7 @@ The player explicitly removed the resident creator. Remove its screens, randomiz
 ### Remaining release work
 
 Complete the original map/scenario requirements and gates above: current-source art review of authored residents/buildings/nature in terrain and neighbor contexts; unresolved small-plant readability and authored animation transitions; typical/maximum desktop performance and loading/cancellation; process/GPU memory and long-run stability; persistence/crash/concurrency coverage; and unfamiliar-player walkthroughs. Revalidate the changed example casts through completion and continuation. Historical creator-specific combination/part/preset gates are retired; authored character artwork and normal simulation quality remain required.
+
+### Current authored-cast example validation
+
+First clearing completed all four chapters through normal paid Town purchases and four pointer-placed blueprints, then continued three in-game days. The checkpoint reloaded exactly; returning to the editor preserved the draft and removed the scratch run. Both full desktop gameplay/journal captures were individually inspected. Evidence: `assets/validation/authored-first-clearing-v1/`. The Cerrado and Caatinga examples still require current-cast completion and continuation; this single example does not close Stage 8.
