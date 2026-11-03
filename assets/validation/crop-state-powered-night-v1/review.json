@@ -1,0 +1,144 @@
+{
+  "why": "Daylight crop boards did not cover the night palette, greenhouse glass or neighboring powered-home lighting.",
+  "status": "All controlled powered-night normal-zoom boards inspected; night crop readability remains open.",
+  "coverage": {
+    "boards": 18,
+    "contexts": 150,
+    "biomes": [
+      "mata-atlantica",
+      "cerrado",
+      "caatinga"
+    ],
+    "buildings": [
+      "garden",
+      "greenhouse"
+    ],
+    "crops": [
+      "maize",
+      "cassava",
+      "fodder",
+      "lettuce",
+      "beans",
+      "tomatoes"
+    ],
+    "states": [
+      "empty once per building",
+      "young",
+      "maturing",
+      "ready",
+      "dry-stressed"
+    ],
+    "zoom": 1,
+    "lighting": "powered-night",
+    "power_classification": {
+      "garden": "none",
+      "greenhouse": "grid"
+    },
+    "reference": "Powered home, adjoining road and original Iara"
+  },
+  "observations": [
+    "No additional detached crop bases, bed/frame misalignment, obvious proportion mismatch or leaves painted across greenhouse framing observed in these controlled night scenes.",
+    "Mature silhouettes remain distinguishable; young plants and stress cues are subdued, especially behind greenhouse glass. Night crop readability is not accepted as complete.",
+    "The native classification is recorded, while presentation power levels are controlled; this does not prove live circuit operation."
+  ],
+  "boards": [
+    {
+      "file": "mata-atlantica-zoom-1-powered-night-group-1.png",
+      "sha256": "6f42b549e375e86dcc2df1aa8121d854ae925736aacf918b46c9cbe57419c989",
+      "individually_inspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1-powered-night-group-2.png",
+      "sha256": "0f5a92c57fca9e248a067a1f33e4afab79437c7f73e8e9e52a47fa3248b1522b",
+      "individually_inspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1-powered-night-group-3.png",
+      "sha256": "9f2e746af6be932adea945a3684b59b28555aba031a23c11867782ee762104a4",
+      "individually_inspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1-powered-night-group-4.png",
+      "sha256": "233e7707a56ed1fd0290af08f1921a637dffa32d32a0db7171c38577d88dbafb",
+      "individually_inspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1-powered-night-group-5.png",
+      "sha256": "92e8545637db5b60fe6c866a32e54418f5ff22e22d28659ce02ade75ef3e6f4d",
+      "individually_inspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1-powered-night-group-6.png",
+      "sha256": "8e52a95462479722380294c5a3b3bfa7fca2faec9e9f6c605c6a11de8ffa7566",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-powered-night-group-1.png",
+      "sha256": "810eac9ce91ed2883b26609c1186df6871d93176cc629b70a5b1dbafe6da2174",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-powered-night-group-2.png",
+      "sha256": "4a7c6d3dda9b668fb93c7ee2a04846a6e1b25bf57ba2a80c59dffef0a9905cf7",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-powered-night-group-3.png",
+      "sha256": "96649597092e7e19cc039725013f9a163f3be681cb38bc6c828cf50fe2212b11",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-powered-night-group-4.png",
+      "sha256": "1457ad47cadd3fa58b4e23a8ac536fa553d3c7797c2318c4c8a9da93632193e2",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-powered-night-group-5.png",
+      "sha256": "2d25f0dac9b6f9d605521a25ccdb10ba13f5bb7aaaae0678bb7b1086de5b8344",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-powered-night-group-6.png",
+      "sha256": "66cbf8c3c6b9c3be569ddc337df3c9a9ab06a1f9c56a769f67546abbd6c142be",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-powered-night-group-1.png",
+      "sha256": "94ffc95eea8ca701bfb6bd2f02926042a238536e8972f873a1c2dacb4a8cb91b",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-powered-night-group-2.png",
+      "sha256": "92e2513a316acac60d20796ff3c47358a452ef427a42c8a96ec7a90185c444a3",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-powered-night-group-3.png",
+      "sha256": "700f57109e15c53e641555897d1cd8772b13301787f88f87643e7ad7401d7dce",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-powered-night-group-4.png",
+      "sha256": "c1875052b5348d455df0d832a25ec9796146a454a707fb58bb53e18472d8eba9",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-powered-night-group-5.png",
+      "sha256": "e389b5a3daf609d757677ec137f07be07ee9399c351e6534f61ff2ffc8531d64",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-powered-night-group-6.png",
+      "sha256": "52a07f1d19eaa890d3af4e5a22fdf3eaa214c40caa4b49d74bd799eb76fc4d73",
+      "individually_inspected": true
+    }
+  ],
+  "next": "Compare crop night filtering with powered greenhouse interior treatment while preserving daytime registration and outdoor garden night context.",
+  "harness": "Fingerprints fetched JSON, including the native lighting reference. Reports cleanup success/failure, does not retain complete=true on shutdown failure, and only prints final success after cleanup.",
+  "limits": [
+    "Static controlled states, not live growth transitions or authored circuit operation.",
+    "Unpowered night, rain, other zooms, repeated tomato harvests, broader art, hardware performance and unfamiliar-player acceptance remain open.",
+    "No runtime artwork or lighting change in this step."
+  ],
+  "full_local_boards": "artifacts/crop-state-powered-night-final/"
+}

@@ -11,7 +11,7 @@ assert([.65,1,1.8].includes(zoom),'Choose a documented review zoom: .65, 1 or 1.
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex'),inputs={'scripts/review-building-biome-context.mjs':sha(await readFile('scripts/review-building-biome-context.mjs'))};
 const server=await serve(0,{async handle(_req,res,path){
  if(path==='/building-context-review'){res.writeHead(200,{'Content-Type':'text/html'}).end('<!doctype html><title>Building context review</title>');return true;}
- if(/\.(js|png|wasm)$/.test(path))inputs['web'+path]=sha(await readFile('web'+path));return false;
+ if(/\.(js|json|png|wasm)$/.test(path))inputs['web'+path]=sha(await readFile('web'+path));return false;
 }});let browser;
 const report={complete:false,zoom,lighting,cropStates,inputs,scope:'Static controlled building appearances through shared game world painters, depth-masked emissions, atmosphere and weather; native-generated regional terrain and bank eligibility. Reference home, original Iara and adjoining road. Rain uses a native rainy-day window. Power levels are controlled presentation comparisons, not proof of functioning authored circuits. Optional crop-state boards use the shared crop painter for empty, young, maturing, ready and dry/stressed beds. These are controlled visual states, not simulated growth, scenario feasibility, construction/animal lifecycle, resident motion or automatic visual acceptance.',boards:[]};
 try{
@@ -68,5 +68,6 @@ try{
   await page.evaluate(()=>{for(const ground of window.reviewBuildings.grounds.values())ground.width=ground.height=0;window.reviewBuildings.grounds.clear();});
  }
  assert.equal(report.boards.flatMap(b=>b.entries).length,cropStates?150:81);assert.deepEqual(errors,[]);await page.evaluate(async lighting=>{const r=window.reviewBuildings;r.game.free();await r.art.appearances.dispose();});
- for(const [path,hash]of Object.entries(inputs))assert.equal(sha(await readFile(path)),hash,path);report.complete=true;report.browserErrors=errors;await writeFile(`${output}/report.json`,JSON.stringify(report,null,2)+'\n');console.log(`PASS captured ${report.boards.flatMap(b=>b.entries).length} shared-renderer building/biome contexts at zoom ${zoom}. Visual inspection is still required.`);
-}finally{await closeValidationBrowser(browser,server);}
+ for(const [path,hash]of Object.entries(inputs))assert.equal(sha(await readFile(path)),hash,path);report.complete=true;report.browserErrors=errors;await writeFile(`${output}/report.json`,JSON.stringify(report,null,2)+'\n');console.log(`CAPTURED ${report.boards.flatMap(b=>b.entries).length} shared-renderer contexts; cleanup and visual inspection still pending.`);
+}finally{try{await closeValidationBrowser(browser,server);report.cleanup={ok:true};}catch(error){report.complete=false;report.cleanup={ok:false,error:String(error)};throw error;}finally{await writeFile(`${output}/report.json`,JSON.stringify(report,null,2)+'\n');}}
+console.log(`PASS captured ${report.boards.flatMap(b=>b.entries).length} shared-renderer contexts and completed cleanup. Visual inspection is still required.`);
