@@ -1,0 +1,1988 @@
+{
+  "schema": 1,
+  "checkpointFile": "before-the-dry-season-established.snapshot.json",
+  "checkpointSha256": "6d4877cc0a08b50b100965fb56728db96d972e66365659ad85dbde53babc2143",
+  "producerSha256": "6b9869b7715da7fc854603e5155aba3f12642a8b53cfd73fbecd22e7807c7d2a",
+  "sourceSha256": "4d41ab1d7ac4670a6ebb801ece10304dc7cd5a563905f75e4b56bc56f3b763fe",
+  "controls": {
+    "purchase": {
+      "plumbing": 1,
+      "pumps": 1
+    },
+    "placements": [
+      [
+        "well",
+        27,
+        32,
+        "village"
+      ],
+      [
+        "kitchen",
+        32,
+        34,
+        "food"
+      ],
+      [
+        "garden",
+        35,
+        34,
+        "food"
+      ]
+    ],
+    "preferredSpeed": 8
+  },
+  "finishedAt": 5655.173828125,
+  "observations": [
+    {
+      "elapsedSeconds": 5.137,
+      "minute": 599.9822387695312,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 0
+        },
+        {
+          "kind": "kitchen",
+          "progress": 0
+        },
+        {
+          "kind": "garden",
+          "progress": 0
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 10.267,
+      "minute": 704.8038330078125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 33.333335876464844
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 15.427,
+      "minute": 827.9837036132812,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 20.55,
+      "minute": 951.6055908203125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 25.675,
+      "minute": 1074.6094970703125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 30.798,
+      "minute": 1197.6202392578125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 35.923,
+      "minute": 1320.63427734375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 41.083,
+      "minute": 1443.6436767578125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 46.215,
+      "minute": 1647.4227294921875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 51.355,
+      "minute": 1837.415283203125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 56.518,
+      "minute": 1960.8297119140625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 61.65,
+      "minute": 2084.833740234375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 66.773,
+      "minute": 2207.823974609375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 71.93,
+      "minute": 2330.657958984375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 77.052,
+      "minute": 2454.471435546875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 82.176,
+      "minute": 2577.461181640625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 87.303,
+      "minute": 2700.693603515625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 92.436,
+      "minute": 2823.70068359375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 97.596,
+      "minute": 2946.90966796875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 102.716,
+      "minute": 3175.14599609375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 107.894,
+      "minute": 3318.717529296875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 113.047,
+      "minute": 3441.520751953125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 50
+        },
+        {
+          "kind": "kitchen",
+          "progress": 66.66667175292969
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 118.168,
+      "minute": 3565.33935546875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 85.23809051513672
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 123.298,
+      "minute": 3688.149658203125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 128.424,
+      "minute": 3811.159423828125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 133.558,
+      "minute": 3934.37060546875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 138.718,
+      "minute": 4057.560791015625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 143.838,
+      "minute": 4181.3955078125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 148.967,
+      "minute": 4304.3876953125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 154.123,
+      "minute": 4432.81005859375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 159.246,
+      "minute": 4669.29052734375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 164.366,
+      "minute": 4792.2822265625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 169.522,
+      "minute": 4915.10693359375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 174.641,
+      "minute": 5038.92431640625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 179.76,
+      "minute": 5161.7314453125,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 184.89,
+      "minute": 5284.525390625,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 190.019,
+      "minute": 5407.68359375,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 195.182,
+      "minute": 5530.8671875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 200.302,
+      "minute": 5654.6748046875,
+      "finished": null,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    },
+    {
+      "elapsedSeconds": 205.419,
+      "minute": 5777.48486328125,
+      "finished": 5655.173828125,
+      "construction": [
+        {
+          "kind": "shed",
+          "progress": 100
+        },
+        {
+          "kind": "warehouse",
+          "progress": 100
+        },
+        {
+          "kind": "well",
+          "progress": 100
+        },
+        {
+          "kind": "kitchen",
+          "progress": 100
+        },
+        {
+          "kind": "garden",
+          "progress": 100
+        }
+      ]
+    }
+  ],
+  "postDays": 3,
+  "continuation": [
+    {
+      "minutes": 5937.63623046875,
+      "food": 21,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "hunger": [
+        32.72264099121094,
+        18.409996032714844,
+        17.6760196685791,
+        16.61161994934082,
+        34.5460319519043
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 6174.560546875,
+      "food": 21,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        100,
+        100,
+        99.81622314453125,
+        100,
+        100
+      ],
+      "hunger": [
+        36.27848434448242,
+        21.964752197265625,
+        21.67696189880371,
+        20.1663761138916,
+        38.10187530517578
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "return",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 6301.0673828125,
+      "food": 18,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        98.59839630126953,
+        99.23564147949219,
+        98.34207153320312,
+        99.02325439453125,
+        98.7242202758789
+      ],
+      "hunger": [
+        41.57878875732422,
+        25.717920303344727,
+        27.15055274963379,
+        24.435178756713867,
+        43.09663772583008
+      ],
+      "tasks": [
+        "return",
+        "return",
+        "water",
+        "return",
+        "return"
+      ]
+    },
+    {
+      "minutes": 6427.8896484375,
+      "food": 15,
+      "meals": 11,
+      "money": 276608,
+      "energy": [
+        97.73094940185547,
+        97.95489501953125,
+        99.37223815917969,
+        96.35086059570312,
+        97.14642333984375
+      ],
+      "hunger": [
+        3.3887264728546143,
+        31.20326042175293,
+        0.47673600912094116,
+        29.92145538330078,
+        3.0593600273132324
+      ],
+      "tasks": [
+        "water",
+        "eat",
+        "daydream",
+        "garden",
+        "gather"
+      ]
+    },
+    {
+      "minutes": 6554.400390625,
+      "food": 15,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        96.25464630126953,
+        99.37445831298828,
+        100,
+        99.22161102294922,
+        95.67012023925781
+      ],
+      "hunger": [
+        8.870390892028809,
+        5.460942268371582,
+        5.958384037017822,
+        3.0376248359680176,
+        8.541035652160645
+      ],
+      "tasks": [
+        "water",
+        "daydream",
+        "daydream",
+        "daydream",
+        "gather"
+      ]
+    },
+    {
+      "minutes": 6680.384765625,
+      "food": 19,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        93.6448974609375,
+        100,
+        100,
+        100,
+        92.65611267089844
+      ],
+      "hunger": [
+        14.330361366271973,
+        10.920998573303223,
+        11.418423652648926,
+        8.49775218963623,
+        14.001006126403809
+      ],
+      "tasks": [
+        "haul",
+        "daydream",
+        "daydream",
+        "daydream",
+        "haul"
+      ]
+    },
+    {
+      "minutes": 6806.76123046875,
+      "food": 19,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        91.283447265625,
+        100,
+        99.43269348144531,
+        100,
+        92.3926010131836
+      ],
+      "hunger": [
+        19.8071346282959,
+        16.397645950317383,
+        16.895090103149414,
+        13.974383354187012,
+        19.477764129638672
+      ],
+      "tasks": [
+        "birdwatch",
+        "daydream",
+        "stretch",
+        "nature_walk",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 6933.18212890625,
+      "food": 16,
+      "meals": 7,
+      "money": 276608,
+      "energy": [
+        90.13813781738281,
+        99.49348449707031,
+        99.36044311523438,
+        99.46083068847656,
+        97.54658508300781
+      ],
+      "hunger": [
+        0.866632342338562,
+        21.875532150268555,
+        22.372976303100586,
+        19.45218276977539,
+        2.76462459564209
+      ],
+      "tasks": [
+        "cook",
+        "eat",
+        "eat",
+        "garden",
+        "haul"
+      ]
+    },
+    {
+      "minutes": 7059.79638671875,
+      "food": 20,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        88.41061401367188,
+        98.62621307373047,
+        99.67089080810547,
+        100,
+        94.9768295288086
+      ],
+      "hunger": [
+        6.3526530265808105,
+        4.619156360626221,
+        4.523994445800781,
+        2.9552571773529053,
+        8.250676155090332
+      ],
+      "tasks": [
+        "gather",
+        "water",
+        "sleep",
+        "stargaze",
+        "water"
+      ]
+    },
+    {
+      "minutes": 7186.20654296875,
+      "food": 20,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        90.01127624511719,
+        97.15336608886719,
+        99.70304870605469,
+        99.02655029296875,
+        93.53907012939453
+      ],
+      "hunger": [
+        10.710511207580566,
+        10.09652328491211,
+        9.448920249938965,
+        8.432665824890137,
+        13.727930068969727
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 7312.99072265625,
+      "food": 20,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        98.46420288085938,
+        100,
+        100,
+        97.5470199584961,
+        100
+      ],
+      "hunger": [
+        12.612140655517578,
+        12.255868911743164,
+        11.350549697875977,
+        13.92625904083252,
+        16.266267776489258
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 7546.8955078125,
+      "food": 20,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        99.88333129882812,
+        100,
+        99.76482391357422,
+        100,
+        100
+      ],
+      "hunger": [
+        16.405162811279297,
+        15.765660285949707,
+        15.4312162399292,
+        17.467655181884766,
+        19.775672912597656
+      ],
+      "tasks": [
+        "return",
+        "sleep",
+        "return",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 7673.49951171875,
+      "food": 20,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        98.40589904785156,
+        98.62293243408203,
+        98.30508422851562,
+        100,
+        98.95423126220703
+      ],
+      "hunger": [
+        21.891319274902344,
+        21.00809669494629,
+        20.908720016479492,
+        19.366756439208984,
+        24.213815689086914
+      ],
+      "tasks": [
+        "return",
+        "return",
+        "eat",
+        "sleep",
+        "return"
+      ]
+    },
+    {
+      "minutes": 7800.1123046875,
+      "food": 17,
+      "meals": 11,
+      "money": 276608,
+      "energy": [
+        98.02879333496094,
+        97.1275405883789,
+        97.38726043701172,
+        98.53176879882812,
+        97.49012756347656
+      ],
+      "hunger": [
+        3.0073626041412354,
+        2.227365255355835,
+        4.853363513946533,
+        24.830297470092773,
+        29.691198348999023
+      ],
+      "tasks": [
+        "idle",
+        "garden",
+        "water",
+        "return",
+        "gather"
+      ]
+    },
+    {
+      "minutes": 7927.11572265625,
+      "food": 17,
+      "meals": 11,
+      "money": 276608,
+      "energy": [
+        98.11186218261719,
+        94.84077453613281,
+        95.9798583984375,
+        99.91606903076172,
+        95.318359375
+      ],
+      "hunger": [
+        8.510457992553711,
+        7.730464935302734,
+        10.356400489807129,
+        30.325342178344727,
+        35.19439697265625
+      ],
+      "tasks": [
+        "daydream",
+        "water",
+        "daydream",
+        "eat",
+        "gather"
+      ]
+    },
+    {
+      "minutes": 8054.30859375,
+      "food": 19,
+      "meals": 10,
+      "money": 276608,
+      "energy": [
+        100,
+        93.36207580566406,
+        93.47388458251953,
+        99.69676208496094,
+        93.77386474609375
+      ],
+      "hunger": [
+        14.021831512451172,
+        13.241851806640625,
+        15.86777400970459,
+        4.021462440490723,
+        40.70600891113281
+      ],
+      "tasks": [
+        "daydream",
+        "water",
+        "haul",
+        "garden",
+        "eat"
+      ]
+    },
+    {
+      "minutes": 8181.09521484375,
+      "food": 19,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        100,
+        91.91967010498047,
+        90.93878173828125,
+        100,
+        98.84183502197266
+      ],
+      "hunger": [
+        19.516700744628906,
+        18.736682891845703,
+        21.362709045410156,
+        9.516304016113281,
+        3.899372100830078
+      ],
+      "tasks": [
+        "daydream",
+        "daydream",
+        "haul",
+        "daydream",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 8307.2529296875,
+      "food": 19,
+      "meals": 9,
+      "money": 276608,
+      "energy": [
+        99.68022918701172,
+        94.22103118896484,
+        88.41546630859375,
+        100,
+        100
+      ],
+      "hunger": [
+        24.986083984375,
+        24.206066131591797,
+        26.83209228515625,
+        14.98541259765625,
+        9.368596076965332
+      ],
+      "tasks": [
+        "eat",
+        "eat",
+        "haul",
+        "daydream",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 8433.197265625,
+      "food": 23,
+      "meals": 11,
+      "money": 276608,
+      "energy": [
+        97.85848236083984,
+        92.6059799194336,
+        87.27601623535156,
+        98.68120574951172,
+        99.13458251953125
+      ],
+      "hunger": [
+        4.06472110748291,
+        4.3419904708862305,
+        0.6240003108978271,
+        20.44548797607422,
+        14.828434944152832
+      ],
+      "tasks": [
+        "stargaze",
+        "water",
+        "stargaze",
+        "gather",
+        "stretch"
+      ]
+    },
+    {
+      "minutes": 8558.9375,
+      "food": 23,
+      "meals": 11,
+      "money": 276608,
+      "energy": [
+        99.39543151855469,
+        99.5498046875,
+        87.33126068115234,
+        96.45858764648438,
+        98.99368286132812
+      ],
+      "hunger": [
+        9.516000747680664,
+        9.793261528015137,
+        6.075281620025635,
+        25.89687156677246,
+        20.279747009277344
+      ],
+      "tasks": [
+        "sleep",
+        "stargaze",
+        "sleep",
+        "water",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 8685.0830078125,
+      "food": 23,
+      "meals": 11,
+      "money": 276608,
+      "energy": [
+        97.92259216308594,
+        98.43663024902344,
+        88.30655670166016,
+        94.98807525634766,
+        99.23178100585938
+      ],
+      "hunger": [
+        14.984577178955078,
+        15.26183795928955,
+        10.651528358459473,
+        31.36572265625,
+        25.122360229492188
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 8896.48828125,
+      "food": 23,
+      "meals": 11,
+      "money": 276608,
+      "energy": [
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "hunger": [
+        18.498231887817383,
+        19.59712791442871,
+        13.822774887084961,
+        35.4921875,
+        28.293378829956055
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 9086.265625,
+      "food": 23,
+      "meals": 11,
+      "money": 276608,
+      "energy": [
+        99.66153717041016,
+        100,
+        99.50282287597656,
+        100,
+        99.2635726928711
+      ],
+      "hunger": [
+        22.166894912719727,
+        22.444072723388672,
+        17.87691307067871,
+        38.339630126953125,
+        32.928138732910156
+      ],
+      "tasks": [
+        "return",
+        "sleep",
+        "return",
+        "sleep",
+        "return"
+      ]
+    },
+    {
+      "minutes": 9212.0107421875,
+      "food": 23,
+      "meals": 10,
+      "money": 276608,
+      "energy": [
+        98.19562530517578,
+        98.53408813476562,
+        98.07426452636719,
+        98.62281036376953,
+        98.37283325195312
+      ],
+      "hunger": [
+        27.60976791381836,
+        27.889934539794922,
+        23.319683074951172,
+        43.57016372680664,
+        1.022736668586731
+      ],
+      "tasks": [
+        "nature_walk",
+        "return",
+        "water",
+        "return",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 9338.150390625,
+      "food": 23,
+      "meals": 8,
+      "money": 276608,
+      "energy": [
+        99.55415344238281,
+        100,
+        96.63873291015625,
+        97.76239013671875,
+        99.55415344238281
+      ],
+      "hunger": [
+        33.078548431396484,
+        2.287996292114258,
+        28.7884464263916,
+        1.4906309843063354,
+        6.491396427154541
+      ],
+      "tasks": [
+        "eat",
+        "daydream",
+        "daydream",
+        "water",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 9464.4716796875,
+      "food": 20,
+      "meals": 12,
+      "money": 276608,
+      "energy": [
+        97.9346923828125,
+        98.53434753417969,
+        95.16382598876953,
+        100,
+        99.26496124267578
+      ],
+      "hunger": [
+        4.176418781280518,
+        7.764479160308838,
+        34.2650146484375,
+        6.967094898223877,
+        11.967731475830078
+      ],
+      "tasks": [
+        "water",
+        "daydream",
+        "eat",
+        "daydream",
+        "water"
+      ]
+    },
+    {
+      "minutes": 9590.0341796875,
+      "food": 15,
+      "meals": 11,
+      "money": 276608,
+      "energy": [
+        96.50608825683594,
+        100,
+        99.26457977294922,
+        100,
+        97.83403778076172
+      ],
+      "hunger": [
+        9.61988353729248,
+        13.20779800415039,
+        3.102522850036621,
+        12.41045093536377,
+        17.41111183166504
+      ],
+      "tasks": [
+        "daydream",
+        "daydream",
+        "daydream",
+        "daydream",
+        "daydream"
+      ]
+    },
+    {
+      "minutes": 9716.5830078125,
+      "food": 19,
+      "meals": 11,
+      "money": 276608,
+      "energy": [
+        94.28530883789062,
+        99.43275451660156,
+        98.65835571289062,
+        99.60082244873047,
+        94.34833526611328
+      ],
+      "hunger": [
+        15.105825424194336,
+        18.69390296936035,
+        8.58867073059082,
+        17.89650535583496,
+        22.897350311279297
+      ],
+      "tasks": [
+        "haul",
+        "stretch",
+        "daydream",
+        "birdwatch",
+        "haul"
+      ]
+    },
+    {
+      "minutes": 9842.5224609375,
+      "food": 19,
+      "meals": 8,
+      "money": 276608,
+      "energy": [
+        91.91521453857422,
+        99.93083190917969,
+        96.95532989501953,
+        99.58222961425781,
+        93.65579986572266
+      ],
+      "hunger": [
+        20.565797805786133,
+        1.6119987964630127,
+        14.04840087890625,
+        1.5511589050292969,
+        0.892528235912323
+      ],
+      "tasks": [
+        "eat",
+        "stretch",
+        "haul",
+        "birdwatch",
+        "water"
+      ]
+    },
+    {
+      "minutes": 9968.8583984375,
+      "food": 16,
+      "meals": 12,
+      "money": 276608,
+      "energy": [
+        90.17594909667969,
+        97.17923736572266,
+        94.75917053222656,
+        98.09866333007812,
+        92.25526428222656
+      ],
+      "hunger": [
+        4.705995559692383,
+        7.089406490325928,
+        19.525793075561523,
+        7.028564929962158,
+        6.369921684265137
+      ],
+      "tasks": [
+        "sleep",
+        "haul",
+        "sleep",
+        "water",
+        "gather"
+      ]
+    },
+    {
+      "minutes": 10095.4326171875,
+      "food": 16,
+      "meals": 12,
+      "money": 276608,
+      "energy": [
+        89.12399291992188,
+        95.40758514404297,
+        96.04202270507812,
+        96.66078186035156,
+        94.18280792236328
+      ],
+      "hunger": [
+        10.030403137207031,
+        12.57541275024414,
+        24.005403518676758,
+        12.514573097229004,
+        10.617644309997559
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    },
+    {
+      "minutes": 10303.625,
+      "food": 16,
+      "meals": 12,
+      "money": 276608,
+      "energy": [
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "hunger": [
+        13.153583526611328,
+        16.918460845947266,
+        27.12834930419922,
+        16.592525482177734,
+        13.740824699401855
+      ],
+      "tasks": [
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep",
+        "sleep"
+      ]
+    }
+  ],
+  "saveReloadExact": true,
+  "editorUnchanged": true,
+  "scratchRunRemoved": true,
+  "scope": "Full completion and requested later days through public UI; read-only snapshot observation; no direct simulation commands, forced work, stock changes or runtime patches."
+}
