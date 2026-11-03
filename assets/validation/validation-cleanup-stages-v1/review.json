@@ -1,0 +1,20 @@
+{
+  "why": "Observe the exact shutdown stage when intermittent benchmark cleanup fails; every shutdown stage must be bounded and subsequent cleanup still attempted.",
+  "verdict": "stage/timeout checks pass; intermittent root cause remains unproven",
+  "observations": [
+    "Real headed Metal benchmark closed server/context/browser in about .24/8/94 ms and browser exited code 0.",
+    "Earlier diagnostic repeat also exited normally; no failing close was reproduced in these lifecycle-logged runs.",
+    "Helper now reports start/complete/failure plus elapsed milliseconds for server/context/browser.",
+    "Server shutdown now bounded; a stalled server still triggers context and browser cleanup before the failure is surfaced."
+  ],
+  "limits": [
+    "One short staged real run and deterministic timeout tests do not prove shutdown reliability over long runs.",
+    "No new visual or performance acceptance from these diagnostic captures.",
+    "Historical cleanup failures remain failures."
+  ],
+  "sourceSha256": {
+    "scripts/close-validation-browser.mjs": "d608185532341c5e84cf7f1bc9f98394c4afeafea7c2d89fcce0798b39bcfe09",
+    "scripts/benchmark-mixed-play.mjs": "a46c0c06986bcfc8fce5f00dec7a147aa3ff043c7617c0014b5ecda020555072",
+    "scripts/verify-validation-browser-cleanup.mjs": "78b93beca5fb4ec13ec8501d961d3de0817234a2e996330a5832f19f79c2155a"
+  }
+}

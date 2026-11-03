@@ -1,0 +1,5 @@
+2026-11-03T19:08:10.736Z pw:browser [pid=71443] <gracefully close start>
+2026-11-03T19:08:10.820Z pw:browser [pid=71443] <process did exit: exitCode=0, signal=null>
+2026-11-03T19:08:10.820Z pw:browser [pid=71443] starting temporary directories cleanup
+2026-11-03T19:08:10.829Z pw:browser [pid=71443] finished temporary directories cleanup
+2026-11-03T19:08:10.829Z pw:browser [pid=71443] <gracefully close end>

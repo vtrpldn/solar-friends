@@ -395,3 +395,7 @@ Updated mixed-play benchmarking to accept absent modular-art cache counters and 
 ### Metal pacing and shutdown investigation
 
 Headed Chromium confirms Apple M3 Pro Metal. Four 60-second phases had median 33.3 ms/p95 34.2 ms frame gaps and exact checkpoints, but shutdown timed out; the run remains failed/incomplete. A short repeat closed successfully; a second short repeat measured 8.3 ms/9.3 ms but also timed out on shutdown. An empty visible/focused page measured median 8.8 ms/p95 34.1 ms, supporting browser/environment cadence variability without proving the cause. Explicit sampling-session detach did not reliably fix shutdown. Benchmark PASS is now emitted only after successful cleanup. Evidence: `assets/validation/authored-metal-pacing-investigation-v1/`. Hardware pacing, bounded shutdown reliability and sustained memory acceptance remain open; failed-cleanup observations do not satisfy them.
+
+### Bounded, staged benchmark shutdown
+
+Cleanup now records server/context/browser start, completion/failure and elapsed time; server shutdown is bounded too. A simulated stalled server still attempts later context/browser cleanup and surfaces failure. The real staged headed Metal repeat closed in about .24/8/94 ms, with Chromium exit code 0. Lifecycle-logged repeats did not reproduce the earlier timeout, so its root cause and reliability gate remain open. Evidence: `assets/validation/validation-cleanup-stages-v1/`. These short diagnostics do not close performance or visual acceptance.
