@@ -1,0 +1,42 @@
+{
+  "completed": true,
+  "inputs": {
+    "scripts/verify-editor-publication-race.mjs": "22b58284fef79892e9554ab9bc65420cd590fbf1b4195b3d1619929a93e6aa86",
+    "web/editor/index.js": "4fd225e02285984411c1ed3601fd98d7f34e5528291aec86a2131912698c3b33",
+    "web/editor/map-sharing-controls.js": "53ca21c8fbc4c904180aca0fc44cfa9f028eab2ec200bff3333c66f29e1de684",
+    "web/editor/validate-publication.js": "f85ff689232b45a189c44ec8de3e622eea57d313418b50269fc05f4fdec73159",
+    "web/content-library.js": "9b050abaac96e6cdec99a93fced1e26409cabd3511ad57807b16c7afb726a7bc",
+    "web/publication-validation-worker.js": "c301e0c3d06153fd4e46cd453534d54a1020ed3c8118d06776d08f132510e60d"
+  },
+  "rows": [
+    {
+      "kind": "map",
+      "heldRealValidationWorker": true,
+      "secondTabPublicEdit": true,
+      "stalePublicationRefused": true,
+      "durableWinnerAndLibraryUnchanged": true,
+      "dialogRecoverable": true,
+      "headerConflictAndCopyAvailable": true,
+      "reloadedNewerDraft": true,
+      "retryVersion": 1,
+      "frozenTitle": "Newer shared map",
+      "normalSavesUnchanged": true,
+      "browserErrors": []
+    },
+    {
+      "kind": "release",
+      "heldRealValidationWorker": true,
+      "secondTabPublicEdit": true,
+      "stalePublicationRefused": true,
+      "durableWinnerAndLibraryUnchanged": true,
+      "dialogRecoverable": true,
+      "headerConflictAndCopyAvailable": true,
+      "reloadedNewerDraft": true,
+      "retryVersion": 1,
+      "frozenTitle": "Newer shared release",
+      "normalSavesUnchanged": true,
+      "browserErrors": []
+    }
+  ],
+  "scope": "Public Save map/release, delayed worker loading, real second-tab title edit, native validation and atomic publication conflict, public reload/retry. Notifications unavailable to exercise commit-time source comparison."
+}

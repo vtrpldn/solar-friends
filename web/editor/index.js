@@ -76,6 +76,7 @@ let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
 function toast(text){$('creator-toast').textContent=text;$('creator-toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('creator-toast').hidden=true,6000);}
 function status(text){$('creator-save-status').textContent=text;$('creator-recovery-copy').hidden=!(current?.conflicted||current?.preserveDamagedRecord);}
+function markPublicationConflict(id){if(current?.id===id){current.conflicted=true;status('Changed in another tab · save a copy');}}
 function stepHistory(redo=false){if(!current)return false;if(map?.cancelGesture())return true;return redo?current.doc.redo():current.doc.undo();}
 async function download(definition){
   const file=await prepareCreationExport(definition,report.ok?{terrain:terrainBase,snapshot:map.snapshot,catalog}:null);
@@ -462,7 +463,7 @@ function wire(){
     catch(error){$('creator-library-status').textContent=error.message;}finally{button.disabled=false;}
   };
 
-  mapSharing=new MapSharingControls({library,catalog,engine,Game,art,save,newProject,showLibrary,notify:toast,source:()=>current?{id:current.id,revision:current.doc.revision,definition:current.doc.value,valid:report.ok,attribution:current.record?.attribution??[]}:null,resolve:prepared=>current.doc.transact('Resolve landscape for map sharing',d=>{d.map=prepared.map;d.rules.weather=prepared.weather;}),setBusy:value=>{busy=value;$('creator-test').disabled=busy||!report.ok;$('creator-release').disabled=busy||!report.ok;$('creator-save-map').disabled=busy;}});
+  mapSharing=new MapSharingControls({library,catalog,engine,Game,art,save,onConflict:markPublicationConflict,newProject,showLibrary,notify:toast,source:()=>current?{id:current.id,revision:current.doc.revision,definition:current.doc.value,valid:report.ok,attribution:current.record?.attribution??[]}:null,resolve:prepared=>current.doc.transact('Resolve landscape for map sharing',d=>{d.map=prepared.map;d.rules.weather=prepared.weather;}),setBusy:value=>{busy=value;$('creator-test').disabled=busy||!report.ok;$('creator-release').disabled=busy||!report.ok;$('creator-save-map').disabled=busy;}});
 
   $('creator-route-tools').onclick=()=>{const details=$('creator-routes');revealWorkspaceSection(details);details.open=true;routesEditor.paint();details.scrollIntoView({block:'start'});};
   $('creator-habitat').onchange=()=>{map.view.habitatPreset=$('creator-habitat').value;setTool('habitat');};
@@ -544,7 +545,7 @@ function wire(){
       const thumbnail=previewOf(current.doc.value,map.snapshot);releasePublication=new AbortController();$('creator-release-cancel').disabled=false;$('creator-release-cancel').textContent='Cancel save';$('creator-release-status').textContent='Checking your release…';
       const record=await library.createRelease({projectId:current.id,expectedRevision:current.storageRevision,author:author.value,signal:releasePublication.signal,validate:raw=>validatePublication('release',raw,{signal:releasePublication.signal,onStage:stage=>$('creator-release-status').textContent=stage}),thumbnail});
       $('creator-release-dialog').close();await showLibrary({reset:true});toast(`Version ${record.package.content_revision} is saved independently.`);
-    }catch(error){$('creator-release-status').textContent=error.message;}finally{releasePublication=null;busy=false;author.disabled=false;$('creator-release-cancel').textContent='Keep editing';$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current&&current.doc.revision!==revision)refresh();if($('creator-release-dialog').open)$('creator-release-confirm').focus();}
+    }catch(error){if(error instanceof LibraryConflict)markPublicationConflict(ctx.id);$('creator-release-status').textContent=error.message;}finally{releasePublication=null;busy=false;author.disabled=false;$('creator-release-cancel').textContent='Keep editing';$('creator-release-confirm').disabled=false;$('creator-release-cancel').disabled=false;if(current&&current.doc.revision!==revision)refresh();if($('creator-release-dialog').open)$('creator-release-confirm').focus();}
   };
   $('creator-save').onclick=()=>save({automatic:false}).then(()=>{if($('creator-save-status').textContent==='Saved on this device')toast('Your creation is saved.');}).catch(()=>{});
   $('creator-recovery-copy').onclick=$('creator-save-copy').onclick=()=>copyCurrent().catch(e=>toast(e.message));

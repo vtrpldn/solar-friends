@@ -1,3 +1,4 @@
+import {LibraryConflict} from '../content-library.js';
 import {validatePublication} from './validate-publication.js';
 import {canonical} from './journal.js';
 import {prepareMap} from './prepare-map.js';
@@ -5,8 +6,8 @@ import {mapThumbnail} from './thumbnail.js';
 import {mapPreviewDefinition,scenarioFromSharedMap} from './map-sharing.js';
 const $=id=>document.getElementById(id);
 export class MapSharingControls{
- constructor({library,catalog,engine,Game,art,source,save,resolve,setBusy,showLibrary,notify,newProject}){
-  Object.assign(this,{library,catalog,engine,Game,art,source,save,resolve,setBusy,showLibrary,notify,newProject});
+ constructor({library,catalog,engine,Game,art,source,save,resolve,setBusy,showLibrary,notify,newProject,onConflict=()=>{}}){
+  Object.assign(this,{library,catalog,engine,Game,art,source,save,resolve,setBusy,showLibrary,notify,newProject,onConflict});
   this.validate=raw=>JSON.parse(engine.validate_map_package(raw));
   $('creator-save-map').onclick=()=>{const ctx=source();if(!ctx||this.saving)return;$('creator-map-title').value=ctx.definition.title;$('creator-map-description').value=ctx.definition.description;$('creator-map-save-status').textContent='';$('creator-map-save-dialog').showModal();};
   $('creator-map-save-cancel').onclick=()=>{if(this.publication)this.publication.abort(new DOMException('Map publication cancelled. Your checked draft is still saved.','AbortError'));else $('creator-map-save-dialog').close();};
@@ -30,7 +31,7 @@ export class MapSharingControls{
    if(canonical(prepared.map)!==canonical(ctx.definition.map)||canonical(prepared.weather)!==canonical(ctx.definition.rules.weather??null))this.resolve(prepared);
    const record=await this.save();this.publication=new AbortController();$('creator-map-save-cancel').disabled=false;$('creator-map-save-cancel').textContent='Cancel save';$('creator-map-save-status').textContent='Checking your map…';await this.library.createMap({projectId:ctx.id,expectedRevision:record.revision,title,description,author,signal:this.publication.signal,validate:raw=>validatePublication('map',raw,{signal:this.publication.signal,onStage:stage=>$('creator-map-save-status').textContent=stage}),thumbnail});
    $('creator-map-save-dialog').close();await this.showLibrary({reset:true});this.notify('A separate map is saved. Use it to begin another scenario.');
-  }catch(error){$('creator-map-save-status').textContent=error.message;}finally{this.publication=null;this.saving=false;for(const id of ['creator-map-title','creator-map-description','creator-map-author'])$(id).disabled=false;$('creator-map-save-cancel').textContent='Keep editing';$('creator-map-save-confirm').disabled=false;$('creator-map-save-cancel').disabled=false;this.setBusy(false);if($('creator-map-save-dialog').open)$('creator-map-save-confirm').focus();}
+  }catch(error){if(error instanceof LibraryConflict)this.onConflict(ctx.id);$('creator-map-save-status').textContent=error.message;}finally{this.publication=null;this.saving=false;for(const id of ['creator-map-title','creator-map-description','creator-map-author'])$(id).disabled=false;$('creator-map-save-cancel').textContent='Keep editing';$('creator-map-save-confirm').disabled=false;$('creator-map-save-cancel').disabled=false;this.setBusy(false);if($('creator-map-save-dialog').open)$('creator-map-save-confirm').focus();}
  }
  async use(record){const content=scenarioFromSharedMap(record.package,this.template(),this.validate);await this.newProject('copy',content.definition,content.credits);this.notify('A new scenario uses its own copy of this land. Add buildings, friends and goals.');}
 }

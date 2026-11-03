@@ -1,0 +1,22 @@
+{
+  "why": "Keep publication refusal and editor recovery consistent when another tab changes a draft during validation.",
+  "verdict": "pass for map and release source-edit races through public controls",
+  "screensIndividuallyReviewed": [
+    "map-conflict.png",
+    "map-retry.png",
+    "release-conflict.png",
+    "release-retry.png"
+  ],
+  "observations": [
+    "Both dialogs visibly refuse the stale source with readable instructions and usable actions.",
+    "Publication LibraryConflict now flags the matching current editor context, updates the header and exposes Save a copy.",
+    "Newer draft and package list remain exact after refusal.",
+    "Public reload/retry freezes the newer title as version 1; failed attempt consumes no version.",
+    "Ordinary two-tab conflict/copy regression passes with and without notifications."
+  ],
+  "limits": [
+    "Worker loading delayed intentionally; native validation and actual IndexedDB transactions still run.",
+    "Title edit source race, not every simultaneous map regeneration or run checkpoint boundary.",
+    "No disk-failure, online collaboration or full-release acceptance claim."
+  ]
+}

@@ -367,3 +367,7 @@ Added an ownership-checked disposable-browser interruption test after the real s
 ### Concurrent editor tabs
 
 Two real editor tabs now have current-source coverage for same-project title conflicts, with BroadcastChannel available and unavailable. Stale Save cannot overwrite the newer durable record. The local recovery checkpoint survives, public Save a copy preserves its definition except deliberate new identity/title/revision fields, and both independent checkpoints reload exactly. Four conflict/copy desktop captures were individually inspected. Evidence: `assets/validation/editor-concurrent-tabs-v1/`. No runtime change was needed. This covers the ordinary project conflict/copy path; simultaneous regeneration, publication and run-write concurrency remain separate gates.
+
+### Publication versus second-tab edits
+
+Public Save map and Save release now have a real two-tab source-edit race check: hold validation-worker loading, save a newer draft in the second tab, then resume native validation. Both publications refuse the stale source without changing the newer draft/package list or consuming a version; reload/retry freezes the newer draft as version 1. Fixed inconsistent recovery feedback: publication LibraryConflict now updates the current editor header and exposes Save a copy. Four conflict/retry captures were individually inspected; ordinary concurrent conflict/copy regression passes. Evidence: `assets/validation/editor-publication-race-v1/`. Other regeneration/run-write concurrency and release gates remain open.

@@ -1,0 +1,33 @@
+{
+  "completed": true,
+  "inputs": {
+    "scripts/verify-editor-concurrent-tabs.mjs": "53db8258cb6b5f01ffa02f45ef2e461095f89825be22816a5df3b3c1fc205414",
+    "web/editor/index.js": "4fd225e02285984411c1ed3601fd98d7f34e5528291aec86a2131912698c3b33",
+    "web/editor/document.js": "9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a",
+    "web/content-library.js": "9b050abaac96e6cdec99a93fced1e26409cabd3511ad57807b16c7afb726a7bc",
+    "web/project-save-worker.js": "856ebd7146ef5621fa94544fdd6e0b9f86c5b9653cd4207060c3a0ba2179a54b"
+  },
+  "rows": [
+    {
+      "notification": "broadcast",
+      "conflictDetected": true,
+      "winnerExactBeforeAndAfterCopy": true,
+      "localRecoveryRetained": true,
+      "copyDefinitionExact": true,
+      "bothReloadExactly": true,
+      "normalSavesUnchanged": true,
+      "browserErrors": []
+    },
+    {
+      "notification": "unavailable",
+      "conflictDetected": true,
+      "winnerExactBeforeAndAfterCopy": true,
+      "localRecoveryRetained": true,
+      "copyDefinitionExact": true,
+      "bothReloadExactly": true,
+      "normalSavesUnchanged": true,
+      "browserErrors": []
+    }
+  ],
+  "scope": "Two real editor tabs in one isolated browser context; ordinary title edits, Save, conflict Save a copy and reload. Broadcast present and unavailable. No direct storage writes or simulated LibraryConflict."
+}
