@@ -419,3 +419,7 @@ Public export preserves an unfinished scenario exactly after removing a goal's r
 ### Direct navigation to missing regional goal targets
 
 Missing-region validation now provides the exact goal/condition field path, including each nested all/any reference. Open journal reveals the goal and focuses its missing region selector without a manual expansion step. The public incomplete-draft sharing/repair/reload check passes against the rebuilt game, and the focused desktop capture was individually inspected. Evidence: `assets/validation/editor-region-navigation-v1/`. Native nested-path coverage complements the single direct-goal browser fixture; other validation categories and broader acceptance remain open.
+
+### Crop-state daylight art coverage
+
+The shared building-context review now supports `--crop-states`: both garden and greenhouse, all six crops at young/maturing/ready/dry-stressed states and an empty bed, against all three biome terrains with adjoining road/home/Iara. All 18 daylight normal-zoom boards (150 compositions) were individually inspected. No additional clipping, detached bases or obvious proportion mismatch observed; greenhouse framing/aisle remain coherent. Young seedlings are subtle. Evidence: `assets/validation/crop-state-day-v1/`, full local boards `artifacts/crop-state-day-current/`. These controlled painted states do not establish live growth, night/rain, other zooms, repeated tomato harvests or overall art acceptance. Browser cleanup is now bounded through the shared validation helper.

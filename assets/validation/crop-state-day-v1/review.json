@@ -1,0 +1,137 @@
+{
+  "why": "Completed-building boards did not exercise the visible crops that authored scenarios can start with.",
+  "status": "Daylight normal-zoom controlled crop states inspected; broader art gate remains open.",
+  "coverage": {
+    "biomes": [
+      "mata-atlantica",
+      "cerrado",
+      "caatinga"
+    ],
+    "buildings": [
+      "garden",
+      "greenhouse"
+    ],
+    "crops": [
+      "maize",
+      "cassava",
+      "fodder",
+      "lettuce",
+      "beans",
+      "tomatoes"
+    ],
+    "states": [
+      "empty once per building",
+      "young",
+      "maturing",
+      "ready",
+      "dry-stressed"
+    ],
+    "zoom": 1,
+    "lighting": "day",
+    "contexts": 150
+  },
+  "observations": [
+    "Nine garden planting positions stay grounded inside the bordered bed; mature leaves can naturally overhang it.",
+    "Greenhouse plant rows occupy both sides; framing and glass mask leaves without painting across the entrance aisle.",
+    "Healthy versus dry crops visibly differ; young seedlings remain subtle at normal zoom.",
+    "No additional clipping, detached bases or obvious resident/home proportion mismatch observed in these daylight controlled compositions."
+  ],
+  "boards": [
+    {
+      "file": "mata-atlantica-zoom-1-group-1.png",
+      "sha256": "16f0843ba29ce50b47a4e055315505daf3768e0f705eb739767e581de094259c",
+      "individually_inspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1-group-2.png",
+      "sha256": "6c306e41570e9bf7cb303567cd486993c5d9a8a6d88b11fd6e20cc533c28c054",
+      "individually_inspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1-group-3.png",
+      "sha256": "1ead555cef58ffe71007a43a1c3fb195f8d01fc7ac827ae52f82851ec1884281",
+      "individually_inspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1-group-4.png",
+      "sha256": "4cf84d9a218171542538b5c3506a8628e634472c7d9131b97da0727b88b1acbf",
+      "individually_inspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1-group-5.png",
+      "sha256": "ae04d546bdc16cf87077348c08387da85ca40dc43d5f415abb694e8db05f9dd6",
+      "individually_inspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1-group-6.png",
+      "sha256": "475e83b096239940f2980aa67da95061ae93c9636086510b6424e202364e9a9d",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-group-1.png",
+      "sha256": "cd261e1c31d5b5c249a9169c98a0c5f09130ae676e141ed7d4cf370424e42c0b",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-group-2.png",
+      "sha256": "4608d3e3f74f530a3dbc106bf298ed5c75060e4fa38e92a68c267cffa311dc27",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-group-3.png",
+      "sha256": "b8158d295528fbdafdc019e4b6dfcdffb7c99d90c454dfa0aad4bef9d360211a",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-group-4.png",
+      "sha256": "e36c1d46ca9974975c2f47ac774eaea8213ebe671c6ba5b8ee0fc58004627add",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-group-5.png",
+      "sha256": "9aeb8c408f9d1dc72a07cc63a1570eaf5e9404678bb60715077b6aa03767b763",
+      "individually_inspected": true
+    },
+    {
+      "file": "cerrado-zoom-1-group-6.png",
+      "sha256": "50188376b1785c808f971d83cbe76ae261899af4daf791195a2e840ab22207a9",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-group-1.png",
+      "sha256": "eb330654f59e00745fa8d851e2076a960af47d5a20465627d82f9ce7179b5c02",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-group-2.png",
+      "sha256": "1cca98cd77ba2999fa91fbc4659b892a6a6965b8d9389a2497b5725393f22e22",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-group-3.png",
+      "sha256": "a4f28f6d48d905638b60958db2761bb38fbb266956aa6a304626cc41d5ecc62b",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-group-4.png",
+      "sha256": "7716e14f9cc162b9bbc37ecc4b658cf66f06a38f87e45802503f16b8f70001b1",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-group-5.png",
+      "sha256": "ef635010980cdecf7a8ffb467e44637d9aec651eb732d5432283f41bb50e6249",
+      "individually_inspected": true
+    },
+    {
+      "file": "caatinga-zoom-1-group-6.png",
+      "sha256": "b28f9922fd500edaaae80fce7768e8f4d26353a7512cfe60c7912e618c0df018",
+      "individually_inspected": true
+    }
+  ],
+  "full_local_capture": "artifacts/crop-state-day-current/",
+  "limits": [
+    "Controlled presentation inputs, not simulated planting-to-harvest evidence.",
+    "Night, rain, additional zoom levels, repeated tomato harvest appearance, construction/animals, and unfamiliar-player acceptance are not closed.",
+    "No runtime artwork asset changed."
+  ]
+}
