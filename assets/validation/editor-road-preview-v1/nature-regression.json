@@ -1,0 +1,3881 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-nature-preview-species.mjs": "9889aea96cc848118efaa4d9430f2100ced7dda6956b2bd814c834f4ae2ad679",
+    "web/group-preview-worker.js": "d60c36203f3893097513a9ca13722305e89f96225bc6a41c971896c3290a9cf9",
+    "web/editor/nature.js": "0e7135a7f5175c00c68e941ebc09a386a168679db3bf5e4e89288de5b0a58c87",
+    "web/pkg/solar_friends_bg.wasm": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1"
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.32195899999987887
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 6.251667000000452
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 14.120167000000038
+    }
+  ],
+  "cases": [
+    {
+      "biome": "mata-atlantica",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "mata-atlantica",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "cerrado",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "cerrado",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jequitiba-rosa",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jequitiba-rosa",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jucara",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jucara",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "embauba",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "embauba",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "pau-brasil",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "pau-brasil",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "forest-ferns",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "forest-ferns",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "bromeliads",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "bromeliads",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "meadow-wildflowers",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "meadow-wildflowers",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "dry-grasses",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "dry-grasses",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "granite-outcrop",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "granite-outcrop",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "quartz-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "quartz-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "clay-ironstone",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "clay-ironstone",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "mossy-stones",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "mossy-stones",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "pequi",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "pequi",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "barbatimao",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "barbatimao",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "cerrado-bunchgrass",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "cerrado-bunchgrass",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "campo-shrub",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "campo-shrub",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "umbuzeiro",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "umbuzeiro",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jurema-preta",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "jurema-preta",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "mandacaru",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "mandacaru",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "macambira",
+      "size": 0.6499999761581421,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": false,
+      "site": "camp",
+      "allowed": false
+    },
+    {
+      "biome": "caatinga",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "clear",
+      "allowed": true
+    },
+    {
+      "biome": "caatinga",
+      "species": "macambira",
+      "size": 1.149999976158142,
+      "copy": true,
+      "site": "camp",
+      "allowed": false
+    }
+  ],
+  "scope": "Real browser native worker agrees with independent shared placement plus native validation for 20 catalog species, min/max size, move/copy, clear/camp sites and all three biome profiles. Source immutability. Not public pointer interaction, every seed/surface, rendering or worker performance."
+}

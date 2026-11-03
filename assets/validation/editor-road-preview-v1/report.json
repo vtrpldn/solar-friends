@@ -1,0 +1,50 @@
+{
+  "complete": true,
+  "checks": [
+    "native whole-stroke allowed and blocked feedback",
+    "four-cell stroke exact single-step undo/redo",
+    "mixed clear/building stroke rejected without definition/history change",
+    "Escape cancels whole stroke and feedback",
+    "exact reload",
+    "no page errors"
+  ],
+  "scope": "Public road pointer strokes on default sandbox map; not all river geometries, map edges, maximum stroke size or hardware timing.",
+  "inputs": {
+    "scripts/verify-editor-road-preview.mjs": "ef7f9cec6cecdcd07a37df5bdcb9eb69523aa4410bae8bcd458de056a21ebb4e",
+    "web/editor/road-placement.js": "4d41088d3eb82b94a10af5fe35061bfbe25dbec6441249a7c67d45b6ac18703b",
+    "web/editor/index.js": "528b8c08bcf8636f30e4c66235975d040932f392a03e3de4d8133d0e9df5fb25",
+    "web/editor/map-view.js": "5d38b26e482ee6091de7b11823479459ea573bcfb72acbc6e7c8e44bc5314e24",
+    "web/editor/group-preview.js": "1bee0c775c2de17488be52215e9f3f2a23a0cfbee033d7683081ee521f6f0661",
+    "web/group-preview-worker.js": "d60c36203f3893097513a9ca13722305e89f96225bc6a41c971896c3290a9cf9",
+    "web/pkg/solar_friends_bg.wasm": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1"
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.3346250000013242
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 2.4162500000002183
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 23.92908399999942
+    }
+  ]
+}

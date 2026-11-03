@@ -1,3 +1,4 @@
+import {applyRoadStroke} from './road-placement.js';
 import {applyAssetPlacement} from './asset-placement.js';
 import {wrapDialogTab} from './dialog-focus.js';
 import {parseImportObject} from './import-object.js';
@@ -319,7 +320,7 @@ function mapAction(action){
     if(change(action.type==='copy-site'?'Copy material plot':'Move material plot',d=>{applyAssetPlacement(d,{collection:'resource_sites',asset:site,replace:action.type==='move-site'},action.x,action.y);},{valid:true})){setTool('select');map.selectSite(site.id);map.siteCopy=null;}
   }
   else if(action.type==='region'){if((current.doc.value.map.regions?.length??0)>=catalog.max_regions){toast('Use up to 32 named regions.');return;}const id='region-'+crypto.randomUUID();if(change('Draw named region',d=>{(d.map.regions??=[]).push({id,title:'New region',...action.rectangle});})){revealWorkspaceSection($('creator-regions'));$('creator-regions').open=true;regionsEditor.open(id);}}
-  else if(action.type==='road')change('Paint a road',d=>{const cells=new Map(d.start.roads.map(p=>[p.join(','),p]));for(const cell of action.cells)cells.set(cell.join(','),cell);d.start.roads=[...cells.values()];},{valid:true});
+  else if(action.type==='road')change('Paint a road',d=>applyRoadStroke(d,action.cells),{valid:true});
   else if(action.type==='habitat'){
     const preset=catalog.habitats.find(h=>h.key===$('creator-habitat').value),start=Math.floor(action.size/2);
     change('Paint habitat and soil',d=>{d.map.terrain=Array.from({length:4096},(_,i)=>d.map.terrain?.[i]||terrainBase[i]);for(const [x,y]of action.cells)for(let a=x-start;a<x-start+action.size;a++)for(let b=y-start;b<y-start+action.size;b++)if(a>=0&&a<64&&b>=0&&b<64&&!riverBank(a,b,d.map))d.map.terrain[b*64+a]={habitat:preset.key,fertility:preset.fertility,retention:preset.retention,cover:preset.cover};});

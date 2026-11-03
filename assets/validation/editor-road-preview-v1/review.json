@@ -1,0 +1,21 @@
+{
+  "screenshots": [
+    {
+      "file": "allowed-stroke.png",
+      "sha256": "7c77ae830100dc26776eef857eb2a1f93d7177838b0d079d1a7efbb55561ba30",
+      "individuallyInspected": true
+    },
+    {
+      "file": "blocked-stroke.png",
+      "sha256": "e805b03a373effdb1fbdfb0b3d0a88f52afc769b417575c387fb7ad5235afa25",
+      "individuallyInspected": true
+    }
+  ],
+  "checks": [
+    "public road gestures passed",
+    "13 controlled release cases passed",
+    "preview coalescing, same-endpoint changed-stroke and timeout checks passed",
+    "480 nature worker regression cases passed"
+  ],
+  "scope": "Default desktop sandbox road brush: clear four-cell stroke, mixed clear/occupied stroke, Escape, history and reload. Not all river courses, edges, maximal strokes or physical hardware timing."
+}
