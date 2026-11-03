@@ -1,0 +1,181 @@
+{
+  "sourceCommit": "132c535",
+  "why": "Revalidate maximum editor response after navigation and resident audit optimizations, including the current editor and terrain changes.",
+  "setup": "Three sequential headed Chromium runs on Apple M3 Pro/Metal, 1600x1000, isolated ephemeral origins and browser contexts. Temporary caffeinate prevented idle sleep; this was not an otherwise idle isolated machine.",
+  "inspectedScreens": [
+    "mata-atlantica-editor.png",
+    "cerrado-editor.png",
+    "caatinga-editor.png"
+  ],
+  "visualObservation": "All three complete editor screens inspected: selected shed/storage group, controls and regional ground render without observed broken layout or missing sprites. This is not all-art acceptance.",
+  "results": [
+    {
+      "biome": "mata-atlantica",
+      "importReadyMs": 16162.109999999999,
+      "commits": [
+        {
+          "phase": "habitat-drag",
+          "handlerMs": 90.29999995231628,
+          "twoRafMs": 94.09999990463257
+        },
+        {
+          "phase": "group-move",
+          "handlerMs": 94.79999995231628,
+          "twoRafMs": 99.79999995231628
+        }
+      ],
+      "drag": [
+        {
+          "phase": "habitat-drag",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 3.0999999046325684,
+          "handlerMaxMs": 3.200000047683716,
+          "twoFrameP95Ms": 12,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 2.4000000953674316,
+          "handlerMaxMs": 2.5,
+          "twoFrameP95Ms": 11.299999952316284,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        }
+      ],
+      "checks": {
+        "exactBrushFootprint": true,
+        "atomicBrush": true,
+        "exactBrushUndoRedo": true,
+        "exactGroupMoveUndo": true,
+        "trustedInput": true
+      }
+    },
+    {
+      "biome": "cerrado",
+      "importReadyMs": 16007.080625,
+      "commits": [
+        {
+          "phase": "habitat-drag",
+          "handlerMs": 88.79999995231628,
+          "twoRafMs": 92.79999995231628
+        },
+        {
+          "phase": "group-move",
+          "handlerMs": 90.79999995231628,
+          "twoRafMs": 95
+        }
+      ],
+      "drag": [
+        {
+          "phase": "habitat-drag",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 3,
+          "handlerMaxMs": 3.0999999046325684,
+          "twoFrameP95Ms": 12.400000095367432,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 2.4000000953674316,
+          "handlerMaxMs": 2.5,
+          "twoFrameP95Ms": 11.700000047683716,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        }
+      ],
+      "checks": {
+        "exactBrushFootprint": true,
+        "atomicBrush": true,
+        "exactBrushUndoRedo": true,
+        "exactGroupMoveUndo": true,
+        "trustedInput": true
+      }
+    },
+    {
+      "biome": "caatinga",
+      "importReadyMs": 16040.481875000001,
+      "commits": [
+        {
+          "phase": "habitat-drag",
+          "handlerMs": 88.10000014305115,
+          "twoRafMs": 92
+        },
+        {
+          "phase": "group-move",
+          "handlerMs": 92.40000009536743,
+          "twoRafMs": 96.5
+        }
+      ],
+      "drag": [
+        {
+          "phase": "habitat-drag",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 3.3999998569488525,
+          "handlerMaxMs": 3.3999998569488525,
+          "twoFrameP95Ms": 11.900000095367432,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        },
+        {
+          "phase": "group-move",
+          "method": "motion",
+          "count": 24,
+          "handlerP95Ms": 2.1000001430511475,
+          "handlerMaxMs": 2.5,
+          "twoFrameP95Ms": 11.400000095367432,
+          "nativeCalls": {
+            "load_scenario": 0,
+            "land_report": 0,
+            "world_geometry": 0,
+            "terrain_template": 0
+          }
+        }
+      ],
+      "checks": {
+        "exactBrushFootprint": true,
+        "atomicBrush": true,
+        "exactBrushUndoRedo": true,
+        "exactGroupMoveUndo": true,
+        "trustedInput": true
+      }
+    }
+  ],
+  "limits": [
+    "Single trusted 9x9 brush and two-building move sample per biome; no repeated latency distribution for commits.",
+    "Funds/undo/redo/zoom/minimap timing samples invoke controls programmatically.",
+    "Two requestAnimationFrame callbacks do not measure physical display frame pacing.",
+    "No sustained panning, simulation, shared-appearance comparison, memory plateau, other brush sizes or cancellation throughput measured.",
+    "Historical timing differs in multiple source files: these runs do not isolate one optimization.",
+    "Approximately 16-second cold readiness remains a material loading cost.",
+    "Full original release gates remain open."
+  ]
+}
