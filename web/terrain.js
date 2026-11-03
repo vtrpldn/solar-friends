@@ -144,8 +144,10 @@ export function paintTerrain(texture, roads = [], resourceSites = [],soil=[],see
   if(regional?.image)texture=regional.image;
   const row=regional?.image?regional.row:0,rows=regional?.image?2:1;
   paintedTexture(g,texture,0,row,rows,regional?.image?8:32,makeSurface);
-  // Quiet the repeated leaf texture so buildings and planted plots stay legible.
-  g.fillStyle="rgba(167,178,105,0.24)";g.fillRect(0,0,RESOLUTION,RESOLUTION);
+  // Regional atlases have much finer grass/stone detail than the original
+  // painted ground. Let their local earth colours recede behind placed objects.
+  g.fillStyle=regional?.image?(row===0?'rgba(171,164,100,0.50)':'rgba(194,168,117,0.50)'):'rgba(167,178,105,0.24)';
+  g.fillRect(0,0,RESOLUTION,RESOLUTION);
   paintHabitats(g,seed,map);
   paintSoil(g,soil);
   // An empty road clip contributes no pixels. Paint directly into the ground

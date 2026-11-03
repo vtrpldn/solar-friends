@@ -1,0 +1,49 @@
+{
+  "why": "Reduce competition between fine regional ground detail and placed plants/residents while retaining distinct regional earth palettes and the existing artwork.",
+  "change": "Regional ground receives a stronger earth-colored base wash: muted olive-gold for Cerrado and dusty tan for Caatinga. It is applied before habitats/soil and before roads or world sprites. The original Mata Atlantica treatment remains the same.",
+  "sourceHashes": {
+    "web/terrain.js": "90cd477ddcc8cdd3f13a959553e2ea67a377e5101b74965fbcad364c7ce81235",
+    "scripts/verify-terrain-atlas-isolation.mjs": "d8daca2f4da5de895e372905b452a0484fe616493f49d8e2070c998366c3ef38",
+    "scripts/verify-creator-biomes.mjs": "37683dc6a472ad1f29f082c9a0e38c10508bba03e6a79941a4e07be98b6fba20"
+  },
+  "checks": [
+    "Twelve explicit DOM/OffscreenCanvas isolated atlas pixel cases pass; baseline uses its own old tint so contamination reproduction is independent of the intentional color change.",
+    "Six actual-art main/worker pixel comparisons and terrain cancellation/reuse/fallback/error cases pass.",
+    "Both Mata Atlantica road/no-road fixture hashes equal the prior atlas-isolation evidence.",
+    "Normal player selection of all three biomes, regional planting, native playtest climate and editor return pass without browser errors.",
+    "JavaScript syntax and diff whitespace checks pass.",
+    "Individual natural-object browser journey also passes on the new terrain: selection, exact history, invalid edits, drag/cancel, reload, native playtest and return."
+  ],
+  "visuallyReviewed": {
+    "natureBoards": [
+      "cerrado-zoom-1-day-group-3.png",
+      "caatinga-zoom-1-day-group-3.png",
+      "cerrado-zoom-1-rain-group-3.png",
+      "caatinga-zoom-1-rain-group-3.png"
+    ],
+    "natureCompositions": 36,
+    "fullGameplayScenes": [
+      "solar-biome-mata-atlantica-game.png",
+      "solar-biome-cerrado-game.png",
+      "solar-biome-cerrado-night.png",
+      "solar-biome-caatinga-game.png",
+      "solar-biome-caatinga-night.png"
+    ],
+    "editorScenes": [
+      "selected-plant-editor.png"
+    ]
+  },
+  "visualFindings": [
+    "Placed plants, residents and buildings separate more clearly from the quieter regional ground in the inspected complete scenes.",
+    "Cerrado remains olive/gold with red-earth roads; Caatinga retains its warm tan ground and ochre roads.",
+    "Inspected night scenes retain consistent ambient tint and contact; inspected rain boards preserve the main silhouettes.",
+    "Fine painted ground is still present. This is a contrast correction, not approval of all regional landscape artwork.",
+    "Selected Macambira ring, above-sprite label and inspector remain legible on the revised Caatinga ground."
+  ],
+  "limits": [
+    "Only the listed four normal-scale nature boards and five full scenes were visually inspected for this change. Uninspected boards in capture reports are not visual acceptance.",
+    "All-catalog close/overview weather, mixed habitats and neighboring contexts still need the corresponding full review.",
+    "No sprite assets, proportions, texture repeat scale, simulation rules or native definitions changed.",
+    "Broader resident motion, performance, memory, recovery and player-experience release gates remain open."
+  ]
+}

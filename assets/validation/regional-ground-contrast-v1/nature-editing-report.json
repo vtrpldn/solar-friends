@@ -1,0 +1,27 @@
+{
+  "complete": true,
+  "inputs": {
+    "web/editor/nature.js": "a16451766a35b69dc8caa6fbe899df8c746fc520429494448e627694be6d99b8",
+    "web/editor/map-view.js": "ee9c7113b622c0f71926f373993e75ffd13e22f354bbfaba38cad6b6d145ecba",
+    "web/editor/index.js": "8a04fc307489829c8b71a460ac9b82da66e67c8cfdd77988b5f8b7a1bc92e3de",
+    "scripts/verify-editor-nature-selection.mjs": "3ab14ea118ff2ee5ff76fcd0f860d6995d0baa01f34809b42757ff2c394b285d",
+    "web/pkg/solar_friends_bg.wasm": "41433e3913d33a5b015be57b00c510278c77f200993fa3fbde2e41934f80ae2f"
+  },
+  "browserErrors": [],
+  "checks": [
+    "fractional-anchor picking",
+    "independent copy identity",
+    "bounds, spacing, camp and size rejection",
+    "selected tiny plant inspector",
+    "blank numeric edit preserves draft",
+    "resize exact undo/redo",
+    "move retains identity and neighbors",
+    "rejected move preserves draft",
+    "copy and Delete with exact undo",
+    "typing guard",
+    "erase tool removes only one object",
+    "reload preserves selection",
+    "trusted drag move and Escape cancellation",
+    "native playtest and editor return"
+  ]
+}

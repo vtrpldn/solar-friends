@@ -37,7 +37,7 @@ try{
     // established meadow tint may contribute. Roads receive no meadow tint.
     const reference=new OffscreenCanvas(1,1),referenceContext=reference.getContext('2d');
     referenceContext.fillStyle=colors[row*2+Number(road)];referenceContext.fillRect(0,0,1,1);
-    if(!road){referenceContext.fillStyle='rgba(167,178,105,0.24)';referenceContext.fillRect(0,0,1,1);}
+    if(!road){referenceContext.fillStyle=name==='after'&&rows===2?(row===0?'rgba(171,164,100,0.50)':'rgba(194,168,117,0.50)'):'rgba(167,178,105,0.24)';referenceContext.fillRect(0,0,1,1);}
     const oracle=Array.from(referenceContext.getImageData(0,0,1,1).data);reference.width=reference.height=0;
     let mismatches=0,maxDelta=0;for(let i=0;i<pixels.length;i+=4){let different=false;for(let c=0;c<4;c++){const delta=Math.abs(pixels[i+c]-oracle[c]);maxDelta=Math.max(maxDelta,delta);different||=delta!==0;}if(different)mismatches++;}
     outputs[name]={mismatches,maxDelta,oracle};canvas.width=canvas.height=0;
