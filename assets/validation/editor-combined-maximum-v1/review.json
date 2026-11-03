@@ -1,0 +1,20 @@
+{
+  "screenshot": {
+    "file": "moving-all-buildings.png",
+    "sha256": "ed6f39072ccbf28dccdd95950090b8622a745ed69307b5d9a809efa43d240f60",
+    "individuallyInspected": true
+  },
+  "fixture": {
+    "buildings": 256,
+    "authoredNature": 1000,
+    "species": "macambira",
+    "routes": 64,
+    "routeCells": 83,
+    "residents": "authored five",
+    "river": false
+  },
+  "functionalResult": "Public full-group selection, over-limit rejection, move with internal connections, exact undo/redo and reload passed; both runs completed bounded cleanup.",
+  "performanceResult": "Not accepted: single release handlers 306.3 and 305.1 ms. Profile repeat load_scenario 226.2 ms; report_state 15.4 ms; land_report 11.1 ms. Pointer motion p95 8.4 ms in baseline.",
+  "nextAction": "Prepare large validated commits away from the main thread, display progress, allow cancellation before installation, then repeat exact history/isolation and timing checks.",
+  "limits": "Two headless runs, one release each; not physical frame pacing, sustained memory, maximum history, heterogeneous nature or all utility classes. Intentionally crowded stress fixture, not default landscape/art acceptance."
+}
