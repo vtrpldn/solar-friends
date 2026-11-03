@@ -1,0 +1,1709 @@
+{
+  "complete": true,
+  "browserMode": "headless",
+  "readyTimeout": 30000,
+  "fetchedInputs": {
+    "web/editor/index.js": "729ccc257e45648572b8524095f4ad62662612f5d53415234ff7c8b68ee60b1e",
+    "web/pkg/solar_friends.js": "05d95aabfe7cefba69038ba0a83983ae3c353160051726ee9c962bec77a61e3d",
+    "web/editor/map-view.js": "a7e47205c88b7304e0caad5126ec6cb46af33208f85bc8df96c17a35e806037d",
+    "web/editor/group-preview.js": "33ce210ffc9724a4553af321136b2e93f82411e10d69a2250b60c5a7690facd5",
+    "web/editor/nature.js": "0e7135a7f5175c00c68e941ebc09a386a168679db3bf5e4e89288de5b0a58c87",
+    "web/editor/scene-layers.js": "045c4bf57886043d243f0cac6722f92bba5f1b505fc4a3da3449bcd9ea05e00e",
+    "web/editor/routes.js": "0d2c83154aa359e8fa508ea285961247a2d7a4487dd8e5ae21608c765386fa9b",
+    "web/utility-lines-art.js": "e1cc662f79b7beab542540ef9a923a7dd8f227dea6791ae48544d08f66fb559e",
+    "web/editor/batteries.js": "505a7fc8d07f09c13381d27e45c8797d6b57ef70a49e39b42b86b7b34839ac04",
+    "web/battery-art.js": "48d2c00ba144080d40c048ea3d3edfe4811e02f456af07c851efbb6487bc2887",
+    "web/chickens.js": "f438c1d08c0ebec511511288b2eef6149825b61509e9dd2809244d055798021a",
+    "web/resource-site-art.js": "a0601241ab8d107474b2989d16705b1a73a942617eaae3689af8c0485190f47f",
+    "web/economy-art.js": "b9a9f15be3bdc0f11dda6de42777b34b0f70b250debe1612b9729c9957a6333a",
+    "web/editor/sites.js": "59b51a11d34a80bf5ab155f4a13128dff228d1e965423063b2029a66271a52e8",
+    "web/crop-art.js": "e75beb185b763eb4f18dc984c6d2b3e12fecc0348b3c91ebe8e349cbb174685c",
+    "web/resident-look.js": "94f94dff5b280b57998d97ef94641e1850cbd5d2946ae61a3ed3b2f10367de5d",
+    "web/resident-appearance-library.js": "518acdb703b9eb9bff55a4c05b6c443761af48a53d905a5ee7d761ddbc409773",
+    "web/regional-art.js": "6d531e08223996e044f91bb64a0e26c9e56756d1c7adc2e7b3676b7d7433f178",
+    "web/editor/prepare-terrain.js": "2263c3c79dd89d05bab83920966a9354c206cc533b2f464e2c7748e0ac44319d",
+    "web/editor/terrain-cache.js": "89b760d42a330deee375c4ea6775d98d96f371e82406d80f858676a8669a527d",
+    "web/editor/brush.js": "3bf5390061865456479d91f79f17b2b7db5987a6aeb6d5e88dbd06210ecd28c3",
+    "web/projection.js": "062e70dd949cf7a82c7c600f510484ad92955a83025b8d5d2a56297e6b79d936",
+    "web/terrain.js": "90cd477ddcc8cdd3f13a959553e2ea67a377e5101b74965fbcad364c7ce81235",
+    "web/building-art.js": "977312b8c88e4d700fadff2cb654a3e20a35501dd1560779b830dcbfbb6eeace",
+    "web/building-footprints.js": "4437a07f72209817dc197b24314018362f1abf68966de099a062c933525babf1",
+    "web/world-renderer.js": "3271855bc2976692e0cc9b3392f134560e52ef3ea8f5d8df74b5cf4c0c9b7a8c",
+    "web/building-state-art.js": "2c66d34e1b2582b1509e6caa69cac0f5907f57ab38160d4d0fffc44f37429bef",
+    "web/sprite-frames.js": "4a32cbc68b75e90b7c1fe63e139143ff6c1cbd91954276cfd7179eb4f5b44604",
+    "web/editor/dialog-focus.js": "990d58e8cea2c9b35e87d9d47c6296409097b13507698557f26425426a939b4f",
+    "web/editor/import-object.js": "ccd2c6b80a5192dc9e972315973ba9e2ee6de31d403504bac8b92dc2de784d8e",
+    "web/editor/landscape-regeneration.js": "a25d8bf06a775731ba6ca30eabf932a3a97ff364d84e59692c0c1511bd183c1d",
+    "web/editor/removal-impact.js": "8dccaae9b45c6991ee317433d743627c0901d8fb55474635df55639376b8c5e6",
+    "web/editor/workspaces.js": "7ad930e7cab0dc396a374662536742920a05c72462d46e4120e5dd4607fd55d0",
+    "web/editor/validate-publication.js": "f85ff689232b45a189c44ec8de3e622eea57d313418b50269fc05f4fdec73159",
+    "web/editor/prepare-release.js": "0f2e03aedc2a46a0e0799f75a9bb722bebd56b0b19e9d6b70de6faf323e54bbb",
+    "web/editor/prepare-export.js": "bc434f11185cdd6f4221c34a0a774a900f633c922a3ba20d7a5c49fbb77e2685",
+    "web/editor/prepare-scenario.js": "197f94d9927257ffe2ba7f3818c3f4fc3a13dbdff78504bddd509773186e68f1",
+    "web/editor/land-preview-key.js": "31248e85559d9ffc701551c00e44cb0dc00a2e9657583f9b88041f90e320c5e6",
+    "web/editor/outlook-projects.js": "7f802b828bbd2a0218c40698f7c503ee04a147eb77c241f641bfa967667a6c1e",
+    "web/editor/outlook.js": "c9c9b25da575a46ff67e18854538a949088634fe3026ec79c020c26314263324",
+    "web/recovery-limits.js": "5441cadbac4803d1dcab20c5aeb8e9a15f5ec81f820d4f607b3362d74432c0a1",
+    "web/editor/package-recovery.js": "978233383a0022a7190256eed14cb5df05cc06dfc348cdf96892c326d690c187",
+    "web/editor/stored-package-export.js": "0b5420515643e50dd4150f85bccdebbbf22df20200b3d043bc8ea9730efc2e5b",
+    "web/editor/missing-library-entry.js": "1a87d9735a427c5c517a26f9b845251cf2afdd6339346c4149d4b5a435170bec",
+    "web/editor/example-scenarios.js": "e9614009181b3cb05a5e34baeb59a42a3d4994ceb3c34ce91c038929ca49d052",
+    "web/editor/library-previews.js": "a6396f0141585c47119da8d2f1bc190f70ab7912ee692c33e65cc5b8462b1652",
+    "web/editor/recovery-dialog.js": "48cead933907a5e806934654346912c854f8eea96005969349d53fe1f3acc290",
+    "web/editor/draft-import.js": "6f62e1b32a7d471d3181126d32c4ead28b386debb4bbdee396db3e2ad13e4c99",
+    "web/editor/draft-checkpoint.js": "d5780a82c3665b51b20f9aa51a0e547bda02a12077ea5ca7ab75e111236dd4e6",
+    "web/editor/record-recovery.js": "714d83df2c88a325c6d475fb4c821d53df979a7774d154196c21941517db37c7",
+    "web/map-package.js": "7895d6d124b95721a4e092806201be7b6c5e4fdd12e953c69b7eef8077642b0c",
+    "web/editor/map-sharing-controls.js": "53ca21c8fbc4c904180aca0fc44cfa9f028eab2ec200bff3333c66f29e1de684",
+    "web/editor/thumbnail.js": "bec95459d85e741f51cf35c9af3ef78537c9b25db61bfb36377f9a39d4d33313",
+    "web/editor/library-discovery.js": "ca1f82ea205ebf1866a58e42d0ac264d7bf0f1b2e03450c584fce273cfe2b6b9",
+    "web/release-package.js": "185c0feb4586b6918961f43ff31fd1c4335e770257d659de5f2a6d14022a659a",
+    "web/editor/journal.js": "e5ee57626eecacd22dda40297c98d25dffe20c7cd667564885a5bb97cf61d9e0",
+    "web/editor/arrival.js": "3cd8fc3fd230bde254fdf20d2d1bc4a4ad4df765563c9aeba69d4212eedf0eae",
+    "web/editor/recovery.js": "af0fa4ab952b6898e996f5eb6881a56c1dfc06592fdafb279b619ffa93381826",
+    "web/editor/setup.js": "9c8efb63568986b81e57dc8eb5b8b98e6c87207ef90150372dd8161f18b45cb4",
+    "web/editor/equipment.js": "9f59a3768620a9f184da87ac9ec18680a80333f0e34a64720b32bdf6f64709b0",
+    "web/editor/animals.js": "f510e345438f5c2965fdbba70576443510e5972a833f7928159405ce780c0833",
+    "web/editor/orchards.js": "9a1b17788062b19aaa52cab33fd5fd460baca0dc4dbb50fe095f7c03ce2ffe54",
+    "web/editor/farming.js": "845120ea773613a047ccdb53a1b361792ed7fb132a546dfe5b02de786f1daf4a",
+    "web/editor/liquids.js": "8ca05361e3f65fbd52cabacda39d05639d104809e29affd126242fe910293547",
+    "web/editor/supplies.js": "ad3d1b723ea2288fb44956a7391976d4007e1c3460bdb7d65e7c8096fa158ab7",
+    "web/editor/regions.js": "26475117d3040fd6fd47b2c06dffb72d226d8ac002cd1fa9355aa2e0d9a868ca",
+    "web/editor/scenario-journal.js": "bb57a27d8f16cdf4fdf2365d5e28c07ee0a5b6e5e7fd20835811501c293158cc",
+    "web/editor/relationships.js": "ce6fe7c4faddc01993cc2f69dbf5fdfb9fe7b02285a8171cbb1dcc2467f4eb8c",
+    "web/editor/residents.js": "615bfc149748ea424fcf1315eb89ec95d478cf3cb0054c08486dd1c8e12f40c6",
+    "web/editor/biome-editor.js": "1b74a2d0f9d031050bfde1c2f182995132b3df1997c6ef64b01978a58eeaf73c",
+    "web/editor/weather.js": "7bdec512a7e6a868110d69ce1988b2cab8b152da7c1df62e80f77939f1ea1824",
+    "web/editor/files.js": "fe0edb7fb8a6782403758d159b111d0867cd50314987acdf4f445b7cf5d16195",
+    "web/editor/geology.js": "5b696731787b8e7e0e5a319734f45d19e42f758317236a69881b8b47a90b5e04",
+    "web/editor/minimap.js": "b38166af28847a51db57eb1a9bfd631ec1b22d0dabddaba223680bcd6268fb5c",
+    "web/land-layers.js": "7f927c59b493688072f41b088457b1b8ba1822b997e28ae60ce0db60e2a33236",
+    "web/editor/objects.js": "22b3b2d93d51cb3310ea70e22130097b77f44ce2a5d9094bc5cac50a9257d9ae",
+    "web/content-library.js": "7868edc580b44e984f556559133f4c5467ddbffdf19f121455f30e6c757a2b9b",
+    "web/editor/document.js": "9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a",
+    "web/build-menu.js": "3f4983108515a0e8018e3ef4d8fddf2c68e09eaef44e5d9452ea3ce8dce91408",
+    "web/paint-cache.js": "f070b4e16eeb75c077b26009201fef77ca246a9c202664730bc81dda35cc053c",
+    "web/power.js": "d37e60fba9e9e9057df3bf0b0fda4e6c4d8914f9d8041673627a7868e8694f0d",
+    "web/greenhouse-layout.js": "dce24b4528d6c942c6afcc93e32b810fdac2018aa8a0eebad2d3b2fdcbbb07b8",
+    "web/resource-sites.js": "9a95c65342707d4f07ad8904dd896600d70a94c392962b44d040ef8fd0fc33b8",
+    "web/terrain-revision.js": "f6dfcb06898799931676a227689d0a162b3a278525893c07b2d392c91ce90878",
+    "web/resident-part-recipe.js": "44af0a70cad6a16790a6556d57c6e343bd982085565e3c577bfec9ba065953a1",
+    "web/building-projection.js": "e64a3306774ed0d6d8aa070a6b91aacc28b129ac3bfbe7c244df0532bf6f76de",
+    "web/habitats.js": "63ebeab1df2ac631ec3b0a3bd250d5f7a2e6372fdd55a70f446e3853947aa5a6",
+    "web/building-silhouettes.js": "247be59f561d36f2400b68ceb0c1266d5f19c2864254c4d95a52892c9b670a43",
+    "web/nature-art.js": "389a97d806cbf7d286b3ebedeeabac390770208672529d494444bf1034e255b0",
+    "web/editor/preview-camera.js": "71b1d719d2b91c9f473d2797a1ff5ddad708c8a8f585043b98e42d30ece32119",
+    "web/editor/run-preparation.js": "29cffb125f1ca53917e0a1e24aa6fd09ae7926fe15cad03a8fd0df7b654aec0b",
+    "web/editor/outlook-power.js": "144163979e59e471498b1fe8e051c4f2717e07b25c07d4ceaa29bb66f595b3cf",
+    "web/editor/outlook-monitor.js": "99f5a63ed3d5706a8e5a75e0518fd1dee4df672d035ba9088ce57b0cd9bdbc74",
+    "web/editor/prepare-map.js": "1ab59bdb8df8485e0d73dec61a4511bcdbb11cdc03a0e8de10a25573b87ec8f7",
+    "web/editor/map-sharing.js": "21665f56ac48568ebf4cd7a571ca74797a4284146d3ca7a8f0b1cf9c34766aa1",
+    "web/editor/liquid-data.js": "1dbec1233121b8732a53734d5f4d46f0b9a2f45d4857ff6e4eb317e3f8acce3e",
+    "web/editor/food.js": "cbeb80c24981d19ff8ee5014b187195449be7f02a9294717b193ae7bc9d80753",
+    "web/editor/events.js": "34655564b1d0c336b96b4b1647675758ecff657e32ac87fad73d6ff93fe216fc",
+    "web/resident-portrait.js": "2436b070435c19ddb1a392f2deb308aa7b3eceb6c892f20bf0f42c075084c2cc",
+    "web/editor/roster.js": "70ce9c2552c5ffbe31c7b59acab096835e92c3fca38f4357e69b1653451f4f57",
+    "web/editor/prepare-biome-preview.js": "ddff3e5e474937e006c158f0fa32c6a8e09ba7624858fabb5ec5afa9b61c29a1",
+    "web/editor/biome-change.js": "1f382f16fdf8484aadc1bd2bcdb78f5ac722766c9b0e011bac2e9b35bb3c5c33",
+    "web/save-project-prepared.js": "cf74a19d04439eaea6a30fd2eb5aac3e76865e5c8e02f0324aaf43af5e518fcb",
+    "web/library-migrations.js": "c06f6918a52c147a94a72a4beb71f4607d4e1450bdf251afad72ac60b75cc154",
+    "web/battery-plots.js": "327faa1e4c9f97f173eff8f5de53250dbdcc72e845b23aedbbecaa857d9b3e84",
+    "web/sandbox-rules.js": "c4d708f49592384ed6f6920c85f15f2ef03cc239de08cb8026066c00ffa98b11",
+    "web/character-materials.js": "b7ae2ce5c6e08f63dcd882912cb70416d9f984cc13e7a68be7eeb80d2840fb7d",
+    "web/character-hair-colours.js": "612735bf2a5bb6219d5d68b1b5d187e6662480ecc114ec99d591ac9f91a92dfa",
+    "web/editor/story-roles.js": "55664194e4450fdef200da240c5fd2315b3fbab2c00fc78bfb0ce74b0760c173",
+    "web/character-contact-atlas.js": "71880a29ef77436d4cb3f24361eca91b2fd5ceae8342ffd74936ec006d0a3f26",
+    "web/character-attachments.js": "2f88fee807c21ced70a762e2a1cb7169e9247a7c6136d81e37b235f1e67ac7cf",
+    "web/character-body-ownership.js": "3aa3d0c4c4df107e3182fbcd5ddc1f169260f6a71d4d25ced1efc949550d66c3",
+    "web/character-body-frames.js": "e64697c8c2d523b8072473420f7a953b4c0b810ef5c837658dbd7e8bc5ebfdfb",
+    "web/character-contact-frame.js": "80362004f1bb2e80db69133b3e881261aed8d5ac645783f3ebe82b596eb25663",
+    "web/art/recovered-battery.png": "9cc9f12a8c414b81d68b45a4348b7ec55735e80c0bb6eaf098dd3681f604a2b6",
+    "web/art/economy-atlas-v2.png": "70c115a50bfffd4b4c6808ebb1375e5bc3c6f74d5507bcb797def54886827e06",
+    "web/pkg/solar_friends_bg.wasm": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1",
+    "web/art/starter-shed-refined.png": "2789fff5a1413b0271319804b56dcee5f0037e6753d8d55b5465f0d7bd7dfdf2",
+    "web/art/apiary.png": "b3a7c451bc633954504a1277133431d4a27a671e9335f9f864339936d10300f5",
+    "web/art/orchard.png": "1dd04b792f207a4c31c319384911c2d1410cdd4de935971df8285a20280e4ae4",
+    "web/art/hydro.png": "7bd75d806b40f7c0952d0f148fbce12b98b147436170d6e1373f03e1f0004dde",
+    "web/art/goat-pasture.png": "54896a67fa8d0016c2463230f3dd4a1851b0cd2c82de3cdcc5d6fcd7c43cd626",
+    "web/art/eco-toilet-tall.png": "e08ce149c55cb381abe954eba4cd85029ca0e82ddb74822b6ffc92110ef207d4",
+    "web/art/banana-treatment.png": "36ab3603bbf87a0553d9a0e00c73bf1f3ceaeb8ea18e583482bf9b2684d8ea62",
+    "web/art/biodigester.png": "4b6b182034155f2d876a327d73db8e841ee531c484506029d0f500fcaf25556d",
+    "web/art/streetlight.png": "8c608d6712dff2aa4d658db457e71d3f5703dd17bfd70ba1cb7c2a8e1f488db1",
+    "web/art/wetland-square-v2.png": "c044246b780f34d854975dfebe3a028617a0f8580bd260ef8a84e19046449fae",
+    "web/art/solar-farm.png": "f44cb6236ab2cbb98064452e55db92b6cf6fa11f03107f465f8cf3d66e0c0dcc",
+    "web/art/warehouse.png": "49da93a02756572d724171edc6b225f645981c1ca73d40583d07027604b54d5d",
+    "web/art/garden-simple-isometric.png": "eea34c958d7ff0cb1465ff16860197315e0f25ed67d62deed3763d6735f95410",
+    "web/art/village-atlas-isometric.png": "3b668e5f0e8070a73402bfe021a043c8ea767e65d73ad0b86f52600dd2c655d9",
+    "web/art/greenhouse-isometric.png": "6bc7925077a4089014e8973979cfaa3e242a12cf400888d27998c6aac0350ee2",
+    "web/art/cistern-isometric.png": "58ca1042df7bf075ccd2f0ef7df0c90857f8e5b5bed388adac7dcbf7f7a4d93c",
+    "web/art/compost-isometric.png": "e740e77508069f279ddc02bc22de7067d3022eb72d46882faa6a9a1fc06c3a5a",
+    "web/art/square-isometric.png": "76ec6da02bc5b4575b556019ffbfe74c1a092d32c3e5cbd21d74945f2adf2c91",
+    "web/art/workshop-isometric.png": "fc194eb60c86435ae750c13b4bcb5c9a59c5897e63b2debcb29b1cb960eac4a7",
+    "web/art/coop-isometric.png": "edd75490a16292bf3a4745e45df5cfa2260d4fa344924977411502955cf13596",
+    "web/art/home-veranda.png": "90f2a1fc9b8c06bcbdfef597f29be6f095a634a9b9fe9221c646e6d4c5d3492b",
+    "web/art/home-gable.png": "b78ec7ee2595db9195e43850f2da5caec6d95237a1b98de738f7eb58559b0d21",
+    "web/art/home-courtyard.png": "0faf541defdd86309f8301bdd39072a197fb5dac1719309913b2cdb18f99025d",
+    "web/art/adobe-gable.png": "51264f858bc37351a9c6c7dd424f8fe65de8a700eb8cf9b4664fee2309b44ae0",
+    "web/art/adobe-veranda.png": "7940e5092a7820800a9fdfb132a13ed70de2c8cdef15a5cbbe22661f9ac5db5f",
+    "web/art/goat-pasture-empty-v1.png": "5dcbc3f4d555b4d565ceea84ccfe8c4f40fd6afed23feb982ea6f7b591a89f1b",
+    "web/art/terrain-atlas.png": "f006b8a86d1387c59e3d2886a2bea117f797579cbd50d4bbd98ef914feb2d2f3",
+    "web/art/mata-atlantica-atlas.png": "ff12a2574e53923c1d0837d023f582f273eed36578cfc8cda0f487ec093ce971",
+    "web/art/landscape-details.png": "a5212211cc3d8bca0250b3990a9dcc90ca3bbd3d27fa9b1007d85b3dc931ae56",
+    "web/art/animations/iara.png": "8324e9d73486a3a57e1fead63126f8a7ca36e7d7a3fbe255d7c97d90f64138dc",
+    "web/art/animations/bento.png": "032600db6c14bb1526836f6000c2ea0a604226040a3a20d77eacabec5b636889",
+    "web/art/animations/caua.png": "2d43fd61f1b804d3f6d30a11fdb3247faf683a847d2c1ccea4471b2d1b5b1208",
+    "web/art/animations/luz.png": "28410b4f15e05d65c6718d234125de7541a07176a0babe086a0a15b72b621e59",
+    "web/art/animations/nina.png": "9a6bc52777b4f2f084862b2441f7c68fabf41369638c44a9aa0a894c5044ddc1",
+    "web/art/cerrado-vegetation-v1.png": "1542d0c14fa9cfddc83ec0e1a04e5ef5be34fcf1273d93d4eb13c2c8f5f359a6",
+    "web/art/cerrado-bunchgrass-v2.png": "e7cdd05d327663486036d29f88fda052436eb34f6a96c8809504b9a76758a3c7",
+    "web/art/caatinga-vegetation-v1.png": "522999ec80e708b3203cb6f59a2b90067d3d7eb2f7265b82d6e7815854c26290",
+    "web/art/crops.png": "16aa5062e9a6057cc06fc0d518d31d6247ac3078c0996c6a4aa3b326e5d8a90b",
+    "web/art/field-crops.png": "ca755cb0aced1ef12ec69284c915490e59e5207961d5fb0a4d90fdf5913c219e",
+    "web/art/regional-ground-v1.png": "acdad558e0db68fb04760f2a27d44beaf79eec89d6b02d583e35586748bbfeb1",
+    "web/art/chickens.png": "6ca66e9eeb78a32e093b0b56394962133e07f471f9e4339d314aebf670e7a716",
+    "web/terrain-paint-worker.js": "a95fe15f84b23ed8220d14122dca99004892dbdf12255e4f6ad77cb0d6a517be",
+    "web/project-save-worker.js": "856ebd7146ef5621fa94544fdd6e0b9f86c5b9653cd4207060c3a0ba2179a54b",
+    "web/group-preview-worker.js": "94f3f97939e72e1190f2408f481407b84c7a7a2cbeeb18d0c2938f074cd48148"
+  },
+  "biome": "mata-atlantica",
+  "brushSize": 9,
+  "landCacheBaseline": null,
+  "viewport": {
+    "width": 1600,
+    "height": 1000
+  },
+  "dense_fixture": "256 completed buildings across the current inland catalog, clear arrival area, the five authored friends; no authored utility routes or explicit crop/animal starting overrides.",
+  "wasm_sha256": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1",
+  "scope": "Desktop editor synchronous handlers and two-rAF latency, plus trusted brush and two-building selection/move samples with exact saved undo/redo. Interaction save acknowledgement includes debounce; this is not physical-display frame pacing, sustained simulation, GPU memory, other brush sizes or cancel throughput evidence.",
+  "machine": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpu": "Apple M3 Pro"
+  },
+  "cases": [
+    {
+      "population": 5,
+      "buildings": 256,
+      "browserErrors": [],
+      "fixture": {
+        "population": 5,
+        "buildings": 256,
+        "types": {
+          "shed": 13,
+          "home": 12,
+          "garden": 13,
+          "well": 13,
+          "kitchen": 12,
+          "grove": 12,
+          "warehouse": 13,
+          "compost": 12,
+          "square": 12,
+          "workshop": 12,
+          "greenhouse": 12,
+          "coop": 12,
+          "solar_farm": 12,
+          "streetlight": 12,
+          "eco_toilet": 12,
+          "wetland": 12,
+          "banana_treatment": 12,
+          "biodigester": 12,
+          "orchard": 12,
+          "goat_pasture": 12,
+          "apiary": 12
+        },
+        "custom": false,
+        "residentStyle": "classic",
+        "appearanceRevisions": {
+          "preset": 5
+        },
+        "uniqueAppearances": 5,
+        "attempted": 312,
+        "seed": 42
+      },
+      "importReadyMs": 1240.4848339999999,
+      "loadingProfile": null,
+      "samples": [
+        {
+          "action": "funds",
+          "synchronousMs": 62.10000014305115,
+          "presentationMs": 63.299999952316284,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.300000190734863
+            },
+            {
+              "key": "report_state",
+              "ms": 4.5
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 62,
+          "presentationMs": 63,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 32.200000047683716
+            },
+            {
+              "key": "report_state",
+              "ms": 4.400000095367432
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 60.10000014305115,
+          "presentationMs": 61.200000047683716,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.100000143051147
+            },
+            {
+              "key": "report_state",
+              "ms": 4.5
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 59.40000009536743,
+          "presentationMs": 60.40000009536743,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.100000143051147
+            },
+            {
+              "key": "report_state",
+              "ms": 4.400000095367432
+            }
+          ]
+        },
+        {
+          "action": "funds",
+          "synchronousMs": 60.40000009536743,
+          "presentationMs": 61.59999990463257,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.399999856948853
+            },
+            {
+              "key": "report_state",
+              "ms": 4.5
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 60.60000014305115,
+          "presentationMs": 61.80000019073486,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 32.60000014305115
+            },
+            {
+              "key": "report_state",
+              "ms": 4.700000047683716
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 57.299999952316284,
+          "presentationMs": 58.299999952316284,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.199999809265137
+            },
+            {
+              "key": "report_state",
+              "ms": 4.5
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 58.10000014305115,
+          "presentationMs": 59.200000047683716,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.299999952316284
+            },
+            {
+              "key": "report_state",
+              "ms": 4.6000001430511475
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 59.10000014305115,
+          "presentationMs": 60.200000047683716,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.800000190734863
+            },
+            {
+              "key": "report_state",
+              "ms": 4.199999809265137
+            }
+          ]
+        },
+        {
+          "action": "undo",
+          "synchronousMs": 57.5,
+          "presentationMs": 58.80000019073486,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.5
+            },
+            {
+              "key": "report_state",
+              "ms": 4.300000190734863
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 57.60000014305115,
+          "presentationMs": 58.700000047683716,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.399999856948853
+            },
+            {
+              "key": "report_state",
+              "ms": 4.200000047683716
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 56.90000009536743,
+          "presentationMs": 58.09999990463257,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.399999856948853
+            },
+            {
+              "key": "report_state",
+              "ms": 4.1000001430511475
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 57.09999990463257,
+          "presentationMs": 58.09999990463257,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.5
+            },
+            {
+              "key": "report_state",
+              "ms": 4.299999952316284
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 58.30000019073486,
+          "presentationMs": 59.30000019073486,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31.59999990463257
+            },
+            {
+              "key": "report_state",
+              "ms": 4.5
+            }
+          ]
+        },
+        {
+          "action": "redo",
+          "synchronousMs": 56.799999952316284,
+          "presentationMs": 57.89999985694885,
+          "calls": [
+            {
+              "key": "load_scenario",
+              "ms": 31
+            },
+            {
+              "key": "report_state",
+              "ms": 4.299999952316284
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 15.600000143051147,
+          "presentationMs": 20.100000143051147,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 15.5
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 10.700000047683716,
+          "presentationMs": 14.700000047683716,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 10.600000143051147
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 10.099999904632568,
+          "presentationMs": 13.900000095367432,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 10
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 7.3999998569488525,
+          "presentationMs": 11.399999856948853,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 7.200000047683716
+            }
+          ]
+        },
+        {
+          "action": "zoom",
+          "synchronousMs": 11.900000095367432,
+          "presentationMs": 15.299999952316284,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 11.700000047683716
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 6.5,
+          "presentationMs": 16.300000190734863,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 6.200000047683716
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 6.1000001430511475,
+          "presentationMs": 15.900000095367432,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 6
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 5.8999998569488525,
+          "presentationMs": 16.09999990463257,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 5.8999998569488525
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 6.5,
+          "presentationMs": 15.599999904632568,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 6.400000095367432
+            }
+          ]
+        },
+        {
+          "action": "pan",
+          "synchronousMs": 6.400000095367432,
+          "presentationMs": 16,
+          "calls": [
+            {
+              "key": "map-render",
+              "ms": 6.200000047683716
+            }
+          ]
+        }
+      ],
+      "gestures": {
+        "brushSize": 9,
+        "coveredCells": 135,
+        "scope": "One trusted 24-step brush drag and two-building selection/move, exact durable undo/redo checks, handler and two-rAF latency. Save acknowledgement includes autosave debounce. No physical-display frame pacing, repeated interaction distribution, other brush sizes or cancellation throughput claim.",
+        "delta": [
+          1,
+          0
+        ],
+        "operations": [
+          {
+            "action": "habitat-drag",
+            "inputThroughSavedMs": 1029.8637500000004
+          },
+          {
+            "action": "brush-undo",
+            "inputThroughSavedMs": 679.7289169999985
+          },
+          {
+            "action": "brush-redo",
+            "inputThroughSavedMs": 623.4112089999999
+          },
+          {
+            "action": "group-select",
+            "inputThroughSelectionMs": 59.25233300000036
+          },
+          {
+            "action": "group-move",
+            "inputThroughSavedMs": 1054.6202919999996
+          }
+        ],
+        "summaries": [
+          {
+            "phase": "habitat-drag",
+            "method": "down",
+            "count": 1,
+            "handlerP95Ms": 0.2999999523162842,
+            "handlerMaxMs": 0.2999999523162842,
+            "twoFrameP95Ms": 9.899999856948853,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "count": 24,
+            "handlerP95Ms": 7,
+            "handlerMaxMs": 7.1000001430511475,
+            "twoFrameP95Ms": 12.600000143051147,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "up",
+            "count": 1,
+            "handlerP95Ms": 87.59999990463257,
+            "handlerMaxMs": 87.59999990463257,
+            "twoFrameP95Ms": 97.5,
+            "nativeCalls": {
+              "load_scenario": 1,
+              "land_report": 1,
+              "world_geometry": 1,
+              "terrain_template": 1
+            }
+          },
+          {
+            "phase": "group-select",
+            "method": "down",
+            "count": 2,
+            "handlerP95Ms": 0.09999990463256836,
+            "handlerMaxMs": 0.09999990463256836,
+            "twoFrameP95Ms": 38.09999990463257,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "group-select",
+            "method": "up",
+            "count": 2,
+            "handlerP95Ms": 11.5,
+            "handlerMaxMs": 11.5,
+            "twoFrameP95Ms": 38,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "group-move",
+            "method": "down",
+            "count": 1,
+            "handlerP95Ms": 0.09999990463256836,
+            "handlerMaxMs": 0.09999990463256836,
+            "twoFrameP95Ms": 10.400000095367432,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "count": 24,
+            "handlerP95Ms": 6.799999952316284,
+            "handlerMaxMs": 7.200000047683716,
+            "twoFrameP95Ms": 12.899999856948853,
+            "nativeCalls": {
+              "load_scenario": 0,
+              "land_report": 0,
+              "world_geometry": 0,
+              "terrain_template": 0
+            }
+          },
+          {
+            "phase": "group-move",
+            "method": "up",
+            "count": 1,
+            "handlerP95Ms": 90.79999995231628,
+            "handlerMaxMs": 90.79999995231628,
+            "twoFrameP95Ms": 97.90000009536743,
+            "nativeCalls": {
+              "load_scenario": 1,
+              "land_report": 1,
+              "world_geometry": 1,
+              "terrain_template": 1
+            }
+          }
+        ],
+        "events": [
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 7.5,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.20000004768371582
+              },
+              {
+                "key": "map-render",
+                "ms": 6.800000190734863
+              }
+            ],
+            "twoFrameMs": 13.699999809265137
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "down",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 0.2999999523162842,
+            "calls": [],
+            "twoFrameMs": 9.899999856948853
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.6000001430511475,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.400000095367432
+              }
+            ],
+            "twoFrameMs": 11.799999952316284
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.5
+              }
+            ],
+            "twoFrameMs": 11.900000095367432
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 7,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0
+              },
+              {
+                "key": "map-render",
+                "ms": 6.799999952316284
+              }
+            ],
+            "twoFrameMs": 12.5
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.199999809265137,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.099999904632568
+              }
+            ],
+            "twoFrameMs": 11.399999856948853
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.5
+              }
+            ],
+            "twoFrameMs": 11.600000143051147
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.400000095367432
+              }
+            ],
+            "twoFrameMs": 11.5
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.8999998569488525,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0
+              },
+              {
+                "key": "map-render",
+                "ms": 6.799999952316284
+              }
+            ],
+            "twoFrameMs": 12.399999856948853
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.400000095367432,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.400000095367432
+              }
+            ],
+            "twoFrameMs": 11.799999952316284
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.299999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.199999809265137
+              }
+            ],
+            "twoFrameMs": 11.5
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.900000095367432,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.09999990463256836
+              },
+              {
+                "key": "map-render",
+                "ms": 6.6000001430511475
+              }
+            ],
+            "twoFrameMs": 12.600000143051147
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.3999998569488525,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.299999952316284
+              }
+            ],
+            "twoFrameMs": 11.5
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.5
+              }
+            ],
+            "twoFrameMs": 12
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.6000001430511475,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.6000001430511475
+              }
+            ],
+            "twoFrameMs": 11.799999952316284
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.200000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.200000047683716
+              }
+            ],
+            "twoFrameMs": 11.200000047683716
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 7,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.10000014305114746
+              },
+              {
+                "key": "map-render",
+                "ms": 6.700000047683716
+              }
+            ],
+            "twoFrameMs": 12.5
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.199999809265137,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.199999809265137
+              }
+            ],
+            "twoFrameMs": 11.5
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.400000095367432,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.400000095367432
+              }
+            ],
+            "twoFrameMs": 11.799999952316284
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.599999904632568,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0
+              },
+              {
+                "key": "map-render",
+                "ms": 6.5
+              }
+            ],
+            "twoFrameMs": 12.200000047683716
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.099999904632568,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.099999904632568
+              }
+            ],
+            "twoFrameMs": 11.299999952316284
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.5
+              }
+            ],
+            "twoFrameMs": 11.900000095367432
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.3999998569488525,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.299999952316284
+              }
+            ],
+            "twoFrameMs": 11.700000047683716
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.199999809265137,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.199999809265137
+              }
+            ],
+            "twoFrameMs": 11.699999809265137
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.700000047683716,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.10000014305114746
+              },
+              {
+                "key": "map-render",
+                "ms": 6.5
+              }
+            ],
+            "twoFrameMs": 12.100000143051147
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 7.1000001430511475,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 7.1000001430511475
+              }
+            ],
+            "twoFrameMs": 12.700000047683716
+          },
+          {
+            "phase": "habitat-drag",
+            "method": "up",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 87.59999990463257,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 31.59999990463257
+              },
+              {
+                "key": "report_state",
+                "ms": 4.299999952316284
+              },
+              {
+                "key": "terrain_template",
+                "ms": 2.799999952316284
+              },
+              {
+                "key": "land_report",
+                "ms": 10.799999952316284
+              },
+              {
+                "key": "world_geometry",
+                "ms": 0.09999990463256836
+              },
+              {
+                "key": "map-render",
+                "ms": 7.300000190734863
+              },
+              {
+                "key": "land_preview",
+                "ms": 0
+              }
+            ],
+            "twoFrameMs": 97.5
+          },
+          {
+            "phase": "group-select",
+            "method": "motion",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 6.900000095367432,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0
+              },
+              {
+                "key": "map-render",
+                "ms": 6.599999904632568
+              }
+            ],
+            "twoFrameMs": 49.90000009536743
+          },
+          {
+            "phase": "group-select",
+            "method": "down",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 0.09999990463256836,
+            "calls": [],
+            "twoFrameMs": 38.09999990463257
+          },
+          {
+            "phase": "group-select",
+            "method": "up",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 7.400000095367432,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.8999998569488525
+              }
+            ],
+            "twoFrameMs": 38
+          },
+          {
+            "phase": "group-select",
+            "method": "motion",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 6.099999904632568,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.09999990463256836
+              },
+              {
+                "key": "map-render",
+                "ms": 6
+              }
+            ],
+            "twoFrameMs": 24.09999990463257
+          },
+          {
+            "phase": "group-select",
+            "method": "down",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 0.09999990463256836,
+            "calls": [],
+            "twoFrameMs": 17.799999952316284
+          },
+          {
+            "phase": "group-select",
+            "method": "up",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 11.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 10.5
+              }
+            ],
+            "twoFrameMs": 17.700000047683716
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 6.799999952316284,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0
+              },
+              {
+                "key": "map-render",
+                "ms": 6.5
+              }
+            ],
+            "twoFrameMs": 12.900000095367432
+          },
+          {
+            "phase": "group-move",
+            "method": "down",
+            "trusted": true,
+            "dragging": false,
+            "handlerMs": 0.09999990463256836,
+            "calls": [],
+            "twoFrameMs": 10.400000095367432
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 7.200000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.400000095367432
+              }
+            ],
+            "twoFrameMs": 12.900000095367432
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.799999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.700000047683716
+              }
+            ],
+            "twoFrameMs": 12.899999856948853
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.700000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.700000047683716
+              }
+            ],
+            "twoFrameMs": 11
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.400000095367432,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.299999952316284
+              }
+            ],
+            "twoFrameMs": 12.100000143051147
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.900000095367432,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.900000095367432
+              }
+            ],
+            "twoFrameMs": 11
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.099999904632568,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.099999904632568
+              }
+            ],
+            "twoFrameMs": 11.599999904632568
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.200000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.200000047683716
+              }
+            ],
+            "twoFrameMs": 11.5
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.099999904632568,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6.099999904632568
+              }
+            ],
+            "twoFrameMs": 11.599999904632568
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.599999904632568,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.599999904632568
+              }
+            ],
+            "twoFrameMs": 10.5
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.799999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.799999952316284
+              }
+            ],
+            "twoFrameMs": 10.899999856948853
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.700000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.700000047683716
+              }
+            ],
+            "twoFrameMs": 10.799999952316284
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6.400000095367432,
+            "calls": [
+              {
+                "key": "land_preview",
+                "ms": 0.09999990463256836
+              },
+              {
+                "key": "map-render",
+                "ms": 6.200000047683716
+              }
+            ],
+            "twoFrameMs": 11.599999904632568
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.799999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.799999952316284
+              }
+            ],
+            "twoFrameMs": 10.899999856948853
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.900000095367432,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.900000095367432
+              }
+            ],
+            "twoFrameMs": 11.200000047683716
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.799999952316284,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.799999952316284
+              }
+            ],
+            "twoFrameMs": 11.099999904632568
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.700000047683716,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.700000047683716
+              }
+            ],
+            "twoFrameMs": 10.700000047683716
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.8999998569488525,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.799999952316284
+              }
+            ],
+            "twoFrameMs": 11
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.900000095367432
+              }
+            ],
+            "twoFrameMs": 11.299999952316284
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 6,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 6
+              }
+            ],
+            "twoFrameMs": 11.099999904632568
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.599999904632568,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.599999904632568
+              }
+            ],
+            "twoFrameMs": 11
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.900000095367432,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.799999952316284
+              }
+            ],
+            "twoFrameMs": 11.100000143051147
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.5,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.5
+              }
+            ],
+            "twoFrameMs": 10.400000095367432
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.8999998569488525,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.8999998569488525
+              }
+            ],
+            "twoFrameMs": 11.399999856948853
+          },
+          {
+            "phase": "group-move",
+            "method": "motion",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 5.900000095367432,
+            "calls": [
+              {
+                "key": "map-render",
+                "ms": 5.800000190734863
+              }
+            ],
+            "twoFrameMs": 10.700000047683716
+          },
+          {
+            "phase": "group-move",
+            "method": "up",
+            "trusted": true,
+            "dragging": true,
+            "handlerMs": 90.79999995231628,
+            "calls": [
+              {
+                "key": "load_scenario",
+                "ms": 31.5
+              },
+              {
+                "key": "report_state",
+                "ms": 4.400000095367432
+              },
+              {
+                "key": "terrain_template",
+                "ms": 2.799999952316284
+              },
+              {
+                "key": "land_report",
+                "ms": 10.299999952316284
+              },
+              {
+                "key": "world_geometry",
+                "ms": 0.09999990463256836
+              },
+              {
+                "key": "map-render",
+                "ms": 7.099999904632568
+              },
+              {
+                "key": "land_preview",
+                "ms": 0
+              }
+            ],
+            "twoFrameMs": 97.90000009536743
+          }
+        ],
+        "checks": {
+          "exactBrushFootprint": true,
+          "atomicBrush": true,
+          "exactBrushUndoRedo": true,
+          "exactGroupMoveUndo": true,
+          "trustedInput": true
+        }
+      }
+    }
+  ],
+  "sources": {
+    "scripts/mixed-builder-fixture.mjs": "4e79dee038eb65b24e03efda5da282ef1f13f83c088da153501d5d8c7fa14213",
+    "scripts/close-validation-browser.mjs": "d608185532341c5e84cf7f1bc9f98394c4afeafea7c2d89fcce0798b39bcfe09",
+    "scripts/benchmark-builder.mjs": "348cd6e30c750e0a962621369b582fc9eaba73ba45726090d26dd23804c61d81",
+    "scripts/benchmark-editor-gestures.mjs": "08429d6647c119c2a974716cdc39d6a170e3764c7be73acf7534ad497547fbff",
+    "web/editor/index.js": "729ccc257e45648572b8524095f4ad62662612f5d53415234ff7c8b68ee60b1e",
+    "web/editor/map-view.js": "a7e47205c88b7304e0caad5126ec6cb46af33208f85bc8df96c17a35e806037d",
+    "web/editor/document.js": "9e7dc1780dd8a34342d8eb8c39caf9899a0787d4a8ac9d1ed105c539b9dbdb1a"
+  },
+  "browserVersion": "151.0.7922.34",
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 65535,
+        "deviceId": 65535,
+        "vendorString": "Google Inc. (Google)",
+        "deviceString": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+        "driverVendor": "SwANGLE",
+        "driverVersion": "5.0.0"
+      }
+    ],
+    "auxAttributes": {
+      "amdSwitchable": false,
+      "canSupportThreadedTextureMailbox": false,
+      "directRenderingVersion": "",
+      "displayType": "ANGLE_SWIFTSHADER",
+      "glExtensions": "GL_AMD_performance_monitor GL_ANGLE_base_vertex_base_instance_shader_builtin GL_ANGLE_blob_cache GL_ANGLE_client_arrays GL_ANGLE_clip_cull_distance GL_ANGLE_compressed_texture_etc GL_ANGLE_copy_texture_3d GL_ANGLE_depth_texture GL_ANGLE_framebuffer_blit GL_ANGLE_framebuffer_multisample GL_ANGLE_get_image GL_ANGLE_get_serialized_context_string GL_ANGLE_get_tex_level_parameter GL_ANGLE_instanced_arrays GL_ANGLE_memory_object_flags GL_ANGLE_memory_size GL_ANGLE_multi_draw GL_ANGLE_pack_reverse_row_order GL_ANGLE_polygon_mode GL_ANGLE_program_binary_readiness_query GL_ANGLE_program_cache_control GL_ANGLE_read_only_depth_stencil_feedback_loops GL_ANGLE_relaxed_vertex_attribute_type GL_ANGLE_renderability_validation GL_ANGLE_request_extension GL_ANGLE_rgbx_internal_format GL_ANGLE_robust_client_memory GL_ANGLE_robust_fragment_shader_output GL_ANGLE_robust_resource_initialization GL_ANGLE_shader_pixel_local_storage GL_ANGLE_shader_pixel_local_storage_coherent GL_ANGLE_stencil_texturing GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_ANGLE_texture_multisample GL_ANGLE_texture_usage GL_ANGLE_translated_shader_source GL_ANGLE_vulkan_image GL_ANGLE_yuv_internal_format GL_APPLE_clip_distance GL_ARM_rgba8 GL_ARM_shader_framebuffer_fetch GL_ARM_shader_framebuffer_fetch_depth_stencil GL_CHROMIUM_bind_generates_resource GL_CHROMIUM_bind_uniform_location GL_CHROMIUM_copy_compressed_texture GL_CHROMIUM_copy_texture GL_CHROMIUM_lose_context GL_EXT_EGL_image_array GL_EXT_EGL_image_external_wrap_modes GL_EXT_EGL_image_storage GL_EXT_base_instance GL_EXT_blend_minmax GL_EXT_buffer_storage GL_EXT_clear_texture GL_EXT_clip_control GL_EXT_clip_cull_distance GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_conservative_depth GL_EXT_copy_image GL_EXT_debug_label GL_EXT_debug_marker GL_EXT_depth_clamp GL_EXT_discard_framebuffer GL_EXT_disjoint_timer_query GL_EXT_draw_buffers GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_float_blend GL_EXT_frag_depth GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_occlusion_query_boolean GL_EXT_polygon_offset_clamp GL_EXT_read_format_bgra GL_EXT_robustness GL_EXT_sRGB GL_EXT_sRGB_write_control GL_EXT_semaphore GL_EXT_separate_shader_objects GL_EXT_shader_framebuffer_fetch GL_EXT_shader_framebuffer_fetch_non_coherent GL_EXT_shader_non_constant_global_initializers GL_EXT_shader_texture_lod GL_EXT_shadow_samplers GL_EXT_texture_border_clamp GL_EXT_texture_compression_bptc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_compression_s3tc_srgb GL_EXT_texture_cube_map_array GL_EXT_texture_filter_anisotropic GL_EXT_texture_format_BGRA8888 GL_EXT_texture_lod_bias GL_EXT_texture_mirror_clamp_to_edge GL_EXT_texture_rg GL_EXT_texture_sRGB_R8 GL_EXT_texture_sRGB_RG8 GL_EXT_texture_sRGB_decode GL_EXT_texture_shadow_lod GL_EXT_texture_storage GL_EXT_texture_type_2_10_10_10_REV GL_EXT_unpack_subimage GL_KHR_blend_equation_advanced GL_KHR_debug GL_KHR_robust_buffer_access_behavior GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_NV_fence GL_NV_framebuffer_blit GL_NV_pack_subimage GL_NV_pixel_buffer_object GL_NV_polygon_mode GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_NV_shader_noperspective_interpolation GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_EGL_image_external_essl3 GL_OES_EGL_sync GL_OES_compressed_EAC_R11_signed_texture GL_OES_compressed_EAC_R11_unsigned_texture GL_OES_compressed_EAC_RG11_signed_texture GL_OES_compressed_EAC_RG11_unsigned_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_compressed_ETC2_RGB8_texture GL_OES_compressed_ETC2_RGBA8_texture GL_OES_compressed_ETC2_punchthroughA_RGBA8_texture GL_OES_compressed_ETC2_punchthroughA_sRGB8_alpha_texture GL_OES_compressed_ETC2_sRGB8_alpha8_texture GL_OES_compressed_ETC2_sRGB8_texture GL_OES_compressed_paletted_texture GL_OES_copy_image GL_OES_depth24 GL_OES_depth32 GL_OES_depth_texture GL_OES_depth_texture_cube_map GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_get_program_binary GL_OES_mapbuffer GL_OES_packed_depth_stencil GL_OES_required_internalformat GL_OES_rgb8_rgba8 GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_multisample_interpolation GL_OES_standard_derivatives GL_OES_surfaceless_context GL_OES_texture_3D GL_OES_texture_border_clamp GL_OES_texture_cube_map_array GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_vertex_array_object GL_OES_vertex_half_float GL_OES_vertex_type_10_10_10_2 GL_OVR_multiview GL_OVR_multiview2 GL_QCOM_texture_lod_bias ",
+      "glImplementationParts": "(gl=egl-angle,angle=swiftshader)",
+      "glRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+      "glResetNotificationStrategy": 33362,
+      "glVendor": "Google Inc. (Google)",
+      "glVersion": "OpenGL ES 3.0 (ANGLE 2.1.28222 git hash: 6dab7c7e742b)",
+      "glWsExtensions": "",
+      "glWsVendor": "",
+      "glWsVersion": "",
+      "inProcessGpu": false,
+      "initializationTime": 0.036582,
+      "isAsan": false,
+      "isClangCoverage": false,
+      "jpegDecodeAcceleratorSupported": false,
+      "maxMsaaSamples": "4",
+      "optimus": false,
+      "passthroughCmdDecoder": true,
+      "pixelShaderVersion": "3.00",
+      "processCrashCount": 0,
+      "sandboxed": false,
+      "skiaBackendType": "None",
+      "subpixelFontRendering": true,
+      "targetCpuBits": 64,
+      "vertexShaderVersion": "3.00",
+      "visibilityCallbackCallCount": 0
+    },
+    "featureStatus": {
+      "2d_canvas": "unavailable_software",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "disabled_software",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "disabled_off",
+      "rasterization": "disabled_software",
+      "raw_draw": "disabled_off_ok",
+      "skia_graphite": "disabled_off",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "disabled_software",
+      "video_encode": "disabled_software",
+      "webgl": "unavailable_software",
+      "webgpu": "unavailable_software",
+      "webnn": "unavailable_software"
+    },
+    "driverBugWorkarounds": [],
+    "videoDecoding": [],
+    "videoEncoding": []
+  },
+  "browser": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+    "dpr": 1
+  },
+  "cleanup": {
+    "ok": true
+  }
+}

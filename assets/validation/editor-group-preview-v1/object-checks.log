@@ -1,0 +1,2 @@
+PASS group copy uses distinct stable identities and native-valid remapped stores; move preserves ownership; exact whole-group undo/redo.
+PASS connected group copy/move: remapped pipe/pump/cable identities, equipment wear, translated paths, excluded outside links/truck, native placement and exact atomic undo/redo.

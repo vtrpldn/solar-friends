@@ -116,3 +116,5 @@
 #creator-biome-dialog .dialog-actions{position:sticky;bottom:0;z-index:1;background:#e8d9b2;border-top:1px solid #b39866;padding:12px 0 0;box-shadow:0 -7px 9px #e8d9b2}
 
 .creator-resident-opening{border-top:1px solid #c5ad7b;padding-top:12px;margin:14px 0}.creator-resident-opening h3{font-size:13px}
+
+.creator-placement-status{position:absolute;top:52px;left:14px;max-width:calc(100% - 220px);margin:0;padding:9px 12px;background:#f5e5ba;border:1px solid #a88b55;border-bottom:3px solid #8c6a3c;border-radius:4px;color:#4f3920;font:bold 12px 'Trebuchet MS',sans-serif;pointer-events:none}.creator-placement-status[hidden]{display:none}

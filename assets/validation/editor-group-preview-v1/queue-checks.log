@@ -1,0 +1,2 @@
+PASS group-preview latest-cell coalescing, one in-flight check, no redundant cell checks, cancellation/document isolation and unavailable fallback.
+PASS stalled native preview terminates and leaves placement checking to commit.
