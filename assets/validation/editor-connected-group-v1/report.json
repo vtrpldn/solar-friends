@@ -1,0 +1,26 @@
+{
+  "sources": {
+    "assets/validation/editor-scene-layers-v1/authored.solar-scenario": "5b701bb66d9f1d1fb906c0fc118f8d2ecbfede9b0142a54511e9e84fb73d6a75",
+    "scripts/verify-editor-connected-group.mjs": "2b44d13a7afab994baa29e123d0480127e36f8906ec904c53a302a798727de3d",
+    "web/editor/objects.js": "22b3b2d93d51cb3310ea70e22130097b77f44ce2a5d9094bc5cac50a9257d9ae",
+    "web/editor/index.js": "729ccc257e45648572b8524095f4ad62662612f5d53415234ff7c8b68ee60b1e",
+    "web/pkg/solar_friends_bg.wasm": "8b6430ab33cb6db111508634fcd0fe09852849a5dc8fe906ee4a925f06c6f7f1"
+  },
+  "offset": [
+    0,
+    -12
+  ],
+  "copyInputThroughSavedMs": 684.818917,
+  "checks": {
+    "trustedMarqueeNineBuildings": true,
+    "selectionDoesNotEdit": true,
+    "internalPipePumpCableRemapped": true,
+    "equipmentWearRetained": true,
+    "originalsUnchanged": true,
+    "oneUndoStep": true,
+    "connectedGroupMoveExact": true,
+    "exactUndoRedoReload": true,
+    "browserErrors": []
+  },
+  "scope": "Nine-building connected quarter imported through regular player UI, trusted Shift drag, Copy group placement and Move group drag. Timing includes autosave debounce; not an interaction latency distribution or maximum-group performance gate."
+}
