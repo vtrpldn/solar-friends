@@ -1,3 +1,4 @@
+import {closeValidationBrowser} from './close-validation-browser.mjs';
 import assert from 'node:assert/strict';
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
@@ -64,4 +65,4 @@ try{
  for(const [path,hash]of Object.entries(inputs))assert.equal(sha(await readFile(path)),hash,path);
  await page.evaluate(async()=>{const r=window.natureReview;r.game.free();await r.art.appearances.dispose();});
  report.complete=true;report.browserErrors=errors;await writeFile(`${output}/report.json`,JSON.stringify(report,null,2)+'\n');console.log(`PASS captured ${species*9} nature size/biome contexts. Visual inspection remains required.`);
-}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
+}finally{await closeValidationBrowser(browser,server);}

@@ -1,0 +1,150 @@
+{
+  "sourceCommit": "e76dfff",
+  "why": "Complete the missing close-rain nature inspection and preserve the unresolved low-grass readability finding.",
+  "scope": "Twenty native nature entries at minimum/unit/maximum size across three terrain palettes, zoom 1.8, native rain, shared game painters with home/road/Iara references.",
+  "inspectedBoards": [
+    {
+      "file": "mata-atlantica-zoom-1.8-rain-group-1.png",
+      "sha256": "d12610c834a743cd702e115e5cd927a7654366c2d091fb5ea436ec7181b20113",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-rain-group-2.png",
+      "sha256": "9524f79801ac30f770244a66c8e8499d823bca834287f239374e07375a84a25f",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-rain-group-3.png",
+      "sha256": "1f6fbb0162bba76546a0a508ecc0969eb27fba60b377d1a78b9b466565995675",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-rain-group-4.png",
+      "sha256": "baefcc52da033ecd72d89ca79d182fa4efe5b738ca56a1dee24114ebbbaed0cf",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-rain-group-5.png",
+      "sha256": "d19473d431b0e542db4534ce75307cb9fd77e21a0c88c8217336e4f92ac14e75",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-rain-group-6.png",
+      "sha256": "fbd9b9e67c944f2cba8149554411f9a40598e523b998c1f886afcda6192f2324",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "mata-atlantica-zoom-1.8-rain-group-7.png",
+      "sha256": "135ff0084696cba64811657f713ee89146c8ff5a20b22e128dd36720a71973ff",
+      "compositions": 6,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-rain-group-1.png",
+      "sha256": "fd6a48a0d902eb4dad4b6c6c5a5a4d1fa550f1fa9a6657ee5e860c118acfc8bc",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-rain-group-2.png",
+      "sha256": "2b712489b35cbb309f4eb736c3a1d7645501f35409aa07bb4ab3a0558fd541f4",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-rain-group-3.png",
+      "sha256": "0172f1192b6acd5406367dc705aa09a4210ac0edc1fc99243291fedab74096ee",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-rain-group-4.png",
+      "sha256": "11c332c10f242f040ee49291f8b115cd1bf18a9dc7aede8b27eb67b9aaab4117",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-rain-group-5.png",
+      "sha256": "e7b6190e517f0b215bfb676f1cd67e03900ec8d61938ba8733a2622cb0792266",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-rain-group-6.png",
+      "sha256": "390a0dd80235bb877eaa61e256a43dc51387e78ebbdcfab3c4ca600617dff7ee",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "cerrado-zoom-1.8-rain-group-7.png",
+      "sha256": "2d2d0feec1f2dda5af0bfc17951692332578806853d86436417ec841ef06ca73",
+      "compositions": 6,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-rain-group-1.png",
+      "sha256": "e70bf151ea649908b7dd09239bdecc881bf1c84431fc82a2bb1b0f8c1336e621",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-rain-group-2.png",
+      "sha256": "fabe998fa48e93e2c0d2bc93d2a1f453b3dc5a01f661f312cba984f5e072dc44",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-rain-group-3.png",
+      "sha256": "ddc02c003ac2ec357aacc86e95d4eefc420feaaa07d017d9755dc66bdc0501c6",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-rain-group-4.png",
+      "sha256": "868b6bf332d9494eadf1147d460e6b1bc52ce4ef538b54179d89b529b99d7440",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-rain-group-5.png",
+      "sha256": "075b3a13d53b8aa8e2ea8493b75339bb01c16e4ab4d3aa9a5c1c33d233006db0",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-rain-group-6.png",
+      "sha256": "d8117b4d12eb5c8e37e69c1d50dc2ef179e547adffdb276955b6777617ba4cfc",
+      "compositions": 9,
+      "visuallyInspected": true
+    },
+    {
+      "file": "caatinga-zoom-1.8-rain-group-7.png",
+      "sha256": "645e3b868674984d5b939089b754d181547627944013a96f71b0e0b8e74b57d6",
+      "compositions": 6,
+      "visuallyInspected": true
+    }
+  ],
+  "observations": [
+    "All 21 boards individually inspected, 180 compositions.",
+    "No additional clipping, detached bases, opaque ground islands or obvious scale mismatch observed in these controlled static scenes.",
+    "Trees, rocks, cactus and taller shrubs remain distinct in rain.",
+    "Minimum Cerrado bunchgrass has poor separation against all three textured ground palettes; low grasses overall remain an open readability issue."
+  ],
+  "verdicts": {
+    "captureCoverage": "pass",
+    "clippingAndGroundContactInCapturedScenes": "pass",
+    "lowGrassReadability": "needs correction"
+  },
+  "limits": [
+    "Controlled static scenes, not moving-camera rain, mixed clusters, arbitrary neighbors, habitat transitions or species suitability.",
+    "No resident animation, building catalog, performance or full release acceptance claim."
+  ],
+  "fullBoardsLocal": "artifacts/nature-close-rain-current",
+  "retainedScreens": "Three group-5 boards retaining the bunchgrass issue; full reviewed inventory and source/board hashes in capture and review records."
+}
