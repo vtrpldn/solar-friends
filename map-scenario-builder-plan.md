@@ -459,3 +459,7 @@ The live crop caller now passes actual building illumination through the shared 
 ### Live greenhouse light switching
 
 A public scenario import/Test village check now exercises the actual game Power checkbox at 21:00: enabled/off/enabled delivers illumination 1/0/1 through the main caller into the shared crop painter. The observer records painter arguments without replacing its rendering body; no game-state mutation is used. No page errors and successful browser/server cleanup. Full desktop powered capture individually inspected. Evidence: `assets/validation/greenhouse-crop-lighting-v1/live-power-check.json` and `live-powered.png`. This uses comfortable Sandbox supply, not wired-grid connection or battery depletion; those and the remaining art gates stay open.
+
+### Corrected powered greenhouse review across all biomes
+
+Individually inspected the remaining six Cerrado/Caatinga boards, completing all nine boards and 75 normal-zoom controlled powered-night greenhouse compositions after the illumination correction. No additional grounding, frame-alignment or proportion mismatch observed across empty/young/maturing/ready/dry states for six crops. Young and dry-stress cues remain subdued behind glass; nighttime readability is still open. Board hashes and representative images are retained in `assets/validation/greenhouse-crop-lighting-v1/`. This closes only this composition-review slice, not rain/other zooms, outdoor/unpowered readability, wired-power behaviour or full art acceptance.

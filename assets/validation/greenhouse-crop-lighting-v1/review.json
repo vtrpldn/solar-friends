@@ -14,7 +14,37 @@
       "file": "mata-atlantica-zoom-1-powered-night-group-3.png",
       "sha256": "b970e4860c2697163d999f53a41874d119356d80639e43a861cc68c4f0033d2b",
       "inspection": "individually inspected; coherent crop placement and frame alignment; young plants remain subtle behind glass"
+    },
+    {
+      "file": "cerrado-zoom-1-powered-night-group-1.png",
+      "sha256": "b6384de645faedd663625d5524adb1e31114acfd60818f2f62d9bdfb64721e0a",
+      "inspection": "individually inspected; coherent grounding, crop placement and frame alignment; young and dry-stressed cues remain subdued behind glass"
+    },
+    {
+      "file": "cerrado-zoom-1-powered-night-group-2.png",
+      "sha256": "291f995735526c3227117a7e51de7b11f724bfa330e1bf4bb2bf0eb8eef7a747",
+      "inspection": "individually inspected; coherent grounding, crop placement and frame alignment; young and dry-stressed cues remain subdued behind glass"
+    },
+    {
+      "file": "cerrado-zoom-1-powered-night-group-3.png",
+      "sha256": "63b4cb997a130379419e6dc128d579e9df25495ff6c7db42ea103bb25ba7197b",
+      "inspection": "individually inspected; coherent grounding, crop placement and frame alignment; young and dry-stressed cues remain subdued behind glass"
+    },
+    {
+      "file": "caatinga-zoom-1-powered-night-group-1.png",
+      "sha256": "712add10ddd4382da923bbcdda37cbd7787b7b16bc3ceed476512e71dbfaa952",
+      "inspection": "individually inspected; coherent grounding, crop placement and frame alignment; young and dry-stressed cues remain subdued behind glass"
+    },
+    {
+      "file": "caatinga-zoom-1-powered-night-group-2.png",
+      "sha256": "228ed9eeecc953bd751797407a9fabfa505e0ec93d8b84015b9dd80fbcbcad9b",
+      "inspection": "individually inspected; coherent grounding, crop placement and frame alignment; young and dry-stressed cues remain subdued behind glass"
+    },
+    {
+      "file": "caatinga-zoom-1-powered-night-group-3.png",
+      "sha256": "9a0eed04d2fb96d4ac56e38002397dab809dc2162a8c8d9125c40aff6bc98492",
+      "inspection": "individually inspected; coherent grounding, crop placement and frame alignment; young and dry-stressed cues remain subdued behind glass"
     }
   ],
-  "scope": "25 controlled powered-night greenhouse crop states in Mata Atlantica at normal zoom. Other two biome captures are not yet visually inspected. Pixel checks cover all six crops with dimming; not a live native power-switch test. Outdoor and unpowered night readability remains open."
+  "scope": "All nine boards individually inspected: 75 controlled powered-night greenhouse crop states across Mata Atlantica, Cerrado and Caatinga at normal zoom. Three Mata boards and one representative board per additional biome retained here; all board hashes recorded. Pixel checks cover six crops with dimming. Public Sandbox power toggling separately verified. Wired circuits, battery depletion, rain, other zooms, outdoor/unpowered night readability and full art acceptance remain open."
 }
