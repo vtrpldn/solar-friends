@@ -1,0 +1,57 @@
+{
+  "complete": true,
+  "summary": {
+    "kind": "compound",
+    "edits": 80,
+    "cells": 1080,
+    "steps": 64,
+    "bytes": 8170913,
+    "maxEditMs": 35.40220899999986
+  },
+  "publicUndo": 64,
+  "publicRedo": 64,
+  "independentWholeDefinitions": true,
+  "bothLimitsThroughout": true,
+  "branchClearsRedo": true,
+  "exactReload": true,
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.40612500000861473
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 3.3275419999845326
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 65.92829199999687
+    }
+  ],
+  "inputs": {
+    "scripts/verify-editor-compound-history.mjs": "e3396eacff4735107a49893d50c7c7c340cb4794040689374be2be85693edb45",
+    "scripts/maximum-history-fixture.mjs": "4f097d7c296dae76a9d929f55ac6f5d11c50340666855bcc3fdc2ab4894f4be3",
+    "web/editor/document.js": "cec13374b476713325c38c0b5480d99fbe6c46b36e88c1d533ed965af407d1a1",
+    "web/editor/index.js": "6d331f156cb845780d6b4985bbb4aca76fb9eb12567de816a659c7694241df1f",
+    "web/editor/journal.js": "e5ee57626eecacd22dda40297c98d25dffe20c7cd667564885a5bb97cf61d9e0",
+    "web/editor/prepare-draft.js": "150d4255d1401535aab61f6928b52ebc45d58e4354d630285f59685e6befb4b9",
+    "web/editor/run-preparation.js": "8e50149b09a92b88b959425f6a0d804e52ff2b306f04f748f558a9f481f536e5",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "scope": "Isolated desktop Chromium public opening, complete history traversal, branching and durable reload. Initial 80 edits seeded via document/library APIs. Not public long-stroke creation or responsiveness/hardware acceptance."
+}

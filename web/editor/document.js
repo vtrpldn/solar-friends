@@ -32,7 +32,7 @@ function applyStep(raw,step,forward){
 
 // A lower bound on serialized JSON size avoids copying an obviously oversized
 // journal. Exact format, value and byte checks still run in the shared restore.
-function boundedHistoryCopy(history){
+function boundedHistorySnapshot(history){
   const {past,future,format=1}=history;
   if(!Array.isArray(past)||!Array.isArray(future)||past.length+future.length>MAX_HISTORY_STEPS)throw Error('Invalid history.');
   const journal={format,past,future},ancestors=new WeakSet();let remaining=MAX_HISTORY_BYTES+1024;
@@ -47,12 +47,14 @@ function boundedHistoryCopy(history){
     for(const key of keys){if(!array)take(key.length+3);scan(value[key]);}
     ancestors.delete(value);
   }
-  scan(journal);return JSON.parse(JSON.stringify(journal));
+  // Capture immutable strings before the first yield. Parsing each entry later
+  // avoids one large object-allocation pause without retaining caller objects.
+  scan(journal);return {format,past:past.map(step=>JSON.stringify(step)),future:future.map(step=>JSON.stringify(step))};
 }
 function ownCheckpoint(checkpoint){
   if(checkpoint?.schema!==1||!Number.isSafeInteger(checkpoint.revision)||checkpoint.revision<0)throw Error('This draft checkpoint is not supported.');
   const owned={schema:1,revision:checkpoint.revision,definition:definition(encode(checkpoint.definition))};
-  if(checkpoint.history){try{owned.history=boundedHistoryCopy(checkpoint.history);}catch{owned.history={format:0,past:[],future:[]};}}
+  if(checkpoint.history){try{owned.history=boundedHistorySnapshot(checkpoint.history);}catch{owned.history={format:0,past:[],future:[]};}}
   return owned;
 }
 
@@ -194,7 +196,7 @@ export class EditorDocument extends EventTarget{
         };
         const normalized=[[],[]],sizes=[[],[]];let totalSize=0;
         for(const [index,list]of [past,future].entries())for(const entry of list){
-          const step=normalize(entry),stepSize=historySize(step);totalSize+=stepSize;
+          const step=normalize(owned?JSON.parse(entry):entry),stepSize=historySize(step);totalSize+=stepSize;
           if(totalSize>MAX_HISTORY_BYTES)throw Error('Invalid history size.');
           normalized[index].push(step);sizes[index].push(stepSize);yield;
         }
