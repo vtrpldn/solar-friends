@@ -1,0 +1,75 @@
+{
+  "change": "Heavy weather edits/reset use cancellable preparation. Cancel/failure forces visible fields back to the current draft. Float-noise display uses a compact decimal with the same native float, without changing authored data.",
+  "screenshot": {
+    "file": "weather-ready.png",
+    "sha256": "11f12bffb6ead141582c9ff41f359d1f669b3073d30a68707e32aec35eab9ec6",
+    "individuallyInspected": true,
+    "finding": "Biome remains Mata Atlantica and drying-factor defaults display readable 0.9 / 1.25 rather than binary-noise decimals."
+  },
+  "observations": {
+    "handlers": [
+      {
+        "phase": "season_days",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.1000001430511475
+      },
+      {
+        "phase": "wet_rain_chance",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.1000001430511475
+      },
+      {
+        "phase": "dry_rain_chance",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.200000047683716
+      },
+      {
+        "phase": "wet_evaporation",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3
+      },
+      {
+        "phase": "dry_evaporation",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.0999999046325684
+      },
+      {
+        "phase": "intro_days",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3
+      },
+      {
+        "phase": "reset",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 3.200000047683716
+      }
+    ],
+    "mainThreadCompiles": 0
+  },
+  "additionalChecks": [
+    {
+      "command": "node scripts/verify-weather-display.mjs",
+      "observedExitCode": 0,
+      "scope": "20,000 native-equivalent/idempotent formatting samples, all biome defaults, fine values and non-finite/overflow/signed-zero preservation",
+      "sha256": "4d4ea85e5ebc540bd46132f18fd6d8774e062485a41b26ec71267d8d849dd9e3"
+    },
+    {
+      "command": "node scripts/verify-creator-weather.mjs",
+      "observedExitCode": 0,
+      "sha256": "fb88a877a417700cb82deec767bd7875105a66760999c8257973f00b4e82b736"
+    },
+    {
+      "command": "node scripts/verify-creator-biome-change.mjs",
+      "observedExitCode": 0,
+      "sha256": "d1fce9805ecffe572b22fed98603fce7628bd5fb568378b4df214d3b790ff89f"
+    }
+  ],
+  "limits": "One combined maximum Mata Atlantica fixture for timing/cancellation; ordinary weather and biome-change regressions complement it. Not a full seasonal cycle or all biome/seed/heavy-profile combinations, maximum history, sustained display pacing, memory or full release acceptance."
+}

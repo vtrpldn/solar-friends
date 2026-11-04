@@ -714,7 +714,7 @@ try{
   journalEditor=new JournalEditor($('creator-journal-fields'),{catalog,change,undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo})});
   relationshipsEditor=new RelationshipsEditor($('creator-relationships-fields'),{presets:catalog.resident_presets,art,change});
   residentsEditor=new ResidentsEditor($('creator-residents-fields'),{presets:catalog.resident_presets,occupations:catalog.occupations,catalog,change,source:()=>current.doc.value,placeStart:id=>{map.placingResident=id;setTool('resident-start');map.selectResident(id);},locateStart:(id,position)=>{setTool('select');map.selectResident(id);map.centerAt(...position);}});
-  weatherEditor=new WeatherEditor($('creator-weather-fields'),{defaults:catalog.weather,biomes:catalog.biomes,change});
+  weatherEditor=new WeatherEditor($('creator-weather-fields'),{defaults:catalog.weather,biomes:catalog.biomes,change:changeMap});
   geologyEditor=new GeologyEditor($('creator-geology-fields'),{change,center:()=>map.view.center,defaults:JSON.parse(engine.scenario_template('story')).map.deposits,focus:p=>{map.centerAt(p.x+(p.width-1)/2,p.y+(p.height-1)/2);$('creator-land-layer').value=p.material;$('creator-land-layer').dispatchEvent(new Event('change'));}});
   biomeEditor=new BiomeEditor($('creator-biome-setting-fields'),{catalog,art,change,notify:toast,source:()=>({id:current.id,revision:current.doc.revision,definition:report.ok?freezeCreation(current.doc.value,{terrain:terrainBase,snapshot:map.snapshot,catalog}):current.doc.value})});
   new LandscapeRegeneration($('creator-biome-setting-fields'),{art,source:()=>({id:current.id,revision:current.doc.revision,definition:current.doc.value}),change,notify:toast});

@@ -1,0 +1,150 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-editor-heavy-weather.mjs": "a833d25ec1fd5b604b95b06762ad42fa8150e2eaf35d0ac3790299e2e0318fbb",
+    "web/editor/index.js": "e594788d2dd67020fd108445f3f7a4e3359d97cd6dc54f8573c1a449050b445e",
+    "web/editor/weather.js": "3251cda1adfcc2f8c7ab3f588089b77df2049b046b16c05eeaef8446cf7b97ba",
+    "web/editor/prepare-edit.js": "87c99d35de13531a9755d278197c48245affadf310f28f945311847f6c91b6c3",
+    "web/scenario-prepare-worker.js": "addc75637a2670f8d8d69878508c5b9eec13ad599eb2d3f699f18fa18dd6083c",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "load": {
+    "authoredNature": 1000,
+    "species": "macambira",
+    "size": 0.6499999761581421,
+    "routes": 64,
+    "routeCells": 80,
+    "routeAttempts": 127
+  },
+  "cases": [
+    "season_days",
+    "wet_rain_chance",
+    "dry_rain_chance",
+    "wet_evaporation",
+    "dry_evaporation",
+    "intro_days"
+  ],
+  "observations": {
+    "native": [
+      {
+        "phase": "season_days",
+        "key": "restore",
+        "ms": 20.40000009536743
+      },
+      {
+        "phase": "wet_rain_chance",
+        "key": "restore",
+        "ms": 9
+      },
+      {
+        "phase": "dry_rain_chance",
+        "key": "restore",
+        "ms": 9.400000095367432
+      },
+      {
+        "phase": "wet_evaporation",
+        "key": "restore",
+        "ms": 9.100000143051147
+      },
+      {
+        "phase": "dry_evaporation",
+        "key": "restore",
+        "ms": 9.400000095367432
+      },
+      {
+        "phase": "intro_days",
+        "key": "restore",
+        "ms": 9.899999856948853
+      },
+      {
+        "phase": "reset",
+        "key": "restore",
+        "ms": 9
+      }
+    ],
+    "handlers": [
+      {
+        "phase": "season_days",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.1000001430511475
+      },
+      {
+        "phase": "wet_rain_chance",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.1000001430511475
+      },
+      {
+        "phase": "dry_rain_chance",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.200000047683716
+      },
+      {
+        "phase": "wet_evaporation",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3
+      },
+      {
+        "phase": "dry_evaporation",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.0999999046325684
+      },
+      {
+        "phase": "intro_days",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3
+      },
+      {
+        "phase": "reset",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 3.200000047683716
+      }
+    ]
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.4169160000019474
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 3.1147499999933643
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 38.86504100000457
+    }
+  ],
+  "checks": [
+    "six fields cancel with exact checkpoint and visible-value restoration",
+    "one-step exact undo/redo and biome identity",
+    "landscape reset cancels via Escape and restores exact biome defaults when committed",
+    "worker failure preserves checkpoint and field",
+    "invalid profile remains editable and Undo repairs readiness",
+    "exact reload and live playtest weather profile/editor return",
+    "no main-thread compile in measured field/reset phases",
+    "no page errors and bounded cleanup"
+  ],
+  "scope": "One headless combined maximum Mata Atlantica fixture and six weather fields/reset. Not every biome/seed, forecast cycle, maximum history, sustained hardware timing or memory acceptance."
+}
