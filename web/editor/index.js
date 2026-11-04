@@ -1,3 +1,4 @@
+import {prepareNightInspection} from './prepare-inspection.js';
 import {prepareDraft,prepareRecoveredDraft} from './prepare-draft.js';
 import {heavyDraft} from './heavy-draft.js';
 import {prepareEdit} from './prepare-edit.js';
@@ -77,6 +78,7 @@ let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEdi
 let expandedReview=false,outlook;
 let landReport=null,landReportKey=null,mapPreviewKey=null,landSampleKey='',hoverCell=null;
 let accessReport=null,accessReportKey=null,waterAccessReport=null,waterAccessKey=null;
+let inspectionSerial=0;
 let releasePublication=null,preparedEdit=null,engineDefinition=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -231,8 +233,10 @@ function refresh(){
     landReportKey=nextLandKey;
   }
   landSampleKey='';
+  const inspectionChanged=!!map.inspection;
+  if(inspectionChanged){inspectionSerial++;map.inspection=null;$('creator-inspection').value='day';$('creator-inspection-note').hidden=true;}
   map.landOverlay=overlayTiles();
-  map.set(d,snapshot,undefined,{paint:!report.ok||nextMapKey!==mapPreviewKey});mapPreviewKey=nextMapKey;
+  map.set(d,snapshot,undefined,{paint:inspectionChanged||!report.ok||nextMapKey!==mapPreviewKey});mapPreviewKey=nextMapKey;
   minimap.set(landReport,geometry);
   geologyEditor.render(d,landReport);
   weatherEditor.render(d);
@@ -615,6 +619,11 @@ function wire(){
   $('creator-library').onclick=()=>showLibrary().catch(e=>toast(e.message));
   $('creator-library-close').onclick=()=>{if(current)$('creator-library-dialog').close();else location.assign('./');};
   $('creator-library-dialog').addEventListener('cancel',e=>{if(!current){e.preventDefault();location.assign('./');}});
+  $('creator-inspection').onchange=async e=>{
+    if(!current)return;const ctx=current,revision=ctx.doc.revision,mode=e.target.value,serial=++inspectionSerial,previous=map.inspection;
+    try{const result=mode==='night'?await prepareNightInspection(ctx.doc.value):null;if(current!==ctx||ctx.doc.revision!==revision||serial!==inspectionSerial)return;map.inspection=mode==='day'?null:{mode,...result};map.render();$('creator-inspection-note').hidden=mode==='day';$('creator-inspection-note').textContent=mode==='night'?'Visual inspection · 22:00 opening power · no time passes':'Visual inspection · example rainfall, not a forecast · no time passes';}
+    catch(error){if(current===ctx&&serial===inspectionSerial){e.target.value=previous?.mode??'day';toast(error.message);}}
+  };
   $('creator-zoom-in').onclick=()=>map.setZoom(map.view.zoom+.15);$('creator-zoom-out').onclick=()=>map.setZoom(map.view.zoom-.15);$('creator-center').onclick=()=>map.centerAt(...current.doc.value.map.camp);
   $('creator-test').onclick=async()=>{
     if(!current||busy||!report.ok)return;busy=true;$('creator-test').disabled=true;status('Preparing the playtest…');

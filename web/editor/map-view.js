@@ -1,3 +1,8 @@
+import {unlitFilter,buildingLighting} from '../power.js';
+import {nightAmount} from '../building-art.js';
+import {drawGroundWeather,drawWeatherAir} from '../weather.js';
+import {drawNightEmission,createDepthLightPass} from '../night-lighting.js';
+import {paintWorldAtmosphere} from '../world-atmosphere.js';
 export const MIN_EDITOR_ZOOM=.18;
 import {newStartingBuilding} from './objects.js';
 import {GroupPreview} from './group-preview.js';
@@ -30,12 +35,14 @@ const image=file=>{const value=new Image();value.src=new URL('../art/'+file,impo
 export async function loadEditorArt(){
   const images=Object.fromEntries(Object.entries(allBuildingArt).map(([key,art])=>[key,image(art.file)]));
   for(const [kind,art]of Object.entries(allBuildingArt))if(art.emptyFile)images[kind+':empty']=image(art.emptyFile);
+  const nightImages=Object.fromEntries(Object.entries(allBuildingArt).map(([key,art])=>[key,image(art.nightFile)]));
+  for(const [kind,art]of Object.entries(allBuildingArt))if(art.emptyFile)nightImages[kind+':empty']=images[kind+':empty'];
   const terrain=image('terrain-atlas.png'),forest=image('mata-atlantica-atlas.png'),details=image('landscape-details.png');
   const residents=residentLookKeys.map(name=>image(`animations/${name}.png`));
   await Promise.all([loadRegionalArt(),loadCropArt(),loadChickenArt()]);
-  await Promise.all([...Object.values(images),terrain,forest,details,...residents,economyImage,batteryImage].map(i=>i.decode()));
+  await Promise.all([...Object.values(images),...Object.values(nightImages),terrain,forest,details,...residents,economyImage,batteryImage].map(i=>i.decode()));
   const appearances=createResidentAppearanceLibrary({base:residents});
-  return {images,terrain,forest,details,residents,appearances};
+  return {images,nightImages,terrain,forest,details,residents,appearances};
 }
 const catalogMaterial=material=>['timber','bamboo','earth','stone','salvage'].indexOf(material);
 const keyFor=b=>b.kind!=='home'?b.kind:b.recipe==='local'?'home-veranda':b.appearance||(b.recipe==='adobe'?'adobe-gable':'home');
@@ -219,7 +226,7 @@ export class EditorMap {
   }
   render(){
     if(!this.document||!this.snapshot)return;
-    const {canvas,ctx:c,view,art}=this,r=this.preview?{width:480,height:300}:canvas.getBoundingClientRect(),width=r.width,height=r.height;
+    const {canvas,view,art}=this;let c=this.ctx;const r=this.preview?{width:480,height:300}:canvas.getBoundingClientRect(),width=r.width,height=r.height;
     if(!width||!height)return;
     const dpr=this.preview?1:Math.min(devicePixelRatio,2),w=Math.round(width*dpr),h=Math.round(height*dpr);
     if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
@@ -237,10 +244,14 @@ export class EditorMap {
     this.project=(x,y)=>project(x,y,this.origin,this.scale);
     canvas.dataset.origin=JSON.stringify(this.origin);canvas.dataset.scale=this.scale;
     canvas.dataset.center=JSON.stringify(view.center);canvas.dataset.overlayCells=String(this.landOverlay?.length||0);
+    const mode=this.inspection?.mode??'day',night=mode==='night'?nightAmount(1320):0,power=this.inspection?.power;
+    canvas.dataset.inspection=mode;canvas.dataset.inspectionLights=String(night?(power?.connections??[]).filter(p=>p.light_level>0).length:0);
+    const conditions={rain:mode==='rain'?.85:0,wet:mode==='rain'?.8:0,clouds:mode==='rain'?.8:0},weatherView={conditions,buildings:this.snapshot.village.buildings,project:this.project,scale:this.scale,time:1.25,reducedMotion:false,map:this.document.map,width,height};
     c.fillStyle='#dfe6c9';c.fillRect(0,0,width,height);
     const land=this.snapshot.village.land;
     const {key,request}=this.landPaint,ground=this.groundFor(key,request);
-    if(ground)paintWorldGround(c,ground,this.origin,this.scale);
+    if(ground){c.save();c.filter=unlitFilter(night);paintWorldGround(c,ground,this.origin,this.scale);c.restore();}
+    const weatherGround=drawGroundWeather(c,weatherView);canvas.dataset.weatherPuddles=String(weatherGround.puddles);
     for(const tile of this.landOverlay||[])this.polygon(footprintCorners('road',tile.x,tile.y),tile.fill,tile.stroke);
     if(view.grid){
       c.strokeStyle='#fff9d34d';c.lineWidth=.7;c.beginPath();
@@ -260,32 +271,35 @@ export class EditorMap {
     const groupBlocked=this.groupPlacement?.allowed===false,groupFill=groupBlocked?'#c65e4266':'#f4df9a66',groupStroke=groupBlocked?'#f39b80':'#fff3c4';
     const selectedBuildings=new Set(this.selection());
     const structures=this.document.start.buildings.slice(0,256).filter(b=>Number.isFinite(b.x)&&Number.isFinite(b.y)&&allBuildingArt[b.kind]);
-    const objects=land.vegetation.filter(t=>!t.cleared).map(t=>({depth:t.x+t.y,draw:()=>paintWorldTree(c,t,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details})}));
+    const objects=land.vegetation.filter(t=>!t.cleared).map(t=>({depth:t.x+t.y,draw:()=>paintWorldTree(c,t,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details,night})}));
     for(const b of structures)objects.push({depth:b.x+b.y,draw:()=>{
-      if(selectedBuildings.has(b.id))this.polygon(footprintCorners(b.kind,b.x,b.y),'#efc86d55','#ffe39a');
-      paintWorldBuilding(c,{key:keyFor(b),x:b.x,y:b.y,alpha:b.state==='completed'?1:.2,emptyAnimals:b.state!=='completed'||b.animals?.stocked===false},{project:this.project,scale:this.scale,images:art.images});
+      if(c===this.ctx&&selectedBuildings.has(b.id))this.polygon(footprintCorners(b.kind,b.x,b.y),'#efc86d55','#ffe39a');
+      paintWorldBuilding(c,{key:keyFor(b),x:b.x,y:b.y,alpha:b.state==='completed'?1:.2,emptyAnimals:b.state!=='completed'||b.animals?.stocked===false},{project:this.project,scale:this.scale,images:art.images,nightImages:art.nightImages,night,light:buildingLighting(power,this.snapshot.village.buildings.find(p=>p.kind===b.kind&&p.x===b.x&&p.y===b.y)?.id,b.kind,b.state==='completed')});
       if(b.state==='completed'){
         const resolved=this.snapshot.village.buildings.find(p=>p.kind===b.kind&&p.x===b.x&&p.y===b.y);
-        if(resolved)paintWorldCrops(c,resolved,{project:this.project,scale:this.scale,health:this.snapshot.environment.economy.processes?.growing?.find(p=>p.building===resolved.id)?.health??1});
+        if(resolved)paintWorldCrops(c,resolved,{project:this.project,scale:this.scale,night,light:buildingLighting(power,resolved.id,b.kind),health:this.snapshot.environment.economy.processes?.growing?.find(p=>p.building===resolved.id)?.health??1});
       }
       if(b.state!=='completed')drawBuildingState(c,{complete:false,progress:0,point:this.project(b.x,b.y),corners:footprintCorners(b.kind,b.x,b.y).map(([x,y])=>this.project(x,y)),scale:this.scale,kind:b.kind});
-    }});
+    },light:()=>{const resolved=this.snapshot.village.buildings.find(p=>p.kind===b.kind&&p.x===b.x&&p.y===b.y),level=buildingLighting(power,resolved?.id,b.kind,b.state==='completed');if(!level)return null;const p=this.project(b.x,b.y),key=keyFor(b);return drawNightEmission(c,art.nightImages[key],allBuildingArt[key],key,p.x,p.y,this.scale,night*level)??null;}});
     for(const [i,site]of (this.document.start.resource_sites??[]).entries()){
       const native=this.snapshot.village.economy.sources[i];
       if(!native||native.x!==site.x||native.y!==site.y||catalogMaterial(site.material)!==native.material)continue;
-      objects.push({depth:site.x+site.y,draw:()=>{if(view.selectedSite===site.id)this.polygon(footprintCorners(sourceKinds[native.material],site.x,site.y),'#efc86d55','#ffe39a');paintResourceSite(c,native,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details});}});
+      objects.push({depth:site.x+site.y,draw:()=>{if(c===this.ctx&&view.selectedSite===site.id)this.polygon(footprintCorners(sourceKinds[native.material],site.x,site.y),'#efc86d55','#ffe39a');paintResourceSite(c,native,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details,night});}});
     }
-    if(this.pointer&&(sourceKinds.includes(view.tool)||['move-site','copy-site'].includes(view.tool))){const source=this.siteCopy||this.document.start.resource_sites?.find(s=>s.id===view.selectedSite),kind=sourceKinds.includes(view.tool)?view.tool:sourceKinds[catalogMaterial(source?.material)];if(kind){this.polygon(footprintCorners(kind,this.pointer.x,this.pointer.y),groupFill,groupStroke);const preview=sitePreview(sourceKinds.includes(view.tool)?newStartingSite(kind.slice(7),this.pointer.x,this.pointer.y,'preview'):{...source,x:this.pointer.x,y:this.pointer.y});paintResourceSite(c,preview,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details,alpha:.45});}}
-    for(const bank of this.snapshot.village.power.network.nodes.filter(n=>n.owner.kind==='ground'&&n.kind==='battery'))objects.push({depth:bank.x+bank.y+.1,draw:()=>{if(hitStartingBank(this.document,bank.x,bank.y)?.id===view.selectedBank)this.polygon(footprintCorners('battery',bank.x,bank.y),'#efc86d55','#ffe39a');drawBattery(c,this.project(bank.x,bank.y),this.scale);}});
-    for(const hen of flock(this.snapshot.village))objects.push({depth:hen.x+hen.y+.2,draw:()=>drawChicken(c,this.project(hen.x,hen.y),this.scale,hen)});
+    if(this.pointer&&(sourceKinds.includes(view.tool)||['move-site','copy-site'].includes(view.tool))){const source=this.siteCopy||this.document.start.resource_sites?.find(s=>s.id===view.selectedSite),kind=sourceKinds.includes(view.tool)?view.tool:sourceKinds[catalogMaterial(source?.material)];if(kind){this.polygon(footprintCorners(kind,this.pointer.x,this.pointer.y),groupFill,groupStroke);const preview=sitePreview(sourceKinds.includes(view.tool)?newStartingSite(kind.slice(7),this.pointer.x,this.pointer.y,'preview'):{...source,x:this.pointer.x,y:this.pointer.y});paintResourceSite(c,preview,{project:this.project,scale:this.scale,width,height,forest:art.forest,details:art.details,night,alpha:.45});}}
+    for(const bank of this.snapshot.village.power.network.nodes.filter(n=>n.owner.kind==='ground'&&n.kind==='battery'))objects.push({depth:bank.x+bank.y+.1,draw:()=>{if(c===this.ctx&&hitStartingBank(this.document,bank.x,bank.y)?.id===view.selectedBank)this.polygon(footprintCorners('battery',bank.x,bank.y),'#efc86d55','#ffe39a');drawBattery(c,this.project(bank.x,bank.y),this.scale,night);}});
+    for(const hen of flock(this.snapshot.village))objects.push({depth:hen.x+hen.y+.2,draw:()=>{c.save();c.filter=unlitFilter(night);drawChicken(c,this.project(hen.x,hen.y),this.scale,hen);c.restore();}});
     for(const resident of this.snapshot.residents)objects.push({depth:resident.x+resident.y+.6,draw:()=>{
       const p=this.project(resident.x,resident.y),frame=art.appearances.portraitFrame(resident.appearance),size=RESIDENT_WIDTH*this.scale;
-      if(this.snapshot.scenario_ref?.residents?.[view.selectedResident]===resident.id){c.beginPath();c.ellipse(p.x,p.y,14*this.scale,7*this.scale,0,0,Math.PI*2);c.strokeStyle='#ffe39a';c.lineWidth=2;c.stroke();}
+      if(c===this.ctx&&this.snapshot.scenario_ref?.residents?.[view.selectedResident]===resident.id){c.beginPath();c.ellipse(p.x,p.y,14*this.scale,7*this.scale,0,0,Math.PI*2);c.strokeStyle='#ffe39a';c.lineWidth=2;c.stroke();}
       paintContactShadow(c,p.x,p.y+2*this.scale,10*this.scale,4*this.scale,.25);
-      if(frame)c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);
+      if(frame){c.save();c.filter=unlitFilter(night);c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);c.restore();}
     }});
     if(this.pointer&&(view.tool==='resident-start'||this.drag?.resident)){const id=this.drag?.resident??this.placingResident,person=this.snapshot.residents.find(p=>p.id===this.snapshot.scenario_ref?.residents?.[id]);if(person){const p=this.project(this.pointer.x,this.pointer.y),size=RESIDENT_WIDTH*this.scale,frame=art.appearances.portraitFrame(person.appearance);objects.push({depth:this.pointer.x+this.pointer.y+.6,draw:()=>{c.save();c.globalAlpha=.5;c.drawImage(frame,p.x-size/2,p.y-size*FRAME_ANCHOR,size,size);c.restore();}});}}
-    objects.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());
+    let lightLayer,lightContext,depthLight;if(night){lightLayer=this.inspectionLight??=document.createElement('canvas');lightLayer.width=w;lightLayer.height=h;lightContext=lightLayer.getContext('2d');lightContext.setTransform(dpr,0,0,dpr,0,0);depthLight=createDepthLightPass(lightContext);}
+    objects.sort((a,b)=>a.depth-b.depth).forEach(o=>{o.draw();if(depthLight){const world=c;try{c=lightContext;depthLight.paint(o.draw,o.light);}finally{c=world;}}});
+    const weatherAir=drawWeatherAir(c,weatherView);canvas.dataset.weatherStreaks=String(weatherAir.streaks);
+    if(night)paintWorldAtmosphere(c,{minutes:1320,darkness:night,width,height,lightLayer});
     if(view.layer==='utilities'){
       c.save();c.lineJoin='round';c.lineCap='round';for(const p of lines)paintUtilityRoute(c,this.project,this.scale,p.plan,({fresh:'#7bb8c8',irrigation:'#9dbb68',greywater:'#b99dbb',sewage:'#c6a06a',electricity:'#e0c46b'})[p.plan.kind],p.phase!=='active',{pump:p.plan.kind!=='electricity'});c.restore();
     }
@@ -304,16 +318,16 @@ export class EditorMap {
     for(const port of this.utilityPreview?.ports??[]){const p=this.project(...port.cell);c.beginPath();c.arc(p.x,p.y,5*this.scale,0,Math.PI*2);c.fillStyle=port.supply?'#f3ca70':'#8bd1e4';c.fill();c.strokeStyle='#3a4b38';c.lineWidth=1;c.stroke();}
     if(this.routeStroke)for(const [x,y]of this.routeStroke)this.polygon(footprintCorners('road',x,y),'#f4df9a66','#fff3c4');
     for(const [label,point,colour]of (this.preview?[]:[['Camp',this.document.map.camp,'#476c44'],['Start view',this.document.map.camera,'#8f603c']])){
-      const p=this.project(...point),same=this.document.map.camp.every((n,i)=>n===this.document.map.camera[i]);c.strokeStyle=colour;c.fillStyle='#f5e5ba';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,7,0,Math.PI*2);c.fill();c.stroke();c.font='bold 11px Trebuchet MS';c.textAlign='center';c.fillStyle=colour;c.fillText(label,p.x,p.y+(same&&label==='Camp'?-15:22));
+      const p=this.project(...point),same=this.document.map.camp.every((n,i)=>n===this.document.map.camera[i]);c.strokeStyle=colour;c.fillStyle='#f5e5ba';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,7,0,Math.PI*2);c.fill();c.stroke();c.font='bold 11px Trebuchet MS';c.textAlign='center';c.fillStyle=night?'#fff0bd':colour;c.fillText(label,p.x,p.y+(same&&label==='Camp'?-15:22));
     }
     if(this.pointer&&allBuildingArt[view.tool]){
       this.polygon(footprintCorners(view.tool,this.pointer.x,this.pointer.y),this.groupPlacement?.allowed===false?'#c65e4266':'#f4df9a66',this.groupPlacement?.allowed===false?'#f39b80':'#fff3c4');
-      paintWorldBuilding(c,{key:view.tool,x:this.pointer.x,y:this.pointer.y,alpha:.45},{project:this.project,scale:this.scale,images:art.images});
+      paintWorldBuilding(c,{key:view.tool,x:this.pointer.x,y:this.pointer.y,alpha:.45},{project:this.project,scale:this.scale,images:art.images,nightImages:art.nightImages,night,light:0});
     }
-    if(this.pointer&&(this.drag?.bank||['battery-bank','move-bank','copy-bank'].includes(view.tool))){this.polygon(footprintCorners('battery',this.pointer.x,this.pointer.y),groupFill,groupStroke);drawBattery(c,this.project(this.pointer.x,this.pointer.y),this.scale,0,.45);}
+    if(this.pointer&&(this.drag?.bank||['battery-bank','move-bank','copy-bank'].includes(view.tool))){this.polygon(footprintCorners('battery',this.pointer.x,this.pointer.y),groupFill,groupStroke);drawBattery(c,this.project(this.pointer.x,this.pointer.y),this.scale,night,.45);}
     if(this.drag?.site&&this.pointer)this.polygon(footprintCorners(sourceKinds[catalogMaterial(this.drag.site.material)],this.pointer.x,this.pointer.y),groupFill,groupStroke);
     if(this.drag?.building&&this.pointer){const anchor=this.drag.building;for(const b of structures.filter(b=>selectedBuildings.has(b.id)))this.polygon(footprintCorners(b.kind,b.x+this.pointer.x-anchor.x,b.y+this.pointer.y-anchor.y),groupFill,groupStroke);}
-    if(view.tool==='duplicate'&&this.copy&&this.pointer){const anchor=this.copy.buildings[0];for(const b of this.copy.buildings){const x=b.x+this.pointer.x-anchor.x,y=b.y+this.pointer.y-anchor.y;this.polygon(footprintCorners(b.kind,x,y),groupFill,groupStroke);paintWorldBuilding(c,{key:keyFor(b),x,y,alpha:.45,emptyAnimals:b.state!=='completed'||b.animals?.stocked===false},{project:this.project,scale:this.scale,images:art.images});const crop=this.copy.cropViews?.[b.id];if(b.state==='completed'&&crop)paintWorldCrops(c,{kind:b.kind,x,y,crop},{project:this.project,scale:this.scale,alpha:.45});}}
+    if(view.tool==='duplicate'&&this.copy&&this.pointer){const anchor=this.copy.buildings[0];for(const b of this.copy.buildings){const x=b.x+this.pointer.x-anchor.x,y=b.y+this.pointer.y-anchor.y;this.polygon(footprintCorners(b.kind,x,y),groupFill,groupStroke);paintWorldBuilding(c,{key:keyFor(b),x,y,alpha:.45,emptyAnimals:b.state!=='completed'||b.animals?.stocked===false},{project:this.project,scale:this.scale,images:art.images,nightImages:art.nightImages,night,light:0});const crop=this.copy.cropViews?.[b.id];if(b.state==='completed'&&crop)paintWorldCrops(c,{kind:b.kind,x,y,crop},{project:this.project,scale:this.scale,night,alpha:.45});}}
     if(this.pointer&&this.groupPlacement?.allowed){c.save();c.lineJoin='round';c.lineCap='round';for(const plan of this.groupPlacement.routes??[])paintUtilityRoute(c,this.project,this.scale,plan,'#fff3a4',true,{pump:plan.kind!=='electricity'});c.restore();}
     if(this.drag?.toggle&&this.drag.moved&&view.tool==='select'&&this.pointer){
       const end=this.project(this.pointer.x,this.pointer.y),start=this.drag.point;c.fillStyle='#f4df9a33';c.strokeStyle='#fff3c4';c.lineWidth=2;c.fillRect(start.x,start.y,end.x-start.x,end.y-start.y);c.strokeRect(start.x,start.y,end.x-start.x,end.y-start.y);

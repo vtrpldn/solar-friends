@@ -1,0 +1,93 @@
+{
+  "scope": "Full desktop scenes individually inspected for the three day/rain/night conditions across three native launch biomes; ordinary seeded village with home, streetlight and mature crop bed. Not all buildings or power configurations.",
+  "captures": [
+    {
+      "file": "caatinga-day.png",
+      "sha256": "5c1248ac3a4e2e84ecc6a7e450c26ddf96c74debadcd55a82d7916468d997262",
+      "observations": [
+        "Shared painted scale, ground contact and native biome identity retained.",
+        "Inspection selector and status remain separated from editing controls.",
+        "Day view retains the ordinary editor appearance."
+      ]
+    },
+    {
+      "file": "caatinga-night.png",
+      "sha256": "53d2c8adcf2e033c682f0c60cac743f5c67413e8316cd6ae9935d647b77ae3a2",
+      "observations": [
+        "Shared painted scale, ground contact and native biome identity retained.",
+        "Inspection selector and status remain separated from editing controls.",
+        "Night lamp emission originates at the bulb; windows use the calibrated night artwork and labels remain readable."
+      ]
+    },
+    {
+      "file": "caatinga-rain.png",
+      "sha256": "46a301f6cc57eb83b7e95d7f1d9203324aa31399655e23c0f926fe9dc3cf29b8",
+      "observations": [
+        "Shared painted scale, ground contact and native biome identity retained.",
+        "Inspection selector and status remain separated from editing controls.",
+        "Rain still view includes ground wetness and foreground streaks."
+      ]
+    },
+    {
+      "file": "cerrado-day.png",
+      "sha256": "333c7c9ceb1d1cfafb99b816da5806d3d3ca23cbab726a17c07eaa9a520de3b7",
+      "observations": [
+        "Shared painted scale, ground contact and native biome identity retained.",
+        "Inspection selector and status remain separated from editing controls.",
+        "Day view retains the ordinary editor appearance."
+      ]
+    },
+    {
+      "file": "cerrado-night.png",
+      "sha256": "a29b3f886dd2ac00d06481dfb6aa96ef1869869c90f75def73040e923e131f86",
+      "observations": [
+        "Shared painted scale, ground contact and native biome identity retained.",
+        "Inspection selector and status remain separated from editing controls.",
+        "Night lamp emission originates at the bulb; windows use the calibrated night artwork and labels remain readable."
+      ]
+    },
+    {
+      "file": "cerrado-rain.png",
+      "sha256": "fa5b5ffd6d861d6ac3b7f34194c46a63bce17127ff8ffe6ecbe6170446301fd0",
+      "observations": [
+        "Shared painted scale, ground contact and native biome identity retained.",
+        "Inspection selector and status remain separated from editing controls.",
+        "Rain still view includes ground wetness and foreground streaks."
+      ]
+    },
+    {
+      "file": "mata-atlantica-day.png",
+      "sha256": "b33194ed4d84163d61c5acf6e282f51f53ac7d5ad978f8e4014c268f58d7af7a",
+      "observations": [
+        "Shared painted scale, ground contact and native biome identity retained.",
+        "Inspection selector and status remain separated from editing controls.",
+        "Day view retains the ordinary editor appearance."
+      ]
+    },
+    {
+      "file": "mata-atlantica-night.png",
+      "sha256": "f3d0e3462b3991a372519fcf0171265ce3c0b97b9a985cef2ec791a88c9b5234",
+      "observations": [
+        "Shared painted scale, ground contact and native biome identity retained.",
+        "Inspection selector and status remain separated from editing controls.",
+        "Night lamp emission originates at the bulb; windows use the calibrated night artwork and labels remain readable."
+      ]
+    },
+    {
+      "file": "mata-atlantica-rain.png",
+      "sha256": "3db7160635ca50860b9465700f62399b44587a5bb285aaf805369201d4ec1801",
+      "observations": [
+        "Shared painted scale, ground contact and native biome identity retained.",
+        "Inspection selector and status remain separated from editing controls.",
+        "Rain still view includes ground wetness and foreground streaks."
+      ]
+    }
+  ],
+  "remaining": [
+    "Finite-grid/rooftop charge combinations",
+    "Foreground light occlusion permutations",
+    "Maximum-map preview timing and memory",
+    "Rain/night combinations and motion",
+    "All art release conditions"
+  ]
+}

@@ -118,3 +118,5 @@
 .creator-resident-opening{border-top:1px solid #c5ad7b;padding-top:12px;margin:14px 0}.creator-resident-opening h3{font-size:13px}
 
 .creator-placement-status{position:absolute;top:52px;left:14px;max-width:calc(100% - 220px);margin:0;padding:9px 12px;background:#f5e5ba;border:1px solid #a88b55;border-bottom:3px solid #8c6a3c;border-radius:4px;color:#4f3920;font:bold 12px 'Trebuchet MS',sans-serif;pointer-events:none}.creator-placement-status[hidden]{display:none}
+
+.creator-inspection-label{display:flex;align-items:center;gap:6px;font-size:11px;color:#4e4028;background:#f2e2b8;border:1px solid #967447;border-radius:4px;padding:2px 7px}.creator-page .creator-inspection-label select{width:150px;min-height:28px;margin:0}.creator-inspection-note{position:absolute;left:15px;top:52px;max-width:calc(100% - 30px);background:#f2e2b8ef;color:#4e4028;border:1px solid #967447;border-radius:4px;padding:6px 9px;font-size:11px;pointer-events:none}

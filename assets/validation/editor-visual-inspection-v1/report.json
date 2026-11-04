@@ -1,0 +1,75 @@
+{
+  "complete": true,
+  "results": [
+    {
+      "biome": "mata-atlantica",
+      "dayRainNight": true,
+      "puddlesAndStreaks": true,
+      "nativeLighting": true,
+      "exactCheckpointAndNativeStatePreserved": true,
+      "dayPixelsRestored": true
+    },
+    {
+      "biome": "cerrado",
+      "dayRainNight": true,
+      "puddlesAndStreaks": true,
+      "nativeLighting": true,
+      "exactCheckpointAndNativeStatePreserved": true,
+      "dayPixelsRestored": true
+    },
+    {
+      "biome": "caatinga",
+      "dayRainNight": true,
+      "puddlesAndStreaks": true,
+      "nativeLighting": true,
+      "exactCheckpointAndNativeStatePreserved": true,
+      "dayPixelsRestored": true
+    }
+  ],
+  "cancelAndEscape": true,
+  "workerFailureRetry": true,
+  "editResetsInspection": true,
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.25883299999986775
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 2.395416999999725
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 34.623875000001135
+    }
+  ],
+  "sources": {
+    "web/editor.html": "7ff12ecb1230c2f4ca6302003a5ca80842380c76483855dff6c461c2cb5a9092",
+    "web/editor/style.css": "6ccf64d1114c63ce13f2c940ed2a6dd2a52c8ef8c28ac96ffe2bbd6a242d46c6",
+    "web/editor/map-view.js": "dc22af396544e78d1c8df48f71ddc038c13c82abd31439d6459b1bc962582549",
+    "web/editor/index.js": "56523c92dbfaf52d4d15467b3bfff0f42923e834a8de92d2a6cf35b496d5e66d",
+    "web/editor/prepare-inspection.js": "4e9d35e761d5be5fa2d3e74d69c4555f4b9d5286d3a58d76faad56d0a518d77d",
+    "web/weather.js": "0aed62fb10fd022f0e79a21f73ed5fb69cdf0a8003ab577c8415bae654f2da24",
+    "web/night-lighting.js": "6f8e92f982122297cbc99b1b23c2e82cd8c9fa34c711f200b1b35bbf4bd9ac8e",
+    "web/world-atmosphere.js": "4241f136222191565c2e7900f0bcb7128df2fed32e497684372ce6a5efd3ddcf",
+    "web/power.js": "d37e60fba9e9e9057df3bf0b0fda4e6c4d8914f9d8041673627a7868e8694f0d",
+    "scripts/verify-editor-visual-inspection.mjs": "7c8897b9ed0b36836cac147914aa288faf63bb5d50b8026dfa6775f533c5e857",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "scope": "Three launch biomes, native-valid seeded ordinary village, public visual controls and cancellation, exact full draft-record and native snapshot preservation, day pixel restoration, native opening power at 22:00. Screenshots require review. Not all buildings/lighting conditions, maximum map performance, moving weather or full art acceptance."
+}
