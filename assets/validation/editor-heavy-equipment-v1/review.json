@@ -1,0 +1,22 @@
+{
+  "motivation": "Equipment inspector discovery compiled the full village synchronously even before any equipment edit.",
+  "change": "Disposable asynchronous equipment lookup with cached results, close/source cancellation, written loading/failure/retry states; heavy equipment changes use cancellable edit preparation.",
+  "screenshot": {
+    "file": "lookup-retry.png",
+    "sha256": "d002ca73292e33742a38fba89f89289c1d250bdfdfb97f287c0ceba53501958e",
+    "individuallyInspected": true,
+    "finding": "Lookup failure text and full Try again button are visible in the equipment section; the draft remains playable."
+  },
+  "observations": {
+    "lookupWorkers": 10,
+    "allLookupWorkersTerminated": true,
+    "maximumInspectorPaintMs": 3.5,
+    "mainThreadQueryOrCompileCalls": 0
+  },
+  "additionalChecks": [
+    "controlled cache/stale/cancel/retry/malformed/timeout lifecycle check passed",
+    "existing public starting-equipment regression reached terminal exit 0, including every supported asset, deferral/reset/undo, invalid repair, export/reopen and exact playtest checkpoints"
+  ],
+  "regressionScriptSha256": "f288e4105e96e54d40b11e9269558dfdf82f7591c0d2e9d48fe87b4be1e84025",
+  "scope": "One headless combined maximum fixture and one existing small-map regression. Measured phases cover opening/title-source replacement and truck condition, with service-policy cancellation/history separately asserted. Instrumented Worker construction adds overhead. Not sustained pacing/memory, every heavy equipment row/reset/deferral, other editor queries or full release acceptance."
+}

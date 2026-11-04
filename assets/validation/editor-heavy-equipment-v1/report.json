@@ -1,0 +1,178 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-editor-heavy-equipment.mjs": "20f95a485ae19fc1dbb48b81a687e7b2b0006baa1bbc96cd633ddb38633647da",
+    "web/editor/index.js": "32804f1daeb1bf9c5e9a8ec9853d60c7a35f9caef684d750e9fcc5c827a6e81a",
+    "web/editor/equipment.js": "500b7f7617a3ca1809b525aada5ab2d662deb6ad3f9f6a1f5f90fe7c9306fc73",
+    "web/editor/equipment-query.js": "048589023354a181dcb0caecf1fcd8c7d136add2b8c265966a8275d7ca940e3d",
+    "web/equipment-query-worker.js": "c272ffedd6a5222e03fd9739c5ecedd24430994bd01ad9f62899dc870125bd56",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "load": {
+    "authoredNature": 1000,
+    "species": "macambira",
+    "size": 0.6499999761581421,
+    "routes": 64,
+    "routeCells": 80,
+    "routeAttempts": 127
+  },
+  "observations": {
+    "workers": [
+      {
+        "terminated": true,
+        "results": 0,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 0,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "title": "Changed during equipment lookup"
+      },
+      {
+        "terminated": true,
+        "results": 0,
+        "title": "Retry equipment lookup"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "title": "Retry equipment lookup"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "title": "Retry equipment lookup"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "title": "Retry equipment lookup"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "title": "Retry equipment lookup"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "title": "Retry equipment lookup"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "title": "Retry equipment lookup"
+      }
+    ],
+    "native": [
+      {
+        "phase": "opening",
+        "key": "restore",
+        "ms": 19.899999856948853
+      },
+      {
+        "phase": "condition",
+        "key": "restore",
+        "ms": 8.899999856948853
+      },
+      {
+        "phase": "condition",
+        "key": "restore",
+        "ms": 9.299999952316284
+      },
+      {
+        "phase": "condition",
+        "key": "restore",
+        "ms": 9
+      }
+    ],
+    "paints": [
+      {
+        "phase": "opening",
+        "ms": 3.5
+      },
+      {
+        "phase": "opening",
+        "ms": 3
+      },
+      {
+        "phase": "opening",
+        "ms": 3
+      },
+      {
+        "phase": "opening",
+        "ms": 2.799999952316284
+      },
+      {
+        "phase": "condition",
+        "ms": 3.4000000953674316
+      },
+      {
+        "phase": "condition",
+        "ms": 2.8000001907348633
+      },
+      {
+        "phase": "condition",
+        "ms": 3.299999952316284
+      },
+      {
+        "phase": "condition",
+        "ms": 2.5999999046325684
+      },
+      {
+        "phase": "condition",
+        "ms": 3.299999952316284
+      },
+      {
+        "phase": "condition",
+        "ms": 2.5
+      }
+    ]
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.4210410000014235
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 5.391332999999577
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 34.286833999998635
+    }
+  ],
+  "checks": [
+    "close pending query terminates it without checkpoint changes",
+    "source changes discard old lookup",
+    "real worker load failure exposes Retry and preserves playable draft",
+    "Retry leaves checkpoint exact",
+    "condition and policy cancellation restore field/checkbox",
+    "condition exact undo/redo, policy exact undo",
+    "zero main-thread equipment query or compile in measured phases",
+    "all observed lookup workers terminated",
+    "exact reload and no page errors"
+  ],
+  "scope": "Headless combined maximum fixture, read-only query lifecycle plus truck condition and service policy. Worker instrumentation adds overhead; not physical display pacing, every equipment row, deferral/reset, maximal history or memory acceptance."
+}
