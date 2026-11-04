@@ -1,3 +1,4 @@
+export const MIN_EDITOR_ZOOM=.18;
 import {newStartingBuilding} from './objects.js';
 import {GroupPreview} from './group-preview.js';
 import {resolvedNature,natureAt} from './nature.js';
@@ -155,7 +156,7 @@ export class EditorMap {
   selectNature(id){this.select(null);this.view.selectedNature=id;this.render();this.viewChanged(this.state);}
   natureAt(cell){return natureAt(this.naturalObjects??[],cell.x,cell.y);}
   centerAt(x,y){this.view.center=[Math.max(0,Math.min(63,x)),Math.max(0,Math.min(63,y))];this.render();this.viewChanged(this.state);}
-  setZoom(zoom){this.view.zoom=Math.max(.32,Math.min(2.7,zoom));this.render();this.viewChanged(this.state);}
+  setZoom(zoom){this.view.zoom=Math.max(MIN_EDITOR_ZOOM,Math.min(2.7,zoom));this.render();this.viewChanged(this.state);}
   point(event){const r=this.canvas.getBoundingClientRect();return {x:event.clientX-r.left,y:event.clientY-r.top};}
   cell(point){return unproject(point.x,point.y,this.origin,this.scale);}
   hit(cell){return [...(this.document?.start.buildings||[])].reverse().find(b=>occupies(b,cell.x,cell.y));}
