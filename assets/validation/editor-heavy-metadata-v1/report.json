@@ -1,0 +1,227 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-editor-heavy-metadata.mjs": "02295fd4c0870e9fbda45855164bacf3618c286055f01c218f1c7c01de4b718a",
+    "web/editor/index.js": "1c9e56fe89eb8d066fd39fb33ea711f31ad80c1e48e91f382e306bd5d8482d63",
+    "web/editor/regions.js": "26475117d3040fd6fd47b2c06dffb72d226d8ac002cd1fa9355aa2e0d9a868ca",
+    "web/editor/geology.js": "5b696731787b8e7e0e5a319734f45d19e42f758317236a69881b8b47a90b5e04",
+    "web/editor/residents.js": "615bfc149748ea424fcf1315eb89ec95d478cf3cb0054c08486dd1c8e12f40c6",
+    "web/editor/relationships.js": "ce6fe7c4faddc01993cc2f69dbf5fdfb9fe7b02285a8171cbb1dcc2467f4eb8c",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "load": {
+    "authoredNature": 1000,
+    "species": "macambira",
+    "size": 0.6499999761581421,
+    "routes": 64,
+    "routeCells": 80,
+    "routeAttempts": 127
+  },
+  "cases": [
+    "region name",
+    "region width",
+    "referenced region removal",
+    "geology quantity",
+    "clear geology",
+    "remove geological patch",
+    "add geological patch",
+    "arrival energy",
+    "reset arrival needs",
+    "outside shifts",
+    "shared memories",
+    "clear shared history",
+    "remove arriving friend",
+    "bring authored friend"
+  ],
+  "observations": {
+    "handlers": [
+      {
+        "phase": "region name",
+        "type": "onchange",
+        "trusted": true,
+        "ms": 3
+      },
+      {
+        "phase": "region width",
+        "type": "onchange",
+        "trusted": true,
+        "ms": 2.799999952316284
+      },
+      {
+        "phase": "referenced region removal",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 2.9000000953674316
+      },
+      {
+        "phase": "geology quantity",
+        "type": "change",
+        "trusted": true,
+        "ms": 3.5999999046325684
+      },
+      {
+        "phase": "clear geology",
+        "type": "click",
+        "trusted": true,
+        "ms": 3.3999998569488525
+      },
+      {
+        "phase": "remove geological patch",
+        "type": "click",
+        "trusted": true,
+        "ms": 3.5999999046325684
+      },
+      {
+        "phase": "add geological patch",
+        "type": "click",
+        "trusted": true,
+        "ms": 3.799999952316284
+      },
+      {
+        "phase": "arrival energy",
+        "type": "change",
+        "trusted": true,
+        "ms": 3.4000000953674316
+      },
+      {
+        "phase": "reset arrival needs",
+        "type": "click",
+        "trusted": true,
+        "ms": 3
+      },
+      {
+        "phase": "outside shifts",
+        "type": "click",
+        "trusted": true,
+        "ms": 0
+      },
+      {
+        "phase": "outside shifts",
+        "type": "change",
+        "trusted": true,
+        "ms": 3
+      },
+      {
+        "phase": "shared memories",
+        "type": "change",
+        "trusted": true,
+        "ms": 3
+      },
+      {
+        "phase": "clear shared history",
+        "type": "click",
+        "trusted": true,
+        "ms": 3.3000001907348633
+      },
+      {
+        "phase": "remove arriving friend",
+        "type": "click",
+        "trusted": true,
+        "ms": 3.200000047683716
+      },
+      {
+        "phase": "bring authored friend",
+        "type": "click",
+        "trusted": true,
+        "ms": 2.9000000953674316
+      }
+    ],
+    "native": [
+      {
+        "phase": "region name",
+        "key": "restore",
+        "ms": 20.299999952316284
+      },
+      {
+        "phase": "region width",
+        "key": "restore",
+        "ms": 9.199999809265137
+      },
+      {
+        "phase": "geology quantity",
+        "key": "restore",
+        "ms": 9.400000095367432
+      },
+      {
+        "phase": "clear geology",
+        "key": "restore",
+        "ms": 9.300000190734863
+      },
+      {
+        "phase": "remove geological patch",
+        "key": "restore",
+        "ms": 9.5
+      },
+      {
+        "phase": "add geological patch",
+        "key": "restore",
+        "ms": 9
+      },
+      {
+        "phase": "arrival energy",
+        "key": "restore",
+        "ms": 8.800000190734863
+      },
+      {
+        "phase": "reset arrival needs",
+        "key": "restore",
+        "ms": 8.899999856948853
+      },
+      {
+        "phase": "outside shifts",
+        "key": "restore",
+        "ms": 9.099999904632568
+      },
+      {
+        "phase": "shared memories",
+        "key": "restore",
+        "ms": 9.400000095367432
+      },
+      {
+        "phase": "clear shared history",
+        "key": "restore",
+        "ms": 9.799999952316284
+      },
+      {
+        "phase": "remove arriving friend",
+        "key": "restore",
+        "ms": 8.799999952316284
+      },
+      {
+        "phase": "bring authored friend",
+        "key": "restore",
+        "ms": 9.300000190734863
+      }
+    ]
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.48662499999045394
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 3.9884580000070855
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 37.43462499999441
+    }
+  ],
+  "scope": "One combined maximum Cerrado fixture: 14 public metadata cases with cancellation/control restoration, exact one-step history and reload; linked region goals and arriving-friend needs/bonds retained or deliberately removed. Not every field/dependency, other biomes, running job/relationship simulation, maximum history or sustained pacing/memory."
+}
