@@ -10,3 +10,12 @@ export function prepareDraft(checkpoint){
   return {doc,validation:data.validation,snapshot:data.snapshot};
  }});
 }
+
+export function prepareRecoveredDraft(checkpoint,id){
+ return runPreparation({workerFactory:()=>new Worker(new URL('../scenario-prepare-worker.js',import.meta.url),{type:'module'}),request:{definition:checkpoint.definition,allowInvalid:true},title:'Recovering a separate creation',starting:'Checking the recovered village separately…',note:'Your current creation and original backup stay unchanged until the separate copy is ready. You can cancel.',cancelMessage:'Recovery cancelled. Your creations are unchanged.',failureMessage:'This copy could not be recovered. Your saved data is unchanged.',timeoutMessage:'Recovery took too long. Your saved data is unchanged.',result:async(data,{signal,stage})=>{
+  if(!data.validation)return;
+  const issue=draftImportIssue(data.validation);if(issue)throw Error(issue.message);
+  stage('Preparing an independent copy of the undo history…');
+  return EditorDocument.forkAsync(checkpoint,id,{signal});
+ }});
+}

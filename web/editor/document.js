@@ -220,24 +220,42 @@ export class EditorDocument extends EventTarget{
     return doc;
   }
   static fork(checkpoint,id){
+    EditorDocument.#forkIdentity(id);
+    const steps=EditorDocument.#fork(EditorDocument.restore(checkpoint),id);let next;
+    do{next=steps.next();}while(!next.done);
+    const checked=EditorDocument.restore(next.value.checkpoint());
+    checked.historyRecovered ||= next.value.historyRecovered;
+    return checked;
+  }
+  static async forkAsync(checkpoint,id,{yieldControl=()=>new Promise(resolve=>setTimeout(resolve,0)),signal}={}){
+    EditorDocument.#forkIdentity(id);signal?.throwIfAborted();
+    const source=await EditorDocument.restoreAsync(checkpoint,{yieldControl,signal});
+    const steps=EditorDocument.#fork(source,id);let copy;
+    try{while(true){signal?.throwIfAborted();const next=steps.next();if(next.done){copy=next.value;break;}await yieldControl();}}
+    finally{steps.return();}
+    const saved=await copy.checkpointAsync({yieldControl:async()=>{signal?.throwIfAborted();await yieldControl();signal?.throwIfAborted();}});
+    const checked=await EditorDocument.restoreAsync(saved,{yieldControl,signal});
+    checked.historyRecovered ||= copy.historyRecovered;
+    return checked;
+  }
+  static #forkIdentity(id){
     if(typeof id!=='string'||!id||id.length>100)throw Error('Choose a supported identity for the recovered draft.');
-    const source=EditorDocument.restore(checkpoint),copy=new EditorDocument(source.value);
+  }
+  static *#fork(source,id){
+    const copy=new EditorDocument(source.value);
     const rebind=raw=>{const d=definition(raw);d.id=id;d.map.id='map-'+id;d.revision=1;d.map.revision=1;return encode(d);};
-    copy.#raw=rebind(source.#raw);copy.#saved=copy.#raw;
+    copy.#raw=rebind(source.#raw);copy.#saved=copy.#raw;yield;
     let cursor=source.#raw;
     for(const step of [...source.#past].reverse()){
-      const before=applyStep(cursor,step,false);copy.#past.unshift(stepFor(step.label,rebind(before),rebind(cursor)));cursor=before;
+      const before=applyStep(cursor,step,false);copy.#past.unshift(stepFor(step.label,rebind(before),rebind(cursor)));cursor=before;yield;
     }
     cursor=source.#raw;
     for(const step of [...source.#future].reverse()){
-      const after=applyStep(cursor,step,true);copy.#future.unshift(stepFor(step.label,rebind(cursor),rebind(after)));cursor=after;
+      const after=applyStep(cursor,step,true);copy.#future.unshift(stepFor(step.label,rebind(cursor),rebind(after)));cursor=after;yield;
     }
     copy.historyRecovered=source.historyRecovered;
-    // Revalidate the combined imported journal against the existing total
-    // byte/step limits before publishing the independent document.
-    const checked=EditorDocument.restore(copy.checkpoint());
-    checked.historyRecovered ||= copy.historyRecovered;
-    return checked;
+    // Both callers revalidate the combined journal before publishing the copy.
+    return copy;
   }
   #changed(){this.#revision++;this.dispatchEvent(new Event('change'));}
   #trim(){

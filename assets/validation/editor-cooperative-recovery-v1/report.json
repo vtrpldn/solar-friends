@@ -1,0 +1,46 @@
+{
+  "complete": true,
+  "cancelDuringFork": true,
+  "lateResultIsolated": true,
+  "originalPreserved": true,
+  "independentCopyWithHistory": true,
+  "publicUndoRedo": true,
+  "exactReload": true,
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.5812079999996058
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 3.2754580000000715
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 41.1215830000001
+    }
+  ],
+  "sources": {
+    "web/editor/document.js": "a3b9779f70321af6b412e076c86027c33a18e339cac0043570ab071cbde3db80",
+    "web/editor/prepare-draft.js": "9f7076aaed73aa442bf9765f4425a8e7a2256e43a3482184a4deecc365455988",
+    "web/editor/index.js": "937d0e1c31bcfe9e703aac9beb588a09b56b342c7442a75e363f9901800fa386",
+    "scripts/verify-recovery-fork-ui.mjs": "858bfb4c72114c38373692ba68faa313a09d89384d97cab89af37c7a575ed4c4",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "scope": "Public project-backup import with seeded 64-step mixed past/future history. Checkpoint-choice validation remains synchronous; not maximum map/history or timing acceptance."
+}
