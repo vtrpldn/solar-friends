@@ -187,7 +187,7 @@ async function changePrepared(label,edit,{target=null,history=null,allowInvalid=
     }
     busy=false;
     preparedEdit={key:canonical(draft),report:prepared.validation};
-    committed=history?ctx.doc[history]():ctx.doc.transact(label,d=>Object.assign(d,draft));return committed;
+    committed=history?ctx.doc[history]():ctx.doc.transact(label,d=>{for(const key of Object.keys(d))if(!Object.hasOwn(draft,key))delete d[key];Object.assign(d,draft);});return committed;
   }catch(error){toast(error.message);return false;}
   finally{
     preparedEdit=null;busy=false;
@@ -711,7 +711,7 @@ try{
   liquidsEditor=new LiquidsEditor($('creator-liquids-fields'),{catalog,engine,change,undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   suppliesEditor=new SuppliesEditor($('creator-supply-locations'),{catalog,engine,change,undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   regionsEditor=new RegionsEditor($('creator-regions-fields'),{change:(label,edit)=>changeInspector(label,edit,()=>regionsEditor.render(current.doc.value)),maximum:catalog.max_regions,draw:()=>setTool('region'),focus:r=>map.centerAt(r.x+(r.width-1)/2,r.y+(r.height-1)/2)});
-  journalEditor=new JournalEditor($('creator-journal-fields'),{catalog,change,undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo})});
+  journalEditor=new JournalEditor($('creator-journal-fields'),{catalog,change:(label,edit)=>{const view={chapter:journalEditor.chapter,reveal:journalEditor.reveal,eventReveal:journalEditor.events.reveal,open:journalEditor.dialog.open,eventsOpen:journalEditor.events.dialog.open};changeInspector(label,edit,()=>{journalEditor.chapter=view.chapter;journalEditor.reveal=view.reveal;journalEditor.events.reveal=view.eventReveal;if(view.open&&!journalEditor.dialog.open)journalEditor.dialog.showModal();if(view.eventsOpen&&!journalEditor.events.dialog.open)journalEditor.events.dialog.showModal();journalEditor.render(current.doc.value,report);});},undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo})});
   relationshipsEditor=new RelationshipsEditor($('creator-relationships-fields'),{presets:catalog.resident_presets,art,change:(label,edit)=>changeInspector(label,edit,()=>{relationshipsEditor.signature=null;relationshipsEditor.render(current.doc.value);})});
   residentsEditor=new ResidentsEditor($('creator-residents-fields'),{presets:catalog.resident_presets,occupations:catalog.occupations,catalog,change:(label,edit)=>changeInspector(label,edit,()=>{residentsEditor.signature=null;residentsEditor.render(current.doc.value,report);}),source:()=>current.doc.value,placeStart:id=>{map.placingResident=id;setTool('resident-start');map.selectResident(id);},locateStart:(id,position)=>{setTool('select');map.selectResident(id);map.centerAt(...position);}});
   weatherEditor=new WeatherEditor($('creator-weather-fields'),{defaults:catalog.weather,biomes:catalog.biomes,change:changeMap});

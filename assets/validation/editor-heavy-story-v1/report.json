@@ -1,0 +1,200 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-editor-heavy-story.mjs": "6d8419e63ec9b7af2e37df1f795aa151cf7437a3bf43f29fc7cd81434b8e1461",
+    "web/editor/index.js": "cecab87661d9e5d692616eaf40369b895890b8888d480a572778c0153f5a471e",
+    "web/editor/scenario-journal.js": "bb57a27d8f16cdf4fdf2365d5e28c07ee0a5b6e5e7fd20835811501c293158cc",
+    "web/editor/events.js": "34655564b1d0c336b96b4b1647675758ecff657e32ac87fad73d6ff93fe216fc",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "load": {
+    "authoredNature": 1000,
+    "species": "macambira",
+    "size": 0.6499999761581421,
+    "routes": 64,
+    "routeCells": 80,
+    "routeAttempts": 127
+  },
+  "cases": [
+    "chapter title",
+    "add chapter",
+    "goal count",
+    "add goal",
+    "challenge deadline",
+    "remove journal",
+    "add story role",
+    "add story event",
+    "event message",
+    "remove story event"
+  ],
+  "observations": {
+    "handlers": [
+      {
+        "phase": "chapter title",
+        "type": "onchange",
+        "trusted": true,
+        "ms": 2.5
+      },
+      {
+        "phase": "add chapter",
+        "type": "click",
+        "trusted": true,
+        "ms": 2.700000047683716
+      },
+      {
+        "phase": "goal count",
+        "type": "onchange",
+        "trusted": true,
+        "ms": 2.799999952316284
+      },
+      {
+        "phase": "add goal",
+        "type": "click",
+        "trusted": true,
+        "ms": 2.700000047683716
+      },
+      {
+        "phase": "challenge deadline",
+        "type": "click",
+        "trusted": true,
+        "ms": 0
+      },
+      {
+        "phase": "challenge deadline",
+        "type": "onchange",
+        "trusted": true,
+        "ms": 2.8999998569488525
+      },
+      {
+        "phase": "remove journal",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 2.9000000953674316
+      },
+      {
+        "phase": "add story role",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 2.3999998569488525
+      },
+      {
+        "phase": "add story role",
+        "type": "click",
+        "trusted": true,
+        "ms": 0
+      },
+      {
+        "phase": "add story event",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 2.5
+      },
+      {
+        "phase": "add story event",
+        "type": "click",
+        "trusted": true,
+        "ms": 0
+      },
+      {
+        "phase": "event message",
+        "type": "onchange",
+        "trusted": true,
+        "ms": 2.8999998569488525
+      },
+      {
+        "phase": "remove story event",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 2.6999998092651367
+      },
+      {
+        "phase": "remove story event",
+        "type": "click",
+        "trusted": true,
+        "ms": 0
+      }
+    ],
+    "native": [
+      {
+        "phase": "chapter title",
+        "key": "restore",
+        "ms": 19.90000009536743
+      },
+      {
+        "phase": "add chapter",
+        "key": "restore",
+        "ms": 9.200000047683716
+      },
+      {
+        "phase": "goal count",
+        "key": "restore",
+        "ms": 9.099999904632568
+      },
+      {
+        "phase": "add goal",
+        "key": "restore",
+        "ms": 9
+      },
+      {
+        "phase": "challenge deadline",
+        "key": "restore",
+        "ms": 8.899999856948853
+      },
+      {
+        "phase": "remove journal",
+        "key": "restore",
+        "ms": 8.700000047683716
+      },
+      {
+        "phase": "add story role",
+        "key": "restore",
+        "ms": 8.900000095367432
+      },
+      {
+        "phase": "add story event",
+        "key": "restore",
+        "ms": 9.399999856948853
+      },
+      {
+        "phase": "event message",
+        "key": "restore",
+        "ms": 8.899999856948853
+      },
+      {
+        "phase": "remove story event",
+        "key": "restore",
+        "ms": 9.799999952316284
+      }
+    ]
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.4284999999945285
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 4.263416999994661
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 41.68537500000093
+    }
+  ],
+  "scope": "One combined maximum Cerrado fixture: ten public chapter/goal/deadline/journal/role/event cases with cancellation/control restoration, exact one-step history and reload. Not every condition/effect/role/dependency, other biomes, running story simulation, maximum history or sustained pacing/memory."
+}
