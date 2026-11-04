@@ -1,0 +1,29 @@
+{
+  "inputs": {
+    "web/editor/index.js": "508a9fab8698ed7ebde4fbc6888982b7415d630130d544255adfa30d8f8bb87c",
+    "web/editor.html": "d6ce8ea23ce48264d7e8235642580fdc944578721acb194ff2ca7d8fc118db53",
+    "web/editor/style.css": "c147dcc7bd3e5adac3853e5a850e4bfe7c0d29b7d2ac9799370963a29f28e64f",
+    "web/editor/draft-checkpoint.js": "d5780a82c3665b51b20f9aa51a0e547bda02a12077ea5ca7ab75e111236dd4e6",
+    "web/editor/draft-import.js": "6f62e1b32a7d471d3181126d32c4ead28b386debb4bbdee396db3e2ad13e4c99",
+    "web/editor/document.js": "af58892e42a0174a3f38f35133d59b3e1097ddedf31454485797c2dfcde0d3bd",
+    "scripts/verify-editor-checkpoint-fallback.mjs": "e32157b0e1556e1de7883cea39534918b5ca7f6ecb1016deddd6aa9111c5c617"
+  },
+  "cases": [
+    "unsupported",
+    "unsupported-keyboard",
+    "unsupported-conflict",
+    "incomplete",
+    "bad-cache"
+  ],
+  "damagedOriginalUnchangedUntilExplicitSave": true,
+  "libraryNavigationPreservesOriginal": true,
+  "originalBackupDownloadedExactly": true,
+  "recoveredEditsKeptSeparatelyAcrossReload": true,
+  "recoveryQuotaStopsNavigation": true,
+  "explicitKeyboardSaveAcknowledgesRecovery": true,
+  "conflictedRecoveryStopsNavigation": true,
+  "conflictedRecoverySaveCopyPreservesBoth": true,
+  "normalCurrentContentAndHistoryPreserved": true,
+  "browserErrors": [],
+  "scope": "Public editor reload of a native-incompatible current checkpoint, intact incomplete current draft, and native-incompatible same-revision session recovery copy. Real terrain debounce and background save exercised; explicit Save acknowledges recovery. Previous valid view preserved. Does not simulate physical storage corruption or every crash phase."
+}

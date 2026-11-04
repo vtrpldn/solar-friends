@@ -1,0 +1,19 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-editor-async-restore.mjs": "9ec1a8c7131ef8881ad5376c0fd572133fe1938eda4fad5c0897a596d4020c3e",
+    "scripts/verify-async-preparation.mjs": "0a6351059d9b72cdacc389de57247ef53d329da6126f125efe7796f012e01a09",
+    "web/editor/document.js": "af58892e42a0174a3f38f35133d59b3e1097ddedf31454485797c2dfcde0d3bd",
+    "web/editor/run-preparation.js": "8e50149b09a92b88b959425f6a0d804e52ff2b306f04f748f558a9f481f536e5"
+  },
+  "checks": [
+    "cooperative exact 64-step replay",
+    "legacy and corruption parity",
+    "owned snapshot isolated from caller mutation",
+    "early/mid abort and failed yield preserve source",
+    "oversized journal recovery and ignored outer metadata",
+    "nonfinite definition rejected"
+  ],
+  "separateBrowserCommand": "node scripts/verify-async-preparation.mjs",
+  "browserObservation": "Terminal exit 0: progress remains through async finalization; success once; Cancel/Escape/timeout/rejection abort and ignore late completion."
+}

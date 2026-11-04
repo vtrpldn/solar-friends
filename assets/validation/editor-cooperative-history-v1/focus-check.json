@@ -1,0 +1,16 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-draft-opening-focus.mjs": "5904669a610f7bcff2c5d9ea0bf48e806b591066c475e794d16d7abbd8041749",
+    "web/editor/index.js": "508a9fab8698ed7ebde4fbc6888982b7415d630130d544255adfa30d8f8bb87c",
+    "web/editor/document.js": "af58892e42a0174a3f38f35133d59b3e1097ddedf31454485797c2dfcde0d3bd",
+    "web/editor/prepare-draft.js": "1fcb988f78d4b5880d6766783c8c6defd04ba54becc1cec9c127479036324aa9",
+    "web/editor/run-preparation.js": "8e50149b09a92b88b959425f6a0d804e52ff2b306f04f748f558a9f481f536e5"
+  },
+  "checks": [
+    "saved-draft Cancel returns focus to Edit",
+    "direct-URL Escape leaves focused usable library",
+    "no page errors",
+    "bounded cleanup completed"
+  ]
+}

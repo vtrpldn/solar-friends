@@ -1,3 +1,4 @@
+import {prepareDraft} from './prepare-draft.js';
 import {heavyDraft} from './heavy-draft.js';
 import {prepareEdit} from './prepare-edit.js';
 import {applyRoadStroke} from './road-placement.js';
@@ -404,10 +405,11 @@ async function mapAction(action){
     if(await changeMap('Place '+title(action.type),d=>{d.start.buildings.push(newStartingBuilding(action.type,action.x,action.y,id));},{valid:true}))map.select(id);
   }
 }
-function attach(definition,{id,revision=null,checkpoint=null,view=null,record=null}={}){
+function attach(definition,{id,revision=null,checkpoint=null,view=null,record=null,restored=null,prepared=null}={}){
   map.cancelGesture({paint:false});
   clearTimeout(saveTimer);expandedReview=false;
-  const doc=checkpoint?EditorDocument.restore(checkpoint):new EditorDocument(definition);
+  const doc=restored??(checkpoint?EditorDocument.restore(checkpoint):new EditorDocument(definition));
+  if(prepared?.snapshot&&!engine.restore(prepared.snapshot))throw Error('The prepared creation could not be installed. Your saved data is unchanged.');
   current={id:id||definition.id,doc,storageRevision:revision,record,viewDirty:false,conflicted:false};
   const ctx=current;
   doc.addEventListener('change',()=>{if(current===ctx){refresh();scheduleSave();}});
@@ -422,23 +424,26 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   $('creator-nature-density').value=map.natureDensity;$('creator-brush-size').value=map.brushSize;$('creator-species').value=map.natureSpecies.key;$('creator-nature-size').value=map.natureSize;$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';
   history.replaceState(null,'',`./editor.html?project=${encodeURIComponent(ctx.id)}`);
   $('creator-library-dialog').close();$('creator-library-title').textContent='Creation library';
-  refresh();setTool(map.view.tool);workspaces.select(map.view.workspace,{notify:false});$('creator-land-layer').value=map.view.layer;$('creator-land-legend').textContent=overlayLegend();$('creator-grid').checked=map.view.grid;
+  if(prepared)preparedEdit={key:canonical(doc.value),report:prepared.validation};
+  try{refresh();}finally{preparedEdit=null;}setTool(map.view.tool);workspaces.select(map.view.workspace,{notify:false});$('creator-land-layer').value=map.view.layer;$('creator-land-legend').textContent=overlayLegend();$('creator-grid').checked=map.view.grid;
   ctx.viewDirty=revision===null; // Restoring a durable view is not a new player edit.
   status(revision===null?'New creation · save to keep it':'Saved on this device');
   if(doc.historyRecovered)toast('The creation was recovered. Its damaged undo history was cleared.');
 }
 async function openProject(record){
-  const restore=checkpoint=>restoreEditableCheckpoint(checkpoint,raw=>JSON.parse(engine.validate_scenario(raw)));
-  let checkpoint=record.checkpoint,view=record.view,recovered=false,previousRecovered=false;
-  try{restore(checkpoint);}catch{
+  const restore=async checkpoint=>{const count=(checkpoint.history?.past?.length??0)+(checkpoint.history?.future?.length??0),large=heavyDraft(checkpoint.definition)||count>=16||JSON.stringify(checkpoint.history??{}).length>=128*1024;return large?prepareDraft(checkpoint):{doc:restoreEditableCheckpoint(checkpoint,raw=>JSON.parse(engine.validate_scenario(raw)))};};
+  let checkpoint=record.checkpoint,view=record.view,recovered=false,previousRecovered=false,prepared;
+  try{prepared=await restore(checkpoint);}catch(error){
+    if(error.name==='AbortError')throw error;
     if(!record.previous?.checkpoint)throw Error('This creation could not load. Export its original data before replacing it.');
-    checkpoint=record.previous.checkpoint;view=record.previous.view;restore(checkpoint);recovered=true;previousRecovered=true;
+    checkpoint=record.previous.checkpoint;view=record.previous.view;prepared=await restore(checkpoint);recovered=true;previousRecovered=true;
   }
   try{
     const cached=JSON.parse(sessionStorage.getItem(recoveryKey(record.id))||'null');
-    if(cached?.storageRevision===record.revision){restore(cached.checkpoint);recovered=JSON.stringify(cached.checkpoint)!==JSON.stringify(checkpoint)||JSON.stringify(cached.view)!==JSON.stringify(view);checkpoint=cached.checkpoint;view=cached.view;}
-  }catch{/* Keep the last durable checkpoint. */}
-  attach(checkpoint.definition,{id:record.id,revision:record.revision,checkpoint,view,record});
+    if(cached?.storageRevision===record.revision){const candidate=await restore(cached.checkpoint);prepared=candidate;recovered=JSON.stringify(cached.checkpoint)!==JSON.stringify(checkpoint)||JSON.stringify(cached.view)!==JSON.stringify(view);checkpoint=cached.checkpoint;view=cached.view;}
+  }catch(error){if(error.name==='AbortError')throw error;/* Keep the last durable checkpoint. */}
+  const latest=await library.getProject(record.id);if(!latest||latest.revision!==record.revision)throw new LibraryConflict();
+  attach(checkpoint.definition,{id:record.id,revision:record.revision,checkpoint,view,record,restored:prepared.doc,prepared:prepared.validation?prepared:null});
   current.preserveDamagedRecord=previousRecovered;
   if(recovered){current.viewDirty=true;status('Recovered your last checkpoint');toast('Your creation was recovered. Save it to keep this checkpoint.');}
 }
@@ -636,7 +641,7 @@ function wire(){
       if(b.dataset.removeRelease){const record=await library.getRelease(b.dataset.removeRelease);if(!record)throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');if(record){pendingDelete={kind:'release',record};$('creator-delete-title').textContent='Remove this frozen release?';$('creator-delete-dialog').querySelector('p').textContent='Only this release is removed. Drafts and saved villages keep their own content.';$('creator-delete-dialog').showModal();}}
       if(b.dataset.removeProject){$('creator-delete-title').textContent='Remove this creation?';$('creator-delete-dialog').querySelector('p').textContent='The editable project will be removed. Frozen releases and independent villages keep their content and saves.';pendingDelete=await library.getProject(b.dataset.removeProject);$('creator-delete-dialog').showModal();}
       if(b.dataset.continueRun){if(!await library.getRun(b.dataset.continueRun))throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');location.assign(`./?run=${encodeURIComponent(b.dataset.continueRun)}`);}
-    }catch(error){$('creator-library-status').textContent=error.message;}finally{b.disabled=false;}
+    }catch(error){$('creator-library-status').textContent=error.message;}finally{b.disabled=false;if(b.dataset.openProject&&b.isConnected&&$('creator-library-dialog').open&&document.querySelectorAll('dialog[open]').length===1)b.focus({preventScroll:true});}
   };
   $('creator-delete-cancel').onclick=()=>$('creator-delete-dialog').close();
   $('creator-delete-confirm').onclick=async()=>{
@@ -720,7 +725,7 @@ try{
   new LandscapeRegeneration($('creator-biome-setting-fields'),{art,source:()=>({id:current.id,revision:current.doc.revision,definition:current.doc.value}),change,notify:toast});
   workspaces=new Workspaces({change:key=>{if(!current)return;map.cancelGesture();map.view.workspace=key;if(!['select','pan','move','erase'].includes(map.view.tool))setTool('select');map.viewChanged(map.state);}});
   wire();const id=new URLSearchParams(location.search).get('project');
-  if(id){const record=await library.getProject(id);if(record)await openProject(record);else{await showLibrary();$('creator-library-status').textContent='This creation is no longer in the library. Independent villages remain available.';}}
+  if(id){const record=await library.getProject(id);if(record){try{await openProject(record);}catch(error){if(error.name!=='AbortError'&&!(error instanceof LibraryConflict))throw error;await showLibrary();$('creator-library-status').textContent=error.message;}}else{await showLibrary();$('creator-library-status').textContent='This creation is no longer in the library. Independent villages remain available.';}}
   else await showLibrary();
   document.body.dataset.creatorReady='true';
 }catch(error){status('The workshop could not open');toast(error.message);}

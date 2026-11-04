@@ -30,6 +30,32 @@ function applyStep(raw,step,forward){
   return next;
 }
 
+// A lower bound on serialized JSON size avoids copying an obviously oversized
+// journal. Exact format, value and byte checks still run in the shared restore.
+function boundedHistoryCopy(history){
+  const {past,future,format=1}=history;
+  if(!Array.isArray(past)||!Array.isArray(future)||past.length+future.length>MAX_HISTORY_STEPS)throw Error('Invalid history.');
+  const journal={format,past,future},ancestors=new WeakSet();let remaining=MAX_HISTORY_BYTES+1024;
+  const take=n=>{remaining-=n;if(remaining<0)throw Error('Invalid history size.');};
+  function scan(value){
+    if(value===null){take(4);return;}
+    if(typeof value==='string'){take(value.length+2);return;}
+    if(typeof value==='number'){if(!Number.isFinite(value))throw Error('Invalid history number.');take(String(value).length);return;}
+    if(typeof value==='boolean'){take(value?4:5);return;}
+    if(typeof value!=='object'||ancestors.has(value))throw Error('Invalid history value.');
+    ancestors.add(value);const array=Array.isArray(value),keys=Object.keys(value);take(2+Math.max(0,keys.length-1));
+    for(const key of keys){if(!array)take(key.length+3);scan(value[key]);}
+    ancestors.delete(value);
+  }
+  scan(journal);return structuredClone(journal);
+}
+function ownCheckpoint(checkpoint){
+  if(checkpoint?.schema!==1||!Number.isSafeInteger(checkpoint.revision)||checkpoint.revision<0)throw Error('This draft checkpoint is not supported.');
+  const owned={schema:1,revision:checkpoint.revision,definition:definition(encode(checkpoint.definition))};
+  if(checkpoint.history){try{owned.history=boundedHistoryCopy(checkpoint.history);}catch{owned.history={format:0,past:[],future:[]};}}
+  return owned;
+}
+
 export class EditorDocument extends EventTarget{
   #raw;
   #saved;
@@ -132,10 +158,22 @@ export class EditorDocument extends EventTarget{
     return {schema:1,revision,definition:definition(raw),history};
   }
   static restore(checkpoint){
+    const steps=EditorDocument.#restore(checkpoint);let next;
+    do{next=steps.next();}while(!next.done);
+    return next.value;
+  }
+  static async restoreAsync(checkpoint,{yieldControl=()=>new Promise(resolve=>setTimeout(resolve,0)),signal}={}){
+    signal?.throwIfAborted();
+    const owned=ownCheckpoint(checkpoint),steps=EditorDocument.#restore(owned);
+    try{while(true){signal?.throwIfAborted();const next=steps.next();if(next.done)return next.value;await yieldControl();}}
+    finally{steps.return();}
+  }
+  static *#restore(checkpoint){
     if(checkpoint?.schema!==1||!Number.isSafeInteger(checkpoint.revision)||checkpoint.revision<0)throw Error('This draft checkpoint is not supported.');
     const doc=new EditorDocument(checkpoint.definition);
     doc.#revision=checkpoint.revision;
     doc.#savedRevision=checkpoint.revision;
+    yield;
     if(checkpoint.history){
       try{
         let {past,future,format=1}=checkpoint.history;
@@ -154,15 +192,20 @@ export class EditorDocument extends EventTarget{
           if(Object.keys(step).sort().join(',')!=='after,before,changes,label'||!validSignature(step.before,MAX_DOCUMENT_BYTES)||!validSignature(step.after,MAX_DOCUMENT_BYTES))throw Error('Invalid edit fields.');
           validateChanges(step.changes,encode);return step;
         };
-        past=past.map(normalize);future=future.map(normalize);
-        if([...past,...future].reduce((n,step)=>n+historySize(step),0)>MAX_HISTORY_BYTES)throw Error('Invalid history size.');
+        const normalized=[[],[]];let totalSize=0;
+        for(const [index,list]of [past,future].entries())for(const entry of list){
+          const step=normalize(entry);totalSize+=historySize(step);
+          if(totalSize>MAX_HISTORY_BYTES)throw Error('Invalid history size.');
+          normalized[index].push(step);yield;
+        }
+        [past,future]=normalized;
         let cursor=doc.#raw;
         for(const step of [...past].reverse()){
-          cursor=applyStep(cursor,step,false);
+          cursor=applyStep(cursor,step,false);yield;
         }
         cursor=doc.#raw;
         for(const step of [...future].reverse()){
-          cursor=applyStep(cursor,step,true);
+          cursor=applyStep(cursor,step,true);yield;
         }
         doc.#past=structuredClone(past);doc.#future=structuredClone(future);
       }catch{
