@@ -1,0 +1,45 @@
+{
+  "complete": true,
+  "nativeSevenFlags": true,
+  "weatherModeAndContentPreserved": true,
+  "ordinaryPresetCustomHistoryReload": true,
+  "maximumCancelEscapeFailureRetry": true,
+  "maximumOneStepUndoRedo": true,
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.4299170000012964
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 3.027249999999185
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 40.974874999999884
+    }
+  ],
+  "sources": {
+    "web/editor/rule-presets.js": "485e9a8a0b6da629c2d4da61620e66128eb674ae0486010835ea78b090d47a36",
+    "web/editor/index.js": "5770036d83d27ea0d0470ba82d8eb28c67073ba82bbba3a6eb7bac7bec350f32",
+    "web/editor/style.css": "3d371a142ea9af437e5e4e4c9e376e99c3979ee4e0806d6576a6d950cdc1cc57",
+    "scripts/verify-editor-rule-presets.mjs": "7de65fa0a7e73704c953f7822d18c4520c7d86842028f8c0a27b6bd70dece4e1",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "scope": "Native rule-state checks plus public ordinary and combined-maximum preset edits. Not every long-running rule combination or full release acceptance."
+}

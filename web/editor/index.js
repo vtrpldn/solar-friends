@@ -1,3 +1,4 @@
+import {RuleEditor} from './rule-presets.js';
 import {prepareNightInspection} from './prepare-inspection.js';
 import {prepareDraft,prepareRecoveredDraft} from './prepare-draft.js';
 import {heavyDraft} from './heavy-draft.js';
@@ -69,12 +70,11 @@ import {paintIcon} from '../build-menu.js';
 const $=id=>document.getElementById(id),library=new ContentLibrary();
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const clone=value=>structuredClone(value),title=kind=>allBuildingArt[kind]?.name||kind;
-const ruleNames={logistics:'Materials, hauling and resident work',land:'Living soil and finite land resources',utilities:'Connected local water and power',climate:'Seasonal weather',maintenance:'Equipment condition and repairs',learning:'Learning through useful work',market:'Changing town prices and offers'};
 let newBiome="mata-atlantica";
 let libraryDiscovery,mapSharing,workspaces;
 let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
 const waterLayers={water:{legend:'Owned fresh water · green: open, stocked and reachable; gold: empty; red: closed or unreachable. Labels show unclaimed units and friends with a route. Neighbour service and future deliveries are excluded.'},walkability:{legend:"Green · connected to camp. Gold · clear but disconnected. Red · blocked cell centre. Footprints and riverbanks use native walking rules; this does not reserve space from other residents."},banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
-let minimap,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
+let minimap,ruleEditor,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let expandedReview=false,outlook;
 let landReport=null,landReportKey=null,mapPreviewKey=null,landSampleKey='',hoverCell=null;
 let accessReport=null,accessReportKey=null,waterAccessReport=null,waterAccessKey=null;
@@ -257,7 +257,7 @@ function refresh(){
   field('creator-title',d.title);field('creator-description',d.description);field('creator-seed',d.map.seed);field('creator-funds',d.start.funds/100);field('creator-water',d.start.fresh_water);
   $('creator-undo').disabled=!current.doc.canUndo;$('creator-redo').disabled=!current.doc.canRedo;$('creator-test').disabled=!report.ok||busy;$('creator-release').disabled=!report.ok||busy;$('creator-save-map').disabled=busy;
   $('creator-undo').title=current.doc.undoLabel;$('creator-redo').title=current.doc.redoLabel;
-  for(const [key,label]of Object.entries(ruleNames)){$('creator-rule-'+key).checked=d.rules[key];$('creator-rule-'+key).setAttribute('aria-label',label);}
+  ruleEditor.render(d);
   renderSelection();renderSupplies();renderReview();outlook?.observe();
   if(current.doc.dirty)status('Changes to save');
 }
@@ -550,7 +550,6 @@ function wire(){
     changeInspector(label,d=>{if(path.length===1)d[path[0]]=value;else d[path[0]][path[1]]=value;},()=>{const d=current.doc.value,stored=path.length===1?d[path[0]]:d[path[0]][path[1]];$(id).value=id==='creator-funds'?stored/100:stored;});
   };
   $('creator-biomes').onclick=e=>{const b=e.target.closest('[data-biome]');if(!b)return;newBiome=b.dataset.biome;for(const choice of $('creator-biomes').querySelectorAll('button'))choice.setAttribute('aria-pressed',String(choice===b));};
-  $('creator-rules').onchange=e=>{const rule=e.target.dataset.rule,value=e.target.checked;if(rule)changeInspector('Change village rules',d=>{d.rules[rule]=value;},()=>{e.target.checked=current.doc.value.rules[rule];});};
   $('creator-selection').onchange=async e=>{
     if(e.target.dataset.naturalField){if(e.target.value===''){toast('Enter a position or size before applying this change.');renderSelection();return;}const source=map.naturalObjects?.find(p=>p.id===map.view.selectedNature);if(source){const field=e.target.dataset.naturalField,next={...source,[field]:Number(e.target.value)};editNatureObject('move-nature',next.x,next.y,next.size);}return;}
     if(e.target.matches('[data-start-recovery]')){const value=e.target.value,id=map.view.selected;await changeSelection('Set inherited structure recovery',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(value==='none')delete b.material_recovery;else b.material_recovery=value;});return;}
@@ -715,7 +714,7 @@ try{
   $('creator-sites').innerHTML='<button data-tool="battery-bank" aria-pressed="false">Battery bank</button>'+sourceKinds.map((kind,i)=>`<button data-tool="${kind}" aria-pressed="false">${escape(siteNames[i])}</button>`).join('');
   $('creator-buildings').innerHTML=catalog.buildings.map(b=>`<button data-tool="${b.id}" aria-pressed="false"><canvas width="154" height="100" data-palette="${b.id}" aria-hidden="true"></canvas><span>${escape(title(b.id))}</span></button>`).join('');
   for(const canvas of document.querySelectorAll('[data-palette]')){const key=canvas.dataset.palette;paintIcon(canvas,key,art.images[key],allBuildingArt[key]);}
-  $('creator-rules').innerHTML=Object.entries(ruleNames).map(([key,label])=>`<label class="creator-rule"><input id="creator-rule-${key}" type="checkbox" data-rule="${key}"> ${escape(label)}</label>`).join('');
+  ruleEditor=new RuleEditor($('creator-rules'),{change:(label,edit)=>changeInspector(label,edit,()=>ruleEditor.render(current.doc.value,{force:true}))});
   for(const h of catalog.habitats)$('creator-habitat').append(new Option(h.name,h.key));
   for(const species of catalog.nature)$('creator-species').append(new Option(species.name,species.key));map.natureSpecies=catalog.nature[0];map.natureSize=1;
   $('creator-examples').innerHTML=exampleScenarios.map(e=>`<button data-example="${escape(e.id)}"><b>${escape(e.title)}</b><small>${escape(e.biome)} · ${escape(e.summary)}</small></button>`).join('');
