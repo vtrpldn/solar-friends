@@ -200,6 +200,11 @@ async function changeMap(label,edit,{force=false,...options}={}){
   if(force||heavyDraft(current.doc.value))return changePrepared(label,edit,{allowInvalid:!options.valid});
   return change(label,edit,options);
 }
+async function changeSelection(label,edit,options){
+  const ctx=current,committed=await changeMap(label,edit,options);
+  if(!committed&&current===ctx)renderSelection();
+  return committed;
+}
 // Inspector handlers do not depend on an immediate placement result. Keep their
 // old field values visible if a heavy preparation is cancelled or fails.
 function changeInspector(label,edit,restore){
@@ -537,34 +542,34 @@ function wire(){
   };
   $('creator-biomes').onclick=e=>{const b=e.target.closest('[data-biome]');if(!b)return;newBiome=b.dataset.biome;for(const choice of $('creator-biomes').querySelectorAll('button'))choice.setAttribute('aria-pressed',String(choice===b));};
   $('creator-rules').onchange=e=>{const rule=e.target.dataset.rule,value=e.target.checked;if(rule)changeInspector('Change village rules',d=>{d.rules[rule]=value;},()=>{e.target.checked=current.doc.value.rules[rule];});};
-  $('creator-selection').onchange=e=>{
+  $('creator-selection').onchange=async e=>{
     if(e.target.dataset.naturalField){if(e.target.value===''){toast('Enter a position or size before applying this change.');renderSelection();return;}const source=map.naturalObjects?.find(p=>p.id===map.view.selectedNature);if(source){const field=e.target.dataset.naturalField,next={...source,[field]:Number(e.target.value)};editNatureObject('move-nature',next.x,next.y,next.size);}return;}
-    if(e.target.matches('[data-start-recovery]')){const value=e.target.value,id=map.view.selected;change('Set inherited structure recovery',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(value==='none')delete b.material_recovery;else b.material_recovery=value;});return;}
-    if(e.target.dataset.startBank){const key=e.target.dataset.startBank,value=Number(e.target.value),id=map.view.selectedBank;change('Edit battery bank',d=>{const b=d.start.batteries?.find(b=>b.id===id);if(b)b[key]=value;});return;}
-    if(e.target.dataset.buildingBank){const key=e.target.dataset.buildingBank,value=e.target.type==='checkbox'?e.target.checked:Number(e.target.value),id=map.view.selected;change('Edit building battery',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.battery)b.battery[key]=value;});return;}
+    if(e.target.matches('[data-start-recovery]')){const value=e.target.value,id=map.view.selected;await changeSelection('Set inherited structure recovery',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(value==='none')delete b.material_recovery;else b.material_recovery=value;});return;}
+    if(e.target.dataset.startBank){const key=e.target.dataset.startBank,value=Number(e.target.value),id=map.view.selectedBank;await changeSelection('Edit battery bank',d=>{const b=d.start.batteries?.find(b=>b.id===id);if(b)b[key]=value;});return;}
+    if(e.target.dataset.buildingBank){const key=e.target.dataset.buildingBank,value=e.target.type==='checkbox'?e.target.checked:Number(e.target.value),id=map.view.selected;await changeSelection('Edit building battery',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.battery)b.battery[key]=value;});return;}
 
-    if(e.target.dataset.startAnimal){const key=e.target.dataset.startAnimal,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selected;change('Configure starting animals',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.animals)setStartingAnimalField(b,key,value);});return;}
-    if(e.target.dataset.startSite){const key=e.target.dataset.startSite,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selectedSite;change('Edit material plot',d=>{const site=d.start.resource_sites?.find(s=>s.id===id);if(site)setSiteField(site,key,value);});return;}
-    if(e.target.dataset.startOrchard){const field=e.target.dataset.startOrchard,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selected;change('Configure starting orchard',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.orchard)setStartingOrchardField(b,field,value);});return;}
-    if(e.target.dataset.startCrop){const field=e.target.dataset.startCrop,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selected;change('Configure starting crops',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.crop)setStartingCropField(b,field,value);});return;}
+    if(e.target.dataset.startAnimal){const key=e.target.dataset.startAnimal,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selected;await changeSelection('Configure starting animals',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.animals)setStartingAnimalField(b,key,value);});return;}
+    if(e.target.dataset.startSite){const key=e.target.dataset.startSite,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selectedSite;await changeSelection('Edit material plot',d=>{const site=d.start.resource_sites?.find(s=>s.id===id);if(site)setSiteField(site,key,value);});return;}
+    if(e.target.dataset.startOrchard){const field=e.target.dataset.startOrchard,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selected;await changeSelection('Configure starting orchard',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.orchard)setStartingOrchardField(b,field,value);});return;}
+    if(e.target.dataset.startCrop){const field=e.target.dataset.startCrop,value=e.target.type==='checkbox'?e.target.checked:e.target.value,id=map.view.selected;await changeSelection('Configure starting crops',d=>{const b=d.start.buildings.find(b=>b.id===id);if(b?.crop)setStartingCropField(b,field,value);});return;}
     const id=map.view.selected,key={'creator-object-x':'x','creator-object-y':'y','creator-object-state':'state','creator-object-recipe':'recipe','creator-object-appearance':'appearance'}[e.target.id];
-    if(key)change('Edit '+title(current.doc.value.start.buildings.find(b=>b.id===id)?.kind),d=>{
+    if(key)await changeSelection('Edit '+title(current.doc.value.start.buildings.find(b=>b.id===id)?.kind),d=>{
       const b=d.start.buildings.find(b=>b.id===id);if(!b)return;b[key]=['x','y'].includes(key)?Number(e.target.value):e.target.value;
       if(key==='recipe'&&b.kind==='home')b.appearance=b.recipe==='adobe'?'adobe-gable':b.recipe==='local'?'home-veranda':'home';
     });
   };
-  $('creator-selection').onclick=e=>{
+  $('creator-selection').onclick=async e=>{
     if(e.target.closest('[data-edit-start]')){residentsEditor.openArrival(map.view.selectedResident);return;}
     if(e.target.closest('[data-route-inspect]')){routesEditor.edit(map.view.selectedRoute);return;}
-    const buildingBank=e.target.closest('[data-building-bank-action]')?.dataset.buildingBankAction;if(buildingBank){const id=map.view.selected;change('Configure building battery',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(buildingBank==='reset')delete b.battery;else b.battery={charge:catalog.batteries.buildings.find(p=>p.id===b.kind).default_charge,owned:true};});return;}
-    const bankAction=e.target.closest('[data-bank-action]')?.dataset.bankAction;if(bankAction){const id=map.view.selectedBank;if(bankAction==='remove'){change('Remove battery bank',d=>{d.start.batteries=d.start.batteries.filter(b=>b.id!==id);});map.select(null);}else if(bankAction==='duplicate'){map.bankCopy=clone(current.doc.value.start.batteries.find(b=>b.id===id));setTool('copy-bank');}else setTool('move-bank');return;}
+    const buildingBank=e.target.closest('[data-building-bank-action]')?.dataset.buildingBankAction;if(buildingBank){const id=map.view.selected;await changeSelection('Configure building battery',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(buildingBank==='reset')delete b.battery;else b.battery={charge:catalog.batteries.buildings.find(p=>p.id===b.kind).default_charge,owned:true};});return;}
+    const bankAction=e.target.closest('[data-bank-action]')?.dataset.bankAction;if(bankAction){const id=map.view.selectedBank;if(bankAction==='remove'){if(await changeSelection('Remove battery bank',d=>{d.start.batteries=d.start.batteries.filter(b=>b.id!==id);}))map.select(null);}else if(bankAction==='duplicate'){map.bankCopy=clone(current.doc.value.start.batteries.find(b=>b.id===id));setTool('copy-bank');}else setTool('move-bank');return;}
 
-    const animalAction=e.target.closest('[data-animal-action]')?.dataset.animalAction;if(animalAction){const id=map.view.selected;change('Configure starting animals',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(animalAction==='reset')delete b.animals;else b.animals=clone(catalog.animals.example);});return;}
+    const animalAction=e.target.closest('[data-animal-action]')?.dataset.animalAction;if(animalAction){const id=map.view.selected;await changeSelection('Configure starting animals',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(animalAction==='reset')delete b.animals;else b.animals=clone(catalog.animals.example);});return;}
     const natureAction=e.target.closest('[data-nature-action]')?.dataset.natureAction;if(natureAction){const source=map.naturalObjects?.find(p=>p.id===map.view.selectedNature);if(!source)return;if(natureAction==='remove')removeNatureObject(source.id);else if(natureAction==='duplicate'){map.natureCopy=clone(source);setTool('copy-nature');}else setTool('move-nature');return;}
-    const siteAction=e.target.closest('[data-site-action]')?.dataset.siteAction;if(siteAction){const id=map.view.selectedSite;if(siteAction==='remove'){change('Remove material plot',d=>{d.start.resource_sites=d.start.resource_sites.filter(s=>s.id!==id);});map.select(null);}else if(siteAction==='duplicate'){map.siteCopy=clone(current.doc.value.start.resource_sites.find(s=>s.id===id));setTool('copy-site');}else setTool('move-site');return;}
+    const siteAction=e.target.closest('[data-site-action]')?.dataset.siteAction;if(siteAction){const id=map.view.selectedSite;if(siteAction==='remove'){if(await changeSelection('Remove material plot',d=>{d.start.resource_sites=d.start.resource_sites.filter(s=>s.id!==id);}))map.select(null);}else if(siteAction==='duplicate'){map.siteCopy=clone(current.doc.value.start.resource_sites.find(s=>s.id===id));setTool('copy-site');}else setTool('move-site');return;}
 
-    const orchardAction=e.target.closest('[data-orchard-action]')?.dataset.orchardAction;if(orchardAction){const id=map.view.selected;change('Configure starting orchard',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(orchardAction==='reset')delete b.orchard;else b.orchard=structuredClone(catalog.orchards.example);});return;}
-    const cropAction=e.target.closest('[data-crop-action]')?.dataset.cropAction;if(cropAction){const id=map.view.selected;change('Configure starting crops',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(cropAction==='reset')delete b.crop;else b.crop=structuredClone(catalog.farming.example);});return;}
+    const orchardAction=e.target.closest('[data-orchard-action]')?.dataset.orchardAction;if(orchardAction){const id=map.view.selected;await changeSelection('Configure starting orchard',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(orchardAction==='reset')delete b.orchard;else b.orchard=structuredClone(catalog.orchards.example);});return;}
+    const cropAction=e.target.closest('[data-crop-action]')?.dataset.cropAction;if(cropAction){const id=map.view.selected;await changeSelection('Configure starting crops',d=>{const b=d.start.buildings.find(b=>b.id===id);if(!b)return;if(cropAction==='reset')delete b.crop;else b.crop=structuredClone(catalog.farming.example);});return;}
     const action=e.target.closest('[data-selection-action]')?.dataset.selectionAction,id=map.view.selected;if(!action)return;
     if(action==='move')setTool('move');
     if(action==='remove')removeBuilding(id);

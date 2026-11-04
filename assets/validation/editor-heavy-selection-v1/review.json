@@ -1,0 +1,44 @@
+{
+  "screenshot": {
+    "file": "crop-cancelled.png",
+    "sha256": "1d606ab750c5ac3fcf8c1af076126dd797b6e7672d76f0fd02beb5f94ac1a237",
+    "individuallyInspected": true,
+    "finding": "Canceled wetness proposal is reset to the stored 0 value; selected garden and crop controls remain available."
+  },
+  "change": "Selected-object fields and configure/reset actions prepare separately on heavy maps. Cancellation/failure rerenders original inspector values; bank/site removal clears selection only after successful commit.",
+  "cases": [
+    "home position",
+    "building state",
+    "home recipe",
+    "home appearance",
+    "inherited materials",
+    "configure roof battery",
+    "roof battery charge",
+    "roof battery ownership",
+    "configure crops",
+    "crop stage",
+    "crop wetness",
+    "reset crops",
+    "configure animals",
+    "animal welfare",
+    "animal enabled",
+    "reset animals",
+    "configure orchard",
+    "orchard stage",
+    "orchard wetness",
+    "reset orchard",
+    "ground battery charge",
+    "ground battery capacity",
+    "timber stage",
+    "timber wetness",
+    "timber harvest"
+  ],
+  "observations": {
+    "caseCount": 25,
+    "maximumRecordedHandlerMs": 4.200000047683716,
+    "mainThreadScenarioCompiles": 0,
+    "trustedHandlerRecords": 20,
+    "handlerRecords": 28
+  },
+  "scope": "One combined maximum fixture plus one ground bank/timber plot. Each of 25 sampled fields/configure/reset cases has public cancellation/value restoration, exact one-step undo/redo and final reload. Dropdowns use Playwright selectOption; event trust flags are retained. Not every enum/dependency/site, heavy bank/site removal, maximal history, sustained display pacing or memory acceptance."
+}

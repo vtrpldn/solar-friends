@@ -1,0 +1,34 @@
+{
+  "runtimeSources": {
+    "web/editor/index.js": "e51ee1835621af249bdc09ed2a5837ec40977e9a448cfbdd18b2d7b680d52ad3",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "runs": [
+    {
+      "command": "node scripts/verify-starting-crops-editor.mjs",
+      "scriptSha256": "4e85fc818aa88caab874318830a2f7d3889ebd9b0e420ca9710665e5f40a45f7",
+      "observedExitCode": 0
+    },
+    {
+      "command": "node scripts/verify-starting-animals-editor.mjs",
+      "scriptSha256": "1c60cb064090ed75f6d002109c35e3c16d60063d5b7405e65b71be8f3ea7f0a7",
+      "observedExitCode": 0
+    },
+    {
+      "command": "node scripts/verify-starting-orchards-editor.mjs",
+      "scriptSha256": "137c34785ff7cf95853a299040fbda752b31dca63ac30c86159552800601cf6e",
+      "observedExitCode": 0
+    },
+    {
+      "command": "node scripts/verify-starting-batteries-editor.mjs",
+      "scriptSha256": "323ee0e18281cc24941b7c4dd4431b9a0e7c3a72c8a7b91a946c52979346cbdf",
+      "observedExitCode": 0
+    },
+    {
+      "command": "node scripts/verify-starting-sites-editor.mjs",
+      "scriptSha256": "ef3f623cc5464c135a094ef4a92e9fc4f50bfbc11639b29ff1bc007308e56081",
+      "observedExitCode": 0
+    }
+  ],
+  "scope": "Existing smaller-map public crop, animal, orchard, battery and resource-site regressions all reached terminal success, including their export/reopen, invalid-setting repair and exact checkpoint assertions. Not performance measurements."
+}

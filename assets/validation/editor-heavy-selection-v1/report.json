@@ -1,0 +1,369 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-editor-heavy-selection.mjs": "02ad5bd9d67536de7716d3b8a7abc2da6d500e4d630530135f55b3da0a5f5aa1",
+    "web/editor/index.js": "e51ee1835621af249bdc09ed2a5837ec40977e9a448cfbdd18b2d7b680d52ad3",
+    "web/editor/prepare-edit.js": "87c99d35de13531a9755d278197c48245affadf310f28f945311847f6c91b6c3",
+    "web/scenario-prepare-worker.js": "addc75637a2670f8d8d69878508c5b9eec13ad599eb2d3f699f18fa18dd6083c",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "load": {
+    "authoredNature": 1000,
+    "species": "macambira",
+    "size": 0.6499999761581421,
+    "routes": 64,
+    "routeCells": 80,
+    "routeAttempts": 127
+  },
+  "cases": [
+    "home position",
+    "building state",
+    "home recipe",
+    "home appearance",
+    "inherited materials",
+    "configure roof battery",
+    "roof battery charge",
+    "roof battery ownership",
+    "configure crops",
+    "crop stage",
+    "crop wetness",
+    "reset crops",
+    "configure animals",
+    "animal welfare",
+    "animal enabled",
+    "reset animals",
+    "configure orchard",
+    "orchard stage",
+    "orchard wetness",
+    "reset orchard",
+    "ground battery charge",
+    "ground battery capacity",
+    "timber stage",
+    "timber wetness",
+    "timber harvest"
+  ],
+  "timing": {
+    "handlers": [
+      {
+        "phase": "home position",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 4.1000001430511475
+      },
+      {
+        "phase": "building state",
+        "key": "onchange",
+        "trusted": false,
+        "ms": 3.799999952316284
+      },
+      {
+        "phase": "home recipe",
+        "key": "onchange",
+        "trusted": false,
+        "ms": 3.8999998569488525
+      },
+      {
+        "phase": "home appearance",
+        "key": "onchange",
+        "trusted": false,
+        "ms": 4.200000047683716
+      },
+      {
+        "phase": "inherited materials",
+        "key": "onchange",
+        "trusted": false,
+        "ms": 3.0999999046325684
+      },
+      {
+        "phase": "configure roof battery",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 3.200000047683716
+      },
+      {
+        "phase": "roof battery charge",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 2.8999998569488525
+      },
+      {
+        "phase": "roof battery ownership",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 0
+      },
+      {
+        "phase": "roof battery ownership",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.299999952316284
+      },
+      {
+        "phase": "configure crops",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 3.299999952316284
+      },
+      {
+        "phase": "crop stage",
+        "key": "onchange",
+        "trusted": false,
+        "ms": 3.3999998569488525
+      },
+      {
+        "phase": "crop wetness",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.299999952316284
+      },
+      {
+        "phase": "reset crops",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 3.4000000953674316
+      },
+      {
+        "phase": "configure animals",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 3.200000047683716
+      },
+      {
+        "phase": "animal welfare",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 2.9000000953674316
+      },
+      {
+        "phase": "animal enabled",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 0.10000014305114746
+      },
+      {
+        "phase": "animal enabled",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.299999952316284
+      },
+      {
+        "phase": "reset animals",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 3.6000001430511475
+      },
+      {
+        "phase": "configure orchard",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 3.0999999046325684
+      },
+      {
+        "phase": "orchard stage",
+        "key": "onchange",
+        "trusted": false,
+        "ms": 3.6000001430511475
+      },
+      {
+        "phase": "orchard wetness",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 2.9000000953674316
+      },
+      {
+        "phase": "reset orchard",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 3.299999952316284
+      },
+      {
+        "phase": "ground battery charge",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.799999952316284
+      },
+      {
+        "phase": "ground battery capacity",
+        "key": "onchange",
+        "trusted": false,
+        "ms": 3.200000047683716
+      },
+      {
+        "phase": "timber stage",
+        "key": "onchange",
+        "trusted": false,
+        "ms": 3.200000047683716
+      },
+      {
+        "phase": "timber wetness",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 2.8999998569488525
+      },
+      {
+        "phase": "timber harvest",
+        "key": "onclick",
+        "trusted": true,
+        "ms": 0
+      },
+      {
+        "phase": "timber harvest",
+        "key": "onchange",
+        "trusted": true,
+        "ms": 3.0999999046325684
+      }
+    ],
+    "native": [
+      {
+        "phase": "home position",
+        "key": "restore",
+        "ms": 20.299999952316284
+      },
+      {
+        "phase": "building state",
+        "key": "restore",
+        "ms": 9.600000143051147
+      },
+      {
+        "phase": "home recipe",
+        "key": "restore",
+        "ms": 9.200000047683716
+      },
+      {
+        "phase": "home appearance",
+        "key": "restore",
+        "ms": 9
+      },
+      {
+        "phase": "inherited materials",
+        "key": "restore",
+        "ms": 9.599999904632568
+      },
+      {
+        "phase": "configure roof battery",
+        "key": "restore",
+        "ms": 8.700000047683716
+      },
+      {
+        "phase": "roof battery charge",
+        "key": "restore",
+        "ms": 9.099999904632568
+      },
+      {
+        "phase": "roof battery ownership",
+        "key": "restore",
+        "ms": 9.299999952316284
+      },
+      {
+        "phase": "configure crops",
+        "key": "restore",
+        "ms": 9.5
+      },
+      {
+        "phase": "crop stage",
+        "key": "restore",
+        "ms": 8.900000095367432
+      },
+      {
+        "phase": "crop wetness",
+        "key": "restore",
+        "ms": 8.700000047683716
+      },
+      {
+        "phase": "reset crops",
+        "key": "restore",
+        "ms": 8.799999952316284
+      },
+      {
+        "phase": "configure animals",
+        "key": "restore",
+        "ms": 9.100000143051147
+      },
+      {
+        "phase": "animal welfare",
+        "key": "restore",
+        "ms": 8.899999856948853
+      },
+      {
+        "phase": "animal enabled",
+        "key": "restore",
+        "ms": 8.799999952316284
+      },
+      {
+        "phase": "reset animals",
+        "key": "restore",
+        "ms": 8.799999952316284
+      },
+      {
+        "phase": "configure orchard",
+        "key": "restore",
+        "ms": 8.800000190734863
+      },
+      {
+        "phase": "orchard stage",
+        "key": "restore",
+        "ms": 9.100000143051147
+      },
+      {
+        "phase": "orchard wetness",
+        "key": "restore",
+        "ms": 9.299999952316284
+      },
+      {
+        "phase": "reset orchard",
+        "key": "restore",
+        "ms": 8.799999952316284
+      },
+      {
+        "phase": "ground battery charge",
+        "key": "restore",
+        "ms": 9.299999952316284
+      },
+      {
+        "phase": "timber stage",
+        "key": "restore",
+        "ms": 9.100000143051147
+      },
+      {
+        "phase": "timber wetness",
+        "key": "restore",
+        "ms": 8.699999809265137
+      },
+      {
+        "phase": "timber harvest",
+        "key": "restore",
+        "ms": 9.100000143051147
+      }
+    ]
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.26841599997715093
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 3.386083999997936
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 38.361541999998735
+    }
+  ],
+  "scope": "25 public selected-object cases on one combined maximum fixture, each cancellation/value restoration, one-step exact undo/redo, then final reload. One field/configuration per sampled family; dropdowns use Playwright selectOption and retain their event trust flags. Not every enum/site/dependency, maximum history, sustained pacing or memory."
+}
