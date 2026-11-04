@@ -1,0 +1,135 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-editor-keyboard-removal.mjs": "10626f14fd94e73e13eecadc12f0ece3dbb4eb06cde6d6541183e929455b2846",
+    "scripts/route-editor-load.mjs": "6609944207c00d8e1aba357254b4eefc6bd11d6503418ae85850c82cfe720a96",
+    "web/editor/index.js": "1a3cf7c94696462ed5298c089ef7ae6f6b39a830577f92294b7df18aa898077a",
+    "web/editor/heavy-draft.js": "c589af91836715bfc4eefd3694eb2f9ed4bb607d739cc66d4323662181ec66ae",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "load": {
+    "authoredNature": 1000,
+    "species": "macambira",
+    "size": 0.6499999761581421,
+    "routes": 64,
+    "routeCells": 106,
+    "routeAttempts": 127,
+    "classes": [
+      "electricity",
+      "fresh",
+      "greywater",
+      "irrigation",
+      "sewage"
+    ]
+  },
+  "cases": [
+    "route Delete",
+    "route Backspace",
+    "bank Delete",
+    "bank Backspace",
+    "site Delete",
+    "site Backspace"
+  ],
+  "observations": {
+    "handlers": [
+      {
+        "phase": "route Delete",
+        "key": "Delete",
+        "trusted": true,
+        "ms": 4.8999998569488525
+      },
+      {
+        "phase": "route Backspace",
+        "key": "Backspace",
+        "trusted": true,
+        "ms": 4.599999904632568
+      },
+      {
+        "phase": "bank Delete",
+        "key": "Delete",
+        "trusted": true,
+        "ms": 4.099999904632568
+      },
+      {
+        "phase": "bank Backspace",
+        "key": "Backspace",
+        "trusted": true,
+        "ms": 4.1000001430511475
+      },
+      {
+        "phase": "site Delete",
+        "key": "Delete",
+        "trusted": true,
+        "ms": 3.799999952316284
+      },
+      {
+        "phase": "site Backspace",
+        "key": "Backspace",
+        "trusted": true,
+        "ms": 4.1000001430511475
+      }
+    ],
+    "native": [
+      {
+        "phase": "route Delete",
+        "key": "restore",
+        "ms": 19.800000190734863
+      },
+      {
+        "phase": "route Backspace",
+        "key": "restore",
+        "ms": 9.099999904632568
+      },
+      {
+        "phase": "bank Delete",
+        "key": "restore",
+        "ms": 8.799999952316284
+      },
+      {
+        "phase": "bank Backspace",
+        "key": "restore",
+        "ms": 9.099999904632568
+      },
+      {
+        "phase": "site Delete",
+        "key": "restore",
+        "ms": 9.400000095367432
+      },
+      {
+        "phase": "site Backspace",
+        "key": "restore",
+        "ms": 9.799999952316284
+      }
+    ]
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.3967499999998836
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 4.11970800000563
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 31.71416599999793
+    }
+  ],
+  "scope": "Combined maximum fixture: Delete and Backspace for selected route/dependent pump cable, bank and timber plot; Cancel/Escape/late result/worker failure retain checkpoint and selection; exact one-step success/history/reload, modal and text-field guards. Not every site class, referenced equipment/goal, ordinary-map keyboard path, maximum history or sustained pacing/memory."
+}

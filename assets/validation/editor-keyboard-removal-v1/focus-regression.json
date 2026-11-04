@@ -1,0 +1,23 @@
+{
+  "completed": true,
+  "inputs": {
+    "scripts/verify-editor-keyboard-focus.mjs": "1afabe7a4d57ce4867d3129dafd88e0d8b00667d76ef96aa3ad6938a42869646",
+    "web/editor/index.js": "1a3cf7c94696462ed5298c089ef7ae6f6b39a830577f92294b7df18aa898077a",
+    "web/editor/journal.js": "e5ee57626eecacd22dda40297c98d25dffe20c7cd667564885a5bb97cf61d9e0",
+    "web/editor/dialog-focus.js": "990d58e8cea2c9b35e87d9d47c6296409097b13507698557f26425426a939b4f",
+    "web/editor.html": "d6ce8ea23ce48264d7e8235642580fdc944578721acb194ff2ca7d8fc118db53"
+  },
+  "dialogs": [
+    "#creator-map-save-dialog",
+    "#creator-release-dialog",
+    "#creator-library-dialog"
+  ],
+  "checks": {
+    "dialogTabContainment": true,
+    "escapeFocusReturn": true,
+    "textUndoIsolation": true,
+    "escapeStrokeCancelledExactly": true,
+    "journalFocusReturn": true,
+    "browserErrors": []
+  }
+}
