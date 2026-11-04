@@ -7,10 +7,10 @@ const pathValue=(journal,path)=>path.split('.').reduce((value,key)=>value[key],j
 const field=(path,label,value,{type='text',min,max,step,multiline=false}={})=>`<label class="creator-field">${label}${multiline?`<textarea data-journal-path="${path}" maxlength="${max??1000}" rows="3">${escape(value)}</textarea>`:`<input data-journal-path="${path}" type="${type}" value="${escape(value)}" ${min!==undefined?`min="${min}"`:''} ${max!==undefined?`${type==='text'?'maxlength':'max'}="${max}"`:''} ${step!==undefined?`step="${step}"`:''}>`}</label>`;
 const select=(path,label,value,options)=>`<label class="creator-field">${label}<select data-journal-path="${path}">${options.map(([key,name])=>`<option value="${escape(key)}" ${String(value)===String(key)?'selected':''}>${escape(name)}</option>`).join('')}</select></label>`;
 export class JournalEditor{
- constructor(host,{catalog,change,undo,redo,history}){
+ constructor(host,{catalog,change,undo,redo,history,preview}){
   Object.assign(this,{host,catalog,change,history});this.chapter=null;
   this.dialog=document.createElement('dialog');this.dialog.id='creator-journal-dialog';this.dialog.setAttribute('aria-labelledby','creator-journal-title');
-  this.dialog.innerHTML='<button class="dialog-close" aria-label="Close journal editor">×</button><h2 id="creator-journal-title">Shape our story</h2><p>Chapters unfold in order. Required goals open the next chapter; optional goals can continue later. Changes stay in this draft.</p><div class="creator-journal-layout"><nav aria-label="Scenario chapters"></nav><div data-journal-form></div></div><p data-journal-errors role="status"></p><div class="dialog-actions"><button data-journal-undo>Undo</button><button data-journal-redo>Redo</button><button data-journal-done>Done</button></div>';
+  this.dialog.innerHTML='<button class="dialog-close" aria-label="Close journal editor">×</button><h2 id="creator-journal-title">Shape our story</h2><p>Chapters unfold in order. Required goals open the next chapter; optional goals can continue later. Changes stay in this draft.</p><div class="creator-journal-layout"><nav aria-label="Scenario chapters"></nav><div data-journal-form></div></div><p data-journal-errors role="status"></p><div class="dialog-actions"><button data-journal-undo>Undo</button><button data-journal-redo>Redo</button><button data-journal-action="preview">Reading preview</button><button data-journal-done>Done</button></div>';
   document.body.append(this.dialog);this.form=this.dialog.querySelector('[data-journal-form]');this.nav=this.dialog.querySelector('nav');
   this.dialog.querySelector('.dialog-close').onclick=this.dialog.querySelector('[data-journal-done]').onclick=()=>this.dialog.close();this.dialog.querySelector('[data-journal-undo]').onclick=undo;this.dialog.querySelector('[data-journal-redo]').onclick=redo;
   const edit=e=>{
@@ -47,6 +47,7 @@ export class JournalEditor{
   this.dialog.onchange=this.events.dialog.onchange=edit;
   const click=e=>{
    const button=e.target.closest('[data-journal-action]');if(!button)return;const action=button.dataset.journalAction;
+   if(action==='preview'){preview?.(this.chapter);return;}
    if(action==='events'){this.events.open(this.definition,this.report);return;}
    if(action==='open'){this.dialog.showModal();this.render(this.definition,this.report);this.dialog.scrollTop=0;return;}
    if(action==='choose'){this.chapter=button.dataset.chapter;this.render(this.definition,this.report);return;}
@@ -135,7 +136,7 @@ export class JournalEditor{
  }
  render(definition,report){
   this.definition=definition;this.report=report;const j=definition.journal;
-  this.host.innerHTML=j?'<p>A journal guides this village through its own chapters.</p><button data-journal-action="open">Edit village journal</button><button data-journal-action="disable">Remove journal</button>':'<p>Add chapters and goals for players to follow.</p><button data-journal-action="enable">Add village journal</button>';
+  this.host.innerHTML=j?'<p>A journal guides this village through its own chapters.</p><button data-journal-action="open">Edit village journal</button><button data-journal-action="preview">Reading preview</button><button data-journal-action="disable">Remove journal</button>':'<p>Add chapters and goals for players to follow.</p><button data-journal-action="enable">Add village journal</button>';
   if(j)this.host.insertAdjacentHTML('beforeend',`<button data-journal-action="events">Village events · ${j.events?.length??0}</button>`);this.events.render(definition,report);
   if(!j){if(this.dialog.open)this.dialog.close();return;}if(!this.dialog.open)return;
   if(!j.chapters.some(c=>c.id===this.chapter))this.chapter=j.chapters[0]?.id??null;

@@ -1,3 +1,4 @@
+import {showJournalReading} from './journal-reading.js';
 import {RuleEditor} from './rule-presets.js';
 import {prepareNightInspection} from './prepare-inspection.js';
 import {prepareDraft,prepareRecoveredDraft} from './prepare-draft.js';
@@ -78,7 +79,7 @@ let minimap,ruleEditor,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor
 let expandedReview=false,outlook;
 let landReport=null,landReportKey=null,mapPreviewKey=null,landSampleKey='',hoverCell=null;
 let accessReport=null,accessReportKey=null,waterAccessReport=null,waterAccessKey=null;
-let inspectionSerial=0;
+let inspectionSerial=0,playerJournal=null;
 let releasePublication=null,preparedEdit=null,engineDefinition=null;
 let saving=Promise.resolve(),report={ok:false,issues:[]};
 const recoveryKey=id=>`solar-friends-project-recovery:${id}`;
@@ -223,7 +224,8 @@ function refresh(){
   if(preparedEdit&&preparedEdit.key===canonical(d)){
     report=preparedEdit.report;preparedEdit=null;
   }else report=JSON.parse(engine.load_scenario(JSON.stringify(d)));
-  if(report.ok){engineDefinition=JSON.stringify(d);report.roles=JSON.parse(engine.scenario_journal())?.roles??[];}
+  playerJournal=report.ok?JSON.parse(engine.scenario_journal()):null;
+  if(report.ok){engineDefinition=JSON.stringify(d);report.roles=playerJournal?.roles??[];}
   const snapshot=JSON.parse(engine.report_state());
   const nextMapKey=landPreviewKey(d),nextLandKey=report.ok?nextMapKey:null;
   const landChanged=!landReport||(report.ok&&nextLandKey!==landReportKey);
@@ -724,7 +726,7 @@ try{
   liquidsEditor=new LiquidsEditor($('creator-liquids-fields'),{catalog,engine,change:(label,edit)=>{const selected=liquidsEditor.selected,previewOpen=liquidsEditor.preview.open;changeInspector(label,edit,()=>{liquidsEditor.selected=selected;liquidsEditor.render(current.doc.value,report);if(previewOpen&&!liquidsEditor.preview.open)liquidsEditor.preview.showModal();});},undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   suppliesEditor=new SuppliesEditor($('creator-supply-locations'),{catalog,engine,change:(label,edit)=>{const selected=suppliesEditor.selected,previewOpen=suppliesEditor.preview.open;changeInspector(label,edit,()=>{suppliesEditor.selected=selected;suppliesEditor.render(current.doc.value,report);if(previewOpen&&!suppliesEditor.preview.open)suppliesEditor.preview.showModal();});},undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   regionsEditor=new RegionsEditor($('creator-regions-fields'),{change:(label,edit)=>changeInspector(label,edit,()=>regionsEditor.render(current.doc.value)),maximum:catalog.max_regions,draw:()=>setTool('region'),focus:r=>map.centerAt(r.x+(r.width-1)/2,r.y+(r.height-1)/2)});
-  journalEditor=new JournalEditor($('creator-journal-fields'),{catalog,change:(label,edit)=>{const view={chapter:journalEditor.chapter,reveal:journalEditor.reveal,eventReveal:journalEditor.events.reveal,open:journalEditor.dialog.open,eventsOpen:journalEditor.events.dialog.open};changeInspector(label,edit,()=>{journalEditor.chapter=view.chapter;journalEditor.reveal=view.reveal;journalEditor.events.reveal=view.eventReveal;if(view.open&&!journalEditor.dialog.open)journalEditor.dialog.showModal();if(view.eventsOpen&&!journalEditor.events.dialog.open)journalEditor.events.dialog.showModal();journalEditor.render(current.doc.value,report);});},undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo})});
+  journalEditor=new JournalEditor($('creator-journal-fields'),{catalog,preview:chapter=>{try{showJournalReading({definition:current.doc.value,report:playerJournal,chapter});}catch(error){toast(error.message);}},change:(label,edit)=>{const view={chapter:journalEditor.chapter,reveal:journalEditor.reveal,eventReveal:journalEditor.events.reveal,open:journalEditor.dialog.open,eventsOpen:journalEditor.events.dialog.open};changeInspector(label,edit,()=>{journalEditor.chapter=view.chapter;journalEditor.reveal=view.reveal;journalEditor.events.reveal=view.eventReveal;if(view.open&&!journalEditor.dialog.open)journalEditor.dialog.showModal();if(view.eventsOpen&&!journalEditor.events.dialog.open)journalEditor.events.dialog.showModal();journalEditor.render(current.doc.value,report);});},undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo})});
   relationshipsEditor=new RelationshipsEditor($('creator-relationships-fields'),{presets:catalog.resident_presets,art,change:(label,edit)=>changeInspector(label,edit,()=>{relationshipsEditor.signature=null;relationshipsEditor.render(current.doc.value);})});
   residentsEditor=new ResidentsEditor($('creator-residents-fields'),{presets:catalog.resident_presets,occupations:catalog.occupations,catalog,change:(label,edit)=>changeInspector(label,edit,()=>{residentsEditor.signature=null;residentsEditor.render(current.doc.value,report);}),source:()=>current.doc.value,placeStart:id=>{map.placingResident=id;setTool('resident-start');map.selectResident(id);},locateStart:(id,position)=>{setTool('select');map.selectResident(id);map.centerAt(...position);}});
   weatherEditor=new WeatherEditor($('creator-weather-fields'),{defaults:catalog.weather,biomes:catalog.biomes,change:changeMap});

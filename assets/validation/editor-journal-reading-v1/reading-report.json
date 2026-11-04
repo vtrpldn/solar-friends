@@ -1,0 +1,52 @@
+{
+  "complete": true,
+  "chapters": 4,
+  "nativePlayerMarkup": true,
+  "exactRecordAndNativePreservation": true,
+  "sidebarAndNestedEditor": true,
+  "escapeAndFocusReturn": true,
+  "plainTextIsolation": true,
+  "invalidDraftRefusedAndUndoRepair": true,
+  "exactReload": true,
+  "noRunsCreated": true,
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.8017080000008718
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 8.444708000000901
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 51.984707999999955
+    }
+  ],
+  "sources": {
+    "web/scenario-journal-copy.js": "fa20bfee2dfb4e9cdf1824ec138a6ab20d1e55166cf53a285eb76cd21ab3e0c6",
+    "web/scenario-journal-ui.js": "2cb7db77b0373e5b399b6762dbdd12120018ac5a7778586903186d8efc8d292a",
+    "web/editor/journal-reading.js": "0734693e37ad3db998c706b8d7b075150d60861f5b1e3513f6c0cd1c7008a1e9",
+    "web/editor/scenario-journal.js": "ab001bedc5052121aaa90cb679b3d3fda28fc71caf94bd884508ed29c7328775",
+    "web/editor/index.js": "3e26a3e189203890c95b9b97eb77ee6feee370cda9539ba18603754c11fb2a83",
+    "web/editor/style.css": "96b761bdc6265d6af09ec879ef20464fd2b76496b8fb874d7c69c066a9c9d91b",
+    "scripts/verify-journal-reading-preview.mjs": "8aeeb288b2ae0e732f228e3cff32fa4140dced528abbaa8af54008e7a3adc9ed",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "scope": "Public read-only opening-journal preview on First clearing, all chapters, native copy and completed-message readout. Player markup regression is separate; not every event/deadline/state, maximum journal layout or full release acceptance."
+}

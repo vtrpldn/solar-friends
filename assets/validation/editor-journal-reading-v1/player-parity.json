@@ -1,0 +1,50 @@
+{
+  "complete": true,
+  "cases": [
+    "first-clearing 0",
+    "first-clearing 1",
+    "first-clearing 2",
+    "first-clearing 3",
+    "before-the-dry-season 0",
+    "before-the-dry-season 1",
+    "before-the-dry-season 2",
+    "an-inherited-village 0",
+    "an-inherited-village 1",
+    "an-inherited-village 2"
+  ],
+  "baselineCommit": "a426ef9",
+  "baselineSha256": "bd9a6fc59df1a60345e25a29b52f49c1460b498fdd633551c80356ce3544adb2",
+  "sharedSha256": "fa20bfee2dfb4e9cdf1824ec138a6ab20d1e55166cf53a285eb76cd21ab3e0c6",
+  "uiSha256": "2cb7db77b0373e5b399b6762dbdd12120018ac5a7778586903186d8efc8d292a",
+  "scriptSha256": "61ef6ad3872e11b1b16ed9437fc701c643a73f07f72e3aa4b26ffd6b12e45177",
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.7148750000000064
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 4.510167000000024
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 27.615458999999987
+    }
+  ],
+  "scope": "Exact DOM markup parity between committed and refactored player renderer for all opening-report chapters in three native compiled examples. No action dispatch or later simulation states asserted."
+}
