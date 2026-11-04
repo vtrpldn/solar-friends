@@ -171,14 +171,14 @@ function change(label,edit,{valid=false}={}){
 }
 // Heavy edits and history prepare separately. Invalid history targets retain
 // the last valid preview; valid checkpoints install only for the same revision.
-async function changePrepared(label,edit,{target=null,history=null,allowInvalid=false}={}){
+async function changePrepared(label,edit,{target=null,history=null,allowInvalid=false,preflight=null}={}){
   if(!current||busy)return false;
   const ctx=current,revision=ctx.doc.revision,draft=target??ctx.doc.value;
   busy=true;clearTimeout(toastTimer);$('creator-toast').hidden=true;status('Preparing edit…');
   let previous,installed=false,committed=false;
   try{
     edit?.(draft);
-    const prepared=await prepareEdit(draft,{allowInvalid});
+    const prepared=await prepareEdit(draft,{allowInvalid,preflight});
     if(current!==ctx||ctx.doc.revision!==revision)throw Error('The draft changed. Try this edit again.');
     if(prepared.validation.ok){
       previous=engine.snapshot();
@@ -197,7 +197,7 @@ async function changePrepared(label,edit,{target=null,history=null,allowInvalid=
 }
 async function changeMap(label,edit,{force=false,...options}={}){
   if(!current||busy)return false;
-  if(force||heavyDraft(current.doc.value))return changePrepared(label,edit,{allowInvalid:!options.valid});
+  if(force||heavyDraft(current.doc.value))return changePrepared(label,edit,{allowInvalid:!options.valid,preflight:options.preflight});
   return change(label,edit,options);
 }
 async function changeSelection(label,edit,options){
@@ -707,7 +707,7 @@ try{
   $('creator-examples').innerHTML=exampleScenarios.map(e=>`<button data-example="${escape(e.id)}"><b>${escape(e.title)}</b><small>${escape(e.biome)} · ${escape(e.summary)}</small></button>`).join('');
   $('creator-biomes').innerHTML=catalog.biomes.map(b=>`<button type="button" data-biome="${b.id}" aria-pressed="${b.id===newBiome}"><img src="./art/${b.id==='mata-atlantica'?'mata-atlantica-atlas.png':b.id==='cerrado'?'cerrado-vegetation-v1.png':'caatinga-vegetation-v1.png'}" alt=""><b>${escape(b.name)}</b><small>${escape(b.summary)}</small></button>`).join('');
   equipmentEditor=new EquipmentEditor($('creator-equipment-fields'),{engine,catalog:catalog.equipment,change:(label,edit)=>changeInspector(label,edit,()=>equipmentEditor.render(current.doc.value)),focus:(x,y)=>map.centerAt(x,y)});
-  routesEditor=new RoutesEditor($('creator-routes-fields'),{engine,Game,catalog,change,buildingName:title,notify:toast,focus:(x,y)=>map.centerAt(x,y),select:id=>{setTool('select');if(id)map.selectRoute(id);else map.select(null);},preview:plan=>{if(!plan&&!map.utilityPreview)return;map.utilityPreview=plan;map.render();},draw:()=>setTool('route-path')});
+  routesEditor=new RoutesEditor($('creator-routes-fields'),{engine,Game,catalog,change:changeMap,buildingName:title,notify:toast,clearNotice:()=>{clearTimeout(toastTimer);$('creator-toast').hidden=true;},focus:(x,y)=>map.centerAt(x,y),select:id=>{setTool('select');if(id)map.selectRoute(id);else map.select(null);},preview:plan=>{if(!plan&&!map.utilityPreview)return;map.utilityPreview=plan;map.render();},draw:()=>setTool('route-path')});
   liquidsEditor=new LiquidsEditor($('creator-liquids-fields'),{catalog,engine,change:(label,edit)=>{const selected=liquidsEditor.selected,previewOpen=liquidsEditor.preview.open;changeInspector(label,edit,()=>{liquidsEditor.selected=selected;liquidsEditor.render(current.doc.value,report);if(previewOpen&&!liquidsEditor.preview.open)liquidsEditor.preview.showModal();});},undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   suppliesEditor=new SuppliesEditor($('creator-supply-locations'),{catalog,engine,change:(label,edit)=>{const selected=suppliesEditor.selected,previewOpen=suppliesEditor.preview.open;changeInspector(label,edit,()=>{suppliesEditor.selected=selected;suppliesEditor.render(current.doc.value,report);if(previewOpen&&!suppliesEditor.preview.open)suppliesEditor.preview.showModal();});},undo:()=>stepHistory(),redo:()=>stepHistory(true),history:()=>({undo:current.doc.canUndo,redo:current.doc.canRedo}),source:()=>({id:current.id,definition:current.doc.value,revision:current.doc.revision}),notify:toast});
   regionsEditor=new RegionsEditor($('creator-regions-fields'),{change:(label,edit)=>changeInspector(label,edit,()=>regionsEditor.render(current.doc.value)),maximum:catalog.max_regions,draw:()=>setTool('region'),focus:r=>map.centerAt(r.x+(r.width-1)/2,r.y+(r.height-1)/2)});

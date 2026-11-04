@@ -1,0 +1,613 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-editor-heavy-routes.mjs": "0292fe07802c6cbc2731c334056a82d11c3582473b4aa0ac746a5e64b5de76bb",
+    "scripts/route-editor-load.mjs": "6609944207c00d8e1aba357254b4eefc6bd11d6503418ae85850c82cfe720a96",
+    "web/editor/index.js": "0720c2a12fa27178691d48dc7963ed3a3e59e176f409b524e3a17dfed5ab122d",
+    "web/editor/routes.js": "60c79b8ec79247a87ebdb23145eb6e0a3ccc46b364c8b6e0842292ba0c0c3f7a",
+    "web/editor/route-query.js": "3d4bd754b82b45aa1172d25efa98734973fbbda403de09843c807607f005628f",
+    "web/route-query-worker.js": "ad90f920d81597094e6309d2b58b49f7bb7713dd10bd3f49789ae116024176c0",
+    "web/editor/prepare-edit.js": "3ce8acc346a106f9aeeff6f87e3bbc94f585ae7b00c2ab6f8a9baea4735b847b",
+    "web/scenario-prepare-worker.js": "f17a9d38f9a5c5be7e39fa4a73a9aac8922e4899a6567bc9cde194ecd26c2378",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "load": {
+    "authoredNature": 1000,
+    "species": "macambira",
+    "size": 0.6499999761581421,
+    "routes": 64,
+    "routeCells": 106,
+    "routeAttempts": 127,
+    "classes": [
+      "electricity",
+      "fresh",
+      "greywater",
+      "irrigation",
+      "sewage"
+    ]
+  },
+  "checks": [
+    "close pending endpoint lookup and late result isolation",
+    "real endpoint worker failure and explicit Retry without draft changes",
+    "read-only shortest fresh",
+    "read-only shortest greywater",
+    "read-only shortest irrigation",
+    "read-only shortest sewage",
+    "read-only shortest electricity",
+    "shortest Cancel preserves existing proposal",
+    "real pointer corridor Cancel, valid check and occupied-cell rejection",
+    "save Cancel/failure preserves proposal; exact preflight-checked one-step edit with cable retained",
+    "dependent pump-cable removal Cancel and exact one-step undo/redo",
+    "real worker rejects required invalid route even when target allows unfinished draft",
+    "valid required preflight retains an unfinished linked target as validation-only"
+  ],
+  "blueprintValid": true,
+  "observations": {
+    "workers": [
+      {
+        "terminated": true,
+        "results": [],
+        "mode": "endpoints",
+        "kind": "fresh",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "fresh",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [],
+        "mode": "endpoints",
+        "kind": "electricity",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "electricity",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "fresh",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "fresh",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true,
+            "cells": [
+              [
+                6,
+                2
+              ]
+            ]
+          }
+        ],
+        "mode": "shortest",
+        "kind": "fresh",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "greywater",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true,
+            "cells": [
+              [
+                8,
+                27
+              ],
+              [
+                8,
+                28
+              ],
+              [
+                9,
+                28
+              ]
+            ]
+          }
+        ],
+        "mode": "shortest",
+        "kind": "greywater",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "irrigation",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true,
+            "cells": [
+              [
+                46,
+                6
+              ],
+              [
+                45,
+                6
+              ],
+              [
+                44,
+                6
+              ],
+              [
+                43,
+                6
+              ],
+              [
+                42,
+                6
+              ],
+              [
+                42,
+                7
+              ],
+              [
+                42,
+                8
+              ],
+              [
+                42,
+                9
+              ],
+              [
+                42,
+                10
+              ]
+            ]
+          }
+        ],
+        "mode": "shortest",
+        "kind": "irrigation",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "sewage",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true,
+            "cells": [
+              [
+                44,
+                4
+              ],
+              [
+                44,
+                3
+              ]
+            ]
+          }
+        ],
+        "mode": "shortest",
+        "kind": "sewage",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "electricity",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true,
+            "cells": [
+              [
+                13,
+                12
+              ],
+              [
+                13,
+                11
+              ],
+              [
+                13,
+                10
+              ],
+              [
+                12,
+                10
+              ],
+              [
+                12,
+                9
+              ],
+              [
+                12,
+                8
+              ],
+              [
+                12,
+                7
+              ],
+              [
+                12,
+                6
+              ],
+              [
+                12,
+                5
+              ],
+              [
+                12,
+                4
+              ],
+              [
+                12,
+                3
+              ],
+              [
+                11,
+                3
+              ],
+              [
+                10,
+                3
+              ],
+              [
+                9,
+                3
+              ],
+              [
+                8,
+                3
+              ],
+              [
+                7,
+                3
+              ],
+              [
+                6,
+                3
+              ],
+              [
+                6,
+                2
+              ]
+            ]
+          }
+        ],
+        "mode": "shortest",
+        "kind": "electricity",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "greywater",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true,
+            "cells": [
+              [
+                8,
+                27
+              ],
+              [
+                8,
+                28
+              ],
+              [
+                9,
+                28
+              ]
+            ]
+          }
+        ],
+        "mode": "shortest",
+        "kind": "greywater",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [],
+        "mode": "shortest",
+        "kind": "greywater",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true,
+            "cells": [
+              [
+                8,
+                27
+              ],
+              [
+                8,
+                28
+              ],
+              [
+                9,
+                28
+              ]
+            ]
+          }
+        ],
+        "mode": "shortest",
+        "kind": "greywater",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [],
+        "mode": "check",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true,
+            "cells": [
+              [
+                8,
+                27
+              ],
+              [
+                8,
+                28
+              ],
+              [
+                9,
+                28
+              ]
+            ]
+          }
+        ],
+        "mode": "check",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": false
+          }
+        ],
+        "mode": "check",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "fresh",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true,
+            "cells": [
+              [
+                6,
+                2
+              ]
+            ]
+          }
+        ],
+        "mode": "shortest",
+        "kind": "fresh",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "fresh",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "fresh",
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": [
+          {
+            "allowed": true
+          }
+        ],
+        "mode": "endpoints",
+        "kind": "fresh",
+        "title": "Mixed village stress fixture"
+      }
+    ],
+    "native": [
+      {
+        "phase": "save connection",
+        "key": "restore",
+        "ms": 19.299999952316284
+      },
+      {
+        "phase": "remove connection",
+        "key": "restore",
+        "ms": 8.800000190734863
+      }
+    ],
+    "handlers": [
+      {
+        "phase": "shortest fresh",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 5.099999904632568
+      },
+      {
+        "phase": "shortest greywater",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 4.6000001430511475
+      },
+      {
+        "phase": "shortest irrigation",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 4.300000190734863
+      },
+      {
+        "phase": "shortest sewage",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 4.5
+      },
+      {
+        "phase": "shortest electricity",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 4.799999952316284
+      },
+      {
+        "phase": "draw valid",
+        "type": "stroke",
+        "ms": 4.900000095367432
+      },
+      {
+        "phase": "draw rejected",
+        "type": "stroke",
+        "ms": 4.5
+      },
+      {
+        "phase": "save connection",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 7.699999809265137
+      },
+      {
+        "phase": "remove connection",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 3.6999998092651367
+      }
+    ]
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.40974999999889405
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 3.055499999994936
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 30.695499999994354
+    }
+  ],
+  "scope": "Combined maximum fixture, all five shortest-route classes, lookup close/failure/retry, actual corridor drawing/cancellation/rejection, save cancellation/failure/preflight, pump-cable removal, exact history/reload. Not every endpoint/route terrain/shape, maximum new-connection limit or running transfer/power, maximal history or sustained performance/memory."
+}

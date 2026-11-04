@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "sources": {
+    "web/editor/scene-layers.js": "045c4bf57886043d243f0cac6722f92bba5f1b505fc4a3da3449bcd9ea05e00e",
+    "web/editor/index.js": "0720c2a12fa27178691d48dc7963ed3a3e59e176f409b524e3a17dfed5ab122d",
+    "web/editor/map-view.js": "5d38b26e482ee6091de7b11823479459ea573bcfb72acbc6e7c8e44bc5314e24",
+    "web/editor.html": "d6ce8ea23ce48264d7e8235642580fdc944578721acb194ff2ca7d8fc118db53",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6",
+    "scripts/verify-starting-routes-editor.mjs": "6c12f8749f50be68348e29034948dcd88ab7dc505c04099da153bb5bd512f2c5"
+  },
+  "checks": {
+    "fiveClassFilters": true,
+    "nativeInstalledPlannedSummary": true,
+    "regionGoalReference": true,
+    "exactViewOnlyCheckpoint": true,
+    "reloadFilters": true,
+    "hiddenRouteCannotBeSelectedOrErased": true,
+    "referencedRegionRemovalUndo": true,
+    "existingRouteGameplayAndCheckpoint": true,
+    "browserErrors": []
+  },
+  "scope": "Actual public authoring of five native utility classes, region and goal; retained fixture is the saved scene-inspection draft. Subsequent route import/playtest uses the earlier route-only export. Two desktop captures inspected separately. No native simulation change, no flow or power forecast claim."
+}
