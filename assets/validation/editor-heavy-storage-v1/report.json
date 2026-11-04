@@ -1,0 +1,895 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-editor-heavy-storage.mjs": "94bad26843e2695f2765e5708049660155e58ccdbfbfb122b6be6fe706b0c223",
+    "web/editor/index.js": "136b988ac93a9469a04ed4133ffbef3ad17909a84c73a0f2f130aeae0f980e17",
+    "web/editor/heavy-draft.js": "c589af91836715bfc4eefd3694eb2f9ed4bb607d739cc66d4323662181ec66ae",
+    "web/editor/supplies.js": "4eae218787af9ed92f8ad45277feae4a52586b920d9e37a77ef8185cf37a89b3",
+    "web/editor/liquids.js": "4139e286a17c50e71ee5b67c8e42a81b29fe50f6ab410abea4a20c1e527462a9",
+    "web/editor/storage-query.js": "6b44a1ed383b048581ffdc41a5eb42cee72ac19eaad24ca1c481923c5b86750b",
+    "web/storage-query-worker.js": "bc8853f693e8263eb665c0d475dac904a964549401b9138f257c194b46560b45",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "load": {
+    "authoredNature": 1000,
+    "species": "macambira",
+    "size": 0.6499999761581421,
+    "routes": 64,
+    "routeCells": 80,
+    "routeAttempts": 127
+  },
+  "cases": [
+    "material quantity",
+    "food age",
+    "remove supply allocation",
+    "merge supply owners",
+    "apply supply distribution",
+    "fresh water quantity",
+    "greywater quantity",
+    "remove liquid allocation",
+    "merge liquid owners",
+    "apply liquid distribution"
+  ],
+  "observations": {
+    "workers": [
+      {
+        "terminated": true,
+        "results": 0,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 0,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 0,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "First storage source"
+      },
+      {
+        "terminated": true,
+        "results": 0,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "First storage source"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Current storage source"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Current storage source"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "First storage source"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "First storage source"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 0,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Retry storage source"
+      },
+      {
+        "terminated": true,
+        "results": 0,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Retry storage source"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Retry storage source"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Retry storage source"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 0,
+        "kind": "supplies",
+        "distribute": true,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": true,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 0,
+        "kind": "liquids",
+        "distribute": true,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": true,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "liquids",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      },
+      {
+        "terminated": true,
+        "results": 1,
+        "kind": "supplies",
+        "distribute": false,
+        "title": "Mixed village stress fixture"
+      }
+    ],
+    "native": [
+      {
+        "phase": "material quantity",
+        "key": "restore",
+        "ms": 9
+      },
+      {
+        "phase": "food age",
+        "key": "restore",
+        "ms": 8.799999952316284
+      },
+      {
+        "phase": "remove supply allocation",
+        "key": "restore",
+        "ms": 8.899999856948853
+      },
+      {
+        "phase": "merge supply owners",
+        "key": "restore",
+        "ms": 8.900000095367432
+      },
+      {
+        "phase": "apply supply distribution",
+        "key": "restore",
+        "ms": 8.799999952316284
+      },
+      {
+        "phase": "fresh water quantity",
+        "key": "restore",
+        "ms": 8.799999952316284
+      },
+      {
+        "phase": "greywater quantity",
+        "key": "restore",
+        "ms": 8.899999856948853
+      },
+      {
+        "phase": "remove liquid allocation",
+        "key": "restore",
+        "ms": 9.300000190734863
+      },
+      {
+        "phase": "merge liquid owners",
+        "key": "restore",
+        "ms": 8.799999952316284
+      },
+      {
+        "phase": "apply liquid distribution",
+        "key": "restore",
+        "ms": 9.5
+      }
+    ],
+    "handlers": [
+      {
+        "phase": "material quantity",
+        "type": "onchange",
+        "trusted": true,
+        "ms": 3.200000047683716
+      },
+      {
+        "phase": "food age",
+        "type": "onchange",
+        "trusted": true,
+        "ms": 3.0999999046325684
+      },
+      {
+        "phase": "remove supply allocation",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 3
+      },
+      {
+        "phase": "merge supply owners",
+        "type": "onchange",
+        "trusted": false,
+        "ms": 3.9000000953674316
+      },
+      {
+        "phase": "apply supply distribution",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 4
+      },
+      {
+        "phase": "fresh water quantity",
+        "type": "onchange",
+        "trusted": true,
+        "ms": 2.8000001907348633
+      },
+      {
+        "phase": "greywater quantity",
+        "type": "onchange",
+        "trusted": true,
+        "ms": 2.700000047683716
+      },
+      {
+        "phase": "remove liquid allocation",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 3.0999999046325684
+      },
+      {
+        "phase": "merge liquid owners",
+        "type": "onchange",
+        "trusted": false,
+        "ms": 3.3999998569488525
+      },
+      {
+        "phase": "apply liquid distribution",
+        "type": "onclick",
+        "trusted": true,
+        "ms": 3.3000001907348633
+      }
+    ]
+  },
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.4455000000016298
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 4.9221249999973224
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 34.223125000004075
+    }
+  ],
+  "scope": "One combined maximum Caatinga fixture: lookup close/stale-source/failure/retry, distribution cancellation and ten allocation/material/food-age/liquid-class/owner/distribution cases with exact cancellation/history/reload. Not every material/food batch/container, shortage or invalid draft, biome, running logistics, maximal history or sustained pacing/memory."
+}
