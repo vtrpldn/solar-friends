@@ -1,0 +1,79 @@
+{
+  "scope": "Individually inspected six full boards, 480 activity pose placements plus standing reference cast. Controlled native biome grounds and renderer at one scale, daylight and unlit tint. No production assets changed.",
+  "boards": [
+    {
+      "file": "mata-atlantica-day.png",
+      "sha256": "33c6bea8affa8a26bd64ac6173bc84d14723a3fd21de067d94a9bd808149f5d5",
+      "verdict": "PASS for captured static poses",
+      "observations": [
+        "All five friends retain their authored proportions and painted edge treatment beside the rendered home.",
+        "Cooking pot/utensil and watering can remain attached to their painted hands in all four poses and both mirrored facings.",
+        "Feet and contact shadows remain on the controlled ground; no clipped hat, limb or tool was observed.",
+        "Individual clothing and tool silhouettes remain distinguishable on this biome ground at width 48 times 1.3."
+      ]
+    },
+    {
+      "file": "mata-atlantica-night.png",
+      "sha256": "ad568aebe4d17e9542873162f106efeb179d0425b7e7009f272823c619d6ff40",
+      "verdict": "PASS for captured static poses",
+      "observations": [
+        "All five friends retain their authored proportions and painted edge treatment beside the rendered home.",
+        "Cooking pot/utensil and watering can remain attached to their painted hands in all four poses and both mirrored facings.",
+        "Feet and contact shadows remain on the controlled ground; no clipped hat, limb or tool was observed.",
+        "Individual clothing and tool silhouettes remain distinguishable on this biome ground at width 48 times 1.3."
+      ]
+    },
+    {
+      "file": "cerrado-day.png",
+      "sha256": "45212794f9da7459b0a8d4b00a602b1c0ec1e77962cc53db821ffc62677a0145",
+      "verdict": "PASS for captured static poses",
+      "observations": [
+        "All five friends retain their authored proportions and painted edge treatment beside the rendered home.",
+        "Cooking pot/utensil and watering can remain attached to their painted hands in all four poses and both mirrored facings.",
+        "Feet and contact shadows remain on the controlled ground; no clipped hat, limb or tool was observed.",
+        "Individual clothing and tool silhouettes remain distinguishable on this biome ground at width 48 times 1.3."
+      ]
+    },
+    {
+      "file": "cerrado-night.png",
+      "sha256": "184980b678266e6b71f94066ae8d79374631c06dfcc94aa0b67b5910dde12332",
+      "verdict": "PASS for captured static poses",
+      "observations": [
+        "All five friends retain their authored proportions and painted edge treatment beside the rendered home.",
+        "Cooking pot/utensil and watering can remain attached to their painted hands in all four poses and both mirrored facings.",
+        "Feet and contact shadows remain on the controlled ground; no clipped hat, limb or tool was observed.",
+        "Individual clothing and tool silhouettes remain distinguishable on this biome ground at width 48 times 1.3."
+      ]
+    },
+    {
+      "file": "caatinga-day.png",
+      "sha256": "4d6db5d87d575844cdbd38aea9e765a7675c426e263e1b6337f28189096c6bf6",
+      "verdict": "PASS for captured static poses",
+      "observations": [
+        "All five friends retain their authored proportions and painted edge treatment beside the rendered home.",
+        "Cooking pot/utensil and watering can remain attached to their painted hands in all four poses and both mirrored facings.",
+        "Feet and contact shadows remain on the controlled ground; no clipped hat, limb or tool was observed.",
+        "Individual clothing and tool silhouettes remain distinguishable on this biome ground at width 48 times 1.3."
+      ]
+    },
+    {
+      "file": "caatinga-night.png",
+      "sha256": "ebcc6d630600bbf90726bc6af42702c66c3fa69300c5855028a512982e7a9d57",
+      "verdict": "PASS for captured static poses",
+      "observations": [
+        "All five friends retain their authored proportions and painted edge treatment beside the rendered home.",
+        "Cooking pot/utensil and watering can remain attached to their painted hands in all four poses and both mirrored facings.",
+        "Feet and contact shadows remain on the controlled ground; no clipped hat, limb or tool was observed.",
+        "Individual clothing and tool silhouettes remain distinguishable on this biome ground at width 48 times 1.3."
+      ]
+    }
+  ],
+  "remaining": [
+    "Actual complete loops and transitions",
+    "Rain and dynamic/night lighting overlays",
+    "Other clips including sitting/sleeping and stools",
+    "Portrait correspondence",
+    "Other zooms, terrain transitions, neighbouring objects and gameplay occlusion",
+    "Legacy composed saved appearances"
+  ]
+}
