@@ -1,0 +1,155 @@
+{
+  "scope": "All 79 encoded-and-decoded captured frames individually inspected in seven full contact sheets, five founding friends in both facings, 6.5-second controlled sequence. Not a real-time hardware pacing judgement.",
+  "sheets": [
+    {
+      "file": "review-01.png",
+      "sha256": "0b664c8de663de7c88e16d44daf3eb85cd8b131589b502d7a72abd87b86de9b1",
+      "decodedFrames": [
+        0,
+        11
+      ],
+      "timeSeconds": [
+        0.0,
+        0.9166666666666666
+      ],
+      "verdict": "PASS for captured render sequence",
+      "observations": [
+        "Both facings retain complete opaque painted silhouettes; no duplicate translucent hands, faces or tools observed.",
+        "Cooking pot and watering can stay in their painted hands through each sampled activity pose.",
+        "Feet remain around their fixed ground anchors; bends and arm changes preserve recognisable body scale.",
+        "Transitions switch whole painted poses after the brief transition interval; no spatial inbetweening is claimed."
+      ]
+    },
+    {
+      "file": "review-02.png",
+      "sha256": "a5669494b2e55cdb242168172b131e571ab96ecc57b08cf670d7212b37eabf13",
+      "decodedFrames": [
+        12,
+        23
+      ],
+      "timeSeconds": [
+        1.0,
+        1.9166666666666667
+      ],
+      "verdict": "PASS for captured render sequence",
+      "observations": [
+        "Both facings retain complete opaque painted silhouettes; no duplicate translucent hands, faces or tools observed.",
+        "Cooking pot and watering can stay in their painted hands through each sampled activity pose.",
+        "Feet remain around their fixed ground anchors; bends and arm changes preserve recognisable body scale.",
+        "Transitions switch whole painted poses after the brief transition interval; no spatial inbetweening is claimed."
+      ]
+    },
+    {
+      "file": "review-03.png",
+      "sha256": "1128edd5dcb702376ab35c91d4a0e04ba1f111e94bf4192344f3520c7bf5c82e",
+      "decodedFrames": [
+        24,
+        35
+      ],
+      "timeSeconds": [
+        2.0,
+        2.9166666666666665
+      ],
+      "verdict": "PASS for captured render sequence",
+      "observations": [
+        "Both facings retain complete opaque painted silhouettes; no duplicate translucent hands, faces or tools observed.",
+        "Cooking pot and watering can stay in their painted hands through each sampled activity pose.",
+        "Feet remain around their fixed ground anchors; bends and arm changes preserve recognisable body scale.",
+        "Transitions switch whole painted poses after the brief transition interval; no spatial inbetweening is claimed."
+      ]
+    },
+    {
+      "file": "review-04.png",
+      "sha256": "44ac064fea00ab1a47b29375238bce47ff32d7aaaf6c0b88feea9869f17aaff1",
+      "decodedFrames": [
+        36,
+        47
+      ],
+      "timeSeconds": [
+        3.0,
+        3.9166666666666665
+      ],
+      "verdict": "PASS for captured render sequence",
+      "observations": [
+        "Both facings retain complete opaque painted silhouettes; no duplicate translucent hands, faces or tools observed.",
+        "Cooking pot and watering can stay in their painted hands through each sampled activity pose.",
+        "Feet remain around their fixed ground anchors; bends and arm changes preserve recognisable body scale.",
+        "Transitions switch whole painted poses after the brief transition interval; no spatial inbetweening is claimed."
+      ]
+    },
+    {
+      "file": "review-05.png",
+      "sha256": "8b5607ce6cc1b648fae8920539c6e17d7d4868d776b4a2583f4185553c50a0fd",
+      "decodedFrames": [
+        48,
+        59
+      ],
+      "timeSeconds": [
+        4.0,
+        4.916666666666667
+      ],
+      "verdict": "PASS for captured render sequence",
+      "observations": [
+        "Both facings retain complete opaque painted silhouettes; no duplicate translucent hands, faces or tools observed.",
+        "Cooking pot and watering can stay in their painted hands through each sampled activity pose.",
+        "Feet remain around their fixed ground anchors; bends and arm changes preserve recognisable body scale.",
+        "Transitions switch whole painted poses after the brief transition interval; no spatial inbetweening is claimed."
+      ]
+    },
+    {
+      "file": "review-06.png",
+      "sha256": "44510d5975037bfae032a001932d438f7f8a0b64b4e4cce4a425c0be7aa2a8af",
+      "decodedFrames": [
+        60,
+        71
+      ],
+      "timeSeconds": [
+        5.0,
+        5.916666666666667
+      ],
+      "verdict": "PASS for captured render sequence",
+      "observations": [
+        "Both facings retain complete opaque painted silhouettes; no duplicate translucent hands, faces or tools observed.",
+        "Cooking pot and watering can stay in their painted hands through each sampled activity pose.",
+        "Feet remain around their fixed ground anchors; bends and arm changes preserve recognisable body scale.",
+        "Transitions switch whole painted poses after the brief transition interval; no spatial inbetweening is claimed."
+      ]
+    },
+    {
+      "file": "review-07.png",
+      "sha256": "fb4ec65639fcfb9a231eea7cc8c50fe6c1fe1d65c6518d7b468e36271890c015",
+      "decodedFrames": [
+        72,
+        78
+      ],
+      "timeSeconds": [
+        6.0,
+        6.5
+      ],
+      "verdict": "PASS for captured render sequence",
+      "observations": [
+        "Both facings retain complete opaque painted silhouettes; no duplicate translucent hands, faces or tools observed.",
+        "Cooking pot and watering can stay in their painted hands through each sampled activity pose.",
+        "Feet remain around their fixed ground anchors; bends and arm changes preserve recognisable body scale.",
+        "Transitions switch whole painted poses after the brief transition interval; no spatial inbetweening is claimed."
+      ]
+    }
+  ],
+  "sequence": [
+    "0.0 to 0.5 breathe",
+    "0.5 to 2.75 cook including complete 2-second loop after transition",
+    "2.75 to 6.0 water including complete 3-second loop after transition",
+    "6.0 to 6.5 return to breathe"
+  ],
+  "findings": [
+    "No new clipping, tool detachment, duplicate-opacity or facing reversal found in the sampled sequence.",
+    "Discrete whole-pose transitions remain visible; this review does not label them spatially smooth."
+  ],
+  "remaining": [
+    "Other activity loops and all other transition pairs",
+    "Rain, night and other biomes in motion",
+    "Other zooms, roads/neighbours and gameplay occlusion",
+    "Legacy composed saved residents",
+    "Supported desktop frame pacing and memory"
+  ]
+}
