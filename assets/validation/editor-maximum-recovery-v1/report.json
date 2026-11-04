@@ -1,0 +1,60 @@
+{
+  "complete": true,
+  "maximum": true,
+  "historyBytes": 8170912,
+  "historySteps": 64,
+  "buildings": 256,
+  "checkpointChecksCancel": true,
+  "checkpointChecksEscape": true,
+  "checkpointWorkerFailureRetry": true,
+  "noMainRecoveryChecks": true,
+  "noMainRecoveryCompilation": true,
+  "preparedSnapshotHasIndependentIdentity": true,
+  "cancelDuringFork": true,
+  "lateResultIsolated": true,
+  "originalPreserved": true,
+  "independentCopyWithHistory": true,
+  "publicUndoRedo": true,
+  "exactReload": true,
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.3353330000099959
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 2.7870420000108425
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 55.69412500000908
+    }
+  ],
+  "sources": {
+    "web/editor/document.js": "a3b9779f70321af6b412e076c86027c33a18e339cac0043570ab071cbde3db80",
+    "web/editor/prepare-draft.js": "150d4255d1401535aab61f6928b52ebc45d58e4354d630285f59685e6befb4b9",
+    "web/editor/index.js": "6d331f156cb845780d6b4985bbb4aca76fb9eb12567de816a659c7694241df1f",
+    "web/editor/recovery-dialog.js": "d90ec6aa8cf944f85c60e53671553c3d7d3483e53026756e53ab692b851a707c",
+    "web/editor/recovery-check-worker.js": "2442cf6626b271e728b631b3f3a5b0786e5f9a2d21a880759d5593c863c659f3",
+    "web/editor/record-recovery.js": "714d83df2c88a325c6d475fb4c821d53df979a7774d154196c21941517db37c7",
+    "scripts/verify-recovery-fork-ui.mjs": "a299e6209c7edb4ce80c5cc8e5941efd30e9c4ef56c42bdd5e4fb0ce7bd8f4fd",
+    "scripts/maximum-history-fixture.mjs": "4f097d7c296dae76a9d929f55ac6f5d11c50340666855bcc3fdc2ab4894f4be3",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "scope": "Public project-backup import with seeded 64-step mixed past/future history. Checkpoint-choice checks use disposable workers. Optional --maximum exercises combined maximum entities and near-8-MiB history. Not sustained timing acceptance or complete recovered-history traversal."
+}
