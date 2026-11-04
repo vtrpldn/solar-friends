@@ -1,0 +1,53 @@
+{
+  "complete": true,
+  "checkpointChecksCancel": true,
+  "checkpointChecksEscape": true,
+  "checkpointWorkerFailureRetry": true,
+  "noMainRecoveryChecks": true,
+  "cancelDuringFork": true,
+  "lateResultIsolated": true,
+  "originalPreserved": true,
+  "independentCopyWithHistory": true,
+  "publicUndoRedo": true,
+  "exactReload": true,
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.44737499999973807
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 3.3457500000004075
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 41.07525000000169
+    }
+  ],
+  "sources": {
+    "web/editor/document.js": "a3b9779f70321af6b412e076c86027c33a18e339cac0043570ab071cbde3db80",
+    "web/editor/prepare-draft.js": "9f7076aaed73aa442bf9765f4425a8e7a2256e43a3482184a4deecc365455988",
+    "web/editor/index.js": "c64e26a0022631638b1df0810ed0f80385115105bf676db3d984eef1a2ec3160",
+    "web/editor/recovery-dialog.js": "d90ec6aa8cf944f85c60e53671553c3d7d3483e53026756e53ab692b851a707c",
+    "web/editor/recovery-check-worker.js": "2442cf6626b271e728b631b3f3a5b0786e5f9a2d21a880759d5593c863c659f3",
+    "web/editor/record-recovery.js": "714d83df2c88a325c6d475fb4c821d53df979a7774d154196c21941517db37c7",
+    "scripts/verify-recovery-fork-ui.mjs": "3d0a809c1ffbeebe2e20b51dcf4a2857435a1ddfcb3838b50929da125116fc6a",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "scope": "Public project-backup import with seeded 64-step mixed past/future history. Checkpoint-choice checks use disposable workers. Not maximum map/history or timing acceptance."
+}

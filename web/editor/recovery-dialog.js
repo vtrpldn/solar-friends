@@ -1,9 +1,10 @@
-import {recoveredDraft,recoveredVillage} from './record-recovery.js';
-export function chooseRecoveryCheckpoint(file,{Game,validate}){
- const choices=['current','previous'].map(source=>{
-  try{return {source,value:file.kind==='run'?recoveredVillage(file,Game,{source}):recoveredDraft(file,validate,{source})};}
-  catch(error){return {source,error:error.message};}
- });
+import {runPreparation} from './run-preparation.js';
+export async function chooseRecoveryCheckpoint(file){
+ const choices=await runPreparation({workerFactory:()=>new Worker(new URL('./recovery-check-worker.js',import.meta.url),{type:'module'}),request:{file},title:'Checking backup checkpoints',starting:'Preparing the recovery checks separately…',note:'Your current creation and saved entries stay unchanged. You can cancel before choosing a checkpoint.',cancelMessage:'Backup checks cancelled. Your creations are unchanged.',failureMessage:'The backup could not be checked. Keep the original file.',timeoutMessage:'The backup checks took too long. Keep the original file.',result:data=>{
+  if(data.choices===undefined)return;
+  if(!Array.isArray(data.choices)||data.choices.length!==2||data.choices.some((choice,i)=>choice?.source!==['current','previous'][i]||!choice.value&&typeof choice.error!=='string'))throw Error('The backup checks returned an invalid result. Keep the original file.');
+  return data.choices;
+ }});
  const available=choices.filter(c=>c.value);if(!available.length)throw Error(choices[0].error);
  const dialog=document.createElement('dialog');dialog.id='creator-recovery-dialog';dialog.setAttribute('aria-labelledby','creator-recovery-title');
  const title=document.createElement('h2');title.id='creator-recovery-title';title.textContent='Choose a recovery checkpoint';dialog.append(title);

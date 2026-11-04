@@ -665,7 +665,7 @@ function wire(){
           await showLibrary({reset:true});$('creator-library-status').textContent=`Recovered a separate ${recovered.kind==='release'?'scenario release':'reusable map'}. The original backup and saved entries are unchanged.`;return;
         }
 
-        const recovered=await chooseRecoveryCheckpoint(content,{Game,validate:data=>JSON.parse(engine.validate_scenario(data))});if(!recovered)return;
+        const recovered=await chooseRecoveryCheckpoint(content);if(!recovered)return;
         if(content.kind==='run'){if(current)await save();await library.importRecoveredRun(recovered);await showLibrary({reset:true});toast('Recovered as a separate saved village.');}
         else{if(current)await save();const id=crypto.randomUUID(),doc=await prepareRecoveredDraft(recovered.checkpoint,id);attach(doc.value,{id,checkpoint:doc.checkpoint(),restored:doc,view:recovered.view,record:{attribution:clone(recovered.attribution)}});await save();toast(recovered.historyRecovered||doc.historyRecovered?'Recovered a separate draft. Damaged undo history was cleared.':recovered.playable?'Recovered as a separate draft with its history and view.':'Recovered as a separate draft. Review its issues before playing.');}
         return;
