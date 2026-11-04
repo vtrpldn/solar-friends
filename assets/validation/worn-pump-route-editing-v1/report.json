@@ -1,0 +1,86 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-worn-pump-editor.mjs": "a8204be868806c99ffd685eafaa0a7a691c2c6760aaac3a92b7857fe41caffe7",
+    "scripts/worn-pump-fixture.mjs": "2deb3e9f21b5a3e5784e8316db1d45f9957f0daebfc428b95c7abb0929ce3bc5",
+    "scripts/combined-editor-load.mjs": "0b5b1b8603dda89e5fab73dc219f45bc4438df22bcff0b758f8ebc882f8a5fe8",
+    "web/editor/routes.js": "a757055d797a44460a7e3ef3b60bb27a8e860e8162c697789aa8b0c2304d91b2",
+    "web/editor/index.js": "0720c2a12fa27178691d48dc7963ed3a3e59e176f409b524e3a17dfed5ab122d",
+    "web/editor/route-query.js": "3d4bd754b82b45aa1172d25efa98734973fbbda403de09843c807607f005628f",
+    "web/route-query-worker.js": "ad90f920d81597094e6309d2b58b49f7bb7713dd10bd3f49789ae116024176c0",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "load": {
+    "authoredNature": 1000,
+    "species": "macambira",
+    "size": 0.6499999761581421,
+    "routes": 64,
+    "routeCells": 84,
+    "routeAttempts": 123
+  },
+  "results": [
+    {
+      "fixture": "ordinary",
+      "buildings": 6,
+      "nature": 285,
+      "routes": 4,
+      "historySteps": 4,
+      "duplicateSiblingRejected": true,
+      "pendingDrawGuard": false,
+      "pumpCondition": 37,
+      "automaticDeferred": true,
+      "checkpointExact": true
+    },
+    {
+      "fixture": "combined",
+      "buildings": 256,
+      "nature": 1000,
+      "routes": 64,
+      "historySteps": 4,
+      "duplicateSiblingRejected": true,
+      "pendingDrawGuard": true,
+      "pumpCondition": 37,
+      "automaticDeferred": true,
+      "checkpointExact": true
+    }
+  ],
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.3834169999900041
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 5.01670799999556
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 2.115875000003143
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 36.63025000000198
+    }
+  ],
+  "scope": "Ordinary and combined-maximum authored five: public endpoint/shortest/drawn rerouting and sequential multi-feed cable repair, duplicate sibling rejection, typed same-ID workshop wear, exact history/reload and opening native wear/service/accounting/checkpoint/editor return. Not every wear asset/state, pump class, terrain, actual repair work or sustained simulation/performance."
+}

@@ -1,0 +1,19 @@
+{
+  "complete": true,
+  "inputs": {
+    "scripts/verify-worn-pump-planning.mjs": "4d6229cd44cdf86cecaa3a75860f63c9c6c324e82f39b5bfb6cf1593da1d784e",
+    "scripts/worn-pump-fixture.mjs": "2deb3e9f21b5a3e5784e8316db1d45f9957f0daebfc428b95c7abb0929ce3bc5",
+    "web/editor/routes.js": "a757055d797a44460a7e3ef3b60bb27a8e860e8162c697789aa8b0c2304d91b2",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "checks": [
+    "six condition/deferral variants",
+    "source exact and automatic service preserved",
+    "temporary missing-pump wear excluded only from scratch",
+    "same-ID workshop and unrelated equipment retained",
+    "sibling feed projection remains native-valid",
+    "duplicate full-draft/reversed electric pair rejected",
+    "water pair direction and typed endpoint IDs respected",
+    "pending draw cannot query or parse unavailable ports"
+  ]
+}

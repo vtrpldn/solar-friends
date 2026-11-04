@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import {plantStroke} from '../web/editor/nature.js';
 // Stress content only: native-valid maximum authored nature/routes on top of
 // the building-limit fixture, not a balanced village or generation preset.
-export function addCombinedEditorLoad(game,definition,catalog){
+export function addCombinedEditorLoad(game,definition,catalog,{preserveRoutes=false}={}){
  const species=catalog.nature.find(s=>s.key==='macambira');assert(species);
  const cells=[];for(let y=1;y<63;y++)for(let x=1;x<63;x++)cells.push([x,y]);
  let id=0;definition.map.nature=plantStroke(definition,[],catalog.nature,species.key,species.min_size,cells,1,()=>`load-nature-${id++}`);
  assert.equal(definition.map.nature.length,1000,'Combined fixture must hit the authored nature limit');
- definition.start.routes=[];
+ if(!preserveRoutes)definition.start.routes=[];
  const endpoints=JSON.parse(game.scenario_utility_endpoints(JSON.stringify(definition),'electricity'));assert(endpoints.allowed);
  const pairs=endpoints.endpoints.filter(e=>e.supply&&e.ready).flatMap(a=>endpoints.endpoints.filter(b=>b.receive&&b.ready&&b.reference.id!==a.reference.id).map(b=>({a,b,distance:Math.abs(a.x-b.x)+Math.abs(a.y-b.y)}))).sort((a,b)=>a.distance-b.distance);
  let attempted=0;
