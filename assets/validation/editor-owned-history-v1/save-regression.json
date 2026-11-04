@@ -1,0 +1,82 @@
+{
+  "scope": "Isolated Chromium: native-validated property with near-limit fertility-edit history, seeded through ContentLibrary; public Save, reload, Undo and Redo. Timer gap is an instrumented local responsiveness sample, not sustained frame pacing.",
+  "largeRecoveryParses": 0,
+  "historyBytes": 8078050,
+  "historySteps": 16,
+  "openElapsedMs": 2374,
+  "sample": {
+    "synchronousMs": 0.10000014305114746,
+    "saveElapsedMs": 333.2000000476837,
+    "elapsedWithDurableReadMs": 389.2000000476837,
+    "maxTimerGapMs": 35.59999990463257,
+    "calls": [
+      {
+        "name": "checkpointAsyncElapsed",
+        "ms": 34.5
+      },
+      {
+        "name": "markSaved",
+        "ms": 2.700000047683716
+      },
+      {
+        "name": "markSaved",
+        "ms": 2.6000001430511475
+      }
+    ],
+    "phases": [
+      {
+        "name": "JSON.stringify",
+        "ms": 2.299999952316284
+      },
+      {
+        "name": "JSON.stringify",
+        "ms": 7.400000095367432
+      },
+      {
+        "name": "JSON.stringify",
+        "ms": 7.199999809265137
+      },
+      {
+        "name": "JSON.stringify",
+        "ms": 2.200000047683716
+      }
+    ]
+  },
+  "exactCheckpointReload": true,
+  "coalescedRequests": {
+    "extraClicks": 2,
+    "extraPreparations": 0
+  },
+  "concurrentSave": {
+    "writes": [
+      {
+        "revision": 97,
+        "funds": 900100
+      },
+      {
+        "revision": 100,
+        "funds": 900200
+      },
+      {
+        "revision": 101,
+        "funds": 900300
+      }
+    ],
+    "current": 900300,
+    "previous": 900200
+  },
+  "preparationFailure": {
+    "preservedFunds": 900300,
+    "retriedFunds": 900400,
+    "liveEditPreserved": true
+  },
+  "errors": [],
+  "sourceHashes": {
+    "web/editor/document.js": "6b4240a9f8d23d30d22a941791c981231af428a804c7e496dfccc57f61d3152a",
+    "web/editor/index.js": "508a9fab8698ed7ebde4fbc6888982b7415d630130d544255adfa30d8f8bb87c",
+    "web/content-library.js": "7868edc580b44e984f556559133f4c5467ddbffdf19f121455f30e6c757a2b9b",
+    "web/save-project-prepared.js": "cf74a19d04439eaea6a30fd2eb5aac3e76865e5c8e02f0324aaf43af5e518fcb",
+    "web/project-save-worker.js": "856ebd7146ef5621fa94544fdd6e0b9f86c5b9653cd4207060c3a0ba2179a54b",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  }
+}

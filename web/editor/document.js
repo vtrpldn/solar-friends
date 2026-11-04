@@ -47,7 +47,7 @@ function boundedHistoryCopy(history){
     for(const key of keys){if(!array)take(key.length+3);scan(value[key]);}
     ancestors.delete(value);
   }
-  scan(journal);return structuredClone(journal);
+  scan(journal);return JSON.parse(JSON.stringify(journal));
 }
 function ownCheckpoint(checkpoint){
   if(checkpoint?.schema!==1||!Number.isSafeInteger(checkpoint.revision)||checkpoint.revision<0)throw Error('This draft checkpoint is not supported.');
@@ -164,11 +164,11 @@ export class EditorDocument extends EventTarget{
   }
   static async restoreAsync(checkpoint,{yieldControl=()=>new Promise(resolve=>setTimeout(resolve,0)),signal}={}){
     signal?.throwIfAborted();
-    const owned=ownCheckpoint(checkpoint),steps=EditorDocument.#restore(owned);
+    const owned=ownCheckpoint(checkpoint),steps=EditorDocument.#restore(owned,true);
     try{while(true){signal?.throwIfAborted();const next=steps.next();if(next.done)return next.value;await yieldControl();}}
     finally{steps.return();}
   }
-  static *#restore(checkpoint){
+  static *#restore(checkpoint,owned=false){
     if(checkpoint?.schema!==1||!Number.isSafeInteger(checkpoint.revision)||checkpoint.revision<0)throw Error('This draft checkpoint is not supported.');
     const doc=new EditorDocument(checkpoint.definition);
     doc.#revision=checkpoint.revision;
@@ -192,11 +192,11 @@ export class EditorDocument extends EventTarget{
           if(Object.keys(step).sort().join(',')!=='after,before,changes,label'||!validSignature(step.before,MAX_DOCUMENT_BYTES)||!validSignature(step.after,MAX_DOCUMENT_BYTES))throw Error('Invalid edit fields.');
           validateChanges(step.changes,encode);return step;
         };
-        const normalized=[[],[]];let totalSize=0;
+        const normalized=[[],[]],sizes=[[],[]];let totalSize=0;
         for(const [index,list]of [past,future].entries())for(const entry of list){
-          const step=normalize(entry);totalSize+=historySize(step);
+          const step=normalize(entry),stepSize=historySize(step);totalSize+=stepSize;
           if(totalSize>MAX_HISTORY_BYTES)throw Error('Invalid history size.');
-          normalized[index].push(step);yield;
+          normalized[index].push(step);sizes[index].push(stepSize);yield;
         }
         [past,future]=normalized;
         let cursor=doc.#raw;
@@ -207,7 +207,10 @@ export class EditorDocument extends EventTarget{
         for(const step of [...future].reverse()){
           cursor=applyStep(cursor,step,true);yield;
         }
-        doc.#past=structuredClone(past);doc.#future=structuredClone(future);
+        if(owned){
+          doc.#past=past;doc.#future=future;
+          for(const [index,list]of [past,future].entries())for(const [i,step]of list.entries())doc.#historySizes.set(step,sizes[index][i]);
+        }else{doc.#past=structuredClone(past);doc.#future=structuredClone(future);}
       }catch{
         // Preserve the actual draft even if only its undo journal is corrupt.
         // The workspace surfaces this recovery flag to the player.

@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "summary": {
+    "kind": "compound",
+    "edits": 80,
+    "cells": 1080,
+    "steps": 64,
+    "bytes": 8170913,
+    "maxEditMs": 44.02429200000188
+  },
+  "yields": 129,
+  "checks": [
+    "64 Undo and 64 Redo against independently constructed whole definitions",
+    "both limits hold throughout traversal",
+    "branch clears future and matches synchronous restore",
+    "exact reload and caller checkpoint preservation"
+  ],
+  "scope": "Document and native-valid fixture check; not public gestures or browser responsiveness.",
+  "sources": {
+    "web/editor/document.js": "6b4240a9f8d23d30d22a941791c981231af428a804c7e496dfccc57f61d3152a",
+    "scripts/maximum-history-fixture.mjs": "4f097d7c296dae76a9d929f55ac6f5d11c50340666855bcc3fdc2ab4894f4be3",
+    "scripts/verify-compound-history-restore.mjs": "63a8456a1f98ddebed5a15480dcdcbe1bc6f87e8e1e918acf166b23059781cdf",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  }
+}

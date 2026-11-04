@@ -1,0 +1,19 @@
+{
+  "scope": "Node same-input restore slices, not browser/hardware pacing",
+  "inputSha256": "44d406446a27b51f464fbda68628c180f52d1bf0d259e1bf52d853a58f6ed268",
+  "sourceSha256": "af58892e42a0174a3f38f35133d59b3e1097ddedf31454485797c2dfcde0d3bd",
+  "runs": [
+    {
+      "elapsedMs": 824.989958,
+      "maxSliceMs": 179.53779200000002
+    },
+    {
+      "elapsedMs": 781.755583,
+      "maxSliceMs": 141.01595800000007
+    },
+    {
+      "elapsedMs": 805.5947920000001,
+      "maxSliceMs": 143.3709170000002
+    }
+  ]
+}
