@@ -606,3 +606,7 @@ The event editor now opens the reading preview with current and future story mes
 Weather and seasons now includes day and time controls. Applying them writes one undoable change to the scenario opening clock. The season and day within it come from the compiled native forecast. Draft validation reports dependencies affected by the new date, such as deadlines or starting food ages. Night inspection uses 22:00 on the authored opening day. The final supported day ends at 05:20, so its 22:00 preview is unavailable.
 
 The public weather regression verified the calendar bound, a wet-to-dry season change, Undo and Redo, durable reload, and the exact authored opening time and dry-season forecast in a playtest. The desktop controls were visually inspected.
+
+### Reusable map library names and copies
+
+Players can rename a reusable map in the local library or create a separately named copy. The published package, title, version and source credits remain intact for export and scenario reuse. The desktop map controls check covers invalid names, cancellation, stale revisions, reload, export equality, scenario creation from the copy and its survival after the original entry is removed.

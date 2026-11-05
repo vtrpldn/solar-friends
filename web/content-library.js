@@ -25,6 +25,12 @@ const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title
 const safeThumbnail=value=>typeof value==='string'&&value.length<=96*1024&&/^data:image\/webp;base64,[A-Za-z0-9+/=]+$/.test(value)?value:null;
 const safeView=view=>clone(view||{center:[32,32],zoom:1.3,selected:null,tool:'select'});
 
+function mapLibraryTitle(name){
+  const title=name.trim();
+  if(!title||title.length>100)throw Error('Enter a map name between 1 and 100 characters.');
+  return title;
+}
+
 export class ContentLibrary extends EventTarget {
   #opening;
   #channel;
@@ -146,6 +152,21 @@ export class ContentLibrary extends EventTarget {
   getEntryDetails(kind,id){if(!['project','run','resident','release','map'].includes(kind))throw Error('Unknown library collection.');return this.#read('heads',`${kind}:${id}`);}
   listMaps(){return this.#list('map');}
   getMap(id){return this.#read('maps',id);}
+  renameMap(id,expectedRevision,name){
+    const title=mapLibraryTitle(name);
+    return this.#write('maps',id,expectedRevision,record=>{
+      if(!record)throw new LibraryConflict();
+      return {...record,title};
+    });
+  }
+  async copyMap(id,expectedRevision,name){
+    const title=mapLibraryTitle(name);
+    const record=await this.getMap(id);
+    if(!record||record.revision!==expectedRevision)throw new LibraryConflict();
+    const thumbnail=await this.getPreview('map',id);
+    // Copy the selected frozen snapshot with its publication and source credits.
+    return this.#write('maps',crypto.randomUUID(),null,()=>({...record,title}),thumbnail);
+  }
   deleteMap(id,expectedRevision){return this.#write('maps',id,expectedRevision,()=>null);}
   async importMap(file,validate,thumbnail){const data=validateMapPackage(file,validate);return this.#write('maps',crypto.randomUUID(),null,()=>({format:'solar-friends-frozen-map',schema:1,title:data.title,projectId:null,sourceRevision:null,package:data}),thumbnail);}
   listReleases(){return this.#list('release');}
