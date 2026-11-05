@@ -43,43 +43,40 @@ pub fn check(d: &Definition, report: &mut Report) {
             report.push(&format!("journal.chapters.{index}"), "invalid_chapter", "Use a unique chapter identity, a title, at most sixteen goals and at least one required goal.");
         }
         for (goal_index, goal) in chapter.goals.iter().enumerate() {
+            let path = format!("journal.chapters.{index}.goals.{goal_index}");
+            let condition_path = format!("{path}.condition");
             if !valid_key(&goal.id)
                 || ids.insert(goal.id.clone(), index).is_some()
                 || !text(&goal.title, 100)
                 || goal.description.chars().count() > 1000
             {
-                report.push("journal.chapters", "invalid_goal", "Give every goal a unique identity, a title up to 100 characters and description up to 1,000 characters.");
+                report.push(&path, "invalid_goal", "Give every goal a unique identity, a title up to 100 characters and description up to 1,000 characters.");
             }
             if !operations::setup_valid(&goal.condition, d) {
-                report.push("journal.chapters", "unsupported_operation_rules", "Enable material logistics for production, material logistics and local utilities for treatment, or local utilities for generation and lighting goals.");
+                report.push(&condition_path, "unsupported_operation_rules", "Enable material logistics for production, material logistics and local utilities for treatment, or local utilities for generation and lighting goals.");
             }
             if !services::setup_valid(&goal.condition, d) {
-                report.push("journal.chapters","unsupported_service_setup","Accessible food requires materials and hauling; water, sanitation and lighting require connected local utilities. A housed-person target cannot exceed this founding cast.");
+                report.push(&condition_path,"unsupported_service_setup","Accessible food requires materials and hauling; water, sanitation and lighting require connected local utilities. A housed-person target cannot exceed this founding cast.");
             }
             if !wellbeing::references_valid(&goal.condition, d) {
-                report.push("journal.chapters","missing_wellbeing_resident","Choose an existing cast member or everyone for each wellbeing condition. Removing a friend leaves their goals for you to repair.");
+                report.push(&condition_path,"missing_wellbeing_resident","Choose an existing cast member or everyone for each wellbeing condition. Removing a friend leaves their goals for you to repair.");
             }
             if !delivery::targets_valid(&goal.condition, d) {
-                report.push("journal.chapters","missing_delivery_destination","Choose an existing starting building with a receiving inventory, a construction blueprint, or the arrival store.");
+                report.push(&condition_path,"missing_delivery_destination","Choose an existing starting building with a receiving inventory, a construction blueprint, or the arrival store.");
             }
             if !d.rules.logistics && needs_production(&goal.condition) {
-                report.push("journal.chapters","disabled_production_goal","Enable materials, hauling and resident work before requiring preparation, resident deliveries or material plots.");
+                report.push(&condition_path,"disabled_production_goal","Enable materials, hauling and resident work before requiring preparation, resident deliveries or material plots.");
             }
             if !d.rules.climate && needs_climate(&goal.condition) {
                 report.push(
-                    "journal.chapters",
+                    &condition_path,
                     "disabled_climate_goal",
                     "Enable seasonal weather before requiring a dry-season outcome.",
                 );
             }
-            report_missing_regions(
-                &goal.condition,
-                d,
-                &format!("journal.chapters.{index}.goals.{goal_index}.condition"),
-                report,
-            );
+            report_missing_regions(&goal.condition, d, &condition_path, report);
             if !condition(&goal.condition, 0, &mut nodes) {
-                report.push("journal.chapters", "invalid_condition", "Use supported goal conditions, positive bounded targets and nonempty groups nested at most four levels.");
+                report.push(&condition_path, "invalid_condition", "Use supported goal conditions, positive bounded targets and nonempty groups nested at most four levels.");
             }
         }
     }
@@ -95,7 +92,7 @@ pub fn check(d: &Definition, report: &mut Report) {
     }
     let mut dependencies = BTreeMap::new();
     for (index, chapter) in journal.chapters.iter().enumerate() {
-        for goal in &chapter.goals {
+        for (goal_index, goal) in chapter.goals.iter().enumerate() {
             let mut refs = vec![];
             references(&goal.condition, &mut refs);
             for reference in &refs {
@@ -103,7 +100,7 @@ pub fn check(d: &Definition, report: &mut Report) {
                     .get(*reference)
                     .is_none_or(|&owner| !goal.optional && owner > index)
                 {
-                    report.push("journal.chapters", "unreachable_goal", "A required goal cannot depend on a later chapter. Every referenced goal must exist.");
+                    report.push(&format!("journal.chapters.{index}.goals.{goal_index}.condition"), "unreachable_goal", "A required goal cannot depend on a later chapter. Every referenced goal must exist.");
                 }
             }
             dependencies.insert(goal.id.as_str(), refs);

@@ -636,3 +636,7 @@ Saving only the editor view or thumbnail now retains the previous distinct draft
 An identical village save now keeps the earlier recovery point. If a playthrough opens from its previous checkpoint because the latest snapshot is unreadable, its first successful save retains the valid fallback. Subsequent saves resume normal checkpoint rotation. The IndexedDB journey verifies duplicate saves, fallback, repair and exact continuation with the native simulation.
 
 The real saved-village flow now has a renderer-crash regression. It continues a saved village, holds an IndexedDB transaction open after a changed checkpoint has been written but before commit, and crashes the disposable renderer. A separate tab verifies the exact last committed run and library header, then reopens the checkpoint. The existing full-browser draft interruption check also passes on the current code. These checks cover interrupted browser writes rather than power loss or disk failure.
+
+### Opening a goal from validation
+
+Goal validation now identifies the affected chapter and goal for invalid details, conditions, rule conflicts and unreachable dependencies. **Open goal** switches to the journal, expands the affected goal and focuses the matching editor control. The desktop regression verifies a title repair in the second chapter of First clearing, and all 78 focused native journal tests pass.
