@@ -630,3 +630,5 @@ The library can rename a saved village independently of its frozen scenario and 
 ### Explicit draft replacement
 
 The Creation Library offers a separate **Replace the open draft** file control. It names the old and incoming drafts before asking for confirmation, validates the incoming draft, and checks the selected draft's saved revision before committing. It keeps the library identity and the displaced definition as the previous checkpoint. The incoming draft starts fresh undo history, so the dialog points players to Backup for the full original. Frozen maps, releases and saved villages continue to use independent imports.
+
+Saving only the editor view or thumbnail now retains the previous distinct draft checkpoint. Its source credits stay with it when a backup is recovered or the current checkpoint cannot open. The import regression verifies that reopening the library and importing another file leave the displaced definition and credits recoverable. The editor's checkpoint fallback and lost-save-acknowledgement browser checks also pass.

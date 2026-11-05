@@ -201,12 +201,26 @@ export class ContentLibrary extends EventTarget {
     if(checkpoint?.schema!==1||!Number.isSafeInteger(checkpoint.revision)||!checkpoint.definition?.start)throw Error('This draft checkpoint is not supported.');
     if(receipt!==undefined&&(typeof receipt!=='string'||!receipt.length||receipt.length>96))throw Error('This save receipt is invalid.');
     const data=clone({checkpoint,view:safeView(view)});
-    return this.#write('projects',id,expectedRevision,previous=>({
-      format:'solar-friends-project',schema:1,...data,
-      title:checkpoint.definition.title,attribution:clone(attribution??previous?.attribution??[]),
-      ...(receipt===undefined?{}:{saveReceipt:receipt}),
-      previous:previous?{checkpoint:{...previous.checkpoint,history:undefined},view:previous.view}:null,
-    }),thumbnail);
+    return this.#write('projects',id,expectedRevision,previous=>{
+      const credits=clone(attribution??previous?.attribution??[]);
+      let sameDraft=false;
+      if(previous?.checkpoint?.revision===checkpoint.revision){
+        try{
+          sameDraft=canonical(previous.checkpoint.definition)===canonical(checkpoint.definition)
+            &&canonical(previous.attribution??[])===canonical(credits);
+        }catch{/* An unreadable prior record must remain recoverable as original data. */}
+      }
+      // A view or thumbnail save must not displace the last distinct draft.
+      const recovery=previous&&!sameDraft
+        ?{checkpoint:{...previous.checkpoint,history:undefined},view:previous.view,attribution:previous.attribution??[]}
+        :previous?.previous??null;
+      return {
+        format:'solar-friends-project',schema:1,...data,
+        title:checkpoint.definition.title,attribution:credits,
+        ...(receipt===undefined?{}:{saveReceipt:receipt}),
+        previous:recovery
+      };
+    },thumbnail);
   }
   deleteProject(id,expectedRevision){return this.#write('projects',id,expectedRevision,()=>null);}
   createRelease({projectId,expectedRevision,author,validate,thumbnail,signal}){

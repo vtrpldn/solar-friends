@@ -33,7 +33,7 @@ try{
  await choose();await dialog.waitFor();
  await page.evaluate(async id=>{
   const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(undefined,{broadcast:false});
-  try{const record=await library.getProject(id);await library.saveProject(record,record.revision);}finally{library.close();}
+  try{const record=await library.getProject(id);await library.saveProject({...record,attribution:[{release:'shared-land',revision:1,author:'João'}]},record.revision);}finally{library.close();}
  },id);
  const newer=await stored();
  await confirm.click();
@@ -52,6 +52,8 @@ try{
  assert.equal(replaced.project.checkpoint.definition.start.funds,4576);
  assert.equal(replaced.project.checkpoint.definition.map.id,target.project.checkpoint.definition.map.id);
  assert.deepEqual(replaced.project.previous.checkpoint.definition,target.project.checkpoint.definition);
+ assert.deepEqual(replaced.project.previous.attribution,target.project.attribution);
+ assert.deepEqual(replaced.project.attribution,[]);
  for(const kind of ['maps','releases','presets'])assert.deepEqual(replaced[kind],before[kind]);
  assert.deepEqual(errors,[]);
  await page.locator('#creator-library').click();
@@ -63,6 +65,20 @@ try{
  const separate=await stored();
  assert.equal(separate.projects.length,2);
  assert.deepEqual(separate.project.checkpoint.definition,replaced.project.checkpoint.definition);
+ assert.deepEqual(separate.project.previous,replaced.project.previous);
+ const recovered=await page.evaluate(async id=>{
+  const [{ContentLibrary},{recoveredDraft},{Game}]=await Promise.all([
+   import('/content-library.js'),import('/editor/record-recovery.js'),import('/pkg/solar_friends.js')
+  ]);
+  const library=new ContentLibrary(),game=new Game();
+  try{
+   const record=await library.getProject(id);
+   const backup={format:'solar-friends-recovery',schema:1,kind:'project',record};
+   return recoveredDraft(backup,raw=>JSON.parse(game.validate_scenario(raw)),{source:'previous'});
+  }finally{game.free();library.close();}
+ },id);
+ assert.deepEqual(recovered.definition,target.project.checkpoint.definition);
+ assert.deepEqual(recovered.attribution,target.project.attribution);
  const inputs={};for(const file of ['web/editor/index.js','web/editor/import-object.js','scripts/verify-authored-import-errors.mjs'])inputs[file]=createHash('sha256').update(await readFile(file)).digest('hex');
  await writeFile(output+'/report.json',JSON.stringify({passed:true,checked,samples,malformedImportsLeaveLibraryUnchanged:true,draftIdentityUnchanged:true,explicitReplacementVerified:true,defaultImportCreatesSeparateDraft:true,noFileContentInErrors:true,noExecution:true,browserErrors:errors,inputs,scope:'Actual creation file controls reject malformed text and nonobject roots with readable messages. Exact saved project and collection heads retained. Not all native schema constraints or supported-package sharing.'},null,2)+'\n');console.log('PASS: 7 malformed imports preserve saved content; explicit draft replacement cancels cleanly, rejects stale revisions and keeps the displaced checkpoint.');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

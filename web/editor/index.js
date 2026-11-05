@@ -449,7 +449,8 @@ async function openProject(record){
     if(cached?.storageRevision===record.revision){const candidate=await restore(cached.checkpoint);prepared=candidate;recovered=JSON.stringify(cached.checkpoint)!==JSON.stringify(checkpoint)||JSON.stringify(cached.view)!==JSON.stringify(view);checkpoint=cached.checkpoint;view=cached.view;}
   }catch(error){if(error.name==='AbortError')throw error;/* Keep the last durable checkpoint. */}
   const latest=await library.getProject(record.id);if(!latest||latest.revision!==record.revision)throw new LibraryConflict();
-  attach(checkpoint.definition,{id:record.id,revision:record.revision,checkpoint,view,record,restored:prepared.doc,prepared:prepared.validation?prepared:null});
+  const attribution=previousRecovered?record.previous.attribution??record.attribution:record.attribution;
+  attach(checkpoint.definition,{id:record.id,revision:record.revision,checkpoint,view,record:{...record,attribution},restored:prepared.doc,prepared:prepared.validation?prepared:null});
   current.preserveDamagedRecord=previousRecovered;
   if(recovered){current.viewDirty=true;status('Recovered your last checkpoint');toast('Your creation was recovered. Save it to keep this checkpoint.');}
 }
