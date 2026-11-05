@@ -5,6 +5,7 @@ export class PlayerSession {
   #lastRequested;
   #recovery;
   #Game;
+  #preservePrevious=false;
   #restarting=false;
   #restartController=null;
   constructor(library,record,game,recovery=()=>sessionStorage,Game=game.constructor){
@@ -15,19 +16,21 @@ export class PlayerSession {
     const record=await library.getRun(id);
     if(record?.format!=='solar-friends-run'||record.schema!==1)throw Error('This playthrough is missing or needs a different game version.');
     const game=new Game();
-    let recovered=false;
     try{
-      let raw=record.snapshot;
+      const durable=typeof record.snapshot==='string'&&game.restore(record.snapshot);
+      let cached=false;
       try{
         const saved=JSON.parse((recovery||(()=>sessionStorage))().getItem(`solar-friends-run-recovery:${id}`)||'null');
-        if(saved?.revision===record.revision&&typeof saved.snapshot==='string'&&game.restore(saved.snapshot)){raw=saved.snapshot;recovered=raw!==record.snapshot;}
+        if(saved?.revision===record.revision&&typeof saved.snapshot==='string'&&saved.snapshot!==record.snapshot){
+          cached=game.restore(saved.snapshot);
+        }
       }catch{/* The durable record remains available when session storage is blocked. */}
-      if(!game.restore(raw)){
-        if(!record.previousSnapshot||!game.restore(record.previousSnapshot))throw Error('This playthrough could not load. Its original data is preserved.');
-        recovered=true;
+      if(!durable&&!cached&&(typeof record.previousSnapshot!=='string'||!game.restore(record.previousSnapshot))){
+        throw Error('This playthrough could not load. Its original data is preserved.');
       }
       const session=new PlayerSession(library,record,game,recovery,Game);
-      session.recovered=recovered;
+      session.recovered=cached||!durable;
+      session.#preservePrevious=!durable&&Boolean(record.previousSnapshot);
       return session;
     }catch(error){game.free();throw error;}
   }
@@ -52,8 +55,9 @@ export class PlayerSession {
     const operation=this.#writes.catch(()=>{}).then(async()=>{
       // A preceding copy may have changed the target since this was queued.
       if(this.id!==requestedId){this.#moveRecovery(requestedId,raw);this.#cacheSnapshot(raw,true);}
-      const record=await this.library.saveRun(this.id,raw,this.record.revision);
+      const record=await this.library.saveRun(this.id,raw,this.record.revision,{preservePrevious:this.#preservePrevious});
       this.record=record;
+      this.#preservePrevious=false;
       try{
         const storage=this.#recovery(),key=`solar-friends-run-recovery:${this.id}`,cached=JSON.parse(storage.getItem(key)||'null');
         if(cached?.snapshot===raw)storage.removeItem(key);
@@ -68,7 +72,7 @@ export class PlayerSession {
     const raw=this.game.snapshot(),oldId=this.id,requestedBeforeCopy=this.#lastRequested;
     const operation=this.#writes.catch(()=>{}).then(async()=>{
       const record=await this.library.importRecoveredRun({definition:this.record.definition,snapshot:raw,release:this.record.release??null,attribution:this.record.attribution,title:(this.record.title+' · copy').slice(0,100)});
-      this.record=record;if(this.#lastRequested===requestedBeforeCopy||this.#lastRequested===null)this.#lastRequested=raw;this.conflicted=false;
+      this.record=record;this.#preservePrevious=false;if(this.#lastRequested===requestedBeforeCopy||this.#lastRequested===null)this.#lastRequested=raw;this.conflicted=false;
       this.#moveRecovery(oldId,raw);
       return record;
     });

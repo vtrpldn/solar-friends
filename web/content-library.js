@@ -294,11 +294,12 @@ export class ContentLibrary extends EventTarget {
       return {...record,title};
     });
   }
-  saveRun(id,snapshot,expectedRevision){
+  saveRun(id,snapshot,expectedRevision,{preservePrevious=false}={}){
     if(typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS)throw Error('This playthrough is too large to save.');
     return this.#write('runs',id,expectedRevision,previous=>{
       if(!previous)throw Error('This playthrough is missing.');
       // Definition and source revision are immutable throughout this run.
+      if(preservePrevious||snapshot===previous.snapshot)return {...previous,snapshot};
       return {...previous,previousSnapshot:previous.snapshot,snapshot};
     });
   }

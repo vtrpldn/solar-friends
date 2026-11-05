@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
-const server=await serve(),base=`http://127.0.0.1:${server.address().port}`;
+const server=await serve(0),base=`http://127.0.0.1:${server.address().port}`;
 let browser;
 try{
   browser=await chromium.launch({headless:true});
@@ -72,9 +72,24 @@ try{
     await library.deleteProject(id,project.revision);
     const survivor=await library.getRun(normal.id);
     if(!survivor.definition||!survivor.snapshot)throw Error('Deleting a project removed its independent run');
-    play.dispose();await library.deleteRun(survivor.id,survivor.revision);library.close();
+    play.dispose();
+    const duplicate=await library.saveRun(survivor.id,survivor.snapshot,survivor.revision);
+    if(duplicate.previousSnapshot!==survivor.previousSnapshot)throw Error('A duplicate save displaced the earlier checkpoint');
+    const broken=await library.saveRun(survivor.id,'invalid snapshot',duplicate.revision);
+    if(broken.previousSnapshot!==survivor.snapshot)throw Error('Fixture did not retain a valid fallback');
+    const fallback=await PlayerSession.open(library,survivor.id,Game);
+    if(!fallback.recovered||fallback.game.snapshot()!==survivor.snapshot)throw Error('Failed to reopen the previous checkpoint');
+    fallback.game.tick(.25);
+    const firstRepair=await fallback.save();
+    if(firstRepair.previousSnapshot!==survivor.snapshot)throw Error('Saving after fallback replaced a good recovery checkpoint with corrupt data');
+    fallback.game.tick(.25);
+    const resumedSave=await fallback.save();
+    if(resumedSave.previousSnapshot!==firstRepair.snapshot)throw Error('A later save did not rotate to the repaired checkpoint');
+    fallback.dispose();
+    await library.deleteRun(survivor.id,resumedSave.revision);
+    library.close();
     return {parentBytes:parent.length,runId,checks:9};
   });
   assert(first.id&&second.runId&&second.checks===9);assert.deepEqual(errors,[]);
-  console.log('PASS: actual IndexedDB persistence, history/view reload, atomic stale-tab save/delete rejection, recovery checkpoint, frozen playtest restart, exact run continuation, scratch cleanup, and independent project/run/Story ownership.');
+  console.log('PASS: actual IndexedDB persistence, history/view reload, atomic stale-tab save/delete rejection, recovery checkpoint, frozen playtest restart, exact run continuation, scratch cleanup, duplicate saves, fallback repair, and independent project/run/Story ownership.');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
