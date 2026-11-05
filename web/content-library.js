@@ -257,7 +257,7 @@ export class ContentLibrary extends EventTarget {
     const data=validateRelease(file,validate);
     return this.#write('releases',crypto.randomUUID(),null,()=>({format:'solar-friends-frozen-release',schema:1,title:data.title,projectId:null,sourceRevision:null,package:data}),thumbnail);
   }
-  async createRun({definition,snapshot,projectId=null,sessionKind='scenario',sourceRevision=null,releaseId=null,thumbnail}){
+  async createRun({definition,snapshot,projectId=null,sessionKind='scenario',sourceRevision=null,releaseId=null,thumbnail,attribution}){
     if(!['scenario','playtest'].includes(sessionKind)||typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS)throw Error('This playthrough cannot be stored.');
     let release=null;
     if(releaseId){
@@ -265,12 +265,12 @@ export class ContentLibrary extends EventTarget {
       if(!record||canonical(record.package.definition)!==canonical(definition)||sessionKind!=='scenario')throw Error('Choose the exact frozen release before starting this village.');
       const p=record.package;release={id:record.id,packageId:p.id,content_revision:p.content_revision,author:p.author,compatibility:clone(p.compatibility),credits:clone(p.credits??[])};
     }
-    const data=clone({definition,snapshot,projectId,sessionKind,sourceRevision,...(release?{release}:{})});
+    const data=clone({definition,snapshot,projectId,sessionKind,sourceRevision,...(release?{release}:{}),...(attribution?{attribution}:{})});
     return this.#write('runs',crypto.randomUUID(),null,()=>({format:'solar-friends-run',schema:1,title:definition.title,...data}),thumbnail);
   }
-  async importRecoveredRun({definition,snapshot,release=null,title=definition?.title}){
+  async importRecoveredRun({definition,snapshot,release=null,attribution,title=definition?.title}){
     if(typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS||!definition?.start)throw Error('This recovered village cannot be stored.');
-    const data=clone({definition,snapshot,release});
+    const data=clone({definition,snapshot,release,...(attribution?{attribution}:{})});
     return this.#write('runs',crypto.randomUUID(),null,()=>({format:'solar-friends-run',schema:1,title:typeof title==='string'?title.slice(0,100):definition.title,projectId:null,sessionKind:'scenario',sourceRevision:null,...data}));
   }
   saveRun(id,snapshot,expectedRevision){

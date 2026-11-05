@@ -317,7 +317,10 @@ export class EditorMap {
     if(this.utilityPreview){c.save();c.lineJoin='round';c.lineCap='round';paintUtilityRoute(c,this.project,this.scale,this.utilityPreview,this.utilityPreview.allowed===false?'#c65e42':'#fff3a4',true,{pump:this.utilityPreview.kind!=='electricity'});c.restore();}
     for(const port of this.utilityPreview?.ports??[]){const p=this.project(...port.cell);c.beginPath();c.arc(p.x,p.y,5*this.scale,0,Math.PI*2);c.fillStyle=port.supply?'#f3ca70':'#8bd1e4';c.fill();c.strokeStyle='#3a4b38';c.lineWidth=1;c.stroke();}
     if(this.routeStroke)for(const [x,y]of this.routeStroke)this.polygon(footprintCorners('road',x,y),'#f4df9a66','#fff3c4');
-    for(const [label,point,colour]of (this.preview?[]:[['Camp',this.document.map.camp,'#476c44'],['Start view',this.document.map.camera,'#8f603c']])){
+    const markers=[];
+    if(!this.preview||view.showCamp)markers.push(['Camp',this.document.map.camp,'#476c44']);
+    if(!this.preview)markers.push(['Start view',this.document.map.camera,'#8f603c']);
+    for(const [label,point,colour]of markers){
       const p=this.project(...point),same=this.document.map.camp.every((n,i)=>n===this.document.map.camera[i]);c.strokeStyle=colour;c.fillStyle='#f5e5ba';c.lineWidth=2;c.beginPath();c.arc(p.x,p.y,7,0,Math.PI*2);c.fill();c.stroke();c.font='bold 11px Trebuchet MS';c.textAlign='center';c.fillStyle=night?'#fff0bd':colour;c.fillText(label,p.x,p.y+(same&&label==='Camp'?-15:22));
     }
     if(this.pointer&&allBuildingArt[view.tool]){

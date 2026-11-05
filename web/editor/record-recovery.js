@@ -38,7 +38,13 @@ export function recoveredVillage(file,Game,{source:requested=null}={}){
    if(!definition)continue;
    // Restart uses the same frozen definition that native restoration accepted,
    // never a conflicting or damaged outer record definition.
-   return {source,snapshot:game.snapshot(),definition,release:structuredClone(record.release??null)};
+   const attribution=Array.isArray(record.attribution)&&record.attribution.length<=17
+    ?record.attribution.filter(c=>typeof c?.release==='string'&&/^[a-zA-Z0-9_-]{1,80}$/.test(c.release)&&
+      Number.isInteger(c.revision)&&c.revision>0&&c.revision<=0xffffffff&&
+      typeof c.author==='string'&&c.author.length<=160)
+      .map(({release,revision,author})=>({release,revision,author}))
+    :undefined;
+   return {source,snapshot:game.snapshot(),definition,release:structuredClone(record.release??null),...(attribution?{attribution}:{})};
   }
  }finally{game.free();}
  throw Error('Neither village checkpoint can open in this game version. Keep the original backup; nothing was imported.');

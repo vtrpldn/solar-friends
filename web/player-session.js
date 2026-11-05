@@ -67,7 +67,7 @@ export class PlayerSession {
   saveCopy(){
     const raw=this.game.snapshot(),oldId=this.id,requestedBeforeCopy=this.#lastRequested;
     const operation=this.#writes.catch(()=>{}).then(async()=>{
-      const record=await this.library.importRecoveredRun({definition:this.record.definition,snapshot:raw,release:this.record.release??null,title:(this.record.title+' · copy').slice(0,100)});
+      const record=await this.library.importRecoveredRun({definition:this.record.definition,snapshot:raw,release:this.record.release??null,attribution:this.record.attribution,title:(this.record.title+' · copy').slice(0,100)});
       this.record=record;if(this.#lastRequested===requestedBeforeCopy||this.#lastRequested===null)this.#lastRequested=raw;this.conflicted=false;
       this.#moveRecovery(oldId,raw);
       return record;

@@ -2,13 +2,23 @@ import {LibraryConflict} from '../content-library.js';
 import {validatePublication} from './validate-publication.js';
 import {canonical} from './journal.js';
 import {prepareMap} from './prepare-map.js';
-import {mapThumbnail} from './thumbnail.js';
-import {mapPreviewDefinition,scenarioFromSharedMap} from './map-sharing.js';
+import {prepareScenario} from './prepare-scenario.js';
+import {creationThumbnail,mapThumbnail} from './thumbnail.js';
+import {mapPreviewDefinition,sandboxFromSharedMap,scenarioFromSharedMap} from './map-sharing.js';
 const $=id=>document.getElementById(id);
 export class MapSharingControls{
  constructor({library,catalog,engine,Game,art,source,save,resolve,setBusy,showLibrary,notify,newProject,onConflict=()=>{}}){
   Object.assign(this,{library,catalog,engine,Game,art,source,save,resolve,setBusy,showLibrary,notify,newProject,onConflict});
   this.validate=raw=>JSON.parse(engine.validate_map_package(raw));
+  const sandboxDialog=$('creator-map-sandbox-dialog');
+  $('creator-map-sandbox-cancel').onclick=()=>sandboxDialog.close();
+  sandboxDialog.oncancel=event=>{if($('creator-map-sandbox-start').disabled)event.preventDefault();};
+  sandboxDialog.onclose=()=>{
+   this.sandboxOpening=null;
+   this.sandboxOpener?.focus({preventScroll:true});
+   this.sandboxOpener=null;
+  };
+  $('creator-map-sandbox-start').onclick=()=>this.startSandbox();
   $('creator-save-map').onclick=()=>{const ctx=source();if(!ctx||this.saving)return;$('creator-map-title').value=ctx.definition.title;$('creator-map-description').value=ctx.definition.description;$('creator-map-save-status').textContent='';$('creator-map-save-dialog').showModal();};
   $('creator-map-save-cancel').onclick=()=>{if(this.publication)this.publication.abort(new DOMException('Map publication cancelled. Your checked draft is still saved.','AbortError'));else $('creator-map-save-dialog').close();};
   $('creator-map-save-dialog').addEventListener('cancel',event=>{if(this.saving){event.preventDefault();this.publication?.abort(new DOMException('Map publication cancelled. Your checked draft is still saved.','AbortError'));}});
@@ -32,6 +42,38 @@ export class MapSharingControls{
    const record=await this.save();this.publication=new AbortController();$('creator-map-save-cancel').disabled=false;$('creator-map-save-cancel').textContent='Cancel save';$('creator-map-save-status').textContent='Checking your map…';await this.library.createMap({projectId:ctx.id,expectedRevision:record.revision,title,description,author,signal:this.publication.signal,validate:raw=>validatePublication('map',raw,{signal:this.publication.signal,onStage:stage=>$('creator-map-save-status').textContent=stage}),thumbnail});
    $('creator-map-save-dialog').close();await this.showLibrary({reset:true});this.notify('A separate map is saved. Use it to begin another scenario.');
   }catch(error){if(error instanceof LibraryConflict)this.onConflict(ctx.id);$('creator-map-save-status').textContent=error.message;}finally{this.publication=null;this.saving=false;for(const id of ['creator-map-title','creator-map-description','creator-map-author'])$(id).disabled=false;$('creator-map-save-cancel').textContent='Keep editing';$('creator-map-save-confirm').disabled=false;$('creator-map-save-cancel').disabled=false;this.setBusy(false);if($('creator-map-save-dialog').open)$('creator-map-save-confirm').focus();}
+ }
+ async previewSandbox(record,opener){
+  const {definition,credits}=sandboxFromSharedMap(record.package,this.template(),this.validate);
+  let prepared;
+  try{prepared=await prepareScenario(definition);}
+  catch(error){
+   if(error.name==='AbortError')throw error;
+   throw Error(`${error.message} To choose another camp or starting layout, use Create scenario.`);
+  }
+  const openingView={...prepared.report,residents:[]};
+  $('creator-map-sandbox-preview').src=creationThumbnail(definition,openingView,this.art,{showCamp:true});
+  const [shed,storage]=definition.start.buildings;
+  $('creator-map-sandbox-title').textContent=`Sandbox · ${record.title}`;
+  $('creator-map-sandbox-plots').textContent=`Camp (${definition.map.camp.join(', ')}) · Shed (${shed.x}, ${shed.y}) · Storage (${storage.x}, ${storage.y})`;
+  $('creator-map-sandbox-status').textContent='';
+  this.sandboxOpening={definition,attribution:credits,snapshot:prepared.snapshot};
+  this.sandboxOpener=opener;
+  $('creator-map-sandbox-dialog').showModal();
+ }
+ async startSandbox(){
+  if(!this.sandboxOpening)return;
+  const start=$('creator-map-sandbox-start'),cancel=$('creator-map-sandbox-cancel');
+  start.disabled=cancel.disabled=true;
+  $('creator-map-sandbox-status').textContent='Saving this village…';
+  try{
+   const thumbnail=$('creator-map-sandbox-preview').getAttribute('src');
+   const run=await this.library.createRun({...this.sandboxOpening,thumbnail});
+   location.assign(`./?run=${encodeURIComponent(run.id)}`);
+  }catch(error){
+   $('creator-map-sandbox-status').textContent=error.message;
+   start.disabled=cancel.disabled=false;
+  }
  }
  async use(record){const content=scenarioFromSharedMap(record.package,this.template(),this.validate);await this.newProject('copy',content.definition,content.credits);this.notify('A new scenario uses its own copy of this land. Add buildings, friends and goals.');}
 }

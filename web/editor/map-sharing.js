@@ -25,12 +25,28 @@ export function mapPreviewDefinition(file,template,validate){
   return emptySettlementOnMap(validateMapPackage(file,validate),template);
 }
 
-export function scenarioFromSharedMap(file,template,validate){
-  const source=validateMapPackage(file,validate),d=emptySettlementOnMap(source,template);
-  const own={release:source.id,revision:source.content_revision,author:source.author},credits=structuredClone(source.credits??[]);
+function sharedMapCredits(source){
+  const own={release:source.id,revision:source.content_revision,author:source.author};
+  const credits=structuredClone(source.credits??[]);
   if(!credits.some(c=>c.release===own.release&&c.revision===own.revision&&c.author===own.author))credits.push(own);
+  return credits;
+}
+
+export function scenarioFromSharedMap(file,template,validate){
+  const source=validateMapPackage(file,validate),credits=sharedMapCredits(source);
   if(credits.length>16)throw Error('This map already has the maximum source credits. Keep the original export.');
-  return {definition:d,credits};
+  return {definition:emptySettlementOnMap(source,template),credits};
+}
+
+export function sandboxFromSharedMap(file,template,validate){
+  const source=validateMapPackage(file,validate),definition=emptySettlementOnMap(source,template);
+  const [x,y]=definition.map.camp;
+  const [baseX,baseY]=template.map.camp;
+  definition.start.buildings=template.start.buildings.map(building=>({
+    ...structuredClone(building),x:x+building.x-baseX,y:y+building.y-baseY
+  }));
+  definition.start.inventories=structuredClone(template.start.inventories);
+  return {definition,credits:sharedMapCredits(source)};
 }
 
 export function checkSharedMap({map,weather,title,description,author,credits=[],validate}){

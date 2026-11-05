@@ -63,7 +63,54 @@ try{
   await page.locator('#creator-library-search').fill('nothing matches');await page.locator('#creator-import').setInputFiles({name:'land.solar-map',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(file))});const imported=page.locator('[data-map]').filter({hasText:'Property '+biome});await imported.waitFor({state:'visible'});assert.notEqual(await imported.getAttribute('data-map'),id);assert.deepEqual(await download(imported.locator('[data-export-map]')),file);await imported.locator('.creator-preview img').waitFor();
   const bad=structuredClone(file);bad.compatibility.assets=999;const count=await page.locator('[data-map]').count(),url=page.url();await page.locator('#creator-import').setInputFiles({name:'future.solar-map',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(bad))});await page.waitForFunction(()=>document.querySelector('#creator-library-status').textContent.includes('different game'));assert.equal(await page.locator('[data-map]').count(),count);assert.equal(page.url(),url);await page.locator('#creator-library-close').click();
  }
- assert.equal(new Set(files.map(f=>JSON.stringify(f.map.terrain))).size,3);assert.deepEqual(errors,[]);
+ assert.equal(new Set(files.map(f=>JSON.stringify(f.map.terrain))).size,3);
+ await page.locator('#creator-library').click();
+ const listRuns=()=>page.evaluate(async()=>{
+  const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary();
+  try{return await library.listRuns();}finally{library.close();}
+ });
+ const normalSaves=()=>page.evaluate(()=>['solar-friends-v3','solar-friends-v3-story','solar-friends-v3-sandbox'].flatMap(key=>[localStorage.getItem(key),localStorage.getItem(key+'-backup')]));
+ const normalBefore=await normalSaves();
+ const runsBefore=await listRuns(),sandboxDialog=page.locator('#creator-map-sandbox-dialog');
+ for(const file of files){
+  const row=page.locator('[data-map]').filter({hasText:file.title});
+  await row.locator('[data-sandbox-map]').click();
+  await sandboxDialog.waitFor();
+  assert.match(await sandboxDialog.locator('h2').textContent(),/Sandbox/);
+  assert.match(await sandboxDialog.locator('#creator-map-sandbox-plots').textContent(),/Camp .*Shed .*Storage/);
+  assert(await sandboxDialog.locator('img').evaluate(img=>img.decode().then(()=>img.naturalWidth>0)));
+  await sandboxDialog.getByRole('button',{name:'Cancel',exact:true}).click();
+ }
+ assert.deepEqual(await listRuns(),runsBefore);
+ const file=files[0],source=page.locator('[data-map]').filter({hasText:file.title});
+ await source.locator('[data-sandbox-map]').click();
+ await sandboxDialog.waitFor();
+ await page.screenshot({path:'/private/tmp/solar-map-sandbox.png'});
+ await sandboxDialog.getByRole('button',{name:'Start village',exact:true}).click();
+ await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
+ const url=page.url(),id=new URL(url).searchParams.get('run');
+ const readRun=()=>page.evaluate(async id=>{
+  const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary();
+  try{return await library.getRun(id);}finally{library.close();}
+ },id);
+ const run=await readRun();
+ assert.equal(run.definition.rules.mode,'sandbox');
+ assert.deepEqual(run.definition.map,file.map);
+ // Native snapshot serialization expands the package's short f32 decimals.
+ const nativePrecision=value=>JSON.parse(JSON.stringify(value,(_,n)=>typeof n==='number'?Math.fround(n):n));
+ assert.deepEqual(nativePrecision(JSON.parse(run.snapshot).village.scenario.definition.map),nativePrecision(file.map));
+ assert.deepEqual(run.definition.rules.weather,file.weather);
+ assert.equal(run.definition.start.residents.length,5);
+ assert.deepEqual(run.definition.start.buildings.map(b=>b.kind),['shed','warehouse']);
+ assert.deepEqual(run.attribution,[{release:file.id,revision:file.content_revision,author:file.author}]);
+ await page.getByRole('button',{name:'Scenario library',exact:true}).click();
+ await page.locator(`[data-continue-run="${id}"]`).click();
+ await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
+ assert.equal(page.url(),url);
+ await page.getByRole('button',{name:'Scenario library',exact:true}).click();
+ await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
+ assert.deepEqual(await normalSaves(),normalBefore);
+ assert.deepEqual(errors,[]);
  await page.setViewportSize({width:1366,height:900});await page.screenshot({path:'/private/tmp/solar-map-creator-1366.png'});const bounds=await page.locator('.creator-actions').boundingBox();assert(bounds.x>=0&&bounds.x+bounds.width<=1366,'Creator action bar overflow');
- console.log('PASS: all three biomes through public map save/search/export/import/reuse/playtest, land-only previews, invalid-settlement independence, durable map rename/copy and stale revision protection, versioning and immutable old exports, new scenario isolation, retained authorship, independent deletion, atomic incompatible imports and desktop toolbar fit.');
+ console.log('PASS: all three biomes through public map save/search/export/import/reuse/playtest, land-only previews, invalid-settlement independence, durable map rename/copy and stale revision protection, versioning and immutable old exports, new scenario isolation, retained authorship, independent deletion, atomic incompatible imports, Sandbox preview and continue, and desktop toolbar fit.');
 }catch(error){await browser?.contexts()[0]?.pages()[0]?.screenshot({path:'/private/tmp/solar-map-controls-error.png'});throw error;}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

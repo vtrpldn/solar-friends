@@ -493,7 +493,7 @@ async function showLibrary({reset=false}={}){
   $('creator-map-list').innerHTML=maps.map(m=>{
     if(m.missingBody)return missingLibraryEntry('map',m);
     const compatible=m.compatibility&&Object.entries(catalog.map_packages.compatibility).every(([key,value])=>m.compatibility[key]===value);
-    return `<div class="creator-library-row creator-release-row" data-map="${escape(m.id)}">${previewMarkup('map',m.id)}<div><b>${escape(m.title)}</b><small>Version ${escape(m.contentRevision)} · ${escape(m.author)}</small><small>${compatible?'Land and climate · start a new scenario':'Needs another game version · original export remains available'}</small></div><div class="creator-release-actions"><button data-use-map="${escape(m.id)}" ${compatible?'':'disabled'}>Create scenario</button><button data-rename-map="${escape(m.id)}" ${compatible?'':'disabled'}>Rename</button><button data-copy-map="${escape(m.id)}" ${compatible?'':'disabled'}>Copy</button><button data-export-map="${escape(m.id)}">Export</button><button class="creator-remove" data-remove-map="${escape(m.id)}" aria-label="Remove map ${escape(m.title)}">×</button></div></div>`;
+    return `<div class="creator-library-row creator-release-row" data-map="${escape(m.id)}">${previewMarkup('map',m.id)}<div><b>${escape(m.title)}</b><small>Version ${escape(m.contentRevision)} · ${escape(m.author)}</small><small>${compatible?'Land and climate · start a new scenario':'Needs another game version · original export remains available'}</small></div><div class="creator-release-actions"><button data-use-map="${escape(m.id)}" ${compatible?'':'disabled'}>Create scenario</button><button data-sandbox-map="${escape(m.id)}" ${compatible?'':'disabled'}>Sandbox</button><button data-rename-map="${escape(m.id)}" ${compatible?'':'disabled'}>Rename</button><button data-copy-map="${escape(m.id)}" ${compatible?'':'disabled'}>Copy</button><button data-export-map="${escape(m.id)}">Export</button><button class="creator-remove" data-remove-map="${escape(m.id)}" aria-label="Remove map ${escape(m.title)}">×</button></div></div>`;
   }).join('');
   const villages=runs.filter(r=>r.sessionKind==='scenario'||r.missingBody);
   $('creator-runs-heading').hidden=!villages.length;
@@ -678,6 +678,11 @@ function wire(){
         mapNameStatus.textContent='';
         mapNameDialog.showModal();
         mapNameInput.select();
+      }
+      if(b.dataset.sandboxMap){
+        const record=await library.getMap(b.dataset.sandboxMap);
+        if(!record)throw Error('Saved map data is missing. Use Repair library list or import an exported backup.');
+        await mapSharing.previewSandbox(record,b);
       }
       if(b.dataset.useMap){const record=await library.getMap(b.dataset.useMap);if(!record)throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');if(record)await mapSharing.use(record);}
       if(b.dataset.exportMap){const record=await library.getMap(b.dataset.exportMap);const result=downloadStoredPackage('map',record);$('creator-library-status').textContent=result.backup?'The content package is damaged. A full original-record backup was downloaded; saved data is unchanged.':'Original map package exported. Saved data is unchanged.';}

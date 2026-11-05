@@ -610,3 +610,7 @@ The public weather regression verified the calendar bound, a wet-to-dry season c
 ### Reusable map library names and copies
 
 Players can rename a reusable map in the local library or create a separately named copy. The published package, title, version and source credits remain intact for export and scenario reuse. The desktop map controls check covers invalid names, cancellation, stale revisions, reload, export equality, scenario creation from the copy and its survival after the original entry is removed.
+
+### Sandbox starts on reusable maps
+
+The library can open a reusable map with the standard Sandbox supplies and five authored friends. The opening layout translates the standard shed and storage plots around the map's camp. The native compiler checks that layout before the player sees and confirms the opening preview. An invalid layout leaves the map and saves intact and directs the player to Create scenario to choose the plots. Confirming creates an independent village with the saved geography, climate and source credits.
