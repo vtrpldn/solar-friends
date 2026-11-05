@@ -5,7 +5,7 @@ const server=await serve(0),base=`http://127.0.0.1:${server.address().port}`;
 let browser;
 try{
   browser=await chromium.launch({headless:true});
-  const page=await browser.newPage();
+  const context=await browser.newContext(),page=await context.newPage();
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.goto(base);await page.waitForFunction(()=>window.solarDev);
   const first=await page.evaluate(async()=>{
@@ -91,5 +91,78 @@ try{
     return {parentBytes:parent.length,runId,checks:9};
   });
   assert(first.id&&second.runId&&second.checks===9);assert.deepEqual(errors,[]);
-  console.log('PASS: actual IndexedDB persistence, history/view reload, atomic stale-tab save/delete rejection, recovery checkpoint, frozen playtest restart, exact run continuation, scratch cleanup, duplicate saves, fallback repair, and independent project/run/Story ownership.');
+  // Test the real Continue/Save checkpoint controls in the public library.
+  const runId=await page.evaluate(async()=>{
+    const [{ContentLibrary},{Game}]=await Promise.all([import('/content-library.js'),import('/pkg/solar_friends.js')]);
+    const library=new ContentLibrary(),game=new Game();
+    try{
+      const definition=JSON.parse(game.scenario_template('sandbox'));
+      if(!JSON.parse(game.load_scenario(JSON.stringify(definition))).ok)throw Error('Could not compile crash fixture');
+      const run=await library.createRun({definition,snapshot:game.snapshot()});
+      game.tick(.25);
+      await library.saveRun(run.id,game.snapshot(),run.revision);
+      return run.id;
+    }finally{library.close();game.free();}
+  });
+  const readRun=()=>page.evaluate(async id=>{
+    const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary();
+    try{
+      return {record:await library.getRun(id),header:await library.getEntryDetails('run',id)};
+    }finally{library.close();}
+  },runId);
+  const playing=await page.context().newPage();
+  const sentinel='solar-test-village-unload';
+  await playing.addInitScript(key=>window.addEventListener('beforeunload',()=>localStorage.setItem(key,'yes')),sentinel);
+  await playing.goto(base+'/editor.html?library=1');
+  await playing.locator(`[data-continue-run="${runId}"]`).click();
+  await playing.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
+  const pause=playing.locator('#pause');
+  if((await pause.getAttribute('aria-label')).includes('Resume'))await pause.click();
+  const initial=await readRun();
+  const minute=JSON.parse(initial.record.snapshot).village.minutes;
+  await playing.waitForFunction(minute=>window.solarDev.snapshot().village.minutes>minute,minute);
+  if((await pause.getAttribute('aria-label')).includes('Pause'))await pause.click();
+  const committed=await readRun();
+  assert(committed.record.previousSnapshot);
+  await playing.evaluate(({id,committedSnapshot})=>{
+    const put=IDBObjectStore.prototype.put;
+    IDBObjectStore.prototype.put=function(value,...args){
+      const request=put.call(this,value,...args);
+      if(this.name==='runs'&&value.id===id&&value.snapshot!==committedSnapshot){
+        request.addEventListener('success',()=>{
+          const keepAlive=()=>{
+            const next=this.get('__held_for_renderer_crash__');
+            next.onsuccess=keepAlive;
+          };
+          keepAlive();
+          void fetch('/?validation-run-write=held');
+        });
+      }
+      return request;
+    };
+  },{id:runId,committedSnapshot:committed.record.snapshot});
+  const held=playing.waitForRequest(request=>request.url().includes('validation-run-write=held'));
+  await playing.getByRole('button',{name:'Save checkpoint',exact:true}).click();
+  await held;
+  assert(await playing.getByRole('button',{name:'Save checkpoint',exact:true}).isDisabled());
+  // The deliberate navigation into the run already fired beforeunload.
+  await page.evaluate(key=>localStorage.removeItem(key),sentinel);
+  const cdp=await playing.context().newCDPSession(playing),crashed=playing.waitForEvent('crash');
+  void cdp.send('Page.crash').catch(()=>{});
+  await crashed;
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),sentinel),null);
+  assert.deepEqual(await readRun(),committed,'A renderer crash committed a partial village checkpoint');
+  const reopened=await page.context().newPage();
+  await reopened.goto(base+'/editor.html?library=1');
+  await reopened.locator(`[data-continue-run="${runId}"]`).click();
+  await reopened.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
+  const start=await reopened.evaluate(async id=>{
+    const [{ContentLibrary},{PlayerSession},{Game}]=await Promise.all([
+      import('/content-library.js'),import('/player-session.js'),import('/pkg/solar_friends.js')
+    ]);
+    const library=new ContentLibrary(),session=await PlayerSession.open(library,id,Game);
+    try{return session.game.snapshot();}finally{session.dispose();library.close();}
+  },runId);
+  assert.equal(start,committed.record.snapshot);
+  console.log('PASS: actual IndexedDB persistence, history/view reload, atomic stale-tab save/delete rejection, recovery checkpoint, frozen playtest restart, exact run continuation, scratch cleanup, duplicate saves, fallback repair, renderer-crash rollback, and independent project/run/Story ownership.');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
