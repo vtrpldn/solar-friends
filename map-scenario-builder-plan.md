@@ -600,3 +600,9 @@ The plan audit found no reading preview in the journal editor. Added read-only o
 ### Story message reading preview
 
 The event editor now opens the reading preview with current and future story messages. Each card shows the compiled event status, authored text and resolved speaker. The preview shares message and status formatting with the player journal. Future messages are identified as waiting, and the list is limited to dialogue. Public checks verify role and resident attribution, exact draft and simulation preservation, safe text, focus return and reload. Player markup matches the committed renderer across twelve native cases, including applied dialogue. The role authoring and player Meet-person regression passes. The inspected desktop capture and reports are in `assets/validation/editor-journal-messages-v1/`. Maximum journal layout, broader art and performance checks, and unfamiliar-player acceptance remain open.
+
+### Opening calendar authoring
+
+Weather and seasons now includes day and time controls. Applying them writes one undoable change to the scenario opening clock. The season and day within it come from the compiled native forecast. Draft validation reports dependencies affected by the new date, such as deadlines or starting food ages. Night inspection uses 22:00 on the authored opening day. The final supported day ends at 05:20, so its 22:00 preview is unavailable.
+
+The public weather regression verified the calendar bound, a wet-to-dry season change, Undo and Redo, durable reload, and the exact authored opening time and dry-season forecast in a playtest. The desktop controls were visually inspected.

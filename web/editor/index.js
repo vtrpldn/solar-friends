@@ -241,7 +241,7 @@ function refresh(){
   map.set(d,snapshot,undefined,{paint:inspectionChanged||!report.ok||nextMapKey!==mapPreviewKey});mapPreviewKey=nextMapKey;
   minimap.set(landReport,geometry);
   geologyEditor.render(d,landReport);
-  weatherEditor.render(d);
+  weatherEditor.render(d, false, report.ok ? snapshot.environment.weather?.forecast?.[0] ?? null : null);
   liquidsEditor.render(d,report);
   routesEditor.render(d,report);
   equipmentEditor.render(d);
