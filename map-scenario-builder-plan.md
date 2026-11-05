@@ -622,3 +622,7 @@ Desktop verification imported a riverbank property whose standard storage plot f
 Saved scenario villages can be removed from the Creation Library, including Sandbox villages started on reusable maps. The confirmation names the chosen save, defaults to keeping it, and checks the saved revision before deleting its checkpoints and thumbnail. The Backup action can preserve a recoverable copy before removal. A newer checkpoint written while the confirmation is open requires a fresh review.
 
 Desktop verification covered cancellation, a newer revision written through another library connection, confirmed removal of the selected record and preview, and recovery from its exported backup under a new save ID. The other draft's definition and frozen releases remained available.
+
+### Naming saved villages
+
+The library can rename a saved village independently of its frozen scenario and simulation checkpoints. The playthrough shows its chosen name after continuing, and recovery retains that name when importing a backup as a new save. The desktop release journey checks that the definition, checkpoint data, provenance and thumbnail survive the rename, then continues, removes and recovers the named save.

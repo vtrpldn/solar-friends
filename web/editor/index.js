@@ -497,7 +497,7 @@ async function showLibrary({reset=false}={}){
   }).join('');
   const villages=runs.filter(r=>r.sessionKind==='scenario'||r.missingBody);
   $('creator-runs-heading').hidden=!villages.length;
-  $('creator-run-list').innerHTML=villages.map(r=>r.missingBody?missingLibraryEntry('run',r):`<div class="creator-library-row">${previewMarkup('run',r.id)}<div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button><button data-backup-run="${escape(r.id)}" title="Keep the original village and previous snapshot">Backup</button><button class="creator-remove" data-remove-run="${escape(r.id)}" aria-label="Remove saved village ${escape(r.title)}">×</button></div>`).join('');
+  $('creator-run-list').innerHTML=villages.map(r=>r.missingBody?missingLibraryEntry('run',r):`<div class="creator-library-row">${previewMarkup('run',r.id)}<div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button><button data-rename-run="${escape(r.id)}">Rename</button><button data-backup-run="${escape(r.id)}" title="Keep the original village and previous snapshot">Backup</button><button class="creator-remove" data-remove-run="${escape(r.id)}" aria-label="Remove saved village ${escape(r.title)}">×</button></div>`).join('');
   $('creator-library-title').textContent=projects.length+releases.length+villages.length+maps.length?'Creation library':'Create a village';
   if(!$('creator-library-dialog').open)$('creator-new-options').open=projects.length+releases.length+villages.length+maps.length===0;
   libraryDiscovery??=installLibraryDiscovery();libraryDiscovery.set(projects,releases,villages,maps);if(reset)libraryDiscovery.reset();
@@ -631,30 +631,44 @@ function wire(){
     try{const record=await save();await launch(current.doc.value,record,'playtest');}catch(e){toast(e.message);}finally{busy=false;refresh();$('creator-test').focus();}
   };
   $('creator-back').onclick=async e=>{e.preventDefault();try{if(current)await save();location.assign('./');}catch{/* Keep the unsaved work available to export. */}};
-  const mapNameDialog=$('creator-map-name-dialog'),mapNameInput=$('creator-map-name');
-  const mapNameStatus=$('creator-map-name-status'),mapNameConfirm=$('creator-map-name-confirm');
-  const mapNameCancel=$('creator-map-name-cancel');
-  let mapNameAction;
-  mapNameCancel.onclick=()=>mapNameDialog.close();
-  mapNameInput.oninput=()=>{mapNameStatus.textContent='';};
-  mapNameDialog.oncancel=event=>{if(mapNameConfirm.disabled)event.preventDefault();};
-  $('creator-map-name-form').onsubmit=async event=>{
+  const entryNameDialog=$('creator-entry-name-dialog'),entryNameInput=$('creator-entry-name');
+  const entryNameStatus=$('creator-entry-name-status'),entryNameConfirm=$('creator-entry-name-confirm');
+  const entryNameCancel=$('creator-entry-name-cancel');
+  let entryNameAction;
+  async function nameLibraryEntry(kind,id,copy=false){
+    const record=await library.getEntryDetails(kind,id);
+    if(!record||record.missingBody)throw Error('Saved data for this entry is missing. Use Repair library list or import a backup.');
+    const label=kind==='map'?'map':'village';
+    entryNameAction={kind,copy,record,label};
+    $('creator-entry-name-title').textContent=copy?'Copy map':`Rename ${label}`;
+    $('creator-entry-name-description').textContent=kind==='map'
+      ?'The exported map keeps its published title and credits.'
+      :'The new name identifies this save in the library. Your progress and the original scenario stay intact.';
+    entryNameConfirm.textContent=copy?'Copy map':'Save name';
+    entryNameInput.value=copy?`${record.title.slice(0,93)} · copy`:record.title;
+    entryNameStatus.textContent='';
+    entryNameDialog.showModal();
+    entryNameInput.select();
+  }
+  entryNameCancel.onclick=()=>entryNameDialog.close();
+  entryNameInput.oninput=()=>{entryNameStatus.textContent='';};
+  entryNameDialog.oncancel=event=>{if(entryNameCancel.disabled)event.preventDefault();};
+  $('creator-entry-name-form').onsubmit=async event=>{
     event.preventDefault();
-    if(mapNameConfirm.disabled)return;
-    const {copy,record}=mapNameAction;
-    mapNameConfirm.disabled=mapNameCancel.disabled=true;
+    if(!entryNameAction||entryNameConfirm.disabled)return;
+    const {kind,copy,record,label}=entryNameAction;
+    const action=kind==='run'?'renameRun':copy?'copyMap':'renameMap';
+    entryNameConfirm.disabled=entryNameCancel.disabled=true;
     try{
-      const result=await (copy
-        ?library.copyMap(record.id,record.revision,mapNameInput.value)
-        :library.renameMap(record.id,record.revision,mapNameInput.value));
-      mapNameDialog.close();
+      const result=await library[action](record.id,record.revision,entryNameInput.value);
+      entryNameDialog.close();
       await showLibrary({reset:true});
-      $('creator-library-status').textContent=copy?'Map copied.':'Map renamed.';
-      document.querySelector(`[data-rename-map="${CSS.escape(result.id)}"]`)?.focus();
+      $('creator-library-status').textContent=copy?'Map copied.':`Renamed ${label}.`;
+      document.querySelector(`[data-rename-${kind}="${CSS.escape(result.id)}"]`)?.focus();
     }catch(error){
-      if(mapNameDialog.open)mapNameStatus.textContent=error.message;
+      if(entryNameDialog.open)entryNameStatus.textContent=error.message;
       else $('creator-library-status').textContent=error.message;
-    }finally{mapNameConfirm.disabled=mapNameCancel.disabled=false;}
+    }finally{entryNameConfirm.disabled=entryNameCancel.disabled=false;}
   };
   const deleteDialog=$('creator-delete-dialog'),deleteConfirm=$('creator-delete-confirm');
   const deleteCancel=$('creator-delete-cancel'),deleteStatus=$('creator-delete-status');
@@ -724,18 +738,9 @@ function wire(){
       if(b.dataset.openProject){const record=await library.getProject(b.dataset.openProject);if(!record)throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');if(record)await openProject(record);}
       if(b.dataset.playProject){const record=await library.getProject(b.dataset.playProject);if(!record)throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');if(record)await launch(record.checkpoint.definition,record,'scenario');}
       if(b.dataset.copyProject){const record=await library.getProject(b.dataset.copyProject);if(!record)throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');if(record)await newProject('copy',{...record.checkpoint.definition,title:(record.title+' · copy').slice(0,100)},record.attribution??[]);}
-      if(b.dataset.renameMap||b.dataset.copyMap){
-        const copy=Boolean(b.dataset.copyMap);
-        const record=await library.getMap(b.dataset.copyMap??b.dataset.renameMap);
-        if(!record)throw Error('Saved map data is missing. Use Repair library list or import an exported backup.');
-        mapNameAction={copy,record};
-        $('creator-map-name-title').textContent=copy?'Copy map':'Rename map';
-        mapNameConfirm.textContent=copy?'Copy map':'Save name';
-        mapNameInput.value=copy?`${record.title.slice(0,93)} · copy`:record.title;
-        mapNameStatus.textContent='';
-        mapNameDialog.showModal();
-        mapNameInput.select();
-      }
+      if(b.dataset.renameMap)await nameLibraryEntry('map',b.dataset.renameMap);
+      if(b.dataset.copyMap)await nameLibraryEntry('map',b.dataset.copyMap,true);
+      if(b.dataset.renameRun)await nameLibraryEntry('run',b.dataset.renameRun);
       if(b.dataset.sandboxMap){
         const record=await library.getMap(b.dataset.sandboxMap);
         if(!record)throw Error('Saved map data is missing. Use Repair library list or import an exported backup.');

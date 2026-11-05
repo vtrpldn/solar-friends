@@ -26,10 +26,36 @@ try{
    releases:await library.listReleases(),maps:await library.listMaps()
   };}finally{library.close();}
  },runId);
+ const beforeRename=await readRecords(),rename=page.locator(`[data-rename-run="${runId}"]`);
+ const entryName=page.locator('#creator-entry-name'),alias='First clearing · my river village';
+ await rename.click();
+ await entryName.waitFor();
+ assert.equal(await entryName.inputValue(),'First clearing');
+ await entryName.fill(alias);
+ await entryName.press('Enter');
+ await page.locator('#creator-run-list').getByText(alias,{exact:true}).waitFor();
+ const renamed=await readRecords();
+ const {title,revision,updatedAt,...oldContent}=beforeRename.run;
+ const {title:newTitle,revision:newRevisionAfterRename,updatedAt:newUpdatedAt,...newContent}=renamed.run;
+ assert.equal(newTitle,alias);
+ assert.equal(newRevisionAfterRename,revision+1);
+ assert(newUpdatedAt>updatedAt);
+ assert.deepEqual(newContent,oldContent);
+ assert.equal(renamed.preview,beforeRename.preview);
+ await page.reload();
+ await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
+ if(!(await page.locator('#creator-library-dialog').isVisible()))await page.locator('#creator-library').click();
+ await page.locator('#creator-run-list').getByText(alias,{exact:true}).waitFor();
+ await page.locator(`[data-continue-run="${runId}"]`).click();
+ await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
+ assert.equal(await page.locator('.creation-session strong').textContent(),alias);
+ assert.equal((await page.evaluate(()=>window.solarDev.snapshot())).village.scenario.definition.title,'First clearing');
+ await page.getByRole('button',{name:'Scenario library',exact:true}).click();
+ await page.locator('#creator-library-dialog').waitFor();
  const beforeRemoval=await readRecords();
  await removeVillage.click();
  await removal.waitFor();
- assert.equal(await removal.locator('#creator-delete-name').textContent(),'First clearing');
+ assert.equal(await removal.locator('#creator-delete-name').textContent(),alias);
  assert(await removal.getByRole('button',{name:'Keep it'}).evaluate(button=>button===document.activeElement));
  await page.screenshot({path:'/private/tmp/solar-remove-saved-village.png'});
  await page.keyboard.press('Escape');
@@ -66,6 +92,7 @@ try{
 
  await recovered.waitFor();
  assert.notEqual(await recovered.getAttribute('data-continue-run'),runId);
+ assert.equal(await page.locator('#creator-run-list b').textContent(),alias);
  assert.deepEqual(errors,[]);
- console.log('PASS: accent-insensitive title/author discovery, combined collection filters, name ordering, no-match recovery, accessible creation choices and new-entry filter resets; public release creation and versioning, immutable export after draft edits, independent release play and visible authorship, villages surviving draft/release deletion, new-entry import, credited editable copies and atomic unsupported-version rejection, and independent saved-village deletion, conflict protection and backup recovery.');
+ console.log('PASS: accent-insensitive title/author discovery, combined collection filters, name ordering, no-match recovery, accessible creation choices and new-entry filter resets; public release creation and versioning, immutable export after draft edits, independent release play and visible authorship, villages surviving draft/release deletion, new-entry import, credited editable copies and atomic unsupported-version rejection, and saved-village naming and independent deletion, conflict protection and backup recovery.');
 }catch(error){await browser?.contexts()[0]?.pages()[0]?.screenshot({path:'/private/tmp/solar-release-controls-error.png'});throw error;}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

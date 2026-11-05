@@ -129,9 +129,9 @@
 
 .creator-opening-date{margin:12px 0 16px;padding:10px 12px;border:1px solid #c5ad7b;border-radius:4px}.creator-opening-date legend{padding:0 5px;font-weight:bold}.creator-opening-date [data-opening-status]{margin:8px 0 0}
 
-#creator-map-name-dialog{width:460px;max-width:calc(100vw - 100px);box-sizing:border-box;padding:26px 30px}
-#creator-map-name-dialog .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
-#creator-map-name-status{color:#8b482c;overflow-wrap:anywhere}
+#creator-entry-name-dialog{width:460px;max-width:calc(100vw - 100px);box-sizing:border-box;padding:26px 30px}
+#creator-entry-name-dialog .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+#creator-entry-name-status{color:#8b482c;overflow-wrap:anywhere}
 #creator-map-list .creator-release-actions{flex:0 1 auto;flex-wrap:wrap;justify-content:flex-end;max-width:65%}
 
 #creator-map-sandbox-dialog{width:540px;max-width:calc(100vw - 100px);box-sizing:border-box;padding:26px 30px}

@@ -25,9 +25,9 @@ const header=(kind,record)=>({key:`${kind}:${record.id}`,kind,id:record.id,title
 const safeThumbnail=value=>typeof value==='string'&&value.length<=96*1024&&/^data:image\/webp;base64,[A-Za-z0-9+/=]+$/.test(value)?value:null;
 const safeView=view=>clone(view||{center:[32,32],zoom:1.3,selected:null,tool:'select'});
 
-function mapLibraryTitle(name){
+function libraryTitle(name,label){
   const title=name.trim();
-  if(!title||title.length>100)throw Error('Enter a map name between 1 and 100 characters.');
+  if(!title||title.length>100)throw Error(`Enter a ${label} name between 1 and 100 characters.`);
   return title;
 }
 
@@ -153,14 +153,14 @@ export class ContentLibrary extends EventTarget {
   listMaps(){return this.#list('map');}
   getMap(id){return this.#read('maps',id);}
   renameMap(id,expectedRevision,name){
-    const title=mapLibraryTitle(name);
+    const title=libraryTitle(name,'map');
     return this.#write('maps',id,expectedRevision,record=>{
       if(!record)throw new LibraryConflict();
       return {...record,title};
     });
   }
   async copyMap(id,expectedRevision,name){
-    const title=mapLibraryTitle(name);
+    const title=libraryTitle(name,'map');
     const record=await this.getMap(id);
     if(!record||record.revision!==expectedRevision)throw new LibraryConflict();
     const thumbnail=await this.getPreview('map',id);
@@ -272,6 +272,13 @@ export class ContentLibrary extends EventTarget {
     if(typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS||!definition?.start)throw Error('This recovered village cannot be stored.');
     const data=clone({definition,snapshot,release,...(attribution?{attribution}:{})});
     return this.#write('runs',crypto.randomUUID(),null,()=>({format:'solar-friends-run',schema:1,title:typeof title==='string'?title.slice(0,100):definition.title,projectId:null,sessionKind:'scenario',sourceRevision:null,...data}));
+  }
+  renameRun(id,expectedRevision,name){
+    const title=libraryTitle(name,'village');
+    return this.#write('runs',id,expectedRevision,record=>{
+      if(!record||record.sessionKind!=='scenario')throw new LibraryConflict();
+      return {...record,title};
+    });
   }
   saveRun(id,snapshot,expectedRevision){
     if(typeof snapshot!=='string'||snapshot.length>MAX_VILLAGE_SNAPSHOT_CHARACTERS)throw Error('This playthrough is too large to save.');

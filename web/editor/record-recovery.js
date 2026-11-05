@@ -44,7 +44,8 @@ export function recoveredVillage(file,Game,{source:requested=null}={}){
       typeof c.author==='string'&&c.author.length<=160)
       .map(({release,revision,author})=>({release,revision,author}))
     :undefined;
-   return {source,snapshot:game.snapshot(),definition,release:structuredClone(record.release??null),...(attribution?{attribution}:{})};
+   const title=typeof record.title==='string'&&record.title.trim()?record.title.trim().slice(0,100):definition.title;
+   return {source,snapshot:game.snapshot(),definition,title,release:structuredClone(record.release??null),...(attribution?{attribution}:{})};
   }
  }finally{game.free();}
  throw Error('Neither village checkpoint can open in this game version. Keep the original backup; nothing was imported.');

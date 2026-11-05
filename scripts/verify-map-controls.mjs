@@ -15,11 +15,11 @@ try{
   if(i===0){await page.locator('#creator-library-close').click();await page.locator('[data-workspace=land]').click();await page.locator('#creator-river-enabled').uncheck();await saveMap('Second map version','Another author');const second=page.locator('[data-map]').filter({hasText:'Second map version'});assert.equal((await download(second.locator('[data-export-map]'))).content_revision,2);assert.deepEqual(await download(page.locator(`[data-map="${id}"] [data-export-map]`)),file);}
   let reuseRow=row;
   if(i===0){
-    const source=page.locator(`[data-map="${id}"]`),name=page.locator('#creator-map-name');
+    const source=page.locator(`[data-map="${id}"]`),name=page.locator('#creator-entry-name');
     await source.locator('[data-rename-map]').click();
     await name.fill('   ');
     await name.press('Enter');
-    await page.locator('#creator-map-name-status').getByText(/Enter a map name/).waitFor();
+    await page.locator('#creator-entry-name-status').getByText(/Enter a map name/).waitFor();
     await name.fill('Land for the next village');
     await page.screenshot({path:'/private/tmp/solar-map-rename.png'});
     await name.press('Enter');
@@ -29,7 +29,7 @@ try{
     await name.waitFor();
     assert.equal(await name.inputValue(),'Land for the next village · copy');
     await name.press('Escape');
-    await page.locator('#creator-map-name-dialog').waitFor({state:'hidden'});
+    await page.locator('#creator-entry-name-dialog').waitFor({state:'hidden'});
     assert.equal(await page.locator('[data-map]').count(),2);
     await source.locator('[data-copy-map]').click();
     await name.fill('Independent library copy');

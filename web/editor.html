@@ -17,13 +17,13 @@
     <p id="creator-map-sandbox-status" role="status"></p>
     <div class="dialog-actions"><button id="creator-map-sandbox-cancel">Cancel</button><button id="creator-map-sandbox-start">Start village</button></div>
   </dialog>
-  <dialog id="creator-map-name-dialog" aria-labelledby="creator-map-name-title">
-    <form id="creator-map-name-form">
-      <h2 id="creator-map-name-title"></h2>
-      <p>The exported map keeps its published title and credits.</p>
-      <label class="creator-field">Library name<input id="creator-map-name" type="text" maxlength="100" required autofocus></label>
-      <p id="creator-map-name-status" role="status"></p>
-      <div class="dialog-actions"><button type="button" id="creator-map-name-cancel">Cancel</button><button id="creator-map-name-confirm">Save name</button></div>
+  <dialog id="creator-entry-name-dialog" aria-labelledby="creator-entry-name-title">
+    <form id="creator-entry-name-form">
+      <h2 id="creator-entry-name-title"></h2>
+      <p id="creator-entry-name-description"></p>
+      <label class="creator-field">Library name<input id="creator-entry-name" type="text" maxlength="100" required autofocus></label>
+      <p id="creator-entry-name-status" role="status"></p>
+      <div class="dialog-actions"><button type="button" id="creator-entry-name-cancel">Cancel</button><button id="creator-entry-name-confirm">Save name</button></div>
     </form>
   </dialog>
   <dialog id="creator-release-dialog" aria-labelledby="creator-release-title"><h2 id="creator-release-title">Save a frozen release</h2><p>This keeps the exact land, friends, supplies and rules. Later draft edits will not change this release or its villages.</p><label class="creator-field">Author display name<input id="creator-release-author" type="text" maxlength="80" required value="Our community"></label><p id="creator-release-credits"></p><p id="creator-release-status" role="status"></p><div class="dialog-actions"><button id="creator-release-cancel">Keep editing</button><button id="creator-release-confirm">Save release</button></div></dialog>
