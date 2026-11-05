@@ -480,6 +480,7 @@ async function launch(definition,record,sessionKind,releaseId=null,releasePackag
 }
 async function showLibrary({reset=false}={}){
   if(current)await save();
+  $('creator-replace-field').hidden=!current;
   const [projects,runs,releases,maps]=await Promise.all([library.listProjects(),library.listRuns(),library.listReleases(),library.listMaps()]);
   const backupSelect=$('creator-backup-entry'),selectedBackup=backupSelect.value,backupEntries=[['project',projects],['run',runs],['release',releases],['map',maps]].flatMap(([kind,entries])=>entries.filter(entry=>!entry.missingBody).map(entry=>new Option(`${{project:'Draft',run:'Village',release:'Scenario release',map:'Map'}[kind]} · ${entry.title??'Untitled'}`,JSON.stringify([kind,entry.id]))));
   backupSelect.replaceChildren(...(backupEntries.length?backupEntries:[new Option('No saved records available','')]));if(backupEntries.some(option=>option.value===selectedBackup))backupSelect.value=selectedBackup;$('creator-backup-record').disabled=!backupSelect.value;
@@ -757,6 +758,59 @@ function wire(){
       if(b.dataset.removeRun)await requestRemoval('run',b.dataset.removeRun,b);
       if(b.dataset.continueRun){if(!await library.getRun(b.dataset.continueRun))throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');location.assign(`./?run=${encodeURIComponent(b.dataset.continueRun)}`);}
     }catch(error){$('creator-library-status').textContent=error.message;}finally{b.disabled=false;if(b.dataset.openProject&&b.isConnected&&$('creator-library-dialog').open&&document.querySelectorAll('dialog[open]').length===1)b.focus({preventScroll:true});}
+  };
+  const replaceDialog=$('creator-replace-dialog'),replaceConfirm=$('creator-replace-confirm');
+  const replaceCancel=$('creator-replace-cancel'),replaceStatus=$('creator-replace-status');
+  let pendingReplacement;
+  replaceCancel.onclick=()=>replaceDialog.close();
+  replaceDialog.oncancel=event=>{if(replaceCancel.disabled)event.preventDefault();};
+  replaceDialog.onclose=()=>{pendingReplacement=null;};
+  $('creator-replace-import').onchange=async event=>{
+    const input=event.currentTarget,file=input.files[0],ctx=current;
+    if(!file||!ctx)return;
+    input.disabled=true;
+    try{
+      if(file.size>MAX_CREATION_BYTES)throw Error('This creation file is too large.');
+      const raw=await file.text(),definition=parseImportObject(raw);
+      if(definition.format!=='solar-friends-scenario')throw Error('Choose a scenario draft file to replace this draft. Use Import a creation for maps, releases and backups.');
+      const issue=draftImportIssue(JSON.parse(engine.validate_scenario(raw)));
+      if(issue)throw Error(issue.message);
+      await saving;
+      if(current!==ctx||ctx.conflicted||ctx.preserveDamagedRecord)throw Error('Open the current saved draft before replacing it.');
+      const existing=ctx.doc.value;
+      pendingReplacement={ctx,storageRevision:ctx.storageRevision,editRevision:ctx.doc.revision,definition};
+      $('creator-replace-summary').textContent=`Replace “${existing.title}” with “${typeof definition.title==='string'?definition.title.slice(0,100):file.name}”?`;
+      replaceStatus.textContent='';
+      replaceDialog.showModal();
+    }catch(error){$('creator-library-status').textContent=error.message;}
+    finally{input.disabled=false;input.value='';}
+  };
+  replaceConfirm.onclick=async()=>{
+    if(!pendingReplacement||replaceConfirm.disabled)return;
+    const {ctx,storageRevision,editRevision,definition}=pendingReplacement;
+    replaceConfirm.disabled=replaceCancel.disabled=true;
+    try{
+      const existing=ctx.doc.value;
+      definition.id=existing.id;
+      definition.revision=existing.revision;
+      if(definition.map&&typeof definition.map==='object'){
+        definition.map.id=existing.map.id;
+        definition.map.revision=existing.map.revision;
+      }
+      const prepared=await prepareDraft({schema:1,revision:editRevision+1,definition});
+      if(current!==ctx||ctx.conflicted||ctx.doc.revision!==editRevision||ctx.storageRevision!==storageRevision)throw new LibraryConflict();
+      const checkpoint=prepared.doc.checkpoint();
+      const view={center:checkpoint.definition.map.camera,zoom:1.3,tool:'select'};
+      const record=await library.savePreparedProject({id:ctx.id,checkpoint,view,attribution:[],thumbnail:null},storageRevision);
+      try{sessionStorage.removeItem(recoveryKey(ctx.id));}catch{/* The durable record is authoritative. */}
+      replaceDialog.close();
+      attach(checkpoint.definition,{id:ctx.id,revision:record.revision,view,record,restored:prepared.doc,prepared});
+      toast(prepared.validation.ok?'Draft replaced.':'Draft replaced. Review its issues before testing.');
+    }catch(error){
+      replaceStatus.textContent=error instanceof LibraryConflict
+        ?'This draft changed. Close this dialog and reopen the latest draft before trying again.'
+        :error.message;
+    }finally{replaceConfirm.disabled=replaceCancel.disabled=false;}
   };
   $('creator-import').onchange=async e=>{
     const file=e.target.files[0];if(!file)return;

@@ -626,3 +626,7 @@ Desktop verification covered cancellation, a newer revision written through anot
 ### Naming saved villages
 
 The library can rename a saved village independently of its frozen scenario and simulation checkpoints. The playthrough shows its chosen name after continuing, and recovery retains that name when importing a backup as a new save. The desktop release journey checks that the definition, checkpoint data, provenance and thumbnail survive the rename, then continues, removes and recovers the named save.
+
+### Explicit draft replacement
+
+The Creation Library offers a separate **Replace the open draft** file control. It names the old and incoming drafts before asking for confirmation, validates the incoming draft, and checks the selected draft's saved revision before committing. It keeps the library identity and the displaced definition as the previous checkpoint. The incoming draft starts fresh undo history, so the dialog points players to Backup for the full original. Frozen maps, releases and saved villages continue to use independent imports.

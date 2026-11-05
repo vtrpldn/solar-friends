@@ -143,3 +143,10 @@
 #creator-delete-dialog .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
 #creator-delete-name{font-weight:bold;overflow-wrap:anywhere}
 #creator-delete-status{color:#8b482c;overflow-wrap:anywhere}
+
+#creator-replace-field[hidden]{display:none}
+#creator-replace-field{margin-top:10px}
+#creator-replace-dialog{width:500px;max-width:calc(100vw - 100px);box-sizing:border-box;padding:26px 30px}
+#creator-replace-dialog .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+#creator-replace-summary,#creator-replace-status{overflow-wrap:anywhere}
+#creator-replace-status{color:#8b482c}

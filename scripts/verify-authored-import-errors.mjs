@@ -18,6 +18,51 @@ try{
   const message=await page.locator('#creator-library-status').textContent();assert.match(message,/readable creation/i);assert.doesNotMatch(message,/Cannot read|Unexpected token|JSON|private-import-marker|<script>/i);assert.deepEqual(await stored(),before);checked++;
  }
  await page.screenshot({path:output+'/creation-error.png'});assert.equal(await page.evaluate(()=>window.importExecuted),undefined);assert.deepEqual(errors,[]);
+ const replacement=structuredClone(before.project.checkpoint.definition);
+ replacement.id='external-draft';replacement.map.id='external-property';
+ replacement.title='A different beginning';replacement.start.funds=4576;
+ const replace=page.locator('#creator-replace-import'),dialog=page.locator('#creator-replace-dialog');
+ const choose=()=>replace.setInputFiles({name:'another.solar-scenario',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(replacement))});
+ const confirm=dialog.getByRole('button',{name:'Replace draft',exact:true});
+ await choose();await dialog.waitFor();
+ assert.match(await dialog.locator('#creator-replace-summary').textContent(),/Our new ecovila.*A different beginning/);
+ await page.screenshot({path:output+'/replace-draft.png'});
+ await dialog.getByRole('button',{name:'Keep current draft'}).click();
+ await dialog.waitFor({state:'hidden'});
+ assert.deepEqual(await stored(),before);
+ await choose();await dialog.waitFor();
+ await page.evaluate(async id=>{
+  const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary(undefined,{broadcast:false});
+  try{const record=await library.getProject(id);await library.saveProject(record,record.revision);}finally{library.close();}
+ },id);
+ const newer=await stored();
+ await confirm.click();
+ await dialog.getByText(/This draft changed/).waitFor();
+ assert.deepEqual(await stored(),newer);
+ await dialog.getByRole('button',{name:'Keep current draft'}).click();
+ await page.reload();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await ready();
+ await page.locator('#creator-library').click();
+ const target=await stored();
+ await choose();await dialog.waitFor();await confirm.click();
+ await dialog.waitFor({state:'hidden'});
+ assert.equal(new URL(page.url()).searchParams.get('project'),id);
+ assert.equal(await page.locator('#creator-title').inputValue(),replacement.title);
+ const replaced=await stored();
+ assert.equal(replaced.projects.length,1);
+ assert.equal(replaced.project.checkpoint.definition.start.funds,4576);
+ assert.equal(replaced.project.checkpoint.definition.map.id,target.project.checkpoint.definition.map.id);
+ assert.deepEqual(replaced.project.previous.checkpoint.definition,target.project.checkpoint.definition);
+ for(const kind of ['maps','releases','presets'])assert.deepEqual(replaced[kind],before[kind]);
+ assert.deepEqual(errors,[]);
+ await page.locator('#creator-library').click();
+ await page.locator('#creator-import').setInputFiles({name:'another.solar-scenario',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(replacement))});
+ await page.waitForFunction(id=>{
+  const project=new URL(location.href).searchParams.get('project');
+  return project&&project!==id&&document.querySelector('#creator-save-status').textContent.startsWith('Saved');
+ },id);
+ const separate=await stored();
+ assert.equal(separate.projects.length,2);
+ assert.deepEqual(separate.project.checkpoint.definition,replaced.project.checkpoint.definition);
  const inputs={};for(const file of ['web/editor/index.js','web/editor/import-object.js','scripts/verify-authored-import-errors.mjs'])inputs[file]=createHash('sha256').update(await readFile(file)).digest('hex');
- await writeFile(output+'/report.json',JSON.stringify({passed:true,checked,samples,libraryUnchanged:true,draftIdentityUnchanged:true,noFileContentInErrors:true,noExecution:true,browserErrors:errors,inputs,scope:'Actual creation file controls reject malformed text and nonobject roots with readable messages. Exact saved project and collection heads retained. Not all native schema constraints or supported-package sharing.'},null,2)+'\n');console.log('PASS: 7 malformed creation imports use readable errors and preserve saved content.');
+ await writeFile(output+'/report.json',JSON.stringify({passed:true,checked,samples,malformedImportsLeaveLibraryUnchanged:true,draftIdentityUnchanged:true,explicitReplacementVerified:true,defaultImportCreatesSeparateDraft:true,noFileContentInErrors:true,noExecution:true,browserErrors:errors,inputs,scope:'Actual creation file controls reject malformed text and nonobject roots with readable messages. Exact saved project and collection heads retained. Not all native schema constraints or supported-package sharing.'},null,2)+'\n');console.log('PASS: 7 malformed imports preserve saved content; explicit draft replacement cancels cleanly, rejects stale revisions and keeps the displaced checkpoint.');
 }finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}
