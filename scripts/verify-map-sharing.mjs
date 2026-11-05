@@ -23,5 +23,13 @@ try{
  assert.equal(invalid.ok,false);
  assert(invalid.issues.some(issue=>issue.code==='invalid_placement'));
  assert.equal(copy.snapshot(),previous);
- console.log('PASS: implicit legacy weather and exact physical worlds preserved; explicit weather retained; unsupported defaults rejected; independent scenario copies and source credits; overlong credit chains block reuse while preserving previews; Sandbox translates the starting layout and rejects invalid plots atomically.');
+ assert.equal(blocked.buildingLayouts.length,4);
+ const alternate=blocked.buildingLayouts.slice(1).find(buildings=>{
+   const definition={...blocked.definition,start:{...blocked.definition.start,buildings}};
+   const checked=JSON.parse(copy.load_scenario(JSON.stringify(definition)));
+   return checked.ok&&!checked.issues.some(issue=>issue.code==='opening_building_access');
+ });
+ assert(alternate,'A valid rotation should exist on the same map');
+ assert.deepEqual(JSON.parse(copy.snapshot()).village.scenario.definition.map.camp,edge.map.camp);
+ console.log('PASS: implicit legacy weather and exact physical worlds preserved; explicit weather retained; unsupported defaults rejected; independent scenario copies and source credits; overlong credit chains block reuse while preserving previews; Sandbox translates the starting layout, rejects invalid plots atomically and has a valid rotation around the same camp.');
 }finally{game.free();copy.free();}

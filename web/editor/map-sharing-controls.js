@@ -44,13 +44,14 @@ export class MapSharingControls{
   }catch(error){if(error instanceof LibraryConflict)this.onConflict(ctx.id);$('creator-map-save-status').textContent=error.message;}finally{this.publication=null;this.saving=false;for(const id of ['creator-map-title','creator-map-description','creator-map-author'])$(id).disabled=false;$('creator-map-save-cancel').textContent='Keep editing';$('creator-map-save-confirm').disabled=false;$('creator-map-save-cancel').disabled=false;this.setBusy(false);if($('creator-map-save-dialog').open)$('creator-map-save-confirm').focus();}
  }
  async previewSandbox(record,opener){
-  const {definition,credits}=sandboxFromSharedMap(record.package,this.template(),this.validate);
+  const {definition,buildingLayouts,credits}=sandboxFromSharedMap(record.package,this.template(),this.validate);
   let prepared;
-  try{prepared=await prepareScenario(definition);}
+  try{prepared=await prepareScenario(definition,{buildingLayouts});}
   catch(error){
    if(error.name==='AbortError')throw error;
    throw Error(`${error.message} To choose another camp or starting layout, use Create scenario.`);
   }
+  definition.start.buildings=buildingLayouts[prepared.layoutIndex];
   const openingView={...prepared.report,residents:[]};
   $('creator-map-sandbox-preview').src=creationThumbnail(definition,openingView,this.art,{showCamp:true});
   const [shed,storage]=definition.start.buildings;

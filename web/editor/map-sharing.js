@@ -42,11 +42,21 @@ export function sandboxFromSharedMap(file,template,validate){
   const source=validateMapPackage(file,validate),definition=emptySettlementOnMap(source,template);
   const [x,y]=definition.map.camp;
   const [baseX,baseY]=template.map.camp;
-  definition.start.buildings=template.start.buildings.map(building=>({
-    ...structuredClone(building),x:x+building.x-baseX,y:y+building.y-baseY
+  // Keep the familiar orientation first. Turn the whole layout around the
+  // authored camp so both plots keep their spacing and inventory identities.
+  const orientations=[
+    (dx,dy)=>[dx,dy],
+    (dx,dy)=>[-dy,dx],
+    (dx,dy)=>[-dx,-dy],
+    (dx,dy)=>[dy,-dx]
+  ];
+  const buildingLayouts=orientations.map(orient=>template.start.buildings.map(building=>{
+    const [dx,dy]=orient(building.x-baseX,building.y-baseY);
+    return {...structuredClone(building),x:x+dx,y:y+dy};
   }));
+  definition.start.buildings=buildingLayouts[0];
   definition.start.inventories=structuredClone(template.start.inventories);
-  return {definition,credits:sharedMapCredits(source)};
+  return {definition,buildingLayouts,credits:sharedMapCredits(source)};
 }
 
 export function checkSharedMap({map,weather,title,description,author,credits=[],validate}){

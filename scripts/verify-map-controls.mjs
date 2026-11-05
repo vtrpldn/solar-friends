@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {chromium} from 'playwright';import {serve} from './serve.mjs';
+import init,{Game} from '../web/pkg/solar_friends.js';
+import {checkSharedMap,prepareSharedMap} from '../web/editor/map-sharing.js';
 const server=await serve(0);let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');
@@ -82,9 +84,23 @@ try{
   await sandboxDialog.getByRole('button',{name:'Cancel',exact:true}).click();
  }
  assert.deepEqual(await listRuns(),runsBefore);
- const file=files[0],source=page.locator('[data-map]').filter({hasText:file.title});
+ await init({module_or_path:await readFile('web/pkg/solar_friends_bg.wasm')});
+ const engine=new Game();
+ let file;
+ try{
+  const template=JSON.parse(engine.scenario_template('sandbox'));
+  const map=JSON.parse(engine.generate_biome_property('mata-atlantica',27));
+  map.camp=[56,32];
+  const catalog=JSON.parse(engine.scenario_catalog());
+  const prepared=prepareSharedMap({...template,map},{catalog,defaultMap:template.map});
+  file=checkSharedMap({...prepared,title:'Camp near the riverbank',description:'An edge camp',author:'Map author',
+    validate:raw=>JSON.parse(engine.validate_map_package(raw))});
+ }finally{engine.free();}
+ await page.locator('#creator-import').setInputFiles({name:'riverbank.solar-map',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(file))});
+ const source=page.locator('[data-map]').filter({hasText:file.title});
  await source.locator('[data-sandbox-map]').click();
  await sandboxDialog.waitFor();
+ assert.equal(await sandboxDialog.locator('#creator-map-sandbox-plots').textContent(),'Camp (56, 32) · Shed (58, 35) · Storage (52, 35)');
  await page.screenshot({path:'/private/tmp/solar-map-sandbox.png'});
  await sandboxDialog.getByRole('button',{name:'Start village',exact:true}).click();
  await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));
@@ -101,7 +117,8 @@ try{
  assert.deepEqual(nativePrecision(JSON.parse(run.snapshot).village.scenario.definition.map),nativePrecision(file.map));
  assert.deepEqual(run.definition.rules.weather,file.weather);
  assert.equal(run.definition.start.residents.length,5);
- assert.deepEqual(run.definition.start.buildings.map(b=>b.kind),['shed','warehouse']);
+ assert.deepEqual(run.definition.start.buildings.map(({kind,x,y})=>[kind,x,y]),[['shed',58,35],['warehouse',52,35]]);
+ assert.deepEqual(JSON.parse(run.snapshot).village.scenario.definition.start.buildings,run.definition.start.buildings);
  assert.deepEqual(run.attribution,[{release:file.id,revision:file.content_revision,author:file.author}]);
  await page.getByRole('button',{name:'Scenario library',exact:true}).click();
  await page.locator(`[data-continue-run="${id}"]`).click();
@@ -112,5 +129,5 @@ try{
  assert.deepEqual(await normalSaves(),normalBefore);
  assert.deepEqual(errors,[]);
  await page.setViewportSize({width:1366,height:900});await page.screenshot({path:'/private/tmp/solar-map-creator-1366.png'});const bounds=await page.locator('.creator-actions').boundingBox();assert(bounds.x>=0&&bounds.x+bounds.width<=1366,'Creator action bar overflow');
- console.log('PASS: all three biomes through public map save/search/export/import/reuse/playtest, land-only previews, invalid-settlement independence, durable map rename/copy and stale revision protection, versioning and immutable old exports, new scenario isolation, retained authorship, independent deletion, atomic incompatible imports, Sandbox preview and continue, and desktop toolbar fit.');
+ console.log('PASS: all three biomes through public map save/search/export/import/reuse/playtest, land-only previews, invalid-settlement independence, durable map rename/copy and stale revision protection, versioning and immutable old exports, new scenario isolation, retained authorship, independent deletion, atomic incompatible imports, rotated Sandbox preview and continue, and desktop toolbar fit.');
 }catch(error){await browser?.contexts()[0]?.pages()[0]?.screenshot({path:'/private/tmp/solar-map-controls-error.png'});throw error;}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

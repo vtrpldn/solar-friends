@@ -613,4 +613,6 @@ Players can rename a reusable map in the local library or create a separately na
 
 ### Sandbox starts on reusable maps
 
-The library can open a reusable map with the standard Sandbox supplies and five authored friends. The opening layout translates the standard shed and storage plots around the map's camp. The native compiler checks that layout before the player sees and confirms the opening preview. An invalid layout leaves the map and saves intact and directs the player to Create scenario to choose the plots. Confirming creates an independent village with the saved geography, climate and source credits.
+The library can open a reusable map with the standard Sandbox supplies and five authored friends. The opening layout translates the standard shed and storage plots around the map's camp. The preparation worker checks the standard orientation first, then tries quarter-turns around the authored camp if the plots are blocked or unreachable. The preview shows the exact layout accepted by the native compiler. If no orientation fits, the map and saves stay intact and the player can choose the plots in Create scenario. Confirming creates an independent village with the saved geography, climate and source credits.
+
+Desktop verification imported a riverbank property whose standard storage plot fails native placement. The preview, saved definition and resumed village used the same rotated shed and storage coordinates, with the camp and terrain preserved. The standard layout still opens on the three biome fixtures.
