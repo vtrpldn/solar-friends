@@ -43,7 +43,7 @@ export class JournalEditor{
     }else parent[key]=value;
    });
   };
-  this.events=new ScenarioEventsEditor({catalog,change,undo,redo,history,field,select,condition:(c,path)=>this.condition(c,path,{event:true}),closed:()=>host.querySelector('[data-journal-action=events]')?.focus()});
+  this.events=new ScenarioEventsEditor({catalog,change,undo,redo,history,field,select,condition:(c,path)=>this.condition(c,path,{event:true}),preview:()=>preview?.(this.chapter),closed:()=>host.querySelector('[data-journal-action=events]')?.focus()});
   this.dialog.onchange=this.events.dialog.onchange=edit;
   const click=e=>{
    const button=e.target.closest('[data-journal-action]');if(!button)return;const action=button.dataset.journalAction;

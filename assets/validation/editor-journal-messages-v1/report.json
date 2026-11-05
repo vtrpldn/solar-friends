@@ -1,0 +1,52 @@
+{
+  "complete": true,
+  "messageTextAndNativeStatus": true,
+  "nativeRoleAndResidentAttribution": true,
+  "nonMessageEffectsExcluded": true,
+  "exactRecordAndNativeSnapshotPreserved": true,
+  "eventsEditorFocusReturn": true,
+  "plainTextIsolation": true,
+  "exactReload": true,
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.31912499999998545
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 2.5458330000001297
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 25.66691600000013
+    }
+  ],
+  "sources": {
+    "web/scenario-journal-copy.js": "5b7860a3e56f343cece08becc2d18d0f26397235ffdc172b8f3c0a79fd806489",
+    "web/scenario-journal-ui.js": "edd03ad616512a16ca9537132db6faff898f15048277913a00f2514b9c6d4297",
+    "web/editor/journal-reading.js": "a4c0b27198d32919fc4ab535b5241da096f09ca83c7f1c89e174f833daa2cfb3",
+    "web/editor/events.js": "cee32afc27fe3287c18de4cd1f5efd32d597f4b91f2827b581fc7f38068963a6",
+    "web/editor/scenario-journal.js": "7a6de517161e0f5edc2cad0347544acf82afe670404ec08fd0cb44580432fd29",
+    "web/editor/index.js": "083b37c349ab8dade011722b3980ce9a407baf64567f1b234c406bf6812a9d1e",
+    "web/editor/style.css": "dbaff62f9511ce19ddbc02c25628757774191155b78d951a0f03c005873f48bd",
+    "scripts/message-preview-fixture.mjs": "8da3c90e2f9300dabcff871ad7e6e5cb223af9277494634f3ff3262a61343e5e",
+    "scripts/verify-journal-message-preview.mjs": "b4ea584b501a4ed5e741bedddd5a813577a7d398ce62718d7f2328ae65e28c2a",
+    "web/pkg/solar_friends_bg.wasm": "c88acc786b185ea54e1c2d2b9e58d398492c1c7f4965656fac775d8f5d7ec1d6"
+  },
+  "scope": "Opening author preview of native watched messages, role and explicit resident speakers, future fund event present but never fired. Not every event effect/status combination or maximum journal."
+}

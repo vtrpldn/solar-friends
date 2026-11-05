@@ -1,0 +1,53 @@
+{
+  "complete": true,
+  "cases": [
+    "first-clearing 0",
+    "first-clearing 1",
+    "first-clearing 2",
+    "first-clearing 3",
+    "before-the-dry-season 0",
+    "before-the-dry-season 1",
+    "before-the-dry-season 2",
+    "an-inherited-village 0",
+    "an-inherited-village 1",
+    "an-inherited-village 2",
+    "messages watching",
+    "message applied with role speaker"
+  ],
+  "baselineCommit": "a426ef9",
+  "baselineSha256": "bd9a6fc59df1a60345e25a29b52f49c1460b498fdd633551c80356ce3544adb2",
+  "sharedSha256": "5b7860a3e56f343cece08becc2d18d0f26397235ffdc172b8f3c0a79fd806489",
+  "uiSha256": "edd03ad616512a16ca9537132db6faff898f15048277913a00f2514b9c6d4297",
+  "scriptSha256": "f22f6ea1a09fbf85906ef3351c7bddc8acf708805210479955f1ac65a7d639dc",
+  "fixtureSha256": "8da3c90e2f9300dabcff871ad7e6e5cb223af9277494634f3ff3262a61343e5e",
+  "cleanup": [
+    {
+      "stage": "server",
+      "event": "start"
+    },
+    {
+      "stage": "server",
+      "event": "complete",
+      "elapsedMs": 0.33258299999999963
+    },
+    {
+      "stage": "context",
+      "event": "start"
+    },
+    {
+      "stage": "context",
+      "event": "complete",
+      "elapsedMs": 3.096916999999962
+    },
+    {
+      "stage": "browser",
+      "event": "start"
+    },
+    {
+      "stage": "browser",
+      "event": "complete",
+      "elapsedMs": 27.837375000000065
+    }
+  ],
+  "scope": "Exact DOM markup parity between committed and refactored player renderer for all opening-report chapters in three native compiled examples plus watched/applied message events with native role attribution. No action dispatch or later simulation states asserted."
+}

@@ -19,3 +19,7 @@ export function renderJournalChapter(report,index,{actionButton=()=>''}={}){
  if(!selected)return '';
  return `<article class="quest-card ${selected.completed_at!==null?'complete':''}"><span class="eyebrow">CHAPTER ${index+1} OF ${report.chapters.length}</span><h3>${escape(selected.title)}</h3><p>${escape(selected.description)}</p>${selected.goals.map(goal=>`<section class="scenario-journal-goal ${goal.status}" data-scenario-goal="${escape(goal.id)}"><h4>${goal.status==='complete'?'✓ ':''}${escape(goal.title)}${goal.optional?' <small>Optional</small>':''}</h4><p>${escape(goal.description)}</p><small>${goal.status==='complete'?'Completed':goal.status==='active'?'In progress':'Upcoming'}</small><ul>${condition(goal.condition,goal.status==='complete')}</ul></section>`).join('')}${complete?`<p class="scenario-completion">${escape(report.completion)}</p>`:''}</article>`;
 }
+export function journalEventStatus(event){
+ return event.status==='applied'?'Happened · '+journalDate(event.applied_at):event.status==='waiting_for_delivery'?'Delivery queued':event.status==='waiting_for_fund_space'?'Queued · waiting for room in the shared fund':'Watching for its moment';
+}
+export function renderStoryMessage(event){return event.effect?.kind==='message'?`<p>${escape(event.effect.text)}</p>`:'';}
