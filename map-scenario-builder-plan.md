@@ -616,3 +616,9 @@ Players can rename a reusable map in the local library or create a separately na
 The library can open a reusable map with the standard Sandbox supplies and five authored friends. The opening layout translates the standard shed and storage plots around the map's camp. The preparation worker checks the standard orientation first, then tries quarter-turns around the authored camp if the plots are blocked or unreachable. The preview shows the exact layout accepted by the native compiler. If no orientation fits, the map and saves stay intact and the player can choose the plots in Create scenario. Confirming creates an independent village with the saved geography, climate and source credits.
 
 Desktop verification imported a riverbank property whose standard storage plot fails native placement. The preview, saved definition and resumed village used the same rotated shed and storage coordinates, with the camp and terrain preserved. The standard layout still opens on the three biome fixtures.
+
+### Removing saved villages
+
+Saved scenario villages can be removed from the Creation Library, including Sandbox villages started on reusable maps. The confirmation names the chosen save, defaults to keeping it, and checks the saved revision before deleting its checkpoints and thumbnail. The Backup action can preserve a recoverable copy before removal. A newer checkpoint written while the confirmation is open requires a fresh review.
+
+Desktop verification covered cancellation, a newer revision written through another library connection, confirmed removal of the selected record and preview, and recovery from its exported backup under a new save ID. The other draft's definition and frozen releases remained available.

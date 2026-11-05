@@ -27,7 +27,13 @@
     </form>
   </dialog>
   <dialog id="creator-release-dialog" aria-labelledby="creator-release-title"><h2 id="creator-release-title">Save a frozen release</h2><p>This keeps the exact land, friends, supplies and rules. Later draft edits will not change this release or its villages.</p><label class="creator-field">Author display name<input id="creator-release-author" type="text" maxlength="80" required value="Our community"></label><p id="creator-release-credits"></p><p id="creator-release-status" role="status"></p><div class="dialog-actions"><button id="creator-release-cancel">Keep editing</button><button id="creator-release-confirm">Save release</button></div></dialog>
-  <dialog id="creator-delete-dialog" aria-labelledby="creator-delete-title"><h2 id="creator-delete-title">Remove this creation?</h2><p>The editable project will be removed. Independent scenario villages keep their own content and saves.</p><div class="dialog-actions"><button id="creator-delete-cancel">Keep it</button><button id="creator-delete-confirm" class="danger">Remove creation</button></div></dialog>
+  <dialog id="creator-delete-dialog" aria-labelledby="creator-delete-title" aria-describedby="creator-delete-name creator-delete-description">
+    <h2 id="creator-delete-title"></h2>
+    <p id="creator-delete-name"></p>
+    <p id="creator-delete-description"></p>
+    <p id="creator-delete-status" role="status"></p>
+    <div class="dialog-actions"><button id="creator-delete-cancel">Keep it</button><button id="creator-delete-confirm" class="danger">Remove creation</button></div>
+  </dialog>
   <dialog id="creator-biome-dialog" aria-labelledby="creator-biome-change-title"></dialog>
   <div id="creator-toast" role="status" hidden></div>
   <script type="module" src="editor/index.js"></script>

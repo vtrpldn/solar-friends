@@ -73,7 +73,7 @@ const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&
 const clone=value=>structuredClone(value),title=kind=>allBuildingArt[kind]?.name||kind;
 let newBiome="mata-atlantica";
 let libraryDiscovery,mapSharing,workspaces;
-let current,map,engine,catalog,art,saveTimer,toastTimer,pendingDelete,busy=false;
+let current,map,engine,catalog,art,saveTimer,toastTimer,busy=false;
 const waterLayers={water:{legend:'Owned fresh water · green: open, stocked and reachable; gold: empty; red: closed or unreachable. Labels show unclaimed units and friends with a route. Neighbour service and future deliveries are excluded.'},walkability:{legend:"Green · connected to camp. Gold · clear but disconnected. Red · blocked cell centre. Footprints and riverbanks use native walking rules; this does not reserve space from other residents."},banks:{legend:"Blue · native protected banks. Keep ordinary buildings and paths inland."},hydro:{legend:"Gold · native river segments aligned with the generator artwork. Buildings, worker access and free space are checked when placing."}};
 let minimap,ruleEditor,equipmentEditor,routesEditor,liquidsEditor,suppliesEditor,regionsEditor,journalEditor,relationshipsEditor,residentsEditor,biomeEditor,weatherEditor,geologyEditor,geometry=null,terrainBase=null,inspectorSelection='';
 let expandedReview=false,outlook;
@@ -497,7 +497,7 @@ async function showLibrary({reset=false}={}){
   }).join('');
   const villages=runs.filter(r=>r.sessionKind==='scenario'||r.missingBody);
   $('creator-runs-heading').hidden=!villages.length;
-  $('creator-run-list').innerHTML=villages.map(r=>r.missingBody?missingLibraryEntry('run',r):`<div class="creator-library-row">${previewMarkup('run',r.id)}<div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button><button data-backup-run="${escape(r.id)}" title="Keep the original village and previous snapshot">Backup</button></div>`).join('');
+  $('creator-run-list').innerHTML=villages.map(r=>r.missingBody?missingLibraryEntry('run',r):`<div class="creator-library-row">${previewMarkup('run',r.id)}<div><b>${escape(r.title)}</b><small>Independent village save</small>${r.residentBalance==='unrestricted'?'<small>Unrestricted starting skills</small>':''}</div><button data-continue-run="${escape(r.id)}">Continue</button><button data-backup-run="${escape(r.id)}" title="Keep the original village and previous snapshot">Backup</button><button class="creator-remove" data-remove-run="${escape(r.id)}" aria-label="Remove saved village ${escape(r.title)}">×</button></div>`).join('');
   $('creator-library-title').textContent=projects.length+releases.length+villages.length+maps.length?'Creation library':'Create a village';
   if(!$('creator-library-dialog').open)$('creator-new-options').open=projects.length+releases.length+villages.length+maps.length===0;
   libraryDiscovery??=installLibraryDiscovery();libraryDiscovery.set(projects,releases,villages,maps);if(reset)libraryDiscovery.reset();
@@ -656,6 +656,63 @@ function wire(){
       else $('creator-library-status').textContent=error.message;
     }finally{mapNameConfirm.disabled=mapNameCancel.disabled=false;}
   };
+  const deleteDialog=$('creator-delete-dialog'),deleteConfirm=$('creator-delete-confirm');
+  const deleteCancel=$('creator-delete-cancel'),deleteStatus=$('creator-delete-status');
+  const removal={
+    map:{label:'map',description:'Existing drafts, releases and villages keep their own land.',remove:(id,revision)=>library.deleteMap(id,revision)},
+    release:{label:'release',description:'Drafts and saved villages keep their own content.',remove:(id,revision)=>library.deleteRelease(id,revision)},
+    project:{label:'draft',description:'Frozen releases and independent villages keep their content and saves.',remove:(id,revision)=>library.deleteProject(id,revision)},
+    run:{label:'saved village',description:'This village and its checkpoints will be deleted from this device. The source creation and other villages remain in the library.',remove:(id,revision)=>library.deleteRun(id,revision)}
+  };
+  let pendingDelete;
+  async function requestRemoval(kind,id,opener){
+    const entry=await library.getEntryDetails(kind,id);
+    if(!entry||entry.missingBody)throw Error('Saved data for this entry is missing. Use Repair library list or import a backup.');
+    const {label,description}=removal[kind];
+    pendingDelete={kind,entry,opener};
+    $('creator-delete-title').textContent=`Remove ${label}?`;
+    $('creator-delete-name').textContent=entry.title;
+    $('creator-delete-description').textContent=description;
+    deleteConfirm.textContent=`Remove ${label}`;
+    deleteConfirm.disabled=false;
+    deleteStatus.textContent='';
+    deleteDialog.showModal();
+    deleteCancel.focus();
+  }
+  deleteCancel.onclick=()=>deleteDialog.close();
+  deleteDialog.oncancel=event=>{if(deleteCancel.disabled)event.preventDefault();};
+  deleteDialog.onclose=()=>{
+    pendingDelete?.opener.focus({preventScroll:true});
+    pendingDelete=null;
+  };
+  deleteConfirm.onclick=async()=>{
+    if(!pendingDelete||deleteConfirm.disabled)return;
+    const {kind,entry}=pendingDelete;
+    const {id,revision}=entry;
+    deleteConfirm.disabled=deleteCancel.disabled=true;
+    try{
+      await removal[kind].remove(id,revision);
+      if(kind==='run'){
+        try{sessionStorage.removeItem(`solar-friends-run-recovery:${id}`);}catch{/* The durable deletion already succeeded. */}
+      }
+      if(kind==='project'&&current?.id===id){
+        current=null;
+        history.replaceState(null,'','./editor.html');
+      }
+      pendingDelete=null;
+      deleteDialog.close();
+      await showLibrary();
+      $('creator-library-status').textContent=`Removed ${removal[kind].label}.`;
+      $('creator-library-search').focus({preventScroll:true});
+    }catch(error){
+      if(deleteDialog.open){
+        deleteStatus.textContent=error instanceof LibraryConflict
+          ?'This entry changed in another tab. Close this dialog and review the entry again before removing it.'
+          :error.message;
+        deleteConfirm.disabled=error instanceof LibraryConflict;
+      }else $('creator-library-status').textContent=error.message;
+    }finally{deleteCancel.disabled=false;}
+  };
   $('creator-library-dialog').onclick=async e=>{
     const b=e.target.closest('button');if(!b||b.disabled)return;b.disabled=true;
     try{
@@ -686,19 +743,15 @@ function wire(){
       }
       if(b.dataset.useMap){const record=await library.getMap(b.dataset.useMap);if(!record)throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');if(record)await mapSharing.use(record);}
       if(b.dataset.exportMap){const record=await library.getMap(b.dataset.exportMap);const result=downloadStoredPackage('map',record);$('creator-library-status').textContent=result.backup?'The content package is damaged. A full original-record backup was downloaded; saved data is unchanged.':'Original map package exported. Saved data is unchanged.';}
-      if(b.dataset.removeMap){const record=await library.getMap(b.dataset.removeMap);if(!record)throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');if(record){pendingDelete={kind:'map',record};$('creator-delete-title').textContent='Remove this reusable map?';$('creator-delete-dialog').querySelector('p').textContent='Only this saved map is removed. Existing drafts, releases and villages keep their own land.';$('creator-delete-dialog').showModal();}}
+      if(b.dataset.removeMap)await requestRemoval('map',b.dataset.removeMap,b);
       if(b.dataset.playRelease){const record=await library.getRelease(b.dataset.playRelease);if(!record)throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');if(record)await launch(record.package.definition,{id:record.projectId,revision:record.sourceRevision},'scenario',record.id,record.package);}
       if(b.dataset.exportRelease){const record=await library.getRelease(b.dataset.exportRelease);const result=downloadStoredPackage('release',record);$('creator-library-status').textContent=result.backup?'The content package is damaged. A full original-record backup was downloaded; saved data is unchanged.':'Original release package exported. Saved data is unchanged.';}
       if(b.dataset.copyRelease){const record=await library.getRelease(b.dataset.copyRelease);if(!record)throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');if(record){const checked=JSON.parse(engine.validate_scenario(canonical(record.package)));if(!checked.ok)throw Error(checked.issues.find(i=>i.severity==='error')?.message||'This release cannot open.');const p=record.package,credits=[...(p.credits??[]),{release:p.id,revision:p.content_revision,author:p.author}];if(credits.length>catalog.releases.maximum_credits)throw Error('This release already has the maximum source credits. Keep its original export.');await newProject('copy',{...p.definition,title:(p.title+' · copy').slice(0,100)},credits);}}
-      if(b.dataset.removeRelease){const record=await library.getRelease(b.dataset.removeRelease);if(!record)throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');if(record){pendingDelete={kind:'release',record};$('creator-delete-title').textContent='Remove this frozen release?';$('creator-delete-dialog').querySelector('p').textContent='Only this release is removed. Drafts and saved villages keep their own content.';$('creator-delete-dialog').showModal();}}
-      if(b.dataset.removeProject){$('creator-delete-title').textContent='Remove this creation?';$('creator-delete-dialog').querySelector('p').textContent='The editable project will be removed. Frozen releases and independent villages keep their content and saves.';pendingDelete=await library.getProject(b.dataset.removeProject);$('creator-delete-dialog').showModal();}
+      if(b.dataset.removeRelease)await requestRemoval('release',b.dataset.removeRelease,b);
+      if(b.dataset.removeProject)await requestRemoval('project',b.dataset.removeProject,b);
+      if(b.dataset.removeRun)await requestRemoval('run',b.dataset.removeRun,b);
       if(b.dataset.continueRun){if(!await library.getRun(b.dataset.continueRun))throw Error('Saved data for this entry is missing. Use Repair library list to keep the remaining entry details, or import an exported backup.');location.assign(`./?run=${encodeURIComponent(b.dataset.continueRun)}`);}
     }catch(error){$('creator-library-status').textContent=error.message;}finally{b.disabled=false;if(b.dataset.openProject&&b.isConnected&&$('creator-library-dialog').open&&document.querySelectorAll('dialog[open]').length===1)b.focus({preventScroll:true});}
-  };
-  $('creator-delete-cancel').onclick=()=>$('creator-delete-dialog').close();
-  $('creator-delete-confirm').onclick=async()=>{
-    try{if(pendingDelete?.kind==='map'){await library.deleteMap(pendingDelete.record.id,pendingDelete.record.revision);}else if(pendingDelete?.kind==='release'){await library.deleteRelease(pendingDelete.record.id,pendingDelete.record.revision);}else if(pendingDelete){await library.deleteProject(pendingDelete.id,pendingDelete.revision);if(current?.id===pendingDelete.id){current=null;history.replaceState(null,'','./editor.html');}}
-      $('creator-delete-dialog').close();pendingDelete=null;await showLibrary();}catch(error){toast(error.message);}
   };
   $('creator-import').onchange=async e=>{
     const file=e.target.files[0];if(!file)return;

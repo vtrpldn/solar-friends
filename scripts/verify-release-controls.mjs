@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {chromium} from 'playwright';import {serve} from './serve.mjs';
-const server=await serve();let browser;
+const server=await serve(0);let browser;
 try{
  browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1600,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`http://127.0.0.1:${server.address().port}/editor.html`);await page.waitForFunction(()=>document.body.dataset.creatorReady==='true');await page.locator('[data-preset=camp]').click();
  const set=async(id,v)=>{await page.locator(id).fill(v);await page.locator(id).press('Tab');},release=async author=>{await page.locator('#creator-release').click();await page.locator('#creator-release-author').fill(author);await page.screenshot({path:'/private/tmp/solar-release-dialog.png'});await page.locator('#creator-release-confirm').click();await page.locator('#creator-library-dialog').waitFor({state:'visible'});},exportRow=async row=>{const downloading=page.waitForEvent('download');await row.locator('[data-export-release]').click();return JSON.parse(await readFile(await (await downloading).path(),'utf8'));};
  await set('#creator-title','First clearing');const projectId=new URL(page.url()).searchParams.get('project');await release('João <amigo>');const firstRow=page.locator('[data-release]').filter({hasText:'Version 1 · João <amigo>'});await firstRow.waitFor({state:'visible'});const firstId=await firstRow.getAttribute('data-release'),first=await exportRow(firstRow);assert.equal(first.author,'João <amigo>');assert.equal(first.definition.map.terrain.length,4096);assert.equal(first.definition.start.residents.length,5);assert.deepEqual(first.compatibility,{assets:1,game:1,ruleset:1});assert.equal(await firstRow.locator('amigo').count(),0);await firstRow.locator('.creator-preview img').waitFor();const firstPreview=await firstRow.locator('.creator-preview img').getAttribute('src');assert(firstPreview.startsWith('data:image/webp;base64,'));
- await page.locator('#creator-library-close').click();await set('#creator-title','The next draft');await set('#creator-funds','4321');await release('Our next community');assert.equal(await page.locator('[data-release]').count(),2);await page.locator(`[data-release="${firstId}"] .creator-preview img`).waitFor();assert.equal(await page.locator(`[data-release="${firstId}"] .creator-preview img`).getAttribute('src'),firstPreview);assert.deepEqual(await exportRow(page.locator(`[data-release="${firstId}"]`)),first);await page.screenshot({path:'/private/tmp/solar-release-library.png'});
+ await page.locator('#creator-library-close').click();await set('#creator-title','The next draft');await page.locator('[data-workspace=village]').click();await set('#creator-funds','4321');await release('Our next community');assert.equal(await page.locator('[data-release]').count(),2);await page.locator(`[data-release="${firstId}"] .creator-preview img`).waitFor();assert.equal(await page.locator(`[data-release="${firstId}"] .creator-preview img`).getAttribute('src'),firstPreview);assert.deepEqual(await exportRow(page.locator(`[data-release="${firstId}"]`)),first);await page.screenshot({path:'/private/tmp/solar-release-library.png'});
  await page.locator(`[data-release="${firstId}"] [data-play-release]`).click();await page.waitForFunction(()=>window.solarDev&&document.querySelector('.creation-session'));assert((await page.locator('.creation-session').textContent()).includes('Version 1 · by João <amigo>'));if((await page.locator('#pause').getAttribute('aria-label')).includes('Pause'))await page.locator('#pause').click();const start=await page.evaluate(()=>window.solarDev.snapshot());assert.equal(start.village.scenario.definition.title,'First clearing');assert.equal(start.village.scenario.definition.start.funds,first.definition.start.funds);
  const save=page.getByRole('button',{name:'Save checkpoint',exact:true});await save.click();await page.waitForFunction(()=>[...document.querySelectorAll('.creation-session button')].find(b=>b.textContent==='Save checkpoint')?.disabled===false);await page.screenshot({path:'/private/tmp/solar-release-play.png'});await page.getByRole('button',{name:'Scenario library',exact:true}).click();await page.locator('#creator-library-dialog').waitFor({state:'visible'});
  await page.waitForFunction(()=>document.querySelectorAll('.creator-preview img').length===4);for(const img of await page.locator('.creator-preview img').all())assert(await img.evaluate(i=>i.complete&&i.naturalWidth===480&&i.naturalHeight===300));
@@ -16,5 +16,56 @@ try{
  await page.locator('#creator-library-search').fill('joao');
  await imported.locator('[data-copy-release]').click();await page.waitForFunction(()=>document.body.dataset.creatorReady==='true'&&new URL(location.href).searchParams.has('project')&&!document.querySelector('#creator-library-dialog').open);assert.equal(await page.locator('#creator-title').inputValue(),'First clearing · copy');await page.locator('#creator-release').click();assert((await page.locator('#creator-release-credits').textContent()).includes('João <amigo>'));await page.locator('#creator-release-author').fill('New gardener');await page.locator('#creator-release-confirm').click();await page.locator('#creator-library-dialog').waitFor({state:'visible'});const remix=page.locator('[data-release]').filter({hasText:'Version 1 · New gardener'}),remixed=await exportRow(remix);assert.deepEqual(remixed.credits,[{release:first.id,revision:1,author:'João <amigo>'}]);
  const count=await page.locator('[data-release]').count(),url=page.url(),bad=structuredClone(first);bad.compatibility.ruleset=999;await page.locator('#creator-import').setInputFiles({name:'future.solar-release',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(bad))});await page.waitForFunction(()=>document.querySelector('#creator-library-status').textContent.includes('different game'));assert.equal(await page.locator('[data-release]').count(),count);assert.equal(page.url(),url);assert.equal(await page.locator('#creator-title').inputValue(),'First clearing · copy');assert.deepEqual(errors,[]);
- console.log('PASS: accent-insensitive title/author discovery, combined collection filters, name ordering, no-match recovery, accessible creation choices and new-entry filter resets; public release creation and versioning, immutable export after draft edits, independent release play and visible authorship, villages surviving draft/release deletion, new-entry import, credited editable copies and atomic unsupported-version rejection.');
+ const removeVillage=page.locator('[data-remove-run]'),runId=await removeVillage.getAttribute('data-remove-run');
+ const removal=page.locator('#creator-delete-dialog'),confirm=removal.getByRole('button',{name:'Remove saved village',exact:true});
+ const readRecords=()=>page.evaluate(async id=>{
+  const {ContentLibrary}=await import('/content-library.js'),library=new ContentLibrary();
+  try{return {
+   run:await library.getRun(id),preview:await library.getPreview('run',id),
+   projects:await Promise.all((await library.listProjects()).map(async ({id})=>({id,definition:(await library.getProject(id)).checkpoint.definition}))),
+   releases:await library.listReleases(),maps:await library.listMaps()
+  };}finally{library.close();}
+ },runId);
+ const beforeRemoval=await readRecords();
+ await removeVillage.click();
+ await removal.waitFor();
+ assert.equal(await removal.locator('#creator-delete-name').textContent(),'First clearing');
+ assert(await removal.getByRole('button',{name:'Keep it'}).evaluate(button=>button===document.activeElement));
+ await page.screenshot({path:'/private/tmp/solar-remove-saved-village.png'});
+ await page.keyboard.press('Escape');
+ await removal.waitFor({state:'hidden'});
+ assert.deepEqual(await readRecords(),beforeRemoval);
+ await removeVillage.click();
+ await removal.waitFor();
+ const newRevision=await page.evaluate(async id=>{
+  const {ContentLibrary}=await import('/content-library.js'),other=new ContentLibrary();
+  try{const run=await other.getRun(id);return (await other.saveRun(id,run.snapshot,run.revision)).revision;}
+  finally{other.close();}
+ },runId);
+ await confirm.click();
+ await removal.getByText(/changed in another tab/).waitFor();
+ assert.equal((await readRecords()).run.revision,newRevision);
+ assert(await confirm.isDisabled());
+ await removal.getByRole('button',{name:'Keep it'}).click();
+ await removal.waitFor({state:'hidden'});
+ const pendingBackup=page.waitForEvent('download');
+ await page.locator('[data-backup-run]').click();
+ const backup=JSON.parse(await readFile(await (await pendingBackup).path(),'utf8'));
+ assert.equal(backup.kind,'run');
+ assert.equal(backup.record.revision,newRevision);
+ await removeVillage.click();
+ await confirm.click();
+ await removeVillage.waitFor({state:'detached'});
+ const afterRemoval=await readRecords();
+ assert.equal(afterRemoval.run,null);
+ assert.equal(afterRemoval.preview,null);
+ for(const collection of ['projects','releases','maps'])assert.deepEqual(afterRemoval[collection],beforeRemoval[collection]);
+ await page.locator('#creator-import').setInputFiles({name:'village-backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+ const recovered=page.locator('[data-continue-run]');
+ await page.getByRole("button",{name:"Recover a copy",exact:true}).click();
+
+ await recovered.waitFor();
+ assert.notEqual(await recovered.getAttribute('data-continue-run'),runId);
+ assert.deepEqual(errors,[]);
+ console.log('PASS: accent-insensitive title/author discovery, combined collection filters, name ordering, no-match recovery, accessible creation choices and new-entry filter resets; public release creation and versioning, immutable export after draft edits, independent release play and visible authorship, villages surviving draft/release deletion, new-entry import, credited editable copies and atomic unsupported-version rejection, and independent saved-village deletion, conflict protection and backup recovery.');
 }catch(error){await browser?.contexts()[0]?.pages()[0]?.screenshot({path:'/private/tmp/solar-release-controls-error.png'});throw error;}finally{await browser?.close();await new Promise(resolve=>server.close(resolve));}

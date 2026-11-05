@@ -138,3 +138,8 @@
 #creator-map-sandbox-preview{display:block;width:100%;aspect-ratio:8/5;border-radius:6px}
 #creator-map-sandbox-dialog .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
 #creator-map-sandbox-status{color:#8b482c;overflow-wrap:anywhere}
+
+#creator-delete-dialog{width:460px;max-width:calc(100vw - 100px);box-sizing:border-box;padding:26px 30px}
+#creator-delete-dialog .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+#creator-delete-name{font-weight:bold;overflow-wrap:anywhere}
+#creator-delete-status{color:#8b482c;overflow-wrap:anywhere}
