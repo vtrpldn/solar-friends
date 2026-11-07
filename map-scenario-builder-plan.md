@@ -4,7 +4,7 @@ description: Build player-facing map and scenario tools using the authored resid
 
 # Map and scenario builder implementation plan
 
-Status: implementation in progress. **Scope revision: resident creation/customization was removed at the player’s request on 2026-11-03. Historical implementation notes below record retired work and do not reintroduce it.** Delivery target: the desktop game, with 64×64 maps, at least three Brazilian biomes, and the existing authored cast. The original five friends remain a ready-made cast.
+Status: closed to further implementation at the player’s request on 2026-11-07. Completed work is retained; this document is an implementation record, not an active goal. **Scope revision: resident creation/customization was removed at the player’s request on 2026-11-03. Historical implementation notes below record retired work and do not reintroduce it.** Delivery target: the desktop game, with 64×64 maps, at least three Brazilian biomes, and the existing authored cast. The original five friends remain a ready-made cast.
 
 Required launch biomes: **Mata Atlântica, Cerrado, and Caatinga**. Both player-facing builders must support all three throughout creation, editing, saving, sharing, and play, with distinct vegetation, terrain presentation, climate, and resource tradeoffs. The authored cast must work in each biome. This is a minimum release requirement, not a limit on future biome additions; detailed acceptance criteria appear under Brazilian biome presets below.
 
@@ -701,3 +701,9 @@ The five founding friends completed a full wet and dry cycle on seeds 42 and 73 
 | Caatinga | 56 | 44 / 43 | 39.6 | 68.7 |
 
 Reproduce with `node scripts/verify-biome-cycles.mjs --settlement`. WASM SHA-256 `d106bf81126c8f0cb59a75b49b8c1ca75f51ccfcbfe5c08e06620a7ff65c8980`. The fixture uses default Sandbox opening funds and scripted purchase decisions. These results cover the authored five-person seasonal simulation. Campaign difficulty and player walkthroughs are separate checks.
+
+### Direction-change handoff — 2026-11-07
+
+The player ended this workstream to change direction. No additional builder scope should be undertaken from this plan without a new request. The implementation and recorded checks above are retained. The complete original acceptance criteria have not been proven, and this closure does not claim otherwise.
+
+Remaining unverified gates include physical-display frame pacing, GPU allocation, long-run memory plateau, complete contextual artwork and resident-motion review, and unfamiliar-player walkthroughs. These are deferred rather than release-complete. Resident creation/customization remains removed; add authored residents only when needed.
