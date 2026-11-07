@@ -319,7 +319,10 @@ function revealMapIssue(issue){
       const object=bank??site??building;
       if(!issue.at)map.centerAt(object.x,object.y);
       const panel=$('creator-selection');
-      target=(building&&issue.code==='invalid_placement'?$('creator-object-x'):panel.querySelector('h2'))??target;
+      target=panel.querySelector('h2')??target;
+      if(building&&['invalid_placement','building_outside_map'].includes(issue.code)){
+        target=$(issue.path.endsWith('.y')?'creator-object-y':'creator-object-x')??target;
+      }
     }
   }
   if(target===$('creator-map'))map.select(null);

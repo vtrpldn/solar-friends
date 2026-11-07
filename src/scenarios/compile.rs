@@ -95,12 +95,21 @@ pub(super) fn check(d: &Definition) -> Report {
                 "Choose a supported building and construction recipe.",
             );
         }
-        if !(1..MAP_SIZE - 1).contains(&b.x) || !(1..MAP_SIZE - 1).contains(&b.y) {
-            r.push(
-                &path,
-                "building_outside_map",
-                "Keep this building inside the property.",
-            );
+        for (axis, value) in [("x", b.x), ("y", b.y)] {
+            if !(1..MAP_SIZE - 1).contains(&value) {
+                r.push(
+                    &format!("{path}.{axis}"),
+                    "building_outside_map",
+                    if axis == "x" {
+                        "Set the building's column inside the property."
+                    } else {
+                        "Set the building's row inside the property."
+                    },
+                );
+                let issue = r.issues.last_mut().unwrap();
+                issue.at = Some([b.x, b.y]);
+                issue.entity = Some(b.id.clone());
+            }
         }
         if let Some(key) = &b.appearance {
             let index = HOME_APPEARANCES.iter().position(|s| *s == key);

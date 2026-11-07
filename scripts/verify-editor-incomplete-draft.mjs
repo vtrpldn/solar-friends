@@ -38,5 +38,28 @@ try{
  const fixed=(await saved(plot)).checkpoint.definition;
  assert.deepEqual(fixed.start.buildings,baseline.start.buildings);
  assert.deepEqual(errors,[]);
- const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, public repair and exact reload.');
+ const offMap=structuredClone(baseline),warehouse=offMap.start.buildings[1];
+ const [savedColumn,savedRow]=[warehouse.x,warehouse.y];
+ warehouse.x=0;warehouse.y=63;
+ const boundary=await open();await importFile(boundary,Buffer.from(JSON.stringify(offMap)));
+ const revealBoundary=async axis=>{
+  await boundary.locator('[data-workspace=review]').click();
+  await boundary.locator('#creator-issues [data-severity=error]').filter({hasText:`Set the building's ${axis} inside the property.`})
+   .getByRole('button',{name:'Show on map'}).press('Enter');
+ };
+ await revealBoundary('row');
+ const row=boundary.locator('#creator-object-y');
+ assert(await row.evaluate(el=>el===document.activeElement));
+ assert.equal(await row.inputValue(),'63');
+ await boundary.screenshot({path:`${output}/off-property-repair.png`});
+ await row.fill(String(savedRow));await row.press('Tab');await ready(boundary);
+ assert(await boundary.locator('#creator-test').isDisabled(),'The other invalid coordinate still blocks play');
+ await revealBoundary('column');
+ const offMapColumn=boundary.locator('#creator-object-x');
+ assert(await offMapColumn.evaluate(el=>el===document.activeElement));
+ await offMapColumn.fill(String(savedColumn));await offMapColumn.press('Tab');await ready(boundary);
+ assert(await boundary.locator('#creator-test').isEnabled());
+ assert.deepEqual((await saved(boundary)).checkpoint.definition.start.buildings,baseline.start.buildings);
+ assert.deepEqual(errors,[]);
+ const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement and boundary repairs, and exact reload.');
 }finally{await closeValidationBrowser(browser,server);}
