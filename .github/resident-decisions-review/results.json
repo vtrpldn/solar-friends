@@ -1,0 +1,961 @@
+{
+  "why": "Make residents respond sensibly to their needs and the living village before optional expansion, while preserving leisure and approved projects.",
+  "completedAt": "2026-10-16T10:05:44.007Z",
+  "engineSourceCommit": "439b15c9663f220e7b44a3ca56d1a13eca03762d",
+  "frontendSourceCommit": "9af6596188def12f337ad1a6583843310e8cf726",
+  "saveVersion": 26,
+  "wasmSha256": "5a8e88add3c9d766f884ae9e33bbc1a8fe47725c61535fff0ea06758a4d2790f",
+  "nativeTests": 489,
+  "addedNativeTests": 11,
+  "strictAllTargetLint": "PASS",
+  "formatting": "PASS",
+  "javascriptSyntaxChecks": 166,
+  "counterexamples": {
+    "parent": "ae2629ea8ca1009bc2b99daf1eea1538420fb83e",
+    "parentFailures": [
+      "a_clock_mealtime_does_not_force_a_second_breakfast",
+      "a_community_pantry_shortage_does_not_cancel_a_paid_shift",
+      "a_full_harvest_store_is_reported_instead_of_repeatedly_worked",
+      "a_full_pantry_still_allows_care_for_an_existing_drying_crop",
+      "dairy_and_honey_prevent_false_food_emergencies_and_accept_real_meal_requests",
+      "dry_crop_care_and_a_ready_harvest_precede_optional_expansion",
+      "eggs_do_not_masquerade_as_edible_portions",
+      "outside_commitments_interrupt_a_long_lonely_leisure_activity",
+      "overdue_goats_get_one_caregiver_before_new_construction",
+      "urgent_personal_hunger_interrupts_construction_without_reachable_food"
+    ],
+    "changedEngine": "All pass; the unchanged urgent-foraging timer case is also retained."
+  },
+  "publicVerifiers": [
+    {
+      "check": "art-preview",
+      "passed": true,
+      "seconds": 0.24
+    },
+    {
+      "check": "artwork",
+      "passed": true,
+      "seconds": 0.12
+    },
+    {
+      "check": "autonomy",
+      "passed": true,
+      "seconds": 9.32
+    },
+    {
+      "check": "away-routines",
+      "passed": true,
+      "seconds": 0.9
+    },
+    {
+      "check": "banana-treatment",
+      "passed": true,
+      "seconds": 0.55
+    },
+    {
+      "check": "batteries",
+      "passed": true,
+      "seconds": 9.48
+    },
+    {
+      "check": "building-projection",
+      "passed": true,
+      "seconds": 0.17
+    },
+    {
+      "check": "building-work",
+      "passed": true,
+      "seconds": 14.72
+    },
+    {
+      "check": "chickens",
+      "passed": true,
+      "seconds": 0.41
+    },
+    {
+      "check": "circular",
+      "passed": true,
+      "seconds": 1.5
+    },
+    {
+      "check": "climate",
+      "passed": true,
+      "seconds": 0.25
+    },
+    {
+      "check": "cultivation",
+      "passed": true,
+      "seconds": 3.19
+    },
+    {
+      "check": "dev-tools",
+      "passed": true,
+      "seconds": 1.28
+    },
+    {
+      "check": "economy",
+      "passed": true,
+      "seconds": 230.47
+    },
+    {
+      "check": "electrical-fixtures",
+      "passed": true,
+      "seconds": 0.37
+    },
+    {
+      "check": "electricity",
+      "passed": true,
+      "seconds": 14.96
+    },
+    {
+      "check": "farming",
+      "passed": true,
+      "seconds": 54.27
+    },
+    {
+      "check": "food",
+      "passed": true,
+      "seconds": 3.14
+    },
+    {
+      "check": "forecast",
+      "passed": true,
+      "seconds": 5.22
+    },
+    {
+      "check": "freshness",
+      "passed": true,
+      "seconds": 0.54
+    },
+    {
+      "check": "gatherings",
+      "passed": true,
+      "seconds": 3.07
+    },
+    {
+      "check": "grid-foundations",
+      "passed": true,
+      "seconds": 0.24
+    },
+    {
+      "check": "kitchen-batches",
+      "passed": true,
+      "seconds": 7.89
+    },
+    {
+      "check": "land",
+      "passed": true,
+      "seconds": 1.49
+    },
+    {
+      "check": "leisure",
+      "passed": true,
+      "seconds": 128.12
+    },
+    {
+      "check": "living-land",
+      "passed": true,
+      "seconds": 0.56
+    },
+    {
+      "check": "logistics",
+      "passed": true,
+      "seconds": 1.01
+    },
+    {
+      "check": "maintenance",
+      "passed": true,
+      "seconds": 3.17
+    },
+    {
+      "check": "modes",
+      "passed": true,
+      "seconds": 6.03
+    },
+    {
+      "check": "navigation",
+      "passed": true,
+      "seconds": 0.11
+    },
+    {
+      "check": "night-lighting",
+      "passed": true,
+      "seconds": 0.04
+    },
+    {
+      "check": "occupations",
+      "passed": true,
+      "seconds": 0.21
+    },
+    {
+      "check": "organics",
+      "passed": true,
+      "seconds": 13.72
+    },
+    {
+      "check": "passive-processes",
+      "passed": true,
+      "seconds": 6.61
+    },
+    {
+      "check": "pipes",
+      "passed": true,
+      "seconds": 16.9
+    },
+    {
+      "check": "planting",
+      "passed": true,
+      "seconds": 11.72
+    },
+    {
+      "check": "playtest",
+      "passed": true,
+      "seconds": 0.67
+    },
+    {
+      "check": "polish",
+      "passed": true,
+      "seconds": 4.76
+    },
+    {
+      "check": "power",
+      "passed": true,
+      "seconds": 4.68
+    },
+    {
+      "check": "production",
+      "passed": true,
+      "seconds": 9.2
+    },
+    {
+      "check": "requests",
+      "passed": true,
+      "seconds": 3.46
+    },
+    {
+      "check": "resident-animation",
+      "passed": true,
+      "seconds": 0.09
+    },
+    {
+      "check": "resource-sites",
+      "passed": true,
+      "seconds": 12.98
+    },
+    {
+      "check": "restoration",
+      "passed": true,
+      "seconds": 0.75
+    },
+    {
+      "check": "sandbox-rules",
+      "passed": true,
+      "seconds": 1.06
+    },
+    {
+      "check": "sanitation",
+      "passed": true,
+      "seconds": 21.69
+    },
+    {
+      "check": "simulation",
+      "passed": true,
+      "seconds": 0.64
+    },
+    {
+      "check": "situations",
+      "passed": true,
+      "seconds": 63.97
+    },
+    {
+      "check": "skills",
+      "passed": true,
+      "seconds": 42.72
+    },
+    {
+      "check": "sleep-speed",
+      "passed": true,
+      "seconds": 8.3
+    },
+    {
+      "check": "sprite-frames",
+      "passed": true,
+      "seconds": 0.04
+    },
+    {
+      "check": "sprite-grid-fit",
+      "passed": true,
+      "seconds": 4.01
+    },
+    {
+      "check": "storage",
+      "passed": true,
+      "seconds": 0.04
+    },
+    {
+      "check": "suppliers",
+      "passed": true,
+      "seconds": 3.47
+    },
+    {
+      "check": "tools",
+      "passed": true,
+      "seconds": 10.28
+    },
+    {
+      "check": "utility-routes",
+      "passed": true,
+      "seconds": 0.12
+    },
+    {
+      "check": "water",
+      "passed": true,
+      "seconds": 4.02
+    },
+    {
+      "check": "weather",
+      "passed": true,
+      "seconds": 0.04
+    },
+    {
+      "check": "work-routes",
+      "passed": true,
+      "seconds": 1.44
+    },
+    {
+      "check": "workforce",
+      "passed": true,
+      "seconds": 0.17
+    }
+  ],
+  "competingNeeds": {
+    "days": 4,
+    "firstChoices": [
+      {
+        "name": "Iara",
+        "task": "rest",
+        "reason": "Taking a proper rest until I feel ready to help again."
+      },
+      {
+        "name": "Bento",
+        "task": "eat",
+        "reason": "Sitting down for a cooked meal."
+      },
+      {
+        "name": "Luz",
+        "task": "socialize",
+        "reason": "I need some company. Taking time to catch up before more chores."
+      },
+      {
+        "name": "Cau\u00e3",
+        "task": "garden",
+        "reason": "Watering our dry fruit trees before taking on another project."
+      },
+      {
+        "name": "Nina",
+        "task": "outside",
+        "reason": "Walking out for my rainwater systems technician shift at a regional water cooperative. Back at 17:00."
+      }
+    ],
+    "projectCompletedAt": 3532.050048828125,
+    "acceptedRequestCompleted": true,
+    "leisure": [
+      0.6308693351558062,
+      0.6457367666079558,
+      0.6565725827499933,
+      0.6316885972849587,
+      0.6610430272942014
+    ],
+    "exactDailyContinuation": true,
+    "materialAndLiquidAccountsBalanced": true
+  },
+  "farming": {
+    "days": 18,
+    "produce": {
+      "milk": 32,
+      "honey": 9,
+      "fruit": 38,
+      "rotations": 1
+    },
+    "leisure": [
+      0.665674012308914,
+      0.6233495482974287,
+      0.6917480566075344,
+      0.6955876533438861,
+      0.6695582809851431
+    ],
+    "boundedProduce": true,
+    "exactDailyCheckpoints": 18,
+    "materialAndLiquidAccountsBalanced": true
+  },
+  "leisureScenarios": {
+    "cases": [
+      "arrival",
+      "leisure",
+      "hungry",
+      "surplus"
+    ],
+    "daysEach": 14,
+    "eachResidentMinimumLeisurePercent": 66,
+    "ordinaryFoodReserve": "2-36; intentionally oversized surplus fixture expires and recovers"
+  },
+  "projectScenarios": {
+    "cases": [
+      "economy",
+      "economy-poor",
+      "economy-depleted"
+    ],
+    "daysEach": 24,
+    "allThreeProjectsCompleteInEachCase": true,
+    "foodMinimum": 2,
+    "hungerMaximum": 37.6,
+    "eachResidentMinimumLeisurePercent": 71
+  },
+  "desktop": {
+    "status": "PASS",
+    "captures": 196,
+    "browserErrors": [],
+    "sourceAndBuildHash": "fb33dc90ccfc0146981183613516ac1c488d1fcc3cd681c8645086f10540e5ad",
+    "localReport": "artifacts/dev-check/index.html",
+    "fixtureProvenance": {
+      "scope": "Existing earned Story checkpoints replayed through the new engine and current UI. Not a fresh full campaign.",
+      "fixtures": [
+        {
+          "file": "artifacts/story/solar-chapter-9.json",
+          "source_version": 25,
+          "sha256": "d60b81874eaa1923d8a94723b531553a677565d1d23a1c6e9d01b39b79f7d9a7"
+        },
+        {
+          "file": "artifacts/story/solar-chapter-5.json",
+          "source_version": 25,
+          "sha256": "8f8f6eb8acf753b4cf47e0e3cee05adb8db4c7a911d1a24e94ad2321a62865d1"
+        },
+        {
+          "file": "artifacts/story/solar-chapter-4.json",
+          "source_version": 25,
+          "sha256": "3caabdbf96375aac45331ce07f5e4ed57277cdbaea9ba45011fbddc96beb89ef"
+        },
+        {
+          "file": "artifacts/story/solar-chapter-8.json",
+          "source_version": 25,
+          "sha256": "c55c9ff51ddcca0947ad6c97c8229690da3d7aad65ee6aa5023120dc99fad3a2"
+        },
+        {
+          "file": "artifacts/story/solar-chapter-12.json",
+          "source_version": 25,
+          "sha256": "063271d6e27227a2a7e2ae8c280fd1aac3ba6221cf23496c69edd6c3671c92a8"
+        },
+        {
+          "file": "artifacts/story/solar-chapter-3.json",
+          "source_version": 25,
+          "sha256": "550eab88c72181f71ff65a8bd56fe49cfba01e2646d60924a8dd0b95710fd83b"
+        },
+        {
+          "file": "artifacts/story/solar-chapter-2.json",
+          "source_version": 25,
+          "sha256": "5ef3e2f9bb73d019f5748892ea111f49a9749d7a20c9cd05e0234a71466df263"
+        },
+        {
+          "file": "artifacts/story/solar-chapter-11.json",
+          "source_version": 25,
+          "sha256": "995e12c880bb619a8f3104e28e84f99c0e3e2938b7480795c4a6a34d179d017e"
+        },
+        {
+          "file": "artifacts/story/solar-chapter-7.json",
+          "source_version": 25,
+          "sha256": "bebd7f1ce8f6995a6ad56a588b233c368805e6deb42be43744d4f7ca8f88fc04"
+        },
+        {
+          "file": "artifacts/story/solar-chapter-6.json",
+          "source_version": 25,
+          "sha256": "538d73fb793064d674f8a7d8ee9327210ce3f5c3ccdb5980278f01784567e35d"
+        },
+        {
+          "file": "artifacts/story/solar-chapter-10.json",
+          "source_version": 25,
+          "sha256": "6f4f36828d2e0d7a946c57a13e96ccef14703500afae468328bf962a5ba8154b"
+        },
+        {
+          "file": "artifacts/story/care-check-in.json",
+          "source_version": 25,
+          "sha256": "1b28ca22c45ab83ad9cea2343c29c65a765d0cb358e8dc1841dbf7184d1fe68b"
+        },
+        {
+          "file": "artifacts/electricity/before.json",
+          "source_version": 26,
+          "sha256": "6ea69479d784dc113b124562e362e598af35f30d269e7653db551cd76f09577b"
+        },
+        {
+          "file": "artifacts/electricity/workshop-working.json",
+          "source_version": 26,
+          "sha256": "859509f0342a90373ab2b4332451bee4b86de75b4ef508ebe1c7d93c7e2f3f56"
+        },
+        {
+          "file": "artifacts/electricity/workshop-powered-finish.json",
+          "source_version": 26,
+          "sha256": "3c44163cd140ebf0e6e27c0e2ae4ae545df433e794524e6b2a1cd9eef3348753"
+        },
+        {
+          "file": "artifacts/electricity/workshop-outage.json",
+          "source_version": 26,
+          "sha256": "af80aec79e3457fb1aa1c1c04b2c73fe44f6c5d4de4695da99e98e60c523b536"
+        },
+        {
+          "file": "artifacts/electricity/workshop-manual-finish.json",
+          "source_version": 26,
+          "sha256": "a539ce79112d6c2f62807c48c5ed892064af38585611d459d80e3ab8bdd9a8e8"
+        },
+        {
+          "file": "artifacts/kitchen/cancelled.json",
+          "source_version": 26,
+          "sha256": "61120a3cfa49f68240b865dc0d25d1f653d698f8b8cb43c128ab8257e24b29e6"
+        },
+        {
+          "file": "artifacts/kitchen/waiting-water.json",
+          "source_version": 26,
+          "sha256": "92332e14fb3a0f16d1ab6aa0245e0fb6dc0ef8ec29552cbfa91b1d9e3eb85c2b"
+        },
+        {
+          "file": "artifacts/kitchen/start.json",
+          "source_version": 26,
+          "sha256": "7e06f0eeb012c206cda5619f47d0d5adc7d012ecd182075b5910a642f171e877"
+        },
+        {
+          "file": "artifacts/kitchen/finished.json",
+          "source_version": 26,
+          "sha256": "3ac3046655d02e3deb96b93c174c5f61ed4cb2ea7651cb1a74e2a3efff15be63"
+        },
+        {
+          "file": "artifacts/kitchen/working.json",
+          "source_version": 26,
+          "sha256": "caeb601d6faa6fc7a5eff0d49ce87727cda03e047f8eddc3045d5a6a0946a45c"
+        },
+        {
+          "file": "artifacts/living-land/banana-shade.json",
+          "source_version": 26,
+          "sha256": "4fb6be5dd8b6dceac1d2a09001c069cd2e770e3e73132e11ae323e3ee5117913"
+        },
+        {
+          "file": "artifacts/living-land/disturbed-clearing.json",
+          "source_version": 26,
+          "sha256": "09e68669803ace931fcf37acc8bfe490312d662b57c2984ebead58af987532ee"
+        },
+        {
+          "file": "artifacts/living-land/ground-before.json",
+          "source_version": 26,
+          "sha256": "b6e76e5408f9fe4aed56b4717c01619e28cf4508de161b00205a873e0345821d"
+        },
+        {
+          "file": "artifacts/living-land/standing-trees.json",
+          "source_version": 26,
+          "sha256": "ff553e750edbfbd5260f885c6696fa0e42b0af8a0d61fe189b5b72206b8d615a"
+        },
+        {
+          "file": "artifacts/living-land/extracted-ground.json",
+          "source_version": 26,
+          "sha256": "b5ae58003de6f30ac06db9a949046ca78eed15a67c51dcbee462fe3eea708b9d"
+        },
+        {
+          "file": "artifacts/living-land/restored-clearing.json",
+          "source_version": 26,
+          "sha256": "6d6fa71942d96fcf6852528781aa6a560e001fa8b7de5ae8a9f6e3f9069a0ee8"
+        },
+        {
+          "file": "artifacts/living-land/cleared-tree.json",
+          "source_version": 26,
+          "sha256": "de05d2a3a7847c716e696bb36b30999bfc239cca6f286502176828e082b8a72e"
+        },
+        {
+          "file": "artifacts/land/disturbed.json",
+          "source_version": 26,
+          "sha256": "4e62312d5c05f75a7d7ba1bae03db73041a79d2712c40c4e6e34fa28a8e90920"
+        },
+        {
+          "file": "artifacts/land/exhausted.json",
+          "source_version": 26,
+          "sha256": "f09c45ef10e5fafc4f564f55efadaa2dcf5b49c381a7f798ffa69a181292d404"
+        },
+        {
+          "file": "artifacts/cultivation/journal-intro.json",
+          "source_version": 12,
+          "sha256": "31669f334ccbc9ad83a6950502552ed927314701bd318b00cadef46d37c39c0c"
+        },
+        {
+          "file": "artifacts/utility-routes/no-supply.json",
+          "source_version": 26,
+          "sha256": "8adbf5ea923331733d2f84f67c386f21cce8bc168c574e693193c425634291d8"
+        },
+        {
+          "file": "artifacts/utility-routes/moving.json",
+          "source_version": 26,
+          "sha256": "20fb41fa1a5cbb8653a127d356506fab8d1c68d1776bcc568594735fe53a55d6"
+        },
+        {
+          "file": "artifacts/utility-routes/blueprints.json",
+          "source_version": 26,
+          "sha256": "e2c45d3e4df9d225f0c762b7f69931507fc167316077c0ce22ebf589955156e8"
+        },
+        {
+          "file": "artifacts/utility-routes/ready.json",
+          "source_version": 26,
+          "sha256": "450b6402e1bec79617c2c08737db3e0e9efd7197c9bb8b1e68c1bf1db9ff10ac"
+        },
+        {
+          "file": "artifacts/planting/seedling-used.json",
+          "source_version": 26,
+          "sha256": "d30eef9721e2994a749c1d8d0cd599165335980f90d79099f4b354e1b703af73"
+        },
+        {
+          "file": "artifacts/planting/queued.json",
+          "source_version": 26,
+          "sha256": "0ff0c8bafc2e69108607cfcce9535fec741e4f8bf348095831c3f4b8d7ca1498"
+        },
+        {
+          "file": "artifacts/planting/planted.json",
+          "source_version": 26,
+          "sha256": "b4ca5d48b83df6c32f2708e0362b411db7bc61200a788f0d96208447479bb268"
+        },
+        {
+          "file": "artifacts/planting/vegetable-cargo.json",
+          "source_version": 26,
+          "sha256": "deb40fa1f2a557b2ff237660b1cf39f04524517635d418f2f7bf3c9c65ecd081"
+        },
+        {
+          "file": "artifacts/planting/town-planted.json",
+          "source_version": 26,
+          "sha256": "49447314b290cb4c5f5309f9c637139f032124d286d1dd9421725646dcf17162"
+        },
+        {
+          "file": "artifacts/planting/forestry-cargo.json",
+          "source_version": 26,
+          "sha256": "3eb1975d3d7aad7ab2b96692367849abff14c64c2cb7155b7fe43348033da83d"
+        },
+        {
+          "file": "artifacts/planting/planting-work.json",
+          "source_version": 26,
+          "sha256": "89532b7816ce6cbad4ab907dfc68a20affae385fbb1a4d0050b5afdbd753d097"
+        },
+        {
+          "file": "artifacts/planting/nursery.json",
+          "source_version": 26,
+          "sha256": "57ab93eff8e5a648ee9e43d2ce278c785cc1eaa49e3b58a473cd419cdde873ca"
+        },
+        {
+          "file": "artifacts/pipes/before.json",
+          "source_version": 26,
+          "sha256": "08e7e8a0c8631cb8a74025e8fe0596ed585f1cf228c94fe6e4d2e44a87b821b0"
+        },
+        {
+          "file": "artifacts/pipes/removing.json",
+          "source_version": 26,
+          "sha256": "cdd413113155dee6ba215549043d3955bf55bbc6b679bc5313053e75cce12db8"
+        },
+        {
+          "file": "artifacts/pipes/installing.json",
+          "source_version": 26,
+          "sha256": "676cf8c2b9f70c6d867b581d88da15912bf31d7889403f2b6a169be064f2bc1f"
+        },
+        {
+          "file": "artifacts/pipes/night.json",
+          "source_version": 26,
+          "sha256": "5e0c1a7f9a3329485e746270ff37f33286c9f09eb2f61808000f3c5263b6cf37"
+        },
+        {
+          "file": "artifacts/pipes/dismantling.json",
+          "source_version": 26,
+          "sha256": "64b8a9ee30cf9840ac174ed62da70e9190436f2de1d2c6ea4155645738e124d3"
+        },
+        {
+          "file": "artifacts/pipes/active.json",
+          "source_version": 26,
+          "sha256": "d4c3c0b4907f776e16d310eb19da1734db156134dd0507d588441c9e4a30f545"
+        },
+        {
+          "file": "artifacts/pipes/queued.json",
+          "source_version": 26,
+          "sha256": "65591436d0218071e99c883eb76f9440556d9f3bd633afdbb7afc0bfb49f4e78"
+        },
+        {
+          "file": "artifacts/pipes/replacement.json",
+          "source_version": 26,
+          "sha256": "b70758a55c1b3824558545417b31d240a6d3612303809514f7257239dde17be1"
+        },
+        {
+          "file": "artifacts/pipes/kit-carrying.json",
+          "source_version": 26,
+          "sha256": "43a8b90986f3fec9e611a3c1fd98e393bee3a0987e2a6083e84ca383b32c42ea"
+        },
+        {
+          "file": "artifacts/pipes/disconnected.json",
+          "source_version": 26,
+          "sha256": "8c67cc4fcab31c7aeaf177d9a9007b5b798f5060b026d2bbd5844ac920b88197"
+        },
+        {
+          "file": "artifacts/pipes/installation-paused.json",
+          "source_version": 26,
+          "sha256": "f295a7b6dd5b640158025267fa8385b29889a1e167c89acfc84052f8b68af0ea"
+        },
+        {
+          "file": "artifacts/pipes/outage.json",
+          "source_version": 26,
+          "sha256": "282d91f820d04d14d1d1bd0badb6f8b0e01f3da8cc6860cdf3e2571b8c140a18"
+        },
+        {
+          "file": "artifacts/pipes/pumping.json",
+          "source_version": 26,
+          "sha256": "ae51a8a031cdcf0f37a472271dae6a6df9abedb7658e3198f906a04cdeda9282"
+        },
+        {
+          "file": "artifacts/pipes/paused.json",
+          "source_version": 26,
+          "sha256": "5425d32a80ab664f929f6587781d0087e61fc98b8fd5aaa0ebc2fa4be0e76658"
+        },
+        {
+          "file": "artifacts/pipes/removed.json",
+          "source_version": 26,
+          "sha256": "269ba0ba5770dab4cebc5e8c85423b7ef23f7ad35c8d4572c58b5d4a87f85a74"
+        },
+        {
+          "file": "artifacts/tools/at-garden.json",
+          "source_version": 26,
+          "sha256": "1f731b92bfaae10670ac5ee25ac67926557704bf9249344e294840031125eece"
+        },
+        {
+          "file": "artifacts/tools/harvested.json",
+          "source_version": 26,
+          "sha256": "e156d153e7b3e4dbd929d2db85bfa6e75729cd6c79381fc7fca0c87aea4a025b"
+        },
+        {
+          "file": "artifacts/tools/start.json",
+          "source_version": 26,
+          "sha256": "de834852c79ecb0c391e344f83d8c858884b20733dd420829fdcc50de6bd4f1f"
+        },
+        {
+          "file": "artifacts/tools/finished.json",
+          "source_version": 26,
+          "sha256": "dc6aa08bbfc7ed652da53b2f96ff94d96349d46bbde192faa9090b7c8d78675c"
+        },
+        {
+          "file": "artifacts/tools/working.json",
+          "source_version": 26,
+          "sha256": "1b1eee6b981dc2be2ae64622c11c1baabe84184dfa9a64c26b0c9f2054b10130"
+        },
+        {
+          "file": "artifacts/climate/care-recovered.json",
+          "source_version": 21,
+          "sha256": "d0c4a3fab19271d3d605d98604b5412f922497cacf57a3042fe08e2283edb94e"
+        },
+        {
+          "file": "artifacts/organics/scraps-cargo.json",
+          "source_version": 26,
+          "sha256": "d7d3e0fc807e9e40865e4fe4c297326ef60193b0a31a438a23d3419e47ea220b"
+        },
+        {
+          "file": "artifacts/organics/compost-cargo.json",
+          "source_version": 26,
+          "sha256": "5cd84a72f2ddfce495e17fec31a9e4913b40c8bec6304dfd2913fa45737bad1a"
+        },
+        {
+          "file": "artifacts/organics/harvest.json",
+          "source_version": 26,
+          "sha256": "961487c012b2ff1bb75fe11b541d9b62e87298f8fe5d43ea7ba6cb19ffaad93f"
+        },
+        {
+          "file": "artifacts/freshness/interrupted-pot.json",
+          "source_version": 26,
+          "sha256": "e429e87164c481e5a91031dc28616c5e63d58db2397da58c7c5c3c51c7d5eb09"
+        },
+        {
+          "file": "artifacts/freshness/gathering-debug.json",
+          "source_version": 9,
+          "sha256": "da823398cf5743e317a1560b1cfbd9a08ad2f2cc4db708f197dba59853f55960"
+        },
+        {
+          "file": "artifacts/freshness/spoiled.json",
+          "source_version": 26,
+          "sha256": "9b697e85afd4998e39d0150151bf3828e65b98124e9fd32104f423cfccfba14b"
+        },
+        {
+          "file": "artifacts/freshness/pot-spoiled.json",
+          "source_version": 26,
+          "sha256": "e62ec54d9ebd3746af45e274eb34f8b7415bda4a605a4c24eefd6ff8d7b06d4b"
+        },
+        {
+          "file": "artifacts/freshness/cargo.json",
+          "source_version": 26,
+          "sha256": "4fc46e5fb49e0158ba5beeb316e4bdc75009b3065b64877041bd3c3010838b44"
+        },
+        {
+          "file": "artifacts/freshness/partial-cargo.json",
+          "source_version": 26,
+          "sha256": "38ce7da89255c7993bce5c20419d5b019f07f8f22ec7a2b3c9441fbf49e4d9e1"
+        },
+        {
+          "file": "artifacts/freshness/use-soon.json",
+          "source_version": 26,
+          "sha256": "d32c3cad46151c67c0de1df2cf601ccd72cf25e328247278b7b285ef53bf5558"
+        },
+        {
+          "file": "artifacts/processes/recovered.json",
+          "source_version": 26,
+          "sha256": "9a29fdfe41bd8410993ce9fe592fb07b6675f4811c0ba464d44ff61b8ccbf01c"
+        },
+        {
+          "file": "artifacts/processes/curing.json",
+          "source_version": 26,
+          "sha256": "e82f36af239a35cc1436fe9e9e2e1e9d4b8a32503c9a54de021497cae5b6a329"
+        },
+        {
+          "file": "artifacts/processes/paused.json",
+          "source_version": 26,
+          "sha256": "8ecabb37d10aae53db5546e15ba1ece5076b93ad5cfec53afcccb34b27bbfcad"
+        },
+        {
+          "file": "artifacts/processes/moved.json",
+          "source_version": 26,
+          "sha256": "1073ae986d744ecc1f1714837ae6911177a377a16ff4e2b6767b4b2d745e3a62"
+        },
+        {
+          "file": "artifacts/processes/finished.json",
+          "source_version": 26,
+          "sha256": "24a772d7b299a75a1cfc0c8aa427c88adc9d8b6f6f4288851019e52e815dbfd6"
+        },
+        {
+          "file": "artifacts/processes/working.json",
+          "source_version": 26,
+          "sha256": "fdce2b1c082598874ed23b01311b704c3ca8eb2824dfe5c3daf0475c13ca7efd"
+        },
+        {
+          "file": "artifacts/sanitation/before.json",
+          "source_version": 26,
+          "sha256": "8726d4f2aa52923d6590355ca846aa89347d07fdf87343c54f1e67463dce3cd7"
+        },
+        {
+          "file": "artifacts/sanitation/help-complete.json",
+          "source_version": 19,
+          "sha256": "8329523710c69a4caed8cf4e5508a056a5bbfae823a365f2a2de69fc7b9b497d"
+        },
+        {
+          "file": "artifacts/sanitation/greywater-carrying.json",
+          "source_version": 26,
+          "sha256": "ce2254ae42af532a8b5e46fa30c04c0bc78260375629928227b1056943d720f9"
+        },
+        {
+          "file": "artifacts/sanitation/batch-recovered.json",
+          "source_version": 26,
+          "sha256": "cae977161f19ade2213c4257ca73dbc334c08545126e185a0ca4e8cb1c452aeb"
+        },
+        {
+          "file": "artifacts/sanitation/connected.json",
+          "source_version": 26,
+          "sha256": "ac01b9186ba051b6808b6c9a1f9362c21e84e14acfa559cc08568b42c80f1fa9"
+        },
+        {
+          "file": "artifacts/sanitation/recovered.json",
+          "source_version": 26,
+          "sha256": "bbf20dcde89865d3d39adf29d3caddab45a5063ad8458b5a78b2e9cdbc95556a"
+        },
+        {
+          "file": "artifacts/sanitation/filtering.json",
+          "source_version": 26,
+          "sha256": "60bc405977d6a122ce84cccf61a3ca385c76911a4817553b109c4b707f76f98d"
+        },
+        {
+          "file": "artifacts/sanitation/sewage-carrying.json",
+          "source_version": 26,
+          "sha256": "40aec85d84dae399d82bd82f1a85d73f378ae472c16013f855f30e44772dfa09"
+        },
+        {
+          "file": "artifacts/sanitation/pumping.json",
+          "source_version": 26,
+          "sha256": "0e9fab74f2eb5fcd3e5e89bf17d66ae07ea1d495560895a28e26a3505dd51f86"
+        },
+        {
+          "file": "artifacts/sanitation/filtered.json",
+          "source_version": 26,
+          "sha256": "0c7f80ee01eeda973705cc244348d579c47d7954aa3f18c2e17255193c245fd9"
+        },
+        {
+          "file": "artifacts/sanitation/handed-over.json",
+          "source_version": 26,
+          "sha256": "89c4c59f10dcb4f69af71147933114e7bd0dc6493909c451a3d9301083876dad"
+        },
+        {
+          "file": "artifacts/sanitation/recovered-night.json",
+          "source_version": 26,
+          "sha256": "fb0c262a622ed1f54133ca0ad4485ef393d46404c5234f35a691a2fc5b7271b1"
+        },
+        {
+          "file": "artifacts/restoration/cancelled.json",
+          "source_version": 26,
+          "sha256": "3c1878bf7cea4c2e0a23008ff0f4f67aa7dd0445ed11db38be25939ae36ce108"
+        },
+        {
+          "file": "artifacts/restoration/plantation.json",
+          "source_version": 26,
+          "sha256": "8abdf84418a922c4fa82e849eab2e5f5d3e8fa2515063d38e4ac46de8ff48cb9"
+        },
+        {
+          "file": "artifacts/restoration/carrying.json",
+          "source_version": 26,
+          "sha256": "867aa556ebbdf6d237a1bf49f1c9eea1582a371225e48cd78da1e8e4c375fcfb"
+        },
+        {
+          "file": "artifacts/restoration/complete.json",
+          "source_version": 26,
+          "sha256": "47cf941553da5079826114560682f05b1ba6f22771e01286de2bffe55c3c2aef"
+        },
+        {
+          "file": "artifacts/restoration/working.json",
+          "source_version": 26,
+          "sha256": "b5e075f0e54910dc0ffb59f092b4a312c25540e71c76943d1d56bcb9332529c8"
+        },
+        {
+          "file": "artifacts/suppliers/before.json",
+          "source_version": 26,
+          "sha256": "c6a1be3a5551ae3a5e8787955efbf2a5b9ecc15ba8fa9778f638e9ed66666139"
+        },
+        {
+          "file": "artifacts/suppliers/freight-before.json",
+          "source_version": 26,
+          "sha256": "f03455ff3dede29a6a0882b2683355bfa3d4b4b70dddaca879dd5786767989d4"
+        },
+        {
+          "file": "artifacts/suppliers/pickup-after.json",
+          "source_version": 26,
+          "sha256": "dd2ea56676d4ad6217de09a6174828025b1a293971813af2db8e4607fcb7f846"
+        },
+        {
+          "file": "artifacts/suppliers/weekly-rollover.json",
+          "source_version": 26,
+          "sha256": "d251ccc66429686cae4d045f8262fe54c13077a40b5217f1f73f5f4c0ff7fc19"
+        },
+        {
+          "file": "artifacts/suppliers/earned-campaign-before-long.json",
+          "source_version": 25,
+          "sha256": "878bfb13a2cd1acb965dcd19b819390a35be99fad834b8e24bc433b5a6fe8821"
+        },
+        {
+          "file": "artifacts/suppliers/freight-after.json",
+          "source_version": 26,
+          "sha256": "53aec9a10c157a6bff956037239d515136c0eecfa2d2a7c363751bb6e26fe17a"
+        },
+        {
+          "file": "artifacts/suppliers/pantry-probe/first-low-basic.json",
+          "source_version": 25,
+          "sha256": "d2f1f5b781a513f09ad2b9f91e6963d9542d770515fe5be1123ec40bda15bfcb"
+        }
+      ],
+      "note": "This manifest lists staged inherited checkpoints, including files not needed by the walkthrough. It is provenance rather than a claim that every staged file was imported."
+    }
+  },
+  "scope": "The new engine ran all listed public checks. Existing earned Story and other saved checkpoints were imported for desktop UI replay. A fresh full thirteen-chapter campaign, the 84-day seasonal extension and the paired 24-day utility comparison were not rerun for this change.",
+  "hostedCheck": {
+    "status": "BLOCKED",
+    "sourceCommit": "9af6596188def12f337ad1a6583843310e8cf726",
+    "url": "https://github.com/vtrpldn/solar-friends/actions/runs/38883889322/job/116916845690",
+    "reason": "The hosted job did not start because recent account payments failed or the spending limit needs to be increased."
+  },
+  "pullRequest": "https://github.com/vtrpldn/solar-friends/pull/64",
+  "merged": false
+}

@@ -4,6 +4,36 @@ use economy::{Bundle, COUNT, EGGS, FOOD, HONEY, MEALS, MILK};
 use logistics::{Owner, Store};
 use simulation::Id;
 
+pub const EDIBLE: [usize; 4] = [MEALS, FOOD, MILK, HONEY];
+
+/// Directly edible portions already in stores, excluding reservations, pots
+/// and cargo. The meal chooser separately verifies the resident's route and
+/// expiry at arrival; a forecast is never a substitute for an actual meal.
+pub fn other_portions(v: &Village) -> u32 {
+    v.logistics.as_ref().map_or(0, |s| {
+        s.stores
+            .iter()
+            .map(|p| {
+                [MILK, HONEY]
+                    .into_iter()
+                    .map(|m| {
+                        let free = available(v, p, m, None);
+                        let dated: u32 = p
+                            .food_lots
+                            .iter()
+                            .filter(|l| {
+                                l.material == m && (!sandbox::logistics(v) || l.expires > v.minutes)
+                            })
+                            .map(|l| l.amount)
+                            .sum();
+                        dated.saturating_sub(p.items[m] - free)
+                    })
+                    .sum::<u32>()
+            })
+            .sum()
+    })
+}
+
 pub fn held(v: &Village, store: Id, material: usize, except: Option<usize>) -> u32 {
     v.workforce_peers
         .iter()
@@ -162,7 +192,7 @@ pub fn reserved_space(v: &Village, owner: Option<Owner>) -> u32 {
 pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
     let mut choices = vec![];
     for p in &v.logistics.as_ref()?.stores {
-        if [MEALS, FOOD, MILK, HONEY]
+        if EDIBLE
             .into_iter()
             .all(|i| available(v, p, i, Some(r.id)) == 0)
         {
@@ -174,7 +204,7 @@ pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
         let Ok((route, _)) = navigation::work_route(v, [r.x, r.y], point) else {
             continue;
         };
-        for material in [MEALS, FOOD, MILK, HONEY] {
+        for material in EDIBLE {
             let available_now = available(v, p, material, Some(r.id));
             let ready_at = v.minutes + route.minutes + 5. * MINUTES_PER_SECOND;
             let edible: Vec<_> = p

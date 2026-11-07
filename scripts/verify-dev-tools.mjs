@@ -35,7 +35,7 @@ assert(g.restore(JSON.stringify(ingredients)));
 advanceGame(g,.75);
 for(const resident of JSON.parse(g.snapshot()).residents) {
   assert.equal(resident.task,'eat');
-  assert.equal(resident.reason,'Eating available ingredients while we wait for a cooked meal.');
+  assert.equal(resident.reason,'Eating an available portion from our pantry.');
 }
 assert.throws(()=>makeScenario('missing',fresh,established));
 const pixels = new Uint8ClampedArray(4*4*4); pixels[(1*4+2)*4+3]=255;
