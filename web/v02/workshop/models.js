@@ -650,3 +650,6 @@ export function disposeModel(model) {
     if (o.userData.ownedMaterial) o.material.dispose();
   });
 }
+
+// Shared construction language; approved study recipes remain unchanged.
+export { box, cylinder, ball, beam, clayRoof, mesh };
