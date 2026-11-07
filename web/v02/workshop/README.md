@@ -1,0 +1,36 @@
+# v0.2 asset workshop
+
+## Why
+
+Prove a repeatable model-to-sprite workflow before adding more game systems. The v0.1 code and art remain unchanged. These five models are reviewable material studies, not approved final artwork.
+
+Open http://127.0.0.1:4173/v02/workshop/ after `npm run dev:serve`.
+
+## Source of truth
+
+- `models.js` contains deterministic metre-based model recipes, shared materials and the reusable roof/window/beam kit.
+- House 2×2 cells, shed 2×1, tree 2×2, path 1×1. A cell is 2 metres. The resident is approximately 1.70 m tall without the hat.
+- Orthographic sprite camera: 45° azimuth, 30° elevation, producing 2:1 ground axes. Vertical lines stay vertical. Orbiting is inspection only.
+- Export: four 512×512 transparent views at 0°, 90°, 180°, 270°, arranged left to right. 48 pixels per metre; local ground origin at pixel (256,384) in every frame. Non-square footprints swap dimensions at quarter turns. Shadows use a transparent receiver, never an opaque foundation.
+- The camera and light stay fixed as the model rotates. All frames use the same scale and crop; no per-asset auto-fit. PNG export ignores inspection surfaces, orbit, zoom, grid and scale figure.
+- Placement JSON records the frame rectangles, anchors, footprints, camera and light. 3D JSON is compatible with Three.js ObjectLoader. The editable authoritative recipe remains models.js.
+- Night is a lighting study, not powered windows. Resident animation, botanical specificity, painted textures, normal/depth passes and game integration are subsequent decisions, not delivered here.
+
+## Inspection
+
+Select an asset, orbit it, compare clay/wireframe/materials, add the human reference and inspect all four rotations. View together checks proportions and road contact at one shared scale. Sprite proof shows the exact transparent frames that PNG export generates. Day/night exports retain identical registration.
+
+## Art review status
+
+All five models: material study, awaiting player review. Warm terracotta, cream plaster, restrained turquoise and timber follow the old palette, but these deliberately use a new geometry-led approach. Do not treat mechanical geometry checks as artistic approval. The shade tree is a generic canopy study. The resident is an authored scale figure, not the removed character creator.
+
+## Dependencies
+
+Three.js 0.187.0, MIT. The local browser modules and OrbitControls are copied from the exact npm package; no CDN or network requests are needed at runtime. Keep `vendor/LICENSE`. To update, change the pinned package and recopy `build/three.module.js`, `build/three.core.js`, and `examples/jsm/controls/OrbitControls.js` together.
+
+## Checks performed for study 01
+
+- `node scripts/verify-v02-models.mjs` checks five model JSON roundtrips, 20 rotated geometry bounds, exact 2:1 projection, shared anchor, road edge dimensions and rotated shed dimensions.
+- `node scripts/verify-v02-exports.mjs` checks actual browser-exported samples in `exports/`: 40 frames across five assets and two lights, nonempty transparent silhouettes including shadows, no edge clipping, identical day/night alpha, and placement metadata.
+- In-app browser review exercised asset switching, free orbit, materials/clay/wireframe, the scale figure, shared yard, sprite proof, and PNG/placement/source downloads. A house export after orbiting, adding a scale figure and selecting clay was byte-identical to the clean export. The actual downloaded 3D JSON reloaded with matching bounds.
+- These studies are intentionally faceted and simplified. They demonstrate the pipeline; the painted visual direction and final character design still need player review.
