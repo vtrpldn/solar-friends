@@ -5,7 +5,7 @@ const sections={
  people:['creator-residents','creator-relationships'],
  village:['creator-routes','creator-starting-conditions','creator-supplies','creator-equipment','creator-liquids'],
  story:['creator-regions','creator-journal'],
- review:['creator-opening-setup','creator-outlook','creator-validation','creator-save-copy'],
+ review:['creator-validation','creator-opening-setup','creator-outlook','creator-save-copy'],
 };
 const guidance={land:'Shape the property, choose its plants and inspect the ground.',people:'Choose the arriving friends and their starting circumstances.',village:'Place buildings and paths, then choose supplies and utilities.',story:'Write the journal, draw goal regions and set up events.',review:'Review the opening, test village life and prepare a creation to share.'};
 let activeNavigation;
@@ -33,15 +33,19 @@ export class Workspaces {
  }
  select(key,{notify=true,focus=false}={}){
   if(!Object.hasOwn(workspaceNames,key))key='land';
-  if(this.key!==key){if(this.key)this.scroll.set(this.key,{tools:this.tools.scrollTop,inspector:this.inspector.scrollTop});this.key=key;document.getElementById('creator-selection').hidden=key!=='village'&&!this.hasSelection;
+  if(this.key!==key){if(this.key)this.scroll.set(this.key,{tools:this.tools.scrollTop,inspector:this.inspector.scrollTop});this.key=key;this.context(this.hasSelection);
    for(const panel of this.inspector.querySelectorAll('[data-workspace-panel]'))panel.hidden=panel.dataset.workspacePanel!==key;
    for(const el of this.tools.querySelectorAll('[data-workspace-tools]'))el.hidden=el.dataset.workspaceTools!==key;
    for(const tab of this.nav.querySelectorAll('[role=tab]')){const selected=tab.dataset.workspace===key;tab.setAttribute('aria-selected',String(selected));tab.tabIndex=selected?0:-1;}
    this.tools.querySelector('h2').textContent=workspaceNames[key];this.note.textContent=guidance[key];const scroll=this.scroll.get(key);this.tools.scrollTop=scroll?.tools??0;this.inspector.scrollTop=scroll?.inspector??0;if(notify)this.change(key);
   }
-  if(focus)document.getElementById('creator-tab-'+key).focus();
+  if(focus){
+   const tab=document.getElementById('creator-tab-'+key);
+   if(key==='review'&&Number(tab.dataset.errorCount)>0)this.inspector.scrollTop=0;
+   tab.focus();
+  }
  }
  review(report){const count=report.issues.filter(issue=>issue.severity==='error').length,tab=document.getElementById('creator-tab-review');tab.textContent=workspaceNames.review+(count?' · '+count:'');tab.dataset.errorCount=String(count);tab.title=count?`${count} blocking ${count===1?'issue':'issues'} · review before testing`:'Review the opening, test and share this creation';}
- context(visible){this.hasSelection=!!visible;document.getElementById('creator-selection').hidden=this.key!=='village'&&!visible;}
+ context(visible){this.hasSelection=!!visible;document.getElementById('creator-selection').hidden=this.key==='review'||(this.key!=='village'&&!visible);}
  reveal(element){const panel=element?.closest('[data-workspace-panel]');if(panel)this.select(panel.dataset.workspacePanel);}
 }

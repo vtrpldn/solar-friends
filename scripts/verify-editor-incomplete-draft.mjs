@@ -35,6 +35,18 @@ try{
  assert(await column.evaluate(el=>el===document.activeElement));
  assert.equal(await column.inputValue(),String(overlapX));
  await plot.screenshot({path:`${output}/placement-repair.png`});
+ await plot.setViewportSize({width:1280,height:800});
+ await plot.locator('[data-workspace=review]').click();
+ assert(await plot.locator('#creator-selection').isHidden());
+ const firstIssueInView=await plotIssue.evaluate(el=>{
+  const rect=el.getBoundingClientRect(),panel=el.closest('.creator-inspector');
+  const bounds=panel.getBoundingClientRect();
+  return panel.scrollTop===0&&rect.top>=bounds.top&&rect.bottom<=bounds.bottom;
+ });
+ assert(firstIssueInView,'Blocking placement issue should be in view without scrolling');
+ await plot.screenshot({path:`${output}/review-first-1280.png`});
+ await plot.locator('[data-workspace=village]').click();
+ assert.equal(await column.inputValue(),String(overlapX),'Review should retain the selected building');
  await column.fill(String(originalX));await column.press('Tab');await ready(plot);
  assert(await plot.locator('#creator-test').isEnabled());
  const fixed=(await saved(plot)).checkpoint.definition;
@@ -120,5 +132,5 @@ try{
  await notes.locator('#creator-review-count').scrollIntoViewIfNeeded();
  await notes.screenshot({path:`${output}/review-severity.png`});
  assert.deepEqual(errors,[]);
- const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,keyboardCampRepair:true,independentPositionRepairs:true,keyboardCameraRepair:true,textSeverityAndNonblockingNotes:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement, boundary, arrival and opening-view repairs, text severity and exact reload.');
+ const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,keyboardCampRepair:true,independentPositionRepairs:true,keyboardCameraRepair:true,textSeverityAndNonblockingNotes:true,reviewStartsWithVisibleBlockingIssue:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement, boundary, arrival and opening-view repairs, text severity and exact reload.');
 }finally{await closeValidationBrowser(browser,server);}
