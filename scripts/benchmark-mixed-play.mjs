@@ -6,18 +6,27 @@ const headed=process.argv.includes('--headed'),processMemory=process.argv.includ
 let memoryTimer=null,memorySampling=Promise.resolve(),memorySession=null;
 const residentStyle=process.argv.find(a=>a.startsWith('--resident-style='))?.slice('--resident-style='.length)??'classic';
 const biome=process.argv.find(a=>a.startsWith('--biome='))?.slice('--biome='.length)??'mata-atlantica';assert(['mata-atlantica','cerrado','caatinga'].includes(biome));
-let population=Number(process.argv.find(a=>a.startsWith('--population='))?.slice('--population='.length)??12);assert([1,5,12].includes(population));
+const authored=process.argv.includes('--authored');
+let population=Number(process.argv.find(a=>a.startsWith('--population='))?.slice('--population='.length)??(authored?5:12));assert([1,5,12].includes(population));
 const starter=process.argv.includes('--starter'),sharedAppearances=process.argv.includes('--shared-appearances');
+if(authored){
+ assert(population<=5,'Select a supported founding cast size with --population=1 or --population=5');
+ assert(!sharedAppearances&&!process.argv.some(a=>a.startsWith('--resident-style=')),
+  'The authored fixture uses each friend’s original appearance');
+}
 const output=process.argv[2]??'/tmp/solar-mixed-play',seconds=Number(process.argv.find(a=>a.startsWith('--seconds='))?.split('=')[1]??10);assert(Number.isFinite(seconds)&&seconds>=5&&seconds<=60);await mkdir(output,{recursive:true});await init({module_or_path:await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url))});
 const snapshotPath=process.argv.find(a=>a.startsWith('--snapshot='))?.slice('--snapshot='.length);
 const author=new Game();let definition,summary,raw,compileMs,snapshotSource=null;
 if(snapshotPath){
- assert(!starter&&!sharedAppearances&&!process.argv.some(a=>/^--(biome|population|resident-style)=/.test(a)),'A retained snapshot supplies its actual map, cast and buildings; do not override them');
+ assert(!starter&&!sharedAppearances&&!authored&&!process.argv.some(a=>/^--(biome|population|resident-style)=/.test(a)),'A retained snapshot supplies its actual map, cast and buildings; do not override them');
  const bytes=await readFile(snapshotPath),start=performance.now();assert(author.restore(bytes.toString()),'Retained gameplay snapshot must restore natively');compileMs=performance.now()-start;raw=author.snapshot();const state=JSON.parse(raw);definition=state.village.scenario?.definition;assert(definition,'Use an authored scenario checkpoint');population=state.residents.length;
  summary={biome:definition.map.biome.id,population,buildings:state.village.buildings.length,types:Object.fromEntries([...new Set(state.village.buildings.map(b=>b.kind))].map(kind=>[kind,state.village.buildings.filter(b=>b.kind===kind).length])),uniqueAppearances:new Set(state.residents.map(r=>JSON.stringify(r.appearance))).size,sharedAppearances:new Set(state.residents.map(r=>JSON.stringify(r.appearance))).size===1,starter:false,established:true,minute:state.village.minutes};
  await writeFile(output+'/input.snapshot.json',bytes);snapshotSource={path:snapshotPath,file:'input.snapshot.json',sha256:createHash('sha256').update(bytes).digest('hex'),openingFile:'opening.snapshot.json'};await writeFile(output+'/opening.snapshot.json',raw);
 }else{
- const template=JSON.parse(author.scenario_template('sandbox'));template.map=JSON.parse(author.generate_biome_property(biome,42));({definition,summary}=mixedBuilderFixture(author,template,{residentStyle,population}));if(starter)definition.start.buildings=structuredClone(template.start.buildings);if(sharedAppearances)for(const resident of definition.start.residents)resident.appearance=structuredClone(definition.start.residents[0].appearance);summary.biome=biome;summary.buildings=definition.start.buildings.length;summary.types=Object.fromEntries([...new Set(definition.start.buildings.map(b=>b.kind))].map(kind=>[kind,definition.start.buildings.filter(b=>b.kind===kind).length]));summary.uniqueAppearances=new Set(definition.start.residents.map(r=>JSON.stringify(r.appearance))).size;summary.sharedAppearances=sharedAppearances;summary.starter=starter;const start=performance.now();assert(JSON.parse(author.load_scenario(JSON.stringify(definition))).ok);compileMs=performance.now()-start;raw=author.snapshot();
+ const template=JSON.parse(author.scenario_template('sandbox'));template.map=JSON.parse(author.generate_biome_property(biome,42));({definition,summary}=mixedBuilderFixture(author,template,{residentStyle,population,custom:!authored}));if(starter)definition.start.buildings=structuredClone(template.start.buildings);if(sharedAppearances)for(const resident of definition.start.residents)resident.appearance=structuredClone(definition.start.residents[0].appearance);summary.biome=biome;summary.buildings=definition.start.buildings.length;summary.types=Object.fromEntries([...new Set(definition.start.buildings.map(b=>b.kind))].map(kind=>[kind,definition.start.buildings.filter(b=>b.kind===kind).length]));summary.sharedAppearances=sharedAppearances;summary.starter=starter;const start=performance.now();assert(JSON.parse(author.load_scenario(JSON.stringify(definition))).ok);compileMs=performance.now()-start;raw=author.snapshot();
+ const residents=JSON.parse(raw).residents;
+ summary.uniqueAppearances=new Set(residents.map(resident=>JSON.stringify(resident.appearance))).size;
+ if(authored)assert.equal(summary.uniqueAppearances,population,'The native fixture must retain every founding appearance');
 }
 author.free();const wasmPath=process.argv.find(arg=>arg.startsWith('--baseline-wasm='))?.slice('--baseline-wasm='.length),baselineWasm=wasmPath?await readFile(wasmPath):null;
 const bindingPath=process.argv.find(arg=>arg.startsWith('--baseline-bindings='))?.slice('--baseline-bindings='.length),bindingSource=bindingPath?await readFile(bindingPath):null;

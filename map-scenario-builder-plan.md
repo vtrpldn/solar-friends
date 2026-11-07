@@ -666,3 +666,14 @@ The benchmark now waits for the heavy editor's move to commit before reading the
 | 5 | 256 | 1,199 ms | 15 ms | 16 ms |
 
 Each release value is one gesture. The heavy move took about 1,136 ms from starting the drag to the saved acknowledgement, including pointer motion, preparation and autosave debounce. These samples cover editor feedback and durable correctness. Sustained camera pacing, 1×/16× gameplay and total memory still require separate evidence.
+
+### Current gameplay benchmark with the founding cast
+
+The runtime benchmark now supports `--authored`. Native snapshots confirm five distinct original appearances. The starter camp and a 256-building inland fixture on 64 × 64 Mata Atlântica each completed four ten-second phases in headless Chromium at 1440 × 900 on Apple M3 Pro. Each phase restored its resulting checkpoint exactly.
+
+| Fixture | 1× still p95 frame gap | 1× panning p95 | 16× still p95 | 16× panning p95 |
+| --- | --- | --- | --- | --- |
+| Starter camp, 2 buildings | 9.2 ms | 9.0 ms | 16.6 ms | 16.6 ms |
+| Mixed property, 256 buildings | 17.5 ms | 25.0 ms | 25.0 ms | 25.9 ms |
+
+Both fixtures advanced approximately 3 and 48 game minutes per real second at 1× and 16×. The sampled peak renderer RSS was 1,424 MiB and 1,490 MiB respectively. This is process resident memory, which includes shared pages, and the short samples cannot establish a memory plateau. The benchmark uses diagnostic snapshot and speed controls plus trusted pointer motion. Physical-display frame pacing, GPU allocation and long-run memory remain unverified.
