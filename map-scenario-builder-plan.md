@@ -677,3 +677,9 @@ The runtime benchmark now supports `--authored`. Native snapshots confirm five d
 | Mixed property, 256 buildings | 17.5 ms | 25.0 ms | 25.0 ms | 25.9 ms |
 
 Both fixtures advanced approximately 3 and 48 game minutes per real second at 1× and 16×. The sampled peak renderer RSS was 1,424 MiB and 1,490 MiB respectively. This is process resident memory, which includes shared pages, and the short samples cannot establish a memory plateau. The benchmark uses diagnostic snapshot and speed controls plus trusted pointer motion. Physical-display frame pacing, GPU allocation and long-run memory remain unverified.
+
+### Panning cache experiment
+
+A five-second paired headless comparison on the 256-building founding-cast map tested direct ground drawing while the camera moved. It cut the panning-phase backdrop rebuilds from roughly sixty per phase to one, but p95 frame gaps moved from 25.0 ms to 25.5 ms at 1× and from 25.0 ms to 25.9 ms at 16×. The p95 paint time also rose in both samples, so the existing cache remains in use. These short samples rule out a demonstrated gain from this implementation on the tested setup.
+
+The full-frame regression now uses the five founding friends and includes both an active pointer drag and its settled position. All 48 frame cases match direct ground rendering pixel for pixel across the three biomes, two times of day and desktop DPR 1 and 2. Native state remains exact during the comparisons.
