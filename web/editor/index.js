@@ -294,6 +294,39 @@ function inspectGround(point){
   const deposits=landReport.deposits.filter(d=>point.x>=d.x&&point.x<d.x+d.width&&point.y>=d.y&&point.y<d.y+d.height);
   $('creator-ground-detail').innerHTML=`<p><b>${escape(g.biome)}</b><br>${escape(g.geology)}</p><dl><dt>Inspected footprint</dt><dd>${sample.cells} ${sample.cells===1?'cell':'cells'}</dd><dt>Fertility</dt><dd>${Math.round(g.fertility*100)}%</dd><dt>Water retention</dt><dd>×${g.retention.toFixed(2)}</dd><dt>Moisture</dt><dd>${Math.round(g.moisture*100)}%</dd><dt>Tree shade</dt><dd>${Math.round(g.shade*100)}%</dd><dt>Solar exposure</dt><dd>${Math.round(sample.solar_exposure*100)}%</dd><dt>Crop growth</dt><dd>×${sample.growth_multiplier.toFixed(2)}</dd><dt>Disturbance</dt><dd>${Math.round(g.disturbance*100)}%</dd></dl>${deposits.map(d=>`<p>${escape(catalog.materials[d.material])}: ${d.remaining} remaining of ${d.maximum}</p>`).join('')}${map.view.layer==='walkability'&&accessReport?`<p><b>Walking access:</b> ${accessReport.cells[point.y*64+point.x]?.walkable?(accessReport.cells[point.y*64+point.x]?.reachable?'Connected to the arrival camp.':'Clear cell centre, but no route from camp.'):'Blocked cell centre.'}</p>`:''}${report.ok?'':'<p>Draft has unresolved issues. Ground preview uses the last valid setup.</p>'}`;
 }
+function revealMapIssue(issue){
+  if(!issue||!current)return;
+  const {start}=current.doc.value,id=issue.entity;
+  setTool('select');
+  if(issue.at)map.centerAt(...issue.at);
+  let target=$('creator-map');
+  if(id&&(start.residents??catalog.resident_presets).some(person=>person.id===id)){
+    map.selectResident(id);
+    residentsEditor.openArrival(id);
+    target=$('creator-residents').querySelector(`[data-resident="${CSS.escape(id)}"] > summary`)??target;
+  }else if(id&&start.routes?.some(route=>route.id===id)){
+    routesEditor.edit(id);
+    target=$('creator-routes').querySelector('summary')??target;
+  }else if(id){
+    const bank=start.batteries?.find(item=>item.id===id);
+    const site=start.resource_sites?.find(item=>item.id===id);
+    const building=start.buildings.find(item=>item.id===id);
+    if(bank||site||building){
+      workspaces.select('village');
+      if(bank)map.selectBank(id);
+      else if(site)map.selectSite(id);
+      else map.select(id);
+      const object=bank??site??building;
+      if(!issue.at)map.centerAt(object.x,object.y);
+      const panel=$('creator-selection');
+      target=(building&&issue.code==='invalid_placement'?$('creator-object-x'):panel.querySelector('h2'))??target;
+    }
+  }
+  if(target===$('creator-map'))map.select(null);
+  if(target.matches('h2'))target.tabIndex=-1;
+  target.scrollIntoView({block:'nearest'});
+  target.focus({preventScroll:true});
+}
 function renderSelection(){
   if(!current)return;
   workspaces?.context(map.selection().length||map.view.selectedResident||map.view.selectedRoute||map.view.selectedBank||map.view.selectedSite||map.view.selectedNature);
@@ -593,7 +626,7 @@ function wire(){
     const journalIssue=e.target.closest('[data-issue-journal]');if(journalIssue){const issue=report.issues[Number(journalIssue.dataset.issueJournal)];if(issue){const section=$('creator-journal');revealWorkspaceSection(section);section.open=true;journalEditor.openIssue(issue.path);}return;}
     if(e.target.closest('[data-issue-more]')){expandedReview=true;renderReview();return;}
     const button=e.target.closest('[data-issue]');
-    if(button){const issue=report.issues[Number(button.dataset.issue)];if(issue.at)map.centerAt(...issue.at);if(issue.entity){if((current.doc.value.start.residents??catalog.resident_presets).some(p=>p.id===issue.entity)){map.selectResident(issue.entity);residentsEditor.openArrival(issue.entity);}else if(current.doc.value.start.routes?.some(r=>r.id===issue.entity)){map.selectRoute(issue.entity);routesEditor.edit(issue.entity);}else if(current.doc.value.start.batteries?.some(b=>b.id===issue.entity))map.selectBank(issue.entity);else if(current.doc.value.start.resource_sites?.some(s=>s.id===issue.entity))map.selectSite(issue.entity);else map.select(issue.entity);}}
+    if(button){revealMapIssue(report.issues[Number(button.dataset.issue)]);return;}
     if(e.target.matches('[data-issue-liquids]')){revealWorkspaceSection($('creator-liquids'));$('creator-liquids').open=true;$('creator-liquids').scrollIntoView({block:'nearest'});}
     if(e.target.matches('[data-issue-supplies]')){revealWorkspaceSection($('creator-supplies'));$('creator-supplies').open=true;$('creator-supplies').scrollIntoView({block:'nearest'});}
   };

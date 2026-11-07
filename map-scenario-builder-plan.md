@@ -640,3 +640,5 @@ The real saved-village flow now has a renderer-crash regression. It continues a 
 ### Opening a goal from validation
 
 Goal validation now identifies the affected chapter and goal for invalid details, conditions, rule conflicts and unreachable dependencies. **Open goal** switches to the journal, expands the affected goal and focuses the matching editor control. The desktop regression verifies a title repair in the second chapter of First clearing, and all 78 focused native journal tests pass.
+
+**Show on map** now switches to Select and moves keyboard focus to the affected inspector. It opens arrival or utility controls for their linked records and focuses the column field for building placement errors. A desktop regression uses the keyboard to open an overlapping storage house, repairs its column and verifies that the draft is playable again.
