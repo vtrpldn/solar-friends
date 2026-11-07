@@ -689,3 +689,15 @@ The full-frame regression now uses the five founding friends and includes both a
 The current native build completed six single-resident seasonal runs for seeds 42 and 73 across the three biomes. Each included a hand-edited soil cell. Mata Atlântica and Cerrado ran 42 days per seed, and Caatinga ran 56. The suite verified forecasts, real rain and harvests, solar generation, dry-season hydro reduction where rivers exist, zero hydro output without rivers, 286 conserved daily checkpoints and 40 exact resumed continuations.
 
 A separate native check starts with empty tanks and an authored cistern on each of six no-river maps. The normal regional forecast supplies the rain, and every case completes a real journal objective for six reachable fresh-water units held for 30 minutes. Completion occurred 60–75 game minutes after rain began, with zero external fresh water and zero hydro output. Crop moisture and solar shade comparisons also pass for all six biome and seed pairs. These runs establish the tested climate and water behavior. Multi-resident settlement balance and visual review have separate gates.
+
+### Founding settlement across complete regional seasons
+
+The five founding friends completed a full wet and dry cycle on seeds 42 and 73 in all three biomes. Seed 42 includes a river generator and seed 73 has no river. The fixture includes three gardens, beds, a kitchen, a cistern, solar generation and a workshop with inherited wear. Each run bought service parts through the normal paid town API and completed at least one equipment service. All 286 daily checkpoints conserved materials, water and power, and 40 resumed runs continued exactly.
+
+| Biome | Days per seed | Harvests, seeds 42 / 73 | Highest observed hunger | Lowest observed energy |
+| --- | --- | --- | --- | --- |
+| Mata Atlântica | 42 | 31 / 32 | 42.1 | 71.7 |
+| Cerrado | 42 | 32 / 36 | 38.3 | 68.9 |
+| Caatinga | 56 | 44 / 43 | 39.6 | 68.7 |
+
+Reproduce with `node scripts/verify-biome-cycles.mjs --settlement`. WASM SHA-256 `d106bf81126c8f0cb59a75b49b8c1ca75f51ccfcbfe5c08e06620a7ff65c8980`. The fixture uses default Sandbox opening funds and scripted purchase decisions. These results cover the authored five-person seasonal simulation. Campaign difficulty and player walkthroughs are separate checks.
