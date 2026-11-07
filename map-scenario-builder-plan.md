@@ -654,3 +654,15 @@ When both map positions need repair, the editor can commit either position while
 Scenario review now labels each entry as a blocking issue, warning or information in text. Blocking issues appear first, and a concise live summary announces the counts. Desktop verification checks the labels on real native reports, confirms that warnings and information leave playtesting enabled, and retains the keyboard repair checks for blocking issues.
 
 **Check & share** shows validation before the opening estimates and outlook. Entering that workspace with blocking issues returns the sidebar to the first issue. The object inspector stays out of the review panel while the selection remains available on return to Village. Desktop verification at 1280 × 800 checks visibility without scrolling and confirms selection retention; the workspace and playtest-return regression also passes.
+
+### Current desktop gesture benchmark
+
+The benchmark now waits for the heavy editor's move to commit before reading the checkpoint. It distinguishes one synchronous native compilation for a small draft from one prepared snapshot installation and zero synchronous compilations for a heavy draft. All three 64 × 64 Mata Atlântica cases passed exact durable brush and group-move Undo/Redo in headless Chromium at 1600 × 1000 on an Apple M3 Pro.
+
+| Authored friends | Buildings | Import to ready | Brush release to two frames | Move release to two frames |
+| --- | --- | --- | --- | --- |
+| 1 | 2 | 767 ms | 53 ms | 55 ms |
+| 5 | 2 | 1,006 ms | 49 ms | 55 ms |
+| 5 | 256 | 1,199 ms | 15 ms | 16 ms |
+
+Each release value is one gesture. The heavy move took about 1,136 ms from starting the drag to the saved acknowledgement, including pointer motion, preparation and autosave debounce. These samples cover editor feedback and durable correctness. Sustained camera pacing, 1×/16× gameplay and total memory still require separate evidence.
