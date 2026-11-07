@@ -78,5 +78,22 @@ try{
  assert.deepEqual(repairedCamp.map.camp,baseline.map.camp);
  assert.deepEqual(repairedCamp.start,baseline.start);
  assert.deepEqual(errors,[]);
- const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,keyboardCampRepair:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement, boundary and arrival repairs, and exact reload.');
+ const badView=structuredClone(baseline);badView.map.camera=[-20,baseline.map.camera[1]];
+ const opening=await open();await importFile(opening,Buffer.from(JSON.stringify(badView)));
+ assert(await opening.locator('#creator-test').isDisabled());
+ await opening.locator('[data-workspace=review]').click();
+ const viewIssue=opening.locator('#creator-issues [data-severity=error]').filter({hasText:'Choose a starting view inside the property'});
+ await viewIssue.getByRole('button',{name:'Show on map'}).press('Enter');
+ const viewColumn=opening.locator('#creator-camera-column');
+ assert(await viewColumn.evaluate(el=>el===document.activeElement));
+ assert.equal(await viewColumn.inputValue(),'-20');
+ await opening.screenshot({path:`${output}/opening-view-repair.png`});
+ await viewColumn.fill('33.5');await viewColumn.press('Enter');await ready(opening);
+ assert(await opening.locator('#creator-test').isEnabled());
+ const repairedView=(await saved(opening)).checkpoint.definition;
+ assert.deepEqual(repairedView.map.camera,[33.5,baseline.map.camera[1]]);
+ assert.deepEqual(repairedView.map.camp,baseline.map.camp);
+ assert.deepEqual(repairedView.start,baseline.start);
+ assert.deepEqual(errors,[]);
+ const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,keyboardCampRepair:true,keyboardCameraRepair:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement, boundary, arrival and opening-view repairs, and exact reload.');
 }finally{await closeValidationBrowser(browser,server);}

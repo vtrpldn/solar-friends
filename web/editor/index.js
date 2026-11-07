@@ -217,6 +217,10 @@ function changeInspector(label,edit,restore){
   if(heavyDraft(ctx.doc.value))void changePrepared(label,edit,{allowInvalid:true}).then(committed=>{if(!committed&&current===ctx)restore?.();});
   else if(!change(label,edit))restore?.();
 }
+const mapPositions={
+  camp:{section:'creator-arrival-plot',label:'Move arrival camp'},
+  camera:{section:'creator-opening-view',label:'Choose starting view'}
+};
 function field(id,value){if(document.activeElement!==$(id))$(id).value=value;}
 function refresh(){
   if(!current)return;
@@ -256,7 +260,10 @@ function refresh(){
   $('creator-biome-name').textContent='64 × 64 cells · '+(catalog.biomes.find(b=>b.id===d.map.biome?.id)?.name||'Mata Atlântica');
   $('creator-river-enabled').checked=d.map.river!==null;
   $('creator-water').readOnly=Array.isArray(d.start.liquids);$('creator-water').title=d.start.liquids?'Edit the fresh-water allocations in Starting liquids.':'';
-  field('creator-camp-column',d.map.camp[0]);field('creator-camp-row',d.map.camp[1]);
+  for(const key of Object.keys(mapPositions)){
+    field(`creator-${key}-column`,d.map[key][0]);
+    field(`creator-${key}-row`,d.map[key][1]);
+  }
   field('creator-title',d.title);field('creator-description',d.description);field('creator-seed',d.map.seed);field('creator-funds',d.start.funds/100);field('creator-water',d.start.fresh_water);
   $('creator-undo').disabled=!current.doc.canUndo;$('creator-redo').disabled=!current.doc.canRedo;$('creator-test').disabled=!report.ok||busy;$('creator-release').disabled=!report.ok||busy;$('creator-save-map').disabled=busy;
   $('creator-undo').title=current.doc.undoLabel;$('creator-redo').title=current.doc.redoLabel;
@@ -297,14 +304,15 @@ function inspectGround(point){
 }
 function revealMapIssue(issue){
   if(!issue||!current)return;
-  if(issue.path==='map.camp'){
-    const section=$('creator-arrival-plot'),[column,row]=current.doc.value.map.camp;
+  const position=issue.path==='map.camp'?'camp':issue.path==='map.camera'?'camera':null;
+  if(position){
+    const section=$(mapPositions[position].section),[column,row]=current.doc.value.map[position];
     setTool('select');
     map.select(null);
     map.centerAt(column,row);
     revealWorkspaceSection(section);
     section.open=true;
-    const columnInput=$('creator-camp-column'),rowInput=$('creator-camp-row');
+    const columnInput=$(`creator-${position}-column`),rowInput=$(`creator-${position}-row`);
     columnInput.value=column;rowInput.value=row;
     const target=columnInput.validity.valid&&!rowInput.validity.valid?rowInput:columnInput;
     target.scrollIntoView({block:'nearest'});
@@ -375,7 +383,7 @@ function renderReview(){
   workspaces?.review(report);
   renderOpeningSetup($('creator-opening-setup'),engine,report.ok);
   $('creator-review-title').textContent=report.ok?'Ready to test':'Before we can begin';
-  $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,expandedReview?report.issues.length:40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity||i.path==='map.camp'?`<button data-issue="${n}">Show on map</button>`:''}${i.path==='journal'||i.path.startsWith('journal.')?`<button data-issue-journal="${n}">${/^journal\.(events|roles|locked_buildings)(\.|$)/.test(i.path)?'Open events & roles':/^journal\.chapters\.\d+\.goals\.\d+(\.|$)/.test(i.path)?'Open goal':'Open journal'}</button>`:''}${i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':i.path.startsWith('start.liquids')||i.path==='start.fresh_water'?'<button data-issue-liquids>Review starting liquids</button>':''}</div>`).join('')+(report.issues.length>40&&!expandedReview?`<button data-issue-more>Show all ${report.issues.length} review notes</button>`:''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
+  $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,expandedReview?report.issues.length:40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity||i.path==='map.camp'||i.path==='map.camera'?`<button data-issue="${n}">Show on map</button>`:''}${i.path==='journal'||i.path.startsWith('journal.')?`<button data-issue-journal="${n}">${/^journal\.(events|roles|locked_buildings)(\.|$)/.test(i.path)?'Open events & roles':/^journal\.chapters\.\d+\.goals\.\d+(\.|$)/.test(i.path)?'Open goal':'Open journal'}</button>`:''}${i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':i.path.startsWith('start.liquids')||i.path==='start.fresh_water'?'<button data-issue-liquids>Review starting liquids</button>':''}</div>`).join('')+(report.issues.length>40&&!expandedReview?`<button data-issue-more>Show all ${report.issues.length} review notes</button>`:''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
 }
 function setTool(tool){
   const workspace=['road','route-path','battery-bank','move-bank','copy-bank','move-site','copy-site','duplicate',...sourceKinds].includes(tool)||allBuildingArt[tool]?'village':['habitat','nature','thin-nature','move-nature','copy-nature','river','meadow','camp','camera'].includes(tool)?'land':tool==='region'?'story':tool==='resident-start'?'people':null;
@@ -470,7 +478,7 @@ function attach(definition,{id,revision=null,checkpoint=null,view=null,record=nu
   current={id:id||definition.id,doc,storageRevision:revision,record,viewDirty:false,conflicted:false};
   const ctx=current;
   doc.addEventListener('change',()=>{if(current===ctx){refresh();scheduleSave();}});
-  map.view={center:clone(doc.value.map.camera),zoom:1.3,selected:null,selectedResident:null,selectedRoute:null,selectedBank:null,selectedSite:null,selectedNature:null,selection:[],tool:'select',grid:true,layer:'none',utilityKind:'all',regionId:'all',habitatPreset:'flower-meadow',workspace:'land'};
+  map.view={center:doc.value.map.camera.map(n=>Math.max(0,Math.min(63,n))),zoom:1.3,selected:null,selectedResident:null,selectedRoute:null,selectedBank:null,selectedSite:null,selectedNature:null,selection:[],tool:'select',grid:true,layer:'none',utilityKind:'all',regionId:'all',habitatPreset:'flower-meadow',workspace:'land'};
   if(view){
     const center=Array.isArray(view.center)&&view.center.length===2&&view.center.every(Number.isFinite)?view.center:map.view.center;
     const tool=['select','pan','move','road','meadow','river','nature','thin-nature','habitat','camp','camera','erase','battery-bank',...sourceKinds,...catalog.buildings.map(b=>b.id)].includes(view.tool)?view.tool:'select';
@@ -591,11 +599,13 @@ function wire(){
   $('creator-species').onchange=()=>{map.natureSpecies=catalog.nature.find(s=>s.key===$('creator-species').value);$('creator-nature-size').min=map.natureSpecies.min_size;$('creator-nature-size').max=map.natureSpecies.max_size;setTool('nature');};
   $('creator-nature-density').onchange=e=>{map.natureDensity=Number(e.target.value);map.viewChanged(map.state);};
   $('creator-nature-size').oninput=e=>{map.natureSize=Number(e.target.value);$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';map.render();map.viewChanged(map.state);};
-  $('creator-camp-form').onsubmit=async event=>{
-    event.preventDefault();
-    const x=$('creator-camp-column').valueAsNumber,y=$('creator-camp-row').valueAsNumber;
-    if(await changeMap('Move arrival camp',d=>{d.map.camp=[x,y];},{valid:true}))map.centerAt(x,y);
-  };
+  for(const [key,{label}] of Object.entries(mapPositions)){
+    $(`creator-${key}-form`).onsubmit=async event=>{
+      event.preventDefault();
+      const x=$(`creator-${key}-column`).valueAsNumber,y=$(`creator-${key}-row`).valueAsNumber;
+      if(await changeMap(label,d=>{d.map[key]=[x,y];},{valid:true}))map.centerAt(x,y);
+    };
+  }
   $('creator-river-enabled').onchange=e=>change(e.target.checked?'Restore river':'Remove river',d=>{d.map.river=e.target.checked?JSON.parse(engine.scenario_template('story')).map.river:null;});
   $('creator-overlay-filter').onchange=e=>{map.view[map.view.layer==='utilities'?'utilityKind':'regionId']=e.target.value;$('creator-land-legend').textContent=overlayLegend();map.render();map.viewChanged(map.state);};
   $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;renderSceneFilter();map.landOverlay=overlayTiles();$('creator-land-legend').textContent=overlayLegend();inspectGround(hoverCell);map.render();map.viewChanged(map.state);};
