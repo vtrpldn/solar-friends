@@ -34,3 +34,9 @@ Three.js 0.187.0, MIT. The local browser modules and OrbitControls are copied fr
 - `node scripts/verify-v02-exports.mjs` checks actual browser-exported samples in `exports/`: 40 frames across five assets and two lights, nonempty transparent silhouettes including shadows, no edge clipping, identical day/night alpha, and placement metadata.
 - In-app browser review exercised asset switching, free orbit, materials/clay/wireframe, the scale figure, shared yard, sprite proof, and PNG/placement/source downloads. A house export after orbiting, adding a scale figure and selecting clay was byte-identical to the clean export. The actual downloaded 3D JSON reloaded with matching bounds.
 - These studies are intentionally faceted and simplified. They demonstrate the pipeline; the painted visual direction and final character design still need player review.
+
+## House direction study 02
+
+The house alone now uses a broader low-poly roof, a lower wall silhouette, a faceted arched turquoise entrance, large open shutters and a single small doorstep plant. Fine tile rows, shutter slats and exposed-brick decoration were removed from this candidate. The original house recipe and r01 exports remain available as references; the other four models are unchanged.
+
+The house uses 1,020 triangles across 75 meshes, down from 4,796 triangles across 293 meshes. The original camera, shared scale and 2×2-cell footprint remain. Study 02 is an art-direction candidate awaiting player feedback, not approval to apply this style to the other props. Its day/night sprites and manifests are saved as `exports/house-*-r02.*`.

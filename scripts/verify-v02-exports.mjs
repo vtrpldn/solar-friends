@@ -55,13 +55,11 @@ for (const asset of ASSETS) {
   let alpha;
   for (const light of ["day", "night"]) {
     const root = new URL(
-        `../web/v02/workshop/exports/${asset.id}-${light}-r01`,
+        `../web/v02/workshop/exports/${asset.id}-${light}-r${String(asset.revision || 1).padStart(2, "0")}`,
         import.meta.url,
       ),
       im = png(fileURLToPath(root) + ".png");
-    const meta = JSON.parse(
-      readFileSync(fileURLToPath(root) + ".json"),
-    );
+    const meta = JSON.parse(readFileSync(fileURLToPath(root) + ".json"));
     assert.equal(im.width, 2048);
     assert.equal(im.height, 512);
     assert.equal(meta.asset, asset.id);

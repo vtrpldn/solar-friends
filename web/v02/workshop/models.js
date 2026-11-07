@@ -154,7 +154,7 @@ function windowOn(g, x, y, z, rotation = 0) {
   }
   box(w, 1.02, 0.1, 0.2, "timberLight", 0, -0.5, 0.04);
 }
-function house() {
+function houseStudy01() {
   const g = new THREE.Group();
   box(g, 3.6, 2.6, 3.6, "plaster", 0, 1.3, 0);
   gable(g, 3.6, 3.6, 2.6, 0.95);
@@ -181,6 +181,113 @@ function house() {
         1.81,
       );
   box(g, 1.14, 0.08, 0.2, "stone", -0.65, 0.04, 1.9);
+  return g;
+}
+// House-only direction study. The other props keep the original shared kit.
+function house() {
+  const g = new THREE.Group();
+  box(g, 3.5, 2.4, 3.5, "plaster", 0, 1.2, 0);
+  gable(g, 3.5, 3.5, 2.4, 1.1);
+  const half = 2,
+    rise = 1.12,
+    angle = Math.atan2(rise, half),
+    length = Math.hypot(half, rise);
+  for (const side of [-1, 1]) {
+    const slope = new THREE.Group();
+    slope.position.set(side, 2.4 + rise / 2, 0);
+    slope.rotation.z = -side * angle;
+    g.add(slope);
+    box(slope, length, 0.16, 4, "tile", 0, 0, 0);
+    // A few broad, three-sided barrel channels replace hundreds of tiny tiles.
+    for (let col = 0; col < 8; col++) {
+      const channel = mesh(
+        slope,
+        new THREE.CylinderGeometry(0.24, 0.24, length, 3, 1, false, 0, Math.PI),
+        col % 4 === 0 ? "tileLight" : "tile",
+        0,
+        0.08,
+        -1.75 + col * 0.5,
+      );
+      channel.rotation.z = Math.PI / 2;
+    }
+    box(slope, length, 0.2, 0.16, "tileLight", 0, 0.01, 2);
+    box(slope, length, 0.2, 0.16, "tileLight", 0, 0.01, -2);
+    box(slope, 0.14, 0.22, 4.15, "tileDark", (side * length) / 2, -0.04, 0);
+  }
+  const ridge = cylinder(g, 0.18, 0.18, 4.16, "tileLight", 0, 3.61, 0, 5);
+  ridge.rotation.x = Math.PI / 2;
+  // A broad arched entrance and a few chunky joinery details read at game scale.
+  function arch(width, height, depth, material, x, y, z) {
+    const r = width / 2,
+      shape = new THREE.Shape();
+    shape.moveTo(-r, 0);
+    shape.lineTo(r, 0);
+    shape.lineTo(r, height - r);
+    for (let i = 1; i <= 6; i++) {
+      const a = (i * Math.PI) / 6;
+      shape.lineTo(Math.cos(a) * r, height - r + Math.sin(a) * r);
+    }
+    shape.closePath();
+    return mesh(
+      g,
+      new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false }),
+      material,
+      x,
+      y,
+      z,
+    );
+  }
+  arch(1.16, 2.18, 0.12, "timberLight", -0.62, 0, 1.76);
+  arch(0.94, 2.07, 0.13, "teal", -0.62, 0, 1.89);
+  box(g, 0.88, 0.1, 0.04, "timberLight", -0.62, 0.45, 2.035);
+  cylinder(
+    g,
+    0.045,
+    0.045,
+    0.05,
+    "tileLight",
+    -0.31,
+    1.05,
+    2.06,
+    6,
+  ).rotation.x = Math.PI / 2;
+  box(g, 1.24, 0.09, 0.3, "stone", -0.62, 0.045, 1.88);
+  function friendlyWindow(x, z, rotation) {
+    const w = new THREE.Group();
+    w.position.set(x, 1.38, z);
+    w.rotation.y = rotation;
+    g.add(w);
+    box(w, 1.0, 1.0, 0.1, "timberLight");
+    box(w, 0.78, 0.76, 0.12, "glass", 0, 0, 0.08);
+    box(w, 0.065, 0.76, 0.05, "timberLight", 0, 0, 0.16);
+    box(w, 0.78, 0.065, 0.05, "timberLight", 0, 0, 0.16);
+    for (const side of [-1, 1]) {
+      box(w, 0.25, 0.88, 0.12, "teal", side * 0.61, 0, 0.09);
+      box(w, 0.27, 0.09, 0.04, "timberLight", side * 0.61, -0.24, 0.17);
+    }
+    box(w, 1.48, 0.15, 0.3, "timberLight", 0, -0.52, 0.08);
+  }
+  friendlyWindow(0.88, 1.78, 0);
+  friendlyWindow(1.78, 0.1, Math.PI / 2);
+  friendlyWindow(-1.78, 0, -Math.PI / 2);
+  friendlyWindow(0, -1.78, Math.PI);
+  // One small lived-in detail; no plot-sized platform or decorative clutter.
+  cylinder(g, 0.24, 0.17, 0.36, "tile", 1.38, 0.18, 1.77, 6);
+  cylinder(g, 0.26, 0.26, 0.09, "tileLight", 1.38, 0.34, 1.77, 6);
+  for (let i = 0; i < 5; i++) {
+    const a = i * 2.4;
+    const leaf = ball(
+      g,
+      0.18,
+      i % 2 ? "leaf" : "leafLight",
+      1.38 + Math.cos(a) * 0.14,
+      0.53,
+      1.77 + Math.sin(a) * 0.12,
+      [0.6, 1.5, 0.6],
+      0,
+    );
+    leaf.rotation.z = Math.cos(a) * 0.5;
+  }
   return g;
 }
 function shed() {
@@ -295,10 +402,11 @@ export const ASSETS = [
   {
     id: "house",
     name: "Limewashed house",
+    revision: 2,
     type: "Home",
     footprint: [2, 2],
     description:
-      "Clay barrel tiles, limewashed walls and timber shutters. A 2.06 m door sets the human scale.",
+      "House study 02: broad faceted terracotta, a welcoming arched door, generous shutters and a little doorstep plant.",
     build: house,
   },
   {
@@ -343,7 +451,7 @@ export function createAsset(id) {
   if (!def) throw new Error(`Unknown asset ${id}`);
   const g = def.build();
   g.name = id;
-  g.userData = { id, footprint: def.footprint, revision: 1 };
+  g.userData = { id, footprint: def.footprint, revision: def.revision || 1 };
   g.updateMatrixWorld(true);
   return g;
 }

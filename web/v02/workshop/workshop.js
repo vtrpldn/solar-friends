@@ -195,6 +195,8 @@ function rebuild() {
   $("#description").textContent = state.together
     ? "All five assets at their real shared scale. The road connects to the house threshold; the resident is never enlarged to fill a preview."
     : def.description;
+  $("#revision").textContent =
+    `${String(def.revision || 1).padStart(2, "0")} · Procedural source`;
   $("#footprint").textContent = state.together
     ? "Shared 2 m grid"
     : `${def.footprint.join(" × ")} cells`;
@@ -228,14 +230,14 @@ function rebuild() {
     $("#" + id).disabled = state.together;
   $("#status").textContent = state.together
     ? "Context view · all assets share metre-based geometry."
-    : "Study 01 · inspect freely, then compare the sprite proof.";
+    : `Study ${String(def.revision || 1).padStart(2, "0")} · inspect freely, then compare the sprite proof.`;
   if (state.mode === "sprites") proof();
 }
 function resize() {
   const r = $("#viewport").getBoundingClientRect();
   if (!r.width || !r.height) return;
   renderer.setSize(r.width, r.height, false);
-  const h = 9.5;
+  const h = Math.max(9.5, (7 * r.height) / r.width);
   camera.left = (-h * r.width) / r.height / 2;
   camera.right = -camera.left;
   camera.top = h / 2;
@@ -262,7 +264,7 @@ function manifest() {
   return {
     schema: "solar-friends.sprite-study.v1",
     asset: state.id,
-    revision: 1,
+    revision: def.revision || 1,
     status: "material-study-awaiting-art-review",
     light: state.light,
     units: "metres",
@@ -390,7 +392,7 @@ function json(value, name) {
 for (const [i, def] of ASSETS.entries()) {
   const b = document.createElement("button");
   b.dataset.asset = def.id;
-  b.innerHTML = `<span class="number">0${i + 1}</span><span><strong>${def.name}</strong><small>${def.type} · study 01</small></span>`;
+  b.innerHTML = `<span class="number">0${i + 1}</span><span><strong>${def.name}</strong><small>${def.type} · study ${String(def.revision || 1).padStart(2, "0")}</small></span>`;
   b.onclick = () => {
     state.id = def.id;
     state.together = false;
@@ -440,16 +442,26 @@ $("#iso").onclick = iso;
 $("#export-sheet").onclick = () => {
   const { sheet } = renderSheet();
   sheet.toBlob((blob) => {
-    if (blob) download(blob, `${state.id}-${state.light}-r01.png`);
+    if (blob)
+      download(
+        blob,
+        `${state.id}-${state.light}-r${String(ASSETS.find((a) => a.id === state.id).revision || 1).padStart(2, "0")}.png`,
+      );
     else $("#status").textContent = "PNG export failed. Please try again.";
   }, "image/png");
 };
 $("#export-meta").onclick = () =>
-  json(manifest(), `${state.id}-${state.light}-r01.json`);
+  json(
+    manifest(),
+    `${state.id}-${state.light}-r${String(ASSETS.find((a) => a.id === state.id).revision || 1).padStart(2, "0")}.json`,
+  );
 $("#export-model").onclick = () => {
   const source = createAsset(state.id);
   try {
-    json(source.toJSON(), `${state.id}-model-r01.json`);
+    json(
+      source.toJSON(),
+      `${state.id}-model-r${String(ASSETS.find((a) => a.id === state.id).revision || 1).padStart(2, "0")}.json`,
+    );
   } finally {
     disposeModel(source);
   }
