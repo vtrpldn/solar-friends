@@ -61,5 +61,22 @@ try{
  assert(await boundary.locator('#creator-test').isEnabled());
  assert.deepEqual((await saved(boundary)).checkpoint.definition.start.buildings,baseline.start.buildings);
  assert.deepEqual(errors,[]);
- const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement and boundary repairs, and exact reload.');
+ const badCamp=structuredClone(baseline);badCamp.map.camp=[baseline.map.camp[0],2];
+ const arrival=await open();await importFile(arrival,Buffer.from(JSON.stringify(badCamp)));
+ assert(await arrival.locator('#creator-test').isDisabled());
+ await arrival.locator('[data-workspace=review]').click();
+ const campIssue=arrival.locator('#creator-issues [data-severity=error]').filter({hasText:'Leave enough space around the arrival camp'});
+ await campIssue.getByRole('button',{name:'Show on map'}).press('Enter');
+ const campRow=arrival.locator('#creator-camp-row');
+ assert(await campRow.evaluate(el=>el===document.activeElement));
+ assert.equal(await campRow.inputValue(),'2');
+ assert.equal(await arrival.locator('[data-workspace=land]').getAttribute('aria-selected'),'true');
+ await arrival.screenshot({path:`${output}/camp-repair.png`});
+ await campRow.fill(String(baseline.map.camp[1]));await campRow.press('Enter');await ready(arrival);
+ assert(await arrival.locator('#creator-test').isEnabled());
+ const repairedCamp=(await saved(arrival)).checkpoint.definition;
+ assert.deepEqual(repairedCamp.map.camp,baseline.map.camp);
+ assert.deepEqual(repairedCamp.start,baseline.start);
+ assert.deepEqual(errors,[]);
+ const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,keyboardCampRepair:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement, boundary and arrival repairs, and exact reload.');
 }finally{await closeValidationBrowser(browser,server);}

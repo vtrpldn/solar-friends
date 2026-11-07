@@ -1,7 +1,7 @@
 // These are views of one draft, never wizard steps or separate documents.
 export const workspaceNames={land:'Land',people:'Friends',village:'Village',story:'Journal',review:'Check & share'};
 const sections={
- land:['creator-ground','creator-biome-setting','creator-weather','creator-geology'],
+ land:['creator-arrival-plot','creator-ground','creator-biome-setting','creator-weather','creator-geology'],
  people:['creator-residents','creator-relationships'],
  village:['creator-routes','creator-starting-conditions','creator-supplies','creator-equipment','creator-liquids'],
  story:['creator-regions','creator-journal'],

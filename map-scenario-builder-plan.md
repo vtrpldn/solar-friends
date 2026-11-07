@@ -644,3 +644,5 @@ Goal validation now identifies the affected chapter and goal for invalid details
 **Show on map** now switches to Select and moves keyboard focus to the affected inspector. It opens arrival or utility controls for their linked records and focuses the column field for building placement errors. A desktop regression uses the keyboard to open an overlapping storage house, repairs its column and verifies that the draft is playable again.
 
 Buildings outside the property now produce a repair link for each invalid coordinate. The link centers the nearest map location, opens the building inspector and focuses the named row or column. Desktop verification repaired both coordinates in an imported draft and confirmed that playtesting remained blocked until both were valid.
+
+Arrival camp errors now link to the camp's map location and coordinate controls in Land. Players can enter and apply both coordinates by keyboard. The desktop check repairs an imported camp near the property edge, restores playtest readiness and verifies that the starting village configuration is unchanged.

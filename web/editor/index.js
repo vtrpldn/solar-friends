@@ -256,6 +256,7 @@ function refresh(){
   $('creator-biome-name').textContent='64 × 64 cells · '+(catalog.biomes.find(b=>b.id===d.map.biome?.id)?.name||'Mata Atlântica');
   $('creator-river-enabled').checked=d.map.river!==null;
   $('creator-water').readOnly=Array.isArray(d.start.liquids);$('creator-water').title=d.start.liquids?'Edit the fresh-water allocations in Starting liquids.':'';
+  field('creator-camp-column',d.map.camp[0]);field('creator-camp-row',d.map.camp[1]);
   field('creator-title',d.title);field('creator-description',d.description);field('creator-seed',d.map.seed);field('creator-funds',d.start.funds/100);field('creator-water',d.start.fresh_water);
   $('creator-undo').disabled=!current.doc.canUndo;$('creator-redo').disabled=!current.doc.canRedo;$('creator-test').disabled=!report.ok||busy;$('creator-release').disabled=!report.ok||busy;$('creator-save-map').disabled=busy;
   $('creator-undo').title=current.doc.undoLabel;$('creator-redo').title=current.doc.redoLabel;
@@ -296,6 +297,20 @@ function inspectGround(point){
 }
 function revealMapIssue(issue){
   if(!issue||!current)return;
+  if(issue.path==='map.camp'){
+    const section=$('creator-arrival-plot'),[column,row]=current.doc.value.map.camp;
+    setTool('select');
+    map.select(null);
+    map.centerAt(column,row);
+    revealWorkspaceSection(section);
+    section.open=true;
+    const columnInput=$('creator-camp-column'),rowInput=$('creator-camp-row');
+    columnInput.value=column;rowInput.value=row;
+    const target=columnInput.validity.valid&&!rowInput.validity.valid?rowInput:columnInput;
+    target.scrollIntoView({block:'nearest'});
+    target.focus({preventScroll:true});
+    return;
+  }
   const {start}=current.doc.value,id=issue.entity;
   setTool('select');
   if(issue.at)map.centerAt(...issue.at);
@@ -360,7 +375,7 @@ function renderReview(){
   workspaces?.review(report);
   renderOpeningSetup($('creator-opening-setup'),engine,report.ok);
   $('creator-review-title').textContent=report.ok?'Ready to test':'Before we can begin';
-  $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,expandedReview?report.issues.length:40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity?`<button data-issue="${n}">Show on map</button>`:''}${i.path==='journal'||i.path.startsWith('journal.')?`<button data-issue-journal="${n}">${/^journal\.(events|roles|locked_buildings)(\.|$)/.test(i.path)?'Open events & roles':/^journal\.chapters\.\d+\.goals\.\d+(\.|$)/.test(i.path)?'Open goal':'Open journal'}</button>`:''}${i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':i.path.startsWith('start.liquids')||i.path==='start.fresh_water'?'<button data-issue-liquids>Review starting liquids</button>':''}</div>`).join('')+(report.issues.length>40&&!expandedReview?`<button data-issue-more>Show all ${report.issues.length} review notes</button>`:''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
+  $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,expandedReview?report.issues.length:40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity||i.path==='map.camp'?`<button data-issue="${n}">Show on map</button>`:''}${i.path==='journal'||i.path.startsWith('journal.')?`<button data-issue-journal="${n}">${/^journal\.(events|roles|locked_buildings)(\.|$)/.test(i.path)?'Open events & roles':/^journal\.chapters\.\d+\.goals\.\d+(\.|$)/.test(i.path)?'Open goal':'Open journal'}</button>`:''}${i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':i.path.startsWith('start.liquids')||i.path==='start.fresh_water'?'<button data-issue-liquids>Review starting liquids</button>':''}</div>`).join('')+(report.issues.length>40&&!expandedReview?`<button data-issue-more>Show all ${report.issues.length} review notes</button>`:''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
 }
 function setTool(tool){
   const workspace=['road','route-path','battery-bank','move-bank','copy-bank','move-site','copy-site','duplicate',...sourceKinds].includes(tool)||allBuildingArt[tool]?'village':['habitat','nature','thin-nature','move-nature','copy-nature','river','meadow','camp','camera'].includes(tool)?'land':tool==='region'?'story':tool==='resident-start'?'people':null;
@@ -576,6 +591,11 @@ function wire(){
   $('creator-species').onchange=()=>{map.natureSpecies=catalog.nature.find(s=>s.key===$('creator-species').value);$('creator-nature-size').min=map.natureSpecies.min_size;$('creator-nature-size').max=map.natureSpecies.max_size;setTool('nature');};
   $('creator-nature-density').onchange=e=>{map.natureDensity=Number(e.target.value);map.viewChanged(map.state);};
   $('creator-nature-size').oninput=e=>{map.natureSize=Number(e.target.value);$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';map.render();map.viewChanged(map.state);};
+  $('creator-camp-form').onsubmit=async event=>{
+    event.preventDefault();
+    const x=$('creator-camp-column').valueAsNumber,y=$('creator-camp-row').valueAsNumber;
+    if(await changeMap('Move arrival camp',d=>{d.map.camp=[x,y];},{valid:true}))map.centerAt(x,y);
+  };
   $('creator-river-enabled').onchange=e=>change(e.target.checked?'Restore river':'Remove river',d=>{d.map.river=e.target.checked?JSON.parse(engine.scenario_template('story')).map.river:null;});
   $('creator-overlay-filter').onchange=e=>{map.view[map.view.layer==='utilities'?'utilityKind':'regionId']=e.target.value;$('creator-land-legend').textContent=overlayLegend();map.render();map.viewChanged(map.state);};
   $('creator-land-layer').onchange=e=>{map.view.layer=e.target.value;renderSceneFilter();map.landOverlay=overlayTiles();$('creator-land-legend').textContent=overlayLegend();inspectGround(hoverCell);map.render();map.viewChanged(map.state);};
