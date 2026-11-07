@@ -150,3 +150,7 @@
 #creator-replace-dialog .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
 #creator-replace-summary,#creator-replace-status{overflow-wrap:anywhere}
 #creator-replace-status{color:#8b482c}
+
+#creator-review-count{font-weight:bold}
+#creator-review-count:empty{display:none}
+.creator-issue h4{margin:0 0 4px;font-size:11px;color:#594125}

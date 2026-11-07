@@ -390,11 +390,49 @@ function renderSelection(){
   if(cropFocus)[...panel.querySelectorAll('[data-start-crop]')].find(input=>input.dataset.startCrop===cropFocus)?.focus({preventScroll:true});
 }
 function renderSupplies(){suppliesEditor.render(current.doc.value,report);}
+const reviewSeverities=[
+  {key:'error',label:'Blocking issue',plural:'blocking issues'},
+  {key:'warning',label:'Warning',plural:'warnings'},
+  {key:'information',label:'Information',plural:'notes'}
+];
+const reviewLimit=40;
+function reviewIssueMarkup(issue,index,label){
+  const {path,severity,message}=issue;
+  const actions=[];
+  if(issue.at||issue.entity||path==='map.camp'||path==='map.camera'){
+    actions.push(`<button data-issue="${index}">Show on map</button>`);
+  }
+  if(path==='journal'||path.startsWith('journal.')){
+    const name=/^journal\.(events|roles|locked_buildings)(\.|$)/.test(path)?'Open events & roles'
+      :/^journal\.chapters\.\d+\.goals\.\d+(\.|$)/.test(path)?'Open goal':'Open journal';
+    actions.push(`<button data-issue-journal="${index}">${name}</button>`);
+  }
+  if(path.startsWith('start.inventories'))actions.push('<button data-issue-supplies>Review supply locations</button>');
+  if(path.startsWith('start.liquids')||path==='start.fresh_water')actions.push('<button data-issue-liquids>Review starting liquids</button>');
+  return `<div class="creator-issue" data-severity="${severity}"><h4>${label}</h4><p>${escape(message)}</p>${actions.join('')}</div>`;
+}
 function renderReview(){
   workspaces?.review(report);
   renderOpeningSetup($('creator-opening-setup'),engine,report.ok);
   $('creator-review-title').textContent=report.ok?'Ready to test':'Before we can begin';
-  $('creator-issues').innerHTML=report.issues.length?report.issues.slice(0,expandedReview?report.issues.length:40).map((i,n)=>`<div class="creator-issue" data-severity="${i.severity}"><p>${escape(i.message)}</p>${i.at||i.entity||i.path==='map.camp'||i.path==='map.camera'?`<button data-issue="${n}">Show on map</button>`:''}${i.path==='journal'||i.path.startsWith('journal.')?`<button data-issue-journal="${n}">${/^journal\.(events|roles|locked_buildings)(\.|$)/.test(i.path)?'Open events & roles':/^journal\.chapters\.\d+\.goals\.\d+(\.|$)/.test(i.path)?'Open goal':'Open journal'}</button>`:''}${i.path.startsWith('start.inventories')?'<button data-issue-supplies>Review supply locations</button>':i.path.startsWith('start.liquids')||i.path==='start.fresh_water'?'<button data-issue-liquids>Review starting liquids</button>':''}</div>`).join('')+(report.issues.length>40&&!expandedReview?`<button data-issue-more>Show all ${report.issues.length} review notes</button>`:''):'<p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
+  const indexed=report.issues.map((issue,index)=>({issue,index})),counts=[],ordered=[];
+  for(const {key,label,plural} of reviewSeverities){
+    const entries=indexed.filter(({issue})=>issue.severity===key);
+    if(entries.length){
+      const singular=key==='information'?'note':label.toLowerCase();
+      counts.push(`${entries.length} ${entries.length===1?singular:plural}`);
+      ordered.push(...entries.map(entry=>({...entry,label})));
+    }
+  }
+  const summary=$('creator-review-count'),copy=counts.join(' · ');
+  if(summary.textContent!==copy)summary.textContent=copy;
+  const visible=expandedReview?ordered:ordered.slice(0,reviewLimit);
+  $('creator-issues').innerHTML=visible.length
+    ?visible.map(({issue,index,label})=>reviewIssueMarkup(issue,index,label)).join('')
+    :' <p>Our starting setup is ready. Test it to see how village life unfolds.</p>';
+  if(!expandedReview&&ordered.length>reviewLimit){
+    $('creator-issues').insertAdjacentHTML('beforeend',`<button data-issue-more>Show all ${ordered.length} review notes</button>`);
+  }
 }
 function setTool(tool){
   const workspace=['road','route-path','battery-bank','move-bank','copy-bank','move-site','copy-site','duplicate',...sourceKinds].includes(tool)||allBuildingArt[tool]?'village':['habitat','nature','thin-nature','move-nature','copy-nature','river','meadow','camp','camera'].includes(tool)?'land':tool==='region'?'story':tool==='resident-start'?'people':null;
@@ -667,7 +705,12 @@ function wire(){
   };
   $('creator-issues').onclick=e=>{
     const journalIssue=e.target.closest('[data-issue-journal]');if(journalIssue){const issue=report.issues[Number(journalIssue.dataset.issueJournal)];if(issue){const section=$('creator-journal');revealWorkspaceSection(section);section.open=true;journalEditor.openIssue(issue.path);}return;}
-    if(e.target.closest('[data-issue-more]')){expandedReview=true;renderReview();return;}
+    if(e.target.closest('[data-issue-more]')){
+      expandedReview=true;renderReview();
+      const heading=$('creator-issues').querySelectorAll('h4')[reviewLimit];
+      if(heading){heading.tabIndex=-1;heading.focus();}
+      return;
+    }
     const button=e.target.closest('[data-issue]');
     if(button){revealMapIssue(report.issues[Number(button.dataset.issue)]);return;}
     if(e.target.matches('[data-issue-liquids]')){revealWorkspaceSection($('creator-liquids'));$('creator-liquids').open=true;$('creator-liquids').scrollIntoView({block:'nearest'});}

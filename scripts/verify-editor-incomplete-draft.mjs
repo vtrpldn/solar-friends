@@ -27,6 +27,8 @@ try{
  const plot=await open();await importFile(plot,Buffer.from(JSON.stringify(placement)));
  await plot.locator('[data-workspace=review]').click();
  const plotIssue=plot.locator('#creator-issues [data-severity=error]').filter({hasText:'Leave a little room between buildings'});
+ assert.equal(await plotIssue.locator('h4').textContent(),'Blocking issue');
+ assert.equal(await plot.locator('#creator-review-count').textContent(),'1 blocking issue');
  await plotIssue.getByRole('button',{name:'Show on map'}).press('Enter');
  const column=plot.locator('#creator-object-x');
  assert(await plot.locator('[data-workspace=village]').evaluate(el=>el.getAttribute('aria-selected')==='true'));
@@ -105,5 +107,18 @@ try{
  assert.deepEqual(repairedView.map.camp,baseline.map.camp);
  assert.deepEqual(repairedView.start,baseline.start);
  assert.deepEqual(errors,[]);
- const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,keyboardCampRepair:true,independentPositionRepairs:true,keyboardCameraRepair:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement, boundary, arrival and opening-view repairs, and exact reload.');
+ const notes=await open();
+ const template=await notes.evaluate(async()=>{
+  const {Game}=await import('/pkg/solar_friends.js'),game=new Game();
+  try{return game.scenario_template('sandbox');}finally{game.free();}
+ });
+ await importFile(notes,Buffer.from(template));
+ await notes.locator('[data-workspace=review]').click();
+ assert(await notes.locator('#creator-test').isEnabled());
+ assert.equal(await notes.locator('#creator-review-count').textContent(),'1 warning · 2 notes');
+ assert.deepEqual(await notes.locator('#creator-issues .creator-issue h4').allTextContents(),['Warning','Information','Information']);
+ await notes.locator('#creator-review-count').scrollIntoViewIfNeeded();
+ await notes.screenshot({path:`${output}/review-severity.png`});
+ assert.deepEqual(errors,[]);
+ const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,keyboardCampRepair:true,independentPositionRepairs:true,keyboardCameraRepair:true,textSeverityAndNonblockingNotes:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement, boundary, arrival and opening-view repairs, text severity and exact reload.');
 }finally{await closeValidationBrowser(browser,server);}
