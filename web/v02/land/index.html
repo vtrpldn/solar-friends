@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solar Friends · v0.2 Land Preview</title>
+    <link rel="stylesheet" href="land.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "../workshop/vendor/three.module.js",
+          "three/addons/controls/OrbitControls.js": "../workshop/vendor/OrbitControls.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <canvas
+      id="land"
+      aria-label="64 by 64 cell isometric 3D land preview"
+      tabindex="0"
+    ></canvas>
+    <header>
+      <div class="emblem">SF</div>
+      <div>
+        <h1>A place to begin</h1>
+        <p>Solar Friends · v0.2 land preview</p>
+      </div>
+      <a href="../workshop/">Asset workshop ↗</a>
+    </header>
+    <aside id="inspector">
+      <span class="eyebrow">THE FIRST CLEARING</span>
+      <h2 id="object-name">Room to grow</h2>
+      <p id="object-description">
+        A 64 × 64 plot, with our first five props gathered at its center. Select
+        a prop to inspect it.
+      </p>
+      <dl>
+        <div>
+          <dt>Land</dt>
+          <dd>64 × 64 cells</dd>
+        </div>
+        <div>
+          <dt>Scale</dt>
+          <dd>128 × 128 metres</dd>
+        </div>
+        <div>
+          <dt>Preview</dt>
+          <dd>Live 3D · orthographic</dd>
+        </div>
+      </dl>
+      <div id="selection" hidden>
+        <p id="object-details"></p>
+        <button id="clear">Clear selection</button>
+      </div>
+      <div class="asset-list" id="asset-list" aria-label="Find a prop"></div>
+    </aside>
+    <div id="toast" role="status">Preparing the clearing…</div>
+    <footer>
+      <div class="toolbar">
+        <button id="home" title="Return to the central props (Home)">
+          ⌂ Clearing</button
+        ><button id="overview">Whole plot</button><span class="divider"></span
+        ><button
+          id="left"
+          aria-label="Rotate camera left"
+          title="Rotate left (Q)"
+        >
+          ↶</button
+        ><span id="bearing">SE</span
+        ><button
+          id="right"
+          aria-label="Rotate camera right"
+          title="Rotate right (E)"
+        >
+          ↷</button
+        ><span class="divider"></span
+        ><button id="zoom-out" aria-label="Zoom out">−</button
+        ><button id="zoom-in" aria-label="Zoom in">+</button
+        ><span class="divider"></span
+        ><button id="grid" aria-pressed="false">Grid</button
+        ><button id="night" aria-pressed="false">Night</button>
+      </div>
+      <div class="readout">
+        <span>Drag to pan · Scroll to zoom · Q / E to turn</span
+        ><span id="coordinate">64 × 64 · 4,096 cells</span>
+      </div>
+    </footer>
+    <script type="module" src="land.js"></script>
+  </body>
+</html>
