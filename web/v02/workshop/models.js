@@ -652,4 +652,4 @@ export function disposeModel(model) {
 }
 
 // Shared construction language; approved study recipes remain unchanged.
-export { box, cylinder, ball, beam, clayRoof, mesh };
+export { box, cylinder, ball, beam, clayRoof, mesh, gable };

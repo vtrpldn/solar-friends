@@ -412,3 +412,29 @@ dd {
     padding: 22px 14px;
   }
 }
+
+.workshop-links {
+  margin-left: auto;
+  display: flex;
+  gap: 20px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.workshop-links a {
+  color: #47604b;
+  text-decoration: none;
+}
+#assets {
+  max-height: calc(100vh - 425px);
+  min-height: 240px;
+  overflow: auto;
+  margin-top: 12px;
+}
+aside input[type="search"] {
+  width: 100%;
+  padding: 9px;
+  border: 1px solid #c5c9b9;
+  border-radius: 6px;
+  background: #fffdf4;
+  font: inherit;
+}

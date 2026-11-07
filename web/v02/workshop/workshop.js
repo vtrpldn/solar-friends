@@ -1,9 +1,19 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { ASSETS, PALETTE, CELL, createAsset, disposeModel } from "./models.js";
+import {
+  ASSETS,
+  PALETTE,
+  CELL,
+  createAsset,
+  disposeModel,
+} from "../library/catalog.js";
 const $ = (s) => document.querySelector(s);
 const state = {
-  id: "house",
+  id: ASSETS.some(
+    (a) => a.id === new URLSearchParams(location.search).get("asset"),
+  )
+    ? new URLSearchParams(location.search).get("asset")
+    : "house",
   angle: 0,
   light: "day",
   surface: "materials",
@@ -288,7 +298,7 @@ function manifest() {
       anchor: ANCHOR,
       footprint: rotation % 180 ? [...def.footprint].reverse() : def.footprint,
     })),
-    source: "models.js",
+    source: "../library/catalog.js",
     threeRevision: THREE.REVISION,
   };
 }
@@ -391,10 +401,21 @@ function json(value, name) {
     name,
   );
 }
+const filter = document.createElement("input");
+filter.type = "search";
+filter.placeholder = "Find an asset…";
+filter.setAttribute("aria-label", "Search assets");
+$("#assets").before(filter);
+filter.oninput = () => {
+  for (const b of $("#assets").children)
+    b.hidden = !b.textContent
+      .toLowerCase()
+      .includes(filter.value.toLowerCase());
+};
 for (const [i, def] of ASSETS.entries()) {
   const b = document.createElement("button");
   b.dataset.asset = def.id;
-  b.innerHTML = `<span class="number">0${i + 1}</span><span><strong>${def.name}</strong><small>${def.type} · study ${String(def.revision || 1).padStart(2, "0")}</small></span>`;
+  b.innerHTML = `<span class="number">${String(i + 1).padStart(2, "0")}</span><span><strong>${def.name}</strong><small>${def.type} · study ${String(def.revision || 1).padStart(2, "0")}</small></span>`;
   b.onclick = () => {
     state.id = def.id;
     state.together = false;

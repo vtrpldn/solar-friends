@@ -23,13 +23,13 @@
     <header>
       <div class="emblem">SF</div>
       <div>
-        <h1>A place to begin</h1>
-        <p>Solar Friends · v0.2 land preview</p>
+        <h1>The asset garden</h1>
+        <p>Solar Friends · v0.2 · editable 3D gallery</p>
       </div>
       <a href="../workshop/">Asset workshop ↗</a>
     </header>
     <aside id="inspector">
-      <span class="eyebrow">THE FIRST CLEARING</span>
+      <span class="eyebrow">SCENE INSPECTOR</span>
       <h2 id="object-name">Room to grow</h2>
       <p id="object-description">
         A 64 × 64 plot, with our first five props gathered at its center. Select
@@ -51,15 +51,76 @@
       </dl>
       <div id="selection" hidden>
         <p id="object-details"></p>
-        <button id="clear">Clear selection</button>
+        <div class="actions">
+          <button id="move">Move · M</button
+          ><button id="rotate-prop">Rotate · R</button
+          ><button id="duplicate">Duplicate</button
+          ><button id="delete">Delete</button
+          ><button id="place-copy">Place another</button
+          ><button id="clear">Deselect</button>
+        </div>
+        <form id="position-form">
+          <label
+            >Column<input
+              id="column"
+              type="number"
+              min="1"
+              max="64"
+              required /></label
+          ><label
+            >Row<input
+              id="row"
+              type="number"
+              min="1"
+              max="64"
+              required /></label
+          ><button>Apply position</button>
+        </form>
       </div>
-      <div class="asset-list" id="asset-list" aria-label="Find a prop"></div>
+      <p id="scene-count"></p>
+      <p id="save-state"></p>
+      <div class="actions">
+        <button id="undo" disabled>Undo</button
+        ><button id="redo" disabled>Redo</button
+        ><button id="export">Export scene</button
+        ><button id="import">Import scene</button
+        ><button id="reset">Restore gallery</button>
+      </div>
+      <input
+        id="scene-file"
+        type="file"
+        accept=".json,application/json"
+        hidden
+      />
+      <p class="hint">
+        Overlapping props is allowed for composing gardens and courtyards. Edits
+        stay inside the plot.
+      </p>
     </aside>
+    <section id="library">
+      <h2>Asset library</h2>
+      <a href="../library/" class="collection-link"
+        >See the whole collection ↗</a
+      >
+      <input
+        id="search"
+        type="search"
+        placeholder="Find an asset…"
+        aria-label="Search assets"
+      /><select id="category" aria-label="Asset category">
+        <option value="">All categories</option>
+      </select>
+      <p class="hint">
+        Click to find a placed model. Deleted models can be placed again here.
+      </p>
+      <div class="asset-list" id="asset-list" aria-label="Asset library"></div>
+    </section>
+    <button id="cancel-place" hidden>Cancel placement · Esc</button>
     <div id="toast" role="status">Preparing the clearing…</div>
     <footer>
       <div class="toolbar">
-        <button id="home" title="Return to the central props (Home)">
-          ⌂ Clearing</button
+        <button id="home" title="Return to the first model (Home)">
+          ⌂ Gallery</button
         ><button id="overview">Whole plot</button><span class="divider"></span
         ><button
           id="left"

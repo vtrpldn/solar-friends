@@ -1,21 +1,24 @@
-# v0.2 land preview
+# v0.2 asset garden
 
 ## Why
 
-Provide a fresh, direct-3D counterpart to the old artwork preview: a real 64×64 plot with the approved v0.2 props, before designing the new game's simulation.
+A live 64×64 plot lets us judge the complete collection at one real scale and compose scenes with the same models used in the workshop. It is separate from v0.1 and its simulation.
 
-Open `/v02/land/` on the local server. The asset workshop links here and this preview links back. No v0.1 simulation, saved villages or sprites are loaded.
+Open `/v02/land/`. The initial gallery places all 89 model types on the 128×128 metre plot. The asset library can search/filter and focus a model, or place it again after deletion. The collection link opens a visual contact sheet; each card opens that model in the orbitable workshop.
 
-## Scene and controls
+## Controls
 
-- 64×64 cells, each 2 metres, on a flat 128×128 metre continuous land mesh. Quiet vertex colors avoid noisy per-cell texture repetition. Grid lines and plot edges use the same dimensions.
-- The house, shed, tree, resident and ten connected path tiles are placed around the middle of the plot. Models come directly from the approved workshop recipes. This is a fixed preview arrangement, not a construction or simulation system.
-- Left/right drag pans; wheel or buttons zoom; Q/E or arrow buttons rotate the camera in quarter turns. The orthographic camera stays at 30° elevation, preserving 2:1 ground axes. Home returns to the clearing; Whole plot fits the land boundary.
-- Grid and Night toggle inspection aids. Clicking a prop outlines its logical footprint; the prop buttons focus individual assets. Coordinates shown to players are 1–64; stored layout coordinates are 0–63.
-- Rendering happens on changes, rather than continuously repainting a static scene. Shadow coverage is focused on the central reference clearing. This small scene does not establish performance for a populated game.
+- Drag to pan; scroll or ± to zoom. Q/E rotate the orthographic camera; Home returns to the first model; Whole plot frames the map.
+- Select a model. **Move / M** starts a placement preview; click the land or Enter to commit. R rotates the selected model or preview by 90°. Escape cancels placement without changing the scene.
+- **Duplicate** (Command/Ctrl+D) starts a new copy preview. **Place another** starts another copy of that asset. Delete/Backspace removes the selected model.
+- Column/Row fields provide exact one-based cell placement. Bounds are validated using rotated footprints. Roof and foliage overhangs are preserved. Overlapping props are allowed deliberately for art composition.
+- Undo/redo buttons or Command/Ctrl+Z / Shift+Z reverse up to 100 edits. Restore gallery is also undoable.
+- Grid and Night are inspection options. Windows and streetlamp heads glow at night; streetlamp light originates at the lamp head.
 
-## Checks
+## Storage
 
-`node scripts/verify-v02-land.mjs` checks all 4,096 cell centers, map boundaries, centered placement, non-overlapping solid footprints, connected paths and exact 2:1 projection for all four camera bearings. The resident can stand on a path.
+Edits save to localStorage under `solar-friends-v02-scene-1`, separate from every v0.1 save. Export/import use a versioned JSON document with up to 1,000 props. Imports validate known asset IDs, unique instance IDs, integer cells, quarter turns and map bounds before replacing the scene. Failed imports leave the scene intact. The browser reports storage failure and offers export. Undo history resets on reload; scene contents persist.
 
-The in-app browser was used to inspect both the full plot and the close clearing, select props, pan, zoom, rotate and switch lighting. No browser errors or warnings were observed in that review. Existing assets and the sprite workshop remain available.
+`editor.js` owns pure scene validation/history; `layout.js` owns map coordinates and the original five-prop reference fixture; `land.js` owns rendering and interaction. Rendering is on demand. The asset library batches each model by material, while the terrain remains one continuous mesh. There are no platform sprites or simulated residents.
+
+Run `node scripts/verify-v02-library.mjs`, `node scripts/verify-v02-models.mjs`, and `node scripts/verify-v02-land.mjs`. The last checks map math and the original centered five-prop reference layout; the library test covers the full gallery and editor transactions.

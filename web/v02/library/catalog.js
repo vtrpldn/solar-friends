@@ -7,6 +7,7 @@ import {
   ball,
   beam,
   clayRoof,
+  gable,
 } from "../workshop/models.js";
 export { disposeModel, PALETTE, CELL } from "../workshop/models.js";
 const group = () => new THREE.Group();
@@ -35,13 +36,97 @@ function foliage(g, x, y, z, r = 1, hex = "#68883c", scale = [1, 1, 1]) {
   return color(ball(g, r, "leaf", x, y, z, scale, 0), hex);
 }
 function leaf(g, x, y, z, angle, length = 1, hex = "#68883c") {
-  const m = foliage(g, x, y, z, 0.5, hex, [0.32, 0.1, length * 2]);
-  m.rotation.set(-0.25, angle, 0.12);
+  const geo = new THREE.BufferGeometry();
+  const w = length * 0.24;
+  geo.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(
+      [
+        0,
+        0,
+        0,
+        -w,
+        0,
+        length * 0.45,
+        0,
+        length * 0.16,
+        length * 0.5,
+        0,
+        0,
+        0,
+        0,
+        length * 0.16,
+        length * 0.5,
+        w,
+        0,
+        length * 0.45,
+        -w,
+        0,
+        length * 0.45,
+        0,
+        -length * 0.12,
+        length,
+        0,
+        length * 0.16,
+        length * 0.5,
+        0,
+        length * 0.16,
+        length * 0.5,
+        0,
+        -length * 0.12,
+        length,
+        w,
+        0,
+        length * 0.45,
+      ],
+      3,
+    ),
+  );
+  geo.computeVertexNormals();
+  const m = color(new THREE.Mesh(geo), hex);
+  m.material.side = THREE.DoubleSide;
+  m.position.set(x, y, z);
+  m.rotation.y = angle;
+  m.castShadow = true;
+  g.add(m);
   return m;
 }
+
 function plant(kind, stage = 2) {
   const g = group(),
     s = [0.28, 0.62, 1][stage];
+  if (["fern", "bromeliad", "macambira"].includes(kind)) {
+    for (let i = 0; i < 9; i++) {
+      const a = i * 2.4;
+      const f = leaf(
+        g,
+        0,
+        0.12,
+        0,
+        a,
+        (kind === "bromeliad" ? 0.45 : 0.7) * s,
+        i % 2 ? "#91a74c" : "#68883c",
+      );
+      f.rotation.x = -0.35;
+      if (kind === "fern")
+        for (let j = 1; j < 4; j++)
+          for (const side of [-1, 1])
+            leaf(
+              g,
+              Math.sin(a) * j * 0.12,
+              0.15 + j * 0.025,
+              Math.cos(a) * j * 0.12,
+              a + side * 0.85,
+              0.2 * s,
+              "#68883c",
+            );
+    }
+    if (kind === "bromeliad") {
+      cylinder(g, 0.035, 0.035, 0.45, "leaf", 0, 0.225, 0, 5);
+      foliage(g, 0, 0.5, 0, 0.12, "#bf633b", [0.5, 1, 0.5]);
+    }
+    return g;
+  }
   if (kind === "lettuce")
     for (let i = 0; i < 7; i++)
       foliage(
@@ -53,7 +138,7 @@ function plant(kind, stage = 2) {
         i % 2 ? "#91a74c" : "#68883c",
         [1, 0.7, 1],
       );
-  else if (kind === "grass" || kind === "fodder")
+  else if (kind === "grass" || kind === "fodder" || kind === "reed")
     for (let i = 0; i < 9; i++) {
       const a = i * 2.4;
       beam(
@@ -61,7 +146,7 @@ function plant(kind, stage = 2) {
         [0, 0, 0],
         [
           Math.sin(a) * 0.4 * s,
-          (0.5 + (i % 3) * 0.18) * s,
+          ((kind === "reed" ? 1.1 : 0.5) + (i % 3) * 0.18) * s,
           Math.cos(a) * 0.4 * s,
         ],
         0.045,
@@ -94,17 +179,41 @@ function plant(kind, stage = 2) {
     );
     for (let i = 0; i < (kind === "banana" ? 7 : 6); i++) {
       const a = i * 2.4,
-        y = h * (0.32 + i * 0.105);
+        y = h * (kind === "banana" ? 0.75 + (i % 3) * 0.08 : 0.32 + i * 0.105);
       leaf(
         g,
-        Math.cos(a) * 0.22 * s,
+        0,
         y,
-        Math.sin(a) * 0.22 * s,
+        0,
         a,
-        kind === "banana" ? 1.25 * s : 0.45 * s,
+        kind === "banana" ? 1.5 * s : 0.5 * s,
         i % 2 ? "#91a74c" : "#68883c",
       );
     }
+    if (kind === "tomato" || kind === "beans")
+      for (let i = 0; i < 4; i++)
+        foliage(
+          g,
+          Math.sin(i * 2.4) * 0.2 * s,
+          (0.3 + i * 0.16) * s,
+          Math.cos(i * 2.4) * 0.2 * s,
+          0.22 * s,
+          i % 2 ? "#91a74c" : "#68883c",
+          [1, 0.8, 1],
+        );
+    if (kind === "beans" && stage === 2)
+      for (let i = 0; i < 4; i++)
+        cylinder(
+          g,
+          0.025,
+          0.025,
+          0.22,
+          "leafLight",
+          Math.sin(i) * 0.25,
+          0.5 + i * 0.12,
+          Math.cos(i) * 0.25,
+          5,
+        );
     if (stage === 2 && kind === "tomato")
       for (let i = 0; i < 5; i++)
         foliage(
@@ -127,8 +236,7 @@ function tree(kind) {
   const g = group();
   if (kind === "jucara") {
     cylinder(g, 0.1, 0.2, 4.5, "timber", 0, 2.25, 0, 7);
-    for (let i = 0; i < 9; i++)
-      leaf(g, Math.sin(i) * 0.55, 4.35, Math.cos(i) * 0.55, i, 1.8, "#4b7b43");
+    for (let i = 0; i < 9; i++) leaf(g, 0, 4.35, 0, i, 1.8, "#4b7b43");
     return g;
   }
   if (kind === "mandacaru") {
@@ -158,7 +266,7 @@ function tree(kind) {
       z = Math.cos(a) * r * 0.6,
       y = h * 0.72 + (i % 2) * 0.35;
     beam(g, [0, h * 0.35, 0], [x, y, z], 0.18, "timber");
-    foliage(g, x, y, z, r * 0.78, c, [1, 0.8, 1]);
+    color(ball(g, r * 0.66, "leaf", x, y, z, [1, 0.85, 1], 1), c);
   }
   if (kind === "orchard" || kind === "pequi")
     for (let i = 0; i < 7; i++)
@@ -243,6 +351,7 @@ function cabin(kind) {
     veranda = kind.includes("veranda"),
     terrace = kind.includes("courtyard");
   block(g, 3.4, 2.35, 3.2, adobe ? "#bd9069" : "#e8d8ab");
+  color(gable(g, 3.4, 3.2, 2.35, 0.87), adobe ? "#bd9069" : "#e8d8ab");
   clayRoof(g, {
     half: 1.95,
     depth: 3.6,
@@ -256,8 +365,9 @@ function cabin(kind) {
   box(g, 1.1, 0.12, 0.55, "stone", -0.55, 0.06, 1.85);
   if (veranda || terrace) {
     box(g, 3.4, 0.1, 1.2, "earth", 0, 0.05, 2.2);
-    for (const x of [-1.5, 1.5])
-      box(g, 0.16, 2.2, 0.16, "timber", x, 1.1, 2.65);
+    if (veranda)
+      for (const x of [-1.5, 1.5])
+        box(g, 0.16, 2.2, 0.16, "timber", x, 1.1, 2.65);
     if (veranda) {
       const aw = group();
       aw.position.set(0, 0, 2.2);
@@ -281,13 +391,14 @@ function goat() {
   const g = group();
   foliage(g, 0, 0.65, 0, 0.47, "#dfd4b7", [1.2, 0.65, 0.6]);
   for (const x of [-0.3, 0.3])
-    for (const z of [-0.18, 0.18])
-      box(g, 0.09, 0.43, 0.09, "timber", x, 0.215, z);
+    for (const z of [-0.18, 0.18]) box(g, 0.09, 0.6, 0.09, "timber", x, 0.3, z);
   foliage(g, 0.46, 0.93, 0, 0.21, "#e9dfc5", [0.8, 1, 0.8]);
   for (const z of [-0.13, 0.13]) {
     beam(g, [0.43, 1.07, z], [0.32, 1.3, z], 0.045, "stone");
     foliage(g, 0.48, 0.94, z, 0.1, "#b19a78", [1, 0.4, 0.7]);
   }
+  for (const z of [-0.16, 0.16]) foliage(g, 0.57, 0.99, z, 0.025, "#3a2a23");
+  beam(g, [-0.45, 0.7, 0], [-0.65, 0.93, 0], 0.07, "plaster");
   return g;
 }
 function chicken(variant = 0) {
@@ -296,6 +407,8 @@ function chicken(variant = 0) {
   foliage(g, 0, 0.29, 0, 0.25, c, [0.8, 1, 1.15]);
   foliage(g, 0, 0.52, 0.18, 0.12, c);
   foliage(g, 0, 0.65, 0.18, 0.06, "#bb4f38", [0.7, 1, 1]);
+  for (const x of [-0.09, 0.09]) foliage(g, x, 0.55, 0.23, 0.018, "#3a2a23");
+  foliage(g, 0, 0.39, -0.23, 0.16, c, [0.6, 1.2, 0.65]);
   block(g, 0.08, 0.06, 0.14, "#d6a34b", 0, 0.5, 0.3);
   for (const x of [-0.09, 0.09])
     beam(g, [x, 0.02, 0], [x, 0.19, 0], 0.025, "earth");
@@ -309,6 +422,18 @@ function building(id) {
         box(g, 0.1, 2.45, 0.1, "timberLight", x, 1.225, z);
         beam(g, [x, 2.45, z], [0, 3.5, z], 0.1, "timberLight");
       }
+    for (const x of [-1.7, 1.7])
+      for (const y of [0.2, 1.2, 2.4])
+        box(g, 0.1, 0.09, 3.4, "timberLight", x, y, 0);
+    for (const x of [-0.5, 0.5])
+      box(g, 0.11, 2.15, 0.1, "timberLight", x, 1.075, 1.7);
+    box(g, 1.1, 0.1, 0.1, "timberLight", 0, 2.15, 1.7);
+    color(box(g, 0.9, 2, 0.03, "glass", 0, 1.05, 1.7), "#b4d6c5", 0.18);
+    for (const x of [-1.05, 1.05]) {
+      block(g, 0.8, 0.15, 3, "#936b43", x, 0.075);
+      for (const side of [-1, 1])
+        box(g, 0.06, 0.2, 3, "timberLight", x + side * 0.4, 0.1, 0);
+    }
     beam(g, [0, 3.5, -1.7], [0, 3.5, 1.7], 0.12, "timberLight");
     for (const x of [-1.7, 1.7])
       color(box(g, 0.025, 2.3, 3.4, "glass", x, 1.2, 0), "#b4d6c5", 0.18);
@@ -336,8 +461,8 @@ function building(id) {
   if (id === "grove" || id === "banana_treatment") {
     if (id === "banana_treatment") bed(g, 3.5, 3.5);
     for (const [x, z] of [
-      [-0.8, -0.8],
-      [0.8, 0.7],
+      [-0.8, 0.6],
+      [0.8, -0.6],
     ]) {
       const p = plant("banana");
       p.position.set(x, 0, z);
@@ -388,7 +513,11 @@ function building(id) {
   }
   if (id === "square") {
     for (const z of [-1.4, 1.4]) {
-      table(g, 0, z, 2);
+      box(g, 2, 0.12, 0.55, "timberLight", 0, 0.48, z);
+      box(g, 2, 0.38, 0.09, "timberLight", 0, 0.79, z + Math.sign(z) * 0.25);
+      for (const x of [-0.8, 0.8])
+        for (const side of [-0.18, 0.18])
+          box(g, 0.1, 0.45, 0.1, "timber", x, 0.225, z + side);
     }
     for (const x of [-1.5, 1.5]) {
       cylinder(g, 0.23, 0.17, 0.35, "tile", x, 0.175, 0);
@@ -467,6 +596,7 @@ function building(id) {
   }
   if (id === "eco_toilet") {
     block(g, 1.5, 2.35, 1.5, "#dfc99b");
+    gable(g, 1.5, 1.5, 2.35, 0.36);
     block(g, 0.75, 1.9, 0.08, "#397c72", 0, 0.95, 0.79);
     clayRoof(g, {
       half: 0.95,
@@ -483,6 +613,7 @@ function building(id) {
       for (const z of [-0.55, 0.55])
         box(g, 0.12, 0.65, 0.12, "timber", x, 0.325, z);
     block(g, 1.5, 1.2, 1.4, "#d5bc85", 0, 1.15);
+    gable(g, 1.5, 1.4, 1.75, 0.36);
     block(g, 0.45, 0.6, 0.06, "#397c72", 0, 1, 0.73);
     clayRoof(g, {
       half: 0.95,
@@ -546,6 +677,10 @@ function supply(id) {
       m.rotation.z = Math.PI / 2;
     }
     table(g, 1, 0.1, 1);
+    box(g, 0.8, 0.08, 0.17, "stone", 1, 1.01, 0.1);
+    box(g, 0.16, 0.12, 0.24, "timber", 1.43, 1.01, 0.1);
+    for (let i = 0; i < 7; i++)
+      box(g, 0.04, 0.06, 0.025, "stone", 0.65 + i * 0.1, 0.99, 0.2);
   }
   if (id === 1)
     for (let i = 0; i < 9; i++) {
@@ -584,14 +719,53 @@ function supply(id) {
       );
   if (id === 4) {
     block(g, 0.8, 1.8, 0.12, "#397c72", -0.5, 0.9, -0.4);
-    for (let i = 0; i < 5; i++)
-      box(g, 0.7, 0.1, 0.6, "tile", 0, 0.06 + i * 0.1, 0.5);
+    for (const y of [0.5, 1.3]) {
+      block(g, 0.58, 0.5, 0.03, "#30695e", -0.5, y, -0.32);
+    }
+    foliage(g, -0.19, 0.9, -0.3, 0.035, "#d2b16b");
+    for (const x of [0.05, 0.65])
+      box(g, 0.07, 1.05, 0.07, "plaster", x, 1.15, -0.35);
+    for (const y of [0.65, 1.15, 1.65])
+      box(g, 0.67, 0.07, 0.07, "plaster", 0.35, y, -0.35);
+    block(g, 0.5, 0.85, 0.02, "#73918a", 0.35, 1.15, -0.38);
+    for (let row = 0; row < 4; row++)
+      for (let col = 0; col < 3; col++) {
+        const tile = color(
+          new THREE.Mesh(
+            new THREE.CylinderGeometry(
+              0.14,
+              0.14,
+              0.6,
+              6,
+              1,
+              true,
+              -Math.PI / 2,
+              Math.PI,
+            ),
+          ),
+          "#b95532",
+        );
+        tile.rotation.x = -Math.PI / 2;
+        tile.position.set(-0.25 + col * 0.24, 0.13 + row * 0.09, 0.5);
+        tile.material.side = THREE.DoubleSide;
+        tile.castShadow = true;
+        g.add(tile);
+      }
     box(g, 0.6, 0.5, 0.6, "timberLight", 0.7, 0.25, 0);
+    for (const y of [0.12, 0.35])
+      box(g, 0.64, 0.045, 0.64, "timber", 0.7, y, 0);
   }
   if (id === 5) {
     table(g, 0, 0, 2);
     box(g, 0.6, 0.5, 0.55, "timberLight", 0.4, 1.23, 0);
-    block(g, 0.5, 0.5, 0.15, "#365c73", -0.5, 1.23, 0);
+    for (const y of [1.05, 1.4]) box(g, 0.64, 0.04, 0.59, "timber", 0.4, y, 0);
+    const solar = group();
+    panel(solar);
+    solar.scale.setScalar(0.33);
+    solar.position.set(-0.5, 0.98, 0);
+    g.add(solar);
+    box(g, 0.4, 0.05, 0.07, "stone", 0, 1.02, 0.3);
+    box(g, 0.12, 0.06, 0.12, "timber", 0.23, 1.02, 0.3);
   }
   if (id === 6) {
     block(g, 0.65, 0.65, 0.4, "#48665b");
@@ -617,17 +791,57 @@ function detail(i) {
           "#e4c778",
         );
     }
-  } else
-    for (let n = 0; n < 4; n++)
+  } else if (i === 5) {
+    for (let n = 0; n < 5; n++) {
+      const x = Math.sin(n) * 0.35,
+        z = Math.cos(n) * 0.35,
+        h = 0.3 + n * 0.08;
+      const crystal = color(
+        cylinder(g, 0.07, 0.15, h, "stone", x, h / 2, z, 5),
+        "#ded8bd",
+      );
+      const tip = color(
+        new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.16, 5)),
+        "#eee6cb",
+      );
+      tip.position.set(x, h + 0.08, z);
+      tip.castShadow = true;
+      g.add(tip);
+    }
+  } else if (i === 6) {
+    for (let n = 0; n < 5; n++)
       foliage(
         g,
-        Math.sin(n) * 0.45,
-        0.18,
-        Math.cos(n) * 0.45,
-        0.34,
-        ["#93988d", "#d9d3b7", "#ad7653", "#73816b"][i - 4],
-        [1, 0.7, 1],
+        Math.sin(n) * 0.4,
+        0.08 + (n % 2) * 0.1,
+        Math.cos(n) * 0.35,
+        0.4,
+        n % 2 ? "#ad7653" : "#bd956b",
+        [1, 0.3, 0.8],
       );
+  } else
+    for (let n = 0; n < 4; n++) {
+      const x = Math.sin(n) * 0.45,
+        z = Math.cos(n) * 0.45;
+      color(
+        ball(
+          g,
+          0.34,
+          "stone",
+          x,
+          0.18,
+          z,
+          [1, i === 7 ? 0.5 : 0.9, 1],
+          i === 7 ? 1 : 0,
+        ),
+        i === 7 ? "#929b82" : "#93988d",
+      );
+      if (i === 7) foliage(g, x, 0.3, z, 0.18, "#71854d", [1, 0.12, 1]);
+    }
+  if (i === 3)
+    g.traverse((o) => {
+      if (o.isMesh) color(o, "#b39f64");
+    });
   return g;
 }
 function person(i) {
@@ -801,7 +1015,19 @@ for (const [i, id] of [
         : id === "macambira"
           ? plant("macambira")
           : id === "campo"
-            ? detail(0)
+            ? (() => {
+                const g = group();
+                for (let i = 0; i < 5; i++)
+                  foliage(
+                    g,
+                    Math.sin(i) * 0.25,
+                    0.3,
+                    Math.cos(i) * 0.25,
+                    0.32,
+                    i % 2 ? "#91a74c" : "#68883c",
+                  );
+                return g;
+              })()
             : tree(id),
     [`regional-nature-${i}`],
   );
@@ -898,6 +1124,9 @@ export function createAsset(id) {
   const def = ASSETS.find((a) => a.id === id);
   if (!def) throw new Error(`Unknown asset ${id}`);
   const g = def.build();
+  const bounds = new THREE.Box3().setFromObject(g, true);
+  if (bounds.min.y < 0)
+    for (const child of g.children) child.position.y -= bounds.min.y;
   g.name = id;
   g.userData = { id, footprint: def.footprint, revision: def.revision || 1 };
   g.updateMatrixWorld(true);
@@ -910,9 +1139,11 @@ export const CATEGORIES = [...new Set(ASSETS.map((a) => a.category))];
 export function compactModel(root) {
   root.updateMatrixWorld(true);
   const batches = new Map();
+  const owned = new Set();
   root.traverse((o) => {
     if (!o.isMesh) return;
     const key = o.material;
+    if (o.userData.ownedMaterial) owned.add(key);
     const geometry = (
       o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()
     ).applyMatrix4(o.matrixWorld);
@@ -940,6 +1171,7 @@ export function compactModel(root) {
     }
     geo.computeBoundingSphere();
     const mesh = new THREE.Mesh(geo, material);
+    mesh.userData.ownedMaterial = owned.has(material);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     result.add(mesh);

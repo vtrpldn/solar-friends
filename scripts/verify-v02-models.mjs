@@ -5,7 +5,7 @@ import {
   createAsset,
   disposeModel,
   CELL,
-} from "../web/v02/workshop/models.js";
+} from "../web/v02/library/catalog.js";
 const camera = new THREE.OrthographicCamera(
   -512 / 48 / 2,
   512 / 48 / 2,
@@ -38,8 +38,8 @@ let frames = 0;
 for (const def of ASSETS) {
   const model = createAsset(def.id);
   const roundtrip = new THREE.ObjectLoader().parse(model.toJSON());
-  const originalBounds = new THREE.Box3().setFromObject(model),
-    loadedBounds = new THREE.Box3().setFromObject(roundtrip);
+  const originalBounds = new THREE.Box3().setFromObject(model, true),
+    loadedBounds = new THREE.Box3().setFromObject(roundtrip, true);
   assert.ok(originalBounds.min.distanceTo(loadedBounds.min) < 1e-5);
   assert.ok(originalBounds.max.distanceTo(loadedBounds.max) < 1e-5);
   assert.ok(originalBounds.min.y >= -0.001, `${def.id} sinks below ground`);

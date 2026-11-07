@@ -2,18 +2,18 @@
 
 ## Why
 
-Prove a repeatable model-to-sprite workflow before adding more game systems. The v0.1 code and art remain unchanged. These five models are reviewable material studies, not approved final artwork.
+Prove a repeatable model-to-sprite workflow before adding more game systems. The v0.1 code and art remain unchanged. The workshop now includes all 89 models in the v0.2 collection. The original five recipes remain as the reference kit; house study 03 is approved, and the newly recreated models are reviewable studies.
 
 Open http://127.0.0.1:4173/v02/workshop/ after `npm run dev:serve`.
 
 ## Source of truth
 
-- `models.js` contains deterministic metre-based model recipes, shared materials and the reusable roof/window/beam kit.
+- `models.js` contains the original five deterministic metre-based model recipes and shared construction helpers. `../library/catalog.js` extends them with the full collection and explicit v0.1 coverage IDs.
 - House 2×2 cells, shed 2×1, tree 2×2, path 1×1. A cell is 2 metres. The resident is approximately 1.70 m tall without the hat.
 - Orthographic sprite camera: 45° azimuth, 30° elevation, producing 2:1 ground axes. Vertical lines stay vertical. Orbiting is inspection only.
 - Export: four 512×512 transparent views at 0°, 90°, 180°, 270°, arranged left to right. 48 pixels per metre; local ground origin at pixel (256,384) in every frame. Non-square footprints swap dimensions at quarter turns. Shadows use a transparent receiver, never an opaque foundation.
 - The camera and light stay fixed as the model rotates. All frames use the same scale and crop; no per-asset auto-fit. PNG export ignores inspection surfaces, orbit, zoom, grid and scale figure.
-- Placement JSON records the frame rectangles, anchors, footprints, camera and light. 3D JSON is compatible with Three.js ObjectLoader. The editable authoritative recipe remains models.js.
+- Placement JSON records the frame rectangles, anchors, footprints, camera and light. 3D JSON is compatible with Three.js ObjectLoader. The authoritative recipes remain `models.js` and `../library/catalog.js`.
 - Night is a lighting study, not powered windows. Resident animation, botanical specificity, painted textures, normal/depth passes and game integration are subsequent decisions, not delivered here.
 
 ## Inspection
@@ -55,3 +55,7 @@ The player approved house study 03 as the reference and requested its style acro
 - Resident r02 uses a larger faceted face, simpler clothing, sturdy shoes and a low-sided straw hat, preserving human scale.
 
 The prior recipes and exports remain as references. No randomized house accessories were added. The current r02 props were inspected from all four directions and together in daylight/night. Both verification scripts pass for the current five-model kit and 40 exported frames. The shared preview now leaves enough horizontal space for the complete yard on a narrower desktop panel; export scale is unchanged.
+
+## Full collection and scene editing
+
+All 89 models can now be searched and inspected here, including direct `?asset=greenhouse` links from the [visual collection](../library/). The [asset garden](../land/) supports placement, movement, rotation, duplication, deletion, undo/redo and scene save/import/export. `verify-v02-models.mjs` now covers 89 JSON roundtrips and 356 rotated geometry projections. Existing exported PNG checks still cover the five reference assets. See the [collection scope](../library/README.md) for legacy mappings and static-resident limitations.
