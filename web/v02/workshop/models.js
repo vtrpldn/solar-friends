@@ -198,23 +198,45 @@ function house() {
     slope.rotation.z = -side * angle;
     g.add(slope);
     box(slope, length, 0.16, 4, "tile", 0, 0, 0);
-    // A few broad, three-sided barrel channels replace hundreds of tiny tiles.
-    for (let col = 0; col < 8; col++) {
-      const channel = mesh(
-        slope,
-        new THREE.CylinderGeometry(0.24, 0.24, length, 3, 1, false, 0, Math.PI),
-        col % 4 === 0 ? "tileLight" : "tile",
-        0,
-        0.08,
-        -1.75 + col * 0.5,
-      );
-      channel.rotation.z = Math.PI / 2;
+    // Four overlapping courses of hollow, softly faceted clay barrel tiles.
+    const course = length / 4;
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 8; col++) {
+        const shell = new THREE.Shape();
+        for (let i = 0; i <= 6; i++) {
+          const a = (i * Math.PI) / 6;
+          const x = Math.cos(a) * 0.245,
+            y = Math.sin(a) * 0.245;
+          if (i === 0) shell.moveTo(x, y);
+          else shell.lineTo(x, y);
+        }
+        for (let i = 6; i >= 0; i--) {
+          const a = (i * Math.PI) / 6;
+          shell.lineTo(Math.cos(a) * 0.195, Math.sin(a) * 0.195);
+        }
+        shell.closePath();
+        const tileLength = course + 0.075;
+        const geo = new THREE.ExtrudeGeometry(shell, {
+          depth: tileLength,
+          bevelEnabled: false,
+        });
+        geo.translate(0, 0, -tileLength / 2);
+        const tile = mesh(
+          slope,
+          geo,
+          (row * 3 + col) % 7 === 0 ? "tileLight" : "tile",
+          side * (length / 2 - (row + 0.5) * course),
+          0.09 + row * 0.025,
+          -1.75 + col * 0.5,
+        );
+        tile.rotation.y = (side * Math.PI) / 2;
+      }
     }
     box(slope, length, 0.2, 0.16, "tileLight", 0, 0.01, 2);
     box(slope, length, 0.2, 0.16, "tileLight", 0, 0.01, -2);
     box(slope, 0.14, 0.22, 4.15, "tileDark", (side * length) / 2, -0.04, 0);
   }
-  const ridge = cylinder(g, 0.18, 0.18, 4.16, "tileLight", 0, 3.61, 0, 5);
+  const ridge = cylinder(g, 0.25, 0.25, 4.16, "tileLight", 0, 3.78, 0, 6);
   ridge.rotation.x = Math.PI / 2;
   // A broad arched entrance and a few chunky joinery details read at game scale.
   function arch(width, height, depth, material, x, y, z) {
@@ -402,11 +424,11 @@ export const ASSETS = [
   {
     id: "house",
     name: "Limewashed house",
-    revision: 2,
+    revision: 3,
     type: "Home",
     footprint: [2, 2],
     description:
-      "House study 02: broad faceted terracotta, a welcoming arched door, generous shutters and a little doorstep plant.",
+      "House study 03: chunky overlapping clay barrel tiles, a welcoming arched door, generous shutters and a little doorstep plant.",
     build: house,
   },
   {

@@ -40,3 +40,7 @@ Three.js 0.187.0, MIT. The local browser modules and OrbitControls are copied fr
 The house alone now uses a broader low-poly roof, a lower wall silhouette, a faceted arched turquoise entrance, large open shutters and a single small doorstep plant. Fine tile rows, shutter slats and exposed-brick decoration were removed from this candidate. The original house recipe and r01 exports remain available as references; the other four models are unchanged.
 
 The house uses 1,020 triangles across 75 meshes, down from 4,796 triangles across 293 meshes. The original camera, shared scale and 2×2-cell footprint remain. Study 02 is an art-direction candidate awaiting player feedback, not approval to apply this style to the other props. Its day/night sprites and manifests are saved as `exports/house-*-r02.*`.
+
+## House direction study 03
+
+Restores recognizable clay roofing with four overlapping courses of chunky, six-facet hollow barrel tiles and a matching ridge cap. The study 02 walls, entrance, windows and plant are unchanged. Other props remain unchanged. All four rotations were visually inspected in the in-app browser; the r03 day/night exports pass the same alpha, clipping, footprint and anchor checks.
