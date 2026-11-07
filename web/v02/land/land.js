@@ -1,3 +1,4 @@
+import { configureMapSun } from "./lighting.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
@@ -76,19 +77,8 @@ function toast(text) {
 const hemi = new THREE.HemisphereLight("#fff1cf", "#687547", 2.2);
 scene.add(hemi);
 const sun = new THREE.DirectionalLight("#ffedcf", 3);
-sun.position.set(-6, 18, 7);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, {
-  left: -22,
-  right: 22,
-  top: 22,
-  bottom: -22,
-  near: 0.1,
-  far: 70,
-});
-sun.shadow.normalBias = 0.025;
-sun.shadow.bias = -0.00015;
+configureMapSun(sun);
 scene.add(sun, sun.target);
 // One continuous land surface: no per-cell meshes and no decorative ground islands.
 const geometry = new THREE.PlaneGeometry(
@@ -424,18 +414,6 @@ controls.addEventListener("change", () => {
   controls.target.x = THREE.MathUtils.clamp(controls.target.x, -limit, limit);
   controls.target.z = THREE.MathUtils.clamp(controls.target.z, -limit, limit);
   camera.position.add(controls.target.clone().sub(target));
-  sun.target.position.copy(controls.target);
-  sun.position.copy(controls.target).add(new THREE.Vector3(-20, 45, 25));
-  sun.target.updateMatrixWorld();
-  const shadowSpan = overviewMode ? 90 : 25;
-  Object.assign(sun.shadow.camera, {
-    left: -shadowSpan,
-    right: shadowSpan,
-    top: shadowSpan,
-    bottom: -shadowSpan,
-    far: 180,
-  });
-  sun.shadow.camera.updateProjectionMatrix();
   render();
 });
 const raycaster = new THREE.Raycaster(),

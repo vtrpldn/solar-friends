@@ -19,7 +19,8 @@ function color(object, hex, opacity = 1) {
       key,
       new THREE.MeshStandardMaterial({
         color: hex,
-        roughness: 0.95,
+        roughness: opacity < 1 ? 0.16 : 0.95,
+        side: opacity < 1 ? THREE.DoubleSide : THREE.FrontSide,
         flatShading: true,
         transparent: opacity < 1,
         opacity,
@@ -27,6 +28,7 @@ function color(object, hex, opacity = 1) {
       }),
     );
   object.material = colors.get(key);
+  if (opacity < 1) object.castShadow = false;
   return object;
 }
 function block(g, w, h, d, hex, x = 0, y = h / 2, z = 0) {
@@ -232,61 +234,224 @@ function plant(kind, stage = 2) {
   }
   return g;
 }
+function limb(g, a, b, base, tip, hex = "#936039") {
+  const start = new THREE.Vector3(...a),
+    end = new THREE.Vector3(...b),
+    v = end.clone().sub(start);
+  const m = color(
+    cylinder(g, tip, base, v.length(), "timber", 0, 0, 0, 7),
+    hex,
+  );
+  m.position.copy(start.add(end).multiplyScalar(0.5));
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v.normalize());
+  return m;
+}
 function tree(kind) {
   const g = group();
   if (kind === "jucara") {
-    cylinder(g, 0.1, 0.2, 4.5, "timber", 0, 2.25, 0, 7);
-    for (let i = 0; i < 9; i++) leaf(g, 0, 4.35, 0, i, 1.8, "#4b7b43");
+    limb(g, [0, 0, 0], [0.12, 4.5, 0], 0.15, 0.095, "#9d9974");
+    for (let y = 0.3; y < 4; y += 0.35)
+      color(
+        cylinder(
+          g,
+          0.15 - y * 0.01,
+          0.15 - y * 0.01,
+          0.025,
+          "stone",
+          y * 0.025,
+          y,
+          0,
+          10,
+        ),
+        "#bbb391",
+      );
+    limb(g, [0.1, 3.8, 0], [0.12, 4.65, 0], 0.13, 0.09, "#54834b");
+    for (let i = 0; i < 9; i++) {
+      const a = (i * Math.PI * 2) / 9,
+        len = 1.9 + (i % 2) * 0.2;
+      const direction = new THREE.Vector3(Math.sin(a), 0, Math.cos(a));
+      let previous = [0.12, 4.6, 0];
+      for (let j = 1; j <= 6; j++) {
+        const t = j / 6,
+          y = 4.6 + Math.sin(t * Math.PI) * 0.4 - t * 0.55;
+        const point = [0.12 + direction.x * t * len, y, direction.z * t * len];
+        limb(g, previous, point, 0.025, 0.015, "#526f38");
+        previous = point;
+        for (const side of [-1, 1]) {
+          const f = leaf(
+            g,
+            ...point,
+            a + side * 1.15,
+            0.65 * Math.sin(t * Math.PI) + 0.12,
+            "#4c7d42",
+          );
+          f.rotation.x = 0.25;
+        }
+      }
+    }
+    for (let i = 0; i < 9; i++)
+      foliage(
+        g,
+        0.12 + Math.sin(i) * 0.19,
+        4.05 - (i % 3) * 0.1,
+        Math.cos(i) * 0.18,
+        0.065,
+        "#424d35",
+      );
+    return g;
+  }
+  if (kind === "embauba") {
+    limb(g, [0, 0, 0], [0, 3.8, 0], 0.2, 0.11, "#b1b19a");
+    for (let y = 0.3; y < 3.5; y += 0.4)
+      cylinder(g, 0.19 - y * 0.02, 0.19 - y * 0.02, 0.025, "stone", 0, y, 0, 8);
+    for (let i = 0; i < 5; i++) {
+      const a = i * 2.4,
+        x = Math.sin(a) * 1.2,
+        z = Math.cos(a) * 1.2,
+        y = 3.3 + (i % 3) * 0.38;
+      limb(g, [0, 2.3 + i * 0.12, 0], [x, y, z], 0.1, 0.04, "#b1b19a");
+      for (let n = 0; n < 3; n++) {
+        const c = a + n * 2.1,
+          cx = x + Math.sin(c) * 0.3,
+          cz = z + Math.cos(c) * 0.3;
+        limb(g, [x, y, z], [cx, y + 0.25, cz], 0.025, 0.015, "#a9b48a");
+        for (let l = 0; l < 7; l++)
+          leaf(
+            g,
+            cx,
+            y + 0.25,
+            cz,
+            (l * Math.PI * 2) / 7,
+            0.48,
+            n % 2 ? "#a8b98b" : "#7f9d6c",
+          );
+      }
+    }
     return g;
   }
   if (kind === "mandacaru") {
-    color(cylinder(g, 0.19, 0.25, 2.5, "leaf", 0, 1.25, 0, 7), "#598269");
-    for (const side of [-1, 1]) {
-      beam(g, [0, 1, 0], [side * 0.65, 1, 0], 0.22, "leaf");
-      cylinder(g, 0.13, 0.16, 0.95, "leaf", side * 0.65, 1.45, 0, 7);
+    cylinder(g, 0.18, 0.25, 2.7, "leaf", 0, 1.35, 0, 8);
+    for (const [x, h, y] of [
+      [-0.65, 1.0, 1.0],
+      [0.65, 1.5, 0.85],
+      [0.3, 0.7, 1.7],
+    ]) {
+      limb(g, [0, y, 0], [x, y + 0.15, 0], 0.14, 0.12, "#638c61");
+      cylinder(g, 0.1, 0.13, h, "leaf", x, y + 0.15 + h / 2, 0, 8);
+      foliage(g, x, y + 0.15 + h, 0, 0.1, "#68883c", [1, 0.7, 1]);
+    }
+    for (let i = 0; i < 6; i++) {
+      const a = (i * Math.PI) / 3;
+      limb(
+        g,
+        [Math.sin(a) * 0.22, 0.1, Math.cos(a) * 0.22],
+        [Math.sin(a) * 0.18, 2.6, Math.cos(a) * 0.18],
+        0.018,
+        0.014,
+        "#91a174",
+      );
     }
     return g;
   }
   const specs = {
-    jequitiba: [6, 2.1, "#54743a"],
-    embauba: [4, 1.3, "#9eaf72"],
-    pau_brasil: [4.5, 1.6, "#6a883b"],
-    pequi: [3.4, 1.7, "#879641"],
-    barbatimao: [3, 1.3, "#68804b"],
-    umbuzeiro: [3.2, 1.8, "#7c994c"],
-    jurema: [3.1, 1.5, "#829270"],
-    orchard: [2.7, 1, "#73913f"],
-    timber: [4.8, 1.5, "#658543"],
+    jequitiba: [6.8, 2.0, "#55773b"],
+    pau_brasil: [4.8, 1.6, "#608443"],
+    pequi: [3.6, 1.7, "#7f9142"],
+    barbatimao: [3.3, 1.4, "#718747"],
+    umbuzeiro: [3.5, 2.2, "#77974a"],
+    jurema: [3.5, 1.8, "#81926a"],
+    orchard: [2.7, 1.0, "#73913f"],
+    timber: [5.6, 1.4, "#658543"],
   };
   const [h, r, c] = specs[kind] || specs.orchard;
-  cylinder(g, 0.16, 0.36, h * 0.7, "timber", 0, h * 0.35, 0, 6);
-  for (let i = 0; i < 5; i++) {
+  const crooked = ["pequi", "barbatimao", "umbuzeiro"].includes(kind),
+    fine = kind === "jurema",
+    tall = kind === "jequitiba" || kind === "timber";
+  const fork = tall ? h * 0.65 : crooked ? h * 0.3 : h * 0.42,
+    bark = kind === "pau_brasil" ? "#9a614a" : fine ? "#67513d" : "#8d6846";
+  limb(
+    g,
+    [0, 0, 0],
+    [crooked ? 0.22 : 0, fork * 0.5, 0.08],
+    tall ? 0.38 : 0.28,
+    0.22,
+    bark,
+  );
+  limb(
+    g,
+    [crooked ? 0.22 : 0, fork * 0.5, 0.08],
+    [crooked ? -0.1 : 0, fork, 0],
+    0.22,
+    0.16,
+    bark,
+  );
+  if (tall)
+    for (let i = 0; i < 5; i++) {
+      const a = i * 1.256;
+      limb(
+        g,
+        [Math.sin(a) * 0.55, 0.04, Math.cos(a) * 0.55],
+        [0, 1, 0],
+        0.13,
+        0.07,
+        bark,
+      );
+    }
+  const count = fine ? 9 : kind === "umbuzeiro" ? 8 : 6;
+  for (let i = 0; i < count; i++) {
     const a = i * 2.4,
-      x = Math.sin(a) * r * 0.6,
-      z = Math.cos(a) * r * 0.6,
-      y = h * 0.72 + (i % 2) * 0.35;
-    beam(g, [0, h * 0.35, 0], [x, y, z], 0.18, "timber");
-    color(ball(g, r * 0.66, "leaf", x, y, z, [1, 0.85, 1], 1), c);
+      x = Math.sin(a) * r * 0.7,
+      z = Math.cos(a) * r * 0.7,
+      y =
+        kind === "umbuzeiro"
+          ? h * 0.7 + (i % 2) * 0.12
+          : h * 0.72 + (i % 3) * 0.18;
+    const elbow = [x * 0.5, fork + (y - fork) * 0.5, z * 0.45];
+    limb(g, [0, fork, 0], elbow, 0.13, 0.08, bark);
+    limb(g, elbow, [x, y, z], 0.08, 0.035, bark);
+    if (fine) {
+      for (let j = 0; j < 3; j++) {
+        const xx = x + Math.sin(j * 2.1) * 0.35,
+          zz = z + Math.cos(j * 2.1) * 0.35;
+        limb(g, [x, y - 0.3, z], [xx, y, zz], 0.035, 0.015, bark);
+        color(ball(g, 0.44, "leaf", xx, y, zz, [1.15, 0.38, 0.8], 1), c);
+      }
+    } else
+      color(
+        ball(
+          g,
+          r * (kind === "umbuzeiro" ? 0.57 : 0.49),
+          "leaf",
+          x,
+          y,
+          z,
+          [1, kind === "umbuzeiro" ? 0.58 : 0.85, 1],
+          1,
+        ),
+        i % 3 === 0 ? "#89a354" : c,
+      );
   }
+  if (kind === "jequitiba")
+    color(ball(g, 1.15, "leaf", 0, h - 0.6, 0, [1, 0.65, 1], 1), c);
   if (kind === "orchard" || kind === "pequi")
-    for (let i = 0; i < 7; i++)
+    for (let i = 0; i < 9; i++)
       foliage(
         g,
-        Math.sin(i * 2.4) * 0.8,
-        h * 0.72 + (i % 3) * 0.15,
-        Math.cos(i * 2.4) * 0.8,
-        0.1,
-        kind === "orchard" ? "#db9d42" : "#a9b34e",
+        Math.sin(i * 2.4) * r * 0.8,
+        h * 0.69 + (i % 3) * 0.12,
+        Math.cos(i * 2.4) * r * 0.8,
+        0.09,
+        kind === "orchard" ? "#d9a343" : "#9ca93e",
       );
   if (kind === "pau_brasil")
-    for (let i = 0; i < 8; i++)
+    for (let i = 0; i < 10; i++)
       foliage(
         g,
-        Math.sin(i) * 1.3,
-        h * 0.8,
-        Math.cos(i) * 1.3,
-        0.12,
-        "#d7b44d",
+        Math.sin(i) * 1.35,
+        h * 0.78 + (i % 2) * 0.2,
+        Math.cos(i) * 1.35,
+        0.1,
+        "#d2b65b",
       );
   return g;
 }
@@ -333,6 +498,7 @@ function table(g, x = 0, z = 0, w = 1.6) {
 }
 function panel(g, x = 0, z = 0) {
   const p = group();
+  p.name = "solar-panel";
   p.position.set(x, 1.2, z);
   p.rotation.x = -0.38;
   g.add(p);
@@ -345,60 +511,171 @@ function panel(g, x = 0, z = 0) {
   for (const dx of [-0.65, 0.65])
     box(g, 0.1, 1.15, 0.1, "teal", x + dx, 0.575, z);
 }
+function doorway(g, x, z, adobe = false) {
+  const shape = new THREE.Shape();
+  shape.moveTo(-0.49, 0);
+  shape.lineTo(0.49, 0);
+  shape.lineTo(0.49, 1.55);
+  shape.absarc(0, 1.55, 0.49, 0, Math.PI, false);
+  shape.lineTo(-0.49, 0);
+  const surround = color(
+    new THREE.Mesh(
+      new THREE.ExtrudeGeometry(shape, { depth: 0.13, bevelEnabled: false }),
+    ),
+    adobe ? "#cca67a" : "#b4834e",
+  );
+  surround.position.set(x, 0, z);
+  surround.castShadow = true;
+  g.add(surround);
+  const door = surround.clone();
+  door.geometry = surround.geometry.clone();
+  door.material = surround.material;
+  door.scale.set(0.8, 0.94, 1);
+  door.position.set(x, 0.025, z + 0.1);
+  color(door, "#397c72");
+  g.add(door);
+  box(g, 0.78, 0.08, 0.06, "timberLight", x, 0.45, z + 0.25);
+  foliage(g, x + 0.27, 1, z + 0.27, 0.035, "#c6a45d");
+  box(g, 1.15, 0.1, 0.35, "stone", x, 0.05, z + 0.14);
+}
+function framedWindow(g, x, y, z, rotation = 0) {
+  const w = group();
+  w.position.set(x, y, z);
+  w.rotation.y = rotation;
+  g.add(w);
+  box(w, 0.88, 0.95, 0.1, "timberLight");
+  box(w, 0.68, 0.74, 0.11, "glass", 0, 0, 0.06);
+  for (const side of [-1, 1]) {
+    box(w, 0.24, 0.85, 0.1, "teal", side * 0.53, 0, 0.08);
+    box(w, 0.25, 0.07, 0.04, "timberLight", side * 0.53, -0.22, 0.15);
+  }
+  box(w, 0.06, 0.74, 0.06, "timberLight", 0, 0, 0.15);
+  box(w, 0.7, 0.06, 0.06, "timberLight", 0, 0, 0.15);
+  box(w, 1.3, 0.12, 0.26, "timberLight", 0, -0.5, 0.08);
+}
 function cabin(kind) {
   const g = group(),
     adobe = kind.startsWith("adobe"),
     veranda = kind.includes("veranda"),
     terrace = kind.includes("courtyard");
-  block(g, 3.4, 2.35, 3.2, adobe ? "#bd9069" : "#e8d8ab");
-  color(gable(g, 3.4, 3.2, 2.35, 0.87), adobe ? "#bd9069" : "#e8d8ab");
+  const recessed = veranda || terrace,
+    depth = recessed ? 2.55 : 3.35,
+    center = recessed ? -0.4 : 0,
+    front = center + depth / 2;
+  block(g, 3.4, 2.4, depth, adobe ? "#bd9069" : "#e8d8ab", 0, 1.2, center);
+  const gab = gable(g, 3.4, depth, 2.4, 1.0);
+  gab.position.z += center;
+  color(gab, adobe ? "#bd9069" : "#e8d8ab");
   clayRoof(g, {
     half: 1.95,
-    depth: 3.6,
-    eave: 2.35,
-    rise: 1,
-    ridgeHeight: 3.6,
+    depth: 3.9,
+    eave: 2.4,
+    rise: 1.05,
+    ridgeHeight: 3.7,
   });
-  block(g, 0.75, 1.8, 0.1, "#397c72", -0.55, 0.9, 1.64);
-  block(g, 0.85, 0.8, 0.1, "#334f4e", 0.8, 1.45, 1.65);
-  for (const x of [0.25, 1.35]) box(g, 0.22, 0.95, 0.14, "teal", x, 1.45, 1.68);
-  box(g, 1.1, 0.12, 0.55, "stone", -0.55, 0.06, 1.85);
-  if (veranda || terrace) {
-    box(g, 3.4, 0.1, 1.2, "earth", 0, 0.05, 2.2);
-    if (veranda)
-      for (const x of [-1.5, 1.5])
-        box(g, 0.16, 2.2, 0.16, "timber", x, 1.1, 2.65);
+  doorway(g, -0.65, front + 0.01, adobe);
+  framedWindow(g, 0.85, 1.4, front + 0.04);
+  framedWindow(g, 1.72, 1.4, -0.35, Math.PI / 2);
+  framedWindow(g, -1.72, 1.4, -0.35, -Math.PI / 2);
+  framedWindow(g, 0, 1.4, center - depth / 2 - 0.03, Math.PI);
+  for (const x of [-1.67, 1.67])
+    for (const z of [center - depth / 2, front]) {
+      if (adobe) {
+        for (let y = 0.2; y < 2.4; y += 0.38)
+          block(g, 0.28, 0.16, 0.08, "#a77350", x, y, z + 0.045);
+      } else box(g, 0.1, 2.4, 0.1, "plaster", x, 1.2, z);
+    }
+  // All porch architecture lives inside the same four-metre square.
+  if (recessed) {
+    box(g, 3.4, 0.1, 0.95, "earth", 0, 0.05, 1.35);
     if (veranda) {
-      const aw = group();
-      aw.position.set(0, 0, 2.2);
-      g.add(aw);
-      clayRoof(aw, {
-        half: 1.85,
-        depth: 1.1,
-        eave: 2.05,
-        rise: 0.3,
-        ridgeHeight: 2.6,
-      });
+      for (const x of [-1.52, 1.52]) {
+        box(g, 0.16, 2.4, 0.16, "timber", x, 1.2, 1.68);
+        beam(
+          g,
+          [x, 1.9, 1.68],
+          [x - Math.sign(x) * 0.4, 2.34, 1.68],
+          0.1,
+          "timberLight",
+        );
+      }
+      box(g, 3.25, 0.15, 0.15, "timber", 0, 2.32, 1.68);
+    } else {
+      box(g, 0.12, 0.55, 0.9, "plaster", 1.6, 0.275, 1.35);
+      box(g, 0.22, 0.08, 1, "tile", 1.6, 0.59, 1.35);
     }
   }
-  if (adobe)
-    for (let y = 0.25; y < 2.3; y += 0.35)
-      for (let x = -1.4; x < 1.6; x += 0.65)
-        block(g, 0.48, 0.025, 0.012, "#ab7e59", x, y, -1.61);
+  for (let i = 0; i < 3; i++)
+    box(
+      g,
+      0.5 - i * 0.1,
+      0.055,
+      0.06,
+      "teal",
+      0,
+      2.73 + i * 0.12,
+      front + 0.05,
+    );
+  cylinder(g, 0.2, 0.14, 0.32, "tile", 1.28, 0.16, recessed ? 1.5 : 1.76, 7);
+  const p = plant("bromeliad");
+  p.scale.setScalar(0.55);
+  p.position.set(1.28, 0.32, recessed ? 1.5 : 1.76);
+  g.add(p);
   return g;
 }
 function goat() {
   const g = group();
-  foliage(g, 0, 0.65, 0, 0.47, "#dfd4b7", [1.2, 0.65, 0.6]);
-  for (const x of [-0.3, 0.3])
-    for (const z of [-0.18, 0.18]) box(g, 0.09, 0.6, 0.09, "timber", x, 0.3, z);
-  foliage(g, 0.46, 0.93, 0, 0.21, "#e9dfc5", [0.8, 1, 0.8]);
-  for (const z of [-0.13, 0.13]) {
-    beam(g, [0.43, 1.07, z], [0.32, 1.3, z], 0.045, "stone");
-    foliage(g, 0.48, 0.94, z, 0.1, "#b19a78", [1, 0.4, 0.7]);
+  const coat = "#d8c6a3",
+    dark = "#695744";
+  color(ball(g, 0.48, "plaster", 0, 0.67, 0, [1.25, 0.65, 0.5], 1), coat);
+  color(ball(g, 0.25, "plaster", 0.35, 0.8, 0, [0.65, 1.25, 0.78], 1), coat);
+  color(ball(g, 0.21, "plaster", 0.52, 1.04, 0, [1, 0.95, 0.68], 1), coat);
+  color(
+    ball(g, 0.13, "plaster", 0.7, 0.97, 0, [1.05, 0.62, 0.8], 1),
+    "#bea984",
+  );
+  for (const x of [-0.33, 0.31])
+    for (const z of [-0.18, 0.18]) {
+      beam(
+        g,
+        [x, 0.65, z],
+        [x + (x < 0 ? -0.025 : 0.03), 0.32, z],
+        0.075,
+        "plaster",
+      );
+      beam(
+        g,
+        [x + (x < 0 ? -0.025 : 0.03), 0.32, z],
+        [x, 0.08, z],
+        0.055,
+        "plaster",
+      );
+      block(g, 0.1, 0.09, 0.085, dark, x, 0.045, z);
+    }
+  for (const sign of [-1, 1]) {
+    const ear = color(
+      ball(g, 0.12, "plaster", 0.44, 1.06, sign * 0.22, [1.05, 0.32, 1.5], 0),
+      coat,
+    );
+    ear.rotation.x = sign * 0.2;
+    foliage(g, 0.63, 1.08, sign * 0.12, 0.021, "#302b26");
+    beam(
+      g,
+      [0.45, 1.17, sign * 0.09],
+      [0.39, 1.32, sign * 0.1],
+      0.045,
+      "stone",
+    );
+    beam(
+      g,
+      [0.39, 1.32, sign * 0.1],
+      [0.27, 1.37, sign * 0.11],
+      0.025,
+      "stone",
+    );
   }
-  for (const z of [-0.16, 0.16]) foliage(g, 0.57, 0.99, z, 0.025, "#3a2a23");
-  beam(g, [-0.45, 0.7, 0], [-0.65, 0.93, 0], 0.07, "plaster");
+  color(ball(g, 0.07, "plaster", 0.62, 0.84, 0, [0.6, 1.5, 0.5], 0), dark);
+  beam(g, [-0.52, 0.76, 0], [-0.64, 0.91, 0], 0.07, "plaster");
   return g;
 }
 function chicken(variant = 0) {
@@ -428,7 +705,25 @@ function building(id) {
     for (const x of [-0.5, 0.5])
       box(g, 0.11, 2.15, 0.1, "timberLight", x, 1.075, 1.7);
     box(g, 1.1, 0.1, 0.1, "timberLight", 0, 2.15, 1.7);
-    color(box(g, 0.9, 2, 0.03, "glass", 0, 1.05, 1.7), "#b4d6c5", 0.18);
+    color(box(g, 0.9, 2, 0.03, "glass", 0, 1.05, 1.7), "#69aab5", 0.35);
+    for (const z of [-1.7, 1.7]) {
+      for (const x of [-1.1, 1.1])
+        color(box(g, 1.1, 2.3, 0.025, "glass", x, 1.2, z), "#69aab5", 0.35);
+      if (z < 0)
+        color(box(g, 1.1, 2.3, 0.025, "glass", 0, 1.2, z), "#69aab5", 0.35);
+      const triangle = gable(g, 3.4, 0.018, 2.45, 1.05);
+      triangle.position.z = z;
+      color(triangle, "#83bdc9", 0.36);
+    }
+    for (const x of [-1.71, 1.71])
+      for (const z of [-0.8, 0.8]) {
+        const reflection = color(
+          box(g, 0.012, 0.65, 0.045, "plaster", x, 1.65, z),
+          "#d7eeeb",
+          0.75,
+        );
+        reflection.rotation.x = 0.45;
+      }
     for (const x of [-1.05, 1.05]) {
       block(g, 0.8, 0.15, 3, "#936b43", x, 0.075);
       for (const side of [-1, 1])
@@ -436,12 +731,12 @@ function building(id) {
     }
     beam(g, [0, 3.5, -1.7], [0, 3.5, 1.7], 0.12, "timberLight");
     for (const x of [-1.7, 1.7])
-      color(box(g, 0.025, 2.3, 3.4, "glass", x, 1.2, 0), "#b4d6c5", 0.18);
+      color(box(g, 0.025, 2.3, 3.4, "glass", x, 1.2, 0), "#69aab5", 0.35);
     for (const sign of [-1, 1]) {
       const p = color(
         box(g, 2, 0.03, 3.4, "glass", sign * 0.85, 2.975, 0),
-        "#bdd8c7",
-        0.22,
+        "#83bdc9",
+        0.36,
       );
       p.rotation.z = -sign * Math.atan2(1.05, 1.7);
     }
@@ -481,15 +776,55 @@ function building(id) {
     return g;
   }
   if (id === "well") {
-    cylinder(g, 0.85, 0.85, 2.5, "teal", 0, 1.25, 0, 12);
-    for (const y of [0.3, 1.2, 2.2])
-      cylinder(g, 0.88, 0.88, 0.08, "stone", 0, y, 0, 12);
-    cylinder(g, 0.9, 0.9, 0.1, "teal", 0, 2.55, 0, 12);
-    beam(g, [0.85, 0.45, 0], [1.12, 0.45, 0], 0.12, "timberLight");
+    color(cylinder(g, 1.42, 1.42, 1.35, "plaster", 0, 0.675, 0, 24), "#e9e3cf");
+    color(cylinder(g, 0.18, 1.48, 0.38, "plaster", 0, 1.54, 0, 24), "#eee8d7");
+    for (let i = 0; i < 18; i++) {
+      const a = (i * Math.PI) / 9;
+      beam(
+        g,
+        [Math.sin(a) * 1.425, 0.05, Math.cos(a) * 1.425],
+        [Math.sin(a) * 1.425, 1.3, Math.cos(a) * 1.425],
+        0.018,
+        "stone",
+      );
+    }
+    color(
+      cylinder(g, 1.435, 1.435, 0.045, "plaster", 0, 0.69, 0, 24),
+      "#d1caba",
+    );
+    cylinder(g, 0.28, 0.28, 0.06, "teal", 0.55, 1.64, 0.4, 12);
+    box(g, 0.22, 0.06, 0.06, "timber", 0.55, 1.7, 0.4);
+    beam(g, [-1.4, 1.35, -0.3], [-1.65, 1.35, -0.3], 0.11, "teal");
+    beam(g, [-1.65, 0.15, -0.3], [-1.65, 1.8, -0.3], 0.11, "teal");
+    cylinder(g, 0.085, 0.1, 0.8, "teal", 1.3, 0.4, 0.9, 8);
+    beam(g, [1.3, 0.75, 0.9], [1.7, 0.75, 0.9], 0.065, "teal");
+    beam(g, [1.3, 0.85, 0.9], [1.1, 1.05, 0.9], 0.06, "timber");
+    box(g, 0.45, 0.14, 0.4, "stone", 1.35, 0.07, 1.35);
     return g;
   }
   if (id === "solar_farm") {
-    for (const x of [-1, 1]) panel(g, x, 0);
+    for (const z of [-0.95, 0.95]) {
+      for (const x of [-1.85, 0, 1.85]) {
+        const rack = group();
+        panel(rack);
+        rack.scale.z = 0.82;
+        rack.position.set(x, 0, z);
+        g.add(rack);
+        for (const side of [-0.65, 0.65])
+          beam(
+            g,
+            [x + side, 0.1, z - 0.6],
+            [x + side, 1.38, z + 0.6],
+            0.07,
+            "teal",
+          );
+      }
+      for (const offset of [-0.55, 0.55])
+        box(g, 5.45, 0.1, 0.09, "stone", 0, 0.78, z + offset);
+    }
+    block(g, 0.4, 0.6, 0.2, "#397c72", 2.68, 0.3, 0);
+    for (const z of [-0.9, 0.9])
+      beam(g, [2.5, 0.2, z], [2.5, 0.2, 0], 0.035, "hair");
     return g;
   }
   if (id === "streetlight") {
@@ -500,31 +835,90 @@ function building(id) {
     return g;
   }
   if (id === "compost") {
-    for (const x of [-0.85, 0.85]) {
-      for (const z of [-0.65, 0.65])
-        box(g, 0.12, 0.9, 0.12, "timber", x, 0.45, z);
-      for (let y = 0.15; y < 0.9; y += 0.22) {
-        box(g, 0.1, 0.14, 1.4, "timberLight", x, y, 0);
-        box(g, 1.7, 0.14, 0.1, "timberLight", 0, y, -0.65);
+    for (const x of [-1.85, 0, 1.85]) {
+      const bin = group();
+      bin.position.x = x;
+      bin.name = "compost-bin";
+      g.add(bin);
+      for (const side of [-0.82, 0.82])
+        for (const z of [-0.78, 0.78])
+          box(bin, 0.12, 1.1, 0.12, "timber", side, 0.55, z);
+      for (let y = 0.13; y < 1.1; y += 0.22) {
+        for (const side of [-0.82, 0.82])
+          box(bin, 0.1, 0.15, 1.6, "timberLight", side, y, 0);
+        box(bin, 1.64, 0.15, 0.1, "timberLight", 0, y, -0.78);
+        if (y < 0.7) box(bin, 1.64, 0.15, 0.1, "timberLight", 0, y, 0.78);
       }
+      foliage(
+        bin,
+        0,
+        0.28,
+        0,
+        0.75,
+        x < 0 ? "#7e873d" : x === 0 ? "#98774c" : "#594a36",
+        [1, 0.48, 0.95],
+      );
+      for (let i = 0; i < 7; i++)
+        foliage(
+          bin,
+          Math.sin(i) * 0.45,
+          0.45,
+          Math.cos(i) * 0.45,
+          0.13,
+          x < 0 ? "#8fa44e" : x === 0 ? "#af8c55" : "#66533a",
+          [1, 0.35, 1],
+        );
     }
-    foliage(g, 0, 0.25, 0, 0.65, "#725638", [1, 0.4, 1]);
     return g;
   }
   if (id === "square") {
-    for (const z of [-1.4, 1.4]) {
-      box(g, 2, 0.12, 0.55, "timberLight", 0, 0.48, z);
-      box(g, 2, 0.38, 0.09, "timberLight", 0, 0.79, z + Math.sign(z) * 0.25);
-      for (const x of [-0.8, 0.8])
-        for (const side of [-0.18, 0.18])
-          box(g, 0.1, 0.45, 0.1, "timber", x, 0.225, z + side);
+    const mosaic = color(
+      cylinder(g, 0.65, 0.65, 0.035, "earth", 0, 0.018, 0, 16),
+      "#d5b684",
+    );
+    for (let i = 0; i < 12; i++) {
+      const a = (i * Math.PI) / 6;
+      const tile = box(
+        g,
+        0.19,
+        0.035,
+        0.19,
+        i % 2 ? "tile" : "teal",
+        Math.sin(a) * 0.48,
+        0.045,
+        Math.cos(a) * 0.48,
+      );
+      tile.rotation.y = a;
     }
-    for (const x of [-1.5, 1.5]) {
-      cylinder(g, 0.23, 0.17, 0.35, "tile", x, 0.175, 0);
+    for (const [x, z, angle] of [
+      [0, -1.35, 0],
+      [-1.35, 0.2, Math.PI / 2],
+      [1.35, 0.2, -Math.PI / 2],
+    ]) {
+      const bench = group();
+      bench.position.set(x, 0, z);
+      bench.rotation.y = angle;
+      g.add(bench);
+      for (const zz of [-0.16, 0, 0.16])
+        box(bench, 1.65, 0.09, 0.13, "timberLight", 0, 0.48, zz);
+      for (const y of [0.76, 0.94])
+        box(bench, 1.65, 0.14, 0.07, "timberLight", 0, y, -0.24);
+      for (const xx of [-0.65, 0.65]) {
+        box(bench, 0.12, 0.96, 0.12, "timber", xx, 0.48, -0.23);
+        box(bench, 0.12, 0.43, 0.12, "timber", xx, 0.215, 0.2);
+      }
+    }
+    for (const x of [-1.45, 1.45]) {
+      cylinder(g, 0.25, 0.2, 0.35, "tile", x, 0.175, 1.45, 8);
       const p = plant("bromeliad");
-      p.position.set(x, 0.35, 0);
+      p.position.set(x, 0.35, 1.45);
       g.add(p);
     }
+    for (const x of [-0.45, 0.45])
+      box(g, 0.09, 1.4, 0.09, "timber", x, 0.7, 1.6);
+    box(g, 1.1, 0.6, 0.12, "timberLight", 0, 1.16, 1.6);
+    for (const x of [-0.28, 0, 0.28])
+      block(g, 0.2, 0.32, 0.025, "#ece1ba", x, 1.16, 1.68);
     return g;
   }
   if (id === "apiary") {
@@ -575,23 +969,66 @@ function building(id) {
     return g;
   }
   if (id === "hydro") {
-    box(g, 1.5, 0.22, 1.5, "timber", 0, 0.65, 0);
-    block(g, 0.7, 0.55, 0.65, "#397c72", 0, 1);
-    const wheel = cylinder(g, 0.75, 0.75, 0.22, "timberLight", 0, 0.8, 1, 12);
-    wheel.rotation.x = Math.PI / 2;
-    for (let i = 0; i < 8; i++) {
-      const a = (i * Math.PI) / 4;
-      box(
-        g,
-        0.22,
-        0.24,
-        0.4,
-        "timber",
-        Math.cos(a) * 0.68,
-        0.8 + Math.sin(a) * 0.68,
-        1,
+    for (const x of [-1.15, 1.15])
+      for (const z of [-0.9, 0.9]) {
+        box(g, 0.32, 0.65, 0.32, "stone", x, 0.325, z);
+        box(g, 0.14, 0.65, 0.14, "timber", x, 0.85, z);
+      }
+    for (let i = 0; i < 8; i++)
+      box(g, 2.6, 0.12, 0.24, "timberLight", 0, 0.7, -0.87 + i * 0.25);
+    const wheel = group();
+    wheel.position.set(0, 1.05, 1.2);
+    wheel.name = "waterwheel";
+    g.add(wheel);
+    for (const z of [-0.23, 0.23]) {
+      const rim = color(
+        new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.06, 5, 16)),
+        "#936039",
       );
+      rim.position.z = z;
+      rim.castShadow = true;
+      wheel.add(rim);
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4;
+        beam(
+          wheel,
+          [0, 0, z],
+          [Math.cos(a) * 0.82, Math.sin(a) * 0.82, z],
+          0.065,
+          "timberLight",
+        );
+      }
     }
+    for (let i = 0; i < 12; i++) {
+      const a = (i * Math.PI) / 6;
+      const paddle = box(
+        wheel,
+        0.18,
+        0.3,
+        0.58,
+        "timberLight",
+        Math.cos(a) * 0.84,
+        Math.sin(a) * 0.84,
+        0,
+      );
+      paddle.rotation.z = a;
+    }
+    const axle = cylinder(g, 0.1, 0.1, 2.2, "stone", 0, 1.05, 0.4, 10);
+    axle.rotation.x = Math.PI / 2;
+    const motor = cylinder(g, 0.28, 0.28, 0.7, "teal", 0, 1.09, -0.55, 12);
+    motor.rotation.x = Math.PI / 2;
+    for (const z of [-0.8, -0.65, -0.5, -0.35]) {
+      const rib = cylinder(g, 0.3, 0.3, 0.045, "teal", 0, 1.09, z, 12);
+      rib.rotation.x = Math.PI / 2;
+    }
+    block(g, 0.42, 0.6, 0.25, "#397c72", 0.85, 1.03, -0.55);
+    block(g, 0.24, 0.19, 0.02, "#dbd1a1", 0.85, 1.16, -0.41);
+    beam(g, [0.2, 0.86, -0.4], [0.65, 0.86, -0.4], 0.055, "hair");
+    for (const x of [-1.15, 1.15]) {
+      box(g, 0.1, 1.1, 0.1, "timber", x, 1.24, -0.9);
+      beam(g, [x, 1.75, -0.9], [x, 1.35, 0], 0.07, "timber");
+    }
+    box(g, 2.5, 0.08, 0.1, "timberLight", 0, 1.8, -0.9);
     return g;
   }
   if (id === "eco_toilet") {
@@ -626,7 +1063,67 @@ function building(id) {
     ramp.rotation.x = 0.55;
     return g;
   }
-  // Open work buildings have intentionally different silhouettes and equipment.
+  if (id === "workshop") {
+    block(g, 3.4, 2.2, 2.8, "#bd965c");
+    box(g, 1.85, 1.92, 0.06, "hair", -0.25, 0.96, 1.43);
+    for (const x of [-1.45, 0.95]) {
+      box(g, 0.65, 1.95, 0.12, "teal", x, 0.98, 1.5);
+      for (const y of [0.3, 1.5])
+        box(g, 0.7, 0.1, 0.04, "timberLight", x, y, 1.59);
+    }
+    gable(g, 3.4, 2.8, 2.2, 0.7);
+    clayRoof(g, {
+      half: 1.9,
+      depth: 3.2,
+      eave: 2.2,
+      rise: 0.8,
+      ridgeHeight: 3.25,
+    });
+    table(g, -0.2, 1.15, 1.7);
+    box(g, 0.6, 0.08, 0.14, "stone", -0.1, 1.02, 1.28);
+    box(g, 0.12, 0.12, 0.22, "timber", 0.26, 1.03, 1.28);
+    framedWindow(g, 1.73, 1.3, -0.3, Math.PI / 2);
+    for (let i = 0; i < 4; i++)
+      box(
+        g,
+        0.15,
+        1.45 + i * 0.1,
+        0.12,
+        "timberLight",
+        -1.5 + i * 0.18,
+        0.75,
+        -1.5,
+      );
+    box(g, 0.9, 0.3, 0.1, "timber", 0, 2.02, 1.5);
+    box(g, 0.4, 0.06, 0.06, "stone", 0, 2.02, 1.57);
+    return g;
+  }
+  if (id === "kitchen") {
+    block(g, 3.25, 1.0, 0.3, "#d8bd90", 0, 0.5, -1.45);
+    block(g, 0.25, 2.3, 2.9, "#e8d8ab", -1.55, 1.15, 0);
+    for (const x of [-1.45, 1.45])
+      box(g, 0.15, 2.3, 0.15, "timber", x, 1.15, 1.35);
+    clayRoof(g, {
+      half: 1.8,
+      depth: 3.2,
+      eave: 2.3,
+      rise: 0.65,
+      ridgeHeight: 3.2,
+    });
+    block(g, 1.2, 0.85, 1.2, "#bc815c", -0.85, 0.425, -0.3);
+    color(ball(g, 0.65, "tile", -0.85, 1.02, -0.3, [1, 0.85, 1], 1), "#ba704c");
+    box(g, 0.5, 0.35, 0.05, "hair", -0.85, 0.94, 0.31);
+    block(g, 0.36, 3.1, 0.36, "#b57551", -1.05, 2.4, -0.8);
+    box(g, 0.48, 0.12, 0.48, "tile", -1.05, 4.0, -0.8);
+    block(g, 1.4, 0.9, 0.75, "#e8d8ab", 0.7, 0.45, -0.9);
+    box(g, 1.5, 0.12, 0.85, "stone", 0.7, 0.95, -0.9);
+    block(g, 0.45, 0.025, 0.4, "#397c72", 0.6, 1.02, -0.9);
+    beam(g, [0.6, 1.02, -1.2], [0.6, 1.3, -1.2], 0.045, "stone");
+    cylinder(g, 0.18, 0.14, 0.2, "tile", 1.1, 1.13, -0.9);
+    table(g, 0.45, 1.1, 1.9);
+    cylinder(g, 0.23, 0.16, 0.1, "plaster", 0.3, 1.03, 1.12);
+    return g;
+  }
   const shed = createStudy("shed");
   g.add(shed);
   if (id === "warehouse") {
@@ -637,22 +1134,6 @@ function building(id) {
       box(g, 0.7, 0.6, 0.65, "timberLight", x, 0.3, 0);
       box(g, 0.5, 0.5, 0.5, "earth", x, 0.85, -0.1);
     }
-  }
-  if (id === "workshop") {
-    table(g, 0, 0, 2.5);
-    box(g, 2.8, 0.85, 0.12, "timber", 0, 1.7, -0.65);
-    for (const x of [-0.8, 0, 0.8]) {
-      beam(g, [x, 1.5, -0.55], [x, 1.95, -0.55], 0.07, "stone");
-    }
-    cylinder(g, 0.25, 0.25, 0.12, "stone", 0.8, 1.05, 0);
-  }
-  if (id === "kitchen") {
-    block(g, 1.15, 0.85, 0.85, "#c48d66", -0.7, 0.425, 0);
-    foliage(g, -0.7, 1.0, 0, 0.6, "#b86b44", [1, 0.8, 1]);
-    block(g, 0.45, 0.3, 0.06, "#3a2a23", -0.7, 0.95, 0.53);
-    table(g, 0.85, 0, 1.15);
-    cylinder(g, 0.15, 0.12, 0.22, "teal", 0.8, 1.1, 0);
-    cylinder(g, 0.13, 0.13, 2, "tile", -1, 2, -0.3);
   }
   return g;
 }
@@ -927,19 +1408,13 @@ ASSETS.find((a) => a.id === "house").legacy = [
 ASSETS.find((a) => a.id === "shed").legacy = ["shed", "shed-night"];
 for (const [id, name] of Object.entries(names)) {
   const fp =
-    id === "goat_pasture"
-      ? [3, 2]
-      : [
-            "apiary",
-            "well",
-            "streetlight",
-            "eco_toilet",
-            "coop",
-            "compost",
-            "hydro",
-          ].includes(id)
-        ? [1, 1]
-        : [2, 2];
+    id === "compost"
+      ? [3, 1]
+      : id === "goat_pasture" || id === "solar_farm"
+        ? [3, 2]
+        : ["apiary", "streetlight", "eco_toilet", "coop"].includes(id)
+          ? [1, 1]
+          : [2, 2];
   add(id, name, "Buildings", fp, () => building(id), [
     oldId(id),
     oldId(id) + "-night",
@@ -952,14 +1427,7 @@ for (const [id, name] of Object.entries({
   "adobe-gable": "Adobe gabled house",
   "adobe-veranda": "Adobe veranda house",
 }))
-  add(
-    id,
-    name,
-    "Homes",
-    id.includes("veranda") || id.includes("courtyard") ? [2, 3] : [2, 2],
-    () => cabin(id),
-    [id, id + "-night"],
-  );
+  add(id, name, "Homes", [2, 2], () => cabin(id), [id, id + "-night"]);
 add(
   "goat-pasture-empty",
   "Empty goat pasture",
@@ -1132,6 +1600,35 @@ export function createAsset(id) {
   g.updateMatrixWorld(true);
   return g;
 }
+const revised = new Set([
+  "home-veranda",
+  "home-gable",
+  "home-courtyard",
+  "adobe-gable",
+  "adobe-veranda",
+  "goat",
+  "goat_pasture",
+  "solar_farm",
+  "compost",
+  "square",
+  "workshop",
+  "kitchen",
+  "greenhouse",
+  "hydro",
+  "well",
+  "jequitiba",
+  "jucara",
+  "embauba",
+  "pau_brasil",
+  "pequi",
+  "barbatimao",
+  "umbuzeiro",
+  "jurema",
+  "mandacaru",
+  "orchard",
+  "supply-0",
+]);
+for (const a of ASSETS) if (revised.has(a.id)) a.revision = 2;
 export const CATEGORIES = [...new Set(ASSETS.map((a) => a.category))];
 
 // Bake static recipe pieces into one draw per material. This preserves the exact
@@ -1140,6 +1637,7 @@ export function compactModel(root) {
   root.updateMatrixWorld(true);
   const batches = new Map();
   const owned = new Set();
+  const transparent = [];
   root.traverse((o) => {
     if (!o.isMesh) return;
     const key = o.material;
@@ -1147,12 +1645,21 @@ export function compactModel(root) {
     const geometry = (
       o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()
     ).applyMatrix4(o.matrixWorld);
+    if (key.transparent) {
+      const pane = new THREE.Mesh(geometry, key);
+      pane.castShadow = false;
+      pane.receiveShadow = true;
+      pane.renderOrder = 2;
+      transparent.push(pane);
+      return;
+    }
     if (!batches.has(key)) batches.set(key, []);
     batches.get(key).push(geometry);
   });
   const result = group();
   result.name = root.name;
   result.userData = { ...root.userData };
+  if (transparent.length) result.add(...transparent);
   for (const [material, parts] of batches) {
     const geo = new THREE.BufferGeometry();
     for (const name of ["position", "normal", "uv"]) {
