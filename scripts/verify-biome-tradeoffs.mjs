@@ -6,7 +6,7 @@ const output=process.argv[2]??'artifacts/biome-tradeoffs';await mkdir(output,{re
 const wasm=await readFile(new URL('../web/pkg/solar_friends_bg.wasm',import.meta.url));await init({module_or_path:wasm});
 const hash=data=>createHash('sha256').update(data).digest('hex'),catalogGame=new Game();
 const catalog=JSON.parse(catalogGame.scenario_catalog());catalogGame.free();
-const report={passed:false,scope:'Controlled authored properties in all three biomes and two seeds. Sixty simulated minutes per crop comparison; moisture is the native crop minute-equivalent summary, not litres; instantaneous solar comparisons. Complements full seasonal-cycle evidence; not a visual, example-difficulty, long-term irrigation logistics or performance approval.',wasm_sha256:hash(wasm),script_sha256:hash(await readFile(new URL(import.meta.url))),cases:[]};
+const report={passed:false,scope:'Controlled authored properties in all three biomes and two seeds. Sixty simulated minutes per crop comparison; moisture is the native crop minute-equivalent summary, not litres; instantaneous solar comparisons and a rain-fed reachable-water objective on properties with no river. Complements full seasonal-cycle evidence; not a visual, example-difficulty, long-term irrigation logistics or performance approval.',wasm_sha256:hash(wasm),script_sha256:hash(await readFile(new URL(import.meta.url))),cases:[]};
 const persist=()=>writeFile(output+'/report.json',JSON.stringify(report,null,2)+'\n');
 function load(g,d){const r=JSON.parse(g.load_scenario(JSON.stringify(d)));assert(r.ok,JSON.stringify(r));}
 function checkpoint(g){const raw=g.snapshot(),copy=new Game();try{assert(copy.restore(raw));assert.equal(copy.snapshot(),raw);for(let i=0;i<8;i++){g.tick(.25);copy.tick(.25);}assert.equal(copy.snapshot(),g.snapshot(),'Checkpoint continuation stays exact');}finally{copy.free();}}
@@ -43,7 +43,51 @@ for(const biome of catalog.biomes)for(const seed of [42,73]){
  const cloudyProbe=measure('cloud-window',{solar:true,clouds:true}),minute=cloudyProbe.before.forecast.rain_start+40;
  const clear=measure('clear-at-rain-window',{solar:true,minutes:minute}),cloud=measure('cloudy-solar',{solar:true,clouds:true,minutes:minute});
  assert(cloud.before.weather.raining);assert(cloud.before.weather.clouds>clear.before.weather.clouds);assert(cloud.before.solar<clear.before.solar&&cloud.before.solar>0,'Clouds reduce actual solar supply at the same sun position');
+ // Start with dry tanks and use an actual forecast window from this seed.
+ const rain=structuredClone(base);
+ rain.rules.weather={...biome.weather};
+ rain.start.fresh_water=0;
+ rain.start.buildings.push({id:'rain-cistern',kind:'well',x:28,y:25,state:'completed',recipe:'standard'});
+ rain.journal={schema:1,introduction:'Collect rain for the clearing.',completion:'The cistern can support the camp.',chapters:[{
+  id:'rainwater',title:'Water from the sky',description:'',goals:[{
+   id:'reachable-rain',title:'Keep rainwater close',description:'Keep six units of reachable fresh water for half an hour.',optional:false,
+   condition:{kind:'service',service:'fresh_water',minimum:6,minutes:30}
+  }]
+ }]};
+ const rainGame=new Game();
+ try{
+  let forecast;
+  for(let day=0;day<biome.weather.season_days&&!forecast;day+=7){
+   rain.start.minutes=day*1440;
+   load(rainGame,rain);
+   forecast=JSON.parse(rainGame.snapshot()).environment.weather.forecast.find(entry=>entry.season==='wet'&&entry.rain_expected);
+  }
+  assert(forecast,'The representative seed should offer a forecast wet-season rain window');
+  rain.start.minutes=forecast.day*1440+Math.max(0,forecast.rain_start-15);
+  load(rainGame,rain);
+  const opening=JSON.parse(rainGame.snapshot()),journal=()=>JSON.parse(rainGame.scenario_journal());
+  assert(opening.village.water_supply.opening[0]===0);
+  assert.equal(journal().finished_at,null);
+  assert.equal(JSON.parse(rainGame.world_geometry()).hydro_sites.length,0);
+  let state=opening;
+  for(let frame=0;frame<960&&journal().finished_at===null;frame++){
+   rainGame.tick(.25);
+   if(frame%16===0){
+    state=JSON.parse(rainGame.snapshot());
+    assert(state.environment.power.hydro_generation===0);
+    assert.equal(state.village.water_supply.external[0],0,'The goal must use rain instead of external water');
+   }
+  }
+  state=JSON.parse(rainGame.snapshot());
+  const finishedAt=journal().finished_at;
+  assert(finishedAt!==null,'Rain and a reachable cistern must complete the goal');
+  assert(state.village.progress.rain_caught);
+  assert.equal(state.village.water_supply.external[0],0);
+  assert(state.environment.power.hydro_generation===0);
+  accounts(rainGame);checkpoint(rainGame);accounts(rainGame);
+  rows.noRiverWaterGoal={forecast,finishedAt,openingFreshWater:0,externalFreshWater:0,hydroOutput:0,exactContinuation:true};
+ }finally{rainGame.free();}
  assert.equal(JSON.stringify(base),original,'Compiling comparisons cannot mutate the authored source');
  report.cases.push(rows);await persist();console.log(`${key}: dry crop moisture loss ${dry.moistureLost.toFixed(3)} > wet ${wet.moistureLost.toFixed(3)} > shaded ${shaded.moistureLost.toFixed(3)}; shade/cloud solar tradeoffs pass`);
 }
-report.passed=true;await persist();console.log('PASS six regional/seed planning comparisons with native compilation, conserved accounts and exact checkpoint continuations.');
+report.passed=true;await persist();console.log('PASS six regional/seed planning comparisons and rain-only water goals with native compilation, conserved accounts and exact checkpoint continuations.');

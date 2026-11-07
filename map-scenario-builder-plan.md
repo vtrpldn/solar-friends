@@ -683,3 +683,9 @@ Both fixtures advanced approximately 3 and 48 game minutes per real second at 1�
 A five-second paired headless comparison on the 256-building founding-cast map tested direct ground drawing while the camera moved. It cut the panning-phase backdrop rebuilds from roughly sixty per phase to one, but p95 frame gaps moved from 25.0 ms to 25.5 ms at 1× and from 25.0 ms to 25.9 ms at 16×. The p95 paint time also rose in both samples, so the existing cache remains in use. These short samples rule out a demonstrated gain from this implementation on the tested setup.
 
 The full-frame regression now uses the five founding friends and includes both an active pointer drag and its settled position. All 48 frame cases match direct ground rendering pixel for pixel across the three biomes, two times of day and desktop DPR 1 and 2. Native state remains exact during the comparisons.
+
+### Current wet and dry cycle and no-river water checks
+
+The current native build completed six single-resident seasonal runs for seeds 42 and 73 across the three biomes. Each included a hand-edited soil cell. Mata Atlântica and Cerrado ran 42 days per seed, and Caatinga ran 56. The suite verified forecasts, real rain and harvests, solar generation, dry-season hydro reduction where rivers exist, zero hydro output without rivers, 286 conserved daily checkpoints and 40 exact resumed continuations.
+
+A separate native check starts with empty tanks and an authored cistern on each of six no-river maps. The normal regional forecast supplies the rain, and every case completes a real journal objective for six reachable fresh-water units held for 30 minutes. Completion occurred 60–75 game minutes after rain began, with zero external fresh water and zero hydro output. Crop moisture and solar shade comparisons also pass for all six biome and seed pairs. These runs establish the tested climate and water behavior. Multi-resident settlement balance and visual review have separate gates.
