@@ -156,15 +156,18 @@ function save({automatic=true}={}){
   }).finally(()=>{if(pending.get(requestKey)===handled)pending.delete(requestKey);});
   pending.set(requestKey,handled);return handled;
 }
-function change(label,edit,{valid=false}={}){
+function change(label,edit,{valid=false,rejectIssue=null}={}){
   if(!current||busy)return false;
   let previous,compiled=false,committed=false;
   try{
-    if(valid){
+    if(valid||rejectIssue){
       const draft=current.doc.value;previous=engineDefinition;edit(draft);
       const result=JSON.parse(engine.load_scenario(JSON.stringify(draft)));
-      if(!result.ok){toast(result.issues.find(i=>i.severity==='error')?.message||'Choose a clear plot.');return false;}
-      compiled=true;
+      if(!result.ok){
+        const issue=rejectIssue?rejectIssue(result):result.issues.find(i=>i.severity==='error');
+        if(valid||issue){toast(issue?.message||'Choose a clear plot.');return false;}
+      }
+      compiled=result.ok;
       // Document notifications are synchronous. Refresh consumes this candidate
       // only when the committed definition exactly matches the validated edit.
       preparedEdit={key:canonical(draft),report:result};
@@ -175,7 +178,7 @@ function change(label,edit,{valid=false}={}){
 }
 // Heavy edits and history prepare separately. Invalid history targets retain
 // the last valid preview; valid checkpoints install only for the same revision.
-async function changePrepared(label,edit,{target=null,history=null,allowInvalid=false,preflight=null}={}){
+async function changePrepared(label,edit,{target=null,history=null,allowInvalid=false,preflight=null,rejectIssue=null}={}){
   if(!current||busy)return false;
   const ctx=current,revision=ctx.doc.revision,draft=target??ctx.doc.value;
   busy=true;clearTimeout(toastTimer);$('creator-toast').hidden=true;status('Preparing edit…');
@@ -184,6 +187,8 @@ async function changePrepared(label,edit,{target=null,history=null,allowInvalid=
     edit?.(draft);
     const prepared=await prepareEdit(draft,{allowInvalid,preflight});
     if(current!==ctx||ctx.doc.revision!==revision)throw Error('The draft changed. Try this edit again.');
+    const issue=rejectIssue?.(prepared.validation);
+    if(issue)throw Error(issue.message);
     if(prepared.validation.ok){
       previous=engine.snapshot();
       if(!engine.restore(prepared.snapshot))throw Error('The prepared edit could not be installed. Your draft is unchanged.');
@@ -201,7 +206,7 @@ async function changePrepared(label,edit,{target=null,history=null,allowInvalid=
 }
 async function changeMap(label,edit,{force=false,...options}={}){
   if(!current||busy)return false;
-  if(force||heavyDraft(current.doc.value))return changePrepared(label,edit,{allowInvalid:!options.valid,preflight:options.preflight});
+  if(force||heavyDraft(current.doc.value))return changePrepared(label,edit,{allowInvalid:!options.valid,preflight:options.preflight,rejectIssue:options.rejectIssue});
   return change(label,edit,options);
 }
 async function changeSelection(label,edit,options){
@@ -221,6 +226,12 @@ const mapPositions={
   camp:{section:'creator-arrival-plot',label:'Move arrival camp'},
   camera:{section:'creator-opening-view',label:'Choose starting view'}
 };
+function changeMapPosition(key,x,y){
+  const positionIssue=validation=>validation.issues.find(issue=>issue.severity==='error'&&issue.path===`map.${key}`);
+  // An existing position error can be repaired while other draft errors remain.
+  const options=positionIssue(report)?{rejectIssue:positionIssue}:{valid:true};
+  return changeMap(mapPositions[key].label,d=>{d.map[key]=[x,y];},options);
+}
 function field(id,value){if(document.activeElement!==$(id))$(id).value=value;}
 function refresh(){
   if(!current)return;
@@ -463,8 +474,7 @@ async function mapAction(action){
     else if(route){const ids=dependentRoutes(current.doc.value,route.id);await changeMap('Remove utility connection',d=>{d.start.routes=d.start.routes.filter(r=>!ids.has(r.id));});}
     else if(action.natureId&&!current.doc.value.start.roads.some(([x,y])=>x===action.x&&y===action.y))removeNatureObject(action.natureId);
     else await changeMap('Remove a road',d=>{d.start.roads=d.start.roads.filter(([x,y])=>x!==action.x||y!==action.y);});
-  }else if(action.type==='camp')await changeMap('Move arrival camp',d=>{d.map.camp=[action.x,action.y];},{valid:true});
-  else if(action.type==='camera')await changeMap('Choose starting view',d=>{d.map.camera=[action.x,action.y];},{valid:true});
+  }else if(action.type==='camp'||action.type==='camera')await changeMapPosition(action.type,action.x,action.y);
   else if(allBuildingArt[action.type]){
     const id=crypto.randomUUID();
     if(await changeMap('Place '+title(action.type),d=>{d.start.buildings.push(newStartingBuilding(action.type,action.x,action.y,id));},{valid:true}))map.select(id);
@@ -599,11 +609,11 @@ function wire(){
   $('creator-species').onchange=()=>{map.natureSpecies=catalog.nature.find(s=>s.key===$('creator-species').value);$('creator-nature-size').min=map.natureSpecies.min_size;$('creator-nature-size').max=map.natureSpecies.max_size;setTool('nature');};
   $('creator-nature-density').onchange=e=>{map.natureDensity=Number(e.target.value);map.viewChanged(map.state);};
   $('creator-nature-size').oninput=e=>{map.natureSize=Number(e.target.value);$('creator-nature-scale').textContent=map.natureSize.toFixed(2)+'×';map.render();map.viewChanged(map.state);};
-  for(const [key,{label}] of Object.entries(mapPositions)){
+  for(const key of Object.keys(mapPositions)){
     $(`creator-${key}-form`).onsubmit=async event=>{
       event.preventDefault();
       const x=$(`creator-${key}-column`).valueAsNumber,y=$(`creator-${key}-row`).valueAsNumber;
-      if(await changeMap(label,d=>{d.map[key]=[x,y];},{valid:true}))map.centerAt(x,y);
+      if(await changeMapPosition(key,x,y))map.centerAt(x,y);
     };
   }
   $('creator-river-enabled').onchange=e=>change(e.target.checked?'Restore river':'Remove river',d=>{d.map.river=e.target.checked?JSON.parse(engine.scenario_template('story')).map.river:null;});

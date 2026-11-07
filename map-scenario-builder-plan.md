@@ -648,3 +648,5 @@ Buildings outside the property now produce a repair link for each invalid coordi
 Arrival camp errors now link to the camp's map location and coordinate controls in Land. Players can enter and apply both coordinates by keyboard. The desktop check repairs an imported camp near the property edge, restores playtest readiness and verifies that the starting village configuration is unchanged.
 
 The opening camera has independent coordinate controls in Land. An invalid opening view links to its controls and focuses the invalid coordinate. The editor bounds its inspection view while retaining the authored value for repair. Desktop verification repairs an imported off-property camera to a fractional coordinate and confirms that the camp and starting settlement retain their exact definitions.
+
+When both map positions need repair, the editor can commit either position while leaving the other issue visible. Position changes use the same validation policy for keyboard entry and map clicks. The desktop regression fixes the camp first in a draft with an off-property camera, verifies that play stays blocked, and then fixes the camera to restore readiness.

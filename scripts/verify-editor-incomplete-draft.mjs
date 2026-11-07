@@ -62,6 +62,7 @@ try{
  assert.deepEqual((await saved(boundary)).checkpoint.definition.start.buildings,baseline.start.buildings);
  assert.deepEqual(errors,[]);
  const badCamp=structuredClone(baseline);badCamp.map.camp=[baseline.map.camp[0],2];
+ badCamp.map.camera=[-20,baseline.map.camera[1]];
  const arrival=await open();await importFile(arrival,Buffer.from(JSON.stringify(badCamp)));
  assert(await arrival.locator('#creator-test').isDisabled());
  await arrival.locator('[data-workspace=review]').click();
@@ -73,10 +74,19 @@ try{
  assert.equal(await arrival.locator('[data-workspace=land]').getAttribute('aria-selected'),'true');
  await arrival.screenshot({path:`${output}/camp-repair.png`});
  await campRow.fill(String(baseline.map.camp[1]));await campRow.press('Enter');await ready(arrival);
- assert(await arrival.locator('#creator-test').isEnabled());
+ assert(await arrival.locator('#creator-test').isDisabled(),'The camera error still blocks play after the camp is repaired');
  const repairedCamp=(await saved(arrival)).checkpoint.definition;
  assert.deepEqual(repairedCamp.map.camp,baseline.map.camp);
  assert.deepEqual(repairedCamp.start,baseline.start);
+ assert.deepEqual(repairedCamp.map.camera,badCamp.map.camera);
+ await arrival.locator('[data-workspace=review]').click();
+ assert.equal(await campIssue.count(),0);
+ const secondIssue=arrival.locator('#creator-issues [data-severity=error]').filter({hasText:'Choose a starting view inside the property'});
+ await secondIssue.getByRole('button',{name:'Show on map'}).press('Enter');
+ const secondColumn=arrival.locator('#creator-camera-column');
+ await secondColumn.fill('33.5');await secondColumn.press('Enter');await ready(arrival);
+ assert(await arrival.locator('#creator-test').isEnabled());
+ assert.deepEqual((await saved(arrival)).checkpoint.definition.map.camp,baseline.map.camp);
  assert.deepEqual(errors,[]);
  const badView=structuredClone(baseline);badView.map.camera=[-20,baseline.map.camera[1]];
  const opening=await open();await importFile(opening,Buffer.from(JSON.stringify(badView)));
@@ -95,5 +105,5 @@ try{
  assert.deepEqual(repairedView.map.camp,baseline.map.camp);
  assert.deepEqual(repairedView.start,baseline.start);
  assert.deepEqual(errors,[]);
- const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,keyboardCampRepair:true,keyboardCameraRepair:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement, boundary, arrival and opening-view repairs, and exact reload.');
+ const sources={};for(const path of ['scripts/verify-editor-incomplete-draft.mjs','web/editor/index.js','web/editor/scenario-journal.js','src/scenarios/journal/validation.rs','web/editor/draft-import.js','web/creation-export-worker.js','web/pkg/solar_friends_bg.wasm'])sources[path]=createHash('sha256').update(await readFile(path)).digest('hex');await writeFile(`${output}/report.json`,JSON.stringify({schema:1,sources,checks:{exactIncompleteExport:true,cleanStorageImport:true,independentIdentity:true,missingTargetRetained:true,testAndReleaseBlocked:true,publicJournalRepair:true,missingRegionRevealedAndFocused:true,repairReloadExact:true,keyboardPlacementRepair:true,keyboardBoundaryRepair:true,keyboardCampRepair:true,independentPositionRepairs:true,keyboardCameraRepair:true,sourceUnchanged:true,browserErrors:errors},scope:'Missing region reference draft, two isolated browser contexts, ordinary export/import and journal controls. Does not prove every invalid draft class or launch gameplay.'},null,2)+'\n');console.log('PASS: incomplete draft export, isolated import, retained missing target, readiness blocks, keyboard placement, boundary, arrival and opening-view repairs, and exact reload.');
 }finally{await closeValidationBrowser(browser,server);}
