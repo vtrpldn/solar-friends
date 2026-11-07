@@ -183,25 +183,23 @@ function houseStudy01() {
   box(g, 1.14, 0.08, 0.2, "stone", -0.65, 0.04, 1.9);
   return g;
 }
-// House-only direction study. The other props keep the original shared kit.
-function house() {
-  const g = new THREE.Group();
-  box(g, 3.5, 2.4, 3.5, "plaster", 0, 1.2, 0);
-  gable(g, 3.5, 3.5, 2.4, 1.1);
-  const half = 2,
-    rise = 1.12,
-    angle = Math.atan2(rise, half),
+// Approved house roof language shared without changing the reference geometry.
+function clayRoof(
+  g,
+  { half = 2, depth = 4, eave = 2.4, rise = 1.12, ridgeHeight = 3.78 } = {},
+) {
+  const angle = Math.atan2(rise, half),
     length = Math.hypot(half, rise);
   for (const side of [-1, 1]) {
     const slope = new THREE.Group();
-    slope.position.set(side, 2.4 + rise / 2, 0);
+    slope.position.set((side * half) / 2, eave + rise / 2, 0);
     slope.rotation.z = -side * angle;
     g.add(slope);
-    box(slope, length, 0.16, 4, "tile", 0, 0, 0);
+    box(slope, length, 0.16, depth, "tile", 0, 0, 0);
     // Four overlapping courses of hollow, softly faceted clay barrel tiles.
     const course = length / 4;
     for (let row = 0; row < 4; row++) {
-      for (let col = 0; col < 8; col++) {
+      for (let col = 0; col < depth / 0.5; col++) {
         const shell = new THREE.Shape();
         for (let i = 0; i <= 6; i++) {
           const a = (i * Math.PI) / 6;
@@ -227,17 +225,43 @@ function house() {
           (row * 3 + col) % 7 === 0 ? "tileLight" : "tile",
           side * (length / 2 - (row + 0.5) * course),
           0.09 + row * 0.025,
-          -1.75 + col * 0.5,
+          -depth / 2 + 0.25 + col * 0.5,
         );
         tile.rotation.y = (side * Math.PI) / 2;
       }
     }
-    box(slope, length, 0.2, 0.16, "tileLight", 0, 0.01, 2);
-    box(slope, length, 0.2, 0.16, "tileLight", 0, 0.01, -2);
-    box(slope, 0.14, 0.22, 4.15, "tileDark", (side * length) / 2, -0.04, 0);
+    box(slope, length, 0.2, 0.16, "tileLight", 0, 0.01, depth / 2);
+    box(slope, length, 0.2, 0.16, "tileLight", 0, 0.01, -depth / 2);
+    box(
+      slope,
+      0.14,
+      0.22,
+      depth + 0.15,
+      "tileDark",
+      (side * length) / 2,
+      -0.04,
+      0,
+    );
   }
-  const ridge = cylinder(g, 0.25, 0.25, 4.16, "tileLight", 0, 3.78, 0, 6);
+  const ridge = cylinder(
+    g,
+    0.25,
+    0.25,
+    depth + 0.16,
+    "tileLight",
+    0,
+    ridgeHeight,
+    0,
+    6,
+  );
   ridge.rotation.x = Math.PI / 2;
+}
+// Approved house reference: preserve its silhouette and material assignments.
+function house() {
+  const g = new THREE.Group();
+  box(g, 3.5, 2.4, 3.5, "plaster", 0, 1.2, 0);
+  gable(g, 3.5, 3.5, 2.4, 1.1);
+  clayRoof(g);
   // A broad arched entrance and a few chunky joinery details read at game scale.
   function arch(width, height, depth, material, x, y, z) {
     const r = width / 2,
@@ -312,7 +336,7 @@ function house() {
   }
   return g;
 }
-function shed() {
+function shedStudy01() {
   const g = new THREE.Group();
   for (const x of [-1.75, 1.75])
     for (const z of [-0.75, 0.75]) {
@@ -338,7 +362,7 @@ function shed() {
     box(g, 0.12, 0.43, 0.32, "timber", x, 0.215, -0.42);
   return g;
 }
-function tree() {
+function treeStudy01() {
   const g = new THREE.Group();
   cylinder(g, 0.16, 0.31, 2.6, "timber", 0, 1.3, 0, 9);
   for (let i = 0; i < 6; i++) {
@@ -377,7 +401,7 @@ function tree() {
   });
   return g;
 }
-function road() {
+function roadStudy01() {
   const g = new THREE.Group();
   box(g, 2, 0.035, 2, "earth", 0, 0.0175, 0);
   for (let i = 0; i < 40; i++) {
@@ -397,7 +421,7 @@ function road() {
   }
   return g;
 }
-function resident() {
+function residentStudy01() {
   const g = new THREE.Group();
   for (const x of [-0.13, 0.13]) {
     box(g, 0.17, 0.12, 0.31, "timber", x, 0.06, 0.045);
@@ -420,6 +444,145 @@ function resident() {
   cylinder(g, 0.192, 0.195, 0.04, "timber", 0, 1.7, 0, 16);
   return g;
 }
+// Study 02 carries the approved house language across the reference kit.
+function shed() {
+  const g = new THREE.Group();
+  for (const x of [-1.72, 1.72])
+    for (const z of [-0.72, 0.72]) {
+      box(g, 0.23, 2.25, 0.23, "timber", x, 1.125, z);
+      beam(
+        g,
+        [x, 1.67, z],
+        [x - Math.sign(x) * 0.53, 2.2, z],
+        0.16,
+        "timberLight",
+      );
+    }
+  for (const z of [-0.72, 0.72])
+    box(g, 3.7, 0.22, 0.22, "timberLight", 0, 2.2, z);
+  clayRoof(g, { depth: 2, eave: 2.3, rise: 0.85, ridgeHeight: 3.41 });
+  for (let i = 0; i < 7; i++)
+    box(
+      g,
+      0.45,
+      0.88,
+      0.1,
+      i % 3 === 0 ? "timberLight" : "timber",
+      -1.47 + i * 0.49,
+      0.73,
+      -0.73,
+    );
+  for (const z of [-0.28, -0.54])
+    box(g, 2.9, 0.14, 0.24, "timberLight", 0, 0.48, z);
+  for (const x of [-1.1, 1.1])
+    box(g, 0.2, 0.41, 0.38, "timber", x, 0.205, -0.41);
+  box(g, 2.8, 0.13, 0.12, "timber", 0, 0.24, -0.41);
+  return g;
+}
+function tree() {
+  const g = new THREE.Group();
+  function bough(a, b, r1, r2) {
+    const start = new THREE.Vector3(...a),
+      end = new THREE.Vector3(...b);
+    const trunk = cylinder(
+      g,
+      r2,
+      r1,
+      start.distanceTo(end),
+      "timber",
+      0,
+      0,
+      0,
+      6,
+    );
+    trunk.position.copy(start.clone().add(end).multiplyScalar(0.5));
+    trunk.quaternion.setFromUnitVectors(
+      new THREE.Vector3(0, 1, 0),
+      end.sub(start).normalize(),
+    );
+  }
+  bough([0, 0.3, 0], [0.12, 2.5, 0.02], 0.3, 0.19);
+  cylinder(g, 0.3, 0.43, 0.46, "timber", 0, 0.23, 0, 6);
+  bough([0.08, 1.8, 0], [-0.9, 3.2, 0.2], 0.17, 0.09);
+  bough([0.1, 2.1, 0], [1, 3.4, 0.25], 0.17, 0.09);
+  bough([0.1, 2.2, 0], [0.1, 3.5, -0.9], 0.16, 0.08);
+  const clusters = [
+    [-0.9, 3.2, 0.2, 1.05],
+    [0.95, 3.4, 0.25, 1.08],
+    [0.1, 3.45, -0.9, 1.08],
+    [-0.15, 4.02, -0.05, 1.16],
+    [0.1, 3.25, 1.02, 0.95],
+    [-0.8, 3.7, -0.65, 0.82],
+  ];
+  clusters.forEach(([x, y, z, r], i) =>
+    ball(
+      g,
+      r,
+      i === 3 ? "leafLight" : i === 2 ? "leafDark" : "leaf",
+      x,
+      y,
+      z,
+      [1, 0.84, 1],
+      1,
+    ),
+  );
+  for (const [x, y, z] of [
+    [-1.3, 3.55, 0.3],
+    [0.65, 4.22, 0.28],
+    [-0.1, 3.6, 1.5],
+  ])
+    ball(g, 0.42, "leafLight", x, y, z, [1, 0.6, 0.9], 0);
+  return g;
+}
+function road() {
+  const g = new THREE.Group();
+  box(g, 2, 0.025, 2, "earth", 0, 0.0125, 0);
+  // Broad, quiet marks and a handful of low-sided stones replace pixel-sized grit.
+  for (const [x, z, r] of [
+    [-0.55, -0.48, 0.33],
+    [0.43, 0.38, 0.42],
+    [-0.17, 0.12, 0.29],
+  ]) {
+    const patch = cylinder(g, r, r, 0.003, "earth", x, 0.027, z, 6);
+    patch.scale.z = 0.62;
+    patch.material = materials.earth.clone();
+    patch.material.color.offsetHSL(0, -0.02, 0.025);
+    patch.userData.ownedMaterial = true;
+  }
+  for (const [x, z, r] of [
+    [-0.8, 0.63, 0.09],
+    [0.71, -0.58, 0.08],
+    [0.64, 0.72, 0.065],
+    [-0.66, -0.78, 0.06],
+    [0.2, -0.5, 0.055],
+  ])
+    ball(g, r, "stone", x, 0.032, z, [1, 0.28, 0.75], 0);
+  return g;
+}
+function resident() {
+  const g = new THREE.Group();
+  for (const x of [-0.125, 0.125]) {
+    const boot = box(g, 0.2, 0.13, 0.3, "timber", x, 0.065, 0.055);
+    cylinder(g, 0.09, 0.085, 0.6, "trousers", x, 0.42, 0, 6);
+  }
+  const body = cylinder(g, 0.23, 0.24, 0.5, "shirt", 0, 0.98, 0, 6);
+  body.scale.z = 0.68;
+  cylinder(g, 0.075, 0.08, 0.12, "skin", 0, 1.27, 0, 6);
+  ball(g, 0.235, "skin", 0, 1.49, 0, [0.88, 1, 0.86], 1);
+  ball(g, 0.238, "hair", 0, 1.57, -0.035, [0.88, 0.62, 0.86], 0);
+  for (const side of [-1, 1]) {
+    beam(g, [side * 0.23, 1.17, 0], [side * 0.3, 0.95, 0.015], 0.16, "shirt");
+    beam(g, [side * 0.3, 0.95, 0.015], [side * 0.3, 0.76, 0.07], 0.11, "skin");
+    ball(g, 0.07, "skin", side * 0.3, 0.73, 0.07, [0.8, 1, 1], 0);
+    ball(g, 0.023, "hair", side * 0.075, 1.51, 0.177, [1, 1, 0.5], 0);
+    ball(g, 0.046, "skin", side * 0.205, 1.49, -0.005, [0.6, 1, 0.65], 0);
+  }
+  ball(g, 0.043, "skin", 0, 1.46, 0.2, [0.8, 0.8, 1], 0);
+  cylinder(g, 0.34, 0.34, 0.045, "earth", 0, 1.68, 0, 10);
+  cylinder(g, 0.15, 0.19, 0.15, "earth", 0, 1.775, 0, 8);
+  cylinder(g, 0.19, 0.195, 0.045, "timber", 0, 1.72, 0, 8);
+  return g;
+}
 export const ASSETS = [
   {
     id: "house",
@@ -433,38 +596,42 @@ export const ASSETS = [
   },
   {
     id: "shed",
+    revision: 2,
     name: "Open timber shed",
     type: "Shelter",
     footprint: [2, 1],
     description:
-      "Open sides, structural braces and a shaded bench. Shares the house’s roof and timber kit.",
+      "Chunky timber framing, broad bench planks and the same overlapping clay tiles as the approved house.",
     build: shed,
   },
   {
     id: "tree",
+    revision: 2,
     name: "Shade tree",
     type: "Vegetation",
     footprint: [2, 2],
     description:
-      "Branch-supported foliage clusters and visible root contact. A generic canopy study, not a botanical species.",
+      "Broad faceted canopy masses, a tapered branching trunk and restrained leaf accents. A generic shade-tree study.",
     build: tree,
   },
   {
     id: "road",
+    revision: 2,
     name: "Earth path",
     type: "Ground",
     footprint: [1, 1],
     description:
-      "A seamless 2 × 2 m packed-earth tile. Its edges meet the grid without a surrounding platform.",
+      "Quiet packed earth with broad tonal patches and a few chunky stones. Exact 2 × 2 m edges join without a surrounding platform.",
     build: road,
   },
   {
     id: "resident",
+    revision: 2,
     name: "Resident scale study",
     type: "Human scale",
     footprint: [1, 1],
     description:
-      "An authored standing figure, 1.70 m to the head and 1.84 m with hat. A proportion study, not a character creator.",
+      "A friendly faceted scale figure with simpler clothes, sturdy shoes and a broad straw hat. About 1.72 m to the head, 1.85 m with hat.",
     build: resident,
   },
 ];
@@ -480,5 +647,6 @@ export function createAsset(id) {
 export function disposeModel(model) {
   model.traverse((o) => {
     o.geometry?.dispose();
+    if (o.userData.ownedMaterial) o.material.dispose();
   });
 }

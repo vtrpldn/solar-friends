@@ -111,6 +111,7 @@ function iso() {
   camera.lookAt(target);
   camera.updateProjectionMatrix();
   controls.update();
+  resize();
   $("#view-subtitle").textContent = "ORTHOGRAPHIC · 2:1";
 }
 function lights() {
@@ -135,6 +136,7 @@ function outline(w, d) {
   );
 }
 function rebuild() {
+  surface("materials");
   for (const child of [...content.children]) {
     disposeModel(child);
     content.remove(child);
@@ -237,7 +239,7 @@ function resize() {
   const r = $("#viewport").getBoundingClientRect();
   if (!r.width || !r.height) return;
   renderer.setSize(r.width, r.height, false);
-  const h = Math.max(9.5, (7 * r.height) / r.width);
+  const h = Math.max(9.5, ((state.together ? 8.5 : 7) * r.height) / r.width);
   camera.left = (-h * r.width) / r.height / 2;
   camera.right = -camera.left;
   camera.top = h / 2;

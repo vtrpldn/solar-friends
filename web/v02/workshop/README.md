@@ -44,3 +44,14 @@ The house uses 1,020 triangles across 75 meshes, down from 4,796 triangles acros
 ## House direction study 03
 
 Restores recognizable clay roofing with four overlapping courses of chunky, six-facet hollow barrel tiles and a matching ridge cap. The study 02 walls, entrance, windows and plant are unchanged. Other props remain unchanged. All four rotations were visually inspected in the in-app browser; the r03 day/night exports pass the same alpha, clipping, footprint and anchor checks.
+
+## Reference kit style pass 02
+
+The player approved house study 03 as the reference and requested its style across the other props. House geometry, transforms and colors remain identical; a new browser export was byte-identical to the approved r03 day sheet. Its roof construction is now shared with the shed.
+
+- Shed r02 uses the same chunky clay tiles, thicker timber posts/braces and broad bench planks.
+- Tree r02 uses six broad canopy masses, a few leaf accents and a tapered branching trunk instead of many small foliage lumps.
+- Road r02 uses broad, subtle earth patches and five low-sided stones instead of fine gravel. Its exact 2 m square boundary remains.
+- Resident r02 uses a larger faceted face, simpler clothing, sturdy shoes and a low-sided straw hat, preserving human scale.
+
+The prior recipes and exports remain as references. No randomized house accessories were added. The current r02 props were inspected from all four directions and together in daylight/night. Both verification scripts pass for the current five-model kit and 40 exported frames. The shared preview now leaves enough horizontal space for the complete yard on a narrower desktop panel; export scale is unchanged.
