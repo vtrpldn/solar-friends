@@ -49,10 +49,11 @@ import {
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
   SAVE = "solar-friends-v02-first-weekend-2";
-const arrivalPreview = new URLSearchParams(location.search).has(
-  "arrival-preview",
-);
+const restPreview = new URLSearchParams(location.search).has("rest-preview");
+const arrivalPreview =
+  restPreview || new URLSearchParams(location.search).has("arrival-preview");
 let s = createWeekend();
+if (restPreview) for (const resident of s.people) resident.energy = 10;
 try {
   if (!arrivalPreview) s = restore(localStorage.getItem(SAVE)) || s;
 } catch {}
@@ -662,9 +663,11 @@ function renderUI() {
     energy.textContent = `${Math.round(r.energy)}% energy`;
     const status = document.createElement("span");
     status.textContent =
-      r.action === "rest" && !r.tentPhase
-        ? "Heading to the tent"
-        : actionText[r.action] || "Settling in";
+      r.tentPhase === "exit"
+        ? "Leaving the tent"
+        : r.action === "rest" && !r.tentPhase
+          ? "Heading to the tent"
+          : actionText[r.action] || "Settling in";
     status.style.gridColumn = "1 / -1";
     const progress = document.createElement("progress");
     progress.max = 100;
@@ -806,6 +809,8 @@ function frame(now) {
         t = Math.max(0, Math.min(1, (visual.time - r.tentAt) / 1.5));
       const inward =
         r.tentPhase === "exit" ? 1 - t : r.tentPhase === "inside" ? 1 : t;
+      // The interior is hidden; reveal the resident only at the open doorway.
+      g.visible = inward < 0.64;
       g.position.copy(world(door.x, door.z - inward * 1.35));
       // Duck beneath the ridge while passing through the open tent door.
       g.position.y = 0;

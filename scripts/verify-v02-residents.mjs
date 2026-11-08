@@ -30,6 +30,7 @@ for (const id of RESIDENT_IDS) {
     "stretch",
     "chat",
     "breathe",
+    "duck-walk",
     "walk",
     "sit",
     "rest",

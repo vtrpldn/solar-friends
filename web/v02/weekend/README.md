@@ -36,3 +36,5 @@ Recipes model small temporary structures assembled from prepared materials, not 
 Assembly budgets are 1, 2, 8 and 4 person-hours for the gathering place, water stand, open shelter and temporary toilet. One simulation second represents 0.45 game minutes; skill improves assembly speed by 25%. Carrying, walking and rest are additional. Timber loads carry four pieces, roof loads two sheets, and equipment/fasteners one pack each. These loads abstract carrying capacity; they do not model exact weight or two-person lifting yet. Money never substitutes for missing stock.
 
 The revised economy uses save schema/key 2, preserving old prototype saves under their original key while starting a new weekend.
+
+For an isolated tent-resting playtest, open `?rest-preview&performance`: friends arrive with low energy. It never reads or writes the player save. Choose a camp to watch door approaches, indoor recovery and exits.
