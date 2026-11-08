@@ -145,32 +145,6 @@ header {
 header > * {
   pointer-events: auto;
 }
-header > div:first-child {
-  background: #405a40;
-  color: #fff5d6;
-  padding: 12px 20px 13px 55px;
-  border: 2px solid #2d452f;
-  border-radius: 20px 9px 22px 9px;
-  box-shadow: 0 4px 0 #263a2d55;
-  position: relative;
-}
-header > div:first-child::before {
-  content: "✿";
-  position: absolute;
-  left: 13px;
-  top: 13px;
-  font-size: 34px;
-  color: #efc66c;
-  line-height: 1;
-}
-header small {
-  color: #d4dda9;
-  font-size: 9px;
-  letter-spacing: 1.6px;
-}
-header h1 {
-  font-size: 22px;
-}
 #supplies {
   display: flex;
   gap: 7px;
@@ -786,18 +760,6 @@ dialog button {
 @media (max-width: 1200px) {
   header {
     gap: 9px;
-  }
-  header > div:first-child {
-    padding-left: 43px;
-    padding-right: 12px;
-  }
-  header h1 {
-    font-size: 18px;
-  }
-  header > div:first-child::before {
-    font-size: 27px;
-    left: 9px;
-    top: 17px;
   }
   .resource {
     min-width: 70px;

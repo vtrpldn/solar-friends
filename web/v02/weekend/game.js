@@ -1395,8 +1395,6 @@ function renderUI() {
     "aria-pressed",
     String(s.instantBuild !== false),
   );
-  document.querySelector("header h1").textContent =
-    s.mode === "sandbox" ? "Your sandbox" : "Our little village";
   $("skip-arrival").hidden = active || s.arrivalElapsed >= ARRIVAL_DURATION;
   $("village-actions").hidden = !active;
   document.querySelectorAll("[data-panel-toggle]").forEach((button) => {
