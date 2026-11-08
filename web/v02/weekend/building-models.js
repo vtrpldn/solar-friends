@@ -205,12 +205,6 @@ export const BUILDING_MODELS = [
     size: [1, 1],
   },
   {
-    id: "supply-4",
-    name: "Salvage clearing",
-    category: "Supplies",
-    size: [1, 1],
-  },
-  {
     id: "supply-5",
     name: "Camp receiving bench",
     category: "Supplies",
@@ -218,7 +212,7 @@ export const BUILDING_MODELS = [
   },
   {
     id: "supply-6",
-    name: "Recovered battery",
+    name: "Battery station",
     category: "Supplies",
     size: [1, 1],
   },

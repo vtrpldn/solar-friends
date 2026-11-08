@@ -2016,6 +2016,21 @@ export function restore(text) {
       s.projects.length > 512
     )
       return null;
+    // Retired reclaimed-parts economy: remove obsolete stock, sites and jobs.
+    delete s.materials?.salvage;
+    const retiredSites=new Set(s.projects.filter(p=>p.key==='supply-4').map(p=>p.id));
+    s.projects=s.projects.filter(p=>!retiredSites.has(p.id));
+    if(Array.isArray(s.operations))s.operations=s.operations.filter(o=>!retiredSites.has(o.site)&&!['salvage','hardware','tools'].includes(o.recipe));
+    if(s.infrastructure?.nodes){
+      for(const id of retiredSites)delete s.infrastructure.nodes[id];
+      if(Array.isArray(s.infrastructure.links))s.infrastructure.links=s.infrastructure.links.filter(l=>!retiredSites.has(l.from)&&!retiredSites.has(l.to));
+    }
+    if(s.trip?.material==='salvage'){
+      s.money+=30; // Refund the retired shop batch already paid for.
+      const traveler=s.people.find(r=>r.id===s.trip.person);
+      if(traveler){traveler.action='idle';traveler.x=s.stock.x;traveler.z=s.stock.z;}
+      s.trip=null;
+    }
     if (
       s.opening &&
       (s.opening.version !== 1 ||

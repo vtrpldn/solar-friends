@@ -105,7 +105,6 @@ const extraMaterials = {
   bamboo: ["Bamboo poles", 4, 12, 48],
   earth: ["Building earth", 4, 12, 18],
   stone: ["Stone", 4, 12, 42],
-  salvage: ["Reclaimed parts", 4, 6, 30],
   frames: ["Frames", 2, 4, 72],
   walls: ["Wall material", 4, 8, 40],
   tiles: ["Roof tiles", 4, 12, 108],
@@ -158,7 +157,6 @@ export function expandProjects(projects) {
       "supply-1": { bamboo_starts: 4 },
       "supply-2": { tools: 1 },
       "supply-3": { tools: 1 },
-      "supply-4": { tools: 1 },
       "supply-5": { wood: 4 },
       "supply-6": { batteries: 1, electrical: 1 },
     };
@@ -259,20 +257,6 @@ export const PROCESSES = {
     kind: "workshop",
     work: 40,
   },
-  hardware: {
-    name: "Recover fittings",
-    input: { salvage: 2 },
-    output: { hardware: 1 },
-    kind: "workshop",
-    work: 30,
-  },
-  tools: {
-    name: "Repair tools",
-    input: { wood: 1, salvage: 1 },
-    output: { tools: 1 },
-    kind: "workshop",
-    work: 30,
-  },
   meals: {
     name: "Cook a meal batch",
     input: { food: 4 },
@@ -319,14 +303,6 @@ export const PROCESSES = {
     kind: "supply-3",
     work: 50,
     deposit: 160,
-  },
-  salvage: {
-    name: "Sort reclaimed material",
-    input: {},
-    output: { salvage: 6 },
-    kind: "supply-4",
-    work: 40,
-    deposit: 120,
   },
   vegetables: {
     name: "Plant and harvest vegetables",

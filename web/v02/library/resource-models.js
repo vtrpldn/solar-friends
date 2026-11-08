@@ -11,7 +11,6 @@ export const RESOURCE_IDS = [
   "bamboo",
   "earth",
   "stone",
-  "salvage",
   "frames",
   "walls",
   "tiles",
@@ -137,11 +136,6 @@ export function resourceModel(id, asset) {
     case "stone":
       a(0.45, "stone", -0.2, 0.3, 0, [1, 0.8, 0.85]);
       a(0.3, "stone", 0.3, 0.23, 0.2, [1, 0.8, 1]);
-      break;
-    case "salvage":
-      b(0.7, 0.08, 0.8, "timberLight", 0, 0.08);
-      b(0.4, 0.5, 0.1, "teal", -0.2, 0.35);
-      b(0.3, 0.2, 0.35, "stone", 0.25, 0.18, 0.15);
       break;
     case "frames":
       for (const x of [-0.4, 0.4]) b(0.12, 1, 0.12, "timberLight", x, 0.5);

@@ -32,7 +32,7 @@ export function landParameters(seed = 0) {
 // Regional geology is repeatable for a saved map and varies between plots.
 export function resourceRichness(seed,x,z,kind='stone') {
   if(!seed)return 1;
-  const salt={stone:0x91af,earth:0x7c32,salvage:0x42eb}[kind]||0x91af;
+  const salt={stone:0x91af,earth:0x7c32}[kind]||0x91af;
   const random=landRandom((seed ^ salt ^ Math.imul(Math.floor(x/12),73856093) ^ Math.imul(Math.floor(z/12),19349663))>>>0);
   return (.6+random()*1.4)*richnessFactor(settingsFor(seed).resources);
 }

@@ -1305,44 +1305,6 @@ function supply(id) {
         "#a4a38f",
         [1, 0.7, 1],
       );
-  if (id === 4) {
-    block(g, 0.8, 1.8, 0.12, "#397c72", -0.5, 0.9, -0.4);
-    for (const y of [0.5, 1.3]) {
-      block(g, 0.58, 0.5, 0.03, "#30695e", -0.5, y, -0.32);
-    }
-    foliage(g, -0.19, 0.9, -0.3, 0.035, "#d2b16b");
-    for (const x of [0.05, 0.65])
-      box(g, 0.07, 1.05, 0.07, "plaster", x, 1.15, -0.35);
-    for (const y of [0.65, 1.15, 1.65])
-      box(g, 0.67, 0.07, 0.07, "plaster", 0.35, y, -0.35);
-    block(g, 0.5, 0.85, 0.02, "#73918a", 0.35, 1.15, -0.38);
-    for (let row = 0; row < 4; row++)
-      for (let col = 0; col < 3; col++) {
-        const tile = color(
-          new THREE.Mesh(
-            new THREE.CylinderGeometry(
-              0.14,
-              0.14,
-              0.6,
-              6,
-              1,
-              true,
-              -Math.PI / 2,
-              Math.PI,
-            ),
-          ),
-          "#b95532",
-        );
-        tile.rotation.x = -Math.PI / 2;
-        tile.position.set(-0.25 + col * 0.24, 0.13 + row * 0.09, 0.5);
-        tile.material.side = THREE.DoubleSide;
-        tile.castShadow = true;
-        g.add(tile);
-      }
-    box(g, 0.6, 0.5, 0.6, "timberLight", 0.7, 0.25, 0);
-    for (const y of [0.12, 0.35])
-      box(g, 0.64, 0.045, 0.64, "timber", 0.7, y, 0);
-  }
   if (id === 5) {
     table(g, 0, 0, 2);
     box(g, 0.6, 0.5, 0.55, "timberLight", 0.4, 1.23, 0);
@@ -1652,11 +1614,11 @@ for (const [i, name] of [
   "Bamboo stand",
   "Building earth",
   "Stone deposit",
-  "Salvage clearing",
+  null, // Retired supply slot; preserve the remaining asset IDs.
   "Camp receiving bench",
-  "Recovered battery",
+  "Battery station",
 ].entries())
-  add(
+  if(name) add(
     `supply-${i}`,
     name,
     "Supplies",
