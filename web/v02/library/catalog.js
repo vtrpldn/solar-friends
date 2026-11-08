@@ -1,3 +1,4 @@
+import { rigAnimal } from "./animal-motion.js";
 import { COMMUNITY } from "./community-defs.js";
 import { createCommunity } from "./community.js";
 import { createPickup, createJimny } from "./vehicles.js";
@@ -717,7 +718,7 @@ function goat() {
   }
   color(ball(g, 0.07, "plaster", 0.62, 0.84, 0, [0.6, 1.5, 0.5], 0), dark);
   beam(g, [-0.52, 0.76, 0], [-0.64, 0.91, 0], 0.07, "plaster");
-  return g;
+  return rigAnimal(g,"goat");
 }
 function chicken(variant = 0) {
   const g = group(),
@@ -730,7 +731,7 @@ function chicken(variant = 0) {
   block(g, 0.08, 0.06, 0.14, "#d6a34b", 0, 0.5, 0.3);
   for (const x of [-0.09, 0.09])
     beam(g, [x, 0.02, 0], [x, 0.19, 0], 0.025, "earth");
-  return g;
+  return rigAnimal(g,"chicken");
 }
 function building(id) {
   const g = group();
@@ -1102,6 +1103,7 @@ function building(id) {
     });
     const ramp = box(g, 0.5, 0.06, 1.2, "timberLight", 0, 0.38, 1.2);
     ramp.rotation.x = 0.55;
+    for (const [i,x,z] of [[0,-1.3,.6],[1,1.3,.8],[2,.8,1.5]]) { const bird=chicken(i);bird.position.set(x,0,z);g.add(bird); }
     return g;
   }
   if (id === "workshop") {
@@ -1862,6 +1864,11 @@ export const CATEGORIES = [...new Set(ASSETS.map((a) => a.category))];
 // Bake static recipe pieces into one draw per material. This preserves the exact
 // authored geometry while avoiding hundreds of individual clay-tile draw calls.
 export function compactModel(root) {
+  // Keep articulated animals separate from static material batches.
+  const animals=[];
+  root.traverse(o=>{if(o!==root && o.animalRig)animals.push(o);});
+  for(const animal of animals){root.attach(animal);root.remove(animal);}
+  if(root.animalRig)return root;
   root.updateMatrixWorld(true);
   const batches = new Map();
   const owned = new Set();
@@ -1914,5 +1921,6 @@ export function compactModel(root) {
     parts.forEach((p) => p.dispose());
   }
   root.traverse((o) => o.geometry?.dispose());
+  if (animals.length) result.add(...animals);
   return result;
 }

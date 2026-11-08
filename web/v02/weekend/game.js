@@ -1,3 +1,4 @@
+import { collectAnimals, animateAnimals } from "../library/animal-motion.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import { resourceIcon } from "./resource-icons.js";
 import { createManagement } from "./management.js";
@@ -423,7 +424,7 @@ function syncBuildings() {
         p.z + (def.size[1] - 1) / 2,
       );
       root.userData.projectId = p.id;
-      entry = { root, asset: id };
+      entry = { root, asset: id, animals: collectAnimals(root) };
       buildings.set(p.id, entry);
     }
     entry.root.position.copy(
@@ -1231,6 +1232,7 @@ $("purchase").onchange = () => {
 renderUI();
 if (s.stage !== "arrival") message(s.log[0] || "Welcome back to your camp.");
 const recordPerformance = performanceReadout(renderer);
+let animalTime = 0;
 let previous = performance.now(),
   accumulator = 0,
   latestMessage = s.log[0];
@@ -1249,6 +1251,10 @@ function frame(now) {
   const visual = interpolateMotion(previousMotion, s, accumulator / 0.1);
   drawCamp();
   syncBuildings();
+  if (!paused && !document.hidden) animalTime += dt * speed;
+  for (const [id, entry] of buildings)
+    if (entry.animals.length)
+      animateAnimals(entry.animals, animalTime + id * 2.73);
   entrance.position.copy(world(s.stock.x, s.stock.z));
   vehicles.forEach(
     (vehicle, index) => (vehicle.root.visible = index !== 0 || !s.trip),
