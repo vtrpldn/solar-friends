@@ -22,7 +22,7 @@ export function landParameters(seed = 0) {
     phase: random() * Math.PI * 2,
     frequency: 0.045 + random() * 0.025,
     width: (2.1 + random() * 1.3)*Math.sqrt(waterFactor(settingsFor(seed).water)),
-    hillHeight: (2 + random() * 7)*({gentle:.35,rolling:1,rugged:1.7}[settingsFor(seed).landscape]),
+    hillHeight: (4 + random() * 5)*({gentle:.35,rolling:1,rugged:1.7}[settingsFor(seed).landscape]),
     hillScaleX: .025 + random() * .065,
     hillScaleZ: .025 + random() * .065,
     ridge: .5 + random() * 3,
