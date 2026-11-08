@@ -1,3 +1,4 @@
+import { RESOURCE_GROUPS } from "./resource-groups.js";
 import { createFire, animateFire } from "./fire.js";
 import { saveKey } from "./modes.js";
 import { openingProgress, openingRecap } from "./opening.js";
@@ -1323,13 +1324,18 @@ function renderUI() {
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
   }
 }
-for (const [id, item] of Object.entries(MATERIALS).filter(
-  ([, item]) => item.quantity > 0,
-)) {
-  const option = document.createElement("option");
-  option.value = id;
-  option.textContent = `${materialText(id, item.quantity)} · R$${item.price}`;
-  $("purchase").append(option);
+for (const group of RESOURCE_GROUPS) {
+  const options = document.createElement("optgroup");
+  options.label = group.name;
+  for (const id of group.ids) {
+    const item = MATERIALS[id];
+    if (!item.quantity) continue;
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = `${materialText(id, item.quantity)} · R$${item.price}`;
+    options.append(option);
+  }
+  if (options.children.length) $("purchase").append(options);
 }
 management = createManagement({
   state: () => s,

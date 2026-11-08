@@ -1357,3 +1357,6 @@ body[data-tray="closed"] {
 .resource-icon { object-fit: contain; }
 .resource-icon:not(.ready) { visibility: hidden; }
 .stock-card > .resource-icon { width: 64px; height: 48px; }
+
+.resource-group-title { grid-column: 1 / -1; margin: 12px 0 2px; padding-bottom: 7px; border-bottom: 1px solid #c5bd96; color: #536347; font-size: 14px; }
+.resource-group-title:first-child { margin-top: 0; }

@@ -1,3 +1,4 @@
+import { RESOURCE_GROUPS } from "./resource-groups.js";
 import { resourceIcon, illustrateResources } from "./resource-icons.js";
 import {
   MATERIALS,
@@ -211,19 +212,29 @@ export function createManagement({
     if (view === "resources") {
       $("resource-grid").replaceChildren();
       const search = $("resource-search").value.toLowerCase();
-      for (const [id, item] of Object.entries(MATERIALS)) {
-        if (!item.name.toLowerCase().includes(search)) continue;
-        const b = document.createElement("button");
-        b.className = "stock-card";
-        b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name}</span><small>${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
-        illustrateResources(b);
-        b.disabled = !item.quantity;
-        b.classList.toggle("active", $("purchase").value === id);
-        b.onclick = () => {
-          $("purchase").value = id;
-          refresh();
-        };
-        $("resource-grid").append(b);
+      for (const group of RESOURCE_GROUPS) {
+        const matches = group.ids.filter((id) =>
+          MATERIALS[id].name.toLowerCase().includes(search),
+        );
+        if (!matches.length) continue;
+        const heading = document.createElement("h4");
+        heading.className = "resource-group-title";
+        heading.textContent = group.name;
+        $("resource-grid").append(heading);
+        for (const id of matches) {
+          const item = MATERIALS[id];
+          const b = document.createElement("button");
+          b.className = "stock-card";
+          b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name}</span><small>${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
+          illustrateResources(b);
+          b.disabled = !item.quantity;
+          b.classList.toggle("active", $("purchase").value === id);
+          b.onclick = () => {
+            $("purchase").value = id;
+            refresh();
+          };
+          $("resource-grid").append(b);
+        }
       }
       if (!$("resource-grid").children.length)
         $("resource-grid").textContent =
