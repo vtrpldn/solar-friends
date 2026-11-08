@@ -42,6 +42,16 @@
       <p id="menu-status" role="status"></p>
     </main>
     <div class="corner">SOLAR FRIENDS<small>v2</small></div>
+    <dialog id="world-setup" aria-labelledby="setup-title">
+      <h2 id="setup-title">Your village</h2>
+      <p>Choose the land and the circumstances your friends arrive with.</p>
+      <div class="setup-layout"><div>
+      <label>Starting point<select id="setup-preset"><option value="custom">Custom</option><option value="gentle">Gentle beginning</option><option value="scratch">Starting from scratch</option><option value="remote">Remote homestead</option></select></label>
+      <div id="setup-fields"></div>
+      </div><div><canvas id="land-preview" width="400" height="400" aria-label="Terrain and river preview"></canvas><p>Top-down land preview · darker ground is higher</p>
+      <label>Map seed<input id="setup-seed" type="number" min="1" max="4294967295" step="1" required></label><button id="reroll-land">New plot ↻</button><p id="setup-summary"></p></div></div>
+      <p id="setup-error" role="status"></p><div class="setup-actions"><button id="setup-back">Back</button><button id="setup-start">Start village</button></div>
+    </dialog>
     <dialog id="replace-save">
       <h2>Start a fresh village?</h2>
       <p id="replace-copy"></p>

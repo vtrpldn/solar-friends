@@ -1,3 +1,4 @@
+import {settingsFor,richnessFactor,waterFactor} from './world-settings.js';
 // Seed zero preserves the original plot for old saves and reproducible dev scenes.
 export function freshLandSeed() {
   const value = new Uint32Array(1);
@@ -20,8 +21,8 @@ export function landParameters(seed = 0) {
     bend: 4 + random() * 10,
     phase: random() * Math.PI * 2,
     frequency: 0.045 + random() * 0.025,
-    width: 2.1 + random() * 1.3,
-    hillHeight: 2 + random() * 7,
+    width: (2.1 + random() * 1.3)*Math.sqrt(waterFactor(settingsFor(seed).water)),
+    hillHeight: (2 + random() * 7)*({gentle:.35,rolling:1,rugged:1.7}[settingsFor(seed).landscape]),
     hillScaleX: .025 + random() * .065,
     hillScaleZ: .025 + random() * .065,
     ridge: .5 + random() * 3,
@@ -33,7 +34,7 @@ export function resourceRichness(seed,x,z,kind='stone') {
   if(!seed)return 1;
   const salt={stone:0x91af,earth:0x7c32,salvage:0x42eb}[kind]||0x91af;
   const random=landRandom((seed ^ salt ^ Math.imul(Math.floor(x/12),73856093) ^ Math.imul(Math.floor(z/12),19349663))>>>0);
-  return .6+random()*1.4;
+  return (.6+random()*1.4)*richnessFactor(settingsFor(seed).resources);
 }
 export function depositCapacity(seed,p,recipe) {
   if(!recipe.deposit)return 0;

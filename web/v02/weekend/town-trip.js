@@ -18,7 +18,7 @@ export function townCarPose(trip, index) {
   if (trip.phase === "away") return { ...parked, visible: false };
   const outgoing = trip.phase === "outbound";
   const elapsed = outgoing
-    ? TRIP_DURATION - trip.left
+    ? (trip.duration||TRIP_DURATION) - trip.left
     : DRIVE_DURATION - trip.left;
   const t = Math.max(0, Math.min(1, elapsed / DRIVE_DURATION));
   const smooth = t * t * (3 - 2 * t);

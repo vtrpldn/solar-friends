@@ -1,3 +1,4 @@
+import {waterFactor} from './world-settings.js';
 import { riverAccess } from "./river-layout.js";
 // v2 port of v1 electricity and water ownership rules. No renderer dependency.
 export const GRID_POWER = { capacity: 4, tariff: 1.2 };
@@ -312,7 +313,7 @@ export function infrastructureStep(s, defs, dt) {
   for (const n of Object.values(sys.nodes)) {
     // Rain is non-potable until filtered; no sewage or greywater becomes drinking water.
     if (s.rain && ["well", "rain-barrel"].includes(n.kind)) {
-      const add = Math.min(n.capacity[1] - n.water[1], 30 * hours);
+      const add = Math.min(n.capacity[1] - n.water[1], 30 * hours * waterFactor(s.worldSettings?.water));
       n.water[1] += add;
       sys.account.waterReceived += add;
     }
@@ -348,7 +349,7 @@ export function infrastructureStep(s, defs, dt) {
     if (a.enabled && sys.nodes[l.to].enabled && a.power > 0.99) {
       if (a.kind === "river" && l.kind === "irrigation") {
         const target = sys.nodes[l.to],
-          amount = Math.min(24 * hours, target.capacity[1] - target.water[1]);
+          amount = Math.min(24 * hours * waterFactor(s.worldSettings?.water), target.capacity[1] - target.water[1]);
         a.water[1] += amount;
         sys.account.waterReceived += amount;
       }

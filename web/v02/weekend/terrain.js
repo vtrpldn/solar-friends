@@ -1,3 +1,4 @@
+import {settingsFor,BIOMES} from './world-settings.js';
 import { MAP_CELLS, MAP_HALF } from "./map-size.js";
 import { riverCenter } from "./river-layout.js";
 import { elevationVertex } from "./elevation.js";
@@ -18,10 +19,11 @@ export function createTerrain(seed = 0, elevationSeed = seed, pads = []) {
     z: random() * MAP_HALF * 2 - MAP_HALF,
     radius: 5 + random() * 13,
   }));
+  const palette=BIOMES[settingsFor(seed).biome].colors;
   const colors = [],
-    grass = new THREE.Color("#9fad72"),
-    dry = new THREE.Color("#b9ad7b"),
-    lush = new THREE.Color("#849965");
+    grass = new THREE.Color(palette[0]),
+    dry = new THREE.Color(palette[1]),
+    lush = new THREE.Color(palette[2]);
   const points = geometry.attributes.position;
   for (let i = 0; i < points.count; i++) {
     const x = points.getX(i),

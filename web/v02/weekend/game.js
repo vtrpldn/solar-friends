@@ -1,3 +1,4 @@
+import {settingsFor,BIOMES,richnessFactor} from './world-settings.js';
 import {beginArrival} from './simulation.js';
 import {depositCapacity} from './land-layout.js';
 import {profileFor,friendshipLabel} from './resident-personality.js';
@@ -281,7 +282,8 @@ const native = ASSETS.filter(
 const scenery = new THREE.Group();
 scene.add(scenery);
 const sceneryRandom = landRandom(s.landSeed);
-for (let i = 0; i < 52; i++) {
+const biomeTrees=s.worldSettings?BIOMES[settingsFor(s.landSeed).biome].trees:native;
+for (let i = 0; i < Math.round(52*richnessFactor(settingsFor(s.landSeed).resources)); i++) {
   const a = i * 2.3999 + (s.landSeed ? sceneryRandom() * 0.5 : 0),
     r = s.landSeed ? 30 + sceneryRandom() * 25 : 29 + (i % 5) * 5,
     x = 32 + (Math.cos(a) * r) / 2,
@@ -292,10 +294,10 @@ for (let i = 0; i < 52; i++) {
   )
     scenery.add(
       prop(
-        native[
+        biomeTrees[
           s.landSeed
-            ? Math.floor(sceneryRandom() * native.length)
-            : i % native.length
+            ? Math.floor(sceneryRandom() * biomeTrees.length)
+            : i % biomeTrees.length
         ] || "tree",
         x,
         z,
@@ -331,7 +333,7 @@ for (let i = 0; i < 190; i++) {
       : wx > 60
         ? "rocky"
         : "meadow";
-  const set = regionSets[region],
+  const set = s.worldSettings && region!=="rocky" ? biomeTrees : regionSets[region],
     id = set[Math.floor(regionRandom() * set.length)];
   const variant = Math.floor(regionRandom() * 3);
   const varied =

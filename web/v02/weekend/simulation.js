@@ -1,3 +1,4 @@
+import {registerWorld,validSettings,townDuration,waterFactor} from './world-settings.js';
 import {depositCapacity} from './land-layout.js';
 import {workMultiplier} from './resident-personality.js';
 import { ensureNeeds, decayNeeds, chooseNeed, advanceNeed, validNeeds } from "./resident-needs.js";
@@ -1044,7 +1045,8 @@ export function supplyRun(s, material = "wood", project = null) {
   s.nextTripVehicle = 1 - vehicle;
   s.trip = {
     person: r.id,
-    left: TRIP_DURATION,
+    left: townDuration(s.worldSettings?.town),
+    duration: townDuration(s.worldSettings?.town),
     material,
     ...(project ? {project: project.id} : {}),
     vehicle,
@@ -1725,7 +1727,7 @@ export function tick(s, dt) {
     } else {
       trip.left = Math.max(0, trip.left - dt);
       trip.phase =
-        trip.left > TRIP_DURATION - DRIVE_DURATION
+        trip.left > (trip.duration||TRIP_DURATION) - DRIVE_DURATION
           ? "outbound"
           : trip.left > DRIVE_DURATION
             ? "away"
@@ -1743,8 +1745,8 @@ export function tick(s, dt) {
   if (
     s.stage === "playing" &&
     (s.opening && !s.opening.complete
-      ? s.time >= 240
-      : s.time >= 150 ||
+      ? s.time >= 240/waterFactor(s.worldSettings?.water)
+      : s.time >= 150/waterFactor(s.worldSettings?.water) ||
         s.projects.some(
           (p) => p.key !== "gathering" && p.work >= PROJECTS[p.key].work / 2,
         )) &&
@@ -2060,6 +2062,7 @@ export function restore(text) {
       s.landSeed > 0xffffffff
     )
       return null;
+    if(s.worldSettings!==undefined){if(!validSettings(s.worldSettings))return null;registerWorld(s.landSeed,s.worldSettings);}
     const fresh = createWeekend();
     s.arrivalElapsed ??= ARRIVAL_DURATION;
     if (
@@ -2245,7 +2248,8 @@ export function restore(text) {
         !s.people.some((r) => r.id === s.trip.person) ||
         !Number.isFinite(s.trip.left) ||
         s.trip.left < 0 ||
-        s.trip.left > TRIP_DURATION)
+        s.trip.left > (s.trip.duration||TRIP_DURATION) ||
+        (s.trip.duration!==undefined && ![45,55,110].includes(s.trip.duration)))
     )
       return null;
     if (s.nextTripVehicle !== undefined && ![0, 1].includes(s.nextTripVehicle))

@@ -252,3 +252,12 @@ body {
     transition: none;
   }
 }
+#world-setup { width: min(1000px,calc(100vw - 64px)); max-width: none; max-height: calc(100vh - 64px); overflow: auto; background: #fff7df; padding: 28px; border-radius: 24px; }
+#world-setup h2 { margin: 0 0 8px; }
+.setup-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin: 20px 0; }
+#world-setup label { display: grid; gap: 5px; font-size: 13px; margin: 10px 0; }
+#world-setup select,#world-setup input { width: 100%; padding: 8px; }
+#land-preview { width: 100%; max-height: 330px; object-fit: contain; border-radius: 16px; background: #a4b184; }
+#world-setup p { font-size: 13px; line-height: 1.5; }
+.setup-actions { display: flex; justify-content: space-between; }
+#world-setup #land-preview { position: static; inset: auto; display: block; height: auto; aspect-ratio: 1; max-width: 330px; margin: auto; }
