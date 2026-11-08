@@ -1182,7 +1182,7 @@ body[data-tray="closed"] {
   border-radius: 20px;
   box-shadow: 0 4px 0 #8f7c4566;
 }
-#village-actions button {
+#village-actions > button {
   font-size: 14px;
   padding: 10px 16px;
 }
@@ -1239,7 +1239,7 @@ body[data-tray="closed"] {
     transform: none;
     right: -110px;
   }
-  #village-actions button {
+  #village-actions > button {
     padding: 9px 11px;
   }
 }
@@ -1496,3 +1496,9 @@ header > .time { grid-column: 3; justify-self: end; }
 .relationship-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #dfd5b9; }
 .relationship-row img { width: 44px; height: 52px; object-fit: contain; }
 .relationship-row > div { flex: 1; }
+
+/* Options belong to the dock, not the width of whichever tray is open. */
+#village-actions .view-menu { position: relative; right: auto; bottom: auto; transform: none; margin: 0; flex: none; }
+#village-actions .view-menu > summary { font-size: 13px; padding: 10px 12px; cursor: pointer; border-radius: 12px; }
+#village-actions .view-menu[open] > summary { background: #e3ebcc; border-color: #7b9260; }
+#village-actions .view-menu .controls { bottom: calc(100% + 18px); right: 0; }
