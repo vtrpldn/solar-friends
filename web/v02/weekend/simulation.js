@@ -101,7 +101,23 @@ expandProjects(PROJECTS);
 Object.assign(PROJECTS, OPENING_PROJECTS);
 export { PROCESSES };
 export function footprint(p) {
-  return PROJECTS[p.key].size;
+  const [w, d] = PROJECTS[p.key].size;
+  return (p.rotation || 0) % 2 ? [d, w] : [w, d];
+}
+function shelteredFrontCell(p, x, z) {
+  const [w, d] = footprint(p);
+  return [z === p.z + d - 1, x === p.x + w - 1, z === p.z, x === p.x][
+    p.rotation || 0
+  ];
+}
+export function buildingFront(p) {
+  const [w, d] = footprint(p),
+    angle = ((p.rotation || 0) * Math.PI) / 2;
+  const reach = (PROJECTS[p.key].size[1] + 1) / 2;
+  return {
+    x: p.x + (w - 1) / 2 + Math.sin(angle) * reach,
+    z: p.z + (d - 1) / 2 + Math.cos(angle) * reach,
+  };
 }
 export function storageCapacity(s) {
   if (s.mode === "sandbox") return 1000000;
@@ -257,10 +273,7 @@ function utilitySpot(s, node, r) {
       PROJECTS[p.key].kind,
     )
   ) {
-    const front = {
-      x: p.x + (footprint(p)[0] - 1) / 2,
-      z: p.z + footprint(p)[1],
-    };
+    const front = buildingFront(p);
     if (
       !occupied(s, front.x, front.z) &&
       !s.people.some(
@@ -690,11 +703,13 @@ export function chooseCamp(s, id) {
 export function finished(s, key) {
   return s.projects.some((p) => p.key === key && p.work >= PROJECTS[key].work);
 }
-export function placementError(s, key, x, z, ignore = null) {
+export function placementError(s, key, x, z, ignore = null, rotation = 0) {
   const def = PROJECTS[key];
   if (!def || !Number.isInteger(x) || !Number.isInteger(z))
     return "Choose a grid square.";
-  const [w, d] = def.size;
+  if (!Number.isInteger(rotation) || rotation < 0 || rotation > 3)
+    return "Choose a valid orientation.";
+  const [w, d] = footprint({ key, rotation });
   if (!foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads))
     return "Leave a little space between foundations at different heights.";
   for (let dx = 0; dx < w; dx++)
@@ -742,7 +757,7 @@ export function placementError(s, key, x, z, ignore = null) {
     ...s,
     projects: [
       ...s.projects.filter((p) => p.id !== ignore),
-      { id: ignore || -1, key, x, z },
+      { id: ignore || -1, key, x, z, rotation },
     ],
   };
   for (const p of proposed.projects)
@@ -754,10 +769,20 @@ export function placementError(s, key, x, z, ignore = null) {
         })
       )
         return "Leave a walking route along the left edge of every project.";
+  for (const p of proposed.projects) {
+    if (
+      p.rotation &&
+      ["home", "workshop", "kitchen", "wash-station", "eco_toilet"].includes(
+        PROJECTS[p.key].kind,
+      ) &&
+      !route(proposed, s.stock, buildingFront(p))
+    )
+      return "Leave a walking route to the building entrance.";
+  }
   return "";
 }
-function gradeFoundation(s, key, x, z) {
-  const [w, d] = PROJECTS[key].size;
+function gradeFoundation(s, key, x, z, rotation = 0) {
+  const [w, d] = footprint({ key, rotation });
   const pad = foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads);
   s.terrainPads ??= [];
   if (
@@ -766,7 +791,7 @@ function gradeFoundation(s, key, x, z) {
   )
     s.terrainPads.push(pad);
 }
-export function plan(s, key, x, z) {
+export function plan(s, key, x, z, rotation = 0) {
   if (s.stage !== "playing") return "Choose your campsite first.";
   const def = PROJECTS[key];
   if (!def) return "Unknown project.";
@@ -776,7 +801,7 @@ export function plan(s, key, x, z) {
     !def.repeatable
   )
     return "Already planned. Select it to change priority or move it.";
-  const error = placementError(s, key, x, z);
+  const error = placementError(s, key, x, z, null, rotation);
   if (error) return error;
   const missing = missingMaterials(s, key);
   if (missing.length)
@@ -802,13 +827,14 @@ export function plan(s, key, x, z) {
     if (id === "wood") s.wood -= n;
     else s.materials[id] -= n;
   }
-  gradeFoundation(s, key, x, z);
+  gradeFoundation(s, key, x, z, rotation);
   const instant = s.mode === "sandbox" && s.instantBuild !== false;
   s.projects.push({
     id: s.nextId++,
     key,
     x,
     z,
+    rotation,
     work: instant ? def.work : 0,
     delivered: s.mode === "sandbox" ? requiredLoads(key) : 0,
   });
@@ -824,7 +850,7 @@ export function plan(s, key, x, z) {
   );
   return "";
 }
-export function moveProject(s, id, x, z) {
+export function moveProject(s, id, x, z, rotation = undefined) {
   const p = s.projects.find((p) => p.id === id);
   if (!p || s.stage !== "playing") return "Cannot move that now.";
   if (
@@ -835,11 +861,13 @@ export function moveProject(s, id, x, z) {
     return "Wait until residents have finished resting here.";
   if (s.infrastructure?.links.some((l) => l.from === id || l.to === id))
     return "Disconnect utility lines before relocating this building.";
-  const error = placementError(s, p.key, x, z, id);
+  rotation ??= p.rotation || 0;
+  const error = placementError(s, p.key, x, z, id, rotation);
   if (error) return error;
-  gradeFoundation(s, p.key, x, z);
+  gradeFoundation(s, p.key, x, z, rotation);
   p.x = x;
   p.z = z;
+  p.rotation = rotation;
   for (const r of s.people) {
     r.target = null;
     r.walk = [];
@@ -955,7 +983,7 @@ function occupied(s, x, z) {
           p.work >= PROJECTS[p.key].work &&
           (["shed", "rain-shelter"].includes(PROJECTS[p.key].kind) ||
             (COMMUNITY[PROJECTS[p.key].kind]?.sheltered &&
-              z === p.z + footprint(p)[1] - 1))
+              shelteredFrontCell(p, x, z)))
         ) &&
         x >= p.x &&
         x < p.x + footprint(p)[0] &&
@@ -1131,7 +1159,7 @@ export function restingDoor(s, i) {
   const r = s.people[i];
   const p = s.projects.find((p) => p.id === r.restSite);
   if (!p) return tentDoor(s, i);
-  return { x: p.x + (footprint(p)[0] - 1) / 2, z: p.z + footprint(p)[1] };
+  return buildingFront(p);
 }
 function chooseRestingPlace(s, r, i) {
   if (r.restSite && s.projects.some((p) => p.id === r.restSite)) return;
@@ -1309,20 +1337,25 @@ function idleActivity(s, r, i, dt) {
       ["shed", "rain-shelter"].includes(PROJECTS[p.key].kind) ||
       COMMUNITY[PROJECTS[p.key].kind]?.sheltered
     ) {
-      spot = Array.from({ length: footprint(p)[0] }, (_, n) => ({
-        x: p.x + n,
-        z: p.z + footprint(p)[1] - 1,
-      })).find(
-        (candidate) =>
-          !s.people.some(
-            (other) =>
-              other !== r &&
-              (Math.hypot(other.x - candidate.x, other.z - candidate.z) <
-                0.65 ||
-                (other.idleGoal?.x === candidate.x &&
-                  other.idleGoal?.z === candidate.z)),
-          ) && route(s, r, candidate),
-      );
+      spot = Array.from(
+        { length: footprint(p)[0] * footprint(p)[1] },
+        (_, n) => ({
+          x: p.x + (n % footprint(p)[0]),
+          z: p.z + Math.floor(n / footprint(p)[0]),
+        }),
+      )
+        .filter((c) => shelteredFrontCell(p, c.x, c.z))
+        .find(
+          (candidate) =>
+            !s.people.some(
+              (other) =>
+                other !== r &&
+                (Math.hypot(other.x - candidate.x, other.z - candidate.z) <
+                  0.65 ||
+                  (other.idleGoal?.x === candidate.x &&
+                    other.idleGoal?.z === candidate.z)),
+            ) && route(s, r, candidate),
+        );
     }
     if (spot) {
       r.idleGoal = spot;
@@ -1993,6 +2026,10 @@ export function restore(text) {
       keys = new Set();
     for (const p of s.projects) {
       if (
+        (p.rotation !== undefined &&
+          (!Number.isInteger(p.rotation) ||
+            p.rotation < 0 ||
+            p.rotation > 3)) ||
         !PROJECTS[p.key] ||
         (s.mode !== "sandbox" &&
           !PROJECTS[p.key]?.repeatable &&
@@ -2016,6 +2053,8 @@ export function restore(text) {
           p.key,
           p.x,
           p.z,
+          null,
+          p.rotation || 0,
         )
       )
         return null;

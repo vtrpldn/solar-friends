@@ -2,7 +2,7 @@ import { townCarPose } from "./town-trip.js";
 import { accessRoadAt } from "./road-layout.js";
 import { MAP_CELLS, MAP_HALF, CELL_MIN, CELL_MAX } from "./map-size.js";
 import { fitTerrainCamera } from "./camera-depth.js";
-import { elevationAt } from "./elevation.js";
+import { elevationAt, foundationPad } from "./elevation.js";
 import { freshLandSeed, landRandom } from "./land-layout.js";
 import { createTerrain, updateTerrain } from "./terrain.js";
 import { RESOURCE_GROUPS } from "./resource-groups.js";
@@ -45,6 +45,7 @@ import {
   PROJECTS,
   PROCESSES,
   footprint,
+  buildingFront,
   queueProduction,
   repeatProduction,
   queueWater,
@@ -477,10 +478,7 @@ function drawUtilities() {
     const p = s.projects.find((p) => p.id === n.id);
     if (!p) continue;
     light.position.copy(
-      world(
-        p.x + (PROJECTS[p.key].size[0] - 1) / 2,
-        p.z + (PROJECTS[p.key].size[1] - 1) / 2,
-      ),
+      world(p.x + (footprint(p)[0] - 1) / 2, p.z + (footprint(p)[1] - 1) / 2),
     );
     light.position.y += n.kind === "streetlight" ? 2.7 : 1.6;
     light.intensity = night * (n.power || 0) * 12;
@@ -545,16 +543,17 @@ function syncBuildings() {
       }
       const root = prop(
         id,
-        p.x + (def.size[0] - 1) / 2,
-        p.z + (def.size[1] - 1) / 2,
+        p.x + (footprint(p)[0] - 1) / 2,
+        p.z + (footprint(p)[1] - 1) / 2,
       );
       root.userData.projectId = p.id;
       entry = { root, asset: id, animals: collectAnimals(root) };
       buildings.set(p.id, entry);
     }
     entry.root.position.copy(
-      world(p.x + (def.size[0] - 1) / 2, p.z + (def.size[1] - 1) / 2),
+      world(p.x + (footprint(p)[0] - 1) / 2, p.z + (footprint(p)[1] - 1) / 2),
     );
+    entry.root.rotation.y = ((p.rotation || 0) * Math.PI) / 2;
     if (def.asset === "fire-circle") {
       if (fraction >= 1 && !entry.fire) {
         entry.fire = createFire();
@@ -662,9 +661,21 @@ function persist() {
     );
   }
 }
+let placementRotation = 0,
+  wireframe = null;
+const rotateButton = $("rotate-placement");
+function rotatePlacement(direction = 1) {
+  if (!placing) return;
+  placementRotation = (placementRotation + direction + 4) % 4;
+  rotateButton.textContent = `Rotate · R · ${placementRotation * 90}°`;
+  updatePlacementPreview();
+}
+rotateButton.onclick = () => rotatePlacement();
 function cancel() {
   placing = null;
   moving = null;
+  if (wireframe) wireframe.visible = false;
+  rotateButton.hidden = true;
   ghost.visible = false;
   $("cancel").hidden = true;
   grid.visible = false;
@@ -673,11 +684,43 @@ function cancel() {
 function startPlacement(key, id = null) {
   placing = key;
   moving = id;
+  placementRotation = s.projects.find((p) => p.id === id)?.rotation || 0;
+  if (wireframe) {
+    scene.remove(wireframe);
+    wireframe.traverse((o) => {
+      o.geometry?.dispose();
+      o.material?.dispose();
+    });
+  }
+  wireframe = new THREE.Group();
+  const model = compactModel(createAsset(PROJECTS[key].asset));
+  model.updateMatrixWorld(true);
+  model.traverse((o) => {
+    if (!o.isMesh) return;
+    const edges = new THREE.EdgesGeometry(o.geometry, 18);
+    edges.applyMatrix4(o.matrixWorld);
+    wireframe.add(
+      new THREE.LineSegments(
+        edges,
+        new THREE.LineBasicMaterial({
+          color: "#d9eda5",
+          transparent: true,
+          opacity: 0.85,
+          depthTest: false,
+        }),
+      ),
+    );
+  });
+  disposeModel(model);
+  scene.add(wireframe);
+  wireframe.visible = false;
+  rotateButton.hidden = false;
+  rotateButton.textContent = `Rotate · R · ${placementRotation * 90}°`;
   ghost.visible = false;
   $("cancel").hidden = false;
   grid.visible = true;
   message(
-    "Choose a building site. Sloping ground levels automatically. Esc cancels.",
+    "Choose a building site. R rotates; Shift+R reverses. Ground levels automatically. Esc cancels.",
   );
   renderUI();
 }
@@ -715,7 +758,16 @@ $("world").addEventListener("pointermove", (e) => {
   const p = hit(e);
   if (!p) return;
   cell = { x: Math.round(p.x / 2 + 32), z: Math.round(p.z / 2 + 32) };
-  const size = pitching ? [5, 4] : PROJECTS[placing].size;
+  updatePlacementPreview();
+});
+function updatePlacementPreview() {
+  if (!cell) return;
+  const pitching =
+    !placing && s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION;
+  if (!placing && !pitching) return;
+  const size = pitching
+    ? [5, 4]
+    : footprint({ key: placing, rotation: placementRotation });
   ghost.scale.set(size[0] / 2, size[1] / 2, 1);
   ghost.position.copy(
     world(
@@ -727,9 +779,27 @@ $("world").addEventListener("pointermove", (e) => {
   ghost.visible = true;
   const error = pitching
     ? campPlacementError(s, cell.x, cell.z)
-    : placementError(s, placing, cell.x, cell.z, moving);
+    : placementError(s, placing, cell.x, cell.z, moving, placementRotation);
   ghost.material.color.set(error ? "#c26847" : "#d9eda5");
-});
+  if (!pitching && wireframe) {
+    ghost.visible = false;
+    wireframe.visible = true;
+    wireframe.position.copy(ghost.position);
+    const pad = foundationPad(
+      cell.x,
+      cell.z,
+      size[0],
+      size[1],
+      s.elevationSeed,
+      s.terrainPads,
+    );
+    if (pad) wireframe.position.y = pad.height + 0.025;
+    wireframe.rotation.y = (placementRotation * Math.PI) / 2;
+    wireframe.traverse((o) =>
+      o.material?.color.set(error ? "#e88767" : "#d9eda5"),
+    );
+  }
+}
 $("world").addEventListener("pointerup", (e) => {
   if (
     !down ||
@@ -756,8 +826,8 @@ $("world").addEventListener("pointerup", (e) => {
   }
   if (placing) {
     const error = moving
-      ? moveProject(s, moving, x, z)
-      : plan(s, placing, x, z);
+      ? moveProject(s, moving, x, z, placementRotation)
+      : plan(s, placing, x, z, placementRotation);
     if (error) {
       message(error);
       return;
@@ -794,6 +864,15 @@ $("close-selection").onclick = () => {
 };
 $("cancel").onclick = cancel;
 addEventListener("keydown", (e) => {
+  if (
+    e.code === "KeyR" &&
+    placing &&
+    !e.repeat &&
+    !e.target.closest?.("input,textarea,select,dialog")
+  ) {
+    e.preventDefault();
+    rotatePlacement(e.shiftKey ? -1 : 1);
+  }
   if (e.key === "Escape" && !$("management").open) cancel();
 });
 $("town").onclick = () => {
@@ -1490,10 +1569,16 @@ function frame(now) {
       const travel = isHome ? (recessed ? 1.15 : 0.75) : 1.35;
       // Enter at the authored door, including recessed house verandas.
       g.visible = inward < (isHome ? 0.82 : 0.64);
-      g.position.copy(world(door.x, door.z - inward * travel));
+      const facing = ((restingBuilding?.rotation || 0) * Math.PI) / 2;
+      g.position.copy(
+        world(
+          door.x - Math.sin(facing) * inward * travel,
+          door.z - Math.cos(facing) * inward * travel,
+        ),
+      );
       // Duck beneath the ridge while passing through the open tent door.
       // Keep the entrance animation on the actual foundation elevation.
-      g.rotation.y = r.tentPhase === "exit" ? 0 : Math.PI;
+      g.rotation.y = facing + (r.tentPhase === "exit" ? 0 : Math.PI);
       animateResident(
         g.rig,
         r.restSite &&
@@ -1568,7 +1653,10 @@ function frame(now) {
     if (
       anchor &&
       !r.walk.length &&
-      r.z >= service.z + footprint(service)[1] - 0.1
+      Math.hypot(
+        r.x - buildingFront(service).x,
+        r.z - buildingFront(service).z,
+      ) < 0.6
     ) {
       const center = world(
         service.x + (footprint(service)[0] - 1) / 2,
@@ -1576,7 +1664,12 @@ function frame(now) {
       );
       offset
         .copy(center)
-        .add(new THREE.Vector3(anchor[0], 0, anchor[1]))
+        .add(
+          new THREE.Vector3(anchor[0], 0, anchor[1]).applyAxisAngle(
+            new THREE.Vector3(0, 1, 0),
+            ((service.rotation || 0) * Math.PI) / 2,
+          ),
+        )
         .sub(target);
     }
     g.userData.serviceOffset ??= new THREE.Vector3();
