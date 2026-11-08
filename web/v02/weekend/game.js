@@ -46,6 +46,8 @@ import {
   PROCESSES,
   footprint,
   buildingFront,
+  crossingAt,
+  bridgeDeckHeight,
   queueProduction,
   repeatProduction,
   queueWater,
@@ -335,8 +337,11 @@ for (let i = 0; i < 190; i++) {
         : "meadow";
   const set = regionSets[region],
     id = set[Math.floor(regionRandom() * set.length)];
-    const variant = Math.floor(regionRandom() * 3);
-  const varied = variant && ASSETS.some(a => a.id === `${id}-variant-${variant}`) ? `${id}-variant-${variant}` : id;
+  const variant = Math.floor(regionRandom() * 3);
+  const varied =
+    variant && ASSETS.some((a) => a.id === `${id}-variant-${variant}`)
+      ? `${id}-variant-${variant}`
+      : id;
   scenery.add(prop(varied, x, z, regionRandom() * Math.PI * 2));
 }
 const entrance = prop("produce-crates", s.stock.x, s.stock.z);
@@ -493,6 +498,14 @@ function syncTerrain() {
   if (terrainPadCount === (s.terrainPads?.length || 0)) return;
   terrainPadCount = s.terrainPads.length;
   updateTerrain(ground, s.elevationSeed, s.terrainPads);
+  for (const p of s.projects.filter((p) => p.key === "road")) {
+    const entry = buildings.get(p.id);
+    if (entry) {
+      scene.remove(entry.root);
+      disposeModel(entry.root);
+      buildings.delete(p.id);
+    }
+  }
   const points = grid.geometry.attributes.position;
   for (let i = 0; i < points.count; i++)
     points.setY(
@@ -538,7 +551,12 @@ function syncBuildings() {
     )
       id += `-construction-${fraction < 0.5 ? 0 : 1}`;
     let entry = buildings.get(p.id);
-    if (!entry || entry.asset !== id) {
+    if (
+      !entry ||
+      entry.asset !== id ||
+      (p.key === "road" &&
+        entry.groundKey !== `${p.x},${p.z},${p.rotation || 0}`)
+    ) {
       if (entry) {
         scene.remove(entry.root);
         disposeModel(entry.root);
@@ -548,8 +566,37 @@ function syncBuildings() {
         p.x + (footprint(p)[0] - 1) / 2,
         p.z + (footprint(p)[1] - 1) / 2,
       );
+      if (p.key === "road") {
+        root.traverse((o) => {
+          if (!o.geometry) return;
+          const positions = o.geometry.attributes.position;
+          for (let i = 0; i < positions.count; i++) {
+            const angle = ((p.rotation || 0) * Math.PI) / 2,
+              x = positions.getX(i),
+              z = positions.getZ(i);
+            positions.setY(
+              i,
+              positions.getY(i) +
+                elevationAt(
+                  root.position.x + x * Math.cos(angle) + z * Math.sin(angle),
+                  root.position.z + z * Math.cos(angle) - x * Math.sin(angle),
+                  s.elevationSeed,
+                  s.terrainPads,
+                ) -
+                root.position.y,
+            );
+          }
+          o.geometry.computeVertexNormals();
+          o.geometry.computeBoundingSphere();
+        });
+      }
       root.userData.projectId = p.id;
-      entry = { root, asset: id, animals: collectAnimals(root) };
+      entry = {
+        root,
+        asset: id,
+        animals: collectAnimals(root),
+        groundKey: `${p.x},${p.z},${p.rotation || 0}`,
+      };
       buildings.set(p.id, entry);
     }
     entry.root.position.copy(
@@ -722,7 +769,11 @@ function startPlacement(key, id = null) {
   $("cancel").hidden = false;
   grid.visible = true;
   message(
-    "Choose a building site. R rotates; Shift+R reverses. Ground levels automatically. Esc cancels.",
+    key === "bridge"
+      ? "Span the river with both ends on dry land. R rotates. Esc cancels."
+      : key === "road"
+        ? "Click to lay road tiles along the terrain. Keep placing; Esc finishes."
+        : "Choose a building site. R rotates; Shift+R reverses. Ground levels automatically. Esc cancels.",
   );
   renderUI();
 }
@@ -795,7 +846,8 @@ function updatePlacementPreview() {
       s.elevationSeed,
       s.terrainPads,
     );
-    if (pad) wireframe.position.y = pad.height + 0.025;
+    if (pad && !["road", "bridge"].includes(placing))
+      wireframe.position.y = pad.height + 0.025;
     wireframe.rotation.y = (placementRotation * Math.PI) / 2;
     wireframe.traverse((o) =>
       o.material?.color.set(error ? "#e88767" : "#d9eda5"),
@@ -834,7 +886,7 @@ $("world").addEventListener("pointerup", (e) => {
       message(error);
       return;
     }
-    cancel();
+    if (placing !== "road" || moving) cancel();
     message(s.log[0]);
     syncBuildings();
     persist();
@@ -1596,6 +1648,14 @@ function frame(now) {
     const target = world(visual.people[i].x, visual.people[i].z),
       dx = target.x - g.position.x,
       dz = target.z - g.position.z;
+    const crossing = crossingAt(s, visual.people[i].x, visual.people[i].z);
+    if (crossing)
+      target.y =
+        world(
+          crossing.x + (footprint(crossing)[0] - 1) / 2,
+          crossing.z + (footprint(crossing)[1] - 1) / 2,
+        ).y +
+        bridgeDeckHeight(crossing, visual.people[i].x, visual.people[i].z);
     if (r.walk.length && Math.hypot(dx, dz) < 1)
       g.userData.walkTime =
         (g.userData.walkTime || 0) + Math.hypot(dx, dz) / 1.9;

@@ -1,6 +1,13 @@
 import { COMMUNITY } from "../library/community-defs.js";
 // Data-only snapshot of the shared art catalog; verified against it by the economy checks.
 export const BUILDING_MODELS = [
+  { id: "road", name: "Village road", category: "Terrain", size: [1, 1] },
+  {
+    id: "bridge",
+    name: "Timber footbridge",
+    category: "Buildings",
+    size: [8, 2],
+  },
   {
     id: "house",
     name: "Limewashed house",

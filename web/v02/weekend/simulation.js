@@ -1,3 +1,4 @@
+import { PathQueue } from "./path-queue.js";
 import { carDoor, TRIP_DURATION, DRIVE_DURATION } from "./town-trip.js";
 import { CELL_MIN, CELL_MAX } from "./map-size.js";
 import { footprintRelief, foundationPad } from "./elevation.js";
@@ -118,6 +119,47 @@ export function buildingFront(p) {
     x: p.x + (w - 1) / 2 + Math.sin(angle) * reach,
     z: p.z + (d - 1) / 2 + Math.cos(angle) * reach,
   };
+}
+export function crossingAt(s, x, z) {
+  return s.projects.find(
+    (p) =>
+      p.key === "bridge" && p.work >= PROJECTS[p.key].work && covers(p, x, z),
+  );
+}
+function covers(p, x, z) {
+  const [w, d] = footprint(p);
+  return (
+    x >= p.x - 0.5 && x <= p.x + w - 0.5 && z >= p.z - 0.5 && z <= p.z + d - 0.5
+  );
+}
+function roadAt(s, x, z) {
+  return (
+    accessRoadAt(x, z) ||
+    s.projects.some(
+      (p) =>
+        ["road", "bridge"].includes(p.key) &&
+        p.work >= PROJECTS[p.key].work &&
+        covers(p, x, z),
+    )
+  );
+}
+export function bridgeDeckHeight(p, x, z) {
+  const [w, d] = footprint(p),
+    along =
+      (p.rotation || 0) % 2 ? z - (p.z + (d - 1) / 2) : x - (p.x + (w - 1) / 2);
+  return 0.08 + 0.42 * Math.min(1, Math.max(0, (8 - Math.abs(along * 2)) / 2));
+}
+function bridgeEnds(p) {
+  const [w, d] = footprint(p);
+  return (p.rotation || 0) % 2
+    ? [
+        { x: p.x + (w - 1) / 2, z: p.z - 1 },
+        { x: p.x + (w - 1) / 2, z: p.z + d },
+      ]
+    : [
+        { x: p.x - 1, z: p.z + (d - 1) / 2 },
+        { x: p.x + w, z: p.z + (d - 1) / 2 },
+      ];
 }
 export function storageCapacity(s) {
   if (s.mode === "sandbox") return 1000000;
@@ -710,15 +752,21 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
   if (!Number.isInteger(rotation) || rotation < 0 || rotation > 3)
     return "Choose a valid orientation.";
   const [w, d] = footprint({ key, rotation });
-  if (!foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads))
+  if (
+    !["road", "bridge"].includes(key) &&
+    !foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads)
+  )
     return "Leave a little space between foundations at different heights.";
   for (let dx = 0; dx < w; dx++)
     for (let dz = 0; dz < d; dz++)
-      if (accessRoadAt(x + dx, z + dz, 1))
+      if (key !== "road" && accessRoadAt(x + dx, z + dz, 1))
         return "Keep the access road and parking clearing open.";
   for (let dx = 0; dx < w; dx++)
     for (let dz = 0; dz < d; dz++)
-      if (def.kind !== "hydro" && riverBankAt(x + dx, z + dz, 1, s.landSeed))
+      if (
+        !["hydro", "bridge"].includes(def.kind) &&
+        riverBankAt(x + dx, z + dz, 1, s.landSeed)
+      )
         return "Keep projects back from the riverbank.";
   if (
     x < CELL_MIN + 2 ||
@@ -729,6 +777,16 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
     return "Keep buildings inside the plot boundary.";
   if (def.kind === "hydro" && !riverBankAt(x + w / 2, z + d / 2, 3, s.landSeed))
     return "Place the river generator beside the river.";
+  if (key === "bridge") {
+    const ends = bridgeEnds({ key, x, z, rotation });
+    if (
+      !riverBankAt(x + (w - 1) / 2, z + (d - 1) / 2, 0, s.landSeed) ||
+      ends.some((e) => riverBankAt(e.x, e.z, 0.7, s.landSeed))
+    )
+      return "Span the river with both bridge ends on dry land.";
+    if (!ends.some((e) => route(s, s.stock, e)))
+      return "Keep one bridge end reachable from the village.";
+  }
   if (
     x <= s.stock.x &&
     x + w > s.stock.x &&
@@ -760,7 +818,9 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
       { id: ignore || -1, key, x, z, rotation },
     ],
   };
-  for (const p of proposed.projects)
+  for (const p of proposed.projects.filter(
+    (p) => !["road", "bridge"].includes(p.key),
+  ))
     for (const dz of [0, 1])
       if (
         !route(proposed, s.stock, {
@@ -782,6 +842,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
   return "";
 }
 function gradeFoundation(s, key, x, z, rotation = 0) {
+  if (["road", "bridge"].includes(key)) return;
   const [w, d] = footprint({ key, rotation });
   const pad = foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads);
   s.terrainPads ??= [];
@@ -975,10 +1036,13 @@ function blockedCamp(s) {
 }
 function occupied(s, x, z) {
   return (
-    riverBankAt(x, z, 0.5, s.landSeed) ||
+    (riverBankAt(x, z, 0.5, s.landSeed) && !crossingAt(s, x, z)) ||
     blockedCamp(s).some((c) => c.x === x && c.z === z) ||
     s.projects.some(
       (p) =>
+        !(
+          ["road", "bridge"].includes(p.key) && p.work >= PROJECTS[p.key].work
+        ) &&
         !(
           p.work >= PROJECTS[p.key].work &&
           (["shed", "rain-shelter"].includes(PROJECTS[p.key].kind) ||
@@ -1040,10 +1104,27 @@ export function walkSegmentClear(s, from, to) {
   return true;
 }
 function naturalPath(s, from, path) {
+  const keepRoad =
+    roadAt(s, from.x, from.z) && path.every((p) => roadAt(s, p.x, p.z));
+  const roadClear = (a, b) => {
+    if (!keepRoad) return true;
+    const steps = Math.ceil(Math.hypot(a.x - b.x, a.z - b.z) * 3);
+    for (let i = 0; i <= steps; i++) {
+      const t = steps ? i / steps : 0;
+      if (!roadAt(s, a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t))
+        return false;
+    }
+    return true;
+  };
   const direct = [from];
   for (let i = 0; i < path.length; ) {
     let far = path.length - 1;
-    while (far > i && !walkSegmentClear(s, direct.at(-1), path[far])) far--;
+    while (
+      far > i &&
+      (!walkSegmentClear(s, direct.at(-1), path[far]) ||
+        !roadClear(direct.at(-1), path[far]))
+    )
+      far--;
     direct.push(path[far]);
     i = far + 1;
   }
@@ -1094,10 +1175,13 @@ export function route(s, from, to) {
         ? [{ x: to.x, z: to.z }]
         : []
       : null;
-  const queue = [start],
-    parent = new Map([[key(...start), null]]);
-  for (let i = 0; i < queue.length; i++) {
-    const [x, z] = queue[i];
+  const queue = new PathQueue(),
+    parent = new Map([[key(...start), null]]),
+    costs = new Map([[key(...start), 0]]);
+  queue.push({ x: start[0], z: start[1], cost: 0, priority: 0 });
+  while (queue.length) {
+    const { x, z, cost } = queue.pop();
+    if (cost > costs.get(key(x, z))) continue;
     if (x === end[0] && z === end[1]) {
       const path = [];
       let k = key(x, z);
@@ -1108,7 +1192,22 @@ export function route(s, from, to) {
       }
       if (path.length && (to.x !== end[0] || to.z !== end[1]))
         path.push({ x: to.x, z: to.z });
-      return naturalPath(s, from, path);
+      const result = [];
+      let anchor = from,
+        chunk = [],
+        onRoad = roadAt(s, from.x, from.z);
+      for (const point of path) {
+        const nextRoad = roadAt(s, point.x, point.z);
+        if (nextRoad !== onRoad && chunk.length) {
+          result.push(...naturalPath(s, anchor, chunk));
+          anchor = chunk.at(-1);
+          chunk = [];
+        }
+        chunk.push(point);
+        onRoad = nextRoad;
+      }
+      result.push(...naturalPath(s, anchor, chunk));
+      return result;
     }
     for (const [dx, dz] of [
       [1, 0],
@@ -1124,12 +1223,20 @@ export function route(s, from, to) {
         nx > CELL_MAX - 2 ||
         nz < CELL_MIN + 1 ||
         nz > CELL_MAX - 2 ||
-        parent.has(k) ||
         occupied(s, nx, nz)
       )
         continue;
+      const nextCost = cost + (roadAt(s, nx, nz) ? 0.65 : 1);
+      if (nextCost >= (costs.get(k) ?? Infinity)) continue;
+      costs.set(k, nextCost);
       parent.set(k, key(x, z));
-      queue.push([nx, nz]);
+      queue.push({
+        x: nx,
+        z: nz,
+        cost: nextCost,
+        priority:
+          nextCost + 0.65 * (Math.abs(nx - end[0]) + Math.abs(nz - end[1])),
+      });
     }
   }
   return null;

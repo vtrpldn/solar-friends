@@ -2,6 +2,8 @@ import { COMMUNITY } from "../library/community-defs.js";
 import { BUILDING_MODELS } from "./building-models.js";
 // v0.1 economy.rs construction recipes, expressed in v0.2 material IDs.
 const recipes = {
+  road: { stone: 1, earth: 1 },
+  bridge: { wood: 32, hardware: 8, stone: 8 },
   home: {
     earth: 6,
     stone: 4,
@@ -195,12 +197,17 @@ export function expandProjects(projects) {
       asset: model.id,
       size: model.size,
       materials,
-      work: Math.max(
-        90,
-        Object.values(materials).reduce((a, b) => a + b, 0) * 22,
-      ),
+      work:
+        kind === "road"
+          ? 20
+          : Math.max(
+              90,
+              Object.values(materials).reduce((a, b) => a + b, 0) * 22,
+            ),
       kind,
-      category: COMMUNITY[model.id]?.category || category,
+      category: ["road", "bridge"].includes(kind)
+        ? "Roads & bridges"
+        : COMMUNITY[model.id]?.category || category,
       repeatable: true,
       description:
         COMMUNITY[model.id]?.description ||
