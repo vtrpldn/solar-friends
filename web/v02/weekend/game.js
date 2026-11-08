@@ -1,3 +1,4 @@
+import {materialTooltip} from './material-tooltip.js';
 import {createWildlife} from './wildlife.js';
 import {installAudio} from './audio.js';
 import {settingsFor,BIOMES,richnessFactor} from './world-settings.js';
@@ -790,6 +791,7 @@ function startPlacement(key, id = null) {
   renderUI();
 }
 
+const buildMaterialTooltip = materialTooltip();
 for (const [key, d] of Object.entries(PROJECTS)) {
   const b = document.createElement("button");
   b.id = `build-${key}`;
@@ -797,6 +799,7 @@ for (const [key, d] of Object.entries(PROJECTS)) {
   b.innerHTML = `<span class="material-warning" aria-hidden="true">!</span><img class="build-art" alt=""/><strong>${d.name}</strong><span class="build-cost">${s.mode === "sandbox" ? "Free" : `${count} materials`} <i>· ${d.size.join("×")}</i></span>`;
   b.setAttribute("aria-label", `${d.name}. ${recipeText(key)}`);
   b.title = d.description;
+  buildMaterialTooltip.attach(b);
   b.dataset.category = d.category;
   b.onclick = () => { setPanel(null); startPlacement(key); };
   $("build-list").append(b);
@@ -1685,6 +1688,7 @@ function renderUI() {
       !PROJECTS[key].repeatable &&
       s.projects.some((p) => p.key === key);
     const missing = missingMaterials(s, key);
+    buildMaterialTooltip.update(b,missing);
     const purchase = blueprintPurchase(s, key);
     b.title = `${PROJECTS[key].description} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: R$${purchase.cost.toFixed(2)}. Resident pickup included.` : "All materials available."}`;
     b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? "Free"

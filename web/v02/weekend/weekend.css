@@ -1539,3 +1539,13 @@ header > .time { grid-column: 3; justify-self: end; }
 .audio-controls label { display: grid; grid-template-columns: 112px minmax(0,1fr); align-items: center; gap: 12px; margin: 8px 0; font-size: 12px; text-align: left; }
 .audio-controls input { width: 100%; min-width: 0; margin: 0; padding: 0; border: 0; background: transparent; accent-color: #637b49; }
 .audio-controls small { display: block; font-size: 11px; letter-spacing: normal; font-weight: 400; margin-top: 10px; }
+
+#missing-materials-tooltip {
+  position: fixed; z-index: 1000; pointer-events: none;
+  max-width: 280px; padding: 12px 14px; white-space: pre-line;
+  background: var(--paper); color: #4b5b40; border: 2px solid var(--edge);
+  border-radius: 12px; box-shadow: 0 4px 12px #302f2533;
+  font-size: 13px; line-height: 1.65; text-align: left;
+}
+#missing-materials-tooltip::first-line { font-weight: 750; }
+#build-list .material-warning { cursor: help; }
