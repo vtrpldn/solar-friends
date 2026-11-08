@@ -1503,4 +1503,39 @@ header > .time { grid-column: 3; justify-self: end; }
 #village-actions .view-menu[open] > summary { background: #e3ebcc; border-color: #7b9260; }
 #village-actions .view-menu .controls { bottom: calc(100% + 18px); right: 0; }
 
-.audio-controls{flex-basis:100%;border:0;border-top:1px solid #cbb98a;margin:8px 0 0;padding:10px 0 0;min-width:0}.audio-controls legend{padding-right:8px}.audio-controls label{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:6px 0}.audio-controls input{width:130px;accent-color:#637b49}.audio-controls small{opacity:.75}
+/* Fixed rows prevent controls and sliders from drifting as labels wrap. */
+#village-actions .view-menu > summary {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border: 2px solid var(--edge);
+  box-shadow: 0 3px 0 #b19a6e;
+  line-height: normal;
+}
+#village-actions .view-menu .controls {
+  display: grid;
+  grid-template-columns: minmax(0,1fr);
+  gap: 12px;
+  width: 310px;
+  padding: 16px;
+  bottom: calc(100% + 14px);
+  text-align: left;
+}
+.view-control-row { display: grid; gap: 6px; align-items: stretch; }
+.camera-row { grid-template-columns: repeat(5,minmax(0,1fr)); }
+.location-row { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.session-row { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.view-control-row button, .view-control-row .controls-help summary {
+  width: 100%; height: 34px; margin: 0; padding: 0 6px; font-size: 12px;
+  display: grid; place-items: center; border-radius: 9px; box-sizing: border-box;
+}
+.view-menu .controls > a { padding: 0; color: #526546; font-size: 12px; text-align: left; }
+.audio-controls { border: 0; border-top: 1px solid #cbb98a; margin: 2px 0 0; padding: 8px 0 0; min-width: 0; }
+.audio-controls legend { padding: 0 8px 0 0; font-size: 12px; font-weight: 600; }
+.audio-controls label { display: grid; grid-template-columns: 112px minmax(0,1fr); align-items: center; gap: 12px; margin: 8px 0; font-size: 12px; text-align: left; }
+.audio-controls input { width: 100%; min-width: 0; margin: 0; padding: 0; border: 0; background: transparent; accent-color: #637b49; }
+.audio-controls small { display: block; font-size: 11px; letter-spacing: normal; font-weight: 400; margin-top: 10px; }

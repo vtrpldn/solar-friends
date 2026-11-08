@@ -162,6 +162,7 @@
       <details class="view-menu">
         <summary>View &amp; options</summary>
         <div class="controls">
+          <div class="view-control-row camera-row">
           <details class="controls-help">
             <summary aria-label="Camera controls">?</summary>
             <p>
@@ -180,12 +181,12 @@
             ↷</button
           ><button id="zoom-out" aria-label="Zoom out">−</button
           ><button id="zoom-in" aria-label="Zoom in">+</button
-          ><button id="home" title="Home · Center on camp">⌂ Camp</button
+          ></div><div class="view-control-row location-row"><button id="home" title="Home · Center on camp">⌂ Camp</button
           ><button id="river-view">River bend</button
           ><button id="grid">Grid</button
-          ><button id="restart">New village</button
+          ></div><div class="view-control-row session-row"><button id="restart">New village</button
           ><button id="main-menu">Main menu</button>
-          <a href="../library/">Art collection ↗</a>
+          </div><a href="../library/">Art collection ↗</a>
           <fieldset class="audio-controls"><legend>Sound</legend>
             <label for="audio-music">Music <input id="audio-music" type="range" min="0" max="100" step="1" aria-label="Music volume" /></label>
             <label for="audio-effects">Interaction sounds <input id="audio-effects" type="range" min="0" max="100" step="1" aria-label="Interaction sounds volume" /></label>
