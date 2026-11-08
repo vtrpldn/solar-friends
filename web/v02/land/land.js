@@ -1,10 +1,11 @@
+import { connections } from "./connections.js";
 import { configureMapSun } from "./lighting.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
   ASSETS,
   CATEGORIES,
-  createAsset,
+  createConnectedAsset,
   compactModel,
   disposeModel,
 } from "../library/catalog.js";
@@ -153,8 +154,11 @@ function sync(selectedId = selected?.userData.placement.id) {
   }
   objects.length = 0;
   selectable.length = 0;
+  const joined = connections(editor.records);
   for (const record of editor.records) {
-    const model = compactModel(createAsset(record.asset));
+    const connection = joined.get(record.id);
+    const model = compactModel(createConnectedAsset(record.asset, connection));
+    model.userData.connection = connection;
     model.position.set(
       ...placementPosition(record.column, record.row, footprint(record)),
     );
@@ -222,7 +226,10 @@ function showGhost() {
   clearGhost();
   if (!placing) return;
   const r = placing.record;
-  ghost = compactModel(createAsset(r.asset));
+  const candidates = [...editor.records.filter((item) => item.id !== r.id), r];
+  ghost = compactModel(
+    createConnectedAsset(r.asset, connections(candidates).get(r.id)),
+  );
   ghost.traverse((o) => {
     if (o.isMesh) {
       o.material = o.material.clone();
@@ -262,7 +269,12 @@ function commitPlacement() {
     const id = r.id;
     cancelPlacement();
     sync(id);
-    toast("Placed");
+    const joined = selected?.userData.connection;
+    toast(
+      joined
+        ? `Joined ${joined.count} sections · ${joined.area} cells`
+        : "Placed",
+    );
   } catch (e) {
     toast(e.message);
   }
@@ -352,7 +364,12 @@ function select(model) {
     $("#object-name").textContent = r.label;
     $("#column").value = r.column + 1;
     $("#row").value = r.row + 1;
-    $("#object-description").textContent = def.description;
+    const joined = model.userData.connection;
+    $("#object-description").textContent =
+      def.description +
+      (joined
+        ? ` Connected with ${joined.count} sections across ${joined.area} cells. Move or delete a section to reshape it.`
+        : "");
     $("#object-details").textContent =
       `Cell ${r.column + 1}, ${r.row + 1} · ${model.userData.footprint.join(" × ")} cells · ${r.rotation}°`;
   }
@@ -649,7 +666,10 @@ window.addEventListener("keydown", (e) => {
     e.preventDefault();
     if (selected) edit(() => editor.remove(selected.userData.placement.id));
   }
-  if (e.code === "Enter" && placing) commitPlacement();
+  if (e.code === "Enter" && placing) {
+    e.preventDefault();
+    commitPlacement();
+  }
   if (e.code === "KeyQ") turn(-1);
   if (e.code === "KeyE") turn(1);
   if (e.code === "Home") {

@@ -1633,6 +1633,100 @@ for (let i = 0; i < 3; i++)
   );
 add("goat", "Goat", "Animals", [1, 1], goat);
 ASSETS.push(...PROPS);
+// A connected section keeps its own origin and selection footprint. Only its
+// exposed perimeter is drawn; editable neighbors provide the rest of the area.
+export function createConnectedAsset(id, connection) {
+  if (!connection) return createAsset(id);
+  const g = group(),
+    def = ASSETS.find((a) => a.id === id);
+  const [w, d] = def.footprint.map((n) => n * 2);
+  if (id === "garden") {
+    block(g, w, 0.08, d, "#936b43", 0, 0.04);
+    for (let x = -w / 2 + 0.4; x < w / 2; x += 0.8)
+      for (let z = -d / 2 + 0.4; z < d / 2; z += 0.8) {
+        const crop = plant("lettuce");
+        crop.position.set(x, 0.08, z);
+        g.add(crop);
+      }
+    for (const [a, b] of connection.edges) {
+      const edge = beam(
+        g,
+        [a[0], 0.11, a[1]],
+        [b[0], 0.11, b[1]],
+        0.1,
+        "timberLight",
+      );
+      edge.name = "outer-border";
+    }
+  } else if (id === "solar_farm") {
+    for (let z = -d / 2 + 1; z < d / 2; z += 2) {
+      for (let x = -w / 2 + 1; x < w / 2; x += 2) {
+        const rack = group();
+        panel(rack);
+        rack.scale.z = 0.82;
+        rack.position.set(x, 0, z);
+        g.add(rack);
+        for (const side of [-0.65, 0.65])
+          beam(
+            g,
+            [x + side, 0.1, z - 0.6],
+            [x + side, 1.38, z + 0.6],
+            0.07,
+            "teal",
+          );
+      }
+      for (const offset of [-0.55, 0.55])
+        box(g, w, 0.1, 0.09, "stone", 0, 0.78, z + offset);
+      box(g, w, 0.025, 0.025, "hair", 0, 0.25, z);
+    }
+    // One control cabinet serves the connected array, rather than one per tile.
+    if (connection.leader) {
+      const cabinet = block(
+        g,
+        0.4,
+        0.6,
+        0.2,
+        "#397c72",
+        -w / 2 + 0.25,
+        0.3,
+        -d / 2 + 0.2,
+      );
+      cabinet.name = "shared-inverter";
+    }
+  } else if (id === "orchard") {
+    for (const x of [-1, 1]) {
+      const t = tree("orchard");
+      t.position.set(x, 0, 0);
+      g.add(t);
+      color(
+        cylinder(g, 0.65, 0.65, 0.025, "earth", x, 0.013, 0, 10),
+        "#9c8152",
+      );
+    }
+    // A single low perimeter fence defines the expanded orchard; no interior fences.
+    const posts = new Set();
+    for (const [a, b] of connection.edges) {
+      for (const y of [0.3, 0.58]) {
+        const rail = beam(
+          g,
+          [a[0], y, a[1]],
+          [b[0], y, b[1]],
+          0.065,
+          "timberLight",
+        );
+        rail.name = "outer-fence";
+      }
+      for (const p of [a, b])
+        if (!posts.has(p.join(","))) {
+          posts.add(p.join(","));
+          box(g, 0.09, 0.75, 0.09, "timber", p[0], 0.375, p[1]);
+        }
+    }
+  } else return createAsset(id);
+  g.name = id;
+  g.userData = { id, footprint: def.footprint, connection };
+  return g;
+}
 export function createAsset(id) {
   const def = ASSETS.find((a) => a.id === id);
   if (!def) throw new Error(`Unknown asset ${id}`);
