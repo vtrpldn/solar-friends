@@ -57,9 +57,9 @@ const recipes = {
     hardware: 3,
   },
   orchard: { earth: 8, compost: 2, tree_starts: 4 },
-  goat_pasture: { bamboo: 10, tiles: 3, hardware: 2, plumbing: 1, goats: 1 },
+  goat_pasture: { bamboo: 10, tiles: 3, hardware: 2, plumbing: 1, goats: 2 },
   apiary: { wood: 3, tiles: 1, hardware: 1, bees: 1 },
-  coop: { stone: 2, frames: 2, tiles: 2, hardware: 1, hens: 1 },
+  coop: { stone: 2, frames: 2, tiles: 2, hardware: 1, hens: 3 },
   solar_farm: { stone: 6, hardware: 3, panels: 2, batteries: 1, electrical: 2 },
   streetlight: { stone: 1, wood: 2, electrical: 1, hardware: 1 },
   hydro: {
@@ -122,9 +122,9 @@ const extraMaterials = {
   fodder: ["Dry fodder", 4, 12, 24],
   milk: ["Fresh milk", 4, 6, 42],
   honey: ["Honey", 4, 4, 48],
-  goats: ["Goat pairs", 1, 1, 1800],
+  goats: ["Goats", 1, 2, 1800],
   bees: ["Bee colonies", 1, 1, 400],
-  hens: ["Hen trios", 1, 1, 180],
+  hens: ["Hens", 1, 3, 180],
 };
 export function expandMaterials(materials) {
   for (const [id, [name, batch, quantity, price]] of Object.entries(

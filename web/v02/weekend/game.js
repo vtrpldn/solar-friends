@@ -1319,8 +1319,17 @@ function renderUI() {
     $("selected-state").textContent = finished(s, p.key)
       ? "READY TO USE"
       : `${Math.floor((p.work / PROJECTS[p.key].work) * 100)}% BUILT`;
+    const livestock =
+      p.key === "coop"
+        ? " Housing: 3 hens / 3 places."
+        : p.key === "goat_pasture" ||
+            (p.key === "goat-pasture-empty" && p.stocked)
+          ? " Housing: 2 goats / 2 places."
+          : p.key === "goat-pasture-empty"
+            ? " Housing: 0 goats / 2 places."
+            : "";
     $("selected-desc").textContent =
-      `${PROJECTS[p.key].description} Reserved: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+      `${PROJECTS[p.key].description}${p.work >= PROJECTS[p.key].work ? livestock : ""} Reserved: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
   }
 }

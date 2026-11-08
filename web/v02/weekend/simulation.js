@@ -184,9 +184,9 @@ export function queueProduction(s, site, recipe) {
   for (const [id, n] of Object.entries(def.input))
     if (materialCount(s, id) < n) return `Missing ${n} ${id}.`;
   if (p.key === "goat-pasture-empty" && !p.stocked) {
-    if (materialCount(s, "goats") < 1)
-      return "Bring a pair of goats to stock this pasture.";
-    changeMaterial(s, "goats", -1);
+    if (materialCount(s, "goats") < 2)
+      return "Bring 2 goats to stock this pasture.";
+    changeMaterial(s, "goats", -2);
     p.stocked = true;
   }
   for (const [id, n] of Object.entries(def.input)) changeMaterial(s, id, -n);
@@ -525,6 +525,7 @@ export const NAMES = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 export function createWeekend() {
   return {
     version: 2,
+    livestockUnits: 1,
     opening: { version: 1, townTrips: 0 },
     stage: "arrival",
     arrivalElapsed: 0,
@@ -1798,6 +1799,19 @@ export function restore(text) {
       s.stock.z > 45
     )
       return null;
+    // Older saves counted a pair/trio as one item; preserve the actual animals.
+    if (s.livestockUnits === undefined) {
+      s.materials.goats *= 2;
+      s.materials.hens *= 3;
+      for (const p of s.projects) {
+        if (p.key === "goat_pasture")
+          p.delivered = Math.min(requiredLoads(p.key), p.delivered + 1);
+        if (p.key === "coop")
+          p.delivered = Math.min(requiredLoads(p.key), p.delivered + 2);
+      }
+      s.livestockUnits = 1;
+    }
+    if (s.livestockUnits !== 1) return null;
     const ids = new Set(),
       keys = new Set();
     for (const p of s.projects) {

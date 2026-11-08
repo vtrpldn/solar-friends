@@ -1360,3 +1360,33 @@ body[data-tray="closed"] {
 
 .resource-group-title { grid-column: 1 / -1; margin: 12px 0 2px; padding-bottom: 7px; border-bottom: 1px solid #c5bd96; color: #536347; font-size: 14px; }
 .resource-group-title:first-child { margin-top: 0; }
+
+/* Village field journal: warm paper, painted wood and illustrated supply cards. */
+:root { --ink: #334e43; --paper: #fff6da; --edge: #ae8b59; --leaf: #719151; }
+h1, h2 { letter-spacing: -0.035em; }
+#management, #build-panel, #people-panel {
+  background-color: var(--paper);
+  background-image: radial-gradient(ellipse at top left, #e5b55720, transparent 60%);
+  border-color: #b79560;
+  box-shadow: 0 6px 0 #80633f, 0 18px 55px #243e3840;
+}
+#management h2 { color: #345e51; }
+.resource-group-title { color: #9b532f; letter-spacing: .04em; }
+#village-actions {
+  background: #365d4f;
+  border: 3px solid #254a3e;
+  border-radius: 18px 18px 24px 24px;
+  box-shadow: 0 5px 0 #203e35, inset 0 2px 0 #70937a;
+}
+#village-actions button { background: #f2dfa5; border-color: #b2985b; color: #304c3e; }
+#village-actions button:nth-child(2) { background: #efc79e; }
+#village-actions button:nth-child(3) { background: #d7dea6; }
+#village-actions button:nth-child(5) { background: #bcded5; }
+#village-actions button:nth-child(6) { background: #f2d480; }
+#village-actions button:hover:not(:disabled) { background: #fff4c9; }
+.stock-card { background: #fff4d3; border-radius: 8px 16px 10px 14px; position: relative; }
+.stock-card > .resource-icon { background: radial-gradient(ellipse, #d4dca18a, transparent 72%); width: 72px; height: 54px; }
+.stock-card.active { background: #e0e9b7; border-color: #68884e; }
+.management-tabs button { background: #eadcb5; }
+.management-tabs button.active { background: #365d4f; color: #fff2cc; border-color: #254a3e; box-shadow: 0 3px 0 #213e34; }
+button:focus-visible, a:focus-visible { outline: 3px solid #c67537; outline-offset: 4px; }
