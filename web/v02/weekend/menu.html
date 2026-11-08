@@ -3,21 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <title>Solar Friends</title>
-    <script type="importmap">
-      { "imports": { "three": "../workshop/vendor/three.module.js" } }
-    </script>
     <link rel="stylesheet" href="weekend.css" />
     <link rel="stylesheet" href="menu.css" />
   </head>
   <body>
-    <canvas id="menu-landscape" aria-hidden="true"></canvas>
-    <main class="start-menu">
-      <header class="menu-title">
+    <div class="frame" aria-hidden="true"></div>
+    <div class="art" aria-hidden="true">
+      <div class="sun"></div>
+      <div class="stem"><i></i><i></i><i></i><i></i></div>
+      <span class="art-caption">GROW SOMETHING GOOD</span>
+    </div>
+    <main class="welcome">
+      <header class="brand">
         <small>A LITTLE LAND. A LIFE TOGETHER.</small>
-        <h1>Solar Friends</h1>
+        <h1>Solar<br />Friends</h1>
       </header>
-      <div class="menu-choices">
-        <button id="continue-game" hidden>
+      <div class="menu-actions">
+        <button id="continue-game" class="primary" hidden>
           <strong>Continue</strong
           ><span id="continue-label" class="save-detail"></span></button
         ><button data-start="story">
@@ -35,10 +37,11 @@
           ><span>Return to your saved playground.</span>
         </button>
       </div>
-      <p class="hint">Made for growing together · v0.2</p>
+
       <a href="../library/">Browse the art collection ↗</a>
       <p id="menu-status" role="status"></p>
     </main>
+    <div class="corner">SOLAR FRIENDS<small>v0.2</small></div>
     <dialog id="replace-save">
       <h2>Start a fresh village?</h2>
       <p id="replace-copy"></p>
@@ -46,6 +49,5 @@
       ><button id="confirm-new">Start fresh</button>
     </dialog>
     <script type="module" src="menu.js"></script>
-    <script type="module" src="menu-scene.js"></script>
   </body>
 </html>

@@ -17,6 +17,8 @@ const story = existing("story"),
   sandbox = existing("sandbox");
 $("continue-game").hidden = !story;
 $("continue-sandbox").hidden = !sandbox;
+if (!story)
+  document.querySelector('[data-start="story"]').classList.add("primary");
 if (story)
   $("continue-label").textContent =
     story.stage === "arrival"

@@ -1,148 +1,254 @@
+* {
+  box-sizing: border-box;
+}
 body {
   margin: 0;
-  min-height: 100vh;
-  overflow: auto;
-  background: #a8b590;
+  overflow: hidden;
+  background: #e9e0c8;
+  color: #36523f;
 }
-#menu-landscape {
+.frame {
   position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: 25px;
+  border: 1px solid #8b9875;
   pointer-events: none;
 }
-.start-menu {
-  position: relative;
-  width: 340px;
-  min-height: 100vh;
-  margin-left: 7vw;
-  padding: 9vh 0 26px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
+.welcome {
+  position: absolute;
+  left: 10%;
+  top: 12%;
+  width: 350px;
 }
-.menu-title {
+.brand {
   position: static;
-  display: flex;
-  flex-direction: column;
+  display: block;
   background: none;
   border: 0;
   box-shadow: none;
   padding: 0;
-  text-align: center;
+  color: inherit;
 }
-.menu-title small {
-  order: 2;
-  color: #f9f1d7;
-  font-size: 10px;
-  letter-spacing: 0.13em;
-  margin-top: 16px;
-  text-shadow: 0 1px 3px #344c35;
+.brand small {
+  display: block;
+  color: inherit;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  margin-bottom: 20px;
 }
-.menu-title h1 {
+.brand h1 {
   font:
-    800 72px/0.9 Outfit,
+    800 89px/0.88 Outfit,
     system-ui,
     sans-serif;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.06em;
   margin: 0;
-  color: #fff4d0;
-  text-shadow:
-    0 4px 0 #405b3d,
-    0 7px 0 #405b3d,
-    0 10px 18px #30432e30;
-  -webkit-text-stroke: 1px #405b3d;
+  color: inherit;
 }
-.menu-choices {
-  display: grid;
-  width: 280px;
-  gap: 13px;
-  margin: 50px auto 24px;
-  padding: 0;
-  background: none;
-  border: 0;
-  box-shadow: none;
-}
-.menu-choices button {
-  position: relative;
-  text-align: center;
-  background: #fff2d1;
-  color: #3e553b;
-  border: 2px solid #61734d;
-  border-radius: 13px;
-  box-shadow:
-    0 5px 0 #4c6240,
-    0 8px 15px #30432e20;
-  padding: 13px 16px;
-  transition:
-    transform 0.12s,
-    box-shadow 0.12s,
-    background 0.12s;
-}
-.menu-choices button:first-of-type {
-  background: #dbe8b8;
-}
-.menu-choices strong {
-  display: block;
-  font-size: 21px;
-  font-weight: 650;
-}
-.menu-choices span {
+.sun-mark {
   display: none;
 }
-.menu-choices button:hover:not(:disabled),
-.menu-choices button:focus-visible {
-  background: #fff8e3;
-  transform: translateY(-2px);
-  box-shadow:
-    0 7px 0 #4c6240,
-    0 10px 18px #30432e20;
+.menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 265px;
+  margin-top: 38px;
 }
-.menu-choices button:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow: 0 2px 0 #4c6240;
+.menu-actions button {
+  font:
+    600 18px Outfit,
+    system-ui,
+    sans-serif;
+  color: inherit;
+  text-align: left;
+  padding: 12px 18px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.15s;
 }
-.start-menu .hint {
-  margin: 18px 0 12px;
+.menu-actions button:hover {
+  background: #36523f13;
+  transform: translateX(3px);
+}
+.menu-actions button:focus-visible {
+  outline: 3px solid #aa773c;
+  outline-offset: 3px;
+}
+.menu-actions .primary {
+  background: #36523f;
+  color: #f7edcf;
+  box-shadow: 0 3px #263d30;
+}
+.primary span {
+  display: block;
+}
+.primary small {
+  display: block;
+  color: inherit;
+  font-size: 10px;
+  font-weight: 400;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+.menu-actions .settings {
+  font-size: 14px;
+  margin-top: 9px;
+}
+.edition {
+  font:
+    italic 15px Georgia,
+    serif;
+  margin-top: 32px;
+}
+.corner {
+  position: absolute;
+  bottom: 46px;
+  left: 10%;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+}
+.corner small {
+  display: block;
+  margin-top: 5px;
+  font-size: 10px;
+  letter-spacing: 0;
+}
+.art {
+  position: absolute;
+  left: 57%;
+  top: 18%;
+  width: 29%;
+  height: 64%;
+  color: #5b704d;
+}
+.sun {
+  position: absolute;
+  top: 0;
+  left: 15%;
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: #c8a454;
+}
+.stem {
+  position: absolute;
+  left: 45%;
+  top: 35%;
+  height: 210px;
+  width: 5px;
+  background: currentColor;
+  transform: rotate(-12deg);
+}
+.stem i {
+  position: absolute;
+  width: 90px;
+  height: 43px;
+  border-radius: 100% 0 100% 0;
+  background: currentColor;
+  right: 0;
+  top: 10%;
+  transform: rotate(35deg);
+  transform-origin: right center;
+}
+.stem i:nth-child(2) {
+  top: 25%;
+  left: 0;
+  transform: rotate(-35deg);
+  transform-origin: left center;
+}
+.stem i:nth-child(3) {
+  top: 55%;
+}
+.stem i:nth-child(4) {
+  top: 70%;
+  left: 0;
+  transform: rotate(-35deg);
+  transform-origin: left center;
+}
+.art-caption {
+  position: absolute;
+  bottom: 7%;
+  width: 100%;
   text-align: center;
-  font-size: 11px;
-  color: #f8f2dd;
-  text-shadow: 0 1px 4px #344c35;
+  font-size: 10px;
+  letter-spacing: 0.22em;
 }
-.start-menu a {
-  align-self: center;
-  color: #fff6dc;
+.preview-message {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff6dc;
+  color: #36523f;
+  padding: 12px 20px;
+  border: 1px solid #a3aa8c;
+  border-radius: 5px;
   font-size: 12px;
-  text-shadow: 0 1px 4px #344c35;
-  text-decoration: none;
-  border-bottom: 1px solid #fff6dc80;
-  padding-bottom: 3px;
 }
-.start-menu button:focus-visible,
-.start-menu a:focus-visible {
-  outline: 3px solid #fff5cb;
-  outline-offset: 5px;
+.preview-message[hidden] {
+  display: none;
+}
+
+.menu-actions button[hidden] {
+  display: none;
+}
+.menu-actions strong {
+  font: inherit;
+}
+.menu-actions button > span {
+  display: none;
+}
+.menu-actions #continue-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  margin-top: 6px;
+  opacity: 0.8;
+  letter-spacing: 0;
+}
+.welcome > a {
+  display: inline-block;
+  margin: 24px 18px 0;
+  color: inherit;
+  font-size: 12px;
+  text-underline-offset: 4px;
+}
+#menu-status {
+  max-width: 300px;
+  font-size: 13px;
 }
 #replace-save {
   max-width: 440px;
 }
+.corner small {
+  color: inherit;
+  opacity: 0.8;
+}
 @media (max-height: 760px) {
-  .start-menu {
-    padding-top: 36px;
+  .welcome {
+    top: 8%;
   }
-  .menu-title h1 {
-    font-size: 62px;
+  .brand h1 {
+    font-size: 66px;
   }
-  .menu-choices {
-    margin-top: 30px;
-    gap: 11px;
+  .menu-actions {
+    margin-top: 24px;
+    gap: 4px;
   }
-  .menu-choices button {
-    padding: 10px 16px;
+  .menu-actions button {
+    padding: 10px 18px;
+  }
+  .corner {
+    bottom: 32px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .menu-choices button {
+  .menu-actions button {
     transition: none;
   }
 }
