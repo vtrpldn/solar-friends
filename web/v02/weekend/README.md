@@ -59,3 +59,7 @@ Run `node scripts/verify-v02-economy.mjs` for catalog parity, resource productio
 Sunlight follows the game clock (sunrise 06:00, sunset 18:00): shadows turn and shorten toward noon, then lengthen toward sunset. Rain fades direct light and shadow contrast over three seconds while retaining diffuse sky light. Sunlight contributes no cast shadows at night; powered lamps retain their separate lighting. The sun uses the existing single 2048px shadow map with expanded depth coverage for its daily orbit.
 
 For an unsaved, paused comparison use `?utilities-preview&lighting-hour=8`, `lighting-hour=12` or `lighting-hour=16`; add `&lighting-rain` for overcast conditions. Run `node scripts/verify-v02-sunlight.mjs` for orbit, shadow-length, weather and night checks.
+
+### Building interaction audit
+
+See [the building-by-building audit](../../../docs/v02/building-interaction-audit.md) for functional coverage and decorative-prop limits. Run `node scripts/verify-v02-buildings.mjs` to exercise all build choices and production recipes through actual resident work. Use `?utilities-preview&interactions` for an unsaved scene with exhausted residents, a supplied wash station, and queued milk/egg production.

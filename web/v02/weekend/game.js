@@ -37,7 +37,7 @@ import {
   sellMaterial,
   storageCapacity,
   storedMaterials,
-  tentDoor,
+  restingDoor,
   MATERIALS,
   materialText,
   recipeText,
@@ -69,7 +69,11 @@ const arrivalPreview =
   utilitiesPreview ||
   restPreview ||
   new URLSearchParams(location.search).has("arrival-preview");
-let s = utilitiesPreview ? createUtilitiesPreview() : createWeekend();
+let s = utilitiesPreview
+  ? createUtilitiesPreview(
+      new URLSearchParams(location.search).has("interactions"),
+    )
+  : createWeekend();
 // Optional frozen lighting comparison, only in the unsaved utilities scene.
 const lightingPreview =
   utilitiesPreview && new URLSearchParams(location.search).has("lighting-hour");
@@ -397,6 +401,7 @@ function syncBuildings() {
       fraction = p.work / def.work;
     let id =
       p.key === "gathering" && fraction < 0.35 ? "produce-crates" : def.asset;
+    if (p.key === "goat-pasture-empty" && p.stocked) id = "goat_pasture";
     if (
       fraction < 1 &&
       assets.has(`${id}-construction-${fraction < 0.5 ? 0 : 1}`)
@@ -754,7 +759,8 @@ const actionText = {
   breathe: "Taking a quiet moment",
   town: "Supply run in town",
   meal: "Sharing our first evening",
-  wash: "Washing up at the water tank",
+  wash: "Washing up",
+  toilet: "Using the toilet",
 };
 let uiSignature = "";
 function refillSelect(id, options) {
@@ -1017,10 +1023,23 @@ function renderUI() {
     const status = document.createElement("span");
     status.textContent =
       r.tentPhase === "exit"
-        ? "Leaving the tent"
+        ? "Leaving " +
+          (r.restSite
+            ? PROJECTS[s.projects.find((p) => p.id === r.restSite).key].name
+            : "the tent")
         : r.action === "rest" && !r.tentPhase
-          ? "Heading to the tent"
-          : actionText[r.action] || "Settling in";
+          ? "Heading to " +
+            (r.restSite
+              ? PROJECTS[s.projects.find((p) => p.id === r.restSite).key].name
+              : "the tent")
+          : r.action === "rest" && r.restSite
+            ? "Resting in " +
+              PROJECTS[s.projects.find((p) => p.id === r.restSite).key].name
+            : r.action === "produce"
+              ? PROCESSES[
+                  s.operations.find((o) => o.id === r.operation)?.recipe
+                ]?.name || "Preparing supplies"
+              : actionText[r.action] || "Settling in";
     status.style.gridColumn = "1 / -1";
     const progress = document.createElement("progress");
     progress.max = 100;
@@ -1163,21 +1182,33 @@ function frame(now) {
       );
       continue;
     }
-    g.visible = r.action !== "town" && r.tentPhase !== "inside";
+    g.visible =
+      r.action !== "town" &&
+      r.tentPhase !== "inside" &&
+      !(r.action === "toilet" && r.toiletTime > 0);
     if (r.tentPhase) {
-      const door = tentDoor(s, i),
+      const door = restingDoor(s, i),
         t = Math.max(0, Math.min(1, (visual.time - r.tentAt) / 1.5));
       const inward =
         r.tentPhase === "exit" ? 1 - t : r.tentPhase === "inside" ? 1 : t;
-      // The interior is hidden; reveal the resident only at the open doorway.
-      g.visible = inward < 0.64;
-      g.position.copy(world(door.x, door.z - inward * 1.35));
+      const restingBuilding = s.projects.find((p) => p.id === r.restSite);
+      const isHome =
+        restingBuilding && PROJECTS[restingBuilding.key].kind === "home";
+      const recessed = isHome && /veranda|courtyard/.test(restingBuilding.key);
+      const travel = isHome ? (recessed ? 1.15 : 0.75) : 1.35;
+      // Enter at the authored door, including recessed house verandas.
+      g.visible = inward < (isHome ? 0.82 : 0.64);
+      g.position.copy(world(door.x, door.z - inward * travel));
       // Duck beneath the ridge while passing through the open tent door.
       g.position.y = 0;
       g.rotation.y = r.tentPhase === "exit" ? 0 : Math.PI;
       animateResident(
         g.rig,
-        "duck-walk",
+        r.restSite &&
+          PROJECTS[s.projects.find((p) => p.id === r.restSite)?.key]?.kind ===
+            "home"
+          ? "walk"
+          : "duck-walk",
         visual.time + i * 0.7,
         paused ? 0 : dt * speed,
       );
@@ -1212,10 +1243,68 @@ function frame(now) {
       seated = g.position.distanceTo(seat) < 0.15;
       g.rotation.y = i < 3 ? Math.PI : 0;
     } else g.position.copy(target);
-    if (r.action === "build" && !r.walk.length) {
-      const p = s.projects.find((p) => p.id === r.job);
+    if (
+      ["build", "produce", "install", "wash"].includes(r.action) &&
+      !r.walk.length
+    ) {
+      const site =
+        r.action === "build"
+          ? r.job
+          : r.action === "wash"
+            ? r.washSite
+            : r.action === "install"
+              ? s.infrastructure.links.find((l) => l.id === r.linkJob)?.from
+              : s.operations.find((o) => o.id === r.operation)?.site;
+      const p = s.projects.find((p) => p.id === site);
       if (p) g.rotation.y = Math.atan2(p.x + 0.5 - r.x, p.z + 0.5 - r.z);
     }
+    const serviceId =
+      r.action === "wash"
+        ? r.washSite
+        : r.action === "produce"
+          ? s.operations.find((o) => o.id === r.operation)?.site
+          : null;
+    const service = s.projects.find((p) => p.id === serviceId);
+    const anchor =
+      service &&
+      {
+        workshop: [-0.2, 1.87],
+        kitchen: [0.45, 1.87],
+        "wash-station": [0, 0.52],
+      }[PROJECTS[service.key].kind];
+    const offset = new THREE.Vector3();
+    if (
+      anchor &&
+      !r.walk.length &&
+      r.z >= service.z + footprint(service)[1] - 0.1
+    ) {
+      const center = world(
+        service.x + (footprint(service)[0] - 1) / 2,
+        service.z + (footprint(service)[1] - 1) / 2,
+      );
+      offset
+        .copy(center)
+        .add(new THREE.Vector3(anchor[0], 0, anchor[1]))
+        .sub(target);
+    }
+    g.userData.serviceOffset ??= new THREE.Vector3();
+    g.userData.serviceOffset.lerp(offset, paused ? 0 : 1 - Math.exp(-dt * 5));
+    if (!seated) g.position.add(g.userData.serviceOffset);
+    const production =
+      r.action === "produce" &&
+      PROCESSES[s.operations.find((o) => o.id === r.operation)?.recipe];
+    const tending =
+      production &&
+      [
+        "garden",
+        "greenhouse",
+        "orchard",
+        "grove",
+        "coop",
+        "goat_pasture",
+        "compost",
+        "apiary",
+      ].includes(production.kind);
     const motion = r.walk.length
       ? r.cargo
         ? "carry-walk"
@@ -1224,13 +1313,15 @@ function frame(now) {
         ? "sit"
         : r.action === "wash"
           ? "wash"
-          : ["build", "produce", "install"].includes(r.action)
-            ? "work"
-            : r.action === "rest"
-              ? "idle"
-              : ["look", "stretch", "chat", "breathe"].includes(r.action)
-                ? r.action
-                : "idle";
+          : tending
+            ? "tend"
+            : ["build", "produce", "install"].includes(r.action)
+              ? "work"
+              : r.action === "rest"
+                ? "idle"
+                : ["look", "stretch", "chat", "breathe"].includes(r.action)
+                  ? r.action
+                  : "idle";
     animateResident(
       g.rig,
       motion,

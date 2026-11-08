@@ -29,6 +29,13 @@ import {
 const run = (s, seconds) => {
   for (let i = 0; i < seconds * 10; i++) tick(s, 0.1);
 };
+const finishJobs = (s) => {
+  for (let i = 0; i < 6000; i++) {
+    if (s.operations?.every((o) => o.done)) return;
+    tick(s, 0.1);
+  }
+  assert.fail(`Jobs did not finish: ${JSON.stringify(s.operations)}`);
+};
 const fresh = () => {
   const s = createWeekend();
   s.arrivalElapsed = 17;
@@ -153,18 +160,18 @@ jobs.materials.food = 20;
 jobs.wood = 20;
 const quarry = built(jobs, "supply-3", 40, 40);
 assert.equal(queueProduction(jobs, quarry.id, "stone"), "");
-run(jobs, 160);
+finishJobs(jobs);
 assert.equal(jobs.materials.stone, 8);
 assert(jobs.operations[0].done);
 assert(sellMaterial(jobs, "stone") === false, "No full sale batch yet");
 assert.equal(queueProduction(jobs, quarry.id, "stone"), "");
-run(jobs, 160);
+finishJobs(jobs);
 assert.equal(jobs.materials.stone, 16);
 assert(sellMaterial(jobs, "stone"));
 assert.equal(jobs.materials.stone, 4);
 const trees = built(jobs, "supply-0", 44, 40);
 assert.equal(queueProduction(jobs, trees.id, "wood"), "");
-run(jobs, 180);
+finishJobs(jobs);
 assert.match(queueProduction(jobs, trees.id, "wood"), /Growing/);
 assert(storedMaterials(jobs) < storageCapacity(jobs));
 console.log(
@@ -185,7 +192,7 @@ assert(
   "Resident installs line",
 );
 assert.equal(queueProduction(labor, shop.id, "walls"), "");
-run(labor, 180);
+finishJobs(labor);
 assert.equal(labor.materials.walls, 2);
 assert(restore(save(labor)));
 console.log(
@@ -196,7 +203,7 @@ hauling.rainSeen = true;
 for (const id of Object.keys(hauling.materials)) hauling.materials[id] = 0;
 const tank = built(hauling, "well", 40, 40);
 assert.equal(queueWater(hauling, -1, tank.id, "irrigation"), "");
-run(hauling, 220);
+finishJobs(hauling);
 assert.equal(
   hauling.infrastructure.nodes[tank.id].water[1],
   12,
@@ -247,7 +254,7 @@ assert.equal(
   connectUtility(pending, "power", pendingSolar.id, pendingShop.id),
   "",
 );
-run(pending, 250);
+finishJobs(pending);
 assert.equal(
   pending.materials.walls,
   2,

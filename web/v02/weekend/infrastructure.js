@@ -153,11 +153,13 @@ export function useWater(s, node, amount, irrigation = false) {
   const sys = ensureInfrastructure(s),
     n = sys.nodes[node];
   if (!n) return false;
-  const i = irrigation && n.water[1] >= amount ? 1 : 0;
+  const drinking = ["coop", "goat_pasture"].includes(n.kind);
+  const i = irrigation && !drinking && n.water[1] >= amount ? 1 : 0;
   if (n.water[i] + 1e-8 < amount) return false;
-  if (!irrigation && n.capacity[2] - n.water[2] < amount * 0.8) return false;
+  if (!irrigation && !drinking && n.capacity[2] - n.water[2] < amount * 0.8)
+    return false;
   n.water[i] -= amount;
-  if (irrigation) sys.account.waterUsed += amount;
+  if (irrigation || drinking) sys.account.waterUsed += amount;
   else {
     n.water[2] += amount * 0.8;
     sys.account.waterUsed += amount * 0.2;
@@ -224,8 +226,10 @@ export function infrastructureStep(s, defs, dt) {
             0.4
         : 0;
       generation += n.generation;
-      stored += n.charge;
-      capacity += n.battery;
+      if (n.enabled) {
+        stored += n.charge;
+        capacity += n.battery;
+      }
       demand += n.demand;
     }
     const generated = generation * hours;
@@ -260,7 +264,8 @@ export function infrastructureStep(s, defs, dt) {
     sys.account.curtailed += Math.max(0, remainder - capacity);
     remainder = Math.min(capacity, remainder);
     for (const n of component) {
-      n.charge = capacity ? (remainder * n.battery) / capacity : 0;
+      if (n.enabled)
+        n.charge = capacity ? (remainder * n.battery) / capacity : 0;
       n.connected = component.length > 1;
     }
   }
@@ -300,7 +305,7 @@ export function infrastructureStep(s, defs, dt) {
   for (const l of sys.links) {
     if (l.kind === "power" || !l.enabled || l.work < l.required) continue;
     const a = sys.nodes[l.from];
-    if (a.power > 0.99) {
+    if (a.enabled && sys.nodes[l.to].enabled && a.power > 0.99) {
       if (a.kind === "river" && l.kind === "irrigation") {
         const target = sys.nodes[l.to],
           amount = Math.min(24 * hours, target.capacity[1] - target.water[1]);
@@ -316,16 +321,10 @@ export function infrastructureStep(s, defs, dt) {
   camp.water[0] -= drink;
   sys.account.waterUsed += drink;
   sys.thirst = drink + 1e-8 < s.people.length * 0.6 * hours;
-  const toilet = nodes.find((n) => n.enabled && n.kind === "eco_toilet");
-  if (toilet) {
-    const waste = Math.min(
-      toilet.capacity[3] - toilet.water[3],
-      s.people.length * 0.3 * hours,
-    );
-    toilet.water[3] += waste;
-    sys.account.waterReceived += waste;
-    sys.sanitationBlocked = toilet.water[3] >= toilet.capacity[3] - 0.01;
-  }
+  const toilets = nodes.filter((n) => n.enabled && n.kind === "eco_toilet");
+  sys.sanitationBlocked =
+    toilets.length > 0 &&
+    toilets.every((n) => n.capacity[3] - n.water[3] < 1.5);
   sys.sun = sun;
 }
 export function validInfrastructure(s) {

@@ -244,6 +244,28 @@ export function queueWater(s, from, to, kind = "fresh") {
 function utilitySpot(s, node, r) {
   if (node.id === -1) return { x: node.x, z: node.z };
   const p = s.projects.find((p) => p.id === node.id);
+  if (
+    p &&
+    ["workshop", "kitchen", "wash-station", "eco_toilet"].includes(
+      PROJECTS[p.key].kind,
+    )
+  ) {
+    const front = {
+      x: p.x + (footprint(p)[0] - 1) / 2,
+      z: p.z + footprint(p)[1],
+    };
+    if (
+      !occupied(s, front.x, front.z) &&
+      !s.people.some(
+        (other) =>
+          other !== r &&
+          (Math.hypot(other.x - front.x, other.z - front.z) < 0.55 ||
+            (other.target?.x === front.x && other.target?.z === front.z)),
+      ) &&
+      route(s, r, front)
+    )
+      return front;
+  }
   return p ? workSpot(s, r, p) : { x: s.stock.x - 1, z: s.stock.z + 1 };
 }
 function operationalWork(s, r, i, dt) {
@@ -318,7 +340,11 @@ function operationalWork(s, r, i, dt) {
             !["rest", "town"].includes(other.action),
         ),
     );
-    if (!link) return false;
+    if (!link) {
+      r.operation = null;
+      r.linkJob = null;
+      return false;
+    }
     r.linkJob = link.id;
     const dest = utilitySpot(s, sys.nodes[link.from], r);
     if (!dest) return false;
@@ -681,6 +707,12 @@ export function plan(s, key, x, z) {
 export function moveProject(s, id, x, z) {
   const p = s.projects.find((p) => p.id === id);
   if (!p || s.stage !== "playing") return "Cannot move that now.";
+  if (
+    s.people.some(
+      (r) => r.restSite === id && (r.tentPhase || r.action === "rest"),
+    )
+  )
+    return "Wait until residents have finished resting here.";
   if (s.infrastructure?.links.some((l) => l.from === id || l.to === id))
     return "Disconnect utility lines before relocating this building.";
   const error = placementError(s, p.key, x, z, id);
@@ -733,6 +765,9 @@ export function supplyRun(s, material = "wood") {
   r.target = null;
   r.walk = [];
   r.action = "town";
+  r.toiletSite = null;
+  r.toiletTime = 0;
+  r.washSite = null;
   say(
     s,
     `${r.name} is driving to town: ${item.quantity} ${item.name} for R$${item.price}. Back in about a minute.`,
@@ -784,6 +819,7 @@ function occupied(s, x, z) {
     blockedCamp(s).some((c) => c.x === x && c.z === z) ||
     s.projects.some(
       (p) =>
+        !(PROJECTS[p.key].kind === "shed" && p.work >= PROJECTS[p.key].work) &&
         x >= p.x &&
         x < p.x + footprint(p)[0] &&
         z >= p.z &&
@@ -954,6 +990,33 @@ export function tentDoor(s, i) {
   const camp = CAMPS.find((c) => c.id === s.camp);
   return { x: camp.x + (i % 2) * 1.5, z: camp.z };
 }
+export function restingDoor(s, i) {
+  const r = s.people[i];
+  const p = s.projects.find((p) => p.id === r.restSite);
+  if (!p) return tentDoor(s, i);
+  return { x: p.x + (footprint(p)[0] - 1) / 2, z: p.z + footprint(p)[1] };
+}
+function chooseRestingPlace(s, r, i) {
+  if (r.restSite && s.projects.some((p) => p.id === r.restSite)) return;
+  const choices = s.projects.filter(
+    (p) =>
+      p.work >= PROJECTS[p.key].work &&
+      (PROJECTS[p.key].kind === "home" || p.key.startsWith("canvas-tent")) &&
+      s.infrastructure.nodes[p.id]?.enabled !== false &&
+      s.people.filter((other) => other !== r && other.restSite === p.id)
+        .length < 2,
+  );
+  choices.sort(
+    (a, b) =>
+      (PROJECTS[b.key].kind === "home") - (PROJECTS[a.key].kind === "home") ||
+      Math.hypot(a.x - r.x, a.z - r.z) - Math.hypot(b.x - r.x, b.z - r.z),
+  );
+  for (const p of choices) {
+    r.restSite = p.id;
+    if (route(s, r, restingDoor(s, i))) return;
+  }
+  r.restSite = null;
+}
 function restSpot(s, i) {
   const layout = JSON.stringify([
     s.camp,
@@ -967,7 +1030,7 @@ function restSpot(s, i) {
   if (cache.spots[i]) return cache.spots[i];
   const c = CAMPS.find((c) => c.id === s.camp);
   const p = s.projects.find(
-    (p) => p.key === "gathering" && finished(s, "gathering"),
+    (p) => PROJECTS[p.key].kind === "square" && p.work >= PROJECTS[p.key].work,
   );
   const origin = p || c;
   const offsets = [
@@ -998,6 +1061,21 @@ function restSpot(s, i) {
   return { x: 31, z: 24 };
 }
 function supplySpot(s, r, i) {
+  const stores = s.projects
+    .filter(
+      (p) =>
+        ["warehouse", "supply-5"].includes(PROJECTS[p.key].kind) &&
+        p.work >= PROJECTS[p.key].work &&
+        s.infrastructure?.nodes[p.id]?.enabled !== false,
+    )
+    .sort(
+      (a, b) =>
+        Math.hypot(a.x - r.x, a.z - r.z) - Math.hypot(b.x - r.x, b.z - r.z),
+    );
+  for (const p of stores) {
+    const spot = workSpot(s, r, p);
+    if (spot) return spot;
+  }
   const offsets = [
     [-1, 0],
     [1, 0],
@@ -1043,6 +1121,13 @@ function workSpot(s, r, p) {
     .find(
       (spot) =>
         !occupied(s, spot.x, spot.z) &&
+        !s.people.some(
+          (other) =>
+            other !== r &&
+            !other.tentPhase &&
+            (Math.hypot(other.x - spot.x, other.z - spot.z) < 0.55 ||
+              (other.target?.x === spot.x && other.target?.z === spot.z)),
+        ) &&
         !reserved.some((other) => other.x === spot.x && other.z === spot.z) &&
         route(s, r, spot),
     );
@@ -1062,6 +1147,44 @@ function idleActivity(s, r, i) {
   const c = CAMPS.find((c) => c.id === s.camp);
   const cycle = r.idleCycle || 0;
   r.idleCycle = cycle + 1;
+  const social = s.projects.filter(
+    (p) =>
+      p.work >= PROJECTS[p.key].work &&
+      (s.rain
+        ? PROJECTS[p.key].kind === "shed"
+        : ["square", "picnic-table", "garden-bench", "fire-circle"].includes(
+            PROJECTS[p.key].kind,
+          )),
+  );
+  if (social.length && (s.rain || cycle % 2 === 0)) {
+    const p = social[i % social.length];
+    let spot = workSpot(s, r, p);
+    if (PROJECTS[p.key].kind === "shed") {
+      spot = Array.from({ length: footprint(p)[0] }, (_, n) => ({
+        x: p.x + n,
+        z: p.z,
+      })).find(
+        (candidate) =>
+          !s.people.some(
+            (other) =>
+              other !== r &&
+              (Math.hypot(other.x - candidate.x, other.z - candidate.z) <
+                0.65 ||
+                (other.idleGoal?.x === candidate.x &&
+                  other.idleGoal?.z === candidate.z)),
+          ) && route(s, r, candidate),
+      );
+    }
+    if (spot) {
+      r.idleGoal = spot;
+      r.idleUntil = s.time + 25 + i * 2;
+      r.action = "relax";
+      r.lookAt = null;
+      r.target = null;
+      go(s, r, spot);
+      return;
+    }
+  }
   const activities = ["look", "stretch", "chat", "stroll", "breathe"];
   r.action = activities[(cycle + i) % activities.length];
   r.lookAt = null;
@@ -1227,6 +1350,7 @@ export function tick(s, dt) {
       }
       if (r.tentPhase === "exit" && s.time - r.tentAt >= 1.5) {
         r.tentPhase = null;
+        r.restSite = null;
         r.action = "idle";
       }
       continue;
@@ -1307,43 +1431,81 @@ export function tick(s, dt) {
       go(s, r, restSpot(s, i));
       continue;
     }
-    const water = s.projects.find(
-      (p) => PROJECTS[p.key].kind === "well" && p.work >= PROJECTS[p.key].work,
+    // Visits are physical resident actions; waste is generated only on completion.
+    const toiletNodes = Object.values(s.infrastructure.nodes).filter(
+      (n) =>
+        n.enabled &&
+        n.kind === "eco_toilet" &&
+        n.capacity[3] - n.water[3] >= 1.5,
     );
     if (
-      water &&
-      (r.action === "wash" || r.work - (r.cleanedAtWork || 0) >= 55)
+      !r.cargo &&
+      !r.operation &&
+      (r.action === "toilet" || s.time - (r.toiletAt || 0) > 180 + i * 17)
     ) {
-      if (r.action !== "wash") {
-        r.job = null;
-        r.cargo = false;
-        r.target = null;
-      }
-      r.action = "wash";
-      const washNode = Object.values(s.infrastructure.nodes).find(
-        (n) => n.water[0] >= 1 && n.capacity[2] - n.water[2] >= 0.8,
+      const toilet = toiletNodes.find(
+        (n) =>
+          !s.people.some((other) => other !== r && other.toiletSite === n.id),
       );
-      if (!washNode) {
-        r.action = "idle";
-        r.cleanedAtWork = r.work;
+      const spot = toilet && utilitySpot(s, toilet, r);
+      if (spot) {
+        r.toiletSite = toilet.id;
+        r.action = "toilet";
+        r.job = null;
+        if (go(s, r, spot)) {
+          r.toiletTime = (r.toiletTime || 0) + dt;
+          if (r.toiletTime >= 6) {
+            toilet.water[3] += 1.5;
+            s.infrastructure.account.waterReceived += 1.5;
+            r.toiletAt = s.time;
+            r.toiletTime = 0;
+            r.toiletSite = null;
+            r.action = "idle";
+          }
+        }
         continue;
       }
-      const washSpot = utilitySpot(s, washNode, r);
-      if (washSpot && go(s, r, washSpot)) {
-        r.washTime = (r.washTime || 0) + dt;
-        if (r.washTime >= 8) {
-          if (!useWater(s, washNode.id, 1)) {
-            r.action = "idle";
+      r.toiletSite = null;
+    }
+    if (
+      !r.cargo &&
+      (r.action === "wash" || r.work - (r.cleanedAtWork || 0) >= 55)
+    ) {
+      const washNodes = Object.values(s.infrastructure.nodes)
+        .filter(
+          (n) =>
+            n.enabled &&
+            ["wash-station", "home", "eco_toilet", "camp"].includes(n.kind) &&
+            n.water[0] >= 1 &&
+            n.capacity[2] - n.water[2] >= 0.8,
+        )
+        .sort(
+          (a, b) =>
+            (b.kind === "wash-station") - (a.kind === "wash-station") ||
+            (a.kind === "camp") - (b.kind === "camp"),
+        );
+      const washNode = washNodes.find(
+        (n) =>
+          !s.people.some((other) => other !== r && other.washSite === n.id),
+      );
+      const washSpot = washNode && utilitySpot(s, washNode, r);
+      if (washSpot) {
+        r.action = "wash";
+        r.job = null;
+        r.washSite = washNode.id;
+        if (go(s, r, washSpot)) {
+          r.washTime = (r.washTime || 0) + dt;
+          if (r.washTime >= 8 && useWater(s, washNode.id, 1)) {
+            r.washTime = 0;
+            r.washSite = null;
             r.cleanedAtWork = r.work;
-            continue;
+            r.energy = Math.min(100, r.energy + 8);
+            r.action = "idle";
           }
-          r.washTime = 0;
-          r.cleanedAtWork = r.work;
-          r.energy = Math.min(100, r.energy + 8);
-          r.action = "idle";
         }
+        continue;
       }
-      continue;
+      r.washSite = null;
     }
     if (
       r.energy < 25 ||
@@ -1355,13 +1517,25 @@ export function tick(s, dt) {
       r.job = null;
       r.workSpot = null;
       r.cargo = false;
-      if (go(s, r, tentDoor(s, i))) {
+      chooseRestingPlace(s, r, i);
+      if (go(s, r, restingDoor(s, i))) {
         r.tentPhase = "enter";
         r.tentAt = s.time;
         r.walk = [];
         r.target = null;
       }
       continue;
+    }
+    if (
+      r.operation &&
+      s.operations?.some(
+        (o) =>
+          o.id === r.operation &&
+          !o.done &&
+          (o.phase === "return" || (o.water && o.phase === "deliver")),
+      )
+    ) {
+      if (operationalWork(s, r, i, dt)) continue;
     }
     let p = s.projects.find(
       (p) => p.id === r.job && p.work < PROJECTS[p.key].work,
@@ -1434,7 +1608,7 @@ export function tick(s, dt) {
     if (before < PROJECTS[p.key].work && p.work >= PROJECTS[p.key].work) {
       say(
         s,
-        `${PROJECTS[p.key].name} is ready. ${p.key === "gathering" ? "Somewhere to sit together at last." : p.key === "shelter" ? "A roof for our first night." : p.key === "water" ? "Water close at hand." : "A little privacy goes a long way."}`,
+        `${PROJECTS[p.key].name} is ready. ${p.key === "gathering" ? "Somewhere to sit together at last." : p.key === "shelter" ? "A roof for our first night." : p.key === "water" ? "Water close at hand." : PROJECTS[p.key].kind === "eco_toilet" ? "A little privacy goes a long way." : "Ready for the community to use."}`,
       );
     }
   }
@@ -1545,7 +1719,7 @@ export function restore(text) {
       )
         return null;
       if (r.work < 0) return null;
-      for (const k of ["washTime", "cleanedAtWork"])
+      for (const k of ["washTime", "cleanedAtWork", "toiletAt", "toiletTime"])
         if (r[k] !== undefined && (!Number.isFinite(r[k]) || r[k] < 0))
           return null;
       r.idleUntil = 0;
@@ -1567,6 +1741,20 @@ export function restore(text) {
           !s.camp)
       )
         return null;
+      if (
+        r.restSite != null &&
+        !s.projects.some(
+          (p) =>
+            p.id === r.restSite &&
+            p.work >= PROJECTS[p.key].work &&
+            (PROJECTS[p.key].kind === "home" ||
+              p.key.startsWith("canvas-tent")),
+        )
+      )
+        return null;
+      r.washSite = null;
+      r.toiletSite = null;
+      r.toiletTime = 0;
       r.action =
         s.trip?.person === r.id ? "town" : r.tentPhase ? "rest" : "idle";
       r.name = fresh.people[i].name;

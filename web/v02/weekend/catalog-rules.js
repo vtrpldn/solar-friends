@@ -158,7 +158,7 @@ export function expandProjects(projects) {
     const category =
       model.category === "Homes"
         ? "Homes"
-        : model.category === "Supplies"
+        : model.category === "Supplies" && model.id !== "supply-6"
           ? "Resources"
           : ["solar_farm", "hydro", "streetlight", "supply-6"].includes(
                 model.id,
