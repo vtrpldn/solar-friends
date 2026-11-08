@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>Resident lineup · Solar Friends</title>
+<style>body{margin:0;background:#d9ddbd;color:#344a39;font:16px system-ui}header{padding:20px 32px;display:flex;gap:24px;align-items:center}a{color:inherit}canvas{display:block;width:100%}footer{display:flex;justify-content:space-evenly;padding:12px 6%;font-weight:600}select{font:inherit;padding:6px;background:#f2ecd9;border:1px solid #9b9f78;border-radius:6px}</style>
+<script type="importmap">{"imports":{"three":"../workshop/vendor/three.module.js"}}</script>
+<header><a href="../land/">← Art garden</a><strong>Resident lineup</strong><label>Pose <select id="pose"><option>idle</option><option>walk</option><option>sit</option><option>water</option><option>tend</option><option>carry</option><option>rest</option></select></label></header><canvas></canvas><footer><span>Resident</span><span>Iara</span><span>Bento</span><span>Luz</span><span>Cauã</span><span>Nina</span></footer>
+<script type="module">
+import * as THREE from 'three';
+import {createResident,poseResident,RESIDENT_IDS} from './rig.js';
+const scene=new THREE.Scene();scene.background=new THREE.Color('#d9ddbd');
+const renderer=new THREE.WebGLRenderer({canvas:document.querySelector('canvas'),antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+const camera=new THREE.OrthographicCamera(-5,5,2.3,-2.3,.1,100);camera.position.set(0,4,10);camera.lookAt(0,.8,0);
+scene.add(new THREE.HemisphereLight(0xfff4d8,0x718253,2));const sun=new THREE.DirectionalLight(0xffe5bd,3);sun.position.set(-4,8,5);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-7,right:7,top:5,bottom:-5});scene.add(sun);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.MeshStandardMaterial({color:0xbcc48c,roughness:1}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.position.y=-.03;scene.add(ground);
+const residents=RESIDENT_IDS.map((id,i)=>{const r=createResident(id);r.position.x=(i-2.5)*1.6;r.rotation.y=.3;scene.add(r);return r;});
+function resize(){const w=innerWidth,h=Math.min(620,innerHeight-140);renderer.setSize(w,h);camera.left=-5.1;camera.right=5.1;camera.top=5.1*h/w;camera.bottom=-camera.top;camera.updateProjectionMatrix();}addEventListener('resize',resize);resize();
+const pose=document.querySelector('#pose');renderer.setAnimationLoop(t=>{for(const r of residents)poseResident(r.rig,pose.value,t/1000);renderer.render(scene,camera);});
+</script></html>

@@ -1,3 +1,4 @@
+import { createResident, RESIDENT_IDS } from "../residents/rig.js";
 import * as THREE from "three";
 import { PROPS } from "./props.js";
 import {
@@ -1369,28 +1370,6 @@ function detail(i) {
     });
   return g;
 }
-function person(i) {
-  const g = createStudy("resident");
-  const shirts = ["#d6af52", "#397c86", "#e6b987", "#7a954d", "#967caa"],
-    skins = ["#bb8055", "#8d573a", "#bd8159", "#b77b4e", "#915a3c"];
-  g.traverse((o) => {
-    if (!o.isMesh) return;
-    const c = o.material.color.getHexString();
-    if (c === "d3ad58") color(o, shirts[i]);
-    if (c === "b87950") color(o, skins[i]);
-  });
-  if ([0, 2, 4].includes(i))
-    foliage(
-      g,
-      0,
-      1.39,
-      -0.19,
-      0.17,
-      ["#382c24", "#382c24", "#773b23", "#382c24", "#302822"][i],
-      [1, 0.9, 0.6],
-    );
-  return g;
-}
 export const ASSETS = STUDIES.map((a) => ({
   ...a,
   category: {
@@ -1619,7 +1598,7 @@ for (const [i, id] of ["iara", "bento", "luz", "caua", "nina"].entries())
     ["Iara", "Bento", "Luz", "Cauã", "Nina"][i],
     "Residents",
     [1, 1],
-    () => person(i),
+    () => createResident(id),
     [`portrait-${i}`, id, `${id}-idle`, `${id}-activities`],
   );
 for (let i = 0; i < 3; i++)
@@ -1730,7 +1709,15 @@ export function createConnectedAsset(id, connection) {
 export function createAsset(id) {
   const def = ASSETS.find((a) => a.id === id);
   if (!def) throw new Error(`Unknown asset ${id}`);
-  const g = def.build();
+  const g = RESIDENT_IDS.includes(id) ? createResident(id) : def.build();
+  if (g.rig) {
+    // Static catalog previews omit rehearsal-only tools before material batching.
+    for (const tool of [g.rig.cargo, g.rig.can]) {
+      tool.traverse((o) => { if (o.isMesh) o.geometry.dispose(); });
+      tool.removeFromParent();
+    }
+    delete g.rig;
+  }
   const bounds = new THREE.Box3().setFromObject(g, true);
   if (bounds.min.y < 0)
     for (const child of g.children) child.position.y -= bounds.min.y;

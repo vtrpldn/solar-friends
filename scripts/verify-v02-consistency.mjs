@@ -8,7 +8,7 @@ const budgets = {
   Buildings: 5000,
   Vegetation: 3000,
   Animals: 800,
-  Residents: 600,
+  Residents: 800,
   Supplies: 2000,
   Crops: 300,
   Geology: 500,

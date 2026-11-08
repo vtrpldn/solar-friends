@@ -8,6 +8,15 @@ export const RESIDENT_IDS = [
   "caua",
   "nina",
 ];
+// Identity changes only the visible meshes: joint lengths and interaction anchors stay shared.
+const looks = {
+  resident: { hat: true, hair: "short", outfit: "shirt", width: 1 },
+  iara: { hat: true, hair: "braid", outfit: "overalls", width: 0.94 },
+  bento: { hair: "curls", outfit: "vest", width: 1.08, beard: true },
+  luz: { hair: "bun", outfit: "apron", width: 1 },
+  caua: { hat: true, hair: "short", outfit: "vest", width: 1.04 },
+  nina: { hair: "puffs", outfit: "overalls", width: 0.94 },
+};
 const palettes = new Map();
 function joint(parent, name, x = 0, y = 0, z = 0) {
   const g = new THREE.Group();
@@ -17,11 +26,24 @@ function joint(parent, name, x = 0, y = 0, z = 0) {
   return g;
 }
 export function createResident(id = "resident") {
+  const look = looks[id] || looks.resident;
   const root = new THREE.Group(),
     hips = joint(root, "hips", 0, 0.9),
     head = joint(hips, "head", 0, 0.59);
   const torso = cylinder(hips, 0.23, 0.24, 0.42, "shirt", 0, 0.2, 0, 6);
   torso.scale.z = 0.68;
+  torso.scale.x = look.width;
+  const clothes = joint(hips, "clothing");
+  if (look.outfit === "overalls" || look.outfit === "apron") {
+    const material = look.outfit === "apron" ? "plaster" : "trousers";
+    box(clothes, 0.29, 0.28, 0.035, material, 0, 0.18, 0.16);
+    for (const x of [-0.12, 0.12])
+      box(clothes, 0.045, 0.19, 0.035, material, x, 0.34, 0.15);
+    box(clothes, 0.14, 0.09, 0.015, "timberLight", 0, 0.17, 0.185);
+  } else if (look.outfit === "vest") {
+    for (const x of [-0.14, 0.14])
+      box(clothes, 0.13, 0.32, 0.055, "earth", x, 0.22, 0.14);
+  }
   cylinder(hips, 0.075, 0.08, 0.12, "skin", 0, 0.47, 0, 6);
   ball(head, 0.235, "skin", 0, 0, 0, [0.88, 1, 0.86], 1);
   ball(head, 0.238, "hair", 0, 0.08, -0.035, [0.88, 0.62, 0.86], 0);
@@ -30,9 +52,28 @@ export function createResident(id = "resident") {
     ball(head, 0.046, "skin", s * 0.205, 0, -0.005, [0.6, 1, 0.65], 0);
   }
   ball(head, 0.043, "skin", 0, -0.03, 0.2, [0.8, 0.8, 1], 0);
-  cylinder(head, 0.34, 0.34, 0.045, "earth", 0, 0.19, 0, 10);
-  cylinder(head, 0.15, 0.19, 0.15, "earth", 0, 0.285, 0, 8);
-  cylinder(head, 0.19, 0.195, 0.045, "timber", 0, 0.23, 0, 8);
+  const hairstyle = joint(head, "hairstyle");
+  if (look.hat) {
+    const brim = id === "caua" ? 0.28 : 0.34;
+    cylinder(hairstyle, brim, brim, 0.045, "earth", 0, 0.19, 0, 10);
+    cylinder(hairstyle, 0.15, 0.19, 0.15, "earth", 0, 0.285, 0, 8);
+    cylinder(hairstyle, 0.19, 0.195, 0.045, id === "caua" ? "teal" : "timber", 0, 0.23, 0, 8);
+  }
+  if (look.hair === "braid") {
+    for (let i = 0; i < 3; i++)
+      ball(hairstyle, 0.085 - i * 0.012, "hair", 0.14, -0.08 - i * 0.1, -0.12, [1, 1, 1], 0);
+  }
+  if (look.hair === "bun") {
+    ball(hairstyle, 0.13, "hair", 0, 0.14, -0.2, [1, 1, 1], 0);
+    cylinder(hairstyle, 0.218, 0.218, 0.055, "tile", 0, 0.13, -0.02, 8);
+  }
+  if (look.hair === "curls" || look.hair === "puffs") {
+    for (const x of [-1, 1])
+      ball(hairstyle, look.hair === "puffs" ? 0.135 : 0.12, "hair", x * (look.hair === "puffs" ? 0.23 : 0.14), look.hair === "puffs" ? 0.2 : 0.1, -0.065, [1, 1, 1], 0);
+    ball(hairstyle, 0.14, "hair", 0, 0.19, -0.045, [1, 0.75, 1], 0);
+  }
+  if (look.beard)
+    ball(hairstyle, 0.15, "hair", 0, -0.13, 0.07, [1, 0.7, 0.85], 0);
   const legs = [],
     arms = [];
   for (const s of [-1, 1]) {
@@ -77,8 +118,6 @@ export function createResident(id = "resident") {
   root.rig = rig;
   root.name = id;
   const i = RESIDENT_IDS.indexOf(id) - 1;
-  if ([0, 2, 4].includes(i))
-    ball(head, 0.17, "hair", 0, -0.1, -0.19, [1, 0.9, 0.6], 0);
   if (i >= 0) {
     const shirt = ["#d6af52", "#397c86", "#e6b987", "#7a954d", "#967caa"][i],
       skin = ["#bb8055", "#8d573a", "#bd8159", "#b77b4e", "#915a3c"][i];

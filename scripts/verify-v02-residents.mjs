@@ -13,12 +13,13 @@ import {
   findRoute,
 } from "../web/v02/residents/interactions.js";
 import { ResidentDirector } from "../web/v02/residents/director.js";
+import { createAsset } from "../web/v02/library/catalog.js";
 import { placementPosition } from "../web/v02/land/layout.js";
 import { footprint } from "../web/v02/land/editor.js";
 for (const id of RESIDENT_IDS) {
   const a = createResident(id);
   const neutral = new THREE.Box3().setFromObject(a, true);
-  assert(Math.abs(neutral.max.y - 1.85) < 0.01, id);
+  assert(neutral.max.y >= 1.72 && neutral.max.y <= 1.86, `${id}: consistent adult scale`);
   for (const action of [
     "idle",
     "walk",
@@ -39,6 +40,11 @@ for (const id of RESIDENT_IDS) {
       });
     }
   a.toJSON();
+  const catalog = createAsset(id);
+  assert(!catalog.getObjectByName("carried-crate"), `${id}: no hidden cargo in static preview`);
+  assert(!catalog.getObjectByName("watering-can"), `${id}: no hidden can in static preview`);
+  const previewBounds = new THREE.Box3().setFromObject(catalog, true);
+  assert(Math.abs(previewBounds.max.y - neutral.max.y) < 0.02, `${id}: shared preview scale`);
 }
 let cases = 0;
 for (const asset of Object.keys(INTERACTIONS))
@@ -174,7 +180,7 @@ for (const id of RESIDENT_IDS) {
       triangles +=
         (o.geometry.index?.count ?? o.geometry.attributes.position.count) / 3;
   });
-  assert(triangles <= 650, `${id}: resident detail budget`);
+  assert(triangles <= 800, `${id}: resident detail budget`);
 }
 console.log(
   "PASS: full-distance walking arrival, changing gait and visible resident geometry budget.",
