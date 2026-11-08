@@ -285,6 +285,7 @@ export function moveProject(s, id, x, z) {
     r.walk = [];
     if (r.job === id) {
       r.job = null;
+      r.workSpot = null;
       r.cargo = false;
       r.action = "idle";
     }
@@ -601,6 +602,34 @@ function supplySpot(s, r, i) {
   }
   return { x: s.stock.x - 2, z: s.stock.z + 1 };
 }
+function workSpot(s, r, p) {
+  const reserved = s.people
+    .filter((other) => other !== r && other.job === p.id && other.workSpot)
+    .map((other) => other.workSpot);
+  const offsets = [
+    [-1, 0],
+    [-1, 1],
+    [0, 2],
+    [1, 2],
+    [2, 1],
+    [2, 0],
+    [1, -1],
+    [0, -1],
+  ];
+  return offsets
+    .map(([x, z]) => ({ x: p.x + x, z: p.z + z }))
+    .find(
+      (spot) =>
+        !occupied(s, spot.x, spot.z) &&
+        !reserved.some((other) => other.x === spot.x && other.z === spot.z) &&
+        route(s, r, spot),
+    );
+}
+function availableProject(s, r) {
+  return s.projects.find(
+    (p) => p.work < PROJECTS[p.key].work && workSpot(s, r, p),
+  );
+}
 function idleActivity(s, r, i) {
   if (r.idleUntil > s.time) {
     if (r.idleGoal && go(s, r, r.idleGoal) && r.action === "stroll")
@@ -741,6 +770,27 @@ export function tick(s, dt) {
   if (s.rainResolved && s.time > (s.rainAt ?? 150) + 35) s.rain = false;
   for (const [i, r] of s.people.entries()) {
     if (r.action === "town") continue;
+    // Leisure is interruptible: a newly available task beats finishing a stroll.
+    if (
+      s.stage === "playing" &&
+      !r.job &&
+      r.energy >= 25 &&
+      [
+        "idle",
+        "relax",
+        "look",
+        "stretch",
+        "chat",
+        "stroll",
+        "breathe",
+      ].includes(r.action) &&
+      availableProject(s, r)
+    ) {
+      r.walk = [];
+      r.target = null;
+      r.idleUntil = 0;
+      r.idleGoal = null;
+    }
     if (r.walk.length) {
       const next = r.walk[0],
         dx = next.x - r.x,
@@ -820,15 +870,23 @@ export function tick(s, dt) {
       }
       continue;
     }
-    if (r.energy < 25 || (r.action === "rest" && r.energy < 80)) {
+    if (
+      r.energy < 25 ||
+      (r.action === "rest" &&
+        r.energy <
+          (s.projects.some((p) => p.work < PROJECTS[p.key].work) ? 60 : 80))
+    ) {
       r.action = "rest";
       r.job = null;
+      r.workSpot = null;
       r.cargo = false;
       if (go(s, r, restSpot(s, i))) {
         const shade =
           CAMPS.find((c) => c.id === s.camp).shade ||
           finished(s, "gathering") ||
-          s.projects.some((p) => p.key === "shelter" && p.work >= 110);
+          s.projects.some(
+            (p) => p.key === "shelter" && p.work >= PROJECTS.shelter.work / 2,
+          );
         r.energy = Math.min(100, r.energy + dt * (shade ? 1.4 : 0.65));
       }
       continue;
@@ -838,13 +896,11 @@ export function tick(s, dt) {
     );
     if (!p) {
       r.job = null;
+      r.workSpot = null;
       r.cargo = false;
-      p = s.projects.find(
-        (p) =>
-          p.work < PROJECTS[p.key].work &&
-          s.people.filter((other) => other.job === p.id).length < 2,
-      );
+      p = availableProject(s, r);
       if (p) {
+        r.workSpot = workSpot(s, r, p);
         r.job = p.id;
         r.idleUntil = 0;
         r.idleGoal = null;
@@ -858,10 +914,13 @@ export function tick(s, dt) {
       r.energy = Math.min(100, r.energy + dt * 0.25);
       continue;
     }
-    const slot = s.people
-      .filter((other) => other.job === p.id)
-      .findIndex((other) => other === r);
-    const dest = { x: p.x - 1, z: p.z + Math.max(0, slot) };
+    if (!r.workSpot || occupied(s, r.workSpot.x, r.workSpot.z))
+      r.workSpot = workSpot(s, r, p);
+    if (!r.workSpot) {
+      r.job = null;
+      continue;
+    }
+    const dest = r.workSpot;
     const loads = requiredLoads(p.key);
     const inTransit = s.people.filter(
       (other) => other.job === p.id && other.cargo,
@@ -1014,6 +1073,7 @@ export function restore(text) {
       r.target = null;
       r.walk = [];
       r.job = null;
+      r.workSpot = null;
       r.cargo = false;
       r.action = s.trip?.person === r.id ? "town" : "idle";
       r.name = fresh.people[i].name;

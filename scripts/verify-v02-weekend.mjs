@@ -331,3 +331,45 @@ assert.equal(restore(JSON.stringify(invalidMaterials)), null);
 console.log(
   "PASS: material recipes, money-free construction, atomic reservations, proportional loads/labor, purchased inventory and saved deliveries.",
 );
+
+const eager = createWeekend();
+chooseCamp(eager, "clearing");
+assert.equal(plan(eager, "shelter", 29, 35), "");
+for (const r of eager.people) {
+  r.action = "stroll";
+  r.idleUntil = eager.time + 200;
+  r.walk = [{ x: 40, z: 40 }];
+}
+tick(eager, 0.1);
+assert.equal(
+  eager.people.filter((r) => r.job === eager.projects[0].id).length,
+  5,
+  "All available friends collaborate, interrupting leisure",
+);
+assert.equal(
+  new Set(eager.people.map((r) => `${r.workSpot.x},${r.workSpot.z}`)).size,
+  5,
+  "Collaborators reserve distinct work positions",
+);
+const recovering = eager.people[0];
+recovering.job = null;
+recovering.walk = [];
+recovering.target = null;
+recovering.action = "rest";
+recovering.energy = 60;
+tick(eager, 0.1);
+assert.equal(
+  recovering.job,
+  eager.projects[0].id,
+  "Recovered residents promptly rejoin unfinished work",
+);
+run(eager, 900);
+assert(finished(eager, "shelter"));
+assert(
+  eager.people.every((r) => r.work > 0),
+  "Everyone contributes actual labor",
+);
+assert.equal(eager.projects[0].delivered, requiredLoads("shelter"));
+console.log(
+  "PASS: five-person collaboration, unique work positions, interrupted leisure, recovery and shared construction labor.",
+);
