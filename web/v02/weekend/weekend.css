@@ -362,3 +362,67 @@ dialog::backdrop {
 #build span {
   line-height: 1.45;
 }
+/* Desktop game catalog: category rail with a compact, scrollable build tray. */
+#build {
+  display: block;
+  width: min(1040px, calc(100vw - 48px));
+}
+.build-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  color: #f6f0da;
+}
+.build-toolbar label {
+  font-weight: bold;
+}
+.build-toolbar select,
+.build-toolbar input {
+  padding: 7px;
+  border-radius: 5px;
+  border: 1px solid #a3ad8b;
+  background: #f6f0da;
+  color: #30493e;
+}
+#build-list {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  max-height: 180px;
+  padding-bottom: 5px;
+}
+#build-list[hidden],
+#build-list button[hidden] {
+  display: none;
+}
+#build-list button {
+  flex: 0 0 210px;
+}
+#people,
+#selection,
+#journal {
+  max-height: calc(100vh - 390px);
+  overflow-y: auto;
+}
+#people select,
+#selection select {
+  width: 100%;
+  padding: 6px;
+  margin: 5px 0 8px;
+  background: #f6f0da;
+  color: #30493e;
+  border: 1px solid #a3ad8b;
+  border-radius: 5px;
+}
+#utility-links button {
+  display: block;
+  width: 100%;
+  font-size: 11px;
+  margin-top: 5px;
+}
+#utility-summary,
+#building-service {
+  font-size: 12px;
+  line-height: 1.5;
+}

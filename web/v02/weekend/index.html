@@ -69,9 +69,34 @@
         <p id="inventory"></p>
         <label for="purchase">Bring back from town</label
         ><select id="purchase"></select
-        ><button id="town">Send a supply run</button>
+        ><button id="town">Send a supply run</button
+        ><button id="sell">Sell one batch</button>
       </details>
       <p id="trip" class="hint"></p>
+      <details id="utility-panel">
+        <summary>Power &amp; water</summary>
+        <p id="utility-summary"></p>
+        <label for="utility-from">From</label
+        ><select id="utility-from"></select>
+        <label for="utility-to">To</label
+        ><select id="utility-to"></select>
+        <label for="utility-kind">Connection / cargo</label
+        ><select id="utility-kind">
+          <option value="power">Power cable</option>
+          <option value="fresh">Fresh water</option>
+          <option value="irrigation">Irrigation water</option>
+          <option value="greywater">Greywater</option>
+          <option value="sewage">Sealed sewage</option>
+        </select>
+        <button id="connect-utility">Install connection</button
+        ><button id="haul-water">Carry 12 water</button>
+        <p class="hint">
+          Pipes need a pump and power at the source. River water must be
+          filtered by a powered cistern. Greywater goes to reed beds; sewage
+          goes to a biodigester or banana bed.
+        </p>
+        <div id="utility-links"></div>
+      </details>
     </aside>
     <section id="rain" class="paper" hidden>
       <small>A CHANGE IN THE WEATHER</small>
@@ -87,6 +112,11 @@
       <small id="selected-state"></small>
       <h2 id="selected-name"></h2>
       <p id="selected-desc"></p>
+      <p id="building-service"></p>
+      <label for="production">Resident work</label
+      ><select id="production"></select
+      ><button id="queue-production">Start batch</button>
+      <button id="toggle-building">Switch off</button>
       <button id="priority">Do this next</button
       ><button id="move">Move camp furniture</button
       ><button id="close-selection" aria-label="Close project details">
@@ -102,7 +132,19 @@
       ><button id="again">Try a different start</button>
     </section>
     <footer>
-      <div id="build" hidden></div>
+      <section id="build" hidden>
+        <div class="build-toolbar">
+          <label for="build-category">Build</label
+          ><select id="build-category"></select
+          ><input
+            id="build-search"
+            type="search"
+            placeholder="Find a building"
+            aria-label="Find a building"
+          /><button id="toggle-build-list">Hide catalog</button>
+        </div>
+        <div id="build-list"></div>
+      </section>
       <button id="skip-arrival" hidden>Skip arrival</button>
       <div id="message" role="status">Choose a campsite to begin.</div>
       <div class="controls">

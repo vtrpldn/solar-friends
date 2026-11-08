@@ -1,3 +1,4 @@
+import { syncInfrastructure, LIQUIDS } from "./infrastructure.js";
 import { createAccessRoad } from "./access-road.js";
 import { captureMotion, interpolateMotion } from "./presentation.js";
 import { installCameraNavigation } from "./camera-navigation.js";
@@ -25,6 +26,14 @@ import { createResident, animateResident } from "../residents/rig.js";
 import {
   CAMPS,
   PROJECTS,
+  PROCESSES,
+  footprint,
+  queueProduction,
+  queueWater,
+  connectUtility,
+  sellMaterial,
+  storageCapacity,
+  storedMaterials,
   tentDoor,
   MATERIALS,
   materialText,
@@ -92,7 +101,8 @@ const navigation = installCameraNavigation(camera, controls, {
     arrivalCameraFollow = false;
   },
 });
-scene.add(new THREE.HemisphereLight("#fff1cd", "#658658", 2));
+const daylight = new THREE.HemisphereLight("#fff1cd", "#658658", 2);
+scene.add(daylight);
 const sun = new THREE.DirectionalLight("#ffe2a8", 3.4);
 sun.position.set(-25, 45, 18);
 sun.castShadow = true;
@@ -225,10 +235,10 @@ function drawCamp() {
 const border = new THREE.LineLoop(
   new THREE.BufferGeometry().setFromPoints(
     [
-      [20.5, 20.5],
-      [43.5, 20.5],
-      [43.5, 43.5],
-      [20.5, 43.5],
+      [1.5, 1.5],
+      [61.5, 1.5],
+      [61.5, 61.5],
+      [1.5, 61.5],
     ].map(([x, z]) => world(x, z).setY(0.025)),
   ),
   new THREE.LineBasicMaterial({ color: "#e0dfad" }),
@@ -251,6 +261,88 @@ const actors = s.people.map((r) => {
   scene.add(root);
   return root;
 });
+const utilityLines = new THREE.Group();
+scene.add(utilityLines);
+let utilityDrawing = "";
+const utilityLights = new Map();
+function drawUtilities() {
+  const sys = s.infrastructure;
+  if (!sys) return;
+  const signature = JSON.stringify(
+    sys.links.map((l) => [
+      l.id,
+      l.enabled,
+      l.work >= l.required,
+      sys.nodes[l.from].x,
+      sys.nodes[l.from].z,
+      sys.nodes[l.to].x,
+      sys.nodes[l.to].z,
+    ]),
+  );
+  if (signature !== utilityDrawing) {
+    utilityDrawing = signature;
+    for (const child of [...utilityLines.children]) {
+      child.geometry.dispose();
+      child.material.dispose();
+      utilityLines.remove(child);
+    }
+    for (const l of sys.links) {
+      const a = sys.nodes[l.from],
+        b = sys.nodes[l.to];
+      const points = [world(a.x, a.z).setY(0.12), world(b.x, b.z).setY(0.12)];
+      const line = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(points),
+        new THREE.LineBasicMaterial({
+          color:
+            l.kind === "power"
+              ? "#e6bc5c"
+              : {
+                  fresh: "#73cce5",
+                  irrigation: "#6b9c63",
+                  greywater: "#97919a",
+                  sewage: "#815c48",
+                }[l.kind],
+          transparent: true,
+          opacity: l.enabled && l.work >= l.required ? 0.8 : 0.25,
+        }),
+      );
+      utilityLines.add(line);
+    }
+  }
+  const night = 1 - Math.min(1, (sys.sun || 0) * 4);
+  daylight.intensity = 1.1 + (1 - night) * 0.9;
+  sun.intensity = 0.25 + (1 - night) * 3.15;
+  for (const n of Object.values(sys.nodes)) {
+    if (
+      ![
+        "streetlight",
+        "home",
+        "kitchen",
+        "workshop",
+        "shed",
+        "warehouse",
+        "square",
+      ].includes(n.kind)
+    )
+      continue;
+    let light = utilityLights.get(n.id);
+    if (!light) {
+      light = new THREE.PointLight("#ffcb76", 0, 10, 2);
+      scene.add(light);
+      utilityLights.set(n.id, light);
+    }
+    const p = s.projects.find((p) => p.id === n.id);
+    if (!p) continue;
+    light.position.copy(
+      world(
+        p.x + (PROJECTS[p.key].size[0] - 1) / 2,
+        p.z + (PROJECTS[p.key].size[1] - 1) / 2,
+      ),
+    );
+    light.position.y = n.kind === "streetlight" ? 2.7 : 1.6;
+    light.intensity = night * (n.power || 0) * 12;
+  }
+}
 const buildings = new Map();
 const assets = new Set(ASSETS.map((a) => a.id));
 function syncBuildings() {
@@ -270,12 +362,18 @@ function syncBuildings() {
         scene.remove(entry.root);
         disposeModel(entry.root);
       }
-      const root = prop(id, p.x + 0.5, p.z + 0.5);
+      const root = prop(
+        id,
+        p.x + (def.size[0] - 1) / 2,
+        p.z + (def.size[1] - 1) / 2,
+      );
       root.userData.projectId = p.id;
       entry = { root, asset: id };
       buildings.set(p.id, entry);
     }
-    entry.root.position.copy(world(p.x + 0.5, p.z + 0.5));
+    entry.root.position.copy(
+      world(p.x + (def.size[0] - 1) / 2, p.z + (def.size[1] - 1) / 2),
+    );
     if (p.key === "gathering" && s.meal && !entry.meal) {
       for (let i = 0; i < 5; i++) {
         const plate = new THREE.Mesh(
@@ -410,8 +508,9 @@ for (const [key, d] of Object.entries(PROJECTS)) {
   b.id = `build-${key}`;
   b.innerHTML = `<strong>${d.name}</strong><span>${recipeText(key)}</span>`;
   b.title = d.description;
+  b.dataset.category = d.category;
   b.onclick = () => startPlacement(key);
-  $("build").append(b);
+  $("build-list").append(b);
 }
 const ray = new THREE.Raycaster(),
   mouse = new THREE.Vector2();
@@ -433,7 +532,11 @@ $("world").addEventListener("pointermove", (e) => {
   const p = hit(e);
   if (!p) return;
   cell = { x: Math.round(p.x / 2 + 32), z: Math.round(p.z / 2 + 32) };
-  ghost.position.copy(world(cell.x + 0.5, cell.z + 0.5));
+  const size = PROJECTS[placing].size;
+  ghost.scale.set(size[0] / 2, size[1] / 2, 1);
+  ghost.position.copy(
+    world(cell.x + (size[0] - 1) / 2, cell.z + (size[1] - 1) / 2),
+  );
   ghost.position.y = 0.04;
   ghost.visible = true;
   const error = placementError(s, placing, cell.x, cell.z, moving);
@@ -465,8 +568,13 @@ $("world").addEventListener("pointerup", (e) => {
     renderUI();
   } else {
     selected =
-      s.projects.find((p) => x >= p.x && x < p.x + 2 && z >= p.z && z < p.z + 2)
-        ?.id || null;
+      s.projects.find(
+        (p) =>
+          x >= p.x &&
+          x < p.x + footprint(p)[0] &&
+          z >= p.z &&
+          z < p.z + footprint(p)[1],
+      )?.id || null;
     renderUI();
   }
 });
@@ -573,6 +681,10 @@ const actionText = {
   carry: "Carrying supplies",
   walk: "Walking to the project",
   build: "Building",
+  produce: "Preparing supplies",
+  install: "Installing utilities",
+  "fetch-water": "Fetching water",
+  blocked: "Waiting for supplies or utilities",
   rest: "Resting in the tent",
   relax: "Enjoying the clearing",
   look: "Taking in the surroundings",
@@ -585,6 +697,159 @@ const actionText = {
   wash: "Washing up at the water tank",
 };
 let uiSignature = "";
+function refillSelect(id, options) {
+  const el = $(id),
+    value = el.value,
+    html = options
+      .map(([key, label]) => `<option value="${key}">${label}</option>`)
+      .join("");
+  if (el.dataset.options !== html) {
+    el.innerHTML = html;
+    el.dataset.options = html;
+    if (options.some(([key]) => String(key) === value)) el.value = value;
+  }
+}
+function renderUtilityUI() {
+  const sys = syncInfrastructure(s, PROJECTS),
+    nodes = Object.values(sys.nodes);
+  const labels = nodes.map((n) => [
+    n.id,
+    n.id === 0
+      ? "Camp stores"
+      : `${PROJECTS[s.projects.find((p) => p.id === n.id).key].name} #${n.id}`,
+  ]);
+  refillSelect("utility-from", [[-1, "River (untreated)"], ...labels]);
+  refillSelect("utility-to", labels);
+  const generation = nodes.reduce((a, n) => a + (n.generation || 0), 0),
+    demand = nodes.reduce((a, n) => a + (n.demand || 0), 0),
+    stored = nodes.reduce((a, n) => a + n.charge, 0),
+    capacity = nodes.reduce((a, n) => a + n.battery, 0);
+  const liquids = LIQUIDS.map(
+    (key, i) =>
+      `${Math.floor(nodes.reduce((a, n) => a + n.water[i], 0))} ${key}`,
+  ).join(" · ");
+  $("utility-summary").textContent =
+    `Power: ${generation.toFixed(1)} kW generated / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}.${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Connect treatment." : ""}`;
+  $("utility-links").replaceChildren();
+  for (const l of sys.links) {
+    const b = document.createElement("button");
+    b.textContent = `${l.kind} #${l.from} → #${l.to}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
+    b.onclick = () => {
+      l.enabled = !l.enabled;
+      persist();
+      renderUI();
+    };
+    $("utility-links").append(b);
+    const remove = document.createElement("button");
+    remove.textContent = "Remove connection";
+    remove.onclick = () => {
+      sys.links = sys.links.filter((item) => item.id !== l.id);
+      persist();
+      renderUI();
+    };
+    $("utility-links").append(remove);
+  }
+  const p = s.projects.find((p) => p.id === selected),
+    node = p && sys.nodes[p.id];
+  refillSelect(
+    "production",
+    p
+      ? Object.entries(PROCESSES)
+          .filter(([, d]) => d.kind === PROJECTS[p.key].kind)
+          .map(([id, d]) => [id, d.name])
+      : [],
+  );
+  $("queue-production").disabled = !node || !$("production").value;
+  $("toggle-building").disabled = !node;
+  $("toggle-building").textContent = node?.enabled ? "Switch off" : "Switch on";
+  const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done);
+  $("building-service").textContent = node
+    ? `Power ${(node.power * 100).toFixed(0)}% · Battery ${node.charge.toFixed(1)}/${node.battery}. ${LIQUIDS.map(
+        (k, i) =>
+          node.capacity[i]
+            ? `${k}: ${node.water[i].toFixed(1)}/${node.capacity[i]}`
+            : "",
+      )
+        .filter(Boolean)
+        .join(" · ")} ${op ? op.status || "Resident job queued" : ""}`
+    : "";
+}
+$("connect-utility").onclick = () => {
+  message(
+    connectUtility(
+      s,
+      $("utility-kind").value,
+      $("utility-from").value,
+      $("utility-to").value,
+    ) || "Connection planned. Residents will install it.",
+  );
+  persist();
+  renderUI();
+};
+$("haul-water").onclick = () => {
+  message(
+    queueWater(
+      s,
+      $("utility-from").value,
+      $("utility-to").value,
+      $("utility-kind").value,
+    ) || "Water carrying job queued.",
+  );
+  persist();
+  renderUI();
+};
+$("queue-production").onclick = () => {
+  message(
+    queueProduction(s, selected, $("production").value) ||
+      "Resident production job queued.",
+  );
+  persist();
+  renderUI();
+};
+$("toggle-building").onclick = () => {
+  const node = s.infrastructure.nodes[selected];
+  if (node) node.enabled = !node.enabled;
+  persist();
+  renderUI();
+};
+$("sell").onclick = () => {
+  message(
+    sellMaterial(s, $("purchase").value)
+      ? "Surplus sold at half the purchase price."
+      : "Not enough available supplies to sell.",
+  );
+  persist();
+  renderUI();
+};
+const categories = [
+  "First camp",
+  ...new Set(
+    Object.values(PROJECTS)
+      .map((d) => d.category)
+      .filter((c) => c !== "First camp"),
+  ),
+  "All",
+];
+refillSelect(
+  "build-category",
+  categories.map((c) => [c, c]),
+);
+function filterBuildings() {
+  for (const [key, d] of Object.entries(PROJECTS))
+    $(`build-${key}`).hidden =
+      ($("build-category").value !== "All" &&
+        d.category !== $("build-category").value) ||
+      !d.name.toLowerCase().includes($("build-search").value.toLowerCase());
+}
+$("build-category").onchange = filterBuildings;
+$("build-search").oninput = filterBuildings;
+$("toggle-build-list").onclick = () => {
+  $("build-list").hidden = !$("build-list").hidden;
+  $("toggle-build-list").textContent = $("build-list").hidden
+    ? "Show catalog"
+    : "Hide catalog";
+};
+filterBuildings();
 function renderUI() {
   const signature = JSON.stringify([
     s.stage,
@@ -593,6 +858,17 @@ function renderUI() {
     s.money,
     s.wood,
     s.materials,
+    s.infrastructure && [
+      Object.values(s.infrastructure.nodes).map((n) => [
+        n.id,
+        n.enabled,
+        Math.round(n.charge * 10),
+        n.water.map((v) => Math.floor(v)),
+        Math.round(n.power * 10),
+      ]),
+      s.infrastructure.links.map((l) => [l.id, Math.floor(l.work), l.enabled]),
+    ],
+    s.operations?.map((o) => [o.id, o.done, Math.floor(o.work), o.status]),
     $("purchase").value,
     Math.floor(s.time * 0.45),
     s.trip && Math.ceil(s.trip.left),
@@ -618,11 +894,11 @@ function renderUI() {
   $("build").hidden = !active || s.stage === "evening";
   $("supplies").textContent =
     `R$${s.money} shared savings · ${s.wood} timber available`;
-  const minutes = 9 * 60 + Math.min(9 * 60, Math.floor(s.time * 0.45));
+  const minutes = 9 * 60 + Math.floor(s.time * 0.45);
   $("clock").textContent =
     s.stage === "evening"
       ? "Saturday · Evening"
-      : `Saturday · ${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+      : `Day ${Math.floor(minutes / 1440) + 1} · ${String(Math.floor(minutes / 60) % 24).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
   $("objective").textContent =
     s.stage === "evening"
       ? "Tools away. Take a moment to enjoy what you made together."
@@ -683,9 +959,12 @@ function renderUI() {
   $("inventory").textContent = Object.keys(MATERIALS)
     .map((id) => materialText(id, materialCount(s, id)))
     .join(" · ");
+  $("sell").disabled =
+    materialCount(s, $("purchase").value) < purchase.quantity ||
+    !purchase.quantity;
   $("trip").textContent = s.trip
     ? `${s.people.find((r) => r.id === s.trip.person).name} returns in ${Math.ceil(s.trip.left)} seconds.`
-    : "Packed meals and drinking water cover this weekend.";
+    : `Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. Buy essentials or sell locally produced surplus.`;
   $("rain").hidden = !s.rainSeen || s.rainResolved;
   $("boards").disabled = s.wood < 2;
   $("meal").hidden = !canFinish(s) || s.stage !== "playing";
@@ -705,11 +984,13 @@ function renderUI() {
   );
   for (const key of Object.keys(PROJECTS)) {
     const b = $(`build-${key}`);
-    b.disabled = s.projects.some((p) => p.key === key);
+    b.disabled =
+      !PROJECTS[key].repeatable && s.projects.some((p) => p.key === key);
     const missing = missingMaterials(s, key);
     b.title = `${PROJECTS[key].description} ${missing.length ? "Missing: " + missing.join(", ") : "All materials available."}`;
     b.classList.toggle("active", placing === key);
   }
+  renderUtilityUI();
   const p = s.projects.find((p) => p.id === selected);
   $("selection").hidden = !p || s.stage === "evening";
   if (p) {
@@ -719,10 +1000,12 @@ function renderUI() {
       : `${Math.floor((p.work / PROJECTS[p.key].work) * 100)}% BUILT`;
     $("selected-desc").textContent =
       `${PROJECTS[p.key].description} Reserved: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
-    $("priority").disabled = finished(s, p.key);
+    $("priority").disabled = p.work >= PROJECTS[p.key].work;
   }
 }
-for (const [id, item] of Object.entries(MATERIALS)) {
+for (const [id, item] of Object.entries(MATERIALS).filter(
+  ([, item]) => item.quantity > 0,
+)) {
   const option = document.createElement("option");
   option.value = id;
   option.textContent = `${materialText(id, item.quantity)} · R$${item.price}`;
@@ -864,7 +1147,7 @@ function frame(now) {
         ? "sit"
         : r.action === "wash"
           ? "wash"
-          : r.action === "build"
+          : ["build", "produce", "install"].includes(r.action)
             ? "work"
             : r.action === "rest"
               ? "idle"
@@ -905,6 +1188,7 @@ function frame(now) {
   }
   navigation.update(dt);
   controls.update();
+  drawUtilities();
   renderer.render(scene, camera);
   recordPerformance(now, arriving ? visual.arrivalElapsed : visual.time);
   requestAnimationFrame(frame);

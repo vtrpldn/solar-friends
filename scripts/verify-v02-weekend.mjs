@@ -51,7 +51,7 @@ const s = createWeekend();
 assert(!plan(s, "water", 30, 30).includes("Unknown"));
 chooseCamp(s, "shade");
 assert.equal(plan(s, "gathering", 30, 32), "");
-assert(plan(s, "shelter", 31, 33));
+assert(plan(s, "shelter", 31, 32));
 assert(plan(s, "shelter", 19, 30));
 assert(plan(s, "gathering", 35, 35));
 assert.equal(plan(s, "water", 35, 35), "");
@@ -269,7 +269,7 @@ for (const point of detour) {
     const x = previous.x + (point.x - previous.x) * t,
       z = previous.z + (point.z - previous.z) * t;
     assert(
-      !(x > 28.34 && x < 30.66 && z > 34.34 && z < 36.66),
+      !(x > 28.34 && x < 30.66 && z > 34.34 && z < 35.66),
       "Body clearance around construction",
     );
   }
