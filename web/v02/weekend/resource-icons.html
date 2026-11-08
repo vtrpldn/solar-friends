@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><title>Solar Friends · 3D resources</title>
+  <script type="importmap">
+    { "imports": { "three": "../workshop/vendor/three.module.js" } }
+  </script>
+  <style>
+    body {
+      margin: 28px;
+      background: #fff7df;
+      color: #40503c;
+      font: 15px system-ui;
+    }
+    main {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+    }
+    article {
+      background: #eee6cc;
+      border-radius: 16px;
+      text-align: center;
+      padding: 10px;
+    }
+    img {
+      width: 120px;
+      height: 90px;
+      object-fit: contain;
+    }
+    a {
+      color: inherit;
+    }
+  </style>
+  <h1>Our shared supplies · low-poly 3D</h1>
+  <p>
+    Shared village materials, camera and lighting ·
+    <a href="../library/">Inspect the 3D models</a>
+  </p>
+  <main id="icons"></main>
+  <script type="module">
+    import { MATERIALS } from "./simulation.js";
+    import { RESOURCE_IDS } from "../library/resource-models.js";
+    import { resourceIcon, illustrateResources } from "./resource-icons.js";
+    const grid = document.getElementById("icons");
+    grid.innerHTML = RESOURCE_IDS.map(
+      (id) =>
+        `<article>${resourceIcon(id)}<div>${MATERIALS[id]?.name || id}</div></article>`,
+    ).join("");
+    illustrateResources(grid);
+  </script>
+</html>

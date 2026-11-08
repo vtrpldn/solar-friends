@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Solar Friends · v2 Asset Workshop</title>
+    <link rel="stylesheet" href="workshop.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "./vendor/three.module.js",
+          "three/addons/controls/OrbitControls.js": "./vendor/OrbitControls.js"
+        }
+      }
+    </script>
+  <link rel="stylesheet" href="../navigation.css">
+<script type="module" src="../navigation.js"></script>
+</head>
+  <body>
+    <header>
+      <a href="/v1/" title="Open the preserved v1 game"
+        >SF<span> SOLAR FRIENDS</span></a
+      >
+      <div class="heading">
+        <h1>Asset workshop</h1>
+        <p>v2 · One shared 3D collection</p>
+      </div>
+
+    </header>
+    <main>
+      <aside>
+        <h2>The collection</h2>
+        <p class="muted">The full collection. One camera, one scale.</p>
+        <nav id="assets" aria-label="Reference assets"></nav>
+        <button id="village" class="scene-button">View together ↗</button>
+        <section class="notes">
+          <h3>In progress</h3>
+          <p>
+            Geometry → <strong>Material study</strong> → Art review → Game
+            integration
+          </p>
+          <p>
+            These studies are ready to inspect. Their visual direction still
+            needs your review.
+          </p>
+        </section>
+        <a class="quiet" href="../land/">64 × 64 land preview ↗</a>
+        <a class="quiet" href="README.md">Pipeline notes ↗</a>
+      </aside>
+      <section class="workspace">
+        <div class="toolbar">
+          <div class="segmented" aria-label="View mode">
+            <button id="model-tab" aria-pressed="true">3D model</button
+            ><button id="sprite-tab" aria-pressed="false">Sprite proof</button>
+          </div>
+          <div class="tools">
+            <label
+              >Light
+              <select id="light">
+                <option value="day">Daylight</option>
+                <option value="night">Night</option>
+              </select></label
+            ><label
+              >Surface
+              <select id="surface">
+                <option value="materials">Materials</option>
+                <option value="clay">Clay</option>
+                <option value="wire">Wireframe</option>
+              </select></label
+            >
+          </div>
+        </div>
+        <div id="viewport">
+          <canvas id="world" aria-label="Interactive 3D model preview"></canvas>
+          <div class="view-label">
+            <span id="view-title">Limewashed house</span
+            ><small id="view-subtitle">ORTHOGRAPHIC · 2:1</small>
+          </div>
+          <div class="viewport-bottom">
+            <span id="hint"
+              >Drag to orbit · Scroll to zoom · Right-drag to pan</span
+            ><button id="reset">Reset camera</button>
+          </div>
+        </div>
+        <div id="proof" hidden>
+          <div class="proof-heading">
+            <h2>Four rotations. Same scale.</h2>
+            <p>Transparent exports · 48 pixels / metre · Fixed ground anchor</p>
+          </div>
+          <div id="frames"></div>
+          <p class="proof-note">
+            Checkerboard is preview only. Exports contain the asset and its
+            contact shadow.
+          </p>
+        </div>
+        <div class="bottom-bar">
+          <div class="segmented rotations" aria-label="Asset rotation">
+            <button data-angle="0" aria-pressed="true">0°</button
+            ><button data-angle="90" aria-pressed="false">90°</button
+            ><button data-angle="180" aria-pressed="false">180°</button
+            ><button data-angle="270" aria-pressed="false">270°</button>
+          </div>
+          <label><input id="grid" type="checkbox" checked /> Grid</label
+          ><label><input id="human" type="checkbox" /> Scale figure</label
+          ><button id="iso">Isometric camera</button>
+        </div>
+      </section>
+      <aside class="inspector">
+        <div class="eyebrow" id="kind">HOME</div>
+        <h2 id="name">Limewashed house</h2>
+        <p id="description"></p>
+        <dl>
+          <div>
+            <dt>Footprint</dt>
+            <dd id="footprint"></dd>
+          </div>
+          <div>
+            <dt>Bounds</dt>
+            <dd id="bounds"></dd>
+          </div>
+          <div>
+            <dt>Grid cell</dt>
+            <dd>2 × 2 m</dd>
+          </div>
+          <div>
+            <dt>Export</dt>
+            <dd>512 × 512 / view</dd>
+          </div>
+          <div>
+            <dt>Revision</dt>
+            <dd id="revision">01 · Procedural source</dd>
+          </div>
+        </dl>
+        <h3>Shared material palette</h3>
+        <div id="palette"></div>
+        <section class="export">
+          <h3>Take it through the pipeline</h3>
+          <button id="export-sheet" class="primary">Export 4-view PNG</button
+          ><button id="export-meta">Export placement JSON</button
+          ><button id="export-model">Export 3D source JSON</button>
+          <p>
+            All exports use the locked camera and selected light. Inspection
+            zoom, clay and wireframe never change the exported art.
+          </p>
+        </section>
+        <p id="status" role="status">Preparing the workshop…</p>
+      </aside>
+    </main>
+    <script type="module" src="workshop.js"></script>
+  </body>
+</html>

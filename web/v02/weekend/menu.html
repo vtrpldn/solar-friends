@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Solar Friends</title>
+    <link rel="stylesheet" href="weekend.css" />
+    <link rel="stylesheet" href="menu.css" />
+  </head>
+  <body>
+    <div class="frame" aria-hidden="true"></div>
+    <div class="art" aria-hidden="true">
+      <div class="sun"></div>
+      <div class="stem"><i></i><i></i><i></i><i></i></div>
+      <span class="art-caption">GROW SOMETHING GOOD</span>
+    </div>
+    <main class="welcome">
+      <header class="brand">
+        <small>A LITTLE LAND. A LIFE TOGETHER.</small>
+        <h1>Solar<br />Friends</h1>
+      </header>
+      <div class="menu-actions">
+        <button id="continue-game" class="primary" hidden>
+          <strong>Continue</strong
+          ><span id="continue-label" class="save-detail"></span></button
+        ><button data-start="story">
+          <strong>New game</strong
+          ><span
+            >A fresh plot of land. A few friends. Your own way forward.</span
+          ></button
+        ><button data-start="sandbox">
+          <strong>New sandbox</strong
+          ><span
+            >Room to experiment. Everything available, without the costs.</span
+          ></button
+        ><button id="continue-sandbox" hidden>
+          <strong>Continue sandbox</strong
+          ><span>Return to your saved playground.</span>
+        </button>
+      </div>
+
+      <a href="../library/">Browse the art collection ↗</a>
+      <p id="menu-status" role="status"></p>
+    </main>
+    <div class="corner">SOLAR FRIENDS<small>v2</small></div>
+    <dialog id="world-setup" aria-labelledby="setup-title">
+      <h2 id="setup-title">Your village</h2>
+      <p>Choose the land and the circumstances your friends arrive with.</p>
+      <div class="setup-layout"><div>
+      <label>Starting point<select id="setup-preset"><option value="custom">Custom</option><option value="gentle">Gentle beginning</option><option value="scratch">Starting from scratch</option><option value="remote">Remote homestead</option></select></label>
+      <div id="setup-fields"></div>
+      </div><div><canvas id="land-preview" width="400" height="400" aria-label="Terrain and river preview"></canvas><p>Top-down land preview · darker ground is higher</p>
+      <label>Map seed<input id="setup-seed" type="number" min="1" max="4294967295" step="1" required></label><button id="reroll-land">New plot ↻</button><p id="setup-summary"></p></div></div>
+      <p id="setup-error" role="status"></p><div class="setup-actions"><button id="setup-back">Back</button><button id="setup-start">Start village</button></div>
+    </dialog>
+    <dialog id="replace-save">
+      <h2>Start a fresh village?</h2>
+      <p id="replace-copy"></p>
+      <button id="cancel-new">Keep my village</button
+      ><button id="confirm-new">Start fresh</button>
+    </dialog>
+    <script type="module" src="menu.js"></script>
+  </body>
+</html>

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solar Friends · v2 Land Preview</title>
+    <link rel="stylesheet" href="land.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "../workshop/vendor/three.module.js",
+          "three/addons/controls/OrbitControls.js": "../workshop/vendor/OrbitControls.js"
+        }
+      }
+    </script>
+  <link rel="stylesheet" href="../navigation.css">
+<script type="module" src="../navigation.js"></script>
+</head>
+  <body>
+    <canvas
+      id="land"
+      aria-label="64 by 64 cell isometric 3D land preview"
+      tabindex="0"
+    ></canvas>
+    <header>
+      <div class="emblem">SF</div>
+      <div>
+        <h1>The asset garden</h1>
+        <p>Solar Friends · v2 · editable 3D gallery</p>
+      </div>
+      <label>Terrain <select id="biome" aria-label="Terrain biome"></select></label>
+      <button id="landscape">Load biome landscape</button>
+
+    </header>
+    <aside id="inspector">
+      <span class="eyebrow">SCENE INSPECTOR</span>
+      <h2 id="object-name">Room to grow</h2>
+      <p id="object-description">
+        A 64 × 64 plot, with our first five props gathered at its center. Select
+        a prop to inspect it.
+      </p>
+      <dl>
+        <div>
+          <dt>Land</dt>
+          <dd>64 × 64 cells</dd>
+        </div>
+        <div>
+          <dt>Scale</dt>
+          <dd>128 × 128 metres</dd>
+        </div>
+        <div>
+          <dt>Preview</dt>
+          <dd>Live 3D · orthographic</dd>
+        </div>
+      </dl>
+      <div id="selection" hidden>
+        <p id="object-details"></p>
+        <div class="actions">
+          <button id="move">Move · M</button
+          ><button id="rotate-prop">Rotate · R</button
+          ><button id="duplicate">Duplicate</button
+          ><button id="delete">Delete</button
+          ><button id="place-copy">Place another</button
+          ><button id="clear">Deselect</button>
+        </div>
+        <form id="position-form">
+          <label
+            >Column<input
+              id="column"
+              type="number"
+              min="1"
+              max="64"
+              required /></label
+          ><label
+            >Row<input
+              id="row"
+              type="number"
+              min="1"
+              max="64"
+              required /></label
+          ><button>Apply position</button>
+        </form>
+      </div>
+      <section id="resident-controls" hidden>
+        <h3>Resident rehearsal</h3>
+        <label>Resident<select id="resident-choice"></select></label>
+        <label>Interaction<select id="interaction-choice"></select></label>
+        <div class="actions">
+          <button id="send-resident">Send resident</button
+          ><button id="preview-interaction">Preview nearby</button>
+        </div>
+        <p class="hint">
+          Preview nearby starts a short walk beside this prop. One rehearsal
+          runs at a time; editing stops it.
+        </p>
+      </section>
+      <div class="resident-playback">
+        <label
+          ><input id="animate-residents" type="checkbox" checked /> Animate
+          residents</label
+        ><button id="stop-interaction">Stop / reset pose</button>
+      </div>
+      <p id="resident-status" role="status" class="hint">
+        Select a bench, garden or workspace to try an interaction.
+      </p>
+      <p id="scene-count"></p>
+      <p id="save-state"></p>
+      <div class="actions">
+        <button id="undo" disabled>Undo</button
+        ><button id="redo" disabled>Redo</button
+        ><button id="export">Export scene</button
+        ><button id="import">Import scene</button
+        ><button id="reset">Restore gallery</button>
+      </div>
+      <input
+        id="scene-file"
+        type="file"
+        accept=".json,application/json"
+        hidden
+      />
+      <p class="hint">
+        Overlapping props is allowed for composing gardens and courtyards. Edits
+        stay inside the plot.
+      </p>
+    </aside>
+    <section id="library">
+      <h2>Asset library</h2>
+      <a href="../library/" class="collection-link"
+        >See the whole collection ↗</a
+      >
+      <input
+        id="search"
+        type="search"
+        placeholder="Find an asset…"
+        aria-label="Search assets"
+      /><select id="category" aria-label="Asset category">
+        <option value="">All categories</option>
+      </select>
+      <p class="hint">
+        Click to find a placed model. Deleted models can be placed again here.
+      </p>
+      <div class="asset-list" id="asset-list" aria-label="Asset library"></div>
+    </section>
+    <button id="cancel-place" hidden>Cancel placement · Esc</button>
+    <div id="toast" role="status">Preparing the clearing…</div>
+    <footer>
+      <div class="toolbar">
+        <button id="home" title="Return to the first model (Home)">
+          ⌂ Gallery</button
+        ><button id="overview">Whole plot</button><span class="divider"></span
+        ><button
+          id="left"
+          aria-label="Rotate camera left"
+          title="Rotate left (Q)"
+        >
+          ↶</button
+        ><span id="bearing">SE</span
+        ><button
+          id="right"
+          aria-label="Rotate camera right"
+          title="Rotate right (E)"
+        >
+          ↷</button
+        ><span class="divider"></span
+        ><button id="zoom-out" aria-label="Zoom out">−</button
+        ><button id="zoom-in" aria-label="Zoom in">+</button
+        ><span class="divider"></span
+        ><button id="grid" aria-pressed="false">Grid</button
+        ><button id="night" aria-pressed="false">Night</button>
+      </div>
+      <div class="readout">
+        <span>Drag to pan · Scroll to zoom · Q / E to turn</span
+        ><span id="coordinate">64 × 64 · 4,096 cells</span>
+      </div>
+    </footer>
+    <script type="module" src="land.js"></script>
+  </body>
+</html>

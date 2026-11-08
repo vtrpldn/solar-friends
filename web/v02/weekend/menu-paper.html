@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Solar Friends · Menu concept</title>
+    <script type="importmap">
+      { "imports": { "three": "../workshop/vendor/three.module.js" } }
+    </script>
+    <link rel="stylesheet" href="weekend.css" />
+    <link rel="stylesheet" href="menu-paper.css" />
+  </head>
+  <body>
+    <div class="art" aria-hidden="true">
+      <div class="sun"></div>
+      <div class="stem"><i></i><i></i><i></i><i></i></div>
+      <span class="art-caption">GROW SOMETHING GOOD</span>
+    </div>
+    <div class="frame" aria-hidden="true"></div>
+    <main class="welcome">
+      <header class="brand">
+        <span class="sun-mark" aria-hidden="true">✳</span
+        ><small>A LITTLE LAND. A LIFE TOGETHER.</small>
+        <h1>
+          Solar<br />
+          Friends
+        </h1>
+      </header>
+      <div class="menu-actions">
+        <button class="primary">
+          <span>Continue</span
+          ><small>Our little village · Day 12</small></button
+        ><button>New game</button><button>Sandbox</button
+        ><button class="settings">Settings</button>
+      </div>
+    </main>
+    <div class="corner">
+      <span>SOLAR FRIENDS</span><small>v2 · Menu concept</small>
+    </div>
+    <div class="preview-message" role="status" hidden>
+      Design preview only — your village is untouched.
+    </div>
+    <script type="module">
+      const n = Math.max(
+        1,
+        Math.min(
+          5,
+          Number(new URLSearchParams(location.search).get("concept")) || 1,
+        ),
+      );
+      document.body.dataset.concept = n;
+      document.querySelectorAll(".menu-actions button").forEach(
+        (b) =>
+          (b.onclick = () => {
+            document.querySelector(".preview-message").hidden = false;
+          }),
+      );
+    </script>
+  </body>
+</html>

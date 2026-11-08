@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {createResourceTrends,formatTrend} from '../web/v02/weekend/resource-trends.js';
+const trend=createResourceTrends(),hour=60/.45;
+assert.equal(trend(0,{wood:100}),null);
+assert.equal(trend(hour/2,{wood:90}).wood,-20);
+assert.equal(trend(hour,{wood:80}).wood,-20);
+assert.equal(trend(1.5*hour,{wood:90}).wood,0);
+assert.equal(trend(2*hour,{wood:100}).wood,20);
+assert.equal(trend(0,{wood:100}),null);
+assert.equal(formatTrend(-.001),'0/h');
+const irregular=createResourceTrends();irregular(0,{wood:0});irregular(hour*.8,{wood:8});assert(Math.abs(irregular(hour*1.3,{wood:13}).wood-10)<1e-9);
+console.log('PASS: warmup, hourly normalization, interpolated rolling baseline, time reset and rounding.');

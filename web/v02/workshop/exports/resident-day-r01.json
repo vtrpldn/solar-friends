@@ -1,0 +1,84 @@
+{
+  "schema": "solar-friends.sprite-study.v1",
+  "asset": "resident",
+  "revision": 1,
+  "status": "material-study-awaiting-art-review",
+  "light": "day",
+  "units": "metres",
+  "cellMetres": 2,
+  "pixelsPerMetre": 48,
+  "camera": {
+    "projection": "orthographic",
+    "groundRatio": "2:1",
+    "elevationDegrees": 30,
+    "azimuthDegrees": 45
+  },
+  "sheet": {
+    "width": 2048,
+    "height": 512
+  },
+  "frames": [
+    {
+      "rotation": 0,
+      "x": 0,
+      "y": 0,
+      "width": 512,
+      "height": 512,
+      "anchor": [
+        256,
+        384
+      ],
+      "footprint": [
+        1,
+        1
+      ]
+    },
+    {
+      "rotation": 90,
+      "x": 512,
+      "y": 0,
+      "width": 512,
+      "height": 512,
+      "anchor": [
+        256,
+        384
+      ],
+      "footprint": [
+        1,
+        1
+      ]
+    },
+    {
+      "rotation": 180,
+      "x": 1024,
+      "y": 0,
+      "width": 512,
+      "height": 512,
+      "anchor": [
+        256,
+        384
+      ],
+      "footprint": [
+        1,
+        1
+      ]
+    },
+    {
+      "rotation": 270,
+      "x": 1536,
+      "y": 0,
+      "width": 512,
+      "height": 512,
+      "anchor": [
+        256,
+        384
+      ],
+      "footprint": [
+        1,
+        1
+      ]
+    }
+  ],
+  "source": "models.js",
+  "threeRevision": "187"
+}

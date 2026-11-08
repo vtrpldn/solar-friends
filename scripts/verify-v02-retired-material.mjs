@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {createWeekend,save,restore,MATERIALS,PROJECTS} from '../web/v02/weekend/simulation.js';
+import {ASSETS} from '../web/v02/library/catalog.js';
+assert(!MATERIALS.salvage);assert(!PROJECTS['supply-4']);assert(!ASSETS.some(a=>a.id==='supply-4'||a.id==='resource-salvage'));
+const old=createWeekend();old.materials.salvage=12;
+old.projects.push({id:old.nextId++,key:'supply-4',x:45,z:45,work:120,delivered:1});
+old.operations=[{id:1,site:old.projects[0].id,recipe:'salvage',work:0,done:false}];
+const loaded=restore(save(old));assert(loaded);assert(!('salvage' in loaded.materials));assert.equal(loaded.projects.length,0);assert.equal(loaded.operations.length,0);
+const trip=createWeekend();trip.trip={person:trip.people[0].id,material:'salvage',left:30,vehicle:0,phase:'away'};
+const money=trip.money;const returned=restore(save(trip));assert(returned);assert.equal(returned.trip,null);assert.equal(returned.money,money+30);
+console.log('PASS: resource and site removed; old stock, jobs, sites and paid town trips migrate.');

@@ -8,9 +8,11 @@
     "dev:check": "node scripts/dev-check.mjs",
     "dev:browser": "node scripts/dev-check.mjs --browser-only",
     "dev:serve": "node scripts/serve.mjs",
-    "dev:check-iteration": "node scripts/check-iteration.mjs"
+    "dev:check-iteration": "node scripts/check-iteration.mjs",
+    "build:site": "node scripts/build-site.mjs"
   },
   "devDependencies": {
-    "playwright": "1.62.1"
+    "playwright": "1.62.1",
+    "three": "0.187.0"
   }
 }

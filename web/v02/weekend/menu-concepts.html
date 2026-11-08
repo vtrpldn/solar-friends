@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Solar Friends · Menu directions</title>
+    <script type="importmap">
+      { "imports": { "three": "../workshop/vendor/three.module.js" } }
+    </script>
+    <link rel="stylesheet" href="weekend.css" />
+    <link rel="stylesheet" href="menu-concepts.css" />
+  </head>
+  <body>
+    <iframe id="concept" title="Main menu design preview"></iframe>
+    <nav class="concept-picker" aria-label="Menu design variations">
+      <div>
+        <small>ART DIRECTION</small><strong>Choose your welcome</strong>
+      </div>
+      <div class="concept-tabs">
+        <button data-concept="1">01 · Village Morning</button
+        ><button data-concept="2">02 · The Gate</button
+        ><button data-concept="3">03 · Field Notes</button
+        ><button data-concept="4">04 · Blue Hour</button
+        ><button data-concept="5">05 · Postcard</button>
+      </div>
+      <p id="description"></p>
+    </nav>
+    <script type="module">
+      const descriptions = [
+        "An open village view, generous lettering and a quiet left-hand menu.",
+        "A timber welcome sign and carved wooden choices at the entrance to the village.",
+        "A cream field book beside the land: practical, personal and quietly tactile.",
+        "A lantern-lit village at dusk, with a restrained menu and warm windows.",
+        "A framed view of your future village, with the title above and choices along the bottom.",
+      ];
+      function show(n) {
+        document.querySelector("#concept").src =
+          `menu-concept.html?concept=${n}`;
+        document
+          .querySelectorAll("[data-concept]")
+          .forEach((b) =>
+            b.setAttribute("aria-pressed", String(+b.dataset.concept === n)),
+          );
+        document.querySelector("#description").textContent =
+          descriptions[n - 1];
+        history.replaceState(null, "", `?concept=${n}`);
+      }
+      document
+        .querySelectorAll("[data-concept]")
+        .forEach((b) => (b.onclick = () => show(+b.dataset.concept)));
+      show(
+        Math.max(
+          1,
+          Math.min(
+            5,
+            Number(new URLSearchParams(location.search).get("concept")) || 1,
+          ),
+        ),
+      );
+    </script>
+  </body>
+</html>

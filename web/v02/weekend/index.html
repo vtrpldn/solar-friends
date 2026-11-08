@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Solar Friends · Our village</title>
+    <script>
+      const route = new URLSearchParams(location.search);
+      if (
+        !route.has("mode") &&
+        !["wildlife-preview", "arrival-preview", "utilities-preview", "rest-preview", "needs-preview"].some((k) =>
+          route.has(k),
+        )
+      )
+        location.replace("./menu.html");
+    </script>
+    <link rel="stylesheet" href="weekend.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "../workshop/vendor/three.module.js",
+          "three/addons/controls/OrbitControls.js": "../workshop/vendor/OrbitControls.js"
+        }
+      }
+    </script>
+  </head>
+  <body data-tray="closed">
+    <canvas
+      id="world"
+      aria-label="Our land. Drag to pan, right-drag to orbit. Click a grid square to place a project."
+      tabindex="0"
+    ></canvas>
+    <header>
+      <div id="supplies" aria-label="Community supplies"></div>
+      <div class="time">
+        <span id="clock"></span>
+        <div>
+          <button id="pause" aria-label="Pause simulation">Ⅱ</button
+          ><button id="speed">1×</button>
+        </div>
+      </div>
+    </header>
+      <aside id="terrain-panel" class="paper" hidden>
+        <button class="panel-close" data-close-panel aria-label="Close terrain tools">×</button>
+        <h2>Shape the land</h2>
+        <p>Instant and free. Click the ground to apply a brush.</p>
+        <label for="terrain-tool">Tool</label>
+        <select id="terrain-tool"><option value="raise">Raise</option><option value="lower">Lower</option><option value="flatten">Flatten</option><option value="smooth">Smooth</option></select>
+        <label for="terrain-radius">Brush radius</label>
+        <select id="terrain-radius"><option value="4">Small · 2 cells</option><option value="8" selected>Medium · 4 cells</option><option value="12">Large · 6 cells</option></select>
+        <p id="terrain-level">Flatten uses the height of your first click.</p>
+        <button id="terrain-pick">Pick a new flatten height</button>
+        <button id="terrain-undo" disabled>Undo terrain edit</button>
+        <p class="hint">Riverbanks, roads, supplies and foundations stay protected. Esc closes these tools.</p>
+      </aside>
+
+    <aside id="projects-panel" class="paper" hidden>
+      <button class="panel-close" data-close-panel aria-label="Close projects">
+        ×</button
+      ><small>VILLAGE WORK</small>
+      <h2>Your projects</h2>
+      <div id="tasks"></div>
+      <details id="completed-panel" hidden>
+        <summary id="completed-title">Around the village</summary>
+        <div id="completed-tasks"></div>
+      </details>
+      <details>
+        <summary>Recent events</summary>
+        <ol id="log"></ol>
+      </details>
+    </aside>
+    <dialog id="people" aria-labelledby="residents-title">
+      <button class="panel-close" data-close-panel aria-label="Close residents">
+        ×</button
+      ><small>♡ OUR LITTLE CREW</small><h2 id="residents-title">Our residents</h2><p class="hint">Choose a friend to see how they’re doing. · Game paused</p>
+      <div class="residents-layout"><div id="roster"></div><div id="resident-detail"></div></div>
+    </dialog>
+    <section id="rain" class="paper" hidden>
+      <small>A CHANGE IN THE WEATHER</small>
+      <h2>Our supplies are getting wet.</h2>
+      <p>
+        The low ground near the entrance collects runoff. We can keep working,
+        but let’s sort this out before evening.
+      </p>
+      <button id="boards">Raise supplies · 2 timber</button
+      ><button id="uphill">Move them uphill · free</button>
+    </section>
+    <section id="selection" class="paper" hidden>
+      <img id="selected-art" class="selection-art" alt="" />
+      <small id="selected-state"></small>
+      <h2 id="selected-name"></h2>
+      <p id="building-service"></p>
+      <div id="production-controls">
+        <label for="production">Resident work</label
+        ><select id="production"></select
+        ><button id="queue-production">Start batch</button
+        ><button id="repeat-production">Keep 24 in stock</button>
+      </div>
+      <details class="building-notes">
+        <summary>Materials &amp; building notes</summary>
+        <p id="selected-desc"></p>
+      </details>
+      <button id="toggle-building">Switch off</button>
+      <button id="priority">Do this next</button
+      ><button id="focus-selection" title="F">Find in village</button
+      ><button id="copy-building">Build another</button
+      ><button id="move">Move building</button
+      ><button id="close-selection" aria-label="Close project details">
+        ×
+      </button>
+    </section>
+    <footer>
+      <section id="build" hidden>
+        <div class="build-toolbar">
+          <button id="sandbox-instant" hidden aria-pressed="true">
+            Instant build: on
+          </button>
+          <label for="build-search">⌂ Let’s build</label
+          ><select id="build-category" hidden></select
+          ><input
+            id="build-search"
+            type="search"
+            placeholder="Find something to build…"
+            aria-label="Find a building"
+          /><button id="auto-buy" aria-pressed="true" title="Automatically purchase missing building materials when savings allow.">Auto-buy: on</button><button id="toggle-build-list">Close catalog</button>
+        </div>
+        <div class="build-browser"><nav id="build-categories" aria-label="Building categories"></nav><div class="build-results"><div id="build-count" aria-live="polite"></div><div id="build-list"></div><p id="build-empty" hidden>No buildings found. Try a name or purpose, like water or food.</p></div></div>
+      </section>
+      <button id="rotate-placement" hidden>Rotate · R · 0°</button>
+      <button id="cancel" hidden>Cancel placement · Esc</button>
+      <div id="message" role="status">
+        Click clear ground to pitch your tents.
+      </div>
+      <nav id="village-actions" aria-label="Village actions" hidden>
+        <button
+          data-panel-toggle="build"
+          aria-controls="build"
+          aria-expanded="false"
+        >
+          ⌂ Build
+        </button>
+        <button
+          data-panel-toggle="projects-panel"
+          aria-controls="projects-panel"
+          aria-expanded="false"
+        >
+          ▤ Projects
+        </button>
+        <button
+          data-panel-toggle="people"
+          aria-controls="people"
+          aria-expanded="false"
+        >
+          ♡ Residents
+        </button>
+        <button data-panel-toggle="terrain-panel" aria-controls="terrain-panel" aria-expanded="false">△ Terrain</button>
+        <span class="dock-divider"></span>
+        <button data-manage="resources">▰ Resources</button
+        ><button data-manage="water">♦ Water</button
+        ><button data-manage="power">ϟ Power</button>
+      <span class="dock-divider" aria-hidden="true"></span>
+      <details class="view-menu">
+        <summary>View &amp; options</summary>
+        <div class="controls">
+          <div class="view-control-row camera-row">
+          <details class="controls-help">
+            <summary aria-label="Camera controls">?</summary>
+            <p>
+              <kbd>W A S D</kbd> Move around<br /><kbd>Q / E</kbd> Turn the
+              view<br />Scroll to zoom · Drag to pan<br /><kbd>Space</kbd> Pause
+              / resume<br /><kbd>B</kbd> Build · <kbd>G</kbd> Grid ·
+              <kbd>F</kbd> Focus<br /><kbd>R</kbd> Rotate building ·
+              <kbd>Shift + R</kbd> Reverse<br /><kbd>Shift-click</kbd> Repeat
+              building / extend straight road<br /><kbd>Esc</kbd> Cancel
+              placement / close panel
+            </p>
+          </details>
+          <button id="rotate-left" aria-label="Rotate camera left" title="Q">
+            ↶</button
+          ><button id="rotate-right" aria-label="Rotate camera right" title="E">
+            ↷</button
+          ><button id="zoom-out" aria-label="Zoom out">−</button
+          ><button id="zoom-in" aria-label="Zoom in">+</button
+          ></div><div class="view-control-row location-row"><button id="home" title="Home · Center on camp">⌂ Camp</button
+          ><button id="river-view">River bend</button
+          ><button id="grid">Grid</button
+          ></div><div class="view-control-row session-row"><button id="restart">New village</button
+          ><button id="main-menu">Main menu</button>
+          </div><a href="../library/">Art collection ↗</a>
+          <fieldset class="audio-controls"><legend>Sound</legend>
+            <label for="audio-music">Music <input id="audio-music" type="range" min="0" max="100" step="1" aria-label="Music volume" /></label>
+            <label for="audio-effects">Interaction sounds <input id="audio-effects" type="range" min="0" max="100" step="1" aria-label="Interaction sounds volume" /></label>
+            <small>Slide to zero to mute.</small>
+          </fieldset>
+        </div>
+      </details>
+      </nav>
+    </footer>
+    <dialog id="management" aria-labelledby="management-title">
+      <div class="management-heading">
+        <div>
+          <small>YOUR VILLAGE ALMANAC</small>
+          <h2 id="management-title">Resources</h2>
+        </div>
+        <button id="close-management" aria-label="Close management screen">
+          ×
+        </button>
+      </div>
+      <nav class="management-tabs" aria-label="Management screens">
+        <button data-manage="resources">▰ Resources</button
+        ><button data-manage="water">♦ Water</button
+        ><button data-manage="power">ϟ Power</button
+        ><span>Ⅱ Village paused while you plan</span>
+      </nav>
+      <p id="management-intro"></p>
+      <div id="management-stats" class="management-stats"></div>
+      <div class="management-layout">
+        <div class="management-main">
+          <section id="resource-screen">
+            <div class="management-section-title">
+              <h3>In our stores</h3>
+              <input
+                id="resource-search"
+                type="search"
+                placeholder="Find a resource…"
+                aria-label="Find a resource"
+              />
+            </div>
+            <div id="resource-grid"></div>
+            <h3>Making things together</h3>
+            <div id="production-sites"></div>
+          </section>
+          <section id="network-screen" hidden>
+            <section id="grid-power-panel" class="network-node" hidden>
+              <h3>Electricity from town</h3>
+              <p id="grid-power-status"></p>
+              <p class="hint">Your own generation and batteries come first. The grid covers shortages up to 4 kW, at R$1.20/kWh. No standing charge. Imports stop when savings run out.</p>
+              <button id="toggle-grid-power" type="button">Disconnect grid power</button>
+            </section>
+            <h3 id="network-title">Our network</h3>
+            <div id="network-nodes"></div>
+            <h3>Connections</h3>
+            <div id="utility-links"></div>
+          </section>
+        </div>
+        <aside class="management-side">
+          <section id="pantry-panel">
+            <h3>A trip to town</h3>
+            <p id="inventory" hidden></p>
+            <label for="purchase">Bring back from town</label
+            ><select id="purchase"></select
+            ><button id="town">Send a supply run</button
+            ><button id="sell">Sell one batch</button>
+            <p id="trip" class="hint"></p>
+            <p class="hint">
+              A resident drives to town and returns with your purchase. Surplus
+              sells immediately for half its purchase price.
+            </p>
+          </section>
+          <section id="utility-panel" hidden>
+            <h3 id="connection-title">Connect the village</h3>
+            <p id="utility-summary" hidden></p>
+            <label for="utility-from">From</label
+            ><select id="utility-from"></select>
+            <label for="utility-to">To</label
+            ><select id="utility-to"></select>
+            <label for="utility-kind">Connection / cargo</label
+            ><select id="utility-kind">
+              <option value="power">Power cable</option>
+              <option value="fresh">Fresh water</option>
+              <option value="irrigation">Irrigation water</option>
+              <option value="greywater">Greywater</option>
+              <option value="sewage">Sealed sewage</option>
+            </select>
+            <button id="connect-utility">Install connection</button
+            ><button id="haul-water">Carry 12 water</button>
+            <p class="hint" id="connection-hint">
+              Pipes need a pump and power at the source. River water must be
+              filtered by a powered cistern. Greywater goes to reed beds; sewage
+              goes to a biodigester or banana bed.
+            </p>
+          </section>
+        </aside>
+      </div>
+      <div id="management-message" role="status">
+        Choose a resource or building to get started.
+      </div>
+    </dialog>
+    <dialog id="reset-dialog">
+      <h2>Start a new weekend?</h2>
+      <p>
+        This starts a fresh camp and replaces your current village. Ready for a
+        new adventure?
+      </p>
+      <button id="confirm-reset">Start again</button
+      ><button id="keep">Keep this camp</button>
+    </dialog>
+    <script type="module" src="game.js"></script>
+  </body>
+</html>

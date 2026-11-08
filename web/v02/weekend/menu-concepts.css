@@ -1,0 +1,67 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #eee7d5;
+  color: #354c3c;
+}
+#concept {
+  border: 0;
+  position: absolute;
+  inset: 0 0 116px;
+  width: 100%;
+  height: calc(100% - 116px);
+}
+.concept-picker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 116px;
+  box-sizing: border-box;
+  background: #f7f1e2;
+  border-top: 1px solid #b9b49e;
+  padding: 17px 28px;
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  gap: 8px 25px;
+}
+.concept-picker small {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  margin-bottom: 5px;
+}
+.concept-picker strong {
+  font-size: 17px;
+}
+.concept-tabs {
+  display: flex;
+  gap: 8px;
+  align-items: start;
+}
+.concept-tabs button {
+  flex: 1;
+  border: 1px solid #b2b99f;
+  border-radius: 7px;
+  background: transparent;
+  box-shadow: none;
+  color: #354c3c;
+  font-size: 12px;
+  padding: 10px 8px;
+  white-space: nowrap;
+}
+.concept-tabs button[aria-pressed="true"] {
+  background: #3e5845;
+  color: #fff6dd;
+  border-color: #3e5845;
+}
+.concept-picker p {
+  grid-column: 2;
+  margin: 0;
+  font-size: 12px;
+  color: #64705c;
+}
+button:focus-visible {
+  outline: 3px solid #b98241;
+  outline-offset: 3px;
+}
