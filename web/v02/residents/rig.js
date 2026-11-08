@@ -48,7 +48,7 @@ export function createResident(id = "resident") {
   }
   cylinder(hips, 0.075, 0.08, 0.12, "skin", 0, 0.47, 0, 6);
   ball(head, 0.235, "skin", 0, 0, 0, [0.91, 1.02, 0.88], 1);
-  ball(head, 0.238, "hair", 0, 0.08, -0.035, [0.91, 0.62, 0.88], 0);
+  if(look.hair!=="bun") ball(head, 0.238, "hair", 0, 0.08, -0.035, [0.91, 0.62, 0.88], 0);
   for (const s of [-1, 1]) {
     ball(head, 0.018, "hair", s * 0.075, 0.025, 0.192, [1, 1.15, 0.5], 0);
     ball(head, 0.046, "skin", s * 0.205, 0, -0.005, [0.6, 1, 0.65], 0);
@@ -87,8 +87,14 @@ export function createResident(id = "resident") {
       );
   }
   if (look.hair === "bun") {
-    ball(hairstyle, 0.13, "hair", 0, 0.14, -0.2, [1, 1, 1], 0);
-    cylinder(hairstyle, 0.218, 0.218, 0.055, "tile", 0, 0.13, -0.02, 8);
+    // A low bun joins the back of a fitted hair cap; the scarf follows
+    // the forehead rather than forming a flat hat across the scalp.
+    const cap=new THREE.Mesh(new THREE.SphereGeometry(.247,8,3,0,Math.PI*2,0,Math.PI*.5),new THREE.MeshStandardMaterial({color:0x3a2a23,roughness:1}));
+    cap.scale.set(.93,1,.91);cap.position.set(0,.06,-.018);hairstyle.add(cap);
+    ball(hairstyle, 0.105, "hair", 0, 0.015, -0.235, [1, .95, .85], 0);
+    const scarf=new THREE.Mesh(new THREE.TorusGeometry(.207,.025,3,10,Math.PI*1.3),new THREE.MeshStandardMaterial({color:0xb87351,roughness:1}));
+    scarf.rotation.x=Math.PI/2;scarf.rotation.z=-Math.PI*.15;
+    scarf.position.set(0,.105,-.01);hairstyle.add(scarf);
   }
   if (look.hair === "curls" || look.hair === "puffs") {
     for (const x of [-1, 1])
