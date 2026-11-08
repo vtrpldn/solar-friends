@@ -1,3 +1,4 @@
+import { LIVESTOCK } from "./livestock.js";
 import { construction } from "./construction.js";
 import { createResident, RESIDENT_IDS } from "../residents/rig.js";
 import * as THREE from "three";
@@ -1844,6 +1845,7 @@ for(const def of ASSETS.filter(a=>['Homes','Buildings'].includes(a.category)))
     add(`${def.id}-construction-${stage}`,`${def.name} · ${stage?'assembly':'groundwork'}`,"Construction",def.footprint,()=>construction(def,stage));
     ASSETS.at(-1).constructionOf=def.id;
   }
+for (const animal of LIVESTOCK) add(animal.id,animal.name,"Animals",[1,1],animal.build);
 export const CATEGORIES = [...new Set(ASSETS.map((a) => a.category))];
 
 // Bake static recipe pieces into one draw per material. This preserves the exact

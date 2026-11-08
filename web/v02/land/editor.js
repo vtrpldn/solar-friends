@@ -49,8 +49,8 @@ export function gallery() {
   return ASSETS.map((a, i) => ({
     id: `gallery-${a.id}`,
     asset: a.id,
-    column: 2 + (i % 15) * 4,
-    row: 2 + Math.floor(i / 15) * 4,
+    column: (i % 16) * 4,
+    row: Math.floor(i / 16) * 4,
     rotation: 0,
     label: a.name,
   }));
