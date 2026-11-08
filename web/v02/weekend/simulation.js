@@ -1,3 +1,4 @@
+import { accessRoadAt } from "./road-layout.js";
 import { ARRIVAL_DURATION, ARRIVAL_SPOTS } from "./arrival.js";
 import { riverBankAt } from "./river-layout.js";
 // A self-contained v0.2 prototype. Time is measured in active simulation seconds.
@@ -130,6 +131,10 @@ export function placementError(s, key, x, z, ignore = null) {
   if (!def || !Number.isInteger(x) || !Number.isInteger(z))
     return "Choose a grid square.";
   const [w, d] = def.size;
+  for (let dx = 0; dx < w; dx++)
+    for (let dz = 0; dz < d; dz++)
+      if (accessRoadAt(x + dx, z + dz, 1))
+        return "Keep the access road and parking clearing open.";
   for (let dx = 0; dx < w; dx++)
     for (let dz = 0; dz < d; dz++)
       if (riverBankAt(x + dx, z + dz, 1))

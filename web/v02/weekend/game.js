@@ -1,3 +1,4 @@
+import { createAccessRoad } from "./access-road.js";
 import { captureMotion, interpolateMotion } from "./presentation.js";
 import { installCameraNavigation } from "./camera-navigation.js";
 import { createJimny } from "../library/vehicles.js";
@@ -107,6 +108,7 @@ const ground = new THREE.Mesh(
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
+scene.add(compactModel(createAccessRoad()));
 const river = createRiver();
 scene.add(compactModel(river.root), river.current);
 const lowSpot = new THREE.Mesh(

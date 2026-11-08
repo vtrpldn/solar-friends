@@ -186,3 +186,23 @@ assert.equal(arrivalPose(9, 3).visible, true);
 console.log(
   "PASS: two-vehicle clearance and second-car disembarkation timing.",
 );
+const { accessRoadAt } = await import("../web/v02/weekend/road-layout.js");
+for (let t = 0; t <= 17; t += 0.25)
+  for (const index of [0, 1]) {
+    const pose = vehiclePose(t, index);
+    for (const dx of [-1.1, 1.1])
+      assert(
+        accessRoadAt((pose.x + dx) / 2 + 32, pose.z / 2 + 32),
+        "Both SUVs stay on the access road",
+      );
+  }
+const entranceCamp = createWeekend();
+chooseCamp(entranceCamp, "clearing");
+assert.match(plan(entranceCamp, "water", 32, 22), /access road/);
+assert(
+  accessRoadAt((1.1 - 7) / 2 + 32, 0),
+  "Access road reaches the northern plot boundary",
+);
+console.log(
+  "PASS: boundary connection, vehicle alignment and access-road construction protection.",
+);

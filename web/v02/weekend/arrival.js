@@ -1,3 +1,4 @@
+import { roadCenter } from "./road-layout.js";
 export const ARRIVAL_SPOTS = [
   [30, 24.7],
   [30.8, 25.2],
@@ -15,7 +16,7 @@ export function vehiclePose(elapsed, index) {
   const remaining = 1 - smooth((elapsed - index * 2) / PARK_TIME);
   const parkedX = index ? 3.2 : -1;
   return {
-    x: parkedX - 7 * remaining * remaining,
+    x: roadCenter(-22 - 36 * remaining) + parkedX - 1.1,
     z: -22 - 36 * remaining,
     yaw: Math.atan2(14 * remaining, 36),
   };
