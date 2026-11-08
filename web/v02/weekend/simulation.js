@@ -12,7 +12,7 @@ import {
 import { expandMaterials, expandProjects, PROCESSES } from "./catalog-rules.js";
 import { accessRoadAt } from "./road-layout.js";
 import { ARRIVAL_DURATION, ARRIVAL_SPOTS } from "./arrival.js";
-import { riverBankAt } from "./river-layout.js";
+import { riverBankAt, riverAccess } from "./river-layout.js";
 // A self-contained v0.2 prototype. Time is measured in active simulation seconds.
 export const CAMPS = [
   {
@@ -374,10 +374,7 @@ function operationalWork(s, r, i, dt) {
     if (op.phase === "pickup") {
       let start;
       if (w.from === -1) {
-        const row = 32;
-        let x = 20;
-        while (x > 1 && !riverBankAt(x, row, 3)) x--;
-        start = { x: x + 2, z: row };
+        start = riverAccess(s.landSeed);
       } else start = utilitySpot(s, sys.nodes[w.from], r);
       if (!start) return false;
       r.action = "fetch-water";
@@ -522,9 +519,10 @@ export function requiredLoads(key) {
   );
 }
 export const NAMES = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
-export function createWeekend() {
+export function createWeekend(landSeed = 0) {
   return {
     version: 2,
+    landSeed,
     livestockUnits: 1,
     opening: { version: 1, townTrips: 0 },
     stage: "arrival",
@@ -575,8 +573,8 @@ export function createWeekend() {
     nextId: 1,
   };
 }
-export function createSandbox() {
-  const s = createWeekend();
+export function createSandbox(landSeed = 0) {
+  const s = createWeekend(landSeed);
   delete s.opening;
   s.mode = "sandbox";
   s.instantBuild = true;
@@ -646,11 +644,11 @@ export function placementError(s, key, x, z, ignore = null) {
         return "Keep the access road and parking clearing open.";
   for (let dx = 0; dx < w; dx++)
     for (let dz = 0; dz < d; dz++)
-      if (def.kind !== "hydro" && riverBankAt(x + dx, z + dz, 1))
+      if (def.kind !== "hydro" && riverBankAt(x + dx, z + dz, 1, s.landSeed))
         return "Keep projects back from the riverbank.";
   if (x < 2 || z < 2 || x + w > 62 || z + d > 62)
     return "Keep buildings inside the plot boundary.";
-  if (def.kind === "hydro" && !riverBankAt(x + w / 2, z + d / 2, 3))
+  if (def.kind === "hydro" && !riverBankAt(x + w / 2, z + d / 2, 3, s.landSeed))
     return "Place the river generator beside the river.";
   if (
     x <= s.stock.x &&
@@ -863,7 +861,7 @@ function blockedCamp(s) {
 }
 function occupied(s, x, z) {
   return (
-    riverBankAt(x, z, 0.5) ||
+    riverBankAt(x, z, 0.5, s.landSeed) ||
     blockedCamp(s).some((c) => c.x === x && c.z === z) ||
     s.projects.some(
       (p) =>
@@ -1750,6 +1748,13 @@ export function restore(text) {
     if (s.mode !== undefined && s.mode !== "sandbox" && s.mode !== "story")
       return null;
     if (s.instantBuild !== undefined && typeof s.instantBuild !== "boolean")
+      return null;
+    s.landSeed ??= 0;
+    if (
+      !Number.isInteger(s.landSeed) ||
+      s.landSeed < 0 ||
+      s.landSeed > 0xffffffff
+    )
       return null;
     const fresh = createWeekend();
     s.arrivalElapsed ??= ARRIVAL_DURATION;

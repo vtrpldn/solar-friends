@@ -1,13 +1,36 @@
-export function riverCenter(z) {
-  return -31 + 5 * Math.sin(z * 0.07) + 1.8 * Math.sin(z * 0.14);
-}
-export function riverWidth(z) {
+import { landParameters } from "./land-layout.js";
+export function riverCenter(z, seed = 0) {
+  if (!seed) return -31 + 5 * Math.sin(z * 0.07) + 1.8 * Math.sin(z * 0.14);
+  const p = landParameters(seed);
   return (
-    2.5 + 0.65 * Math.sin(z * 0.11) + 1.3 * Math.exp(-(((z - 13) / 9) ** 2))
+    p.offset +
+    p.bend * Math.sin(z * p.frequency + p.phase) +
+    Math.sin(z * 0.12 + p.phase)
   );
 }
-export function riverBankAt(column, row, margin = 0) {
+export function riverWidth(z, seed = 0) {
+  if (!seed)
+    return (
+      2.5 + 0.65 * Math.sin(z * 0.11) + 1.3 * Math.exp(-(((z - 13) / 9) ** 2))
+    );
+  const p = landParameters(seed);
+  return (
+    p.width +
+    0.5 * Math.sin(z * 0.08 + p.phase) +
+    0.8 * Math.exp(-(((z - 13) / 10) ** 2))
+  );
+}
+export function riverBankAt(column, row, margin = 0, seed = 0) {
   const z = (row - 32) * 2,
     x = (column - 32) * 2;
-  return Math.abs(x - riverCenter(z)) <= riverWidth(z) + 1.9 + margin;
+  return (
+    Math.abs(x - riverCenter(z, seed)) <= riverWidth(z, seed) + 1.9 + margin
+  );
+}
+export function riverAccess(seed = 0) {
+  if (!seed) return { x: 22, z: 32 };
+  return {
+    x: Math.ceil(32 + (riverCenter(0, seed) + riverWidth(0, seed) + 3) / 2),
+    z: 32,
+  };
 }

@@ -1,3 +1,5 @@
+import { freshLandSeed, landRandom } from "./land-layout.js";
+import { createTerrain } from "./terrain.js";
 import { RESOURCE_GROUPS } from "./resource-groups.js";
 import { createFire, animateFire } from "./fire.js";
 import { saveKey } from "./modes.js";
@@ -22,7 +24,7 @@ import {
   arrivalLaneAt,
 } from "./arrival.js";
 import { createRiver } from "./river.js";
-import { riverBankAt } from "./river-layout.js";
+import { riverBankAt, riverAccess } from "./river-layout.js";
 import { createTent } from "../library/camping.js";
 import { performanceReadout } from "./performance.js";
 import * as THREE from "three";
@@ -82,10 +84,11 @@ const arrivalPreview =
 let s = utilitiesPreview
   ? createUtilitiesPreview(
       new URLSearchParams(location.search).has("interactions"),
+      Number(new URLSearchParams(location.search).get("land-seed")) >>> 0,
     )
   : new URLSearchParams(location.search).get("mode") === "sandbox"
-    ? createSandbox()
-    : createWeekend();
+    ? createSandbox(freshLandSeed())
+    : createWeekend(arrivalPreview ? 0 : freshLandSeed());
 // Optional frozen lighting comparison, only in the unsaved utilities scene.
 const lightingPreview =
   utilitiesPreview && new URLSearchParams(location.search).has("lighting-hour");
@@ -172,15 +175,10 @@ function updateSunlight(time, dt) {
 }
 const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });
-const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(128, 128),
-  mat("#9fad72"),
-);
-ground.rotation.x = -Math.PI / 2;
-ground.receiveShadow = true;
+const ground = createTerrain(s.landSeed);
 scene.add(ground);
 scene.add(compactModel(createAccessRoad()));
-const river = createRiver();
+const river = createRiver(s.landSeed);
 scene.add(compactModel(river.root), river.current);
 const lowSpot = new THREE.Mesh(
   new THREE.CircleGeometry(4.4, 16),
@@ -228,14 +226,27 @@ const native = ASSETS.filter(
 ).map((a) => a.id);
 const scenery = new THREE.Group();
 scene.add(scenery);
+const sceneryRandom = landRandom(s.landSeed);
 for (let i = 0; i < 52; i++) {
-  const a = i * 2.3999,
-    r = 29 + (i % 5) * 5,
+  const a = i * 2.3999 + (s.landSeed ? sceneryRandom() * 0.5 : 0),
+    r = s.landSeed ? 30 + sceneryRandom() * 25 : 29 + (i % 5) * 5,
     x = 32 + (Math.cos(a) * r) / 2,
     z = 32 + (Math.sin(a) * r) / 2;
-  if (!riverBankAt(x, z, 2) && !arrivalLaneAt((x - 32) * 2, (z - 32) * 2))
+  if (
+    !riverBankAt(x, z, 2, s.landSeed) &&
+    !arrivalLaneAt((x - 32) * 2, (z - 32) * 2)
+  )
     scenery.add(
-      prop(native[i % Math.min(native.length, 8)] || "tree", x, z, i),
+      prop(
+        native[
+          s.landSeed
+            ? Math.floor(sceneryRandom() * Math.min(native.length, 8))
+            : i % Math.min(native.length, 8)
+        ] || "tree",
+        x,
+        z,
+        i,
+      ),
     );
 }
 for (const [x, z] of [
@@ -715,7 +726,7 @@ $("speed").onclick = () => {
   $("speed").textContent = `${speed}×`;
 };
 $("home").onclick = () => focus(CAMPS.find((c) => c.id === s.camp));
-$("river-view").onclick = () => focus({ x: 20, z: 38 });
+$("river-view").onclick = () => focus(riverAccess(s.landSeed));
 $("rotate-left").onclick = () => navigation.rotate(-Math.PI / 2);
 $("rotate-right").onclick = () => navigation.rotate(Math.PI / 2);
 $("zoom-in").onclick = () => navigation.zoom(1.2);

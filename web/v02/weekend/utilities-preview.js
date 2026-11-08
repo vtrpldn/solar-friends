@@ -10,8 +10,8 @@ import {
 } from "./simulation.js";
 import { syncInfrastructure } from "./infrastructure.js";
 // Isolated demonstration, never read from or persisted to a player's save.
-export function createUtilitiesPreview(interactions = false) {
-  const s = createWeekend();
+export function createUtilitiesPreview(interactions = false, landSeed = 0) {
+  const s = createWeekend(landSeed);
   s.arrivalElapsed = 17;
   chooseCamp(s, "clearing");
   s.time = 1100;

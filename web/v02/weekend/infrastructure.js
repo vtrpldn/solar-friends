@@ -1,3 +1,4 @@
+import { riverAccess } from "./river-layout.js";
 // v0.2 port of v0.1 electricity and water ownership rules. No renderer dependency.
 export const LIQUIDS = ["fresh", "irrigation", "greywater", "sewage"];
 export const POWER_LOAD = {
@@ -70,6 +71,7 @@ export function ensureInfrastructure(s) {
     enabled: true,
     power: 0,
   };
+  if (s.landSeed) Object.assign(sys.nodes[-1], riverAccess(s.landSeed));
   sys.nodes[0].x = s.stock.x;
   sys.nodes[0].z = s.stock.z;
   return sys;

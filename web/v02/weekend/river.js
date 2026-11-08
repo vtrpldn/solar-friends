@@ -2,7 +2,9 @@ import * as THREE from "three";
 // Metres in the scene, shared with placement and resident navigation through river-layout.js.
 import { riverCenter, riverWidth } from "./river-layout.js";
 export { riverCenter, riverWidth };
-export function createRiver() {
+export function createRiver(seed = 0) {
+  const center = (z) => riverCenter(z, seed);
+  const width = (z) => riverWidth(z, seed);
   const root = new THREE.Group(),
     materials = new Map();
   const material = (color) => {
@@ -23,10 +25,10 @@ export function createRiver() {
     for (let i = 0; i < 128; i++) {
       const za = -64 + i,
         zb = za + 1;
-      const xa = riverCenter(za),
-        xb = riverCenter(zb),
-        wa = riverWidth(za) + extra,
-        wb = riverWidth(zb) + extra;
+      const xa = center(za),
+        xb = center(zb),
+        wa = width(za) + extra,
+        wb = width(zb) + extra;
       positions.push(
         xa - wa,
         y,
@@ -69,7 +71,7 @@ export function createRiver() {
   for (let i = 0; i < 42; i++) {
     const z = -60 + i * 2.9,
       side = i % 2 ? 1 : -1,
-      x = riverCenter(z) + side * (riverWidth(z) + 0.65 + (i % 3) * 0.23);
+      x = center(z) + side * (width(z) + 0.65 + (i % 3) * 0.23);
     const rock = new THREE.Mesh(
       new THREE.IcosahedronGeometry(0.2 + (i % 4) * 0.12, 0),
       material(["#9a9d85", "#b8b69d", "#808e7b"][i % 3]),
@@ -88,7 +90,7 @@ export function createRiver() {
   );
   island.rotation.x = -Math.PI / 2;
   island.scale.set(1.1, 3, 1);
-  island.position.set(riverCenter(13) - 0.4, 0.09, 13);
+  island.position.set(center(13) - 0.4, 0.09, 13);
   island.receiveShadow = true;
   stones.add(island);
   for (let i = 0; i < 8; i++) {
@@ -96,11 +98,7 @@ export function createRiver() {
       new THREE.IcosahedronGeometry(0.25 + (i % 3) * 0.14, 0),
       material("#959b83"),
     );
-    rock.position.set(
-      riverCenter(13) - 0.6 + Math.sin(i) * 0.5,
-      0.28,
-      11 + i * 0.5,
-    );
+    rock.position.set(center(13) - 0.6 + Math.sin(i) * 0.5, 0.28, 11 + i * 0.5);
     rock.scale.y = 0.6;
     rock.castShadow = true;
     stones.add(rock);
@@ -109,7 +107,7 @@ export function createRiver() {
   for (let i = 0; i < 24; i++) {
     const z = -52 + i * 4.5,
       side = i % 2 ? 1 : -1,
-      x = riverCenter(z) + side * (riverWidth(z) + 1.3);
+      x = center(z) + side * (width(z) + 1.3);
     for (let j = 0; j < 4; j++) {
       const reed = new THREE.Mesh(
         new THREE.ConeGeometry(0.09, 0.65 + j * 0.15, 3),
@@ -145,7 +143,7 @@ export function createRiver() {
   function update(time) {
     for (let i = 0; i < 32; i++) {
       const z = ((i * 4 + time * 0.65) % 126) - 63,
-        x = riverCenter(z) + Math.sin(i * 2.4) * (riverWidth(z) - 1.3),
+        x = center(z) + Math.sin(i * 2.4) * (width(z) - 1.3),
         w = 0.35 + (i % 3) * 0.16;
       const points = [
         x - w,
