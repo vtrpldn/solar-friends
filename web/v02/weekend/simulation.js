@@ -585,6 +585,7 @@ export function blueprintPurchase(s, key, count = 1) {
   if (s.mode !== "sandbox") for (const [id, required] of Object.entries(PROJECTS[key].materials)) {
     const missing = Math.max(0, required * count - materialCount(s, id));
     if (!missing) continue;
+    if(s.autoBuy===false)return {items:{},cost:0,error:'Auto-buy is off. Gather or purchase the missing materials first.'};
     const item = MATERIALS[id];
     if (!item.quantity || !Number.isFinite(item.price)) return {items, cost: 0, error: `Produce ${item.name} locally first.`};
     items[id] = missing;

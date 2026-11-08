@@ -59,3 +59,11 @@ assert(!batch.projects[1].pendingMaterials,'one trip delivers both original orde
 assert(batch.projects[2].pendingMaterials,'later order waits for the next pickup');
 assert(batch.money<batchMoney);
 console.log('PASS: batching before departure, later-order queue and saved manifest validation.');
+
+const manual=fresh();manual.autoBuy=false;
+const original=JSON.stringify(manual);
+assert.match(plan(manual,'shelter',40,39),/Auto-buy is off/);
+assert.equal(JSON.stringify(manual),original,'disabled auto-buy must not spend or reserve anything');
+assert.equal(restore(save(manual)).autoBuy,false);
+manual.autoBuy=true;assert.equal(plan(manual,'shelter',40,39),'');
+console.log('PASS: auto-buy toggle prevents purchases, persists and can be re-enabled.');

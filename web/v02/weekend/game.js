@@ -1130,6 +1130,7 @@ $("main-menu").onclick = () => {
   persist();
   location.href = "./menu.html";
 };
+$("auto-buy").onclick=()=>{s.autoBuy=s.autoBuy===false;uiSignature='';persist();renderUI();};
 $("sandbox-instant").onclick = () => {
   s.instantBuild = s.instantBuild === false;
   uiSignature = "";
@@ -1461,6 +1462,10 @@ function renderUI() {
   const active = s.stage !== "arrival" && !s.arrivalAnimating;
   if(s.arrivalAnimating) message("Our friends are arriving…");
   else if(s.stage === "arrival") message("Click clear ground to pitch your tents.");
+  $("auto-buy").hidden=s.mode==='sandbox';
+  $("auto-buy").textContent=`Auto-buy: ${s.autoBuy===false?'off':'on'}`;
+  $("auto-buy").setAttribute('aria-pressed',String(s.autoBuy!==false));
+  $("auto-buy").classList.toggle('active',s.autoBuy!==false);
   $("sandbox-instant").hidden = s.mode !== "sandbox";
   $("sandbox-instant").textContent =
     `Instant buildings: ${s.instantBuild === false ? "off" : "on"}`;
@@ -1701,6 +1706,7 @@ function renderUI() {
     const purchase = blueprintPurchase(s, key);
     b.title = `${PROJECTS[key].description} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: R$${purchase.cost.toFixed(2)}. Resident pickup included.` : "All materials available."}`;
     b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? "Free"
+      : s.autoBuy===false && missing.length ? 'Missing materials'
       : purchase.cost ? `Auto-buy R$${purchase.cost.toFixed(2)}`
       : `${Object.values(PROJECTS[key].materials).reduce((sum, n) => sum + n, 0)} materials · ${PROJECTS[key].size.join("×")}`;
     b.classList.toggle("active", placing === key);
