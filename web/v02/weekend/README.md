@@ -16,3 +16,11 @@ Choose one of three camps, select a project, then click a clear grid square. Pro
 - Time pauses in hidden tabs. Saves use `solar-friends-v02-first-weekend-1` in local storage. The restart action never touches other modes.
 
 `simulation.js` contains serializable state and rules. `game.js` renders the scene and UI. Run `node scripts/verify-v02-weekend.mjs` from the repository root for deterministic playthroughs and regression checks.
+
+## Rendering checks
+
+Append `?performance` for a visible rolling frame-time and draw-call readout. Static scenery is batched by material; moving residents retain their joint hierarchy. Rest destinations are cached until the camp layout changes, and the journal refreshes only when its displayed values change.
+
+A local browser sample of the idle clearing measured 4,497 draw calls / about 45 fps before batching and 381 calls / about 96 fps afterward, with p95 frame intervals changing from 26 ms to 17 ms. These are local rolling samples, not hardware-independent benchmarks. Batching trades some fine-grained frustum culling for fewer submissions.
+
+The two ridge tents use actual fabric panels, open doors, tied flaps, poles, ropes, stakes and bedrolls. Each is 398 triangles before batching and approximately 1.54 m tall, with a 2.88 × 3.08 m extent including guy ropes.

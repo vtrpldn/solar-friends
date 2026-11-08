@@ -1,3 +1,4 @@
+import { createTent } from "./camping.js";
 import { LIVESTOCK } from "./livestock.js";
 import { construction } from "./construction.js";
 import { createResident, RESIDENT_IDS } from "../residents/rig.js";
@@ -1847,6 +1848,8 @@ for(const def of ASSETS.filter(a=>['Homes','Buildings'].includes(a.category)))
   }
 for (const animal of LIVESTOCK) add(animal.id,animal.name,"Animals",[1,1],animal.build);
 ASSETS.find(asset => asset.id === "piglet").revision = 2;
+add("canvas-tent-teal", "Sage canvas tent", "Props", [2, 2], () => createTent(0));
+add("canvas-tent-ochre", "Ochre canvas tent", "Props", [2, 2], () => createTent(1));
 export const CATEGORIES = [...new Set(ASSETS.map((a) => a.category))];
 
 // Bake static recipe pieces into one draw per material. This preserves the exact

@@ -1,6 +1,13 @@
+import { createTent } from "../library/camping.js";
+import { performanceReadout } from "./performance.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { createAsset, ASSETS, disposeModel } from "../library/catalog.js";
+import {
+  compactModel,
+  createAsset,
+  ASSETS,
+  disposeModel,
+} from "../library/catalog.js";
 import { createResident, animateResident } from "../residents/rig.js";
 import {
   CAMPS,
@@ -109,7 +116,7 @@ function world(x, z) {
   return new THREE.Vector3((x - 32) * 2, 0, (z - 32) * 2);
 }
 function prop(id, x, z, rotation = 0) {
-  const g = createAsset(id);
+  const g = compactModel(createAsset(id));
   g.position.copy(world(x, z));
   g.rotation.y = rotation;
   scene.add(g);
@@ -122,21 +129,25 @@ const native = ASSETS.filter(
     !/growing|young|sapling|seedling|sprout/.test(a.id) &&
     a.footprint[0] >= 2,
 ).map((a) => a.id);
+const scenery = new THREE.Group();
+scene.add(scenery);
 for (let i = 0; i < 52; i++) {
   const a = i * 2.3999,
     r = 29 + (i % 5) * 5,
     x = 32 + (Math.cos(a) * r) / 2,
     z = 32 + (Math.sin(a) * r) / 2;
-  prop(native[i % Math.min(native.length, 8)] || "tree", x, z, i);
+  scenery.add(prop(native[i % Math.min(native.length, 8)] || "tree", x, z, i));
 }
 for (const [x, z] of [
   [25, 29],
   [25, 33],
   [27, 28],
 ])
-  prop("tree", x, z);
+  scenery.add(prop("tree", x, z));
 const entrance = prop("produce-crates", s.stock.x, s.stock.z);
-prop("garden-bench", 30, 24);
+scenery.add(prop("garden-bench", 30, 24));
+scene.add(compactModel(scenery));
+scene.remove(scenery);
 // A simple arrival car and camping tents use the same flat materials and metre scale.
 function box(g, w, h, d, color, x, y, z) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color));
@@ -173,14 +184,8 @@ function drawCamp() {
   const c = CAMPS.find((c) => c.id === s.camp);
   campGroup.position.copy(world(c.x, c.z));
   for (let i = 0; i < 2; i++) {
-    const tent = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.25, 1.25, 2.5, 3),
-      mat(i ? "#c69855" : "#b07853"),
-    );
-    tent.rotation.z = Math.PI / 2;
-    tent.rotation.y = Math.PI / 2;
-    tent.position.set(i * 3, 1, -3);
-    tent.castShadow = true;
+    const tent = compactModel(createTent(i));
+    tent.position.set(i * 3, 0, -3);
     campGroup.add(tent);
   }
 }
@@ -522,7 +527,29 @@ const actionText = {
   meal: "Sharing our first evening",
   wash: "Washing up at the water tank",
 };
+let uiSignature = "";
 function renderUI() {
+  const signature = JSON.stringify([
+    s.stage,
+    s.camp,
+    s.money,
+    s.wood,
+    Math.floor(s.time * 0.45),
+    s.trip && Math.ceil(s.trip.left),
+    s.rainSeen,
+    s.rainResolved,
+    selected,
+    placing,
+    endingDismissed,
+    s.log,
+    s.people.map((r) => [r.action, Math.round(r.energy)]),
+    s.projects.map((p) => [
+      p.id,
+      Math.floor((p.work / PROJECTS[p.key].work) * 100),
+    ]),
+  ]);
+  if (signature === uiSignature) return;
+  uiSignature = signature;
   const active = s.stage !== "arrival";
   $("arrival").hidden = active;
   $("journal").hidden = !active;
@@ -621,6 +648,7 @@ function renderUI() {
 }
 renderUI();
 if (s.stage !== "arrival") message(s.log[0] || "Welcome back to your camp.");
+const recordPerformance = performanceReadout(renderer);
 let previous = performance.now(),
   accumulator = 0,
   latestMessage = s.log[0];
@@ -697,12 +725,13 @@ function frame(now) {
     renderUI();
     lastUI = now;
   }
-  if (now - lastSave > 3000) {
+  if (!document.hidden && now - lastSave > 3000) {
     persist();
     lastSave = now;
   }
   controls.update();
   renderer.render(scene, camera);
+  recordPerformance(now);
   requestAnimationFrame(frame);
 }
 addEventListener("pagehide", persist);

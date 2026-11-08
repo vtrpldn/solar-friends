@@ -332,6 +332,11 @@ export function route(s, from, to) {
   return null;
 }
 function go(s, r, target) {
+  if (Math.hypot(r.x - target.x, r.z - target.z) < 0.01) {
+    r.target = null;
+    r.walk = [];
+    return true;
+  }
   if (!r.target || r.target.x !== target.x || r.target.z !== target.z) {
     r.target = target;
     r.walk = route(s, r, target) || [];
@@ -342,7 +347,18 @@ function go(s, r, target) {
   }
   return false;
 }
+const restingPlaces = new WeakMap();
 function restSpot(s, i) {
+  const layout = JSON.stringify([
+    s.camp,
+    s.projects.map((p) => [p.id, p.x, p.z, finished(s, p.key)]),
+  ]);
+  let cache = restingPlaces.get(s);
+  if (!cache || cache.layout !== layout) {
+    cache = { layout, spots: [] };
+    restingPlaces.set(s, cache);
+  }
+  if (cache.spots[i]) return cache.spots[i];
   const c = CAMPS.find((c) => c.id === s.camp);
   const p = s.projects.find(
     (p) => p.key === "gathering" && finished(s, "gathering"),
@@ -362,8 +378,10 @@ function restSpot(s, i) {
   for (let j = 0; j < offsets.length; j++) {
     const [x, z] = offsets[(i + j) % offsets.length],
       target = { x: origin.x + x, z: origin.z + z };
-    if (!occupied(s, target.x, target.z) && route(s, s.people[i], target))
+    if (!occupied(s, target.x, target.z) && route(s, s.people[i], target)) {
+      cache.spots[i] = target;
       return target;
+    }
   }
   return { x: 31, z: 24 };
 }
