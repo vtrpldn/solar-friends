@@ -1502,3 +1502,5 @@ header > .time { grid-column: 3; justify-self: end; }
 #village-actions .view-menu > summary { font-size: 13px; padding: 10px 12px; cursor: pointer; border-radius: 12px; }
 #village-actions .view-menu[open] > summary { background: #e3ebcc; border-color: #7b9260; }
 #village-actions .view-menu .controls { bottom: calc(100% + 18px); right: 0; }
+
+.audio-controls{flex-basis:100%;border:0;border-top:1px solid #cbb98a;margin:8px 0 0;padding:10px 0 0;min-width:0}.audio-controls legend{padding-right:8px}.audio-controls label{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:6px 0}.audio-controls input{width:130px;accent-color:#637b49}.audio-controls small{opacity:.75}

@@ -1,3 +1,4 @@
+import {installAudio} from './audio.js';
 import {settingsFor,BIOMES,richnessFactor} from './world-settings.js';
 import {beginArrival} from './simulation.js';
 import {depositCapacity} from './land-layout.js';
@@ -2022,3 +2023,5 @@ function frame(now) {
 }
 addEventListener("pagehide", persist);
 requestAnimationFrame(frame);
+
+installAudio();
