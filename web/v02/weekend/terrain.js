@@ -1,6 +1,7 @@
+import { elevationVertex } from "./elevation.js";
 import * as THREE from "three";
 import { landRandom } from "./land-layout.js";
-export function createTerrain(seed = 0) {
+export function createTerrain(seed = 0, elevationSeed = seed) {
   const geometry = new THREE.PlaneGeometry(128, 128, 64, 64);
   geometry.rotateX(-Math.PI / 2);
   const random = landRandom(seed),
@@ -18,6 +19,7 @@ export function createTerrain(seed = 0) {
   for (let i = 0; i < points.count; i++) {
     const x = points.getX(i),
       z = points.getZ(i);
+    points.setY(i, elevationVertex(x, z, elevationSeed));
     let soil = 0;
     for (const p of patches)
       soil = Math.max(
@@ -33,6 +35,7 @@ export function createTerrain(seed = 0) {
       .lerp(dry, soil * 0.7);
     colors.push(color.r, color.g, color.b);
   }
+  geometry.computeVertexNormals();
   geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
   const mesh = new THREE.Mesh(
     geometry,

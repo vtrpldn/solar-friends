@@ -1,3 +1,4 @@
+import { footprintRelief } from "./elevation.js";
 import { OPENING_PROJECTS, openingProgress } from "./opening.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import {
@@ -523,6 +524,7 @@ export function createWeekend(landSeed = 0) {
   return {
     version: 2,
     landSeed,
+    elevationSeed: landSeed,
     livestockUnits: 1,
     opening: { version: 1, townTrips: 0 },
     stage: "arrival",
@@ -638,6 +640,8 @@ export function placementError(s, key, x, z, ignore = null) {
   if (!def || !Number.isInteger(x) || !Number.isInteger(z))
     return "Choose a grid square.";
   const [w, d] = def.size;
+  if (footprintRelief(x, z, w, d, s.elevationSeed) > 0.22)
+    return "Choose flatter ground for the building foundation.";
   for (let dx = 0; dx < w; dx++)
     for (let dz = 0; dz < d; dz++)
       if (accessRoadAt(x + dx, z + dz, 1))
@@ -1748,6 +1752,13 @@ export function restore(text) {
     if (s.mode !== undefined && s.mode !== "sandbox" && s.mode !== "story")
       return null;
     if (s.instantBuild !== undefined && typeof s.instantBuild !== "boolean")
+      return null;
+    s.elevationSeed ??= 0;
+    if (
+      !Number.isInteger(s.elevationSeed) ||
+      s.elevationSeed < 0 ||
+      s.elevationSeed > 0xffffffff
+    )
       return null;
     s.landSeed ??= 0;
     if (

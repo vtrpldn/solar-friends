@@ -1,3 +1,4 @@
+import { elevationAt } from "./elevation.js";
 import { freshLandSeed, landRandom } from "./land-layout.js";
 import { createTerrain } from "./terrain.js";
 import { RESOURCE_GROUPS } from "./resource-groups.js";
@@ -175,7 +176,7 @@ function updateSunlight(time, dt) {
 }
 const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });
-const ground = createTerrain(s.landSeed);
+const ground = createTerrain(s.landSeed, s.elevationSeed);
 scene.add(ground);
 scene.add(compactModel(createAccessRoad()));
 const river = createRiver(s.landSeed);
@@ -205,10 +206,43 @@ puddle.position.y = 0.025;
 scene.add(puddle);
 const grid = new THREE.GridHelper(128, 64, "#b6bd8c", "#b6bd8c");
 grid.position.set(1, 0.015, 1);
+const gridPoints = grid.geometry.attributes.position;
+const gridVertices = [];
+for (let i = 0; i < gridPoints.count; i += 2) {
+  const ax = gridPoints.getX(i),
+    az = gridPoints.getZ(i),
+    bx = gridPoints.getX(i + 1),
+    bz = gridPoints.getZ(i + 1);
+  const steps = Math.ceil(Math.hypot(bx - ax, bz - az) / 2);
+  for (let j = 0; j < steps; j++)
+    for (const t of [j / steps, (j + 1) / steps]) {
+      const x = ax + (bx - ax) * t,
+        z = az + (bz - az) * t;
+      gridVertices.push(x, elevationAt(x + 1, z + 1, s.elevationSeed), z);
+    }
+}
+const gridGeometry = new THREE.BufferGeometry();
+gridGeometry.setAttribute(
+  "position",
+  new THREE.Float32BufferAttribute(gridVertices, 3),
+);
+gridGeometry.setAttribute(
+  "color",
+  new THREE.Float32BufferAttribute(
+    gridVertices.map(() => 0.7),
+    3,
+  ),
+);
+grid.geometry.dispose();
+grid.geometry = gridGeometry;
 grid.visible = false;
 scene.add(grid);
 function world(x, z) {
-  return new THREE.Vector3((x - 32) * 2, 0, (z - 32) * 2);
+  return new THREE.Vector3(
+    (x - 32) * 2,
+    elevationAt((x - 32) * 2, (z - 32) * 2, s.elevationSeed),
+    (z - 32) * 2,
+  );
 }
 function prop(id, x, z, rotation = 0) {
   const g = compactModel(createAsset(id));
@@ -412,7 +446,7 @@ function drawUtilities() {
         p.z + (PROJECTS[p.key].size[1] - 1) / 2,
       ),
     );
-    light.position.y = n.kind === "streetlight" ? 2.7 : 1.6;
+    light.position.y += n.kind === "streetlight" ? 2.7 : 1.6;
     light.intensity = night * (n.power || 0) * 12;
   }
 }
@@ -624,7 +658,7 @@ $("world").addEventListener("pointermove", (e) => {
   ghost.position.copy(
     world(cell.x + (size[0] - 1) / 2, cell.z + (size[1] - 1) / 2),
   );
-  ghost.position.y = 0.04;
+  ghost.position.y += 0.04;
   ghost.visible = true;
   const error = placementError(s, placing, cell.x, cell.z, moving);
   ghost.material.color.set(error ? "#c26847" : "#d9eda5");
