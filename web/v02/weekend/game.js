@@ -205,7 +205,7 @@ const overcastColor = new THREE.Color("#d6e3ef");
 function updateSunlight(time, dt) {
   cloudCover += ((s.rain ? 1 : 0) - cloudCover) * (1 - Math.exp(-dt / 3));
   const light = sunlightAt(time, cloudCover);
-  sun.position.set(light.x, light.y, light.z);
+  sun.position.set(light.x, light.y, light.z).add(sun.target.position);
   sun.intensity = light.direct;
   sun.shadow.intensity = light.shadow;
   sun.color
@@ -2041,6 +2041,15 @@ function frame(now) {
   navigation.update(dt);
   controls.update();
   fitTerrainCamera(camera, controls.target, scene.fog);
+  // Keep the shadow volume over the viewed land, not the world origin.
+  // Moving light and target together preserves the time-of-day sun direction.
+  const shadowExtent = Math.max(32, Math.hypot(camera.right - camera.left, camera.top - camera.bottom) / (2 * camera.zoom) + 20);
+  sun.position.sub(sun.target.position).normalize().multiplyScalar(400);
+  sun.target.position.copy(controls.target);
+  sun.position.add(sun.target.position);
+  Object.assign(sun.shadow.camera, { left: -shadowExtent, right: shadowExtent,
+    top: shadowExtent, bottom: -shadowExtent, near: 1, far: 900 });
+  sun.shadow.camera.updateProjectionMatrix();
   drawUtilities();
   renderer.render(scene, camera);
   recordPerformance(now, visual.time);
