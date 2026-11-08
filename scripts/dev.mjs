@@ -50,7 +50,7 @@ const server=await serve(Number(process.env.PORT||4173),{handle:async(req,res,pa
   res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-store','Connection':'keep-alive'});res.write(`data: ${JSON.stringify({status:'connected',revision:current})}\n\n`);clients.add(res);req.on('close',()=>clients.delete(res));return true;
  }
  if(pathname==='/__dev/client.js'){res.writeHead(200,{'Content-Type':'text/javascript','Cache-Control':'no-store'}).end(client);return true;}
- if(pathname.startsWith('/pkg/')){res.writeHead(307,{Location:`/__dev/build/${current}/${path.basename(pathname)}`,'Cache-Control':'no-store'}).end();return true;}
+ if(pathname.startsWith('/pkg/') || pathname.startsWith('/v1/pkg/')){res.writeHead(307,{Location:`/__dev/build/${current}/${path.basename(pathname)}`,'Cache-Control':'no-store'}).end();return true;}
  const match=pathname.match(/^\/__dev\/build\/([0-9a-f-]{36})\/(solar_friends(?:_bg\.wasm|\.js))$/);
  if(match){const bytes=await readFile(path.join(buildRoot,match[1],match[2]));res.writeHead(200,{'Content-Type':match[2].endsWith('.wasm')?'application/wasm':'text/javascript','Cache-Control':'no-store'}).end(bytes);return true;}
  return false;

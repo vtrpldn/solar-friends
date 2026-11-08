@@ -1,3 +1,4 @@
+import { rewriteSiteText } from "./site-routes.mjs";
 import { cp, mkdir, readdir, readFile, writeFile, rm } from "node:fs/promises";
 import path from "node:path";
 const root = path.resolve(import.meta.dirname, "..");
@@ -28,19 +29,7 @@ async function rewrite(dir) {
     if (!/\.(js|html|css)$/.test(file) || file.includes("/vendor/")) continue;
     let text = await readFile(file, "utf8");
     const rel = path.relative(out, file);
-    if (rel.startsWith("v2/")) {
-      text = text
-        .replaceAll("/v02/weekend/", "/v2/")
-        .replaceAll("/v02/", "/v2/");
-      if (path.dirname(rel) === "v2")
-        text = text.replace(
-          /\.\.\/(library|residents|workshop|land)\//g,
-          "./$1/",
-        );
-      text = text
-        .replaceAll("../weekend/", "../")
-        .replaceAll("../../fonts/", "/v1/fonts/");
-    }
+    text = rewriteSiteText(text, rel);
     await writeFile(file, text);
   }
 }
