@@ -3,7 +3,7 @@ import { riverCenter } from "./river-layout.js";
 import { elevationVertex } from "./elevation.js";
 import * as THREE from "three";
 import { landRandom } from "./land-layout.js";
-export function createTerrain(seed = 0, elevationSeed = seed) {
+export function createTerrain(seed = 0, elevationSeed = seed, pads = []) {
   const geometry = new THREE.PlaneGeometry(
     MAP_HALF * 2,
     MAP_HALF * 2,
@@ -26,7 +26,7 @@ export function createTerrain(seed = 0, elevationSeed = seed) {
   for (let i = 0; i < points.count; i++) {
     const x = points.getX(i),
       z = points.getZ(i);
-    points.setY(i, elevationVertex(x, z, elevationSeed));
+    points.setY(i, elevationVertex(x, z, elevationSeed, pads));
     let soil = 0;
     for (const p of patches)
       soil = Math.max(
@@ -54,4 +54,15 @@ export function createTerrain(seed = 0, elevationSeed = seed) {
   );
   mesh.receiveShadow = true;
   return mesh;
+}
+
+export function updateTerrain(mesh, seed, pads) {
+  const geometry = mesh.geometry,
+    points = geometry.attributes.position;
+  for (let i = 0; i < points.count; i++)
+    points.setY(i, elevationVertex(points.getX(i), points.getZ(i), seed, pads));
+  points.needsUpdate = true;
+  geometry.computeVertexNormals();
+  geometry.computeBoundingBox();
+  geometry.computeBoundingSphere();
 }

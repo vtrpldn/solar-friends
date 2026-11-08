@@ -1,5 +1,5 @@
 import { CELL_MIN, CELL_MAX } from "./map-size.js";
-import { footprintRelief } from "./elevation.js";
+import { footprintRelief, foundationPad } from "./elevation.js";
 import { OPENING_PROJECTS, openingProgress } from "./opening.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import {
@@ -526,6 +526,7 @@ export function createWeekend(landSeed = 0) {
     version: 2,
     landSeed,
     elevationSeed: landSeed,
+    terrainPads: [],
     livestockUnits: 1,
     opening: { version: 1, townTrips: 0 },
     stage: "arrival",
@@ -612,7 +613,9 @@ export function campPlacementError(s, x, z) {
     z > CELL_MAX - 5
   )
     return "Keep the tents inside the plot.";
-  if (footprintRelief(x - 1, z - 3, 5, 4, s.elevationSeed) > 0.22)
+  if (
+    footprintRelief(x - 1, z - 3, 5, 4, s.elevationSeed, s.terrainPads) > 0.22
+  )
     return "The tents need flatter ground.";
   for (let cx = x - 1; cx <= x + 3; cx++)
     for (let cz = z - 3; cz <= z; cz++) {
@@ -646,6 +649,15 @@ export function chooseCamp(s, id) {
   if (!c) return false;
   if (custom) s.campSite = c;
   s.camp = c.id;
+  const campPad = foundationPad(
+    c.x - 1,
+    c.z - 3,
+    5,
+    4,
+    s.elevationSeed,
+    s.terrainPads,
+  );
+  if (campPad) (s.terrainPads ??= []).push(campPad);
   // Unpacking tents is an instantaneous setup step; keep the group beside them.
   for (const r of s.people) {
     if (walkSegmentClear(s, r, r)) continue;
@@ -682,8 +694,8 @@ export function placementError(s, key, x, z, ignore = null) {
   if (!def || !Number.isInteger(x) || !Number.isInteger(z))
     return "Choose a grid square.";
   const [w, d] = def.size;
-  if (footprintRelief(x, z, w, d, s.elevationSeed) > 0.22)
-    return "Choose flatter ground for the building foundation.";
+  if (!foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads))
+    return "Leave a little space between foundations at different heights.";
   for (let dx = 0; dx < w; dx++)
     for (let dz = 0; dz < d; dz++)
       if (accessRoadAt(x + dx, z + dz, 1))
@@ -743,6 +755,16 @@ export function placementError(s, key, x, z, ignore = null) {
         return "Leave a walking route along the left edge of every project.";
   return "";
 }
+function gradeFoundation(s, key, x, z) {
+  const [w, d] = PROJECTS[key].size;
+  const pad = foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads);
+  s.terrainPads ??= [];
+  if (
+    pad &&
+    !s.terrainPads.some((p) => Object.keys(pad).every((k) => p[k] === pad[k]))
+  )
+    s.terrainPads.push(pad);
+}
 export function plan(s, key, x, z) {
   if (s.stage !== "playing") return "Choose your campsite first.";
   const def = PROJECTS[key];
@@ -779,6 +801,7 @@ export function plan(s, key, x, z) {
     if (id === "wood") s.wood -= n;
     else s.materials[id] -= n;
   }
+  gradeFoundation(s, key, x, z);
   const instant = s.mode === "sandbox" && s.instantBuild !== false;
   s.projects.push({
     id: s.nextId++,
@@ -813,6 +836,7 @@ export function moveProject(s, id, x, z) {
     return "Disconnect utility lines before relocating this building.";
   const error = placementError(s, p.key, x, z, id);
   if (error) return error;
+  gradeFoundation(s, p.key, x, z);
   p.x = x;
   p.z = z;
   for (const r of s.people) {
@@ -1799,6 +1823,28 @@ export function restore(text) {
     if (s.mode !== undefined && s.mode !== "sandbox" && s.mode !== "story")
       return null;
     if (s.instantBuild !== undefined && typeof s.instantBuild !== "boolean")
+      return null;
+    s.terrainPads ??= [];
+    if (
+      !Array.isArray(s.terrainPads) ||
+      s.terrainPads.length > 4096 ||
+      s.terrainPads.some(
+        (p) =>
+          !p ||
+          ![p.left, p.right, p.top, p.bottom, p.height].every(
+            Number.isFinite,
+          ) ||
+          p.left < -128 ||
+          p.right > 128 ||
+          p.top < -128 ||
+          p.bottom > 128 ||
+          p.left >= p.right ||
+          p.top >= p.bottom ||
+          p.height < 0 ||
+          p.height > 12 ||
+          [p.left, p.right, p.top, p.bottom].some((n) => n % 2 !== 0),
+      )
+    )
       return null;
     s.elevationSeed ??= 0;
     if (

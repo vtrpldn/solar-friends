@@ -3,7 +3,7 @@ import { MAP_CELLS, MAP_HALF, CELL_MIN, CELL_MAX } from "./map-size.js";
 import { fitTerrainCamera } from "./camera-depth.js";
 import { elevationAt } from "./elevation.js";
 import { freshLandSeed, landRandom } from "./land-layout.js";
-import { createTerrain } from "./terrain.js";
+import { createTerrain, updateTerrain } from "./terrain.js";
 import { RESOURCE_GROUPS } from "./resource-groups.js";
 import { createFire, animateFire } from "./fire.js";
 import { saveKey } from "./modes.js";
@@ -187,7 +187,7 @@ function updateSunlight(time, dt) {
 }
 const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });
-const ground = createTerrain(s.landSeed, s.elevationSeed);
+const ground = createTerrain(s.landSeed, s.elevationSeed, s.terrainPads);
 scene.add(ground);
 scene.add(compactModel(createAccessRoad()));
 const river = createRiver(s.landSeed);
@@ -234,7 +234,11 @@ for (let i = 0; i < gridPoints.count; i += 2) {
     for (const t of [j / steps, (j + 1) / steps]) {
       const x = ax + (bx - ax) * t,
         z = az + (bz - az) * t;
-      gridVertices.push(x, elevationAt(x + 1, z + 1, s.elevationSeed), z);
+      gridVertices.push(
+        x,
+        elevationAt(x + 1, z + 1, s.elevationSeed, s.terrainPads),
+        z,
+      );
     }
 }
 const gridGeometry = new THREE.BufferGeometry();
@@ -256,7 +260,7 @@ scene.add(grid);
 function world(x, z) {
   return new THREE.Vector3(
     (x - 32) * 2,
-    elevationAt((x - 32) * 2, (z - 32) * 2, s.elevationSeed),
+    elevationAt((x - 32) * 2, (z - 32) * 2, s.elevationSeed, s.terrainPads),
     (z - 32) * 2,
   );
 }
@@ -333,7 +337,8 @@ for (let i = 0; i < 190; i++) {
 }
 const entrance = prop("produce-crates", s.stock.x, s.stock.z);
 scenery.add(prop("garden-bench", 30, 24));
-scene.add(compactModel(scenery));
+let sceneryMesh = compactModel(scenery);
+scene.add(sceneryMesh);
 scene.remove(scenery);
 // A simple arrival car and camping tents use the same flat materials and metre scale.
 function box(g, w, h, d, color, x, y, z) {
@@ -482,7 +487,44 @@ function drawUtilities() {
 }
 const buildings = new Map();
 const assets = new Set(ASSETS.map((a) => a.id));
+let terrainPadCount = s.terrainPads?.length || 0;
+function syncTerrain() {
+  if (terrainPadCount === (s.terrainPads?.length || 0)) return;
+  terrainPadCount = s.terrainPads.length;
+  updateTerrain(ground, s.elevationSeed, s.terrainPads);
+  const points = grid.geometry.attributes.position;
+  for (let i = 0; i < points.count; i++)
+    points.setY(
+      i,
+      elevationAt(
+        points.getX(i) + 1,
+        points.getZ(i) + 1,
+        s.elevationSeed,
+        s.terrainPads,
+      ),
+    );
+  points.needsUpdate = true;
+  grid.geometry.computeBoundingSphere();
+  for (const child of scenery.children)
+    child.position.y = elevationAt(
+      child.position.x,
+      child.position.z,
+      s.elevationSeed,
+      s.terrainPads,
+    );
+  scene.remove(sceneryMesh);
+  sceneryMesh.traverse((o) => {
+    if (o.geometry) o.geometry.dispose();
+  });
+  sceneryMesh = compactModel(scenery);
+  scene.add(sceneryMesh);
+  if (s.camp) {
+    const c = campLocation(s);
+    campGroup.position.copy(world(c.x, c.z));
+  }
+}
 function syncBuildings() {
+  syncTerrain();
   for (const p of s.projects) {
     const def = PROJECTS[p.key],
       fraction = p.work / def.work;
@@ -633,7 +675,9 @@ function startPlacement(key, id = null) {
   ghost.visible = false;
   $("cancel").hidden = false;
   grid.visible = true;
-  message("Click a square in the central clearing. Esc cancels.");
+  message(
+    "Choose a building site. Sloping ground levels automatically. Esc cancels.",
+  );
   renderUI();
 }
 
@@ -1434,7 +1478,7 @@ function frame(now) {
       g.visible = inward < (isHome ? 0.82 : 0.64);
       g.position.copy(world(door.x, door.z - inward * travel));
       // Duck beneath the ridge while passing through the open tent door.
-      g.position.y = 0;
+      // Keep the entrance animation on the actual foundation elevation.
       g.rotation.y = r.tentPhase === "exit" ? 0 : Math.PI;
       animateResident(
         g.rig,
