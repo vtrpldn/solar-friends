@@ -59,6 +59,8 @@ import {
   createWeekend,
   createSandbox,
   chooseCamp,
+  campLocation,
+  campPlacementError,
   plan,
   moveProject,
   prioritize,
@@ -144,7 +146,7 @@ controls.maxPolarAngle = Math.PI * 0.46;
 controls.minPolarAngle = 0.25;
 let arrivalCameraFollow = true;
 const navigation = installCameraNavigation(camera, controls, {
-  home: () => focus(CAMPS.find((c) => c.id === s.camp)),
+  home: () => focus(campLocation(s)),
   onInteract: () => {
     arrivalCameraFollow = false;
   },
@@ -329,7 +331,7 @@ function drawCamp() {
   campDrawn = s.camp;
   campGroup.clear();
   if (!s.camp) return;
-  const c = CAMPS.find((c) => c.id === s.camp);
+  const c = campLocation(s);
   campGroup.position.copy(world(c.x, c.z));
   for (let i = 0; i < 2; i++) {
     const tent = compactModel(createTent(i));
@@ -349,18 +351,6 @@ const border = new THREE.LineLoop(
   new THREE.LineBasicMaterial({ color: "#e0dfad" }),
 );
 scene.add(border);
-const markers = [];
-for (const c of CAMPS) {
-  const m = new THREE.Mesh(
-    new THREE.RingGeometry(2.5, 2.65, 40),
-    new THREE.MeshBasicMaterial({ color: "#fff3ba", side: THREE.DoubleSide }),
-  );
-  m.rotation.x = -Math.PI / 2;
-  m.position.copy(world(c.x, c.z));
-  m.position.y = 0.03;
-  scene.add(m);
-  markers.push(m);
-}
 const actors = s.people.map((r) => {
   const root = createResident(r.id);
   scene.add(root);
@@ -566,7 +556,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(CAMPS.find((c) => c.id === s.camp));
+focus(campLocation(s));
 if (s.stage === "arrival" && s.arrivalElapsed < ARRIVAL_DURATION) {
   const pose = arrivalPose(s.arrivalElapsed, 0).car;
   focus({ x: pose.x / 2 + 32, z: pose.z / 2 + 32 });
@@ -613,22 +603,7 @@ function startPlacement(key, id = null) {
   message("Click a square in the central clearing. Esc cancels.");
   renderUI();
 }
-for (const c of CAMPS) {
-  const b = document.createElement("button");
-  b.innerHTML = `<strong>${c.name}</strong><span>${c.description}</span>`;
-  b.onmouseenter = () => focus(c);
-  b.onclick = () => {
-    chooseCamp(s, c.id);
-    focus(c);
-    message(
-      "Your camp is unpacked. Explore the land and build at your own pace.",
-    );
-    setPanel(null);
-    persist();
-    renderUI();
-  };
-  $("camps").append(b);
-}
+
 for (const [key, d] of Object.entries(PROJECTS)) {
   const b = document.createElement("button");
   b.id = `build-${key}`;
@@ -656,18 +631,25 @@ $("world").addEventListener("pointerdown", (e) => {
   down = { x: e.clientX, y: e.clientY };
 });
 $("world").addEventListener("pointermove", (e) => {
-  if (!placing) return;
+  const pitching =
+    s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION;
+  if (!placing && !pitching) return;
   const p = hit(e);
   if (!p) return;
   cell = { x: Math.round(p.x / 2 + 32), z: Math.round(p.z / 2 + 32) };
-  const size = PROJECTS[placing].size;
+  const size = pitching ? [5, 4] : PROJECTS[placing].size;
   ghost.scale.set(size[0] / 2, size[1] / 2, 1);
   ghost.position.copy(
-    world(cell.x + (size[0] - 1) / 2, cell.z + (size[1] - 1) / 2),
+    world(
+      cell.x + (pitching ? 1 : (size[0] - 1) / 2),
+      cell.z + (pitching ? -1.5 : (size[1] - 1) / 2),
+    ),
   );
   ghost.position.y += 0.04;
   ghost.visible = true;
-  const error = placementError(s, placing, cell.x, cell.z, moving);
+  const error = pitching
+    ? campPlacementError(s, cell.x, cell.z)
+    : placementError(s, placing, cell.x, cell.z, moving);
   ghost.material.color.set(error ? "#c26847" : "#d9eda5");
 });
 $("world").addEventListener("pointerup", (e) => {
@@ -681,6 +663,19 @@ $("world").addEventListener("pointerup", (e) => {
   if (!p) return;
   const x = Math.round(p.x / 2 + 32),
     z = Math.round(p.z / 2 + 32);
+  if (s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION) {
+    const error = campPlacementError(s, x, z);
+    if (error) {
+      message(error);
+      return;
+    }
+    chooseCamp(s, { x, z });
+    ghost.visible = false;
+    focus(campLocation(s));
+    persist();
+    renderUI();
+    return;
+  }
   if (placing) {
     const error = moving
       ? moveProject(s, moving, x, z)
@@ -746,7 +741,7 @@ $("skip-arrival").onclick = () => {
   previousMotion = captureMotion(s);
   accumulator = 0;
   focus();
-  message("Choose a campsite to begin.");
+  message("Click clear ground to pitch your tents.");
   renderUI();
   persist();
 };
@@ -766,7 +761,7 @@ $("speed").onclick = () => {
   speed = speed === 1 ? 4 : 1;
   $("speed").textContent = `${speed}×`;
 };
-$("home").onclick = () => focus(CAMPS.find((c) => c.id === s.camp));
+$("home").onclick = () => focus(campLocation(s));
 $("river-view").onclick = () => focus(riverAccess(s.landSeed));
 $("rotate-left").onclick = () => navigation.rotate(-Math.PI / 2);
 $("rotate-right").onclick = () => navigation.rotate(Math.PI / 2);
@@ -1077,7 +1072,6 @@ function renderUI() {
   );
   document.querySelector("header h1").textContent =
     s.mode === "sandbox" ? "Your sandbox" : "Our little village";
-  $("arrival").hidden = active || s.arrivalElapsed < ARRIVAL_DURATION;
   $("skip-arrival").hidden = active || s.arrivalElapsed >= ARRIVAL_DURATION;
   $("village-actions").hidden = !active;
   document.querySelectorAll("[data-panel-toggle]").forEach((button) => {
@@ -1366,15 +1360,14 @@ function frame(now) {
           : "We’re here! Everyone out—let’s take a look.",
       );
     } else if (
-      !$("arrival").hidden &&
+      s.arrivalElapsed >= ARRIVAL_DURATION &&
       $("message").textContent.startsWith("We’re here")
     ) {
       if (arrivalCameraFollow) focus();
-      message("Choose a campsite to begin.");
+      message("Click clear ground to pitch your tents.");
     }
   }
   entrance.visible = !arriving;
-  markers.forEach((m) => (m.visible = s.stage === "arrival" && !arriving));
   for (const [i, r] of s.people.entries()) {
     const g = actors[i];
     if (arriving) {

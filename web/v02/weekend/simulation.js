@@ -598,12 +598,53 @@ export function say(s, text) {
   s.log.unshift(text);
   s.log = s.log.slice(0, 12);
 }
+export function campLocation(s) {
+  return s.camp === "custom" ? s.campSite : CAMPS.find((c) => c.id === s.camp);
+}
+export function campPlacementError(s, x, z) {
+  if (
+    !Number.isInteger(x) ||
+    !Number.isInteger(z) ||
+    x < 4 ||
+    z < 6 ||
+    x > 58 ||
+    z > 59
+  )
+    return "Keep the tents inside the plot.";
+  if (footprintRelief(x - 1, z - 3, 5, 4, s.elevationSeed) > 0.22)
+    return "The tents need flatter ground.";
+  for (let cx = x - 1; cx <= x + 3; cx++)
+    for (let cz = z - 3; cz <= z; cz++) {
+      if (riverBankAt(cx, cz, 2, s.landSeed))
+        return "Keep the tents back from the river.";
+      if (
+        accessRoadAt(cx, cz, 1) ||
+        blockedCamp({ ...s, camp: null }).some((p) => p.x === cx && p.z === cz)
+      )
+        return "Leave the road, trees and supplies clear.";
+    }
+  if (!route({ ...s, camp: null }, s.stock, { x, z: z + 1 }))
+    return "Choose somewhere reachable from the supplies.";
+  return null;
+}
 export function chooseCamp(s, id) {
   if (s.stage !== "arrival" || s.arrivalElapsed < ARRIVAL_DURATION)
     return false;
-  const c = CAMPS.find((c) => c.id === id);
+  const custom = typeof id === "object" && id !== null;
+  if (custom && campPlacementError(s, id.x, id.z)) return false;
+  const c = custom
+    ? {
+        id: "custom",
+        name: "Your camp",
+        x: id.x,
+        z: id.z,
+        shade: false,
+        wet: false,
+      }
+    : CAMPS.find((c) => c.id === id);
   if (!c) return false;
-  s.camp = id;
+  if (custom) s.campSite = c;
+  s.camp = c.id;
   // Unpacking tents is an instantaneous setup step; keep the group beside them.
   for (const r of s.people) {
     if (walkSegmentClear(s, r, r)) continue;
@@ -848,7 +889,7 @@ export function resolveRain(s, choice) {
   return true;
 }
 function blockedCamp(s) {
-  const c = CAMPS.find((c) => c.id === s.camp);
+  const c = campLocation(s);
   const cells = [
     ...[31, 32, 33, 34].flatMap((x) => [20, 21, 22].map((z) => ({ x, z }))),
     { x: 30, z: 24 },
@@ -1042,7 +1083,7 @@ function go(s, r, target) {
 }
 const restingPlaces = new WeakMap();
 export function tentDoor(s, i) {
-  const camp = CAMPS.find((c) => c.id === s.camp);
+  const camp = campLocation(s);
   return { x: camp.x + (i % 2) * 1.5, z: camp.z };
 }
 export function restingDoor(s, i) {
@@ -1083,7 +1124,7 @@ function restSpot(s, i) {
     restingPlaces.set(s, cache);
   }
   if (cache.spots[i]) return cache.spots[i];
-  const c = CAMPS.find((c) => c.id === s.camp);
+  const c = campLocation(s);
   const p = s.projects.find(
     (p) => PROJECTS[p.key].kind === "square" && p.work >= PROJECTS[p.key].work,
   );
@@ -1202,7 +1243,7 @@ function idleActivity(s, r, i, dt) {
     );
     return;
   }
-  const c = CAMPS.find((c) => c.id === s.camp);
+  const c = campLocation(s);
   r.leisureKind = null;
   const cycle = r.idleCycle || 0;
   r.idleCycle = cycle + 1;
@@ -1791,7 +1832,17 @@ export function restore(text) {
       s.nextId <= Math.max(0, ...s.projects.map((p) => p.id))
     )
       return null;
-    if (s.stage !== "arrival" && !CAMPS.some((c) => c.id === s.camp))
+    if (
+      s.stage !== "arrival" &&
+      !(s.camp === "custom"
+        ? s.campSite &&
+          !campPlacementError(
+            { ...s, projects: [] },
+            s.campSite.x,
+            s.campSite.z,
+          )
+        : CAMPS.some((c) => c.id === s.camp))
+    )
       return null;
     if (s.materials)
       for (const id of Object.keys(MATERIALS))
