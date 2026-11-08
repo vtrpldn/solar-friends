@@ -627,7 +627,7 @@ export function chooseCamp(s, id) {
   if (s.opening)
     say(
       s,
-      "Iara: A shower is forecast. One spare tarp and eight roof sheets: should we cover ourselves first, or the supplies? We can build simply, or send someone to town.",
+      "Iara: We have tents, meals and drinking water. There’s a spare tarp in the supplies if the weather turns.",
     );
   say(s, `${c.name}: unpack first, then choose what matters most.`);
   return true;

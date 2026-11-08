@@ -271,7 +271,7 @@ header > a {
   font-size: 11px;
   color: #83775d;
 }
-#journal,
+#projects-panel,
 #people,
 #selection {
   top: 112px;
@@ -280,11 +280,11 @@ header > a {
   scrollbar-width: thin;
   scrollbar-color: #c8b78e transparent;
 }
-#journal {
+#projects-panel {
   left: 22px;
   width: 256px;
 }
-#journal h2 {
+#projects-panel h2 {
   font-size: 23px;
   margin-top: 10px;
 }
@@ -809,7 +809,7 @@ dialog button {
   header > a {
     font-size: 10px;
   }
-  #journal {
+  #projects-panel {
     width: 235px;
   }
   #people,

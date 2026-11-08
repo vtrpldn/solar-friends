@@ -4,7 +4,6 @@ import { createTerrain } from "./terrain.js";
 import { RESOURCE_GROUPS } from "./resource-groups.js";
 import { createFire, animateFire } from "./fire.js";
 import { saveKey } from "./modes.js";
-import { openingProgress, openingRecap } from "./opening.js";
 import { collectAnimals, animateAnimals } from "../library/animal-motion.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import { resourceIcon, illustrateResources } from "./resource-icons.js";
@@ -65,8 +64,6 @@ import {
   supplyRun,
   resolveRain,
   finished,
-  canFinish,
-  endWeekend,
   tick,
   save,
   restore,
@@ -107,12 +104,21 @@ if (restPreview) for (const resident of s.people) resident.energy = 10;
 try {
   if (!arrivalPreview) s = restore(localStorage.getItem(SAVE)) || s;
 } catch {}
+if (s.stage === "evening") {
+  s.stage = "playing";
+  s.meal = false;
+  for (const r of s.people)
+    if (r.action === "meal") {
+      r.action = "idle";
+      r.walk = [];
+      r.target = null;
+    }
+}
 let speed = 1,
   paused = lightingPreview,
   placing = null,
   moving = null,
   selected = null,
-  endingDismissed = false,
   lastUI = 0,
   lastSave = 0;
 const scene = new THREE.Scene();
@@ -614,9 +620,9 @@ for (const c of CAMPS) {
     chooseCamp(s, c.id);
     focus(c);
     message(
-      "Open Our first evening to choose what matters most. You can start with a quick fix or invest in a permanent roof.",
+      "Your camp is unpacked. Explore the land and build at your own pace.",
     );
-    setPanel("journal");
+    setPanel(null);
     persist();
     renderUI();
   };
@@ -769,33 +775,6 @@ $("grid").onclick = () => {
   grid.visible = !grid.visible;
   $("grid").setAttribute("aria-pressed", String(grid.visible));
 };
-$("opening-status").onclick = () => {
-  if (canFinish(s)) $("meal").click();
-  else setPanel("journal");
-};
-$("opening-town").onclick = () => management.open("resources");
-$("meal").onclick = () => {
-  if (endWeekend(s)) {
-    endingDismissed = false;
-    cancel();
-    persist();
-    renderUI();
-  }
-};
-$("continue").onclick = () => {
-  endingDismissed = true;
-  s.stage = "playing";
-  s.meal = false;
-  for (const r of s.people) {
-    if (r.action === "meal") {
-      r.action = "idle";
-      r.walk = [];
-      r.target = null;
-    }
-  }
-  persist();
-  renderUI();
-};
 function askReset() {
   $("reset-dialog").showModal();
 }
@@ -810,7 +789,6 @@ $("sandbox-instant").onclick = () => {
   persist();
 };
 $("restart").onclick = askReset;
-$("again").onclick = askReset;
 $("keep").onclick = () => $("reset-dialog").close();
 $("confirm-reset").onclick = () => {
   // pagehide also saves: replace live state before navigating so it cannot resurrect the old camp.
@@ -1079,7 +1057,6 @@ function renderUI() {
     s.rainResolved,
     selected,
     placing,
-    endingDismissed,
     s.log,
     s.people.map((r) => [r.action, r.tentPhase, Math.round(r.energy)]),
     s.projects.map((p) => [
@@ -1107,7 +1084,8 @@ function renderUI() {
     button.setAttribute("aria-expanded", String(opened));
     button.classList.toggle("active", opened);
   });
-  $("journal").hidden = !active || openPanel !== "journal" || !!selected;
+  $("projects-panel").hidden =
+    !active || openPanel !== "projects-panel" || !!selected;
   $("people").hidden = !active || !!selected || openPanel !== "people";
   $("build").hidden =
     !active || s.stage === "evening" || openPanel !== "build" || !!selected;
@@ -1148,86 +1126,6 @@ function renderUI() {
     s.stage === "evening"
       ? "Saturday · Evening"
       : `Day ${Math.floor(minutes / 1440) + 1} · ${String(Math.floor(minutes / 60) % 24).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-  const opening = s.opening && !s.opening.complete && active;
-  const goals = openingProgress(s, PROJECTS);
-  $("opening-plan").hidden = !opening;
-  $("opening-status").hidden = !opening;
-  $("opening-status").textContent = goals.ready
-    ? "✦ Camp is ready · Gather for dinner"
-    : `✦ Our first evening · ${goals.count}/3 needs met · Open plan`;
-  if (opening) {
-    $("opening-needs").innerHTML = [
-      ["gathering", "A place to share a meal"],
-      ["shelter", "Dry cover for people"],
-      ["supplies", "Protected tools and supplies"],
-    ]
-      .map(([key, label]) => `<p>${goals[key] ? "✓" : "○"} ${label}</p>`)
-      .join("");
-    $("opening-options").replaceChildren();
-    for (const [key, reason] of [
-      ["gathering", "Luz: Start with somewhere to sit together."],
-      ["rain-tent", "Quick cover · uses the spare tarp"],
-      ["shelter", "Lasting shelter · uses six roof sheets"],
-      ["tarp-stores", "Quick storage protection · uses the spare tarp"],
-      ["covered-stores", "Lasting storage · uses six roof sheets"],
-    ]) {
-      const need =
-        key === "gathering"
-          ? "gathering"
-          : ["rain-tent", "shelter"].includes(key)
-            ? "shelter"
-            : "supplies";
-      const planned = openingProgress(
-        {
-          ...s,
-          projects: s.projects.map((p) => ({
-            ...p,
-            work: PROJECTS[p.key].work,
-          })),
-        },
-        PROJECTS,
-      );
-      if (planned[need]) continue;
-      const b = document.createElement("button");
-      b.innerHTML = `<strong>${PROJECTS[key].name}</strong><small>${reason}</small><small>${recipeText(key)}</small>`;
-      const missing = missingMaterials(s, key);
-      if (missing.length) {
-        const warning = document.createElement("small");
-        warning.textContent = `Need ${missing.join(", ")} · fetch in town`;
-        b.append(warning);
-      }
-      b.title = PROJECTS[key].description;
-      b.onclick = () => {
-        setPanel(null);
-        startPlacement(key);
-      };
-      $("opening-options").append(b);
-    }
-  }
-  $("objective").textContent =
-    s.mode === "sandbox"
-      ? "Build freely. Supplies replenish automatically. Toggle Instant build in the catalog to have residents construct your plans. Water and power networks still work normally."
-      : opening
-        ? goals.ready
-          ? "The essentials are covered. Bring everyone together, or keep improving the camp."
-          : s.trip
-            ? "One friend is fetching supplies. The others can keep building while they are away."
-            : s.rain
-              ? "The shower is here. Uncovered work is 20% slower; a dry place helps us take better breaks. There is no deadline: finish when you feel ready."
-              : s.rainSeen
-                ? "The shower has passed. Finish the essentials at your own pace, then gather everyone for dinner."
-                : "Iara: Let’s make tonight comfortable. A shower is forecast after a few minutes of work; choose a quick fix or a lasting improvement. There is no single right layout."
-        : s.stage === "evening"
-          ? "Tools away. Take a moment to enjoy what you made together."
-          : !finished(s, "gathering")
-            ? "First, make somewhere to sit and recover. Then choose one practical improvement."
-            : canFinish(s)
-              ? "We have a gathering place and a practical improvement. Keep building, or call everyone for dinner."
-              : s.trip
-                ? "Our camp is ready. Wait for our friend to return before sharing dinner, or keep improving the camp."
-                : s.rainSeen && !s.rainResolved
-                  ? "A roof is taking shape. Keep the supplies dry before calling everyone for dinner."
-                  : "Choose what helps us stay: water storage, a roof, or a private toilet.";
   $("tasks").replaceChildren();
   $("completed-tasks").replaceChildren();
   const builtCount = s.projects.filter(
@@ -1326,16 +1224,6 @@ function renderUI() {
     : `Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. Buy essentials or sell locally produced surplus.`;
   $("rain").hidden = !s.rainSeen || s.rainResolved;
   $("boards").disabled = s.wood < 2;
-  $("meal").hidden = !canFinish(s) || s.stage !== "playing";
-  $("ending").hidden = s.stage !== "evening" || endingDismissed;
-  $("recap").textContent = s.opening
-    ? openingRecap(s, PROJECTS)
-    : `Together, you built: ${s.projects
-        .filter((p) => finished(s, p.key))
-        .map((p) => PROJECTS[p.key].name.toLowerCase())
-        .join(
-          ", ",
-        )}. ${finished(s, "shelter") ? "There’s a dry roof for tonight." : "For tonight, the tents will do."} ${finished(s, "toilet") ? "Everyone has a little privacy." : ""} R$${s.money} remains for next time.`;
   $("log").replaceChildren(
     ...s.log.map((t) => {
       const li = document.createElement("li");

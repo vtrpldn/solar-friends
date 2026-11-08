@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Solar Friends · Our first weekend</title>
+    <title>Solar Friends · Our village</title>
     <script>
       const route = new URLSearchParams(location.search);
       if (
@@ -57,29 +57,18 @@
         to make a thoughtful start.
       </p>
     </section>
-    <aside id="journal" class="paper" hidden>
-      <button class="panel-close" data-close-panel aria-label="Close journal">
+    <aside id="projects-panel" class="paper" hidden>
+      <button class="panel-close" data-close-panel aria-label="Close projects">
         ×</button
-      ><small>✦ CAMP JOURNAL</small>
-      <h2>Make yourselves at home</h2>
-      <p id="objective"></p>
-      <section id="opening-plan" hidden>
-        <div id="opening-needs"></div>
-        <p class="hint">
-          We brought one spare tarp and eight roof sheets. Choose where they
-          help most; town trips take one friend away from building.
-        </p>
-        <div id="opening-options"></div>
-        <button id="opening-town">Plan a town trip</button>
-      </section>
+      ><small>VILLAGE WORK</small>
+      <h2>Your projects</h2>
       <div id="tasks"></div>
       <details id="completed-panel" hidden>
         <summary id="completed-title">Around the village</summary>
         <div id="completed-tasks"></div>
       </details>
-      <button id="meal" hidden>Put the kettle on · Gather for dinner</button>
       <details>
-        <summary>The weekend so far</summary>
+        <summary>Recent events</summary>
         <ol id="log"></ol>
       </details>
     </aside>
@@ -121,16 +110,7 @@
         ×
       </button>
     </section>
-    <section id="ending" class="paper" hidden>
-      <small>THE FIRST EVENING</small>
-      <h2>It’s starting to feel like ours.</h2>
-      <p id="recap"></p>
-      <p>Tomorrow’s ideas can wait. Tonight, there’s a meal to share.</p>
-      <button id="continue">Continue building</button
-      ><button id="again">Try a different start</button>
-    </section>
     <footer>
-      <button id="opening-status" hidden aria-controls="journal"></button>
       <section id="build" hidden>
         <div class="build-toolbar">
           <button id="sandbox-instant" hidden aria-pressed="true">
@@ -159,11 +139,11 @@
           ⌂ Build
         </button>
         <button
-          data-panel-toggle="journal"
-          aria-controls="journal"
+          data-panel-toggle="projects-panel"
+          aria-controls="projects-panel"
           aria-expanded="false"
         >
-          ✦ Journal
+          ▤ Projects
         </button>
         <button
           data-panel-toggle="people"
