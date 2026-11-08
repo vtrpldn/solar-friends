@@ -1,4 +1,5 @@
 const modes = [
+  ['weekend', 'Play first weekend', '/v02/weekend/', 'Start a small camp with five friends'],
   ['library', 'Collection', '/v02/library/', 'Browse every model'],
   ['workshop', '3D inspector', '/v02/workshop/', 'Orbit a model and inspect its sprite proof'],
   ['land', 'Scene editor', '/v02/land/', 'Place, move and rotate props'],
