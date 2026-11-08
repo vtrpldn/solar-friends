@@ -1,3 +1,4 @@
+import {createCapybaraVisitors} from "./capybaras.js";
 import { constructionStatus } from "./construction-logistics.js";
 import { BUILD_CATEGORIES, buildingCategory, inBuildCategory } from "./build-categories.js";
 import {createResourceTrends,resourceSnapshot,formatTrend} from './resource-trends.js';
@@ -1772,6 +1773,7 @@ $("purchase").onchange = () => {
 renderUI();
 if (s.stage !== "arrival") message(s.log[0] || "Welcome back to your camp.");
 const recordPerformance = performanceReadout(renderer);
+const capybaras = createCapybaraVisitors(scene,s);
 const wildlife = createWildlife(scene,s,wildlifePreview ? {random:()=>.75} : {});
 if(wildlifePreview) for(let i=0;i<270;i++) wildlife.update(.1);
 let animalTime = 0;
@@ -1791,6 +1793,7 @@ function frame(now) {
     }
   }
   wildlife.update(!paused && !document.hidden ? dt : 0);
+  capybaras.update(!paused && !document.hidden ? dt : 0);
   const visual = interpolateMotion(previousMotion, s, accumulator / 0.1);
   const arrivalTime=Math.max(0,s.arrivalElapsed-(paused?0:0.1)+accumulator);
   drawCamp();

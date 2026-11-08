@@ -1,3 +1,4 @@
+import {createCapybara} from "./capybara.js";
 import * as THREE from 'three';
 import {ball,box,beam} from '../workshop/models.js';
 const materials=new Map();
@@ -96,6 +97,7 @@ function bird(goose=false,brown=false){
   shape(g,.15,coat,-.35,.4,0,[1.1,.5,.6]);return g;
 }
 export const LIVESTOCK=[
+  ["capybara","Capybara",createCapybara],
   ['cow-cream','Cream dairy cow',()=>quadruped('cow','#dfd3b7')],
   ['cow-brown','Brown dairy cow',()=>quadruped('cow','#98704c')],
   ['calf','Calf',()=>quadruped('cow','#b08c61',true)],
