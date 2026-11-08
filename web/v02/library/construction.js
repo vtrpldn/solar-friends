@@ -3,6 +3,22 @@ import {box,cylinder,beam} from '../workshop/models.js';
 // Construction keeps the completed asset's cell allocation and material scale.
 export function construction(def, stage) {
   const g=new THREE.Group(),[w,d]=def.footprint.map(n=>n*2-.5);
+  if (def.id === 'road') {
+    for(const x of [-.88,.88]) for(const z of [-.88,.88]) {
+      box(g,.055,.38,.055,'timber',x,.19,z);
+      box(g,.09,.08,.07,'plaster',x,.33,z);
+    }
+    for(const z of [-.88,.88]) box(g,1.76,.025,.025,'plaster',0,.23,z);
+    if(stage===1) {
+      // Scattered aggregate, not a finished road surface.
+      for(let i=0;i<9;i++) {
+        const stone=cylinder(g,.12,.2,.12,'stone',Math.sin(i*2.4)*.58,.06,Math.cos(i*2.4)*.58,5);
+        stone.rotation.y=i;
+      }
+      box(g,1.3,.035,.3,'earth',0,.025,0);
+    }
+    return g;
+  }
   const tank=['biodigester','well','eco_toilet','hydro'].includes(def.id);
   const bed=['garden','grove','orchard','wetland','banana_treatment','compost','square'].includes(def.id);
   const solar=def.id==='solar_farm';

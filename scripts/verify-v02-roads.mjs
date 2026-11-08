@@ -9,6 +9,7 @@ import {
   PROJECTS,
   walkSegmentClear,
   crossingAt,
+  tick,
 } from "../web/v02/weekend/simulation.js";
 const s = createSandbox(42);
 let site;
@@ -43,6 +44,17 @@ const pads = JSON.stringify(roads.terrainPads);
 for (let x = 50; x < 57; x++) assert.equal(plan(roads, "road", x, 50), "");
 assert.ok(route(roads, { x: 49, z: 50 }, { x: 57, z: 50 }));
 assert.ok(restore(save(roads)));
+assert(roads.projects.every(p=>p.work===0), "Roads never use sandbox instant construction");
+const plain = route(roads, {x:49,z:51}, {x:57,z:51});
+assert(plain.every(p=>p.z===51), "Blueprints do not grant road path preference");
+assert(walkSegmentClear(roads,{x:49,z:50},{x:57,z:50}), "Road plans leave the ground walkable");
+const workers = new Set();
+for(let i=0;i<16000 && roads.projects.some(p=>p.work<PROJECTS.road.work);i++) {
+  tick(roads,.1);
+  roads.people.filter(r=>r.action==='build').forEach(r=>workers.add(r.id));
+}
+assert(workers.size>0, "Residents physically build the road");
+assert(roads.projects.every(p=>p.work===PROJECTS.road.work));
 const preferred = route(roads, { x: 49, z: 51 }, { x: 57, z: 51 });
 assert.ok(
   preferred.some((p) => p.z < 50.6),
@@ -57,3 +69,19 @@ assert.ok(placementError(roads, "bridge", 60, 60), "bridge requires river");
 console.log(
   "PASS: bridge spans dry banks, connects only when complete, safe crossing segments, road placement and persistence without terrain flattening.",
 );
+const storyRoad = createSandbox(42);
+storyRoad.mode = 'story';
+const stone = storyRoad.materials.stone, earth = storyRoad.materials.earth;
+assert.equal(plan(storyRoad,'road',40,35),'');
+assert.equal(storyRoad.materials.stone,stone-1);
+assert.equal(storyRoad.materials.earth,earth-1);
+const actions = new Set();
+for(let i=0;i<12000 && storyRoad.projects[0].work<PROJECTS.road.work;i++) {
+  tick(storyRoad,.1);
+  storyRoad.people.filter(r=>r.job===storyRoad.projects[0].id).forEach(r=>actions.add(r.action));
+}
+for(const action of ['collect','carry','build']) assert(actions.has(action),action);
+assert.equal(storyRoad.projects[0].delivered,2);
+assert.equal(storyRoad.projects[0].work,PROJECTS.road.work);
+assert(restore(save(storyRoad)));
+console.log('PASS: residents deliver stone and earth, build roads in story and sandbox, and road benefits wait for completion.');

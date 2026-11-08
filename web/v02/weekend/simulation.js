@@ -913,7 +913,7 @@ export function plan(s, key, x, z, rotation = 0) {
   }
   s.money -= purchase.cost;
   gradeFoundation(s, key, x, z, rotation);
-  const instant = s.mode === "sandbox" && s.instantBuild !== false;
+  const instant = key !== "road" && s.mode === "sandbox" && s.instantBuild !== false;
   s.projects.push({
     id: s.nextId++,
     key,
@@ -1094,7 +1094,7 @@ function occupied(s, x, z) {
     s.projects.some(
       (p) =>
         !(
-          ["road", "bridge"].includes(p.key) && p.work >= PROJECTS[p.key].work
+          p.key === "road" || (p.key === "bridge" && p.work >= PROJECTS[p.key].work)
         ) &&
         !(
           p.work >= PROJECTS[p.key].work &&

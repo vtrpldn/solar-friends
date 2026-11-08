@@ -775,7 +775,7 @@ function startPlacement(key, id = null) {
     key === "bridge"
       ? "Span the river with both ends on dry land. R rotates. Esc cancels."
       : key === "road"
-        ? "Click to lay roads. Shift-click along a row or column to extend. Esc finishes."
+        ? "Mark a road route. Residents bring materials and build each section. Shift-click extends; Esc finishes planning."
         : "Choose a building site. R rotates. Shift-click repeats. Ground levels automatically. Esc cancels.",
   );
   renderUI();
@@ -1425,7 +1425,8 @@ function renderUI() {
   const active = s.stage !== "arrival";
   $("sandbox-instant").hidden = s.mode !== "sandbox";
   $("sandbox-instant").textContent =
-    `Instant build: ${s.instantBuild === false ? "off" : "on"}`;
+    `Instant buildings: ${s.instantBuild === false ? "off" : "on"}`;
+  $("sandbox-instant").title = "Roads always require resident construction.";
   $("sandbox-instant").setAttribute(
     "aria-pressed",
     String(s.instantBuild !== false),
