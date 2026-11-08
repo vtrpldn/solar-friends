@@ -14,6 +14,9 @@ import {
   restore,
   route,
   walkSegmentClear,
+  PROJECTS,
+  MATERIALS,
+  requiredLoads,
 } from "../web/v02/weekend/simulation.js";
 function createWeekend() {
   const s = createFreshWeekend();
@@ -29,8 +32,8 @@ for (const camp of ["shade", "entrance", "clearing"]) {
   assert.equal(plan(s, "gathering", 29, 35), "");
   assert.equal(plan(s, "shelter", 34, 39), "");
   assert.equal(s.wood, 4);
-  assert.equal(s.money, 170);
-  run(s, 420);
+  assert.equal(s.money, 220);
+  run(s, 1800);
   assert(finished(s, "gathering"), `${camp} gathering stalls`);
   assert(finished(s, "shelter"), `${camp} shelter stalls`);
   assert(s.people.every((r) => r.energy >= 0 && r.energy <= 100));
@@ -55,18 +58,20 @@ assert.equal(plan(s, "water", 35, 35), "");
 assert(supplyRun(s));
 assert(!supplyRun(s));
 run(s, 60);
-assert.equal(s.wood, 23);
+assert.equal(s.wood, 32);
 assert(!s.trip);
-assert.equal(s.money, 105);
+assert.equal(s.money, 175);
 assert.equal(moveProject(s, 1, 28, 33), "");
-run(s, 360);
+run(s, 600);
 assert(finished(s, "gathering"));
 assert(finished(s, "water"));
 assert.equal(plan(s, "toilet", 39, 30), "");
-run(s, 240);
+run(s, 900);
 assert(finished(s, "toilet"));
+assert(supplyRun(s));
+run(s, 60);
 assert.equal(plan(s, "shelter", 40, 36), "");
-run(s, 300);
+run(s, 1800);
 assert(finished(s, "shelter"));
 assert(s.people.some((r) => r.work > 0));
 const path = route(s, { x: 28, z: 30 }, { x: 33, z: 35 });
@@ -117,9 +122,9 @@ run(trip, 20);
 const resumed = restore(save(trip));
 assert(resumed);
 run(resumed, 36);
-assert.equal(resumed.wood, 30);
+assert.equal(resumed.wood, 48);
 run(resumed, 60);
-assert.equal(resumed.wood, 30, "Supply trip must not pay twice after reload");
+assert.equal(resumed.wood, 48, "Supply trip must not pay twice after reload");
 assert.equal(plan(loaded, "water", 40, 40).length > 0, true);
 console.log(
   "PASS: water use, autonomous recovery, protected work access and in-flight trip restore.",
@@ -275,4 +280,54 @@ assert.deepEqual(route(walking, { x: 40, z: 42 }, { x: 40.2, z: 42.1 }), [
 ]);
 console.log(
   "PASS: direct open-ground travel, rounded detours, swept body clearance and precise fractional destinations.",
+);
+
+const materialTest = createWeekend();
+chooseCamp(materialTest, "clearing");
+materialTest.money = 0;
+assert.equal(
+  plan(materialTest, "shelter", 29, 35),
+  "",
+  "Construction consumes no money",
+);
+assert.equal(materialTest.money, 0);
+assert.equal(materialTest.wood, 12);
+assert.equal(materialTest.materials.roofing, 2);
+assert.equal(materialTest.materials.hardware, 4);
+assert(requiredLoads("shelter") > requiredLoads("gathering"));
+assert(PROJECTS.shelter.work > PROJECTS.gathering.work * 5);
+assert.match(plan(materialTest, "toilet", 39, 30), /Missing 4 timber pieces/);
+assert.equal(
+  materialTest.materials.sanitation,
+  1,
+  "Failed plan consumes nothing",
+);
+assert(!supplyRun(materialTest, "wood"), "Purchases require money");
+materialTest.money = 220;
+assert(supplyRun(materialTest, "roofing"));
+assert.equal(materialTest.money, 100);
+assert.equal(
+  materialTest.materials.roofing,
+  2,
+  "Purchases are unavailable until delivered",
+);
+run(materialTest, 20);
+const delivery = restore(save(materialTest));
+assert(delivery);
+run(delivery, 36);
+assert.equal(delivery.materials.roofing, 8);
+run(delivery, 60);
+assert.equal(delivery.materials.roofing, 8);
+run(delivery, 1800);
+assert(finished(delivery, "shelter"));
+assert.equal(
+  delivery.projects[0].delivered,
+  requiredLoads("shelter"),
+  "No duplicate material loads",
+);
+const invalidMaterials = JSON.parse(save(delivery));
+invalidMaterials.materials.tank = -1;
+assert.equal(restore(JSON.stringify(invalidMaterials)), null);
+console.log(
+  "PASS: material recipes, money-free construction, atomic reservations, proportional loads/labor, purchased inventory and saved deliveries.",
 );

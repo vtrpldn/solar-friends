@@ -9,11 +9,11 @@ Test a short loop of choosing a campsite, placing practical projects, watching f
 Choose one of three camps, select a project, then click a clear grid square. Project buttons in the journal open priority and relocation controls. WASD/arrows or left-drag pan relative to the camera; Shift pans faster. Q/E or right-drag turn the view. Scroll or +/− zoom; Home centers the camp. Keyboard movement works while paused, ignores text fields and dialogs, and stops on focus loss. Pause and 4× speed are available. The evening button ends construction for this session; New weekend asks before replacing its save.
 
 - Five autonomous friends share work, carry materials, recover energy and use an installed tank for washing breaks.
-- Resources are reserved at planning time. Work access is protected during placement and relocation. Two friends can work on each project.
+- Physical materials are reserved at planning time; construction never deducts money. Each recipe determines the number of carrying loads, followed by resident assembly labor. Work access is protected during placement and relocation. Two friends can work on each project.
 - An entrance camp needs a runoff decision during the shower. Other sites drain well. Raising supplies consumes timber; moving them is free.
-- Town trips cost R$45, take 55 active simulation seconds, and bring 12 timber. Reloading preserves the remaining trip time without paying twice.
+- Town purchases offer timber, fasteners, roofing, tarp/rope, tanks, plumbing and toilet kits. Money is spent only when buying these supplies. Trips take 55 active simulation seconds; inventory arrives on return, including after reloading.
 - Meals, drinking water and tents cover initial essentials. Detailed consumption, sanitation processing, overnight sleep, tool inventory, terrain excavation and a second day are not simulated here. The temporary toilet contributes to the evening outcome.
-- Time pauses in hidden tabs. Saves use `solar-friends-v02-first-weekend-1` in local storage. The restart action never touches other modes.
+- Time pauses in hidden tabs. Saves use `solar-friends-v02-first-weekend-2` in local storage. The restart action never touches other modes.
 
 `simulation.js` contains serializable state and rules. `game.js` renders the scene and UI. Run `node scripts/verify-v02-weekend.mjs` from the repository root for deterministic playthroughs and regression checks.
 
@@ -28,3 +28,11 @@ The two ridge tents use actual fabric panels, open doors, tied flaps, poles, rop
 New weekends open with a 17-second two-SUV arrival: staggered curved approaches, side-by-side parking, and five exits split between two Jimny-inspired SUVs. Camp selection waits until everyone is out. Pause, speed and Skip arrival work during the opening; elapsed arrival time is saved. `?arrival-preview` replays the opening without reading or writing the player save.
 
 The simulation runs at 10 Hz; presentation interpolates between its last two states every display frame. Residents, arrival vehicles, limb poses and current highlights share that interpolated clock, with one tick of visual latency and no extrapolation through obstacles. The performance overlay reports motion-clock updates separately from renderer FPS so high FPS cannot hide a stepped visual clock. `node scripts/verify-v02-presentation.mjs` checks 30/60/120 Hz, 1×/4× pace, pause and teleport boundaries.
+
+## Construction balance
+
+Recipes model small temporary structures assembled from prepared materials, not permanent buildings or engineering specifications. The group brings 36 timber pieces, seven fastener packs, eight roof sheets and one each of the tarp, tank, plumbing and sanitation kits. It can establish a camp and choose a practical improvement; completing every project requires another timber purchase.
+
+Assembly budgets are 1, 2, 8 and 4 person-hours for the gathering place, water stand, open shelter and temporary toilet. One simulation second represents 0.45 game minutes; skill improves assembly speed by 25%. Carrying, walking and rest are additional. Timber loads carry four pieces, roof loads two sheets, and equipment/fasteners one pack each. These loads abstract carrying capacity; they do not model exact weight or two-person lifting yet. Money never substitutes for missing stock.
+
+The revised economy uses save schema/key 2, preserving old prototype saves under their original key while starting a new weekend.

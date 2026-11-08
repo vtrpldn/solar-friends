@@ -345,3 +345,20 @@ dialog::backdrop {
 #build button {
   flex: 1;
 }
+
+#purchase {
+  width: 100%;
+  margin: 6px 0 10px;
+  padding: 8px;
+  border: 1px solid #9da481;
+  border-radius: 5px;
+  background: #f6f0da;
+  color: #2f483d;
+  font: inherit;
+}
+#inventory {
+  line-height: 1.6;
+}
+#build span {
+  line-height: 1.45;
+}

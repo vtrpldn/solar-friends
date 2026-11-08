@@ -31,58 +31,93 @@ export const CAMPS = [
     description: "Dry, roomy ground. You’ll need to make your own shade.",
   },
 ];
+export const MATERIALS = {
+  wood: { name: "timber pieces", batch: 4, quantity: 12, price: 45 },
+  hardware: { name: "fastener packs", batch: 1, quantity: 2, price: 30 },
+  roofing: { name: "roof sheets", batch: 2, quantity: 6, price: 120 },
+  tarp: { name: "tarp & rope kits", batch: 1, quantity: 1, price: 50 },
+  tank: { name: "water tanks", batch: 1, quantity: 1, price: 140 },
+  plumbing: { name: "pipe & tap kits", batch: 1, quantity: 1, price: 40 },
+  sanitation: { name: "toilet kits", batch: 1, quantity: 1, price: 80 },
+};
 export const PROJECTS = {
   gathering: {
     name: "Gathering place",
     asset: "picnic-table",
     size: [2, 2],
-    wood: 4,
-    cost: 0,
-    work: 85,
+    materials: { wood: 8, hardware: 1, tarp: 1 },
+    work: 134,
     description:
-      "Unpack the tarp and assemble a table. Shade, meals and a place to recover together.",
+      "Assemble a table from pre-cut boards and tie up the brought-in tarp. About 1 person-hour of assembly, plus carrying.",
   },
   water: {
     name: "Water storage",
     asset: "well",
     size: [2, 2],
-    wood: 3,
-    cost: 70,
-    work: 150,
+    materials: { wood: 8, hardware: 1, tank: 1, plumbing: 1 },
+    work: 267,
     description:
-      "Fit a purchased tank and fill it from your brought-in supply. Friends can wash and refresh themselves between jobs.",
+      "Build a level timber stand and install the brought-in tank, tap and pipes. About 2 person-hours, plus carrying; this is not a drilled well.",
   },
   shelter: {
     name: "Basic shelter",
     asset: "shed",
     size: [2, 2],
-    wood: 10,
-    cost: 50,
-    work: 220,
+    materials: { wood: 24, hardware: 3, roofing: 6 },
+    work: 1067,
     description:
-      "A dry roof for the group. The frame gives shade halfway through construction.",
+      "Raise a small open timber shelter with a sheet roof. About 8 person-hours with pre-cut timber, plus carrying. The frame gives shade halfway through.",
   },
   toilet: {
     name: "Private toilet",
     asset: "eco_toilet",
     size: [2, 2],
-    wood: 6,
-    cost: 40,
-    work: 160,
+    materials: { wood: 16, hardware: 2, roofing: 2, sanitation: 1 },
+    work: 534,
     description:
-      "Assemble a private temporary toilet. Makes an overnight stay more comfortable.",
+      "Assemble a temporary screened toilet around a purchased dry-toilet kit. About 4 person-hours, plus carrying; permanent sanitation comes later.",
   },
 };
+export function materialText(id, n) {
+  return `${n} ${n === 1 ? MATERIALS[id].name.replace(/s$/, "") : MATERIALS[id].name}`;
+}
+export function recipeText(key) {
+  return Object.entries(PROJECTS[key].materials)
+    .map(([id, n]) => materialText(id, n))
+    .join(" · ");
+}
+export function materialCount(s, id) {
+  return id === "wood" ? s.wood : s.materials[id];
+}
+export function missingMaterials(s, key) {
+  return Object.entries(PROJECTS[key].materials)
+    .filter(([id, n]) => materialCount(s, id) < n)
+    .map(([id, n]) => materialText(id, n - materialCount(s, id)));
+}
+export function requiredLoads(key) {
+  return Object.entries(PROJECTS[key].materials).reduce(
+    (sum, [id, n]) => sum + Math.ceil(n / MATERIALS[id].batch),
+    0,
+  );
+}
 export const NAMES = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 export function createWeekend() {
   return {
-    version: 1,
+    version: 2,
     stage: "arrival",
     arrivalElapsed: 0,
     camp: null,
     time: 0,
     money: 220,
-    wood: 18,
+    wood: 36,
+    materials: {
+      hardware: 7,
+      roofing: 8,
+      tarp: 1,
+      tank: 1,
+      plumbing: 1,
+      sanitation: 1,
+    },
     stock: { x: 32, z: 23 },
     projects: [],
     people: NAMES.map((name, i) => ({
@@ -205,8 +240,9 @@ export function plan(s, key, x, z) {
     return "Already planned. Select it to change priority or move it.";
   const error = placementError(s, key, x, z);
   if (error) return error;
-  if (s.wood < def.wood || s.money < def.cost)
-    return "Not enough supplies. Bring timber from town or choose a smaller project.";
+  const missing = missingMaterials(s, key);
+  if (missing.length)
+    return `Missing ${missing.join(", ")}. Buy supplies in town first.`;
   for (const r of s.people)
     if (
       [
@@ -222,8 +258,10 @@ export function plan(s, key, x, z) {
       r.walk = [];
       r.target = null;
     }
-  s.wood -= def.wood;
-  s.money -= def.cost;
+  for (const [id, n] of Object.entries(def.materials)) {
+    if (id === "wood") s.wood -= n;
+    else s.materials[id] -= n;
+  }
   s.projects.push({ id: s.nextId++, key, x, z, work: 0, delivered: 0 });
   for (const r of s.people) {
     r.walk = [];
@@ -266,21 +304,23 @@ export function prioritize(s, id) {
     "The group will pick up this project next. Current carrying trips finish first.",
   );
 }
-export function supplyRun(s) {
-  if (s.stage !== "playing" || s.trip || s.money < 45) return false;
+export function supplyRun(s, material = "wood") {
+  const item = MATERIALS[material];
+  if (!item || s.stage !== "playing" || s.trip || s.money < item.price)
+    return false;
   const r = s.people
     .filter((r) => r.energy > 35 && !r.cargo)
     .sort((a, b) => b.energy - a.energy)[0];
   if (!r) return false;
-  s.money -= 45;
-  s.trip = { person: r.id, left: 55 };
+  s.money -= item.price;
+  s.trip = { person: r.id, left: 55, material };
   r.job = null;
   r.target = null;
   r.walk = [];
   r.action = "town";
   say(
     s,
-    `${r.name} is driving to town: 12 timber for R$45. Back in about a minute.`,
+    `${r.name} is driving to town: ${item.quantity} ${item.name} for R$${item.price}. Back in about a minute.`,
   );
   return true;
 }
@@ -665,9 +705,12 @@ export function tick(s, dt) {
       r.action = "idle";
       r.x = 32;
       r.z = 24;
-      s.wood += 12;
+      const id = s.trip.material,
+        item = MATERIALS[id];
+      if (id === "wood") s.wood += item.quantity;
+      else s.materials[id] += item.quantity;
       s.trip = null;
-      say(s, `${r.name} is back with 12 timber.`);
+      say(s, `${r.name} is back with ${item.quantity} ${item.name}.`);
     }
   }
   if (
@@ -819,7 +862,11 @@ export function tick(s, dt) {
       .filter((other) => other.job === p.id)
       .findIndex((other) => other === r);
     const dest = { x: p.x - 1, z: p.z + Math.max(0, slot) };
-    if (p.delivered < 2 && !r.cargo) {
+    const loads = requiredLoads(p.key);
+    const inTransit = s.people.filter(
+      (other) => other.job === p.id && other.cargo,
+    ).length;
+    if (p.delivered + inTransit < loads && !r.cargo) {
       r.action = "collect";
       if (!r.supplyGoal) r.supplyGoal = supplySpot(s, r, i);
       if (go(s, r, r.supplyGoal)) {
@@ -835,7 +882,7 @@ export function tick(s, dt) {
       p.delivered++;
       r.cargo = false;
     }
-    if (p.delivered < 2) continue;
+    if (p.delivered < loads) continue;
     r.action = "build";
     const skilled =
       (r.id === "bento" && p.key === "shelter") ||
@@ -861,7 +908,7 @@ export function restore(text) {
   try {
     const s = JSON.parse(text);
     if (
-      s.version !== 1 ||
+      s.version !== 2 ||
       !["arrival", "playing", "evening"].includes(s.stage) ||
       !Array.isArray(s.people) ||
       s.people.length !== 5 ||
@@ -895,6 +942,13 @@ export function restore(text) {
       return null;
     if (s.stage !== "arrival" && !CAMPS.some((c) => c.id === s.camp))
       return null;
+    if (
+      !s.materials ||
+      Object.keys(MATERIALS)
+        .filter((id) => id !== "wood")
+        .some((id) => !Number.isInteger(s.materials[id]) || s.materials[id] < 0)
+    )
+      return null;
     for (const k of ["time", "money", "wood", "nextId"])
       if (!Number.isFinite(s[k]) || s[k] < 0) return null;
     if (
@@ -921,7 +975,7 @@ export function restore(text) {
         p.work > PROJECTS[p.key].work ||
         !Number.isInteger(p.delivered) ||
         p.delivered < 0 ||
-        p.delivered > 5
+        p.delivered > requiredLoads(p.key)
       )
         return null;
       ids.add(p.id);
@@ -966,7 +1020,8 @@ export function restore(text) {
     }
     if (
       s.trip &&
-      (!s.people.some((r) => r.id === s.trip.person) ||
+      (!Object.hasOwn(MATERIALS, s.trip.material) ||
+        !s.people.some((r) => r.id === s.trip.person) ||
         !Number.isFinite(s.trip.left) ||
         s.trip.left <= 0 ||
         s.trip.left > 55)

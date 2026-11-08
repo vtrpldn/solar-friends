@@ -25,6 +25,12 @@ import { createResident, animateResident } from "../residents/rig.js";
 import {
   CAMPS,
   PROJECTS,
+  MATERIALS,
+  materialText,
+  recipeText,
+  materialCount,
+  missingMaterials,
+  requiredLoads,
   createWeekend,
   chooseCamp,
   plan,
@@ -41,7 +47,7 @@ import {
   placementError,
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
-  SAVE = "solar-friends-v02-first-weekend-1";
+  SAVE = "solar-friends-v02-first-weekend-2";
 const arrivalPreview = new URLSearchParams(location.search).has(
   "arrival-preview",
 );
@@ -400,7 +406,7 @@ for (const c of CAMPS) {
 for (const [key, d] of Object.entries(PROJECTS)) {
   const b = document.createElement("button");
   b.id = `build-${key}`;
-  b.innerHTML = `<strong>${d.name}</strong><span>${d.wood} timber · ${d.cost ? `R$${d.cost}` : "brought from home"}</span>`;
+  b.innerHTML = `<strong>${d.name}</strong><span>${recipeText(key)}</span>`;
   b.title = d.description;
   b.onclick = () => startPlacement(key);
   $("build").append(b);
@@ -480,7 +486,7 @@ addEventListener("keydown", (e) => {
   if (e.key === "Escape") cancel();
 });
 $("town").onclick = () => {
-  if (supplyRun(s)) {
+  if (supplyRun(s, $("purchase").value)) {
     message(s.log[0]);
     persist();
     renderUI();
@@ -584,6 +590,8 @@ function renderUI() {
     s.camp,
     s.money,
     s.wood,
+    s.materials,
+    $("purchase").value,
     Math.floor(s.time * 0.45),
     s.trip && Math.ceil(s.trip.left),
     s.rainSeen,
@@ -660,7 +668,14 @@ function renderUI() {
     div.append(name, energy, status, progress);
     $("roster").append(div);
   }
-  $("town").disabled = !!s.trip || s.money < 45 || s.stage !== "playing";
+  const purchase = MATERIALS[$("purchase").value];
+  $("town").textContent =
+    `Fetch ${materialText($("purchase").value, purchase.quantity)} · R$${purchase.price}`;
+  $("town").disabled =
+    !!s.trip || s.money < purchase.price || s.stage !== "playing";
+  $("inventory").textContent = Object.keys(MATERIALS)
+    .map((id) => materialText(id, materialCount(s, id)))
+    .join(" · ");
   $("trip").textContent = s.trip
     ? `${s.people.find((r) => r.id === s.trip.person).name} returns in ${Math.ceil(s.trip.left)} seconds.`
     : "Packed meals and drinking water cover this weekend.";
@@ -684,6 +699,8 @@ function renderUI() {
   for (const key of Object.keys(PROJECTS)) {
     const b = $(`build-${key}`);
     b.disabled = s.projects.some((p) => p.key === key);
+    const missing = missingMaterials(s, key);
+    b.title = `${PROJECTS[key].description} ${missing.length ? "Missing: " + missing.join(", ") : "All materials available."}`;
     b.classList.toggle("active", placing === key);
   }
   const p = s.projects.find((p) => p.id === selected);
@@ -693,10 +710,18 @@ function renderUI() {
     $("selected-state").textContent = finished(s, p.key)
       ? "READY TO USE"
       : `${Math.floor((p.work / PROJECTS[p.key].work) * 100)}% BUILT`;
-    $("selected-desc").textContent = PROJECTS[p.key].description;
+    $("selected-desc").textContent =
+      `${PROJECTS[p.key].description} Reserved: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     $("priority").disabled = finished(s, p.key);
   }
 }
+for (const [id, item] of Object.entries(MATERIALS)) {
+  const option = document.createElement("option");
+  option.value = id;
+  option.textContent = `${materialText(id, item.quantity)} · R$${item.price}`;
+  $("purchase").append(option);
+}
+$("purchase").onchange = () => renderUI();
 renderUI();
 if (s.stage !== "arrival") message(s.log[0] || "Welcome back to your camp.");
 const recordPerformance = performanceReadout(renderer);
