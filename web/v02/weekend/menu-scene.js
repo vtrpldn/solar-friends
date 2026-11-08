@@ -15,7 +15,7 @@ try {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("#b9cbd0");
-  scene.fog = new THREE.Fog("#b9cbd0", 45, 110);
+  scene.fog = new THREE.Fog("#a8b590", 90, 170);
   scene.add(new THREE.HemisphereLight("#fff0cd", "#687d52", 2.5));
   const sun = new THREE.DirectionalLight("#ffdda2", 3.2);
   sun.position.set(-12, 22, 8);
@@ -79,16 +79,17 @@ try {
   scene.add(path);
   prop("house", -9, -4, 0.3);
   prop("house", 8, -7, -0.4);
-  prop("solar_farm", 8, 5);
+
   prop("orchard", -9, 6);
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 180);
-  camera.position.set(27, 15, 35);
-  camera.lookAt(0, 2, -3);
+  camera.position.set(22, 28, 32);
+  camera.lookAt(-3, 0, 1);
   function render() {
     const w = innerWidth,
       h = innerHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
+    camera.setViewOffset(w, h, -w * 0.16, 0, w, h);
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
   }
