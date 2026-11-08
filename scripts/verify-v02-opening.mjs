@@ -66,7 +66,9 @@ run(scarce, 241);
 assert(scarce.rainSeen && scarce.rainResolved, "opening shower does not create a forced repair quest");
 scarce.money = 220;
 assert.equal(plan(scarce, "covered-stores", 40, 39), "");
-run(scarce, 400);
+// Crews are now limited; carrying, breaks and construction must still finish
+// within the opening budget, rather than assuming all five residents build it.
+for (let elapsed = 0; elapsed < 1200 && !scarce.projects.some(p => p.key === "covered-stores" && p.work === PROJECTS[p.key].work); elapsed++) run(scarce, 1);
 assert(scarce.projects.some(p=>p.key === "covered-stores" && p.work === PROJECTS[p.key].work), "residents complete the storage plan");
 assert(restore(save(scarce)));
 assert(!canFinish(scarce), "shelter and stores cannot replace gathering");

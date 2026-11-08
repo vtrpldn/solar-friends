@@ -1,3 +1,4 @@
+import { STORAGE_KINDS, crewLimit, carriedLoads } from "./construction-logistics.js";
 import {registerWorld,validSettings,townDuration,waterFactor} from './world-settings.js';
 import {depositCapacity} from './land-layout.js';
 import {workMultiplier} from './resident-personality.js';
@@ -1023,6 +1024,9 @@ export function prioritize(s, id) {
   const i = s.projects.findIndex((p) => p.id === id);
   if (i < 0) return;
   s.projects.unshift(...s.projects.splice(i, 1));
+  for (const r of s.people) if (r.job && !r.cargo && !r.needTask) {
+    r.job = null; r.workSpot = null; r.supplyGoal = null; r.walk = []; r.target = null;
+  }
   say(
     s,
     "The group will pick up this project next. Current carrying trips finish first.",
@@ -1412,21 +1416,6 @@ function restSpot(s, i) {
   return { x: 31, z: 24 };
 }
 function supplySpot(s, r, i) {
-  const stores = s.projects
-    .filter(
-      (p) =>
-        ["warehouse", "supply-5"].includes(PROJECTS[p.key].kind) &&
-        p.work >= PROJECTS[p.key].work &&
-        s.infrastructure?.nodes[p.id]?.enabled !== false,
-    )
-    .sort(
-      (a, b) =>
-        Math.hypot(a.x - r.x, a.z - r.z) - Math.hypot(b.x - r.x, b.z - r.z),
-    );
-  for (const p of stores) {
-    const spot = workSpot(s, r, p);
-    if (spot) return spot;
-  }
   const offsets = [
     [-1, 0],
     [1, 0],
@@ -1486,7 +1475,8 @@ function workSpot(s, r, p) {
 }
 function availableProject(s, r) {
   return s.projects.find(
-    (p) => !p.pendingMaterials && p.work < PROJECTS[p.key].work && workSpot(s, r, p),
+    (p) => !p.pendingMaterials && p.work < PROJECTS[p.key].work &&
+      s.people.filter(other => other !== r && other.job === p.id).length < crewLimit(PROJECTS[p.key]) && workSpot(s, r, p),
   );
 }
 function idleActivity(s, r, i, dt) {
@@ -1822,6 +1812,9 @@ export function tick(s, dt) {
       r.idleUntil = 0;
       r.idleGoal = null;
     }
+    if (r.energy < 25 && r.job && !r.cargo && !r.needTask) {
+      r.walk=[]; r.target=null; r.job=null; r.supplyGoal=null;
+    }
     if (r.walk.length) {
       const next = r.walk[0],
         dx = next.x - r.x,
@@ -1940,24 +1933,50 @@ export function tick(s, dt) {
     }
     const dest = r.workSpot;
     const loads = requiredLoads(p.key);
-    const inTransit = s.people.filter(
-      (other) => other.job === p.id && other.cargo,
-    ).length;
-    if (p.delivered + inTransit < loads && !r.cargo) {
-      r.action = "collect";
-      if (!r.supplyGoal) r.supplyGoal = supplySpot(s, r, i);
-      if (go(s, r, r.supplyGoal)) {
-        r.supplyGoal = null;
-        r.cargo = true;
-        r.target = null;
+    // Reserved supplies begin at the receiving stockpile. Storage only helps
+    // after a resident physically stages a larger batch there.
+    const transit = s.people.filter(other => other.job === p.id && other.cargo);
+    const inTransit = transit.reduce((n,other) => n + carriedLoads(other), 0);
+    const remaining = Math.max(0, loads - p.delivered - (p.staged || 0) - inTransit);
+    let depot = s.projects.find(other => other.id === p.depot && other.work >= PROJECTS[other.key].work);
+    if (!depot && !(p.staged > 0)) {
+      depot = s.projects.filter(other => other.id !== p.id && STORAGE_KINDS.includes(PROJECTS[other.key].kind) && other.work >= PROJECTS[other.key].work &&
+        Math.hypot(other.x-p.x,other.z-p.z) < 8 &&
+        Math.hypot(other.x-s.stock.x,other.z-s.stock.z)+Math.hypot(other.x-p.x,other.z-p.z) < Math.hypot(p.x-s.stock.x,p.z-s.stock.z)*1.35)
+        .sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))
+        .find(other=>workSpot(s,r,other));
+      p.depot = depot?.id;
+    }
+    if (!r.cargo && p.delivered < loads) {
+      const staged = (p.staged || 0) > 0 && depot;
+      if (!staged && !remaining) {
+        r.job=null; r.workSpot=null; r.action='idle'; r.target=null;
+        continue;
+      }
+      r.action = 'collect';
+      const source = staged ? workSpot(s,r,depot) : supplySpot(s,r,i);
+      if (!source) { r.job=null; continue; }
+      const sourceId=staged ? depot.id : 0;
+      if(r.supplySource!==sourceId){r.supplyGoal=null;r.walk=[];r.target=null;}
+      r.supplySource=sourceId;
+      if (!r.supplyGoal) r.supplyGoal=source;
+      if (go(s,r,r.supplyGoal)) {
+        r.haulLoads = Math.min(staged ? 2 : depot ? 4 : 1, staged ? p.staged : remaining);
+        r.haulStage = staged || !depot ? 'site' : 'storage';
+        if(staged) p.staged-=r.haulLoads;
+        r.supplyGoal=null; r.cargo=true; r.target=null;
       }
       continue;
     }
-    r.action = r.cargo ? "carry" : "walk";
-    if (!go(s, r, dest)) continue;
-    if (r.cargo) {
-      p.delivered++;
-      r.cargo = false;
+    r.action = r.cargo ? 'carry' : 'walk';
+    const delivery = r.cargo && r.haulStage==='storage' && depot ? workSpot(s,r,depot) : dest;
+    if(!delivery || !go(s,r,delivery)) continue;
+    if(r.cargo) {
+      if(r.haulStage==='storage' && depot) p.staged=(p.staged||0)+carriedLoads(r);
+      else p.delivered=Math.min(loads,p.delivered+carriedLoads(r));
+      r.cargo=false; r.haulLoads=0; r.haulStage=null;
+      r.target=null;
+      if(p.delivered<loads) continue;
     }
     if (p.delivered < loads || r.energy < 25) continue;
     r.action = "build";
@@ -2184,6 +2203,8 @@ export function restore(text) {
         p.work > PROJECTS[p.key].work ||
         !Number.isInteger(p.delivered) ||
         p.delivered < 0 ||
+        (p.staged !== undefined && (!Number.isInteger(p.staged) || p.staged < 0 || p.staged + p.delivered > requiredLoads(p.key))) ||
+        (p.depot !== undefined && (!Number.isInteger(p.depot) || !s.projects.some(other => other.id === p.depot && STORAGE_KINDS.includes(PROJECTS[other.key].kind)))) ||
         p.delivered > requiredLoads(p.key)
       )
         return null;
@@ -2221,6 +2242,11 @@ export function restore(text) {
       if (!validNeeds(r)) return null;
       if(r.friendships!==undefined && (!r.friendships || typeof r.friendships!=='object' || Array.isArray(r.friendships) || Object.entries(r.friendships).some(([id,value])=>id===r.id || !fresh.people.some(p=>p.id===id) || !Number.isFinite(value) || value<0 || value>100))) return null;
       ensureNeeds(r,i);
+      if (r.cargo && r.haulStage === 'site' && r.haulLoads && r.job) {
+        const project=s.projects.find(p=>p.id===r.job);
+        if(project?.depot) project.staged=(project.staged||0)+r.haulLoads;
+      }
+      r.haulLoads=0; r.haulStage=null;
       r.needTask = null;
       r.needRetryAt = 0;
       r.needBlocked = null;

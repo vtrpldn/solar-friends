@@ -20,7 +20,7 @@ export const OPENING_PROJECTS = {
     kind: "covered-storage",
     category: "First camp",
     description:
-      "A raised, roofed rack keeps our supplies dry and adds storage. Uses the same six roof sheets as the permanent shelter.",
+      "A raised, roofed rack keeps our supplies dry and adds storage. Nearby building projects can stage bundled deliveries here to reduce hauling trips. Uses the same six roof sheets as the permanent shelter.",
   },
   "tarp-stores": {
     name: "Tarp-covered supplies",

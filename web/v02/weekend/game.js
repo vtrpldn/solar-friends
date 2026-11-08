@@ -1,3 +1,4 @@
+import { constructionStatus } from "./construction-logistics.js";
 import { BUILD_CATEGORIES, buildingCategory, inBuildCategory } from "./build-categories.js";
 import {createResourceTrends,resourceSnapshot,formatTrend} from './resource-trends.js';
 import {materialTooltip} from './material-tooltip.js';
@@ -1446,7 +1447,7 @@ function renderUI() {
     s.log,
     s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
     s.projects.map((p) => [
-      p.id,
+      p.id, p.delivered, p.staged,
       Math.floor((p.work / PROJECTS[p.key].work) * 100),
     ]),
   ]);
@@ -1552,12 +1553,7 @@ function renderUI() {
       const workers = s.people.filter(
         (r) => r.job === p.id && r.action === "build",
       ).length;
-      workStatus.textContent =
-        p.pendingMaterials ? ((s.trip?.projects || [s.trip?.project]).includes(p.id) ? "Materials purchased · resident collecting in town" : "Materials purchased · waiting for a pickup") : p.delivered < requiredLoads(p.key)
-          ? `Bringing supplies · ${p.delivered}/${requiredLoads(p.key)} loads delivered`
-          : workers
-            ? `${workers} friends building`
-            : "Supplies ready · waiting for a builder";
+      workStatus.textContent = constructionStatus(s, p, d, requiredLoads(p.key));
       div.append(workStatus);
     }
     $(done ? "completed-tasks" : "tasks").append(div);
@@ -1600,6 +1596,7 @@ function renderUI() {
               : (r.action === "relax" && COMMUNITY[r.leisureKind]?.activity) ||
                 actionText[r.action] ||
                 "Settling in";
+    if(r.job && r.cargo && r.haulLoads) status.textContent = `Carrying ${r.haulLoads} load${r.haulLoads===1?'':'s'} to ${r.haulStage==='storage'?'nearby storage':PROJECTS[s.projects.find(p=>p.id===r.job)?.key]?.name || 'the building site'}`;
     if(r.needBlocked && !r.needTask) status.textContent += ` · ${r.needBlocked}`;
     status.className = "resident-status";
     const needs=document.createElement('div');
