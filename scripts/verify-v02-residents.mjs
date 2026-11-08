@@ -143,3 +143,39 @@ assert.equal(
 console.log(
   `PASS: six serializable rigs, ten finite poses, ${cases} rotated prop/action rehearsals, carrying return, stop reset, blocked approaches, route detours and inaccessible joined-garden interior.`,
 );
+// Exercise a full trip from the authored placement, not just nearby rehearsals.
+const walker = createResident("bento");
+walker.userData.placement = {
+  id: "walker",
+  asset: "bento",
+  column: 23,
+  row: 25,
+  rotation: 0,
+};
+walker.position.set(...placementPosition(23, 25, [1, 1]));
+const trip = new ResidentDirector(
+  [walker],
+  [walker.userData.placement, target],
+);
+trip.start("walker", target, "sit", false);
+const beforeWalk = walker.position.clone();
+trip.tick(0.1);
+assert(walker.position.distanceTo(beforeWalk) > 0);
+const legPose = walker.rig.legs[0].hip.rotation.x;
+trip.tick(0.1);
+assert.notEqual(walker.rig.legs[0].hip.rotation.x, legPose);
+for (let i = 0; i < 2400; i++) trip.tick(1 / 60);
+assert.equal(trip.task.phase, "action");
+for (const id of RESIDENT_IDS) {
+  const model = createResident(id);
+  let triangles = 0;
+  model.traverseVisible((o) => {
+    if (o.isMesh)
+      triangles +=
+        (o.geometry.index?.count ?? o.geometry.attributes.position.count) / 3;
+  });
+  assert(triangles <= 650, `${id}: resident detail budget`);
+}
+console.log(
+  "PASS: full-distance walking arrival, changing gait and visible resident geometry budget.",
+);

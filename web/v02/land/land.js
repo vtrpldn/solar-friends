@@ -365,6 +365,19 @@ cursor.rotation.x = -Math.PI / 2;
 cursor.position.y = 0.009;
 cursor.visible = false;
 scene.add(cursor);
+function updateSelectionOutline(model) {
+  const [w, d] = model.userData.footprint.map((n) => n * CELL_METRES),
+    { x, z } = model.position;
+  selectionGeometry.setFromPoints(
+    [
+      [x - w / 2, 0.04, z - d / 2],
+      [x + w / 2, 0.04, z - d / 2],
+      [x + w / 2, 0.04, z + d / 2],
+      [x - w / 2, 0.04, z + d / 2],
+    ].map((v) => new THREE.Vector3(...v)),
+  );
+  selectionGeometry.computeBoundingSphere();
+}
 function select(model) {
   selected = model;
   const choices = INTERACTIONS[model?.userData.placement.asset] || [];
@@ -384,17 +397,8 @@ function select(model) {
       "Select a prop to move, rotate, duplicate or delete it. Browse the library to find or place any asset.";
   } else {
     const r = model.userData.placement,
-      def = ASSETS.find((a) => a.id === r.asset),
-      [w, d] = model.userData.footprint.map((n) => n * CELL_METRES),
-      { x, z } = model.position;
-    selectionGeometry.setFromPoints(
-      [
-        [x - w / 2, 0.04, z - d / 2],
-        [x + w / 2, 0.04, z - d / 2],
-        [x + w / 2, 0.04, z + d / 2],
-        [x - w / 2, 0.04, z + d / 2],
-      ].map((v) => new THREE.Vector3(...v)),
-    );
+      def = ASSETS.find((a) => a.id === r.asset);
+    updateSelectionOutline(model);
     $("#object-name").textContent = r.label;
     $("#column").value = r.column + 1;
     $("#row").value = r.row + 1;
@@ -728,6 +732,7 @@ function animateResidents(time = 0) {
       : 0;
     lastAnimationTime = time;
     director?.tick(dt);
+    if (selected?.rig) updateSelectionOutline(selected);
     render();
   }
   if (!animationFrame) animationFrame = requestAnimationFrame(animateResidents);
@@ -752,9 +757,14 @@ $("#send-resident").onclick = () => interact(false);
 $("#preview-interaction").onclick = () => interact(true);
 $("#stop-interaction").onclick = () => {
   director?.stop();
+  if (selected?.rig) updateSelectionOutline(selected);
   render();
 };
 $("#animate-residents").onchange = () => {
+  const status = $("#resident-status");
+  status.textContent = $("#animate-residents").checked
+    ? status.textContent.replace(/^Paused · /, "")
+    : `Paused · ${status.textContent.replace(/ · preview running$/, "")}`;
   lastAnimationTime = 0;
   animateResidents();
 };

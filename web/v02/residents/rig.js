@@ -77,6 +77,8 @@ export function createResident(id = "resident") {
   root.rig = rig;
   root.name = id;
   const i = RESIDENT_IDS.indexOf(id) - 1;
+  if ([0, 2, 4].includes(i))
+    ball(head, 0.17, "hair", 0, -0.1, -0.19, [1, 0.9, 0.6], 0);
   if (i >= 0) {
     const shirt = ["#d6af52", "#397c86", "#e6b987", "#7a954d", "#967caa"][i],
       skin = ["#bb8055", "#8d573a", "#bd8159", "#b77b4e", "#915a3c"][i];
@@ -182,6 +184,7 @@ export function poseResident(rig, action, time, blend = 1) {
     legs.forEach((l) => (l.hip.rotation.x = -hips.rotation.x));
     if (action === "tend") {
       hips.position.y = 0.68;
+      hips.position.z = 0.25;
       legs.forEach((l) => {
         l.hip.rotation.x = -1.35;
         l.knee.rotation.x = 1.5;
@@ -194,6 +197,8 @@ export function poseResident(rig, action, time, blend = 1) {
         0.34 + Math.cos(time * 3 + i) * 0.035,
       ),
     );
+    if (action === "wash")
+      arms.forEach((a, i) => (a.shoulder.rotation.z = i === 0 ? 0.25 : -0.25));
     if (action === "water") {
       can.rotation.x = 0.3 + Math.sin(time * 2) * 0.12;
       stream.scale.y = 0.85 + Math.sin(time * 10) * 0.15;

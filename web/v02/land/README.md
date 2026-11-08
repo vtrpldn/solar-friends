@@ -19,7 +19,7 @@ Open `/v02/land/`. The initial gallery places all 105 model types on the 128×12
 
 Edits save to localStorage under `solar-friends-v02-scene-1`, separate from every v0.1 save. Export/import use a versioned JSON document with up to 1,000 props. Imports validate known asset IDs, unique instance IDs, integer cells, quarter turns and map bounds before replacing the scene. Failed imports leave the scene intact. The browser reports storage failure and offers export. Undo history resets on reload; scene contents persist.
 
-`editor.js` owns pure scene validation/history; `layout.js` owns map coordinates and the original five-prop reference fixture; `land.js` owns rendering and interaction. Rendering is on demand. The asset library batches each model by material, while the terrain remains one continuous mesh. There are no platform sprites or simulated residents.
+`editor.js` owns pure scene validation/history; `layout.js` owns map coordinates and the original five-prop reference fixture; `land.js` owns rendering and interaction. Rendering is on demand. The asset library batches each model by material, while the terrain remains one continuous mesh. There are no platform sprites or v0.1 simulation systems. Residents use articulated animation rehearsals.
 
 Run `node scripts/verify-v02-library.mjs`, `node scripts/verify-v02-models.mjs`, and `node scripts/verify-v02-land.mjs`. The last checks map math and the original centered five-prop reference layout; the library test covers the full gallery and editor transactions.
 
@@ -28,3 +28,7 @@ Run `node scripts/verify-v02-library.mjs`, `node scripts/verify-v02-models.mjs`,
 Gardens, solar farms and orchards automatically join when their footprints share an edge. Gardens use continuous soil/crop rows with only an outside border; solar modules line up on extended rails and share one inverter; orchards share an outside fence. L-shapes, partial edges and holes follow the actual occupied cells. Corner contact does not join. Overlapping same-type sections stay independent, avoiding ambiguous ownership.
 
 Each section remains selectable and editable. Moving, rotating, deleting, undoing or loading a scene recomputes the connections; saved files keep the original placement records. The inspector shows connected section count and occupied cell area. Other building types retain their individual models. Run `node scripts/verify-v02-connections.mjs` for topology, rotated geometry, split/rejoin and persistence checks.
+
+## Resident rehearsals
+
+Select a supported prop to choose a resident and action. **Send resident** walks from their authored location; **Preview nearby** starts a short approach for close inspection. Pause animations or use **Stop / reset pose** to restore the resident. Benches, the shed, picnic table, hammock, gardens, seedling bench, workshop, kitchen, wash station and crates have authored contact points, including rotated placements. One rehearsal runs at a time and edits cancel it. Rehearsals do not alter saved placements or inventories. See [resident implementation](../residents/README.md) and run `node scripts/verify-v02-residents.mjs`.

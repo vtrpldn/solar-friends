@@ -68,10 +68,10 @@ export function interactionSlots(record, records) {
       shed: [[0, -0.4], [0, 1.6], 0],
       "picnic-table": [[0, 0.85], [0, 1.7], Math.PI],
       hammock: [[-0.15, 0], [-0.15, 1.7], 0],
-      "seedling-bench": [[0, 0.82], [0, 1.5], Math.PI],
-      workshop: [[-0.2, 2.02], [-0.2, 3], Math.PI],
-      kitchen: [[0.45, 1.98], [0.45, 3], Math.PI],
-      "wash-station": [[0, 0.64], [0, 1.5], Math.PI],
+      "seedling-bench": [[0, 0.74], [0, 1.5], Math.PI],
+      workshop: [[-0.2, 1.87], [-0.2, 3], Math.PI],
+      kitchen: [[0.45, 1.87], [0.45, 3], Math.PI],
+      "wash-station": [[0, 0.52], [0, 1.5], Math.PI],
       "produce-crates": [[0.35, 0.85], [0.35, 1.5], Math.PI],
     }[record.asset];
     slots = [{ at: s[0], approach: s[1], yaw: s[2] }];

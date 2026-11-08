@@ -12,7 +12,7 @@ There are **105 models**, covering **127 active entries** in `web/artwork/catalo
 - 18 crop models: six crops at three growth stages.
 - The five named residents plus the existing scale study; three hens and a goat.
 
-Day/night images use the same geometry with scene lighting. Portrait, idle and activity atlas entries refer to the same authored resident. These are static art studies: this pass does not recreate animation clips, simulation or production behavior. Residents retain the approved scale-study body as requested; they are not a character creator. Species are stylized representations, not botanical models.
+Day/night images use the same geometry with scene lighting. Portrait, idle and activity atlas entries refer to the same authored resident. The collection cards and sprite proofs remain static art studies. The land preview now has articulated resident motion and prop interaction rehearsals; it does not recreate v0.1 simulation or production behavior. Residents retain the approved scale-study body as requested; they are not a character creator. Species are stylized representations, not botanical models.
 
 Archived references, rejected images and earlier prototypes are deliberately excluded. All v0.1 source files and the original five model recipes remain intact. House study 03 is unchanged. New housing uses authored structural variations; randomized accessories remain deferred.
 
