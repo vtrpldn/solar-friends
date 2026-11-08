@@ -39,5 +39,5 @@ export function resourceRichness(seed,x,z,kind='stone') {
 export function depositCapacity(seed,p,recipe) {
   if(!recipe.deposit)return 0;
   const kind=Object.keys(recipe.output)[0],batch=recipe.output[kind];
-  return Math.round(recipe.deposit*resourceRichness(seed,p.x,p.z,kind)/batch)*batch;
+  return Math.round((p.natural?recipe.deposit*8:recipe.deposit)*resourceRichness(seed,p.x,p.z,kind)/batch)*batch;
 }

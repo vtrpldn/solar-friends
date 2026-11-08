@@ -8,7 +8,7 @@ import {
   storedMaterials,
   storageCapacity,
   queueProduction,
-  repeatProduction,
+  repeatProduction, queueWater, queuePurification,
 } from "./simulation.js";
 import { LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
 import { illustrate } from "./ui-art.js";
@@ -22,7 +22,7 @@ const intros = {
   resources:
     "Keep the essentials close, turn local materials into something useful, and plan the next trip to town.",
   water:
-    "Completed buildings connect automatically. Pumps need power, cisterns filter river water, and wastewater flows to compatible treatment.",
+    "Carry river water into a reservoir, then assign residents to purify it by hand. Untreated water stays separate. Powered pumps and cisterns automate this later.",
   power:
     "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically.",
 };
@@ -153,6 +153,20 @@ export function createManagement({
       if (canSwitchBuilding(state().infrastructure,n)) actions.append(toggle);
       el.append(actions);
     }
+    if(view==='water' && n.id!==-1 && n.capacity[1]) {
+      const actions=document.createElement('div');actions.className='node-actions';
+      const pending=(state().operations||[]).some(o=>!o.done && o.site===n.id);
+      const fetch=document.createElement('button');fetch.textContent='Carry river water';
+      fetch.disabled=pending || n.water[1]>=n.capacity[1];
+      fetch.onclick=()=>{notify(queueWater(state(),-1,n.id,'irrigation')||'Resident assigned to carry river water.');refresh();render();};actions.append(fetch);
+      if(n.capacity[0]) {
+        const purify=document.createElement('button');purify.textContent='Purify by hand';
+        purify.disabled=pending || n.water[1]<1 || n.capacity[0]-n.water[0]<1;
+        purify.onclick=()=>{notify(queuePurification(state(),n.id)||'Resident assigned to purify water.');refresh();render();};actions.append(purify);
+      }
+      if(pending){const status=document.createElement('small');status.textContent='Resident water job queued or in progress';actions.append(status);}
+      el.append(actions);
+    }
     return el;
   }
   function render() {
@@ -275,6 +289,7 @@ export function createManagement({
           "No matching supplies. Try another name.";
       $("production-sites").replaceChildren();
       for (const p of s.projects) {
+        if(PROJECTS[p.key].kind==='wild-tree')continue;
         const recipes = Object.entries(PROCESSES).filter(
           ([, d]) => d.kind === PROJECTS[p.key].kind,
         );

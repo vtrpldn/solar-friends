@@ -102,6 +102,8 @@ const recipes = {
   },
 };
 const extraMaterials = {
+  logs:['Raw wood',4,12,24],
+  planks:['Planks',4,12,60],
   bamboo: ["Bamboo poles", 4, 12, 48],
   earth: ["Building earth", 4, 12, 18],
   stone: ["Stone", 4, 12, 42],
@@ -198,7 +200,7 @@ export function expandProjects(projects) {
                   ? "Camp"
                   : "Buildings";
     projects[model.id] = {
-      name: model.name,
+      name: model.id==='supply-5' ? 'Timber workbench' : model.name,
       asset: model.id,
       size: model.size,
       beds: model.beds,
@@ -216,7 +218,7 @@ export function expandProjects(projects) {
         : COMMUNITY[model.id]?.category || category,
       repeatable: true,
       description:
-        ({'well':'A cistern storing 75 clean and 60 untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
+        ({'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. No electricity required.', 'well':'A cistern storing 75 clean and 60 untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
           'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 24 untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply.'}[model.id]) ||
         COMMUNITY[model.id]?.description ||
         `${model.name}. ${model.size.join(" × ")} cells. Build with physical supplies and resident labor.${["warehouse", "supply-5"].includes(kind) ? " Nearby construction can stage bundled deliveries here to reduce hauling trips." : ""}`,
@@ -236,9 +238,12 @@ export function expandProjects(projects) {
   }
 }
 export const PROCESSES = {
+  fell_tree:{name:'Fell selected tree',input:{},output:{logs:12},kind:'wild-tree',work:90},
+  saw_timber:{name:'Saw raw wood into timber',input:{logs:6},output:{wood:4},kind:'supply-5',work:45},
+  saw_planks:{name:'Saw timber into planks',input:{wood:3},output:{planks:6},kind:'supply-5',work:35},
   frames: {
     name: "Prepare frames",
-    input: { wood: 2, hardware: 1 },
+    input: { planks: 2, hardware: 1 },
     output: { frames: 1 },
     kind: "workshop",
     work: 30,
@@ -273,9 +278,9 @@ export const PROCESSES = {
     work: 40,
   },
   wood: {
-    name: "Harvest and replant timber",
+    name: "Harvest and replant raw wood",
     input: {},
-    output: { wood: 12 },
+    output: { logs: 12 },
     kind: "supply-0",
     work: 60,
     renew: 600,

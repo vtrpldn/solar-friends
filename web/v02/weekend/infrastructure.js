@@ -38,7 +38,7 @@ const CAPACITY = {
   'groundwater-well':[0,40,0,0],
   'water-pump':[0,12,0,0],
   well: [75, 60, 0, 0],
-  "water-storage": [40, 0, 0, 0],
+  "water-storage": [40, 40, 0, 0],
   home: [8, 0, 24, 16],
   kitchen: [6, 0, 24, 0],
   eco_toilet: [8, 0, 16, 16],
@@ -120,9 +120,9 @@ export function syncInfrastructure(s, defs) {
       power: 0,
     };
     const node=sys.nodes[p.id];
-    if(kind==='water-storage' && node.kind!==kind) {
+    if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<40)) {
       // Existing starter tanks become passive without destroying stored water.
-      node.kind=kind;node.capacity=[Math.max(40,node.water[0]),node.water[1],0,0];
+      node.kind=kind;node.capacity=[Math.max(40,node.water[0]),Math.max(40,node.water[1]),0,0];
     }
     Object.assign(sys.nodes[p.id], { x: p.x, z: p.z });
     if (kind === "home" && sys.nodes[p.id].capacity[3] === 0) sys.nodes[p.id].capacity = [...CAPACITY.home];

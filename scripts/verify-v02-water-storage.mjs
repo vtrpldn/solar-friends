@@ -5,7 +5,7 @@ import {infrastructureStep,hasPowerService,syncInfrastructure} from '../web/v02/
 const s=createSandbox();s.people=[];s.rain=true;
 for(const [i,key] of ['water','well'].entries())s.projects.push({id:i+1,key,x:40+i*4,z:40,work:PROJECTS[key].work,delivered:requiredLoads(key)});
 const sys=autoConnectUtilities(s,PROJECTS),tank=sys.nodes[1],cistern=sys.nodes[2];
-assert.equal(tank.kind,'water-storage');assert.deepEqual(tank.capacity,[40,0,0,0]);assert(!hasPowerService(sys,tank));assert(!sys.links.some(l=>l.kind==='power'&&(l.from===1||l.to===1)));
+assert.equal(tank.kind,'water-storage');assert.deepEqual(tank.capacity,[40,40,0,0]);assert(!hasPowerService(sys,tank));assert(!sys.links.some(l=>l.kind==='power'&&(l.from===1||l.to===1)));
 sys.grid.enabled=false;
 for(let i=0;i<100;i++)infrastructureStep(s,PROJECTS,.1);
 assert(cistern.water[1]>0);assert.equal(tank.water[1],0);assert.equal(tank.water[0],0);
@@ -15,5 +15,5 @@ assert(sys.nodes[0].water[0]>0,'passive tank delivers without grid power');asser
 assert.equal(cistern.water[0],0,'unpowered cistern cannot treat rainwater');
 tank.kind='well';tank.water=[50,12,0,0];tank.capacity=[75,60,0,0];
 syncInfrastructure(s,PROJECTS);
-assert.equal(tank.kind,'water-storage');assert.deepEqual(tank.water,[50,12,0,0]);assert.deepEqual(tank.capacity,[50,12,0,0]);
+assert.equal(tank.kind,'water-storage');assert.deepEqual(tank.water,[50,12,0,0]);assert.deepEqual(tank.capacity,[50,40,0,0]);
 console.log('PASS distinct storage capacity, no tank power service, passive delivery, rain collection and powered treatment gating');

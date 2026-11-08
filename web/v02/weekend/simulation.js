@@ -1,8 +1,9 @@
+import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
 import { STORAGE_KINDS, crewLimit, carriedLoads } from "./construction-logistics.js";
 import {registerWorld,validSettings,townDuration,waterFactor} from './world-settings.js';
 import {depositCapacity} from './land-layout.js';
 import {workMultiplier} from './resident-personality.js';
-import { ensureNeeds, decayNeeds, chooseNeed, advanceNeed, validNeeds } from "./resident-needs.js";
+import { ensureNeeds, decayNeeds, chooseNeed, advanceNeed, validNeeds, cancelNeed } from "./resident-needs.js";
 import { validTerrainVertices } from "./terraform.js";
 import { ROAD_SHIFT } from "./road-layout.js";
 import { roadLine } from "./placement-helpers.js";
@@ -85,7 +86,7 @@ export const PROJECTS = {
     materials: { wood: 8, hardware: 1, tank: 1, plumbing: 1 },
     work: 267,
     description:
-      "An unpowered tank holding 40 clean water. Receives treated water or resident deliveries; it does not collect rain or filter river water. About 2 person-hours to assemble.",
+      "An unpowered tank holding 40 clean and 40 untreated water in separate compartments. Residents can carry river water here and purify it by hand; no power needed. About 2 person-hours to assemble.",
   },
   shelter: {
     name: "Basic shelter",
@@ -108,10 +109,11 @@ export const PROJECTS = {
 };
 expandMaterials(MATERIALS);
 expandProjects(PROJECTS);
+registerNaturalProjects(PROJECTS);
 Object.assign(PROJECTS, OPENING_PROJECTS);
 export { PROCESSES };
 export function footprint(p) {
-  const [w, d] = PROJECTS[p.key].size;
+  const [w, d] = !p.natural && ['supply-2','supply-3'].includes(p.key) ? [1,1] : PROJECTS[p.key].size;
   return (p.rotation || 0) % 2 ? [d, w] : [w, d];
 }
 function shelteredFrontCell(p, x, z) {
@@ -230,7 +232,7 @@ export function connectUtility(s, kind, from, to) {
   return error;
 }
 export function queueProduction(s, site, recipe) {
-  const p = s.projects.find((p) => p.id === Number(site)),
+  const p = s.projects.find((p) => p.id === Number(site) && !p.felled),
     def = PROCESSES[recipe];
   if (
     !p ||
@@ -279,6 +281,7 @@ export function repeatProduction(s, site, recipe) {
     PROJECTS[p.key].kind !== PROCESSES[recipe].kind
   )
     return false;
+  if(PROJECTS[p.key].kind==='wild-tree')return false;
   p.repeat = p.repeat === recipe ? null : recipe;
   return true;
 }
@@ -314,6 +317,16 @@ export function queueWater(s, from, to, kind = "fresh") {
   });
   wakeHelpers(s);
   return "";
+}
+export function queuePurification(s,site) {
+  const node=syncInfrastructure(s,PROJECTS).nodes[site];
+  if(!node || !node.capacity[0] || !node.capacity[1])return 'Choose a reservoir with separate untreated and drinking-water storage.';
+  if(node.water[1]<1)return 'Bring untreated river water here first.';
+  if(node.capacity[0]-node.water[0]<1)return 'Drinking-water storage is full.';
+  s.operations??=[];
+  if(s.operations.some(o=>!o.done && o.site===site))return 'A resident job is already queued here.';
+  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,water:{from:site,to:site,kind:'irrigation',amount:0,purify:true},work:0,phase:'process',done:false});
+  wakeHelpers(s);return '';
 }
 function utilitySpot(s, node, r) {
   if (node.id === -1) return { x: node.x, z: node.z };
@@ -438,6 +451,18 @@ function operationalWork(s, r, i, dt) {
   if (op.water) {
     const w = op.water,
       index = LIQUIDS.indexOf(w.kind);
+    if(w.purify) {
+      const dest=utilitySpot(s,node,r);
+      if(!dest || !go(s,r,dest))return true;
+      r.action='produce';op.status='Purifying untreated water';
+      op.work+=dt;r.energy=Math.max(0,r.energy-dt*.06);
+      if(op.work>=30) {
+        const amount=Math.min(12,node.water[1],node.capacity[0]-node.water[0]);
+        node.water[1]-=amount;node.water[0]+=amount;op.done=true;r.operation=null;
+        say(s,`${r.name} purified ${amount.toFixed(0)} water for drinking.`);
+      }
+      return true;
+    }
     if (op.phase === "pickup") {
       let start;
       if (w.from === -1) {
@@ -555,6 +580,7 @@ function operationalWork(s, r, i, dt) {
   r.work += dt;
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if (op.work >= recipe.work) {
+    if(recipe.kind==='wild-tree')p.felled=true;
     op.phase = "return";
     r.target = null;
     p.readyAt = s.time + (recipe.renew || 0);
@@ -842,7 +868,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
   if (
     s.projects.some(
       (p) =>
-        p.id !== ignore &&
+        !p.felled && p.id !== ignore &&
         x < p.x + footprint(p)[0] &&
         x + w > p.x &&
         z < p.z + footprint(p)[1] &&
@@ -864,7 +890,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
     ],
   };
   for (const p of proposed.projects.filter(
-    (p) => !["road", "bridge"].includes(p.key),
+    (p) => !p.natural && !p.felled && !["road", "bridge"].includes(p.key),
   ))
     for (const dz of [0, 1])
       if (
@@ -898,6 +924,7 @@ function gradeFoundation(s, key, x, z, rotation = 0) {
     s.terrainPads.push(pad);
 }
 export function plan(s, key, x, z, rotation = 0) {
+  if(PROJECTS[key]?.natural)return 'Natural resources are found on the land, not built.';
   if (s.stage !== "playing") return "Choose your campsite first.";
   const def = PROJECTS[key];
   if (!def) return "Unknown project.";
@@ -983,6 +1010,7 @@ export function planRoadLine(s, from, to) {
   return "";
 }
 export function moveProject(s, id, x, z, rotation = undefined) {
+  if(s.projects.find(p=>p.id===id)?.natural)return 'Natural resources cannot be moved.';
   const p = s.projects.find((p) => p.id === id);
   if (!p || s.stage !== "playing") return "Cannot move that now.";
   if (
@@ -1102,11 +1130,7 @@ function blockedCamp(s) {
   const cells = [
     ...[31, 32, 33, 34].flatMap((x) => [20, 21, 22].map((z) => ({ x, z: z - ROAD_SHIFT / 2 }))),
     { x: 30, z: 24 - ROAD_SHIFT / 2 },
-    ...[
-      [25, 29],
-      [25, 33],
-      [27, 28],
-    ].map(([x, z]) => ({ x, z })),
+
   ];
   if (c)
     for (let x = c.x - 1; x <= c.x + 3; x++)
@@ -1120,7 +1144,7 @@ function occupied(s, x, z) {
     s.projects.some(
       (p) =>
         !(
-          p.key === "road" || (p.key === "bridge" && p.work >= PROJECTS[p.key].work)
+          p.felled || p.key === "road" || (p.key === "bridge" && p.work >= PROJECTS[p.key].work)
         ) &&
         !(
           p.work >= PROJECTS[p.key].work &&
@@ -1485,7 +1509,7 @@ function idleActivity(s, r, i, dt) {
       r.action = "look";
     r.energy = Math.min(
       100,
-      r.energy + dt * 10 * (COMMUNITY[r.leisureKind]?.recovery || 0.025),
+      r.energy + dt * Math.min(.02, COMMUNITY[r.leisureKind]?.recovery || 0),
     );
     return;
   }
@@ -1637,6 +1661,7 @@ export function tick(s, dt) {
     return;
   }
   dt = Math.min(dt, 1);
+  ensureNaturalLand(s,PROJECTS);
   if (s.mode === "sandbox") sandboxSupplies(s);
   s.time += dt;
   autoConnectUtilities(s, PROJECTS);
@@ -1649,7 +1674,19 @@ export function tick(s, dt) {
       p.productionStatus = queueProduction(s, p.id, p.repeat);
   }
 
-  for (const [i,r] of s.people.entries()) decayNeeds(s,r,i,dt);
+  for (const [i,r] of s.people.entries()) {
+    decayNeeds(s,r,i,dt);
+    // Being awake is tiring even when no construction is underway.
+    if(r.tentPhase !== 'inside') r.energy=Math.max(0,r.energy-dt*.035);
+    const hours=9+s.time*.45/60, hour=hours%24, bedtime=21+(i%4)*.45;
+    const sleepNight=Math.floor((hours-5)/24);
+    if(!r.sleepUntil && r.sleepNight!==sleepNight && (hour>=bedtime || hour<5) && !r.cargo && r.action!=='town') {
+      r.sleepNight=sleepNight;
+      r.sleepUntil=s.time+(6+3*(1-r.energy/100))*60/.45;
+      r.job=null;r.operation=null;r.walk=[];r.target=null;r.action='rest';
+      cancelNeed(s,r);
+    }
+  }
   s.infrastructure.hungry = s.people.some(r=>r.needs.hunger<15);
   const needApi = {
     route: (r,point)=>route(s,r,point),
@@ -1742,7 +1779,7 @@ export function tick(s, dt) {
       ? s.time >= 240/waterFactor(s.worldSettings?.water)
       : s.time >= 150/waterFactor(s.worldSettings?.water) ||
         s.projects.some(
-          (p) => p.key !== "gathering" && p.work >= PROJECTS[p.key].work / 2,
+          (p) => !p.natural && p.key !== "gathering" && p.work >= PROJECTS[p.key].work / 2,
         )) &&
     !s.rainSeen &&
     s.projects.length
@@ -1768,17 +1805,18 @@ export function tick(s, dt) {
   if (s.rainResolved && s.time > (s.rainAt ?? 150) + 35) s.rain = false;
   for (const [i, r] of s.people.entries()) {
     if (r.action === "town") continue;
-    chooseNeed(s,r,i,needApi);
+    if (!r.sleepUntil) chooseNeed(s,r,i,needApi);
     if (r.tentPhase) {
       r.action = "rest";
       if (r.tentPhase === "enter" && s.time - r.tentAt >= 1.5)
         r.tentPhase = "inside";
       if (r.tentPhase === "inside") {
-        r.energy = Math.min(100, r.energy + dt * 1.4);
+        r.energy = Math.min(100, r.energy + dt * (r.sleepUntil ? .13 : .45));
         const recovered = s.projects.some((p) => p.work < PROJECTS[p.key].work)
           ? 60
           : 80;
-        if (r.energy >= recovered || s.stage === "evening") {
+        if ((r.sleepUntil ? s.time >= r.sleepUntil : r.energy >= recovered) || s.stage === "evening") {
+          r.sleepUntil=null;
           r.tentPhase = "exit";
           r.tentAt = s.time;
         }
@@ -1872,7 +1910,7 @@ export function tick(s, dt) {
     }
     if (advanceNeed(s,r,dt,needApi)) continue;
     if (
-      !r.cargo && (r.energy < 25 ||
+      !r.cargo && (r.sleepUntil || r.energy < 25 ||
       (r.action === "rest" &&
         r.energy <
           (s.projects.some((p) => p.work < PROJECTS[p.key].work) ? 60 : 80)))
@@ -1922,7 +1960,7 @@ export function tick(s, dt) {
     if (!p) {
       if (operationalWork(s, r, i, dt)) continue;
       idleActivity(s, r, i, dt);
-      r.energy = Math.min(100, r.energy + dt * 0.25);
+      // Leisure restores fun and social needs; it does not substitute for sleep.
       continue;
     }
     if (!r.workSpot || occupied(s, r.workSpot.x, r.workSpot.z))
@@ -2119,7 +2157,7 @@ export function restore(text) {
       return null;
     if (
       s.stage === "arrival" &&
-      (s.projects.length || s.camp !== null || s.trip)
+      (s.projects.some(p=>!p.natural) || s.camp !== null || s.trip)
     )
       return null;
     if (
@@ -2210,7 +2248,7 @@ export function restore(text) {
         return null;
       ids.add(p.id);
       keys.add(p.key);
-      if (
+      if (!PROJECTS[p.key].natural && !p.felled &&
         placementError(
           { ...s, projects: s.projects.filter((q) => q !== p) },
           p.key,

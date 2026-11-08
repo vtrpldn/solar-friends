@@ -1,3 +1,4 @@
+import {ensureNaturalLand} from './natural-resources.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {createCapybaraVisitors} from "./capybaras.js";
@@ -283,75 +284,17 @@ function prop(id, x, z, rotation = 0) {
   scene.add(g);
   return g;
 }
-// Native trees frame the clearing; every playable square stays walkable.
-const native = ASSETS.filter(
-  (a) =>
-    a.category === "Vegetation" &&
-    !/growing|young|sapling|seedling|sprout/.test(a.id) &&
-    a.footprint[0] >= 2,
-).map((a) => a.id);
-const scenery = new THREE.Group();
-scene.add(scenery);
-const sceneryRandom = landRandom(s.landSeed);
-const biomeTrees=s.worldSettings?BIOMES[settingsFor(s.landSeed).biome].trees:native;
-for (let i = 0; i < Math.round(52*richnessFactor(settingsFor(s.landSeed).resources)); i++) {
-  const a = i * 2.3999 + (s.landSeed ? sceneryRandom() * 0.5 : 0),
-    r = s.landSeed ? 30 + sceneryRandom() * 25 : 29 + (i % 5) * 5,
-    x = 32 + (Math.cos(a) * r) / 2,
-    z = 32 + (Math.sin(a) * r) / 2;
-  if (
-    !riverBankAt(x, z, 2, s.landSeed) &&
-    !arrivalLaneAt((x - 32) * 2, (z - 32) * 2)
-  )
-    scenery.add(
-      prop(
-        biomeTrees[
-          s.landSeed
-            ? Math.floor(sceneryRandom() * biomeTrees.length)
-            : i % biomeTrees.length
-        ] || "tree",
-        x,
-        z,
-        i,
-      ),
-    );
-}
-for (let i=0;i<3;i++) {
-  const x=s.landSeed?24+sceneryRandom()*5:[25,25,27][i];
-  const z=s.landSeed?27+sceneryRandom()*8:[29,33,28][i];
-  if(!riverBankAt(x,z,2,s.landSeed) && !accessRoadAt(x,z,2))
-    scenery.add(prop(native[Math.floor(sceneryRandom()*native.length)]||'tree',x,z));
-}
-// Seeded outer regions leave generous open space around the starting clearing.
-const regionRandom = landRandom((s.landSeed || 1) ^ 0x51f92);
-const regionSets = {
-  river: ["jucara", "embauba", "landscape-0", "landscape-7"],
-  forest: ["jequitiba", "pau_brasil", "jucara", "landscape-1"],
-  meadow: ["pequi", "barbatimao", "bunchgrass", "landscape-2"],
-  rocky: ["landscape-4", "landscape-5", "landscape-6", "campo"],
-};
-for (let i = 0; i < 190; i++) {
-  const wx = (regionRandom() - 0.5) * 240,
-    wz = (regionRandom() - 0.5) * 240;
-  if (Math.hypot(wx, wz) < 57 || arrivalLaneAt(wx, wz)) continue;
-  const x = 32 + wx / 2,
-    z = 32 + wz / 2;
-  if (riverBankAt(x, z, 1, s.landSeed) || accessRoadAt(x, z, 2)) continue;
-  const region = riverBankAt(x, z, 13, s.landSeed)
-    ? "river"
-    : wx < -15
-      ? "forest"
-      : wx > 60
-        ? "rocky"
-        : "meadow";
-  const set = s.worldSettings && region!=="rocky" ? biomeTrees : regionSets[region],
-    id = set[Math.floor(regionRandom() * set.length)];
-  const variant = Math.floor(regionRandom() * 3);
-  const varied =
-    variant && ASSETS.some((a) => a.id === `${id}-variant-${variant}`)
-      ? `${id}-variant-${variant}`
-      : id;
-  scenery.add(prop(varied, x, z, regionRandom() * Math.PI * 2));
+// Natural trees and deposits are persistent, selectable world objects.
+ensureNaturalLand(s,PROJECTS);
+const scenery = new THREE.Group();scene.add(scenery);
+// Keep low vegetation biome-specific; harvestable trees live in the simulation.
+const undergrowthRandom=landRandom(s.landSeed^0x51f92);
+const undergrowth=BIOMES[settingsFor(s.landSeed).biome].trees.filter(id=>!PROJECTS[`wild-${id}`]);
+const groundPlants=undergrowth.length?undergrowth:['landscape-7','landscape-0'];
+for(let i=0;i<100;i++){
+  const x=32+(undergrowthRandom()-.5)*120,z=32+(undergrowthRandom()-.5)*120;
+  if(Math.hypot(x-s.stock.x,z-s.stock.z)<9 || riverBankAt(x,z,1,s.landSeed)||accessRoadAt(x,z,2))continue;
+  scenery.add(prop(groundPlants[Math.floor(undergrowthRandom()*groundPlants.length)],x,z,undergrowthRandom()*Math.PI*2));
 }
 const entrance = prop("produce-crates", s.stock.x, s.stock.z);
 scenery.add(prop("garden-bench", s.stock.x - 2, s.stock.z + 1));
@@ -618,6 +561,8 @@ function syncBuildings() {
       world(p.x + (footprint(p)[0] - 1) / 2, p.z + (footprint(p)[1] - 1) / 2),
     );
     entry.root.rotation.y = ((p.rotation || 0) * Math.PI) / 2;
+    entry.root.visible=!p.felled;
+
     if (def.asset === "fire-circle") {
       if (fraction >= 1 && !entry.fire) {
         entry.fire = createFire();
@@ -801,6 +746,7 @@ function startPlacement(key, id = null) {
 
 const buildMaterialTooltip = materialTooltip();
 for (const [key, d] of Object.entries(PROJECTS)) {
+  if(d.natural)continue;
   const b = document.createElement("button");
   b.id = `build-${key}`;
   const count = Object.values(d.materials).reduce((a, b) => a + b, 0);
@@ -991,10 +937,14 @@ $("world").addEventListener("pointerup", (e) => {
     persist();
     renderUI();
   } else {
-    selected =
+    // Pick the visible model, including a tree's canopy, before falling back to its cell.
+    const modelHit=ray.intersectObjects([...buildings.values()].filter(b=>b.root.visible).map(b=>b.root),true)[0];
+    let picked=modelHit?.object;
+    while(picked && !picked.userData.projectId)picked=picked.parent;
+    selected = picked?.userData.projectId ||
       s.projects.find(
         (p) =>
-          x >= p.x &&
+          !p.felled && x >= p.x &&
           x < p.x + footprint(p)[0] &&
           z >= p.z &&
           z < p.z + footprint(p)[1],
@@ -1117,7 +1067,7 @@ $("pause").onclick = () => {
   updatePauseButton();
 };
 $("speed").onclick = () => {
-  speed = speed === 1 ? 4 : 1;
+  speed = [1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4];
   $("speed").textContent = `${speed}×`;
 };
 $("home").onclick = () => focus(campLocation(s));
@@ -1263,6 +1213,8 @@ function renderUtilityUI() {
   );
   $("production-controls").hidden = !$("production").value;
   $("queue-production").disabled = !node || !$("production").value;
+  $("repeat-production").hidden = !!p && PROJECTS[p.key].kind==='wild-tree';
+  $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : 'Start batch';
   $("repeat-production").disabled = !node || !$("production").value;
   $("repeat-production").textContent = p?.repeat
     ? "Stop repeating"
@@ -1358,6 +1310,7 @@ function filterBuildings() {
   let count=0;
   for (const [key,d] of Object.entries(PROJECTS)) {
     const button=$(`build-${key}`);
+    if(!button)continue;
     // Search the entire catalogue, even when a category was selected earlier.
     button.hidden=query ? !`${d.name} ${d.description} ${buildingCategory(d)}`.toLowerCase().includes(query)
       : !inBuildCategory(key,d,category);
@@ -1532,11 +1485,12 @@ function renderUI() {
   $("tasks").replaceChildren();
   $("completed-tasks").replaceChildren();
   const builtCount = s.projects.filter(
-    (p) => p.work >= PROJECTS[p.key].work,
+    (p) => !p.natural && p.work >= PROJECTS[p.key].work,
   ).length;
   $("completed-panel").hidden = builtCount === 0;
   $("completed-title").textContent = `Around the village · ${builtCount} built`;
   for (const p of s.projects) {
+    if(p.natural)continue;
     const d = PROJECTS[p.key],
       div = document.createElement("div");
     div.className = "task";
@@ -1693,6 +1647,7 @@ function renderUI() {
   );
   for (const key of Object.keys(PROJECTS)) {
     const b = $(`build-${key}`);
+    if(!b)continue;
     b.disabled =
       s.mode !== "sandbox" &&
       !PROJECTS[key].repeatable &&
@@ -1714,7 +1669,8 @@ function renderUI() {
   $("selection").hidden = !p || s.stage === "evening";
   if (p) {
     $("selected-name").textContent = PROJECTS[p.key].name;
-    $("copy-building").hidden =
+    $("move").hidden=!!PROJECTS[p.key].natural;
+    $("copy-building").hidden = PROJECTS[p.key].natural ||
       s.mode !== "sandbox" && !PROJECTS[p.key].repeatable;
     illustrate($("selected-art"), PROJECTS[p.key].asset);
     $("selected-state").textContent = finished(s, p.key)

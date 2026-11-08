@@ -2,12 +2,12 @@
 export const RESOURCE_GROUPS = [
   {
     name: "Raw materials",
-    ids: ["wood", "bamboo", "earth", "stone"],
+    ids: ["logs", "bamboo", "earth", "stone"],
   },
   {
     name: "Manufactured / industrial materials",
     ids: [
-      "frames",
+      "wood", "planks", "frames",
       "walls",
       "tiles",
       "hardware",
