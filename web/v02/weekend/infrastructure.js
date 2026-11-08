@@ -1,9 +1,10 @@
 import {waterFactor} from './world-settings.js';
-import { riverAccess } from "./river-layout.js";
+import { riverBankAt, riverAccess } from "./river-layout.js";
 // v2 port of v1 electricity and water ownership rules. No renderer dependency.
 export const GRID_POWER = { capacity: 4, tariff: 1.2 };
 export const LIQUIDS = ["fresh", "irrigation", "greywater", "sewage"];
 export const POWER_LOAD = {
+  'water-pump': .6,
   shed: 0.1,
   kitchen: 0.6,
   workshop: 0.6,
@@ -33,6 +34,8 @@ export function switchBuilding(sys, id) {
   return true;
 }
 const CAPACITY = {
+  'groundwater-well':[0,40,0,0],
+  'water-pump':[0,12,0,0],
   well: [75, 60, 0, 0],
   home: [8, 0, 24, 16],
   kitchen: [6, 0, 24, 0],
@@ -266,6 +269,7 @@ export function infrastructureStep(s, defs, dt) {
       used = 0;
     // Keep water services running before workshop equipment when supply is tight.
     const priority = {
+      "water-pump": 0,
       river: 0,
       well: 0,
       camp: 0,
@@ -311,6 +315,18 @@ export function infrastructureStep(s, defs, dt) {
     }
   }
   for (const n of Object.values(sys.nodes)) {
+    if(n.enabled && n.kind==='groundwater-well') {
+      const add=Math.min(n.capacity[1]-n.water[1],8*hours*waterFactor(s.worldSettings?.water));
+      n.water[1]+=add;sys.account.waterReceived+=add;
+    }
+    if(n.enabled && n.kind==='water-pump' && n.power>.99) {
+      let amount=Math.min(n.capacity[1]-n.water[1],24*hours);
+      const source=Object.values(sys.nodes).filter(a=>a.kind==='groundwater-well'&&a.enabled&&Math.hypot(a.x-n.x,a.z-n.z)<=6).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
+      if(source){amount=Math.min(amount,source.water[1]);source.water[1]-=amount;}
+      else if(riverBankAt(n.x+.5,n.z+.5,3,s.landSeed))sys.account.waterReceived+=amount;
+      else amount=0;
+      n.water[1]+=amount;
+    }
     // Rain is non-potable until filtered; no sewage or greywater becomes drinking water.
     if (s.rain && ["well", "rain-barrel"].includes(n.kind)) {
       const add = Math.min(n.capacity[1] - n.water[1], 30 * hours * waterFactor(s.worldSettings?.water));

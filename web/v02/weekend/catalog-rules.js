@@ -2,6 +2,8 @@ import { COMMUNITY } from "../library/community-defs.js";
 import { BUILDING_MODELS } from "./building-models.js";
 // v1 economy.rs construction recipes, expressed in v2 material IDs.
 const recipes = {
+  'groundwater-well':{stone:18,wood:8,hardware:4,plumbing:2,tiles:4},
+  'water-pump':{stone:4,pumps:1,plumbing:4,electrical:2,hardware:2},
   road: { stone: 1, earth: 1 },
   bridge: { wood: 32, hardware: 8, stone: 8 },
   home: {
@@ -174,7 +176,7 @@ export function expandProjects(projects) {
               )
             ? "Power"
             : [
-                  "well",
+                  "well", "groundwater-well", "water-pump",
                   "rain-barrel",
                   "wash-station",
                   "eco_toilet",
@@ -216,6 +218,8 @@ export function expandProjects(projects) {
         : COMMUNITY[model.id]?.category || category,
       repeatable: true,
       description:
+        ({'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
+          'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 24 untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply.'}[model.id]) ||
         COMMUNITY[model.id]?.description ||
         `${model.name}. ${model.size.join(" × ")} cells. Build with physical supplies and resident labor.`,
     };

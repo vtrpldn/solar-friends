@@ -804,7 +804,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
   for (let dx = 0; dx < w; dx++)
     for (let dz = 0; dz < d; dz++)
       if (
-        !["hydro", "bridge"].includes(def.kind) &&
+        !["hydro", "bridge", "water-pump"].includes(def.kind) &&
         riverBankAt(x + dx, z + dz, 1, s.landSeed)
       )
         return "Keep projects back from the riverbank.";
@@ -815,6 +815,9 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
     z + d > CELL_MAX - 2
   )
     return "Keep buildings inside the plot boundary.";
+  if(def.kind==='water-pump' && !riverBankAt(x+.5,z+.5,3,s.landSeed) &&
+    !s.projects.some(p=>PROJECTS[p.key].kind==='groundwater-well'&&p.work>=PROJECTS[p.key].work&&Math.hypot(p.x-x,p.z-z)<=6))
+    return 'Place the pump beside the river or within 6 cells of a completed water well.';
   if (def.kind === "hydro" && !riverBankAt(x + w / 2, z + d / 2, 3, s.landSeed))
     return "Place the river generator beside the river.";
   if (key === "bridge") {

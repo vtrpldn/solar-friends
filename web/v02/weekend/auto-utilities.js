@@ -26,9 +26,10 @@ export function autoConnectUtilities(s, defs) {
             Math.hypot(b.x - target.x, b.z - target.z) || a.id - b.id,
       )[0];
   const suppliers = nodes.filter((n) => n.kind === "well");
+  const pumps=nodes.filter(n=>n.kind==='water-pump');
   const fresh = suppliers.length ? suppliers : [sys.nodes[0]];
   for (const n of nodes) {
-    if (n.kind === "well") add("irrigation", sys.nodes[-1], n);
+    if (n.kind === "well") add("irrigation", nearest(n,pumps)||sys.nodes[-1], n);
     else if (n.capacity[0]) add("fresh", nearest(n, fresh), n);
     if (["garden", "greenhouse", "orchard", "grove"].includes(n.kind)) {
       add(
@@ -39,7 +40,7 @@ export function autoConnectUtilities(s, defs) {
         ),
         n,
       );
-      add("irrigation", sys.nodes[-1], n);
+      add("irrigation", nearest(n,pumps)||sys.nodes[-1], n);
     }
     if (n.capacity[2] && n.kind !== "wetland")
       add(

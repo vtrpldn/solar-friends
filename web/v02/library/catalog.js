@@ -686,6 +686,26 @@ function extendedHouse(cells) {
   const panel=block(g,1.35,.07,.9,'#436b79',-.8,3.06,.8);panel.rotation.x=Math.atan2(1.05,1.78);
   return g;
 }
+function waterSource(pump=false){
+ const g=group();
+ if(pump){
+  box(g,1.5,.15,1.4,'stone',0,.075,0);
+  color(cylinder(g,.28,.28,.75,'teal',0,.53,0,10),'#518a80');
+  box(g,.55,.35,.45,'teal',.4,.65,0);
+  beam(g,[-.5,.2,-.5],[-.5,.75,-.5],.12,'timberLight');
+  beam(g,[-.5,.75,-.5],[0,.75,-.5],.12,'timberLight');
+  beam(g,[0,.5,.35],[0,.5,.8],.12,'teal');
+ }else{
+  const ring=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,1,12,1,true),new THREE.MeshStandardMaterial({color:'#a89b7c',roughness:1,side:THREE.DoubleSide,flatShading:true}));ring.position.y=.5;ring.castShadow=true;g.add(ring);
+  color(cylinder(g,.95,.95,.04,'teal',0,.12,0,12),'#496965');
+  for(const x of [-1.3,1.3])box(g,.18,2.4,.18,'timber',x,1.2,0);
+  beam(g,[-1.3,1.5,0],[1.3,1.5,0],.14,'timberLight');
+  beam(g,[0,1.5,0],[0,.6,0],.025,'timber');
+  cylinder(g,.18,.14,.28,'timberLight',0,.48,0,8);
+  clayRoof(g,{half:1.5,depth:2.4,eave:2.35,rise:.75,ridgeHeight:3.25});
+ }
+ return g;
+}
 function goat() {
   const g = group();
   const coat = "#d8c6a3",
@@ -1516,6 +1536,8 @@ for (const [id, name] of Object.entries({
   "adobe-veranda": "Adobe veranda house",
 }))
   add(id, name, "Homes", [2, 2], () => cabin(id), [id, id + "-night"]);
+add('groundwater-well','Water well','Buildings',[2,2],()=>waterSource(),[]);
+add('water-pump','Water pump','Buildings',[1,1],()=>waterSource(true),[]);
 add('home-family','Family house','Homes',[3,2],()=>extendedHouse(3),[]);
 add('home-shared','Shared adobe house','Homes',[4,2],()=>extendedHouse(4),[]);
 add(
