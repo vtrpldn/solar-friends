@@ -1,3 +1,4 @@
+import { fitTerrainCamera } from "./camera-depth.js";
 import { elevationAt } from "./elevation.js";
 import { freshLandSeed, landRandom } from "./land-layout.js";
 import { createTerrain } from "./terrain.js";
@@ -1561,6 +1562,7 @@ function frame(now) {
   }
   navigation.update(dt);
   controls.update();
+  fitTerrainCamera(camera, controls.target, scene.fog);
   drawUtilities();
   renderer.render(scene, camera);
   recordPerformance(now, arriving ? visual.arrivalElapsed : visual.time);
