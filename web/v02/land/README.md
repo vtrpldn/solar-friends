@@ -42,3 +42,5 @@ The Terrain selector includes the three v0.1 regions: Mata Atlântica (forest hi
 Open `/v02/land/?biome=mata-atlantica`, `?biome=cerrado`, or `?biome=caatinga` for an isolated study. These studies do not overwrite the saved gallery; export to retain edits. This is an art/placement foundation, not erosion, water flow, slope-aware route planning or a climate simulation.
 
 Run `node scripts/verify-v02-terrain.mjs` for height ranges, rendered-triangle raycast agreement, joined terraces, native landscape validation and biome export roundtrips.
+
+The shared Art Preview navigation connects Collection, 3D inspector, Scene editor, Biome landscapes and Resident animations. The current view is highlighted; the inspector remembers the last selected model for the browser session. Model selection updates the inspector URL for direct links.

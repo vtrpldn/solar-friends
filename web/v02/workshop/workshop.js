@@ -146,6 +146,10 @@ function outline(w, d) {
   );
 }
 function rebuild() {
+  const url = new URL(location.href);url.searchParams.set("asset", state.id);
+  history.replaceState(null, "", url);
+  try { sessionStorage.setItem("sf-art-last-asset", state.id); } catch { /* Optional navigation memory. */ }
+
   surface("materials");
   for (const child of [...content.children]) {
     disposeModel(child);
