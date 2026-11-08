@@ -1,12 +1,119 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Solar Friends · Our first weekend</title><link rel="stylesheet" href="weekend.css"><script type="importmap">{"imports":{"three":"../workshop/vendor/three.module.js","three/addons/controls/OrbitControls.js":"../workshop/vendor/OrbitControls.js"}}</script></head><body>
-<canvas id="world" aria-label="Our land. Click a grid square to place a project." tabindex="0"></canvas>
-<header><div><small>SOLAR FRIENDS · FIRST PLAYABLE</small><h1>Our first weekend</h1></div><div id="supplies"></div><div class="time"><span id="clock"></span><div><button id="pause" aria-label="Pause simulation">Ⅱ</button><button id="speed">1×</button></div></div><a href="../library/" title="Back to the art collection">Art collection ↗</a></header>
-<section id="arrival" class="paper"><small>A PLACE OF OUR OWN</small><h2>Where should we make camp?</h2><p>Five friends. A few tools. A car full of supplies.<br>Start by choosing a place to spend the weekend.</p><div id="camps"></div><p class="hint">Drinking water, packed meals and tents are already covered. There’s time to make a thoughtful start.</p></section>
-<aside id="journal" class="paper" hidden><small>OUR SHARED PLAN</small><h2>Somewhere we can stay</h2><p id="objective"></p><div id="tasks"></div><button id="meal" hidden>Put the kettle on · Gather for dinner</button><details><summary>The weekend so far</summary><ol id="log"></ol></details></aside>
-<aside id="people" class="paper" hidden><small>THE FIVE OF US</small><div id="roster"></div><button id="town">Town run · 12 timber · R$45</button><p id="trip" class="hint"></p></aside>
-<section id="rain" class="paper" hidden><small>A CHANGE IN THE WEATHER</small><h2>Our supplies are getting wet.</h2><p>The low ground near the entrance collects runoff. We can keep working, but let’s sort this out before evening.</p><button id="boards">Raise supplies · 2 timber</button><button id="uphill">Move them uphill · free</button></section>
-<section id="selection" class="paper" hidden><small id="selected-state"></small><h2 id="selected-name"></h2><p id="selected-desc"></p><button id="priority">Do this next</button><button id="move">Move camp furniture</button><button id="close-selection" aria-label="Close project details">Close</button></section>
-<section id="ending" class="paper" hidden><small>THE FIRST EVENING</small><h2>It’s starting to feel like ours.</h2><p id="recap"></p><p>Tomorrow’s ideas can wait. Tonight, there’s a meal to share.</p><button id="continue">Stay a little longer</button><button id="again">Try a different start</button></section>
-<footer><div id="build" hidden></div><div id="message" role="status">Choose a campsite to begin.</div><div class="controls"><span>Drag to orbit · Right-drag to pan · Scroll to zoom</span><button id="home">⌂ Camp</button><button id="grid">Grid</button><button id="cancel" hidden>Cancel · Esc</button><button id="restart">New weekend</button></div></footer>
-<dialog id="reset-dialog"><h2>Start a new weekend?</h2><p>This replaces this prototype’s saved camp. The art collection and v0.1 saves stay untouched.</p><button id="confirm-reset">Start again</button><button id="keep">Keep this camp</button></dialog>
-<script type="module" src="game.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Solar Friends · Our first weekend</title>
+    <link rel="stylesheet" href="weekend.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "../workshop/vendor/three.module.js",
+          "three/addons/controls/OrbitControls.js": "../workshop/vendor/OrbitControls.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <canvas
+      id="world"
+      aria-label="Our land. Click a grid square to place a project."
+      tabindex="0"
+    ></canvas>
+    <header>
+      <div>
+        <small>SOLAR FRIENDS · FIRST PLAYABLE</small>
+        <h1>Our first weekend</h1>
+      </div>
+      <div id="supplies"></div>
+      <div class="time">
+        <span id="clock"></span>
+        <div>
+          <button id="pause" aria-label="Pause simulation">Ⅱ</button
+          ><button id="speed">1×</button>
+        </div>
+      </div>
+      <a href="../library/" title="Back to the art collection"
+        >Art collection ↗</a
+      >
+    </header>
+    <section id="arrival" class="paper">
+      <small>A PLACE OF OUR OWN</small>
+      <h2>Where should we make camp?</h2>
+      <p>
+        Five friends. A few tools. A car full of supplies.<br />Start by
+        choosing a place to spend the weekend.
+      </p>
+      <div id="camps"></div>
+      <p class="hint">
+        Drinking water, packed meals and tents are already covered. There’s time
+        to make a thoughtful start.
+      </p>
+    </section>
+    <aside id="journal" class="paper" hidden>
+      <small>OUR SHARED PLAN</small>
+      <h2>Somewhere we can stay</h2>
+      <p id="objective"></p>
+      <div id="tasks"></div>
+      <button id="meal" hidden>Put the kettle on · Gather for dinner</button>
+      <details>
+        <summary>The weekend so far</summary>
+        <ol id="log"></ol>
+      </details>
+    </aside>
+    <aside id="people" class="paper" hidden>
+      <small>THE FIVE OF US</small>
+      <div id="roster"></div>
+      <button id="town">Town run · 12 timber · R$45</button>
+      <p id="trip" class="hint"></p>
+    </aside>
+    <section id="rain" class="paper" hidden>
+      <small>A CHANGE IN THE WEATHER</small>
+      <h2>Our supplies are getting wet.</h2>
+      <p>
+        The low ground near the entrance collects runoff. We can keep working,
+        but let’s sort this out before evening.
+      </p>
+      <button id="boards">Raise supplies · 2 timber</button
+      ><button id="uphill">Move them uphill · free</button>
+    </section>
+    <section id="selection" class="paper" hidden>
+      <small id="selected-state"></small>
+      <h2 id="selected-name"></h2>
+      <p id="selected-desc"></p>
+      <button id="priority">Do this next</button
+      ><button id="move">Move camp furniture</button
+      ><button id="close-selection" aria-label="Close project details">
+        Close
+      </button>
+    </section>
+    <section id="ending" class="paper" hidden>
+      <small>THE FIRST EVENING</small>
+      <h2>It’s starting to feel like ours.</h2>
+      <p id="recap"></p>
+      <p>Tomorrow’s ideas can wait. Tonight, there’s a meal to share.</p>
+      <button id="continue">Stay a little longer</button
+      ><button id="again">Try a different start</button>
+    </section>
+    <footer>
+      <div id="build" hidden></div>
+      <div id="message" role="status">Choose a campsite to begin.</div>
+      <div class="controls">
+        <span>Drag to orbit · Right-drag to pan · Scroll to zoom</span
+        ><button id="home">⌂ Camp</button><button id="grid">Grid</button
+        ><button id="cancel" hidden>Cancel · Esc</button
+        ><button id="restart">New weekend</button>
+      </div>
+    </footer>
+    <dialog id="reset-dialog">
+      <h2>Start a new weekend?</h2>
+      <p>
+        This replaces this prototype’s saved camp. The art collection and v0.1
+        saves stay untouched.
+      </p>
+      <button id="confirm-reset">Start again</button
+      ><button id="keep">Keep this camp</button>
+    </dialog>
+    <script type="module" src="game.js"></script>
+  </body>
+</html>
