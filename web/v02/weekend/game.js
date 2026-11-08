@@ -1,3 +1,5 @@
+import {saveSlots} from "./save-slots.js";
+import {installSaveDialog} from "./save-dialog.js";
 import {createCapybaraVisitors} from "./capybaras.js";
 import { constructionStatus } from "./construction-logistics.js";
 import { BUILD_CATEGORIES, buildingCategory, inBuildCategory } from "./build-categories.js";
@@ -710,10 +712,12 @@ function message(t) {
   if ($("message").textContent !== t) $("message").textContent = t;
   $("management-message").textContent = t;
 }
+let activeSaveSlot;
+try { activeSaveSlot=saveSlots(localStorage).active(s.mode||"story"); } catch {}
 function persist() {
   if (arrivalPreview) return;
   try {
-    localStorage.setItem(SAVE, save(s));
+    saveSlots(localStorage).autosave(s.mode || "story", save(s), activeSaveSlot);
   } catch {
     message(
       "Progress cannot be saved in this browser. Keep this tab open to continue.",
@@ -1129,6 +1133,8 @@ $("grid").onclick = () => {
 function askReset() {
   $("reset-dialog").showModal();
 }
+let savesWasPaused=false;
+installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:save(s)}),beforeOpen:()=>{savesWasPaused=paused;paused=true;},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
 $("main-menu").onclick = () => {
   persist();
   location.href = "./menu.html";

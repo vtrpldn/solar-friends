@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {saveSlots,SLOT_KEY} from '../web/v02/weekend/save-slots.js';
+import {saveKey} from '../web/v02/weekend/modes.js';
+const values=new Map(),storage={getItem:k=>values.get(k)||null,setItem:(k,v)=>values.set(k,v)};
+const slots=saveSlots(storage),a=slots.create(' Forest ','story','a'),b=slots.create('Desert','sandbox','b');
+slots.autosave('story','new-a');assert.equal(slots.list().find(s=>s.id===a.id).data,'new-a');assert.equal(slots.list().find(s=>s.id===b.id).data,'b');
+slots.detach('story');slots.autosave('story','fresh');assert.equal(slots.list().find(s=>s.id===a.id).data,'new-a');
+slots.load(a.id);assert.equal(storage.getItem(saveKey('story')),'new-a');slots.rename(a.id,'River');assert.equal(slots.list().find(s=>s.id===a.id).name,'River');
+slots.remove(a.id);slots.autosave('story','after-delete');assert.equal(slots.list().length,1);assert.throws(()=>slots.create('  ','story','x'));assert(values.has(SLOT_KEY));
+console.log('PASS named save creation, mode isolation, autosaving, fresh games, load, rename and deletion');
+const first=slots.create('First','story','one'),second=slots.create('Second','story','two');
+slots.autosave('story','stale-tab',first.id);assert.equal(slots.list().find(s=>s.id===second.id).data,'two');
+console.log('PASS an older open tab cannot overwrite the active named village');

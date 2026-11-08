@@ -1,3 +1,5 @@
+import {saveSlots} from "./save-slots.js";
+import {installSaveDialog} from "./save-dialog.js";
 import {DEFAULT_SETTINGS,OPTIONS,PRESETS,BIOMES,applySettings,registerWorld,townDuration} from './world-settings.js';
 import {elevationVertex} from './elevation.js';
 import {riverCenter,riverWidth} from './river-layout.js';
@@ -6,6 +8,7 @@ import { createWeekend, createSandbox, save, restore, beginArrival } from "./sim
 import { saveKey } from "./modes.js";
 const $ = (id) => document.getElementById(id);
 let pending = null;
+installSaveDialog($("saved-villages"));
 function existing(mode) {
   try {
     return restore(localStorage.getItem(saveKey(mode)));
@@ -31,6 +34,7 @@ $("continue-game").onclick = () => enter("story");
 $("continue-sandbox").onclick = () => enter("sandbox");
 function start(mode) {
   try {
+    saveSlots(localStorage).detach(mode);
     localStorage.setItem(
       saveKey(mode),
       save(
@@ -80,6 +84,6 @@ $('reroll-land').onclick=()=>{$('setup-seed').value=freshLandSeed();updatePrevie
 $('setup-back').onclick=()=>$('world-setup').close();
 $('setup-start').onclick=()=>{
  if(!$('setup-seed').checkValidity()){ $('setup-seed').reportValidity();return; }
- if(existing(pending)){$('replace-copy').textContent=`This replaces your ${pending} village. The other mode is kept.`;$('replace-save').showModal();}
+ if(existing(pending)){$('replace-copy').textContent=`This replaces your current ${pending} autosave. Named villages and the other mode are kept.`;$('replace-save').showModal();}
  else start(pending);
 };
