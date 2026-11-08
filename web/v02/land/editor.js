@@ -61,9 +61,14 @@ export function decode(text) {
     throw Error("Not a v0.2 scene file.");
   return validate(data.props);
 }
-export function encode(records) {
+export function decodeBiome(text) {
+  const biome = JSON.parse(text).biome || "flat";
+  if (!["flat", "mata-atlantica", "cerrado", "caatinga"].includes(biome)) throw Error("Unknown terrain biome.");
+  return biome;
+}
+export function encode(records, biome = "flat") {
   return JSON.stringify(
-    { format: "solar-friends-scene", version: 1, props: validate(records) },
+    { format: "solar-friends-scene", version: 1, biome, props: validate(records) },
     null,
     2,
   );

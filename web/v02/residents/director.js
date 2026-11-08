@@ -6,7 +6,8 @@ import {
   findRoute,
 } from "./interactions.js";
 export class ResidentDirector {
-  constructor(actors, records, status = () => {}) {
+  constructor(actors, records, status = () => {}, groundHeight = () => 0) {
+    this.groundHeight = groundHeight;
     this.actors = actors;
     this.records = records;
     this.status = status;
@@ -77,7 +78,7 @@ export class ResidentDirector {
         "No clear approach. Leave room beside the prop or choose an outer garden section.",
       );
     const best = candidates[0];
-    actor.position.set(best.start[0], 0, best.start[1]);
+    actor.position.set(best.start[0], this.groundHeight(...best.start), best.start[1]);
     this.task = {
       actor,
       target,
@@ -187,5 +188,6 @@ export class ResidentDirector {
         this.status("Carrying the sample crate back…");
       }
     }
+    a.position.y = this.groundHeight(a.position.x, a.position.z);
   }
 }

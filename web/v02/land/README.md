@@ -32,3 +32,13 @@ Each section remains selectable and editable. Moving, rotating, deleting, undoin
 ## Resident rehearsals
 
 Select a supported prop to choose a resident and action. **Send resident** walks from their authored location; **Preview nearby** starts a short approach for close inspection. Pause animations or use **Stop / reset pose** to restore the resident. Benches, the shed, picnic table, hammock, gardens, seedling bench, workshop, kitchen, wash station and crates have authored contact points, including rotated placements. One rehearsal runs at a time and edits cancel it. Rehearsals do not alter saved placements or inventories. See [resident implementation](../residents/README.md) and run `node scripts/verify-v02-residents.mjs`.
+
+## Biome terrain
+
+The Terrain selector includes the three v0.1 regions: Mata Atlântica (forest hills), Cerrado (broad savanna rises), and Caatinga (dryland ridges), plus the flat comparison gallery. Each 64×64 terrain uses biome soil colors and a deterministic elevation field, closed soil edges and a surface-following grid. Heights are sampled from the rendered triangles for props, placement previews and resident movement. Structures form level terraces; touching footprints share a height so connected gardens, orchards and solar arrays meet.
+
+**Load biome landscape** replaces the current props with an editable selection of the region's existing plant/rock models; Undo restores the prior props. The forest study is denser than the savanna and dryland studies. The central clearing remains open. Terrain selection and scene exports preserve the biome. Prop undo does not change the biome selector.
+
+Open `/v02/land/?biome=mata-atlantica`, `?biome=cerrado`, or `?biome=caatinga` for an isolated study. These studies do not overwrite the saved gallery; export to retain edits. This is an art/placement foundation, not erosion, water flow, slope-aware route planning or a climate simulation.
+
+Run `node scripts/verify-v02-terrain.mjs` for height ranges, rendered-triangle raycast agreement, joined terraces, native landscape validation and biome export roundtrips.

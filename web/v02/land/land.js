@@ -1,3 +1,4 @@
+import { buildTerrain, BIOMES, biomeLandscape, terrainField } from "./terrain.js";
 import { createResident, RESIDENT_IDS } from "../residents/rig.js";
 import { INTERACTIONS } from "../residents/interactions.js";
 import { ResidentDirector } from "../residents/director.js";
@@ -18,6 +19,7 @@ import {
   footprint,
   encode,
   decode,
+  decodeBiome,
   validate,
 } from "./editor.js";
 import {
@@ -84,64 +86,39 @@ const sun = new THREE.DirectionalLight("#ffedcf", 3);
 sun.castShadow = true;
 configureMapSun(sun);
 scene.add(sun, sun.target);
-// One continuous land surface: no per-cell meshes and no decorative ground islands.
-const geometry = new THREE.PlaneGeometry(
-  MAP_METRES,
-  MAP_METRES,
-  MAP_CELLS,
-  MAP_CELLS,
-);
-geometry.rotateX(-Math.PI / 2);
-const colors = [];
-const pos = geometry.attributes.position;
-for (let i = 0; i < pos.count; i++) {
-  const x = pos.getX(i),
-    z = pos.getZ(i);
-  const c = new THREE.Color("#a9b983");
-  const variation =
-    Math.sin(x * 0.08) * Math.cos(z * 0.065) * 0.018 +
-    Math.sin((x + z) * 0.11) * 0.008;
-  c.offsetHSL(0, 0, variation);
-  colors.push(c.r, c.g, c.b);
+const previewBiome = new URLSearchParams(location.search).get("biome");
+const terrainPreview = !!BIOMES[previewBiome];
+let biome = terrainPreview ? previewBiome : localStorage.getItem("solar-friends-v02-biome") || "flat";
+if (!BIOMES[biome]) biome = "flat";
+let terrainView = buildTerrain(biome), terrain = terrainView.mesh, grid = terrainView.grid;
+scene.add(terrainView.group);
+for (const [id, definition] of Object.entries(BIOMES)) {
+  const option = document.createElement("option"); option.value = id; option.textContent = definition.name;
+  $("#biome").append(option);
 }
-geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-const terrain = new THREE.Mesh(
-  geometry,
-  new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }),
-);
-terrain.receiveShadow = true;
-terrain.name = "64 × 64 land";
-scene.add(terrain);
-const earth = new THREE.Mesh(
-  new THREE.BoxGeometry(MAP_METRES, 0.65, MAP_METRES),
-  new THREE.MeshStandardMaterial({ color: "#aa895d", roughness: 1 }),
-);
-earth.position.y = -0.34;
-scene.add(earth);
-const grid = new THREE.GridHelper(MAP_METRES, MAP_CELLS, "#697d51", "#7b8b59");
-grid.position.y = 0.006;
-grid.material.transparent = true;
-grid.material.opacity = 0.24;
-grid.visible = false;
-scene.add(grid);
-const boundary = new THREE.LineLoop(
-  new THREE.BufferGeometry().setFromPoints(
-    [
-      [-64, 0.012, -64],
-      [64, 0.012, -64],
-      [64, 0.012, 64],
-      [-64, 0.012, 64],
-    ].map((p) => new THREE.Vector3(...p)),
-  ),
-  new THREE.LineBasicMaterial({ color: "#d0bb7f" }),
-);
-scene.add(boundary);
+$("#biome").value = biome;
+$("#landscape").disabled = biome === "flat";
+$("#biome").onchange = () => {
+  cancelPlacement();
+  biome = $("#biome").value;
+  $("#landscape").disabled = biome === "flat";
+  if (!terrainPreview) localStorage.setItem("solar-friends-v02-biome", biome);
+  sync();
+  overviewMode = true; overview(); render();
+};
+function refreshTerrain() {
+  const visible = grid.visible;
+  scene.remove(terrainView.group); disposeModel(terrainView.group);
+  terrainView = buildTerrain(biome, editor.records);
+  terrain = terrainView.mesh; grid = terrainView.grid; grid.visible = visible;
+  scene.add(terrainView.group);
+}
 const STORAGE = "solar-friends-v02-scene-1";
-let initial = gallery(),
+let initial = terrainPreview ? biomeLandscape(biome) : gallery(),
   loadWarning = "";
 try {
   const saved = localStorage.getItem(STORAGE);
-  if (saved) initial = decode(saved);
+  if (saved && !terrainPreview) initial = decode(saved);
 } catch {
   loadWarning = "Saved scene could not be read. The gallery is loaded instead.";
 }
@@ -155,6 +132,7 @@ let placing = null,
   ghost = null;
 function sync(selectedId = selected?.userData.placement.id) {
   director?.stop();
+  refreshTerrain();
   for (const m of objects) {
     scene.remove(m);
     disposeModel(m);
@@ -171,6 +149,7 @@ function sync(selectedId = selected?.userData.placement.id) {
     model.position.set(
       ...placementPosition(record.column, record.row, footprint(record)),
     );
+    model.position.y = terrainView.sample(model.position.x, model.position.z);
     model.rotation.y = (record.rotation * Math.PI) / 180;
     model.traverse((o) => {
       if (!o.isMesh) return;
@@ -203,6 +182,7 @@ function sync(selectedId = selected?.userData.placement.id) {
     objects.filter((m) => m.rig),
     editor.records,
     (text) => ($("#resident-status").textContent = text),
+    terrainView.sample,
   );
   const previousResident = $("#resident-choice").value;
   $("#resident-choice").replaceChildren();
@@ -221,8 +201,8 @@ function sync(selectedId = selected?.userData.placement.id) {
   $("#scene-count").textContent =
     `${editor.records.length} placed · ${ASSETS.length} asset types`;
   try {
-    localStorage.setItem(STORAGE, encode(editor.records));
-    $("#save-state").textContent = "Saved on this browser";
+    if (!terrainPreview) localStorage.setItem(STORAGE, encode(editor.records, biome));
+    $("#save-state").textContent = terrainPreview ? "Biome study · export to keep edits" : "Saved on this browser";
   } catch {
     $("#save-state").textContent =
       "Storage unavailable · export to keep your scene";
@@ -264,6 +244,7 @@ function showGhost() {
     }
   });
   ghost.position.set(...placementPosition(r.column, r.row, footprint(r)));
+  ghost.position.y = terrainField(biome, candidates).sample(ghost.position.x, ghost.position.z);
   ghost.rotation.y = (r.rotation * Math.PI) / 180;
   try {
     validate([r]);
@@ -374,7 +355,7 @@ function updateSelectionOutline(model) {
       [x + w / 2, 0.04, z - d / 2],
       [x + w / 2, 0.04, z + d / 2],
       [x - w / 2, 0.04, z + d / 2],
-    ].map((v) => new THREE.Vector3(...v)),
+    ].map(([x, y, z]) => new THREE.Vector3(x, terrainView.sample(x,z) + y, z)),
   );
   selectionGeometry.computeBoundingSphere();
 }
@@ -530,7 +511,12 @@ canvas.addEventListener("pointermove", (e) => {
   cursor.visible = !!cell && grid.visible;
   if (cell) {
     cursor.position.set(...placementPosition(cell.column, cell.row, [1, 1]));
-    cursor.position.y = 0.009;
+    cursor.position.y = 0;
+    const vertices = cursor.geometry.attributes.position;
+    for (let i=0;i<vertices.count;i++)
+      vertices.setY(i,terrainView.sample(cursor.position.x+vertices.getX(i),cursor.position.z+vertices.getZ(i))+.035);
+    vertices.needsUpdate = true;
+    cursor.geometry.computeBoundingSphere();
     $("#coordinate").textContent =
       `Cell ${cell.column + 1}, ${cell.row + 1} · 64 × 64`;
   } else $("#coordinate").textContent = "64 × 64 · 4,096 cells";
@@ -652,6 +638,11 @@ $("#position-form").onsubmit = (e) => {
 };
 $("#undo").onclick = () => edit(() => editor.undo());
 $("#redo").onclick = () => edit(() => editor.redo());
+$("#landscape").onclick = () => {
+  edit(() => editor.replace(biomeLandscape(biome)));
+  overviewMode = true; overview();
+  toast("Biome landscape loaded · Undo restores your previous props");
+};
 $("#reset").onclick = () => {
   edit(() => editor.replace(gallery()));
   focusClearing();
@@ -660,7 +651,7 @@ $("#reset").onclick = () => {
 $("#export").onclick = () => {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(
-    new Blob([encode(editor.records)], { type: "application/json" }),
+    new Blob([encode(editor.records, biome)], { type: "application/json" }),
   );
   a.download = "solar-friends-v02-scene.json";
   a.click();
@@ -672,7 +663,12 @@ $("#scene-file").onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 1000000) throw Error("Scene file is too large.");
-    const records = decode(await file.text());
+    const text = await file.text();
+    const records = decode(text), importedBiome = decodeBiome(text);
+    biome = importedBiome;
+    $("#biome").value = biome;
+    $("#landscape").disabled = biome === "flat";
+    if (!terrainPreview) localStorage.setItem("solar-friends-v02-biome", biome);
     edit(() => editor.replace(records));
     focusClearing();
   } catch (error) {
@@ -776,3 +772,5 @@ sync();
 focusClearing();
 if (loadWarning) toast(loadWarning);
 render();
+
+if (terrainPreview) { overviewMode = true; overview(); }
