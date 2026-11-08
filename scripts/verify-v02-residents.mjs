@@ -253,3 +253,22 @@ for (const action of ['eat','bathe','pee','toilet','read','play','chat']) {
  poseResident(actor.rig,'walk',2);assert(!actor.rig.bowl.visible&&!actor.rig.book.visible);
 }
 console.log('PASS: eating, bathing, toilet, reading, play and conversation animate; held props reset between actions.');
+
+for (const id of RESIDENT_IDS) {
+  const actor = createResident(id);
+  for (let time = 0; time <= 6; time += 0.25) {
+    for (const action of ['duck-walk', 'tend']) {
+      poseResident(actor.rig, action, time);
+      actor.updateMatrixWorld(true);
+      const sole = Math.min(...actor.rig.legs.map(({ shoe }) => new THREE.Box3().setFromObject(shoe).min.y));
+      assert(Math.abs(sole) < 1e-6, `${id} ${action}: feet must meet the ground`);
+    }
+    poseResident(actor.rig, 'chat', time);
+    assert(actor.rig.arms[0].elbow.rotation.x < 0, 'conversational elbow must bend forward');
+    poseResident(actor.rig, 'eat', time);
+    actor.updateMatrixWorld(true);
+    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(actor.rig.bowl.getWorldQuaternion(new THREE.Quaternion()));
+    assert(up.y > 0.999, 'eating bowl must remain upright');
+  }
+}
+console.log('PASS: crouching feet stay grounded, conversational elbows bend forward, and eating bowls stay upright throughout each cycle.');

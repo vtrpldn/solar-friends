@@ -121,7 +121,7 @@ export function createResident(id = "resident") {
     cylinder(knee, 0.095, 0.075, 0.42, "trousers", 0, -0.21, 0, 6);
     const shoe=cylinder(knee,.1,.11,.13,"timber",0,-.455,.055,8);
     shoe.scale.z=1.5;
-    legs.push({ hip, knee });
+    legs.push({ hip, knee, shoe });
     const shoulder = joint(hips, `shoulder-${s}`, s * 0.26, 0.29),
       elbow = joint(shoulder, `elbow-${s}`, 0, -0.26);
     cylinder(shoulder, 0.08, 0.07, 0.26, "shirt", 0, -0.13, 0, 8);
@@ -164,7 +164,7 @@ export function createResident(id = "resident") {
   const joints = [
     hips,
     head,
-    ...legs.flatMap((l) => [l.hip, l.knee]),
+    ...legs.flatMap((l) => [l.hip, l.knee, l.shoe]),
     ...arms.flatMap((a) => [a.shoulder, a.elbow]),
   ];
   const rig = { root, hips, head, legs, arms, cargo, can, stream, bowl, book, joints };
@@ -253,7 +253,7 @@ export function poseResident(rig, action, time, blend = 1) {
     });
     arms.forEach((a, i) => {
       a.shoulder.rotation.x = -Math.sin(phase + i * Math.PI) * 0.35;
-      a.elbow.rotation.x = 0.12;
+      a.elbow.rotation.x = -0.12;
     });
   } else hips.position.y += Math.sin(time * 2) * 0.003;
   if (action === "duck-walk") {
@@ -266,7 +266,7 @@ export function poseResident(rig, action, time, blend = 1) {
     });
     arms.forEach((a) => {
       a.shoulder.rotation.x = -0.25;
-      a.elbow.rotation.x = 0.35;
+      a.elbow.rotation.x = -0.35;
     });
   }
   if (action === "sit") {
@@ -287,7 +287,7 @@ export function poseResident(rig, action, time, blend = 1) {
     });
     arms.forEach((a) => {
       a.shoulder.rotation.z = 0.25;
-      a.elbow.rotation.x = 0.25;
+      a.elbow.rotation.x = -0.25;
     });
   }
   if (["work", "wash", "water", "tend"].includes(action)) {
@@ -319,19 +319,19 @@ export function poseResident(rig, action, time, blend = 1) {
   if (action === "look" || action === "breathe") {
     head.rotation.y = Math.sin(time * 0.45) * 0.32;
     hips.rotation.z = Math.sin(time * 0.55) * 0.025;
-    if (action === "breathe") arms.forEach((a) => (a.elbow.rotation.x = 0.25));
+    if (action === "breathe") arms.forEach((a) => (a.elbow.rotation.x = -0.25));
   }
   if (action === "chat") {
     head.rotation.x = Math.sin(time * 2) * 0.06;
     arms[0].shoulder.rotation.x = -0.3 + Math.sin(time * 1.5) * 0.12;
-    arms[0].elbow.rotation.x = 0.65 + Math.sin(time * 2) * 0.16;
+    arms[0].elbow.rotation.x = -0.65 + Math.sin(time * 2) * 0.16;
     head.rotation.y = Math.sin(time * 0.7) * 0.09;
   }
   if (action === "stretch") {
     const amount = 0.5 - 0.5 * Math.cos(time * 0.9);
     arms.forEach((a, i) => {
       a.shoulder.rotation.z = (i ? 1 : -1) * amount * 1.7;
-      a.elbow.rotation.x = 0.25;
+      a.elbow.rotation.x = -0.25;
     });
     hips.rotation.z = Math.sin(time * 0.9) * 0.045;
   }
@@ -367,6 +367,18 @@ export function poseResident(rig, action, time, blend = 1) {
     head.rotation.y=Math.sin(time)*.2;
   }
   if (cargo.visible) arms.forEach((a) => reach(a, 0.2, 0.36));
+  if(action==='eat'||action==='read'){
+    const forearm=hips.rotation.x+arms[0].shoulder.rotation.x+arms[0].elbow.rotation.x;
+    rig.bowl.rotation.x=-forearm;
+    rig.book.rotation.x=-forearm-.5;
+  }
+  for(const l of legs)l.shoe.rotation.x=action==='rest'?0:-(hips.rotation.x+l.hip.rotation.x+l.knee.rotation.x);
+  if(['duck-walk','tend'].includes(action)){
+    rig.root.updateMatrixWorld(true);
+    const rootY=rig.root.getWorldPosition(new THREE.Vector3()).y;
+    const sole=Math.min(...legs.map(l=>new THREE.Box3().setFromObject(l.shoe).min.y));
+    hips.position.y+=(rootY-sole)/rig.root.getWorldScale(new THREE.Vector3()).y;
+  }
   const alpha = THREE.MathUtils.clamp(blend, 0, 1);
   for (const [g, p, q] of previous) {
     g.position.lerpVectors(p, g.position, alpha);
