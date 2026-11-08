@@ -114,7 +114,8 @@ export function createResident(id = "resident") {
       0.35,
       4,
     );
-  const rig = { root, hips, head, legs, arms, cargo, can, stream };
+  const joints = [hips, head, ...legs.flatMap(l => [l.hip, l.knee]), ...arms.flatMap(a => [a.shoulder, a.elbow])];
+  const rig = { root, hips, head, legs, arms, cargo, can, stream, joints };
   root.rig = rig;
   root.name = id;
   const i = RESIDENT_IDS.indexOf(id) - 1;
@@ -164,13 +165,9 @@ export function poseResident(rig, action, time, blend = 1) {
   const { hips, head, legs, arms, cargo, can, stream } = rig,
     phase = time * 8;
   const previous = [];
-  for (const g of [
-    hips,
-    head,
-    ...legs.flatMap((l) => [l.hip, l.knee]),
-    ...arms.flatMap((a) => [a.shoulder, a.elbow]),
-  ])
-    previous.push([g, g.position.clone(), g.quaternion.clone()]);
+  if (blend < 1)
+    for (const g of rig.joints)
+      previous.push([g, g.position.clone(), g.quaternion.clone()]);
   hips.position.set(0, 0.9, 0);
   hips.rotation.set(0, 0, 0);
   head.rotation.set(0, 0, 0);
@@ -185,11 +182,13 @@ export function poseResident(rig, action, time, blend = 1) {
   cargo.visible = action === "carry" || action === "carry-walk";
   can.visible = action === "water";
   if (action === "walk" || action === "carry-walk") {
-    hips.position.y += 0.025 * (1 - Math.cos(phase * 2));
+    hips.position.y += 0.015 * (1 - Math.cos(phase * 2));
+    hips.rotation.z = Math.sin(phase) * 0.025;
+    head.rotation.z = -hips.rotation.z * 0.6;
     legs.forEach((l, i) => {
       const p = phase + i * Math.PI;
       l.hip.rotation.x = Math.sin(p) * 0.48;
-      l.knee.rotation.x = Math.max(0, -Math.sin(p)) * 0.65;
+      l.knee.rotation.x = Math.max(0, -Math.sin(p)) ** 2 * 0.65;
     });
     arms.forEach((a, i) => {
       a.shoulder.rotation.x = -Math.sin(phase + i * Math.PI) * 0.35;
@@ -249,5 +248,26 @@ export function poseResident(rig, action, time, blend = 1) {
     g.position.lerpVectors(p, g.position, alpha);
     g.quaternion.slerpQuaternions(q, g.quaternion.clone(), alpha);
   }
+  rig.root.updateMatrixWorld(true);
+}
+
+// Capture the displayed pose once, then ease toward the live target over a fixed
+// duration. This avoids frame-rate-dependent lag and supports interrupted changes.
+export function animateResident(rig, action, time, dt) {
+  if (rig.motion?.action !== action) {
+    rig.motion = {
+      action, elapsed: 0,
+      from: rig.joints.map(j => [j.position.clone(), j.quaternion.clone()]),
+    };
+  }
+  const motion = rig.motion;
+  motion.elapsed += Math.max(0, dt);
+  poseResident(rig, action, time);
+  const t = Math.min(1, motion.elapsed / 0.45);
+  const weight = t * t * t * (t * (t * 6 - 15) + 10);
+  if (t < 1) rig.joints.forEach((j, i) => {
+    j.position.lerpVectors(motion.from[i][0], j.position, weight);
+    j.quaternion.slerpQuaternions(motion.from[i][1], j.quaternion.clone(), weight);
+  });
   rig.root.updateMatrixWorld(true);
 }

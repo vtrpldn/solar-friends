@@ -1,4 +1,4 @@
-import { poseResident } from "./rig.js";
+import { poseResident, animateResident } from "./rig.js";
 import {
   INTERACTIONS,
   interactionSlots,
@@ -24,6 +24,7 @@ export class ResidentDirector {
       const home = this.homes.get(a);
       a.position.copy(home.position);
       a.rotation.y = home.rotation;
+      delete a.rig.motion;
       poseResident(a.rig, "idle", 0);
     }
     this.task = null;
@@ -85,6 +86,8 @@ export class ResidentDirector {
       path: best.route.map((p) => [...p]),
       phase: "walk",
       elapsed: 0,
+      speed: 0,
+      gait: 0,
     };
     this.status(`Walking to ${target.label || target.asset}…`);
   }
@@ -93,12 +96,19 @@ export class ResidentDirector {
     const task = this.task;
     for (let i = 0; i < this.actors.length; i++)
       if (this.actors[i] !== task?.actor)
-        poseResident(this.actors[i].rig, "idle", this.time + i, 0.15);
+        animateResident(this.actors[i].rig, "idle", this.time + i, dt);
     if (!task) return;
     const a = task.actor;
     task.elapsed += dt;
     if (task.phase === "walk" || task.phase === "return") {
-      let distance = dt * 1.25;
+      let remaining = 0, previous = [a.position.x, a.position.z];
+      for (const point of task.path) {
+        remaining += Math.hypot(point[0] - previous[0], point[1] - previous[1]);
+        previous = point;
+      }
+      const targetSpeed = Math.min(1.25, Math.sqrt(2 * 2.5 * remaining));
+      task.speed += (targetSpeed - task.speed) * (1 - Math.exp(-8 * dt));
+      let distance = dt * task.speed, travelled = 0;
       while (distance > 0 && task.path.length) {
         const [x, z] = task.path[0],
           dx = x - a.position.x,
@@ -116,15 +126,17 @@ export class ResidentDirector {
             Math.sin(desired - a.rotation.y),
             Math.cos(desired - a.rotation.y),
           );
-        a.rotation.y += delta * Math.min(1, dt * 12);
+        a.rotation.y += delta * (1 - Math.exp(-12 * dt));
         distance -= step;
+        travelled += step;
         if (step === len) task.path.shift();
       }
-      poseResident(
+      task.gait += travelled / 1.25;
+      animateResident(
         a.rig,
         task.phase === "return" ? "carry-walk" : "walk",
-        this.time,
-        Math.min(1, dt * 12),
+        task.gait,
+        dt,
       );
       if (!task.path.length) {
         if (task.phase === "return") {
@@ -133,20 +145,21 @@ export class ResidentDirector {
         } else {
           task.phase = "enter";
           task.entry = [a.position.x, a.position.z];
+          task.entryYaw = a.rotation.y;
           task.elapsed = 0;
         }
       }
     } else if (task.phase === "enter") {
       const t = Math.min(1, task.elapsed / 0.8),
-        smooth = t * t * (3 - 2 * t);
+        smooth = t * t * t * (t * (t * 6 - 15) + 10);
       a.position.x = task.entry[0] * (1 - smooth) + task.slot.at[0] * smooth;
       a.position.z = task.entry[1] * (1 - smooth) + task.slot.at[1] * smooth;
       const delta = Math.atan2(
-        Math.sin(task.slot.yaw - a.rotation.y),
-        Math.cos(task.slot.yaw - a.rotation.y),
+        Math.sin(task.slot.yaw - task.entryYaw),
+        Math.cos(task.slot.yaw - task.entryYaw),
       );
-      a.rotation.y += delta * Math.min(1, dt * 10);
-      poseResident(a.rig, task.action, this.time, Math.min(1, dt * 8));
+      a.rotation.y = task.entryYaw + delta * smooth;
+      animateResident(a.rig, task.action, this.time, dt);
       if (t === 1) {
         a.rotation.y = task.slot.yaw;
         task.phase = "action";
@@ -158,13 +171,14 @@ export class ResidentDirector {
         );
       }
     } else {
-      poseResident(a.rig, task.action, this.time, Math.min(1, dt * 10));
+      animateResident(a.rig, task.action, this.time, dt);
       if (
         task.action === "carry" &&
         task.phase === "action" &&
         task.elapsed > 1.2
       ) {
         task.phase = "return";
+        task.speed = 0;
         task.path = [
           task.slot.approach,
           ...task.route.slice(0, -1).reverse(),

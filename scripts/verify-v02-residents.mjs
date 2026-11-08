@@ -3,6 +3,7 @@ import * as THREE from "three";
 import {
   createResident,
   poseResident,
+  animateResident,
   RESIDENT_IDS,
 } from "../web/v02/residents/rig.js";
 import {
@@ -185,3 +186,29 @@ for (const id of RESIDENT_IDS) {
 console.log(
   "PASS: full-distance walking arrival, changing gait and visible resident geometry budget.",
 );
+
+// The same transition must reach the same pose at different rendering rates.
+function transitionAt(fps, seconds) {
+  const model = createResident("iara");
+  for (let frame = 1; frame <= Math.round(fps * seconds); frame++)
+    animateResident(model.rig, "sit", frame / fps, 1 / fps);
+  return model;
+}
+for (const seconds of [0.2, 0.5, 1]) {
+  const reference = transitionAt(60, seconds);
+  for (const fps of [30, 120]) {
+    const candidate = transitionAt(fps, seconds);
+    candidate.rig.joints.forEach((joint, i) => {
+      assert(joint.position.distanceTo(reference.rig.joints[i].position) < 1e-9);
+      assert(joint.quaternion.angleTo(reference.rig.joints[i].quaternion) < 1e-7);
+    });
+  }
+}
+const interrupted = transitionAt(60, 0.2);
+const before = interrupted.rig.joints.map(j => [j.position.clone(), j.quaternion.clone()]);
+animateResident(interrupted.rig, "walk", 0, 0);
+interrupted.rig.joints.forEach((j, i) => {
+  assert(j.position.distanceTo(before[i][0]) < 1e-9, "interrupted transition must not snap");
+  assert(j.quaternion.angleTo(before[i][1]) < 1e-7);
+});
+console.log("PASS: matching transitions at 30/60/120 Hz and continuous interrupted poses.");

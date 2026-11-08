@@ -13,3 +13,5 @@ One rehearsal runs at a time. A new rehearsal or Stop restores the previous resi
 `rig.js` owns articulated models and poses; `interactions.js` owns rotated contact/approach positions and grid routing; `director.js` owns walk, enter, action and carry-return transitions. `verify-v02-residents.mjs` covers all actions at four rotations, geometry, blocked routes, connected garden access, carrying and reset.
 
 Browser review covered bench sitting, hammock rest, garden watering/crouching, workshop hand placement, wash-station use, crate pickup/return and pause. Screenshots are under `assets/art-direction/v02/resident-*.png`. The 44 rotated action checks are automated geometry/state checks, not 44 separate visual approvals. Autonomous scheduling, multi-resident task assignment and resource effects remain future simulation work.
+
+Motion uses fixed-duration eased pose changes, including interrupted transitions, and a distance-driven walking phase. Residents accelerate from rest and decelerate near arrival; entry position and orientation use the same easing curve. Transition checks compare 30, 60 and 120 Hz.
