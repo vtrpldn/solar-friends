@@ -71,3 +71,12 @@ console.log('PASS: paired conversation, recreation, unavailable supplies, cargo 
  assert(run(s,400,()=>!s.trip),"food trip returns");assert(s.materials.food>0);
 }
 console.log("PASS: hungry residents can collect town food");
+
+{
+ const s=fresh();assert.equal(plan(s,'shelter',34,39),'');
+ s.people.forEach(r=>r.needs.social=5);
+ assert(run(s,180,()=>s.people.filter(r=>r.needs.social>80).length>=2),
+   'lonely residents can socialize together while a large project is active');
+ assert(s.projects[0].work<PROJECTS.shelter.work,'conversation happens before the project ends');
+}
+console.log('PASS: mutually lonely residents take social breaks during active projects');

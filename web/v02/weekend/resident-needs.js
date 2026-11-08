@@ -70,7 +70,7 @@ export function chooseNeed(s,r,i,api) {
    if(spot){assign(s,r,kind,spot,{river:true,label:'Washing by the river',animation:'bathe'});return;}
   }
   if(kind==='social') {
-   const partner=s.people.filter(p=>p!==r && !p.tentPhase && !p.needTask && !p.cargo && !p.operation && p.action!=='town' && p.energy>=35 && Math.min(...Object.values(ensureNeeds(p)))>20)
+   const partner=s.people.filter(p=>p!==r && !p.tentPhase && !p.needTask && !p.cargo && !p.operation && p.action!=='town' && p.energy>=35 && ['hunger','bladder','bowels','hygiene'].every(key=>ensureNeeds(p)[key]>20))
     .sort((a,b)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z))[0];
    if(partner) {
     const spot=api.groundSpot(r,api.camp(),i), other=spot && api.groundSpot(partner,spot,i+1);
