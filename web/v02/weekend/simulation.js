@@ -5,7 +5,7 @@ import { autoConnectUtilities } from "./auto-utilities.js";
 import { PathQueue } from "./path-queue.js";
 import { carDoor, TRIP_DURATION, DRIVE_DURATION } from "./town-trip.js";
 import { CELL_MIN, CELL_MAX } from "./map-size.js";
-import { footprintRelief, foundationPad } from "./elevation.js";
+import { foundationPad } from "./elevation.js";
 import { OPENING_PROJECTS, openingProgress } from "./opening.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import {
@@ -609,7 +609,7 @@ export function createWeekend(landSeed = 0) {
     livestockUnits: 1,
     opening: { version: 1, townTrips: 0 },
     stage: "arrival",
-    arrivalElapsed: 0,
+    arrivalElapsed: ARRIVAL_DURATION,
     camp: null,
     time: 0,
     money: 220,
@@ -693,9 +693,9 @@ export function campPlacementError(s, x, z) {
   )
     return "Keep the tents inside the plot.";
   if (
-    footprintRelief(x - 1, z - 3, 5, 4, s.elevationSeed, s.terrainPads) > 0.22
+    !foundationPad(x - 1, z - 3, 5, 4, s.elevationSeed, s.terrainPads)
   )
-    return "The tents need flatter ground.";
+    return "Leave space between foundations at different heights.";
   for (let cx = x - 1; cx <= x + 3; cx++)
     for (let cz = z - 3; cz <= z; cz++) {
       if (riverBankAt(cx, cz, 2, s.landSeed))
@@ -1611,10 +1611,7 @@ export function endWeekend(s) {
 export function tick(s, dt) {
   if (!Number.isFinite(dt) || dt <= 0) return;
   if (s.stage === "arrival") {
-    s.arrivalElapsed = Math.min(
-      ARRIVAL_DURATION,
-      (s.arrivalElapsed ?? ARRIVAL_DURATION) + Math.min(dt, 1),
-    );
+    s.arrivalElapsed = ARRIVAL_DURATION;
     return;
   }
   dt = Math.min(dt, 1);
@@ -2111,6 +2108,7 @@ export function restore(text) {
       s.arrivalElapsed > ARRIVAL_DURATION
     )
       return null;
+    if (s.stage === "arrival") s.arrivalElapsed = ARRIVAL_DURATION;
     if (
       ["rain", "rainSeen", "rainResolved", "meal"].some(
         (k) => typeof s[k] !== "boolean",

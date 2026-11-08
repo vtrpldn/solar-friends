@@ -152,20 +152,15 @@ console.log(
   "PASS: riverbank building exclusion and accessible camp construction.",
 );
 const intro = createFreshWeekend();
-assert.equal(
-  chooseCamp(intro, "shade"),
-  false,
-  "Cannot choose camp before everyone exits",
-);
+assert.equal(intro.arrivalElapsed, 17, "New games skip the arrival cutscene");
 run(intro, 4);
-assert(intro.arrivalElapsed > 3.9 && intro.arrivalElapsed < 4.1);
-assert.equal(intro.time, 0, "Arrival does not consume the working day");
+assert.equal(intro.time, 0, "Choosing a camp does not consume the day");
 const introSaved = restore(save(intro));
 assert(introSaved);
-assert.equal(introSaved.arrivalElapsed, intro.arrivalElapsed);
-run(introSaved, 14);
-assert.equal(introSaved.arrivalElapsed, 17);
-assert(chooseCamp(introSaved, "shade"));
+assert(chooseCamp(introSaved, "shade"), "Camp placement is immediately available");
+const oldArrival = createFreshWeekend();
+oldArrival.arrivalElapsed = 3;
+assert.equal(restore(save(oldArrival)).arrivalElapsed, 17, "Old arrival saves skip the cutscene too");
 const { arrivalPose } = await import("../web/v02/weekend/arrival.js");
 for (let i = 0; i < 5; i++) {
   assert(!arrivalPose(5, i).visible);
@@ -177,7 +172,7 @@ for (let i = 0; i < 5; i++) {
 assert(Math.abs(arrivalPose(6, 0).car.x + 1) < 1e-8);
 assert.equal(arrivalPose(6, 0).car.z, PARK_Z);
 console.log(
-  "PASS: driving before exits, staggered disembarkation, final positions, camp gating and saved arrival progress.",
+  "PASS: immediate camp setup, parked resident positions and legacy arrival-save migration.",
 );
 const { vehiclePose } = await import("../web/v02/weekend/arrival.js");
 for (let t = 0; t <= 17; t += 0.1) {

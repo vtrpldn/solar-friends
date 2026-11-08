@@ -1,3 +1,4 @@
+import {footprintRelief,elevationAt} from "../web/v02/weekend/elevation.js";
 import { ROAD_SHIFT } from "../web/v02/weekend/road-layout.js";
 import assert from "node:assert/strict";
 import {
@@ -25,3 +26,15 @@ for (const seed of [0, 42, 97]) {
 console.log(
   "PASS: custom camp placement, blocked road/edges, simulation and saved camp coordinates.",
 );
+
+for (const seed of [42,97]) {
+  const s=createWeekend(seed);
+  const site={x:60,z:60};
+  assert(footprintRelief(59,57,5,4,seed,s.terrainPads)>.22);
+  assert.equal(campPlacementError(s,site.x,site.z),null);
+  assert(chooseCamp(s,site));
+  assert(footprintRelief(59,57,5,4,seed,s.terrainPads)<1e-8);
+  assert(elevationAt(56,56,seed,s.terrainPads)>0);
+  assert(restore(save(s)));
+}
+console.log('PASS: tents grade elevated slopes immediately and preserve their foundations through saves.');

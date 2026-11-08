@@ -26,8 +26,6 @@ import { installCameraNavigation } from "./camera-navigation.js";
 import { createJimny } from "../library/vehicles.js";
 import {
   ARRIVAL_DURATION,
-  PARK_TIME,
-  arrivalPose,
   vehiclePose,
   arrivalLaneAt,
 } from "./arrival.js";
@@ -156,12 +154,8 @@ controls.minZoom = 0.18;
 controls.maxZoom = 6;
 controls.maxPolarAngle = Math.PI * 0.46;
 controls.minPolarAngle = 0.25;
-let arrivalCameraFollow = true;
 const navigation = installCameraNavigation(camera, controls, {
   home: () => focus(campLocation(s)),
-  onInteract: () => {
-    arrivalCameraFollow = false;
-  },
 });
 const daylight = new THREE.HemisphereLight("#fff1cd", "#658658", 2);
 scene.add(daylight);
@@ -353,7 +347,6 @@ const vehicles = [0, 1].map((index) => {
   scene.add(root);
   return { root, wheels };
 });
-const car = vehicles[0].root;
 const campGroup = new THREE.Group();
 scene.add(campGroup);
 let campDrawn = null;
@@ -687,10 +680,7 @@ function focus(c) {
   controls.update();
 }
 focus(campLocation(s));
-if (s.stage === "arrival" && s.arrivalElapsed < ARRIVAL_DURATION) {
-  const pose = arrivalPose(s.arrivalElapsed, 0).car;
-  focus({ x: pose.x / 2 + 32, z: pose.z / 2 + 32 });
-}
+
 function resize() {
   const a = innerWidth / innerHeight;
   camera.left = -23 * a;
@@ -868,6 +858,10 @@ function updatePlacementPreview() {
       cell.z + (pitching ? -1.5 : (size[1] - 1) / 2),
     ),
   );
+  if (pitching) {
+    const pad = foundationPad(cell.x-1,cell.z-3,5,4,s.elevationSeed,s.terrainPads);
+    if (pad) ghost.position.y = pad.height;
+  }
   ghost.position.y += 0.04;
   ghost.visible = true;
   const error = pitching
@@ -1087,15 +1081,6 @@ $("uphill").onclick = () => {
   resolveRain(s, "move");
   message(s.log[0]);
   renderUI();
-};
-$("skip-arrival").onclick = () => {
-  s.arrivalElapsed = ARRIVAL_DURATION;
-  previousMotion = captureMotion(s);
-  accumulator = 0;
-  focus();
-  message("Click clear ground to pitch your tents.");
-  renderUI();
-  persist();
 };
 function updatePauseButton() {
   $("pause").textContent = paused ? "▶" : "Ⅱ";
@@ -1445,7 +1430,6 @@ function renderUI() {
     "aria-pressed",
     String(s.instantBuild !== false),
   );
-  $("skip-arrival").hidden = active || s.arrivalElapsed >= ARRIVAL_DURATION;
   $("village-actions").hidden = !active;
   document.querySelectorAll("[data-panel-toggle]").forEach((button) => {
     const opened = openPanel === button.dataset.panelToggle && !selected;
@@ -1713,8 +1697,7 @@ function frame(now) {
   for (const [id, entry] of buildings)
     if (entry.fire) animateFire(entry.fire, animalTime + id * 2.73);
   entrance.position.copy(world(s.stock.x, s.stock.z));
-  if (s.stage !== "arrival")
-    for (const [index, vehicle] of vehicles.entries()) {
+  for (const [index, vehicle] of vehicles.entries()) {
       const trip = s.trip && {
         ...s.trip,
         left: s.trip.left + (s.time - visual.time),
@@ -1728,54 +1711,8 @@ function frame(now) {
         wheel.rotateY((pose.z + 22) / 0.41);
       }
     }
-  const arriving = s.stage === "arrival" && s.arrivalElapsed < ARRIVAL_DURATION;
-  if (s.stage === "arrival") {
-    const pose = arrivalPose(visual.arrivalElapsed, 0);
-    for (const [index, vehicle] of vehicles.entries()) {
-      const drive = vehiclePose(visual.arrivalElapsed, index);
-      vehicle.root.position.set(drive.x, 0, drive.z);
-      vehicle.root.rotation.y = drive.yaw;
-      for (const wheel of vehicle.wheels) {
-        wheel.rotation.set(0, 0, Math.PI / 2);
-        wheel.rotateY((drive.z + 58) / 0.41);
-      }
-    }
-    if (arriving) {
-      if (arrivalCameraFollow) {
-        controls.target.lerp(car.position, 1 - Math.exp(-dt * 7));
-        camera.position
-          .copy(controls.target)
-          .add(new THREE.Vector3(24, 26, 24));
-      }
-      message(
-        s.arrivalElapsed < PARK_TIME
-          ? "There it is. Our own little piece of land."
-          : "We’re here! Everyone out—let’s take a look.",
-      );
-    } else if (
-      s.arrivalElapsed >= ARRIVAL_DURATION &&
-      $("message").textContent.startsWith("We’re here")
-    ) {
-      if (arrivalCameraFollow) focus();
-      message("Click clear ground to pitch your tents.");
-    }
-  }
-  entrance.visible = !arriving;
   for (const [i, r] of s.people.entries()) {
     const g = actors[i];
-    if (arriving) {
-      const pose = arrivalPose(visual.arrivalElapsed, i);
-      g.visible = pose.visible;
-      g.position.set(pose.x, pose.y, pose.z);
-      g.rotation.y = pose.yaw;
-      animateResident(
-        g.rig,
-        pose.walking ? "walk" : "idle",
-        visual.arrivalElapsed + i * 0.3,
-        paused ? 0 : dt * speed,
-      );
-      continue;
-    }
     g.visible =
       (r.action !== "town" ||
         ["boarding", "unloading"].includes(s.trip?.phase)) &&
@@ -1973,7 +1910,7 @@ function frame(now) {
   fitTerrainCamera(camera, controls.target, scene.fog);
   drawUtilities();
   renderer.render(scene, camera);
-  recordPerformance(now, arriving ? visual.arrivalElapsed : visual.time);
+  recordPerformance(now, visual.time);
   requestAnimationFrame(frame);
 }
 addEventListener("pagehide", persist);
