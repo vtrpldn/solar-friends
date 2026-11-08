@@ -52,6 +52,10 @@ function ball(g, r, m, x, y, z, s = [1, 1, 1], detail = 1) {
 // Deterministic broad lobes break the repeated spherical silhouette without
 // adding triangles or noisy per-vertex randomness.
 export function shapeCrown(mesh, seed = 0) {
+  // Store deformed vertices rather than primitive parameters in scene exports.
+  const original = mesh.geometry;
+  mesh.geometry = new THREE.BufferGeometry().copy(original);
+  original.dispose();
   const points = mesh.geometry.attributes.position;
   for (let i=0;i<points.count;i++) {
     const x=points.getX(i), y=points.getY(i), z=points.getZ(i);

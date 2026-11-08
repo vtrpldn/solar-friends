@@ -477,6 +477,7 @@ function tree(kind, variant = 0) {
       crown.rotation.y = a*.4;
     }
   }
+  if (kind === "umbuzeiro") g.scale.set(.95,1,.95);
   if (kind === "jequitiba")
     color(ball(g, 1.15, "leaf", 0, h - 0.6, 0, [1, 0.65, 1], 1), c);
   if (kind === "orchard" || kind === "pequi")

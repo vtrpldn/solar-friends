@@ -1,3 +1,4 @@
+import { spriteCamera } from "./export-camera.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import {
@@ -21,7 +22,6 @@ const state = {
   mode: "model",
 };
 const SIZE = 512,
-  PPM = 48,
   ANCHOR = [256, 384];
 let renderer;
 try {
@@ -112,7 +112,8 @@ function surface(value) {
   });
 }
 function iso() {
-  const target = new THREE.Vector3(0, state.together ? 1 : 1.3, 0);
+  const bounds = new THREE.Box3().setFromObject(state.together ? content : model);
+  const target = state.together ? new THREE.Vector3(0,1,0) : bounds.getCenter(new THREE.Vector3());
   controls.target.copy(target);
   camera.position
     .copy(target)
@@ -122,6 +123,11 @@ function iso() {
   camera.updateProjectionMatrix();
   controls.update();
   resize();
+  if (!state.together) {
+    const span = bounds.getSize(new THREE.Vector3()).length() * 1.1;
+    camera.zoom = Math.min(1, (camera.top-camera.bottom)/span, (camera.right-camera.left)/span);
+    camera.updateProjectionMatrix();
+  }
   $("#view-subtitle").textContent = "ORTHOGRAPHIC · 2:1";
 }
 function lights() {
@@ -261,20 +267,7 @@ function resize() {
   camera.updateProjectionMatrix();
 }
 new ResizeObserver(resize).observe($("#viewport"));
-function exportCamera() {
-  const c = new THREE.OrthographicCamera(
-    -SIZE / PPM / 2,
-    SIZE / PPM / 2,
-    ANCHOR[1] / PPM,
-    -(SIZE - ANCHOR[1]) / PPM,
-    0.1,
-    100,
-  );
-  c.position.set(12, Math.sqrt(2 / 3) * 12, 12);
-  c.lookAt(0, 0, 0);
-  c.updateMatrixWorld();
-  return c;
-}
+function exportCamera() { return spriteCamera(model); }
 function manifest() {
   const def = ASSETS.find((a) => a.id === state.id);
   return {
@@ -285,7 +278,7 @@ function manifest() {
     light: state.light,
     units: "metres",
     cellMetres: CELL,
-    pixelsPerMetre: PPM,
+    pixelsPerMetre: exportCamera().userData.pixelsPerMetre,
     camera: {
       projection: "orthographic",
       groundRatio: "2:1",
@@ -365,6 +358,7 @@ function renderSheet() {
 function proof() {
   if (state.together) return;
   const { frames } = renderSheet();
+  $("#proof .proof-heading p").textContent = `Transparent exports · ${exportCamera().userData.pixelsPerMetre.toFixed(1)} pixels / metre · Fixed ground anchor`;
   $("#frames").replaceChildren(
     ...frames.map((src, i) => {
       const f = document.createElement("figure");

@@ -46,14 +46,26 @@ export function validate(records) {
   });
 }
 export function gallery() {
-  return ASSETS.map((a, i) => ({
-    id: `gallery-${a.id}`,
-    asset: a.id,
-    column: (i % 16) * 4,
-    row: Math.floor(i / 16) * 4,
-    rotation: 0,
-    label: a.name,
-  }));
+  const occupied = new Set();
+  const placements = new Map();
+  // Pack actual footprints, with a cell of breathing room between exhibits.
+  for (const asset of [...ASSETS].sort((a,b)=>b.footprint[1]-a.footprint[1] || b.footprint[0]-a.footprint[0])) {
+    const [w,d] = asset.footprint;
+    let spot;
+    for (let row=0; row<=MAP_CELLS-d && !spot; row++) {
+      for (let column=0; column<=MAP_CELLS-w && !spot; column++) {
+        let free=true;
+        for(let z=row; z<row+d && free; z++)
+          for(let x=column; x<column+w; x++) if(occupied.has(`${x},${z}`)) {free=false; break;}
+        if(free) spot={column,row};
+      }
+    }
+    if(!spot) throw Error(`Gallery is full: ${asset.name}`);
+    for(let z=spot.row-1; z<=spot.row+d; z++)
+      for(let x=spot.column-1; x<=spot.column+w; x++) occupied.add(`${x},${z}`);
+    placements.set(asset.id,{id:`gallery-${asset.id}`,asset:asset.id,...spot,rotation:0,label:asset.name});
+  }
+  return ASSETS.map(asset=>placements.get(asset.id));
 }
 export function decode(text) {
   const data = JSON.parse(text);

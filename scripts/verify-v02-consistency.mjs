@@ -4,6 +4,7 @@ import { ASSETS, createAsset } from "../web/v02/library/catalog.js";
 // Budgets follow visual role: tile roofs need geometry; tiny crop leaves do not.
 const budgets = {
   Props: 1200,
+  "Resource icons": 800,
   Construction: 5000,
   Homes: 5000,
   Buildings: 5000,
@@ -26,8 +27,9 @@ for (const asset of ASSETS) {
       triangles +=
         (o.geometry.index?.count ?? o.geometry.attributes.position.count) / 3;
   });
+  // The 4x2 kitchen has twice the roof area of the standard 2x2 buildings.
   assert(
-    triangles <= budgets[asset.category],
+    triangles <= (asset.id === "kitchen" ? 7000 : budgets[asset.category]),
     `${asset.id}: ${triangles} triangles exceeds category budget`,
   );
   assert(bounds.min.y >= -0.001, `${asset.id}: below ground`);

@@ -1,3 +1,4 @@
+import { spriteCamera } from "../web/v02/workshop/export-camera.js";
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import {
@@ -6,17 +7,7 @@ import {
   disposeModel,
   CELL,
 } from "../web/v02/library/catalog.js";
-const camera = new THREE.OrthographicCamera(
-  -512 / 48 / 2,
-  512 / 48 / 2,
-  384 / 48,
-  -128 / 48,
-  0.1,
-  100,
-);
-camera.position.set(12, Math.sqrt(2 / 3) * 12, 12);
-camera.lookAt(0, 0, 0);
-camera.updateMatrixWorld();
+let camera = spriteCamera();
 const project = (p) => {
   const v = new THREE.Vector3(...p).project(camera);
   return [(v.x + 1) * 256, (1 - v.y) * 256];
@@ -37,6 +28,7 @@ assert.ok(Math.abs(up[0] - origin[0]) < 1e-10);
 let frames = 0;
 for (const def of ASSETS) {
   const model = createAsset(def.id);
+  camera = spriteCamera(model);
   const roundtrip = new THREE.ObjectLoader().parse(model.toJSON());
   const originalBounds = new THREE.Box3().setFromObject(model, true),
     loadedBounds = new THREE.Box3().setFromObject(roundtrip, true);

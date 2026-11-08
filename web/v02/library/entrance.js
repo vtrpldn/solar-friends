@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {box, cylinder, beam, clayRoof} from '../workshop/models.js';
+import {box, cylinder, beam, mesh} from '../workshop/models.js';
 export function createEntrancePortal() {
   const g = new THREE.Group();
   g.name = 'entrance-portal';
@@ -11,10 +11,20 @@ export function createEntrancePortal() {
     beam(g,[side*5.3,3.3,0],[side*4.3,4.35,0],.2,'timberLight');
   }
   box(g,11.4,.32,.4,'timber',0,4.5,0);
-  const roof = new THREE.Group();
-  roof.rotation.y = Math.PI/2;
-  clayRoof(roof,{half:.7,depth:11.5,eave:4.65,rise:.4,ridgeHeight:5.13});
-  g.add(roof);
+  // A shallow canopy needs one tile course, not a full house roof's geometry.
+  for(const side of [-1,1]) {
+    const slope=box(g,11.5,.06,Math.hypot(.7,.4),'tileDark',0,4.85,side*.35);
+    slope.rotation.x=side*Math.atan2(.4,.7);
+    for(let i=0;i<23;i++) {
+      const tile=mesh(g,new THREE.CylinderGeometry(.25,.25,Math.hypot(.7,.4),5,1,true,0,Math.PI).rotateY(side*Math.PI/2),
+        i%3===0?'tileLight':'tile',-5.5+i*.5,4.9,side*.35);
+      tile.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(0,-.4,side*.7).normalize());
+    }
+  }
+  for(let i=0;i<23;i++) {
+    const cap=mesh(g,new THREE.CylinderGeometry(.13,.13,.5,5,1,true,0,Math.PI),'tileLight',-5.5+i*.5,5.1,0);
+    cap.rotation.z=Math.PI/2;
+  }
   // A carved sun badge reads from both directions without a tiny text texture.
   box(g,2.1,.72,.16,'teal',0,3.65,0);
   for(const side of [-1,1]) {
