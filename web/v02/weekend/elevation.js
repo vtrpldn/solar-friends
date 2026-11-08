@@ -26,12 +26,22 @@ function naturalVertex(x, z, seed = 0) {
 }
 // Pads cover whole mesh triangles beneath the foundation. Blended shoulders
 // never override another pad's level interior.
+const layers = new WeakMap();
+function terrainLayers(pads) {
+  let layer = layers.get(pads);
+  if (!layer || layer.length !== pads.length) {
+    layer = {length:pads.length, foundations:pads.filter(p=>!p.terraform), vertices:pads.find(p=>p.terraform)?.vertices || {}};
+    layers.set(pads,layer);
+  }
+  return layer;
+}
 export function elevationVertex(x, z, seed = 0, pads = []) {
-  const natural = naturalVertex(x, z, seed);
+  const layer = terrainLayers(pads);
+  const natural = layer.vertices[`${x},${z}`] ?? naturalVertex(x, z, seed);
   let total = 0,
     height = 0,
     strongest = 0;
-  for (const p of pads) {
+  for (const p of layer.foundations) {
     const distance = Math.hypot(
       Math.max(p.left - x, 0, x - p.right),
       Math.max(p.top - z, 0, z - p.bottom),
@@ -62,7 +72,7 @@ export function foundationPad(x, z, w, d, seed = 0, pads = []) {
   };
   const touching = pads.filter(
     (p) =>
-      pad.left <= p.right &&
+      !p.terraform && pad.left <= p.right &&
       pad.right >= p.left &&
       pad.top <= p.bottom &&
       pad.bottom >= p.top,

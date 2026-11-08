@@ -89,6 +89,7 @@ assert.ok(restore(save(moved)), "moved foundations survive reload");
 const poor = createSandbox(42);
 poor.mode = "story";
 poor.wood = 0;
+poor.money = 0;
 for (const key of Object.keys(poor.materials)) poor.materials[key] = 0;
 const untouched = JSON.stringify(poor.terrainPads);
 assert.match(plan(poor, "garden", site.x, site.z), /Missing/);

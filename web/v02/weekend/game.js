@@ -1,3 +1,4 @@
+import { terraform } from "./terraform.js";
 import { roadLine } from "./placement-helpers.js";
 import { prepareHouseLighting, updateHouseLighting } from "./house-lighting.js";
 import { autoConnectUtilities } from "./auto-utilities.js";
@@ -494,9 +495,10 @@ function drawUtilities() {
 }
 const buildings = new Map();
 const assets = new Set(ASSETS.map((a) => a.id));
-let terrainPadCount = s.terrainPads?.length || 0;
+let terrainPadCount = s.terrainPads?.length || 0, terrainLayer = s.terrainPads;
 function syncTerrain() {
-  if (terrainPadCount === (s.terrainPads?.length || 0)) return;
+  if (terrainLayer === s.terrainPads && terrainPadCount === (s.terrainPads?.length || 0)) return;
+  terrainLayer = s.terrainPads;
   terrainPadCount = s.terrainPads.length;
   updateTerrain(ground, s.elevationSeed, s.terrainPads);
   for (const p of s.projects.filter((p) => p.key === "road")) {
@@ -739,6 +741,7 @@ function cancel() {
   renderUI();
 }
 function startPlacement(key, id = null) {
+  if (openPanel === "terrain-panel") setPanel(null);
   lastRoad = null;
   roadPreview.visible = false;
   placing = key;
@@ -821,6 +824,21 @@ $("world").addEventListener("pointerdown", (e) => {
   down = { x: e.clientX, y: e.clientY };
 });
 $("world").addEventListener("pointermove", (e) => {
+  if (openPanel === "terrain-panel") {
+    const point = hit(e);
+    terrainBrush.visible = !!point;
+    if (point) {
+      const radius = Number($("terrain-radius").value);
+      const points = Array.from({length:65},(_,i)=>{
+        const x = point.x + Math.cos(i/64*Math.PI*2)*radius;
+        const z = point.z + Math.sin(i/64*Math.PI*2)*radius;
+        return new THREE.Vector3(x,elevationAt(x,z,s.elevationSeed,s.terrainPads)+.08,z);
+      });
+      terrainBrush.geometry.dispose();
+      terrainBrush.geometry = new THREE.BufferGeometry().setFromPoints(points);
+    }
+    return;
+  }
   const pitching =
     s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION;
   if (!placing && !pitching) return;
@@ -910,6 +928,20 @@ $("world").addEventListener("pointerup", (e) => {
   if (!p) return;
   const x = Math.round(p.x / 2 + 32),
     z = Math.round(p.z / 2 + 32);
+  if (openPanel === "terrain-panel") {
+    const old = s.terrainPads.find(p=>p.terraform);
+    const tool = $("terrain-tool").value;
+    if (tool === "flatten" && flattenLevel === null) flattenLevel = p.y;
+    if (terraform(s,p.x,p.z,tool,Number($("terrain-radius").value),flattenLevel)) {
+      terrainHistory.push(old);
+      if (terrainHistory.length>20) terrainHistory.shift();
+      $("terrain-undo").disabled = false;
+      syncTerrain(); syncBuildings(); persist();
+      message("Terrain updated · no materials, money or resident work used.");
+    } else message("No change here. Try open ground away from protected areas.");
+    $("terrain-level").textContent = flattenLevel === null ? "Flatten uses the height of your first click." : `Flatten height: ${flattenLevel.toFixed(1)} m`;
+    return;
+  }
   if (s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION) {
     const error = campPlacementError(s, x, z);
     if (error) {
@@ -1327,10 +1359,28 @@ function filterBuildings() {
 }
 $("build-category").onchange = filterBuildings;
 $("build-search").oninput = filterBuildings;
-let openPanel = null;
+let openPanel = null, flattenLevel = null;
+const terrainHistory = [];
+const terrainBrush = new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xffe1a0,depthTest:false}));
+terrainBrush.visible = false; terrainBrush.renderOrder = 10; scene.add(terrainBrush);
+$("terrain-tool").onchange = $("terrain-pick").onclick = () => {
+  flattenLevel = null;
+  $("terrain-level").textContent = "Flatten uses the height of your first click.";
+};
+$("terrain-undo").onclick = () => {
+  if (!terrainHistory.length) return;
+  const layer = terrainHistory.pop();
+  s.terrainPads = s.terrainPads.filter(p=>!p.terraform);
+  if(layer) s.terrainPads.push(layer);
+  syncTerrain(); syncBuildings(); persist();
+  $("terrain-undo").disabled = !terrainHistory.length;
+  message("Terrain edit undone.");
+};
 function setPanel(panel) {
   if (placing) cancel();
   openPanel = panel;
+  terrainBrush.visible = false;
+  $("terrain-panel").hidden = panel !== "terrain-panel";
   if (panel) selected = null;
   document.body.dataset.tray = panel === "build" ? "open" : "closed";
   uiSignature = "";

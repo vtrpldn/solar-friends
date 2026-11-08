@@ -1406,3 +1406,7 @@ body[data-tray="closed"] {
 #grid-power-panel { display: block; margin-bottom: 18px; }
 #grid-power-panel[hidden] { display: none; }
 #grid-power-panel button { margin-top: 8px; }
+
+#terrain-panel { position: fixed; left: 22px; top: 100px; width: 260px; z-index: 5; }
+#terrain-panel label, #terrain-panel select { display: block; width: 100%; margin-top: 8px; }
+#terrain-panel button:not(.panel-close) { margin-top: 8px; }

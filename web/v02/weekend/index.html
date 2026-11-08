@@ -40,6 +40,20 @@
         </div>
       </div>
     </header>
+      <aside id="terrain-panel" class="paper" hidden>
+        <button class="panel-close" data-close-panel aria-label="Close terrain tools">×</button>
+        <h2>Shape the land</h2>
+        <p>Instant and free. Click the ground to apply a brush.</p>
+        <label for="terrain-tool">Tool</label>
+        <select id="terrain-tool"><option value="raise">Raise</option><option value="lower">Lower</option><option value="flatten">Flatten</option><option value="smooth">Smooth</option></select>
+        <label for="terrain-radius">Brush radius</label>
+        <select id="terrain-radius"><option value="4">Small · 2 cells</option><option value="8" selected>Medium · 4 cells</option><option value="12">Large · 6 cells</option></select>
+        <p id="terrain-level">Flatten uses the height of your first click.</p>
+        <button id="terrain-pick">Pick a new flatten height</button>
+        <button id="terrain-undo" disabled>Undo terrain edit</button>
+        <p class="hint">Riverbanks, roads, supplies and foundations stay protected. Esc closes these tools.</p>
+      </aside>
+
     <aside id="projects-panel" class="paper" hidden>
       <button class="panel-close" data-close-panel aria-label="Close projects">
         ×</button
@@ -140,6 +154,7 @@
         >
           ♡ Residents
         </button>
+        <button data-panel-toggle="terrain-panel" aria-controls="terrain-panel" aria-expanded="false">△ Terrain</button>
         <span class="dock-divider"></span>
         <button data-manage="resources">▰ Resources</button
         ><button data-manage="water">♦ Water</button

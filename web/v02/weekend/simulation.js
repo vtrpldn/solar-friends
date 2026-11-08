@@ -1,3 +1,4 @@
+import { validTerrainVertices } from "./terraform.js";
 import { ROAD_SHIFT } from "./road-layout.js";
 import { roadLine } from "./placement-helpers.js";
 import { autoConnectUtilities } from "./auto-utilities.js";
@@ -2069,9 +2070,10 @@ export function restore(text) {
     if (
       !Array.isArray(s.terrainPads) ||
       s.terrainPads.length > 4096 ||
+      s.terrainPads.filter(p => p?.terraform).length > 1 ||
       s.terrainPads.some(
         (p) =>
-          !p ||
+          !p || (p.terraform !== undefined ? !validTerrainVertices(p) : (
           ![p.left, p.right, p.top, p.bottom, p.height].every(
             Number.isFinite,
           ) ||
@@ -2083,7 +2085,7 @@ export function restore(text) {
           p.top >= p.bottom ||
           p.height < 0 ||
           p.height > 12 ||
-          [p.left, p.right, p.top, p.bottom].some((n) => n % 2 !== 0),
+          [p.left, p.right, p.top, p.bottom].some((n) => n % 2 !== 0))),
       )
     )
       return null;
