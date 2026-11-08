@@ -32,6 +32,7 @@ export function createUtilitiesPreview(interactions = false) {
     ["wetland", 37, 30],
     ["house", 30, 30],
     ["streetlight", 30, 37],
+    ["fire-circle", 33, 35],
   ];
   if (interactions)
     rows.push(

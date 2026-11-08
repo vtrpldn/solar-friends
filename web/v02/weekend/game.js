@@ -1,3 +1,4 @@
+import { createFire, animateFire } from "./fire.js";
 import { saveKey } from "./modes.js";
 import { openingProgress, openingRecap } from "./opening.js";
 import { collectAnimals, animateAnimals } from "../library/animal-motion.js";
@@ -435,6 +436,13 @@ function syncBuildings() {
     entry.root.position.copy(
       world(p.x + (def.size[0] - 1) / 2, p.z + (def.size[1] - 1) / 2),
     );
+    if (def.asset === "fire-circle") {
+      if (fraction >= 1 && !entry.fire) {
+        entry.fire = createFire();
+        entry.root.add(entry.fire.root);
+      }
+      if (entry.fire) entry.fire.root.visible = fraction >= 1;
+    }
     if (p.key === "gathering" && s.meal && !entry.meal) {
       for (let i = 0; i < 5; i++) {
         const plate = new THREE.Mesh(
@@ -1378,6 +1386,8 @@ function frame(now) {
   for (const [id, entry] of buildings)
     if (entry.animals.length)
       animateAnimals(entry.animals, animalTime + id * 2.73);
+  for (const [id, entry] of buildings)
+    if (entry.fire) animateFire(entry.fire, animalTime + id * 2.73);
   entrance.position.copy(world(s.stock.x, s.stock.z));
   vehicles.forEach(
     (vehicle, index) => (vehicle.root.visible = index !== 0 || !s.trip),
