@@ -1,3 +1,4 @@
+import {financeSummary,financeTime} from './finances.js';
 import { RESOURCE_GROUPS } from "./resource-groups.js";
 import { resourceIcon, illustrateResources } from "./resource-icons.js";
 import {
@@ -14,11 +15,13 @@ import { LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./i
 import { illustrate } from "./ui-art.js";
 const $ = (id) => document.getElementById(id);
 const titles = {
+  finances: "Our shared purse",
   resources: "Our shared supplies",
   water: "Every drop counts",
   power: "A little village energy",
 };
 const intros = {
+  finances: "See what comes in, what goes out, and what keeps the village running. Click Savings at any time to return here.",
   resources:
     "Keep the essentials close, turn local materials into something useful, and plan the next trip to town.",
   water:
@@ -187,7 +190,8 @@ export function createManagement({
     $("toggle-grid-power").setAttribute("aria-pressed", String(grid.enabled));
     $("resource-screen").hidden = view !== "resources";
     $("pantry-panel").hidden = view !== "resources";
-    $("network-screen").hidden = view === "resources";
+    $("network-screen").hidden = view === "resources" || view === "finances";
+    $("finance-screen").hidden = view !== "finances";
     $("utility-panel").hidden = true;
     $("pantry-panel").parentElement.hidden = view !== "resources";
     $("haul-water").hidden = true;
@@ -207,7 +211,31 @@ export function createManagement({
         ? "Generation, storage & demand"
         : "Sources, tanks & treatment";
     let stats;
-    if (view === "resources")
+    if(view === "finances") {
+      const f=financeSummary(s), money=n=>`R$${n.toFixed(2)}`;
+      stats=[["Shared savings",money(f.balance)],["Income recorded",money(f.income)],["Expenses recorded",money(f.expenses)],["Net change",`${f.net>=0?'+':'−'}${money(Math.abs(f.net))}`]];
+      const screen=$("finance-screen");screen.replaceChildren();
+      const add=(tag,text,parent=screen)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
+      add('p',s.mode==='sandbox'?'Sandbox supplies and funds are unlimited; purchases are not tracked.':`Records begin ${financeTime(f.since)} with ${money(f.opening)}. Earlier purchases in an existing save are not reconstructed.`);
+      add('h3','Ongoing costs');
+      add('p',`Grid power: ${money(f.gridRate)}/hour at the current import rate. Charges change with demand, local generation and available funds.`);
+      const power=document.createElement('button');power.textContent='Manage grid power';power.onclick=()=>open('power');screen.append(power);
+      add('h3','Where the money goes');
+      const groups={sales:'Surplus sales',construction:'Building materials',purchases:'Town purchases',electricity:'Grid electricity'};
+      for(const [key,label] of Object.entries(groups))add('p',`${label}: ${money(Math.abs(f.categories[key]||0))}`);
+      add('h3','Recent transactions');
+      if(!f.entries.length)add('p','No transactions recorded yet. Selling surplus brings income; purchases and imported power spend shared savings.');
+      else {
+        const table=add('table','');table.className='finance-ledger';
+        const head=document.createElement('thead');table.append(head);const heading=add('tr','',head);
+        for(const title of ['When','Transaction','Amount'])add('th',title,heading).scope='col';
+        const body=document.createElement('tbody');table.append(body);
+        for(const entry of f.entries.slice(0,30)){
+          const row=add('tr','',body);add('td',financeTime(entry.time),row);add('td',entry.description,row);add('td',`${entry.amount>0?'+':'−'}${money(Math.abs(entry.amount))}`,row);
+        }
+      }
+    }
+    else if (view === "resources")
       stats = [
         ["Shared savings", `R$${s.money.toFixed(2)}`],
         [

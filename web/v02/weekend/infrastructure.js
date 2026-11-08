@@ -1,3 +1,4 @@
+import {recordMoney} from './finances.js';
 import {waterFactor} from './world-settings.js';
 import { riverBankAt, riverAccess } from "./river-layout.js";
 // v2 port of v1 electricity and water ownership rules. No renderer dependency.
@@ -297,6 +298,7 @@ export function infrastructureStep(s, defs, dt) {
       if (n.enabled && shortfall > 0 && shortfall <= gridAvailable + 1e-9 &&
           shortfall * GRID_POWER.tariff <= s.money) {
         const cost = shortfall * GRID_POWER.tariff;
+        recordMoney(s,-cost,"electricity","Grid electricity");
         s.money = Math.max(0, s.money - cost);
         sys.grid.imported += shortfall;
         sys.grid.spent += cost;

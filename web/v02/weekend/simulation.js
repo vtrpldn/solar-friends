@@ -1,3 +1,4 @@
+import {ensureFinances,recordMoney} from './finances.js';
 import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
 import { STORAGE_KINDS, crewLimit, carriedLoads } from "./construction-logistics.js";
 import {registerWorld,validSettings,townDuration,waterFactor} from './world-settings.js';
@@ -201,6 +202,7 @@ export function sellMaterial(s, id) {
   )
     return false;
   changeMaterial(s, id, -item.quantity);
+  recordMoney(s,Math.floor(item.price * .5),"sales",`Sold ${item.quantity} ${item.name}`);
   s.money += Math.floor(item.price * 0.5);
   return true;
 }
@@ -960,6 +962,7 @@ export function plan(s, key, x, z, rotation = 0) {
     if (id === "wood") s.wood -= reserved;
     else s.materials[id] -= reserved;
   }
+  recordMoney(s,-purchase.cost,"construction",`Materials for ${def.name}`);
   s.money -= purchase.cost;
   gradeFoundation(s, key, x, z, rotation);
   const instant = key !== "road" && s.mode === "sandbox" && s.instantBuild !== false;
@@ -1077,7 +1080,10 @@ export function supplyRun(s, material = "wood", project = null) {
     .sort((a, b) => b.energy - a.energy)
     .find(r => route(s, r, carDoor(vehicle)));
   if (!r) return false;
-  if (!project) s.money -= item.price;
+  if (!project) {
+    recordMoney(s,-item.price,"purchases",`Bought ${item.quantity} ${item.name}`);
+    s.money -= item.price;
+  }
   s.nextTripVehicle = 1 - vehicle;
   s.trip = {
     person: r.id,
@@ -1662,6 +1668,7 @@ export function tick(s, dt) {
   }
   dt = Math.min(dt, 1);
   ensureNaturalLand(s,PROJECTS);
+  ensureFinances(s);
   if (s.mode === "sandbox") sandboxSupplies(s);
   s.time += dt;
   autoConnectUtilities(s, PROJECTS);

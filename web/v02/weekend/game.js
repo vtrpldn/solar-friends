@@ -1441,7 +1441,7 @@ function renderUI() {
     !active || s.stage === "evening" || openPanel !== "build" || !!selected;
   const trends=resourceTrends(s.time,resourceSnapshot(s));
   const counters = [
-    ["money", `R$${s.money.toFixed(2)}`, "Savings", "resources"],
+    ["money", `R$${s.money.toFixed(2)}`, "Savings", "finances"],
     ["meals", s.materials.meals || 0, "Meals", "resources"],
     [
       "power",
