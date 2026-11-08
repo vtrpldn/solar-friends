@@ -610,6 +610,11 @@ export function requiredLoads(key) {
   );
 }
 export const NAMES = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
+export function beginArrival(s) {
+  s.arrivalAnimating=true;
+  s.arrivalElapsed=0;
+  return s;
+}
 export function createWeekend(landSeed = 0) {
   return {
     version: 2,
@@ -1626,6 +1631,11 @@ export function endWeekend(s) {
 }
 export function tick(s, dt) {
   if (!Number.isFinite(dt) || dt <= 0) return;
+  if(s.arrivalAnimating){
+    s.arrivalElapsed=Math.min(ARRIVAL_DURATION,s.arrivalElapsed+Math.min(dt,1));
+    if(s.arrivalElapsed>=ARRIVAL_DURATION)s.arrivalAnimating=false;
+    return;
+  }
   if (s.stage === "arrival") {
     s.arrivalElapsed = ARRIVAL_DURATION;
     return;
@@ -2058,7 +2068,8 @@ export function restore(text) {
       s.arrivalElapsed > ARRIVAL_DURATION
     )
       return null;
-    if (s.stage === "arrival") s.arrivalElapsed = ARRIVAL_DURATION;
+    if(s.arrivalAnimating!==undefined && typeof s.arrivalAnimating!=="boolean") return null;
+    if (s.stage === "arrival" && !s.arrivalAnimating) s.arrivalElapsed = ARRIVAL_DURATION;
     if (
       ["rain", "rainSeen", "rainResolved", "meal"].some(
         (k) => typeof s[k] !== "boolean",

@@ -1,5 +1,5 @@
 import { freshLandSeed } from "./land-layout.js";
-import { createWeekend, createSandbox, save, restore } from "./simulation.js";
+import { createWeekend, createSandbox, save, restore, beginArrival } from "./simulation.js";
 import { saveKey } from "./modes.js";
 const $ = (id) => document.getElementById(id);
 let pending = null;
@@ -31,9 +31,9 @@ function start(mode) {
     localStorage.setItem(
       saveKey(mode),
       save(
-        mode === "sandbox"
+        beginArrival(mode === "sandbox"
           ? createSandbox(freshLandSeed())
-          : createWeekend(freshLandSeed()),
+          : createWeekend(freshLandSeed())),
       ),
     );
     enter(mode);

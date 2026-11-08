@@ -1,3 +1,4 @@
+import {beginArrival} from './simulation.js';
 import {depositCapacity} from './land-layout.js';
 import {profileFor,friendshipLabel} from './resident-personality.js';
 import { needMeters } from "./resident-needs.js";
@@ -31,6 +32,7 @@ import { createJimny } from "../library/vehicles.js";
 import {
   ARRIVAL_DURATION,
   vehiclePose,
+  arrivalPose,
   arrivalLaneAt,
 } from "./arrival.js";
 import { createRiver } from "./river.js";
@@ -105,6 +107,7 @@ let s = utilitiesPreview
   : new URLSearchParams(location.search).get("mode") === "sandbox"
     ? createSandbox(freshLandSeed())
     : createWeekend(arrivalPreview ? 0 : freshLandSeed());
+if(!arrivalPreview || new URLSearchParams(location.search).has('arrival-preview')) beginArrival(s);
 // Optional frozen lighting comparison, only in the unsaved utilities scene.
 const lightingPreview =
   utilitiesPreview && new URLSearchParams(location.search).has("lighting-hour");
@@ -679,7 +682,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(campLocation(s));
+focus(s.arrivalAnimating ? s.stock : campLocation(s));
 
 function resize() {
   const a = innerWidth / innerHeight;
@@ -1444,7 +1447,9 @@ function renderUI() {
   ]);
   if (signature === uiSignature) return;
   uiSignature = signature;
-  const active = s.stage !== "arrival";
+  const active = s.stage !== "arrival" && !s.arrivalAnimating;
+  if(s.arrivalAnimating) message("Our friends are arriving…");
+  else if(s.stage === "arrival") message("Click clear ground to pitch your tents.");
   $("sandbox-instant").hidden = s.mode !== "sandbox";
   $("sandbox-instant").textContent =
     `Instant buildings: ${s.instantBuild === false ? "off" : "on"}`;
@@ -1770,6 +1775,7 @@ function frame(now) {
     }
   }
   const visual = interpolateMotion(previousMotion, s, accumulator / 0.1);
+  const arrivalTime=Math.max(0,s.arrivalElapsed-(paused?0:0.1)+accumulator);
   drawCamp();
   syncBuildings();
   if (!paused && !document.hidden) animalTime += dt * speed;
@@ -1784,7 +1790,7 @@ function frame(now) {
         ...s.trip,
         left: s.trip.left + (s.time - visual.time),
       };
-      const pose = townCarPose(trip, index);
+      const pose = s.arrivalAnimating ? {...vehiclePose(arrivalTime,index),visible:true} : townCarPose(trip, index);
       vehicle.root.visible = pose.visible;
       vehicle.root.position.set(pose.x, 0, pose.z);
       vehicle.root.rotation.y = pose.yaw;
@@ -1795,6 +1801,12 @@ function frame(now) {
     }
   for (const [i, r] of s.people.entries()) {
     const g = actors[i];
+    if(s.arrivalAnimating){
+      const pose=arrivalPose(arrivalTime,i);
+      g.visible=pose.visible;g.position.set(pose.x,pose.y,pose.z);g.rotation.y=pose.yaw;
+      animateResident(g.rig,pose.walking?'walk':'idle',arrivalTime+i*.7,paused?0:dt*speed);
+      continue;
+    }
     g.visible =
       (r.action !== "town" ||
         ["boarding", "unloading"].includes(s.trip?.phase)) &&
