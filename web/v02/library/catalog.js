@@ -989,17 +989,17 @@ function building(id) {
   if (id === "biodigester") {
     const dome = color(
       new THREE.Mesh(
-        new THREE.SphereGeometry(1.3, 12, 5, 0, Math.PI * 2, 0, Math.PI / 2),
+        new THREE.SphereGeometry(2.2, 12, 5, 0, Math.PI * 2, 0, Math.PI / 2),
       ),
       "#6d9270",
     );
-    dome.scale.y = 0.7;
+    dome.scale.y = 0.75;
     dome.castShadow = true;
     g.add(dome);
-    cylinder(g, 0.3, 0.3, 0.3, "teal", 0, 1.2, 0);
-    for (const x of [-1.4, 1.4]) {
-      beam(g, [x, 0.35, 0], [x, 0.35, 1], 0.12, "teal");
-      cylinder(g, 0.35, 0.35, 0.5, "stone", x, 0.25, 1);
+    cylinder(g, 0.3, 0.3, 0.3, "teal", 0, 1.72, 0);
+    for (const x of [-2.4, 2.4]) {
+      beam(g, [x * 0.75, 0.45, 0.3], [x, 0.45, 1.35], 0.12, "teal");
+      cylinder(g, 0.45, 0.45, 0.7, "stone", x, 0.35, 1.35);
     }
     return g;
   }
@@ -1431,7 +1431,9 @@ ASSETS.find((a) => a.id === "house").legacy = [
 ASSETS.find((a) => a.id === "shed").legacy = ["shed", "shed-night"];
 for (const [id, name] of Object.entries(names)) {
   const fp =
-    id === "compost"
+    id === "biodigester"
+      ? [3, 3]
+      : id === "compost"
       ? [3, 1]
       : id === "goat_pasture" || id === "solar_farm"
         ? [3, 2]
@@ -1727,6 +1729,7 @@ export function createAsset(id) {
   return g;
 }
 const revised = new Set([
+  "biodigester",
   "home-veranda",
   "home-gable",
   "home-courtyard",
