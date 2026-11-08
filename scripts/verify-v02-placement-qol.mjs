@@ -35,6 +35,7 @@ const poor = createSandbox(42);
 poor.mode = "story";
 poor.materials.stone = 1;
 poor.materials.earth = 1;
+poor.money = 0;
 const empty = JSON.stringify(poor);
 assert.ok(planRoadLine(poor, { x: 50, z: 50 }, { x: 54, z: 50 }));
 assert.equal(

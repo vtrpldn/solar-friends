@@ -573,6 +573,25 @@ export function missingMaterials(s, key) {
     .filter(([id, n]) => materialCount(s, id) < n)
     .map(([id, n]) => materialText(id, n - materialCount(s, id)));
 }
+export function blueprintPurchase(s, key) {
+  const items = {};
+  let cost = 0;
+  if (s.mode !== "sandbox") for (const [id, required] of Object.entries(PROJECTS[key].materials)) {
+    const missing = Math.max(0, required - materialCount(s, id));
+    if (!missing) continue;
+    const item = MATERIALS[id];
+    if (!item.quantity || !Number.isFinite(item.price)) return {items, cost: 0, error: `Produce ${item.name} locally first.`};
+    items[id] = missing;
+    cost += missing * item.price / item.quantity;
+  }
+  cost = Math.ceil(cost * 100) / 100;
+  return {items, cost, error: cost > s.money ? `Missing materials cost R$${cost.toFixed(2)}; shared savings are too low.` : ""};
+}
+function dispatchBlueprintPickup(s) {
+  if (s.trip) return;
+  const project = s.projects.find(p => p.pendingMaterials);
+  if (project) supplyRun(s, Object.keys(project.pendingMaterials)[0], project);
+}
 export function requiredLoads(key) {
   return Object.entries(PROJECTS[key].materials).reduce(
     (sum, [id, n]) => sum + Math.ceil(n / MATERIALS[id].batch),
@@ -867,9 +886,8 @@ export function plan(s, key, x, z, rotation = 0) {
     return "Already planned. Select it to change priority or move it.";
   const error = placementError(s, key, x, z, null, rotation);
   if (error) return error;
-  const missing = missingMaterials(s, key);
-  if (missing.length)
-    return `Missing ${missing.join(", ")}. Buy supplies in town first.`;
+  const purchase = blueprintPurchase(s, key);
+  if (purchase.error) return purchase.error;
   for (const r of s.people)
     if (
       [
@@ -888,9 +906,11 @@ export function plan(s, key, x, z, rotation = 0) {
   for (const [id, n] of Object.entries(
     s.mode === "sandbox" ? {} : def.materials,
   )) {
-    if (id === "wood") s.wood -= n;
-    else s.materials[id] -= n;
+    const reserved = n - (purchase.items[id] || 0);
+    if (id === "wood") s.wood -= reserved;
+    else s.materials[id] -= reserved;
   }
+  s.money -= purchase.cost;
   gradeFoundation(s, key, x, z, rotation);
   const instant = s.mode === "sandbox" && s.instantBuild !== false;
   s.projects.push({
@@ -901,6 +921,7 @@ export function plan(s, key, x, z, rotation = 0) {
     rotation,
     work: instant ? def.work : 0,
     delivered: s.mode === "sandbox" ? requiredLoads(key) : 0,
+    ...(Object.keys(purchase.items).length ? {pendingMaterials: purchase.items} : {}),
   });
   for (const r of s.people) {
     r.walk = [];
@@ -910,8 +931,10 @@ export function plan(s, key, x, z, rotation = 0) {
     s,
     s.mode === "sandbox"
       ? `${def.name} ${instant ? "built" : "queued for resident construction"}. No materials spent.`
+      : purchase.cost ? `${def.name} planned. Missing materials purchased for R$${purchase.cost.toFixed(2)}; pickup ${s.trip ? "queued after the current trip" : "being arranged"}.`
       : `${def.name} planned. Materials reserved; friends will bring them over.`,
   );
+  dispatchBlueprintPickup(s);
   return "";
 }
 export function planRoadLine(s, from, to) {
@@ -983,30 +1006,30 @@ export function prioritize(s, id) {
     "The group will pick up this project next. Current carrying trips finish first.",
   );
 }
-export function supplyRun(s, material = "wood") {
+export function supplyRun(s, material = "wood", project = null) {
   const item = MATERIALS[material];
   if (
     !item ||
     !item.quantity ||
-    storedMaterials(s) + item.quantity > storageCapacity(s) ||
+    (!project && storedMaterials(s) + item.quantity > storageCapacity(s)) ||
     s.stage !== "playing" ||
     s.trip ||
-    s.money < item.price
+    (!project && s.money < item.price)
   )
     return false;
+  const vehicle = s.nextTripVehicle || 0;
   const r = s.people
     .filter((r) => r.energy > 35 && !r.cargo && !r.tentPhase)
-    .sort((a, b) => b.energy - a.energy)[0];
+    .sort((a, b) => b.energy - a.energy)
+    .find(r => route(s, r, carDoor(vehicle)));
   if (!r) return false;
-  const vehicle = s.nextTripVehicle || 0;
-  const path = route(s, r, carDoor(vehicle));
-  if (!path) return false;
-  s.money -= item.price;
+  if (!project) s.money -= item.price;
   s.nextTripVehicle = 1 - vehicle;
   s.trip = {
     person: r.id,
     left: TRIP_DURATION,
     material,
+    ...(project ? {project: project.id} : {}),
     vehicle,
     phase: "boarding",
   };
@@ -1020,7 +1043,7 @@ export function supplyRun(s, material = "wood") {
   if (s.opening) s.opening.townTrips++;
   say(
     s,
-    `${r.name} is heading to the car for town: ${item.quantity} ${item.name} for R$${item.price}. Back in about a minute.`,
+    project ? `${r.name} is heading to town to collect the prepaid materials for ${PROJECTS[project.key].name}.` : `${r.name} is heading to the car for town: ${item.quantity} ${item.name} for R$${item.price}. Back in about a minute.`,
   );
   return true;
 }
@@ -1435,7 +1458,7 @@ function workSpot(s, r, p) {
 }
 function availableProject(s, r) {
   return s.projects.find(
-    (p) => p.work < PROJECTS[p.key].work && workSpot(s, r, p),
+    (p) => !p.pendingMaterials && p.work < PROJECTS[p.key].work && workSpot(s, r, p),
   );
 }
 function idleActivity(s, r, i, dt) {
@@ -1616,6 +1639,7 @@ export function tick(s, dt) {
       s.infrastructure.hungry = false;
     } else s.infrastructure.hungry = true;
   }
+  dispatchBlueprintPickup(s);
   if (s.trip) {
     const trip = s.trip,
       r = s.people.find((r) => r.id === trip.person);
@@ -1649,14 +1673,16 @@ export function tick(s, dt) {
         else {
           const id = trip.material,
             item = MATERIALS[id];
-          if (id === "wood") s.wood += item.quantity;
+          const project = s.projects.find(p => p.id === trip.project);
+          if (project) delete project.pendingMaterials;
+          else if (id === "wood") s.wood += item.quantity;
           else s.materials[id] += item.quantity;
           r.action = "idle";
           r.cargo = false;
           s.trip = null;
           say(
             s,
-            `${r.name} unloaded ${item.quantity} ${item.name} from the car.`,
+            project ? `${r.name} unloaded the reserved materials for ${PROJECTS[project.key].name}. Construction can begin.` : `${r.name} unloaded ${item.quantity} ${item.name} from the car.`,
           );
         }
       }
@@ -1914,7 +1940,7 @@ export function tick(s, dt) {
       if (operationalWork(s, r, i, dt)) continue;
     }
     let p = s.projects.find(
-      (p) => p.id === r.job && p.work < PROJECTS[p.key].work,
+      (p) => p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
     );
     if (!p) {
       r.job = null;
@@ -2146,6 +2172,12 @@ export function restore(text) {
       s.livestockUnits = 1;
     }
     if (s.livestockUnits !== 1) return null;
+    for (const p of s.projects) {
+      if (p.pendingMaterials && (p.work !== 0 || p.delivered !== 0 ||
+          !Object.keys(p.pendingMaterials).length || Object.entries(p.pendingMaterials).some(([id,n]) =>
+            !Number.isInteger(n) || n <= 0 || !PROJECTS[p.key]?.materials[id] || n > PROJECTS[p.key].materials[id]))) return null;
+    }
+    if (s.trip?.project !== undefined && !s.projects.some(p => p.id === s.trip.project && p.pendingMaterials)) return null;
     const ids = new Set(),
       keys = new Set();
     for (const p of s.projects) {

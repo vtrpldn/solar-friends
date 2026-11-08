@@ -64,6 +64,7 @@ import {
   recipeText,
   materialCount,
   missingMaterials,
+  blueprintPurchase,
   requiredLoads,
   createWeekend,
   createSandbox,
@@ -858,9 +859,8 @@ function updatePlacementPreview() {
   let hint = error;
   if (placing) {
     const missing = moving ? [] : missingMaterials(s, placing);
-    hint ||= missing.length
-      ? `Missing ${missing.join(", ")}. Buy supplies in town.`
-      : "";
+    const purchase = blueprintPurchase(s, placing);
+    hint ||= missing.length ? purchase.error || `Place to buy missing materials for R$${purchase.cost.toFixed(2)} · ${s.trip ? "Pickup queued after current trip" : "Resident pickup arranged automatically"}` : "";
     if (placing === "road" && shiftPlacement && lastRoad) {
       const line = roadLine(lastRoad, cell);
       if (!line) hint = "Extend roads in a straight row or column.";
@@ -1477,7 +1477,7 @@ function renderUI() {
         (r) => r.job === p.id && r.action === "build",
       ).length;
       workStatus.textContent =
-        p.delivered < requiredLoads(p.key)
+        p.pendingMaterials ? (s.trip?.project === p.id ? "Materials purchased · resident collecting in town" : "Materials purchased · waiting for a pickup") : p.delivered < requiredLoads(p.key)
           ? `Bringing supplies · ${p.delivered}/${requiredLoads(p.key)} loads delivered`
           : workers
             ? `${workers} friends building`
@@ -1560,7 +1560,11 @@ function renderUI() {
       !PROJECTS[key].repeatable &&
       s.projects.some((p) => p.key === key);
     const missing = missingMaterials(s, key);
-    b.title = `${PROJECTS[key].description} Materials: ${recipeText(key)}. ${missing.length ? "Missing: " + missing.join(", ") : "All materials available."}`;
+    const purchase = blueprintPurchase(s, key);
+    b.title = `${PROJECTS[key].description} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: R$${purchase.cost.toFixed(2)}. Resident pickup included.` : "All materials available."}`;
+    b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? "Free"
+      : purchase.cost ? `Auto-buy R$${purchase.cost.toFixed(2)}`
+      : `${Object.values(PROJECTS[key].materials).reduce((sum, n) => sum + n, 0)} materials · ${PROJECTS[key].size.join("×")}`;
     b.classList.toggle("active", placing === key);
     b.classList.toggle("needs-materials", missing.length > 0);
   }
@@ -1586,7 +1590,7 @@ function renderUI() {
             ? " Housing: 0 goats / 2 places."
             : "";
     $("selected-desc").textContent =
-      `${PROJECTS[p.key].description}${p.work >= PROJECTS[p.key].work ? livestock : ""} Reserved: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+      `${PROJECTS[p.key].description}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
   }
 }

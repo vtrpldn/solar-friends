@@ -301,7 +301,7 @@ assert.equal(materialTest.materials.roofing, 2);
 assert.equal(materialTest.materials.hardware, 4);
 assert(requiredLoads("shelter") > requiredLoads("gathering"));
 assert(PROJECTS.shelter.work > PROJECTS.gathering.work * 5);
-assert.match(plan(materialTest, "toilet", 39, 30), /Missing 4 timber pieces/);
+assert.match(plan(materialTest, "toilet", 39, 30), /Missing materials cost.*savings/);
 assert.equal(
   materialTest.materials.sanitation,
   1,
