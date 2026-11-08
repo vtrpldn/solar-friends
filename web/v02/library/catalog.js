@@ -1,3 +1,4 @@
+import { RESOURCE_IDS, resourceModel } from "./resource-models.js";
 import { openingStorage, openingAssembly } from "./opening-props.js";
 import { rigAnimal } from "./animal-motion.js";
 import { COMMUNITY } from "./community-defs.js";
@@ -1406,6 +1407,7 @@ function add(id, name, category, footprint, build, legacy = []) {
 for (const [id, def] of Object.entries(COMMUNITY)) add(id,def.name,"Buildings",def.size,()=>createCommunity(id));
 add("covered-supply-rack","Covered supply rack","Props",[2,1],()=>openingStorage(false));
 add("tarp-covered-supplies","Tarp-covered supplies","Props",[1,1],()=>openingStorage(true));
+for(const id of RESOURCE_IDS)add(`resource-${id}`,`${id.replaceAll("_"," ")} · resource`,"Resource icons",[1,1],()=>resourceModel(id,createAsset));
 const names = {
   orchard: "Fruit orchard",
   goat_pasture: "Goat pasture",

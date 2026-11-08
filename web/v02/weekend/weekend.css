@@ -1352,3 +1352,8 @@ body[data-tray="closed"] {
   text-transform: none;
   margin: 4px 0 8px;
 }
+
+/* Cached orthographic resource portraits keep their rendered proportions. */
+.resource-icon { object-fit: contain; }
+.resource-icon:not(.ready) { visibility: hidden; }
+.stock-card > .resource-icon { width: 64px; height: 48px; }

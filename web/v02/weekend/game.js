@@ -2,7 +2,7 @@ import { saveKey } from "./modes.js";
 import { openingProgress, openingRecap } from "./opening.js";
 import { collectAnimals, animateAnimals } from "../library/animal-motion.js";
 import { COMMUNITY } from "../library/community-defs.js";
-import { resourceIcon } from "./resource-icons.js";
+import { resourceIcon, illustrateResources } from "./resource-icons.js";
 import { createManagement } from "./management.js";
 import { illustrate } from "./ui-art.js";
 import { sunlightAt } from "./sunlight.js";
@@ -1083,6 +1083,7 @@ function renderUI() {
           `<button class="resource" data-panel="${panel}" title="Open ${panel} management">${resourceIcon(icon)}<b></b><small>${label}</small></button>`,
       )
       .join("");
+  illustrateResources($("supplies"));
   counters.forEach((counter, i) => {
     $("supplies").children[i].querySelector("b").textContent =
       s.mode === "sandbox" && i < 3 ? "∞" : counter[1];
