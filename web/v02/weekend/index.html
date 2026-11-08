@@ -14,7 +14,7 @@
       }
     </script>
   </head>
-  <body data-tray="open">
+  <body data-tray="closed">
     <canvas
       id="world"
       aria-label="Our land. Drag to pan, right-drag to orbit. Click a grid square to place a project."
@@ -33,12 +33,6 @@
           ><button id="speed">1×</button>
         </div>
       </div>
-      <a
-        href="../library/"
-        title="Back to the art collection"
-        aria-label="Open art collection"
-        >Art book ↗</a
-      >
     </header>
     <section id="arrival" class="paper">
       <small>A PLACE OF OUR OWN</small>
@@ -54,7 +48,9 @@
       </p>
     </section>
     <aside id="journal" class="paper" hidden>
-      <small>✦ CAMP JOURNAL</small>
+      <button class="panel-close" data-close-panel aria-label="Close journal">
+        ×</button
+      ><small>✦ CAMP JOURNAL</small>
       <h2>Make yourselves at home</h2>
       <p id="objective"></p>
       <div id="tasks"></div>
@@ -69,13 +65,10 @@
       </details>
     </aside>
     <aside id="people" class="paper" hidden>
-      <small>♡ OUR LITTLE CREW</small>
+      <button class="panel-close" data-close-panel aria-label="Close residents">
+        ×</button
+      ><small>♡ OUR LITTLE CREW</small>
       <div id="roster"></div>
-      <nav class="management-launchers" aria-label="Village management">
-        <button data-manage="resources">▰ Resources</button
-        ><button data-manage="water">♦ Water</button
-        ><button data-manage="power">ϟ Power</button>
-      </nav>
     </aside>
     <section id="rain" class="paper" hidden>
       <small>A CHANGE IN THE WEATHER</small>
@@ -127,33 +120,64 @@
             type="search"
             placeholder="Find something to build…"
             aria-label="Find a building"
-          /><button id="toggle-build-list">Hide catalog</button>
+          /><button id="toggle-build-list">Close catalog</button>
         </div>
         <div id="build-list"></div>
       </section>
       <button id="skip-arrival" hidden>Skip arrival</button>
+      <button id="cancel" hidden>Cancel placement · Esc</button>
       <div id="message" role="status">Choose a campsite to begin.</div>
-      <div class="controls">
-        <details class="controls-help">
-          <summary aria-label="Camera controls">?</summary>
-          <p>
-            <kbd>W A S D</kbd> Move around<br /><kbd>Q / E</kbd> Turn the
-            view<br />Scroll to zoom · Drag to pan<br /><kbd>Esc</kbd> Cancel
-            placement
-          </p>
-        </details>
-        <button id="rotate-left" aria-label="Rotate camera left" title="Q">
-          ↶</button
-        ><button id="rotate-right" aria-label="Rotate camera right" title="E">
-          ↷</button
-        ><button id="zoom-out" aria-label="Zoom out">−</button
-        ><button id="zoom-in" aria-label="Zoom in">+</button
-        ><button id="home" title="Home · Center on camp">⌂ Camp</button
-        ><button id="river-view">River bend</button
-        ><button id="grid">Grid</button
-        ><button id="cancel" hidden>Cancel · Esc</button
-        ><button id="restart">New weekend</button>
-      </div>
+      <nav id="village-actions" aria-label="Village actions" hidden>
+        <button
+          data-panel-toggle="build"
+          aria-controls="build"
+          aria-expanded="false"
+        >
+          ⌂ Build
+        </button>
+        <button
+          data-panel-toggle="journal"
+          aria-controls="journal"
+          aria-expanded="false"
+        >
+          ✦ Journal
+        </button>
+        <button
+          data-panel-toggle="people"
+          aria-controls="people"
+          aria-expanded="false"
+        >
+          ♡ Residents
+        </button>
+        <span class="dock-divider"></span>
+        <button data-manage="resources">▰ Resources</button
+        ><button data-manage="water">♦ Water</button
+        ><button data-manage="power">ϟ Power</button>
+      </nav>
+      <details class="view-menu">
+        <summary>View &amp; options</summary>
+        <div class="controls">
+          <details class="controls-help">
+            <summary aria-label="Camera controls">?</summary>
+            <p>
+              <kbd>W A S D</kbd> Move around<br /><kbd>Q / E</kbd> Turn the
+              view<br />Scroll to zoom · Drag to pan<br /><kbd>Esc</kbd> Cancel
+              placement
+            </p>
+          </details>
+          <button id="rotate-left" aria-label="Rotate camera left" title="Q">
+            ↶</button
+          ><button id="rotate-right" aria-label="Rotate camera right" title="E">
+            ↷</button
+          ><button id="zoom-out" aria-label="Zoom out">−</button
+          ><button id="zoom-in" aria-label="Zoom in">+</button
+          ><button id="home" title="Home · Center on camp">⌂ Camp</button
+          ><button id="river-view">River bend</button
+          ><button id="grid">Grid</button
+          ><button id="restart">New weekend</button>
+          <a href="../library/">Art collection ↗</a>
+        </div>
+      </details>
     </footer>
     <dialog id="management" aria-labelledby="management-title">
       <div class="management-heading">

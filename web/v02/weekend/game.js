@@ -947,16 +947,31 @@ function filterBuildings() {
 }
 $("build-category").onchange = filterBuildings;
 $("build-search").oninput = filterBuildings;
-$("toggle-build-list").onclick = () => {
-  $("build-list").hidden = !$("build-list").hidden;
-  document.body.dataset.tray = $("build-list").hidden ? "closed" : "open";
-  $("toggle-build-list").textContent = $("build-list").hidden
-    ? "Show catalog"
-    : "Hide catalog";
-};
+let openPanel = null;
+function setPanel(panel) {
+  if (placing) cancel();
+  openPanel = panel;
+  if (panel) selected = null;
+  document.body.dataset.tray = panel === "build" ? "open" : "closed";
+  uiSignature = "";
+  renderUI();
+}
+document.querySelectorAll("[data-panel-toggle]").forEach((button) => {
+  button.onclick = () =>
+    setPanel(
+      openPanel === button.dataset.panelToggle
+        ? null
+        : button.dataset.panelToggle,
+    );
+});
+document
+  .querySelectorAll("[data-close-panel]")
+  .forEach((button) => (button.onclick = () => setPanel(null)));
+$("toggle-build-list").onclick = () => setPanel(null);
 filterBuildings();
 function renderUI() {
   const signature = JSON.stringify([
+    openPanel,
     s.stage,
     s.arrivalElapsed < ARRIVAL_DURATION,
     s.camp,
@@ -994,9 +1009,16 @@ function renderUI() {
   const active = s.stage !== "arrival";
   $("arrival").hidden = active || s.arrivalElapsed < ARRIVAL_DURATION;
   $("skip-arrival").hidden = active || s.arrivalElapsed >= ARRIVAL_DURATION;
-  $("journal").hidden = !active;
-  $("people").hidden = !active || !!selected;
-  $("build").hidden = !active || s.stage === "evening";
+  $("village-actions").hidden = !active;
+  document.querySelectorAll("[data-panel-toggle]").forEach((button) => {
+    const opened = openPanel === button.dataset.panelToggle && !selected;
+    button.setAttribute("aria-expanded", String(opened));
+    button.classList.toggle("active", opened);
+  });
+  $("journal").hidden = !active || openPanel !== "journal" || !!selected;
+  $("people").hidden = !active || !!selected || openPanel !== "people";
+  $("build").hidden =
+    !active || s.stage === "evening" || openPanel !== "build" || !!selected;
   const counters = [
     ["◉", `R$${s.money}`, "Savings", "resources"],
     ["▰", Math.floor(s.wood), "Timber", "resources"],
@@ -1020,7 +1042,7 @@ function renderUI() {
     $("supplies").innerHTML = counters
       .map(
         ([icon, value, label, panel]) =>
-          `<button class="resource" data-panel="${panel}" title="${label} · Open supplies"><span aria-hidden="true">${icon}</span><b></b><small>${label}</small></button>`,
+          `<button class="resource" data-panel="${panel}" title="Open ${panel} management"><span aria-hidden="true">${icon}</span><b></b><small>${label}</small></button>`,
       )
       .join("");
   counters.forEach((counter, i) => {

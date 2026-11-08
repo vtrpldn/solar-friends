@@ -1201,3 +1201,80 @@ dialog button {
     font-size: 10px;
   }
 }
+
+/* A quiet village view, with details opened deliberately. */
+body[data-tray="closed"] {
+  --dock: 135px;
+}
+#village-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--paper);
+  border: 2px solid var(--edge);
+  border-radius: 20px;
+  box-shadow: 0 4px 0 #8f7c4566;
+}
+#village-actions button {
+  font-size: 14px;
+  padding: 10px 16px;
+}
+.dock-divider {
+  width: 1px;
+  height: 28px;
+  background: var(--edge);
+  margin: 0 3px;
+}
+.panel-close {
+  float: right;
+  padding: 2px 8px;
+  font-size: 18px;
+  margin: -7px -7px 0 6px;
+}
+.view-menu {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  transform: translateX(calc(100% + 12px));
+  border: 0;
+  padding: 0;
+}
+.view-menu > summary {
+  list-style: none;
+  font-size: 12px;
+  background: var(--paper);
+  border: 1px solid var(--edge);
+  border-radius: 12px;
+  padding: 9px;
+  white-space: nowrap;
+}
+.view-menu .controls {
+  position: absolute;
+  right: 0;
+  bottom: 45px;
+  width: 245px;
+  flex-wrap: wrap;
+  background: var(--paper);
+  padding: 15px;
+  border: 2px solid var(--edge);
+  border-radius: 16px;
+  box-shadow: 0 4px 0 #8f7c4566;
+}
+.view-menu a {
+  font-size: 12px;
+  padding: 8px;
+}
+#message {
+  margin: 8px auto;
+}
+@media (max-width: 1200px) {
+  .view-menu {
+    transform: none;
+    right: -110px;
+  }
+  #village-actions button {
+    padding: 9px 11px;
+  }
+}
