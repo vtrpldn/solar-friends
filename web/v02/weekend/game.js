@@ -1,3 +1,5 @@
+import { accessRoadAt } from "./road-layout.js";
+import { MAP_CELLS, MAP_HALF, CELL_MIN, CELL_MAX } from "./map-size.js";
 import { fitTerrainCamera } from "./camera-depth.js";
 import { elevationAt } from "./elevation.js";
 import { freshLandSeed, landRandom } from "./land-layout.js";
@@ -140,7 +142,7 @@ renderer.toneMappingExposure = 1.2;
 const camera = new THREE.OrthographicCamera(-26, 26, 20, -20, 0.1, 300);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.minZoom = 0.3;
+controls.minZoom = 0.18;
 controls.maxZoom = 6;
 controls.maxPolarAngle = Math.PI * 0.46;
 controls.minPolarAngle = 0.25;
@@ -213,7 +215,12 @@ puddle.material = new THREE.MeshStandardMaterial({
 });
 puddle.position.y = 0.025;
 scene.add(puddle);
-const grid = new THREE.GridHelper(128, 64, "#b6bd8c", "#b6bd8c");
+const grid = new THREE.GridHelper(
+  MAP_HALF * 2,
+  MAP_CELLS,
+  "#b6bd8c",
+  "#b6bd8c",
+);
 grid.position.set(1, 0.015, 1);
 const gridPoints = grid.geometry.attributes.position;
 const gridVertices = [];
@@ -298,6 +305,32 @@ for (const [x, z] of [
   [27, 28],
 ])
   scenery.add(prop("tree", x, z));
+// Seeded outer regions leave generous open space around the starting clearing.
+const regionRandom = landRandom((s.landSeed || 1) ^ 0x51f92);
+const regionSets = {
+  river: ["jucara", "embauba", "landscape-0", "landscape-7"],
+  forest: ["jequitiba", "pau_brasil", "jucara", "landscape-1"],
+  meadow: ["pequi", "barbatimao", "bunchgrass", "landscape-2"],
+  rocky: ["landscape-4", "landscape-5", "landscape-6", "campo"],
+};
+for (let i = 0; i < 190; i++) {
+  const wx = (regionRandom() - 0.5) * 240,
+    wz = (regionRandom() - 0.5) * 240;
+  if (Math.hypot(wx, wz) < 57 || arrivalLaneAt(wx, wz)) continue;
+  const x = 32 + wx / 2,
+    z = 32 + wz / 2;
+  if (riverBankAt(x, z, 1, s.landSeed) || accessRoadAt(x, z, 2)) continue;
+  const region = riverBankAt(x, z, 13, s.landSeed)
+    ? "river"
+    : wx < -15
+      ? "forest"
+      : wx > 60
+        ? "rocky"
+        : "meadow";
+  const set = regionSets[region],
+    id = set[Math.floor(regionRandom() * set.length)];
+  scenery.add(prop(id, x, z, regionRandom() * Math.PI * 2));
+}
 const entrance = prop("produce-crates", s.stock.x, s.stock.z);
 scenery.add(prop("garden-bench", 30, 24));
 scene.add(compactModel(scenery));
@@ -342,10 +375,10 @@ function drawCamp() {
 const border = new THREE.LineLoop(
   new THREE.BufferGeometry().setFromPoints(
     [
-      [1.5, 1.5],
-      [61.5, 1.5],
-      [61.5, 61.5],
-      [1.5, 61.5],
+      [CELL_MIN + 1.5, CELL_MIN + 1.5],
+      [CELL_MAX - 2.5, CELL_MIN + 1.5],
+      [CELL_MAX - 2.5, CELL_MAX - 2.5],
+      [CELL_MIN + 1.5, CELL_MAX - 2.5],
     ].map(([x, z]) => world(x, z).setY(0.025)),
   ),
   new THREE.LineBasicMaterial({ color: "#e0dfad" }),

@@ -1,3 +1,4 @@
+import { MAP_HALF } from "./map-size.js";
 import * as THREE from "three";
 import { roadCenter } from "./road-layout.js";
 export function createAccessRoad() {
@@ -17,7 +18,7 @@ export function createAccessRoad() {
   };
   function strip(left, right, y, color) {
     const vertices = [];
-    for (let z = -64; z < -18; z++) {
+    for (let z = -MAP_HALF; z < -18; z++) {
       const w = z > -26 ? 1 + (z + 26) * 0.045 : 1,
         wn = z + 1 > -26 ? 1 + (z + 27) * 0.045 : 1;
       const a = roadCenter(z),

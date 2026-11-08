@@ -1,3 +1,4 @@
+import { MAP_HALF } from "./map-size.js";
 import * as THREE from "three";
 // Metres in the scene, shared with placement and resident navigation through river-layout.js.
 import { riverCenter, riverWidth } from "./river-layout.js";
@@ -22,8 +23,8 @@ export function createRiver(seed = 0) {
   };
   function ribbon(extra, y, color) {
     const positions = [];
-    for (let i = 0; i < 128; i++) {
-      const za = -64 + i,
+    for (let i = 0; i < MAP_HALF * 2; i++) {
+      const za = -MAP_HALF + i,
         zb = za + 1;
       const xa = center(za),
         xb = center(zb),
@@ -142,7 +143,10 @@ export function createRiver(seed = 0) {
   current.frustumCulled = false;
   function update(time) {
     for (let i = 0; i < 32; i++) {
-      const z = ((i * 4 + time * 0.65) % 126) - 63,
+      const z =
+          ((i * ((MAP_HALF * 2) / 32) + time * 0.65) % (MAP_HALF * 2 - 2)) -
+          MAP_HALF +
+          1,
         x = center(z) + Math.sin(i * 2.4) * (width(z) - 1.3),
         w = 0.35 + (i % 3) * 0.16;
       const points = [

@@ -1,3 +1,4 @@
+import { CELL_MIN, CELL_MAX } from "./map-size.js";
 import { footprintRelief } from "./elevation.js";
 import { OPENING_PROJECTS, openingProgress } from "./opening.js";
 import { COMMUNITY } from "../library/community-defs.js";
@@ -605,10 +606,10 @@ export function campPlacementError(s, x, z) {
   if (
     !Number.isInteger(x) ||
     !Number.isInteger(z) ||
-    x < 4 ||
-    z < 6 ||
-    x > 58 ||
-    z > 59
+    x < CELL_MIN + 4 ||
+    z < CELL_MIN + 6 ||
+    x > CELL_MAX - 6 ||
+    z > CELL_MAX - 5
   )
     return "Keep the tents inside the plot.";
   if (footprintRelief(x - 1, z - 3, 5, 4, s.elevationSeed) > 0.22)
@@ -691,7 +692,12 @@ export function placementError(s, key, x, z, ignore = null) {
     for (let dz = 0; dz < d; dz++)
       if (def.kind !== "hydro" && riverBankAt(x + dx, z + dz, 1, s.landSeed))
         return "Keep projects back from the riverbank.";
-  if (x < 2 || z < 2 || x + w > 62 || z + d > 62)
+  if (
+    x < CELL_MIN + 2 ||
+    z < CELL_MIN + 2 ||
+    x + w > CELL_MAX - 2 ||
+    z + d > CELL_MAX - 2
+  )
     return "Keep buildings inside the plot boundary.";
   if (def.kind === "hydro" && !riverBankAt(x + w / 2, z + d / 2, 3, s.landSeed))
     return "Place the river generator beside the river.";
@@ -1051,10 +1057,10 @@ export function route(s, from, to) {
         nz = z + dz,
         k = key(nx, nz);
       if (
-        nx < 1 ||
-        nx > 62 ||
-        nz < 1 ||
-        nz > 62 ||
+        nx < CELL_MIN + 1 ||
+        nx > CELL_MAX - 2 ||
+        nz < CELL_MIN + 1 ||
+        nz > CELL_MAX - 2 ||
         parent.has(k) ||
         occupied(s, nx, nz)
       )
@@ -1915,10 +1921,10 @@ export function restore(text) {
       if (
         r.id !== fresh.people[i].id ||
         !["x", "z", "energy", "work"].every((k) => Number.isFinite(r[k])) ||
-        r.x < 0 ||
-        r.x > 64 ||
-        r.z < 0 ||
-        r.z > 64 ||
+        r.x < CELL_MIN ||
+        r.x > CELL_MAX ||
+        r.z < CELL_MIN ||
+        r.z > CELL_MAX ||
         r.energy < 0 ||
         r.energy > 100
       )

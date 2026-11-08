@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {createSandbox,plan,restore,save,route} from '../web/v02/weekend/simulation.js';
+import {createTerrain} from '../web/v02/weekend/terrain.js';
+const s=createSandbox();
+assert.equal(plan(s,'garden',75,40),'');
+assert.ok(restore(save(s)));
+assert.ok(route(s,{x:40,z:40},{x:80,z:40}));
+const mesh=createTerrain(42);assert.equal(mesh.geometry.attributes.position.count,129*129);
+assert.equal(mesh.geometry.parameters.width,256);
+console.log('PASS: 128x128 terrain, construction/routing beyond old bounds and save restoration.');

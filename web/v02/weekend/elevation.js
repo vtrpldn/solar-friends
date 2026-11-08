@@ -1,3 +1,4 @@
+import { MAP_CELLS, MAP_HALF } from "./map-size.js";
 import { landParameters } from "./land-layout.js";
 import { riverCenter, riverWidth } from "./river-layout.js";
 import { roadCenter } from "./road-layout.js";
@@ -22,10 +23,13 @@ export function elevationVertex(x, z, seed = 0) {
 }
 // Sample the same two triangles as the terrain mesh, avoiding floating feet.
 export function elevationAt(x, z, seed = 0) {
-  const ix = Math.max(0, Math.min(63, Math.floor((x + 64) / 2))),
-    iz = Math.max(0, Math.min(63, Math.floor((z + 64) / 2)));
-  const left = ix * 2 - 64,
-    top = iz * 2 - 64;
+  const ix = Math.max(
+      0,
+      Math.min(MAP_CELLS - 1, Math.floor((x + MAP_HALF) / 2)),
+    ),
+    iz = Math.max(0, Math.min(MAP_CELLS - 1, Math.floor((z + MAP_HALF) / 2)));
+  const left = ix * 2 - MAP_HALF,
+    top = iz * 2 - MAP_HALF;
   const u = Math.max(0, Math.min(1, (x - left) / 2)),
     v = Math.max(0, Math.min(1, (z - top) / 2));
   const a = elevationVertex(left, top, seed),

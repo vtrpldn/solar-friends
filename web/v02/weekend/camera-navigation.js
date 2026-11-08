@@ -1,3 +1,4 @@
+import { MAP_HALF } from "./map-size.js";
 import * as THREE from "three";
 export function cameraStep({ x, z, zoom }, keys, dt) {
   const length = Math.hypot(x, z) || 1;
@@ -115,11 +116,17 @@ export function installCameraNavigation(
         dt,
       );
       const x =
-          THREE.MathUtils.clamp(controls.target.x + step.x, -60, 60) -
-          controls.target.x,
+          THREE.MathUtils.clamp(
+            controls.target.x + step.x,
+            -MAP_HALF + 4,
+            MAP_HALF - 4,
+          ) - controls.target.x,
         z =
-          THREE.MathUtils.clamp(controls.target.z + step.z, -60, 60) -
-          controls.target.z;
+          THREE.MathUtils.clamp(
+            controls.target.z + step.z,
+            -MAP_HALF + 4,
+            MAP_HALF - 4,
+          ) - controls.target.z;
       controls.target.x += x;
       controls.target.z += z;
       camera.position.x += x;

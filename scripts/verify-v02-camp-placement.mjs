@@ -19,7 +19,7 @@ for (const seed of [0, 42, 97]) {
   assert.ok(restored);
   assert.equal(campLocation(restored).x, 40);
   assert.ok(campPlacementError(s, 32, 21));
-  assert.ok(campPlacementError(s, -1, 30));
+  assert.ok(campPlacementError(s, -40, 30));
 }
 console.log(
   "PASS: custom camp placement, blocked road/edges, simulation and saved camp coordinates.",

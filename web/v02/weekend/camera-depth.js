@@ -7,14 +7,14 @@ export function fitTerrainCamera(camera, target, fog) {
     dz = camera.position.z - target.z;
   const distance = Math.hypot(dx, dy, dz);
   if (!distance) return;
-  const safeDistance = Math.max(256, distance);
-  if (distance < 256)
+  const safeDistance = Math.max(512, distance);
+  if (distance < 512)
     camera.position.set(
       target.x + (dx / distance) * safeDistance,
       target.y + (dy / distance) * safeDistance,
       target.z + (dz / distance) * safeDistance,
     );
-  const far = safeDistance + 256;
+  const far = safeDistance + 512;
   if (camera.far !== far) {
     camera.far = far;
     camera.updateProjectionMatrix();
