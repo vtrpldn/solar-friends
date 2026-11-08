@@ -15,6 +15,22 @@ export const POWER_LOAD = {
   eco_toilet: 0.1,
   home: 0.2,
 };
+// Capability, not instantaneous demand: lights still have a switch in daylight,
+// and pumps still have one while their tanks are empty or their pipes disabled.
+export function hasPowerService(sys, node) {
+  return !!node && !!(POWER_LOAD[node.kind] || node.battery ||
+    ["solar_farm", "hydro", "home", "river", "camp"].includes(node.kind) ||
+    sys.links.some(link => link.from === node.id && link.kind !== "power"));
+}
+export function canSwitchBuilding(sys, node) {
+  return !!node && node.id > 0 && hasPowerService(sys, node);
+}
+export function switchBuilding(sys, id) {
+  const node = sys.nodes[id];
+  if (!canSwitchBuilding(sys, node)) return false;
+  node.enabled = !node.enabled;
+  return true;
+}
 const CAPACITY = {
   well: [75, 60, 0, 0],
   home: [8, 0, 24, 0],
@@ -99,6 +115,10 @@ export function syncInfrastructure(s, defs) {
     };
     Object.assign(sys.nodes[p.id], { x: p.x, z: p.z });
   }
+  // Old saves may contain a passive structure disabled by the former blanket
+  // switch. Restore its availability now that it no longer has such a control.
+  for (const node of Object.values(sys.nodes))
+    if (!hasPowerService(sys,node)) node.enabled = true;
   return sys;
 }
 export function connect(s, defs, kind, from, to) {

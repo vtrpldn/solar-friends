@@ -20,7 +20,7 @@ import { createManagement } from "./management.js";
 import { illustrate } from "./ui-art.js";
 import { sunlightAt } from "./sunlight.js";
 import { createUtilitiesPreview } from "./utilities-preview.js";
-import { syncInfrastructure, LIQUIDS } from "./infrastructure.js";
+import { syncInfrastructure, LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
 import { createAccessRoad } from "./access-road.js";
 import { captureMotion, interpolateMotion } from "./presentation.js";
 import { installCameraNavigation } from "./camera-navigation.js";
@@ -1236,11 +1236,12 @@ function renderUtilityUI() {
   $("repeat-production").textContent = p?.repeat
     ? "Stop repeating"
     : "Keep 24 in stock";
-  $("toggle-building").disabled = !node;
+  $("toggle-building").hidden = !canSwitchBuilding(sys,node);
+  $("toggle-building").disabled = !canSwitchBuilding(sys,node);
   $("toggle-building").textContent = node?.enabled ? "Switch off" : "Switch on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done);
   $("building-service").textContent = node
-    ? `Power ${(node.power * 100).toFixed(0)}%${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}. ${LIQUIDS.map(
+    ? `${hasPowerService(sys,node) ? `Power ${(node.power * 100).toFixed(0)}%` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
         (k, i) =>
           node.capacity[i]
             ? `${k}: ${node.water[i].toFixed(1)}/${node.capacity[i]}`
@@ -1251,6 +1252,7 @@ function renderUtilityUI() {
           " · ",
         )} ${op ? op.status || "Resident job queued" : p.productionStatus || (p.readyAt > s.time ? `Growing: ${Math.ceil(p.readyAt - s.time)} seconds remaining` : "")}`
     : "";
+  $("building-service").hidden = !$("building-service").textContent.trim();
 }
 $("connect-utility").onclick = () => {
   message(
@@ -1291,8 +1293,7 @@ $("repeat-production").onclick = () => {
   renderUI();
 };
 $("toggle-building").onclick = () => {
-  const node = s.infrastructure.nodes[selected];
-  if (node) node.enabled = !node.enabled;
+  if (!switchBuilding(s.infrastructure,selected)) return;
   persist();
   renderUI();
 };

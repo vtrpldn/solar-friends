@@ -10,7 +10,7 @@ import {
   queueProduction,
   repeatProduction,
 } from "./simulation.js";
-import { LIQUIDS, POWER_LOAD } from "./infrastructure.js";
+import { LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
 import { illustrate } from "./ui-art.js";
 const $ = (id) => document.getElementById(id);
 const titles = {
@@ -143,13 +143,14 @@ export function createManagement({
       const toggle = document.createElement("button");
       toggle.textContent = n.enabled ? "Switch off" : "Switch on";
       toggle.onclick = () => {
-        n.enabled = !n.enabled;
+        if (!switchBuilding(state().infrastructure,n.id)) return;
         notify(
           `${label(n)} ${n.enabled ? "switched on" : "switched off"}. Network supply updates when the village resumes.`,
         );
         refresh();
       };
-      actions.append(inspectButton, toggle);
+      actions.append(inspectButton);
+      if (canSwitchBuilding(state().infrastructure,n)) actions.append(toggle);
       el.append(actions);
     }
     return el;
@@ -326,13 +327,7 @@ export function createManagement({
         const relevant =
           view === "water"
             ? n.capacity.some((v) => v > 0)
-            : n.battery ||
-              POWER_LOAD[n.kind] ||
-              n.kind === "river" ||
-              n.kind === "camp" ||
-              s.infrastructure.links.some(
-                (l) => l.from === n.id && l.kind !== "power",
-              );
+            : hasPowerService(s.infrastructure,n);
         if (relevant) $("network-nodes").append(card(n));
       }
     }
