@@ -115,8 +115,8 @@
           <button id="sandbox-instant" hidden aria-pressed="true">
             Instant build: on
           </button>
-          <label for="build-category">⌂ Let’s build</label
-          ><select id="build-category"></select
+          <label for="build-search">⌂ Let’s build</label
+          ><select id="build-category" hidden></select
           ><input
             id="build-search"
             type="search"
@@ -124,7 +124,7 @@
             aria-label="Find a building"
           /><button id="toggle-build-list">Close catalog</button>
         </div>
-        <div id="build-list"></div>
+        <div class="build-browser"><nav id="build-categories" aria-label="Building categories"></nav><div class="build-results"><div id="build-count" aria-live="polite"></div><div id="build-list"></div><p id="build-empty" hidden>No buildings found. Try a name or purpose, like water or food.</p></div></div>
       </section>
       <button id="rotate-placement" hidden>Rotate · R · 0°</button>
       <button id="cancel" hidden>Cancel placement · Esc</button>

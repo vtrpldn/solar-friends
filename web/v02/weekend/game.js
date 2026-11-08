@@ -787,7 +787,7 @@ for (const [key, d] of Object.entries(PROJECTS)) {
   b.setAttribute("aria-label", `${d.name}. ${recipeText(key)}`);
   b.title = d.description;
   b.dataset.category = d.category;
-  b.onclick = () => startPlacement(key);
+  b.onclick = () => { setPanel(null); startPlacement(key); };
   $("build-list").append(b);
 }
 const ray = new THREE.Raycaster(),
@@ -1332,16 +1332,30 @@ refillSelect(
   categories.map((c) => [c, c]),
 );
 if (s.mode === "sandbox") $("build-category").value = "Homes";
+for (const category of categories) {
+  const button=document.createElement("button");
+  button.textContent=category;
+  button.onclick=()=>{ $("build-category").value=category; $("build-search").value=""; filterBuildings(); };
+  button.dataset.category=category;
+  $("build-categories").append(button);
+}
 function filterBuildings() {
-  for (const [key, d] of Object.entries(PROJECTS)) {
-    const button = $(`build-${key}`);
-    button.hidden =
-      ($("build-category").value !== "All" &&
-        d.category !== $("build-category").value) ||
-      !d.name.toLowerCase().includes($("build-search").value.toLowerCase());
-    if (!button.hidden) illustrate(button.querySelector("img"), d.asset);
+  const query=$("build-search").value.trim().toLowerCase();
+  const category=$("build-category").value;
+  let count=0;
+  for (const [key,d] of Object.entries(PROJECTS)) {
+    const button=$(`build-${key}`);
+    // Search the entire catalogue, even when a category was selected earlier.
+    button.hidden=query ? !`${d.name} ${d.description} ${d.category}`.toLowerCase().includes(query)
+      : category!=="All" && d.category!==category;
+    if(!button.hidden){count++;illustrate(button.querySelector("img"),d.asset);}
   }
-  $("build-list").scrollLeft = 0;
+  for(const button of $("build-categories").children) {
+    button.setAttribute("aria-pressed",String(!query && button.dataset.category===category));
+  }
+  $("build-count").textContent=`${query ? "Search results" : category} · ${count} building${count===1?"":"s"}`;
+  $("build-empty").hidden=count>0;
+  $("build-list").scrollTop=0;
 }
 $("build-category").onchange = filterBuildings;
 $("build-search").oninput = filterBuildings;

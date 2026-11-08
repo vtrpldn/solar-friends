@@ -1421,3 +1421,17 @@ body[data-tray="closed"] {
 .resident-needs .need-low progress::-webkit-progress-value { background: #b5664e; }
 .resident-needs .need-warn progress::-webkit-progress-value { background: #bb9b4e; }
 .resident-needs .need-good progress::-webkit-progress-value { background: #81995e; }
+
+/* A catalogue that can be scanned without a long horizontal strip. */
+#build { width: min(1100px, calc(100vw - 48px)); }
+.build-toolbar input { flex: 1; min-width: 180px; }
+.build-browser { display: grid; grid-template-columns: 148px minmax(0,1fr); gap: 14px; }
+#build-categories { display: flex; flex-direction: column; gap: 4px; max-height: min(46vh,410px); overflow-y: auto; padding: 2px 5px 5px 0; }
+#build-categories button { text-align: left; padding: 5px 10px; font-size: 12px; box-shadow: none; border: 1px solid transparent; background: transparent; }
+#build-categories button[aria-pressed="true"] { background: #e0ebbd; border-color: #8c9d67; color: #344b36; }
+.build-results { min-width: 0; }
+#build-count { font-size: 11px; color: #746749; margin: 0 0 8px; }
+#build-list { display: grid; grid-template-columns: repeat(auto-fill,minmax(125px,1fr)); align-content: start; gap: 9px; overflow-x: hidden; overflow-y: auto; max-height: min(42vh,375px); padding: 2px 5px 7px 2px; justify-content: stretch; }
+#build-list button { min-height: 119px; }
+#build-list .build-art { height: 66px; }
+#build-empty { padding: 35px 15px; font-size: 13px; color: #746749; }
