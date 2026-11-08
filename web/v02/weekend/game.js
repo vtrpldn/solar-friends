@@ -1,3 +1,4 @@
+import {createResourceTrends,resourceSnapshot,formatTrend} from './resource-trends.js';
 import {materialTooltip} from './material-tooltip.js';
 import {createWildlife} from './wildlife.js';
 import {installAudio} from './audio.js';
@@ -1165,6 +1166,7 @@ const actionText = {
   wash: "Washing up",
   toilet: "Using the toilet",
 };
+const resourceTrends = createResourceTrends();
 let uiSignature = "", expandedResident = null, residentTab = "Overview";
 let management;
 function refillSelect(id, options) {
@@ -1478,6 +1480,7 @@ function renderUI() {
 
   $("build").hidden =
     !active || s.stage === "evening" || openPanel !== "build" || !!selected;
+  const trends=resourceTrends(s.time,resourceSnapshot(s));
   const counters = [
     ["money", `R$${s.money.toFixed(2)}`, "Savings", "resources"],
     ["wood", Math.floor(s.wood), "Timber", "resources"],
@@ -1501,14 +1504,20 @@ function renderUI() {
     $("supplies").innerHTML = counters
       .map(
         ([icon, value, label, panel]) =>
-          `<button class="resource" data-panel="${panel}" title="Open ${panel} management">${resourceIcon(icon)}<b></b><small>${label}</small></button>`,
+          `<button class="resource" data-panel="${panel}" title="Open ${panel} management">${resourceIcon(icon)}<b></b><small>${label}</small><em class="resource-trend"></em></button>`,
       )
       .join("");
   illustrateResources($("supplies"));
   counters.forEach((counter, i) => {
     $("supplies").children[i].querySelector("b").textContent =
       s.mode === "sandbox" && i < 3 ? "∞" : counter[1];
-    $("supplies").children[i].disabled = !active;
+    const button=$("supplies").children[i],rate=trends?.[counter[0]]??null;
+    const trend=button.querySelector('.resource-trend');
+    const unlimited=s.mode==='sandbox'&&i<3;
+    trend.textContent=unlimited?'Unlimited':formatTrend(rate,i===0);
+    trend.dataset.direction=rate>.05?'up':rate<-.05?'down':'flat';
+    button.title=`Open ${counter[3]} management. ${unlimited?'Unlimited in sandbox.':rate===null?'Gathering trend data (first five in-game minutes).':`${i===3?'Stored energy':counter[2]}: ${formatTrend(rate,i===0)} net change over the last in-game hour, or time observed since loading. Includes spending, consumption and deliveries.`}`;
+    button.disabled = !active;
   });
   const minutes = 9 * 60 + Math.floor(s.time * 0.45);
   $("clock").textContent =
