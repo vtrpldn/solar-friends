@@ -1,3 +1,4 @@
+import { captureMotion, interpolateMotion } from "./presentation.js";
 import { installCameraNavigation } from "./camera-navigation.js";
 import { createJimny } from "../library/vehicles.js";
 import {
@@ -352,7 +353,7 @@ function resize() {
 addEventListener("resize", resize);
 resize();
 function message(t) {
-  $("message").textContent = t;
+  if ($("message").textContent !== t) $("message").textContent = t;
 }
 function persist() {
   if (arrivalPreview) return;
@@ -496,6 +497,8 @@ $("uphill").onclick = () => {
 };
 $("skip-arrival").onclick = () => {
   s.arrivalElapsed = ARRIVAL_DURATION;
+  previousMotion = captureMotion(s);
+  accumulator = 0;
   focus();
   message("Choose a campsite to begin.");
   renderUI();
@@ -693,16 +696,19 @@ const recordPerformance = performanceReadout(renderer);
 let previous = performance.now(),
   accumulator = 0,
   latestMessage = s.log[0];
+let previousMotion = captureMotion(s);
 function frame(now) {
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
   if (!paused && !document.hidden) {
     accumulator += dt * speed;
     while (accumulator >= 0.1) {
+      previousMotion = captureMotion(s);
       tick(s, 0.1);
       accumulator -= 0.1;
     }
   }
+  const visual = interpolateMotion(previousMotion, s, accumulator / 0.1);
   drawCamp();
   syncBuildings();
   entrance.position.copy(world(s.stock.x, s.stock.z));
@@ -711,9 +717,9 @@ function frame(now) {
   );
   const arriving = s.stage === "arrival" && s.arrivalElapsed < ARRIVAL_DURATION;
   if (s.stage === "arrival") {
-    const pose = arrivalPose(s.arrivalElapsed, 0);
+    const pose = arrivalPose(visual.arrivalElapsed, 0);
     for (const [index, vehicle] of vehicles.entries()) {
-      const drive = vehiclePose(s.arrivalElapsed, index);
+      const drive = vehiclePose(visual.arrivalElapsed, index);
       vehicle.root.position.set(drive.x, 0, drive.z);
       vehicle.root.rotation.y = drive.yaw;
       for (const wheel of vehicle.wheels) {
@@ -723,7 +729,7 @@ function frame(now) {
     }
     if (arriving) {
       if (arrivalCameraFollow) {
-        controls.target.lerp(car.position, 0.06);
+        controls.target.lerp(car.position, 1 - Math.exp(-dt * 7));
         camera.position
           .copy(controls.target)
           .add(new THREE.Vector3(24, 26, 24));
@@ -746,20 +752,20 @@ function frame(now) {
   for (const [i, r] of s.people.entries()) {
     const g = actors[i];
     if (arriving) {
-      const pose = arrivalPose(s.arrivalElapsed, i);
+      const pose = arrivalPose(visual.arrivalElapsed, i);
       g.visible = pose.visible;
       g.position.set(pose.x, pose.y, pose.z);
       g.rotation.y = pose.yaw;
       animateResident(
         g.rig,
         pose.walking ? "walk" : "idle",
-        s.arrivalElapsed + i * 0.3,
+        visual.arrivalElapsed + i * 0.3,
         paused ? 0 : dt * speed,
       );
       continue;
     }
     g.visible = r.action !== "town";
-    const target = world(r.x, r.z),
+    const target = world(visual.people[i].x, visual.people[i].z),
       dx = target.x - g.position.x,
       dz = target.z - g.position.z;
     if (Math.hypot(dx, dz) > 0.001) g.rotation.y = Math.atan2(dx, dz);
@@ -792,9 +798,14 @@ function frame(now) {
             : r.action === "rest"
               ? "rest"
               : "idle";
-    animateResident(g.rig, motion, s.time + i * 0.7, paused ? 0 : dt * speed);
+    animateResident(
+      g.rig,
+      motion,
+      visual.time + i * 0.7,
+      paused ? 0 : dt * speed,
+    );
   }
-  river.update(s.time);
+  river.update(visual.time);
   rainMesh.visible = s.rain;
   puddle.visible = s.rain && s.camp === "entrance";
   if (s.rain) {
@@ -822,7 +833,7 @@ function frame(now) {
   navigation.update(dt);
   controls.update();
   renderer.render(scene, camera);
-  recordPerformance(now);
+  recordPerformance(now, arriving ? visual.arrivalElapsed : visual.time);
   requestAnimationFrame(frame);
 }
 addEventListener("pagehide", persist);

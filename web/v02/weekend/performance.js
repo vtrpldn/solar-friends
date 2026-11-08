@@ -10,17 +10,29 @@ export function performanceReadout(renderer) {
   let previous = performance.now(),
     last = previous;
   const frames = [];
-  return (now) => {
+  const motionFrames = [];
+  let previousMotionTime;
+  return (now, motionTime) => {
     const elapsed = now - previous;
     previous = now;
     if (elapsed < 250 && !document.hidden) {
       frames.push(elapsed);
-      if (frames.length > 300) frames.shift();
+      motionFrames.push(
+        previousMotionTime !== undefined &&
+          Math.abs(motionTime - previousMotionTime) > 1e-7
+          ? 1
+          : 0,
+      );
+      if (frames.length > 300) {
+        frames.shift();
+        motionFrames.shift();
+      }
     }
+    previousMotionTime = motionTime;
     if (now - last < 1000) return;
     last = now;
     const sorted = [...frames].sort((a, b) => a - b);
     const mean = frames.reduce((a, b) => a + b, 0) / frames.length;
-    output.textContent = `${Math.round(1000 / mean)} fps · p95 ${Math.round(sorted[Math.floor(sorted.length * 0.95)] || 0)} ms · ${renderer.info.render.calls} draw calls · ${renderer.info.render.triangles.toLocaleString()} triangles`;
+    output.textContent = `${Math.round(1000 / mean)} fps · ${Math.round((motionFrames.reduce((a, b) => a + b, 0) * 1000) / frames.reduce((a, b) => a + b, 0))} motion updates/s · p95 ${Math.round(sorted[Math.floor(sorted.length * 0.95)] || 0)} ms · ${renderer.info.render.calls} draw calls · ${renderer.info.render.triangles.toLocaleString()} triangles`;
   };
 }
