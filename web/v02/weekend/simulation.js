@@ -1,3 +1,4 @@
+import { ensureNeeds, decayNeeds, chooseNeed, advanceNeed, validNeeds } from "./resident-needs.js";
 import { validTerrainVertices } from "./terraform.js";
 import { ROAD_SHIFT } from "./road-layout.js";
 import { roadLine } from "./placement-helpers.js";
@@ -315,7 +316,7 @@ function utilitySpot(s, node, r) {
   const p = s.projects.find((p) => p.id === node.id);
   if (
     p &&
-    ["workshop", "kitchen", "wash-station", "eco_toilet"].includes(
+    ["workshop", "kitchen", "wash-station", "eco_toilet", "home"].includes(
       PROJECTS[p.key].kind,
     )
   ) {
@@ -544,6 +545,7 @@ function operationalWork(s, r, i, dt) {
     return true;
   }
   op.status = "Working";
+  if (r.energy < 25) { r.action = "idle"; r.operation = null; return true; }
   r.action = "produce";
   op.work += dt * (node.power > 0.99 && recipe.kind === "workshop" ? 2 : 1);
   r.work += dt;
@@ -644,6 +646,7 @@ export function createWeekend(landSeed = 0) {
       x: ARRIVAL_SPOTS[i][0],
       z: ARRIVAL_SPOTS[i][1],
       energy: 85 + i * 3,
+      needs: ensureNeeds({},i),
       action: "idle",
       job: null,
       cargo: false,
@@ -1026,7 +1029,7 @@ export function supplyRun(s, material = "wood", project = null) {
     return false;
   const vehicle = s.nextTripVehicle || 0;
   const r = s.people
-    .filter((r) => r.energy > 35 && !r.cargo && !r.tentPhase)
+    .filter((r) => r.energy > 35 && !r.cargo && !r.tentPhase && !r.needTask && Math.min(...Object.values(ensureNeeds(r)))>25)
     .sort((a, b) => b.energy - a.energy)
     .find(r => route(s, r, carDoor(vehicle)));
   if (!r) return false;
@@ -1638,16 +1641,27 @@ export function tick(s, dt) {
       p.productionStatus = queueProduction(s, p.id, p.repeat);
   }
 
-  s.foodClock = (s.foodClock || 0) + dt;
-  if (s.foodClock >= 240) {
-    s.foodClock -= 240;
-    const food = s.materials.meals >= 5 ? "meals" : "food";
-    if (s.materials[food] >= 5) {
-      s.materials[food] -= 5;
-      s.materials.scraps += 1;
-      s.infrastructure.hungry = false;
-    } else s.infrastructure.hungry = true;
-  }
+  for (const [i,r] of s.people.entries()) decayNeeds(s,r,i,dt);
+  s.infrastructure.hungry = s.people.some(r=>r.needs.hunger<15);
+  const needApi = {
+    route: (r,point)=>route(s,r,point),
+    go: (r,point)=>go(s,r,point),
+    serviceSpot: (node,r)=>utilitySpot(s,node,r),
+    camp: ()=>campLocation(s)||s.stock,
+    river: ()=>riverAccess(s.landSeed),
+    groundSpot: (r,center,index,privateBreak=false)=>{
+      const radius=privateBreak?6:1;
+      for(let ring=radius;ring<=radius+2;ring++)for(let j=0;j<12;j++) {
+        const angle=(j+index)*Math.PI/6;
+        const point={x:Math.round(center.x+Math.cos(angle)*ring),z:Math.round(center.z+Math.sin(angle)*ring)};
+        if(point.x<CELL_MIN+2 || point.x>CELL_MAX-2 || point.z<CELL_MIN+2 || point.z>CELL_MAX-2 || occupied(s,point.x,point.z))continue;
+        if(privateBreak && (riverBankAt(point.x,point.z,5,s.landSeed) || Math.hypot(point.x-s.stock.x,point.z-s.stock.z)<5))continue;
+        if(s.people.some(p=>p!==r && ((p.needTask && Math.hypot(p.needTask.target.x-point.x,p.needTask.target.z-point.z)<.8) || Math.hypot(p.x-point.x,p.z-point.z)<.7)))continue;
+        if(route(s,r,point))return point;
+      }
+      return null;
+    },
+  };
   dispatchBlueprintPickup(s);
   if (s.trip) {
     const trip = s.trip,
@@ -1746,6 +1760,7 @@ export function tick(s, dt) {
   if (s.rainResolved && s.time > (s.rainAt ?? 150) + 35) s.rain = false;
   for (const [i, r] of s.people.entries()) {
     if (r.action === "town") continue;
+    chooseNeed(s,r,i,needApi);
     if (r.tentPhase) {
       r.action = "rest";
       if (r.tentPhase === "enter" && s.time - r.tentAt >= 1.5)
@@ -1771,6 +1786,7 @@ export function tick(s, dt) {
     if (
       s.stage === "playing" &&
       !r.job &&
+      !r.needTask &&
       r.energy >= 25 &&
       [
         "idle",
@@ -1843,87 +1859,12 @@ export function tick(s, dt) {
       go(s, r, restSpot(s, i));
       continue;
     }
-    // Visits are physical resident actions; waste is generated only on completion.
-    const toiletNodes = Object.values(s.infrastructure.nodes).filter(
-      (n) =>
-        n.enabled &&
-        n.kind === "eco_toilet" &&
-        n.capacity[3] - n.water[3] >= 1.5,
-    );
+    if (advanceNeed(s,r,dt,needApi)) continue;
     if (
-      !r.cargo &&
-      !r.operation &&
-      (r.action === "toilet" || s.time - (r.toiletAt || 0) > 180 + i * 17)
-    ) {
-      const toilet = toiletNodes.find(
-        (n) =>
-          !s.people.some((other) => other !== r && other.toiletSite === n.id),
-      );
-      const spot = toilet && utilitySpot(s, toilet, r);
-      if (spot) {
-        r.toiletSite = toilet.id;
-        r.action = "toilet";
-        r.job = null;
-        if (go(s, r, spot)) {
-          r.toiletTime = (r.toiletTime || 0) + dt;
-          if (r.toiletTime >= 6) {
-            toilet.water[3] += 1.5;
-            s.infrastructure.account.waterReceived += 1.5;
-            r.toiletAt = s.time;
-            r.toiletTime = 0;
-            r.toiletSite = null;
-            r.action = "idle";
-          }
-        }
-        continue;
-      }
-      r.toiletSite = null;
-    }
-    if (
-      !r.cargo &&
-      (r.action === "wash" || r.work - (r.cleanedAtWork || 0) >= 55)
-    ) {
-      const washNodes = Object.values(s.infrastructure.nodes)
-        .filter(
-          (n) =>
-            n.enabled &&
-            ["wash-station", "home", "eco_toilet", "camp"].includes(n.kind) &&
-            n.water[0] >= 1 &&
-            n.capacity[2] - n.water[2] >= 0.8,
-        )
-        .sort(
-          (a, b) =>
-            (b.kind === "wash-station") - (a.kind === "wash-station") ||
-            (a.kind === "camp") - (b.kind === "camp"),
-        );
-      const washNode = washNodes.find(
-        (n) =>
-          !s.people.some((other) => other !== r && other.washSite === n.id),
-      );
-      const washSpot = washNode && utilitySpot(s, washNode, r);
-      if (washSpot) {
-        r.action = "wash";
-        r.job = null;
-        r.washSite = washNode.id;
-        if (go(s, r, washSpot)) {
-          r.washTime = (r.washTime || 0) + dt;
-          if (r.washTime >= 8 && useWater(s, washNode.id, 1)) {
-            r.washTime = 0;
-            r.washSite = null;
-            r.cleanedAtWork = r.work;
-            r.energy = Math.min(100, r.energy + 8);
-            r.action = "idle";
-          }
-        }
-        continue;
-      }
-      r.washSite = null;
-    }
-    if (
-      r.energy < 25 ||
+      !r.cargo && (r.energy < 25 ||
       (r.action === "rest" &&
         r.energy <
-          (s.projects.some((p) => p.work < PROJECTS[p.key].work) ? 60 : 80))
+          (s.projects.some((p) => p.work < PROJECTS[p.key].work) ? 60 : 80)))
     ) {
       r.action = "rest";
       r.job = null;
@@ -2000,7 +1941,7 @@ export function tick(s, dt) {
       p.delivered++;
       r.cargo = false;
     }
-    if (p.delivered < loads) continue;
+    if (p.delivered < loads || r.energy < 25) continue;
     r.action = "build";
     const skilled =
       (r.id === "bento" && p.key === "shelter") ||
@@ -2019,7 +1960,7 @@ export function tick(s, dt) {
           !openingProgress(s, PROJECTS).shelter
             ? 0.8
             : 1) *
-          (s.infrastructure?.thirst || s.infrastructure?.hungry ? 0.65 : 1),
+          (s.infrastructure?.thirst || r.needs.hunger<15 ? 0.65 : 1),
     );
     r.work += dt;
     r.energy = Math.max(0, r.energy - dt * 0.16);
@@ -2247,6 +2188,11 @@ export function restore(text) {
       for (const k of ["washTime", "cleanedAtWork", "toiletAt", "toiletTime"])
         if (r[k] !== undefined && (!Number.isFinite(r[k]) || r[k] < 0))
           return null;
+      if (!validNeeds(r)) return null;
+      ensureNeeds(r,i);
+      r.needTask = null;
+      r.needRetryAt = 0;
+      r.needBlocked = null;
       r.idleUntil = 0;
       r.idleGoal = null;
       r.lookAt = null;
