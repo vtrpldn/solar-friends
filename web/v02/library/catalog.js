@@ -1167,6 +1167,19 @@ function building(id) {
     cylinder(g, 0.18, 0.14, 0.2, "tile", 1.1, 1.13, -0.9);
     table(g, 0.45, 1.1, 1.9);
     cylinder(g, 0.23, 0.16, 0.1, "plaster", 0.3, 1.03, 1.12);
+    // Two full-size bays keep furniture and roof tiles at the village scale.
+    for (const part of g.children) part.position.x -= 2;
+    const dining = group();
+    for (const x of [-1.45, 1.45])
+      for (const z of [-1.35, 1.35]) box(dining, 0.15, 2.3, 0.15, "timber", x, 1.15, z);
+    clayRoof(dining, {half:1.8, depth:3.2, eave:2.3, rise:0.65, ridgeHeight:3.2});
+    table(dining, 0, 0, 2.5);
+    for (const z of [-0.75,0.75]) {
+      box(dining, 2.5, 0.12, 0.35, "timberLight", 0, 0.48, z);
+      for (const x of [-0.95,0.95]) box(dining, 0.12, 0.45, 0.25, "timber", x, 0.225, z);
+    }
+    dining.position.x = 2;
+    g.add(dining);
     return g;
   }
   if (id === "warehouse") {
@@ -1445,7 +1458,9 @@ ASSETS.find((a) => a.id === "house").legacy = [
 ASSETS.find((a) => a.id === "shed").legacy = ["shed", "shed-night"];
 for (const [id, name] of Object.entries(names)) {
   const fp =
-    id === "biodigester"
+    id === "kitchen"
+      ? [4, 2]
+      : id === "biodigester"
       ? [3, 3]
       : id === "compost"
       ? [3, 1]

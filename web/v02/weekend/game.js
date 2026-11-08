@@ -1646,7 +1646,7 @@ function frame(now) {
       service &&
       {
         workshop: [-0.2, 1.87],
-        kitchen: [0.45, 1.87],
+        kitchen: [-1.55, 1.87],
         "wash-station": [0, 0.52],
       }[PROJECTS[service.key].kind];
     const offset = new THREE.Vector3();

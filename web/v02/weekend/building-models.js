@@ -83,7 +83,7 @@ export const BUILDING_MODELS = [
     id: "kitchen",
     name: "Community kitchen",
     category: "Buildings",
-    size: [2, 2],
+    size: [4, 2],
   },
   {
     id: "grove",
