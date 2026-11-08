@@ -38,6 +38,7 @@ function fresh() {
   return s;
 }
 function built(s, key, x = 40, z = 40) {
+  assert.equal(placementError(s,key,x,z), "", `${key}: invalid completed-building fixture`);
   const p = {
     id: s.nextId++,
     key,
@@ -50,18 +51,23 @@ function built(s, key, x = 40, z = 40) {
   syncInfrastructure(s, PROJECTS);
   return p;
 }
-for (const [key, def] of Object.entries(PROJECTS)) {
+const allBuilds=Object.entries(PROJECTS);
+const startAt=process.argv.find(arg=>arg.startsWith('--from='))?.slice(7);
+assert(!startAt || PROJECTS[startAt], 'Unknown starting building');
+const builds=startAt ? allBuilds.slice(allBuilds.findIndex(([key])=>key===startAt)) : allBuilds;
+for (const [key, def] of builds) {
   const s = fresh();
   s.wood = 500;
   for (const k in s.materials) s.materials[k] = 100;
   let spot;
   for (let z = 34; z < 50 && !spot; z++)
-    for (let x = 20; x < 48 && !spot; x++)
+    for (let x = key === "bridge" ? 5 : 20; x < 48 && !spot; x++)
       if (!placementError(s, key, x, z)) spot = { x, z };
   assert(spot, `${key}: no reachable placement`);
+  console.log(`Checking resident construction: ${key}`);
   assert.equal(plan(s, key, spot.x, spot.z), "");
   assert(
-    run(s, 1300, () => s.projects[0].work === def.work),
+    run(s, Math.max(1300, def.work), () => s.projects[0].work === def.work),
     `${key}: residents failed to build`,
   );
   assert.equal(
@@ -72,13 +78,13 @@ for (const [key, def] of Object.entries(PROJECTS)) {
   assert(restore(save(s)), `${key}: completed building cannot reload`);
 }
 console.log(
-  `PASS: all ${Object.keys(PROJECTS).length} build choices physically supplied, built and saved by residents`,
+  `PASS: ${builds.length} build choices physically supplied, built and saved by residents`,
 );
 for (const [recipe, def] of Object.entries(PROCESSES)) {
   const s = fresh();
   const key = Object.keys(PROJECTS).find((k) => PROJECTS[k].kind === def.kind);
   const p = built(s, key),
-    solar = built(s, "solar_farm", 44, 40);
+    solar = built(s, "solar_farm", 45, 40);
   const sys = syncInfrastructure(s, PROJECTS);
   sys.nodes[p.id].water = sys.nodes[p.id].capacity.map((c, i) =>
     i < 2 ? c : 0,

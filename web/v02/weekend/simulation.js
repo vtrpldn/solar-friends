@@ -20,7 +20,7 @@ import {
 import { expandMaterials, expandProjects, PROCESSES } from "./catalog-rules.js";
 import { accessRoadAt } from "./road-layout.js";
 import { ARRIVAL_DURATION, ARRIVAL_SPOTS } from "./arrival.js";
-import { riverBankAt, riverAccess } from "./river-layout.js";
+import { riverBankAt, riverAccess, riverCenter } from "./river-layout.js";
 // A self-contained v2 prototype. Time is measured in active simulation seconds.
 export const CAMPS = [
   {
@@ -1225,6 +1225,10 @@ function naturalPath(s, from, path) {
 }
 // The grid finds a safe corridor; residents follow continuous shortcuts and bends.
 export function route(s, from, to) {
+  // This river runs across the whole plot. Without a completed crossing,
+  // searching thousands of cells on the opposite bank cannot find a route.
+  const bank = point => Math.sign((point.x-32)*2 - riverCenter((point.z-32)*2,s.landSeed));
+  if (bank(from) !== bank(to) && !s.projects.some(p=>p.key === "bridge" && p.work >= PROJECTS[p.key].work)) return null;
   const start = [Math.round(from.x), Math.round(from.z)],
     end = [Math.round(to.x), Math.round(to.z)];
   const key = (x, z) => `${x},${z}`;
@@ -1449,6 +1453,7 @@ function workSpot(s, r, p) {
   }
   return offsets
     .map(([x, z]) => ({ x: p.x + x, z: p.z + z }))
+    .sort((a,b) => Math.hypot(a.x-r.x,a.z-r.z) - Math.hypot(b.x-r.x,b.z-r.z))
     .find(
       (spot) =>
         !occupied(s, spot.x, spot.z) &&
