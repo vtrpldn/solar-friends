@@ -216,7 +216,7 @@ export function expandProjects(projects) {
         : COMMUNITY[model.id]?.category || category,
       repeatable: true,
       description:
-        ({'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
+        ({'well':'A cistern storing 75 clean and 60 untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
           'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 24 untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply.'}[model.id]) ||
         COMMUNITY[model.id]?.description ||
         `${model.name}. ${model.size.join(" × ")} cells. Build with physical supplies and resident labor.${["warehouse", "supply-5"].includes(kind) ? " Nearby construction can stage bundled deliveries here to reduce hauling trips." : ""}`,
@@ -228,7 +228,7 @@ export function expandProjects(projects) {
     ).size;
     projects[key].category = "First camp";
     projects[key].kind = {
-      water: "well",
+      water: "water-storage",
       shelter: "shed",
       toilet: "eco_toilet",
       gathering: "square",

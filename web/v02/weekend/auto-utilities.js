@@ -4,7 +4,7 @@ const signatures = new WeakMap();
 export function autoConnectUtilities(s, defs) {
   const sys = syncInfrastructure(s, defs),
     nodes = Object.values(sys.nodes);
-  const signature = nodes.map((n) => `${n.id}:${n.x}:${n.z}`).join("|");
+  const signature = nodes.map((n) => `${n.id}:${n.kind}:${n.x}:${n.z}`).join("|");
   if (signatures.get(sys) === signature) return sys;
   signatures.set(sys, signature);
   const wanted = [];
@@ -27,9 +27,11 @@ export function autoConnectUtilities(s, defs) {
       )[0];
   const suppliers = nodes.filter((n) => n.kind === "well");
   const pumps=nodes.filter(n=>n.kind==='water-pump');
-  const fresh = suppliers.length ? suppliers : [sys.nodes[0]];
+  const tanks=nodes.filter(n=>n.kind==="water-storage");
+  const fresh = suppliers.length || tanks.length ? [...suppliers,...tanks] : [sys.nodes[0]];
   for (const n of nodes) {
     if (n.kind === "well") add("irrigation", nearest(n,pumps)||sys.nodes[-1], n);
+    else if(n.kind === "water-storage") add("fresh",nearest(n,suppliers),n);
     else if (n.capacity[0]) add("fresh", nearest(n, fresh), n);
     if (["garden", "greenhouse", "orchard", "grove"].includes(n.kind)) {
       add(
@@ -66,7 +68,7 @@ export function autoConnectUtilities(s, defs) {
   // A short spanning network links producers, batteries, loads and water pumps.
   const powered = nodes.filter(
     (n) =>
-      n.id === 0 || n.battery || POWER_LOAD[n.kind] || wanted.some((l) => l.from === n.id),
+      n.id === 0 || n.battery || POWER_LOAD[n.kind] || (n.kind !== "water-storage" && wanted.some((l) => l.from === n.id)),
   );
   if (powered.length) {
     const joined = [powered.shift()];

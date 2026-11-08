@@ -20,6 +20,7 @@ export const POWER_LOAD = {
 // Capability, not instantaneous demand: lights still have a switch in daylight,
 // and pumps still have one while their tanks are empty or their pipes disabled.
 export function hasPowerService(sys, node) {
+  if(node?.kind === "water-storage") return false;
   return !!node && !!(POWER_LOAD[node.kind] || node.battery ||
     ["solar_farm", "hydro", "home", "river", "camp"].includes(node.kind) ||
     sys.links.some(link => link.from === node.id && link.kind !== "power"));
@@ -37,6 +38,7 @@ const CAPACITY = {
   'groundwater-well':[0,40,0,0],
   'water-pump':[0,12,0,0],
   well: [75, 60, 0, 0],
+  "water-storage": [40, 0, 0, 0],
   home: [8, 0, 24, 16],
   kitchen: [6, 0, 24, 0],
   eco_toilet: [8, 0, 16, 16],
@@ -117,6 +119,11 @@ export function syncInfrastructure(s, defs) {
       enabled: true,
       power: 0,
     };
+    const node=sys.nodes[p.id];
+    if(kind==='water-storage' && node.kind!==kind) {
+      // Existing starter tanks become passive without destroying stored water.
+      node.kind=kind;node.capacity=[Math.max(40,node.water[0]),node.water[1],0,0];
+    }
     Object.assign(sys.nodes[p.id], { x: p.x, z: p.z });
     if (kind === "home" && sys.nodes[p.id].capacity[3] === 0) sys.nodes[p.id].capacity = [...CAPACITY.home];
   }
@@ -244,7 +251,7 @@ export function infrastructureStep(s, defs, dt) {
             1.2 +
           sys.links.filter(
             (l) =>
-              l.from === n.id &&
+              n.kind !== "water-storage" && l.from === n.id &&
               l.kind !== "power" &&
               l.enabled &&
               l.work >= l.required &&
@@ -362,7 +369,7 @@ export function infrastructureStep(s, defs, dt) {
   for (const l of sys.links) {
     if (l.kind === "power" || !l.enabled || l.work < l.required) continue;
     const a = sys.nodes[l.from];
-    if (a.enabled && sys.nodes[l.to].enabled && a.power > 0.99) {
+    if (a.enabled && sys.nodes[l.to].enabled && (a.kind === "water-storage" || a.power > 0.99)) {
       if (a.kind === "river" && l.kind === "irrigation") {
         const target = sys.nodes[l.to],
           amount = Math.min(24 * hours * waterFactor(s.worldSettings?.water), target.capacity[1] - target.water[1]);

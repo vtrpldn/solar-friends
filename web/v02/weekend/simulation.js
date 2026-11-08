@@ -85,7 +85,7 @@ export const PROJECTS = {
     materials: { wood: 8, hardware: 1, tank: 1, plumbing: 1 },
     work: 267,
     description:
-      "Build a level timber stand and install the brought-in tank, tap and pipes. About 2 person-hours, plus carrying; this is not a drilled well.",
+      "An unpowered tank holding 40 clean water. Receives treated water or resident deliveries; it does not collect rain or filter river water. About 2 person-hours to assemble.",
   },
   shelter: {
     name: "Basic shelter",
