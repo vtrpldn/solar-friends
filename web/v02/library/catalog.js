@@ -1418,6 +1418,16 @@ function add(id, name, category, footprint, build, legacy = []) {
     legacy,
   });
 }
+for(const kind of ['stone','earth'])add(`natural-${kind}`,kind==='stone'?'Large stone outcrop':'Exposed earth deposit','Geology',[4,3],()=>{
+ const g=group();
+ for(let i=0;i<13;i++){
+  const angle=i*2.3999,radius=.6+(i%4)*.8;
+  const height=kind==='stone'?.7+(i%3)*.35:.3+(i%3)*.18;
+  foliage(g,Math.cos(angle)*radius,height*.55,Math.sin(angle)*radius*.65,1,
+    kind==='stone'?(i%2?'#939583':'#aaa58d'):(i%2?'#b57d50':'#a96b44'),[.9+(i%3)*.2,height,.7+(i%2)*.3]);
+ }
+ return g;
+});
 for (const [id, def] of Object.entries(COMMUNITY)) add(id,def.name,"Buildings",def.size,()=>createCommunity(id));
 add("covered-supply-rack","Covered supply rack","Props",[2,1],()=>openingStorage(false));
 add("tarp-covered-supplies","Tarp-covered supplies","Props",[1,1],()=>openingStorage(true));

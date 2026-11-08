@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { box, cylinder, ball, beam } from "../workshop/models.js";
 export const RESOURCE_IDS = [
-  "wood",
+  "wood", "logs", "planks",
   "hardware",
   "roofing",
   "tarp",
@@ -61,6 +61,15 @@ export function resourceModel(id, asset) {
     a(0.22, "leafLight", x + 0.14, y + 0.55, z, [1.1, 0.4, 0.65]);
   };
   switch (id) {
+    case "logs":
+      for(let i=0;i<3;i++){
+        const log=c(.14,1.4,'timber',0,.16+Math.floor(i/2)*.25,(i%2-.5)*.32);
+        log.rotation.z=Math.PI/2;
+      }
+      break;
+    case "planks":
+      for(let i=0;i<4;i++)b(1.5,.06,.32,'timberLight',0,.04+i*.075,0);
+      break;
     case "wood":
       for (let i = 0; i < 4; i++)
         b(
