@@ -11,5 +11,6 @@ export function accessRoadAt(column, row, margin = 0) {
   const x = (column - 32) * 2,
     z = (row - 32) * 2;
   if (z < -MAP_HALF || z > ROAD_END_Z) return false;
-  return Math.abs(x - roadCenter(z)) < (z > PARK_Z - 3 ? 5.6 : 4.5) + margin;
+  const width = z < -MAP_HALF + 12 ? 8.3 : z > PARK_Z - 3 ? 5.6 : 4.5;
+  return Math.abs(x - roadCenter(z)) < width + margin;
 }

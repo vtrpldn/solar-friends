@@ -1,3 +1,4 @@
+import { createEntrancePortal, createUtilityPole } from "./entrance.js";
 import { RESOURCE_IDS, resourceModel } from "./resource-models.js";
 import { openingStorage, openingAssembly } from "./opening-props.js";
 import { rigAnimal } from "./animal-motion.js";
@@ -1984,3 +1985,6 @@ export function compactModel(root) {
   if (animals.length) result.add(...animals);
   return result;
 }
+
+add("entrance-portal", "Village entrance portal", "Props", [6,1], createEntrancePortal);
+add("utility-pole", "Grid connection pole", "Props", [1,1], createUtilityPole);

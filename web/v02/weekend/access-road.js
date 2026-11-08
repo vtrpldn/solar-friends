@@ -1,3 +1,4 @@
+import { createEntrancePortal, createUtilityPole } from "../library/entrance.js";
 import { MAP_HALF } from "./map-size.js";
 import * as THREE from "three";
 import { roadCenter, PARK_Z } from "./road-layout.js";
@@ -97,6 +98,22 @@ export function createAccessRoad() {
       rail.castShadow = true;
       root.add(rail);
     }
+  }
+  const entranceZ = -MAP_HALF + 5;
+  const entranceX = roadCenter(entranceZ);
+  const portal = createEntrancePortal();
+  portal.position.set(entranceX,0,entranceZ);
+  root.add(portal);
+  const pole = createUtilityPole();
+  pole.position.set(roadCenter(entranceZ+3)+6.8,0,entranceZ+3);
+  root.add(pole);
+  // External supply cables end at the map boundary, visibly connecting to town.
+  for (const offset of [-.75,0,.75]) {
+    const a = new THREE.Vector3(pole.position.x+offset,6.55,pole.position.z);
+    const b = new THREE.Vector3(roadCenter(-MAP_HALF)+6.8+offset,6.55,-MAP_HALF);
+    const mid = a.clone().lerp(b,.5); mid.y-=.4;
+    const wire = new THREE.Mesh(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(a,mid,b),8,.018,4,false),mat("#334f4e"));
+    root.add(wire);
   }
   return root;
 }
