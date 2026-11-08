@@ -65,7 +65,7 @@ export function autoConnectUtilities(s, defs) {
   // A short spanning network links producers, batteries, loads and water pumps.
   const powered = nodes.filter(
     (n) =>
-      n.battery || POWER_LOAD[n.kind] || wanted.some((l) => l.from === n.id),
+      n.id === 0 || n.battery || POWER_LOAD[n.kind] || wanted.some((l) => l.from === n.id),
   );
   if (powered.length) {
     const joined = [powered.shift()];

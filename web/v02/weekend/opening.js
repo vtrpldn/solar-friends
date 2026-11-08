@@ -78,5 +78,5 @@ export function openingRecap(s, projects) {
   const storage = complete("tarp-stores")
     ? "The spare tarp kept the supplies safe."
     : "Your raised storage will serve future projects.";
-  return `${protection} ${storage} ${s.opening?.townTrips || 0} town trips, R$${s.money} still shared. There is more to build, but tonight everyone has a place here.`;
+  return `${protection} ${storage} ${s.opening?.townTrips || 0} town trips, R$${s.money.toFixed(2)} still shared. There is more to build, but tonight everyone has a place here.`;
 }

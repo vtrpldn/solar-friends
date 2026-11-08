@@ -34,6 +34,14 @@ export function createManagement({
   isPaused,
   setPaused,
 }) {
+  $("toggle-grid-power").onclick = () => {
+    const grid = state().infrastructure.grid;
+    grid.enabled = !grid.enabled;
+    if (!grid.enabled) grid.importing = 0;
+    notify(grid.enabled ? "Grid backup connected. You pay only for imported electricity." : "Grid disconnected. The village now relies on its own power.");
+    refresh();
+    render();
+  };
   const recipeChoices = new Map();
   const dialog = $("management");
   let view = "resources",
@@ -157,6 +165,11 @@ export function createManagement({
       b.classList.toggle("active", b.dataset.manage === view);
       b.setAttribute("aria-pressed", String(b.dataset.manage === view));
     });
+    $("grid-power-panel").hidden = view !== "power";
+    const grid = s.infrastructure.grid;
+    $("grid-power-status").textContent = `${grid.enabled ? (s.money <= 0 ? "No funds for grid power" : "Grid backup connected") : "Off-grid"} · ${grid.importing.toFixed(2)} kW imported now · ${grid.imported.toFixed(2)} kWh purchased · R$${grid.spent.toFixed(2)} spent`;
+    $("toggle-grid-power").textContent = grid.enabled ? "Disconnect grid power" : "Connect grid backup";
+    $("toggle-grid-power").setAttribute("aria-pressed", String(grid.enabled));
     $("resource-screen").hidden = view !== "resources";
     $("pantry-panel").hidden = view !== "resources";
     $("network-screen").hidden = view === "resources";
@@ -181,7 +194,7 @@ export function createManagement({
     let stats;
     if (view === "resources")
       stats = [
-        ["Shared savings", `R$${s.money}`],
+        ["Shared savings", `R$${s.money.toFixed(2)}`],
         [
           "Storage used",
           `${Math.round(storedMaterials(s))} / ${storageCapacity(s)}`,
@@ -193,8 +206,10 @@ export function createManagement({
       ];
     else if (view === "power")
       stats = [
+        ["Local energy share", s.infrastructure.account.consumed > 0
+          ? `${Math.max(0, 100 * (1 - grid.imported / s.infrastructure.account.consumed)).toFixed(0)}% since arrival` : "No usage yet"],
         [
-          "Generation",
+          "Local generation",
           `${nodes.reduce((v, n) => v + (n.enabled ? n.generation || 0 : 0), 0).toFixed(1)} kW`,
         ],
         [

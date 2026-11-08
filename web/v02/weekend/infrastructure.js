@@ -1,5 +1,6 @@
 import { riverAccess } from "./river-layout.js";
 // v2 port of v1 electricity and water ownership rules. No renderer dependency.
+export const GRID_POWER = { capacity: 4, tariff: 1.2 };
 export const LIQUIDS = ["fresh", "irrigation", "greywater", "sewage"];
 export const POWER_LOAD = {
   shed: 0.1,
@@ -47,6 +48,7 @@ export function ensureInfrastructure(s) {
     biogas: 0,
   };
   const sys = s.infrastructure;
+  sys.grid ??= { enabled: true, imported: 0, spent: 0, importing: 0 };
   sys.nodes[0] ??= {
     id: 0,
     kind: "camp",
@@ -175,6 +177,7 @@ export function infrastructureStep(s, defs, dt) {
     0,
     Math.sin(((((9 + (s.time * 0.45) / 60) % 24) - 6) * Math.PI) / 12),
   );
+  sys.grid.importing = 0;
   const nodes = Object.values(sys.nodes),
     visited = new Set();
   for (const root of nodes) {
@@ -234,6 +237,8 @@ export function infrastructureStep(s, defs, dt) {
       }
       demand += n.demand;
     }
+    const gridConnected = sys.grid.enabled && component.some(n => n.id === 0 && n.enabled);
+    let gridAvailable = gridConnected ? GRID_POWER.capacity * hours : 0;
     const generated = generation * hours;
     let remainder = stored + generated,
       used = 0;
@@ -254,6 +259,18 @@ export function infrastructureStep(s, defs, dt) {
     );
     for (const n of demandOrder) {
       const need = n.demand * hours;
+      const shortfall = Math.max(0, need - remainder);
+      // Buy only energy that a load can use; never charge batteries from the grid.
+      if (n.enabled && shortfall > 0 && shortfall <= gridAvailable + 1e-9 &&
+          shortfall * GRID_POWER.tariff <= s.money) {
+        const cost = shortfall * GRID_POWER.tariff;
+        s.money = Math.max(0, s.money - cost);
+        sys.grid.imported += shortfall;
+        sys.grid.spent += cost;
+        sys.grid.importing += hours ? shortfall / hours : 0;
+        gridAvailable = Math.max(0, gridAvailable - shortfall);
+        remainder += shortfall;
+      }
       n.power = n.enabled && remainder + 1e-9 >= need ? 1 : 0;
       if (n.power) {
         remainder -= need;
@@ -342,6 +359,8 @@ export function validInfrastructure(s) {
     sys.biogas < 0
   )
     return false;
+  if (sys.grid && (typeof sys.grid.enabled !== "boolean" ||
+      [sys.grid.imported, sys.grid.spent, sys.grid.importing].some(v => !Number.isFinite(v) || v < 0))) return false;
   if (Object.values(sys.account).some((v) => !Number.isFinite(v) || v < 0))
     return false;
   for (const n of Object.values(sys.nodes))

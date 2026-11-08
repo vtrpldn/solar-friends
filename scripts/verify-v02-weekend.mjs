@@ -1,3 +1,4 @@
+import { ensureInfrastructure } from "../web/v02/weekend/infrastructure.js";
 import { ROAD_SHIFT, PARK_Z } from "../web/v02/weekend/road-layout.js";
 import assert from "node:assert/strict";
 import {
@@ -21,6 +22,7 @@ import {
 } from "../web/v02/weekend/simulation.js";
 function createWeekend() {
   const s = createFreshWeekend();
+  ensureInfrastructure(s).grid.enabled = false; // Keep original off-grid regression coverage.
   for (let i = 0; i < 171; i++) tick(s, 0.1);
   return s;
 }

@@ -1176,7 +1176,7 @@ function renderUtilityUI() {
     "utility-to",
     compatible.filter(([id]) => id !== -1),
   );
-  const generation = nodes.reduce((a, n) => a + (n.generation || 0), 0),
+  const generation = nodes.reduce((a, n) => a + (n.generation || 0), s.infrastructure?.grid?.importing || 0),
     demand = nodes.reduce((a, n) => a + (n.demand || 0), 0),
     stored = nodes.reduce((a, n) => a + n.charge, 0),
     capacity = nodes.reduce((a, n) => a + n.battery, 0);
@@ -1185,7 +1185,7 @@ function renderUtilityUI() {
       `${Math.floor(nodes.reduce((a, n) => a + n.water[i], 0))} ${key}`,
   ).join(" · ");
   $("utility-summary").textContent =
-    `Power: ${generation.toFixed(1)} kW generated / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}.${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Build more treatment capacity." : ""}`;
+    `Power: ${generation.toFixed(1)} kW available / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}.${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Build more treatment capacity." : ""}`;
   $("utility-links").replaceChildren();
   for (const l of sys.links.filter(
     (l) => (management?.view === "power") === (l.kind === "power"),
@@ -1357,7 +1357,7 @@ function renderUI() {
     s.instantBuild,
     s.arrivalElapsed < ARRIVAL_DURATION,
     s.camp,
-    s.money,
+    Math.floor(s.money * 100),
     s.wood,
     s.materials,
     s.infrastructure && [
@@ -1410,13 +1410,13 @@ function renderUI() {
   $("build").hidden =
     !active || s.stage === "evening" || openPanel !== "build" || !!selected;
   const counters = [
-    ["money", `R$${s.money}`, "Savings", "resources"],
+    ["money", `R$${s.money.toFixed(2)}`, "Savings", "resources"],
     ["wood", Math.floor(s.wood), "Timber", "resources"],
     ["meals", s.materials.meals || 0, "Meals", "resources"],
     [
       "power",
       `${Object.values(s.infrastructure?.nodes || {})
-        .reduce((a, n) => a + (n.generation || 0), 0)
+        .reduce((a, n) => a + (n.generation || 0), s.infrastructure?.grid?.importing || 0)
         .toFixed(1)}`,
       "Power",
       "power",

@@ -1440,3 +1440,7 @@ body[data-tray="closed"] {
   color: #40533d;
   box-shadow: 0 2px 0 #c5b58e;
 }
+
+#grid-power-panel { display: block; margin-bottom: 18px; }
+#grid-power-panel[hidden] { display: none; }
+#grid-power-panel button { margin-top: 8px; }

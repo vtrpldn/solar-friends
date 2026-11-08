@@ -23,7 +23,7 @@ if (story)
   $("continue-label").textContent =
     story.stage === "arrival"
       ? "Your friends are arriving."
-      : `${story.projects.length} ${story.projects.length === 1 ? "project" : "projects"} · R$${story.money} shared savings`;
+      : `${story.projects.length} ${story.projects.length === 1 ? "project" : "projects"} · R$${story.money.toFixed(2)} shared savings`;
 $("continue-game").onclick = () => enter("story");
 $("continue-sandbox").onclick = () => enter("sandbox");
 function start(mode) {

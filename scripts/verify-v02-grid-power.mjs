@@ -1,0 +1,52 @@
+import assert from 'node:assert/strict';
+import { ensureInfrastructure, infrastructureStep, GRID_POWER, validInfrastructure } from '../web/v02/weekend/infrastructure.js';
+import { autoConnectUtilities } from '../web/v02/weekend/auto-utilities.js';
+const defs = { shop: {kind:'workshop',work:1}, solar: {kind:'solar_farm',work:1} };
+function fixture() {
+  const s = {stock:{x:32,z:20},money:100,time:0,people:[],projects:[{id:1,key:'shop',work:1,x:33,z:21}]};
+  autoConnectUtilities(s,defs);
+  return s;
+}
+const s=fixture();
+infrastructureStep(s,defs,60);
+assert.equal(s.infrastructure.nodes[1].power,1);
+assert(s.money<100);
+assert(Math.abs(100-s.money-s.infrastructure.grid.imported*GRID_POWER.tariff)<1e-9);
+assert.equal(s.infrastructure.account.generated,0,'imports are not local generation');
+assert(validInfrastructure(s));
+const restored=JSON.parse(JSON.stringify(s));
+ensureInfrastructure(restored);
+assert.equal(restored.infrastructure.grid.spent,s.infrastructure.grid.spent);
+s.infrastructure.grid.enabled=false;
+const savings=s.money;
+infrastructureStep(s,defs,60);
+assert.equal(s.money,savings);
+assert.equal(s.infrastructure.nodes[1].power,0);
+assert.equal(s.infrastructure.grid.importing,0);
+s.infrastructure.grid.enabled=true;s.money=0;
+infrastructureStep(s,defs,60);
+assert.equal(s.money,0);assert.equal(s.infrastructure.nodes[1].power,0);
+s.money=100;s.projects.push({id:2,key:'solar',work:1,x:35,z:21});
+autoConnectUtilities(s,defs);
+infrastructureStep(s,defs,60);
+assert.equal(s.money,100,'renewables cover demand before importing');
+assert(s.infrastructure.nodes[2].charge>0);
+s.time=1600; // night: battery serves loads before imports
+infrastructureStep(s,defs,1);
+assert.equal(s.money,100);
+const empty=fixture();empty.projects=[];empty.infrastructure=undefined;
+autoConnectUtilities(empty,defs);infrastructureStep(empty,defs,60);
+assert.equal(empty.money,100,'no standing charge');
+const limited=fixture();limited.projects=Array.from({length:10},(_,i)=>({id:i+1,key:'shop',work:1,x:i+30,z:21}));
+limited.infrastructure=undefined;autoConnectUtilities(limited,defs);infrastructureStep(limited,defs,60);
+assert(limited.infrastructure.grid.importing<=4);
+assert(Object.values(limited.infrastructure.nodes).some(n=>n.demand>0&&!n.power));
+console.log('PASS: paid imports, capacity, no debt/idle fee, local-first dispatch, batteries, disconnect and persisted billing.');
+
+const {createWeekend, save, restore} = await import('../web/v02/weekend/simulation.js');
+const game = createWeekend();
+assert.equal(ensureInfrastructure(game).grid.enabled, true);
+game.infrastructure.grid = {enabled:false, imported:2, spent:2.4, importing:0};
+assert.deepEqual(restore(save(game)).infrastructure.grid, game.infrastructure.grid);
+game.infrastructure.grid.spent = -1;
+assert.equal(restore(save(game)), null, 'invalid billing rejected');

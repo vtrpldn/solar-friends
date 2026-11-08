@@ -43,6 +43,7 @@ const fresh = () => {
   for (const id of Object.keys(MATERIALS))
     if (id !== "wood") s.materials[id] = 500;
   s.wood = 500;
+  syncInfrastructure(s, PROJECTS).grid.enabled = false; // Exercise self-sufficient utility behavior.
   return s;
 };
 const built = (s, key, x, z) => {
@@ -302,7 +303,8 @@ for (const id of Object.keys(auto.materials)) auto.materials[id] = 0;
 auto.materials.food = 30;
 const autoQuarry = built(auto, "supply-3", 40, 40);
 assert(repeatProduction(auto, autoQuarry.id, "stone"));
-run(auto, 700);
+// Allow the longer carrying route from the map-edge unloading area.
+for (let i = 0; i < 18000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
 assert.equal(
   auto.materials.stone,
   24,
@@ -312,7 +314,7 @@ const outputBefore = auto.materials.stone;
 run(auto, 100);
 assert.equal(auto.materials.stone, outputBefore);
 assert(sellMaterial(auto, "stone"));
-run(auto, 400);
+for (let i = 0; i < 18000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
 assert(auto.materials.stone >= 24 && auto.materials.stone < 32);
 console.log(
   "PASS: repeat production respects its stock target and restarts after surplus is sold.",

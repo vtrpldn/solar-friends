@@ -214,6 +214,12 @@
             <div id="production-sites"></div>
           </section>
           <section id="network-screen" hidden>
+            <section id="grid-power-panel" class="network-node" hidden>
+              <h3>Electricity from town</h3>
+              <p id="grid-power-status"></p>
+              <p class="hint">Your own generation and batteries come first. The grid covers shortages up to 4 kW, at R$1.20/kWh. No standing charge. Imports stop when savings run out.</p>
+              <button id="toggle-grid-power" type="button">Disconnect grid power</button>
+            </section>
             <h3 id="network-title">Our network</h3>
             <div id="network-nodes"></div>
             <h3>Connections</h3>
