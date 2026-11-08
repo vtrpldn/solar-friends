@@ -172,3 +172,74 @@ export function createPickup() {
     }
   return g;
 }
+
+export function createJimny(variant = 0) {
+  const g = new THREE.Group(),
+    paint = variant ? "#cda657" : "#819d86",
+    roof = "#dbd4b6",
+    trim = "#414b40",
+    glass = "#42616a";
+  block(g, 1.64, 0.58, 3.35, paint, 0, 0.86, 0, 0.07);
+  block(g, 1.56, 0.32, 0.76, paint, 0, 1.13, 1.25, 0.06);
+  block(g, 1.53, 0.08, 0.74, paint, 0, 1.32, 1.24, 0.025);
+  block(g, 1.53, 0.73, 2.33, paint, 0, 1.42, -0.42, 0.06);
+  block(g, 1.62, 0.12, 2.46, roof, 0, 1.84, -0.42, 0.04);
+  block(g, 1.29, 0.45, 0.035, glass, 0, 1.52, 0.767);
+  block(g, 1.25, 0.43, 0.035, glass, 0, 1.5, -1.607);
+  for (const side of [-1, 1]) {
+    block(g, 0.025, 0.46, 1.05, glass, side * 0.776, 1.51, 0.12);
+    block(g, 0.025, 0.43, 0.78, glass, side * 0.776, 1.5, -0.94);
+    block(g, 0.17, 0.2, 0.23, paint, side * 0.88, 1.35, 0.67, 0.025);
+    block(g, 0.025, 0.055, 0.16, trim, side * 0.8, 1.15, -0.29);
+    block(g, 0.1, 0.12, 1.45, trim, side * 0.84, 0.48, -0.25);
+    for (const z of [-1.12, 1.07]) {
+      block(g, 0.17, 0.18, 0.88, trim, side * 0.82, 0.94, z, 0.035);
+      for (const [radius, width, color] of [
+        [0.41, 0.25, trim],
+        [0.22, 0.27, "#b7b8a4"],
+      ]) {
+        const wheel = new THREE.Mesh(
+          new THREE.CylinderGeometry(radius, radius, width, 10),
+          material(color),
+        );
+        wheel.position.set(side * 0.85, 0.41, z);
+        wheel.rotation.z = Math.PI / 2;
+        wheel.castShadow = true;
+        wheel.userData.wheel = true;
+        g.add(wheel);
+      }
+    }
+  }
+  block(g, 1.55, 0.25, 0.16, trim, 0, 0.63, 1.73, 0.035);
+  block(g, 1.55, 0.18, 0.17, trim, 0, 0.59, -1.71, 0.025);
+  block(g, 1.4, 0.32, 0.045, trim, 0, 1.06, 1.7);
+  for (const x of [-0.29, -0.145, 0, 0.145, 0.29])
+    block(g, 0.065, 0.21, 0.03, "#899787", x, 1.06, 1.735);
+  for (const x of [-0.56, 0.56]) {
+    const lamp = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.15, 0.15, 0.07, 12),
+      material("#f1dfb0"),
+    );
+    lamp.rotation.x = Math.PI / 2;
+    lamp.position.set(x, 1.08, 1.74);
+    g.add(lamp);
+    block(g, 0.13, 0.08, 0.045, "#d3934e", x, 1.3, 1.66);
+    block(g, 0.14, 0.2, 0.045, "#ae654e", x, 0.91, -1.7);
+  }
+  const spare = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.39, 0.39, 0.24, 10),
+    material(trim),
+  );
+  spare.rotation.x = Math.PI / 2;
+  spare.position.set(0, 1.1, -1.8);
+  spare.castShadow = true;
+  g.add(spare);
+  const cover = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.28, 0.28, 0.25, 10),
+    material(paint),
+  );
+  cover.rotation.x = Math.PI / 2;
+  cover.position.copy(spare.position);
+  g.add(cover);
+  return g;
+}

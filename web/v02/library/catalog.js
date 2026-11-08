@@ -1,4 +1,4 @@
-import { createPickup } from "./vehicles.js";
+import { createPickup, createJimny } from "./vehicles.js";
 import { createTent } from "./camping.js";
 import { LIVESTOCK } from "./livestock.js";
 import { construction } from "./construction.js";
@@ -1852,6 +1852,8 @@ ASSETS.find(asset => asset.id === "piglet").revision = 2;
 add("canvas-tent-teal", "Sage canvas tent", "Props", [2, 2], () => createTent(0));
 add("canvas-tent-ochre", "Ochre canvas tent", "Props", [2, 2], () => createTent(1));
 add("community-pickup", "Community pickup", "Props", [2, 3], createPickup);
+add("jimny-sage", "Sage trail SUV", "Props", [2,2], () => createJimny(0));
+add("jimny-ochre", "Ochre trail SUV", "Props", [2,2], () => createJimny(1));
 export const CATEGORIES = [...new Set(ASSETS.map((a) => a.category))];
 
 // Bake static recipe pieces into one draw per material. This preserves the exact

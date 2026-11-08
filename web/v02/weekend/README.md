@@ -25,4 +25,4 @@ A local browser sample of the idle clearing measured 4,497 draw calls / about 45
 
 The two ridge tents use actual fabric panels, open doors, tied flaps, poles, ropes, stakes and bedrolls. Each is 398 triangles before batching and approximately 1.54 m tall, with a 2.88 × 3.08 m extent including guy ropes.
 
-New weekends open with a 15-second pickup arrival: a curved drive, parking, and five staggered exits. Camp selection waits until everyone is out. Pause, speed and Skip arrival work during the opening; elapsed arrival time is saved. `?arrival-preview` replays the opening without reading or writing the player save.
+New weekends open with a 17-second two-SUV arrival: staggered curved approaches, side-by-side parking, and five exits split between two Jimny-inspired SUVs. Camp selection waits until everyone is out. Pause, speed and Skip arrival work during the opening; elapsed arrival time is saved. `?arrival-preview` replays the opening without reading or writing the player save.

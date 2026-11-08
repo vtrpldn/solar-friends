@@ -1,8 +1,9 @@
-import { createPickup } from "../library/vehicles.js";
+import { createJimny } from "../library/vehicles.js";
 import {
   ARRIVAL_DURATION,
   PARK_TIME,
   arrivalPose,
+  vehiclePose,
   arrivalLaneAt,
 } from "./arrival.js";
 import { createRiver } from "./river.js";
@@ -174,13 +175,18 @@ function box(g, w, h, d, color, x, y, z) {
   g.add(m);
   return m;
 }
-const pickup = createPickup();
-const wheels = pickup.children.filter((part) => part.userData.wheel);
-for (const wheel of wheels) pickup.remove(wheel);
-const car = compactModel(pickup);
-car.add(...wheels);
-car.position.copy(world(32, 21));
-scene.add(car);
+const vehicles = [0, 1].map((index) => {
+  const model = createJimny(index),
+    wheels = model.children.filter((part) => part.userData.wheel);
+  for (const wheel of wheels) model.remove(wheel);
+  const root = compactModel(model);
+  root.add(...wheels);
+  const pose = vehiclePose(ARRIVAL_DURATION, index);
+  root.position.set(pose.x, 0, pose.z);
+  scene.add(root);
+  return { root, wheels };
+});
+const car = vehicles[0].root;
 const campGroup = new THREE.Group();
 scene.add(campGroup);
 let campDrawn = null;
@@ -688,15 +694,20 @@ function frame(now) {
   drawCamp();
   syncBuildings();
   entrance.position.copy(world(s.stock.x, s.stock.z));
-  car.visible = !s.trip;
+  vehicles.forEach(
+    (vehicle, index) => (vehicle.root.visible = index !== 0 || !s.trip),
+  );
   const arriving = s.stage === "arrival" && s.arrivalElapsed < ARRIVAL_DURATION;
   if (s.stage === "arrival") {
     const pose = arrivalPose(s.arrivalElapsed, 0);
-    car.position.set(pose.car.x, 0, pose.car.z);
-    car.rotation.y = pose.car.yaw;
-    for (const wheel of wheels) {
-      wheel.rotation.set(0, 0, Math.PI / 2);
-      wheel.rotateY((pose.car.z + 58) / 0.43);
+    for (const [index, vehicle] of vehicles.entries()) {
+      const drive = vehiclePose(s.arrivalElapsed, index);
+      vehicle.root.position.set(drive.x, 0, drive.z);
+      vehicle.root.rotation.y = drive.yaw;
+      for (const wheel of vehicle.wheels) {
+        wheel.rotation.set(0, 0, Math.PI / 2);
+        wheel.rotateY((drive.z + 58) / 0.41);
+      }
     }
     if (arriving) {
       controls.target.lerp(car.position, 0.06);

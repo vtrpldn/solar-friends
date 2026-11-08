@@ -16,7 +16,7 @@ import {
 } from "../web/v02/weekend/simulation.js";
 function createWeekend() {
   const s = createFreshWeekend();
-  for (let i = 0; i < 151; i++) tick(s, 0.1);
+  for (let i = 0; i < 171; i++) tick(s, 0.1);
   return s;
 }
 function run(s, seconds) {
@@ -152,19 +152,37 @@ assert.equal(intro.time, 0, "Arrival does not consume the working day");
 const introSaved = restore(save(intro));
 assert(introSaved);
 assert.equal(introSaved.arrivalElapsed, intro.arrivalElapsed);
-run(introSaved, 12);
-assert.equal(introSaved.arrivalElapsed, 15);
+run(introSaved, 14);
+assert.equal(introSaved.arrivalElapsed, 17);
 assert(chooseCamp(introSaved, "shade"));
 const { arrivalPose } = await import("../web/v02/weekend/arrival.js");
 for (let i = 0; i < 5; i++) {
   assert(!arrivalPose(5, i).visible);
-  const pose = arrivalPose(15, i);
+  const pose = arrivalPose(17, i);
   assert(pose.visible && !pose.walking);
   assert(Math.abs(pose.x - (intro.people[i].x - 32) * 2) < 1e-8);
   assert.equal(pose.z, (intro.people[i].z - 32) * 2);
 }
-assert(Math.abs(arrivalPose(6, 0).car.x) < 1e-8);
+assert(Math.abs(arrivalPose(6, 0).car.x + 1) < 1e-8);
 assert.equal(arrivalPose(6, 0).car.z, -22);
 console.log(
   "PASS: driving before exits, staggered disembarkation, final positions, camp gating and saved arrival progress.",
+);
+const { vehiclePose } = await import("../web/v02/weekend/arrival.js");
+for (let t = 0; t <= 17; t += 0.1) {
+  const a = vehiclePose(t, 0),
+    b = vehiclePose(t, 1);
+  assert(
+    Math.hypot(a.x - b.x, a.z - b.z) > 2.2,
+    "SUVs maintain clearance during approach",
+  );
+}
+assert.equal(
+  arrivalPose(8, 3).visible,
+  false,
+  "Second vehicle passengers wait until it parks",
+);
+assert.equal(arrivalPose(9, 3).visible, true);
+console.log(
+  "PASS: two-vehicle clearance and second-car disembarkation timing.",
 );

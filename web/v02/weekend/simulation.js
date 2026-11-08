@@ -276,8 +276,7 @@ export function resolveRain(s, choice) {
 function blockedCamp(s) {
   const c = CAMPS.find((c) => c.id === s.camp);
   const cells = [
-    { x: 32, z: 21 },
-    { x: 32, z: 22 },
+    ...[31, 32, 33, 34].flatMap((x) => [20, 21, 22].map((z) => ({ x, z }))),
     { x: 30, z: 24 },
     ...[
       [25, 29],
