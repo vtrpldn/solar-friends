@@ -1,3 +1,5 @@
+import { COMMUNITY } from "./community-defs.js";
+import { createCommunity } from "./community.js";
 import { createPickup, createJimny } from "./vehicles.js";
 import { createTent } from "./camping.js";
 import { LIVESTOCK } from "./livestock.js";
@@ -1398,6 +1400,7 @@ function add(id, name, category, footprint, build, legacy = []) {
     legacy,
   });
 }
+for (const [id, def] of Object.entries(COMMUNITY)) add(id,def.name,"Buildings",def.size,()=>createCommunity(id));
 const names = {
   orchard: "Fruit orchard",
   goat_pasture: "Goat pasture",

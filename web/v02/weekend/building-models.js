@@ -1,3 +1,4 @@
+import { COMMUNITY } from "../library/community-defs.js";
 // Data-only snapshot of the shared art catalog; verified against it by the economy checks.
 export const BUILDING_MODELS = [
   {
@@ -319,3 +320,11 @@ export const BUILDING_MODELS = [
     size: [2, 2],
   },
 ];
+
+for (const [id, def] of Object.entries(COMMUNITY))
+  BUILDING_MODELS.push({
+    id,
+    name: def.name,
+    category: "Buildings",
+    size: def.size,
+  });

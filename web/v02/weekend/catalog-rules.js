@@ -1,3 +1,4 @@
+import { COMMUNITY } from "../library/community-defs.js";
 import { BUILDING_MODELS } from "./building-models.js";
 // v0.1 economy.rs construction recipes, expressed in v0.2 material IDs.
 const recipes = {
@@ -136,10 +137,11 @@ export function expandProjects(projects) {
     let kind = model.category === "Homes" ? "home" : model.id;
     if (kind === "goat-pasture-empty") kind = "goat_pasture";
     let materials = {
-      ...(recipes[model.id.startsWith("adobe") ? "adobe" : kind] || {
-        wood: 4,
-        hardware: 1,
-      }),
+      ...(COMMUNITY[model.id]?.materials ||
+        recipes[model.id.startsWith("adobe") ? "adobe" : kind] || {
+          wood: 4,
+          hardware: 1,
+        }),
     };
     if (model.id === "goat-pasture-empty") delete materials.goats;
     const sources = {
@@ -198,9 +200,11 @@ export function expandProjects(projects) {
         Object.values(materials).reduce((a, b) => a + b, 0) * 22,
       ),
       kind,
-      category,
+      category: COMMUNITY[model.id]?.category || category,
       repeatable: true,
-      description: `${model.name}. ${model.size.join(" × ")} cells. Build with physical supplies and resident labor.`,
+      description:
+        COMMUNITY[model.id]?.description ||
+        `${model.name}. ${model.size.join(" × ")} cells. Build with physical supplies and resident labor.`,
     };
   }
   for (const key of ["gathering", "water", "shelter", "toilet"]) {

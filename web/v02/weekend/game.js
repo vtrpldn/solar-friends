@@ -1,3 +1,4 @@
+import { COMMUNITY } from "../library/community-defs.js";
 import { resourceIcon } from "./resource-icons.js";
 import { createManagement } from "./management.js";
 import { illustrate } from "./ui-art.js";
@@ -1125,7 +1126,9 @@ function renderUI() {
               ? PROCESSES[
                   s.operations.find((o) => o.id === r.operation)?.recipe
                 ]?.name || "Preparing supplies"
-              : actionText[r.action] || "Settling in";
+              : (r.action === "relax" && COMMUNITY[r.leisureKind]?.activity) ||
+                actionText[r.action] ||
+                "Settling in";
     status.className = "resident-status";
     const progress = document.createElement("progress");
     progress.max = 100;

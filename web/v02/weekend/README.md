@@ -73,3 +73,9 @@ The HUD uses the existing Outfit font, a compact resource strip, resident portra
 Open Resources, Water or Power from the crew panel or the matching top-bar counter. These desktop screens pause the village while planning, then restore its previous pause setting when closed.
 
 Resources groups searchable stock, town purchases/sales and production jobs. Water shows storage by water type, treatment buildings, pipes and carrying jobs. Power shows generation, demand, batteries, building switches and cable installation. Find in village returns to the selected building. Installation and production still require resident work after resuming.
+
+### Community life
+
+Build → Learning contains the reading room and outdoor classroom; Community contains the hall; Recreation contains the exercise garden and volleyball court. Each uses the shared 3D art catalog and physical construction supplies. Completed sites become autonomous leisure destinations with modest energy recovery; covered front rows remain accessible for rainy-day shelter. These use existing leisure animations: formal classes, skill progression and organized sports matches are not simulated.
+
+Run `node scripts/verify-v02-community.mjs` for model footprint, construction recipe, autonomous visit and save checks.

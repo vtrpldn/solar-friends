@@ -1,3 +1,4 @@
+import { COMMUNITY } from "../library/community-defs.js";
 import {
   ensureInfrastructure,
   syncInfrastructure,
@@ -819,7 +820,12 @@ function occupied(s, x, z) {
     blockedCamp(s).some((c) => c.x === x && c.z === z) ||
     s.projects.some(
       (p) =>
-        !(PROJECTS[p.key].kind === "shed" && p.work >= PROJECTS[p.key].work) &&
+        !(
+          p.work >= PROJECTS[p.key].work &&
+          (PROJECTS[p.key].kind === "shed" ||
+            (COMMUNITY[PROJECTS[p.key].kind]?.sheltered &&
+              z === p.z + footprint(p)[1] - 1))
+        ) &&
         x >= p.x &&
         x < p.x + footprint(p)[0] &&
         z >= p.z &&
@@ -1137,32 +1143,44 @@ function availableProject(s, r) {
     (p) => p.work < PROJECTS[p.key].work && workSpot(s, r, p),
   );
 }
-function idleActivity(s, r, i) {
+function idleActivity(s, r, i, dt) {
   if (r.idleUntil > s.time) {
     if (r.idleGoal && go(s, r, r.idleGoal) && r.action === "stroll")
       r.action = "look";
-    r.energy = Math.min(100, r.energy + 0.025);
+    r.energy = Math.min(
+      100,
+      r.energy + dt * 10 * (COMMUNITY[r.leisureKind]?.recovery || 0.025),
+    );
     return;
   }
   const c = CAMPS.find((c) => c.id === s.camp);
+  r.leisureKind = null;
   const cycle = r.idleCycle || 0;
   r.idleCycle = cycle + 1;
   const social = s.projects.filter(
     (p) =>
       p.work >= PROJECTS[p.key].work &&
       (s.rain
-        ? PROJECTS[p.key].kind === "shed"
-        : ["square", "picnic-table", "garden-bench", "fire-circle"].includes(
-            PROJECTS[p.key].kind,
-          )),
+        ? PROJECTS[p.key].kind === "shed" ||
+          COMMUNITY[PROJECTS[p.key].kind]?.sheltered
+        : [
+            "square",
+            "picnic-table",
+            "garden-bench",
+            "fire-circle",
+            ...Object.keys(COMMUNITY),
+          ].includes(PROJECTS[p.key].kind)),
   );
   if (social.length && (s.rain || cycle % 2 === 0)) {
-    const p = social[i % social.length];
+    const p = social[(i + Math.floor(cycle / 2)) % social.length];
     let spot = workSpot(s, r, p);
-    if (PROJECTS[p.key].kind === "shed") {
+    if (
+      PROJECTS[p.key].kind === "shed" ||
+      COMMUNITY[PROJECTS[p.key].kind]?.sheltered
+    ) {
       spot = Array.from({ length: footprint(p)[0] }, (_, n) => ({
         x: p.x + n,
-        z: p.z,
+        z: p.z + footprint(p)[1] - 1,
       })).find(
         (candidate) =>
           !s.people.some(
@@ -1179,6 +1197,7 @@ function idleActivity(s, r, i) {
       r.idleGoal = spot;
       r.idleUntil = s.time + 25 + i * 2;
       r.action = "relax";
+      r.leisureKind = PROJECTS[p.key].kind;
       r.lookAt = null;
       r.target = null;
       go(s, r, spot);
@@ -1557,7 +1576,7 @@ export function tick(s, dt) {
     }
     if (!p) {
       if (operationalWork(s, r, i, dt)) continue;
-      idleActivity(s, r, i);
+      idleActivity(s, r, i, dt);
       r.energy = Math.min(100, r.energy + dt * 0.25);
       continue;
     }
