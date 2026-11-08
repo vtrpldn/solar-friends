@@ -77,6 +77,28 @@
           ><button>Apply position</button>
         </form>
       </div>
+      <section id="resident-controls" hidden>
+        <h3>Resident rehearsal</h3>
+        <label>Resident<select id="resident-choice"></select></label>
+        <label>Interaction<select id="interaction-choice"></select></label>
+        <div class="actions">
+          <button id="send-resident">Send resident</button
+          ><button id="preview-interaction">Preview nearby</button>
+        </div>
+        <p class="hint">
+          Preview nearby starts a short walk beside this prop. One rehearsal
+          runs at a time; editing stops it.
+        </p>
+      </section>
+      <div class="resident-playback">
+        <label
+          ><input id="animate-residents" type="checkbox" checked /> Animate
+          residents</label
+        ><button id="stop-interaction">Stop / reset pose</button>
+      </div>
+      <p id="resident-status" role="status" class="hint">
+        Select a bench, garden or workspace to try an interaction.
+      </p>
       <p id="scene-count"></p>
       <p id="save-state"></p>
       <div class="actions">

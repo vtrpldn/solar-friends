@@ -315,3 +315,32 @@ button:disabled {
   margin: 0 0 12px;
   text-decoration: none;
 }
+
+#resident-controls {
+  border-top: 1px solid #cbd1bd;
+  margin-top: 14px;
+  padding-top: 8px;
+}
+#resident-controls h3 {
+  font-size: 15px;
+  margin: 5px 0 10px;
+}
+#resident-controls label,
+.resident-playback {
+  font-size: 11px;
+}
+.resident-playback {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+.resident-playback input {
+  width: auto;
+  margin: 0 4px 0 0;
+}
+.resident-playback button {
+  font-size: 11px;
+  padding: 6px;
+}

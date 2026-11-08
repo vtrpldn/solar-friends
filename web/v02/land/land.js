@@ -1,3 +1,6 @@
+import { createResident, RESIDENT_IDS } from "../residents/rig.js";
+import { INTERACTIONS } from "../residents/interactions.js";
+import { ResidentDirector } from "../residents/director.js";
 import { connections } from "./connections.js";
 import { configureMapSun } from "./lighting.js";
 import * as THREE from "three";
@@ -145,9 +148,13 @@ try {
 const editor = createEditor(initial);
 const objects = [],
   selectable = [];
+let director = null,
+  animationFrame = 0,
+  lastAnimationTime = 0;
 let placing = null,
   ghost = null;
 function sync(selectedId = selected?.userData.placement.id) {
+  director?.stop();
   for (const m of objects) {
     scene.remove(m);
     disposeModel(m);
@@ -157,7 +164,9 @@ function sync(selectedId = selected?.userData.placement.id) {
   const joined = connections(editor.records);
   for (const record of editor.records) {
     const connection = joined.get(record.id);
-    const model = compactModel(createConnectedAsset(record.asset, connection));
+    const model = RESIDENT_IDS.includes(record.asset)
+      ? createResident(record.asset)
+      : compactModel(createConnectedAsset(record.asset, connection));
     model.userData.connection = connection;
     model.position.set(
       ...placementPosition(record.column, record.row, footprint(record)),
@@ -190,7 +199,23 @@ function sync(selectedId = selected?.userData.placement.id) {
     scene.add(model);
     objects.push(model);
   }
+  director = new ResidentDirector(
+    objects.filter((m) => m.rig),
+    editor.records,
+    (text) => ($("#resident-status").textContent = text),
+  );
+  const previousResident = $("#resident-choice").value;
+  $("#resident-choice").replaceChildren();
+  for (const actor of director.actors) {
+    const option = document.createElement("option");
+    option.value = actor.userData.placement.id;
+    option.textContent = actor.userData.placement.label;
+    $("#resident-choice").append(option);
+  }
+  if (director.actors.some((a) => a.userData.placement.id === previousResident))
+    $("#resident-choice").value = previousResident;
   select(objects.find((m) => m.userData.placement.id === selectedId) || null);
+  animateResidents();
   $("#undo").disabled = !editor.canUndo;
   $("#redo").disabled = !editor.canRedo;
   $("#scene-count").textContent =
@@ -342,6 +367,15 @@ cursor.visible = false;
 scene.add(cursor);
 function select(model) {
   selected = model;
+  const choices = INTERACTIONS[model?.userData.placement.asset] || [];
+  $("#resident-controls").hidden = !choices.length;
+  $("#interaction-choice").replaceChildren();
+  for (const [id, label] of choices) {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = label;
+    $("#interaction-choice").append(option);
+  }
   $("#selection").hidden = !model;
   selectionOutline.visible = !!model;
   if (!model) {
@@ -681,6 +715,52 @@ window.addEventListener("keydown", (e) => {
     if (placing) cancelPlacement();
     else select(null);
   }
+});
+function animateResidents(time = 0) {
+  if (time) animationFrame = 0;
+  if (document.hidden || !$("#animate-residents").checked) {
+    lastAnimationTime = 0;
+    return;
+  }
+  if (time) {
+    const dt = lastAnimationTime
+      ? Math.min(0.05, (time - lastAnimationTime) / 1000)
+      : 0;
+    lastAnimationTime = time;
+    director?.tick(dt);
+    render();
+  }
+  if (!animationFrame) animationFrame = requestAnimationFrame(animateResidents);
+}
+function interact(nearby) {
+  try {
+    if (!selected) return;
+    director.start(
+      $("#resident-choice").value,
+      selected.userData.placement,
+      $("#interaction-choice").value,
+      nearby,
+    );
+    $("#animate-residents").checked = true;
+    animateResidents();
+  } catch (e) {
+    toast(e.message);
+    $("#resident-status").textContent = e.message;
+  }
+}
+$("#send-resident").onclick = () => interact(false);
+$("#preview-interaction").onclick = () => interact(true);
+$("#stop-interaction").onclick = () => {
+  director?.stop();
+  render();
+};
+$("#animate-residents").onchange = () => {
+  lastAnimationTime = 0;
+  animateResidents();
+};
+document.addEventListener("visibilitychange", () => {
+  lastAnimationTime = 0;
+  animateResidents();
 });
 sync();
 focusClearing();
