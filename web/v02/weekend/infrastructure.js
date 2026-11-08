@@ -1,6 +1,7 @@
 // v0.2 port of v0.1 electricity and water ownership rules. No renderer dependency.
 export const LIQUIDS = ["fresh", "irrigation", "greywater", "sewage"];
 export const POWER_LOAD = {
+  shed: 0.1,
   kitchen: 0.6,
   workshop: 0.6,
   greenhouse: 0.5,
@@ -52,6 +53,18 @@ export function ensureInfrastructure(s) {
     z: s.stock.z,
     capacity: [40, 60, 120, 80],
     water: [40, 0, 0, 0],
+    charge: 0,
+    battery: 0,
+    enabled: true,
+    power: 0,
+  };
+  sys.nodes[-1] ??= {
+    id: -1,
+    kind: "river",
+    x: 22,
+    z: 32,
+    capacity: [0, 12, 0, 0],
+    water: [0, 0, 0, 0],
     charge: 0,
     battery: 0,
     enabled: true,
@@ -193,6 +206,7 @@ export function infrastructureStep(s, defs, dt) {
               o.site === n.id &&
               !o.done &&
               o.recipe &&
+              o.phase !== "return" &&
               ["workshop", "kitchen"].includes(n.kind),
           ).length *
             1.2 +
@@ -201,7 +215,11 @@ export function infrastructureStep(s, defs, dt) {
               l.from === n.id &&
               l.kind !== "power" &&
               l.enabled &&
-              l.work >= l.required,
+              l.work >= l.required &&
+              (n.kind === "river" || n.water[LIQUIDS.indexOf(l.kind)] > 0) &&
+              sys.nodes[l.to].capacity[LIQUIDS.indexOf(l.kind)] -
+                sys.nodes[l.to].water[LIQUIDS.indexOf(l.kind)] >
+                0.001,
           ).length *
             0.4
         : 0;
@@ -210,16 +228,38 @@ export function infrastructureStep(s, defs, dt) {
       capacity += n.battery;
       demand += n.demand;
     }
-    const generated = generation * hours,
-      need = demand * hours,
-      used = Math.min(stored + generated, need);
-    let remainder = Math.max(0, stored + generated - used);
+    const generated = generation * hours;
+    let remainder = stored + generated,
+      used = 0;
+    // Keep water services running before workshop equipment when supply is tight.
+    const priority = {
+      river: 0,
+      well: 0,
+      camp: 0,
+      eco_toilet: 1,
+      home: 2,
+      streetlight: 3,
+      kitchen: 4,
+      workshop: 5,
+    };
+    const demandOrder = [...component].sort(
+      (a, b) =>
+        (priority[a.kind] ?? 6) - (priority[b.kind] ?? 6) || a.id - b.id,
+    );
+    for (const n of demandOrder) {
+      const need = n.demand * hours;
+      n.power = n.enabled && remainder + 1e-9 >= need ? 1 : 0;
+      if (n.power) {
+        remainder -= need;
+        used += need;
+      }
+    }
+    remainder = Math.max(0, remainder);
     sys.account.generated += generated;
     sys.account.consumed += used;
     sys.account.curtailed += Math.max(0, remainder - capacity);
     remainder = Math.min(capacity, remainder);
     for (const n of component) {
-      n.power = n.enabled ? (need > 0 ? used / need : 1) : 0;
       n.charge = capacity ? (remainder * n.battery) / capacity : 0;
       n.connected = component.length > 1;
     }
@@ -260,7 +300,15 @@ export function infrastructureStep(s, defs, dt) {
   for (const l of sys.links) {
     if (l.kind === "power" || !l.enabled || l.work < l.required) continue;
     const a = sys.nodes[l.from];
-    if (a.power > 0.99) transferWater(sys, l.from, l.to, l.kind, 24 * hours);
+    if (a.power > 0.99) {
+      if (a.kind === "river" && l.kind === "irrigation") {
+        const target = sys.nodes[l.to],
+          amount = Math.min(24 * hours, target.capacity[1] - target.water[1]);
+        a.water[1] += amount;
+        sys.account.waterReceived += amount;
+      }
+      transferWater(sys, l.from, l.to, l.kind, 24 * hours);
+    }
   }
   // Drinking and washing at camp: preserve wastewater instead of silently deleting it.
   const camp = sys.nodes[0],

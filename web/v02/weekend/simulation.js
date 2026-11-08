@@ -128,9 +128,32 @@ export function sellMaterial(s, id) {
   s.money += Math.floor(item.price * 0.5);
   return true;
 }
+function wakeHelpers(s) {
+  for (const r of s.people)
+    if (
+      !r.job &&
+      !r.tentPhase &&
+      [
+        "idle",
+        "look",
+        "stretch",
+        "chat",
+        "stroll",
+        "breathe",
+        "relax",
+      ].includes(r.action)
+    ) {
+      r.walk = [];
+      r.target = null;
+      r.idleUntil = 0;
+      r.idleGoal = null;
+    }
+}
 export function connectUtility(s, kind, from, to) {
   if (s.stage !== "playing") return "Choose a camp first.";
-  return connect(s, PROJECTS, kind, Number(from), Number(to));
+  const error = connect(s, PROJECTS, kind, Number(from), Number(to));
+  if (!error) wakeHelpers(s);
+  return error;
 }
 export function queueProduction(s, site, recipe) {
   const p = s.projects.find((p) => p.id === Number(site)),
@@ -143,20 +166,25 @@ export function queueProduction(s, site, recipe) {
   )
     return "Choose a completed compatible building.";
   s.operations ??= [];
+  if (s.operations.length > 128)
+    s.operations = [
+      ...s.operations.filter((o) => !o.done),
+      ...s.operations.filter((o) => o.done).slice(-32),
+    ];
   if (s.operations.some((o) => o.site === p.id && !o.done))
     return "This site already has a job.";
-  if (p.key === "goat-pasture-empty" && !p.stocked) {
-    if (materialCount(s, "goats") < 1)
-      return "Bring a pair of goats to stock this pasture.";
-    changeMaterial(s, "goats", -1);
-    p.stocked = true;
-  }
   if ((p.readyAt || 0) > s.time)
     return `Growing: ready in ${Math.ceil(p.readyAt - s.time)} seconds.`;
   if (def.deposit && (p.extracted || 0) >= def.deposit)
     return "This deposit is exhausted.";
   for (const [id, n] of Object.entries(def.input))
     if (materialCount(s, id) < n) return `Missing ${n} ${id}.`;
+  if (p.key === "goat-pasture-empty" && !p.stocked) {
+    if (materialCount(s, "goats") < 1)
+      return "Bring a pair of goats to stock this pasture.";
+    changeMaterial(s, "goats", -1);
+    p.stocked = true;
+  }
   for (const [id, n] of Object.entries(def.input)) changeMaterial(s, id, -n);
   s.operations.push({
     id: (s.nextOperation = (s.nextOperation || 0) + 1),
@@ -166,7 +194,19 @@ export function queueProduction(s, site, recipe) {
     phase: "pickup",
     done: false,
   });
+  wakeHelpers(s);
   return "";
+}
+export function repeatProduction(s, site, recipe) {
+  const p = s.projects.find((p) => p.id === Number(site));
+  if (
+    !p ||
+    !PROCESSES[recipe] ||
+    PROJECTS[p.key].kind !== PROCESSES[recipe].kind
+  )
+    return false;
+  p.repeat = p.repeat === recipe ? null : recipe;
+  return true;
 }
 export function queueWater(s, from, to, kind = "fresh") {
   const sys = syncInfrastructure(s, PROJECTS);
@@ -198,9 +238,11 @@ export function queueWater(s, from, to, kind = "fresh") {
     phase: "pickup",
     done: false,
   });
+  wakeHelpers(s);
   return "";
 }
 function utilitySpot(s, node, r) {
+  if (node.id === -1) return { x: node.x, z: node.z };
   const p = s.projects.find((p) => p.id === node.id);
   return p ? workSpot(s, r, p) : { x: s.stock.x - 1, z: s.stock.z + 1 };
 }
@@ -215,7 +257,7 @@ function operationalWork(s, r, i, dt) {
     );
   const eligible = (op) => {
     if (op.done || reserved(op)) return false;
-    if (op.water) return true;
+    if (op.water || op.phase === "return") return true;
     const node = sys.nodes[op.site],
       recipe = PROCESSES[op.recipe];
     if (!node?.enabled) {
@@ -338,6 +380,25 @@ function operationalWork(s, r, i, dt) {
     return true;
   }
   const recipe = PROCESSES[op.recipe];
+  if (op.phase === "return") {
+    r.action = "carry";
+    r.cargo = true;
+    op.status = "Carrying output to storage";
+    if (!go(s, r, supplySpot(s, r, i))) return true;
+    const total = Object.values(recipe.output).reduce((a, b) => a + b, 0);
+    if (storedMaterials(s) + total > storageCapacity(s)) {
+      op.status = "Storage full; output is still carried";
+      return true;
+    }
+    for (const [id, n] of Object.entries(recipe.output))
+      changeMaterial(s, id, n);
+    op.done = true;
+    r.operation = null;
+    r.cargo = false;
+    say(s, `${recipe.name}: supplies delivered to storage.`);
+    return true;
+  }
+
   if (op.phase === "pickup") {
     r.action = "collect";
     if (!go(s, r, supplySpot(s, r, i))) return true;
@@ -399,18 +460,16 @@ function operationalWork(s, r, i, dt) {
   r.work += dt;
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if (op.work >= recipe.work) {
-    for (const [id, n] of Object.entries(recipe.output))
-      changeMaterial(s, id, n);
-    op.done = true;
+    op.phase = "return";
+    r.target = null;
     p.readyAt = s.time + (recipe.renew || 0);
     p.extracted = (p.extracted || 0) + output;
-    r.operation = null;
-    say(s, `${recipe.name}: supplies are ready.`);
+    op.work = recipe.work;
   }
   return true;
 }
 export function materialText(id, n) {
-  return `${n} ${n === 1 ? MATERIALS[id].name.replace(/s$/, "") : MATERIALS[id].name}`;
+  return `${n} ${n === 1 ? MATERIALS[id].name.replace(/ies$/, "y").replace(/s$/, "") : MATERIALS[id].name}`;
 }
 export function recipeText(key) {
   return Object.entries(PROJECTS[key].materials)
@@ -1091,6 +1150,14 @@ export function tick(s, dt) {
   dt = Math.min(dt, 1);
   s.time += dt;
   infrastructureStep(s, PROJECTS, dt);
+  for (const p of s.projects) {
+    if (!p.repeat || s.operations?.some((o) => o.site === p.id && !o.done))
+      continue;
+    const recipe = PROCESSES[p.repeat];
+    if (recipe && materialCount(s, Object.keys(recipe.output)[0]) < 24)
+      p.productionStatus = queueProduction(s, p.id, p.repeat);
+  }
+
   s.foodClock = (s.foodClock || 0) + dt;
   if (s.foodClock >= 240) {
     s.foodClock -= 240;
@@ -1253,10 +1320,19 @@ export function tick(s, dt) {
         r.target = null;
       }
       r.action = "wash";
-      if (go(s, r, { x: water.x - 1, z: water.z + (i % 2) })) {
+      const washNode = Object.values(s.infrastructure.nodes).find(
+        (n) => n.water[0] >= 1 && n.capacity[2] - n.water[2] >= 0.8,
+      );
+      if (!washNode) {
+        r.action = "idle";
+        r.cleanedAtWork = r.work;
+        continue;
+      }
+      const washSpot = utilitySpot(s, washNode, r);
+      if (washSpot && go(s, r, washSpot)) {
         r.washTime = (r.washTime || 0) + dt;
         if (r.washTime >= 8) {
-          if (!useWater(s, water.id, 1)) {
+          if (!useWater(s, washNode.id, 1)) {
             r.action = "idle";
             r.cleanedAtWork = r.work;
             continue;
@@ -1480,6 +1556,8 @@ export function restore(text) {
       r.walk = [];
       r.job = null;
       r.workSpot = null;
+      r.operation = null;
+      r.linkJob = null;
       r.cargo = false;
       if (
         r.tentPhase &&
@@ -1508,6 +1586,7 @@ export function restore(text) {
       Object.values(s.infrastructure.nodes).some(
         (n) =>
           n.id !== 0 &&
+          n.id !== -1 &&
           !s.projects.some(
             (p) =>
               p.id === n.id &&
@@ -1522,6 +1601,11 @@ export function restore(text) {
       (!Array.isArray(s.operations) ||
         s.operations.some(
           (o) =>
+            !s.infrastructure?.nodes[o.site] ||
+            !["pickup", "process", "deliver", "return"].includes(o.phase) ||
+            (o.water &&
+              o.water.from !== -1 &&
+              !s.infrastructure?.nodes[o.water.from]) ||
             !Number.isFinite(o.work) ||
             o.work < 0 ||
             (!o.water && !PROCESSES[o.recipe]) ||

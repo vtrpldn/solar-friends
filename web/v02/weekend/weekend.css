@@ -426,3 +426,13 @@ dialog::backdrop {
   font-size: 12px;
   line-height: 1.5;
 }
+#build .build-toolbar button {
+  flex: 0 0 auto;
+  width: auto;
+  margin-left: auto;
+}
+#people,
+#selection,
+#journal {
+  max-height: calc(100vh - 470px);
+}

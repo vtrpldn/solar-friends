@@ -1,3 +1,4 @@
+import { createUtilitiesPreview } from "./utilities-preview.js";
 import { syncInfrastructure, LIQUIDS } from "./infrastructure.js";
 import { createAccessRoad } from "./access-road.js";
 import { captureMotion, interpolateMotion } from "./presentation.js";
@@ -29,6 +30,7 @@ import {
   PROCESSES,
   footprint,
   queueProduction,
+  repeatProduction,
   queueWater,
   connectUtility,
   sellMaterial,
@@ -58,10 +60,15 @@ import {
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
   SAVE = "solar-friends-v02-first-weekend-2";
+const utilitiesPreview = new URLSearchParams(location.search).has(
+  "utilities-preview",
+);
 const restPreview = new URLSearchParams(location.search).has("rest-preview");
 const arrivalPreview =
-  restPreview || new URLSearchParams(location.search).has("arrival-preview");
-let s = createWeekend();
+  utilitiesPreview ||
+  restPreview ||
+  new URLSearchParams(location.search).has("arrival-preview");
+let s = utilitiesPreview ? createUtilitiesPreview() : createWeekend();
 if (restPreview) for (const resident of s.people) resident.energy = 10;
 try {
   if (!arrivalPreview) s = restore(localStorage.getItem(SAVE)) || s;
@@ -264,7 +271,7 @@ const actors = s.people.map((r) => {
 const utilityLines = new THREE.Group();
 scene.add(utilityLines);
 let utilityDrawing = "";
-const utilityLights = new Map();
+const utilityLights = [];
 function drawUtilities() {
   const sys = s.infrastructure;
   if (!sys) return;
@@ -312,9 +319,9 @@ function drawUtilities() {
   const night = 1 - Math.min(1, (sys.sun || 0) * 4);
   daylight.intensity = 1.1 + (1 - night) * 0.9;
   sun.intensity = 0.25 + (1 - night) * 3.15;
-  for (const n of Object.values(sys.nodes)) {
-    if (
-      ![
+  const lit = Object.values(sys.nodes)
+    .filter((n) =>
+      [
         "streetlight",
         "home",
         "kitchen",
@@ -322,14 +329,25 @@ function drawUtilities() {
         "shed",
         "warehouse",
         "square",
-      ].includes(n.kind)
+      ].includes(n.kind),
     )
-      continue;
-    let light = utilityLights.get(n.id);
+    .sort(
+      (a, b) =>
+        world(a.x, a.z).distanceToSquared(controls.target) -
+        world(b.x, b.z).distanceToSquared(controls.target),
+    )
+    .slice(0, 8);
+  for (let index = 0; index < 8; index++) {
+    let light = utilityLights[index];
     if (!light) {
       light = new THREE.PointLight("#ffcb76", 0, 10, 2);
       scene.add(light);
-      utilityLights.set(n.id, light);
+      utilityLights.push(light);
+    }
+    const n = lit[index];
+    if (!n) {
+      light.intensity = 0;
+      continue;
     }
     const p = s.projects.find((p) => p.id === n.id);
     if (!p) continue;
@@ -654,6 +672,16 @@ $("meal").onclick = () => {
 };
 $("continue").onclick = () => {
   endingDismissed = true;
+  s.stage = "playing";
+  s.meal = false;
+  for (const r of s.people) {
+    if (r.action === "meal") {
+      r.action = "idle";
+      r.walk = [];
+      r.target = null;
+    }
+  }
+  persist();
   renderUI();
 };
 function askReset() {
@@ -714,12 +742,17 @@ function renderUtilityUI() {
     nodes = Object.values(sys.nodes);
   const labels = nodes.map((n) => [
     n.id,
-    n.id === 0
-      ? "Camp stores"
-      : `${PROJECTS[s.projects.find((p) => p.id === n.id).key].name} #${n.id}`,
+    n.id === -1
+      ? "River intake"
+      : n.id === 0
+        ? "Camp stores"
+        : `${PROJECTS[s.projects.find((p) => p.id === n.id).key].name} #${n.id}`,
   ]);
-  refillSelect("utility-from", [[-1, "River (untreated)"], ...labels]);
-  refillSelect("utility-to", labels);
+  refillSelect("utility-from", labels);
+  refillSelect(
+    "utility-to",
+    labels.filter(([id]) => id !== -1),
+  );
   const generation = nodes.reduce((a, n) => a + (n.generation || 0), 0),
     demand = nodes.reduce((a, n) => a + (n.demand || 0), 0),
     stored = nodes.reduce((a, n) => a + n.charge, 0),
@@ -760,6 +793,10 @@ function renderUtilityUI() {
       : [],
   );
   $("queue-production").disabled = !node || !$("production").value;
+  $("repeat-production").disabled = !node || !$("production").value;
+  $("repeat-production").textContent = p?.repeat
+    ? "Stop repeating"
+    : "Keep 24 in stock";
   $("toggle-building").disabled = !node;
   $("toggle-building").textContent = node?.enabled ? "Switch off" : "Switch on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done);
@@ -771,7 +808,9 @@ function renderUtilityUI() {
             : "",
       )
         .filter(Boolean)
-        .join(" · ")} ${op ? op.status || "Resident job queued" : ""}`
+        .join(
+          " · ",
+        )} ${op ? op.status || "Resident job queued" : p.productionStatus || (p.readyAt > s.time ? `Growing: ${Math.ceil(p.readyAt - s.time)} seconds remaining` : "")}`
     : "";
 }
 $("connect-utility").onclick = () => {
@@ -803,6 +842,12 @@ $("queue-production").onclick = () => {
     queueProduction(s, selected, $("production").value) ||
       "Resident production job queued.",
   );
+  persist();
+  renderUI();
+};
+$("repeat-production").onclick = () => {
+  repeatProduction(s, selected, $("production").value);
+  uiSignature = "";
   persist();
   renderUI();
 };

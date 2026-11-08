@@ -10,6 +10,7 @@ import {
   requiredLoads,
   placementError,
   queueProduction,
+  repeatProduction,
   queueWater,
   connectUtility,
   save,
@@ -203,3 +204,109 @@ assert.equal(
 );
 assert.equal(hauling.infrastructure.nodes[tank.id].water[0], 0);
 console.log("PASS: physical river-water pickup and delivery to a local tank.");
+
+// No free pumping and no water appearing from an incompatible pipe.
+const pumped = fresh();
+pumped.rainSeen = true;
+const pumpTank = built(pumped, "well", 40, 40),
+  pumpSolar = built(pumped, "solar_farm", 44, 40);
+let ps = syncInfrastructure(pumped, PROJECTS);
+ps.nodes[0].water[0] = 0;
+ps.nodes[pumpTank.id].water[0] = 20;
+assert.equal(connectUtility(pumped, "fresh", pumpTank.id, 0), "");
+ps.links[0].work = ps.links[0].required;
+infrastructureStep(pumped, PROJECTS, 10);
+assert.equal(ps.nodes[0].water[0], 0);
+assert.equal(connectUtility(pumped, "power", pumpSolar.id, pumpTank.id), "");
+ps.links[1].work = ps.links[1].required;
+infrastructureStep(pumped, PROJECTS, 10);
+assert(ps.nodes[0].water[0] > 0);
+assert(ps.nodes[pumpTank.id].water[0] < 20);
+const liquidTotal = Object.values(ps.nodes).reduce(
+  (sum, n) => sum + n.water.reduce((a, b) => a + b, 0),
+  0,
+);
+assert(
+  Math.abs(liquidTotal + ps.account.waterUsed + ps.account.waterLost - 20) <
+    1e-6,
+);
+console.log(
+  "PASS: powered pipe flow, no unpowered pumping and water mass conservation.",
+);
+
+const pending = fresh();
+pending.rainSeen = true;
+for (const id of Object.keys(pending.materials)) pending.materials[id] = 0;
+pending.materials.electrical = 10;
+pending.materials.earth = 4;
+pending.materials.food = 20;
+const pendingShop = built(pending, "workshop", 40, 40),
+  pendingSolar = built(pending, "solar_farm", 44, 40);
+assert.equal(queueProduction(pending, pendingShop.id, "walls"), "");
+assert.equal(
+  connectUtility(pending, "power", pendingSolar.id, pendingShop.id),
+  "",
+);
+run(pending, 250);
+assert.equal(
+  pending.materials.walls,
+  2,
+  "Queued processing must not deadlock utility installation",
+);
+const again = restore(save(pending));
+assert(again);
+run(again, 80);
+assert.equal(
+  again.materials.walls,
+  2,
+  "Completed output must not duplicate after reload",
+);
+console.log(
+  "PASS: utility installation unblocks queued production and reload does not duplicate output.",
+);
+const intake = fresh();
+intake.rainSeen = true;
+const intakeTank = built(intake, "well", 40, 40),
+  intakeSolar = built(intake, "solar_farm", 44, 40);
+assert.equal(connectUtility(intake, "irrigation", -1, intakeTank.id), "");
+let ins = intake.infrastructure;
+ins.links.forEach((l) => (l.work = l.required));
+infrastructureStep(intake, PROJECTS, 10);
+assert.equal(ins.nodes[intakeTank.id].water[1], 0);
+assert.equal(connectUtility(intake, "power", intakeSolar.id, -1), "");
+ins.links.forEach((l) => (l.work = l.required));
+infrastructureStep(intake, PROJECTS, 10);
+assert(ins.nodes[intakeTank.id].water[1] > 0);
+assert.equal(ins.nodes[intakeTank.id].water[0], 0);
+assert.equal(
+  connectUtility(intake, "power", intakeSolar.id, intakeTank.id),
+  "",
+);
+ins.links.forEach((l) => (l.work = l.required));
+infrastructureStep(intake, PROJECTS, 10);
+assert(ins.nodes[intakeTank.id].water[0] > 0);
+console.log(
+  "PASS: river intake needs installed pump power, then the cistern independently needs power to filter.",
+);
+
+const auto = fresh();
+auto.rainSeen = true;
+for (const id of Object.keys(auto.materials)) auto.materials[id] = 0;
+auto.materials.food = 30;
+const autoQuarry = built(auto, "supply-3", 40, 40);
+assert(repeatProduction(auto, autoQuarry.id, "stone"));
+run(auto, 700);
+assert.equal(
+  auto.materials.stone,
+  24,
+  "Automatic production stops at target instead of hoarding",
+);
+const outputBefore = auto.materials.stone;
+run(auto, 100);
+assert.equal(auto.materials.stone, outputBefore);
+assert(sellMaterial(auto, "stone"));
+run(auto, 400);
+assert(auto.materials.stone >= 24 && auto.materials.stone < 32);
+console.log(
+  "PASS: repeat production respects its stock target and restarts after surplus is sold.",
+);
