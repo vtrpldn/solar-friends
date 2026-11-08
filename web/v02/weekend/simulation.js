@@ -1,3 +1,4 @@
+import { roadLine } from "./placement-helpers.js";
 import { autoConnectUtilities } from "./auto-utilities.js";
 import { PathQueue } from "./path-queue.js";
 import { carDoor, TRIP_DURATION, DRIVE_DURATION } from "./town-trip.js";
@@ -909,6 +910,28 @@ export function plan(s, key, x, z, rotation = 0) {
     s.mode === "sandbox"
       ? `${def.name} ${instant ? "built" : "queued for resident construction"}. No materials spent.`
       : `${def.name} planned. Materials reserved; friends will bring them over.`,
+  );
+  return "";
+}
+export function planRoadLine(s, from, to) {
+  const cells = roadLine(from, to);
+  if (!cells) return "Extend roads in a straight row or column.";
+  const draft = structuredClone(s);
+  let added = 0;
+  for (const c of cells) {
+    if (
+      draft.projects.some((p) => p.key === "road" && p.x === c.x && p.z === c.z)
+    )
+      continue;
+    const error = plan(draft, "road", c.x, c.z);
+    if (error) return `Road not placed: ${error}`;
+    added++;
+  }
+  if (!added) return "These road tiles are already planned.";
+  Object.assign(s, draft);
+  say(
+    s,
+    `${added} road tiles planned. Shift-click along the same row or column to extend.`,
   );
   return "";
 }

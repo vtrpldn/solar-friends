@@ -1,3 +1,4 @@
+import { roadLine } from "./placement-helpers.js";
 import { prepareHouseLighting, updateHouseLighting } from "./house-lighting.js";
 import { autoConnectUtilities } from "./auto-utilities.js";
 import { townCarPose } from "./town-trip.js";
@@ -70,6 +71,7 @@ import {
   campLocation,
   campPlacementError,
   plan,
+  planRoadLine,
   moveProject,
   prioritize,
   supplyRun,
@@ -733,6 +735,8 @@ function persist() {
     );
   }
 }
+let lastRoad = null,
+  shiftPlacement = false;
 let placementRotation = 0,
   wireframe = null;
 const rotateButton = $("rotate-placement");
@@ -746,6 +750,8 @@ rotateButton.onclick = () => rotatePlacement();
 function cancel() {
   placing = null;
   moving = null;
+  lastRoad = null;
+  roadPreview.visible = false;
   if (wireframe) wireframe.visible = false;
   rotateButton.hidden = true;
   ghost.visible = false;
@@ -754,6 +760,8 @@ function cancel() {
   renderUI();
 }
 function startPlacement(key, id = null) {
+  lastRoad = null;
+  roadPreview.visible = false;
   placing = key;
   moving = id;
   placementRotation = s.projects.find((p) => p.id === id)?.rotation || 0;
@@ -795,8 +803,8 @@ function startPlacement(key, id = null) {
     key === "bridge"
       ? "Span the river with both ends on dry land. R rotates. Esc cancels."
       : key === "road"
-        ? "Click to lay road tiles along the terrain. Keep placing; Esc finishes."
-        : "Choose a building site. R rotates; Shift+R reverses. Ground levels automatically. Esc cancels.",
+        ? "Click to lay roads. Shift-click along a row or column to extend. Esc finishes."
+        : "Choose a building site. R rotates. Shift-click repeats. Ground levels automatically. Esc cancels.",
   );
   renderUI();
 }
@@ -816,6 +824,12 @@ const ray = new THREE.Raycaster(),
   mouse = new THREE.Vector2();
 let down = null,
   cell = null;
+const roadPreview = new THREE.Line(
+  new THREE.BufferGeometry(),
+  new THREE.LineBasicMaterial({ color: "#e8d796", depthTest: false }),
+);
+roadPreview.visible = false;
+scene.add(roadPreview);
 function hit(e) {
   mouse.set(
     (e.clientX / innerWidth) * 2 - 1,
@@ -832,7 +846,13 @@ $("world").addEventListener("pointermove", (e) => {
     s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION;
   if (!placing && !pitching) return;
   const p = hit(e);
-  if (!p) return;
+  if (!p) {
+    ghost.visible = false;
+    if (wireframe) wireframe.visible = false;
+    roadPreview.visible = false;
+    return;
+  }
+  shiftPlacement = e.shiftKey;
   cell = { x: Math.round(p.x / 2 + 32), z: Math.round(p.z / 2 + 32) };
   updatePlacementPreview();
 });
@@ -856,6 +876,30 @@ function updatePlacementPreview() {
   const error = pitching
     ? campPlacementError(s, cell.x, cell.z)
     : placementError(s, placing, cell.x, cell.z, moving, placementRotation);
+  roadPreview.visible = false;
+  let hint = error;
+  if (placing) {
+    const missing = moving ? [] : missingMaterials(s, placing);
+    hint ||= missing.length
+      ? `Missing ${missing.join(", ")}. Buy supplies in town.`
+      : "";
+    if (placing === "road" && shiftPlacement && lastRoad) {
+      const line = roadLine(lastRoad, cell);
+      if (!line) hint = "Extend roads in a straight row or column.";
+      else {
+        roadPreview.geometry.dispose();
+        roadPreview.geometry = new THREE.BufferGeometry().setFromPoints(
+          line.map((c) => world(c.x, c.z).add(new THREE.Vector3(0, 0.08, 0))),
+        );
+        roadPreview.visible = true;
+        hint ||= `${line.filter((c) => !s.projects.some((p) => p.key === "road" && p.x === c.x && p.z === c.z)).length} road tiles · Shift-click to place the line`;
+      }
+    }
+    message(
+      hint ||
+        `${PROJECTS[placing].name} · ${size.join("×")} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats"}`,
+    );
+  } else if (hint) message(hint);
   ghost.material.color.set(error ? "#c26847" : "#d9eda5");
   if (!pitching && wireframe) {
     ghost.visible = false;
@@ -904,12 +948,18 @@ $("world").addEventListener("pointerup", (e) => {
   if (placing) {
     const error = moving
       ? moveProject(s, moving, x, z, placementRotation)
-      : plan(s, placing, x, z, placementRotation);
+      : placing === "road" && e.shiftKey && lastRoad
+        ? planRoadLine(s, lastRoad, { x, z })
+        : plan(s, placing, x, z, placementRotation);
     if (error) {
       message(error);
       return;
     }
-    if (placing !== "road" || moving) cancel();
+    if (placing === "road" && !moving) lastRoad = { x, z };
+    const repeat =
+      e.shiftKey && (s.mode === "sandbox" || PROJECTS[placing].repeatable);
+    if (moving || (placing !== "road" && !repeat)) cancel();
+    roadPreview.visible = false;
     message(s.log[0]);
     syncBuildings();
     persist();
@@ -935,12 +985,63 @@ $("move").onclick = () => {
   const p = s.projects.find((p) => p.id === selected);
   if (p) startPlacement(p.key, p.id);
 };
+$("copy-building").onclick = () => {
+  const p = s.projects.find((p) => p.id === selected);
+  if (p) {
+    const rotation = p.rotation || 0;
+    selected = null;
+    setPanel(null);
+    startPlacement(p.key);
+    placementRotation = rotation;
+    rotateButton.textContent = `Rotate · R · ${rotation * 90}°`;
+  }
+};
+$("focus-selection").onclick = () => {
+  const p = s.projects.find((p) => p.id === selected);
+  if (p)
+    focus({
+      x: p.x + (footprint(p)[0] - 1) / 2,
+      z: p.z + (footprint(p)[1] - 1) / 2,
+    });
+};
 $("close-selection").onclick = () => {
   selected = null;
   renderUI();
 };
 $("cancel").onclick = cancel;
+addEventListener("keyup", (e) => {
+  if (e.key === "Shift") {
+    shiftPlacement = false;
+    roadPreview.visible = false;
+  }
+});
 addEventListener("keydown", (e) => {
+  const editing =
+    e.target.closest?.('input,textarea,select,[contenteditable="true"]') ||
+    $("management").open;
+  if (e.key === "Shift" && !editing) {
+    shiftPlacement = true;
+    updatePlacementPreview();
+  }
+  if (!editing && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    if (e.code === "KeyB" && s.stage === "playing") {
+      e.preventDefault();
+      setPanel(openPanel === "build" ? null : "build");
+    }
+    if (e.code === "KeyG") {
+      e.preventDefault();
+      $("grid").click();
+    }
+    if (e.code === "KeyF") {
+      e.preventDefault();
+      if (selected) $("focus-selection").click();
+      else focus(campLocation(s));
+    }
+    if (e.code === "Space" && !e.target.closest?.("button,summary,a")) {
+      e.preventDefault();
+      $("pause").click();
+    }
+  }
   if (
     e.code === "KeyR" &&
     placing &&
@@ -1491,6 +1592,8 @@ function renderUI() {
   $("selection").hidden = !p || s.stage === "evening";
   if (p) {
     $("selected-name").textContent = PROJECTS[p.key].name;
+    $("copy-building").hidden =
+      s.mode !== "sandbox" && !PROJECTS[p.key].repeatable;
     illustrate($("selected-art"), PROJECTS[p.key].asset);
     $("selected-state").textContent = finished(s, p.key)
       ? "READY TO USE"
