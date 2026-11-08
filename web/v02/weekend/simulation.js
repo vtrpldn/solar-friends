@@ -101,6 +101,7 @@ export function footprint(p) {
   return PROJECTS[p.key].size;
 }
 export function storageCapacity(s) {
+  if (s.mode === "sandbox") return 1000000;
   return (
     600 +
     s.projects.filter(
@@ -509,6 +510,7 @@ export function materialCount(s, id) {
   return id === "wood" ? s.wood : s.materials[id];
 }
 export function missingMaterials(s, key) {
+  if (s.mode === "sandbox") return [];
   return Object.entries(PROJECTS[key].materials)
     .filter(([id, n]) => materialCount(s, id) < n)
     .map(([id, n]) => materialText(id, n - materialCount(s, id)));
@@ -571,6 +573,25 @@ export function createWeekend() {
     ],
     nextId: 1,
   };
+}
+export function createSandbox() {
+  const s = createWeekend();
+  delete s.opening;
+  s.mode = "sandbox";
+  s.instantBuild = true;
+  s.arrivalElapsed = ARRIVAL_DURATION;
+  chooseCamp(s, "clearing");
+  sandboxSupplies(s);
+  s.log = [
+    "Your land, your pace. All buildings are available; construction is free. Toggle Instant build to let residents do the work.",
+  ];
+  return s;
+}
+function sandboxSupplies(s) {
+  s.money = 999999;
+  s.wood = 9999;
+  for (const id of Object.keys(MATERIALS))
+    if (id !== "wood") s.materials[id] = 9999;
 }
 export function say(s, text) {
   s.log.unshift(text);
@@ -676,7 +697,11 @@ export function plan(s, key, x, z) {
   if (s.stage !== "playing") return "Choose your campsite first.";
   const def = PROJECTS[key];
   if (!def) return "Unknown project.";
-  if (s.projects.some((p) => p.key === key) && !def.repeatable)
+  if (
+    s.mode !== "sandbox" &&
+    s.projects.some((p) => p.key === key) &&
+    !def.repeatable
+  )
     return "Already planned. Select it to change priority or move it.";
   const error = placementError(s, key, x, z);
   if (error) return error;
@@ -698,18 +723,30 @@ export function plan(s, key, x, z) {
       r.walk = [];
       r.target = null;
     }
-  for (const [id, n] of Object.entries(def.materials)) {
+  for (const [id, n] of Object.entries(
+    s.mode === "sandbox" ? {} : def.materials,
+  )) {
     if (id === "wood") s.wood -= n;
     else s.materials[id] -= n;
   }
-  s.projects.push({ id: s.nextId++, key, x, z, work: 0, delivered: 0 });
+  const instant = s.mode === "sandbox" && s.instantBuild !== false;
+  s.projects.push({
+    id: s.nextId++,
+    key,
+    x,
+    z,
+    work: instant ? def.work : 0,
+    delivered: s.mode === "sandbox" ? requiredLoads(key) : 0,
+  });
   for (const r of s.people) {
     r.walk = [];
     r.target = null;
   }
   say(
     s,
-    `${def.name} planned. Materials reserved; friends will bring them over.`,
+    s.mode === "sandbox"
+      ? `${def.name} ${instant ? "built" : "queued for resident construction"}. No materials spent.`
+      : `${def.name} planned. Materials reserved; friends will bring them over.`,
   );
   return "";
 }
@@ -1269,6 +1306,7 @@ function idleActivity(s, r, i, dt) {
   r.idleUntil = s.time + 18 + i * 2 + (cycle % 3) * 5;
 }
 export function canFinish(s) {
+  if (s.mode === "sandbox") return false;
   if (s.opening && !s.opening.complete)
     return openingProgress(s, PROJECTS).ready;
   return (
@@ -1302,6 +1340,7 @@ export function tick(s, dt) {
     return;
   }
   dt = Math.min(dt, 1);
+  if (s.mode === "sandbox") sandboxSupplies(s);
   s.time += dt;
   infrastructureStep(s, PROJECTS, dt);
   for (const p of s.projects) {
@@ -1707,6 +1746,10 @@ export function restore(text) {
           typeof s.opening.complete !== "boolean"))
     )
       return null;
+    if (s.mode !== undefined && s.mode !== "sandbox" && s.mode !== "story")
+      return null;
+    if (s.instantBuild !== undefined && typeof s.instantBuild !== "boolean")
+      return null;
     const fresh = createWeekend();
     s.arrivalElapsed ??= ARRIVAL_DURATION;
     if (
@@ -1760,7 +1803,9 @@ export function restore(text) {
     for (const p of s.projects) {
       if (
         !PROJECTS[p.key] ||
-        (!PROJECTS[p.key]?.repeatable && keys.has(p.key)) ||
+        (s.mode !== "sandbox" &&
+          !PROJECTS[p.key]?.repeatable &&
+          keys.has(p.key)) ||
         ids.has(p.id) ||
         !Number.isInteger(p.id) ||
         p.id < 1 ||

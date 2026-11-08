@@ -4,6 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Solar Friends · Our first weekend</title>
+    <script>
+      const route = new URLSearchParams(location.search);
+      if (
+        !route.has("mode") &&
+        !["arrival-preview", "utilities-preview", "rest-preview"].some((k) =>
+          route.has(k),
+        )
+      )
+        location.replace("./menu.html");
+    </script>
     <link rel="stylesheet" href="weekend.css" />
     <script type="importmap">
       {
@@ -123,6 +133,9 @@
       <button id="opening-status" hidden aria-controls="journal"></button>
       <section id="build" hidden>
         <div class="build-toolbar">
+          <button id="sandbox-instant" hidden aria-pressed="true">
+            Instant build: on
+          </button>
           <label for="build-category">⌂ Let’s build</label
           ><select id="build-category"></select
           ><input
@@ -184,7 +197,8 @@
           ><button id="home" title="Home · Center on camp">⌂ Camp</button
           ><button id="river-view">River bend</button
           ><button id="grid">Grid</button
-          ><button id="restart">New weekend</button>
+          ><button id="restart">New village</button
+          ><button id="main-menu">Main menu</button>
           <a href="../library/">Art collection ↗</a>
         </div>
       </details>

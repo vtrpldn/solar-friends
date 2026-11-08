@@ -79,3 +79,9 @@ Resources groups searchable stock, town purchases/sales and production jobs. Wat
 Build → Learning contains the reading room and outdoor classroom; Community contains the hall; Recreation contains the exercise garden and volleyball court. Each uses the shared 3D art catalog and physical construction supplies. Completed sites become autonomous leisure destinations with modest energy recovery; covered front rows remain accessible for rainy-day shelter. These use existing leisure animations: formal classes, skill progression and organized sports matches are not simulated.
 
 Run `node scripts/verify-v02-community.mjs` for model footprint, construction recipe, autonomous visit and save checks.
+
+### Start menu and sandbox
+
+`/v02/weekend/` opens the start menu. New game starts the first-evening story; Continue restores its save. Sandbox has its own save slot and starts in the clearing with all build categories available, free construction, replenishing material reserves and no opening/dinner goals. Instant build is on by default; turn it off in the build catalog to require resident construction. Water, power, resident needs and production continue to simulate normally. View & options → Main menu saves and returns to the menu. Starting fresh asks before replacing the selected mode's save.
+
+Developer preview URLs still bypass the menu and do not save. `node scripts/verify-v02-modes.mjs` checks mode isolation keys, construction rules, duplicate sandbox buildings, save restoration and story defaults.

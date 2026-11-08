@@ -1,3 +1,4 @@
+import { saveKey } from "./modes.js";
 import { openingProgress, openingRecap } from "./opening.js";
 import { collectAnimals, animateAnimals } from "../library/animal-motion.js";
 import { COMMUNITY } from "../library/community-defs.js";
@@ -51,6 +52,7 @@ import {
   missingMaterials,
   requiredLoads,
   createWeekend,
+  createSandbox,
   chooseCamp,
   plan,
   moveProject,
@@ -66,7 +68,7 @@ import {
   placementError,
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
-  SAVE = "solar-friends-v02-first-weekend-2";
+  SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
 const utilitiesPreview = new URLSearchParams(location.search).has(
   "utilities-preview",
 );
@@ -79,7 +81,9 @@ let s = utilitiesPreview
   ? createUtilitiesPreview(
       new URLSearchParams(location.search).has("interactions"),
     )
-  : createWeekend();
+  : new URLSearchParams(location.search).get("mode") === "sandbox"
+    ? createSandbox()
+    : createWeekend();
 // Optional frozen lighting comparison, only in the unsaved utilities scene.
 const lightingPreview =
   utilitiesPreview && new URLSearchParams(location.search).has("lighting-hour");
@@ -568,7 +572,7 @@ for (const [key, d] of Object.entries(PROJECTS)) {
   const b = document.createElement("button");
   b.id = `build-${key}`;
   const count = Object.values(d.materials).reduce((a, b) => a + b, 0);
-  b.innerHTML = `<span class="material-warning" aria-hidden="true">!</span><img class="build-art" alt=""/><strong>${d.name}</strong><span class="build-cost">${count} materials <i>· ${d.size.join("×")}</i></span>`;
+  b.innerHTML = `<span class="material-warning" aria-hidden="true">!</span><img class="build-art" alt=""/><strong>${d.name}</strong><span class="build-cost">${s.mode === "sandbox" ? "Free" : `${count} materials`} <i>· ${d.size.join("×")}</i></span>`;
   b.setAttribute("aria-label", `${d.name}. ${recipeText(key)}`);
   b.title = d.description;
   b.dataset.category = d.category;
@@ -741,12 +745,22 @@ $("continue").onclick = () => {
 function askReset() {
   $("reset-dialog").showModal();
 }
+$("main-menu").onclick = () => {
+  persist();
+  location.href = "./menu.html";
+};
+$("sandbox-instant").onclick = () => {
+  s.instantBuild = s.instantBuild === false;
+  uiSignature = "";
+  renderUI();
+  persist();
+};
 $("restart").onclick = askReset;
 $("again").onclick = askReset;
 $("keep").onclick = () => $("reset-dialog").close();
 $("confirm-reset").onclick = () => {
   // pagehide also saves: replace live state before navigating so it cannot resurrect the old camp.
-  s = createWeekend();
+  s = s.mode === "sandbox" ? createSandbox() : createWeekend();
   persist();
   location.reload();
 };
@@ -946,6 +960,7 @@ refillSelect(
   "build-category",
   categories.map((c) => [c, c]),
 );
+if (s.mode === "sandbox") $("build-category").value = "Homes";
 function filterBuildings() {
   for (const [key, d] of Object.entries(PROJECTS)) {
     const button = $(`build-${key}`);
@@ -986,6 +1001,7 @@ function renderUI() {
     openPanel,
     s.stage,
     s.opening,
+    s.instantBuild,
     s.arrivalElapsed < ARRIVAL_DURATION,
     s.camp,
     s.money,
@@ -1020,6 +1036,15 @@ function renderUI() {
   if (signature === uiSignature) return;
   uiSignature = signature;
   const active = s.stage !== "arrival";
+  $("sandbox-instant").hidden = s.mode !== "sandbox";
+  $("sandbox-instant").textContent =
+    `Instant build: ${s.instantBuild === false ? "off" : "on"}`;
+  $("sandbox-instant").setAttribute(
+    "aria-pressed",
+    String(s.instantBuild !== false),
+  );
+  document.querySelector("header h1").textContent =
+    s.mode === "sandbox" ? "Your sandbox" : "Our little village";
   $("arrival").hidden = active || s.arrivalElapsed < ARRIVAL_DURATION;
   $("skip-arrival").hidden = active || s.arrivalElapsed >= ARRIVAL_DURATION;
   $("village-actions").hidden = !active;
@@ -1059,7 +1084,8 @@ function renderUI() {
       )
       .join("");
   counters.forEach((counter, i) => {
-    $("supplies").children[i].querySelector("b").textContent = counter[1];
+    $("supplies").children[i].querySelector("b").textContent =
+      s.mode === "sandbox" && i < 3 ? "∞" : counter[1];
     $("supplies").children[i].disabled = !active;
   });
   const minutes = 9 * 60 + Math.floor(s.time * 0.45);
@@ -1123,27 +1149,30 @@ function renderUI() {
       $("opening-options").append(b);
     }
   }
-  $("objective").textContent = opening
-    ? goals.ready
-      ? "The essentials are covered. Bring everyone together, or keep improving the camp."
-      : s.trip
-        ? "One friend is fetching supplies. The others can keep building while they are away."
-        : s.rain
-          ? "The shower is here. Uncovered work is 20% slower; a dry place helps us take better breaks. There is no deadline: finish when you feel ready."
-          : s.rainSeen
-            ? "The shower has passed. Finish the essentials at your own pace, then gather everyone for dinner."
-            : "Iara: Let’s make tonight comfortable. A shower is forecast after a few minutes of work; choose a quick fix or a lasting improvement. There is no single right layout."
-    : s.stage === "evening"
-      ? "Tools away. Take a moment to enjoy what you made together."
-      : !finished(s, "gathering")
-        ? "First, make somewhere to sit and recover. Then choose one practical improvement."
-        : canFinish(s)
-          ? "We have a gathering place and a practical improvement. Keep building, or call everyone for dinner."
+  $("objective").textContent =
+    s.mode === "sandbox"
+      ? "Build freely. Supplies replenish automatically. Toggle Instant build in the catalog to have residents construct your plans. Water and power networks still work normally."
+      : opening
+        ? goals.ready
+          ? "The essentials are covered. Bring everyone together, or keep improving the camp."
           : s.trip
-            ? "Our camp is ready. Wait for our friend to return before sharing dinner, or keep improving the camp."
-            : s.rainSeen && !s.rainResolved
-              ? "A roof is taking shape. Keep the supplies dry before calling everyone for dinner."
-              : "Choose what helps us stay: water storage, a roof, or a private toilet.";
+            ? "One friend is fetching supplies. The others can keep building while they are away."
+            : s.rain
+              ? "The shower is here. Uncovered work is 20% slower; a dry place helps us take better breaks. There is no deadline: finish when you feel ready."
+              : s.rainSeen
+                ? "The shower has passed. Finish the essentials at your own pace, then gather everyone for dinner."
+                : "Iara: Let’s make tonight comfortable. A shower is forecast after a few minutes of work; choose a quick fix or a lasting improvement. There is no single right layout."
+        : s.stage === "evening"
+          ? "Tools away. Take a moment to enjoy what you made together."
+          : !finished(s, "gathering")
+            ? "First, make somewhere to sit and recover. Then choose one practical improvement."
+            : canFinish(s)
+              ? "We have a gathering place and a practical improvement. Keep building, or call everyone for dinner."
+              : s.trip
+                ? "Our camp is ready. Wait for our friend to return before sharing dinner, or keep improving the camp."
+                : s.rainSeen && !s.rainResolved
+                  ? "A roof is taking shape. Keep the supplies dry before calling everyone for dinner."
+                  : "Choose what helps us stay: water storage, a roof, or a private toilet.";
   $("tasks").replaceChildren();
   $("completed-tasks").replaceChildren();
   const builtCount = s.projects.filter(
@@ -1262,7 +1291,9 @@ function renderUI() {
   for (const key of Object.keys(PROJECTS)) {
     const b = $(`build-${key}`);
     b.disabled =
-      !PROJECTS[key].repeatable && s.projects.some((p) => p.key === key);
+      s.mode !== "sandbox" &&
+      !PROJECTS[key].repeatable &&
+      s.projects.some((p) => p.key === key);
     const missing = missingMaterials(s, key);
     b.title = `${PROJECTS[key].description} Materials: ${recipeText(key)}. ${missing.length ? "Missing: " + missing.join(", ") : "All materials available."}`;
     b.classList.toggle("active", placing === key);

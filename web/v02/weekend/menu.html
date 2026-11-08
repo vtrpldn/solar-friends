@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Solar Friends</title>
+    <link rel="stylesheet" href="weekend.css" />
+    <link rel="stylesheet" href="menu.css" />
+  </head>
+  <body>
+    <main class="start-menu">
+      <div class="menu-sun" aria-hidden="true">☀</div>
+      <small>A LITTLE LAND. A LIFE TOGETHER.</small>
+      <h1>Solar Friends</h1>
+      <p>Build a place where your friends can feel at home.</p>
+      <div class="menu-choices">
+        <button id="continue-game" hidden>
+          <strong>Continue</strong><span id="continue-label"></span></button
+        ><button data-start="story">
+          <strong>New game</strong
+          ><span
+            >Our first weekend · shared needs, limited supplies, meaningful
+            choices.</span
+          ></button
+        ><button data-start="sandbox">
+          <strong>Sandbox</strong
+          ><span
+            >All buildings, free construction and replenished supplies. Build at
+            your own pace.</span
+          ></button
+        ><button id="continue-sandbox" hidden>
+          <strong>Continue sandbox</strong
+          ><span>Return to your saved playground.</span>
+        </button>
+      </div>
+      <p class="hint">Story and sandbox have separate saves.</p>
+      <a href="../library/">Browse the art collection ↗</a>
+      <p id="menu-status" role="status"></p>
+    </main>
+    <dialog id="replace-save">
+      <h2>Start a fresh village?</h2>
+      <p id="replace-copy"></p>
+      <button id="cancel-new">Keep my village</button
+      ><button id="confirm-new">Start fresh</button>
+    </dialog>
+    <script type="module" src="menu.js"></script>
+  </body>
+</html>
