@@ -4,6 +4,8 @@ import * as THREE from "three";
 import { createAsset, compactModel, disposeModel } from "../library/catalog.js";
 
 // A real village diorama; render only on load/resize, never run a hidden simulation.
+const concept = Number(new URLSearchParams(location.search).get("concept"));
+const dusk = concept === 4;
 const canvas = document.getElementById("menu-landscape");
 let renderer;
 try {
@@ -14,10 +16,19 @@ try {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#b9cbd0");
-  scene.fog = new THREE.Fog("#a8b590", 90, 170);
-  scene.add(new THREE.HemisphereLight("#fff0cd", "#687d52", 2.5));
-  const sun = new THREE.DirectionalLight("#ffdda2", 3.2);
+  scene.background = new THREE.Color(dusk ? "#263d50" : "#b9cbd0");
+  scene.fog = new THREE.Fog(dusk ? "#263d50" : "#a8b590", 90, 170);
+  scene.add(
+    new THREE.HemisphereLight(
+      dusk ? "#9db8df" : "#fff0cd",
+      "#687d52",
+      dusk ? 1.1 : 2.5,
+    ),
+  );
+  const sun = new THREE.DirectionalLight(
+    dusk ? "#acbce8" : "#ffdda2",
+    dusk ? 0.6 : 3.2,
+  );
   sun.position.set(-12, 22, 8);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -38,6 +49,19 @@ try {
     model.position.set(x, 0, z);
     model.rotation.y = rotation;
     scene.add(model);
+    if (dusk && id === "house") {
+      model.traverse((mesh) => {
+        if (mesh.material?.userData.windowPane) {
+          mesh.material = mesh.material.clone();
+          mesh.material.emissive.set("#ffc675");
+          mesh.material.emissiveIntensity = 1.2;
+          mesh.material.userData.owned = true;
+        }
+      });
+      const light = new THREE.PointLight("#ffce85", 7, 7);
+      light.position.set(x, 1.4, z + 1.8);
+      scene.add(light);
+    }
   }
   prop("house", 0, 0);
   prop("shed", -5, 2);
@@ -82,14 +106,20 @@ try {
 
   prop("orchard", -9, 6);
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 180);
-  camera.position.set(22, 28, 32);
+  camera.position.set(
+    ...(concept === 2
+      ? [19, 18, 29]
+      : concept === 5
+        ? [22, 32, 35]
+        : [22, 28, 32]),
+  );
   camera.lookAt(-3, 0, 1);
   function render() {
-    const w = innerWidth,
-      h = innerHeight;
+    const w = canvas.clientWidth,
+      h = canvas.clientHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    camera.setViewOffset(w, h, -w * 0.16, 0, w, h);
+    camera.setViewOffset(w, h, -w * (concept === 5 ? 0 : 0.16), 0, w, h);
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
   }

@@ -1,0 +1,419 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #adb990;
+  color: #344d38;
+}
+#menu-landscape {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.welcome {
+  position: absolute;
+  left: 7%;
+  top: 10%;
+  width: 350px;
+}
+.brand {
+  position: static;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.brand small {
+  display: block;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.19em;
+  margin: 0 0 17px;
+}
+.brand h1 {
+  font-family: Outfit, system-ui, sans-serif;
+  font-size: 94px;
+  line-height: 0.88;
+  letter-spacing: -0.055em;
+  margin: 0;
+  font-weight: 800;
+}
+.sun-mark {
+  display: none;
+}
+.menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  margin-top: 38px;
+  width: 260px;
+}
+.menu-actions button {
+  font:
+    600 20px Outfit,
+    system-ui,
+    sans-serif;
+  min-height: 46px;
+  text-align: left;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  padding: 11px 17px;
+  cursor: pointer;
+  transition:
+    transform 0.15s,
+    background 0.15s;
+}
+.menu-actions button:hover {
+  transform: translateX(5px);
+}
+.menu-actions button:focus-visible {
+  outline: 3px solid #d6a04d;
+  outline-offset: 4px;
+}
+.menu-actions .primary {
+  background: #fff4d8;
+  box-shadow: 0 3px 0 #b9a97a;
+}
+.primary span {
+  display: block;
+}
+.primary small {
+  font-size: 11px;
+  font-weight: 400;
+  display: block;
+  margin-top: 5px;
+  letter-spacing: 0.025em;
+}
+.menu-actions .settings {
+  font-size: 15px;
+  margin-top: 7px;
+  opacity: 0.8;
+}
+.edition {
+  font-size: 12px;
+  margin-top: 26px;
+}
+.corner {
+  position: absolute;
+  right: 32px;
+  bottom: 23px;
+  text-align: right;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+}
+.corner small {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0;
+  margin-top: 6px;
+}
+.preview-message {
+  position: fixed;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: #fff4dc;
+  color: #354c3c;
+  font-size: 13px;
+  box-shadow: 0 3px 12px #24382a30;
+}
+.preview-message[hidden] {
+  display: none;
+}
+/* 01 — Open landscape, simple grounded game menu. */
+[data-concept="1"] .brand {
+  color: #fff4d5;
+  text-shadow:
+    0 4px 0 #496446,
+    0 6px 18px #32483130;
+}
+[data-concept="1"] .brand small {
+  color: #354d36;
+  text-shadow: none;
+}
+[data-concept="1"] .menu-actions button:not(.primary) {
+  background: #f6f0d6d9;
+}
+/* 02 — A physical welcome sign at the village gate. */
+[data-concept="2"] .welcome {
+  left: 8%;
+  top: 9%;
+  width: 320px;
+  padding: 28px 28px 20px;
+  background: #624a32;
+  border: 7px solid #8e704a;
+  outline: 2px solid #443d29;
+  box-shadow: 7px 10px 0 #3e392c35;
+  transform: rotate(-1deg);
+  color: #fff0cc;
+  border-radius: 10px;
+}
+[data-concept="2"] .welcome:before,
+[data-concept="2"] .welcome:after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  width: 22px;
+  height: 70vh;
+  background: #715539;
+  border-left: 5px solid #8a6b46;
+  z-index: -1;
+}
+[data-concept="2"] .welcome:before {
+  left: 30px;
+}
+[data-concept="2"] .welcome:after {
+  right: 30px;
+}
+[data-concept="2"] .brand h1 {
+  font-size: 70px;
+  text-shadow: 0 3px #423520;
+}
+[data-concept="2"] .brand small {
+  font-size: 8px;
+  letter-spacing: 0.13em;
+}
+[data-concept="2"] .menu-actions {
+  width: 100%;
+  margin-top: 26px;
+  gap: 9px;
+}
+[data-concept="2"] .menu-actions button {
+  color: #fff0cd;
+  border: 1px solid #ad8952;
+  background: #745b3d;
+  border-radius: 3px;
+  box-shadow: 0 3px #403725;
+  font-size: 18px;
+}
+[data-concept="2"] .menu-actions .primary {
+  background: #e3d5a8;
+  color: #414b31;
+}
+[data-concept="2"] .edition {
+  font-size: 11px;
+  text-align: center;
+}
+/* 03 — A field book, with a narrow cloth binding. */
+[data-concept="3"] .welcome {
+  top: 6%;
+  bottom: 6%;
+  left: 5%;
+  width: 355px;
+  background: #f5efda;
+  padding: 35px 35px 28px 45px;
+  border-radius: 3px 15px 15px 3px;
+  box-shadow:
+    10px 12px 0 #4d63432b,
+    inset 12px 0 #7b8d60,
+    inset 17px 0 #d6d0b8;
+}
+[data-concept="3"] .brand h1 {
+  font-family: Georgia, serif;
+  font-size: 69px;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.98;
+}
+[data-concept="3"] .brand small {
+  font-size: 8px;
+}
+[data-concept="3"] .sun-mark {
+  display: block;
+  color: #b78b3e;
+  font-size: 37px;
+  margin-bottom: 16px;
+}
+[data-concept="3"] .menu-actions {
+  width: 100%;
+  margin-top: 28px;
+  gap: 4px;
+}
+[data-concept="3"] .menu-actions button {
+  border-bottom: 1px solid #d4cfb7;
+  border-radius: 0;
+  padding-left: 0;
+  font-size: 18px;
+}
+[data-concept="3"] .menu-actions .primary {
+  background: none;
+  box-shadow: none;
+  color: #516d3d;
+}
+[data-concept="3"] .edition {
+  font-family: Georgia, serif;
+  font-style: italic;
+}
+/* 04 — Warm inhabited windows against a cool dusk landscape. */
+[data-concept="4"] {
+  background: #263d50;
+  color: #f4edcd;
+}
+[data-concept="4"] .welcome {
+  left: 8%;
+  top: 13%;
+}
+[data-concept="4"] .brand h1 {
+  font-weight: 650;
+  font-size: 88px;
+  text-shadow: 0 3px 20px #1c2d41;
+}
+[data-concept="4"] .brand small {
+  color: #cfbf8e;
+}
+[data-concept="4"] .menu-actions {
+  gap: 4px;
+  margin-top: 34px;
+}
+[data-concept="4"] .menu-actions button {
+  border-radius: 0;
+  border-bottom: 1px solid #c0c8ba38;
+  background: #203746b3;
+}
+[data-concept="4"] .menu-actions .primary {
+  background: #eed7a4;
+  color: #354a45;
+  box-shadow: none;
+  border-left: 4px solid #fff2ce;
+}
+[data-concept="4"] .corner {
+  color: #e2dfc1;
+}
+/* 05 — A landscape postcard, with horizontal game controls. */
+[data-concept="5"] {
+  background: #e9e1c9;
+}
+[data-concept="5"] #menu-landscape {
+  inset: 21% 3% 19%;
+  width: 94%;
+  height: 60%;
+  border: 1px solid #b6ba97;
+}
+[data-concept="5"] .welcome {
+  inset: 0;
+  width: 100%;
+  pointer-events: none;
+}
+[data-concept="5"] .brand {
+  position: absolute;
+  left: 7%;
+  top: 4%;
+}
+[data-concept="5"] .brand h1 {
+  font-size: 58px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+[data-concept="5"] .brand h1 br {
+  display: none;
+}
+[data-concept="5"] .brand h1 br:after {
+  content: " ";
+}
+[data-concept="5"] .brand small {
+  margin-bottom: 6px;
+  font-size: 9px;
+}
+[data-concept="5"] .menu-actions {
+  position: absolute;
+  bottom: 5%;
+  left: 7%;
+  right: 7%;
+  width: auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 25px;
+  margin: 0;
+  pointer-events: auto;
+}
+[data-concept="5"] .menu-actions button {
+  font-size: 19px;
+  min-width: 150px;
+}
+[data-concept="5"] .menu-actions .primary {
+  min-width: 240px;
+  background: #466146;
+  color: #fff3d0;
+  box-shadow: 0 3px #2f4735;
+}
+[data-concept="5"] .menu-actions .settings {
+  margin: 0 0 0 auto;
+  min-width: 0;
+  font-size: 15px;
+}
+[data-concept="5"] .edition {
+  position: absolute;
+  right: 7%;
+  top: 9%;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+  margin: 0;
+}
+[data-concept="5"] .corner {
+  display: none;
+}
+@media (max-height: 700px) {
+  .welcome {
+    top: 6%;
+  }
+  .brand h1 {
+    font-size: 74px;
+  }
+  .menu-actions {
+    margin-top: 24px;
+    gap: 7px;
+  }
+  .edition {
+    margin-top: 16px;
+  }
+  [data-concept="2"] .welcome {
+    top: 5%;
+    padding: 20px 24px 12px;
+  }
+  [data-concept="2"] .brand h1 {
+    font-size: 60px;
+  }
+  [data-concept="3"] .welcome {
+    padding-top: 23px;
+  }
+  [data-concept="3"] .sun-mark {
+    display: none;
+  }
+  [data-concept="3"] .brand h1 {
+    font-size: 60px;
+  }
+  [data-concept="4"] .brand h1 {
+    font-size: 74px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-actions button {
+    transition: none;
+  }
+}
+
+.brand small,
+.primary small {
+  color: inherit;
+}
+[data-concept="3"] .brand small,
+[data-concept="5"] .brand small {
+  color: #61714f;
+}
+[data-concept="4"] .brand small {
+  color: #cfbf8e;
+}
+[data-concept="5"] .primary small {
+  color: #e5dfbd;
+}
