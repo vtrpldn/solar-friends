@@ -53,3 +53,9 @@ The v0.1 rules in `src/economy.rs`, `src/production.rs`, `src/electricity.rs`, `
 Run `node scripts/verify-v02-economy.mjs` for catalog parity, resource production, inventory/sales, installation, disconnected/night power, conservation, river intake, filtration/treatment and save tests. Existing weekend and resident/presentation checks remain applicable.
 
 `?utilities-preview&performance` is a separate, unsaved demonstration with ten completed buildings, connected solar/batteries, a powered river intake, cistern, garden irrigation, sanitation and workshop. Use building details to queue work, and Power & water to inspect or change the networks. It never overwrites the player village.
+
+### Sunlight and shadows
+
+Sunlight follows the game clock (sunrise 06:00, sunset 18:00): shadows turn and shorten toward noon, then lengthen toward sunset. Rain fades direct light and shadow contrast over three seconds while retaining diffuse sky light. Sunlight contributes no cast shadows at night; powered lamps retain their separate lighting. The sun uses the existing single 2048px shadow map with expanded depth coverage for its daily orbit.
+
+For an unsaved, paused comparison use `?utilities-preview&lighting-hour=8`, `lighting-hour=12` or `lighting-hour=16`; add `&lighting-rain` for overcast conditions. Run `node scripts/verify-v02-sunlight.mjs` for orbit, shadow-length, weather and night checks.

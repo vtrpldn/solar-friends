@@ -1,3 +1,4 @@
+import { sunlightAt } from "./sunlight.js";
 import { createUtilitiesPreview } from "./utilities-preview.js";
 import { syncInfrastructure, LIQUIDS } from "./infrastructure.js";
 import { createAccessRoad } from "./access-road.js";
@@ -69,12 +70,25 @@ const arrivalPreview =
   restPreview ||
   new URLSearchParams(location.search).has("arrival-preview");
 let s = utilitiesPreview ? createUtilitiesPreview() : createWeekend();
+// Optional frozen lighting comparison, only in the unsaved utilities scene.
+const lightingPreview =
+  utilitiesPreview && new URLSearchParams(location.search).has("lighting-hour");
+if (lightingPreview) {
+  const hour = Number(
+    new URLSearchParams(location.search).get("lighting-hour"),
+  );
+  s.time =
+    (((Number.isFinite(hour) ? Math.max(0, Math.min(24, hour)) : 12) + 24 - 9) *
+      60) /
+    0.45;
+  s.rain = new URLSearchParams(location.search).has("lighting-rain");
+}
 if (restPreview) for (const resident of s.people) resident.energy = 10;
 try {
   if (!arrivalPreview) s = restore(localStorage.getItem(SAVE)) || s;
 } catch {}
 let speed = 1,
-  paused = false,
+  paused = lightingPreview,
   placing = null,
   moving = null,
   selected = null,
@@ -120,10 +134,26 @@ Object.assign(sun.shadow.camera, {
   top: 48,
   bottom: -48,
   near: 1,
-  far: 130,
+  far: 190,
 });
 sun.shadow.normalBias = 0.04;
-scene.add(sun);
+scene.add(sun, sun.target);
+let cloudCover = s.rain ? 1 : 0;
+const noonColor = new THREE.Color("#ffe2a8");
+const sunsetColor = new THREE.Color("#ffad72");
+const overcastColor = new THREE.Color("#d6e3ef");
+function updateSunlight(time, dt) {
+  cloudCover += ((s.rain ? 1 : 0) - cloudCover) * (1 - Math.exp(-dt / 3));
+  const light = sunlightAt(time, cloudCover);
+  sun.position.set(light.x, light.y, light.z);
+  sun.intensity = light.direct;
+  sun.shadow.intensity = light.shadow;
+  sun.color
+    .copy(noonColor)
+    .lerp(sunsetColor, light.warmth)
+    .lerp(overcastColor, cloudCover);
+  daylight.intensity = light.ambient;
+}
 const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });
 const ground = new THREE.Mesh(
@@ -317,8 +347,6 @@ function drawUtilities() {
     }
   }
   const night = 1 - Math.min(1, (sys.sun || 0) * 4);
-  daylight.intensity = 1.1 + (1 - night) * 0.9;
-  sun.intensity = 0.25 + (1 - night) * 3.15;
   const lit = Object.values(sys.nodes)
     .filter((n) =>
       [
@@ -640,13 +668,17 @@ $("skip-arrival").onclick = () => {
   renderUI();
   persist();
 };
-$("pause").onclick = () => {
-  paused = !paused;
+function updatePauseButton() {
   $("pause").textContent = paused ? "▶" : "Ⅱ";
   $("pause").setAttribute(
     "aria-label",
     paused ? "Resume simulation" : "Pause simulation",
   );
+}
+updatePauseButton();
+$("pause").onclick = () => {
+  paused = !paused;
+  updatePauseButton();
 };
 $("speed").onclick = () => {
   speed = speed === 1 ? 4 : 1;
@@ -1216,9 +1248,7 @@ function frame(now) {
     }
     drops.attributes.position.needsUpdate = true;
   }
-  const evening = s.stage === "evening";
-  sun.color.set(evening ? "#ffb36e" : s.rain ? "#d6e3ef" : "#ffe2a8");
-  sun.intensity = evening ? 2.2 : s.rain ? 1.5 : 3.4;
+  updateSunlight(visual.time, paused ? 0 : dt);
   if (now - lastUI > 450) {
     if (s.log[0] !== latestMessage) {
       latestMessage = s.log[0];
