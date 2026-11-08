@@ -157,20 +157,7 @@ function box(g, w, h, d, color, x, y, z) {
   g.add(m);
   return m;
 }
-const car = new THREE.Group();
-box(car, 1.8, 0.65, 3.4, "#74959b", 0, 0.65, 0);
-box(car, 1.65, 0.65, 1.8, "#d3d7bd", 0, 1.25, -0.2);
-box(car, 1.67, 0.43, 1.2, "#486b70", 0, 1.3, -0.25);
-for (const x of [-0.87, 0.87])
-  for (const z of [-1.05, 1.05]) {
-    const w = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.33, 0.33, 0.2, 10),
-      mat("#454a40"),
-    );
-    w.rotation.z = Math.PI / 2;
-    w.position.set(x, 0.34, z);
-    car.add(w);
-  }
+const car = compactModel(createAsset("community-pickup"));
 car.position.copy(world(32, 21));
 scene.add(car);
 const campGroup = new THREE.Group();
