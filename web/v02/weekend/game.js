@@ -1482,7 +1482,6 @@ function renderUI() {
   const trends=resourceTrends(s.time,resourceSnapshot(s));
   const counters = [
     ["money", `R$${s.money.toFixed(2)}`, "Savings", "resources"],
-    ["wood", Math.floor(s.wood), "Timber", "resources"],
     ["meals", s.materials.meals || 0, "Meals", "resources"],
     [
       "power",
