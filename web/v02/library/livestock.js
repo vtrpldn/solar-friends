@@ -59,6 +59,28 @@ function quadruped(kind,coat,young=false){
   }
   return g;
 }
+function piglet() {
+  const g = new THREE.Group(), coat = '#d6ae96', pink = '#bd8875';
+  shape(g,1,coat,-.07,.28,0,[.34,.22,.21],1);
+  // A broad forehead flows into a short, flat snout instead of a pointed muzzle.
+  shape(g,.21,coat,.23,.32,0,[1,.94,.9],1);
+  tint(box(g,.095,.11,.17,'plaster',.425,.275,0),pink);
+  for(const side of [-1,1]) {
+    shape(g,.012,dark,.478,.285,side*.045);
+    shape(g,.016,dark,.33,.375,side*.155);
+    const ear=shape(g,.075,coat,.18,.49,side*.125,[.9,.55,1.15]);
+    ear.rotation.x=side*.45;ear.rotation.z=-.3;
+    shape(g,.039,pink,.195,.505,side*.145,[.9,.25,.85]);
+  }
+  for(const x of [-.27,.16])for(const z of [-.13,.13]) {
+    bar(g,[x,.23,z],[x,.055,z],.07,coat);
+    tint(box(g,.075,.045,.07,'earth',x,.0225,z),'#967561');
+  }
+  // A tiny curled tail, kept attached to the rump.
+  const points=[[-.38,.31,0],[-.46,.34,0],[-.48,.4,0],[-.43,.425,0],[-.41,.39,0]];
+  for(let i=1;i<points.length;i++)bar(g,points[i-1],points[i],.025,coat);
+  return g;
+}
 function bird(goose=false,brown=false){
   const g=new THREE.Group(),coat=brown?'#977451':'#e3d8bd';
   shape(g,.32,coat,0,.32,0,[1.25,.85,.8],1);
@@ -80,7 +102,7 @@ export const LIVESTOCK=[
   ['sheep','Sheep',()=>quadruped('sheep','#e3d5b4')],
   ['lamb','Lamb',()=>quadruped('sheep','#e3d5b4',true)],
   ['pig','Pig',()=>quadruped('pig','#cda28d')],
-  ['piglet','Piglet',()=>quadruped('pig','#d6ae96',true)],
+  ['piglet','Piglet',piglet],
   ['donkey','Donkey',()=>quadruped('donkey','#99917d')],
   ['duck-cream','Cream duck',()=>bird()],
   ['duck-brown','Brown duck',()=>bird(false,true)],
