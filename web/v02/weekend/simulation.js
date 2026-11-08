@@ -1,3 +1,4 @@
+import { autoConnectUtilities } from "./auto-utilities.js";
 import { PathQueue } from "./path-queue.js";
 import { carDoor, TRIP_DURATION, DRIVE_DURATION } from "./town-trip.js";
 import { CELL_MIN, CELL_MAX } from "./map-size.js";
@@ -920,7 +921,11 @@ export function moveProject(s, id, x, z, rotation = undefined) {
     )
   )
     return "Wait until residents have finished resting here.";
-  if (s.infrastructure?.links.some((l) => l.from === id || l.to === id))
+  if (
+    s.infrastructure?.links.some(
+      (l) => !l.automatic && (l.from === id || l.to === id),
+    )
+  )
     return "Disconnect utility lines before relocating this building.";
   rotation ??= p.rotation || 0;
   const error = placementError(s, p.key, x, z, id, rotation);
@@ -1567,6 +1572,7 @@ export function tick(s, dt) {
   dt = Math.min(dt, 1);
   if (s.mode === "sandbox") sandboxSupplies(s);
   s.time += dt;
+  autoConnectUtilities(s, PROJECTS);
   infrastructureStep(s, PROJECTS, dt);
   for (const p of s.projects) {
     if (!p.repeat || s.operations?.some((o) => o.site === p.id && !o.done))

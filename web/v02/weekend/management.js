@@ -24,7 +24,7 @@ const intros = {
   water:
     "Follow water from the river to storage, through daily life, and back into the land safely.",
   power:
-    "Balance generation, batteries and the buildings that depend on them. Cables need resident work before they carry power.",
+    "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically.",
 };
 export function createManagement({
   state,
@@ -154,13 +154,18 @@ export function createManagement({
     $("pantry-panel").hidden = view !== "resources";
     $("network-screen").hidden = view === "resources";
     $("utility-panel").hidden = view === "resources";
-    $("haul-water").hidden = view === "power";
+    $("haul-water").hidden = true;
+    $("connect-utility").hidden = true;
+    for (const id of ["utility-from", "utility-to", "utility-kind"]) {
+      $(id).hidden = true;
+      document.querySelector(`label[for="${id}"]`).hidden = true;
+    }
     $("connection-title").textContent =
-      view === "power" ? "Lay a power cable" : "Move water safely";
+      view === "power" ? "Automatic power network" : "Automatic water network";
     $("connection-hint").textContent =
       view === "power"
-        ? "Cables connect two buildings and cost electrical parts. Residents install them before power can flow. Batteries cover demand when generation drops."
-        : "Pipes need a pump and power at the source. River water must be filtered by a powered cistern. Greywater goes to reed beds; sewage goes to a biodigester or banana bed.";
+        ? "Completed buildings connect automatically. Generation and battery capacity still determine whether the village has enough power."
+        : "Completed buildings connect to compatible sources and treatment automatically. Pumps still need power; cisterns filter river water. Greywater and sewage stay separate.";
     $("network-title").textContent =
       view === "power"
         ? "Generation, storage & demand"

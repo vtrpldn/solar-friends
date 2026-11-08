@@ -1,3 +1,4 @@
+import { autoConnectUtilities } from "./auto-utilities.js";
 import { townCarPose } from "./town-trip.js";
 import { accessRoadAt } from "./road-layout.js";
 import { MAP_CELLS, MAP_HALF, CELL_MIN, CELL_MAX } from "./map-size.js";
@@ -539,6 +540,7 @@ function syncTerrain() {
 }
 function syncBuildings() {
   syncTerrain();
+  autoConnectUtilities(s, PROJECTS);
   for (const p of s.projects) {
     const def = PROJECTS[p.key],
       fraction = p.work / def.work;
@@ -1076,7 +1078,7 @@ function renderUtilityUI() {
       `${Math.floor(nodes.reduce((a, n) => a + n.water[i], 0))} ${key}`,
   ).join(" · ");
   $("utility-summary").textContent =
-    `Power: ${generation.toFixed(1)} kW generated / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}.${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Connect treatment." : ""}`;
+    `Power: ${generation.toFixed(1)} kW generated / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}.${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Build more treatment capacity." : ""}`;
   $("utility-links").replaceChildren();
   for (const l of sys.links.filter(
     (l) => (management?.view === "power") === (l.kind === "power"),
@@ -1089,6 +1091,7 @@ function renderUtilityUI() {
       renderUI();
     };
     $("utility-links").append(b);
+    if (l.automatic) continue;
     const remove = document.createElement("button");
     remove.textContent = "Remove connection";
     remove.onclick = () => {
@@ -1100,7 +1103,7 @@ function renderUtilityUI() {
   }
   if (!$("utility-links").children.length)
     $("utility-links").textContent =
-      "No connections yet. Choose two buildings to plan the first one.";
+      "Compatible buildings connect automatically when construction finishes.";
   const p = s.projects.find((p) => p.id === selected),
     node = p && sys.nodes[p.id];
   refillSelect(
