@@ -14,7 +14,8 @@ import {
   decode,
 } from "../web/v02/land/editor.js";
 const mapping = new Set(ASSETS.flatMap((a) => a.legacy));
-for (const a of catalog.filter((a) => a.usage === "Active"))
+// Reclaimed parts were intentionally retired from v2; v1 remains archived.
+for (const a of catalog.filter((a) => a.usage === "Active" && a.id !== "economy-4"))
   assert(mapping.has(a.id), `Missing v0.1 asset ${a.id}`);
 assert.equal(new Set(ASSETS.map((a) => a.id)).size, ASSETS.length);
 let draws = 0;
