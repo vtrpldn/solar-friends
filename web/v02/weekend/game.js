@@ -1,3 +1,4 @@
+import { drapeRoadGeometry } from "./road-surface.js";
 import { terraform } from "./terraform.js";
 import { roadLine } from "./placement-helpers.js";
 import { prepareHouseLighting, updateHouseLighting } from "./house-lighting.js";
@@ -566,25 +567,10 @@ function syncBuildings() {
       if (p.key === "road") {
         root.traverse((o) => {
           if (!o.geometry) return;
-          const positions = o.geometry.attributes.position;
-          for (let i = 0; i < positions.count; i++) {
-            const angle = ((p.rotation || 0) * Math.PI) / 2,
-              x = positions.getX(i),
-              z = positions.getZ(i);
-            positions.setY(
-              i,
-              positions.getY(i) +
-                elevationAt(
-                  root.position.x + x * Math.cos(angle) + z * Math.sin(angle),
-                  root.position.z + z * Math.cos(angle) - x * Math.sin(angle),
-                  s.elevationSeed,
-                  s.terrainPads,
-                ) -
-                root.position.y,
-            );
-          }
-          o.geometry.computeVertexNormals();
-          o.geometry.computeBoundingSphere();
+          const previous = o.geometry;
+          o.geometry = drapeRoadGeometry(previous, root.position,
+            ((p.rotation || 0) * Math.PI) / 2, s.elevationSeed, s.terrainPads);
+          previous.dispose();
         });
       }
       root.userData.projectId = p.id;
