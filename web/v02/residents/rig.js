@@ -57,11 +57,30 @@ export function createResident(id = "resident") {
     const brim = id === "caua" ? 0.28 : 0.34;
     cylinder(hairstyle, brim, brim, 0.045, "earth", 0, 0.19, 0, 10);
     cylinder(hairstyle, 0.15, 0.19, 0.15, "earth", 0, 0.285, 0, 8);
-    cylinder(hairstyle, 0.19, 0.195, 0.045, id === "caua" ? "teal" : "timber", 0, 0.23, 0, 8);
+    cylinder(
+      hairstyle,
+      0.19,
+      0.195,
+      0.045,
+      id === "caua" ? "teal" : "timber",
+      0,
+      0.23,
+      0,
+      8,
+    );
   }
   if (look.hair === "braid") {
     for (let i = 0; i < 3; i++)
-      ball(hairstyle, 0.085 - i * 0.012, "hair", 0.14, -0.08 - i * 0.1, -0.12, [1, 1, 1], 0);
+      ball(
+        hairstyle,
+        0.085 - i * 0.012,
+        "hair",
+        0.14,
+        -0.08 - i * 0.1,
+        -0.12,
+        [1, 1, 1],
+        0,
+      );
   }
   if (look.hair === "bun") {
     ball(hairstyle, 0.13, "hair", 0, 0.14, -0.2, [1, 1, 1], 0);
@@ -69,7 +88,16 @@ export function createResident(id = "resident") {
   }
   if (look.hair === "curls" || look.hair === "puffs") {
     for (const x of [-1, 1])
-      ball(hairstyle, look.hair === "puffs" ? 0.135 : 0.12, "hair", x * (look.hair === "puffs" ? 0.23 : 0.14), look.hair === "puffs" ? 0.2 : 0.1, -0.065, [1, 1, 1], 0);
+      ball(
+        hairstyle,
+        look.hair === "puffs" ? 0.135 : 0.12,
+        "hair",
+        x * (look.hair === "puffs" ? 0.23 : 0.14),
+        look.hair === "puffs" ? 0.2 : 0.1,
+        -0.065,
+        [1, 1, 1],
+        0,
+      );
     ball(hairstyle, 0.14, "hair", 0, 0.19, -0.045, [1, 0.75, 1], 0);
   }
   if (look.beard)
@@ -114,7 +142,12 @@ export function createResident(id = "resident") {
       0.35,
       4,
     );
-  const joints = [hips, head, ...legs.flatMap(l => [l.hip, l.knee]), ...arms.flatMap(a => [a.shoulder, a.elbow])];
+  const joints = [
+    hips,
+    head,
+    ...legs.flatMap((l) => [l.hip, l.knee]),
+    ...arms.flatMap((a) => [a.shoulder, a.elbow]),
+  ];
   const rig = { root, hips, head, legs, arms, cargo, can, stream, joints };
   root.rig = rig;
   root.name = id;
@@ -242,6 +275,25 @@ export function poseResident(rig, action, time, blend = 1) {
       stream.scale.y = 0.85 + Math.sin(time * 10) * 0.15;
     }
   }
+  if (action === "look" || action === "breathe") {
+    head.rotation.y = Math.sin(time * 0.45) * 0.32;
+    hips.rotation.z = Math.sin(time * 0.55) * 0.025;
+    if (action === "breathe") arms.forEach((a) => (a.elbow.rotation.x = 0.25));
+  }
+  if (action === "chat") {
+    head.rotation.x = Math.sin(time * 2) * 0.06;
+    arms[0].shoulder.rotation.x = -0.3 + Math.sin(time * 1.5) * 0.12;
+    arms[0].elbow.rotation.x = 0.65 + Math.sin(time * 2) * 0.16;
+    head.rotation.y = Math.sin(time * 0.7) * 0.09;
+  }
+  if (action === "stretch") {
+    const amount = 0.5 - 0.5 * Math.cos(time * 0.9);
+    arms.forEach((a, i) => {
+      a.shoulder.rotation.z = (i ? 1 : -1) * amount * 1.7;
+      a.elbow.rotation.x = 0.25;
+    });
+    hips.rotation.z = Math.sin(time * 0.9) * 0.045;
+  }
   if (cargo.visible) arms.forEach((a) => reach(a, 0.2, 0.36));
   const alpha = THREE.MathUtils.clamp(blend, 0, 1);
   for (const [g, p, q] of previous) {
@@ -256,8 +308,9 @@ export function poseResident(rig, action, time, blend = 1) {
 export function animateResident(rig, action, time, dt) {
   if (rig.motion?.action !== action) {
     rig.motion = {
-      action, elapsed: 0,
-      from: rig.joints.map(j => [j.position.clone(), j.quaternion.clone()]),
+      action,
+      elapsed: 0,
+      from: rig.joints.map((j) => [j.position.clone(), j.quaternion.clone()]),
     };
   }
   const motion = rig.motion;
@@ -265,9 +318,14 @@ export function animateResident(rig, action, time, dt) {
   poseResident(rig, action, time);
   const t = Math.min(1, motion.elapsed / 0.45);
   const weight = t * t * t * (t * (t * 6 - 15) + 10);
-  if (t < 1) rig.joints.forEach((j, i) => {
-    j.position.lerpVectors(motion.from[i][0], j.position, weight);
-    j.quaternion.slerpQuaternions(motion.from[i][1], j.quaternion.clone(), weight);
-  });
+  if (t < 1)
+    rig.joints.forEach((j, i) => {
+      j.position.lerpVectors(motion.from[i][0], j.position, weight);
+      j.quaternion.slerpQuaternions(
+        motion.from[i][1],
+        j.quaternion.clone(),
+        weight,
+      );
+    });
   rig.root.updateMatrixWorld(true);
 }

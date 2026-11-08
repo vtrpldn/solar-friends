@@ -20,9 +20,16 @@ import { footprint } from "../web/v02/land/editor.js";
 for (const id of RESIDENT_IDS) {
   const a = createResident(id);
   const neutral = new THREE.Box3().setFromObject(a, true);
-  assert(neutral.max.y >= 1.72 && neutral.max.y <= 1.86, `${id}: consistent adult scale`);
+  assert(
+    neutral.max.y >= 1.72 && neutral.max.y <= 1.86,
+    `${id}: consistent adult scale`,
+  );
   for (const action of [
     "idle",
+    "look",
+    "stretch",
+    "chat",
+    "breathe",
     "walk",
     "sit",
     "rest",
@@ -42,10 +49,19 @@ for (const id of RESIDENT_IDS) {
     }
   a.toJSON();
   const catalog = createAsset(id);
-  assert(!catalog.getObjectByName("carried-crate"), `${id}: no hidden cargo in static preview`);
-  assert(!catalog.getObjectByName("watering-can"), `${id}: no hidden can in static preview`);
+  assert(
+    !catalog.getObjectByName("carried-crate"),
+    `${id}: no hidden cargo in static preview`,
+  );
+  assert(
+    !catalog.getObjectByName("watering-can"),
+    `${id}: no hidden can in static preview`,
+  );
   const previewBounds = new THREE.Box3().setFromObject(catalog, true);
-  assert(Math.abs(previewBounds.max.y - neutral.max.y) < 0.02, `${id}: shared preview scale`);
+  assert(
+    Math.abs(previewBounds.max.y - neutral.max.y) < 0.02,
+    `${id}: shared preview scale`,
+  );
 }
 let cases = 0;
 for (const asset of Object.keys(INTERACTIONS))
@@ -148,7 +164,7 @@ assert.equal(
   0,
 );
 console.log(
-  `PASS: six serializable rigs, ten finite poses, ${cases} rotated prop/action rehearsals, carrying return, stop reset, blocked approaches, route detours and inaccessible joined-garden interior.`,
+  `PASS: six serializable rigs, all supported finite poses, ${cases} rotated prop/action rehearsals, carrying return, stop reset, blocked approaches, route detours and inaccessible joined-garden interior.`,
 );
 // Exercise a full trip from the authored placement, not just nearby rehearsals.
 const walker = createResident("bento");
@@ -199,16 +215,28 @@ for (const seconds of [0.2, 0.5, 1]) {
   for (const fps of [30, 120]) {
     const candidate = transitionAt(fps, seconds);
     candidate.rig.joints.forEach((joint, i) => {
-      assert(joint.position.distanceTo(reference.rig.joints[i].position) < 1e-9);
-      assert(joint.quaternion.angleTo(reference.rig.joints[i].quaternion) < 1e-7);
+      assert(
+        joint.position.distanceTo(reference.rig.joints[i].position) < 1e-9,
+      );
+      assert(
+        joint.quaternion.angleTo(reference.rig.joints[i].quaternion) < 1e-7,
+      );
     });
   }
 }
 const interrupted = transitionAt(60, 0.2);
-const before = interrupted.rig.joints.map(j => [j.position.clone(), j.quaternion.clone()]);
+const before = interrupted.rig.joints.map((j) => [
+  j.position.clone(),
+  j.quaternion.clone(),
+]);
 animateResident(interrupted.rig, "walk", 0, 0);
 interrupted.rig.joints.forEach((j, i) => {
-  assert(j.position.distanceTo(before[i][0]) < 1e-9, "interrupted transition must not snap");
+  assert(
+    j.position.distanceTo(before[i][0]) < 1e-9,
+    "interrupted transition must not snap",
+  );
   assert(j.quaternion.angleTo(before[i][1]) < 1e-7);
 });
-console.log("PASS: matching transitions at 30/60/120 Hz and continuous interrupted poses.");
+console.log(
+  "PASS: matching transitions at 30/60/120 Hz and continuous interrupted poses.",
+);

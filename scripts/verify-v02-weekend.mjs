@@ -13,6 +13,7 @@ import {
   save,
   restore,
   route,
+  walkSegmentClear,
 } from "../web/v02/weekend/simulation.js";
 function createWeekend() {
   const s = createFreshWeekend();
@@ -100,7 +101,7 @@ for (const camp of ["shade", "clearing"]) {
   for (const r of tired.people) r.energy = 10;
   run(tired, 150);
   assert(
-    tired.people.every((r) => r.energy >= 80),
+    tired.people.every((r) => r.energy >= 75 && r.action !== "rest"),
     "Exhausted residents recover without player babysitting",
   );
 }
@@ -205,4 +206,73 @@ assert(
 );
 console.log(
   "PASS: boundary connection, vehicle alignment and access-road construction protection.",
+);
+const social = createWeekend();
+chooseCamp(social, "clearing");
+const seen = new Set();
+for (let i = 0; i < 1800; i++) {
+  tick(social, 0.1);
+  social.people.forEach((r) => seen.add(r.action));
+}
+for (const activity of ["look", "stretch", "chat", "stroll", "breathe"])
+  assert(seen.has(activity), `Idle residents should ${activity}`);
+assert(
+  social.people.some((r) => r.idleCycle >= 3),
+  "People stay with activities before choosing another",
+);
+assert.equal(plan(social, "gathering", 29, 35), "");
+run(social, 180);
+assert(finished(social, "gathering"), "Leisure must yield to useful work");
+assert(
+  social.people.every(
+    (r) => Number.isFinite(r.x) && Number.isFinite(r.z) && r.energy >= 0,
+  ),
+);
+console.log(
+  "PASS: varied sustained leisure, nearby conversation and prompt return to village projects.",
+);
+
+const walking = createWeekend();
+chooseCamp(walking, "clearing");
+const openStart = { x: 38, z: 40 },
+  openEnd = { x: 42, z: 43 };
+assert.deepEqual(
+  route(walking, openStart, openEnd),
+  [openEnd],
+  "Open ground should be one direct diagonal",
+);
+assert.equal(plan(walking, "gathering", 29, 35), "");
+const start = { x: 27, z: 35 },
+  end = { x: 33, z: 36 };
+assert(
+  !walkSegmentClear(walking, start, end),
+  "Cannot shortcut through a project",
+);
+const detour = route(walking, start, end);
+assert(detour && detour.length > 1);
+assert(
+  detour.some((p) => !Number.isInteger(p.x) || !Number.isInteger(p.z)),
+  "Detour should round its corners",
+);
+let previous = start;
+for (const point of detour) {
+  assert(
+    walkSegmentClear(walking, previous, point),
+    "Every detour segment must clear obstacles",
+  );
+  for (let t = 0; t <= 1; t += 0.01) {
+    const x = previous.x + (point.x - previous.x) * t,
+      z = previous.z + (point.z - previous.z) * t;
+    assert(
+      !(x > 28.34 && x < 30.66 && z > 34.34 && z < 36.66),
+      "Body clearance around construction",
+    );
+  }
+  previous = point;
+}
+assert.deepEqual(route(walking, { x: 40, z: 42 }, { x: 40.2, z: 42.1 }), [
+  { x: 40.2, z: 42.1 },
+]);
+console.log(
+  "PASS: direct open-ground travel, rounded detours, swept body clearance and precise fractional destinations.",
 );

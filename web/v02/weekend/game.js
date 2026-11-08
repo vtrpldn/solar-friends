@@ -567,6 +567,11 @@ const actionText = {
   build: "Building",
   rest: "Taking a breather",
   relax: "Enjoying the clearing",
+  look: "Taking in the surroundings",
+  stretch: "Stretching their legs",
+  chat: "Having a chat",
+  stroll: "Taking a little walk",
+  breathe: "Taking a quiet moment",
   town: "Supply run in town",
   meal: "Sharing our first evening",
   wash: "Washing up at the water tank",
@@ -770,7 +775,20 @@ function frame(now) {
     const target = world(visual.people[i].x, visual.people[i].z),
       dx = target.x - g.position.x,
       dz = target.z - g.position.z;
-    if (Math.hypot(dx, dz) > 0.001) g.rotation.y = Math.atan2(dx, dz);
+    if (r.walk.length && Math.hypot(dx, dz) < 1)
+      g.userData.walkTime =
+        (g.userData.walkTime || 0) + Math.hypot(dx, dz) / 1.9;
+    let desiredYaw = g.rotation.y;
+    if (Math.hypot(dx, dz) > 0.001) desiredYaw = Math.atan2(dx, dz);
+    else if (r.lookAt) {
+      const friend = s.people.find((p) => p.id === r.lookAt);
+      if (friend) desiredYaw = Math.atan2(friend.x - r.x, friend.z - r.z);
+    }
+    const turn = Math.atan2(
+      Math.sin(desiredYaw - g.rotation.y),
+      Math.cos(desiredYaw - g.rotation.y),
+    );
+    g.rotation.y += turn * (1 - Math.exp(-dt * 9));
     const gathering = s.projects.find(
       (p) => p.key === "gathering" && finished(s, "gathering"),
     );
@@ -799,11 +817,13 @@ function frame(now) {
             ? "work"
             : r.action === "rest"
               ? "rest"
-              : "idle";
+              : ["look", "stretch", "chat", "breathe"].includes(r.action)
+                ? r.action
+                : "idle";
     animateResident(
       g.rig,
       motion,
-      visual.time + i * 0.7,
+      (r.walk.length ? g.userData.walkTime || 0 : visual.time) + i * 0.7,
       paused ? 0 : dt * speed,
     );
   }

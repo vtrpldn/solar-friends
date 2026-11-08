@@ -119,6 +119,25 @@ export function chooseCamp(s, id) {
   const c = CAMPS.find((c) => c.id === id);
   if (!c) return false;
   s.camp = id;
+  // Unpacking tents is an instantaneous setup step; keep the group beside them.
+  for (const r of s.people) {
+    if (walkSegmentClear(s, r, r)) continue;
+    const spots = [];
+    for (let x = 20; x <= 45; x++)
+      for (let z = 20; z <= 45; z++) {
+        const p = { x, z };
+        if (
+          walkSegmentClear(s, p, p) &&
+          s.people.every((o) => o === r || Math.hypot(o.x - x, o.z - z) > 0.7)
+        )
+          spots.push(p);
+      }
+    spots.sort(
+      (a, b) =>
+        Math.hypot(a.x - r.x, a.z - r.z) - Math.hypot(b.x - r.x, b.z - r.z),
+    );
+    if (spots[0]) Object.assign(r, spots[0]);
+  }
   s.stage = "playing";
   say(s, `${c.name}: unpack first, then choose what matters most.`);
   return true;
@@ -189,7 +208,17 @@ export function plan(s, key, x, z) {
   if (s.wood < def.wood || s.money < def.cost)
     return "Not enough supplies. Bring timber from town or choose a smaller project.";
   for (const r of s.people)
-    if (["relax", "idle"].includes(r.action)) {
+    if (
+      [
+        "relax",
+        "idle",
+        "look",
+        "stretch",
+        "chat",
+        "stroll",
+        "breathe",
+      ].includes(r.action)
+    ) {
       r.walk = [];
       r.target = null;
     }
@@ -301,11 +330,108 @@ function occupied(s, x, z) {
     s.projects.some((p) => x >= p.x && x < p.x + 2 && z >= p.z && z < p.z + 2)
   );
 }
-// Four-neighbour paths keep people outside project footprints, including unfinished ones.
+// Test the whole swept body, not just waypoint cells. Expanded cell rectangles
+// leave shoulders clear of tents, construction sites and the riverbank.
+export function walkSegmentClear(s, from, to) {
+  const radius = 0.16;
+  const minX = Math.floor(Math.min(from.x, to.x) - 0.5 - radius);
+  const maxX = Math.ceil(Math.max(from.x, to.x) + 0.5 + radius);
+  const minZ = Math.floor(Math.min(from.z, to.z) - 0.5 - radius);
+  const maxZ = Math.ceil(Math.max(from.z, to.z) + 0.5 + radius);
+  for (let x = minX; x <= maxX; x++)
+    for (let z = minZ; z <= maxZ; z++) {
+      if (!occupied(s, x, z)) continue;
+      let enter = 0,
+        leave = 1;
+      for (const [a, b, center] of [
+        [from.x, to.x, x],
+        [from.z, to.z, z],
+      ]) {
+        const delta = b - a,
+          low = center - 0.5 - radius,
+          high = center + 0.5 + radius;
+        if (Math.abs(delta) < 1e-9) {
+          if (a < low || a > high) {
+            enter = 2;
+            break;
+          }
+        } else {
+          const t1 = (low - a) / delta,
+            t2 = (high - a) / delta;
+          enter = Math.max(enter, Math.min(t1, t2));
+          leave = Math.min(leave, Math.max(t1, t2));
+        }
+      }
+      if (enter <= leave) {
+        // A newly unpacked tent/project can enclose someone already standing there.
+        // Permit only outward progress until their body clears that footprint.
+        const penetration = (p) =>
+          Math.min(0.66 - Math.abs(p.x - x), 0.66 - Math.abs(p.z - z));
+        if (
+          penetration(from) >= 0 &&
+          penetration(to) < penetration(from) - 1e-8
+        )
+          continue;
+        return false;
+      }
+    }
+  return true;
+}
+function naturalPath(s, from, path) {
+  const direct = [from];
+  for (let i = 0; i < path.length; ) {
+    let far = path.length - 1;
+    while (far > i && !walkSegmentClear(s, direct.at(-1), path[far])) far--;
+    direct.push(path[far]);
+    i = far + 1;
+  }
+  const curved = [from];
+  for (let i = 1; i < direct.length - 1; i++) {
+    const a = direct[i - 1],
+      b = direct[i],
+      c = direct[i + 1];
+    const trim = Math.min(
+      0.4,
+      Math.hypot(b.x - a.x, b.z - a.z) / 3,
+      Math.hypot(c.x - b.x, c.z - b.z) / 3,
+    );
+    const toward = (p) => {
+      const d = Math.hypot(p.x - b.x, p.z - b.z);
+      return {
+        x: b.x + ((p.x - b.x) * trim) / d,
+        z: b.z + ((p.z - b.z) * trim) / d,
+      };
+    };
+    const entry = toward(a),
+      exit = toward(c),
+      bend = [entry];
+    for (let j = 1; j <= 4; j++) {
+      const t = j / 4,
+        u = 1 - t;
+      bend.push({
+        x: u * u * entry.x + 2 * u * t * b.x + t * t * exit.x,
+        z: u * u * entry.z + 2 * u * t * b.z + t * t * exit.z,
+      });
+    }
+    const points = [curved.at(-1), ...bend, c];
+    if (points.slice(1).every((p, j) => walkSegmentClear(s, points[j], p)))
+      curved.push(...bend);
+    else curved.push(b);
+  }
+  if (direct.length > 1) curved.push(direct.at(-1));
+  return curved.slice(1);
+}
+// The grid finds a safe corridor; residents follow continuous shortcuts and bends.
 export function route(s, from, to) {
   const start = [Math.round(from.x), Math.round(from.z)],
     end = [Math.round(to.x), Math.round(to.z)];
   const key = (x, z) => `${x},${z}`;
+  if (start[0] === end[0] && start[1] === end[1])
+    return walkSegmentClear(s, from, to)
+      ? Math.hypot(from.x - to.x, from.z - to.z) > 0.001
+        ? [{ x: to.x, z: to.z }]
+        : []
+      : null;
   const queue = [start],
     parent = new Map([[key(...start), null]]);
   for (let i = 0; i < queue.length; i++) {
@@ -318,7 +444,9 @@ export function route(s, from, to) {
         path.unshift({ x: px, z: pz });
         k = parent.get(k);
       }
-      return path;
+      if (path.length && (to.x !== end[0] || to.z !== end[1]))
+        path.push({ x: to.x, z: to.z });
+      return naturalPath(s, from, path);
     }
     for (const [dx, dz] of [
       [1, 0],
@@ -391,12 +519,112 @@ function restSpot(s, i) {
   for (let j = 0; j < offsets.length; j++) {
     const [x, z] = offsets[(i + j) % offsets.length],
       target = { x: origin.x + x, z: origin.z + z };
-    if (!occupied(s, target.x, target.z) && route(s, s.people[i], target)) {
+    if (
+      !occupied(s, target.x, target.z) &&
+      !cache.spots.some(
+        (spot) => spot && spot.x === target.x && spot.z === target.z,
+      ) &&
+      route(s, s.people[i], target)
+    ) {
       cache.spots[i] = target;
       return target;
     }
   }
   return { x: 31, z: 24 };
+}
+function supplySpot(s, r, i) {
+  const offsets = [
+    [-1, 0],
+    [1, 0],
+    [0, 1],
+    [-1, 1],
+    [1, 1],
+    [-2, 0],
+    [2, 0],
+  ];
+  for (let n = 0; n < offsets.length; n++) {
+    const [dx, dz] = offsets[(n + i) % offsets.length],
+      goal = { x: s.stock.x + dx, z: s.stock.z + dz };
+    if (
+      occupied(s, goal.x, goal.z) ||
+      s.people.some(
+        (other) =>
+          other !== r &&
+          ((other.target &&
+            other.target.x === goal.x &&
+            other.target.z === goal.z) ||
+            Math.hypot(other.x - goal.x, other.z - goal.z) < 0.6),
+      )
+    )
+      continue;
+    if (route(s, r, goal)) return goal;
+  }
+  return { x: s.stock.x - 2, z: s.stock.z + 1 };
+}
+function idleActivity(s, r, i) {
+  if (r.idleUntil > s.time) {
+    if (r.idleGoal && go(s, r, r.idleGoal) && r.action === "stroll")
+      r.action = "look";
+    r.energy = Math.min(100, r.energy + 0.025);
+    return;
+  }
+  const c = CAMPS.find((c) => c.id === s.camp);
+  const cycle = r.idleCycle || 0;
+  r.idleCycle = cycle + 1;
+  const activities = ["look", "stretch", "chat", "stroll", "breathe"];
+  r.action = activities[(cycle + i) % activities.length];
+  r.lookAt = null;
+  let goal = null;
+  if (r.action === "chat") {
+    const friend = s.people.find(
+      (other) =>
+        other !== r &&
+        !other.job &&
+        !other.walk.length &&
+        ["look", "breathe", "stretch", "chat", "relax"].includes(
+          other.action,
+        ) &&
+        Math.hypot(other.x - r.x, other.z - r.z) < 5,
+    );
+    if (friend) {
+      r.lookAt = friend.id;
+      friend.lookAt = r.id;
+      friend.action = "chat";
+      friend.idleUntil = s.time + 16;
+      friend.idleGoal = null;
+      goal = {
+        x: Math.round(friend.x) + (i % 2 ? 1 : -1),
+        z: Math.round(friend.z),
+      };
+    } else r.action = "look";
+  }
+  if (r.action === "stroll" || r.action === "breathe") {
+    const spots = [
+      [c.x - 3, c.z + 2],
+      [c.x + 4, c.z + 3],
+      [c.x + 1, c.z + 4],
+      [c.x - 2, c.z + 4],
+      [c.x + 4, c.z + 1],
+    ];
+    const [x, z] = spots[(cycle * 2 + i) % spots.length];
+    goal = { x, z };
+  }
+  if (
+    goal &&
+    !occupied(s, goal.x, goal.z) &&
+    !s.people.some(
+      (other) =>
+        other !== r &&
+        (Math.hypot(other.x - goal.x, other.z - goal.z) < 0.8 ||
+          (other.idleGoal?.x === goal.x && other.idleGoal?.z === goal.z)),
+    ) &&
+    route(s, r, goal)
+  ) {
+    r.idleGoal = goal;
+    r.target = null;
+    go(s, r, goal);
+  } else r.idleGoal = null;
+  r.idleUntil = s.time + 18 + i * 2 + (cycle % 3) * 5;
 }
 export function canFinish(s) {
   return (
@@ -475,18 +703,51 @@ export function tick(s, dt) {
         dx = next.x - r.x,
         dz = next.z - r.z,
         d = Math.hypot(dx, dz),
-        step = dt * (r.cargo ? 0.72 : 0.95);
-      if (d <= step) {
-        r.x = next.x;
-        r.z = next.z;
-        r.walk.shift();
+        desiredSpeed =
+          (r.cargo ? 0.72 : 0.95) *
+          (0.92 + i * 0.035) *
+          (r.energy < 35 ? 0.8 : 1),
+        braking = r.walk.length === 1 ? Math.max(0.25, Math.min(1, d * 2)) : 1;
+      r.moveSpeed = Math.min(
+        desiredSpeed * braking,
+        (r.moveSpeed || 0) + dt * 1.8,
+      );
+      const nearby = s.people.filter(
+        (other) =>
+          other !== r &&
+          other.action !== "town" &&
+          Math.hypot(other.x - r.x, other.z - r.z) < 0.75,
+      );
+      const step = dt * r.moveSpeed * (nearby.length ? 0.65 : 1);
+      const travel = Math.min(step, d);
+      const candidate = {
+        x: r.x + (d ? (dx / d) * travel : 0),
+        z: r.z + (d ? (dz / d) * travel : 0),
+      };
+      if (d > 0.1 && nearby.length) {
+        const sidestep = {
+          x: candidate.x + (dz / d) * dt * 0.18,
+          z: candidate.z - (dx / d) * dt * 0.18,
+        };
+        if (
+          walkSegmentClear(s, r, sidestep) &&
+          walkSegmentClear(s, sidestep, next)
+        ) {
+          candidate.x = sidestep.x;
+          candidate.z = sidestep.z;
+        }
+      }
+      if (walkSegmentClear(s, r, candidate)) {
+        r.x = candidate.x;
+        r.z = candidate.z;
+        if (Math.hypot(r.x - next.x, r.z - next.z) < 0.015) r.walk.shift();
       } else {
-        r.x += (dx / d) * step;
-        r.z += (dz / d) * step;
+        r.walk = route(s, r, r.target || next) || [];
       }
       r.energy = Math.max(0, r.energy - dt * 0.025);
       continue;
     }
+    r.moveSpeed = 0;
     if (s.stage === "evening") {
       r.action = "meal";
       go(s, r, restSpot(s, i));
@@ -542,12 +803,15 @@ export function tick(s, dt) {
       );
       if (p) {
         r.job = p.id;
+        r.idleUntil = 0;
+        r.idleGoal = null;
+        r.lookAt = null;
+        r.supplyGoal = null;
         r.target = null;
       }
     }
     if (!p) {
-      r.action = "relax";
-      go(s, r, restSpot(s, i));
+      idleActivity(s, r, i);
       r.energy = Math.min(100, r.energy + dt * 0.25);
       continue;
     }
@@ -557,7 +821,9 @@ export function tick(s, dt) {
     const dest = { x: p.x - 1, z: p.z + Math.max(0, slot) };
     if (p.delivered < 2 && !r.cargo) {
       r.action = "collect";
-      if (go(s, r, s.stock)) {
+      if (!r.supplyGoal) r.supplyGoal = supplySpot(s, r, i);
+      if (go(s, r, r.supplyGoal)) {
+        r.supplyGoal = null;
         r.cargo = true;
         r.target = null;
       }
@@ -687,6 +953,10 @@ export function restore(text) {
       for (const k of ["washTime", "cleanedAtWork"])
         if (r[k] !== undefined && (!Number.isFinite(r[k]) || r[k] < 0))
           return null;
+      r.idleUntil = 0;
+      r.idleGoal = null;
+      r.lookAt = null;
+      r.supplyGoal = null;
       r.target = null;
       r.walk = [];
       r.job = null;
