@@ -3,12 +3,16 @@
   <head>
     <meta charset="utf-8" />
     <title>Solar Friends</title>
+    <script type="importmap">
+      { "imports": { "three": "../workshop/vendor/three.module.js" } }
+    </script>
     <link rel="stylesheet" href="weekend.css" />
     <link rel="stylesheet" href="menu.css" />
   </head>
   <body>
+    <canvas id="menu-landscape" aria-hidden="true"></canvas>
+    <div class="menu-shade" aria-hidden="true"></div>
     <main class="start-menu">
-      <div class="menu-sun" aria-hidden="true">☀</div>
       <small>A LITTLE LAND. A LIFE TOGETHER.</small>
       <h1>Solar Friends</h1>
       <p>Build a place where your friends can feel at home.</p>
@@ -18,14 +22,12 @@
         ><button data-start="story">
           <strong>New game</strong
           ><span
-            >Start with friends and limited supplies. Explore, experiment and
-            build your own village.</span
+            >A fresh plot of land. A few friends. Your own way forward.</span
           ></button
         ><button data-start="sandbox">
           <strong>Sandbox</strong
           ><span
-            >All buildings, free construction and replenished supplies. Build at
-            your own pace.</span
+            >Room to experiment. Everything available, without the costs.</span
           ></button
         ><button id="continue-sandbox" hidden>
           <strong>Continue sandbox</strong
@@ -43,5 +45,6 @@
       ><button id="confirm-new">Start fresh</button>
     </dialog>
     <script type="module" src="menu.js"></script>
+    <script type="module" src="menu-scene.js"></script>
   </body>
 </html>
