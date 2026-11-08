@@ -1,3 +1,5 @@
+import { createRiver } from "./river.js";
+import { riverBankAt } from "./river-layout.js";
 import { createTent } from "../library/camping.js";
 import { performanceReadout } from "./performance.js";
 import * as THREE from "three";
@@ -85,6 +87,8 @@ const ground = new THREE.Mesh(
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
+const river = createRiver();
+scene.add(compactModel(river.root), river.current);
 const lowSpot = new THREE.Mesh(
   new THREE.CircleGeometry(4.4, 16),
   new THREE.MeshStandardMaterial({
@@ -136,7 +140,10 @@ for (let i = 0; i < 52; i++) {
     r = 29 + (i % 5) * 5,
     x = 32 + (Math.cos(a) * r) / 2,
     z = 32 + (Math.sin(a) * r) / 2;
-  scenery.add(prop(native[i % Math.min(native.length, 8)] || "tree", x, z, i));
+  if (!riverBankAt(x, z, 2))
+    scenery.add(
+      prop(native[i % Math.min(native.length, 8)] || "tree", x, z, i),
+    );
 }
 for (const [x, z] of [
   [25, 29],
@@ -467,6 +474,7 @@ $("speed").onclick = () => {
   $("speed").textContent = `${speed}×`;
 };
 $("home").onclick = () => focus(CAMPS.find((c) => c.id === s.camp));
+$("river-view").onclick = () => focus({ x: 20, z: 38 });
 $("grid").onclick = () => {
   grid.visible = !grid.visible;
   $("grid").setAttribute("aria-pressed", String(grid.visible));
@@ -692,6 +700,7 @@ function frame(now) {
               : "idle";
     animateResident(g.rig, motion, s.time + i * 0.7, paused ? 0 : dt * speed);
   }
+  river.update(s.time);
   rainMesh.visible = s.rain;
   puddle.visible = s.rain && s.camp === "entrance";
   if (s.rain) {

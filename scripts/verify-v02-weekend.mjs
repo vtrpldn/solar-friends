@@ -118,3 +118,20 @@ assert.equal(plan(loaded, "water", 40, 40).length > 0, true);
 console.log(
   "PASS: water use, autonomous recovery, protected work access and in-flight trip restore.",
 );
+const riverside = createWeekend();
+chooseCamp(riverside, "clearing");
+assert.match(
+  plan(riverside, "gathering", 21, 38),
+  /riverbank/,
+  "River banks cannot become building sites",
+);
+assert.equal(
+  plan(riverside, "gathering", 29, 35),
+  "",
+  "Central camp remains usable beside the river",
+);
+run(riverside, 180);
+assert(finished(riverside, "gathering"), "River must not strand camp workers");
+console.log(
+  "PASS: riverbank building exclusion and accessible camp construction.",
+);

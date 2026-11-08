@@ -1,3 +1,4 @@
+import { riverBankAt } from "./river-layout.js";
 // A self-contained v0.2 prototype. Time is measured in active simulation seconds.
 export const CAMPS = [
   {
@@ -126,6 +127,10 @@ export function placementError(s, key, x, z, ignore = null) {
   if (!def || !Number.isInteger(x) || !Number.isInteger(z))
     return "Choose a grid square.";
   const [w, d] = def.size;
+  for (let dx = 0; dx < w; dx++)
+    for (let dz = 0; dz < d; dz++)
+      if (riverBankAt(x + dx, z + dz, 1))
+        return "Keep projects back from the riverbank.";
   if (x < 21 || z < 21 || x + w > 44 || z + d > 44)
     return "Keep this first camp inside the marked clearing.";
   if (
@@ -284,6 +289,7 @@ function blockedCamp(s) {
 }
 function occupied(s, x, z) {
   return (
+    riverBankAt(x, z, 0.5) ||
     blockedCamp(s).some((c) => c.x === x && c.z === z) ||
     s.projects.some((p) => x >= p.x && x < p.x + 2 && z >= p.z && z < p.z + 2)
   );
