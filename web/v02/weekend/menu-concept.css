@@ -289,15 +289,15 @@ body {
 [data-concept="4"] .corner {
   color: #e2dfc1;
 }
-/* 05 — A landscape postcard, with horizontal game controls. */
+/* 05 — The landscape is the postcard; controls sit in its paper margin. */
 [data-concept="5"] {
-  background: #e9e1c9;
+  background: #eee7d4;
 }
 [data-concept="5"] #menu-landscape {
-  inset: 21% 3% 19%;
-  width: 94%;
-  height: 60%;
-  border: 1px solid #b6ba97;
+  inset: 76px 18px 93px;
+  width: calc(100% - 36px);
+  height: calc(100% - 169px);
+  border: 1px solid #b9bea4;
 }
 [data-concept="5"] .welcome {
   inset: 0;
@@ -306,59 +306,66 @@ body {
 }
 [data-concept="5"] .brand {
   position: absolute;
-  left: 7%;
-  top: 4%;
+  left: 34px;
+  top: 19px;
 }
 [data-concept="5"] .brand h1 {
-  font-size: 58px;
+  font-size: 35px;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.045em;
 }
 [data-concept="5"] .brand h1 br {
   display: none;
 }
-[data-concept="5"] .brand h1 br:after {
-  content: " ";
-}
 [data-concept="5"] .brand small {
-  margin-bottom: 6px;
-  font-size: 9px;
+  display: none;
 }
 [data-concept="5"] .menu-actions {
   position: absolute;
-  bottom: 5%;
-  left: 7%;
-  right: 7%;
+  bottom: 19px;
+  left: 34px;
+  right: 34px;
   width: auto;
   flex-direction: row;
   align-items: center;
-  gap: 25px;
+  gap: 14px;
   margin: 0;
   pointer-events: auto;
 }
 [data-concept="5"] .menu-actions button {
-  font-size: 19px;
-  min-width: 150px;
+  font-size: 17px;
+  min-width: 125px;
+  min-height: 48px;
+  padding: 10px 18px;
+  border-radius: 5px;
+}
+[data-concept="5"] .menu-actions button:hover {
+  transform: translateY(-2px);
+  background: #dfdfc6;
 }
 [data-concept="5"] .menu-actions .primary {
-  min-width: 240px;
+  min-width: 210px;
   background: #466146;
   color: #fff3d0;
   box-shadow: 0 3px #2f4735;
 }
+[data-concept="5"] .menu-actions .primary:hover {
+  background: #526e4c;
+}
 [data-concept="5"] .menu-actions .settings {
   margin: 0 0 0 auto;
   min-width: 0;
-  font-size: 15px;
+  font-size: 14px;
 }
 [data-concept="5"] .edition {
   position: absolute;
-  right: 7%;
-  top: 9%;
+  right: 35px;
+  top: 30px;
   font-family: Georgia, serif;
   font-style: italic;
   font-size: 15px;
   margin: 0;
+  color: #697457;
 }
 [data-concept="5"] .corner {
   display: none;

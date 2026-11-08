@@ -100,9 +100,14 @@ try {
   path.rotation.z = -0.25;
   path.position.set(-2, 0.012, 8);
   path.receiveShadow = true;
-  scene.add(path);
-  prop("house", -9, -4, 0.3);
-  prop("house", 8, -7, -0.4);
+  if (concept !== 5) scene.add(path);
+  else {
+    // The same two-metre road tiles players place, with right-angle junctions.
+    for (let z = 4; z <= 18; z += 2) prop("road", -3, z);
+    for (let x = -9; x <= 1; x += 2) if (x !== -3) prop("road", x, 4);
+  }
+  prop("house", -9, -4, concept === 5 ? 0 : 0.3);
+  prop("house", 8, -7, concept === 5 ? Math.PI / 2 : -0.4);
 
   prop("orchard", -9, 6);
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 180);
@@ -110,7 +115,7 @@ try {
     ...(concept === 2
       ? [19, 18, 29]
       : concept === 5
-        ? [22, 32, 35]
+        ? [18, 22, 27]
         : [22, 28, 32]),
   );
   camera.lookAt(-3, 0, 1);
