@@ -17,6 +17,7 @@ import {
   cylinder,
   ball,
   shapeCrown,
+  windowPane,
   beam,
   clayRoof,
   gable,
@@ -586,7 +587,7 @@ function framedWindow(g, x, y, z, rotation = 0) {
   w.rotation.y = rotation;
   g.add(w);
   box(w, 0.88, 0.95, 0.1, "timberLight");
-  box(w, 0.68, 0.74, 0.11, "glass", 0, 0, 0.06);
+  windowPane(box(w, 0.68, 0.74, 0.11, "glass", 0, 0, 0.06));
   for (const side of [-1, 1]) {
     box(w, 0.24, 0.85, 0.1, "teal", side * 0.53, 0, 0.08);
     box(w, 0.25, 0.07, 0.04, "timberLight", side * 0.53, -0.22, 0.15);

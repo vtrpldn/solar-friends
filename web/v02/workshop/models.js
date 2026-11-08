@@ -63,6 +63,12 @@ export function shapeCrown(mesh, seed = 0) {
   mesh.geometry.computeVertexNormals();
   return mesh;
 }
+export function windowPane(mesh) {
+  mesh.material = mesh.material.clone();
+  mesh.material.userData.windowPane = true;
+  mesh.userData.ownedMaterial = true;
+  return mesh;
+}
 function beam(g, a, b, width, material = "timber") {
   const start = new THREE.Vector3(...a),
     end = new THREE.Vector3(...b);
@@ -318,7 +324,7 @@ function house() {
     w.rotation.y = rotation;
     g.add(w);
     box(w, 1.0, 1.0, 0.1, "timberLight");
-    box(w, 0.78, 0.76, 0.12, "glass", 0, 0, 0.08);
+    windowPane(box(w, 0.78, 0.76, 0.12, "glass", 0, 0, 0.08));
     box(w, 0.065, 0.76, 0.05, "timberLight", 0, 0, 0.16);
     box(w, 0.78, 0.065, 0.05, "timberLight", 0, 0, 0.16);
     for (const side of [-1, 1]) {

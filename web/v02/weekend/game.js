@@ -1,3 +1,4 @@
+import { prepareHouseLighting, updateHouseLighting } from "./house-lighting.js";
 import { autoConnectUtilities } from "./auto-utilities.js";
 import { townCarPose } from "./town-trip.js";
 import { accessRoadAt } from "./road-layout.js";
@@ -452,7 +453,14 @@ function drawUtilities() {
       utilityLines.add(line);
     }
   }
-  const night = 1 - Math.min(1, (sys.sun || 0) * 4);
+  const night = 1 - sunlightAt(s.time).daylight;
+  for (const [id, entry] of buildings) {
+    if (entry.houseLighting)
+      updateHouseLighting(
+        entry.houseLighting,
+        night * (sys.nodes[id]?.enabled ? sys.nodes[id]?.power || 0 : 0),
+      );
+  }
   const lit = Object.values(sys.nodes)
     .filter((n) =>
       [
@@ -488,8 +496,19 @@ function drawUtilities() {
     light.position.copy(
       world(p.x + (footprint(p)[0] - 1) / 2, p.z + (footprint(p)[1] - 1) / 2),
     );
-    light.position.y += n.kind === "streetlight" ? 2.7 : 1.6;
-    light.intensity = night * (n.power || 0) * 12;
+    light.distance = n.kind === "home" ? 5 : 10;
+    if (n.kind === "home") {
+      const entry = buildings.get(p.id);
+      const spill =
+        entry?.houseLighting?.spill.clone() || new THREE.Vector3(0.8, 1.4, 2.1);
+      spill.applyAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        ((p.rotation || 0) * Math.PI) / 2,
+      );
+      light.position.add(spill);
+    } else light.position.y += n.kind === "streetlight" ? 2.7 : 1.6;
+    light.intensity =
+      night * (n.enabled ? n.power || 0 : 0) * (n.kind === "home" ? 3.5 : 12);
   }
 }
 const buildings = new Map();
@@ -599,6 +618,8 @@ function syncBuildings() {
         animals: collectAnimals(root),
         groundKey: `${p.x},${p.z},${p.rotation || 0}`,
       };
+      if (def.kind === "home" && fraction >= 1)
+        entry.houseLighting = prepareHouseLighting(root);
       buildings.set(p.id, entry);
     }
     entry.root.position.copy(
