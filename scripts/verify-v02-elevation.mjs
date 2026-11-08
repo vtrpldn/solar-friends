@@ -16,9 +16,10 @@ for (let seed = 1; seed <= 30; seed++) {
   assert.ok(high > 3);
   for (let z = -60; z <= 60; z += 2)
     assert.equal(elevationAt(riverCenter(z, seed), z, seed), 0);
-  assert.equal(elevationAt(0, 0, seed), 0);
+
   assert.equal(restore(save(createWeekend(seed))).elevationSeed, seed);
 }
+assert.ok(elevationAt(0, 0, 42) > 0, "map center retains natural elevation");
 const terrain = createTerrain(42);
 terrain.updateMatrixWorld(true);
 const ray = new THREE.Raycaster();
@@ -35,7 +36,7 @@ for (const [x, z] of [
 const old = createWeekend(42);
 delete old.elevationSeed;
 assert.equal(restore(save(old)).elevationSeed, 0);
-assert.equal(footprintRelief(30, 30, 2, 2, 42), 0);
+assert.ok(footprintRelief(30, 30, 2, 2, 42) > 0, "center is not an artificial flat clearing");
 console.log(
-  "PASS: seeded hills, level river/clearing, exact terrain triangle sampling and save compatibility.",
+  "PASS: seeded hills, natural center and level river, exact terrain triangle sampling and save compatibility.",
 );

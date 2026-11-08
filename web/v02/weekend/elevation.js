@@ -1,4 +1,4 @@
-import {naturalRelief,terrainNoise} from './terrain-noise.js';
+import {naturalRelief} from './terrain-noise.js';
 import { MAP_CELLS, MAP_HALF } from "./map-size.js";
 import { landParameters } from "./land-layout.js";
 import { riverCenter, riverWidth, riverBankAt } from "./river-layout.js";
@@ -10,8 +10,7 @@ const smooth = (n) => {
 function naturalVertex(x, z, seed = 0) {
   if (!seed) return 0;
   const p = landParameters(seed);
-  // A level starting clearing and continuous low river/road corridors.
-  const clearing = smooth((Math.hypot(x, z) - 27 - terrainNoise(x/35,z/35,seed^0xa792)*8) / 16);
+  // Only the river and entrance road carve low corridors into natural relief.
   const river = smooth(
     (Math.abs(x - riverCenter(z, seed)) - riverWidth(z, seed) - 5) / 9,
   );
@@ -20,7 +19,7 @@ function naturalVertex(x, z, seed = 0) {
     Math.max(0, z - ROAD_END_Z - 3),
   ) / 10);
   const hills = p.hillHeight * naturalRelief(x,z,seed);
-  return Math.max(0, hills) * clearing * river * road;
+  return Math.max(0, hills) * river * road;
 }
 // Pads cover whole mesh triangles beneath the foundation. Blended shoulders
 // never override another pad's level interior.
