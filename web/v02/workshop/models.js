@@ -49,6 +49,20 @@ function ball(g, r, m, x, y, z, s = [1, 1, 1], detail = 1) {
   a.scale.set(...s);
   return a;
 }
+// Deterministic broad lobes break the repeated spherical silhouette without
+// adding triangles or noisy per-vertex randomness.
+export function shapeCrown(mesh, seed = 0) {
+  const points = mesh.geometry.attributes.position;
+  for (let i=0;i<points.count;i++) {
+    const x=points.getX(i), y=points.getY(i), z=points.getZ(i);
+    const radius=Math.hypot(x,y,z) || 1;
+    const a=Math.atan2(z,x), h=y/radius;
+    const lobe=1 + .13*Math.sin(a*3 + seed) * (1-h*h) + .08*Math.cos(h*5 + a*2 + seed*.7);
+    points.setXYZ(i,x*lobe,y*(1+.09*Math.sin(a*2+seed)),z*lobe);
+  }
+  mesh.geometry.computeVertexNormals();
+  return mesh;
+}
 function beam(g, a, b, width, material = "timber") {
   const start = new THREE.Vector3(...a),
     end = new THREE.Vector3(...b);
@@ -515,16 +529,16 @@ function tree() {
     [-0.8, 3.7, -0.65, 0.82],
   ];
   clusters.forEach(([x, y, z, r], i) =>
-    ball(
+    shapeCrown(ball(
       g,
       r,
       i === 3 ? "leafLight" : i === 2 ? "leafDark" : "leaf",
       x,
       y,
       z,
-      [1, 0.84, 1],
+      [1 + Math.sin(i*2)*.18, 0.65 + (i%3)*.12, .85 + (i%2)*.2],
       1,
-    ),
+    ), i*1.7),
   );
   for (const [x, y, z] of [
     [-1.3, 3.55, 0.3],

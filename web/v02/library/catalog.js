@@ -16,6 +16,7 @@ import {
   box,
   cylinder,
   ball,
+  shapeCrown,
   beam,
   clayRoof,
   gable,
@@ -292,6 +293,7 @@ function limb(g, a, b, base, tip, hex = "#936039") {
 }
 function tree(kind, variant = 0) {
   const g = group();
+  const speciesSeed = [...kind].reduce((n,c) => n+c.charCodeAt(0),0)*.17;
   if (kind === "jucara") {
     limb(g, [0, 0, 0], [0.12, 4.5, 0], 0.15, 0.095, "#9d9974");
     for (let y = 0.3; y < 4; y += 0.35)
@@ -349,7 +351,7 @@ function tree(kind, variant = 0) {
     for (let y = 0.3; y < 3.5; y += 0.4)
       cylinder(g, 0.19 - y * 0.02, 0.19 - y * 0.02, 0.025, "stone", 0, y, 0, 8);
     for (let i = 0; i < 5; i++) {
-      const a = i * 2.4 + variant * .65,
+      const a = i * 2.4 + variant * .65 + speciesSeed,
         x = Math.sin(a) * 1.2,
         z = Math.cos(a) * 1.2,
         y = 3.3 + (i % 3) * 0.38;
@@ -441,15 +443,17 @@ function tree(kind, variant = 0) {
         bark,
       );
     }
-  const count = (fine ? 9 : kind === "umbuzeiro" ? 8 : 6) - variant;
+  const count = (fine ? 9 : kind === "umbuzeiro" ? 8 : kind === "pau_brasil" ? 7 : 6) - variant;
+  const broad = kind === "umbuzeiro" || kind === "pequi";
+  const shades = [c, new THREE.Color(c).offsetHSL(.008,-.025,.045).getStyle(), new THREE.Color(c).offsetHSL(-.01,.015,-.045).getStyle()];
   for (let i = 0; i < count; i++) {
     const a = i * 2.4 + variant * .65,
-      x = Math.sin(a) * r * (0.7 + Math.sin(i+variant)*variant*.07),
-      z = Math.cos(a) * r * (0.7 + Math.cos(i+variant)*variant*.07),
+      x = Math.sin(a) * r * (0.58 + (Math.sin(i*2.3+variant)+1)*.14),
+      z = Math.cos(a) * r * (0.58 + (Math.cos(i*1.7+variant)+1)*.14),
       y =
         kind === "umbuzeiro"
           ? h * 0.7 + (i % 2) * 0.12
-          : h * (0.72 + variant*.025) + (i % 3) * 0.18;
+          : h * (0.69 + variant*.025) + (Math.sin(i*1.8 + speciesSeed)+1) * (tall ? .4 : .25);
     const elbow = [x * 0.5, fork + (y - fork) * 0.5, z * 0.45];
     limb(g, [0, fork, 0], elbow, 0.13, 0.08, bark);
     limb(g, elbow, [x, y, z], 0.08, 0.035, bark);
@@ -460,20 +464,14 @@ function tree(kind, variant = 0) {
         limb(g, [x, y - 0.3, z], [xx, y, zz], 0.035, 0.015, bark);
         color(ball(g, 0.44, "leaf", xx, y, zz, [1.15, 0.38, 0.8], 0), c);
       }
-    } else
-      color(
-        ball(
-          g,
-          r * (kind === "umbuzeiro" ? 0.57 : 0.49),
-          "leaf",
-          x,
-          y,
-          z,
-          [1, kind === "umbuzeiro" ? 0.58 : 0.85, 1],
-          1,
-        ),
-        i % 3 === 0 ? "#89a354" : c,
-      );
+    } else {
+      const crown = color(ball(g,
+        r * (kind === "umbuzeiro" ? 0.57 : 0.49) * (.85 + (Math.sin(i*3.1+variant)+1)*.14),
+        "leaf", x, y, z,
+        [broad ? 1.2 : .85 + (i%3)*.15, broad ? .45 + (i%2)*.13 : .65 + (i%3)*.12, .8 + (i%3)*.14], 1), shades[i%3]);
+      shapeCrown(crown, speciesSeed + i*1.7 + variant*2.3);
+      crown.rotation.y = a*.4;
+    }
   }
   if (kind === "jequitiba")
     color(ball(g, 1.15, "leaf", 0, h - 0.6, 0, [1, 0.65, 1], 1), c);

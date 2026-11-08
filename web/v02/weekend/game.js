@@ -296,8 +296,8 @@ for (let i = 0; i < 52; i++) {
       prop(
         native[
           s.landSeed
-            ? Math.floor(sceneryRandom() * Math.min(native.length, 8))
-            : i % Math.min(native.length, 8)
+            ? Math.floor(sceneryRandom() * native.length)
+            : i % native.length
         ] || "tree",
         x,
         z,
@@ -335,7 +335,9 @@ for (let i = 0; i < 190; i++) {
         : "meadow";
   const set = regionSets[region],
     id = set[Math.floor(regionRandom() * set.length)];
-  scenery.add(prop(id, x, z, regionRandom() * Math.PI * 2));
+    const variant = Math.floor(regionRandom() * 3);
+  const varied = variant && ASSETS.some(a => a.id === `${id}-variant-${variant}`) ? `${id}-variant-${variant}` : id;
+  scenery.add(prop(varied, x, z, regionRandom() * Math.PI * 2));
 }
 const entrance = prop("produce-crates", s.stock.x, s.stock.z);
 scenery.add(prop("garden-bench", 30, 24));
