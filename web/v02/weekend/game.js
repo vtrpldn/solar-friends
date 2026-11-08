@@ -1,3 +1,4 @@
+import { illustrate } from "./ui-art.js";
 import { sunlightAt } from "./sunlight.js";
 import { createUtilitiesPreview } from "./utilities-preview.js";
 import { syncInfrastructure, LIQUIDS } from "./infrastructure.js";
@@ -557,7 +558,9 @@ for (const c of CAMPS) {
 for (const [key, d] of Object.entries(PROJECTS)) {
   const b = document.createElement("button");
   b.id = `build-${key}`;
-  b.innerHTML = `<strong>${d.name}</strong><span>${recipeText(key)}</span>`;
+  const count = Object.values(d.materials).reduce((a, b) => a + b, 0);
+  b.innerHTML = `<span class="material-warning" aria-hidden="true">!</span><img class="build-art" alt=""/><strong>${d.name}</strong><span class="build-cost">${count} materials <i>· ${d.size.join("×")}</i></span>`;
+  b.setAttribute("aria-label", `${d.name}. ${recipeText(key)}`);
   b.title = d.description;
   b.dataset.category = d.category;
   b.onclick = () => startPlacement(key);
@@ -830,6 +833,7 @@ function renderUtilityUI() {
           .map(([id, d]) => [id, d.name])
       : [],
   );
+  $("production-controls").hidden = !$("production").value;
   $("queue-production").disabled = !node || !$("production").value;
   $("repeat-production").disabled = !node || !$("production").value;
   $("repeat-production").textContent = p?.repeat
@@ -839,7 +843,7 @@ function renderUtilityUI() {
   $("toggle-building").textContent = node?.enabled ? "Switch off" : "Switch on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done);
   $("building-service").textContent = node
-    ? `Power ${(node.power * 100).toFixed(0)}% · Battery ${node.charge.toFixed(1)}/${node.battery}. ${LIQUIDS.map(
+    ? `Power ${(node.power * 100).toFixed(0)}%${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}. ${LIQUIDS.map(
         (k, i) =>
           node.capacity[i]
             ? `${k}: ${node.water[i].toFixed(1)}/${node.capacity[i]}`
@@ -918,16 +922,21 @@ refillSelect(
   categories.map((c) => [c, c]),
 );
 function filterBuildings() {
-  for (const [key, d] of Object.entries(PROJECTS))
-    $(`build-${key}`).hidden =
+  for (const [key, d] of Object.entries(PROJECTS)) {
+    const button = $(`build-${key}`);
+    button.hidden =
       ($("build-category").value !== "All" &&
         d.category !== $("build-category").value) ||
       !d.name.toLowerCase().includes($("build-search").value.toLowerCase());
+    if (!button.hidden) illustrate(button.querySelector("img"), d.asset);
+  }
+  $("build-list").scrollLeft = 0;
 }
 $("build-category").onchange = filterBuildings;
 $("build-search").oninput = filterBuildings;
 $("toggle-build-list").onclick = () => {
   $("build-list").hidden = !$("build-list").hidden;
+  document.body.dataset.tray = $("build-list").hidden ? "closed" : "open";
   $("toggle-build-list").textContent = $("build-list").hidden
     ? "Show catalog"
     : "Hide catalog";
@@ -975,8 +984,28 @@ function renderUI() {
   $("journal").hidden = !active;
   $("people").hidden = !active || !!selected;
   $("build").hidden = !active || s.stage === "evening";
-  $("supplies").textContent =
-    `R$${s.money} shared savings · ${s.wood} timber available`;
+  const counters = [
+    ["◉", `R$${s.money}`, "Savings", "pantry-panel"],
+    ["▰", Math.floor(s.wood), "Timber", "pantry-panel"],
+    ["♨", s.materials.meals || 0, "Meals", "pantry-panel"],
+    [
+      "♦",
+      Math.floor(s.infrastructure?.nodes[0]?.water[0] || 0),
+      "Water",
+      "utility-panel",
+    ],
+  ];
+  if (!$("supplies").children.length)
+    $("supplies").innerHTML = counters
+      .map(
+        ([icon, value, label, panel]) =>
+          `<button class="resource" data-panel="${panel}" title="${label} · Open supplies"><span aria-hidden="true">${icon}</span><b></b><small>${label}</small></button>`,
+      )
+      .join("");
+  counters.forEach((counter, i) => {
+    $("supplies").children[i].querySelector("b").textContent = counter[1];
+    $("supplies").children[i].disabled = !active;
+  });
   const minutes = 9 * 60 + Math.floor(s.time * 0.45);
   $("clock").textContent =
     s.stage === "evening"
@@ -995,12 +1024,21 @@ function renderUI() {
               ? "A roof is taking shape. Keep the supplies dry before calling everyone for dinner."
               : "Choose what helps us stay: water storage, a roof, or a private toilet.";
   $("tasks").replaceChildren();
+  $("completed-tasks").replaceChildren();
+  const builtCount = s.projects.filter(
+    (p) => p.work >= PROJECTS[p.key].work,
+  ).length;
+  $("completed-panel").hidden = builtCount === 0;
+  $("completed-title").textContent = `Around the village · ${builtCount} built`;
   for (const p of s.projects) {
     const d = PROJECTS[p.key],
       div = document.createElement("div");
     div.className = "task";
     const b = document.createElement("button");
-    b.textContent = `${p.work >= d.work ? "✓ " : ""}${d.name} · ${Math.floor((p.work / d.work) * 100)}%`;
+    const done = p.work >= d.work;
+    div.classList.toggle("complete", done);
+    b.innerHTML = `<img alt=""/><span>${d.name}</span><em>${done ? "✓" : Math.floor((p.work / d.work) * 100) + "%"}</em>`;
+    illustrate(b.querySelector("img"), d.asset);
     b.onclick = () => {
       selected = p.id;
       renderUI();
@@ -1009,12 +1047,16 @@ function renderUI() {
     progress.max = d.work;
     progress.value = p.work;
     div.append(b, progress);
-    $("tasks").append(div);
+    $(done ? "completed-tasks" : "tasks").append(div);
   }
   $("roster").replaceChildren();
   for (const r of s.people) {
     const div = document.createElement("div");
     div.className = "person";
+    const portrait = document.createElement("img");
+    portrait.className = "portrait";
+    illustrate(portrait, r.id);
+    div.dataset.resident = r.id;
     const name = document.createElement("strong");
     name.textContent = r.name;
     name.title = `Good at: ${specialties[r.id]}`;
@@ -1040,11 +1082,11 @@ function renderUI() {
                   s.operations.find((o) => o.id === r.operation)?.recipe
                 ]?.name || "Preparing supplies"
               : actionText[r.action] || "Settling in";
-    status.style.gridColumn = "1 / -1";
+    status.className = "resident-status";
     const progress = document.createElement("progress");
     progress.max = 100;
     progress.value = r.energy;
-    div.append(name, energy, status, progress);
+    div.append(portrait, name, energy, status, progress);
     $("roster").append(div);
   }
   const purchase = MATERIALS[$("purchase").value];
@@ -1083,14 +1125,16 @@ function renderUI() {
     b.disabled =
       !PROJECTS[key].repeatable && s.projects.some((p) => p.key === key);
     const missing = missingMaterials(s, key);
-    b.title = `${PROJECTS[key].description} ${missing.length ? "Missing: " + missing.join(", ") : "All materials available."}`;
+    b.title = `${PROJECTS[key].description} Materials: ${recipeText(key)}. ${missing.length ? "Missing: " + missing.join(", ") : "All materials available."}`;
     b.classList.toggle("active", placing === key);
+    b.classList.toggle("needs-materials", missing.length > 0);
   }
   renderUtilityUI();
   const p = s.projects.find((p) => p.id === selected);
   $("selection").hidden = !p || s.stage === "evening";
   if (p) {
     $("selected-name").textContent = PROJECTS[p.key].name;
+    illustrate($("selected-art"), PROJECTS[p.key].asset);
     $("selected-state").textContent = finished(s, p.key)
       ? "READY TO USE"
       : `${Math.floor((p.work / PROJECTS[p.key].work) * 100)}% BUILT`;
@@ -1107,6 +1151,17 @@ for (const [id, item] of Object.entries(MATERIALS).filter(
   option.textContent = `${materialText(id, item.quantity)} · R$${item.price}`;
   $("purchase").append(option);
 }
+$("supplies").onclick = (event) => {
+  const button = event.target.closest("[data-panel]");
+  if (!button) return;
+  selected = null;
+  renderUI();
+  $(button.dataset.panel).open = true;
+  $(button.dataset.panel).scrollIntoView({
+    block: "nearest",
+    behavior: "smooth",
+  });
+};
 $("purchase").onchange = () => renderUI();
 renderUI();
 if (s.stage !== "arrival") message(s.log[0] || "Welcome back to your camp.");

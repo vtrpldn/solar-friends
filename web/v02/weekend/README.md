@@ -63,3 +63,7 @@ For an unsaved, paused comparison use `?utilities-preview&lighting-hour=8`, `lig
 ### Building interaction audit
 
 See [the building-by-building audit](../../../docs/v02/building-interaction-audit.md) for functional coverage and decorative-prop limits. Run `node scripts/verify-v02-buildings.mjs` to exercise all build choices and production recipes through actual resident work. Use `?utilities-preview&interactions` for an unsaved scene with exhausted residents, a supplied wash station, and queued milk/egg production.
+
+### Game interface artwork
+
+The HUD uses the existing Outfit font, a compact resource strip, resident portraits, illustrated build cards and a collapsible completed-building list. `ui-art.js` renders each model illustration once on demand with a separate small renderer, caches its image, and schedules new illustrations during idle time. It does not add illustration rendering to the game frame loop. Hidden resident equipment is excluded from portraits. Full material recipes remain available through card tooltips and accessible labels.

@@ -14,7 +14,7 @@
       }
     </script>
   </head>
-  <body>
+  <body data-tray="open">
     <canvas
       id="world"
       aria-label="Our land. Drag to pan, right-drag to orbit. Click a grid square to place a project."
@@ -22,10 +22,10 @@
     ></canvas>
     <header>
       <div>
-        <small>SOLAR FRIENDS · FIRST PLAYABLE</small>
-        <h1>Our first weekend</h1>
+        <small>SOLAR FRIENDS</small>
+        <h1>Our little village</h1>
       </div>
-      <div id="supplies"></div>
+      <div id="supplies" aria-label="Community supplies"></div>
       <div class="time">
         <span id="clock"></span>
         <div>
@@ -33,8 +33,11 @@
           ><button id="speed">1×</button>
         </div>
       </div>
-      <a href="../library/" title="Back to the art collection"
-        >Art collection ↗</a
+      <a
+        href="../library/"
+        title="Back to the art collection"
+        aria-label="Open art collection"
+        >Art book ↗</a
       >
     </header>
     <section id="arrival" class="paper">
@@ -51,10 +54,14 @@
       </p>
     </section>
     <aside id="journal" class="paper" hidden>
-      <small>OUR SHARED PLAN</small>
-      <h2>Somewhere we can stay</h2>
+      <small>✦ CAMP JOURNAL</small>
+      <h2>Make yourselves at home</h2>
       <p id="objective"></p>
       <div id="tasks"></div>
+      <details id="completed-panel" hidden>
+        <summary id="completed-title">Around the village</summary>
+        <div id="completed-tasks"></div>
+      </details>
       <button id="meal" hidden>Put the kettle on · Gather for dinner</button>
       <details>
         <summary>The weekend so far</summary>
@@ -62,9 +69,9 @@
       </details>
     </aside>
     <aside id="people" class="paper" hidden>
-      <small>THE FIVE OF US</small>
+      <small>♡ OUR LITTLE CREW</small>
       <div id="roster"></div>
-      <details>
+      <details id="pantry-panel">
         <summary>Supplies &amp; town purchases</summary>
         <p id="inventory"></p>
         <label for="purchase">Bring back from town</label
@@ -109,19 +116,25 @@
       ><button id="uphill">Move them uphill · free</button>
     </section>
     <section id="selection" class="paper" hidden>
+      <img id="selected-art" class="selection-art" alt="" />
       <small id="selected-state"></small>
       <h2 id="selected-name"></h2>
-      <p id="selected-desc"></p>
       <p id="building-service"></p>
-      <label for="production">Resident work</label
-      ><select id="production"></select
-      ><button id="queue-production">Start batch</button
-      ><button id="repeat-production">Keep 24 in stock</button>
+      <div id="production-controls">
+        <label for="production">Resident work</label
+        ><select id="production"></select
+        ><button id="queue-production">Start batch</button
+        ><button id="repeat-production">Keep 24 in stock</button>
+      </div>
+      <details class="building-notes">
+        <summary>Materials &amp; building notes</summary>
+        <p id="selected-desc"></p>
+      </details>
       <button id="toggle-building">Switch off</button>
       <button id="priority">Do this next</button
-      ><button id="move">Move camp furniture</button
+      ><button id="move">Move building</button
       ><button id="close-selection" aria-label="Close project details">
-        Close
+        ×
       </button>
     </section>
     <section id="ending" class="paper" hidden>
@@ -135,12 +148,12 @@
     <footer>
       <section id="build" hidden>
         <div class="build-toolbar">
-          <label for="build-category">Build</label
+          <label for="build-category">⌂ Let’s build</label
           ><select id="build-category"></select
           ><input
             id="build-search"
             type="search"
-            placeholder="Find a building"
+            placeholder="Find something to build…"
             aria-label="Find a building"
           /><button id="toggle-build-list">Hide catalog</button>
         </div>
@@ -149,10 +162,15 @@
       <button id="skip-arrival" hidden>Skip arrival</button>
       <div id="message" role="status">Choose a campsite to begin.</div>
       <div class="controls">
-        <span
-          >WASD / arrows or drag: pan · Shift: faster · Q/E or right-drag: turn
-          · Scroll / +−: zoom</span
-        ><button id="rotate-left" aria-label="Rotate camera left" title="Q">
+        <details class="controls-help">
+          <summary aria-label="Camera controls">?</summary>
+          <p>
+            <kbd>W A S D</kbd> Move around<br /><kbd>Q / E</kbd> Turn the
+            view<br />Scroll to zoom · Drag to pan<br /><kbd>Esc</kbd> Cancel
+            placement
+          </p>
+        </details>
+        <button id="rotate-left" aria-label="Rotate camera left" title="Q">
           ↶</button
         ><button id="rotate-right" aria-label="Rotate camera right" title="E">
           ↷</button
@@ -168,8 +186,8 @@
     <dialog id="reset-dialog">
       <h2>Start a new weekend?</h2>
       <p>
-        This replaces this prototype’s saved camp. The art collection and v0.1
-        saves stay untouched.
+        This starts a fresh camp and replaces your current village. Ready for a
+        new adventure?
       </p>
       <button id="confirm-reset">Start again</button
       ><button id="keep">Keep this camp</button>
