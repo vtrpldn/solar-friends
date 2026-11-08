@@ -30,28 +30,32 @@ export function createResident(id = "resident") {
   const root = new THREE.Group(),
     hips = joint(root, "hips", 0, 0.9),
     head = joint(hips, "head", 0, 0.59);
-  const torso = cylinder(hips, 0.23, 0.24, 0.42, "shirt", 0, 0.2, 0, 6);
+  const torso = cylinder(hips, 0.25, 0.21, 0.44, "shirt", 0, 0.2, 0, 8);
   torso.scale.z = 0.68;
   torso.scale.x = look.width;
+  ball(hips,.22,"trousers",0,-.015,0,[1,.55,.7],0);
   const clothes = joint(hips, "clothing");
   if (look.outfit === "overalls" || look.outfit === "apron") {
     const material = look.outfit === "apron" ? "plaster" : "trousers";
     box(clothes, 0.29, 0.28, 0.035, material, 0, 0.18, 0.16);
     for (const x of [-0.12, 0.12])
       box(clothes, 0.045, 0.19, 0.035, material, x, 0.34, 0.15);
-    box(clothes, 0.14, 0.09, 0.015, "timberLight", 0, 0.17, 0.185);
+    box(clothes, 0.13, 0.08, 0.015, material, 0, 0.15, 0.185);
+    if(look.outfit==='apron')box(clothes,.34,.22,.04,material,0,-.05,.155);
   } else if (look.outfit === "vest") {
     for (const x of [-0.14, 0.14])
       box(clothes, 0.13, 0.32, 0.055, "earth", x, 0.22, 0.14);
   }
   cylinder(hips, 0.075, 0.08, 0.12, "skin", 0, 0.47, 0, 6);
-  ball(head, 0.235, "skin", 0, 0, 0, [0.88, 1, 0.86], 1);
-  ball(head, 0.238, "hair", 0, 0.08, -0.035, [0.88, 0.62, 0.86], 0);
+  ball(head, 0.235, "skin", 0, 0, 0, [0.91, 1.02, 0.88], 1);
+  ball(head, 0.238, "hair", 0, 0.08, -0.035, [0.91, 0.62, 0.88], 0);
   for (const s of [-1, 1]) {
-    ball(head, 0.023, "hair", s * 0.075, 0.02, 0.177, [1, 1, 0.5], 0);
+    ball(head, 0.018, "hair", s * 0.075, 0.025, 0.192, [1, 1.15, 0.5], 0);
     ball(head, 0.046, "skin", s * 0.205, 0, -0.005, [0.6, 1, 0.65], 0);
   }
-  ball(head, 0.043, "skin", 0, -0.03, 0.2, [0.8, 0.8, 1], 0);
+  ball(head, 0.033, "skin", 0, -0.025, 0.211, [.9,.85,.8],0);
+  const mouth=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-.035,-.087,.188),new THREE.Vector3(0,-.094,.196),new THREE.Vector3(.035,-.087,.188)]),new THREE.LineBasicMaterial({color:0x714c36}));
+  head.add(mouth);
   const hairstyle = joint(head, "hairstyle");
   if (look.hat) {
     const brim = id === "caua" ? 0.28 : 0.34;
@@ -90,7 +94,7 @@ export function createResident(id = "resident") {
     for (const x of [-1, 1])
       ball(
         hairstyle,
-        look.hair === "puffs" ? 0.135 : 0.12,
+        look.hair === "puffs" ? 0.12 : 0.11,
         "hair",
         x * (look.hair === "puffs" ? 0.23 : 0.14),
         look.hair === "puffs" ? 0.2 : 0.1,
@@ -101,19 +105,20 @@ export function createResident(id = "resident") {
     ball(hairstyle, 0.14, "hair", 0, 0.19, -0.045, [1, 0.75, 1], 0);
   }
   if (look.beard)
-    ball(hairstyle, 0.15, "hair", 0, -0.13, 0.07, [1, 0.7, 0.85], 0);
+    ball(hairstyle, 0.15, "hair", 0, -0.13, 0.07, [1, 0.65, 0.8], 0);
   const legs = [],
     arms = [];
   for (const s of [-1, 1]) {
     const hip = joint(hips, `hip-${s}`, s * 0.125),
       knee = joint(hip, `knee-${s}`, 0, -0.38);
-    cylinder(hip, 0.09, 0.085, 0.38, "trousers", 0, -0.19, 0, 6);
-    cylinder(knee, 0.085, 0.075, 0.42, "trousers", 0, -0.21, 0, 6);
-    box(knee, 0.2, 0.13, 0.3, "timber", 0, -0.455, 0.055);
+    cylinder(hip, 0.105, 0.095, 0.38, "trousers", 0, -0.19, 0, 6);
+    cylinder(knee, 0.095, 0.075, 0.42, "trousers", 0, -0.21, 0, 6);
+    const shoe=cylinder(knee,.1,.11,.13,"timber",0,-.455,.055,8);
+    shoe.scale.z=1.5;
     legs.push({ hip, knee });
     const shoulder = joint(hips, `shoulder-${s}`, s * 0.26, 0.29),
       elbow = joint(shoulder, `elbow-${s}`, 0, -0.26);
-    cylinder(shoulder, 0.08, 0.07, 0.26, "shirt", 0, -0.13, 0, 6);
+    cylinder(shoulder, 0.08, 0.07, 0.26, "shirt", 0, -0.13, 0, 8);
     cylinder(elbow, 0.055, 0.05, 0.25, "skin", 0, -0.125, 0, 6);
     ball(elbow, 0.065, "skin", 0, -0.25, 0, [0.8, 1, 1], 0);
     arms.push({ shoulder, elbow });
@@ -166,7 +171,7 @@ export function createResident(id = "resident") {
     root.traverse((o) => {
       if (!o.isMesh) return;
       const hex = o.material.color.getHexString(),
-        color = hex === "d3ad58" ? shirt : hex === "b87950" ? skin : null;
+        color = hex === "d3ad58" ? shirt : hex === "b87950" ? skin : hex === "496e62" ? ["#496e62","#555d55","#7e7560","#63745a","#5c6876"][i] : null;
       if (color) {
         if (!palettes.has(color)) {
           const m = o.material.clone();
@@ -177,6 +182,13 @@ export function createResident(id = "resident") {
       }
     });
   }
+  // Softer facial lighting without increasing the shared low-poly budget.
+  head.traverse(o=>{
+    if(!o.isMesh)return;
+    const key=`face-${o.material.uuid}`;
+    if(!palettes.has(key)){const m=o.material.clone();m.flatShading=false;palettes.set(key,m);}
+    o.material=palettes.get(key);
+  });
   poseResident(rig, "idle", 0);
   return root;
 }
