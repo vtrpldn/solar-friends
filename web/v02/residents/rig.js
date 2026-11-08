@@ -142,13 +142,21 @@ export function createResident(id = "resident") {
       0.35,
       4,
     );
+  const bowl = new THREE.Group();
+  cylinder(bowl,.12,.08,.06,'plaster',0,0,0,8);
+  ball(bowl,.07,'shirt',0,.035,0,[1,.3,1],0);
+  arms[0].elbow.add(bowl);bowl.position.set(0,-.21,.07);bowl.visible=false;
+  const book = new THREE.Group();
+  box(book,.28,.025,.2,'teal',0,0,0);
+  box(book,.24,.015,.17,'plaster',0,.018,0);
+  arms[0].elbow.add(book);book.position.set(0,-.2,.08);book.visible=false;
   const joints = [
     hips,
     head,
     ...legs.flatMap((l) => [l.hip, l.knee]),
     ...arms.flatMap((a) => [a.shoulder, a.elbow]),
   ];
-  const rig = { root, hips, head, legs, arms, cargo, can, stream, joints };
+  const rig = { root, hips, head, legs, arms, cargo, can, stream, bowl, book, joints };
   root.rig = rig;
   root.name = id;
   const i = RESIDENT_IDS.indexOf(id) - 1;
@@ -214,6 +222,8 @@ export function poseResident(rig, action, time, blend = 1) {
   }
   cargo.visible = action === "carry" || action === "carry-walk";
   can.visible = action === "water";
+  rig.bowl.visible = action === "eat";
+  rig.book.visible = action === "read";
   if (action === "walk" || action === "carry-walk") {
     hips.position.y += 0.015 * (1 - Math.cos(phase * 2));
     hips.rotation.z = Math.sin(phase) * 0.025;
@@ -306,6 +316,37 @@ export function poseResident(rig, action, time, blend = 1) {
       a.elbow.rotation.x = 0.25;
     });
     hips.rotation.z = Math.sin(time * 0.9) * 0.045;
+  }
+  if (action === "eat" || action === "read") {
+    head.rotation.x=.15+Math.sin(time*1.8)*.025;
+    arms[0].shoulder.rotation.x=-.65;
+    arms[0].elbow.rotation.x=-.9;
+    arms[1].shoulder.rotation.x=action==='eat' ? -.75-Math.sin(time*2.6)*.25 : -.6;
+    arms[1].elbow.rotation.x=action==='eat' ? -1.2-Math.sin(time*2.6)*.3 : -.9;
+  }
+  if (action === "bathe") {
+    hips.rotation.z=Math.sin(time*1.5)*.035;
+    head.rotation.x=.12;
+    arms.forEach((a,i)=>{
+      a.shoulder.rotation.x=-1.8+Math.sin(time*2+i*Math.PI)*.2;
+      a.shoulder.rotation.z=(i?1:-1)*.2;
+      a.elbow.rotation.x=-1.2+Math.sin(time*3+i)*.25;
+    });
+  }
+  if (action === "pee") {
+    hips.rotation.x=.07;head.rotation.x=.15+Math.sin(time*.8)*.015;
+    arms.forEach((a,i)=>{a.shoulder.rotation.x=-.15;a.shoulder.rotation.z=(i?1:-1)*.1;a.elbow.rotation.x=-.5;});
+  }
+  if (action === "toilet") {
+    hips.position.y=.58+Math.sin(time*1.7)*.003;hips.rotation.x=.18;head.rotation.x=.1+Math.sin(time)*.02;
+    legs.forEach(l=>{l.hip.rotation.x=-1.25;l.knee.rotation.x=1.5;});
+    arms.forEach(a=>{a.shoulder.rotation.x=-.5;a.elbow.rotation.x=-.3;});
+  }
+  if (action === "play") {
+    hips.rotation.z=Math.sin(time*2)*.08;
+    hips.position.y+=Math.sin(time*4)*.015;
+    arms.forEach((a,i)=>{a.shoulder.rotation.x=-.4+Math.sin(time*2+i)*.3;a.elbow.rotation.x=-.6;});
+    head.rotation.y=Math.sin(time)*.2;
   }
   if (cargo.visible) arms.forEach((a) => reach(a, 0.2, 0.36));
   const alpha = THREE.MathUtils.clamp(blend, 0, 1);

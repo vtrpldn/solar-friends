@@ -44,7 +44,11 @@ export function chooseNeed(s,r,i,api) {
  if(!pending.length){r.needBlocked=null;return;}
  const nodes=Object.values(s.infrastructure.nodes);
  const free=node=>!s.people.some(p=>p!==r && p.needTask?.site===node.id);
- const choose=predicate=>nodes.filter(a=>a.enabled && predicate(a) && free(a)).sort((a,b)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z)).map(node=>({node,spot:api.serviceSpot(node,r)})).find(v=>v.spot && api.route(r,v.spot));
+ const choose=predicate=>{
+   const candidates=nodes.filter(a=>a.enabled && predicate(a) && free(a)).sort((a,b)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z));
+   for(const node of candidates){const spot=api.serviceSpot(node,r);if(spot && api.route(r,spot))return {node,spot};}
+   return null;
+ };
  for(const kind of pending) {
   if(kind==='hunger') {
    if(!(s.materials.meals>0 || s.materials.food>0))continue;

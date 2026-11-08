@@ -1410,3 +1410,14 @@ body[data-tray="closed"] {
 #terrain-panel { position: fixed; left: 22px; top: 100px; width: 260px; z-index: 5; }
 #terrain-panel label, #terrain-panel select { display: block; width: 100%; margin-top: 8px; }
 #terrain-panel button:not(.panel-close) { margin-top: 8px; }
+
+/* Individual needs share the village palette and remain readable at a glance. */
+.resident-needs { grid-column: 2 / 4; display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; padding: 5px 0; }
+.resident-needs label { display: grid; gap: 2px; }
+.person .resident-needs span { font-size: 10px; color: #53624a; }
+.person .resident-needs progress { grid-column: auto; width: 100%; height: 6px; margin: 0; accent-color: #81995e; }
+.resident-needs .need-low progress { accent-color: #b5664e; }
+.resident-needs .need-warn progress { accent-color: #bb9b4e; }
+.resident-needs .need-low progress::-webkit-progress-value { background: #b5664e; }
+.resident-needs .need-warn progress::-webkit-progress-value { background: #bb9b4e; }
+.resident-needs .need-good progress::-webkit-progress-value { background: #81995e; }

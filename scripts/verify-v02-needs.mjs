@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,requiredLoads,tick,save,restore,plan} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,PROJECTS,requiredLoads,tick,save,restore,plan,supplyRun} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 import {NEED_KEYS} from '../web/v02/weekend/resident-needs.js';
 const run=(s,seconds,done=()=>false)=>{for(let i=0;i<seconds*10;i++){tick(s,.1);if(done())return true;}return done();};
@@ -64,3 +64,10 @@ console.log('PASS: separate pee/bowel needs, toilet waste, camp fallback, home a
  const old=JSON.parse(save(s));old.people.forEach(p=>delete p.needs);assert(restore(JSON.stringify(old)),'older saves initialize needs');
 }
 console.log('PASS: paired conversation, recreation, unavailable supplies, cargo safety, energy recovery, work resumption and save validation');
+
+{
+ const s=fresh();s.materials.food=0;s.materials.meals=0;s.people.forEach(r=>r.needs.hunger=5);
+ assert(supplyRun(s,"food"),"hungry residents can fetch food rather than deadlock");
+ assert(run(s,400,()=>!s.trip),"food trip returns");assert(s.materials.food>0);
+}
+console.log("PASS: hungry residents can collect town food");

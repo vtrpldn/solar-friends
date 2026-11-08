@@ -1,3 +1,4 @@
+import { needMeters } from "./resident-needs.js";
 import { drapeRoadGeometry } from "./road-surface.js";
 import { terraform } from "./terraform.js";
 import { roadLine } from "./placement-helpers.js";
@@ -85,7 +86,8 @@ import {
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
   SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
-const utilitiesPreview = new URLSearchParams(location.search).has(
+const needsPreview = new URLSearchParams(location.search).has("needs-preview");
+const utilitiesPreview = needsPreview || new URLSearchParams(location.search).has(
   "utilities-preview",
 );
 const restPreview = new URLSearchParams(location.search).has("rest-preview");
@@ -113,6 +115,16 @@ if (lightingPreview) {
       60) /
     0.45;
   s.rain = new URLSearchParams(location.search).has("lighting-rain");
+}
+if (needsPreview) {
+  s.time=200;s.rain=false;s.rainSeen=true;s.rainResolved=true;
+  s.people.forEach((r,i)=>{
+    r.x=32+i;r.z=37;r.energy=80+i*3;
+    r.needs={hunger:85,bladder:85,bowels:85,hygiene:85,social:85,fun:85};
+    r.needs[['hunger','bladder','hygiene','social','fun'][i]]=8;
+  });
+  const home=Object.values(s.infrastructure.nodes).find(n=>n.kind==='home');
+  if(home) home.water[0]=5;
 }
 if (restPreview) for (const resident of s.people) resident.energy = 10;
 try {
@@ -1403,7 +1415,7 @@ function renderUI() {
     selected,
     placing,
     s.log,
-    s.people.map((r) => [r.action, r.tentPhase, Math.round(r.energy)]),
+    s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
     s.projects.map((p) => [
       p.id,
       Math.floor((p.work / PROJECTS[p.key].work) * 100),
@@ -1520,10 +1532,12 @@ function renderUI() {
     name.textContent = r.name;
     name.title = `Good at: ${specialties[r.id]}`;
     const energy = document.createElement("span");
-    energy.textContent = `${Math.round(r.energy)}% energy`;
+    const meters=needMeters(r), lowest=[...meters].sort((a,b)=>a[1]-b[1])[0];
+    energy.textContent = `${lowest[0]} ${Math.round(lowest[1])}%`;
     const status = document.createElement("span");
-    status.textContent =
-      r.tentPhase === "exit"
+    status.textContent = r.needTask
+      ? (r.needTask.elapsed>0 ? r.needTask.label : {hunger:"Getting something to eat",bladder:"Heading for a toilet break",bowels:"Heading for a toilet break",hygiene:r.needTask.river?"Walking to the river to wash":"Heading to wash up",social:"Meeting a friend",fun:"Taking a recreation break"}[r.needTask.kind])
+      : r.tentPhase === "exit"
         ? "Leaving " +
           (r.restSite
             ? PROJECTS[s.projects.find((p) => p.id === r.restSite).key].name
@@ -1543,11 +1557,19 @@ function renderUI() {
               : (r.action === "relax" && COMMUNITY[r.leisureKind]?.activity) ||
                 actionText[r.action] ||
                 "Settling in";
+    if(r.needBlocked && !r.needTask) status.textContent += ` · ${r.needBlocked}`;
     status.className = "resident-status";
-    const progress = document.createElement("progress");
-    progress.max = 100;
-    progress.value = r.energy;
-    div.append(portrait, name, energy, status, progress);
+    const needs=document.createElement('div');
+    needs.className='resident-needs';
+    for(const [label,value] of meters) {
+      const item=document.createElement('label');
+      item.className=value<25?'need-low':value<50?'need-warn':'need-good';
+      const text=document.createElement('span');text.textContent=`${label} ${Math.round(value)}%`;
+      const progress=document.createElement('progress');progress.max=100;progress.value=value;
+      progress.setAttribute('aria-label',`${r.name}: ${label}`);
+      item.append(text,progress);needs.append(item);
+    }
+    div.append(portrait, name, energy, status, needs);
     $("roster").append(div);
   }
   const purchase = MATERIALS[$("purchase").value];
@@ -1707,7 +1729,7 @@ function frame(now) {
       (r.action !== "town" ||
         ["boarding", "unloading"].includes(s.trip?.phase)) &&
       r.tentPhase !== "inside" &&
-      !(r.action === "toilet" && r.toiletTime > 0);
+      !(r.needTask?.private && r.needTask.elapsed > 1 && r.needTask.elapsed < r.needTask.duration-1);
     if (r.tentPhase) {
       const door = restingDoor(s, i),
         t = Math.max(0, Math.min(1, (visual.time - r.tentAt) / 1.5));
@@ -1849,10 +1871,21 @@ function frame(now) {
         "compost",
         "apiary",
       ].includes(production.kind);
+    const visit=r.needTask;
+    if(visit?.private && visit.elapsed>0 && !r.walk.length) {
+      const site=s.projects.find(p=>p.id===visit.site);
+      if(site) {
+        const center=world(site.x+(footprint(site)[0]-1)/2,site.z+(footprint(site)[1]-1)/2);
+        const amount=Math.min(1,visit.elapsed,visit.duration-visit.elapsed);
+        g.position.lerp(center,Math.max(0,amount));
+      }
+    }
     const motion = r.walk.length
       ? r.cargo
         ? "carry-walk"
         : "walk"
+      : visit?.animation
+        ? (visit.private ? "duck-walk" : visit.animation)
       : seated
         ? "sit"
         : r.action === "wash"

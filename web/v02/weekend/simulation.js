@@ -1029,7 +1029,7 @@ export function supplyRun(s, material = "wood", project = null) {
     return false;
   const vehicle = s.nextTripVehicle || 0;
   const r = s.people
-    .filter((r) => r.energy > 35 && !r.cargo && !r.tentPhase && !r.needTask && Math.min(...Object.values(ensureNeeds(r)))>25)
+    .filter((r) => r.energy > 35 && !r.cargo && !r.tentPhase && !r.needTask && Object.entries(ensureNeeds(r)).every(([key,value])=>value>25 || (key==="hunger" && ["food","meals"].includes(material))))
     .sort((a, b) => b.energy - a.energy)
     .find(r => route(s, r, carDoor(vehicle)));
   if (!r) return false;

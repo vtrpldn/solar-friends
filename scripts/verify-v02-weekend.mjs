@@ -226,8 +226,9 @@ assert(
   "People stay with activities before choosing another",
 );
 assert.equal(plan(social, "gathering", 29, 35), "");
-run(social, 180);
-assert(finished(social, "gathering"), "Leisure must yield to useful work");
+// Personal care may interrupt labor; the project must still finish promptly.
+run(social, 300);
+assert(finished(social, "gathering"), "Residents return to useful work after breaks");
 assert(
   social.people.every(
     (r) => Number.isFinite(r.x) && Number.isFinite(r.z) && r.energy >= 0,

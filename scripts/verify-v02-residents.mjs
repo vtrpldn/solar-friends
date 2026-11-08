@@ -38,6 +38,7 @@ for (const id of RESIDENT_IDS) {
     "tend",
     "work",
     "wash",
+    "eat", "bathe", "pee", "toilet", "read", "play",
     "carry",
     "carry-walk",
   ])
@@ -241,3 +242,14 @@ interrupted.rig.joints.forEach((j, i) => {
 console.log(
   "PASS: matching transitions at 30/60/120 Hz and continuous interrupted poses.",
 );
+
+for (const action of ['eat','bathe','pee','toilet','read','play','chat']) {
+ const actor=createResident('iara');
+ const snapshot=()=>actor.rig.joints.map(j=>[...j.position.toArray(),...j.quaternion.toArray()]);
+ poseResident(actor.rig,action,0);const before=snapshot();
+ poseResident(actor.rig,action,1.37);assert.notDeepEqual(snapshot(),before,`${action}: animation must move`);
+ assert.equal(actor.rig.bowl.visible,action==='eat');
+ assert.equal(actor.rig.book.visible,action==='read');
+ poseResident(actor.rig,'walk',2);assert(!actor.rig.bowl.visible&&!actor.rig.book.visible);
+}
+console.log('PASS: eating, bathing, toilet, reading, play and conversation animate; held props reset between actions.');
