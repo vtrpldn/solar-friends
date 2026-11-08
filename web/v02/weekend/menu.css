@@ -2,7 +2,7 @@ body {
   margin: 0;
   min-height: 100vh;
   overflow: auto;
-  background: #536348;
+  background: #354b4d;
 }
 #menu-landscape {
   position: fixed;
@@ -10,82 +10,115 @@ body {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  filter: brightness(0.78) saturate(0.88);
+  filter: brightness(0.72) saturate(0.8);
 }
 .start-menu {
   position: relative;
-  width: 390px;
-  margin: 0 0 0 7vw;
-  padding: 9vh 0 28px;
-  color: #fff7df;
-  text-shadow:
-    0 2px 5px #1d302d,
-    0 1px 2px #1d302d;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5vh 24px 24px;
+  color: #eee9d7;
 }
-.start-menu h1 {
-  font-size: 84px;
-  line-height: 0.9;
-  letter-spacing: -0.05em;
-  max-width: 360px;
-  margin: 0 0 64px;
-  font-weight: 750;
+.menu-title {
+  position: static;
+  display: block;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  text-align: center;
+  color: #f7f0d7;
+}
+.menu-title small {
+  font-size: 10px;
+  letter-spacing: 0.36em;
+  color: #e1dbc2;
+  text-shadow: 0 2px 5px #203633;
+}
+.menu-title h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.065em;
+  font-size: clamp(46px, 5vw, 76px);
+  line-height: 1.1;
+  margin: 13px 0 14px;
+  text-shadow:
+    0 3px 1px #293e36,
+    0 5px 18px #172b29;
+}
+.title-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  color: #c9bb87;
+  font-size: 9px;
+}
+.title-rule::before,
+.title-rule::after {
+  content: "";
+  display: block;
+  width: 110px;
+  height: 1px;
+  background: #d0c392;
 }
 .menu-choices {
   display: grid;
-  gap: 7px;
   width: 310px;
+  margin: auto 0;
+  padding: 18px 22px;
+  gap: 3px;
+  background: #172d2cdb;
+  border: 1px solid #a6a68480;
+  border-top: 2px solid #c5bb8c;
+  border-bottom: 2px solid #c5bb8c;
+  box-shadow: 0 12px 35px #10272540;
 }
 .menu-choices button {
-  text-align: left;
+  text-align: center;
   background: transparent;
-  color: #fff7df;
-  border: 0;
+  color: #eee9d7;
+  border: 1px solid transparent;
   border-radius: 0;
   box-shadow: none;
-  padding: 10px 0 10px 26px;
+  padding: 15px 6px;
   position: relative;
-  text-shadow: inherit;
   transition:
-    transform 0.15s,
-    color 0.15s;
+    background 0.15s,
+    border-color 0.15s;
 }
 .menu-choices strong {
   display: block;
-  font-size: 29px;
-  font-weight: 600;
+  font-size: 19px;
+  font-weight: 450;
+  letter-spacing: 0.025em;
 }
 .menu-choices span {
   display: none;
 }
-.menu-choices button::before {
-  content: "›";
-  position: absolute;
-  left: 0;
-  top: 9px;
-  font-size: 30px;
-  opacity: 0;
-}
 .menu-choices button:hover:not(:disabled),
 .menu-choices button:focus-visible {
-  background: transparent;
+  background: #b3bc9a20;
+  border-color: #c5bb8c99;
+  color: #fff5ce;
   box-shadow: none;
-  color: #fff0b8;
-  transform: translateX(5px);
-}
-.menu-choices button:hover::before,
-.menu-choices button:focus-visible::before {
-  opacity: 1;
+  transform: none;
 }
 .start-menu .hint {
-  margin: 46px 0 16px;
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  color: #eee9ce;
+  margin: 20px 0 12px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: #e3e3d2;
+  text-shadow: 0 1px 3px #21332c;
 }
 .start-menu a {
   color: #e6e8d6;
   font-size: 12px;
   text-decoration: none;
+  text-shadow: 0 1px 3px #21332c;
 }
 .start-menu button:focus-visible,
 .start-menu a:focus-visible {
@@ -95,19 +128,19 @@ body {
 #replace-save {
   max-width: 440px;
 }
-@media (max-height: 760px) {
+@media (max-height: 700px) {
   .start-menu {
-    padding-top: 34px;
+    padding-top: 24px;
   }
-  .start-menu h1 {
-    font-size: 66px;
-    margin-bottom: 28px;
+  .menu-title h1 {
+    font-size: 48px;
   }
-  .menu-choices strong {
-    font-size: 25px;
+  .menu-choices {
+    padding: 10px 20px;
+    margin: 28px 0 14px;
   }
-  .start-menu .hint {
-    margin-top: 24px;
+  .menu-choices button {
+    padding: 10px 6px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

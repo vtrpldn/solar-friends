@@ -1,3 +1,5 @@
+import { createTerrain } from "./terrain.js";
+import { createRiver } from "./river.js";
 import * as THREE from "three";
 import { createAsset, compactModel, disposeModel } from "../library/catalog.js";
 
@@ -12,8 +14,8 @@ try {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#a8b590");
-  scene.fog = new THREE.Fog("#a8b590", 45, 95);
+  scene.background = new THREE.Color("#b9cbd0");
+  scene.fog = new THREE.Fog("#b9cbd0", 45, 110);
   scene.add(new THREE.HemisphereLight("#fff0cd", "#687d52", 2.5));
   const sun = new THREE.DirectionalLight("#ffdda2", 3.2);
   sun.position.set(-12, 22, 8);
@@ -28,13 +30,9 @@ try {
   });
   sun.shadow.normalBias = 0.04;
   scene.add(sun);
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(180, 180),
-    new THREE.MeshStandardMaterial({ color: "#9ba76c", roughness: 1 }),
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.receiveShadow = true;
-  scene.add(ground);
+  scene.add(createTerrain(42));
+  const river = createRiver(42);
+  scene.add(compactModel(river.root), river.current);
   function prop(id, x, z, rotation = 0) {
     const model = compactModel(createAsset(id));
     model.position.set(x, 0, z);
@@ -79,21 +77,18 @@ try {
   path.position.set(-2, 0.012, 8);
   path.receiveShadow = true;
   scene.add(path);
-  const camera = new THREE.OrthographicCamera(-18, 18, 14, -14, 0.1, 120);
-  camera.position.set(22, 23, 30);
-  camera.lookAt(0, 0, 1);
+  prop("house", -9, -4, 0.3);
+  prop("house", 8, -7, -0.4);
+  prop("solar_farm", 8, 5);
+  prop("orchard", -9, 6);
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 180);
+  camera.position.set(27, 15, 35);
+  camera.lookAt(0, 2, -3);
   function render() {
     const w = innerWidth,
       h = innerHeight;
     renderer.setSize(w, h, false);
-    const half = 9.5,
-      aspect = w / h;
-    // Shift the village to the right of the menu without cropping the landscape.
-    camera.left = -half * aspect;
-    camera.right = half * aspect;
-    camera.top = half;
-    camera.bottom = -half;
-    camera.setViewOffset(w, h, -w * 0.2, 0, w, h);
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.render(scene, camera);
   }
