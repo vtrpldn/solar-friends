@@ -1471,3 +1471,28 @@ header > .time { grid-column: 3; justify-self: end; }
 #resident-detail .resident-profile small { letter-spacing: normal; font-weight: normal; }
 #people > .panel-close { position: absolute; top: 24px; right: 24px; }
 #people #roster { align-items: stretch; }
+/* Keep choosing a resident separate from reading their profile. */
+#people { height: min(720px,calc(100dvh - 64px)); }
+#people .residents-layout { grid-template-columns: 250px minmax(0,1fr); }
+#people .person { display: block; padding: 0; border: 0; background: none; }
+#people .resident-picker { display: grid; grid-template-columns: 44px minmax(0,1fr); width: 100%; text-align: left; gap: 4px 10px; padding: 12px; border: 1px solid #d8c79e; border-radius: 12px; box-shadow: none; background: #fffaf0; }
+#people .resident-picker[aria-pressed="true"] { background: #e3ebcc; border-color: #7b9260; box-shadow: inset 4px 0 #7b9260; }
+#people .resident-picker .portrait { grid-row: 1/4; }
+#people .resident-picker .resident-status { grid-column: 2; font-size: 11px; }
+#people .resident-picker > span:last-child { grid-column: 2; font-size: 11px; }
+#resident-detail .resident-profile { background: transparent; padding: 0 8px 12px; }
+.resident-heading { display: flex; align-items: center; gap: 16px; }
+.resident-heading > img { width: 72px; height: 88px; object-fit: contain; background: #e3ebcc; border-radius: 18px; }
+#resident-detail .resident-traits { color: #778557; font-size: 12px; }
+.resident-tabs { display: flex; gap: 8px; margin: 18px 0; border-bottom: 1px solid #d8c79e; padding-bottom: 12px; }
+.resident-tabs button { font-size: 13px; padding: 8px 14px; box-shadow: none; }
+.resident-tabs button[aria-pressed="true"] { background: #e3ebcc; border-color: #7b9260; }
+.resident-activity { padding: 12px; border-left: 3px solid #8a9c64; background: #eeecd7; border-radius: 6px; font-size: 14px; }
+#resident-detail .resident-needs { gap: 12px 24px; margin-bottom: 16px; }
+#resident-detail .resident-needs span { font-size: 13px; }
+#resident-detail progress { width: 100%; height: 9px; accent-color: #81995e; }
+.resident-specialties { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 24px; }
+.resident-specialties span { padding: 7px 10px; border-radius: 8px; background: #e8e7cf; font-size: 13px; }
+.relationship-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #dfd5b9; }
+.relationship-row img { width: 44px; height: 52px; object-fit: contain; }
+.relationship-row > div { flex: 1; }

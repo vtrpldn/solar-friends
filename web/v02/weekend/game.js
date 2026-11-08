@@ -1153,7 +1153,7 @@ const actionText = {
   wash: "Washing up",
   toilet: "Using the toilet",
 };
-let uiSignature = "", expandedResident = null;
+let uiSignature = "", expandedResident = null, residentTab = "Overview";
 let management;
 function refillSelect(id, options) {
   const el = $(id),
@@ -1591,31 +1591,53 @@ function renderUI() {
       progress.setAttribute('aria-label',`${r.name}: ${label}`);
       item.append(text,progress);needs.append(item);
     }
-    div.append(portrait, name, energy, status, needs);
-    const profile=profileFor(r);
-    const open=document.createElement('button');open.className='resident-profile-toggle';
-    open.textContent=`${expandedResident===r.id?'▾':'▸'} ${profile.role}`;
-    open.setAttribute('aria-expanded',String(expandedResident===r.id));
-    open.onclick=()=>{expandedResident=r.id;uiSignature='';renderUI();};
-    div.append(open);
-    if(expandedResident===r.id){
+    const profile=profileFor(r), chosen=expandedResident===r.id;
+    const pick=document.createElement('button');pick.className='resident-picker';
+    pick.setAttribute('aria-pressed',String(chosen));pick.setAttribute('aria-label',`View ${r.name}`);
+    pick.append(portrait,name,status,energy);
+    pick.onclick=()=>{expandedResident=r.id;uiSignature='';renderUI();$("roster").querySelector(`[data-resident="${r.id}"] button`)?.focus();};
+    div.append(pick);
+    if(chosen){
       const detail=document.createElement('section');detail.className='resident-profile';
-      const paragraph=(text,kind='p')=>{const el=document.createElement(kind);el.textContent=text;detail.append(el);};
-      paragraph(profile.traits.join(' · '),'h3');paragraph(profile.bio);
-      paragraph('Their rhythm','h3');paragraph(profile.effect);
-      paragraph(`Favorite pastime: ${profile.hobby}.`);
-      paragraph('Skills & experience','h3');
-      paragraph(`25% faster at: ${profile.strengths.map(key=>PROJECTS[key]?.name).filter(Boolean).join(', ')}.`);
-      paragraph(`${Math.floor(r.work)} seconds of hands-on practice · +${Math.round((Math.min(.15,r.work/10000))*100)}% experience bonus on all work (up to 15%).`);
-      paragraph('Connections','h3');
-      for(const friend of s.people.filter(p=>p!==r)) {
-        const score=r.friendships?.[friend.id]||0;
-        paragraph(`${friend.name} · ${friendshipLabel(score)} (${score}/100)`);
+      const heading=document.createElement('div');heading.className='resident-heading';
+      const face=document.createElement('img');illustrate(face,r.id);face.alt='';
+      const identity=document.createElement('div');
+      const title=document.createElement('h2');title.textContent=r.name;
+      const role=document.createElement('p');role.textContent=profile.role;
+      const traits=document.createElement('p');traits.className='resident-traits';traits.textContent=profile.traits.join(' · ');
+      identity.append(title,role,traits);heading.append(face,identity);detail.append(heading);
+      const tabs=document.createElement('nav');tabs.className='resident-tabs';tabs.setAttribute('aria-label','Profile sections');
+      for(const label of ['Overview','Skills','Relationships']){
+        const tab=document.createElement('button');tab.textContent=label;tab.setAttribute('aria-pressed',String(residentTab===label));
+        tab.onclick=()=>{residentTab=label;uiSignature='';renderUI();};tabs.append(tab);
       }
-      paragraph('Shared conversations strengthen connections; familiar friends are preferred when nearby.','small');
-      paragraph('Right now','h3');
-      paragraph(r.needBlocked || (r.needTask ? `${status.textContent}. They will return to available work afterward.` : r.energy<25 ? 'Too tired to work; looking for rest.' : r.action==='build' ? 'Needs are manageable, so they are helping with construction.' : status.textContent));
-      const title=document.createElement("h2");title.textContent=r.name;detail.prepend(title);
+      detail.append(tabs);
+      const paragraph=(text,kind='p')=>{const el=document.createElement(kind);el.textContent=text;detail.append(el);};
+      if(residentTab==='Overview'){
+        const activity=document.createElement('div');activity.className='resident-activity';activity.textContent=status.textContent;detail.append(activity);
+        paragraph('Needs','h3');detail.append(needs);
+        paragraph('About '+r.name,'h3');paragraph(profile.bio);
+        paragraph(profile.effect);paragraph(`Enjoys ${profile.hobby.toLowerCase()}.`);
+      } else if(residentTab==='Skills'){
+        paragraph('Specialties · 25% faster','h3');
+        const list=document.createElement('div');list.className='resident-specialties';
+        for(const key of profile.strengths){if(!PROJECTS[key])continue;const chip=document.createElement('span');chip.textContent=PROJECTS[key].name;list.append(chip);}
+        detail.append(list);
+        const bonus=Math.min(15,Math.max(0,r.work)/100);
+        paragraph('Learning by doing','h3');paragraph(`+${Math.floor(bonus)}% speed on all work`);
+        const progress=document.createElement('progress');progress.max=15;progress.value=bonus;progress.setAttribute('aria-label','Experience bonus');detail.append(progress);
+        paragraph('Hands-on work gradually improves efficiency, up to a 15% bonus.');
+      } else {
+        paragraph('Growing together','h3');paragraph('Shared conversations strengthen friendships. Familiar friends are preferred when nearby.');
+        for(const friend of s.people.filter(p=>p!==r)){
+          const score=r.friendships?.[friend.id]||0,row=document.createElement('div');row.className='relationship-row';
+          const img=document.createElement('img');illustrate(img,friend.id);img.alt='';
+          const text=document.createElement('div');const n=document.createElement('strong');n.textContent=friend.name;
+          const label=document.createElement('p');label.textContent=friendshipLabel(score);
+          const bar=document.createElement('progress');bar.max=100;bar.value=score;bar.setAttribute('aria-label',`Friendship with ${friend.name}`);
+          text.append(n,label,bar);row.append(img,text);detail.append(row);
+        }
+      }
       $("resident-detail").append(detail);
     }
     $("roster").append(div);
