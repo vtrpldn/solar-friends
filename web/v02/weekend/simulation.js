@@ -574,11 +574,11 @@ export function missingMaterials(s, key) {
     .filter(([id, n]) => materialCount(s, id) < n)
     .map(([id, n]) => materialText(id, n - materialCount(s, id)));
 }
-export function blueprintPurchase(s, key) {
+export function blueprintPurchase(s, key, count = 1) {
   const items = {};
   let cost = 0;
   if (s.mode !== "sandbox") for (const [id, required] of Object.entries(PROJECTS[key].materials)) {
-    const missing = Math.max(0, required - materialCount(s, id));
+    const missing = Math.max(0, required * count - materialCount(s, id));
     if (!missing) continue;
     const item = MATERIALS[id];
     if (!item.quantity || !Number.isFinite(item.price)) return {items, cost: 0, error: `Produce ${item.name} locally first.`};
@@ -589,9 +589,15 @@ export function blueprintPurchase(s, key) {
   return {items, cost, error: cost > s.money ? `Missing materials cost R$${cost.toFixed(2)}; shared savings are too low.` : ""};
 }
 function dispatchBlueprintPickup(s) {
-  if (s.trip) return;
-  const project = s.projects.find(p => p.pendingMaterials);
-  if (project) supplyRun(s, Object.keys(project.pendingMaterials)[0], project);
+  const pending = s.projects.filter(p => p.pendingMaterials);
+  if (!pending.length) return;
+  // The order stays editable until the driver actually leaves the village.
+  if (s.trip) {
+    if (s.trip.project && s.trip.phase === "boarding") s.trip.projects = pending.map(p=>p.id);
+    return;
+  }
+  if (supplyRun(s, Object.keys(pending[0].pendingMaterials)[0], pending[0]))
+    s.trip.projects = pending.map(p=>p.id);
 }
 export function requiredLoads(key) {
   return Object.entries(PROJECTS[key].materials).reduce(
@@ -1672,7 +1678,8 @@ export function tick(s, dt) {
           const id = trip.material,
             item = MATERIALS[id];
           const project = s.projects.find(p => p.id === trip.project);
-          if (project) delete project.pendingMaterials;
+          const orders = trip.projects || [trip.project];
+          if (project) for (const p of s.projects.filter(p=>orders.includes(p.id))) delete p.pendingMaterials;
           else if (id === "wood") s.wood += item.quantity;
           else s.materials[id] += item.quantity;
           r.action = "idle";
@@ -1680,7 +1687,7 @@ export function tick(s, dt) {
           s.trip = null;
           say(
             s,
-            project ? `${r.name} unloaded the reserved materials for ${PROJECTS[project.key].name}. Construction can begin.` : `${r.name} unloaded ${item.quantity} ${item.name} from the car.`,
+            project ? `${r.name} unloaded reserved materials for ${orders.length === 1 ? PROJECTS[project.key].name : `${orders.length} projects`}. Construction can begin.` : `${r.name} unloaded ${item.quantity} ${item.name} from the car.`,
           );
         }
       }
@@ -2178,6 +2185,9 @@ export function restore(text) {
             !Number.isInteger(n) || n <= 0 || !PROJECTS[p.key]?.materials[id] || n > PROJECTS[p.key].materials[id]))) return null;
     }
     if (s.trip?.project !== undefined && !s.projects.some(p => p.id === s.trip.project && p.pendingMaterials)) return null;
+    if (s.trip?.projects !== undefined && (!Array.isArray(s.trip.projects) ||
+        !s.trip.projects.includes(s.trip.project) || new Set(s.trip.projects).size !== s.trip.projects.length ||
+        s.trip.projects.some(id=>!s.projects.some(p=>p.id===id && p.pendingMaterials)))) return null;
     const ids = new Set(),
       keys = new Set();
     for (const p of s.projects) {

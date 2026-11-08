@@ -41,3 +41,21 @@ const partial=fresh();partial.wood=7;const partialQuote=blueprintPurchase(partia
 assert.equal(partialQuote.items.wood,PROJECTS.shelter.materials.wood-7);
 assert.equal(plan(partial,'shelter',40,39),'');assert.equal(partial.wood,0);
 console.log('PASS: exact shortage purchase, immediate pickup, queued orders, physical delivery, construction gating, recovery, save resume and atomic insufficient funds.');
+
+const batch=fresh();
+assert.equal(plan(batch,'shelter',40,39),'');
+assert.equal(plan(batch,'gathering',29,35),'');
+assert.deepEqual(batch.trip.projects,batch.projects.map(p=>p.id));
+assert(restore(save(batch)), 'batched pickup survives saving');
+const invalidBatch=JSON.parse(save(batch));invalidBatch.trip.projects.push('missing-project');
+assert.equal(restore(JSON.stringify(invalidBatch)),null);
+const batchMoney=batch.money;
+while(batch.trip?.phase==='boarding')tick(batch,.1);
+const departedIds=[...batch.trip.projects];
+assert.equal(plan(batch,'covered-stores',45,39),'');
+assert.deepEqual(batch.trip.projects,departedIds,'departed car cannot collect a later order');
+while(batch.projects[0].pendingMaterials)tick(batch,.1);
+assert(!batch.projects[1].pendingMaterials,'one trip delivers both original orders');
+assert(batch.projects[2].pendingMaterials,'later order waits for the next pickup');
+assert(batch.money<batchMoney);
+console.log('PASS: batching before departure, later-order queue and saved manifest validation.');

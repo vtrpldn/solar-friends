@@ -29,7 +29,7 @@ export function cameraStep({ x, z, zoom }, keys, dt) {
 export function installCameraNavigation(
   camera,
   controls,
-  { home, onInteract },
+  { home, onInteract = () => {} },
 ) {
   const keys = new Set(),
     handled = new Set([

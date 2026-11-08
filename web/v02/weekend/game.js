@@ -882,7 +882,9 @@ function updatePlacementPreview() {
           line.map((c) => world(c.x, c.z).add(new THREE.Vector3(0, 0.08, 0))),
         );
         roadPreview.visible = true;
-        hint ||= `${line.filter((c) => !s.projects.some((p) => p.key === "road" && p.x === c.x && p.z === c.z)).length} road tiles · Shift-click to place the line`;
+        const count = line.filter((c) => !s.projects.some((p) => p.key === "road" && p.x === c.x && p.z === c.z)).length;
+        const total = blueprintPurchase(s, "road", count);
+        hint = error || total.error || `${count} road sections${total.cost ? ` · Auto-buy R$${total.cost.toFixed(2)} total` : " · Materials available"} · Shift-click to plan`;
       }
     }
     message(
@@ -1510,7 +1512,7 @@ function renderUI() {
         (r) => r.job === p.id && r.action === "build",
       ).length;
       workStatus.textContent =
-        p.pendingMaterials ? (s.trip?.project === p.id ? "Materials purchased · resident collecting in town" : "Materials purchased · waiting for a pickup") : p.delivered < requiredLoads(p.key)
+        p.pendingMaterials ? ((s.trip?.projects || [s.trip?.project]).includes(p.id) ? "Materials purchased · resident collecting in town" : "Materials purchased · waiting for a pickup") : p.delivered < requiredLoads(p.key)
           ? `Bringing supplies · ${p.delivered}/${requiredLoads(p.key)} loads delivered`
           : workers
             ? `${workers} friends building`

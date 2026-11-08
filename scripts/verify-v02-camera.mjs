@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cameraStep } from "../web/v02/weekend/camera-navigation.js";
+import { cameraStep, installCameraNavigation } from "../web/v02/weekend/camera-navigation.js";
 const step = (keys, x = 10, z = 10, dt = 1) =>
   cameraStep({ x, z, zoom: 1 }, new Set(keys), dt);
 assert(step(["KeyW"]).x < 0 && step(["KeyW"]).z < 0);
@@ -27,3 +27,20 @@ assert(step(["Equal"]).zoom > 1 && step(["Minus"]).zoom < 1);
 console.log(
   "PASS: camera-relative directions, arrows, diagonal normalization, sprint, frame-rate independence, rotation and zoom.",
 );
+
+const {Vector3,OrthographicCamera}=await import('three');
+const listeners={};
+globalThis.addEventListener=(type,fn)=>listeners[type]=fn;
+globalThis.document={querySelector:()=>null,addEventListener:()=>{}};
+const camera=new OrthographicCamera();camera.position.set(10,10,10);
+const controls={target:new Vector3(),minZoom:.1,maxZoom:10,addEventListener:()=>{}};
+let homes=0;
+const nav=installCameraNavigation(camera,controls,{home:()=>homes++});
+listeners.keydown({code:'KeyW',preventDefault(){}});
+nav.update(.1);
+assert(controls.target.length()>0,'W pans without an interaction callback');
+listeners.keyup({code:'KeyW'});
+listeners.keydown({code:'Home',preventDefault(){}});
+assert.equal(homes,1);
+nav.rotate(.1);nav.zoom(1.1);
+console.log('PASS: keyboard and button navigation without removed cutscene callback.');
