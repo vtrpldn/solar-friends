@@ -4,7 +4,7 @@
 
 A live 64×64 plot lets us judge the complete collection at one real scale and compose scenes with the same models used in the workshop. It is separate from v0.1 and its simulation.
 
-Open `/v02/land/`. The initial gallery places all 105 model types on the 128×128 metre plot. The asset library can search/filter and focus a model, or place it again after deletion. The collection link opens a visual contact sheet; each card opens that model in the orbitable workshop.
+Open `/v02/land/`. The initial gallery places all 223 model types on the 128×128 metre plot. The asset library can search/filter and focus a model, or place it again after deletion. The collection link opens a visual contact sheet; each card opens that model in the orbitable workshop.
 
 ## Controls
 

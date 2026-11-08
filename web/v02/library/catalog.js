@@ -1,3 +1,4 @@
+import { construction } from "./construction.js";
 import { createResident, RESIDENT_IDS } from "../residents/rig.js";
 import * as THREE from "three";
 import { PROPS } from "./props.js";
@@ -281,7 +282,7 @@ function limb(g, a, b, base, tip, hex = "#936039") {
   m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), v.normalize());
   return m;
 }
-function tree(kind) {
+function tree(kind, variant = 0) {
   const g = group();
   if (kind === "jucara") {
     limb(g, [0, 0, 0], [0.12, 4.5, 0], 0.15, 0.095, "#9d9974");
@@ -302,8 +303,8 @@ function tree(kind) {
       );
     limb(g, [0.1, 3.8, 0], [0.12, 4.65, 0], 0.13, 0.09, "#54834b");
     for (let i = 0; i < 9; i++) {
-      const a = (i * Math.PI * 2) / 9,
-        len = 1.9 + (i % 2) * 0.2;
+      const a = (i * Math.PI * 2) / 9 + variant * .37,
+        len = 1.9 + (i % 2) * 0.2 - variant * .12;
       const direction = new THREE.Vector3(Math.sin(a), 0, Math.cos(a));
       let previous = [0.12, 4.6, 0];
       for (let j = 1; j <= 6; j++) {
@@ -340,7 +341,7 @@ function tree(kind) {
     for (let y = 0.3; y < 3.5; y += 0.4)
       cylinder(g, 0.19 - y * 0.02, 0.19 - y * 0.02, 0.025, "stone", 0, y, 0, 8);
     for (let i = 0; i < 5; i++) {
-      const a = i * 2.4,
+      const a = i * 2.4 + variant * .65,
         x = Math.sin(a) * 1.2,
         z = Math.cos(a) * 1.2,
         y = 3.3 + (i % 3) * 0.38;
@@ -432,15 +433,15 @@ function tree(kind) {
         bark,
       );
     }
-  const count = fine ? 9 : kind === "umbuzeiro" ? 8 : 6;
+  const count = (fine ? 9 : kind === "umbuzeiro" ? 8 : 6) - variant;
   for (let i = 0; i < count; i++) {
-    const a = i * 2.4,
-      x = Math.sin(a) * r * 0.7,
-      z = Math.cos(a) * r * 0.7,
+    const a = i * 2.4 + variant * .65,
+      x = Math.sin(a) * r * (0.7 + Math.sin(i+variant)*variant*.07),
+      z = Math.cos(a) * r * (0.7 + Math.cos(i+variant)*variant*.07),
       y =
         kind === "umbuzeiro"
           ? h * 0.7 + (i % 2) * 0.12
-          : h * 0.72 + (i % 3) * 0.18;
+          : h * (0.72 + variant*.025) + (i % 3) * 0.18;
     const elbow = [x * 0.5, fork + (y - fork) * 0.5, z * 0.45];
     limb(g, [0, fork, 0], elbow, 0.13, 0.08, bark);
     limb(g, elbow, [x, y, z], 0.08, 0.035, bark);
@@ -1788,6 +1789,61 @@ const descriptions = {
 };
 for (const a of ASSETS)
   if (descriptions[a.id]) a.description = descriptions[a.id];
+const nativeTrees = ["jequitiba","jucara","embauba","pau_brasil","pequi","barbatimao","umbuzeiro","jurema","mandacaru"];
+for (const id of nativeTrees) {
+  const original=ASSETS.find(a=>a.id===id);
+  for (const variant of [1,2]) {
+    add(`${id}-variant-${variant}`,`${original.name} · ${id==='mandacaru' ? (variant===1?'compact':'tall') : variant===1?'open crown':'asymmetric crown'}`,"Vegetation",[2,2],()=>{
+      const g=tree(id,variant);
+      g.rotation.y=variant*.7;
+      if(id==='mandacaru') {
+        g.scale.set(variant===1?.85:1.05,variant===1?.9:1.12,.9);
+      }
+      return g;
+    });
+  }
+  for(const stage of [0,1]) add(`${id}-young-${stage}`,`${original.name} · ${stage?'young tree':'sapling'}`,"Vegetation",[2,2],()=>{
+    const g=group(),h=stage?1.8:.65;
+    if(id==='mandacaru') {
+      cylinder(g,.08,.12,h,'leaf',0,h/2,0,8);
+      if(stage) {beam(g,[0,.65,0],[.35,.8,0],.1,'leaf');cylinder(g,.07,.09,.65,'leaf',.35,1.1,0,8);}
+    }else{
+      cylinder(g,stage?.06:.025,stage?.11:.04,h,'timber',0,h/2,0,6);
+      for(let n=0;n<(stage?5:3);n++){
+        const a=n*2.4,y=h*(.65+(n%2)*.13),r=stage?.55:.22;
+        if(id==='jucara') {
+          for(let j=1;j<=3;j++)for(const side of [-1,1])
+            leaf(g,Math.sin(a)*r*j/3,h+Math.sin(j)*r*.2,Math.cos(a)*r*j/3,a+side*.9,r*.65,'#4c7d42');
+        } else if(id==='embauba') {
+          const x=Math.sin(a)*r*.6,z=Math.cos(a)*r*.6;
+          beam(g,[0,h*.8,0],[x,h,z],.02,'stone');
+          for(let l=0;l<5;l++)leaf(g,x,h,z,l*Math.PI*.4,r*.65,'#a8b98b');
+        }
+        else {
+          beam(g,[0,y-.2,0],[Math.sin(a)*r,y,Math.cos(a)*r],stage?.04:.02,'timber');
+          foliage(g,Math.sin(a)*r,y,Math.cos(a)*r,r*.7,id==='jurema'?'#81926a':'#68883c',[1,id==='jurema'?.4:.8,1]);
+        }
+      }
+    }
+    return g;
+  });
+}
+for(const [base,kind] of [['forest-fern','fern'],['bromeliad','bromeliad'],['macambira','macambira'],['bunchgrass','grass']])
+  for(const variation of [1,2])add(`${base}-patch-${variation}`,`${base.replaceAll('-',' ')} · patch ${variation}`,"Vegetation",[1,1],()=>{
+    const g=group();
+    for(let i=0;i<variation+1;i++){const p=plant(kind);p.scale.setScalar(.55+i*.12);p.rotation.y=i*2.4;p.position.set(Math.sin(i*2.4)*.35,0,Math.cos(i*2.4)*.35);g.add(p);}return g;
+  });
+for(const crop of ['lettuce','beans','tomato','maize','cassava','fodder'])
+  for(const stage of [0,1,2])add(`${crop}-alternate-${stage}`,`${crop} · alternate ${['seedling','growing','harvestable'][stage]}`,"Crops",[1,1],()=>{
+    const g=plant(crop,stage);g.rotation.y=.8;g.scale.set(.9,1.08,.95);
+    // A second smaller shoot changes the silhouette without increasing crop density excessively.
+    if(crop==='fodder'){const shoot=plant(crop,stage);shoot.scale.setScalar(.45);shoot.position.x=.25;g.add(shoot);}return g;
+  });
+for(const def of ASSETS.filter(a=>['Homes','Buildings'].includes(a.category)))
+  for(const stage of [0,1]){
+    add(`${def.id}-construction-${stage}`,`${def.name} · ${stage?'assembly':'groundwork'}`,"Construction",def.footprint,()=>construction(def,stage));
+    ASSETS.at(-1).constructionOf=def.id;
+  }
 export const CATEGORIES = [...new Set(ASSETS.map((a) => a.category))];
 
 // Bake static recipe pieces into one draw per material. This preserves the exact

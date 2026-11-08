@@ -4,6 +4,7 @@ import { ASSETS, createAsset } from "../web/v02/library/catalog.js";
 // Budgets follow visual role: tile roofs need geometry; tiny crop leaves do not.
 const budgets = {
   Props: 1200,
+  Construction: 5000,
   Homes: 5000,
   Buildings: 5000,
   Vegetation: 3000,

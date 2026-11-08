@@ -1,5 +1,5 @@
 const modes = [
-  ['library', 'Collection', '/v02/library/', 'Browse all 105 models'],
+  ['library', 'Collection', '/v02/library/', 'Browse every model'],
   ['workshop', '3D inspector', '/v02/workshop/', 'Orbit a model and inspect its sprite proof'],
   ['land', 'Scene editor', '/v02/land/', 'Place, move and rotate props'],
   ['biomes', 'Biome landscapes', '/v02/land/?biome=mata-atlantica', 'Explore elevated Brazilian terrain'],

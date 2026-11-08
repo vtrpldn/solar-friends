@@ -23,7 +23,7 @@ export function baseHeight(id,x,z) {
 }
 export function terrainField(id, records=[]) {
   if (!BIOMES[id]) throw Error('Unknown biome');
-  const pads = records.filter(r=>['Homes','Buildings','Props','Supplies'].includes(definitions.get(r.asset)?.category) || r.asset === 'road').map(r=>{
+  const pads = records.filter(r=>['Homes','Buildings','Props','Supplies','Construction'].includes(definitions.get(r.asset)?.category) || r.asset === 'road').map(r=>{
     const f=footprint(r),[x,,z]=placementPosition(r.column,r.row,f);
     return {x,z,w:f[0],d:f[1],y:baseHeight(id,x,z)};
   });
@@ -95,7 +95,10 @@ export function biomeLandscape(id) {
   for(let row=3;row<60;row+=spacing)for(let column=3;column<60;column+=spacing){
     const n=((Math.imul(column+713,374761393)^Math.imul(row+151,668265263))>>>0)%1009;
     if(n%4===0 || Math.hypot(column-31,row-31)<10)continue;
-    const asset=species[n%species.length];
+    let asset=species[n%species.length];
+    const variation=n%8;
+    const candidate=variation<2?`${asset}-young-${variation}`:variation<5?`${asset}-variant-${1+variation%2}`:asset;
+    if(definitions.has(candidate))asset=candidate;
     records.push({id:`biome-${column}-${row}`,asset,column:column+n%3,row:row+(n>>2)%3,rotation:(n%4)*90,label:definitions.get(asset).name});
   }
   return records;
