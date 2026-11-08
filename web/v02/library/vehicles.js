@@ -158,11 +158,13 @@ export function createPickup() {
       tire.rotation.z = Math.PI / 2;
       tire.position.set(x, 0.43, z);
       tire.castShadow = true;
+      tire.userData.wheel = true;
       g.add(tire);
       const hub = new THREE.Mesh(
         new THREE.CylinderGeometry(0.235, 0.235, 0.305, 8),
         material(chrome),
       );
+      hub.userData.wheel = true;
       hub.rotation.z = Math.PI / 2;
       hub.position.copy(tire.position);
       g.add(hub);

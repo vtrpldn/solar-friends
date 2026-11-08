@@ -1,3 +1,4 @@
+import { ARRIVAL_DURATION, ARRIVAL_SPOTS } from "./arrival.js";
 import { riverBankAt } from "./river-layout.js";
 // A self-contained v0.2 prototype. Time is measured in active simulation seconds.
 export const CAMPS = [
@@ -76,6 +77,7 @@ export function createWeekend() {
   return {
     version: 1,
     stage: "arrival",
+    arrivalElapsed: 0,
     camp: null,
     time: 0,
     money: 220,
@@ -85,8 +87,8 @@ export function createWeekend() {
     people: NAMES.map((name, i) => ({
       name,
       id: ["iara", "bento", "luz", "caua", "nina"][i],
-      x: 30 + i * 0.6,
-      z: 24,
+      x: ARRIVAL_SPOTS[i][0],
+      z: ARRIVAL_SPOTS[i][1],
       energy: 85 + i * 3,
       action: "idle",
       job: null,
@@ -111,7 +113,8 @@ export function say(s, text) {
   s.log = s.log.slice(0, 12);
 }
 export function chooseCamp(s, id) {
-  if (s.stage !== "arrival") return false;
+  if (s.stage !== "arrival" || s.arrivalElapsed < ARRIVAL_DURATION)
+    return false;
   const c = CAMPS.find((c) => c.id === id);
   if (!c) return false;
   s.camp = id;
@@ -413,7 +416,14 @@ export function endWeekend(s) {
   return true;
 }
 export function tick(s, dt) {
-  if (s.stage === "arrival" || !Number.isFinite(dt) || dt <= 0) return;
+  if (!Number.isFinite(dt) || dt <= 0) return;
+  if (s.stage === "arrival") {
+    s.arrivalElapsed = Math.min(
+      ARRIVAL_DURATION,
+      (s.arrivalElapsed ?? ARRIVAL_DURATION) + Math.min(dt, 1),
+    );
+    return;
+  }
   dt = Math.min(dt, 1);
   s.time += dt;
   if (s.trip) {
@@ -590,6 +600,13 @@ export function restore(text) {
     )
       return null;
     const fresh = createWeekend();
+    s.arrivalElapsed ??= ARRIVAL_DURATION;
+    if (
+      !Number.isFinite(s.arrivalElapsed) ||
+      s.arrivalElapsed < 0 ||
+      s.arrivalElapsed > ARRIVAL_DURATION
+    )
+      return null;
     if (
       ["rain", "rainSeen", "rainResolved", "meal"].some(
         (k) => typeof s[k] !== "boolean",

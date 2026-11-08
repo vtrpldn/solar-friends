@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import {
-  createWeekend,
+  createWeekend as createFreshWeekend,
   chooseCamp,
   plan,
   tick,
@@ -14,6 +14,11 @@ import {
   restore,
   route,
 } from "../web/v02/weekend/simulation.js";
+function createWeekend() {
+  const s = createFreshWeekend();
+  for (let i = 0; i < 151; i++) tick(s, 0.1);
+  return s;
+}
 function run(s, seconds) {
   for (let i = 0; i < seconds * 10; i++) tick(s, 0.1);
 }
@@ -134,4 +139,32 @@ run(riverside, 180);
 assert(finished(riverside, "gathering"), "River must not strand camp workers");
 console.log(
   "PASS: riverbank building exclusion and accessible camp construction.",
+);
+const intro = createFreshWeekend();
+assert.equal(
+  chooseCamp(intro, "shade"),
+  false,
+  "Cannot choose camp before everyone exits",
+);
+run(intro, 4);
+assert(intro.arrivalElapsed > 3.9 && intro.arrivalElapsed < 4.1);
+assert.equal(intro.time, 0, "Arrival does not consume the working day");
+const introSaved = restore(save(intro));
+assert(introSaved);
+assert.equal(introSaved.arrivalElapsed, intro.arrivalElapsed);
+run(introSaved, 12);
+assert.equal(introSaved.arrivalElapsed, 15);
+assert(chooseCamp(introSaved, "shade"));
+const { arrivalPose } = await import("../web/v02/weekend/arrival.js");
+for (let i = 0; i < 5; i++) {
+  assert(!arrivalPose(5, i).visible);
+  const pose = arrivalPose(15, i);
+  assert(pose.visible && !pose.walking);
+  assert(Math.abs(pose.x - (intro.people[i].x - 32) * 2) < 1e-8);
+  assert.equal(pose.z, (intro.people[i].z - 32) * 2);
+}
+assert(Math.abs(arrivalPose(6, 0).car.x) < 1e-8);
+assert.equal(arrivalPose(6, 0).car.z, -22);
+console.log(
+  "PASS: driving before exits, staggered disembarkation, final positions, camp gating and saved arrival progress.",
 );

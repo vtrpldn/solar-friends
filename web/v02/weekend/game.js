@@ -1,3 +1,10 @@
+import { createPickup } from "../library/vehicles.js";
+import {
+  ARRIVAL_DURATION,
+  PARK_TIME,
+  arrivalPose,
+  arrivalLaneAt,
+} from "./arrival.js";
 import { createRiver } from "./river.js";
 import { riverBankAt } from "./river-layout.js";
 import { createTent } from "../library/camping.js";
@@ -31,9 +38,12 @@ import {
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
   SAVE = "solar-friends-v02-first-weekend-1";
+const arrivalPreview = new URLSearchParams(location.search).has(
+  "arrival-preview",
+);
 let s = createWeekend();
 try {
-  s = restore(localStorage.getItem(SAVE)) || s;
+  if (!arrivalPreview) s = restore(localStorage.getItem(SAVE)) || s;
 } catch {}
 let speed = 1,
   paused = false,
@@ -140,7 +150,7 @@ for (let i = 0; i < 52; i++) {
     r = 29 + (i % 5) * 5,
     x = 32 + (Math.cos(a) * r) / 2,
     z = 32 + (Math.sin(a) * r) / 2;
-  if (!riverBankAt(x, z, 2))
+  if (!riverBankAt(x, z, 2) && !arrivalLaneAt((x - 32) * 2, (z - 32) * 2))
     scenery.add(
       prop(native[i % Math.min(native.length, 8)] || "tree", x, z, i),
     );
@@ -164,7 +174,11 @@ function box(g, w, h, d, color, x, y, z) {
   g.add(m);
   return m;
 }
-const car = compactModel(createAsset("community-pickup"));
+const pickup = createPickup();
+const wheels = pickup.children.filter((part) => part.userData.wheel);
+for (const wheel of wheels) pickup.remove(wheel);
+const car = compactModel(pickup);
+car.add(...wheels);
 car.position.copy(world(32, 21));
 scene.add(car);
 const campGroup = new THREE.Group();
@@ -308,6 +322,10 @@ function focus(c) {
   controls.update();
 }
 focus(CAMPS.find((c) => c.id === s.camp));
+if (s.stage === "arrival" && s.arrivalElapsed < ARRIVAL_DURATION) {
+  const pose = arrivalPose(s.arrivalElapsed, 0).car;
+  focus({ x: pose.x / 2 + 32, z: pose.z / 2 + 32 });
+}
 function resize() {
   const a = innerWidth / innerHeight;
   camera.left = -23 * a;
@@ -323,6 +341,7 @@ function message(t) {
   $("message").textContent = t;
 }
 function persist() {
+  if (arrivalPreview) return;
   try {
     localStorage.setItem(SAVE, save(s));
   } catch {
@@ -461,6 +480,13 @@ $("uphill").onclick = () => {
   message(s.log[0]);
   renderUI();
 };
+$("skip-arrival").onclick = () => {
+  s.arrivalElapsed = ARRIVAL_DURATION;
+  focus();
+  message("Choose a campsite to begin.");
+  renderUI();
+  persist();
+};
 $("pause").onclick = () => {
   paused = !paused;
   $("pause").textContent = paused ? "▶" : "Ⅱ";
@@ -526,6 +552,7 @@ let uiSignature = "";
 function renderUI() {
   const signature = JSON.stringify([
     s.stage,
+    s.arrivalElapsed < ARRIVAL_DURATION,
     s.camp,
     s.money,
     s.wood,
@@ -546,7 +573,8 @@ function renderUI() {
   if (signature === uiSignature) return;
   uiSignature = signature;
   const active = s.stage !== "arrival";
-  $("arrival").hidden = active;
+  $("arrival").hidden = active || s.arrivalElapsed < ARRIVAL_DURATION;
+  $("skip-arrival").hidden = active || s.arrivalElapsed >= ARRIVAL_DURATION;
   $("journal").hidden = !active;
   $("people").hidden = !active || !!selected;
   $("build").hidden = !active || s.stage === "evening";
@@ -661,9 +689,48 @@ function frame(now) {
   syncBuildings();
   entrance.position.copy(world(s.stock.x, s.stock.z));
   car.visible = !s.trip;
-  markers.forEach((m) => (m.visible = s.stage === "arrival"));
+  const arriving = s.stage === "arrival" && s.arrivalElapsed < ARRIVAL_DURATION;
+  if (s.stage === "arrival") {
+    const pose = arrivalPose(s.arrivalElapsed, 0);
+    car.position.set(pose.car.x, 0, pose.car.z);
+    car.rotation.y = pose.car.yaw;
+    for (const wheel of wheels) {
+      wheel.rotation.set(0, 0, Math.PI / 2);
+      wheel.rotateY((pose.car.z + 58) / 0.43);
+    }
+    if (arriving) {
+      controls.target.lerp(car.position, 0.06);
+      camera.position.copy(controls.target).add(new THREE.Vector3(24, 26, 24));
+      message(
+        s.arrivalElapsed < PARK_TIME
+          ? "There it is. Our own little piece of land."
+          : "We’re here! Everyone out—let’s take a look.",
+      );
+    } else if (
+      !$("arrival").hidden &&
+      $("message").textContent.startsWith("We’re here")
+    ) {
+      focus();
+      message("Choose a campsite to begin.");
+    }
+  }
+  entrance.visible = !arriving;
+  markers.forEach((m) => (m.visible = s.stage === "arrival" && !arriving));
   for (const [i, r] of s.people.entries()) {
     const g = actors[i];
+    if (arriving) {
+      const pose = arrivalPose(s.arrivalElapsed, i);
+      g.visible = pose.visible;
+      g.position.set(pose.x, pose.y, pose.z);
+      g.rotation.y = pose.yaw;
+      animateResident(
+        g.rig,
+        pose.walking ? "walk" : "idle",
+        s.arrivalElapsed + i * 0.3,
+        paused ? 0 : dt * speed,
+      );
+      continue;
+    }
     g.visible = r.action !== "town";
     const target = world(r.x, r.z),
       dx = target.x - g.position.x,
