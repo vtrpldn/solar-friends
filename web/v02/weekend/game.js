@@ -1,3 +1,4 @@
+import { BUILD_CATEGORIES, buildingCategory, inBuildCategory } from "./build-categories.js";
 import {createResourceTrends,resourceSnapshot,formatTrend} from './resource-trends.js';
 import {materialTooltip} from './material-tooltip.js';
 import {createWildlife} from './wildlife.js';
@@ -1330,20 +1331,12 @@ $("sell").onclick = () => {
   persist();
   renderUI();
 };
-const categories = [
-  "First camp",
-  ...new Set(
-    Object.values(PROJECTS)
-      .map((d) => d.category)
-      .filter((c) => c !== "First camp"),
-  ),
-  "All",
-];
+const categories = BUILD_CATEGORIES;
 refillSelect(
   "build-category",
   categories.map((c) => [c, c]),
 );
-if (s.mode === "sandbox") $("build-category").value = "Homes";
+if (s.mode === "sandbox") $("build-category").value = "Homes & shelter";
 for (const category of categories) {
   const button=document.createElement("button");
   button.textContent=category;
@@ -1358,8 +1351,8 @@ function filterBuildings() {
   for (const [key,d] of Object.entries(PROJECTS)) {
     const button=$(`build-${key}`);
     // Search the entire catalogue, even when a category was selected earlier.
-    button.hidden=query ? !`${d.name} ${d.description} ${d.category}`.toLowerCase().includes(query)
-      : category!=="All" && d.category!==category;
+    button.hidden=query ? !`${d.name} ${d.description} ${buildingCategory(d)}`.toLowerCase().includes(query)
+      : !inBuildCategory(key,d,category);
     if(!button.hidden){count++;illustrate(button.querySelector("img"),d.asset);}
   }
   for(const button of $("build-categories").children) {
