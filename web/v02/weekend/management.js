@@ -22,7 +22,7 @@ const intros = {
   resources:
     "Keep the essentials close, turn local materials into something useful, and plan the next trip to town.",
   water:
-    "Follow water from the river to storage, through daily life, and back into the land safely.",
+    "Completed buildings connect automatically. Pumps need power, cisterns filter river water, and wastewater flows to compatible treatment.",
   power:
     "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically.",
 };
@@ -59,7 +59,7 @@ export function createManagement({
       )
       .join("");
     $("management-message").textContent =
-      "Changes are planned now. Residents get to work when you return to the village.";
+      "Village paused while this screen is open.";
     refresh();
   }
   document
@@ -77,10 +77,17 @@ export function createManagement({
     const p = state().projects.find((p) => p.id === n.id);
     const title = document.createElement("strong");
     title.textContent = label(n);
-    if (p) {
+    if (p || n.id === 0) {
       const img = document.createElement("img");
-      illustrate(img, PROJECTS[p.key].asset);
+      illustrate(img, p ? PROJECTS[p.key].asset : "produce-crates");
       el.append(img);
+    }
+    if (n.id === -1) {
+      const symbol = document.createElement("span");
+      symbol.className = "node-symbol";
+      symbol.textContent = "≈";
+      symbol.setAttribute("aria-hidden", "true");
+      el.append(symbol);
     }
     el.append(title);
     const detail = document.createElement("div");
@@ -102,7 +109,7 @@ export function createManagement({
         if (n.capacity[i]) {
           const line = document.createElement("div");
           line.className = `water-level ${k}`;
-          line.textContent = `${k} · ${n.water[i].toFixed(1)} / ${n.capacity[i]}`;
+          line.textContent = `${{ fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[k]} · ${n.water[i].toFixed(1)} / ${n.capacity[i]}`;
           const meter = document.createElement("progress");
           meter.max = n.capacity[i];
           meter.value = n.water[i];
@@ -153,7 +160,8 @@ export function createManagement({
     $("resource-screen").hidden = view !== "resources";
     $("pantry-panel").hidden = view !== "resources";
     $("network-screen").hidden = view === "resources";
-    $("utility-panel").hidden = view === "resources";
+    $("utility-panel").hidden = true;
+    $("pantry-panel").parentElement.hidden = view !== "resources";
     $("haul-water").hidden = true;
     $("connect-utility").hidden = true;
     for (const id of ["utility-from", "utility-to", "utility-kind"]) {
@@ -205,7 +213,12 @@ export function createManagement({
       ];
     else
       stats = LIQUIDS.map((k, i) => [
-        k,
+        {
+          fresh: "Drinking water",
+          irrigation: "Irrigation water",
+          greywater: "Greywater",
+          sewage: "Sewage",
+        }[k],
         `${nodes.reduce((v, n) => v + n.water[i], 0).toFixed(1)} stored`,
       ]);
     $("management-stats").innerHTML = stats
@@ -230,7 +243,7 @@ export function createManagement({
           const item = MATERIALS[id];
           const b = document.createElement("button");
           b.className = "stock-card";
-          b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name}</span><small>${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
+          b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><small>${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
           illustrateResources(b);
           b.disabled = !item.quantity;
           b.classList.toggle("active", $("purchase").value === id);

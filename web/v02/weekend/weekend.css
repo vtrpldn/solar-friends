@@ -1140,7 +1140,7 @@ dialog button {
 }
 .water-level {
   margin: 8px 0;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .water-level progress {
   margin-top: 3px;
@@ -1354,9 +1354,88 @@ body[data-tray="closed"] {
 }
 
 /* Cached orthographic resource portraits keep their rendered proportions. */
-.resource-icon { object-fit: contain; }
-.resource-icon:not(.ready) { visibility: hidden; }
-.stock-card > .resource-icon { width: 64px; height: 48px; }
+.resource-icon {
+  object-fit: contain;
+}
+.resource-icon:not(.ready) {
+  visibility: hidden;
+}
+.stock-card > .resource-icon {
+  width: 64px;
+  height: 48px;
+}
 
-.resource-group-title { grid-column: 1 / -1; margin: 12px 0 2px; padding-bottom: 7px; border-bottom: 1px solid #c5bd96; color: #536347; font-size: 14px; }
-.resource-group-title:first-child { margin-top: 0; }
+.resource-group-title {
+  grid-column: 1 / -1;
+  margin: 12px 0 2px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #c5bd96;
+  color: #536347;
+  font-size: 14px;
+}
+.resource-group-title:first-child {
+  margin-top: 0;
+}
+
+/* Shared management layout: utility networks no longer have manual setup forms. */
+#management:not([data-screen="resources"]) .management-layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+.network-node {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  grid-template-rows: 48px 1fr auto;
+  column-gap: 8px;
+}
+.network-node > img {
+  float: none;
+  margin: 0;
+  grid-column: 1;
+  grid-row: 1;
+}
+.network-node > strong {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+  min-height: 0;
+}
+.node-symbol {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  text-align: center;
+  font-size: 38px;
+  color: #5b8c87;
+}
+.node-detail {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+.node-actions {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  align-self: end;
+}
+#management #utility-links {
+  grid-template-columns: minmax(0, 1fr);
+}
+#management #utility-links button[aria-pressed="false"] {
+  color: #81745e;
+  border-style: dashed;
+}
+
+.panel-close,
+#selection #close-selection,
+#management #close-management {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  line-height: 1;
+  font-size: 22px;
+  border: 1px solid #c5b58e;
+  border-radius: 50%;
+  background: #fff3d4;
+  color: #40533d;
+  box-shadow: 0 2px 0 #c5b58e;
+}

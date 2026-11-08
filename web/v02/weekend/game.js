@@ -765,7 +765,7 @@ function startPlacement(key, id = null) {
   disposeModel(model);
   scene.add(wireframe);
   wireframe.visible = false;
-  rotateButton.hidden = false;
+  rotateButton.hidden = key === "road";
   rotateButton.textContent = `Rotate · R · ${placementRotation * 90}°`;
   ghost.visible = false;
   $("cancel").hidden = false;
@@ -929,7 +929,14 @@ addEventListener("keydown", (e) => {
     e.preventDefault();
     rotatePlacement(e.shiftKey ? -1 : 1);
   }
-  if (e.key === "Escape" && !$("management").open) cancel();
+  if (e.key === "Escape" && !$("management").open) {
+    if (placing) cancel();
+    else if (selected) {
+      selected = null;
+      uiSignature = "";
+      renderUI();
+    } else if (openPanel) setPanel(null);
+  }
 });
 $("town").onclick = () => {
   if (supplyRun(s, $("purchase").value)) {
@@ -1084,7 +1091,11 @@ function renderUtilityUI() {
     (l) => (management?.view === "power") === (l.kind === "power"),
   )) {
     const b = document.createElement("button");
-    b.textContent = `${l.kind} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
+    b.textContent = `${{ power: "Power", fresh: "Drinking water", irrigation: "Irrigation", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
+    b.setAttribute("aria-pressed", String(l.enabled));
+    b.title = l.enabled
+      ? "Switch this connection off"
+      : "Switch this connection on";
     b.onclick = () => {
       l.enabled = !l.enabled;
       persist();
@@ -1425,6 +1436,8 @@ function renderUI() {
   $("inventory").textContent = Object.keys(MATERIALS)
     .map((id) => materialText(id, materialCount(s, id)))
     .join(" · ");
+  $("sell").textContent =
+    `Sell ${materialText($("purchase").value, purchase.quantity)} · R$${Math.floor(purchase.price * 0.5)}`;
   $("sell").disabled =
     materialCount(s, $("purchase").value) < purchase.quantity ||
     !purchase.quantity;
