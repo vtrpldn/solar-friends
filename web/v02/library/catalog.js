@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { PROPS } from "./props.js";
 import {
   ASSETS as STUDIES,
   createAsset as createStudy,
@@ -94,6 +95,45 @@ function leaf(g, x, y, z, angle, length = 1, hex = "#68883c") {
   return m;
 }
 
+// Broad banana blades have a curved midrib and tapered sides, not four flat facets.
+function bananaLeaf(g, y, angle, length, hex) {
+  const points = [],
+    indices = [];
+  for (let i = 0; i <= 4; i++) {
+    const t = i / 4,
+      width = Math.sin(Math.PI * t) * length * 0.21;
+    const rise = Math.sin(Math.PI * t) * length * 0.22 - t * t * length * 0.26;
+    points.push(
+      -width,
+      rise - width * 0.22,
+      t * length,
+      0,
+      rise,
+      t * length,
+      width,
+      rise - width * 0.22,
+      t * length,
+    );
+    if (i < 4)
+      for (let side = 0; side < 2; side++) {
+        const a = i * 3 + side;
+        indices.push(a, a + 3, a + 1, a + 1, a + 3, a + 4);
+      }
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(points, 3),
+  );
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  const blade = color(new THREE.Mesh(geometry), hex);
+  blade.material.side = THREE.DoubleSide;
+  blade.position.y = y;
+  blade.rotation.y = angle;
+  blade.castShadow = true;
+  g.add(blade);
+}
 function plant(kind, stage = 2) {
   const g = group(),
     s = [0.28, 0.62, 1][stage];
@@ -182,15 +222,9 @@ function plant(kind, stage = 2) {
     for (let i = 0; i < (kind === "banana" ? 7 : 6); i++) {
       const a = i * 2.4,
         y = h * (kind === "banana" ? 0.75 + (i % 3) * 0.08 : 0.32 + i * 0.105);
-      leaf(
-        g,
-        0,
-        y,
-        0,
-        a,
-        kind === "banana" ? 1.5 * s : 0.5 * s,
-        i % 2 ? "#91a74c" : "#68883c",
-      );
+      if (kind === "banana")
+        bananaLeaf(g, y, a, 1.5 * s, i % 2 ? "#91a74c" : "#68883c");
+      else leaf(g, 0, y, 0, a, 0.5 * s, i % 2 ? "#91a74c" : "#68883c");
     }
     if (kind === "tomato" || kind === "beans")
       for (let i = 0; i < 4; i++)
@@ -414,7 +448,7 @@ function tree(kind) {
         const xx = x + Math.sin(j * 2.1) * 0.35,
           zz = z + Math.cos(j * 2.1) * 0.35;
         limb(g, [x, y - 0.3, z], [xx, y, zz], 0.035, 0.015, bark);
-        color(ball(g, 0.44, "leaf", xx, y, zz, [1.15, 0.38, 0.8], 1), c);
+        color(ball(g, 0.44, "leaf", xx, y, zz, [1.15, 0.38, 0.8], 0), c);
       }
     } else
       color(
@@ -776,30 +810,30 @@ function building(id) {
     return g;
   }
   if (id === "well") {
-    color(cylinder(g, 1.42, 1.42, 1.35, "plaster", 0, 0.675, 0, 24), "#e9e3cf");
-    color(cylinder(g, 0.18, 1.48, 0.38, "plaster", 0, 1.54, 0, 24), "#eee8d7");
+    color(cylinder(g, 1.73, 1.73, 1.2, "plaster", 0, 0.6, 0, 24), "#e9e3cf");
+    color(cylinder(g, 0.18, 1.78, 0.38, "plaster", 0, 1.39, 0, 24), "#eee8d7");
     for (let i = 0; i < 18; i++) {
       const a = (i * Math.PI) / 9;
       beam(
         g,
-        [Math.sin(a) * 1.425, 0.05, Math.cos(a) * 1.425],
-        [Math.sin(a) * 1.425, 1.3, Math.cos(a) * 1.425],
+        [Math.sin(a) * 1.735, 0.05, Math.cos(a) * 1.735],
+        [Math.sin(a) * 1.735, 1.16, Math.cos(a) * 1.735],
         0.018,
         "stone",
       );
     }
     color(
-      cylinder(g, 1.435, 1.435, 0.045, "plaster", 0, 0.69, 0, 24),
+      cylinder(g, 1.745, 1.745, 0.045, "plaster", 0, 0.6, 0, 24),
       "#d1caba",
     );
-    cylinder(g, 0.28, 0.28, 0.06, "teal", 0.55, 1.64, 0.4, 12);
-    box(g, 0.22, 0.06, 0.06, "timber", 0.55, 1.7, 0.4);
-    beam(g, [-1.4, 1.35, -0.3], [-1.65, 1.35, -0.3], 0.11, "teal");
-    beam(g, [-1.65, 0.15, -0.3], [-1.65, 1.8, -0.3], 0.11, "teal");
-    cylinder(g, 0.085, 0.1, 0.8, "teal", 1.3, 0.4, 0.9, 8);
-    beam(g, [1.3, 0.75, 0.9], [1.7, 0.75, 0.9], 0.065, "teal");
-    beam(g, [1.3, 0.85, 0.9], [1.1, 1.05, 0.9], 0.06, "timber");
-    box(g, 0.45, 0.14, 0.4, "stone", 1.35, 0.07, 1.35);
+    cylinder(g, 0.28, 0.28, 0.06, "teal", 0.55, 1.48, 0.4, 12);
+    box(g, 0.22, 0.06, 0.06, "timber", 0.55, 1.54, 0.4);
+    beam(g, [-1.7, 1.2, -0.3], [-1.88, 1.2, -0.3], 0.11, "teal");
+    beam(g, [-1.88, 0.15, -0.3], [-1.88, 1.65, -0.3], 0.11, "teal");
+    cylinder(g, 0.085, 0.1, 0.8, "teal", 1.6, 0.4, 0.9, 8);
+    beam(g, [1.6, 0.75, 0.9], [1.95, 0.75, 0.9], 0.065, "teal");
+    beam(g, [1.6, 0.85, 0.9], [1.4, 1.05, 0.9], 0.06, "timber");
+    box(g, 0.45, 0.14, 0.4, "stone", 1.6, 0.07, 1.35);
     return g;
   }
   if (id === "solar_farm") {
@@ -1124,16 +1158,26 @@ function building(id) {
     cylinder(g, 0.23, 0.16, 0.1, "plaster", 0.3, 1.03, 1.12);
     return g;
   }
-  const shed = createStudy("shed");
-  g.add(shed);
   if (id === "warehouse") {
-    for (const x of [-1.7, 1.7])
-      box(g, 0.15, 2.1, 1.7, "timberLight", x, 1.05, 0);
-    box(g, 3.4, 2.1, 0.12, "timberLight", 0, 1.05, -0.8);
-    for (const x of [-1, 0.1, 1]) {
-      box(g, 0.7, 0.6, 0.65, "timberLight", x, 0.3, 0);
-      box(g, 0.5, 0.5, 0.5, "earth", x, 0.85, -0.1);
+    for (const x of [-1.7, 1.7]) {
+      box(g, 0.15, 2.25, 3.2, "timberLight", x, 1.125, 0);
+      for (const z of [-1.55, 1.55])
+        box(g, 0.2, 2.3, 0.2, "timber", x, 1.15, z);
     }
+    box(g, 3.4, 2.25, 0.12, "timberLight", 0, 1.125, -1.55);
+    gable(g, 3.4, 3.2, 2.25, 0.7);
+    clayRoof(g, {
+      half: 1.9,
+      depth: 3.6,
+      eave: 2.25,
+      rise: 0.8,
+      ridgeHeight: 3.3,
+    });
+    for (const x of [-1, 0.1, 1]) {
+      box(g, 0.7, 0.6, 0.65, "timberLight", x, 0.3, -0.65);
+      box(g, 0.5, 0.5, 0.5, "earth", x, 0.85, -0.65);
+    }
+    for (const x of [-1.3, 1.3]) box(g, 0.65, 2.1, 0.12, "teal", x, 1.05, 1.65);
   }
   return g;
 }
@@ -1412,7 +1456,7 @@ for (const [id, name] of Object.entries(names)) {
       ? [3, 1]
       : id === "goat_pasture" || id === "solar_farm"
         ? [3, 2]
-        : ["apiary", "streetlight", "eco_toilet", "coop"].includes(id)
+        : ["apiary", "streetlight", "eco_toilet"].includes(id)
           ? [1, 1]
           : [2, 2];
   add(id, name, "Buildings", fp, () => building(id), [
@@ -1588,6 +1632,7 @@ for (let i = 0; i < 3; i++)
     [`hen-${i}`],
   );
 add("goat", "Goat", "Animals", [1, 1], goat);
+ASSETS.push(...PROPS);
 export function createAsset(id) {
   const def = ASSETS.find((a) => a.id === id);
   if (!def) throw new Error(`Unknown asset ${id}`);
@@ -1629,6 +1674,36 @@ const revised = new Set([
   "supply-0",
 ]);
 for (const a of ASSETS) if (revised.has(a.id)) a.revision = 2;
+const descriptions = {
+  well: "Brazilian plate-built rainwater cistern: a broad whitewashed reservoir, shallow cover, access hatch and external plumbing.",
+  solar_farm:
+    "Six solar modules on two rows of braced racks, with shared rails, wiring and an inverter. Occupies 3 × 2 cells.",
+  compost:
+    "Three side-by-side slatted bins for fresh material, active compost and finished compost. Occupies 3 × 1 cells.",
+  square:
+    "A gathering circle with timber benches, a small tile mosaic, flowering pots and a community noticeboard. No pergola.",
+  workshop:
+    "An enclosed carpentry shop with wide turquoise doors, a workbench, tools, timber stock and shuttered side windows.",
+  kitchen:
+    "An open masonry kitchen with a clay oven, tall chimney, preparation counter, sink and serving table.",
+  greenhouse:
+    "Blue-green glazed walls, roof and gables with visible pane reflections. Raised beds flank a central aisle.",
+  hydro:
+    "A braced river platform with an open-spoke paddle wheel, axle, finned generator and electrical cabinet.",
+  goat: "A compact goat with jointed legs, cloven-looking dark hooves, a connected neck and muzzle, sideways ears, swept horns and a little beard.",
+  jequitiba:
+    "Jequitibá-rosa: a tall straight trunk, flared roots and a high, broad crown. Stylized to the village scale.",
+  jucara:
+    "Juçara: a slender ringed trunk, green crownshaft and arching pinnate fronds with paired leaflets.",
+  embauba:
+    "Embaúba: pale ringed bark, an open branching crown and clusters of large lobed leaves at branch tips.",
+  umbuzeiro:
+    "Umbuzeiro: a short branching trunk beneath a broad, low umbrella-shaped crown.",
+  jurema:
+    "Jurema-preta: exposed fine branching and a light, open crown of small foliage clusters.",
+};
+for (const a of ASSETS)
+  if (descriptions[a.id]) a.description = descriptions[a.id];
 export const CATEGORIES = [...new Set(ASSETS.map((a) => a.category))];
 
 // Bake static recipe pieces into one draw per material. This preserves the exact
@@ -1650,6 +1725,7 @@ export function compactModel(root) {
       pane.castShadow = false;
       pane.receiveShadow = true;
       pane.renderOrder = 2;
+      pane.userData.ownedMaterial = owned.has(key);
       transparent.push(pane);
       return;
     }
