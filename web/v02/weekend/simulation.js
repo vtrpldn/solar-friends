@@ -1,3 +1,4 @@
+import { OPENING_PROJECTS, openingProgress } from "./opening.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import {
   ensureInfrastructure,
@@ -59,11 +60,10 @@ export const PROJECTS = {
     materials: {
       wood: 8,
       hardware: 1,
-      tarp: 1,
     },
     work: 134,
     description:
-      "Assemble a table from pre-cut boards and tie up the brought-in tarp. About 1 person-hour of assembly, plus carrying.",
+      "Assemble a table and benches from pre-cut boards. About 1 person-hour of assembly, plus carrying.",
   },
   water: {
     name: "Water storage",
@@ -95,6 +95,7 @@ export const PROJECTS = {
 };
 expandMaterials(MATERIALS);
 expandProjects(PROJECTS);
+Object.assign(PROJECTS, OPENING_PROJECTS);
 export { PROCESSES };
 export function footprint(p) {
   return PROJECTS[p.key].size;
@@ -104,7 +105,8 @@ export function storageCapacity(s) {
     600 +
     s.projects.filter(
       (p) =>
-        PROJECTS[p.key].kind === "warehouse" && p.work >= PROJECTS[p.key].work,
+        ["warehouse", "covered-storage"].includes(PROJECTS[p.key].kind) &&
+        p.work >= PROJECTS[p.key].work,
     ).length *
       600
   );
@@ -521,6 +523,7 @@ export const NAMES = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 export function createWeekend() {
   return {
     version: 2,
+    opening: { version: 1, townTrips: 0 },
     stage: "arrival",
     arrivalElapsed: 0,
     camp: null,
@@ -599,6 +602,11 @@ export function chooseCamp(s, id) {
     if (spots[0]) Object.assign(r, spots[0]);
   }
   s.stage = "playing";
+  if (s.opening)
+    say(
+      s,
+      "Iara: A shower is forecast. One spare tarp and eight roof sheets: should we cover ourselves first, or the supplies? We can build simply, or send someone to town.",
+    );
   say(s, `${c.name}: unpack first, then choose what matters most.`);
   return true;
 }
@@ -769,6 +777,7 @@ export function supplyRun(s, material = "wood") {
   r.toiletSite = null;
   r.toiletTime = 0;
   r.washSite = null;
+  if (s.opening) s.opening.townTrips++;
   say(
     s,
     `${r.name} is driving to town: ${item.quantity} ${item.name} for R$${item.price}. Back in about a minute.`,
@@ -822,7 +831,7 @@ function occupied(s, x, z) {
       (p) =>
         !(
           p.work >= PROJECTS[p.key].work &&
-          (PROJECTS[p.key].kind === "shed" ||
+          (["shed", "rain-shelter"].includes(PROJECTS[p.key].kind) ||
             (COMMUNITY[PROJECTS[p.key].kind]?.sheltered &&
               z === p.z + footprint(p)[1] - 1))
         ) &&
@@ -1161,7 +1170,7 @@ function idleActivity(s, r, i, dt) {
     (p) =>
       p.work >= PROJECTS[p.key].work &&
       (s.rain
-        ? PROJECTS[p.key].kind === "shed" ||
+        ? ["shed", "rain-shelter"].includes(PROJECTS[p.key].kind) ||
           COMMUNITY[PROJECTS[p.key].kind]?.sheltered
         : [
             "square",
@@ -1175,7 +1184,7 @@ function idleActivity(s, r, i, dt) {
     const p = social[(i + Math.floor(cycle / 2)) % social.length];
     let spot = workSpot(s, r, p);
     if (
-      PROJECTS[p.key].kind === "shed" ||
+      ["shed", "rain-shelter"].includes(PROJECTS[p.key].kind) ||
       COMMUNITY[PROJECTS[p.key].kind]?.sheltered
     ) {
       spot = Array.from({ length: footprint(p)[0] }, (_, n) => ({
@@ -1260,6 +1269,8 @@ function idleActivity(s, r, i, dt) {
   r.idleUntil = s.time + 18 + i * 2 + (cycle % 3) * 5;
 }
 export function canFinish(s) {
+  if (s.opening && !s.opening.complete)
+    return openingProgress(s, PROJECTS).ready;
   return (
     finished(s, "gathering") &&
     s.projects.some((p) => p.key !== "gathering" && finished(s, p.key)) &&
@@ -1269,6 +1280,7 @@ export function canFinish(s) {
 }
 export function endWeekend(s) {
   if (!canFinish(s) || s.stage !== "playing") return false;
+  if (s.opening) s.opening.complete = true;
   s.stage = "evening";
   s.meal = true;
   for (const r of s.people) {
@@ -1327,17 +1339,22 @@ export function tick(s, dt) {
   }
   if (
     s.stage === "playing" &&
-    (s.time >= 150 ||
-      s.projects.some(
-        (p) => p.key !== "gathering" && p.work >= PROJECTS[p.key].work / 2,
-      )) &&
+    (s.opening && !s.opening.complete
+      ? s.time >= 240
+      : s.time >= 150 ||
+        s.projects.some(
+          (p) => p.key !== "gathering" && p.work >= PROJECTS[p.key].work / 2,
+        )) &&
     !s.rainSeen &&
     s.projects.length
   ) {
     s.rainSeen = true;
     s.rainAt = s.time;
     s.rain = true;
-    if (s.camp === "entrance") {
+    if (
+      s.camp === "entrance" &&
+      !(s.opening && openingProgress(s, PROJECTS).supplies)
+    ) {
       say(
         s,
         "Rain! Water is pooling beside the supplies. Raise them on boards, or move them uphill.",
@@ -1349,6 +1366,18 @@ export function tick(s, dt) {
         "A short shower passes through. Your campsite drains well; the supplies stay dry.",
       );
     }
+  }
+  if (
+    s.opening &&
+    s.rainSeen &&
+    !s.rainResolved &&
+    openingProgress(s, PROJECTS).supplies
+  ) {
+    s.rainResolved = true;
+    say(
+      s,
+      "Bento: The supplies are covered now. Good call getting that built.",
+    );
   }
   if (s.rainResolved && s.time > (s.rainAt ?? 150) + 35) s.rain = false;
   for (const [i, r] of s.people.entries()) {
@@ -1620,11 +1649,33 @@ export function tick(s, dt) {
       p.work +
         dt *
           (skilled ? 1.25 : 1) *
+          (s.opening &&
+          !s.opening.complete &&
+          s.rain &&
+          !openingProgress(s, PROJECTS).shelter
+            ? 0.8
+            : 1) *
           (s.infrastructure?.thirst || s.infrastructure?.hungry ? 0.65 : 1),
     );
     r.work += dt;
     r.energy = Math.max(0, r.energy - dt * 0.16);
     if (before < PROJECTS[p.key].work && p.work >= PROJECTS[p.key].work) {
+      if (s.opening && !s.opening.complete) {
+        const progress = openingProgress(s, PROJECTS);
+        for (const [key, line] of Object.entries({
+          gathering:
+            "Luz: Somewhere to sit together. This is starting to feel like our place.",
+          shelter:
+            "Nina: A dry place to take a break. We can stop rushing when the rain comes.",
+          supplies:
+            "Bento: Tools and supplies are protected. We can save the rest of our money for tomorrow.",
+        })) {
+          if (progress[key] && !s.opening[key]) {
+            s.opening[key] = true;
+            say(s, line);
+          }
+        }
+      }
       say(
         s,
         `${PROJECTS[p.key].name} is ready. ${p.key === "gathering" ? "Somewhere to sit together at last." : p.key === "shelter" ? "A roof for our first night." : p.key === "water" ? "Water close at hand." : PROJECTS[p.key].kind === "eco_toilet" ? "A little privacy goes a long way." : "Ready for the community to use."}`,
@@ -1645,6 +1696,15 @@ export function restore(text) {
       s.people.length !== 5 ||
       !Array.isArray(s.projects) ||
       s.projects.length > 512
+    )
+      return null;
+    if (
+      s.opening &&
+      (s.opening.version !== 1 ||
+        !Number.isInteger(s.opening.townTrips) ||
+        s.opening.townTrips < 0 ||
+        (s.opening.complete !== undefined &&
+          typeof s.opening.complete !== "boolean"))
     )
       return null;
     const fresh = createWeekend();

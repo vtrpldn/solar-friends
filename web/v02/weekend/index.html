@@ -38,8 +38,8 @@
       <small>A PLACE OF OUR OWN</small>
       <h2>Where should we make camp?</h2>
       <p>
-        Five friends. A few tools. Two cars full of supplies.<br />Start by
-        choosing a place to spend the weekend.
+        Five friends. A few tools. Two cars full of supplies.<br />Make a dry,
+        welcoming camp for your first shared evening.
       </p>
       <div id="camps"></div>
       <p class="hint">
@@ -53,6 +53,15 @@
       ><small>✦ CAMP JOURNAL</small>
       <h2>Make yourselves at home</h2>
       <p id="objective"></p>
+      <section id="opening-plan" hidden>
+        <div id="opening-needs"></div>
+        <p class="hint">
+          We brought one spare tarp and eight roof sheets. Choose where they
+          help most; town trips take one friend away from building.
+        </p>
+        <div id="opening-options"></div>
+        <button id="opening-town">Plan a town trip</button>
+      </section>
       <div id="tasks"></div>
       <details id="completed-panel" hidden>
         <summary id="completed-title">Around the village</summary>
@@ -111,6 +120,7 @@
       ><button id="again">Try a different start</button>
     </section>
     <footer>
+      <button id="opening-status" hidden aria-controls="journal"></button>
       <section id="build" hidden>
         <div class="build-toolbar">
           <label for="build-category">⌂ Let’s build</label

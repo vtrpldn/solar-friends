@@ -1302,3 +1302,53 @@ body[data-tray="closed"] {
 .stock-card > span {
   clear: both;
 }
+
+#opening-status {
+  display: block;
+  margin: 0 auto 8px;
+  background: #e3edc5;
+  font-size: 13px;
+}
+#opening-status[hidden] {
+  display: none;
+}
+#opening-plan {
+  border-top: 1px solid var(--edge);
+  margin-top: 12px;
+  padding-top: 8px;
+}
+#opening-needs p {
+  margin: 5px 0;
+  font-size: 13px;
+  font-weight: 650;
+}
+#opening-options {
+  display: grid;
+  gap: 8px;
+}
+#opening-options button {
+  text-align: left;
+  padding: 9px;
+}
+#opening-options strong,
+#opening-options small {
+  display: block;
+}
+#opening-options small {
+  font-size: 10px;
+  letter-spacing: 0;
+  line-height: 1.5;
+  text-transform: none;
+  margin-top: 4px;
+}
+#opening-town {
+  width: 100%;
+  margin-top: 10px;
+}
+.task-work-status {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0;
+  text-transform: none;
+  margin: 4px 0 8px;
+}

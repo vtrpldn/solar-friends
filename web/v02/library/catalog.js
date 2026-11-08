@@ -1,3 +1,4 @@
+import { openingStorage, openingAssembly } from "./opening-props.js";
 import { rigAnimal } from "./animal-motion.js";
 import { COMMUNITY } from "./community-defs.js";
 import { createCommunity } from "./community.js";
@@ -1403,6 +1404,8 @@ function add(id, name, category, footprint, build, legacy = []) {
   });
 }
 for (const [id, def] of Object.entries(COMMUNITY)) add(id,def.name,"Buildings",def.size,()=>createCommunity(id));
+add("covered-supply-rack","Covered supply rack","Props",[2,1],()=>openingStorage(false));
+add("tarp-covered-supplies","Tarp-covered supplies","Props",[1,1],()=>openingStorage(true));
 const names = {
   orchard: "Fruit orchard",
   goat_pasture: "Goat pasture",
@@ -1856,6 +1859,10 @@ for (const animal of LIVESTOCK) add(animal.id,animal.name,"Animals",[1,1],animal
 ASSETS.find(asset => asset.id === "piglet").revision = 2;
 add("canvas-tent-teal", "Sage canvas tent", "Props", [2, 2], () => createTent(0));
 add("canvas-tent-ochre", "Ochre canvas tent", "Props", [2, 2], () => createTent(1));
+for(const id of ["canvas-tent-ochre","covered-supply-rack","tarp-covered-supplies"]){
+ const def=ASSETS.find(a=>a.id===id);
+ for(const stage of [0,1])add(`${id}-construction-${stage}`,`${def.name} · ${stage?"assembly":"unpacked supplies"}`,"Construction",def.footprint,()=>openingAssembly(id,stage));
+}
 add("community-pickup", "Community pickup", "Props", [2, 3], createPickup);
 add("jimny-sage", "Sage trail SUV", "Props", [2,2], () => createJimny(0));
 add("jimny-ochre", "Ochre trail SUV", "Props", [2,2], () => createJimny(1));

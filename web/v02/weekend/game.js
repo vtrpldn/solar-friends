@@ -1,3 +1,4 @@
+import { openingProgress, openingRecap } from "./opening.js";
 import { collectAnimals, animateAnimals } from "../library/animal-motion.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import { resourceIcon } from "./resource-icons.js";
@@ -554,7 +555,10 @@ for (const c of CAMPS) {
   b.onclick = () => {
     chooseCamp(s, c.id);
     focus(c);
-    message("Choose Gathering place below, then click where you want it.");
+    message(
+      "Open Our first evening to choose what matters most. You can start with a quick fix or invest in a permanent roof.",
+    );
+    setPanel("journal");
     persist();
     renderUI();
   };
@@ -707,6 +711,11 @@ $("grid").onclick = () => {
   grid.visible = !grid.visible;
   $("grid").setAttribute("aria-pressed", String(grid.visible));
 };
+$("opening-status").onclick = () => {
+  if (canFinish(s)) $("meal").click();
+  else setPanel("journal");
+};
+$("opening-town").onclick = () => management.open("resources");
 $("meal").onclick = () => {
   if (endWeekend(s)) {
     endingDismissed = false;
@@ -976,6 +985,7 @@ function renderUI() {
   const signature = JSON.stringify([
     openPanel,
     s.stage,
+    s.opening,
     s.arrivalElapsed < ARRIVAL_DURATION,
     s.camp,
     s.money,
@@ -1057,8 +1067,73 @@ function renderUI() {
     s.stage === "evening"
       ? "Saturday · Evening"
       : `Day ${Math.floor(minutes / 1440) + 1} · ${String(Math.floor(minutes / 60) % 24).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-  $("objective").textContent =
-    s.stage === "evening"
+  const opening = s.opening && !s.opening.complete && active;
+  const goals = openingProgress(s, PROJECTS);
+  $("opening-plan").hidden = !opening;
+  $("opening-status").hidden = !opening;
+  $("opening-status").textContent = goals.ready
+    ? "✦ Camp is ready · Gather for dinner"
+    : `✦ Our first evening · ${goals.count}/3 needs met · Open plan`;
+  if (opening) {
+    $("opening-needs").innerHTML = [
+      ["gathering", "A place to share a meal"],
+      ["shelter", "Dry cover for people"],
+      ["supplies", "Protected tools and supplies"],
+    ]
+      .map(([key, label]) => `<p>${goals[key] ? "✓" : "○"} ${label}</p>`)
+      .join("");
+    $("opening-options").replaceChildren();
+    for (const [key, reason] of [
+      ["gathering", "Luz: Start with somewhere to sit together."],
+      ["rain-tent", "Quick cover · uses the spare tarp"],
+      ["shelter", "Lasting shelter · uses six roof sheets"],
+      ["tarp-stores", "Quick storage protection · uses the spare tarp"],
+      ["covered-stores", "Lasting storage · uses six roof sheets"],
+    ]) {
+      const need =
+        key === "gathering"
+          ? "gathering"
+          : ["rain-tent", "shelter"].includes(key)
+            ? "shelter"
+            : "supplies";
+      const planned = openingProgress(
+        {
+          ...s,
+          projects: s.projects.map((p) => ({
+            ...p,
+            work: PROJECTS[p.key].work,
+          })),
+        },
+        PROJECTS,
+      );
+      if (planned[need]) continue;
+      const b = document.createElement("button");
+      b.innerHTML = `<strong>${PROJECTS[key].name}</strong><small>${reason}</small><small>${recipeText(key)}</small>`;
+      const missing = missingMaterials(s, key);
+      if (missing.length) {
+        const warning = document.createElement("small");
+        warning.textContent = `Need ${missing.join(", ")} · fetch in town`;
+        b.append(warning);
+      }
+      b.title = PROJECTS[key].description;
+      b.onclick = () => {
+        setPanel(null);
+        startPlacement(key);
+      };
+      $("opening-options").append(b);
+    }
+  }
+  $("objective").textContent = opening
+    ? goals.ready
+      ? "The essentials are covered. Bring everyone together, or keep improving the camp."
+      : s.trip
+        ? "One friend is fetching supplies. The others can keep building while they are away."
+        : s.rain
+          ? "The shower is here. Uncovered work is 20% slower; a dry place helps us take better breaks. There is no deadline: finish when you feel ready."
+          : s.rainSeen
+            ? "The shower has passed. Finish the essentials at your own pace, then gather everyone for dinner."
+            : "Iara: Let’s make tonight comfortable. A shower is forecast after a few minutes of work; choose a quick fix or a lasting improvement. There is no single right layout."
+    : s.stage === "evening"
       ? "Tools away. Take a moment to enjoy what you made together."
       : !finished(s, "gathering")
         ? "First, make somewhere to sit and recover. Then choose one practical improvement."
@@ -1093,6 +1168,20 @@ function renderUI() {
     progress.max = d.work;
     progress.value = p.work;
     div.append(b, progress);
+    if (!done) {
+      const workStatus = document.createElement("small");
+      workStatus.className = "task-work-status";
+      const workers = s.people.filter(
+        (r) => r.job === p.id && r.action === "build",
+      ).length;
+      workStatus.textContent =
+        p.delivered < requiredLoads(p.key)
+          ? `Bringing supplies · ${p.delivered}/${requiredLoads(p.key)} loads delivered`
+          : workers
+            ? `${workers} friends building`
+            : "Supplies ready · waiting for a builder";
+      div.append(workStatus);
+    }
     $(done ? "completed-tasks" : "tasks").append(div);
   }
   $("roster").replaceChildren();
@@ -1155,12 +1244,14 @@ function renderUI() {
   $("boards").disabled = s.wood < 2;
   $("meal").hidden = !canFinish(s) || s.stage !== "playing";
   $("ending").hidden = s.stage !== "evening" || endingDismissed;
-  $("recap").textContent = `Together, you built: ${s.projects
-    .filter((p) => finished(s, p.key))
-    .map((p) => PROJECTS[p.key].name.toLowerCase())
-    .join(
-      ", ",
-    )}. ${finished(s, "shelter") ? "There’s a dry roof for tonight." : "For tonight, the tents will do."} ${finished(s, "toilet") ? "Everyone has a little privacy." : ""} R$${s.money} remains for next time.`;
+  $("recap").textContent = s.opening
+    ? openingRecap(s, PROJECTS)
+    : `Together, you built: ${s.projects
+        .filter((p) => finished(s, p.key))
+        .map((p) => PROJECTS[p.key].name.toLowerCase())
+        .join(
+          ", ",
+        )}. ${finished(s, "shelter") ? "There’s a dry roof for tonight." : "For tonight, the tents will do."} ${finished(s, "toilet") ? "Everyone has a little privacy." : ""} R$${s.money} remains for next time.`;
   $("log").replaceChildren(
     ...s.log.map((t) => {
       const li = document.createElement("li");

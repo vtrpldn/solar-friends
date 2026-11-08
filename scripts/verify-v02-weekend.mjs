@@ -41,6 +41,8 @@ for (const camp of ["shade", "entrance", "clearing"]) {
     assert(!canFinish(s));
     assert(resolveRain(s, "move"));
   }
+  assert.equal(plan(s, "tarp-stores", 40, 39), "");
+  run(s, 180);
   assert(canFinish(s));
   assert(endWeekend(s));
   run(s, 60);
