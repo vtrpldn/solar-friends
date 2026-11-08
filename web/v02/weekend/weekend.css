@@ -1453,3 +1453,21 @@ header > .time { grid-column: 3; justify-self: end; }
 @media (max-width: 1100px) {
   header > .time { grid-column: 2; grid-row: 2; justify-self: center; }
 }
+
+#people { inset: 0; margin: auto; width: min(1100px,calc(100vw - 72px)); max-width: none; height: min(810px,calc(100dvh - 64px)); max-height: calc(100dvh - 64px); padding: 24px; border-radius: 26px; background: #fff7df; overflow: auto; }
+#people h2 { margin: 8px 0; }
+#people #roster { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); align-items: start; gap: 14px; margin-top: 18px; }
+#people .person { padding: 14px; border: 1px solid #d8c79e; border-radius: 16px; background: #fffaf0; }
+#people .resident-profile-toggle { background: transparent; box-shadow: none; }
+
+#people[open] { display: flex; flex-direction: column; overflow: hidden; }
+#people .residents-layout { display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 20px; min-height: 0; flex: 1; margin-top: 12px; }
+#people #roster { display: flex; flex-direction: column; overflow-y: auto; margin: 0; padding-right: 8px; }
+#people .person { flex: none; }
+#resident-detail { overflow-y: auto; min-height: 0; }
+#resident-detail .resident-profile { margin: 0; padding: 20px; }
+#resident-detail .resident-profile p { font-size: 14px; }
+#resident-detail .resident-profile h3 { font-size: 13px; margin-top: 18px; }
+#resident-detail .resident-profile small { letter-spacing: normal; font-weight: normal; }
+#people > .panel-close { position: absolute; top: 24px; right: 24px; }
+#people #roster { align-items: stretch; }

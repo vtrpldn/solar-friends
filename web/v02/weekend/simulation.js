@@ -1,3 +1,4 @@
+import {depositCapacity} from './land-layout.js';
 import {workMultiplier} from './resident-personality.js';
 import { ensureNeeds, decayNeeds, chooseNeed, advanceNeed, validNeeds } from "./resident-needs.js";
 import { validTerrainVertices } from "./terraform.js";
@@ -246,7 +247,7 @@ export function queueProduction(s, site, recipe) {
     return "This site already has a job.";
   if ((p.readyAt || 0) > s.time)
     return `Growing: ready in ${Math.ceil(p.readyAt - s.time)} seconds.`;
-  if (def.deposit && (p.extracted || 0) >= def.deposit)
+  if (def.deposit && (p.extracted || 0) >= depositCapacity(s.landSeed,p,def))
     return "This deposit is exhausted.";
   for (const [id, n] of Object.entries(def.input))
     if (materialCount(s, id) < n) return `Missing ${n} ${id}.`;

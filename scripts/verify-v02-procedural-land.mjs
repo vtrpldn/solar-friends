@@ -14,7 +14,8 @@ import {
   riverBankAt,
   riverAccess,
 } from "../web/v02/weekend/river-layout.js";
-import { freshLandSeed } from "../web/v02/weekend/land-layout.js";
+import { MAP_HALF } from "../web/v02/weekend/map-size.js";
+import { freshLandSeed,resourceRichness,depositCapacity } from "../web/v02/weekend/land-layout.js";
 import { createTerrain } from "../web/v02/weekend/terrain.js";
 const signatures = new Set();
 for (let seed = 1; seed <= 100; seed++) {
@@ -22,10 +23,10 @@ for (let seed = 1; seed <= 100; seed++) {
   assert.equal(restore(save(s)).landSeed, seed);
   for (const camp of CAMPS)
     assert.equal(riverBankAt(camp.x, camp.z, 5, seed), false);
-  for (let z = -64; z <= 64; z++) {
+  for (let z = -MAP_HALF; z <= MAP_HALF; z++) {
     const x = riverCenter(z, seed),
       w = riverWidth(z, seed);
-    assert.ok(x - w > -64 && x + w < 0 && w > 1.5);
+    assert.ok(x - w > -MAP_HALF && x + w < 0 && w > 1.5);
     assert.ok(riverBankAt(32 + x / 2, 32 + z / 2, 0, seed));
   }
   chooseCamp(s, "clearing");
@@ -54,3 +55,10 @@ assert.notDeepEqual(
 console.log(
   "PASS: 100 distinct seeded rivers; clear camps and water access; persistent seeds; legacy restore; deterministic terrain variation.",
 );
+
+const richness=new Set();
+for(let seed=1;seed<=100;seed++)richness.add(resourceRichness(seed,40,40));
+assert.equal(richness.size,100);
+assert.notEqual(resourceRichness(5,0,0),resourceRichness(5,60,60));
+assert.equal(depositCapacity(0,{x:0,z:0},{deposit:160,output:{stone:8}}),160);
+console.log('PASS: resource richness varies across maps and regions');

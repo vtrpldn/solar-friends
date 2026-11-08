@@ -1,3 +1,4 @@
+import {depositCapacity} from './land-layout.js';
 import {profileFor,friendshipLabel} from './resident-personality.js';
 import { needMeters } from "./resident-needs.js";
 import { drapeRoadGeometry } from "./road-surface.js";
@@ -299,12 +300,12 @@ for (let i = 0; i < 52; i++) {
       ),
     );
 }
-for (const [x, z] of [
-  [25, 29],
-  [25, 33],
-  [27, 28],
-])
-  scenery.add(prop("tree", x, z));
+for (let i=0;i<3;i++) {
+  const x=s.landSeed?24+sceneryRandom()*5:[25,25,27][i];
+  const z=s.landSeed?27+sceneryRandom()*8:[29,33,28][i];
+  if(!riverBankAt(x,z,2,s.landSeed) && !accessRoadAt(x,z,2))
+    scenery.add(prop(native[Math.floor(sceneryRandom()*native.length)]||'tree',x,z));
+}
 // Seeded outer regions leave generous open space around the starting clearing.
 const regionRandom = landRandom((s.landSeed || 1) ^ 0x51f92);
 const regionSets = {
@@ -1023,7 +1024,7 @@ addEventListener("keyup", (e) => {
 addEventListener("keydown", (e) => {
   const editing =
     e.target.closest?.('input,textarea,select,[contenteditable="true"]') ||
-    $("management").open;
+    $("management").open || $("people").open;
   if (e.key === "Shift" && !editing) {
     shiftPlacement = true;
     updatePlacementPreview();
@@ -1056,7 +1057,7 @@ addEventListener("keydown", (e) => {
     e.preventDefault();
     rotatePlacement(e.shiftKey ? -1 : 1);
   }
-  if (e.key === "Escape" && !$("management").open) {
+  if (e.key === "Escape" && !$("management").open && !$("people").open) {
     if (placing) cancel();
     else if (selected) {
       selected = null;
@@ -1258,6 +1259,8 @@ function renderUtilityUI() {
           " · ",
         )} ${op ? op.status || "Resident job queued" : p.productionStatus || (p.readyAt > s.time ? `Growing: ${Math.ceil(p.readyAt - s.time)} seconds remaining` : "")}`
     : "";
+  const recipe=PROCESSES[$("production").value];
+  if(p && recipe?.deposit) $("building-service").textContent+=` · Deposit: ${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} remaining`;
   $("building-service").hidden = !$("building-service").textContent.trim();
 }
 $("connect-utility").onclick = () => {
@@ -1353,7 +1356,7 @@ function filterBuildings() {
 }
 $("build-category").onchange = filterBuildings;
 $("build-search").oninput = filterBuildings;
-let openPanel = null, flattenLevel = null;
+let openPanel = null, flattenLevel = null, residentsWasPaused = false;
 const terrainHistory = [];
 const terrainBrush = new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xffe1a0,depthTest:false}));
 terrainBrush.visible = false; terrainBrush.renderOrder = 10; scene.add(terrainBrush);
@@ -1372,6 +1375,11 @@ $("terrain-undo").onclick = () => {
 };
 function setPanel(panel) {
   if (placing) cancel();
+  if(panel==='people') {
+    expandedResident??=s.people[0].id;
+    residentsWasPaused=paused;paused=true;updatePauseButton();
+    if(!$("people").open) $("people").showModal();
+  } else if($("people").open) $("people").close();
   openPanel = panel;
   terrainBrush.visible = false;
   $("terrain-panel").hidden = panel !== "terrain-panel";
@@ -1391,6 +1399,11 @@ document.querySelectorAll("[data-panel-toggle]").forEach((button) => {
 document
   .querySelectorAll("[data-close-panel]")
   .forEach((button) => (button.onclick = () => setPanel(null)));
+$("people").addEventListener('close',()=>{
+  paused=residentsWasPaused;updatePauseButton();
+  if(openPanel==='people')openPanel=null;
+  uiSignature='';renderUI();
+});
 $("toggle-build-list").onclick = () => setPanel(null);
 filterBuildings();
 function renderUI() {
@@ -1448,7 +1461,7 @@ function renderUI() {
   });
   $("projects-panel").hidden =
     !active || openPanel !== "projects-panel" || !!selected;
-  $("people").hidden = !active || !!selected || openPanel !== "people";
+
   $("build").hidden =
     !active || s.stage === "evening" || openPanel !== "build" || !!selected;
   const counters = [
@@ -1529,6 +1542,7 @@ function renderUI() {
     $(done ? "completed-tasks" : "tasks").append(div);
   }
   $("roster").replaceChildren();
+  $("resident-detail").replaceChildren();
   for (const r of s.people) {
     const div = document.createElement("div");
     div.className = "person";
@@ -1582,7 +1596,7 @@ function renderUI() {
     const open=document.createElement('button');open.className='resident-profile-toggle';
     open.textContent=`${expandedResident===r.id?'▾':'▸'} ${profile.role}`;
     open.setAttribute('aria-expanded',String(expandedResident===r.id));
-    open.onclick=()=>{expandedResident=expandedResident===r.id?null:r.id;uiSignature='';renderUI();};
+    open.onclick=()=>{expandedResident=r.id;uiSignature='';renderUI();};
     div.append(open);
     if(expandedResident===r.id){
       const detail=document.createElement('section');detail.className='resident-profile';
@@ -1601,7 +1615,8 @@ function renderUI() {
       paragraph('Shared conversations strengthen connections; familiar friends are preferred when nearby.','small');
       paragraph('Right now','h3');
       paragraph(r.needBlocked || (r.needTask ? `${status.textContent}. They will return to available work afterward.` : r.energy<25 ? 'Too tired to work; looking for rest.' : r.action==='build' ? 'Needs are manageable, so they are helping with construction.' : status.textContent));
-      div.append(detail);
+      const title=document.createElement("h2");title.textContent=r.name;detail.prepend(title);
+      $("resident-detail").append(detail);
     }
     $("roster").append(div);
   }

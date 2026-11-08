@@ -19,9 +19,9 @@ function naturalVertex(x, z, seed = 0) {
     Math.max(0, z - ROAD_END_Z - 3),
   ) / 10);
   const hills =
-    3.5 +
-    2.5 * Math.sin(x * 0.065 + p.phase) * Math.cos(z * 0.052 - p.phase) +
-    1.5 * Math.sin(z * 0.105 + p.phase * 0.7);
+    p.hillHeight * .6 +
+    p.hillHeight * .5 * Math.sin(x * p.hillScaleX + p.phase) * Math.cos(z * p.hillScaleZ - p.phase) +
+    p.ridge * Math.sin(z * .105 + p.phase * .7);
   return Math.max(0, hills) * clearing * river * road;
 }
 // Pads cover whole mesh triangles beneath the foundation. Blended shoulders

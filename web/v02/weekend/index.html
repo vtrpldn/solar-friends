@@ -69,12 +69,12 @@
         <ol id="log"></ol>
       </details>
     </aside>
-    <aside id="people" class="paper" hidden>
+    <dialog id="people" aria-labelledby="residents-title">
       <button class="panel-close" data-close-panel aria-label="Close residents">
         ×</button
-      ><small>♡ OUR LITTLE CREW</small>
-      <div id="roster"></div>
-    </aside>
+      ><small>♡ OUR LITTLE CREW</small><h2 id="residents-title">Our residents</h2><p class="hint">Explore their needs, strengths and friendships. Village paused while this screen is open.</p>
+      <div class="residents-layout"><div id="roster"></div><div id="resident-detail"></div></div>
+    </dialog>
     <section id="rain" class="paper" hidden>
       <small>A CHANGE IN THE WEATHER</small>
       <h2>Our supplies are getting wet.</h2>
