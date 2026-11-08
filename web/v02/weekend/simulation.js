@@ -1,3 +1,4 @@
+import {workMultiplier} from './resident-personality.js';
 import { ensureNeeds, decayNeeds, chooseNeed, advanceNeed, validNeeds } from "./resident-needs.js";
 import { validTerrainVertices } from "./terraform.js";
 import { ROAD_SHIFT } from "./road-layout.js";
@@ -547,7 +548,7 @@ function operationalWork(s, r, i, dt) {
   op.status = "Working";
   if (r.energy < 25) { r.action = "idle"; r.operation = null; return true; }
   r.action = "produce";
-  op.work += dt * (node.power > 0.99 && recipe.kind === "workshop" ? 2 : 1);
+  op.work += dt * workMultiplier(r,p.key) * (node.power > 0.99 && recipe.kind === "workshop" ? 2 : 1);
   r.work += dt;
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if (op.work >= recipe.work) {
@@ -1943,17 +1944,12 @@ export function tick(s, dt) {
     }
     if (p.delivered < loads || r.energy < 25) continue;
     r.action = "build";
-    const skilled =
-      (r.id === "bento" && p.key === "shelter") ||
-      (r.id === "luz" && p.key === "gathering") ||
-      (r.id === "caua" && p.key === "water") ||
-      (r.id === "nina" && p.key === "toilet");
     const before = p.work;
     p.work = Math.min(
       PROJECTS[p.key].work,
       p.work +
         dt *
-          (skilled ? 1.25 : 1) *
+          workMultiplier(r,p.key) *
           (s.opening &&
           !s.opening.complete &&
           s.rain &&
@@ -2189,6 +2185,7 @@ export function restore(text) {
         if (r[k] !== undefined && (!Number.isFinite(r[k]) || r[k] < 0))
           return null;
       if (!validNeeds(r)) return null;
+      if(r.friendships!==undefined && (!r.friendships || typeof r.friendships!=='object' || Array.isArray(r.friendships) || Object.entries(r.friendships).some(([id,value])=>id===r.id || !fresh.people.some(p=>p.id===id) || !Number.isFinite(value) || value<0 || value>100))) return null;
       ensureNeeds(r,i);
       r.needTask = null;
       r.needRetryAt = 0;

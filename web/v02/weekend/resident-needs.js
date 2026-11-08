@@ -1,3 +1,4 @@
+import {profileFor,recordConversation} from './resident-personality.js';
 import { useWater } from './infrastructure.js';
 export const NEED_KEYS=['hunger','bladder','bowels','hygiene','social','fun'];
 const clamp=n=>Math.max(0,Math.min(100,n));
@@ -12,7 +13,7 @@ export function needMeters(r) {
 export function decayNeeds(s,r,i,dt) {
  const n=ensureNeeds(r,i), working=['build','produce','install','carry','collect'].includes(r.action);
  const rates={hunger:.055,bladder:.12,bowels:.047,hygiene:working?.075:.018,social:.035,fun:working?.055:.025};
- for(const key of NEED_KEYS)n[key]=clamp(n[key]-rates[key]*dt*(.9+i*.05));
+ for(const key of NEED_KEYS)n[key]=clamp(n[key]-rates[key]*dt*(profileFor(r).rates[key]||1));
  if(r.tentPhase==='inside') {n.fun=clamp(n.fun+dt*.04);return;}
  // Friendly conversation during leisure also helps, but only with someone nearby.
  if(r.action==='chat' && !r.needTask && s.people.some(p=>p!==r && p.action==='chat' && Math.hypot(p.x-r.x,p.z-r.z)<2))n.social=clamp(n.social+dt*.7);
@@ -45,7 +46,11 @@ export function chooseNeed(s,r,i,api) {
  const nodes=Object.values(s.infrastructure.nodes);
  const free=node=>!s.people.some(p=>p!==r && p.needTask?.site===node.id);
  const choose=predicate=>{
-   const candidates=nodes.filter(a=>a.enabled && predicate(a) && free(a)).sort((a,b)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z));
+   const candidates=nodes.filter(a=>a.enabled && predicate(a) && free(a)).sort((a,b)=>{
+     const favorites=profileFor(r).favorites;
+     const rank=node=>favorites.includes(node.kind)?favorites.indexOf(node.kind):favorites.length;
+     return rank(a)-rank(b)||Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z);
+   });
    for(const node of candidates){const spot=api.serviceSpot(node,r);if(spot && api.route(r,spot))return {node,spot};}
    return null;
  };
@@ -71,7 +76,7 @@ export function chooseNeed(s,r,i,api) {
   }
   if(kind==='social') {
    const partner=s.people.filter(p=>p!==r && !p.tentPhase && !p.needTask && !p.cargo && !p.operation && p.action!=='town' && p.energy>=35 && ['hunger','bladder','bowels','hygiene'].every(key=>ensureNeeds(p)[key]>20))
-    .sort((a,b)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z))[0];
+    .sort((a,b)=>(Math.hypot(a.x-r.x,a.z-r.z)-(r.friendships?.[a.id]||0)/25)-(Math.hypot(b.x-r.x,b.z-r.z)-(r.friendships?.[b.id]||0)/25))[0];
    if(partner) {
     const spot=api.groundSpot(r,api.camp(),i), other=spot && api.groundSpot(partner,spot,i+1);
     if(spot&&other&&Math.hypot(spot.x-other.x,spot.z-other.z)<=2.5){
@@ -124,7 +129,7 @@ export function advanceNeed(s,r,dt,api) {
  } else if(task.kind==='social') {
   n.social=95;n.fun=clamp(n.fun+15);
   const partner=s.people.find(p=>p.id===task.partner);
-  if(partner?.needTask?.partner===r.id){partner.needs.social=95;partner.needs.fun=clamp(partner.needs.fun+15);release(partner);partner.needRetryAt=s.time+3;}
+  if(partner?.needTask?.partner===r.id){recordConversation(r,partner);partner.needs.social=95;partner.needs.fun=clamp(partner.needs.fun+15);release(partner);partner.needRetryAt=s.time+3;}
  } else n.fun=95;
  r.needHistory??={};r.needHistory[task.kind]=(r.needHistory[task.kind]||0)+1;
  release(r);r.needRetryAt=s.time+3;

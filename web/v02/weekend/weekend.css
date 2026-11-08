@@ -1435,3 +1435,11 @@ body[data-tray="closed"] {
 #build-list button { min-height: 119px; }
 #build-list .build-art { height: 66px; }
 #build-empty { padding: 35px 15px; font-size: 13px; color: #746749; }
+
+#people { width: 360px; }
+.resident-profile-toggle { grid-column: 2 / 4; text-align: left; font-size: 11px; padding: 6px 0; background: transparent; border: 0; box-shadow: none; color: #526647; }
+.resident-profile { grid-column: 1 / 4; padding: 12px; margin: 5px 0 8px; border-radius: 12px; background: #e8e5ca; text-align: left; }
+.resident-profile h3 { font-size: 11px; margin: 12px 0 5px; color: #42583d; }
+.resident-profile h3:first-child { margin-top: 0; }
+.resident-profile p { font-size: 12px; line-height: 1.5; margin: 4px 0; color: #605d46; }
+.resident-profile small { font-size: 10px; color: #766d54; }

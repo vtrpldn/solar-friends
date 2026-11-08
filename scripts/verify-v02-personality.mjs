@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import {PROFILES,workMultiplier,recordConversation} from '../web/v02/weekend/resident-personality.js';
+import {decayNeeds} from '../web/v02/weekend/resident-needs.js';
+import {createWeekend,save,restore} from '../web/v02/weekend/simulation.js';
+const s=createWeekend();
+assert.equal(Object.keys(PROFILES).length,5);
+const [iara,bento,luz]=s.people;
+for(const r of s.people){for(const k in r.needs)r.needs[k]=90;decayNeeds(s,r,0,10);}
+assert(luz.needs.social<bento.needs.social,'sociable residents need more conversation');
+assert(iara.needs.hygiene>bento.needs.hygiene,'outdoorsy residents lose hygiene more slowly');
+assert(workMultiplier(bento,'house')>workMultiplier(luz,'house'));
+const base=workMultiplier(bento,'house');bento.work=10000;
+assert.equal(workMultiplier(bento,'house'),base*1.15);
+recordConversation(iara,bento);assert.equal(iara.friendships.bento,8);assert.equal(bento.friendships.iara,8);
+for(let i=0;i<20;i++)recordConversation(iara,bento);
+assert.equal(iara.friendships.bento,100);
+const loaded=restore(save(s));assert(loaded);assert.equal(loaded.people[0].friendships.bento,100);assert.equal(loaded.people[1].work,10000);
+iara.friendships.bento=101;assert.equal(restore(save(s)),null);
+console.log('PASS: distinct needs rhythms, specialties, capped practice, reciprocal friendships and save validation');
+const {chooseNeed}=await import('../web/v02/weekend/resident-needs.js');
+const leisure=createWeekend(), reader=leisure.people[1];leisure.stage='playing';reader.needs.fun=5;
+leisure.infrastructure={nodes:{1:{id:1,kind:'reading-room',enabled:true,x:10,z:10},2:{id:2,kind:'exercise-garden',enabled:true,x:0,z:0}}};
+chooseNeed(leisure,reader,1,{route:()=>true,serviceSpot:n=>({x:n.x,z:n.z}),groundSpot:()=>null,camp:()=>({x:0,z:0})});
+assert.equal(reader.needTask.site,1,'preferred reading room wins over an available exercise space');
+console.log('PASS: leisure choices use authored preferences');

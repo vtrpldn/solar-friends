@@ -1,3 +1,4 @@
+import {profileFor,friendshipLabel} from './resident-personality.js';
 import { needMeters } from "./resident-needs.js";
 import { drapeRoadGeometry } from "./road-surface.js";
 import { terraform } from "./terraform.js";
@@ -1129,13 +1130,6 @@ $("confirm-reset").onclick = () => {
   persist();
   location.reload();
 };
-const specialties = {
-  iara: "All-rounder",
-  bento: "Building",
-  luz: "Camp setup",
-  caua: "Water systems",
-  nina: "Sanitation",
-};
 const actionText = {
   idle: "Taking in the land",
   collect: "Collecting materials",
@@ -1158,7 +1152,7 @@ const actionText = {
   wash: "Washing up",
   toilet: "Using the toilet",
 };
-let uiSignature = "";
+let uiSignature = "", expandedResident = null;
 let management;
 function refillSelect(id, options) {
   const el = $(id),
@@ -1429,7 +1423,7 @@ function renderUI() {
     selected,
     placing,
     s.log,
-    s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
+    s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
     s.projects.map((p) => [
       p.id,
       Math.floor((p.work / PROJECTS[p.key].work) * 100),
@@ -1544,7 +1538,7 @@ function renderUI() {
     div.dataset.resident = r.id;
     const name = document.createElement("strong");
     name.textContent = r.name;
-    name.title = `Good at: ${specialties[r.id]}`;
+    name.title = profileFor(r).role;
     const energy = document.createElement("span");
     const meters=needMeters(r), lowest=[...meters].sort((a,b)=>a[1]-b[1])[0];
     energy.textContent = `${lowest[0]} ${Math.round(lowest[1])}%`;
@@ -1584,6 +1578,31 @@ function renderUI() {
       item.append(text,progress);needs.append(item);
     }
     div.append(portrait, name, energy, status, needs);
+    const profile=profileFor(r);
+    const open=document.createElement('button');open.className='resident-profile-toggle';
+    open.textContent=`${expandedResident===r.id?'▾':'▸'} ${profile.role}`;
+    open.setAttribute('aria-expanded',String(expandedResident===r.id));
+    open.onclick=()=>{expandedResident=expandedResident===r.id?null:r.id;uiSignature='';renderUI();};
+    div.append(open);
+    if(expandedResident===r.id){
+      const detail=document.createElement('section');detail.className='resident-profile';
+      const paragraph=(text,kind='p')=>{const el=document.createElement(kind);el.textContent=text;detail.append(el);};
+      paragraph(profile.traits.join(' · '),'h3');paragraph(profile.bio);
+      paragraph('Their rhythm','h3');paragraph(profile.effect);
+      paragraph(`Favorite pastime: ${profile.hobby}.`);
+      paragraph('Skills & experience','h3');
+      paragraph(`25% faster at: ${profile.strengths.map(key=>PROJECTS[key]?.name).filter(Boolean).join(', ')}.`);
+      paragraph(`${Math.floor(r.work)} seconds of hands-on practice · +${Math.round((Math.min(.15,r.work/10000))*100)}% experience bonus on all work (up to 15%).`);
+      paragraph('Connections','h3');
+      for(const friend of s.people.filter(p=>p!==r)) {
+        const score=r.friendships?.[friend.id]||0;
+        paragraph(`${friend.name} · ${friendshipLabel(score)} (${score}/100)`);
+      }
+      paragraph('Shared conversations strengthen connections; familiar friends are preferred when nearby.','small');
+      paragraph('Right now','h3');
+      paragraph(r.needBlocked || (r.needTask ? `${status.textContent}. They will return to available work afterward.` : r.energy<25 ? 'Too tired to work; looking for rest.' : r.action==='build' ? 'Needs are manageable, so they are helping with construction.' : status.textContent));
+      div.append(detail);
+    }
     $("roster").append(div);
   }
   const purchase = MATERIALS[$("purchase").value];
