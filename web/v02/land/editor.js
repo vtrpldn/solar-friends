@@ -58,7 +58,7 @@ export function gallery() {
 export function decode(text) {
   const data = JSON.parse(text);
   if (data?.format !== "solar-friends-scene" || data.version !== 1)
-    throw Error("Not a v0.2 scene file.");
+    throw Error("Not a v2 scene file.");
   return validate(data.props);
 }
 export function decodeBiome(text) {

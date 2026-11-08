@@ -1,6 +1,6 @@
 import { COMMUNITY } from "../library/community-defs.js";
 import { BUILDING_MODELS } from "./building-models.js";
-// v0.1 economy.rs construction recipes, expressed in v0.2 material IDs.
+// v1 economy.rs construction recipes, expressed in v2 material IDs.
 const recipes = {
   road: { stone: 1, earth: 1 },
   bridge: { wood: 32, hardware: 8, stone: 8 },

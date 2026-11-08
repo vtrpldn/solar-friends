@@ -1,5 +1,5 @@
 import { riverAccess } from "./river-layout.js";
-// v0.2 port of v0.1 electricity and water ownership rules. No renderer dependency.
+// v2 port of v1 electricity and water ownership rules. No renderer dependency.
 export const LIQUIDS = ["fresh", "irrigation", "greywater", "sewage"];
 export const POWER_LOAD = {
   shed: 0.1,

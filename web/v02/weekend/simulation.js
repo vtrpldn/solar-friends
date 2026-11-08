@@ -19,7 +19,7 @@ import { expandMaterials, expandProjects, PROCESSES } from "./catalog-rules.js";
 import { accessRoadAt } from "./road-layout.js";
 import { ARRIVAL_DURATION, ARRIVAL_SPOTS } from "./arrival.js";
 import { riverBankAt, riverAccess } from "./river-layout.js";
-// A self-contained v0.2 prototype. Time is measured in active simulation seconds.
+// A self-contained v2 prototype. Time is measured in active simulation seconds.
 export const CAMPS = [
   {
     id: "shade",
