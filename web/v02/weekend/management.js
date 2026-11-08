@@ -1,3 +1,4 @@
+import { resourceIcon } from "./resource-icons.js";
 import {
   MATERIALS,
   PROJECTS,
@@ -214,7 +215,7 @@ export function createManagement({
         if (!item.name.toLowerCase().includes(search)) continue;
         const b = document.createElement("button");
         b.className = "stock-card";
-        b.innerHTML = `<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name}</span><small>${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
+        b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name}</span><small>${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
         b.disabled = !item.quantity;
         b.classList.toggle("active", $("purchase").value === id);
         b.onclick = () => {

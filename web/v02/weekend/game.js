@@ -1,3 +1,4 @@
+import { resourceIcon } from "./resource-icons.js";
 import { createManagement } from "./management.js";
 import { illustrate } from "./ui-art.js";
 import { sunlightAt } from "./sunlight.js";
@@ -1020,11 +1021,11 @@ function renderUI() {
   $("build").hidden =
     !active || s.stage === "evening" || openPanel !== "build" || !!selected;
   const counters = [
-    ["◉", `R$${s.money}`, "Savings", "resources"],
-    ["▰", Math.floor(s.wood), "Timber", "resources"],
-    ["♨", s.materials.meals || 0, "Meals", "resources"],
+    ["money", `R$${s.money}`, "Savings", "resources"],
+    ["wood", Math.floor(s.wood), "Timber", "resources"],
+    ["meals", s.materials.meals || 0, "Meals", "resources"],
     [
-      "ϟ",
+      "power",
       `${Object.values(s.infrastructure?.nodes || {})
         .reduce((a, n) => a + (n.generation || 0), 0)
         .toFixed(1)}`,
@@ -1032,7 +1033,7 @@ function renderUI() {
       "power",
     ],
     [
-      "♦",
+      "water",
       Math.floor(s.infrastructure?.nodes[0]?.water[0] || 0),
       "Water",
       "water",
@@ -1042,7 +1043,7 @@ function renderUI() {
     $("supplies").innerHTML = counters
       .map(
         ([icon, value, label, panel]) =>
-          `<button class="resource" data-panel="${panel}" title="Open ${panel} management"><span aria-hidden="true">${icon}</span><b></b><small>${label}</small></button>`,
+          `<button class="resource" data-panel="${panel}" title="Open ${panel} management">${resourceIcon(icon)}<b></b><small>${label}</small></button>`,
       )
       .join("");
   counters.forEach((counter, i) => {
