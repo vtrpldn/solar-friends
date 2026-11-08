@@ -1,3 +1,4 @@
+import { installCameraNavigation } from "./camera-navigation.js";
 import { createJimny } from "../library/vehicles.js";
 import {
   ARRIVAL_DURATION,
@@ -74,6 +75,13 @@ controls.minZoom = 0.6;
 controls.maxZoom = 3;
 controls.maxPolarAngle = Math.PI * 0.46;
 controls.minPolarAngle = 0.25;
+let arrivalCameraFollow = true;
+const navigation = installCameraNavigation(camera, controls, {
+  home: () => focus(CAMPS.find((c) => c.id === s.camp)),
+  onInteract: () => {
+    arrivalCameraFollow = false;
+  },
+});
 scene.add(new THREE.HemisphereLight("#fff1cd", "#658658", 2));
 const sun = new THREE.DirectionalLight("#ffe2a8", 3.4);
 sun.position.set(-25, 45, 18);
@@ -507,6 +515,10 @@ $("speed").onclick = () => {
 };
 $("home").onclick = () => focus(CAMPS.find((c) => c.id === s.camp));
 $("river-view").onclick = () => focus({ x: 20, z: 38 });
+$("rotate-left").onclick = () => navigation.rotate(-Math.PI / 2);
+$("rotate-right").onclick = () => navigation.rotate(Math.PI / 2);
+$("zoom-in").onclick = () => navigation.zoom(1.2);
+$("zoom-out").onclick = () => navigation.zoom(1 / 1.2);
 $("grid").onclick = () => {
   grid.visible = !grid.visible;
   $("grid").setAttribute("aria-pressed", String(grid.visible));
@@ -710,8 +722,12 @@ function frame(now) {
       }
     }
     if (arriving) {
-      controls.target.lerp(car.position, 0.06);
-      camera.position.copy(controls.target).add(new THREE.Vector3(24, 26, 24));
+      if (arrivalCameraFollow) {
+        controls.target.lerp(car.position, 0.06);
+        camera.position
+          .copy(controls.target)
+          .add(new THREE.Vector3(24, 26, 24));
+      }
       message(
         s.arrivalElapsed < PARK_TIME
           ? "There it is. Our own little piece of land."
@@ -721,7 +737,7 @@ function frame(now) {
       !$("arrival").hidden &&
       $("message").textContent.startsWith("We’re here")
     ) {
-      focus();
+      if (arrivalCameraFollow) focus();
       message("Choose a campsite to begin.");
     }
   }
@@ -803,6 +819,7 @@ function frame(now) {
     persist();
     lastSave = now;
   }
+  navigation.update(dt);
   controls.update();
   renderer.render(scene, camera);
   recordPerformance(now);

@@ -333,3 +333,15 @@ dialog::backdrop {
 [hidden] {
   display: none !important;
 }
+
+.controls {
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: auto;
+}
+.controls span {
+  flex-basis: 100%;
+}
+#build button {
+  flex: 1;
+}

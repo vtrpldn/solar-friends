@@ -17,7 +17,7 @@
   <body>
     <canvas
       id="world"
-      aria-label="Our land. Click a grid square to place a project."
+      aria-label="Our land. Drag to pan, right-drag to orbit. Click a grid square to place a project."
       tabindex="0"
     ></canvas>
     <header>
@@ -100,8 +100,16 @@
       <button id="skip-arrival" hidden>Skip arrival</button>
       <div id="message" role="status">Choose a campsite to begin.</div>
       <div class="controls">
-        <span>Drag to orbit · Right-drag to pan · Scroll to zoom</span
-        ><button id="home">⌂ Camp</button
+        <span
+          >WASD / arrows or drag: pan · Shift: faster · Q/E or right-drag: turn
+          · Scroll / +−: zoom</span
+        ><button id="rotate-left" aria-label="Rotate camera left" title="Q">
+          ↶</button
+        ><button id="rotate-right" aria-label="Rotate camera right" title="E">
+          ↷</button
+        ><button id="zoom-out" aria-label="Zoom out">−</button
+        ><button id="zoom-in" aria-label="Zoom in">+</button
+        ><button id="home" title="Home · Center on camp">⌂ Camp</button
         ><button id="river-view">River bend</button
         ><button id="grid">Grid</button
         ><button id="cancel" hidden>Cancel · Esc</button

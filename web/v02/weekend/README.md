@@ -6,7 +6,7 @@ A standalone v0.2 playable at `/v02/weekend/`. It uses the shared 3D catalog and
 
 Test a short loop of choosing a campsite, placing practical projects, watching friends carry and build, and improving the arrangement. The first evening is available after a gathering place and one practical improvement; there is no multi-day unlock gate. This is a compact first playable, not yet a 20–30 minute campaign.
 
-Choose one of three camps, select a project, then click a clear grid square. Project buttons in the journal open priority and relocation controls. Drag to orbit, right-drag to pan, scroll to zoom. Pause and 4× speed are available. The evening button ends construction for this session; New weekend asks before replacing its save.
+Choose one of three camps, select a project, then click a clear grid square. Project buttons in the journal open priority and relocation controls. WASD/arrows or left-drag pan relative to the camera; Shift pans faster. Q/E or right-drag turn the view. Scroll or +/− zoom; Home centers the camp. Keyboard movement works while paused, ignores text fields and dialogs, and stops on focus loss. Pause and 4× speed are available. The evening button ends construction for this session; New weekend asks before replacing its save.
 
 - Five autonomous friends share work, carry materials, recover energy and use an installed tank for washing breaks.
 - Resources are reserved at planning time. Work access is protected during placement and relocation. Two friends can work on each project.
