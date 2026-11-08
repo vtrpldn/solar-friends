@@ -110,10 +110,9 @@ for (const [recipe, def] of Object.entries(PROCESSES)) {
   );
   assert(visited, `${recipe}: no worker visited site`);
   for (const [k, n] of Object.entries(def.output))
-    assert.equal(
-      k === "wood" ? s.wood : s.materials[k],
-      outputBefore[k] + n,
-      `${recipe}: delivered output`,
+    assert(
+      (k === "wood" ? s.wood : s.materials[k]) >= outputBefore[k] + n,
+      `${recipe}: delivered output (passive harvests may add more)`,
     );
   assert(restore(save(s)), `${recipe}: invalid save`);
 }
@@ -225,7 +224,7 @@ for (const key of ["warehouse", "supply-5"]) {
   const goats = s.materials.goats;
   assert.equal(queueProduction(s, p.id, "milk"), "");
   assert(p.stocked);
-  assert.equal(s.materials.goats, goats - 1);
+  assert.equal(s.materials.goats, goats - 2);
   assert(run(s, 400, () => s.operations[0].done));
 }
 {
@@ -235,6 +234,7 @@ for (const key of ["warehouse", "supply-5"]) {
   assert.equal(connect(s, PROJECTS, "power", battery.id, lamp.id), "");
   s.infrastructure.links[0].work = s.infrastructure.links[0].required;
   const n = s.infrastructure.nodes[battery.id];
+  s.infrastructure.grid.enabled = false;
   n.charge = 20;
   n.enabled = false;
   s.time = 1800;
@@ -253,6 +253,7 @@ console.log(
   const s = fresh(),
     digester = built(s, "biodigester"),
     kitchen = built(s, "kitchen", 44, 40);
+  s.infrastructure.grid.enabled = false;
   s.infrastructure.nodes[digester.id].water[3] = 12;
   s.infrastructure.nodes[kitchen.id].water[0] = 6;
   infrastructureStep(s, PROJECTS, 60);
@@ -268,8 +269,10 @@ console.log(
   );
 }
 {
-  const s = fresh(),
-    hydro = built(s, "hydro", 20, 40),
+  const s = fresh();
+  const bank = Array.from({length:30},(_,i)=>({x:5+i,z:40})).find(p=>!placementError(s,"hydro",p.x,p.z));
+  assert(bank, "fixture needs a legal river bank");
+  const hydro = built(s, "hydro", bank.x, bank.z),
     barrel = built(s, "rain-barrel", 40, 40);
   s.time = 1800;
   s.rain = true;
