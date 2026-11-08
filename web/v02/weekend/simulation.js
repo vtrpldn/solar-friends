@@ -1,3 +1,4 @@
+import { carDoor, TRIP_DURATION, DRIVE_DURATION } from "./town-trip.js";
 import { CELL_MIN, CELL_MAX } from "./map-size.js";
 import { footprintRelief, foundationPad } from "./elevation.js";
 import { OPENING_PROJECTS, openingProgress } from "./opening.js";
@@ -879,8 +880,18 @@ export function supplyRun(s, material = "wood") {
     .filter((r) => r.energy > 35 && !r.cargo && !r.tentPhase)
     .sort((a, b) => b.energy - a.energy)[0];
   if (!r) return false;
+  const vehicle = s.nextTripVehicle || 0;
+  const path = route(s, r, carDoor(vehicle));
+  if (!path) return false;
   s.money -= item.price;
-  s.trip = { person: r.id, left: 55, material };
+  s.nextTripVehicle = 1 - vehicle;
+  s.trip = {
+    person: r.id,
+    left: TRIP_DURATION,
+    material,
+    vehicle,
+    phase: "boarding",
+  };
   r.job = null;
   r.target = null;
   r.walk = [];
@@ -891,7 +902,7 @@ export function supplyRun(s, material = "wood") {
   if (s.opening) s.opening.townTrips++;
   say(
     s,
-    `${r.name} is driving to town: ${item.quantity} ${item.name} for R$${item.price}. Back in about a minute.`,
+    `${r.name} is heading to the car for town: ${item.quantity} ${item.name} for R$${item.price}. Back in about a minute.`,
   );
   return true;
 }
@@ -1436,18 +1447,65 @@ export function tick(s, dt) {
     } else s.infrastructure.hungry = true;
   }
   if (s.trip) {
-    s.trip.left -= dt;
-    if (s.trip.left <= 0) {
-      const r = s.people.find((r) => r.id === s.trip.person);
-      r.action = "idle";
-      r.x = 32;
-      r.z = 24;
-      const id = s.trip.material,
-        item = MATERIALS[id];
-      if (id === "wood") s.wood += item.quantity;
-      else s.materials[id] += item.quantity;
-      s.trip = null;
-      say(s, `${r.name} is back with ${item.quantity} ${item.name}.`);
+    const trip = s.trip,
+      r = s.people.find((r) => r.id === trip.person);
+    if (trip.phase === "boarding" || trip.phase === "unloading") {
+      const target =
+        trip.phase === "boarding"
+          ? carDoor(trip.vehicle)
+          : { x: s.stock.x, z: s.stock.z };
+      r.target = target;
+      if (!r.walk.length) r.walk = route(s, r, target) || [];
+      const next = r.walk[0];
+      if (next) {
+        const distance = Math.hypot(next.x - r.x, next.z - r.z);
+        r.moveSpeed = Math.min(0.95, (r.moveSpeed || 0) + dt * 1.8);
+        const step = Math.min(distance, dt * r.moveSpeed);
+        const candidate = {
+          x: r.x + (distance ? ((next.x - r.x) / distance) * step : 0),
+          z: r.z + (distance ? ((next.z - r.z) / distance) * step : 0),
+        };
+        if (walkSegmentClear(s, r, candidate)) {
+          r.x = candidate.x;
+          r.z = candidate.z;
+          if (distance <= step + 0.001) r.walk.shift();
+        } else r.walk = [];
+      }
+      if (Math.hypot(r.x - target.x, r.z - target.z) < 0.025) {
+        r.walk = [];
+        r.target = null;
+        r.moveSpeed = 0;
+        if (trip.phase === "boarding") trip.phase = "outbound";
+        else {
+          const id = trip.material,
+            item = MATERIALS[id];
+          if (id === "wood") s.wood += item.quantity;
+          else s.materials[id] += item.quantity;
+          r.action = "idle";
+          r.cargo = false;
+          s.trip = null;
+          say(
+            s,
+            `${r.name} unloaded ${item.quantity} ${item.name} from the car.`,
+          );
+        }
+      }
+    } else {
+      trip.left = Math.max(0, trip.left - dt);
+      trip.phase =
+        trip.left > TRIP_DURATION - DRIVE_DURATION
+          ? "outbound"
+          : trip.left > DRIVE_DURATION
+            ? "away"
+            : trip.left > 0
+              ? "inbound"
+              : "unloading";
+      if (trip.phase === "unloading") {
+        Object.assign(r, carDoor(trip.vehicle));
+        r.walk = [];
+        r.target = null;
+        r.cargo = true;
+      }
     }
   }
   if (
@@ -2021,10 +2079,25 @@ export function restore(text) {
       (!Object.hasOwn(MATERIALS, s.trip.material) ||
         !s.people.some((r) => r.id === s.trip.person) ||
         !Number.isFinite(s.trip.left) ||
-        s.trip.left <= 0 ||
-        s.trip.left > 55)
+        s.trip.left < 0 ||
+        s.trip.left > TRIP_DURATION)
     )
       return null;
+    if (s.nextTripVehicle !== undefined && ![0, 1].includes(s.nextTripVehicle))
+      return null;
+    if (s.trip) {
+      s.trip.vehicle ??= 0;
+      s.trip.phase ??= s.trip.left > DRIVE_DURATION ? "away" : "inbound";
+      if (
+        ![0, 1].includes(s.trip.vehicle) ||
+        !["boarding", "outbound", "away", "inbound", "unloading"].includes(
+          s.trip.phase,
+        )
+      )
+        return null;
+      const r = s.people.find((r) => r.id === s.trip.person);
+      r.cargo = s.trip.phase === "unloading";
+    }
     if (!validInfrastructure(s)) return null;
     if (
       s.infrastructure &&

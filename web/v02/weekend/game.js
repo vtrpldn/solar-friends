@@ -1,3 +1,4 @@
+import { townCarPose } from "./town-trip.js";
 import { accessRoadAt } from "./road-layout.js";
 import { MAP_CELLS, MAP_HALF, CELL_MIN, CELL_MAX } from "./map-size.js";
 import { fitTerrainCamera } from "./camera-depth.js";
@@ -1292,7 +1293,7 @@ function renderUI() {
     materialCount(s, $("purchase").value) < purchase.quantity ||
     !purchase.quantity;
   $("trip").textContent = s.trip
-    ? `${s.people.find((r) => r.id === s.trip.person).name} returns in ${Math.ceil(s.trip.left)} seconds.`
+    ? `${s.people.find((r) => r.id === s.trip.person).name}: ${{ boarding: "walking to the car", outbound: "driving to town", away: "collecting supplies in town", inbound: "driving home", unloading: "unloading supplies" }[s.trip.phase]}.`
     : `Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. Buy essentials or sell locally produced surplus.`;
   $("rain").hidden = !s.rainSeen || s.rainResolved;
   $("boards").disabled = s.wood < 2;
@@ -1409,9 +1410,21 @@ function frame(now) {
   for (const [id, entry] of buildings)
     if (entry.fire) animateFire(entry.fire, animalTime + id * 2.73);
   entrance.position.copy(world(s.stock.x, s.stock.z));
-  vehicles.forEach(
-    (vehicle, index) => (vehicle.root.visible = index !== 0 || !s.trip),
-  );
+  if (s.stage !== "arrival")
+    for (const [index, vehicle] of vehicles.entries()) {
+      const trip = s.trip && {
+        ...s.trip,
+        left: s.trip.left + (s.time - visual.time),
+      };
+      const pose = townCarPose(trip, index);
+      vehicle.root.visible = pose.visible;
+      vehicle.root.position.set(pose.x, 0, pose.z);
+      vehicle.root.rotation.y = pose.yaw;
+      for (const wheel of vehicle.wheels) {
+        wheel.rotation.set(0, 0, Math.PI / 2);
+        wheel.rotateY((pose.z + 22) / 0.41);
+      }
+    }
   const arriving = s.stage === "arrival" && s.arrivalElapsed < ARRIVAL_DURATION;
   if (s.stage === "arrival") {
     const pose = arrivalPose(visual.arrivalElapsed, 0);
@@ -1461,7 +1474,8 @@ function frame(now) {
       continue;
     }
     g.visible =
-      r.action !== "town" &&
+      (r.action !== "town" ||
+        ["boarding", "unloading"].includes(s.trip?.phase)) &&
       r.tentPhase !== "inside" &&
       !(r.action === "toilet" && r.toiletTime > 0);
     if (r.tentPhase) {
