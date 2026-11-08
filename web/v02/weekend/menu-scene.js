@@ -57,6 +57,28 @@ try {
     [-8, 9],
   ])
     prop("tree", x, z);
+  // Trees frame a lived-in clearing rather than isolated props on a blank stage.
+  for (const [x, z] of [
+    [-12, -10],
+    [-7, -12],
+    [0, -12],
+    [7, -10],
+    [13, -7],
+    [14, 1],
+    [14, 10],
+    [-13, 3],
+    [-13, 12],
+  ])
+    prop("tree", x, z);
+  const path = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.2, 26),
+    new THREE.MeshStandardMaterial({ color: "#b5a17a", roughness: 1 }),
+  );
+  path.rotation.x = -Math.PI / 2;
+  path.rotation.z = -0.25;
+  path.position.set(-2, 0.012, 8);
+  path.receiveShadow = true;
+  scene.add(path);
   const camera = new THREE.OrthographicCamera(-18, 18, 14, -14, 0.1, 120);
   camera.position.set(22, 23, 30);
   camera.lookAt(0, 0, 1);
@@ -64,7 +86,7 @@ try {
     const w = innerWidth,
       h = innerHeight;
     renderer.setSize(w, h, false);
-    const half = 12,
+    const half = 9.5,
       aspect = w / h;
     // Shift the village to the right of the menu without cropping the landscape.
     camera.left = -half * aspect;
