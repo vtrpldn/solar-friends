@@ -25,6 +25,7 @@ import { createResident, animateResident } from "../residents/rig.js";
 import {
   CAMPS,
   PROJECTS,
+  tentDoor,
   MATERIALS,
   materialText,
   recipeText,
@@ -571,7 +572,7 @@ const actionText = {
   carry: "Carrying supplies",
   walk: "Walking to the project",
   build: "Building",
-  rest: "Taking a breather",
+  rest: "Resting in the tent",
   relax: "Enjoying the clearing",
   look: "Taking in the surroundings",
   stretch: "Stretching their legs",
@@ -600,7 +601,7 @@ function renderUI() {
     placing,
     endingDismissed,
     s.log,
-    s.people.map((r) => [r.action, Math.round(r.energy)]),
+    s.people.map((r) => [r.action, r.tentPhase, Math.round(r.energy)]),
     s.projects.map((p) => [
       p.id,
       Math.floor((p.work / PROJECTS[p.key].work) * 100),
@@ -660,7 +661,10 @@ function renderUI() {
     const energy = document.createElement("span");
     energy.textContent = `${Math.round(r.energy)}% energy`;
     const status = document.createElement("span");
-    status.textContent = actionText[r.action] || "Settling in";
+    status.textContent =
+      r.action === "rest" && !r.tentPhase
+        ? "Heading to the tent"
+        : actionText[r.action] || "Settling in";
     status.style.gridColumn = "1 / -1";
     const progress = document.createElement("progress");
     progress.max = 100;
@@ -796,7 +800,24 @@ function frame(now) {
       );
       continue;
     }
-    g.visible = r.action !== "town";
+    g.visible = r.action !== "town" && r.tentPhase !== "inside";
+    if (r.tentPhase) {
+      const door = tentDoor(s, i),
+        t = Math.max(0, Math.min(1, (visual.time - r.tentAt) / 1.5));
+      const inward =
+        r.tentPhase === "exit" ? 1 - t : r.tentPhase === "inside" ? 1 : t;
+      g.position.copy(world(door.x, door.z - inward * 1.35));
+      // Duck beneath the ridge while passing through the open tent door.
+      g.position.y = 0;
+      g.rotation.y = r.tentPhase === "exit" ? 0 : Math.PI;
+      animateResident(
+        g.rig,
+        "duck-walk",
+        visual.time + i * 0.7,
+        paused ? 0 : dt * speed,
+      );
+      continue;
+    }
     const target = world(visual.people[i].x, visual.people[i].z),
       dx = target.x - g.position.x,
       dz = target.z - g.position.z;
@@ -841,7 +862,7 @@ function frame(now) {
           : r.action === "build"
             ? "work"
             : r.action === "rest"
-              ? "rest"
+              ? "idle"
               : ["look", "stretch", "chat", "breathe"].includes(r.action)
                 ? r.action
                 : "idle";

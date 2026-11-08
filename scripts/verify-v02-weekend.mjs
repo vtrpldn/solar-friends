@@ -373,3 +373,24 @@ assert.equal(eager.projects[0].delivered, requiredLoads("shelter"));
 console.log(
   "PASS: five-person collaboration, unique work positions, interrupted leisure, recovery and shared construction labor.",
 );
+
+const sleepers = createWeekend();
+chooseCamp(sleepers, "clearing");
+for (const r of sleepers.people) r.energy = 10;
+const entered = new Set(),
+  exited = new Set();
+for (let n = 0; n < 1800; n++) {
+  tick(sleepers, 0.1);
+  for (const r of sleepers.people) {
+    if (r.tentPhase === "inside") entered.add(r.id);
+    if (r.tentPhase === "exit") exited.add(r.id);
+  }
+  if (n === 500)
+    assert(restore(save(sleepers)), "Resting residents survive reload");
+}
+assert.equal(entered.size, 5, "All exhausted friends rest inside tents");
+assert.equal(exited.size, 5, "All rested friends leave through the door");
+assert(sleepers.people.every((r) => !r.tentPhase && r.energy >= 75));
+console.log(
+  "PASS: tent entry, indoor recovery, exit and resting save restore.",
+);

@@ -228,6 +228,19 @@ export function poseResident(rig, action, time, blend = 1) {
       a.elbow.rotation.x = 0.12;
     });
   } else hips.position.y += Math.sin(time * 2) * 0.003;
+  if (action === "duck-walk") {
+    hips.position.y = 0.68 + Math.sin(phase * 2) * 0.01;
+    hips.rotation.x = 0.28;
+    head.rotation.x = -0.18;
+    legs.forEach((l, i) => {
+      l.hip.rotation.x = -0.65 + Math.sin(phase + i * Math.PI) * 0.18;
+      l.knee.rotation.x = 1.05;
+    });
+    arms.forEach((a) => {
+      a.shoulder.rotation.x = -0.25;
+      a.elbow.rotation.x = 0.35;
+    });
+  }
   if (action === "sit") {
     hips.position.y = 0.62 + Math.sin(time * 2) * 0.003;
     legs.forEach((l) => {

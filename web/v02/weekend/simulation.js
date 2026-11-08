@@ -310,7 +310,7 @@ export function supplyRun(s, material = "wood") {
   if (!item || s.stage !== "playing" || s.trip || s.money < item.price)
     return false;
   const r = s.people
-    .filter((r) => r.energy > 35 && !r.cargo)
+    .filter((r) => r.energy > 35 && !r.cargo && !r.tentPhase)
     .sort((a, b) => b.energy - a.energy)[0];
   if (!r) return false;
   s.money -= item.price;
@@ -530,6 +530,10 @@ function go(s, r, target) {
   return false;
 }
 const restingPlaces = new WeakMap();
+export function tentDoor(s, i) {
+  const camp = CAMPS.find((c) => c.id === s.camp);
+  return { x: camp.x + (i % 2) * 1.5, z: camp.z };
+}
 function restSpot(s, i) {
   const layout = JSON.stringify([
     s.camp,
@@ -770,6 +774,26 @@ export function tick(s, dt) {
   if (s.rainResolved && s.time > (s.rainAt ?? 150) + 35) s.rain = false;
   for (const [i, r] of s.people.entries()) {
     if (r.action === "town") continue;
+    if (r.tentPhase) {
+      r.action = "rest";
+      if (r.tentPhase === "enter" && s.time - r.tentAt >= 1.5)
+        r.tentPhase = "inside";
+      if (r.tentPhase === "inside") {
+        r.energy = Math.min(100, r.energy + dt * 1.4);
+        const recovered = s.projects.some((p) => p.work < PROJECTS[p.key].work)
+          ? 60
+          : 80;
+        if (r.energy >= recovered || s.stage === "evening") {
+          r.tentPhase = "exit";
+          r.tentAt = s.time;
+        }
+      }
+      if (r.tentPhase === "exit" && s.time - r.tentAt >= 1.5) {
+        r.tentPhase = null;
+        r.action = "idle";
+      }
+      continue;
+    }
     // Leisure is interruptible: a newly available task beats finishing a stroll.
     if (
       s.stage === "playing" &&
@@ -880,14 +904,11 @@ export function tick(s, dt) {
       r.job = null;
       r.workSpot = null;
       r.cargo = false;
-      if (go(s, r, restSpot(s, i))) {
-        const shade =
-          CAMPS.find((c) => c.id === s.camp).shade ||
-          finished(s, "gathering") ||
-          s.projects.some(
-            (p) => p.key === "shelter" && p.work >= PROJECTS.shelter.work / 2,
-          );
-        r.energy = Math.min(100, r.energy + dt * (shade ? 1.4 : 0.65));
+      if (go(s, r, tentDoor(s, i))) {
+        r.tentPhase = "enter";
+        r.tentAt = s.time;
+        r.walk = [];
+        r.target = null;
       }
       continue;
     }
@@ -1075,7 +1096,16 @@ export function restore(text) {
       r.job = null;
       r.workSpot = null;
       r.cargo = false;
-      r.action = s.trip?.person === r.id ? "town" : "idle";
+      if (
+        r.tentPhase &&
+        (!["enter", "inside", "exit"].includes(r.tentPhase) ||
+          !Number.isFinite(r.tentAt) ||
+          r.tentAt > s.time ||
+          !s.camp)
+      )
+        return null;
+      r.action =
+        s.trip?.person === r.id ? "town" : r.tentPhase ? "rest" : "idle";
       r.name = fresh.people[i].name;
     }
     if (
