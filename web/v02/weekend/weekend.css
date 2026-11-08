@@ -1360,17 +1360,3 @@ body[data-tray="closed"] {
 
 .resource-group-title { grid-column: 1 / -1; margin: 12px 0 2px; padding-bottom: 7px; border-bottom: 1px solid #c5bd96; color: #536347; font-size: 14px; }
 .resource-group-title:first-child { margin-top: 0; }
-
-/* Restrained game chrome; color indicates selection, not arbitrary categories. */
-#village-actions { background: #38483d; border: 1px solid #566052; border-radius: 10px; box-shadow: 0 4px 16px #15201940; }
-#village-actions button { background: transparent; color: #e9e6d6; border-color: transparent; border-radius: 6px; box-shadow: none; }
-#village-actions button:hover:not(:disabled), #village-actions button.active { background: #56634e; transform: none; box-shadow: none; }
-#village-actions button[aria-expanded="true"] { background: #56634e; }
-#management { background: #f1ecdc; border: 1px solid #a5a58b; border-radius: 12px; box-shadow: 0 12px 45px #18251f40; }
-#management button { border-width: 1px; border-radius: 6px; box-shadow: none; }
-#management button:hover:not(:disabled) { transform: none; box-shadow: none; }
-#management .stock-card { background: #e8e5d7; border-color: #c3c2ad; }
-#management .stock-card.active { background: #dce2cd; border-color: #7e8b68; }
-#management .management-tabs button.active { background: #485a44; color: #f3efdf; border-color: #485a44; }
-.resource-group-title { color: #59634e; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
-button:focus-visible, a:focus-visible { outline: 2px solid #6c8060; outline-offset: 3px; }

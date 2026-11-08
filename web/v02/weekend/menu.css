@@ -57,12 +57,3 @@ body {
   color: var(--ink);
   font-size: 13px;
 }
-
-/* Quiet landscape colors and a single accent for the primary action. */
-body { background: linear-gradient(160deg, #b7c3ab, #d6d8c1 65%, #a8b396); }
-.start-menu { background: #f1ecdc; border: 1px solid #9da38c; border-radius: 12px; box-shadow: 0 18px 60px #23332830; }
-.start-menu h1 { color: #3e5040; font-size: 46px; letter-spacing: -.035em; }
-.menu-sun { color: #8e916d; font-size: 42px; }
-.menu-choices button { background: #e7e5d7; border: 1px solid #b6bba4; border-radius: 6px; box-shadow: none; }
-.menu-choices button:first-child { background: #dce2cf; }
-.menu-choices button:hover:not(:disabled) { background: #d4ddc6; transform: none; box-shadow: none; }
