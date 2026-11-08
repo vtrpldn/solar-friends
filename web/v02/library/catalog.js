@@ -48,7 +48,9 @@ function block(g, w, h, d, hex, x = 0, y = h / 2, z = 0) {
   return color(box(g, w, h, d, "plaster", x, y, z), hex);
 }
 function foliage(g, x, y, z, r = 1, hex = "#68883c", scale = [1, 1, 1]) {
-  return color(ball(g, r, "leaf", x, y, z, scale, 0), hex);
+  const crown = color(ball(g, r, "leaf", x, y, z, scale, 0), hex);
+  crown.userData.foliage = true;
+  return crown;
 }
 function leaf(g, x, y, z, angle, length = 1, hex = "#68883c") {
   const geo = new THREE.BufferGeometry();
@@ -1751,10 +1753,30 @@ export function createConnectedAsset(id, connection) {
   g.userData = { id, footprint: def.footprint, connection };
   return g;
 }
-export function createAsset(id) {
+export function createAsset(id, variationSeed = null) {
   const def = ASSETS.find((a) => a.id === id);
   if (!def) throw new Error(`Unknown asset ${id}`);
-  const g = RESIDENT_IDS.includes(id) ? createResident(id) : def.build();
+  const baseSpecies = id.replace(/-variant-[12]$/, "");
+  let state = (variationSeed ?? 0) >>> 0;
+  const random = () => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+  const varies = variationSeed !== null && def.category === "Vegetation";
+  const g = RESIDENT_IDS.includes(id) ? createResident(id)
+    : varies && nativeTrees.includes(baseSpecies) ? tree(baseSpecies, Math.floor(random() * 3))
+    : def.build();
+  if (varies) {
+    // Modest adult variation preserves each species' architecture and branch joins.
+    const size = 0.86 + random() * 0.28;
+    const width = 0.94 + random() * 0.12;
+    g.scale.multiply(new THREE.Vector3(size * width, size, size * width));
+    g.traverse((part) => {
+      if (!part.userData.foliage) return;
+      part.scale.multiplyScalar(0.87 + random() * 0.26);
+      part.rotation.y += random() * Math.PI * 2;
+    });
+  }
   if (g.rig) {
     // Static catalog previews omit rehearsal-only tools before material batching.
     for (const tool of [g.rig.cargo, g.rig.can]) {

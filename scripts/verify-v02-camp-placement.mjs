@@ -1,3 +1,4 @@
+import { ROAD_SHIFT } from "../web/v02/weekend/road-layout.js";
 import assert from "node:assert/strict";
 import {
   createWeekend,
@@ -18,7 +19,7 @@ for (const seed of [0, 42, 97]) {
   const restored = restore(save(s));
   assert.ok(restored);
   assert.equal(campLocation(restored).x, 40);
-  assert.ok(campPlacementError(s, 32, 21));
+  assert.ok(campPlacementError(s, 32, 21 - ROAD_SHIFT / 2));
   assert.ok(campPlacementError(s, -40, 30));
 }
 console.log(

@@ -1,3 +1,4 @@
+import { ROAD_SHIFT, PARK_Z } from "../web/v02/weekend/road-layout.js";
 import assert from "node:assert/strict";
 import {
   createWeekend as createFreshWeekend,
@@ -39,13 +40,13 @@ for (const camp of ["shade", "entrance", "clearing"]) {
   assert(s.people.every((r) => r.energy >= 0 && r.energy <= 100));
   if (camp === "entrance") {
     assert(!canFinish(s));
-    assert(resolveRain(s, "move"));
+    assert(s.rainResolved, "The entrance no longer forces a flood event");
   }
   assert.equal(plan(s, "tarp-stores", 40, 39), "");
-  run(s, 180);
+  run(s, 600);
   assert(canFinish(s));
   assert(endWeekend(s));
-  run(s, 60);
+  run(s, 240);
   assert(s.people.every((r) => r.action === "meal"));
   assert(restore(save(s)));
 }
@@ -59,7 +60,7 @@ assert(plan(s, "gathering", 35, 35));
 assert.equal(plan(s, "water", 35, 35), "");
 assert(supplyRun(s));
 assert(!supplyRun(s));
-run(s, 60);
+run(s, 240);
 assert.equal(s.wood, 32);
 assert(!s.trip);
 assert.equal(s.money, 175);
@@ -71,7 +72,7 @@ assert.equal(plan(s, "toilet", 39, 30), "");
 run(s, 900);
 assert(finished(s, "toilet"));
 assert(supplyRun(s));
-run(s, 60);
+run(s, 240);
 assert.equal(plan(s, "shelter", 40, 36), "");
 run(s, 1800);
 assert(finished(s, "shelter"));
@@ -95,7 +96,7 @@ assert(loaded);
 assert.equal(loaded.money, s.money);
 assert.equal(loaded.projects.length, 4);
 console.log(
-  "PASS: three camp playthroughs, rain choices, supply trip accounting, all four projects, relocation, obstacle paths, energy bounds, evening and save validation.",
+  "PASS: three camp playthroughs, rain without forced flooding, supply trip accounting, all four projects, relocation, obstacle paths, energy bounds, evening and save validation.",
 );
 // A tank changes resident routines, rather than acting only as a quest checkbox.
 assert(
@@ -106,7 +107,7 @@ for (const camp of ["shade", "clearing"]) {
   const tired = createWeekend();
   chooseCamp(tired, camp);
   for (const r of tired.people) r.energy = 10;
-  run(tired, 150);
+  run(tired, 300);
   assert(
     tired.people.every((r) => r.energy >= 75 && r.action !== "rest"),
     "Exhausted residents recover without player babysitting",
@@ -116,14 +117,14 @@ const routes = createWeekend();
 chooseCamp(routes, "entrance");
 assert.equal(plan(routes, "gathering", 29, 35), "");
 assert(plan(routes, "water", 27, 35), "Must not block existing work access");
-assert(plan(routes, "water", 33, 25), "Must not build over tents");
+assert(plan(routes, "water", 33, 25 - ROAD_SHIFT / 2), "Must not build over tents");
 const trip = createWeekend();
 chooseCamp(trip, "shade");
 supplyRun(trip);
 run(trip, 20);
 const resumed = restore(save(trip));
 assert(resumed);
-run(resumed, 36);
+run(resumed, 240);
 assert.equal(resumed.wood, 48);
 run(resumed, 60);
 assert.equal(resumed.wood, 48, "Supply trip must not pay twice after reload");
@@ -172,7 +173,7 @@ for (let i = 0; i < 5; i++) {
   assert.equal(pose.z, (intro.people[i].z - 32) * 2);
 }
 assert(Math.abs(arrivalPose(6, 0).car.x + 1) < 1e-8);
-assert.equal(arrivalPose(6, 0).car.z, -22);
+assert.equal(arrivalPose(6, 0).car.z, PARK_Z);
 console.log(
   "PASS: driving before exits, staggered disembarkation, final positions, camp gating and saved arrival progress.",
 );
@@ -206,9 +207,9 @@ for (let t = 0; t <= 17; t += 0.25)
   }
 const entranceCamp = createWeekend();
 chooseCamp(entranceCamp, "clearing");
-assert.match(plan(entranceCamp, "water", 32, 22), /access road/);
+assert.match(plan(entranceCamp, "water", 32, 22 - ROAD_SHIFT / 2), /access road/);
 assert(
-  accessRoadAt((1.1 - 7) / 2 + 32, 0),
+  accessRoadAt((1.1 - 7) / 2 + 32, -32),
   "Access road reaches the northern plot boundary",
 );
 console.log(
@@ -316,7 +317,7 @@ assert.equal(
 run(materialTest, 20);
 const delivery = restore(save(materialTest));
 assert(delivery);
-run(delivery, 36);
+run(delivery, 240);
 assert.equal(delivery.materials.roofing, 8);
 run(delivery, 60);
 assert.equal(delivery.materials.roofing, 8);

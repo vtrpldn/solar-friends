@@ -200,29 +200,7 @@ scene.add(ground);
 scene.add(compactModel(createAccessRoad()));
 const river = createRiver(s.landSeed);
 scene.add(compactModel(river.root), river.current);
-const lowSpot = new THREE.Mesh(
-  new THREE.CircleGeometry(4.4, 16),
-  new THREE.MeshStandardMaterial({
-    color: "#8a9970",
-    roughness: 1,
-    transparent: true,
-    opacity: 0.28,
-  }),
-);
-lowSpot.rotation.x = -Math.PI / 2;
-lowSpot.position.set(2, 0.018, -12);
-lowSpot.scale.y = 0.65;
-lowSpot.receiveShadow = true;
-scene.add(lowSpot);
-const puddle = lowSpot.clone();
-puddle.material = new THREE.MeshStandardMaterial({
-  color: "#86aeb0",
-  roughness: 0.3,
-  transparent: true,
-  opacity: 0.5,
-});
-puddle.position.y = 0.025;
-scene.add(puddle);
+
 const grid = new THREE.GridHelper(
   MAP_HALF * 2,
   MAP_CELLS,
@@ -273,7 +251,7 @@ function world(x, z) {
   );
 }
 function prop(id, x, z, rotation = 0) {
-  const g = compactModel(createAsset(id));
+  const g = compactModel(createAsset(id, Math.round(x * 971 + z * 7919 + s.landSeed)));
   g.position.copy(world(x, z));
   g.rotation.y = rotation;
   scene.add(g);
@@ -349,7 +327,7 @@ for (let i = 0; i < 190; i++) {
   scenery.add(prop(varied, x, z, regionRandom() * Math.PI * 2));
 }
 const entrance = prop("produce-crates", s.stock.x, s.stock.z);
-scenery.add(prop("garden-bench", 30, 24));
+scenery.add(prop("garden-bench", s.stock.x - 2, s.stock.z + 1));
 let sceneryMesh = compactModel(scenery);
 scene.add(sceneryMesh);
 scene.remove(scenery);
@@ -698,7 +676,7 @@ const rainMesh = new THREE.Points(
 );
 scene.add(rainMesh);
 function focus(c) {
-  const target = c ? world(c.x, c.z) : world(32, 31);
+  const target = c ? world(c.x, c.z) : world(s.stock.x, s.stock.z + 2);
   controls.target.copy(target);
   camera.position.copy(target).add(new THREE.Vector3(32, 35, 32));
   camera.zoom = 1;
@@ -1918,7 +1896,6 @@ function frame(now) {
   }
   river.update(visual.time);
   rainMesh.visible = s.rain;
-  puddle.visible = s.rain && s.camp === "entrance";
   if (s.rain) {
     for (let i = 0; i < 600; i++) {
       rainPoints[i * 3 + 1] -= dt * 12;

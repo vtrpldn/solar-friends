@@ -1,7 +1,7 @@
 import { MAP_CELLS, MAP_HALF } from "./map-size.js";
 import { landParameters } from "./land-layout.js";
 import { riverCenter, riverWidth, riverBankAt } from "./river-layout.js";
-import { roadCenter, accessRoadAt } from "./road-layout.js";
+import { roadCenter, accessRoadAt, ROAD_END_Z } from "./road-layout.js";
 const smooth = (n) => {
   const t = Math.max(0, Math.min(1, n));
   return t * t * (3 - 2 * t);
@@ -14,7 +14,10 @@ function naturalVertex(x, z, seed = 0) {
   const river = smooth(
     (Math.abs(x - riverCenter(z, seed)) - riverWidth(z, seed) - 5) / 9,
   );
-  const road = z < -14 ? smooth((Math.abs(x - roadCenter(z)) - 8) / 10) : 1;
+  const road = smooth(Math.hypot(
+    Math.max(0, Math.abs(x - roadCenter(z)) - 8),
+    Math.max(0, z - ROAD_END_Z - 3),
+  ) / 10);
   const hills =
     3.5 +
     2.5 * Math.sin(x * 0.065 + p.phase) * Math.cos(z * 0.052 - p.phase) +

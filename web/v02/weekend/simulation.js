@@ -1,3 +1,4 @@
+import { ROAD_SHIFT } from "./road-layout.js";
 import { roadLine } from "./placement-helpers.js";
 import { autoConnectUtilities } from "./auto-utilities.js";
 import { PathQueue } from "./path-queue.js";
@@ -34,10 +35,10 @@ export const CAMPS = [
     id: "entrance",
     name: "Beside the entrance",
     x: 33,
-    z: 27,
+    z: 27 - ROAD_SHIFT / 2,
     shade: false,
-    wet: true,
-    description: "Quick unloading. Low ground may collect water when it rains.",
+    wet: false,
+    description: "Quick unloading beside the entrance clearing.",
   },
   {
     id: "clearing",
@@ -609,7 +610,7 @@ export function createWeekend(landSeed = 0) {
       plumbing: 1,
       sanitation: 1,
     },
-    stock: { x: 32, z: 23 },
+    stock: { x: 32, z: 23 - ROAD_SHIFT / 2 },
     projects: [],
     people: NAMES.map((name, i) => ({
       name,
@@ -1049,8 +1050,8 @@ export function resolveRain(s, choice) {
 function blockedCamp(s) {
   const c = campLocation(s);
   const cells = [
-    ...[31, 32, 33, 34].flatMap((x) => [20, 21, 22].map((z) => ({ x, z }))),
-    { x: 30, z: 24 },
+    ...[31, 32, 33, 34].flatMap((x) => [20, 21, 22].map((z) => ({ x, z: z - ROAD_SHIFT / 2 }))),
+    { x: 30, z: 24 - ROAD_SHIFT / 2 },
     ...[
       [25, 29],
       [25, 33],
@@ -1691,21 +1692,8 @@ export function tick(s, dt) {
     s.rainSeen = true;
     s.rainAt = s.time;
     s.rain = true;
-    if (
-      s.camp === "entrance" &&
-      !(s.opening && openingProgress(s, PROJECTS).supplies)
-    ) {
-      say(
-        s,
-        "Rain! Water is pooling beside the supplies. Raise them on boards, or move them uphill.",
-      );
-    } else {
-      s.rainResolved = true;
-      say(
-        s,
-        "A short shower passes through. Your campsite drains well; the supplies stay dry.",
-      );
-    }
+    s.rainResolved = true;
+    say(s, "A short shower passes through. The supplies stay dry.");
   }
   if (
     s.opening &&
@@ -2139,10 +2127,10 @@ export function restore(text) {
       !s.stock ||
       !Number.isInteger(s.stock.x) ||
       !Number.isInteger(s.stock.z) ||
-      s.stock.x < 20 ||
-      s.stock.x > 45 ||
-      s.stock.z < 20 ||
-      s.stock.z > 45
+      s.stock.x < CELL_MIN ||
+      s.stock.x > CELL_MAX ||
+      s.stock.z < CELL_MIN ||
+      s.stock.z > CELL_MAX
     )
       return null;
     // Older saves counted a pair/trio as one item; preserve the actual animals.
