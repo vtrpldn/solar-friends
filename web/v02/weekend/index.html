@@ -8,7 +8,7 @@
       const route = new URLSearchParams(location.search);
       if (
         !route.has("mode") &&
-        !["arrival-preview", "utilities-preview", "rest-preview", "needs-preview"].some((k) =>
+        !["wildlife-preview", "arrival-preview", "utilities-preview", "rest-preview", "needs-preview"].some((k) =>
           route.has(k),
         )
       )

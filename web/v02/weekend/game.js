@@ -1,3 +1,4 @@
+import {createWildlife} from './wildlife.js';
 import {installAudio} from './audio.js';
 import {settingsFor,BIOMES,richnessFactor} from './world-settings.js';
 import {beginArrival} from './simulation.js';
@@ -92,12 +93,14 @@ import {
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
   SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
+const wildlifePreview = new URLSearchParams(location.search).has("wildlife-preview");
 const needsPreview = new URLSearchParams(location.search).has("needs-preview");
 const utilitiesPreview = needsPreview || new URLSearchParams(location.search).has(
   "utilities-preview",
 );
 const restPreview = new URLSearchParams(location.search).has("rest-preview");
 const arrivalPreview =
+  wildlifePreview ||
   utilitiesPreview ||
   restPreview ||
   new URLSearchParams(location.search).has("arrival-preview");
@@ -1761,6 +1764,8 @@ $("purchase").onchange = () => {
 renderUI();
 if (s.stage !== "arrival") message(s.log[0] || "Welcome back to your camp.");
 const recordPerformance = performanceReadout(renderer);
+const wildlife = createWildlife(scene,s,wildlifePreview ? {random:()=>.75} : {});
+if(wildlifePreview) for(let i=0;i<270;i++) wildlife.update(.1);
 let animalTime = 0;
 let previous = performance.now(),
   accumulator = 0,
@@ -1777,6 +1782,7 @@ function frame(now) {
       accumulator -= 0.1;
     }
   }
+  wildlife.update(!paused && !document.hidden ? dt : 0);
   const visual = interpolateMotion(previousMotion, s, accumulator / 0.1);
   const arrivalTime=Math.max(0,s.arrivalElapsed-(paused?0:0.1)+accumulator);
   drawCamp();
