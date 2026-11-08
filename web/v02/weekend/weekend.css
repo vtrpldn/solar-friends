@@ -856,3 +856,348 @@ dialog button {
 .resource:disabled {
   opacity: 0.8;
 }
+
+/* Village almanac: dedicated management screens, above the paused game. */
+.management-launchers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.management-launchers button {
+  font-size: 12px;
+  padding: 8px;
+}
+.management-launchers button:first-child {
+  grid-column: 1/-1;
+}
+#management {
+  width: min(1100px, calc(100vw - 72px));
+  max-width: none;
+  height: min(810px, calc(100dvh - 64px));
+  max-height: calc(100dvh - 64px);
+  padding: 24px;
+  overflow: hidden;
+  border-radius: 26px;
+  background: #fff7df;
+}
+#management[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.management-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+}
+.management-heading h2 {
+  font-size: 30px;
+  margin: 5px 0 0;
+}
+#close-management {
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 25px;
+  margin: 0;
+}
+.management-tabs {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  border-bottom: 1px dashed #cfbe96;
+  padding-bottom: 13px;
+  flex: none;
+}
+.management-tabs button {
+  font-size: 14px;
+  padding: 9px 16px;
+  margin: 0;
+}
+.management-tabs span {
+  margin-left: auto;
+  font-size: 11px;
+  color: #8d7b56;
+}
+#management-intro {
+  font-size: 13px;
+  margin: 0;
+  color: #7d735b;
+  flex: none;
+}
+.management-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  flex: none;
+}
+.management-stats > div {
+  background: #eee8cb;
+  padding: 12px 15px;
+  border-radius: 15px;
+  border: 1px solid #d8ccaa;
+}
+.management-stats small {
+  display: block;
+  letter-spacing: 0.6px;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.management-stats strong {
+  display: block;
+  font-size: 22px;
+  margin-top: 4px;
+}
+#management[data-screen="water"] .management-stats > div {
+  background: #e1eeea;
+  border-color: #bbd2cb;
+}
+#management[data-screen="power"] .management-stats > div {
+  background: #f5eac0;
+  border-color: #dfc88b;
+}
+#management[data-screen="resources"] .management-stats {
+  grid-template-columns: repeat(3, 1fr);
+}
+.management-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 265px;
+  gap: 22px;
+  min-height: 0;
+  flex: 1;
+}
+.management-main,
+.management-side {
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c5b387 transparent;
+  padding: 2px 6px 6px 2px;
+}
+.management-side {
+  padding: 16px;
+  background: #f1e8cc;
+  border: 1px solid #d6c59e;
+  border-radius: 18px;
+}
+#management h3 {
+  font-size: 17px;
+  margin: 4px 0 13px;
+  letter-spacing: -0.2px;
+}
+#management select {
+  width: 100%;
+  font-size: 12px;
+  padding: 8px;
+  margin: 5px 0 12px;
+}
+#management label {
+  display: block;
+}
+#management button {
+  font-size: 12px;
+  margin: 0;
+}
+#management .management-tabs button {
+  font-size: 14px;
+}
+#management #close-management {
+  font-size: 25px;
+}
+#management #town,
+#management #sell,
+#connect-utility,
+#haul-water {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+}
+#management .hint {
+  font-size: 11px;
+  line-height: 1.6;
+}
+#management #inventory,
+#management #utility-summary {
+  display: none;
+}
+.management-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.management-section-title h3 {
+  margin: 0 !important;
+}
+.management-section-title input {
+  width: 200px;
+  font-size: 12px;
+}
+#resource-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 25px;
+}
+.stock-card {
+  text-align: left;
+  padding: 10px !important;
+  min-height: 88px;
+}
+.stock-card strong {
+  font-size: 23px;
+  display: block;
+  line-height: 1.1;
+  color: #708547;
+}
+.stock-card span {
+  display: block;
+  font-size: 12px;
+  margin: 4px 0;
+}
+.stock-card small {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.stock-card:disabled {
+  opacity: 0.8;
+}
+#production-sites {
+  display: grid;
+  gap: 10px;
+}
+.production-site {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 6px 10px;
+  padding: 12px;
+  border: 1px solid #d6c59e;
+  background: #fbf2d9;
+  border-radius: 16px;
+}
+.production-site img {
+  width: 60px;
+  height: 58px;
+  object-fit: contain;
+  grid-column: 1;
+  grid-row: 1/3;
+}
+.production-site strong {
+  grid-column: 2/4;
+}
+.production-site p {
+  grid-column: 2/4;
+  font-size: 11px;
+  color: #857453;
+  margin: 0;
+}
+.production-site select {
+  grid-column: 1/3;
+  margin: 0 !important;
+}
+.production-site button:last-child {
+  grid-column: 2/4;
+  justify-self: end;
+}
+#network-nodes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 25px;
+}
+.network-node {
+  padding: 13px;
+  background: #fbf2d9;
+  border: 1px solid #d6c59e;
+  border-radius: 17px;
+  min-width: 0;
+}
+.network-node > img {
+  width: 62px;
+  height: 48px;
+  object-fit: contain;
+  float: left;
+  margin: 0 8px 5px 0;
+}
+.network-node > strong {
+  font-size: 14px;
+  display: block;
+  min-height: 43px;
+  line-height: 1.4;
+}
+.node-detail {
+  clear: both;
+  font-size: 11px;
+  color: #7d7157;
+  line-height: 1.5;
+}
+.node-detail p {
+  margin: 6px 0;
+}
+.water-level {
+  margin: 8px 0;
+  text-transform: capitalize;
+}
+.water-level progress {
+  margin-top: 3px;
+}
+.water-level.fresh progress::-webkit-progress-value {
+  background: #7baeb7;
+}
+.water-level.irrigation progress::-webkit-progress-value {
+  background: #96b46a;
+}
+.water-level.greywater progress::-webkit-progress-value {
+  background: #a6a6a0;
+}
+.water-level.sewage progress::-webkit-progress-value {
+  background: #ae8f70;
+}
+.node-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: space-between;
+  margin-top: 11px;
+}
+.node-actions button {
+  font-size: 10px !important;
+  padding: 6px 8px !important;
+}
+#management #utility-links {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+#management #utility-links button {
+  text-align: left;
+  font-size: 11px;
+  padding: 8px;
+}
+#management-message {
+  flex: none;
+  border-top: 1px dashed #ccb98e;
+  padding-top: 12px;
+  font-size: 12px;
+  color: #7e714e;
+  min-height: 30px;
+}
+@media (max-width: 1200px) {
+  #management {
+    padding: 20px;
+    width: calc(100vw - 40px);
+  }
+  .management-layout {
+    grid-template-columns: minmax(0, 1fr) 235px;
+    gap: 15px;
+  }
+  #resource-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .management-tabs span {
+    font-size: 10px;
+  }
+}

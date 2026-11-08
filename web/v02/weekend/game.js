@@ -1,3 +1,4 @@
+import { createManagement } from "./management.js";
 import { illustrate } from "./ui-art.js";
 import { sunlightAt } from "./sunlight.js";
 import { createUtilitiesPreview } from "./utilities-preview.js";
@@ -514,6 +515,7 @@ addEventListener("resize", resize);
 resize();
 function message(t) {
   if ($("message").textContent !== t) $("message").textContent = t;
+  $("management-message").textContent = t;
 }
 function persist() {
   if (arrivalPreview) return;
@@ -647,7 +649,7 @@ $("close-selection").onclick = () => {
 };
 $("cancel").onclick = cancel;
 addEventListener("keydown", (e) => {
-  if (e.key === "Escape") cancel();
+  if (e.key === "Escape" && !$("management").open) cancel();
 });
 $("town").onclick = () => {
   if (supplyRun(s, $("purchase").value)) {
@@ -766,6 +768,7 @@ const actionText = {
   toilet: "Using the toilet",
 };
 let uiSignature = "";
+let management;
 function refillSelect(id, options) {
   const el = $(id),
     value = el.value,
@@ -789,10 +792,15 @@ function renderUtilityUI() {
         ? "Camp stores"
         : `${PROJECTS[s.projects.find((p) => p.id === n.id).key].name} #${n.id}`,
   ]);
-  refillSelect("utility-from", labels);
+  const kind = $("utility-kind").value;
+  const liquidIndex = LIQUIDS.indexOf(kind);
+  const compatible = labels.filter(
+    ([id]) => liquidIndex < 0 || sys.nodes[id].capacity[liquidIndex] > 0,
+  );
+  refillSelect("utility-from", compatible);
   refillSelect(
     "utility-to",
-    labels.filter(([id]) => id !== -1),
+    compatible.filter(([id]) => id !== -1),
   );
   const generation = nodes.reduce((a, n) => a + (n.generation || 0), 0),
     demand = nodes.reduce((a, n) => a + (n.demand || 0), 0),
@@ -805,9 +813,11 @@ function renderUtilityUI() {
   $("utility-summary").textContent =
     `Power: ${generation.toFixed(1)} kW generated / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}.${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Connect treatment." : ""}`;
   $("utility-links").replaceChildren();
-  for (const l of sys.links) {
+  for (const l of sys.links.filter(
+    (l) => (management?.view === "power") === (l.kind === "power"),
+  )) {
     const b = document.createElement("button");
-    b.textContent = `${l.kind} #${l.from} → #${l.to}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
+    b.textContent = `${l.kind} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
     b.onclick = () => {
       l.enabled = !l.enabled;
       persist();
@@ -823,6 +833,9 @@ function renderUtilityUI() {
     };
     $("utility-links").append(remove);
   }
+  if (!$("utility-links").children.length)
+    $("utility-links").textContent =
+      "No connections yet. Choose two buildings to plan the first one.";
   const p = s.projects.find((p) => p.id === selected),
     node = p && sys.nodes[p.id];
   refillSelect(
@@ -985,14 +998,22 @@ function renderUI() {
   $("people").hidden = !active || !!selected;
   $("build").hidden = !active || s.stage === "evening";
   const counters = [
-    ["◉", `R$${s.money}`, "Savings", "pantry-panel"],
-    ["▰", Math.floor(s.wood), "Timber", "pantry-panel"],
-    ["♨", s.materials.meals || 0, "Meals", "pantry-panel"],
+    ["◉", `R$${s.money}`, "Savings", "resources"],
+    ["▰", Math.floor(s.wood), "Timber", "resources"],
+    ["♨", s.materials.meals || 0, "Meals", "resources"],
+    [
+      "ϟ",
+      `${Object.values(s.infrastructure?.nodes || {})
+        .reduce((a, n) => a + (n.generation || 0), 0)
+        .toFixed(1)}`,
+      "Power",
+      "power",
+    ],
     [
       "♦",
       Math.floor(s.infrastructure?.nodes[0]?.water[0] || 0),
       "Water",
-      "utility-panel",
+      "water",
     ],
   ];
   if (!$("supplies").children.length)
@@ -1130,6 +1151,7 @@ function renderUI() {
     b.classList.toggle("needs-materials", missing.length > 0);
   }
   renderUtilityUI();
+  management?.render();
   const p = s.projects.find((p) => p.id === selected);
   $("selection").hidden = !p || s.stage === "evening";
   if (p) {
@@ -1151,18 +1173,35 @@ for (const [id, item] of Object.entries(MATERIALS).filter(
   option.textContent = `${materialText(id, item.quantity)} · R$${item.price}`;
   $("purchase").append(option);
 }
+management = createManagement({
+  state: () => s,
+  refresh: () => {
+    uiSignature = "";
+    renderUI();
+    persist();
+  },
+  inspect: (id) => {
+    selected = id;
+    const p = s.projects.find((p) => p.id === id);
+    if (p) focus(p);
+    uiSignature = "";
+    renderUI();
+  },
+  notify: message,
+  isPaused: () => paused,
+  setPaused: (value) => {
+    paused = value;
+    updatePauseButton();
+  },
+});
 $("supplies").onclick = (event) => {
   const button = event.target.closest("[data-panel]");
-  if (!button) return;
-  selected = null;
-  renderUI();
-  $(button.dataset.panel).open = true;
-  $(button.dataset.panel).scrollIntoView({
-    block: "nearest",
-    behavior: "smooth",
-  });
+  if (button) management.open(button.dataset.panel);
 };
-$("purchase").onchange = () => renderUI();
+$("purchase").onchange = () => {
+  uiSignature = "";
+  renderUI();
+};
 renderUI();
 if (s.stage !== "arrival") message(s.log[0] || "Welcome back to your camp.");
 const recordPerformance = performanceReadout(renderer);

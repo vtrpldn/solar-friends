@@ -67,3 +67,9 @@ See [the building-by-building audit](../../../docs/v02/building-interaction-audi
 ### Game interface artwork
 
 The HUD uses the existing Outfit font, a compact resource strip, resident portraits, illustrated build cards and a collapsible completed-building list. `ui-art.js` renders each model illustration once on demand with a separate small renderer, caches its image, and schedules new illustrations during idle time. It does not add illustration rendering to the game frame loop. Hidden resident equipment is excluded from portraits. Full material recipes remain available through card tooltips and accessible labels.
+
+### Village management screens
+
+Open Resources, Water or Power from the crew panel or the matching top-bar counter. These desktop screens pause the village while planning, then restore its previous pause setting when closed.
+
+Resources groups searchable stock, town purchases/sales and production jobs. Water shows storage by water type, treatment buildings, pipes and carrying jobs. Power shows generation, demand, batteries, building switches and cable installation. Find in village returns to the selected building. Installation and production still require resident work after resuming.

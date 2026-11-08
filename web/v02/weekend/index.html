@@ -71,39 +71,11 @@
     <aside id="people" class="paper" hidden>
       <small>♡ OUR LITTLE CREW</small>
       <div id="roster"></div>
-      <details id="pantry-panel">
-        <summary>Supplies &amp; town purchases</summary>
-        <p id="inventory"></p>
-        <label for="purchase">Bring back from town</label
-        ><select id="purchase"></select
-        ><button id="town">Send a supply run</button
-        ><button id="sell">Sell one batch</button>
-      </details>
-      <p id="trip" class="hint"></p>
-      <details id="utility-panel">
-        <summary>Power &amp; water</summary>
-        <p id="utility-summary"></p>
-        <label for="utility-from">From</label
-        ><select id="utility-from"></select>
-        <label for="utility-to">To</label
-        ><select id="utility-to"></select>
-        <label for="utility-kind">Connection / cargo</label
-        ><select id="utility-kind">
-          <option value="power">Power cable</option>
-          <option value="fresh">Fresh water</option>
-          <option value="irrigation">Irrigation water</option>
-          <option value="greywater">Greywater</option>
-          <option value="sewage">Sealed sewage</option>
-        </select>
-        <button id="connect-utility">Install connection</button
-        ><button id="haul-water">Carry 12 water</button>
-        <p class="hint">
-          Pipes need a pump and power at the source. River water must be
-          filtered by a powered cistern. Greywater goes to reed beds; sewage
-          goes to a biodigester or banana bed.
-        </p>
-        <div id="utility-links"></div>
-      </details>
+      <nav class="management-launchers" aria-label="Village management">
+        <button data-manage="resources">▰ Resources</button
+        ><button data-manage="water">♦ Water</button
+        ><button data-manage="power">ϟ Power</button>
+      </nav>
     </aside>
     <section id="rain" class="paper" hidden>
       <small>A CHANGE IN THE WEATHER</small>
@@ -183,6 +155,90 @@
         ><button id="restart">New weekend</button>
       </div>
     </footer>
+    <dialog id="management" aria-labelledby="management-title">
+      <div class="management-heading">
+        <div>
+          <small>YOUR VILLAGE ALMANAC</small>
+          <h2 id="management-title">Resources</h2>
+        </div>
+        <button id="close-management" aria-label="Close management screen">
+          ×
+        </button>
+      </div>
+      <nav class="management-tabs" aria-label="Management screens">
+        <button data-manage="resources">▰ Resources</button
+        ><button data-manage="water">♦ Water</button
+        ><button data-manage="power">ϟ Power</button
+        ><span>Ⅱ Village paused while you plan</span>
+      </nav>
+      <p id="management-intro"></p>
+      <div id="management-stats" class="management-stats"></div>
+      <div class="management-layout">
+        <div class="management-main">
+          <section id="resource-screen">
+            <div class="management-section-title">
+              <h3>In our stores</h3>
+              <input
+                id="resource-search"
+                type="search"
+                placeholder="Find a resource…"
+                aria-label="Find a resource"
+              />
+            </div>
+            <div id="resource-grid"></div>
+            <h3>Making things together</h3>
+            <div id="production-sites"></div>
+          </section>
+          <section id="network-screen" hidden>
+            <h3 id="network-title">Our network</h3>
+            <div id="network-nodes"></div>
+            <h3>Connections</h3>
+            <div id="utility-links"></div>
+          </section>
+        </div>
+        <aside class="management-side">
+          <section id="pantry-panel">
+            <h3>A trip to town</h3>
+            <p id="inventory" hidden></p>
+            <label for="purchase">Bring back from town</label
+            ><select id="purchase"></select
+            ><button id="town">Send a supply run</button
+            ><button id="sell">Sell one batch</button>
+            <p id="trip" class="hint"></p>
+            <p class="hint">
+              A resident drives to town and returns with your purchase. Surplus
+              sells immediately for half its purchase price.
+            </p>
+          </section>
+          <section id="utility-panel" hidden>
+            <h3 id="connection-title">Connect the village</h3>
+            <p id="utility-summary" hidden></p>
+            <label for="utility-from">From</label
+            ><select id="utility-from"></select>
+            <label for="utility-to">To</label
+            ><select id="utility-to"></select>
+            <label for="utility-kind">Connection / cargo</label
+            ><select id="utility-kind">
+              <option value="power">Power cable</option>
+              <option value="fresh">Fresh water</option>
+              <option value="irrigation">Irrigation water</option>
+              <option value="greywater">Greywater</option>
+              <option value="sewage">Sealed sewage</option>
+            </select>
+            <button id="connect-utility">Install connection</button
+            ><button id="haul-water">Carry 12 water</button>
+            <p class="hint" id="connection-hint">
+              Pipes need a pump and power at the source. River water must be
+              filtered by a powered cistern. Greywater goes to reed beds; sewage
+              goes to a biodigester or banana bed.
+            </p>
+          </section>
+        </aside>
+      </div>
+      <div id="management-message" role="status">
+        Choose a resource or building to get started.
+      </div>
+    </dialog>
     <dialog id="reset-dialog">
       <h2>Start a new weekend?</h2>
       <p>
