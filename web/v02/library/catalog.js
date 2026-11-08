@@ -670,6 +670,22 @@ function cabin(kind) {
   g.add(p);
   return g;
 }
+function extendedHouse(cells) {
+  const g=group(), width=cells*2-.5, depth=3.35;
+  // Extend the floor plan, never stretch doors, windows or roof tiles.
+  block(g,width,2.4,depth,cells===4?'#bd9069':'#e8d8ab',0,1.2,0);
+  const roof=group();roof.rotation.y=Math.PI/2;g.add(roof);
+  color(gable(roof,depth,width,2.4,1.05),cells===4?'#bd9069':'#e8d8ab');
+  clayRoof(roof,{half:1.78,depth:cells*2-.5,eave:2.4,rise:1.05,ridgeHeight:3.7});
+  doorway(g,0,depth/2+.01,cells===4);
+  for(const x of cells===4?[-2.7,-1.35,1.35,2.7]:[-1.8,1.8]) {
+    framedWindow(g,x,1.4,depth/2+.04);
+    framedWindow(g,x,1.4,-depth/2-.04,Math.PI);
+  }
+  for(const side of [-1,1])framedWindow(g,side*(width/2+.03),1.4,0,side*Math.PI/2);
+  const panel=block(g,1.35,.07,.9,'#436b79',-.8,3.06,.8);panel.rotation.x=Math.atan2(1.05,1.78);
+  return g;
+}
 function goat() {
   const g = group();
   const coat = "#d8c6a3",
@@ -1500,6 +1516,8 @@ for (const [id, name] of Object.entries({
   "adobe-veranda": "Adobe veranda house",
 }))
   add(id, name, "Homes", [2, 2], () => cabin(id), [id, id + "-night"]);
+add('home-family','Family house','Homes',[3,2],()=>extendedHouse(3),[]);
+add('home-shared','Shared adobe house','Homes',[4,2],()=>extendedHouse(4),[]);
 add(
   "goat-pasture-empty",
   "Empty goat pasture",

@@ -145,6 +145,11 @@ export function expandProjects(projects) {
           hardware: 1,
         }),
     };
+    if (model.id === 'home-shared') materials={...recipes.adobe};
+    if (model.category === 'Homes' && model.size[0]>2) {
+      const factor=model.size[0]/2;
+      materials=Object.fromEntries(Object.entries(materials).map(([id,n])=>[id,Math.ceil(n*factor)]));
+    }
     if (model.id === "goat-pasture-empty") delete materials.goats;
     const sources = {
       "supply-0": { tree_starts: 4 },
@@ -196,6 +201,7 @@ export function expandProjects(projects) {
       name: model.name,
       asset: model.id,
       size: model.size,
+      beds: model.beds,
       materials,
       work:
         kind === "road"

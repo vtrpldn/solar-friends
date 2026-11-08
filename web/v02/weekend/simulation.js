@@ -1351,7 +1351,7 @@ function chooseRestingPlace(s, r, i) {
       (PROJECTS[p.key].kind === "home" || p.key.startsWith("canvas-tent")) &&
       s.infrastructure.nodes[p.id]?.enabled !== false &&
       s.people.filter((other) => other !== r && other.restSite === p.id)
-        .length < 2,
+        .length < (PROJECTS[p.key].beds || 2),
   );
   choices.sort(
     (a, b) =>
