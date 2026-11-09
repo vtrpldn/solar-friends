@@ -144,7 +144,13 @@ function covers(p, x, z) {
     x >= p.x - 0.5 && x <= p.x + w - 0.5 && z >= p.z - 0.5 && z <= p.z + d - 0.5
   );
 }
-function roadAt(s, x, z) {
+function roadAt(s,x,z){
+  if(activeNavigation?.state!==s)return roadAtUncached(s,x,z);
+  const key=`${x},${z}`,cache=activeNavigation.roads;
+  if(!cache.has(key))cache.set(key,roadAtUncached(s,x,z));
+  return cache.get(key);
+}
+function roadAtUncached(s, x, z) {
   return (
     accessRoadAt(x, z) ||
     s.projects.some(
@@ -615,7 +621,7 @@ function operationalWork(s, r, i, dt, waterOnly = false) {
   r.work += dt;
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if (op.work >= recipe.work) {
-    if(recipe.kind==='wild-tree')p.felled=true;
+    if(recipe.kind==='wild-tree'){p.felled=true;invalidateNavigation(s);}
     if(op.recipe==='solar_upgrade')p.solarUpgrade=true;
     op.phase = "return";
     r.target = null;
@@ -1173,7 +1179,24 @@ function blockedCamp(s) {
       for (let z = c.z - 3; z < c.z; z++) cells.push({ x, z });
   return cells;
 }
-function occupied(s, x, z) {
+// The lab reuses static obstacle queries between routes. No movement or need rules change.
+const fastNavigationStates=new WeakSet(), navigationCaches=new WeakMap();
+let activeNavigation=null;
+export function enableFastNavigation(s){fastNavigationStates.add(s);}
+function prepareNavigation(s){
+  const signature=JSON.stringify([s.landSeed,s.camp,s.campSite,s.projects.map(p=>[p.id,p.key,p.x,p.z,p.rotation,p.felled,p.work>=PROJECTS[p.key].work])]);
+  let cache=navigationCaches.get(s);
+  if(cache?.signature!==signature){cache={signature,state:s,cells:new Map(),roads:new Map()};navigationCaches.set(s,cache);}
+  return cache;
+}
+function invalidateNavigation(s){navigationCaches.delete(s);if(activeNavigation?.state===s)activeNavigation=null;}
+function occupied(s,x,z){
+  if(activeNavigation?.state!==s)return occupiedUncached(s,x,z);
+  const key=`${x},${z}`,cache=activeNavigation.cells;
+  if(!cache.has(key))cache.set(key,occupiedUncached(s,x,z));
+  return cache.get(key);
+}
+function occupiedUncached(s, x, z) {
   return (
     (riverBankAt(x, z, 0.5, s.landSeed) && !crossingAt(s, x, z)) ||
     blockedCamp(s).some((c) => c.x === x && c.z === z) ||
@@ -1304,7 +1327,12 @@ function naturalPath(s, from, path) {
   return curved.slice(1);
 }
 // The grid finds a safe corridor; residents follow continuous shortcuts and bends.
-export function route(s, from, to) {
+export function route(s,from,to){
+  if(!fastNavigationStates.has(s))return routeUncached(s,from,to);
+  const previous=activeNavigation;activeNavigation=prepareNavigation(s);
+  try{return routeUncached(s,from,to);}finally{activeNavigation=previous;}
+}
+function routeUncached(s, from, to) {
   // This river runs across the whole plot. Without a completed crossing,
   // searching thousands of cells on the opposite bank cannot find a route.
   const bank = point => Math.sign((point.x-32)*2 - riverCenter((point.z-32)*2,s.landSeed));
@@ -1685,7 +1713,12 @@ export function endWeekend(s) {
   say(s, "Tools down. Our first meal on our own land.");
   return true;
 }
-export function tick(s, dt) {
+export function tick(s,dt){
+  if(!fastNavigationStates.has(s))return tickUncached(s,dt);
+  const previous=activeNavigation;activeNavigation=prepareNavigation(s);
+  try{return tickUncached(s,dt);}finally{activeNavigation=previous;}
+}
+function tickUncached(s, dt) {
   if (!Number.isFinite(dt) || dt <= 0) return;
   if(s.arrivalAnimating){
     s.arrivalElapsed=Math.min(ARRIVAL_DURATION,s.arrivalElapsed+Math.min(dt,1));
@@ -2075,6 +2108,7 @@ export function tick(s, dt) {
     r.work += dt;
     r.energy = Math.max(0, r.energy - dt * 0.16);
     if (before < PROJECTS[p.key].work && p.work >= PROJECTS[p.key].work) {
+      invalidateNavigation(s);
       if (s.opening && !s.opening.complete) {
         const progress = openingProgress(s, PROJECTS);
         for (const [key, line] of Object.entries({

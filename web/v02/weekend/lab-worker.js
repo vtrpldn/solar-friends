@@ -1,4 +1,4 @@
-import {createWeekend,chooseCamp,PROJECTS,plan,queueProduction,repeatProduction,queueWater,queuePurification,queueSanitation,supplyRun,sellMaterial,tick,save,restore} from './simulation.js';
+import {createWeekend,chooseCamp,PROJECTS,enableFastNavigation,plan,queueProduction,repeatProduction,queueWater,queuePurification,queueSanitation,supplyRun,sellMaterial,tick,save,restore} from './simulation.js';
 import {ensureNaturalLand} from './natural-resources.js';
 import {syncInfrastructure} from './infrastructure.js';
 import {LabRunner} from './lab-runner.js';
@@ -8,7 +8,7 @@ function start(seed,raw) {
  const s=raw?restore(raw):createWeekend(seed);
  if(!s)throw Error('Lab save rejected; existing data has not been replaced.');
  if(!raw){chooseCamp(s,'shade');ensureNaturalLand(s,PROJECTS);}
- syncInfrastructure(s,PROJECTS);runner=new LabRunner(s,tick);samples=[];events=[];lastHour=-1;event(raw?'Loaded isolated lab save':'New story run');
+ syncInfrastructure(s,PROJECTS);enableFastNavigation(s);runner=new LabRunner(s,tick);samples=[];events=[];lastHour=-1;event(raw?'Loaded isolated lab save':'New story run');
 }
 function snapshot(){if(runner)postMessage({type:'state',state:runner.state,paused:runner.paused,speed:runner.speed,actual,backlog:runner.debt});}
 function record(){
@@ -43,7 +43,7 @@ onmessage=({data:m})=>{try{
  snapshot();
 }catch(e){postMessage({type:'notice',text:e.message});}};
 function loop(){const now=performance.now(),elapsed=(now-last)/1000;last=now;
- if(runner){advanced+=runner.advance(elapsed);record();
+ if(runner){advanced+=runner.advance(elapsed,24);record();
  if(now-measuredAt>=1000){actual=advanced/((now-measuredAt)/1000);advanced=0;measuredAt=now;}
  if(now-emitted>=250){snapshot();emitted=now;}}
  setTimeout(loop,0);
