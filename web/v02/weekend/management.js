@@ -1,3 +1,5 @@
+import {economyControls} from './economy-controls.js';
+import {productionTarget} from './economy-policies.js';
 import {financeSummary,financeTime} from './finances.js';
 import { RESOURCE_GROUPS } from "./resource-groups.js";
 import { resourceIcon, illustrateResources } from "./resource-icons.js";
@@ -304,6 +306,7 @@ export function createManagement({
       .join("");
     if (view === "resources") {
       $("resource-grid").replaceChildren();
+      economyControls($("resource-grid"),s,MATERIALS,PROCESSES,materialCount,()=>{refresh();render();});
       const reserve=document.createElement('button');
       reserve.textContent=`Emergency food purchases: ${s.emergencyFood===false?'off':'on'}`;
       reserve.title='When food is low and residents are hungry, buy one affordable batch of ingredients, at most once per day. Existing food plots are prioritized too.';
@@ -335,9 +338,9 @@ export function createManagement({
           $("resource-grid").append(b);
         }
       }
-      if (!$("resource-grid").children.length)
-        $("resource-grid").textContent =
-          "No matching supplies. Try another name.";
+      if (!$("resource-grid").querySelector(".stock-card")) {
+        const empty=document.createElement("p");empty.textContent="No matching supplies. Try another name.";$("resource-grid").append(empty);
+      }
       $("production-sites").replaceChildren();
       for (const p of s.projects) {
         if(PROJECTS[p.key].kind==='wild-tree')continue;
@@ -363,8 +366,9 @@ export function createManagement({
           (p.readyAt > s.time
             ? "Growing before the next harvest"
             : p.repeat
-              ? "Keeping 24 in stock"
+              ? `Keeping ${productionTarget(p)} in stock`
               : "Ready for a job");
+        if(op && !s.people.some(r=>r.operation===op.id && !r.needTask && !r.tentPhase))status.textContent=`${op.status?.startsWith('Waiting')?op.status:'Waiting for an available resident'} · residents may be resting or doing higher-priority work`;
         const start = document.createElement("button");
         start.textContent = "Start batch";
         start.disabled = !!op || s.stage !== "playing";
@@ -375,8 +379,11 @@ export function createManagement({
           );
           refresh();
         };
+        const targetLabel=document.createElement('label');targetLabel.textContent='Stock target ';
+        const target=document.createElement('input');target.type='number';target.min=0;target.max=10000;target.step=1;target.value=productionTarget(p);target.setAttribute('aria-label',`Stock target at ${name.textContent}`);
+        target.oninput=()=>{p.stockTarget=Math.max(0,Math.min(10000,Math.floor(Number(target.value)||0)));};target.onchange=()=>{refresh();render();};targetLabel.append(target);
         const repeat = document.createElement("button");
-        repeat.textContent = p.repeat ? "Stop repeating" : "Keep 24 in stock";
+        repeat.textContent = p.repeat ? "Stop repeating" : `Keep ${productionTarget(p)} in stock`;
         repeat.onclick = () => {
           repeatProduction(s, p.id, p.repeat || choice.value);
           refresh();
@@ -386,7 +393,7 @@ export function createManagement({
         const describe=()=>{const r=PROCESSES[choice.value];recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||'Building upgrade'}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work`;};
         choice.onchange=()=>{recipeChoices.set(p.id,choice.value);describe();};describe();
         el.append(img,name,locate,status,choice,recipeInfo,start);
-        if(PROJECTS[p.key].kind!=='home')el.append(repeat);
+        if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);
         else {start.disabled=!!p.solarUpgrade||!!op;start.textContent=p.solarUpgrade?'Solar upgrade installed':'Install solar upgrade';}
         $("production-sites").append(el);
       }

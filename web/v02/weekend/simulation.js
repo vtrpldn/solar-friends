@@ -1,3 +1,4 @@
+import {economyPolicies,productionTarget,workGroup,salePreview,validatePolicies} from './economy-policies.js';
 import {ensureFinances,recordMoney} from './finances.js';
 import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
 import { STORAGE_KINDS, crewLimit, carriedLoads } from "./construction-logistics.js";
@@ -211,6 +212,16 @@ export function sellMaterial(s, id) {
   recordMoney(s,Math.floor(item.price * .5),"sales",`Sold ${item.quantity} ${item.name}`);
   s.money += Math.floor(item.price * 0.5);
   return true;
+}
+export function automaticSales(s) {
+  if(s.stage!=='playing'||s.mode==='sandbox')return;
+  const policies=economyPolicies(s);
+  for(const [id,p]of Object.entries(policies.sales)) {
+    if(!p.enabled)continue;
+    const offer=salePreview(s,id,MATERIALS,PROCESSES,materialCount);
+    if(p.day!==offer.day){p.day=offer.day;p.sold=0;}
+    for(let n=0;n<offer.quantity;n+=MATERIALS[id].quantity){if(!sellMaterial(s,id))break;p.sold+=MATERIALS[id].quantity;}
+  }
 }
 function wakeHelpers(s) {
   for (const r of s.people)
@@ -427,7 +438,7 @@ function utilitySpot(s, node, r) {
   }
   return p ? workSpot(s, r, p) : { x: s.stock.x - 1, z: s.stock.z + 1 };
 }
-function operationalWork(s, r, i, dt, waterOnly = false) {
+function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   const sys = ensureInfrastructure(s);
   const reserved = (op) =>
     s.people.some(
@@ -437,7 +448,7 @@ function operationalWork(s, r, i, dt, waterOnly = false) {
         !["rest", "town"].includes(other.action),
     );
   const eligible = (op) => {
-    if (op.done || reserved(op) || (waterOnly && !op.water)) return false;
+    if (op.done || reserved(op) || (waterOnly && !op.water) || (group && workGroup(op,PROCESSES)!==group)) return false;
     if (op.water || op.phase === "return") return true;
     const node = sys.nodes[op.site],
       recipe = PROCESSES[op.recipe];
@@ -467,9 +478,9 @@ function operationalWork(s, r, i, dt, waterOnly = false) {
     const priority=o=>o.water?0:((PROCESSES[o.recipe]?.output.food||PROCESSES[o.recipe]?.output.meals)&&s.infrastructure.hungry?1:2);
     return priority(a)-priority(b);
   }).find(eligible);
-  if (waterOnly && !op) return false;
+  if ((waterOnly || group) && !op) return false;
   if (
-    sys.links.some(
+    !group && sys.links.some(
       (l) =>
         l.work < l.required &&
         !s.people.some(
@@ -512,6 +523,8 @@ function operationalWork(s, r, i, dt, waterOnly = false) {
     return true;
   }
   r.linkJob = null;
+  r.job=null;r.workSpot=null;r.supplyGoal=null;
+  if(r.operation!==op.id){r.walk=[];r.target=null;}
   r.operation = op.id;
   const node = sys.nodes[op.site],
     p = s.projects.find((p) => p.id === op.site);
@@ -1775,13 +1788,14 @@ function tickUncached(s, dt) {
   s.time += dt;
   autoConnectUtilities(s, PROJECTS);
   infrastructureStep(s, PROJECTS, dt);
+  if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
   maintainFood(s);
   maintainWater(s);
   for (const p of s.projects) {
     if (!p.repeat || s.operations?.some((o) => o.site === p.id && !o.done))
       continue;
     const recipe = PROCESSES[p.repeat];
-    if (recipe && materialCount(s, Object.keys(recipe.output)[0]) < 24)
+    if (recipe && materialCount(s, Object.keys(recipe.output)[0]) + (s.operations||[]).filter(o=>!o.done).reduce((n,o)=>n+(PROCESSES[o.recipe]?.output[Object.keys(recipe.output)[0]]||0),0) < productionTarget(p))
       p.productionStatus = queueProduction(s, p.id, p.repeat);
   }
 
@@ -2061,9 +2075,22 @@ function tickUncached(s, dt) {
     ) {
       if (operationalWork(s, r, i, dt)) continue;
     }
-    // Essential hauling and sanitation must not wait behind a house construction.
-    if(!r.cargo && s.operations?.some(o=>!o.done&&o.water) && operationalWork(s,r,i,dt,true))continue;
-    if(!r.cargo && s.infrastructure.hungry && s.operations?.some(o=>!o.done&&(PROCESSES[o.recipe]?.output.food||PROCESSES[o.recipe]?.output.meals)) && operationalWork(s,r,i,dt))continue;
+    // Finish an assigned batch before reconsidering work categories. Otherwise
+    // changing availability can shuffle the reserved slots on every tick.
+    const activeOperation=s.operations?.find(o=>o.id===r.operation&&!o.done);
+    if(activeOperation && !r.job && operationalWork(s,r,i,dt,false,workGroup(activeOperation,PROCESSES))) continue;
+    // Needs and completed carrying trips always win. Reserve available people,
+    // not fixed residents who might be asleep, for essential and income work.
+    const priorities=economyPolicies(s).work;
+    const ready=s.people.filter(a=>a.energy>=25&&!a.tentPhase&&!a.sleepUntil&&!a.needTask&&!a.cargo&&a.action!=='town');
+    const slot=ready.indexOf(r),essential=slot>=0&&slot<(priorities.essentialWorkers??1),producer=slot>=0&&slot>=(priorities.essentialWorkers??1)&&slot<(priorities.essentialWorkers??1)+(priorities.productionWorkers??1);
+    let serviced=false;
+    for(const group of ['food','maintenance','production'].sort((a,b)=>(priorities[b]??2)-(priorities[a]??2))){
+      const urgent=group==='food'&&(s.infrastructure.hungry||s.infrastructure.thirst);
+      const reserved=group==='production'?producer:essential;
+      if(!r.cargo && (urgent||reserved||(priorities[group]??2)>(priorities.construction??2)) && operationalWork(s,r,i,dt,false,group)){serviced=true;break;}
+    }
+    if(serviced)continue;
     let p = s.projects.find(
       (p) => p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
     );
@@ -2073,6 +2100,7 @@ function tickUncached(s, dt) {
       r.cargo = false;
       p = availableProject(s, r);
       if (p) {
+        r.operation=null;
         r.workSpot = workSpot(s, r, p);
         r.job = p.id;
         r.idleUntil = 0;
@@ -2472,7 +2500,7 @@ export function restore(text) {
       const r = s.people.find((r) => r.id === s.trip.person);
       r.cargo = s.trip.phase === "unloading";
     }
-    if (!validInfrastructure(s)) return null;
+    if (!validInfrastructure(s) || !validatePolicies(s,MATERIALS)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(
