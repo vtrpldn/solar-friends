@@ -88,3 +88,5 @@ $('setup-start').onclick=()=>{
  if(existing(pending)){$('replace-copy').textContent=`This replaces your current ${pending} autosave. Named villages and the other mode are kept.`;$('replace-save').showModal();}
  else start(pending);
 };
+
+if(new URLSearchParams(location.search).has('load-error')) $('menu-status').textContent='Your village could not be loaded. Its save has been preserved. Open Load village to export it or try the previous save; no fresh village has overwritten it.';

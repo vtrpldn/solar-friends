@@ -683,7 +683,7 @@ function extendedHouse(cells) {
     framedWindow(g,x,1.4,-depth/2-.04,Math.PI);
   }
   for(const side of [-1,1])framedWindow(g,side*(width/2+.03),1.4,0,side*Math.PI/2);
-  const panel=block(g,1.35,.07,.9,'#436b79',-.8,3.06,.8);panel.rotation.x=Math.atan2(1.05,1.78);
+  const panel=block(g,1.35,.07,.9,'#436b79',-.8,3.06,.8);panel.name='optional-rooftop-solar';panel.rotation.x=Math.atan2(1.05,1.78);
   return g;
 }
 function waterSource(pump=false){

@@ -1,3 +1,4 @@
+import {loadVillage} from './load-village.js';
 import {ensureNaturalLand} from './natural-resources.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
@@ -145,9 +146,17 @@ if (needsPreview) {
   if(home) home.water[0]=5;
 }
 if (restPreview) for (const resident of s.people) resident.energy = 10;
+let loadFailure = false;
 try {
-  if (!arrivalPreview) s = restore(localStorage.getItem(SAVE)) || s;
-} catch {}
+  if (!arrivalPreview) {
+    const loaded=loadVillage(localStorage,SAVE,restore);
+    if(loaded) s=loaded;
+  }
+} catch { loadFailure=true; }
+if(loadFailure) {
+  location.replace('./menu.html?load-error=1');
+  throw new Error('Save could not be restored. Original data preserved; autosaving blocked.');
+}
 if (s.stage === "evening") {
   s.stage = "playing";
   s.meal = false;
@@ -278,7 +287,10 @@ function world(x, z) {
   );
 }
 function prop(id, x, z, rotation = 0) {
-  const g = compactModel(createAsset(id, Math.round(x * 971 + z * 7919 + s.landSeed)));
+  const model=createAsset(id, Math.round(x * 971 + z * 7919 + s.landSeed));
+  const rooftop=model.getObjectByName('optional-rooftop-solar');
+  if(rooftop){rooftop.removeFromParent();rooftop.geometry.dispose();}
+  const g = compactModel(model);
   g.position.copy(world(x, z));
   g.rotation.y = rotation;
   scene.add(g);
@@ -587,17 +599,12 @@ function syncBuildings() {
       }
       entry.meal = true;
     }
-    if (p.key === "gathering") {
-      entry.root.visible = true;
-      if (fraction >= 1 && !entry.tarp) {
-        const tarp = new THREE.Group();
-        for (const x of [-1.8, 1.8])
-          for (const z of [-1.8, 1.8])
-            box(tarp, 0.08, 2.6, 0.08, "#8b694a", x, 1.3, z);
-        const roof = box(tarp, 3.8, 0.06, 3.8, "#d8bf85", 0, 2.7, 0);
-        roof.rotation.z = 0.06;
-        entry.root.add(tarp);
-        entry.tarp = tarp;
+    if(def.kind==='home') {
+      if(fraction>=1 && p.solarUpgrade && !entry.solarPanel){
+        const panel=box(entry.root,1.2,.07,.8,'#436b79',-.8,3.2,.6);
+        if(def.size[0]>2)panel.rotation.x=Math.atan2(1.05,1.78);
+        else panel.rotation.z=Math.atan2(1.05,1.95);
+        entry.solarPanel=panel;
       }
     }
   }
@@ -841,7 +848,7 @@ function updatePlacementPreview() {
     hint ||= missing.length ? purchase.error || `Place to buy missing materials for R$${purchase.cost.toFixed(2)} · ${s.trip ? "Pickup queued after current trip" : "Resident pickup arranged automatically"}` : "";
     if (placing === "road" && shiftPlacement && lastRoad) {
       const line = roadLine(lastRoad, cell);
-      if (!line) hint = "Extend roads in a straight row or column.";
+      if (!line) hint = "Choose a shorter road route (up to 128 cells).";
       else {
         roadPreview.geometry.dispose();
         roadPreview.geometry = new THREE.BufferGeometry().setFromPoints(
@@ -1084,7 +1091,7 @@ function askReset() {
   $("reset-dialog").showModal();
 }
 let savesWasPaused=false;
-installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:save(s)}),beforeOpen:()=>{savesWasPaused=paused;paused=true;},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
+installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:save(s)}),beforeOpen:()=>{savesWasPaused=paused;paused=true;updatePauseButton();},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
 $("main-menu").onclick = () => {
   persist();
   location.href = "./menu.html";
@@ -1325,7 +1332,7 @@ function filterBuildings() {
 }
 $("build-category").onchange = filterBuildings;
 $("build-search").oninput = filterBuildings;
-let openPanel = null, flattenLevel = null, residentsWasPaused = false;
+let openPanel = null, flattenLevel = null, residentsWasPaused = false, trayWasPaused = false;
 const terrainHistory = [];
 const terrainBrush = new THREE.Line(new THREE.BufferGeometry(),new THREE.LineBasicMaterial({color:0xffe1a0,depthTest:false}));
 terrainBrush.visible = false; terrainBrush.renderOrder = 10; scene.add(terrainBrush);
@@ -1343,7 +1350,9 @@ $("terrain-undo").onclick = () => {
   message("Terrain edit undone.");
 };
 function setPanel(panel) {
+  if(openPanel && openPanel!=='people'){paused=trayWasPaused;updatePauseButton();}
   if (placing) cancel();
+  if(panel && panel!=='people'){trayWasPaused=paused;paused=true;updatePauseButton();}
   if(panel==='people') {
     expandedResident??=s.people[0].id;
     residentsWasPaused=paused;paused=true;updatePauseButton();
@@ -1442,18 +1451,16 @@ function renderUI() {
   const trends=resourceTrends(s.time,resourceSnapshot(s));
   const counters = [
     ["money", `R$${s.money.toFixed(2)}`, "Savings", "finances"],
-    ["meals", s.materials.meals || 0, "Meals", "resources"],
+    ["meals", `${s.materials.meals||0} + ${s.materials.food||0}`, "Meals + ingredients", "resources"],
     [
       "power",
-      `${Object.values(s.infrastructure?.nodes || {})
-        .reduce((a, n) => a + (n.generation || 0), s.infrastructure?.grid?.importing || 0)
-        .toFixed(1)}`,
-      "Power",
+      `${Object.values(s.infrastructure?.nodes || {}).reduce((a,n)=>a+(n.charge||0),0).toFixed(1)}`,
+      "Battery · kWh",
       "power",
     ],
     [
       "water",
-      Math.floor(s.infrastructure?.nodes[0]?.water[0] || 0),
+      Math.floor(Object.values(s.infrastructure?.nodes||{}).reduce((sum,n)=>sum+n.water[0],0)),
       "Water",
       "water",
     ],
@@ -1474,7 +1481,7 @@ function renderUI() {
     const unlimited=s.mode==='sandbox'&&i<3;
     trend.textContent=unlimited?'Unlimited':formatTrend(rate,i===0);
     trend.dataset.direction=rate>.05?'up':rate<-.05?'down':'flat';
-    button.title=`Open ${counter[3]} management. ${unlimited?'Unlimited in sandbox.':rate===null?'Gathering trend data (first five in-game minutes).':`${i===3?'Stored energy':counter[2]}: ${formatTrend(rate,i===0)} net change over the last in-game hour, or time observed since loading. Includes spending, consumption and deliveries.`}`;
+    button.title=`Open ${counter[3]} management. ${unlimited?'Unlimited in sandbox.':rate===null?'Gathering trend data (first five in-game minutes).':`${i===2?'Stored energy':counter[2]}: ${formatTrend(rate,i===0)} net change over the last in-game hour, or time observed since loading. Includes spending, consumption and deliveries.`}`;
     button.disabled = !active;
   });
   const minutes = 9 * 60 + Math.floor(s.time * 0.45);

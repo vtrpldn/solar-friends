@@ -5,11 +5,11 @@ import {
   MATERIALS,
   PROJECTS,
   PROCESSES,
-  materialCount,
+  materialCount, committedMaterials,
   storedMaterials,
   storageCapacity,
   queueProduction,
-  repeatProduction, queueWater, queuePurification,
+  repeatProduction, queueWater, queuePurification, queueSanitation,
 } from "./simulation.js";
 import { LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
 import { illustrate } from "./ui-art.js";
@@ -25,7 +25,7 @@ const intros = {
   resources:
     "Keep the essentials close, turn local materials into something useful, and plan the next trip to town.",
   water:
-    "Carry river water into a reservoir, then assign residents to purify it by hand. Untreated water stays separate. Powered pumps and cisterns automate this later.",
+    "Enable Maintain drinking reserve to let residents collect and purify water as needed. Wells and rain barrels are manual sources; a placed powered pump supplies pipes. Untreated water stays separate.",
   power:
     "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically.",
 };
@@ -51,7 +51,7 @@ export function createManagement({
     wasPaused = false;
   const label = (n) =>
     n.id === -1
-      ? "River intake"
+      ? "River · manual collection source"
       : n.id === 0
         ? "Camp stores"
         : `${PROJECTS[state().projects.find((p) => p.id === n.id).key].name} #${n.id}`;
@@ -158,17 +158,34 @@ export function createManagement({
     }
     if(view==='water' && n.id!==-1 && n.capacity[1]) {
       const actions=document.createElement('div');actions.className='node-actions';
-      const pending=(state().operations||[]).some(o=>!o.done && o.site===n.id);
+      const waterJob=(state().operations||[]).find(o=>!o.done && o.water && o.site===n.id);
+      const pending=!!waterJob;
       const fetch=document.createElement('button');fetch.textContent='Carry river water';
       fetch.disabled=pending || n.water[1]>=n.capacity[1];
-      fetch.onclick=()=>{notify(queueWater(state(),-1,n.id,'irrigation')||'Resident assigned to carry river water.');refresh();render();};actions.append(fetch);
+      fetch.onclick=()=>{notify(queueWater(state(),-1,n.id,'irrigation')||'Water collection queued for the next available resident.');refresh();render();};actions.append(fetch);
       if(n.capacity[0]) {
         const purify=document.createElement('button');purify.textContent='Purify by hand';
         purify.disabled=pending || n.water[1]<1 || n.capacity[0]-n.water[0]<1;
-        purify.onclick=()=>{notify(queuePurification(state(),n.id)||'Resident assigned to purify water.');refresh();render();};actions.append(purify);
+        purify.onclick=()=>{notify(queuePurification(state(),n.id)||'Purification queued for the next available resident.');refresh();render();};actions.append(purify);
       }
-      if(pending){const status=document.createElement('small');status.textContent='Resident water job queued or in progress';actions.append(status);}
+      if(n.capacity[0]) {const maintain=document.createElement('button');maintain.textContent=n.maintainFresh?'Maintain drinking reserve: on':'Maintain drinking reserve: off';maintain.setAttribute('aria-pressed',String(!!n.maintainFresh));maintain.onclick=()=>{n.maintainFresh=!n.maintainFresh;refresh();render();};actions.append(maintain);}
+      const sources=Object.values(state().infrastructure.nodes).filter(a=>a.id!==n.id && ['groundwater-well','rain-barrel','water-pump'].includes(a.kind) && a.water[1]>=1);
+      for(const source of sources){const carry=document.createElement('button');carry.textContent=`Carry from ${label(source)}`;carry.disabled=pending||n.water[1]>=n.capacity[1];carry.onclick=()=>{notify(queueWater(state(),source.id,n.id,'irrigation')||'Water collection queued.');refresh();render();};actions.append(carry);}
       el.append(actions);
+    }
+    if(view==='water' && (n.capacity[2] || n.capacity[3]) && !['wetland','biodigester','banana_treatment'].includes(n.kind)) {
+      const status=document.createElement('p');status.textContent=((n.capacity[2]>0 && n.water[2]>=n.capacity[2]-.1) || (n.capacity[3]>0 && n.water[3]>=n.capacity[3]-.1)) ? 'Tank full: service is blocked until waste is removed or treated.' : 'Sealed waste: residents can service tanks; treatment buildings automate disposal.';el.append(status);
+      const service=document.createElement('button');service.textContent='Service waste tanks';service.disabled=n.water[2]+n.water[3]<1 || state().operations?.some(o=>!o.done&&o.water&&o.site===n.id);service.onclick=()=>{notify(queueSanitation(state(),n.id)||'Waste service queued for off-site treatment.');refresh();render();};el.append(service);
+      const auto=document.createElement('button');auto.textContent=n.maintainSanitation?'Maintain sanitation: on':'Maintain sanitation: off';auto.setAttribute('aria-pressed',String(!!n.maintainSanitation));auto.onclick=()=>{n.maintainSanitation=!n.maintainSanitation;refresh();render();};el.append(auto);
+    }
+    if(view==='water'){
+      const job=state().operations?.find(o=>!o.done&&o.water&&o.site===n.id);
+      if(job){
+        const status=document.createElement('p'),worker=state().people.find(r=>r.operation===job.id);
+        const duration=job.water.service?45:job.water.purify?30:0;
+        status.textContent=`${worker?worker.name:'Awaiting a rested resident'} · ${job.status||'Queued'}${job.water.amount?` · ${job.water.amount.toFixed(0)} water carried`:''}${duration?` · ${Math.min(100,Math.round(job.work/duration*100))}%`:''}`;
+        el.append(status);
+      }
     }
     return el;
   }
@@ -205,7 +222,7 @@ export function createManagement({
     $("connection-hint").textContent =
       view === "power"
         ? "Completed buildings connect automatically. Generation and battery capacity still determine whether the village has enough power."
-        : "Completed buildings connect to compatible sources and treatment automatically. Pumps still need power; cisterns filter river water. Greywater and sewage stay separate.";
+        : "Completed buildings connect to compatible sources and treatment automatically. Place a water pump by a river or well for automatic supply; cisterns filter incoming untreated water. Greywater and sewage stay separate.";
     $("network-title").textContent =
       view === "power"
         ? "Generation, storage & demand"
@@ -287,7 +304,7 @@ export function createManagement({
       .join("");
     if (view === "resources") {
       $("resource-grid").replaceChildren();
-      const search = $("resource-search").value.toLowerCase();
+      const search = $("resource-search").value.toLowerCase(), committed=committedMaterials(s);
       for (const group of RESOURCE_GROUPS) {
         const matches = group.ids.filter((id) =>
           MATERIALS[id].name.toLowerCase().includes(search),
@@ -301,7 +318,7 @@ export function createManagement({
           const item = MATERIALS[id];
           const b = document.createElement("button");
           b.className = "stock-card";
-          b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><small>${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
+          b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><small>${committed[id]?`${committed[id]} committed to projects/jobs · `:""}${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
           illustrateResources(b);
           b.disabled = !item.quantity;
           b.classList.toggle("active", $("purchase").value === id);
@@ -331,12 +348,12 @@ export function createManagement({
         const choice = document.createElement("select");
         choice.setAttribute("aria-label", `Work at ${name.textContent}`);
         for (const [id, d] of recipes) choice.add(new Option(d.name, id));
-        const op = (s.operations || []).find((o) => o.site === p.id && !o.done);
+        const op = (s.operations || []).find((o) => o.site === p.id && !o.done && !o.water);
         choice.value = p.repeat || recipeChoices.get(p.id) || recipes[0][0];
         choice.onchange = () => recipeChoices.set(p.id, choice.value);
         const status = document.createElement("p");
         status.textContent =
-          (op ? op.status || "Resident job queued" : p.productionStatus) ||
+          (p.readyAt>s.time ? `Growing: ${Math.ceil((p.readyAt-s.time)*.45)} game minutes remaining · faster at higher speed` : op ? op.status || "Resident job queued" : p.productionStatus) ||
           (p.readyAt > s.time
             ? "Growing before the next harvest"
             : p.repeat
@@ -358,7 +375,13 @@ export function createManagement({
           repeatProduction(s, p.id, p.repeat || choice.value);
           refresh();
         };
-        el.append(img, name, status, choice, start, repeat);
+        const locate=document.createElement('button');locate.textContent=`Find in village · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores`;locate.onclick=()=>{dialog.close();inspect(p.id);};
+        const recipeInfo=document.createElement('p');
+        const describe=()=>{const r=PROCESSES[choice.value];recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||'Building upgrade'}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work`;};
+        choice.onchange=()=>{recipeChoices.set(p.id,choice.value);describe();};describe();
+        el.append(img,name,locate,status,choice,recipeInfo,start);
+        if(PROJECTS[p.key].kind!=='home')el.append(repeat);
+        else {start.disabled=!!p.solarUpgrade||!!op;start.textContent=p.solarUpgrade?'Solar upgrade installed':'Install solar upgrade';}
         $("production-sites").append(el);
       }
       if (!$("production-sites").children.length)
