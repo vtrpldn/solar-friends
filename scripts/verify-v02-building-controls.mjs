@@ -5,7 +5,7 @@ const s=createWeekend();
 for(const [key,def] of Object.entries(PROJECTS))s.projects.push({id:s.nextId++,key,x:40,z:40,work:def.work,delivered:requiredLoads(key)});
 const sys=syncInfrastructure(s,PROJECTS);
 const node=key=>sys.nodes[s.projects.find(p=>p.key===key).id];
-for(const key of ['road','bridge','garden','orchard','goat_pasture','supply-1','supply-3','picnic-table','canvas-tent-teal','banana_treatment','biodigester']) {
+for(const key of ['toilet','eco_toilet','road','bridge','garden','orchard','goat_pasture','supply-1','supply-3','picnic-table','canvas-tent-teal','banana_treatment','biodigester']) {
  const n=node(key);
  assert(!hasPowerService(sys,n),`${key}: no electrical service`);
  assert(!canSwitchBuilding(sys,n),`${key}: no switch`);

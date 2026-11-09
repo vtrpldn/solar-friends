@@ -7,7 +7,7 @@ export const LIQUIDS = ["fresh", "irrigation", "greywater", "sewage"];
 export const POWER_LOAD = {
   'water-pump': .18, shed: .015, kitchen: .025, workshop: .025,
   greenhouse: .02, square: .025, well: .08, warehouse: .02,
-  coop: .01, streetlight: .015, eco_toilet: .005, home: .02,
+  coop: .01, streetlight: .015, home: .02,
 };
 export function workingMachine(s,node) {
   return (s.operations||[]).some(o=>o.site===node.id && !o.done && o.phase==='process' &&
