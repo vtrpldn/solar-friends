@@ -1,10 +1,10 @@
-# v0.2 asset garden
+# v2 asset garden
 
 ## Why
 
-A live 64×64 plot lets us judge the complete collection at one real scale and compose scenes with the same models used in the workshop. It is separate from v0.1 and its simulation.
+A live 64×64 plot lets us judge the complete collection at one real scale and compose scenes with the same models used in the workshop. It is separate from v1 and its simulation.
 
-Open `/v02/land/`. The initial gallery places all 236 model types on the 128×128 metre plot. The asset library can search/filter and focus a model, or place it again after deletion. The collection link opens a visual contact sheet; each card opens that model in the orbitable workshop.
+Open `/v2/land/`. The initial gallery places the current catalog on the 128×128 metre plot. The asset library can search/filter and focus a model, or place it again after deletion. The collection link opens a visual contact sheet; each card opens that model in the orbitable workshop.
 
 ## Controls
 
@@ -17,9 +17,9 @@ Open `/v02/land/`. The initial gallery places all 236 model types on the 128×12
 
 ## Storage
 
-Edits save to localStorage under `solar-friends-v02-scene-1`, separate from every v0.1 save. Export/import use a versioned JSON document with up to 1,000 props. Imports validate known asset IDs, unique instance IDs, integer cells, quarter turns and map bounds before replacing the scene. Failed imports leave the scene intact. The browser reports storage failure and offers export. Undo history resets on reload; scene contents persist.
+Edits save to localStorage under `solar-friends-v02-scene-1`, separate from every v1 save. Export/import use a versioned JSON document with up to 1,000 props. Imports validate known asset IDs, unique instance IDs, integer cells, quarter turns and map bounds before replacing the scene. Failed imports leave the scene intact. The browser reports storage failure and offers export. Undo history resets on reload; scene contents persist.
 
-`editor.js` owns pure scene validation/history; `layout.js` owns map coordinates and the original five-prop reference fixture; `land.js` owns rendering and interaction. Rendering is on demand. The asset library batches each model by material, while the terrain remains one continuous mesh. There are no platform sprites or v0.1 simulation systems. Residents use articulated animation rehearsals.
+`editor.js` owns pure scene validation/history; `layout.js` owns map coordinates and the original five-prop reference fixture; `land.js` owns rendering and interaction. Rendering is on demand. The asset library batches each model by material, while the terrain remains one continuous mesh. There are no platform sprites or v1 simulation systems. Residents use articulated animation rehearsals.
 
 Run `node scripts/verify-v02-library.mjs`, `node scripts/verify-v02-models.mjs`, and `node scripts/verify-v02-land.mjs`. The last checks map math and the original centered five-prop reference layout; the library test covers the full gallery and editor transactions.
 
@@ -35,11 +35,11 @@ Select a supported prop to choose a resident and action. **Send resident** walks
 
 ## Biome terrain
 
-The Terrain selector includes the three v0.1 regions: Mata Atlântica (forest hills), Cerrado (broad savanna rises), and Caatinga (dryland ridges), plus the flat comparison gallery. Each 64×64 terrain uses biome soil colors and a deterministic elevation field, closed soil edges and a surface-following grid. Heights are sampled from the rendered triangles for props, placement previews and resident movement. Structures form level terraces; touching footprints share a height so connected gardens, orchards and solar arrays meet.
+The Terrain selector includes the three v1 regions: Mata Atlântica (forest hills), Cerrado (broad savanna rises), and Caatinga (dryland ridges), plus the flat comparison gallery. Each 64×64 terrain uses biome soil colors and a deterministic elevation field, closed soil edges and a surface-following grid. Heights are sampled from the rendered triangles for props, placement previews and resident movement. Structures form level terraces; touching footprints share a height so connected gardens, orchards and solar arrays meet.
 
 **Load biome landscape** replaces the current props with an editable selection of the region's existing plant/rock models; Undo restores the prior props. The forest study is denser than the savanna and dryland studies. The central clearing remains open. Terrain selection and scene exports preserve the biome. Prop undo does not change the biome selector.
 
-Open `/v02/land/?biome=mata-atlantica`, `?biome=cerrado`, or `?biome=caatinga` for an isolated study. These studies do not overwrite the saved gallery; export to retain edits. This is an art/placement foundation, not erosion, water flow, slope-aware route planning or a climate simulation.
+Open `/v2/land/?biome=mata-atlantica`, `?biome=cerrado`, or `?biome=caatinga` for an isolated study. These studies do not overwrite the saved gallery; export to retain edits. This is an art/placement foundation, not erosion, water flow, slope-aware route planning or a climate simulation.
 
 Run `node scripts/verify-v02-terrain.mjs` for height ranges, rendered-triangle raycast agreement, joined terraces, native landscape validation and biome export roundtrips.
 

@@ -4,6 +4,8 @@ description: Outcome-based Story progression with linear introductions, optional
 
 # Story planning outcomes
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 ## Why
 
 Story should teach a working village rather than require a collection of every building. Keep thirteen linear chapters and their unlocks, but let players choose farming, construction methods and service layouts.

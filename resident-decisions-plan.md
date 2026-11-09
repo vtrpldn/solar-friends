@@ -4,6 +4,8 @@ description: Resident needs, farm care, outside commitments and useful autonomou
 
 # Everyday resident decisions
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 Why: personal needs, existing food production and commitments should make residents reconsider work sensibly, while keeping time for hobbies and the village projects the player approved.
 
 - [x] Reproduce unnecessary meals, ignored hunger during work, and farm care losing to construction.

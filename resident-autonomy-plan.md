@@ -1,5 +1,7 @@
 # Resident autonomy
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 Why: residents should make understandable choices about their own needs and the village, and carry out useful intentions instead of bouncing between timers.
 
 - [x] Give recovery and social breaks sensible stopping points; notice pressing needs during leisure as well as work.

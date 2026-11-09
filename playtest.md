@@ -4,6 +4,8 @@ description: Gameplay and artwork playtest coverage, reproduced issues, fixes an
 
 # Gameplay and artwork playtest
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 ## Why
 
 A passing simulation suite can miss a confusing player flow, a broken control after cancellation, or an unreachable work destination. This pass exercised the shipped game through its controls and compared its artwork at the scale used in play.

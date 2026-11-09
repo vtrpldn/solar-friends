@@ -4,6 +4,8 @@ description: Independent saved Sandbox construction, living-land and utility con
 
 # Sandbox simulation options
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 ## Why
 
 Players need to compare village layouts and resource choices without replaying Story unlocks. Free placement remains the default. Optional constraints use the same resident work, accounts and needs as Story.

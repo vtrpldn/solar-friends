@@ -4,6 +4,8 @@ description: Provenance and generation prompts for the Solar Friends prototype s
 
 # Village sprites
 
+> v1 painted-art reference. The active v2 game uses shared 3D models; see [the v2 collection](../v02/library/README.md).
+
 ## Resident motion and standing idles
 
 The five `animations/*-idle.png` sheets add four standing activities: looking around, stretching, waving, and hands-on-hips weight shifts. Each sheet has four columns and four rows, in that order. They were generated with the built-in image tool using the corresponding original resident sheet as the identity reference.

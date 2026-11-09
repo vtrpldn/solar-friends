@@ -1,87 +1,57 @@
-# Our first weekend
+# Solar Friends v2 gameplay
 
-A standalone v0.2 playable at `/v02/weekend/`. It uses the shared 3D catalog and resident rigs, but no v0.1 simulation code or saves.
+Updated 2026-11-09. Public and local route: `/v2/`. The source folder remains `web/v02/weekend/`; v1 code and saves are separate.
 
 ## Why
 
-Test a short loop of choosing a campsite, placing practical projects, watching friends carry and build, and improving the arrangement. The first evening is available after a gathering place and one practical improvement; there is no multi-day unlock gate. The first-evening milestone remains, and Continue building resumes the village simulation afterward.
+Build an ecovila through planning, resource tradeoffs and resident activity. The current game has moved beyond the original first-evening prototype: the complete playable catalog is available without a linear quest-unlock campaign. Earlier opening and journal proposals are historical, not current onboarding instructions.
 
-Choose one of three camps, select a project, then click a clear grid square. Project buttons in the journal open priority and relocation controls. WASD/arrows or left-drag pan relative to the camera; Shift pans faster. Q/E or right-drag turn the view. Scroll or +/− zoom; Home centers the camp. Keyboard movement works while paused, ignores text fields and dialogs, and stops on focus loss. Pause and 4× speed are available. The evening button ends construction for this session; New weekend asks before replacing its save.
+## Starting and navigating
 
-- Five autonomous friends share work, carry materials, recover energy and use an installed tank for washing breaks.
-- Physical materials are reserved at planning time; construction never deducts money. Each recipe determines the number of carrying loads, followed by resident assembly labor. Work access is protected during placement and relocation. All available friends can help a project, each reserving a reachable position around its perimeter. Leisure yields immediately to available work; tired residents rest below 25% energy and rejoin pending work at 60% (80% when there is no work waiting).
-- An entrance camp needs a runoff decision during the shower. Other sites drain well. Raising supplies consumes timber; moving them is free.
-- Town purchases offer timber, fasteners, roofing, tarp/rope, tanks, plumbing and toilet kits. Money is spent only when buying these supplies. Trips take 55 active simulation seconds; inventory arrives on return, including after reloading.
-- Meals, drinking water and tents cover initial essentials. Meals and drinking water are now consumed, and local water treatment and material production operate continuously. Overnight schedules, terrain excavation and a story campaign remain outside this playable. The temporary toilet contributes to the evening outcome.
-- Time pauses in hidden tabs. Saves use `solar-friends-v02-first-weekend-2` in local storage. The restart action never touches other modes.
+New game opens setup for Mata Atlântica, Cerrado or Caatinga, landscape, water availability, land resources, savings, supplies and town access. Defaults include R$220 and standard camp supplies. Terrain, elevation, river, trees and deposits vary with the seed on a 128×128-cell map. Arrival uses two Jimny-inspired vehicles. Follow the on-screen camp placement prompt, then choose what to build.
 
-`simulation.js` contains serializable state and rules. `game.js` renders the scene and UI. Run `node scripts/verify-v02-weekend.mjs` from the repository root for deterministic playthroughs and regression checks.
+WASD/arrows or left-drag pan; Shift pans faster. Q/E or right-drag rotate the camera. Scroll or +/− zoom; Home centers camp. Placement supports a model wireframe and rotation. Buildings and tents can level their footprint; basic terrain tools do not currently charge money or labor.
 
-## Rendering checks
+Normal play supports speeds through 16×. Opening management/planning screens pauses time. View & options contains camera controls, sound, saves and main-menu navigation. Layouts adapt to smaller/shorter windows; desktop is the tested platform. `responsive.css` is loaded after the existing game/menu styles.
 
-Append `?performance` for a visible rolling frame-time and draw-call readout. Static scenery is batched by material; moving residents retain their joint hierarchy. Rest destinations are cached until the camp layout changes, and the journal refreshes only when its displayed values change.
+## Residents and construction
 
-A local browser sample of the idle clearing measured 4,497 draw calls / about 45 fps before batching and 381 calls / about 96 fps afterward, with p95 frame intervals changing from 26 ms to 17 ms. These are local rolling samples, not hardware-independent benchmarks. Batching trades some fine-grained frustum culling for fewer submissions.
+Five friends have distinct identities, preferences and needs: energy, hunger, toilet, hygiene, social contact and fun. Needs can interrupt work. Residents approach service buildings, rest inside accommodation, wash, socialize and use leisure destinations with articulated animations. These remain a simplified simulation, not a complete model of human behavior.
 
-The two ridge tents use actual fabric panels, open doors, tied flaps, poles, ropes, stakes and bedrolls. Each is 398 triangles before batching and approximately 1.54 m tall, with a 2.88 × 3.08 m extent including guy ropes.
+Blueprints reserve materials; residents haul supplies and assemble projects. Money pays for purchased supplies and services, not construction labor. Build-menu auto-buy can order missing materials if affordable. Supply trips use vehicles and deliver on return. Access and terrain constraints still apply. Roads and bridges are build choices; roads require resident construction. Buildings expose applicable relocation/removal and service controls rather than universal power switches.
 
-New weekends open with a 17-second two-SUV arrival: staggered curved approaches, side-by-side parking, and five exits split between two Jimny-inspired SUVs. Camp selection waits until everyone is out. Pause, speed and Skip arrival work during the opening; elapsed arrival time is saved. `?arrival-preview` replays the opening without reading or writing the player save.
+Raw materials come from generated deposits, cultivation and player-selected tree cutting. Raw wood can be processed into timber and planks. Workshop recipes, crops and animal products use inputs, work and storage; regrowth limits repeat harvests. Animals are counted individually. Reclaimed parts are retired from the active economy.
 
-The simulation runs at 10 Hz; presentation interpolates between its last two states every display frame. Residents, arrival vehicles, limb poses and current highlights share that interpolated clock, with one tick of visual latency and no extrapolation through obstacles. The performance overlay reports motion-clock updates separately from renderer FPS so high FPS cannot hide a stepped visual clock. `node scripts/verify-v02-presentation.mjs` checks 30/60/120 Hz, 1×/4× pace, pause and teleport boundaries.
+## Water, power and sanitation
 
-## Construction balance
+Separate management screens show water, power, resources and finances. Residents can carry river water and purify it; maintaining a drinking-water reserve reduces repeated orders. Wells and pumps provide other sources. Water quality and storage matter, and pending crop work does not prevent watering.
 
-Recipes model small temporary structures assembled from prepared materials, not permanent buildings or engineering specifications. The group brings 36 timber pieces, seven fastener packs, eight roof sheets and one each of the tarp, tank, plumbing and sanitation kits. It can establish a camp and choose a practical improvement; completing every project requires another timber purchase.
+Completed applicable buildings connect automatically. Grid power costs money; solar and river generation support going off-grid. Machinery demand depends on productive work and necessary inputs; lights depend on night. A passive toilet or road does not incur an arbitrary machinery load. Sanitation includes toilet servicing, ecological treatment and biodigestion. House solar equipment is an optional upgrade rather than a mandatory early-house cost.
 
-Assembly budgets are 1, 2, 8 and 4 person-hours for the gathering place, water stand, open shelter and temporary toilet. One simulation second represents 0.45 game minutes; skill improves assembly speed by 25%. Carrying, walking and rest are additional. Timber loads carry four pieces, roof loads two sheets, and equipment/fasteners one pack each. These loads abstract carrying capacity; they do not model exact weight or two-person lifting yet. Money never substitutes for missing stock.
+## Production and surplus policies
 
-The revised economy uses save schema/key 2, preserving old prototype saves under their original key while starting a new weekend.
+Resources → **Village work & trade** provides:
 
-For an isolated tent-resting playtest, open `?rest-preview&performance`: friends arrive with low energy. It never reads or writes the player save. Choose a camp to watch door approaches, indoor recovery and exits.
+- Work priorities for food/water, maintenance, production and construction, plus worker reservations. Available residents fill these roles; their own needs take precedence. Assigned batches normally finish before category reassignment.
+- Per-resource automatic sales with a minimum reserve, trigger stock and daily unit cap. Zero cap means unlimited. Sales use whole trade batches and existing manual-sale prices, and appear in Finances.
+- Food and the next two batches of repeating production remain protected. Already committed construction/production inputs are outside available stock. Automatic sales default to off and do not run in sandbox.
 
-## Resource, power and water port
+Each production site has a configurable stock target (default 24). Pending output counts toward it. Set the target sufficiently above the protected reserve to allow at least one sale batch. A target is a stopping threshold, not an exact inventory cap: a whole production batch may cross it.
 
-The v0.1 rules in `src/economy.rs`, `src/production.rs`, `src/electricity.rs`, `src/power/network.rs` and `src/water.rs` informed the new renderer-independent JavaScript implementation. The old Rust simulation and v0.1 files remain intact.
+Bamboo, crops, honey and livestock were rebalanced on 2026-11-08. See [the balance note](../../../docs/balance/2026-11-08-economy.md) for measured replay results and the distinction between theoretical returns and actual earnings.
 
-- `catalog-rules.js` defines material recipes, processing and resource yields. `building-models.js` mirrors the model metadata without importing Three into the simulation. All 28 Homes/Buildings models have playable definitions and their exact art footprints. Resource sites and camp props bring the catalog to 57 choices, including the four first-camp shortcuts. Construction-state models remain automatic stages rather than separate buildings.
-- The categorized, searchable build tray supports repeated buildings and placement across the 64×64 plot. Buildings require access; the river generator must be at the riverbank. The current plot has no crossing to the disconnected western bank.
-- Material inventory remains shared camp/storage inventory. Construction reserves material for the site; residents carry recipe-sized loads. Production reserves inputs, uses resident work, and carries output back to stores. Warehouses add 600 units of capacity. Buy materials in town or sell full batches of surplus for half the purchase price. Resource sites provide finite earth/stone and renewable timber/bamboo. Gardens, orchards, livestock and kitchens produce food through explicit jobs. Keep 24 in stock repeats a selected job only while its primary output is below the target; inputs, growth, utilities and capacity still apply.
-- Electrical connections consume cable supplies and resident installation work. Solar output follows daylight, river generators run continuously, rooftop systems supply homes, and batteries retain energy per connected component. Water services have priority over production under shortage. Turning off or removing a line isolates its loads. Generator/storage capacities and peak rates follow v0.1 (solar 6 kW / 36 kWh, hydro 2.34 kW / 18 kWh, roof 0.6 kW / 4 kWh). The renderer uses at most eight nearby point lights; distant simulation loads still operate.
-- Water stays in local camp/building tanks, separately classified as fresh, irrigation, greywater or sewage. Residents can carry 12-unit sealed loads. Installed pipes require plumbing, pump equipment, resident work and electricity at their source. A powered river intake delivers irrigation water; a separately powered cistern filters it into fresh water. Rain capture is irrigation water until filtered. Reed beds return treated greywater to irrigation; banana beds remove sewage through treatment/evaporation; biodigesters produce biogas usable by kitchens. Treatment never returns sewage as drinking water. Full tanks block delivery without deleting the carried liquid.
-- These are adapted gameplay systems, not a binary port of every v0.1 subsystem: material stores are shared rather than per-warehouse logistics, connection routes are direct endpoint links rather than tile-by-tile pipe/cable editing, and pressure/elevation, equipment maintenance, food spoilage and the old outside-job/market simulations are not implemented here.
+## Saves and modes
 
-Run `node scripts/verify-v02-economy.mjs` for catalog parity, resource production, inventory/sales, installation, disconnected/night power, conservation, river intake, filtration/treatment and save tests. Existing weekend and resident/presentation checks remain applicable.
+Story and sandbox retain separate mode state. View & options → Saved villages creates named saves and offers load, rename, delete and export. Previous snapshots support recovery. Invalid restoration must not silently replace a saved village with a fresh one. Browser-local saves are not cloud saves; export important villages.
 
-`?utilities-preview&performance` is a separate, unsaved demonstration with ten completed buildings, connected solar/batteries, a powered river intake, cistern, garden irrigation, sanitation and workshop. Use building details to queue work, and Power & water to inspect or change the networks. It never overwrites the player village.
+Sandbox replenishes supplies and offers optional instant buildings while resident needs and infrastructure still simulate. The lab uses a separate storage key and worker, supports targets through 1024×, and reports achieved speed. CPU limits mean the requested multiplier is not guaranteed. Lab reports and scripted replays must be distinguished from regular browser play.
 
-### Sunlight and shadows
+## Implementation and checks
 
-Sunlight follows the game clock (sunrise 06:00, sunset 18:00): shadows turn and shorten toward noon, then lengthen toward sunset. Rain fades direct light and shadow contrast over three seconds while retaining diffuse sky light. Sunlight contributes no cast shadows at night; powered lamps retain their separate lighting. The sun uses the existing single 2048px shadow map with expanded depth coverage for its daily orbit.
+- `simulation.js`: state, commands, construction, production and scheduling.
+- `catalog-rules.js`: material and recipe definitions; `economy-policies.js`: reserves, sales and work settings.
+- `game.js`: scene and game interaction; `management.js` and `economy-controls.js`: planning screens.
+- `resident-needs.js`: needs; shared `../residents/` code: rigs/animation.
+- `lab-worker.js` / `lab-runner.js`: isolated acceleration with fixed simulation steps.
 
-For an unsaved, paused comparison use `?utilities-preview&lighting-hour=8`, `lighting-hour=12` or `lighting-hour=16`; add `&lighting-rain` for overcast conditions. Run `node scripts/verify-v02-sunlight.mjs` for orbit, shadow-length, weather and night checks.
-
-### Building interaction audit
-
-See [the building-by-building audit](../../../docs/v02/building-interaction-audit.md) for functional coverage and decorative-prop limits. Run `node scripts/verify-v02-buildings.mjs` to exercise all build choices and production recipes through actual resident work. Use `?utilities-preview&interactions` for an unsaved scene with exhausted residents, a supplied wash station, and queued milk/egg production.
-
-### Game interface artwork
-
-The HUD uses the existing Outfit font, a compact resource strip, resident portraits, illustrated build cards and a collapsible completed-building list. `ui-art.js` renders each model illustration once on demand with a separate small renderer, caches its image, and schedules new illustrations during idle time. It does not add illustration rendering to the game frame loop. Hidden resident equipment is excluded from portraits. Full material recipes remain available through card tooltips and accessible labels.
-
-### Village management screens
-
-Open Resources, Water or Power from the crew panel or the matching top-bar counter. These desktop screens pause the village while planning, then restore its previous pause setting when closed.
-
-Resources groups searchable stock, town purchases/sales and production jobs. Water shows storage by water type, treatment buildings, pipes and carrying jobs. Power shows generation, demand, batteries, building switches and cable installation. Find in village returns to the selected building. Installation and production still require resident work after resuming.
-
-### Community life
-
-Build → Learning contains the reading room and outdoor classroom; Community contains the hall; Recreation contains the exercise garden and volleyball court. Each uses the shared 3D art catalog and physical construction supplies. Completed sites become autonomous leisure destinations with modest energy recovery; covered front rows remain accessible for rainy-day shelter. These use existing leisure animations: formal classes, skill progression and organized sports matches are not simulated.
-
-Run `node scripts/verify-v02-community.mjs` for model footprint, construction recipe, autonomous visit and save checks.
-
-### Start menu and sandbox
-
-`/v02/weekend/` opens the start menu. New game starts the first-evening story; Continue restores its save. Sandbox has its own save slot and starts in the clearing with all build categories available, free construction, replenishing material reserves and no opening/dinner goals. Instant build is on by default; turn it off in the build catalog to require resident construction. Water, power, resident needs and production continue to simulate normally. View & options → Main menu saves and returns to the menu. Starting fresh asks before replacing the selected mode's save.
-
-Developer preview URLs still bypass the menu and do not save. `node scripts/verify-v02-modes.mjs` checks mode isolation keys, construction rules, duplicate sandbox buildings, save restoration and story defaults.
+Run the targeted verification commands listed in the [root README](../../../README.md). The [68-type catalog playthrough](../../../docs/playtests/2026-11-08-regular-catalog.md) records actual construction through normal gameplay. The [three-day replay](../../../docs/balance/2026-11-08-economy.md) checks subsequent policy changes. Neither proves balance for every biome, seed or layout.

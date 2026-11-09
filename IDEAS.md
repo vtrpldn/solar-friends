@@ -4,6 +4,8 @@ description: Deferred ideas for useful buildings and visible resident activities
 
 # Building ideas
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 The crop, animal-care and kitchen loops are implemented: residents carry supplies, tend animals, collect products and prepare saved cooking batches. Food freshness, local buffers, water, waste and optional biogas affect production. Existing work poses show cooking, watering, tending and feeding. These are delivered systems, not future features.
 
 The following extensions remain ideas:

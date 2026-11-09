@@ -4,6 +4,8 @@ description: Saved town supplier prices, limited weekly offers, firm orders and 
 
 # Town suppliers and seasonal offers
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 Why: buying locally prepared materials, waiting for a better offer, and spending resident time on a pickup should become predictable planning choices. Essential supplies must remain available.
 
 Build on resident learning in PR #60. Preserve the full simulator roadmap; Story outcomes, optional Sandbox constraints and the final paired housing comparison remain separate required stages.

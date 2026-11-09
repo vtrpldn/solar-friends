@@ -1,5 +1,7 @@
 # Farming and animal husbandry
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 ## Why
 
 Give village planning more choices about land, water, food, livestock feed and community work without replacing residents' leisure with constant chores.

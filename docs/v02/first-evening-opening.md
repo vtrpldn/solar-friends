@@ -1,5 +1,7 @@
 # First evening: a playable planning loop
 
+> Historical v2 iteration record. Opening goals, catalog counts and behaviors describe that iteration, not the current release. See the [current v2 guide](../../web/v02/weekend/README.md) and [later catalog playthrough](../playtests/2026-11-08-regular-catalog.md).
+
 ## Why
 
 The opening should reward making a place for friends, not waiting for arbitrary day changes. It now asks for three outcomes: a gathering place, dry communal cover and protected supplies. They can be built in any order or location that preserves access. The full catalog remains available.

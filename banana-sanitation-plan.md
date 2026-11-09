@@ -1,5 +1,7 @@
 # Banana sewage treatment bed
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 Why: let the village treat toilet waste through a planted, sealed banana evapotranspiration basin alongside its existing greywater and biogas systems.
 
 - Add a buildable 2×2 banana treatment bed with staged stone, earth, brick and pipe construction. Unlock it with ecological sanitation in Story; Sandbox has it immediately.

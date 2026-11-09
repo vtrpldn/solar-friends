@@ -1,5 +1,7 @@
 # Rural construction economy
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 ## Why
 
 Construction should combine materials available on a Brazilian countryside property with supplies bought in town. Projects compete for money, materials and a limited amount of community work. Residents keep their meals, rest, friendships and hobbies.

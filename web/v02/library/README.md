@@ -1,26 +1,20 @@
-# v0.2 3D collection
+# v2 3D collection
 
 ## Why
 
-The approved house establishes a repeatable material and modeling language. This collection replaces active v0.1 painted asset subjects with authored geometry, so rotations, shadows and proportions come from the same 3D objects.
+The approved house establishes a repeatable material and modeling language. This collection replaces active v1 painted asset subjects with authored geometry, so rotations, shadows and proportions come from the same 3D objects.
 
-There are **105 models**, covering **127 active entries** in `web/artwork/catalog.js`. `catalog.js` records the exact legacy IDs beside each recipe. The automatic coverage check fails when an active old catalog entry has no replacement.
+`catalog.js` exports the current `ASSETS` collection and legacy coverage IDs. Use that collection and the coverage check for current counts; the catalog has expanded beyond the original 105-model milestone. It includes buildings, house variants, vegetation, geology, roads, supplies, residents, livestock, crops and construction/growth stages.
 
-- 22 building models, including the empty pasture; 6 houses including the approved house and adobe variants.
-- 17 vegetation models, 4 geological clusters, 5 ground/path samples, 7 supply props.
-- 16 everyday props: garden tools, water equipment, furniture, bicycle, laundry, crates, signs and a fire circle.
-- 18 crop models: six crops at three growth stages.
-- The five named residents plus the existing scale study; three hens and a goat.
+Day/night images use the same geometry with scene lighting. Portrait, idle and activity atlas entries refer to the same authored resident. The collection cards and sprite proofs remain static art studies. The land preview now has articulated resident motion and prop interaction rehearsals; it does not recreate v1 simulation or production behavior. Residents retain the approved scale-study body as requested; they are not a character creator. Species are stylized representations, not botanical models.
 
-Day/night images use the same geometry with scene lighting. Portrait, idle and activity atlas entries refer to the same authored resident. The collection cards and sprite proofs remain static art studies. The land preview now has articulated resident motion and prop interaction rehearsals; it does not recreate v0.1 simulation or production behavior. Residents retain the approved scale-study body as requested; they are not a character creator. Species are stylized representations, not botanical models.
-
-Archived references, rejected images and earlier prototypes are deliberately excluded. All v0.1 source files and the original five model recipes remain intact. House study 03 is unchanged. New housing uses authored structural variations; randomized accessories remain deferred.
+Archived references, rejected images and earlier prototypes are deliberately excluded. All v1 source files and the original five model recipes remain intact. House study 03 is unchanged. New housing uses authored structural variations; randomized accessories remain deferred.
 
 ## Review
 
-- `/v02/library/`: the complete collection, category filters, four rotations, shared scale and optional enlarged detail previews. Click a card to inspect the live model.
-- `/v02/workshop/`: all 105 models, orbit, wireframe, scale reference, day/night and four-view sprite proof. Export remains optional; the land uses live geometry.
-- `/v02/land/`: all models placed on a 64×64-cell editable plot. See its README for controls and scene storage.
+- `/v2/library/`: the complete collection, category filters, four rotations, shared scale and optional enlarged detail previews. Click a card to inspect the live model.
+- `/v2/workshop/`: the full catalog, orbit, wireframe, scale reference, day/night and four-view sprite proof. Export remains optional; the land uses live geometry.
+- `/v2/land/`: all models placed on a 64×64-cell editable plot. See its README for controls and scene storage.
 
 Geometry uses metres, two metres per cell, the existing warm palette, faceted foliage and the approved barrel-tile recipe. Static meshes are combined by material in the land/gallery to reduce draw calls without changing geometry. Transparent greenhouse panels keep separate materials. New models remain studies open to art direction; inventory coverage is not a claim of final art approval.
 

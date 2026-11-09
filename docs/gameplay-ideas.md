@@ -17,4 +17,4 @@ These are ideas to explore, not committed implementation scope. Keep planning me
 - **Resident-made decorations:** pottery, signs, chimes, hammocks and mosaics emerge from hobbies; players choose placement.
 - **Roadside honesty stall:** passing traffic buys produce and crafts; freshness, placement and physical restocking matter.
 
-Capybaras are being implemented separately as occasional ambient riverbank visitors. Crop damage and fence-aware wandering remain future extensions.
+Capybaras are implemented as occasional ambient riverbank visitors. Crop damage and fence-aware wandering remain future extensions.

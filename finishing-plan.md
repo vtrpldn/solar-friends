@@ -4,6 +4,8 @@ description: Remaining art, playtesting, performance, documentation and integrat
 
 # Solar Friends finishing plan
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 ## Why
 
 Make the current village feel coherent, readable and dependable before expanding the game. The six simulation systems are implemented; this pass addresses visual quality, player experience and release confidence.

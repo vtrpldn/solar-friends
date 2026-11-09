@@ -1,5 +1,7 @@
 # v0.2 building and resident interaction audit
 
+> Historical v2 iteration record. Opening goals, catalog counts and behaviors describe that iteration, not the current release. See the [current v2 guide](../../web/v02/weekend/README.md) and [later catalog playthrough](../playtests/2026-11-08-regular-catalog.md).
+
 Audited 2026-11-08. Scope: the playable weekend simulation, not the art-library interaction rehearsals. All 28 building models are available through 57 total build choices (including the four camp shortcuts, resource sites and props).
 
 ## Findings fixed

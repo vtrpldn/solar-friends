@@ -4,6 +4,8 @@ description: Build player-facing map and scenario tools using the authored resid
 
 # Map and scenario builder implementation plan
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 Status: closed to further implementation at the player’s request on 2026-11-07. Completed work is retained; this document is an implementation record, not an active goal. **Scope revision: resident creation/customization was removed at the player’s request on 2026-11-03. Historical implementation notes below record retired work and do not reintroduce it.** Delivery target: the desktop game, with 64×64 maps, at least three Brazilian biomes, and the existing authored cast. The original five friends remain a ready-made cast.
 
 Required launch biomes: **Mata Atlântica, Cerrado, and Caatinga**. Both player-facing builders must support all three throughout creation, editing, saving, sharing, and play, with distinct vegetation, terrain presentation, climate, and resource tradeoffs. The authored cast must work in each biome. This is a minimum release requirement, not a limit on future biome additions; detailed acceptance criteria appear under Brazilian biome presets below.

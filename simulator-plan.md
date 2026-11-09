@@ -4,6 +4,8 @@ description: Implementation stages for physical resources, production, resident 
 
 # Village simulation implementation plan
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 ## Purpose and proposed scope
 
 Make village planning depend on where resources are, how people spend their time, and how the land and infrastructure change. The player identifies a bottleneck, compares solutions, commits space and resources, observes the result, and adjusts. Residents retain meals, sleep, friendships, optional outside jobs, and hobbies.

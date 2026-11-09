@@ -1,5 +1,7 @@
 # Learning through useful work
 
+> Historical v1 plan or exploration record. Retained for implementation history; unchecked items are not the active v2 roadmap and described mechanics may differ from v2. See [current documentation](README.md) and the [documentation index](docs/README.md).
+
 Why: experience should make village planning evolve without excluding novices or turning leisure into a penalty.
 
 - [x] Save bounded experience in construction, logistics, farming, cooking, craft and equipment care, with strict validation and exact continuation.
