@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {LabRunner} from '../web/v02/weekend/lab-runner.js';
+import {createWeekend,chooseCamp,tick,save} from '../web/v02/weekend/simulation.js';
+const a=createWeekend(42);chooseCamp(a,'shade');const b=structuredClone(a),runner=new LabRunner(a,tick);runner.paused=false;
+let advanced=0;for(let i=0;i<100;i++)advanced+=runner.advance(.01,Infinity,()=>0);
+for(let i=0;i<Math.round(advanced*10);i++)tick(b,.1);
+assert.equal(save(a),save(b),'128x scheduling preserves identical fixed-step simulation');
+assert(Math.abs(advanced-128)<.11);
+runner.paused=true;const before=save(a);runner.advance(5,Infinity,()=>0);assert.equal(save(a),before);assert.equal(runner.debt,0);
+let time=0;runner.paused=false;runner.advance(.25,8,()=>++time);assert(runner.debt>0,'CPU deadline yields instead of blocking interaction');
+console.log('PASS exact fixed-step equivalence, 128x scheduling, pause and bounded CPU slices');
