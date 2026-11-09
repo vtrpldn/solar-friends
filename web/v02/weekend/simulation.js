@@ -27,7 +27,7 @@ import {
 import { expandMaterials, expandProjects, PROCESSES } from "./catalog-rules.js";
 import { accessRoadAt } from "./road-layout.js";
 import { ARRIVAL_DURATION, ARRIVAL_SPOTS } from "./arrival.js";
-import { riverBankAt, riverAccess, riverCenter } from "./river-layout.js";
+import { riverBankAt, riverAccess, riverCenter, riverWidth } from "./river-layout.js";
 // A self-contained v2 prototype. Time is measured in active simulation seconds.
 export const CAMPS = [
   {
@@ -352,12 +352,48 @@ export function queueSanitation(s,site) {
   s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,water:{from:site,to:site,kind:'sewage',amount:0,service:true},work:0,phase:'process',done:false});
   wakeHelpers(s);return '';
 }
+// Enough for a full night plus the next collection trip; bounded by the tank.
+export const drinkingReserve=(s,node)=>Math.min(node.capacity[0],Math.max(24,s.people.length*10));
+export function nearestRiverAccess(s,origin) {
+  const points=[];
+  for(let z=CELL_MIN+2;z<CELL_MAX-2;z++) {
+    const worldZ=(z-32)*2,center=32+riverCenter(worldZ,s.landSeed)/2;
+    const distance=(riverWidth(worldZ,s.landSeed)+4)/2;
+    points.push({x:Math.floor(center-distance),z},{x:Math.ceil(center+distance),z});
+  }
+  points.sort((a,b)=>Math.hypot(a.x-origin.x,a.z-origin.z)-Math.hypot(b.x-origin.x,b.z-origin.z));
+  return points.find(p=>p.x>CELL_MIN&&p.x<CELL_MAX&&!occupied(s,p.x,p.z)&&route(s,origin,p))||null;
+}
+function maintainFood(s) {
+  if(s.time<(s.nextFoodCheck||0))return;
+  s.nextFoodCheck=s.time+10;
+  const food=(s.materials.food||0)+(s.materials.meals||0);
+  if(food>=s.people.length || !s.people.some(r=>ensureNeeds(r).hunger<25))return;
+  // Harvest existing food plots before construction or nonessential production.
+  for(const p of s.projects) {
+    const recipe=Object.entries(PROCESSES).find(([,d])=>d.kind===PROJECTS[p.key].kind&&d.output.food);
+    if(recipe&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))queueProduction(s,p.id,recipe[0]);
+  }
+  // A visible, switchable emergency policy, paid from real savings, at most once a day.
+  if(s.emergencyFood!==false && !s.trip && s.time>=(s.nextFoodTrip||0) && supplyRun(s,'food')) {
+    s.nextFoodTrip=s.time+3200;
+    say(s,'Food reserve is low: the community bought emergency ingredients. Change this policy in Resources.');
+  }
+}
 export function maintainWater(s) {
   const sys=ensureInfrastructure(s);
+  for(const op of [...(s.operations||[])]) {
+    const recipe=PROCESSES[op.recipe],n=sys.nodes[op.site];
+    if(op.done||op.waterPaid||!recipe?.water||!n||s.operations.some(o=>!o.done&&o.water&&o.site===n.id))continue;
+    const fresh=['kitchen','goat_pasture','coop'].includes(recipe.kind);
+    if((fresh?n.water[0]:Math.max(n.water[0],n.water[1]))>=recipe.water)continue;
+    if(fresh&&n.water[1]>=1&&n.capacity[0])queuePurification(s,n.id);
+    else if(n.capacity[1])queueWater(s,-1,n.id,'irrigation');
+  }
   for(const n of Object.values(sys.nodes)) {
-    if(n.maintainFresh && n.capacity[0] && n.capacity[1] && n.water[0]<Math.min(24,n.capacity[0]) &&
+    if(n.maintainFresh && n.capacity[0] && n.capacity[1] && n.water[0]<drinkingReserve(s,n) &&
       !s.operations?.some(o=>!o.done && o.water && o.site===n.id)) {
-      if(n.water[1]>=1) queuePurification(s,n.id);
+      if(n.water[1]>=Math.min(12,n.capacity[0]-n.water[0]) || (n.water[0]<s.people.length*2 && n.water[1]>=1)) queuePurification(s,n.id);
       else {
         const source=Object.values(sys.nodes).filter(a=>a.id!==n.id && ['groundwater-well','rain-barrel','water-pump'].includes(a.kind) && a.water[1]>=1)
           .sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
@@ -427,7 +463,10 @@ function operationalWork(s, r, i, dt, waterOnly = false) {
   let op = (s.operations || []).find(
     (o) => o.id === r.operation && eligible(o),
   );
-  if (!op) op = (s.operations || []).find(eligible);
+  if (!op) op = [...(s.operations || [])].sort((a,b)=>{
+    const priority=o=>o.water?0:((PROCESSES[o.recipe]?.output.food||PROCESSES[o.recipe]?.output.meals)&&s.infrastructure.hungry?1:2);
+    return priority(a)-priority(b);
+  }).find(eligible);
   if (waterOnly && !op) return false;
   if (
     sys.links.some(
@@ -505,7 +544,7 @@ function operationalWork(s, r, i, dt, waterOnly = false) {
     if (op.phase === "pickup") {
       let start;
       if (w.from === -1) {
-        start = riverAccess(s.landSeed);
+        start = w.sourcePoint || (w.sourcePoint=nearestRiverAccess(s,r));
       } else start = utilitySpot(s, sys.nodes[w.from], r);
       if (!start) return false;
       op.status = "Walking to collect untreated water";
@@ -1112,7 +1151,7 @@ export function supplyRun(s, material = "wood", project = null) {
     return false;
   const vehicle = s.nextTripVehicle || 0;
   const r = s.people
-    .filter((r) => r.energy > 35 && !r.cargo && !r.tentPhase && !r.needTask && Object.entries(ensureNeeds(r)).every(([key,value])=>value>25 || (key==="hunger" && ["food","meals"].includes(material))))
+    .filter((r) => r.energy > 35 && !r.cargo && !r.tentPhase && !r.needTask && Object.entries(ensureNeeds(r)).every(([key,value])=>["food","meals"].includes(material)?(!['bladder','bowels','hygiene'].includes(key)||value>10):value>25))
     .sort((a, b) => b.energy - a.energy)
     .find(r => route(s, r, carDoor(vehicle)));
   if (!r) return false;
@@ -1736,6 +1775,7 @@ function tickUncached(s, dt) {
   s.time += dt;
   autoConnectUtilities(s, PROJECTS);
   infrastructureStep(s, PROJECTS, dt);
+  maintainFood(s);
   maintainWater(s);
   for (const p of s.projects) {
     if (!p.repeat || s.operations?.some((o) => o.site === p.id && !o.done))
@@ -1751,7 +1791,7 @@ function tickUncached(s, dt) {
     if(r.tentPhase !== 'inside') r.energy=Math.max(0,r.energy-dt*.035);
     const hours=9+s.time*.45/60, hour=hours%24, bedtime=21+(i%4)*.45;
     const sleepNight=Math.floor((hours-5)/24);
-    if(!r.sleepUntil && r.sleepNight!==sleepNight && (hour>=bedtime || hour<5) && !r.cargo && r.action!=='town') {
+    if(!r.sleepUntil && !r.needTask && Math.min(r.needs.bladder,r.needs.bowels)>20 && (r.needs.hunger>20 || !(s.materials.food+s.materials.meals)) && r.sleepNight!==sleepNight && (hour>=bedtime || hour<5) && !r.cargo && r.action!=='town') {
       r.sleepNight=sleepNight;
       r.sleepUntil=s.time+(6+3*(1-r.energy/100))*60/.45;
       r.job=null;r.operation=null;r.walk=[];r.target=null;r.action='rest';
@@ -1764,7 +1804,7 @@ function tickUncached(s, dt) {
     go: (r,point)=>go(s,r,point),
     serviceSpot: (node,r)=>utilitySpot(s,node,r),
     camp: ()=>campLocation(s)||s.stock,
-    river: ()=>riverAccess(s.landSeed),
+    river: (r)=>nearestRiverAccess(s,r),
     groundSpot: (r,center,index,privateBreak=false)=>{
       const radius=privateBreak?6:1;
       for(let ring=radius;ring<=radius+2;ring++)for(let j=0;j<12;j++) {
@@ -1876,6 +1916,17 @@ function tickUncached(s, dt) {
   if (s.rainResolved && s.time > (s.rainAt ?? 150) + 35) s.rain = false;
   for (const [i, r] of s.people.entries()) {
     if (r.action === "town") continue;
+    const urgent=Math.min(r.needs.bladder,r.needs.bowels)<10 || (r.needs.hunger<15 && s.materials.food+s.materials.meals>=1);
+    if((r.sleepUntil || r.tentPhase==='inside') && urgent) {
+      if(r.sleepUntil)r.resumeSleepUntil=r.sleepUntil;
+      r.sleepUntil=null;
+      if(r.tentPhase){r.tentPhase='exit';r.tentAt=s.time;}
+      else {r.action='idle';r.walk=[];r.target=null;}
+    }
+    if(r.resumeSleepUntil && !r.needTask && !r.tentPhase && !r.cargo && !urgent && Math.min(r.needs.bladder,r.needs.bowels)>30 && (r.needs.hunger>30 || s.materials.food+s.materials.meals<1)) {
+      if(r.resumeSleepUntil>s.time && r.energy<95){r.sleepUntil=r.resumeSleepUntil;r.action='rest';r.walk=[];r.target=null;}
+      r.resumeSleepUntil=null;
+    }
     if (!r.sleepUntil) chooseNeed(s,r,i,needApi);
     if (r.tentPhase) {
       r.action = "rest";
@@ -2012,6 +2063,7 @@ function tickUncached(s, dt) {
     }
     // Essential hauling and sanitation must not wait behind a house construction.
     if(!r.cargo && s.operations?.some(o=>!o.done&&o.water) && operationalWork(s,r,i,dt,true))continue;
+    if(!r.cargo && s.infrastructure.hungry && s.operations?.some(o=>!o.done&&(PROCESSES[o.recipe]?.output.food||PROCESSES[o.recipe]?.output.meals)) && operationalWork(s,r,i,dt))continue;
     let p = s.projects.find(
       (p) => p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
     );

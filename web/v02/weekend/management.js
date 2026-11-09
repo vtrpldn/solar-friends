@@ -304,6 +304,12 @@ export function createManagement({
       .join("");
     if (view === "resources") {
       $("resource-grid").replaceChildren();
+      const reserve=document.createElement('button');
+      reserve.textContent=`Emergency food purchases: ${s.emergencyFood===false?'off':'on'}`;
+      reserve.title='When food is low and residents are hungry, buy one affordable batch of ingredients, at most once per day. Existing food plots are prioritized too.';
+      reserve.setAttribute('aria-pressed',String(s.emergencyFood!==false));
+      reserve.onclick=()=>{s.emergencyFood=s.emergencyFood===false;refresh();render();};
+      $("resource-grid").append(reserve);
       const search = $("resource-search").value.toLowerCase(), committed=committedMaterials(s);
       for (const group of RESOURCE_GROUPS) {
         const matches = group.ids.filter((id) =>

@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import {createWeekend,chooseCamp,tick,enableFastNavigation,nearestRiverAccess,drinkingReserve,PROJECTS,requiredLoads,queueProduction} from '../web/v02/weekend/simulation.js';
+import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
+import {riverAccess} from '../web/v02/weekend/river-layout.js';
+const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);s.rainSeen=s.rainResolved=true;return s;};
+const run=(s,n)=>{for(let i=0;i<n*10;i++)tick(s,.1);};
+const s=fresh(),r=s.people[0];r.energy=85;r.sleepUntil=1000;r.tentPhase='inside';r.tentAt=0;r.needs.bladder=1;
+run(s,100);assert(r.needHistory?.bladder,'sleep interrupts for an urgent toilet break');
+const bank=nearestRiverAccess(s,s.stock);assert(bank);assert(Math.hypot(bank.x-s.stock.x,bank.z-s.stock.z)<Math.hypot(riverAccess(42).x-s.stock.x,riverAccess(42).z-s.stock.z),'use a nearer accessible bank');
+assert.equal(drinkingReserve(s,{capacity:[100]}),50);assert.equal(drinkingReserve(s,{capacity:[20]}),20);
+const hungry=fresh();hungry.materials.food=hungry.materials.meals=0;hungry.people.forEach(r=>r.needs.hunger=5);const money=hungry.money;
+run(hungry,450);assert(hungry.money<money,'emergency food is paid for');assert(hungry.people.some(r=>r.needHistory?.hunger),'residents recover through actual food delivery and eating');
+const off=fresh();off.emergencyFood=false;off.materials.food=off.materials.meals=0;off.people.forEach(r=>r.needs.hunger=5);run(off,30);assert.equal(off.money,220,'policy can be disabled');
+const crop=fresh();crop.materials.seedlings=4;const p={id:crop.nextId++,key:'garden',x:38,z:2,work:PROJECTS.garden.work,delivered:requiredLoads('garden')};crop.projects.push(p);syncInfrastructure(crop,PROJECTS);crop.infrastructure.nodes[p.id].water=[0,0,0,0];assert.equal(queueProduction(crop,p.id,'vegetables'),'');run(crop,600);assert(crop.operations.some(o=>o.water?.to===p.id&&o.done),'queued crop requests and receives water');assert(crop.operations.some(o=>o.recipe==='vegetables'&&o.done),'water-blocked crop finishes');
+console.log('PASS urgent waking, nearby river, population reserve, paid food recovery, opt-out, automatic crop water');

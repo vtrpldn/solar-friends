@@ -13,7 +13,7 @@ export function needMeters(r) {
 export function decayNeeds(s,r,i,dt) {
  const n=ensureNeeds(r,i), working=['build','produce','install','carry','collect'].includes(r.action);
  const rates={hunger:.055,bladder:.12,bowels:.047,hygiene:working?.075:.018,social:.035,fun:working?.055:.025};
- for(const key of NEED_KEYS)n[key]=clamp(n[key]-rates[key]*dt*(profileFor(r).rates[key]||1));
+ for(const key of NEED_KEYS)n[key]=clamp(n[key]-rates[key]*dt*(r.tentPhase==='inside'?.35:1)*(profileFor(r).rates[key]||1));
  if(r.tentPhase==='inside') {n.fun=clamp(n.fun+dt*.04);return;}
  // Friendly conversation during leisure also helps, but only with someone nearby.
  if(r.action==='chat' && !r.needTask && s.people.some(p=>p!==r && p.action==='chat' && Math.hypot(p.x-r.x,p.z-r.z)<2))n.social=clamp(n.social+dt*.7);
@@ -39,7 +39,7 @@ function assign(s,r,kind,spot,details={}) {
 // Called before movement so an unladen resident can stop heading to a job.
 export function chooseNeed(s,r,i,api) {
  if(r.needTask && s.time-r.needTask.created>240){cancelNeed(s,r);r.needRetryAt=s.time+15;}
- if(r.needTask || r.tentPhase || r.cargo || (r.operation && ['return','deliver'].includes(s.operations?.find(o=>o.id===r.operation)?.phase)) || r.action==='town' || s.stage!=='playing' || r.energy<25 || (r.needRetryAt||0)>s.time)return;
+ if(r.needTask || r.tentPhase || r.cargo || (r.operation && ['return','deliver'].includes(s.operations?.find(o=>o.id===r.operation)?.phase)) || r.action==='town' || s.stage!=='playing' || (r.energy<25 && Math.min(ensureNeeds(r).hunger,ensureNeeds(r).bladder,ensureNeeds(r).bowels)>=15) || (r.needRetryAt||0)>s.time)return;
  const n=ensureNeeds(r,i);
  const pending=NEED_KEYS.filter(k=>n[k]<(k==='social'||k==='fun'?35:30)).sort((a,b)=>n[a]-n[b]);
  if(!pending.length){r.needBlocked=null;return;}
@@ -71,7 +71,8 @@ export function chooseNeed(s,r,i,api) {
   if(kind==='hygiene') {
    const facility=choose(node=>['home','wash-station','eco_toilet','camp'].includes(node.kind) && node.water[0]>=1 && node.capacity[2]-node.water[2]>=.8);
    if(facility) {assign(s,r,kind,facility.spot,{site:facility.node.id,private:facility.node.kind==='home',label:facility.node.kind==='home'?'Bathing at home':'Washing up',animation:facility.node.kind==='home'?'bathe':'wash'});return;}
-   const spot=api.groundSpot(r,api.river(),i);
+   const bank=api.river(r);
+   const spot=bank && api.groundSpot(r,bank,i);
    if(spot){assign(s,r,kind,spot,{river:true,label:'Washing by the river',animation:'bathe'});return;}
   }
   if(kind==='social') {
@@ -99,7 +100,7 @@ export function chooseNeed(s,r,i,api) {
 // merely because a destination was selected. Food and water settle exactly once.
 export function advanceNeed(s,r,dt,api) {
  const task=r.needTask;if(!task)return false;
- if(s.time-task.created>240 || (r.energy<12 && task.kind!=='hunger')) {cancelNeed(s,r);r.needRetryAt=s.time+15;return false;}
+ if(s.time-task.created>240 || (r.energy<12 && !['hunger','bladder','bowels'].includes(task.kind))) {cancelNeed(s,r);r.needRetryAt=s.time+15;return false;}
  const node=task.site==null?null:s.infrastructure.nodes[task.site];
  if(task.site!=null && !node?.enabled){cancelNeed(s,r);r.needRetryAt=s.time+5;return false;}
  r.action=ACTION[task.kind];
