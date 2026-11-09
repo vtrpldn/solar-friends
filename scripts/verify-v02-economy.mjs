@@ -213,7 +213,7 @@ assert.equal(
 assert.equal(hauling.infrastructure.nodes[tank.id].water[0], 0);
 console.log("PASS: physical river-water pickup and delivery to a local tank.");
 
-// No free pumping and no water appearing from an incompatible pipe.
+// Stored water flows passively; extraction and filtration still require equipment.
 const pumped = fresh();
 pumped.rainSeen = true;
 const pumpTank = built(pumped, "well", 40, 40),
@@ -224,7 +224,7 @@ ps.nodes[pumpTank.id].water[0] = 20;
 assert.equal(connectUtility(pumped, "fresh", pumpTank.id, 0), "");
 ps.links[0].work = ps.links[0].required;
 infrastructureStep(pumped, PROJECTS, 10);
-assert.equal(ps.nodes[0].water[0], 0);
+assert(ps.nodes[0].water[0] > 0, "stored fresh water flows without powering every pipe");
 assert.equal(connectUtility(pumped, "power", pumpSolar.id, pumpTank.id), "");
 ps.links[1].work = ps.links[1].required;
 infrastructureStep(pumped, PROJECTS, 10);
@@ -239,7 +239,7 @@ assert(
     1e-6,
 );
 console.log(
-  "PASS: powered pipe flow, no unpowered pumping and water mass conservation.",
+  "PASS: passive pipe flow and water mass conservation.",
 );
 
 const pending = fresh();
@@ -284,7 +284,8 @@ assert.equal(ins.nodes[intakeTank.id].water[1], 0);
 assert.equal(connectUtility(intake, "power", intakeSolar.id, -1), "");
 ins.links.forEach((l) => (l.work = l.required));
 infrastructureStep(intake, PROJECTS, 10);
-assert(ins.nodes[intakeTank.id].water[1] > 0);
+assert.equal(ins.nodes[intakeTank.id].water[1], 0, "a legacy river link cannot create an invisible pump");
+ins.nodes[intakeTank.id].water[1] = 12; // Delivered raw water.
 assert.equal(ins.nodes[intakeTank.id].water[0], 0);
 assert.equal(
   connectUtility(intake, "power", intakeSolar.id, intakeTank.id),
@@ -294,7 +295,7 @@ ins.links.forEach((l) => (l.work = l.required));
 infrastructureStep(intake, PROJECTS, 10);
 assert(ins.nodes[intakeTank.id].water[0] > 0);
 console.log(
-  "PASS: river intake needs installed pump power, then the cistern independently needs power to filter.",
+  "PASS: legacy river links do not pump; a powered cistern filters delivered raw water.",
 );
 
 const auto = fresh();

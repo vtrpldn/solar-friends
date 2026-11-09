@@ -5,26 +5,20 @@ import { riverBankAt, riverAccess } from "./river-layout.js";
 export const GRID_POWER = { capacity: 4, tariff: 1.2 };
 export const LIQUIDS = ["fresh", "irrigation", "greywater", "sewage"];
 export const POWER_LOAD = {
-  'water-pump': .6,
-  shed: 0.1,
-  kitchen: 0.6,
-  workshop: 0.6,
-  greenhouse: 0.5,
-  square: 0.4,
-  well: 0.2,
-  warehouse: 0.2,
-  coop: 0.1,
-  streetlight: 0.1,
-  eco_toilet: 0.1,
-  home: 0.2,
+  'water-pump': .18, shed: .015, kitchen: .025, workshop: .025,
+  greenhouse: .02, square: .025, well: .08, warehouse: .02,
+  coop: .01, streetlight: .015, eco_toilet: .005, home: .02,
 };
+export function workingMachine(s,node) {
+  return (s.operations||[]).some(o=>o.site===node.id && !o.done && o.phase==='process' &&
+    ['Working','Waiting for power'].includes(o.status) && !o.biogas && s.people.some(r=>r.operation===o.id && ['produce','blocked'].includes(r.action) && r.energy>=25 && !r.sleepUntil));
+}
 // Capability, not instantaneous demand: lights still have a switch in daylight,
 // and pumps still have one while their tanks are empty or their pipes disabled.
 export function hasPowerService(sys, node) {
   if(node?.kind === "water-storage") return false;
   return !!node && !!(POWER_LOAD[node.kind] || node.battery ||
-    ["solar_farm", "hydro", "home", "river", "camp"].includes(node.kind) ||
-    sys.links.some(link => link.from === node.id && link.kind !== "power"));
+    ["solar_farm", "hydro", "home", "camp"].includes(node.kind));
 }
 export function canSwitchBuilding(sys, node) {
   return !!node && node.id > 0 && hasPowerService(sys, node);
@@ -107,7 +101,7 @@ export function syncInfrastructure(s, defs) {
     if (p.work < defs[p.key].work) continue;
     const kind = defs[p.key].kind || p.key;
     const battery =
-      { solar_farm: 36, hydro: 18, home: 4, "supply-6": 36 }[kind] || 0;
+      { solar_farm: 36, hydro: 18, home: 0, "supply-6": 36 }[kind] || 0;
     sys.nodes[p.id] ??= {
       id: p.id,
       kind,
@@ -121,6 +115,7 @@ export function syncInfrastructure(s, defs) {
       power: 0,
     };
     const node=sys.nodes[p.id];
+    if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4:0;node.charge=Math.min(node.charge,node.battery);}
     if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<40)) {
       // Existing starter tanks become passive without destroying stored water.
       node.kind=kind;node.capacity=[Math.max(40,node.water[0]),Math.max(40,node.water[1]),0,0];
@@ -236,33 +231,15 @@ export function infrastructureStep(s, defs, dt) {
       demand = 0;
     for (const n of component) {
       n.generation = n.enabled
-        ? { solar_farm: 6 * sun, hydro: 2.34, home: 0.6 * sun }[n.kind] || 0
+        ? { solar_farm: 6 * sun, hydro: 2.34, home: n.solarUpgrade ? 0.6 * sun : 0 }[n.kind] || 0
         : 0;
-      n.demand = n.enabled
-        ? (POWER_LOAD[n.kind] || 0) *
-            (n.kind === "streetlight" && sun > 0.2 ? 0 : 1) +
-          (s.operations || []).filter(
-            (o) =>
-              o.site === n.id &&
-              !o.done &&
-              o.recipe &&
-              o.phase !== "return" &&
-              ["workshop", "kitchen"].includes(n.kind),
-          ).length *
-            1.2 +
-          sys.links.filter(
-            (l) =>
-              n.kind !== "water-storage" && l.from === n.id &&
-              l.kind !== "power" &&
-              l.enabled &&
-              l.work >= l.required &&
-              (n.kind === "river" || n.water[LIQUIDS.indexOf(l.kind)] > 0) &&
-              sys.nodes[l.to].capacity[LIQUIDS.indexOf(l.kind)] -
-                sys.nodes[l.to].water[LIQUIDS.indexOf(l.kind)] >
-                0.001,
-          ).length *
-            0.4
-        : 0;
+      const machinery=['kitchen','workshop'].includes(n.kind);
+      const pumping=n.kind==='water-pump' && n.water[1]<n.capacity[1]-.01 && (riverBankAt(n.x+.5,n.z+.5,3,s.landSeed) || Object.values(sys.nodes).some(a=>a.kind==='groundwater-well' && a.enabled && a.water[1]>0 && Math.hypot(a.x-n.x,a.z-n.z)<=6));
+      const filtering=n.kind==='well' && (n.water[1]>0 || s.rain) && n.water[0]<n.capacity[0]-.01;
+      n.demand = !n.enabled ? 0 :
+        (pumping || filtering ? POWER_LOAD[n.kind] :
+          ['water-pump','well'].includes(n.kind) ? 0 : (sun<.15 ? POWER_LOAD[n.kind]||0 : 0)) +
+        (machinery && workingMachine(s,n) ? .45 : 0);
       generation += n.generation;
       if (n.enabled) {
         stored += n.charge;
@@ -328,7 +305,7 @@ export function infrastructureStep(s, defs, dt) {
       const add=Math.min(n.capacity[1]-n.water[1],8*hours*waterFactor(s.worldSettings?.water));
       n.water[1]+=add;sys.account.waterReceived+=add;
     }
-    if(n.enabled && n.kind==='water-pump' && n.power>.99) {
+    if(n.enabled && n.kind==='water-pump' && n.power>.99 && n.demand>0) {
       let amount=Math.min(n.capacity[1]-n.water[1],24*hours);
       const source=Object.values(sys.nodes).filter(a=>a.kind==='groundwater-well'&&a.enabled&&Math.hypot(a.x-n.x,a.z-n.z)<=6).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
       if(source){amount=Math.min(amount,source.water[1]);source.water[1]-=amount;}
@@ -342,7 +319,7 @@ export function infrastructureStep(s, defs, dt) {
       n.water[1] += add;
       sys.account.waterReceived += add;
     }
-    if (n.enabled && n.kind === "well" && n.power > 0.99) {
+    if (n.enabled && n.kind === "well" && n.power > 0.99 && n.demand>0) {
       const amount = Math.min(
         n.water[1],
         n.capacity[0] - n.water[0],
@@ -368,17 +345,18 @@ export function infrastructureStep(s, defs, dt) {
       if (n.kind === "biodigester") sys.biogas += amount * 0.15;
     }
   }
+  const shares=new Map();
+  for(const a of Object.values(sys.nodes))for(let i=0;i<LIQUIDS.length;i++) {
+    const count=sys.links.filter(l=>l.from===a.id && l.kind===LIQUIDS[i] && l.enabled && l.work>=l.required && sys.nodes[l.to]?.enabled && sys.nodes[l.to].capacity[i]-sys.nodes[l.to].water[i]>.0001).length;
+    shares.set(`${a.id}:${LIQUIDS[i]}`,count ? a.water[i]/count : 0);
+  }
   for (const l of sys.links) {
     if (l.kind === "power" || !l.enabled || l.work < l.required) continue;
     const a = sys.nodes[l.from];
-    if (a.enabled && sys.nodes[l.to].enabled && (a.kind === "water-storage" || a.power > 0.99)) {
-      if (a.kind === "river" && l.kind === "irrigation") {
-        const target = sys.nodes[l.to],
-          amount = Math.min(24 * hours * waterFactor(s.worldSettings?.water), target.capacity[1] - target.water[1]);
-        a.water[1] += amount;
-        sys.account.waterReceived += amount;
-      }
-      transferWater(sys, l.from, l.to, l.kind, 24 * hours);
+    if (a.enabled && sys.nodes[l.to].enabled) {
+      // A river is a manual source. Only a placed pump can extract automatically.
+      if(a.kind==='river') continue;
+      transferWater(sys, l.from, l.to, l.kind, Math.min(24 * hours,shares.get(`${l.from}:${l.kind}`)||0));
     }
   }
   // Drinking and washing at camp: preserve wastewater instead of silently deleting it.

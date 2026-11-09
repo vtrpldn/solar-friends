@@ -13,9 +13,6 @@ const recipes = {
     walls: 6,
     tiles: 6,
     hardware: 2,
-    panels: 1,
-    batteries: 1,
-    electrical: 1,
   },
   adobe: {
     earth: 22,
@@ -23,9 +20,6 @@ const recipes = {
     bamboo: 8,
     hardware: 4,
     tiles: 6,
-    panels: 1,
-    batteries: 1,
-    electrical: 1,
   },
   shed: { wood: 8, hardware: 1, tiles: 6 },
   garden: { earth: 4, wood: 4, seedlings: 2 },
@@ -238,6 +232,7 @@ export function expandProjects(projects) {
   }
 }
 export const PROCESSES = {
+  solar_upgrade:{name:'Install rooftop solar and battery',kind:'home',input:{panels:1,batteries:1,electrical:1},output:{},work:90},
   fell_tree:{name:'Fell selected tree',input:{},output:{logs:12},kind:'wild-tree',work:90},
   saw_timber:{name:'Saw raw wood into timber',input:{logs:6},output:{wood:4},kind:'supply-5',work:45},
   saw_planks:{name:'Saw timber into planks',input:{wood:3},output:{planks:6},kind:'supply-5',work:35},

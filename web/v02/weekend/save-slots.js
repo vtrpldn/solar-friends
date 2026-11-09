@@ -8,9 +8,10 @@ export function saveSlots(storage){
   active:mode=>read().active[mode] || null,
   list:()=>read().slots.sort((a,b)=>b.updated-a.updated),
   create(label,mode,data){const db=read(),slot={id:crypto.randomUUID(),name:name(label),mode,data,updated:Date.now()};db.slots.push(slot);db.active[mode]=slot.id;write(db);return slot;},
-  autosave(mode,data,expected){const db=read();if(expected!==undefined && (db.active[mode]||null)!==expected)return;const slot=db.slots.find(s=>s.id===db.active[mode]);if(slot){slot.data=data;slot.updated=Date.now();write(db);}storage.setItem(saveKey(mode),data);},
+  autosave(mode,data,expected){const db=read();if(expected!==undefined && (db.active[mode]||null)!==expected)return;const slot=db.slots.find(s=>s.id===db.active[mode]);if(slot){if(slot.data!==data)slot.previous=slot.data;slot.data=data;slot.updated=Date.now();write(db);}storage.setItem(saveKey(mode),data);},
   detach(mode){const db=read();delete db.active[mode];write(db);},
   load(id){const db=read(),slot=db.slots.find(s=>s.id===id);if(!slot)throw Error('Save not found.');storage.setItem(saveKey(slot.mode),slot.data);db.active[slot.mode]=id;write(db);return slot;},
+  recover(id){const db=read(),slot=db.slots.find(s=>s.id===id);if(!slot?.previous)throw Error('No recovery copy available.');[slot.data,slot.previous]=[slot.previous,slot.data];write(db);return this.load(id);},
   rename(id,label){const db=read(),slot=db.slots.find(s=>s.id===id);if(!slot)throw Error('Save not found.');slot.name=name(label);write(db);},
   remove(id){const db=read();db.slots=db.slots.filter(s=>s.id!==id);for(const mode of Object.keys(db.active))if(db.active[mode]===id)delete db.active[mode];write(db);},
  };

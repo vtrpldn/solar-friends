@@ -11,3 +11,14 @@ console.log('PASS named save creation, mode isolation, autosaving, fresh games, 
 const first=slots.create('First','story','one'),second=slots.create('Second','story','two');
 slots.autosave('story','stale-tab',first.id);assert.equal(slots.list().find(s=>s.id===second.id).data,'two');
 console.log('PASS an older open tab cannot overwrite the active named village');
+
+slots.autosave('story','updated-two',second.id);
+assert.equal(slots.list().find(s=>s.id===second.id).previous,'two');
+slots.recover(second.id);
+assert.equal(storage.getItem(saveKey('story')),'two');
+assert.equal(slots.list().find(s=>s.id===second.id).previous,'updated-two');
+const {loadVillage}=await import('../web/v02/weekend/load-village.js');
+const before=new Map(values);
+assert.throws(()=>loadVillage(storage,saveKey('story'),()=>null),/preserved/);
+assert.deepEqual(values,before,'failed restoration does not change any saved bytes');
+console.log('PASS recoverable previous snapshot and rejected-load preservation');

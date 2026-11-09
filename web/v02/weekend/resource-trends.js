@@ -1,8 +1,8 @@
 const HOUR=60/.45;
 export function resourceSnapshot(s){return {
- money:s.money,wood:s.wood,meals:s.materials.meals||0,
+ money:s.money,wood:s.wood,meals:(s.materials.meals||0)+(s.materials.food||0),
  power:Object.values(s.infrastructure?.nodes||{}).reduce((sum,n)=>sum+(n.charge||0),0),
- water:s.infrastructure?.nodes[0]?.water[0]||0,
+ water:Object.values(s.infrastructure?.nodes||{}).reduce((sum,n)=>sum+(n.water[0]||0),0),
 };}
 // Observed stock change, not a forecast. Keep one sample before the window
 // boundary so an irregular UI update can interpolate the baseline accurately.

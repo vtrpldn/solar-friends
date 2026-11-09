@@ -12,7 +12,7 @@ assert.deepEqual(roadLine({ x: 3, z: 2 }, { x: 1, z: 2 }), [
   { x: 2, z: 2 },
   { x: 1, z: 2 },
 ]);
-assert.equal(roadLine({ x: 1, z: 1 }, { x: 2, z: 2 }), null);
+assert.deepEqual(roadLine({x:1,z:1},{x:2,z:2}),[{x:1,z:1},{x:2,z:1},{x:2,z:2}]);
 assert.equal(roadLine({ x: 1, z: 3 }, { x: 1, z: 1 }).length, 3);
 const s = createSandbox(42);
 assert.equal(plan(s, "road", 50, 50), "");
@@ -21,8 +21,7 @@ assert.equal(s.projects.filter((p) => p.key === "road").length, 5);
 assert.ok(restore(save(s)));
 assert.equal(plan(s, "road", 57, 50), "");
 const before = JSON.stringify(s);
-assert.ok(planRoadLine(s, { x: 50, z: 50 }, { x: 51, z: 51 }));
-assert.equal(JSON.stringify(s), before);
+assert.equal(planRoadLine(s, { x: 50, z: 50 }, { x: 51, z: 51 }), "");
 assert.equal(plan(s, "house", 60, 50), "");
 const blocked = JSON.stringify(s);
 assert.ok(planRoadLine(s, { x: 58, z: 50 }, { x: 62, z: 50 }));

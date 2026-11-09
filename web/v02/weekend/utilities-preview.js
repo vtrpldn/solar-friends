@@ -58,13 +58,6 @@ export function createUtilitiesPreview(interactions = false, landSeed = 0) {
     });
   }
   const sys = syncInfrastructure(s, PROJECTS);
-  for (const [kind, from, to] of [
-    ["power", ids.solar_farm, -1],
-    ["irrigation", -1, ids.well],
-  ]) {
-    const error = connectUtility(s, kind, from, to);
-    if (error) throw new Error(error);
-  }
   for (const key of ["well", "workshop", "streetlight", "eco_toilet"]) {
     const error = connectUtility(s, "power", ids.solar_farm, ids[key]);
     if (error) throw new Error(error);
@@ -79,6 +72,8 @@ export function createUtilitiesPreview(interactions = false, landSeed = 0) {
   }
   for (const link of sys.links) link.work = link.required;
   sys.nodes[ids.solar_farm].charge = 24;
+  s.projects.find(p=>p.id===ids.house).solarUpgrade=true;
+  syncInfrastructure(s,PROJECTS);
   sys.nodes[ids.house].charge = 3;
   sys.nodes[ids.well].water = [30, 40, 0, 0];
   sys.nodes[ids.eco_toilet].water[3] = 10;

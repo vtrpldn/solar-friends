@@ -44,7 +44,10 @@ assert.equal(
 assert.ok(!sys.nodes[unfinished.id]);
 const link = (kind, from, to) =>
   sys.links.find((l) => l.kind === kind && l.from === from && l.to === to);
-assert.ok(link("irrigation", -1, well.id));
+assert.ok(!sys.links.some(l=>l.from===-1), 'no invisible river pumping');
+const pump=add('water-pump',46,50),groundwater=add('groundwater-well',47,50);
+autoConnectUtilities(s,PROJECTS);sys.nodes[groundwater.id].water[1]=40;
+assert.ok(link('irrigation',pump.id,well.id));
 assert.ok(link("fresh", well.id, home.id));
 assert.ok(link("greywater", home.id, reed.id));
 assert.ok(link("sewage", toilet.id, treatment.id));

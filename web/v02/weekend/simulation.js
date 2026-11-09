@@ -233,6 +233,13 @@ export function connectUtility(s, kind, from, to) {
   if (!error) wakeHelpers(s);
   return error;
 }
+export function committedMaterials(s) {
+  const totals={};
+  const add=items=>{for(const [id,n] of Object.entries(items||{}))totals[id]=(totals[id]||0)+n;};
+  for(const p of s.projects)if(p.work<PROJECTS[p.key].work)add(PROJECTS[p.key].materials);
+  for(const o of s.operations||[])if(!o.done&&!o.water)add(PROCESSES[o.recipe]?.input);
+  return totals;
+}
 export function queueProduction(s, site, recipe) {
   const p = s.projects.find((p) => p.id === Number(site) && !p.felled),
     def = PROCESSES[recipe];
@@ -243,16 +250,17 @@ export function queueProduction(s, site, recipe) {
     PROJECTS[p.key].kind !== def.kind
   )
     return "Choose a completed compatible building.";
+  if(recipe==='solar_upgrade' && p.solarUpgrade)return 'Rooftop solar is already installed.';
   s.operations ??= [];
   if (s.operations.length > 128)
     s.operations = [
       ...s.operations.filter((o) => !o.done),
       ...s.operations.filter((o) => o.done).slice(-32),
     ];
-  if (s.operations.some((o) => o.site === p.id && !o.done))
+  if (s.operations.some((o) => o.site === p.id && !o.done && !o.water))
     return "This site already has a job.";
   if ((p.readyAt || 0) > s.time)
-    return `Growing: ready in ${Math.ceil(p.readyAt - s.time)} seconds.`;
+    return `Growing: ready in ${Math.ceil((p.readyAt-s.time)*.45)} game minutes (affected by simulation speed).`;
   if (def.deposit && (p.extracted || 0) >= depositCapacity(s.landSeed,p,def))
     return "This deposit is exhausted.";
   for (const [id, n] of Object.entries(def.input))
@@ -326,9 +334,32 @@ export function queuePurification(s,site) {
   if(node.water[1]<1)return 'Bring untreated river water here first.';
   if(node.capacity[0]-node.water[0]<1)return 'Drinking-water storage is full.';
   s.operations??=[];
-  if(s.operations.some(o=>!o.done && o.site===site))return 'A resident job is already queued here.';
+  if(s.operations.some(o=>!o.done && o.water && o.site===site))return 'A water job is already queued here.';
   s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,water:{from:site,to:site,kind:'irrigation',amount:0,purify:true},work:0,phase:'process',done:false});
   wakeHelpers(s);return '';
+}
+export function queueSanitation(s,site) {
+  const n=ensureInfrastructure(s).nodes[site];
+  if(!n || n.water[2]+n.water[3]<1)return 'No waste to service.';
+  s.operations??=[];
+  if(s.operations.some(o=>!o.done && o.water && o.site===site))return 'A service job is already queued here.';
+  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,water:{from:site,to:site,kind:'sewage',amount:0,service:true},work:0,phase:'process',done:false});
+  wakeHelpers(s);return '';
+}
+export function maintainWater(s) {
+  const sys=ensureInfrastructure(s);
+  for(const n of Object.values(sys.nodes)) {
+    if(n.maintainFresh && n.capacity[0] && n.capacity[1] && n.water[0]<Math.min(24,n.capacity[0]) &&
+      !s.operations?.some(o=>!o.done && o.water && o.site===n.id)) {
+      if(n.water[1]>=1) queuePurification(s,n.id);
+      else {
+        const source=Object.values(sys.nodes).filter(a=>a.id!==n.id && ['groundwater-well','rain-barrel','water-pump'].includes(a.kind) && a.water[1]>=1)
+          .sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
+        queueWater(s,source?.id??-1,n.id,'irrigation');
+      }
+    }
+    if(n.maintainSanitation && n.water[2]+n.water[3]>=Math.max(4,(n.capacity[2]+n.capacity[3])*.5))queueSanitation(s,n.id);
+  }
 }
 function utilitySpot(s, node, r) {
   if (node.id === -1) return { x: node.x, z: node.z };
@@ -354,7 +385,7 @@ function utilitySpot(s, node, r) {
   }
   return p ? workSpot(s, r, p) : { x: s.stock.x - 1, z: s.stock.z + 1 };
 }
-function operationalWork(s, r, i, dt) {
+function operationalWork(s, r, i, dt, waterOnly = false) {
   const sys = ensureInfrastructure(s);
   const reserved = (op) =>
     s.people.some(
@@ -364,20 +395,12 @@ function operationalWork(s, r, i, dt) {
         !["rest", "town"].includes(other.action),
     );
   const eligible = (op) => {
-    if (op.done || reserved(op)) return false;
+    if (op.done || reserved(op) || (waterOnly && !op.water)) return false;
     if (op.water || op.phase === "return") return true;
     const node = sys.nodes[op.site],
       recipe = PROCESSES[op.recipe];
     if (!node?.enabled) {
       op.status = "Building switched off";
-      return false;
-    }
-    if (
-      ["workshop", "kitchen"].includes(recipe.kind) &&
-      node.power < 0.99 &&
-      !(recipe.kind === "kitchen" && (op.biogas || sys.biogas >= 0.2))
-    ) {
-      op.status = "Waiting for power";
       return false;
     }
     if (
@@ -399,6 +422,7 @@ function operationalWork(s, r, i, dt) {
     (o) => o.id === r.operation && eligible(o),
   );
   if (!op) op = (s.operations || []).find(eligible);
+  if (waterOnly && !op) return false;
   if (
     sys.links.some(
       (l) =>
@@ -453,6 +477,13 @@ function operationalWork(s, r, i, dt) {
   if (op.water) {
     const w = op.water,
       index = LIQUIDS.indexOf(w.kind);
+    if(w.service) {
+      const dest=utilitySpot(s,node,r);r.action='produce';op.status='Servicing sealed waste tanks';
+      if(!dest || !go(s,r,dest))return true;
+      op.work+=dt;r.energy=Math.max(0,r.energy-dt*.06);
+      if(op.work>=45){const amount=node.water[2]+node.water[3];node.water[2]=0;node.water[3]=0;sys.account.wasteRemoved=(sys.account.wasteRemoved||0)+amount;op.done=true;r.operation=null;say(s,`${r.name} serviced the sealed waste tanks for off-site treatment.`);}
+      return true;
+    }
     if(w.purify) {
       const dest=utilitySpot(s,node,r);
       if(!dest || !go(s,r,dest))return true;
@@ -471,6 +502,7 @@ function operationalWork(s, r, i, dt) {
         start = riverAccess(s.landSeed);
       } else start = utilitySpot(s, sys.nodes[w.from], r);
       if (!start) return false;
+      op.status = "Walking to collect untreated water";
       r.action = "fetch-water";
       if (!go(s, r, start)) return true;
       const dest = sys.nodes[w.to];
@@ -484,6 +516,7 @@ function operationalWork(s, r, i, dt) {
       op.phase = "deliver";
       r.target = null;
     }
+    op.status = "Carrying water to the reservoir";
     r.action = "carry";
     r.cargo = true;
     const dest = utilitySpot(s, node, r);
@@ -583,6 +616,7 @@ function operationalWork(s, r, i, dt) {
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if (op.work >= recipe.work) {
     if(recipe.kind==='wild-tree')p.felled=true;
+    if(op.recipe==='solar_upgrade')p.solarUpgrade=true;
     op.phase = "return";
     r.target = null;
     p.readyAt = s.time + (recipe.renew || 0);
@@ -649,6 +683,7 @@ export function beginArrival(s) {
 export function createWeekend(landSeed = 0) {
   return {
     version: 2,
+    homeEnergyVersion: 1,
     landSeed,
     elevationSeed: landSeed,
     terrainPads: [],
@@ -891,26 +926,21 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
       { id: ignore || -1, key, x, z, rotation },
     ],
   };
-  for (const p of proposed.projects.filter(
-    (p) => !p.natural && !p.felled && !["road", "bridge"].includes(p.key),
-  ))
-    for (const dz of [0, 1])
-      if (
-        !route(proposed, s.stock, {
-          x: PROJECTS[p.key].kind === "hydro" ? p.x + footprint(p)[0] : p.x - 1,
-          z: p.z + dz,
-        })
-      )
-        return "Leave a walking route along the left edge of every project.";
+  for (const p of proposed.projects.filter(p=>!p.natural&&!p.felled&&!['road','bridge'].includes(p.key))) {
+    const [pw,pd]=footprint(p),edges=[];
+    for(let dz=0;dz<pd;dz++)edges.push({x:p.x-1,z:p.z+dz},{x:p.x+pw,z:p.z+dz});
+    for(let dx=0;dx<pw;dx++)edges.push({x:p.x+dx,z:p.z-1},{x:p.x+dx,z:p.z+pd});
+    if(!edges.some(spot=>!occupied(proposed,spot.x,spot.z)&&route(proposed,s.stock,spot)))
+      return `${PROJECTS[p.key].name} at (${p.x}, ${p.z}) would have no reachable side. Leave a one-cell walking gap.`;
+  }
   for (const p of proposed.projects) {
     if (
-      p.rotation &&
       ["home", "workshop", "kitchen", "wash-station", "eco_toilet"].includes(
         PROJECTS[p.key].kind,
       ) &&
       !route(proposed, s.stock, buildingFront(p))
     )
-      return "Leave a walking route to the building entrance.";
+      return `${PROJECTS[p.key].name} entrance at (${buildingFront(p).x}, ${buildingFront(p).z}) is blocked. Rotate it or leave a walking gap.`;
   }
   return "";
 }
@@ -1673,6 +1703,7 @@ export function tick(s, dt) {
   s.time += dt;
   autoConnectUtilities(s, PROJECTS);
   infrastructureStep(s, PROJECTS, dt);
+  maintainWater(s);
   for (const p of s.projects) {
     if (!p.repeat || s.operations?.some((o) => o.site === p.id && !o.done))
       continue;
@@ -1946,6 +1977,8 @@ export function tick(s, dt) {
     ) {
       if (operationalWork(s, r, i, dt)) continue;
     }
+    // Essential hauling and sanitation must not wait behind a house construction.
+    if(!r.cargo && s.operations?.some(o=>!o.done&&o.water) && operationalWork(s,r,i,dt,true))continue;
     let p = s.projects.find(
       (p) => p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
     );
@@ -2172,18 +2205,9 @@ export function restore(text) {
       s.nextId <= Math.max(0, ...s.projects.map((p) => p.id))
     )
       return null;
-    if (
-      s.stage !== "arrival" &&
-      !(s.camp === "custom"
-        ? s.campSite &&
-          !campPlacementError(
-            { ...s, projects: [] },
-            s.campSite.x,
-            s.campSite.z,
-          )
-        : CAMPS.some((c) => c.id === s.camp))
-    )
-      return null;
+    if (s.stage !== 'arrival' && !(s.camp === 'custom'
+      ? s.campSite && [s.campSite.x,s.campSite.z].every(v=>Number.isInteger(v)&&v>=CELL_MIN&&v<=CELL_MAX)
+      : CAMPS.some(c=>c.id===s.camp))) return null;
     if (s.materials)
       for (const id of Object.keys(MATERIALS))
         if (id !== "wood" && s.materials[id] === undefined) s.materials[id] = 0;
@@ -2219,10 +2243,22 @@ export function restore(text) {
       s.livestockUnits = 1;
     }
     if (s.livestockUnits !== 1) return null;
+    // Homes in older saves already paid for their rooftop equipment.
+    if (!s.homeEnergyVersion) {
+      for (const p of s.projects) if (PROJECTS[p.key]?.kind === 'home') {
+        p.solarUpgrade = true;
+        const loads = requiredLoads(p.key), units=Math.ceil(PROJECTS[p.key].size[0]/2);
+        const extra=['panels','batteries','electrical'].reduce((sum,id)=>sum+Math.ceil(units/MATERIALS[id].batch),0);
+        if (p.delivered > loads && p.delivered <= loads + extra) p.delivered = loads;
+        if (p.staged && p.delivered + p.staged <= loads + extra) p.staged = Math.min(p.staged, loads - p.delivered);
+      }
+      s.homeEnergyVersion = 1;
+    }
     for (const p of s.projects) {
+      const recipe = {...PROJECTS[p.key]?.materials, ...(p.solarUpgrade ? Object.fromEntries(['panels','batteries','electrical'].map(id=>[id,Math.ceil(PROJECTS[p.key].size[0]/2)])) : {})};
       if (p.pendingMaterials && (p.work !== 0 || p.delivered !== 0 ||
           !Object.keys(p.pendingMaterials).length || Object.entries(p.pendingMaterials).some(([id,n]) =>
-            !Number.isInteger(n) || n <= 0 || !PROJECTS[p.key]?.materials[id] || n > PROJECTS[p.key].materials[id]))) return null;
+            !Number.isInteger(n) || n <= 0 || !recipe[id] || n > recipe[id]))) return null;
     }
     if (s.trip?.project !== undefined && !s.projects.some(p => p.id === s.trip.project && p.pendingMaterials)) return null;
     if (s.trip?.projects !== undefined && (!Array.isArray(s.trip.projects) ||
@@ -2255,17 +2291,10 @@ export function restore(text) {
         return null;
       ids.add(p.id);
       keys.add(p.key);
-      if (!PROJECTS[p.key].natural && !p.felled &&
-        placementError(
-          { ...s, projects: s.projects.filter((q) => q !== p) },
-          p.key,
-          p.x,
-          p.z,
-          null,
-          p.rotation || 0,
-        )
-      )
-        return null;
+      // Existing buildings are not new blueprints: later neighbours, roads and
+      // terraforming must not invalidate an otherwise well-formed saved village.
+      if (![p.x,p.z].every(Number.isInteger) || p.x<CELL_MIN || p.z<CELL_MIN ||
+          p.x+footprint(p)[0]>CELL_MAX+1 || p.z+footprint(p)[1]>CELL_MAX+1) return null;
     }
     for (let i = 0; i < 5; i++) {
       const r = s.people[i];

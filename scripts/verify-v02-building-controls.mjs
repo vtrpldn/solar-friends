@@ -26,9 +26,9 @@ for(const key of ['streetlight','solar_farm','hydro','house','workshop','well','
 const barrel=node('rain-barrel');
 assert(!canSwitchBuilding(sys,barrel));
 sys.links.push({from:barrel.id,to:node('garden').id,kind:'irrigation',enabled:false,work:1,required:1});
-assert(hasPowerService(sys,barrel),'connected pump needs electricity even when idle');
-assert(canSwitchBuilding(sys,barrel));
-assert(switchBuilding(sys,barrel.id));
+assert(!hasPowerService(sys,barrel),'a passive pipe must not turn a barrel into an electric pump');
+assert(!canSwitchBuilding(sys,barrel));
+assert(!switchBuilding(sys,barrel.id));
 assert(!canSwitchBuilding(sys,sys.nodes[0]),'camp has a separate grid control');
 assert(!canSwitchBuilding(sys,undefined));
 assert.equal(switchBuilding(sys,99999),false);

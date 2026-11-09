@@ -3,7 +3,7 @@ import { ensureInfrastructure, infrastructureStep, GRID_POWER, validInfrastructu
 import { autoConnectUtilities } from '../web/v02/weekend/auto-utilities.js';
 const defs = { shop: {kind:'workshop',work:1}, solar: {kind:'solar_farm',work:1} };
 function fixture() {
-  const s = {stock:{x:32,z:20},money:100,time:0,people:[],projects:[{id:1,key:'shop',work:1,x:33,z:21}]};
+  const s = {stock:{x:32,z:20},money:100,time:1600,people:[],projects:[{id:1,key:'shop',work:1,x:33,z:21}]};
   autoConnectUtilities(s,defs);
   return s;
 }
@@ -26,7 +26,7 @@ assert.equal(s.infrastructure.grid.importing,0);
 s.infrastructure.grid.enabled=true;s.money=0;
 infrastructureStep(s,defs,60);
 assert.equal(s.money,0);assert.equal(s.infrastructure.nodes[1].power,0);
-s.money=100;s.projects.push({id:2,key:'solar',work:1,x:35,z:21});
+s.money=100;s.time=0;s.projects.push({id:2,key:'solar',work:1,x:35,z:21});
 autoConnectUtilities(s,defs);
 infrastructureStep(s,defs,60);
 assert.equal(s.money,100,'renewables cover demand before importing');
@@ -37,7 +37,7 @@ assert.equal(s.money,100);
 const empty=fixture();empty.projects=[];empty.infrastructure=undefined;
 autoConnectUtilities(empty,defs);infrastructureStep(empty,defs,60);
 assert.equal(empty.money,100,'no standing charge');
-const limited=fixture();limited.projects=Array.from({length:10},(_,i)=>({id:i+1,key:'shop',work:1,x:i+30,z:21}));
+const limited=fixture();limited.projects=Array.from({length:180},(_,i)=>({id:i+1,key:'shop',work:1,x:i+30,z:21}));
 limited.infrastructure=undefined;autoConnectUtilities(limited,defs);infrastructureStep(limited,defs,60);
 assert(limited.infrastructure.grid.importing<=4);
 assert(Object.values(limited.infrastructure.nodes).some(n=>n.demand>0&&!n.power));
