@@ -1,0 +1,700 @@
+{
+  "seed": 42,
+  "startingMoney": 220,
+  "endingMoney": 362.0215170902716,
+  "finance": {
+    "income": 14832,
+    "expenses": 14689.97848291528,
+    "categories": {
+      "construction": -14490.25,
+      "electricity": -103.72848299407258,
+      "purchases": -96,
+      "sales": 14832
+    }
+  },
+  "time": 175420.4000057229,
+  "day": 56,
+  "built": [
+    {
+      "key": "grove",
+      "name": "Banana grove",
+      "x": 26,
+      "z": -4,
+      "rotation": 0,
+      "work": 220,
+      "required": 220
+    },
+    {
+      "key": "water",
+      "name": "Water storage",
+      "x": 36,
+      "z": -4,
+      "rotation": 0,
+      "work": 267,
+      "required": 267
+    },
+    {
+      "key": "toilet",
+      "name": "Private toilet",
+      "x": 40,
+      "z": -4,
+      "rotation": 0,
+      "work": 534,
+      "required": 534
+    },
+    {
+      "key": "gathering",
+      "name": "Gathering place",
+      "x": 44,
+      "z": -4,
+      "rotation": 0,
+      "work": 134,
+      "required": 134
+    },
+    {
+      "key": "supply-1",
+      "name": "Bamboo stand",
+      "x": 26,
+      "z": 1,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "supply-1",
+      "name": "Bamboo stand",
+      "x": 30,
+      "z": 1,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "supply-1",
+      "name": "Bamboo stand",
+      "x": 33,
+      "z": 1,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "supply-1",
+      "name": "Bamboo stand",
+      "x": 36,
+      "z": 1,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "supply-1",
+      "name": "Bamboo stand",
+      "x": 40,
+      "z": 1,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "supply-1",
+      "name": "Bamboo stand",
+      "x": 44,
+      "z": 1,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "grove",
+      "name": "Banana grove",
+      "x": 30,
+      "z": -4,
+      "rotation": 0,
+      "work": 220,
+      "required": 220
+    },
+    {
+      "key": "warehouse",
+      "name": "Storage house",
+      "x": 23,
+      "z": 5,
+      "rotation": 0,
+      "work": 1430,
+      "required": 1430
+    },
+    {
+      "key": "house",
+      "name": "Limewashed house",
+      "x": 28,
+      "z": 5,
+      "rotation": 0,
+      "work": 616,
+      "required": 616
+    },
+    {
+      "key": "kitchen",
+      "name": "Community kitchen",
+      "x": 32,
+      "z": 5,
+      "rotation": 0,
+      "work": 528,
+      "required": 528
+    },
+    {
+      "key": "workshop",
+      "name": "Workshop",
+      "x": 38,
+      "z": 5,
+      "rotation": 0,
+      "work": 726,
+      "required": 726
+    },
+    {
+      "key": "groundwater-well",
+      "name": "Water well",
+      "x": 43,
+      "z": 5,
+      "rotation": 0,
+      "work": 792,
+      "required": 792
+    },
+    {
+      "key": "shed",
+      "name": "Open timber shed",
+      "x": 23,
+      "z": 9,
+      "rotation": 0,
+      "work": 330,
+      "required": 330
+    },
+    {
+      "key": "garden",
+      "name": "Vegetable garden",
+      "x": 28,
+      "z": 9,
+      "rotation": 0,
+      "work": 220,
+      "required": 220
+    },
+    {
+      "key": "greenhouse",
+      "name": "Greenhouse",
+      "x": 32,
+      "z": 9,
+      "rotation": 0,
+      "work": 374,
+      "required": 374
+    },
+    {
+      "key": "compost",
+      "name": "Compost station",
+      "x": 36,
+      "z": 9,
+      "rotation": 0,
+      "work": 154,
+      "required": 154
+    },
+    {
+      "key": "supply-5",
+      "name": "Timber workbench",
+      "x": 42,
+      "z": 9,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "water-pump",
+      "name": "Water pump",
+      "x": 46,
+      "z": 5,
+      "rotation": 0,
+      "work": 286,
+      "required": 286
+    },
+    {
+      "key": "home-family",
+      "name": "Family house",
+      "x": 45,
+      "z": -22,
+      "rotation": 0,
+      "work": 924,
+      "required": 924
+    },
+    {
+      "key": "home-veranda",
+      "name": "Veranda house",
+      "x": 45,
+      "z": -16,
+      "rotation": 0,
+      "work": 616,
+      "required": 616
+    },
+    {
+      "key": "home-gable",
+      "name": "Gabled house",
+      "x": 40,
+      "z": -22,
+      "rotation": 0,
+      "work": 616,
+      "required": 616
+    },
+    {
+      "key": "home-courtyard",
+      "name": "Terrace house",
+      "x": 40,
+      "z": -16,
+      "rotation": 0,
+      "work": 616,
+      "required": 616
+    },
+    {
+      "key": "supply-0",
+      "name": "Managed timber",
+      "x": 23,
+      "z": 14,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "home-shared",
+      "name": "Shared adobe house",
+      "x": 50,
+      "z": -16,
+      "rotation": 0,
+      "work": 1936,
+      "required": 1936
+    },
+    {
+      "key": "adobe-gable",
+      "name": "Adobe gabled house",
+      "x": 50,
+      "z": -22,
+      "rotation": 0,
+      "work": 968,
+      "required": 968
+    },
+    {
+      "key": "adobe-veranda",
+      "name": "Adobe veranda house",
+      "x": 55,
+      "z": -16,
+      "rotation": 0,
+      "work": 968,
+      "required": 968
+    },
+    {
+      "key": "shelter",
+      "name": "Basic shelter",
+      "x": 28,
+      "z": 14,
+      "rotation": 0,
+      "work": 1067,
+      "required": 1067
+    },
+    {
+      "key": "well",
+      "name": "Cistern",
+      "x": 32,
+      "z": 14,
+      "rotation": 0,
+      "work": 352,
+      "required": 352
+    },
+    {
+      "key": "rain-barrel",
+      "name": "Rainwater barrel",
+      "x": 20,
+      "z": -27,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "watering-can",
+      "name": "Watering can",
+      "x": 23,
+      "z": -27,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "wheelbarrow",
+      "name": "Wheelbarrow",
+      "x": 26,
+      "z": -27,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "tool-rack",
+      "name": "Garden tool rack",
+      "x": 39,
+      "z": -27,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "seedling-bench",
+      "name": "Seedling bench",
+      "x": 42,
+      "z": -27,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "woodpile",
+      "name": "Seasoned firewood",
+      "x": 45,
+      "z": -27,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "picnic-table",
+      "name": "Picnic table",
+      "x": 55,
+      "z": -27,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "garden-bench",
+      "name": "Garden bench",
+      "x": 20,
+      "z": -21,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "clothesline",
+      "name": "Clothesline",
+      "x": 23,
+      "z": -21,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "hammock",
+      "name": "Hammock",
+      "x": 26,
+      "z": -21,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "bicycle",
+      "name": "Bicycle",
+      "x": 20,
+      "z": -15,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "produce-crates",
+      "name": "Produce crates",
+      "x": 23,
+      "z": -15,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "wayfinding-sign",
+      "name": "Wayfinding sign",
+      "x": 26,
+      "z": -15,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "wash-station",
+      "name": "Outdoor wash station",
+      "x": 55,
+      "z": -8,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "farm-gate",
+      "name": "Farm gate",
+      "x": 50,
+      "z": -8,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "fire-circle",
+      "name": "Fire circle",
+      "x": 45,
+      "z": -8,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "canvas-tent-teal",
+      "name": "Sage canvas tent",
+      "x": 40,
+      "z": -8,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "canvas-tent-ochre",
+      "name": "Ochre canvas tent",
+      "x": 36,
+      "z": -8,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "rain-tent",
+      "name": "Shared rain tent",
+      "x": 20,
+      "z": -2,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "covered-stores",
+      "name": "Covered supply rack",
+      "x": 20,
+      "z": 1,
+      "rotation": 0,
+      "work": 230,
+      "required": 230
+    },
+    {
+      "key": "tarp-stores",
+      "name": "Tarp-covered supplies",
+      "x": 20,
+      "z": 7,
+      "rotation": 0,
+      "work": 85,
+      "required": 85
+    },
+    {
+      "key": "streetlight",
+      "name": "Street light",
+      "x": 55,
+      "z": -2,
+      "rotation": 0,
+      "work": 110,
+      "required": 110
+    },
+    {
+      "key": "road",
+      "name": "Village road",
+      "x": 48,
+      "z": -2,
+      "rotation": 0,
+      "work": 20,
+      "required": 20
+    },
+    {
+      "key": "banana_treatment",
+      "name": "Banana treatment bed",
+      "x": 36,
+      "z": 14,
+      "rotation": 0,
+      "work": 638,
+      "required": 638
+    },
+    {
+      "key": "wetland",
+      "name": "Reed bed",
+      "x": 40,
+      "z": 14,
+      "rotation": 0,
+      "work": 396,
+      "required": 396
+    },
+    {
+      "key": "biodigester",
+      "name": "Biodigester",
+      "x": 45,
+      "z": 14,
+      "rotation": 0,
+      "work": 440,
+      "required": 440
+    },
+    {
+      "key": "eco_toilet",
+      "name": "Ecological toilet",
+      "x": 51,
+      "z": 14,
+      "rotation": 0,
+      "work": 506,
+      "required": 506
+    },
+    {
+      "key": "orchard",
+      "name": "Fruit orchard",
+      "x": 20,
+      "z": 17,
+      "rotation": 0,
+      "work": 308,
+      "required": 308
+    },
+    {
+      "key": "square",
+      "name": "Community square",
+      "x": 51,
+      "z": 20,
+      "rotation": 0,
+      "work": 528,
+      "required": 528
+    },
+    {
+      "key": "exercise-garden",
+      "name": "Exercise garden",
+      "x": 51,
+      "z": 24,
+      "rotation": 0,
+      "work": 484,
+      "required": 484
+    },
+    {
+      "key": "solar_farm",
+      "name": "Solar farm",
+      "x": 36,
+      "z": 20,
+      "rotation": 0,
+      "work": 308,
+      "required": 308
+    },
+    {
+      "key": "supply-6",
+      "name": "Battery station",
+      "x": 40,
+      "z": 20,
+      "rotation": 0,
+      "work": 90,
+      "required": 90
+    },
+    {
+      "key": "coop",
+      "name": "Chicken coop",
+      "x": 23,
+      "z": 29,
+      "rotation": 0,
+      "work": 220,
+      "required": 220
+    },
+    {
+      "key": "apiary",
+      "name": "Stingless bee apiary",
+      "x": 30,
+      "z": 29,
+      "rotation": 0,
+      "work": 132,
+      "required": 132
+    },
+    {
+      "key": "goat-pasture-empty",
+      "name": "Empty goat pasture",
+      "x": 42,
+      "z": 26,
+      "rotation": 0,
+      "work": 352,
+      "required": 352
+    },
+    {
+      "key": "reading-room",
+      "name": "Village reading room",
+      "x": 33,
+      "z": 26,
+      "rotation": 0,
+      "work": 1122,
+      "required": 1122
+    },
+    {
+      "key": "outdoor-classroom",
+      "name": "Outdoor classroom",
+      "x": 36,
+      "z": 34,
+      "rotation": 0,
+      "work": 1188,
+      "required": 1188
+    },
+    {
+      "key": "volleyball-court",
+      "name": "Volleyball court",
+      "x": 51,
+      "z": 29,
+      "rotation": 0,
+      "work": 748,
+      "required": 748
+    },
+    {
+      "key": "bridge",
+      "name": "Timber footbridge",
+      "x": 3,
+      "z": 29,
+      "rotation": 0,
+      "work": 1056,
+      "required": 1056
+    },
+    {
+      "key": "hydro",
+      "name": "River generator",
+      "x": 10,
+      "z": 10,
+      "rotation": 0,
+      "work": 396,
+      "required": 396
+    },
+    {
+      "key": "community-hall",
+      "name": "Community hall",
+      "x": 41,
+      "z": 31,
+      "rotation": 0,
+      "work": 1936,
+      "required": 1936
+    },
+    {
+      "key": "goat_pasture",
+      "name": "Goat pasture",
+      "x": 24,
+      "z": 32,
+      "rotation": 0,
+      "work": 396,
+      "required": 396
+    }
+  ],
+  "hourlySamples": 504,
+  "sampleDays": [
+    35,
+    56
+  ],
+  "minimumNeeds": {
+    "hunger": 13.01375000002193,
+    "bladder": 8.775599999998835,
+    "bowels": 13.276570000004902,
+    "hygiene": 14.398660000012761,
+    "social": 14.838502500020873,
+    "fun": 24.2668249999524
+  },
+  "zeroWaterSamples": 0,
+  "negativeMoneySamples": 0
+}

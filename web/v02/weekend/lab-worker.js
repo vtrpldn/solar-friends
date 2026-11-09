@@ -23,7 +23,7 @@ onmessage=({data:m})=>{try{
  else if(!runner)throw Error('Start a lab village first.');
  else if(m.type==='pause')runner.paused=!runner.paused;
  else if(m.type==='speed'){if(![1,4,16,32,64,128,256,512,1024].includes(m.value))throw Error('Unsupported speed');runner.speed=m.value;runner.debt=0;}
- else if(m.type==='save')postMessage({type:'save',raw:save(runner.state)});
+ else if(m.type==='save')postMessage({type:'save',raw:save(runner.state),silent:m.silent});
  else if(m.type==='export')postMessage({type:'export',report:{version:1,seed:runner.state.landSeed,step:.1,samples,events,state:runner.state}});
  else {
   const s=runner.state;let error='';
@@ -39,10 +39,10 @@ onmessage=({data:m})=>{try{
   else if(m.type==='food-policy')s.emergencyFood=s.emergencyFood===false;
   else if(m.type==='grid')s.infrastructure.grid.enabled=!s.infrastructure.grid.enabled;
   else throw Error('Unknown lab action');
-  event(`${m.type} ${m.key||m.recipe||m.material||m.site||''}: ${error||'accepted'}`);postMessage({type:'notice',text:error||'Order accepted.'});
+  event(`${m.type} ${m.key||m.recipe||m.material||m.site||''}: ${error||'accepted'}`);postMessage({type:'notice',text:error||'Order accepted.',action:m.type,state:['sell','buy'].includes(m.type)?s:undefined});
  }
  snapshot();
-}catch(e){postMessage({type:'notice',text:e.message});}};
+}catch(e){postMessage({type:'notice',text:e.message,action:m.type,state:runner?.state});}};
 function loop(){const now=performance.now(),elapsed=(now-last)/1000;last=now;
  if(runner){advanced+=runner.advance(elapsed,24);record();
  if(now-measuredAt>=1000){actual=advanced/((now-measuredAt)/1000);advanced=0;measuredAt=now;}

@@ -3,7 +3,7 @@ import {riverCenter} from './river-layout.js';
 import {CELL_MIN,CELL_MAX} from './map-size.js';
 const $=id=>document.getElementById(id),worker=new Worker(new URL('./lab-worker.js',import.meta.url),{type:'module'}),KEY='solar-friends-isolated-128x-lab-1';
 let s,selected=0,placing=null,rotation=0,center={x:32,z:20},scale=16,pointer=null,drag=null,inspectorKey='',lastSave=0;
-const send=(type,args={})=>worker.postMessage({type,...args});
+const send=(type,args={})=>{if(type==='sell'||type==='buy'){$('sell').disabled=true;$('buy').disabled=true;}worker.postMessage({type,...args});};
 const notice=text=>$('notice').textContent=text;
 const opts=(element,items)=>{element.replaceChildren(...items.map(([value,text])=>{const o=document.createElement('option');o.value=value;o.textContent=text;return o;}));};
 const buildOptions=()=>opts($('building'),Object.entries(PROJECTS).filter(([k,d])=>!d.natural&&d.name.toLowerCase().includes($('search').value.toLowerCase())).map(([k,d])=>[k,`${d.name} · ${d.size.join('×')}`]));buildOptions();$('search').oninput=buildOptions;
@@ -61,6 +61,6 @@ canvas.onpointerup=e=>{if(!drag?.moved&&s){const p=cell(e);if(placing)send('buil
 canvas.onwheel=e=>{e.preventDefault();scale=Math.min(45,Math.max(4,scale*(e.deltaY>0?.9:1.1)));draw();};
 document.onkeydown=e=>{if(['INPUT','SELECT'].includes(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();send('pause');}if(e.key.toLowerCase()==='r')rotate();if(e.key==='Escape'){placing=null;notice('Placement cancelled.');draw();}};
 worker.onerror=e=>notice('Simulation worker failed: '+e.message);
-worker.onmessage=({data:m})=>{if(m.type==='notice')notice(m.text);if(m.type==='save'){localStorage.setItem(KEY,m.raw);notice('Lab saved. Normal-game saves untouched.');}if(m.type==='export'){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(m.report,null,2)],{type:'application/json'}));a.href=url;a.download='solar-friends-balance-evidence.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
- if(m.type==='state'){const first=!s;s=m.state;if(first)center={...s.stock};$('pause').textContent=m.paused?'Resume':'Pause';$('speed').value=m.speed;$('performance').textContent=`Actual ${m.actual.toFixed(1)}× / target ${m.speed}×${m.backlog>1?' · CPU limited':''}`;render();if(Date.now()-lastSave>10000){send('save');lastSave=Date.now();}}};
+worker.onmessage=({data:m})=>{if(m.type==='notice'){notice(m.text);if(m.action==='sell'||m.action==='buy'){if(m.state){s=m.state;render();}$('sell').disabled=false;$('buy').disabled=false;}}if(m.type==='save'){localStorage.setItem(KEY,m.raw);if(!m.silent)notice('Lab saved. Normal-game saves untouched.');}if(m.type==='export'){const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(m.report,null,2)],{type:'application/json'}));a.href=url;a.download='solar-friends-balance-evidence.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+ if(m.type==='state'){const first=!s;s=m.state;if(first)center={...s.stock};$('pause').textContent=m.paused?'Resume':'Pause';$('speed').value=m.speed;$('performance').textContent=`Actual ${m.actual.toFixed(1)}× / target ${m.speed}×${m.backlog>1?' · CPU limited':''}`;render();if(Date.now()-lastSave>10000){send('save',{silent:true});lastSave=Date.now();}}};
 window.onresize=draw;

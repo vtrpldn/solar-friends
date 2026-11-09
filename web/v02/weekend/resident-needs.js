@@ -38,10 +38,12 @@ function assign(s,r,kind,spot,details={}) {
 }
 // Called before movement so an unladen resident can stop heading to a job.
 export function chooseNeed(s,r,i,api) {
+ const physical=['hunger','bladder','bowels'];
+ if(r.needTask && !physical.includes(r.needTask.kind) && physical.some(k=>ensureNeeds(r)[k]<10))cancelNeed(s,r);
  if(r.needTask && s.time-r.needTask.created>240){cancelNeed(s,r);r.needRetryAt=s.time+15;}
  if(r.needTask || r.tentPhase || r.cargo || (r.operation && ['return','deliver'].includes(s.operations?.find(o=>o.id===r.operation)?.phase)) || r.action==='town' || s.stage!=='playing' || (r.energy<25 && Math.min(ensureNeeds(r).hunger,ensureNeeds(r).bladder,ensureNeeds(r).bowels)>=15) || (r.needRetryAt||0)>s.time)return;
  const n=ensureNeeds(r,i);
- const pending=NEED_KEYS.filter(k=>n[k]<(k==='social'||k==='fun'?35:30)).sort((a,b)=>n[a]-n[b]);
+ const pending=NEED_KEYS.filter(k=>(r.energy>=25 || physical.includes(k)) && n[k]<(k==='social'||k==='fun'?35:30)).sort((a,b)=>n[a]-n[b]);
  if(!pending.length){r.needBlocked=null;return;}
  const nodes=Object.values(s.infrastructure.nodes);
  const free=node=>!s.people.some(p=>p!==r && p.needTask?.site===node.id);
