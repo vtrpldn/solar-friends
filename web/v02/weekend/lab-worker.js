@@ -7,7 +7,7 @@ const event=text=>{events.push({time:runner?.state.time||0,text});if(events.leng
 function start(seed,raw) {
  const s=raw?restore(raw):createWeekend(seed);
  if(!s)throw Error('Lab save rejected; existing data has not been replaced.');
- if(!raw){chooseCamp(s,'shade');ensureNaturalLand(s,PROJECTS);}
+ if(!raw){chooseCamp(s,'entrance');ensureNaturalLand(s,PROJECTS);}
  syncInfrastructure(s,PROJECTS);enableFastNavigation(s);runner=new LabRunner(s,tick);samples=[];events=[];lastHour=-1;event(raw?'Loaded isolated lab save':'New story run');
 }
 function snapshot(){if(runner)postMessage({type:'state',state:runner.state,paused:runner.paused,speed:runner.speed,actual,backlog:runner.debt});}
@@ -22,7 +22,7 @@ onmessage=({data:m})=>{try{
  else if(m.type==='load')start(0,m.raw);
  else if(!runner)throw Error('Start a lab village first.');
  else if(m.type==='pause')runner.paused=!runner.paused;
- else if(m.type==='speed'){if(![1,4,16,32,64,128].includes(m.value))throw Error('Unsupported speed');runner.speed=m.value;runner.debt=0;}
+ else if(m.type==='speed'){if(![1,4,16,32,64,128,256,512,1024].includes(m.value))throw Error('Unsupported speed');runner.speed=m.value;runner.debt=0;}
  else if(m.type==='save')postMessage({type:'save',raw:save(runner.state)});
  else if(m.type==='export')postMessage({type:'export',report:{version:1,seed:runner.state.landSeed,step:.1,samples,events,state:runner.state}});
  else {
@@ -36,6 +36,7 @@ onmessage=({data:m})=>{try{
   else if(m.type==='purify')error=queuePurification(s,m.site);
   else if(m.type==='service')error=queueSanitation(s,m.site);
   else if(m.type==='maintain'){const n=s.infrastructure.nodes[m.site];if(!n)throw Error('No completed water facility here.');n[m.field]=!n[m.field];}
+  else if(m.type==='food-policy')s.emergencyFood=s.emergencyFood===false;
   else if(m.type==='grid')s.infrastructure.grid.enabled=!s.infrastructure.grid.enabled;
   else throw Error('Unknown lab action');
   event(`${m.type} ${m.key||m.recipe||m.material||m.site||''}: ${error||'accepted'}`);postMessage({type:'notice',text:error||'Order accepted.'});

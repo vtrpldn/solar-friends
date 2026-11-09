@@ -14,16 +14,20 @@ $('save').onclick=()=>send('save');$('export').onclick=()=>send('export');$('pau
 $('place').onclick=()=>{placing=$('building').value;notice(`Click a map cell for ${PROJECTS[placing].name}. R rotates; Escape cancels.`);draw();};
 const rotate=()=>{rotation=(rotation+1)%4;$('rotate').textContent=`Rotate · ${rotation*90}°`;draw();};$('rotate').onclick=rotate;
 $('camp').onclick=()=>{if(s){center={...s.stock};selected=0;placing=null;inspectorKey='';render();}};
+$('sites').onchange=()=>{selected=Number($('sites').value);const p=s.projects.find(p=>p.id===selected);if(p)center={x:p.x,z:p.z};inspectorKey='';render();};
+$('material').onchange=render;
 $('buy').onclick=()=>send('buy',{material:$('material').value});$('sell').onclick=()=>send('sell',{material:$('material').value});
 function button(parent,text,type,args={}){const b=document.createElement('button');b.textContent=text;b.onclick=()=>send(type,args);parent.append(b);}
 function line(parent,text){const p=document.createElement('p');p.textContent=text;parent.append(p);}
 function render(){if(!s)return;
+ const built=new Set(s.projects.filter(p=>!p.natural&&p.work>=PROJECTS[p.key].work).map(p=>p.key));$('catalog-status').textContent=`Built ${built.size}/${Object.values(PROJECTS).filter(d=>!d.natural).length} building types · ${s.projects.filter(p=>!p.natural&&p.work<PROJECTS[p.key].work).length} construction projects`;
  const minutes=540+Math.floor(s.time*.45),nodes=Object.values(s.infrastructure?.nodes||{});
  $('clock').textContent=`Day ${1+Math.floor(minutes/1440)} · ${String(Math.floor(minutes/60)%24).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
  $('totals').textContent=`R$${s.money.toFixed(2)} · ${s.wood} timber · ${s.materials.meals} meals + ${s.materials.food} ingredients · ${nodes.reduce((n,a)=>n+a.water[0],0).toFixed(0)} clean water · Grid R$${s.infrastructure.grid.spent.toFixed(2)} total`;
  $('trade').textContent=`Available: ${$('material').value==='wood'?s.wood:s.materials[$('material').value]} · ${s.trip?'Town pickup in progress':'Car available'}`;
+ const siteList=[['0','Camp stores'],...s.projects.filter(p=>!p.felled).map(p=>[String(p.id),`${PROJECTS[p.key].name} #${p.id} (${p.x}, ${p.z})`])];if($('sites').options.length!==siteList.length){opts($('sites'),siteList);}$('sites').value=selected;
  const p=s.projects.find(p=>p.id===selected),n=s.infrastructure.nodes[selected],ops=s.operations?.filter(o=>o.site===selected&&!o.done)||[];
- const key=JSON.stringify([selected,p?.work,p?.repeat,p?.readyAt,n?.water.map(v=>Math.floor(v)),n?.maintainFresh,n?.maintainSanitation,ops.map(o=>[o.id,o.status]),Math.floor(s.time/20),s.infrastructure.grid.enabled]);
+ const key=JSON.stringify([selected,p?.work,p?.repeat,p?.readyAt,n?.water.map(v=>Math.floor(v)),n?.maintainFresh,n?.maintainSanitation,ops.map(o=>[o.id,o.status]),Math.floor(s.time/20),s.infrastructure.grid.enabled,s.emergencyFood]);
  if(key!==inspectorKey){inspectorKey=key;const panel=$('inspect');panel.replaceChildren();$('selection').textContent=selected===0?'Camp stores':p?`${PROJECTS[p.key].name} #${p.id}`:'Select a building';
  if(p){line(panel,`(${p.x}, ${p.z}) · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores · ${Math.round(100*p.work/PROJECTS[p.key].work)}% built`);
  for(const [recipe,d]of Object.entries(PROCESSES).filter(([,d])=>d.kind===PROJECTS[p.key].kind)){button(panel,d.name,'produce',{site:p.id,recipe});if(Object.keys(d.output).length)button(panel,p.repeat===recipe?'Stop repeating':'Keep 24: '+d.name,'repeat',{site:p.id,recipe});}
@@ -33,6 +37,7 @@ function render(){if(!s)return;
  if(n.capacity[0]&&n.capacity[1]){button(panel,'Purify by hand','purify',{site:selected});button(panel,`Drinking reserve: ${n.maintainFresh?'on':'off'}`,'maintain',{site:selected,field:'maintainFresh'});}
  if(n.capacity[2]||n.capacity[3]){button(panel,'Service waste','service',{site:selected});button(panel,`Sanitation upkeep: ${n.maintainSanitation?'on':'off'}`,'maintain',{site:selected,field:'maintainSanitation'});}}
  for(const o of ops)line(panel,o.status||'Queued');
+ if(selected===0)button(panel,`Emergency food purchases: ${s.emergencyFood===false?'off':'on'}`,'food-policy');
  if(selected===0)button(panel,`Grid: ${s.infrastructure.grid.enabled?'connected':'disconnected'}`,'grid');
  }
  $('residents').replaceChildren();for(const r of s.people){const worst=Object.entries(r.needs).filter(([,v])=>typeof v==='number').sort((a,b)=>a[1]-b[1])[0];line($('residents'),`${r.name} · ${r.action} · energy ${r.energy.toFixed(0)} · ${worst?.[0]} ${Number(worst?.[1]).toFixed(0)}`);}

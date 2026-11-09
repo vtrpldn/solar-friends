@@ -391,7 +391,7 @@ export function maintainWater(s) {
     else if(n.capacity[1])queueWater(s,-1,n.id,'irrigation');
   }
   for(const n of Object.values(sys.nodes)) {
-    if(n.maintainFresh && n.capacity[0] && n.capacity[1] && n.water[0]<drinkingReserve(s,n) &&
+    if(n.maintainFresh && n.capacity[0] && n.capacity[1] && n.water[0]<drinkingReserve(s,n)-Math.min(12,drinkingReserve(s,n)*.25) &&
       !s.operations?.some(o=>!o.done && o.water && o.site===n.id)) {
       if(n.water[1]>=Math.min(12,n.capacity[0]-n.water[0]) || (n.water[0]<s.people.length*2 && n.water[1]>=1)) queuePurification(s,n.id);
       else {
