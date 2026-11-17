@@ -1,3 +1,4 @@
+import {ANIMAL_RATIONS,animalStep,ensureAnimalCare} from './animal-care.js';
 import {projectMaterials} from './project-materials.js';
 import {activeTrips} from "./trip-state.js";
 import {CROP_CARE,GAME_DAY} from './biological-production.js';
@@ -5,7 +6,7 @@ import {CROP_CARE,GAME_DAY} from './biological-production.js';
 const INTERVALS={home:365,shed:365,warehouse:365,kitchen:180,workshop:180,
  'water-pump':90,well:180,'groundwater-well':365,solar_farm:180,hydro:90,greenhouse:180};
 const REPLACEMENT_YEARS={'water-pump':10,well:10,solar_farm:25,home:20,shed:20,warehouse:20,kitchen:20};
-export const ANIMAL_CARE={coop:{days:3,fodder:1,water:2,work:25},goat_pasture:{days:1,fodder:3,water:16,work:35}};
+export const ANIMAL_CARE=ANIMAL_RATIONS;
 export function upkeep(s){return s.upkeep??={version:1,automatic:true,dailyBudget:100,day:-1,used:0,vehicles:[{condition:100,km:0},{condition:100,km:0}],jobs:[]};}
 export function assetCondition(p){return p.condition??100;}
 export function serviceFactor(p){return Math.max(0,Math.min(1,assetCondition(p)/40));}
@@ -29,8 +30,8 @@ export function upkeepStep(s,defs,dt){
   if(crop&&!p.cultivation&&(p.soilFertility??1)<.7&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,soil:true,compost:Math.ceil(crop.area*.25),work:0,partsPaid:false,done:false});
   const care=ANIMAL_CARE[d.kind];
   if(care&&(p.key!=='goat-pasture-empty'||p.stocked)){
-    p.animalHealth=Math.max(0,Math.min(100,(p.animalHealth??100)+(s.time<(p.careUntil||0)?2:-15)*dt/GAME_DAY));
-    if(s.time>=(p.careUntil||0)&&!u.jobs.some(j=>j.target===p.id&&j.care&&!j.done))u.jobs.push({target:p.id,care:d.kind,work:0,partsPaid:false,done:false});
+    animalStep(s,p,d.kind,dt);
+    if(s.time+GAME_DAY*.25>=(p.careUntil||0)&&!u.jobs.some(j=>j.target===p.id&&j.care&&!j.done))u.jobs.push({target:p.id,care:d.kind,work:0,partsPaid:false,done:false});
   }
   if(!interval)continue;
   p.condition=Math.max(0,assetCondition(p)-dt/GAME_DAY*30/interval);
@@ -71,7 +72,7 @@ export function performUpkeep(s,r,dt,go,changeMaterial,materials,carDoor,useWate
  if(!go(s,r,target))return true;
  if(care&&!job.waterPaid){if(!useWater(s,p.id,care.water,false)){job.status='Waiting for animal drinking water';return true;}job.waterPaid=true;}
  job.status=care?'Feeding and caring for animals':job.soil?'Spreading compost over the planting area':job.replacementParts?'Replacing worn equipment or roof materials':job.battery?'Replacing the battery':'Resident servicing equipment';job.work+=dt;r.work+=dt;r.energy=Math.max(0,r.energy-dt*.12);
- if(job.work>=(care?.work||(job.replacementParts?1800:job.soil?60:job.battery?360:240))){if(care){p.careUntil=s.time+care.days*GAME_DAY;p.animalHealth=Math.min(100,(p.animalHealth??100)+40);}else if(job.soil)p.soilFertility=Math.min(1,(p.soilFertility??1)+.3);else if(job.replacementParts){p.assetAgeDays=0;p.condition=100;}else if(job.battery)p.batteryAgeDays=0;else if(p)p.condition=100;else u.vehicles[job.vehicle].condition=100;job.done=true;r.action='idle';}
+ if(job.work>=(care?.work||(job.replacementParts?1800:job.soil?60:job.battery?360:240))){if(care){const a=ensureAnimalCare(s,p,job.care);a.feed+=care.fodder;a.water+=care.water;p.careUntil=s.time+Math.min(a.feed/(care.fodder/care.days),a.water/(care.water/care.days))*GAME_DAY;}else if(job.soil)p.soilFertility=Math.min(1,(p.soilFertility??1)+.3);else if(job.replacementParts){p.assetAgeDays=0;p.condition=100;}else if(job.battery)p.batteryAgeDays=0;else if(p)p.condition=100;else u.vehicles[job.vehicle].condition=100;job.done=true;r.action='idle';}
  return true;
 }
 export function upkeepText(s){const u=upkeep(s);return `${u.jobs.length} service jobs · R$${u.used.toFixed(2)} / R$${u.dailyBudget.toFixed(2)} daily materials allowance. Repairs use one tool pack, one fastener pack and 108 resident-minutes. Battery replacement uses a battery unit, one electrical pack and 162 resident-minutes; capacity falls to 80% over eight years. Pumps are replaced after 10 years, roofs after 20 and panels after 25; these use the actual replacement parts and 13.5 resident-hours. Supplies must already be in stores. ${u.jobs.some(j=>j.status?.startsWith('Needs'))?'Service is waiting for materials or budget.':''}`;}

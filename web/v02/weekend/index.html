@@ -42,6 +42,7 @@
       <div id="supplies" aria-label="Community supplies"></div>
       <div class="time">
         <span id="clock"></span>
+        <details class="weather-forecast"><summary id="weather-summary">Weather</summary><p id="weather-forecast"></p></details>
         <div>
           <button id="pause" data-shortcut="Space" aria-keyshortcuts="Space" aria-label="Pause simulation">Ⅱ</button
           ><button id="speed" data-shortcut="1–4" aria-keyshortcuts="1 2 3 4">1×</button>
@@ -108,7 +109,7 @@
         <label for="production">Resident work</label
         ><select id="production"></select
         ><button id="queue-production">Start batch</button
-        ><button id="repeat-production">Keep 24 in stock</button>
+        >
         <p id="production-activity" hidden></p><progress id="production-progress" aria-label="Production work completed" max="1" value="0" hidden></progress>
       </div>
       <details class="building-notes">

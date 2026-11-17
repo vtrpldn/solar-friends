@@ -26,7 +26,7 @@ export function installDisabledInfo() {
     for(const control of document.querySelectorAll('button:disabled,select:disabled,input:disabled')) {
       let icon=entries.get(control);
       if(!icon){
-        icon=document.createElement('button');icon.type='button';icon.className='disabled-info';icon.textContent='i';icon.setAttribute('popover','manual');
+        icon=document.createElement('button');icon.type='button';icon.className='disabled-info';icon.textContent='ⓘ';icon.setAttribute('popover','manual');
         icon.addEventListener('mouseenter',()=>show(icon,control));icon.addEventListener('mouseleave',()=>{if(document.activeElement!==icon)hide();});
         icon.addEventListener('focus',()=>show(icon,control));icon.addEventListener('blur',hide);icon.addEventListener('click',()=>show(icon,control));
         entries.set(control,icon);control.classList.add('has-disabled-info');
@@ -36,10 +36,10 @@ export function installDisabledInfo() {
       icon.setAttribute('aria-label',`Why unavailable: ${control.dataset.disabledReason||'This action is not available yet.'}`);
       const r=control.getBoundingClientRect();
       let visible=!!control.getClientRects().length&&!control.closest('[hidden]')&&(!modal||modal.contains(control))&&r.bottom>0&&r.top<innerHeight;
-      for(let p=control.parentElement;p&&p!==document.body&&visible;p=p.parentElement){const style=getComputedStyle(p);if(/auto|scroll|hidden/.test(style.overflowY)){const pr=p.getBoundingClientRect();visible=r.top>=pr.top&&r.top+22<=pr.bottom;}}
+      for(let p=control.parentElement;p&&p!==document.body&&visible;p=p.parentElement){const style=getComputedStyle(p);if(/auto|scroll|hidden/.test(style.overflowY)){const pr=p.getBoundingClientRect();visible=r.top>=pr.top&&r.top+20<=pr.bottom;}}
       if(!visible){if(icon.matches(':popover-open'))icon.hidePopover();if(active===icon)hide();continue;}
       if(!icon.matches(':popover-open'))icon.showPopover();
-      icon.style.left=`${r.right-25}px`;icon.style.top=`${r.top+Math.max(3,Math.min(10,(r.height-20)/2))}px`;
+      icon.style.left=`${r.right-22}px`;icon.style.top=`${r.top+Math.max(3,Math.min(10,(r.height-18)/2))}px`;
       if(active===icon&&tip.textContent!==control.dataset.disabledReason)show(icon,control);
     }
   }

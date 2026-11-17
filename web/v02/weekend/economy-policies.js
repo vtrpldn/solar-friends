@@ -7,16 +7,12 @@ export function economyPolicies(s){
  s.economyPolicies??={sales:{},work:{food:3,maintenance:3,production:2,construction:2,essentialWorkers:1,productionWorkers:1}};
  return s.economyPolicies;
 }
-export function productionTarget(p){return Number.isFinite(p.stockTarget)?Math.max(0,Math.min(10000,Math.floor(p.stockTarget))):24;}
 export function workGroup(op,recipes){return op.water?(op.water.service?'maintenance':'food'):(Object.keys(recipes[op.recipe]?.output||{}).some(id=>FOOD_SERVINGS[id])?'food':'production');}
 export function protectedStock(s,id,recipes){
  const policy=economyPolicies(s).sales[id];let reserve=policy?.keep||0;
  if(FOOD_SERVINGS[id]){const others=foodPortions(s)-Math.floor((s.materials[id]||0)/FOOD_SERVINGS[id]);reserve=Math.max(reserve,Math.max(0,Math.ceil(s.people.length*2*(s.foodReserveDays??2))-others)*FOOD_SERVINGS[id]);}
- // Construction and queued inputs have already left available stock. Protect the
- // next two batches at repeating sites as well, without double-counting reservations.
- let inputs=0;
- for(const p of s.projects)if(p.repeat&&productionTarget(p)>0)inputs+=(recipes[p.repeat]?.input[id]||0)*2;
- return Math.max(reserve,inputs,protectedEquipment(s,id));
+ // Queued inputs have already left available stock.
+ return Math.max(reserve,protectedEquipment(s,id));
 }
 export function salePreview(s,id,materials,recipes,count){
  const item=materials[id],p=economyPolicies(s).sales[id],stock=count(s,id);

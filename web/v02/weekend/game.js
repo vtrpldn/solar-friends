@@ -1,6 +1,9 @@
 import {basicNeeds,renderBasicNeeds} from './basic-needs.js';
 import {installGuide} from './guide.js';
 let guide;
+import {hydrationWarning} from './hydration.js';
+import {hydrologyText} from './hydrology.js';
+import {forecast,weatherText} from './weather.js';
 import {ensureCultivation} from './cultivation.js';
 import {cultivationSignature,createCultivationModel} from './cultivation-models.js';
 import {installFarmingUI} from './cultivation-ui.js';
@@ -15,7 +18,6 @@ import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {installLenses} from './lenses.js';
 import {simulationFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
-import {productionTarget} from './economy-policies.js';
 import {eventHistory, eventTime} from './event-history.js';
 import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
 import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
@@ -103,7 +105,6 @@ import {
   crossingAt,
   bridgeDeckHeight,
   queueProduction,
-  repeatProduction,
   queueWater,
   connectUtility,
   sellMaterial,
@@ -267,7 +268,7 @@ const noonColor = new THREE.Color("#ffe2a8");
 const sunsetColor = new THREE.Color("#ffad72");
 const overcastColor = new THREE.Color("#d6e3ef");
 function updateSunlight(time, dt) {
-  cloudCover += ((s.rain ? 1 : 0) - cloudCover) * (1 - Math.exp(-dt / 3));
+  cloudCover += ((s.weather?.cloudCover ?? (s.rain ? 1 : 0)) - cloudCover) * (1 - Math.exp(-dt / 3));
   const light = sunlightAt(time, cloudCover);
   sun.position.set(light.x, light.y, light.z).add(sun.target.position);
   sun.intensity = light.direct;
@@ -1385,7 +1386,7 @@ function renderUtilityUI() {
   $("tank-attention").textContent = `${warnings.length} waste tank${warnings.length===1?' needs':'s need'} attention`;
   $("tank-attention").title = warnings.join('\n');
   $("utility-summary").textContent =
-    `Power: ${generation.toFixed(1)} kW available / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}.${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Build more treatment capacity." : ""}`;
+    `Power: ${generation.toFixed(1)} kW available / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}. ${hydrologyText(s)}${sys.thirst ? ` ${hydrationWarning(s)}.` : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Build more treatment capacity." : ""}`;
   $("utility-links").replaceChildren();
   for (const l of sys.links.filter(
     (l) => (management?.view === "power") === (l.kind === "power"),
@@ -1433,7 +1434,6 @@ function renderUtilityUI() {
   $("production-controls").hidden = !$("production").value;
   $("queue-production").disabled = !node || node.enabled === false || !$("production").value;
   const upgrade = p && $("production").value === "solar_upgrade" ? upgradeAction(p, s.operations || []) : null;
-  $("repeat-production").hidden = !!upgrade || (!!p && PROJECTS[p.key].kind==='wild-tree');
   $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : p && PROJECTS[p.key].natural ? 'Gather resources' : 'Start batch';
   if (node?.enabled === false) $("queue-production").textContent = "Switch on to produce";
   if (activity) { $("queue-production").textContent = activity.label; $("queue-production").disabled = true; }
@@ -1441,10 +1441,6 @@ function renderUtilityUI() {
   const batchBlocker=productionBlocker(s,selected,$("production").value);
   disabledReason($("queue-production"),batchBlocker);
   $("queue-production").disabled ||= !!batchBlocker;
-  $("repeat-production").disabled = !node || !$("production").value;
-  $("repeat-production").textContent = p?.repeat
-    ? "Stop repeating"
-    : `Keep ${productionTarget(p || {})} in stock`;
   $("toggle-building").hidden = !canSwitchBuilding(sys,node);
   disabledReason($("toggle-building"), "This structure has no switchable service.");
   $("toggle-building").disabled = !canSwitchBuilding(sys,node);
@@ -1497,12 +1493,6 @@ $("queue-production").onclick = () => {
     queueProduction(s, selected, $("production").value) ||
       "Resident production job queued.",
   );
-  persist();
-  renderUI();
-};
-$("repeat-production").onclick = () => {
-  repeatProduction(s, selected, $("production").value);
-  uiSignature = "";
   persist();
   renderUI();
 };
@@ -1722,6 +1712,8 @@ function renderUI() {
     s.stage === "evening"
       ? "Saturday · Evening"
       : `Day ${Math.floor(minutes / 1440) + 1} · ${String(Math.floor(minutes / 60) % 24).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  $("weather-summary").textContent=weatherText(s);
+  $("weather-forecast").textContent=forecast(s).map(d=>`Day ${d.day}: ${d.rain}, ${d.temperature}`).join(" · ");
   $("tasks").replaceChildren();
   $("completed-tasks").replaceChildren();
   const builtCount = s.projects.filter(
@@ -1787,7 +1779,7 @@ function renderUI() {
     energy.textContent = `${lowest[0]} ${Math.round(lowest[1])}%`;
     const status = document.createElement("span");
     status.textContent = r.needTask
-      ? (r.needTask.elapsed>0 ? r.needTask.label : {hunger:"Getting something to eat",bladder:"Heading for a toilet break",bowels:"Heading for a toilet break",hygiene:r.needTask.river?"Walking to the river to wash":"Heading to wash up",social:"Meeting a friend",fun:"Taking a recreation break"}[r.needTask.kind])
+      ? (r.needTask.elapsed>0 ? r.needTask.label : {hydration:"Walking to drinking water",hunger:"Getting something to eat",bladder:"Heading for a toilet break",bowels:"Heading for a toilet break",hygiene:r.needTask.river?"Walking to the river to wash":"Heading to wash up",social:"Meeting a friend",fun:"Taking a recreation break"}[r.needTask.kind])
       : r.tentPhase === "exit"
         ? "Leaving " +
           (r.restSite

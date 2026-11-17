@@ -1,0 +1,888 @@
+{
+  "revision": "8b08c1f6",
+  "scenario": "Ordinary commands: new game settings, choose entrance camp, enable five outside contracts; normal 0.1-second ticks and weekly reload; no inventory/cash injections",
+  "observations": [
+    {
+      "scenario": "default",
+      "day": 5,
+      "money": 3811,
+      "food": 24,
+      "water": 28,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 68,
+          "hydration": 30,
+          "energy": 73,
+          "action": "produce",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 69,
+          "hydration": 50,
+          "energy": 74,
+          "action": "blocked",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 37,
+          "hydration": 52,
+          "energy": 77,
+          "action": "blocked",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 51,
+          "hydration": 49,
+          "energy": 74,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 63,
+          "hydration": 30,
+          "energy": 75,
+          "action": "drink",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "default",
+      "day": 10,
+      "money": 4706,
+      "food": 22,
+      "water": 31,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 67,
+          "hydration": 55,
+          "energy": 70,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 72,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 55,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 57,
+          "hydration": 55,
+          "energy": 70,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 55,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "default",
+      "day": 15,
+      "money": 5629,
+      "food": 18,
+      "water": 33.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 62,
+          "hydration": 30,
+          "energy": 58,
+          "action": "blocked",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 78,
+          "hydration": 55,
+          "energy": 60,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 64,
+          "hydration": 55,
+          "energy": 68,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 56,
+          "hydration": 55,
+          "energy": 68,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 65,
+          "hydration": 55,
+          "energy": 71,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "default",
+      "day": 20,
+      "money": 6934,
+      "food": 18,
+      "water": 38,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 55,
+          "hydration": 29,
+          "energy": 69,
+          "action": "drink",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 57,
+          "hydration": 32,
+          "energy": 66,
+          "action": "blocked",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 38,
+          "hydration": 49,
+          "energy": 73,
+          "action": "blocked",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 73,
+          "hydration": 50,
+          "energy": 74,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 58,
+          "hydration": 49,
+          "energy": 74,
+          "action": "toilet",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "default",
+      "day": 25,
+      "money": 8237,
+      "food": 18,
+      "water": 38,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 54,
+          "hydration": 30,
+          "energy": 60,
+          "action": "blocked",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 69,
+          "hydration": 55,
+          "energy": 69,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 85,
+          "hydration": 55,
+          "energy": 69,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 58,
+          "hydration": 55,
+          "energy": 71,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 69,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "default",
+      "day": 30,
+      "money": 9172,
+      "food": 15,
+      "water": 38,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 35,
+          "hydration": 34,
+          "energy": 59,
+          "action": "blocked",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 88,
+          "hydration": 55,
+          "energy": 71,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 81,
+          "hydration": 55,
+          "energy": 71,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 57,
+          "hydration": 55,
+          "energy": 73,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 78,
+          "hydration": 55,
+          "energy": 73,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "tight",
+      "day": 5,
+      "money": 2311,
+      "food": 14,
+      "water": 29,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 68,
+          "hydration": 29,
+          "energy": 73,
+          "action": "blocked",
+          "blocked": "Needs reachable potable water; fetch and filter water"
+        },
+        {
+          "name": "Bento",
+          "hunger": 68,
+          "hydration": 31,
+          "energy": 77,
+          "action": "fetch-water",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 90,
+          "hydration": 30,
+          "energy": 76,
+          "action": "toilet",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 58,
+          "hydration": 50,
+          "energy": 85,
+          "action": "blocked",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 65,
+          "hydration": 29,
+          "energy": 75,
+          "action": "drink",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "tight",
+      "day": 10,
+      "money": 3230,
+      "food": 26,
+      "water": 34.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 72,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 81,
+          "hydration": 30,
+          "energy": 58,
+          "action": "blocked",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 55,
+          "hydration": 55,
+          "energy": 71,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 55,
+          "hydration": 55,
+          "energy": 67,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 55,
+          "hydration": 55,
+          "energy": 80,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "tight",
+      "day": 15,
+      "money": 4137,
+      "food": 24,
+      "water": 37.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 70,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 75,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 67,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 56,
+          "hydration": 55,
+          "energy": 70,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 75,
+          "hydration": 55,
+          "energy": 69,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "tight",
+      "day": 20,
+      "money": 5594,
+      "food": 25,
+      "water": 37.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 64,
+          "hydration": 31,
+          "energy": 73,
+          "action": "wash",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 84,
+          "hydration": 51,
+          "energy": 75,
+          "action": "blocked",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 39,
+          "hydration": 49,
+          "energy": 71,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 76,
+          "hydration": 30,
+          "energy": 75,
+          "action": "blocked",
+          "blocked": "Needs reachable potable water; fetch and filter water"
+        },
+        {
+          "name": "Nina",
+          "hunger": 74,
+          "hydration": 49,
+          "energy": 74,
+          "action": "relax",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "tight",
+      "day": 25,
+      "money": 6899,
+      "food": 25,
+      "water": 38.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 74,
+          "hydration": 55,
+          "energy": 70,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 88,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 86,
+          "hydration": 55,
+          "energy": 70,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 62,
+          "hydration": 55,
+          "energy": 75,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 68,
+          "hydration": 55,
+          "energy": 70,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "tight",
+      "day": 30,
+      "money": 7814,
+      "food": 21,
+      "water": 38.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 87,
+          "hydration": 55,
+          "energy": 70,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 55,
+          "hydration": 55,
+          "energy": 74,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 75,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 67,
+          "hydration": 55,
+          "energy": 72,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 79,
+          "hydration": 55,
+          "energy": 76,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "remote",
+      "day": 5,
+      "money": 3580,
+      "food": 20,
+      "water": 38.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 75,
+          "hydration": 38,
+          "energy": 56,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 35,
+          "hydration": 39,
+          "energy": 76,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 35,
+          "hydration": 39,
+          "energy": 78,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 29,
+          "hydration": 38,
+          "energy": 76,
+          "action": "eat",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 34,
+          "hydration": 39,
+          "energy": 79,
+          "action": "relax",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "remote",
+      "day": 10,
+      "money": 4278,
+      "food": 14,
+      "water": 36.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 53,
+          "hydration": 49,
+          "energy": 53,
+          "action": "town",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 79,
+          "hydration": 55,
+          "energy": 74,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 80,
+          "hydration": 55,
+          "energy": 79,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 89,
+          "hydration": 55,
+          "energy": 80,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 79,
+          "hydration": 55,
+          "energy": 77,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "remote",
+      "day": 15,
+      "money": 5079,
+      "food": 25,
+      "water": 36.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 66,
+          "hydration": 37,
+          "energy": 54,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 81,
+          "hydration": 55,
+          "energy": 61,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 55,
+          "hydration": 55,
+          "energy": 84,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 75,
+          "hydration": 55,
+          "energy": 70,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 55,
+          "hydration": 55,
+          "energy": 63,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "remote",
+      "day": 20,
+      "money": 6393,
+      "food": 15,
+      "water": 31,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 31,
+          "hydration": 40,
+          "energy": 51,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 55,
+          "hydration": 41,
+          "energy": 64,
+          "action": "wash",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 67,
+          "hydration": 42,
+          "energy": 65,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 64,
+          "hydration": 41,
+          "energy": 81,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 60,
+          "hydration": 30,
+          "energy": 77,
+          "action": "toilet",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "remote",
+      "day": 25,
+      "money": 7395,
+      "food": 16,
+      "water": 30.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 57,
+          "hydration": 35,
+          "energy": 54,
+          "action": "toilet",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 66,
+          "hydration": 55,
+          "energy": 74,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 79,
+          "hydration": 55,
+          "energy": 78,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 55,
+          "hydration": 55,
+          "energy": 79,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 56,
+          "hydration": 37,
+          "energy": 58,
+          "action": "relax",
+          "blocked": null
+        }
+      ]
+    },
+    {
+      "scenario": "remote",
+      "day": 30,
+      "money": 8035,
+      "food": 25,
+      "water": 38.5,
+      "residents": [
+        {
+          "name": "Iara",
+          "hunger": 70,
+          "hydration": 41,
+          "energy": 58,
+          "action": "relax",
+          "blocked": null
+        },
+        {
+          "name": "Bento",
+          "hunger": 55,
+          "hydration": 55,
+          "energy": 59,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Luz",
+          "hunger": 45,
+          "hydration": 43,
+          "energy": 82,
+          "action": "walk",
+          "blocked": null
+        },
+        {
+          "name": "Cau\u00e3",
+          "hunger": 77,
+          "hydration": 55,
+          "energy": 68,
+          "action": "outside",
+          "blocked": null
+        },
+        {
+          "name": "Nina",
+          "hunger": 75,
+          "hydration": 55,
+          "energy": 60,
+          "action": "outside",
+          "blocked": null
+        }
+      ]
+    }
+  ]
+}

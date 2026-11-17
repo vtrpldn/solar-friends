@@ -37,8 +37,8 @@ export function createCultivationModel(p,state){
   if(b.stage==='harvested')for(let z=-b.d/2+.2;z<b.d/2;z+=.4)meshBox(root,.06,.12,.06,'#a49155',b.x,ground(b.x,b.z+z)+.1,b.z+z);
 
   const planting=job?.farm.action==='plant'&&fraction>0;
-  if(!['growing','harvestable'].includes(b.stage)&&!planting)continue;
-  const crop=CROPS[b.crop],spacing=1/Math.sqrt(crop.plants*b.density),health=(b.elapsed?1-b.stress/b.elapsed:1)*(b.stage==='harvestable'?Math.max(.15,1-Math.max(0,(state.time-b.ripeAt)/3200-crop.window)/crop.window):1);
+  if(!['growing','harvestable','failed'].includes(b.stage)&&!planting)continue;
+  const crop=CROPS[b.crop],spacing=1/Math.sqrt(crop.plants*b.density),health=Math.min(b.elapsed?1-b.stress/b.elapsed:1,1-(b.droughtDamage||0))*(b.stage==='harvestable'?Math.max(.15,1-Math.max(0,(state.time-b.ripeAt)/3200-crop.window)/crop.window):1);
   for(let x=-b.w/2+spacing/2;x<b.w/2;x+=spacing)for(let z=-b.d/2+spacing/2;z<b.d/2;z+=spacing){
    if(planting&&(z+b.d/2)/b.d>fraction)continue;
    if(job?.farm.action==='harvest'&&(z+b.d/2)/b.d<fraction)continue;

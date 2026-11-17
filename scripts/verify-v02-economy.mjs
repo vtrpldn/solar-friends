@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { ASSETS } from "../web/v02/library/catalog.js";
 import {
   PROJECTS,
+  PROCESSES,
   MATERIALS,
   createWeekend,
   chooseCamp,
@@ -10,7 +11,6 @@ import {
   requiredLoads,
   placementError,
   queueProduction,
-  repeatProduction,
   queueWater,
   connectUtility,
   save,
@@ -306,20 +306,13 @@ auto.rainSeen = true;
 for (const id of Object.keys(auto.materials)) auto.materials[id] = 0;
 auto.materials.food = 30;
 const autoQuarry = built(auto, "supply-3", 40, 40);
-assert(repeatProduction(auto, autoQuarry.id, "stone"));
-// Allow the longer carrying route from the map-edge unloading area.
-for (let i = 0; i < 120000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
-assert.equal(
-  auto.materials.stone,
-  24,
-  "Automatic production stops at target instead of hoarding",
-);
-const outputBefore = auto.materials.stone;
-run(auto, 100);
-assert.equal(auto.materials.stone, outputBefore);
-assert(sellMaterial(auto, "stone"));
-for (let i = 0; i < 120000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
-assert(auto.materials.stone >= 24 && auto.materials.stone < 32);
-console.log(
-  "PASS: repeat production respects its stock target and restarts after surplus is sold.",
-);
+assert.equal(queueProduction(auto,autoQuarry.id,'stone'),'');
+autoQuarry.repeat='stone';autoQuarry.stockTarget=24;
+const loaded=restore(save(auto));assert(loaded);assert.equal(loaded.projects.find(p=>p.id===autoQuarry.id).repeat,undefined);assert.equal(loaded.projects.find(p=>p.id===autoQuarry.id).stockTarget,undefined);
+assert.equal(loaded.operations.filter(o=>o.recipe==='stone').length,1,'migration retains the active order');
+for(let i=0;i<120000&&!loaded.operations.find(o=>o.recipe==='stone').done;i++)tick(loaded,.1);
+assert(loaded.operations.find(o=>o.recipe==='stone').done);
+assert.equal(loaded.materials.stone,PROCESSES.stone.output.stone);
+run(loaded,100);assert.equal(loaded.operations.filter(o=>o.recipe==='stone').length,1,'completed work never repeats');
+assert.equal(queueProduction(loaded,autoQuarry.id,'stone'),'','another manual order remains available');
+console.log('PASS legacy repeat settings retired, current work preserved and new production requires an order');

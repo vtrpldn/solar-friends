@@ -24,7 +24,7 @@ console.log('PASS resident planting, autonomous calendar growth, seasonal slowdo
 const drought={time:0,rain:false,projects:[{id:1,soilMoisture:0,soilFertility:1}],operations:[{site:1,recipe:'vegetables',phase:'growing',growthRemaining:45*GAME_DAY,planted:true}]};
 biologicalStep(drought,100,()=>false);assert.equal(drought.operations[0].growthRemaining,45*GAME_DAY,'dry soil stops growth');
 let liters=0;for(let i=0;i<3200;i++)biologicalStep(drought,1,(_s,_id,n)=>{liters+=n;return true;});
-assert(liters>0&&liters<=48,'irrigation uses physical liters and stops above the soil moisture target');assert(drought.operations[0].growthRemaining<45*GAME_DAY,'water resumes growth');
+assert(liters>0&&liters<=80.00001,'irrigation includes 2 mm/day refill and stops above the soil moisture target');assert(drought.operations[0].growthRemaining<45*GAME_DAY,'water resumes growth');
 drought.rain=true;liters=0;biologicalStep(drought,100,()=>{liters++;return true;});assert.equal(liters,0,'rain replaces irrigation outdoors');
 console.log('PASS dry-soil stall, continuing irrigation demand, recovery and rain substitution');
 const orchard={id:1};const planting={time:0,projects:[orchard]},fruit={site:1,recipe:'fruit'};

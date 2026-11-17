@@ -31,6 +31,9 @@ jobs:
           node scripts/verify-v02-urgent-needs.mjs
           node scripts/verify-v02-resident-agency-browser.mjs
       - run: npm run dev:check -- --v2
+        env:
+          REALISM_SCREENSHOTS: artifacts/dev-check/realism
+          LAB_SCREENSHOTS: artifacts/dev-check/lab
       - uses: actions/upload-artifact@v4
         if: always()
         continue-on-error: true

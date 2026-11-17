@@ -14,7 +14,7 @@ Residents can opt into individual outside jobs. A four-hour weekday shift pays R
 
 Completed equipment wears over time; vehicles wear with distance. Automatic service uses stored tools and fasteners, a daily materials allowance and resident labor. The allowance limits materials consumed, not an additional cash charge. Service warnings explain missing supplies or inaccessible work positions. Condition affects generation and treatment throughput. Battery units now consistently store 4 kWh each and solar panels provide 0.6 kW peak each. Battery capacity declines to 80% over eight game years; automatic replacement needs a stored battery, electrical supplies, a sufficient daily service allowance and resident installation. These are engineering assumptions, not equipment warranties. Pumps, roofs and panels also have lifetime replacement work with real parts; vehicle purchase/replacement and tax depreciation are outside the current model. Unaffordable service jobs no longer prevent affordable animal care later in the queue. Finances lists each pending job, its parts and a location shortcut.
 
-Hens and goats require periodic resident care, fodder and water even when production is idle. Neglect reduces health and output. This remains active independently of the equipment-maintenance toggle.
+Hens and goats consume stored feed and water daily, even when collection is idle. Resident care refills those reserves; it does not immediately heal animals. Neglect reduces health and accumulated output. This remains active independently of the equipment-maintenance toggle.
 
 New starts have R$500 / R$2,000 / R$6,000 working capital for tight / modest / comfortable settings. Land and cars are already owned. Existing saves retain their balance. The original three-day matrix used earlier prices. Current-price default and comfortable starts are tested for three days; tight starts need a longer staged route with outside work and selected local timber. This is not normal-speed browser evidence or a claim about the cost of establishing a real ecovila.
 
@@ -34,3 +34,9 @@ The calibrated catalog run exposed a separate access problem: buildings could su
 
 
 Camp drinking reserves, newly completed water storage/cistern reserves and sanitation now default to automatic maintenance. Explicitly switching a routine off remains saved. This closes the normal-play gap where animals could wait indefinitely for drinking water while every tank routine was left off. Water still requires a reachable source, hauling/purification work and available residents; the default does not grant free water.
+
+## Resident hydration
+
+Each resident has an individual hydration meter and visits reachable potable-water stores to drink. Drinking consumes 0.5 L per action, creates no immediate greywater, and does not require wastewater capacity. The baseline is 2.5 L/day, increased by physical work and heat up to 5 L/day. These are authored game parameters. Low hydration slows productive work but leaves movement and essential water work available. Residents wake for urgent hydration.
+
+Town drivers pack at least 0.5 L, increased for trip duration, from camp water. Packed water remains on the resident until drunk and survives reload. Employers supply hydration during outside jobs. A village shortage warning names residents who cannot satisfy hydration; absent residents do not consume camp water.

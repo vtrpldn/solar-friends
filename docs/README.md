@@ -12,6 +12,7 @@ Separate current gameplay and operational guidance from historical plans and dat
 - [Autonomy mechanics implementation plan](autonomy-implementation-plan.md)
 
 - [Project setup, routes, checks and deployment](../README.md)
+- [High-speed simulation lab](simulation-lab.md): farming controls, breakpoints, telemetry, checkpoints and deterministic replay.
 - [v2 gameplay, economy, residents and infrastructure](../web/v02/weekend/README.md)
 - [3D collection](../web/v02/library/README.md)
 - [Model workshop](../web/v02/workshop/README.md)
@@ -26,6 +27,8 @@ Separate current gameplay and operational guidance from historical plans and dat
 - [Calibration and price provenance](economy-calibration.md)
 - [Calibration validation and evidence](balance/2026-11-17-economy-validation.md): 18 starts, three income continuations, all 68 buildings constructed, off-grid continuation and 87 focused regressions.
 - [Full parameter register](economy-parameter-register.json)
+- [Simulation realism validation](balance/2026-11-17-simulation-realism.md): 30-day ordinary starts, seasonal subsystem checks, and desktop interaction evidence.
+- [Weather and watershed](simulation-climate.md): INMET station references, deterministic forecasts, shared water reserves, and disclosed model assumptions.
 - [Material accounting](material-accounting.md), [biological cycles](economy-biology.md) and [logistics/care](economy-logistics-and-care.md)
 
 ## Recent evidence

@@ -38,9 +38,9 @@ Resources → **Village work & trade** provides:
 
 - Work priorities for food/water, maintenance, production and construction, plus worker reservations. Available residents fill these roles; their own needs take precedence. Assigned batches normally finish before category reassignment.
 - Per-resource automatic sales with a minimum reserve, trigger stock and daily unit cap. Zero cap removes the player-set cap; the buyer’s finite daily demand still applies. Sales reserve whole trade batches for physical town trips, use the named buyer’s quoted price bands and daily demand, and pay only when the driver reaches town. Finances distinguishes receipts from pending exports.
-- Food and the next two batches of repeating production remain protected. Already committed construction/production inputs are outside available stock. Automatic sales default to off and do not run in sandbox.
+- Food reserves remain protected. Already committed construction/production inputs are outside available stock. Automatic sales default to off and do not run in sandbox.
 
-Each production site has a configurable stock target (default 24). Pending output counts toward it. Set the target sufficiently above the protected reserve to allow at least one sale batch. A target is a stopping threshold, not an exact inventory cap: a whole production batch may cross it.
+Gathering and production use one-off work orders. Completed jobs do not repeat automatically. Loading an older save removes its repeat settings and stock targets while preserving active jobs, reserved materials, and cargo.
 
 The current [calibration register](../../../docs/economy-calibration.md) separates published references from engineering assumptions. Crops grow for weeks, new orchards establish over years, timber grows over six favorable years, and animals require feed and water. [Biological timings](../../../docs/economy-biology.md) and the [complete parameter export](../../../docs/economy-parameter-register.json) state quantities and assumptions. Historical November 8 returns do not describe these revised timings.
 
