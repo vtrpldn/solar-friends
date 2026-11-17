@@ -1,0 +1,71 @@
+/* Compact cultivation notebook beside the desktop world. */
+body[data-cultivation-open] #selection { visibility: hidden; }
+#cultivation-panel {
+  position: fixed; right: 20px; top: 152px; bottom: 100px; width: 360px;
+  max-height: 740px; z-index: 12; overflow: hidden;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--edge);
+  border-radius: 14px; box-shadow: 0 8px 28px #302b2029;
+  font-size: 13px; line-height: 1.45;
+}
+#cultivation-panel:not([hidden]) { display: flex; flex-direction: column; }
+#cultivation-panel .farm-heading { position: static; display: flex; align-items: center; justify-content: space-between; padding: 17px 18px 14px; border-bottom: 1px solid #d9ccaa; flex-shrink: 0; }
+.farm-heading small { display: block; font-size: 9px; letter-spacing: 1.7px; color: #6d7758; font-weight: 650; }
+#cultivation-panel h2 { margin: 3px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; }
+#cultivation-panel #close-farm { min-width: 30px; min-height: 30px; padding: 0; font-size: 23px; border: 0; background: transparent; box-shadow: none; }
+#farm-content { padding: 16px 18px 18px; overflow: auto; scrollbar-gutter: stable; }
+#cultivation-panel p { margin: 0; font-size: 12px; line-height: 1.5; }
+#cultivation-panel h3 { margin: 0 0 3px; font-size: 19px; font-weight: 600; line-height: 1.15; }
+#cultivation-panel h4 { margin: 0 0 10px; font-size: 11px; letter-spacing: .6px; text-transform: uppercase; font-weight: 650; color: #66724f; }
+#cultivation-panel label { font-size: 11px; font-weight: 550; }
+#cultivation-panel select, #cultivation-panel input[type=number] { width: 100%; min-width: 0; max-width: 100%; margin-top: 5px; padding: 8px; font: inherit; font-size: 12px; border: 1px solid #cbbd97; border-radius: 6px; background-color: #fffbef; color: var(--ink); }
+#cultivation-panel select:disabled { opacity: .65; }
+#cultivation-panel button { font-size: 12px; border-radius: 7px; min-height: 34px; box-shadow: none; }
+.farm-bed-picker { display: grid; grid-template-columns: 30px minmax(0,1fr); gap: 8px; align-items: center; }
+#cultivation-panel .farm-bed-picker select { margin: 0; }
+.farm-crop-summary { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 18px 0 14px; }
+.farm-area { font-size: 11px; color: #72775e; }
+.farm-stage { flex-shrink: 0; margin-top: 2px; padding: 4px 7px; border-radius: 4px; background: #e9e7cf; color: #626c4d; font-size: 10px; font-weight: 600; }
+.farm-stage[data-stage=harvestable] { background: #e2e9c5; color: #486138; }
+.farm-growth { margin-bottom: 14px; }
+.farm-growth > div { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; }
+#cultivation-panel progress { display: block; width: 100%; height: 5px; accent-color: #789554; }
+.farm-work { padding-bottom: 16px; border-bottom: 1px solid #d9ccaa; }
+#farm-actions { display: flex; margin-top: 10px; }
+#farm-actions:empty { display: none; }
+#cultivation-panel .farm-primary { width: 100%; min-height: 39px; background: #41593d; color: #fff8e5; border: 1px solid #41593d; font-size: 13px; font-weight: 550; }
+#cultivation-panel .farm-primary:disabled { background: #e3e2cd; color: #7d8268; border-color: #d5d3b9; }
+#cultivation-panel #farm-feedback:not(:empty) { margin-top: 7px; color: #8a623b; font-size: 11px; }
+.farm-soil, .farm-settings { padding: 16px 0; border-bottom: 1px solid #d9ccaa; }
+.farm-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 13px 20px; }
+.farm-metric { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 5px; }
+.farm-metric > span { font-size: 11px; color: #72775e; }
+.farm-metric strong { font-size: 14px; font-weight: 550; font-variant-numeric: tabular-nums; }
+.farm-metric strong small { font-size: 10px; font-weight: 400; }
+.farm-metric meter { grid-column: 1 / -1; display: block; appearance: none; width: 100%; height: 4px; border: 0; }
+.farm-metric meter::-webkit-meter-bar { height: 4px; border: 0; background: #e4dfc6; border-radius: 2px; }
+.farm-metric meter::-webkit-meter-optimum-value { background: #849a67; border-radius: 2px; }
+#cultivation-panel .farm-constraint { margin-top: 11px; font-size: 11px; color: #8a623b; }
+.farm-control-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.farm-control-pair label { min-width: 0; }
+#cultivation-panel .farm-check { display: flex; gap: 8px; align-items: center; margin: 13px 0; font-size: 12px; font-weight: 400; }
+.farm-check input { margin: 0; accent-color: #536f42; }
+.farm-residues-label { display: block; }
+#cultivation-panel .farm-estimate { padding: 13px 0 0; }
+.farm-estimate span { font-size: 11px; color: #72775e; }
+.farm-details { border-bottom: 1px solid #d9ccaa; padding: 0; }
+.farm-details:last-child { border-bottom: 0; }
+.farm-details summary { padding: 12px 0; cursor: pointer; font-size: 12px; font-weight: 550; }
+.farm-details[open] { padding-bottom: 12px; }
+.farm-ledger { margin: 0; font-size: 11px; }
+.farm-ledger > div { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px dotted #ded3b6; }
+.farm-ledger dt { color: #72775e; }
+.farm-ledger dd { margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.farm-ledger dd span { color: #72775e; }
+#farm-secondary-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+#cultivation-panel .farm-danger { color: #974b35; border-color: #c8a48e; }
+#farm-resize { margin-top: 10px; }
+#cultivation-panel .farm-intro { margin-bottom: 16px; }
+#field-summary { padding: 14px 0; }
+#confirm-field { width: 100%; }
+
+#cultivation-panel.farm-placement { bottom: auto; }

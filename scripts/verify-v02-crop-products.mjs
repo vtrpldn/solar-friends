@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import {createSandbox,plan,queueProduction,tick,save,restore,enableFastNavigation,PROCESSES,MATERIALS,sellMaterial} from '../web/v02/weekend/simulation.js';
+import {RESOURCE_GROUPS} from '../web/v02/weekend/resource-groups.js';
 import {CROPS} from '../web/v02/weekend/cultivation.js';
 import {foodChange,ensureFoodStorage,foodStorageStep,FOOD_DAYS} from '../web/v02/weekend/food-storage.js';
 import {cancelExport} from '../web/v02/weekend/physical-trade.js';
 import {recipeBalance} from '../web/v02/weekend/production-accounting.js';
 for(const crop of Object.keys(CROPS)){
+ for(const id of [crop,`${crop}_seed`])assert(RESOURCE_GROUPS.some(group=>group.ids.includes(id)),`${id} must be reachable in inventory and trade`);
  let s=createSandbox(42);enableFastNavigation(s);assert.equal(plan(s,'kitchen',50,50),'');const site=s.projects.at(-1);
  // Unlimited sandbox supplies isolate recipe routing and physical resident work;
  // regular-mode assertions below cover reservations, shelf lives and sale refunds.

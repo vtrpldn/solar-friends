@@ -19,6 +19,15 @@ export function createCultivationModel(p,state){
   const angle=(p.rotation||0)*Math.PI/2,cx=(p.x-32+((p.rotation||0)%2?size[1]-1:size[0]-1)/2)*2,cz=(p.z-32+((p.rotation||0)%2?size[0]-1:size[1]-1)/2)*2;
   return elevationAt(cx+Math.cos(angle)*x+Math.sin(angle)*z,cz-Math.sin(angle)*x+Math.cos(angle)*z,state.elevationSeed,state.terrainPads)-elevationAt(cx,cz,state.elevationSeed,state.terrainPads);
  };
+ if(p.key==='field'){
+  root.userData.cultivatedField=true;
+  const [width,depth]=p.fieldSize.map(n=>n*2),points=[];
+  for(let x=-width/2;x<=width/2;x+=2)points.push([x,-depth/2]);
+  for(let z=-depth/2+2;z<=depth/2;z+=2)points.push([width/2,z]);
+  for(let x=width/2-2;x>=-width/2;x-=2)points.push([x,depth/2]);
+  for(let z=depth/2-2;z>=-depth/2;z-=2)points.push([-width/2,z]);
+  const edge=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points.map(([x,z])=>new THREE.Vector3(x,ground(x,z)+.08,z))),new THREE.LineBasicMaterial({color:'#b5a16c',transparent:true,opacity:.65}));edge.name='field-boundary';edge.userData.ownedMaterial=true;root.add(edge);
+ }
  const plants={greens:[],beans:[],corn:[]};
  for(const b of beds){
   const job=(state.operations||[]).find(o=>!o.done&&o.site===p.id&&o.farm?.bed===b.id);
