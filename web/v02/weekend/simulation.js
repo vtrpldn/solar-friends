@@ -1417,7 +1417,7 @@ const fastNavigationStates=new WeakSet(), navigationCaches=new WeakMap();
 let activeNavigation=null;
 export function enableFastNavigation(s){fastNavigationStates.add(s);}
 function prepareNavigation(s){
-  const signature=JSON.stringify([s.landSeed,s.camp,s.campSite,s.projects.map(p=>[p.id,p.key,p.x,p.z,p.rotation,p.felled,p.work>=PROJECTS[p.key].work,footprint(p)])]);
+  const signature=JSON.stringify([s.landSeed,s.worldSettings,s.camp,s.campSite,s.projects.map(p=>[p.id,p.key,p.x,p.z,p.rotation,p.felled,p.work>=PROJECTS[p.key].work,footprint(p)])]);
   let cache=navigationCaches.get(s);
   if(cache?.signature!==signature){
     const obstacles=new Map();
@@ -1430,7 +1430,7 @@ function prepareNavigation(s){
           }
       }
     }
-    cache={signature,state:s,cells:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
+    cache={signature,state:s,cells:new Map(),terrain:new Map(),routes:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
   }
   return cache;
 }
@@ -1441,9 +1441,15 @@ function occupied(s,x,z){
   if(!cache.has(key))cache.set(key,occupiedUncached(s,x,z));
   return cache.get(key);
 }
+function terrainBlocked(s,x,z,cache){
+  const key=`${x},${z}`;
+  if(cache?.terrain.has(key))return cache.terrain.get(key);
+  const blocked=(riverBankAt(x,z,.5,s.landSeed)&&!crossingAt(s,x,z))||(cache?.camp||blockedCamp(s)).some(c=>c.x===x&&c.z===z);
+  cache?.terrain.set(key,blocked);
+  return blocked;
+}
 function occupiedUncached(s, x, z) {
-  if(activeNavigation?.state===s)return (riverBankAt(x,z,.5,s.landSeed)&&!crossingAt(s,x,z)) ||
-    activeNavigation.camp.some(c=>c.x===x&&c.z===z)||
+  if(activeNavigation?.state===s)return terrainBlocked(s,x,z,activeNavigation) ||
     (activeNavigation.obstacles.get(`${Math.floor(x)},${Math.floor(z)}`)||[]).some(rect=>insideSolid({x,z},rect,BODY_RADIUS));
   return (
     (riverBankAt(x, z, 0.5, s.landSeed) && !crossingAt(s, x, z)) ||
@@ -1470,10 +1476,10 @@ export function walkSegmentClear(s, from, to) {
   const minX=Math.floor(Math.min(from.x,to.x)-1),maxX=Math.ceil(Math.max(from.x,to.x)+1);
   const minZ=Math.floor(Math.min(from.z,to.z)-1),maxZ=Math.ceil(Math.max(from.z,to.z)+1);
   const cached=activeNavigation?.state===s?activeNavigation:null;
-  const camp=cached?.camp||blockedCamp(s),nearby=new Set();
+  const nearby=new Set();
   for(let x=minX;x<=maxX;x++)for(let z=minZ;z<=maxZ;z++){
     if(cached)for(const rect of cached.obstacles.get(`${x},${z}`)||[])nearby.add(rect);
-    if(((riverBankAt(x,z,.5,s.landSeed)&&!crossingAt(s,x,z))||camp.some(c=>c.x===x&&c.z===z))&&segmentHitsSolid(from,to,{x,z,w:1,d:1}))return false;
+    if(terrainBlocked(s,x,z,cached)&&segmentHitsSolid(from,to,{x,z,w:1,d:1}))return false;
   }
   if(cached)return ![...nearby].some(rect=>segmentHitsSolid(from,to,rect));
   for(const p of s.projects){
@@ -1551,7 +1557,15 @@ function naturalPath(s, from, path) {
 export function route(s,from,to,reachOnly=false){
   if(!fastNavigationStates.has(s))return routeUncached(s,from,to,1,reachOnly)||routeUncached(s,from,to,.5,reachOnly);
   const previous=activeNavigation;activeNavigation=prepareNavigation(s);
-  try{return routeUncached(s,from,to,1,reachOnly)||routeUncached(s,from,to,.5,reachOnly);}finally{activeNavigation=previous;}
+  try{
+    const cache=activeNavigation.routes,key=`${from.x},${from.z}:${to.x},${to.z}:${reachOnly}`;
+    if(cache.has(key)){const result=cache.get(key);return result?.map(p=>({...p}))??null;}
+    const result=routeUncached(s,from,to,1,reachOnly)||routeUncached(s,from,to,.5,reachOnly);
+    // Walk queues consume their arrays, so cached paths must never be shared.
+    cache.set(key,result?.map(p=>({...p}))??null);
+    if(cache.size>512)cache.delete(cache.keys().next().value);
+    return result;
+  }finally{activeNavigation=previous;}
 }
 function routeUncached(s, from, to, step=1,reachOnly=false) {
   // Start outside an overlapping obstacle before rounding onto the path grid.

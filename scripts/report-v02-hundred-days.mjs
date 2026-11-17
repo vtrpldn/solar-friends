@@ -8,6 +8,7 @@ import {setOutsideWork} from '../web/v02/weekend/outside-work.js';
 import {LabRunner} from '../web/v02/weekend/lab-runner.js';
 import {GAME_DAY,seasonAt} from '../web/v02/weekend/biological-production.js';
 import {spendableMoney} from '../web/v02/weekend/procurement-budget.js';
+import {materialReconciliation} from '../web/v02/weekend/material-ledger.js';
 import {economyPolicies} from '../web/v02/weekend/economy-policies.js';
 const option=(name,fallback)=>process.argv.find(a=>a.startsWith(`--${name}=`))?.split('=').slice(1).join('=')??fallback;
 const days=Number(option('days',100)),seed=Number(option('seed',42));
@@ -59,6 +60,8 @@ function checkFinite(value,label='state'){
 function sample(day){
  const f=s.finances;checkFinite(s);assert(s.money>=0,'cash never negative');
  assert(Math.abs(s.money-(f.opening+f.income-f.expenses))<.011,'cash matches its ledger');
+ assert(s.wood>=0,'wood stock never negative');
+ assert.deepEqual(materialReconciliation(s),{},`Day ${day}: available stock matches its movement ledger`);
  for(const [id,n]of Object.entries(s.materials))assert(n>=-1e-8,`${id}: negative stock`);
  for(const r of s.people)for(const [key,n]of Object.entries(r.needs))assert(n>=0&&n<=100,`${r.id}: invalid ${key}`);
  const row={day,time:s.time,money:s.money,food:s.materials.food,meals:s.materials.meals,season:seasonAt(s.time),
