@@ -1,0 +1,26 @@
+{
+  "kind": "Three-day normal fixed-step continuation of actual paid catalog village; grid switch off, no resource injections",
+  "source": "docs/balance/evidence/2026-11-17-final-catalog-save.json",
+  "days": 3,
+  "opening": {
+    "time": 1328800.800088645,
+    "money": 640.37,
+    "imported": 2049.112463336901,
+    "electricity": -1946.6499999983746,
+    "water": 79240.54368917875
+  },
+  "closing": {
+    "time": 1338400.8000975857,
+    "money": 1348.85,
+    "imported": 2049.112463336901,
+    "electricity": -1946.6499999983746,
+    "food": 16,
+    "meals": 0,
+    "waterReceived": 79827.6021886482
+  },
+  "outageSteps": 0,
+  "steps": 96000,
+  "minimumClosingHunger": 60.66959999999085,
+  "restores": true,
+  "limitation": "Electrical independence for this layout and weather period, not year-round independence or economic self-sufficiency. Food, transport fuel and outside work remain external."
+}

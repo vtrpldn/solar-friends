@@ -33,7 +33,7 @@ Completed applicable buildings connect automatically. Grid power costs money; so
 Resources → **Village work & trade** provides:
 
 - Work priorities for food/water, maintenance, production and construction, plus worker reservations. Available residents fill these roles; their own needs take precedence. Assigned batches normally finish before category reassignment.
-- Per-resource automatic sales with a minimum reserve, trigger stock and daily unit cap. Zero cap means unlimited. Sales reserve whole trade batches for physical town trips, use the named buyer’s quoted price bands and daily demand, and pay only when the driver reaches town. Finances distinguishes receipts from pending exports.
+- Per-resource automatic sales with a minimum reserve, trigger stock and daily unit cap. Zero cap removes the player-set cap; the buyer’s finite daily demand still applies. Sales reserve whole trade batches for physical town trips, use the named buyer’s quoted price bands and daily demand, and pay only when the driver reaches town. Finances distinguishes receipts from pending exports.
 - Food and the next two batches of repeating production remain protected. Already committed construction/production inputs are outside available stock. Automatic sales default to off and do not run in sandbox.
 
 Each production site has a configurable stock target (default 24). Pending output counts toward it. Set the target sufficiently above the protected reserve to allow at least one sale batch. A target is a stopping threshold, not an exact inventory cap: a whole production batch may cross it.

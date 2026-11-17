@@ -1,6 +1,6 @@
 # Realistic economy implementation plan — v2
 
-Written 2026-11-16. Status: implementation in progress; first physical-trade increment implemented locally. This is the active v2 economy proposal, separate from the historical v1 `plan.md`.
+Written 2026-11-16. Status: implementation, calibration and local validation completed on 2026-11-17, within the documented boundaries below. Production has not been updated. This is the v2 economy implementation plan, separate from the historical v1 `plan.md`.
 
 ## Why
 
@@ -8,40 +8,26 @@ Make the village behave like friends establishing an ecovila: land provides some
 
 Success means quantities, time, money and goods agree across the simulation, and players can understand why their plans succeed or stall. It does not mean reproducing every administrative detail of rural life.
 
-## Current baseline
+## Current implementation — 17 November 2026
 
-The current code already has physical construction work, resident needs, procurement trips, production recipes, water/power systems, named saves, stock targets, protected automatic sales and work priorities. Preserve these useful behaviors while revising their underlying accounting.
+The original stage specifications remain below for traceability. Current values, sources and validation supersede the early checkpoint descriptions:
 
-The main gaps are simplified material units and recipes, instant surplus sales, fixed trade batches and prices, generic inventory capacity, and economic rates that have not been calibrated to one coherent real-world reference. Existing three-day replays and the 68-type catalog playthrough are regression evidence, not proof of realistic balance.
+| Stage | Implemented result |
+| --- | --- |
+| 0 — Reference | Campinas baseline; dated fuel, electricity, timber, tanks, panels/batteries, yield and labor references; exhaustive parameter register with estimates explicitly labeled. |
+| 1 — Foundations | Centavo settlement; physical-unit boundary; derived ownership across stores, reservations, processing, transit and installations; bounded cash/material ledgers; paid-bill and labor migrations. |
+| 2 — Construction | Economic floor/wall/roof areas and differentiated shells; resident labor and hauling; optional home utilities; resident demolition, salvage and relocation. |
+| 3 — Trade | Physical resident exports/purchases, two cars, bulky supplier delivery, shared trips, bounded budgets, finite suppliers, named buyers and price bands. |
+| 4 — Biology | Seasonal growth independent of work, moisture/fertility/compost care, age-preserving food, refrigeration/preservation, animal care, finite selected wild trees and multi-year renewable forestry. |
+| 5 — Utilities | Physical water/power balances, autonomous collection/sanitation defaults, idle-demand corrections, charging losses, equipment condition, parts-based service and replacement. |
+| 6 — Controls | Available/committed cash, household versus investment expenses, ownership views, observed-rate forecast, food/expansion/service budgets, optional outside jobs and actionable upkeep details. |
+| 7 — Validation | 18 current-price fresh starts, three normal-command production-to-sale continuations, all-biome full biological cycles, approximately first-hour browser observations and targeted regression checks. All 68 building types completed through paid supplies/resident work; the resulting village then ran three days with grid imports disabled and no powered-load outages. |
 
-Relevant sources: `web/v02/weekend/catalog-rules.js`, `simulation.js`, `economy-policies.js`, infrastructure modules, `resident-needs.js`, management screens and the isolated lab. The game remains a v2 implementation; do not port v1 wholesale.
+See [calibration](economy-calibration.md), [parameter register](economy-parameter-register.json), [construction](construction-economy.md), [accounting](material-accounting.md), [biology](economy-biology.md), [logistics and care](economy-logistics-and-care.md), and the [validation report](balance/2026-11-17-economy-validation.md).
 
-## Implementation checkpoint — 2026-11-16
+Deliberate implementation adjustments: existing integer pack encoding is retained behind a kg/L/count boundary instead of rewriting every paid save; money retains its reais-facing API with centavo transaction settlement; current ownership derives from authoritative records rather than a second mutable inventory. Shell materials aggregate cement, reinforcement and finishes; preparation stages are estimates rather than separate curing jobs. Vehicle acquisition, resale, financial depreciation, taxes, inflation and loans remain outside this version. Unsurveyed prices, buyer bands and wages are marked assumptions. These boundaries are not represented as completed real-world economic research.
 
-Completed in the first playable increment:
-
-- Initial Campinas reference model for distance-based fuel, travel time and shared electricity tariffs; [calibration](economy-calibration.md) separates sourced observations from assumptions and missing research.
-- Physical export reservations, cancellable before loading, payment in town, and persisted order ownership.
-- Shared outbound sale cargo, mass/volume limits, partial collection of large prepaid construction orders, and explicit trip operating charges.
-- Buyer demand limited per resource and game day; automatic sales use the same order path.
-- Cash postings in whole centavos with sub-cent utility accrual; sale receipts and transport expenses appear in Finances.
-- Export queue/cancellation UI, purchase transport quotes, save validation, and duplicate-settlement checks.
-- Shared approximate cargo/processing measurements and a versioned completion ledger for seven transformations with named loss sinks; see [material accounting](material-accounting.md). This does not complete canonical units or biological accounting.
-- Food batch ages, oldest-first use, spoilage into residues, age-preserving reservations and physical return of usable unsold cargo (2026-11-17); see [food storage](food-storage.md).
-- Resident-installed kitchen refrigeration with finite capacity, metered electricity, outages and a separate cooling switch; see [cold storage](cold-storage.md).
-- Optional kitchen dried-provisions recipe, with lower edible yield, extra labor/biogas and 10-day batch life; see [preservation checkpoint](food-preservation.md).
-- Full outstanding collection budgets protected from grid bills and ordinary shopping, with available versus committed cash in Finances.
-- Diminishing crew efficiency and assembly-time estimates.
-- Task-based labor estimates for core buildings, complete material allocation, and versioned progress migration; see [construction checkpoint](construction-economy.md). Physical quantities and regional labor coefficients remain uncalibrated.
-- Three-day replay of an established village completed a paid house with positive food, water and cash. This is regression evidence, not a fresh-start balance certification.
-
-Further local increments (17 November): separate biological growth and resident labor, seasonal growth modifiers and gradual harvest loss; optional paid outside work; two simultaneous resident-driven cars; paid bulk delivery; automatic animal care and equipment service. See [biology](economy-biology.md) and [logistics and care](economy-logistics-and-care.md) for assumptions and diagnostic evidence.
-
-Further implemented: ongoing crop irrigation, soil fertility and resident compost amendment, preventive food reserve budgets, mass-based spoilage, rolling observed-cash forecasts, ownership valuation, battery quantity consistency and replacement, resident demolition/salvage/relocation and optional trip consolidation, and a navigation fix for residents caught against adjacent camp structures. Current Campinas fuel was updated from the ANP 8–14 November 2026 municipality survey. An 18-case fresh-start matrix and a separate seven-day established-village replay passed; neither substitutes for the remaining full release gates.
-
-Further calibration now includes area-based basic building shells with referenced wall-labor coefficients, bounded production carrying, named local buyers and price bands, a reconciled available-store movement ledger, area-based vegetable yields, juvenile orchards, timber replanting, equipment/roof replacement, charging losses and larger physical water storage. The current 18-case bootstrap matrix passes. The all-building run is still in progress; it exposed and led to a fix for blocked tent entrances.
-
-Further completed: finite supplier allocations, physical-unit controls and ownership views, household-food expense classification, affordable-upkeep queue recovery and fresh-map restart repair. Timber and tank retail references have now been applied, the 2,000 L cistern purchases four tank units, and the full machine-readable [parameter register](economy-parameter-register.json) labels sourced versus estimated values. Fixed-pack internal storage remains behind a physical-unit boundary as documented in [material accounting](material-accounting.md); this avoids reinterpreting paid saves. Full-cycle diagnostic probes cover all biological recipes and all biomes. Remaining release work: current-price bootstrap and catalog continuations, three production-to-sale continuations, ordinary-speed first-hour observations, and final documentation/checks. Regional prices outside the listed references remain explicitly estimated rather than claimed as surveyed quotations.
+The long tests exposed and fixed rest/hauling and camp-access deadlocks, unaffordable upkeep blocking animal care, first-planting double charges, restart resource omissions and named-slot overwrite. Failure saves and earlier-parameter reports remain preserved; current evidence is distinguished from them.
 
 ## Design boundaries
 

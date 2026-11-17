@@ -1,0 +1,438 @@
+[
+  {
+    "script": "scripts/verify-v02-land.mjs",
+    "code": 0,
+    "output": "PASS: 4,096 cell roundtrips, map edges, centered non-overlapping props, connected path and four exact 2:1 camera bearings.\n"
+  },
+  {
+    "script": "scripts/verify-v02-world-settings.mjs",
+    "code": 0,
+    "output": "PASS: all biome/preset combinations persist; savings/supplies, terrain, resource richness and configured trips\nPASS story/sandbox restart seeds retain natural resources and survive reload\n"
+  },
+  {
+    "script": "scripts/verify-v02-camera.mjs",
+    "code": 0,
+    "output": "PASS: camera-relative directions, arrows, diagonal normalization, sprint, frame-rate independence, rotation and zoom.\nPASS: keyboard and button navigation without removed cutscene callback.\n"
+  },
+  {
+    "script": "scripts/verify-v02-grid-power.mjs",
+    "code": 0,
+    "output": "PASS: paid imports, capacity, no debt/idle fee, local-first dispatch, batteries, disconnect and persisted billing.\n"
+  },
+  {
+    "script": "scripts/verify-v02-material-units.mjs",
+    "code": 0,
+    "output": "PASS explicit units cover every catalog/recipe resource; egg mass and unknown-unit guard\nPASS canonical mass/volume/count boundary round-trips every resource without changing paid pack quantities\n"
+  },
+  {
+    "script": "scripts/verify-v02-economy-policies.mjs",
+    "code": 0,
+    "output": "PASS automatic sales, protected food/inputs, daily rollover, save validation, concurrent production/construction and aggregate targets\n"
+  },
+  {
+    "script": "scripts/verify-v02-procurement-budget.mjs",
+    "code": 0,
+    "output": "PASS full manifests, shared fares, paid shipments, legacy trips, save restoration and protected cash\nPASS assembly estimates and diminishing crew efficiency\nPASS every catalog bill of materials reconciles quoted and actual collection fares\nPASS boarding consolidation releases only the already-paid fare and locks on departure\n"
+  },
+  {
+    "script": "scripts/verify-v02-expansion-reserve.mjs",
+    "code": 0,
+    "output": "PASS expansion cash buffer, exact boundary, player override and cash-free use of owned materials\n"
+  },
+  {
+    "script": "scripts/verify-v02-soil-care.mjs",
+    "code": 0,
+    "output": "PASS automatic resident compost application, finite consumption, independent equipment budget and save validation\n"
+  },
+  {
+    "script": "scripts/verify-v02-forecast.mjs",
+    "code": 0,
+    "output": "PASS completed-day forecasts, quiet days, construction exclusion, persistent daily totals and corruption checks\n"
+  },
+  {
+    "script": "scripts/verify-v02-construction-specs.mjs",
+    "code": 0,
+    "output": "PASS material breakdowns, labor scaling, new saves, historical migration and idempotent progress preservation\n"
+  },
+  {
+    "script": "scripts/verify-v02-deliveries.mjs",
+    "code": 0,
+    "output": "PASS paid freight without drivers, delayed physical goods, larger cargo, save settlement and protected freight budget\n"
+  },
+  {
+    "script": "scripts/verify-v02-finances.mjs",
+    "code": 0,
+    "output": "PASS finance reconciliation, bounded ledger, aggregated grid charges, save persistence and old-save baseline\n"
+  },
+  {
+    "script": "scripts/verify-v02-food-storage.mjs",
+    "code": 0,
+    "output": "PASS FIFO consumption, exact expiry, cancellation, rejected spoiled exports, physical returns, cooking/carried spoilage, saves and sandbox\nPASS reservation tampering rejected and expiry is independent of observation step\nPASS spoiled cargo persistence and trade-history pruning during an active trip\nPASS spoiled egg mass cannot amplify compost inputs\n"
+  },
+  {
+    "script": "scripts/verify-v02-natural-entrance.mjs",
+    "code": 0,
+    "output": "PASS: short entrance, level vehicle route, buildable former road and stable species variation.\n"
+  },
+  {
+    "script": "scripts/verify-v02-capybaras.mjs",
+    "code": 0,
+    "output": "PASS: capybara visits, bounded population, finite terrain positions, departure, pause and cleanup\n"
+  },
+  {
+    "script": "scripts/verify-v02-community.mjs",
+    "code": 0,
+    "output": "PASS reading-room: model bounds, recipe, autonomous visit and save.\nPASS outdoor-classroom: model bounds, recipe, autonomous visit and save.\nPASS community-hall: model bounds, recipe, autonomous visit and save.\nPASS exercise-garden: model bounds, recipe, autonomous visit and save.\nPASS volleyball-court: model bounds, recipe, autonomous visit and save.\n"
+  },
+  {
+    "script": "scripts/verify-v02-wildlife.mjs",
+    "code": 0,
+    "output": "PASS: recurring bounded visits, finite terrain positions, pause and cleanup.\n"
+  },
+  {
+    "script": "scripts/verify-v02-animal-care.mjs",
+    "code": 0,
+    "output": "PASS resident animal care, feed and water consumption, idle-animal neglect, automatic scheduling and save\n"
+  },
+  {
+    "script": "scripts/verify-v02-building-controls.mjs",
+    "code": 0,
+    "output": "PASS: passive structures have no power/switch, legacy disabled states recover, active controls persist, and pump capability is stable; 78 catalog nodes initialized.\n"
+  },
+  {
+    "script": "scripts/verify-v02-opening.mjs",
+    "code": 0,
+    "output": "PASS temporary: camp ready after 908 active seconds; R$2000, 0 trips.\nPASS permanent: camp ready after 1508 active seconds; R$1999.94, 0 trips.\nPASS investment: camp ready after 3042 active seconds; R$1623.78, 1 trips.\nPASS scarce tarp, atomic rejection, non-blocking rain, construction payoff and incomplete-goal gating.\n",
+    "priorFailure": "PASS temporary: camp ready after 908 active seconds; R$2000, 0 trips.\nPASS permanent: camp ready after 1508 active seconds; R$1999.94, 0 trips.\nnode:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: investment: opening stalled\n    at file:///Users/paladini/Documents/veeware/solar-friends/scripts/verify-v02-opening.mjs:41:3\n    at ModuleJob.run (node:internal/modules/esm/module_job:377:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:691:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: false,\n  expected: true,\n  operator: '==',\n  diff: 'simple'\n}\n\nNode.js v24.10.0\n"
+  },
+  {
+    "script": "scripts/verify-v02-inventory-ownership.mjs",
+    "code": 0,
+    "output": "PASS project ownership, no manifest duplication, individual car purchases, export reservations and replacement values\nPASS separately installed utilities remain owned assets\n"
+  },
+  {
+    "script": "scripts/verify-v02-growth.mjs",
+    "code": 0,
+    "output": "PASS: nine native growth sequences, six alternate crop sequences, construction footprints and 324 non-overlapping gallery placements.\n"
+  },
+  {
+    "script": "scripts/verify-v02-economy.mjs",
+    "code": 0,
+    "output": "PASS: all 38 building models, correct footprints, repeated construction, save and river generator placement.\nPASS: resident-installed connections, isolated loads, solar charging, night discharge, switched links and energy conservation.\nPASS: powered filtration, water classes, treatment, no sewage-to-fresh conversion and invalid tank rejection.\nPASS: resident extraction, finite stock sales, renewable growth cooldown and storage.\nPASS: residents install power, workshop processing consumes inputs once, outputs and infrastructure survive saves.\nPASS: physical river-water pickup and delivery to a local tank.\nPASS: passive pipe flow and water mass conservation.\nPASS: utility installation unblocks queued production and reload does not duplicate output.\nPASS: legacy river links do not pump; a powered cistern filters delivered raw water.\nPASS: repeat production respects its stock target and restarts after surplus is sold.\n"
+  },
+  {
+    "script": "scripts/verify-v02-water-storage.mjs",
+    "code": 0,
+    "output": "PASS distinct storage capacity, no tank power service, passive delivery, rain collection and powered treatment gating\nPASS autonomous essential water defaults preserve explicit opt-outs\n"
+  },
+  {
+    "script": "scripts/verify-v02-expanded-map.mjs",
+    "code": 0,
+    "output": "PASS: 128x128 terrain, construction/routing beyond old bounds and save restoration.\n"
+  },
+  {
+    "script": "scripts/verify-v02-presentation.mjs",
+    "code": 0,
+    "output": "PASS: continuous positions and animation time at 30/60/120 Hz, equal real-time pace, frozen pause and teleport boundaries.\nPASS: smooth 4x presentation without changing simulation pace.\n"
+  },
+  {
+    "script": "scripts/verify-v02-preservation.mjs",
+    "code": 0,
+    "output": "PASS preservation costs, mass balance, actual kitchen work, mid-carry save, mixed-lot expiry, FIFO and trade cancellation\n"
+  },
+  {
+    "script": "scripts/verify-v02-playtest-fixes.mjs",
+    "code": 0,
+    "output": "PASS blocked/active machinery, night lights, concurrent watering, automatic hauling/purification, sanitation, optional solar, old/new saves, whole-village HUD\nPASS Day 7 save round trip retains time and materials\n"
+  },
+  {
+    "script": "scripts/verify-v02-terrain-grading.mjs",
+    "code": 0,
+    "output": "PASS: sloped blueprints flatten foundations, adjacent pads retain height, terrain raycasts match walking heights, failed placements do not grade, and pads persist safely.\n"
+  },
+  {
+    "script": "scripts/verify-v02-material-ledger.mjs",
+    "code": 0,
+    "output": "PASS available-store reconciliation through ordinary play, bounded history, save validation and missing-event detection\n"
+  },
+  {
+    "script": "scripts/verify-v02-outside-work.mjs",
+    "code": 0,
+    "output": "PASS optional contract, walking commute, offsite work, deferred pay, energy, disable-after-shift and save settlement\nPASS outside work recovers from zero savings without free money or an upfront fare deadlock\n"
+  },
+  {
+    "script": "scripts/verify-v02-personality.mjs",
+    "code": 0,
+    "output": "PASS: distinct needs rhythms, specialties, capped practice, reciprocal friendships and save validation\nPASS: leisure choices use authored preferences\n"
+  },
+  {
+    "script": "scripts/verify-v02-building-removal.mjs",
+    "code": 0,
+    "output": "PASS resident demolition and salvage, exact recovery/loss, unassembled reservation return, duplicate command and save checks\nPASS physical resident relocation, reserved destination, preserved materials and reload\nPASS removed staging depot releases project references without losing save validity\n"
+  },
+  {
+    "script": "scripts/verify-v02-camera-depth.mjs",
+    "code": 0,
+    "output": "PASS: 108 zoom/tilt/rotation/pan combinations retain all terrain depths and identical screen positions.\n"
+  },
+  {
+    "script": "scripts/verify-v02-production-hauling.mjs",
+    "code": 0,
+    "output": "PASS bounded hand loads, physical timber trips, partial-load ownership, reload and exact settlement\nPASS multi-load food harvest retains age and restores between deliveries\n"
+  },
+  {
+    "script": "scripts/verify-v02-placement-qol.mjs",
+    "code": 0,
+    "output": "PASS: road directions, existing anchors, persistence, blocked and unaffordable batch rollback\n"
+  },
+  {
+    "script": "scripts/verify-v02-food-reserve.mjs",
+    "code": 0,
+    "output": "PASS preventive food reserve, daily purchase cap, zero target and save validation\n"
+  },
+  {
+    "script": "scripts/verify-v02-sunlight.mjs",
+    "code": 0,
+    "output": "PASS: daily orbit, projected shadow length, rain contrast, night, wrap and map coverage\n"
+  },
+  {
+    "script": "scripts/verify-v02-elevation.mjs",
+    "code": 0,
+    "output": "PASS: seeded hills, natural center and level river, exact terrain triangle sampling and save compatibility.\n"
+  },
+  {
+    "script": "scripts/verify-v02-audio.mjs",
+    "code": 0,
+    "output": "PASS: gesture startup, music scheduling, single timer, saved mute and hidden-tab suspension/resume.\n"
+  },
+  {
+    "script": "scripts/verify-v02-animals.mjs",
+    "code": 0,
+    "output": "PASS goat_pasture: 2 articulated animals, smooth bounded motion and stable geometry.\nPASS coop: 3 articulated animals, smooth bounded motion and stable geometry.\nPASS goat: 1 articulated animals, smooth bounded motion and stable geometry.\nPASS hen-0: 1 articulated animals, smooth bounded motion and stable geometry.\n"
+  },
+  {
+    "script": "scripts/verify-v02-cold-storage.mjs",
+    "code": 0,
+    "output": "PASS capacity, outages, no resurrection, preservation exclusion, installation, duplicate prevention, saves and billed power demand\n"
+  },
+  {
+    "script": "scripts/verify-v02-exports.mjs",
+    "code": 0,
+    "output": "house: four unclipped day/night PNGs, identical alpha, correct anchors and footprints\nshed: four unclipped day/night PNGs, identical alpha, correct anchors and footprints\ntree: four unclipped day/night PNGs, identical alpha, correct anchors and footprints\nroad: four unclipped day/night PNGs, identical alpha, correct anchors and footprints\nresident: four unclipped day/night PNGs, identical alpha, correct anchors and footprints\n"
+  },
+  {
+    "script": "scripts/verify-v02-modes.mjs",
+    "code": 0,
+    "output": "PASS separate slots, free instant builds, resident construction, sandbox persistence and story defaults.\n"
+  },
+  {
+    "script": "scripts/verify-v02-land-and-living.mjs",
+    "code": 0,
+    "output": "PASS generated finite deposits, deterministic trees, save/load, raw-only hauling, manual purification, one-time felling, timber/planks and nighttime fatigue\n"
+  },
+  {
+    "script": "scripts/verify-v02-resource-trends.mjs",
+    "code": 0,
+    "output": "PASS: warmup, hourly normalization, interpolated rolling baseline, time reset and rounding.\n"
+  },
+  {
+    "script": "scripts/verify-v02-roads.mjs",
+    "code": 0,
+    "output": "PASS: bridge spans dry banks, connects only when complete, safe crossing segments, road placement and persistence without terrain flattening.\nPASS: residents deliver stone and earth, build roads in story and sandbox, and road benefits wait for completion.\n"
+  },
+  {
+    "script": "scripts/verify-v02-lab.mjs",
+    "code": 0,
+    "output": "PASS exact fixed-step equivalence, 128x scheduling, pause and bounded CPU slices\nPASS optional navigation cache matches baseline routes and invalidates on construction changes\nPASS 256x, 512x and 1024x retain fixed-step equivalence\nPASS exact cache invalidation for moves, rotation, completion, felling and removal\n"
+  },
+  {
+    "script": "scripts/verify-v02-concurrent-trips.mjs",
+    "code": 0,
+    "output": "PASS concurrent cars, distinct drivers, capacity limit, dual save/load and exactly-once delivery\n"
+  },
+  {
+    "script": "scripts/verify-v02-economy-reference.mjs",
+    "code": 0,
+    "output": "PASS distance/fuel/travel quotes and consistent electricity forecasts\nPASS calibrated timber, tank retail and physical cistern bill\n"
+  },
+  {
+    "script": "scripts/verify-v02-save-slots.mjs",
+    "code": 0,
+    "output": "PASS named save creation, mode isolation, autosaving, fresh games, load, rename and deletion\nPASS an older open tab cannot overwrite the active named village\nPASS recoverable previous snapshot and rejected-load preservation\nPASS in-game restart preserves the previous named village\n"
+  },
+  {
+    "script": "scripts/verify-v02-terrain.mjs",
+    "code": 0,
+    "output": "PASS: three biome landscapes, terrain height ranges, 320 raycast/height matches, joined terraces and biome scene roundtrips.\nPASS: resident approach, interaction and reset on elevated ground.\n"
+  },
+  {
+    "script": "scripts/verify-v02-production-accounting.mjs",
+    "code": 0,
+    "output": "PASS shared mass definitions, eight balanced transformations, real processing/delivery, mid-carry reload and ledger validation\n"
+  },
+  {
+    "script": "scripts/verify-v02-terraform.mjs",
+    "code": 0,
+    "output": "PASS: raise/lower/flatten/smooth, zero costs, persistence, protected access/foundations, bounds and building on edited terrain.\n"
+  },
+  {
+    "script": "scripts/verify-v02-livestock.mjs",
+    "code": 0,
+    "output": "PASS: individual purchase/recipe counts match visible animals; legacy saves convert once and preserve deliveries.\n"
+  },
+  {
+    "script": "scripts/verify-v02-construction-logistics.mjs",
+    "code": 0,
+    "output": "PASS physical staging, batched hauling, material conservation, save restoration, completion and safe priority reassignment.\n"
+  },
+  {
+    "script": "scripts/verify-v02-connections.mjs",
+    "code": 0,
+    "output": "PASS: 511 shape arrangements; shared/partial edges, holes, corners, overlap, mixed types, four rotations, solar cabinets/panels, compaction, move/delete/undo and save reload.\n"
+  },
+  {
+    "script": "scripts/verify-v02-biological-production.mjs",
+    "code": 0,
+    "output": "PASS resident planting, autonomous calendar growth, seasonal slowdown, gradual field loss, save validation and sandbox\nPASS dry-soil stall, continuing irrigation demand, recovery and rain substitution\nPASS juvenile orchard, mature repeat cycle and paid timber replanting inputs\n"
+  },
+  {
+    "script": "scripts/verify-v02-logistics-policy.mjs",
+    "code": 0,
+    "output": "PASS immediate default, cargo threshold, elapsed wait, urgent dispatch and saved settings\n"
+  },
+  {
+    "script": "scripts/verify-v02-utility-capacity.mjs",
+    "code": 0,
+    "output": "PASS panel/battery quantity consistency, calendar degradation, paid replacement parts, resident installation and save state\n"
+  },
+  {
+    "script": "scripts/verify-v02-camp-placement.mjs",
+    "code": 0,
+    "output": "PASS: custom camp placement, blocked road/edges, simulation and saved camp coordinates.\nPASS: tents grade elevated slopes immediately and preserve their foundations through saves.\n"
+  },
+  {
+    "script": "scripts/verify-v02-house-lighting.mjs",
+    "code": 0,
+    "output": "PASS: all house variants have isolated window glow and restore their daytime materials when unlit.\n"
+  },
+  {
+    "script": "scripts/verify-v02-physical-economy.mjs",
+    "code": 0,
+    "output": "PASS physical sale trips, demand limits, cancellation, delivery, cargo splitting, centavo metering and save validation\n"
+  },
+  {
+    "script": "scripts/verify-v02-blueprint-purchase.mjs",
+    "code": 0,
+    "output": "PASS: exact shortage purchase, immediate pickup, queued orders, physical delivery, construction gating, recovery, save resume and atomic insufficient funds.\nPASS: batching before departure, later-order queue and saved manifest validation.\nPASS: auto-buy toggle prevents purchases, persists and can be re-enabled.\n"
+  },
+  {
+    "script": "scripts/verify-v02-auto-utilities.mjs",
+    "code": 0,
+    "output": "PASS: automatic compatible networks, completed buildings only, powered filtration and delivery, separate wastewater, no extra material charge, idempotence, switches, moves and saves.\n"
+  },
+  {
+    "script": "scripts/verify-v02-residents.mjs",
+    "code": 0,
+    "output": "PASS: six serializable rigs, all supported finite poses, 44 rotated prop/action rehearsals, carrying return, stop reset, blocked approaches, route detours and inaccessible joined-garden interior.\nPASS: full-distance walking arrival, changing gait and visible resident geometry budget.\nPASS: matching transitions at 30/60/120 Hz and continuous interrupted poses.\nPASS: eating, bathing, toilet, reading, play and conversation animate; held props reset between actions.\nPASS: crouching feet stay grounded, conversational elbows bend forward, and eating bowls stay upright throughout each cycle.\n"
+  },
+  {
+    "script": "scripts/verify-v02-retired-material.mjs",
+    "code": 0,
+    "output": "PASS: resource and site removed; old stock, jobs, sites and paid town trips migrate.\n"
+  },
+  {
+    "script": "scripts/verify-v02-town-trip.mjs",
+    "code": 0,
+    "output": "PASS: walk, outbound drive, off-map stay, return, unload, all phase saves, one-time delivery and alternating cars.\n"
+  },
+  {
+    "script": "scripts/verify-v02-blocked-route.mjs",
+    "code": 0,
+    "output": "PASS blocked destination rejected without graph expansion; open paths remain reachable\n"
+  },
+  {
+    "script": "scripts/verify-v02-water-sources.mjs",
+    "code": 0,
+    "output": "PASS: groundwater recharge, power gating, automatic treatment supply, conservation, placement, switch and save/restore.\n"
+  },
+  {
+    "script": "scripts/verify-v02-road-surface.mjs",
+    "code": 0,
+    "output": "PASS: 9464 road-surface raycasts across hills, edited peaks, graded shoulders and four rotations; construction geometry remains finite.\n"
+  },
+  {
+    "script": "scripts/verify-v02-procedural-land.mjs",
+    "code": 0,
+    "output": "PASS: 100 distinct seeded rivers; clear camps and water access; persistent seeds; legacy restore; deterministic terrain variation.\nPASS: resource richness varies across maps and regions\n"
+  },
+  {
+    "script": "scripts/verify-v02-building-rotation.mjs",
+    "code": 0,
+    "output": "PASS: all four rotations, swapped rectangular bounds, collision, grading, entrances, move and save restoration.\n"
+  },
+  {
+    "script": "scripts/verify-v02-project-materials.mjs",
+    "code": 0,
+    "output": "PASS paid project bills survive changed catalog recipes, keep original load counts and reject invalid quantities\nPASS old solar quantity preservation and new six-module bill\n"
+  },
+  {
+    "script": "scripts/verify-v02-upkeep.mjs",
+    "code": 0,
+    "output": "PASS wear, automatic resident service, exact parts consumption, budget limits, vehicle mileage and save validation\nPASS lifetime equipment replacement consumes real parts and resident labor, with persistent age\nPASS blocked replacement does not prevent affordable animal care\n"
+  },
+  {
+    "script": "scripts/verify-v02-library.mjs",
+    "code": 0,
+    "output": "324 3D assets cover all 126 active v0.1 catalog entries; 1412 material batches. Bounds, compaction, scene validation and edit history pass.\n"
+  },
+  {
+    "script": "scripts/verify-v02-obstacle-escape.mjs",
+    "code": 0,
+    "output": "PASS overlap escape uses walkable animation steps instead of an impossible rounded first waypoint\nPASS trapped resident recovers through ordinary movement and needs, without teleportation\n"
+  },
+  {
+    "script": "scripts/verify-v02-new-arrival.mjs",
+    "code": 0,
+    "output": "PASS: new story/sandbox arrival, frozen simulation, in-progress save resume, completed saves do not replay, both cars and five exits\n"
+  },
+  {
+    "script": "scripts/verify-v02-needs.mjs",
+    "code": 0,
+    "output": "PASS: physical eating, individual food consumption and interruption-safe saves\nPASS: separate pee/bowel needs, toilet waste, camp fallback, home and river washing\nPASS: paired conversation, recreation, unavailable supplies, cargo safety, energy recovery, work resumption and save validation\nPASS: hungry residents can collect town food\nPASS: mutually lonely residents take social breaks during active projects\n"
+  },
+  {
+    "script": "scripts/verify-v02-local-market.mjs",
+    "code": 0,
+    "output": "PASS named buyers, disclosed price bands, finite daily demand, cancellation, locked quotes, reload and no arbitrage\n"
+  },
+  {
+    "script": "scripts/verify-v02-models.mjs",
+    "code": 0,
+    "output": "PASS: 324 model roundtrips, 1296 unclipped rotation geometries, exact 2:1 ground projection, shared origin, road edges and rotated shed dimensions.\n"
+  },
+  {
+    "script": "scripts/verify-v02-urgent-needs.mjs",
+    "code": 0,
+    "output": "PASS urgent waking, nearby river, population reserve, paid food recovery, opt-out, automatic crop water\nPASS urgent physical needs beat optional breaks, including at low energy\n"
+  },
+  {
+    "script": "scripts/verify-v02-supplier-stock.mjs",
+    "code": 0,
+    "output": "PASS finite suppliers, atomic reservation, reload, replenishment, catalog feasibility and household expense classification\n"
+  },
+  {
+    "script": "scripts/verify-v02-first-planting.mjs",
+    "code": 0,
+    "output": "PASS first planting consumes paid seeds once; reload, repeated orders, later cycles and salvage conserve stock\n"
+  },
+  {
+    "script": "scripts/verify-v02-economic-recovery.mjs",
+    "code": 0,
+    "output": "PASS recorded cash-poor, starving village recovers through movement, care, outside jobs and ordinary food purchasing\n"
+  },
+  {
+    "script": "scripts/verify-v02-hauling-needs-recovery.mjs",
+    "code": 0,
+    "output": "PASS actual catalog save recovers empty-handed haulers from urgent-needs/rest loop without injected supplies or cash\n"
+  }
+]
