@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {box,beam,cylinder} from '../workshop/models.js';
-import {gableRoof,leanRoof} from './roof-forms.js';
+import {gableRoof} from './roof-forms.js';
 
 // All stages share these anchors: the house occupies the rear-left of its run.
 const HOME={x:-1.5,z:-1.5,eave:2.35,ridge:3};
@@ -17,8 +17,7 @@ function enclosure(g,stage){
   const p=part(g,'run-panel',x,z);p.rotation.y=turn;
   for(const y of [.15,1.2])box(p,width,.07,.07,'timberLight',0,y,0);
   if(stage===1)return;
-  for(const y of [.4,.7,1])box(p,width,.018,.018,'glass',0,y,0);
-  for(let x=-width/2+.25;x<width/2;x+=.5)box(p,.018,1.05,.018,'glass',x,.675,0);
+  box(p,width,.055,.055,'timberLight',0,.65,0);
  }
  panel(0,-3.5,7);panel(-3.5,0,7,Math.PI/2);panel(3.5,0,7,Math.PI/2);
  panel(-2.05,3.5,2.9);panel(2.05,3.5,2.9);
@@ -52,11 +51,9 @@ export function chickenCoop(chicken,stage=2){
  beam(frame,[0,HOME.ridge,-1.25],[0,HOME.ridge,1.25],.1,'timber');
  for(let x=-.9;x<1;x+=.2)box(home,.19,.09,2,'timberLight',x,.36,0);
  if(stage===1)return g;
- // Broad boards keep the walls readable at gameplay scale.
- for(let y=.52;y<2.25;y+=.23){
-  box(home,2,.215,.09,'timberLight',0,y,-1);
-  for(const x of [-1,1])box(home,.09,.215,2,y>1.9?'timber':'timberLight',x,y,0);
- }
+ // Quiet wall planes keep the small building legible at game zoom.
+ box(home,2,1.84,.09,'timberLight',0,1.33,-1);
+ for(const x of [-1,1])box(home,.09,1.84,2,'timberLight',x,1.33,0);
  // Full-height cleaning door and a separate low hen hatch.
  box(home,.82,1.85,.08,'teal',-.48,1.33,1.02);
  for(const x of [-.94,-.02,.3,.85])box(home,.07,1.94,.12,'timber',x,1.37,1.03);
@@ -67,7 +64,7 @@ export function chickenCoop(chicken,stage=2){
  for(const y of [.55,2.1])box(home,.8,.07,.1,'timberLight',-.48,y,1.09);
  box(home,.07,.07,.08,'stone',-.18,1.3,1.1);
  const ramp=part(home,'hen-ramp',.575,1.5);ramp.position.y=.22;ramp.rotation.x=.32;
- box(ramp,.48,.06,1,'timberLight');for(const z of [-.4,-.2,0,.2,.4])box(ramp,.48,.035,.045,'timber',0,.05,z);
+ box(ramp,.48,.06,1,'timberLight');for(const z of [-.3,0,.3])box(ramp,.48,.035,.045,'timber',0,.05,z);
  box(home,.95,.16,.45,'stone',-.48,.08,1.3);
  // Front gable ventilation slats sit below the same roof as the trusses.
  for(let n=0;n<3;n++)box(home,1.65-n*.5,.08,.07,'timberLight',0,2.45+n*.16,1);
@@ -75,12 +72,10 @@ export function chickenCoop(chicken,stage=2){
  // Exterior nest-box access on the right wall, away from the cleaning door.
  const nests=part(home,'nest-boxes',1.24,-.25);
  box(nests,.48,.45,1.2,'timberLight',0,.95,0);
- for(const z of [-.4,0,.4])box(nests,.03,.38,.035,'timber',.25,.95,z);
- const lid=part(nests,'nest-lid');lid.rotation.y=Math.PI/2;leanRoof(lid,1.35,.62,1.18,1.3);
+ const lid=box(nests,.62,.07,1.35,'timber',0,1.23,0);lid.rotation.z=-.18;
  for(const z of [-.45,.3])beam(home,[-.8,.85,z],[.8,.85,z],.055,'timber');
  const feed=part(g,'feed-station',1.7,-1);
  cylinder(feed,.22,.3,.42,'teal',0,.27,0,8);cylinder(feed,.38,.38,.07,'tile',0,.07,0,10);
- cylinder(feed,.24,0,.14,'timberLight',0,.55,0,8);
  const water=part(g,'water-station',2.5,.2);
  cylinder(water,.25,.3,.38,'stone',0,.27,0,10);cylinder(water,.4,.4,.08,'teal',0,.08,0,10);
  for(const [i,x,z]of [[0,-.5,.6],[1,1.2,1.5],[2,.4,2.3]]){const bird=chicken(i);bird.position.set(x,0,z);g.add(bird);}

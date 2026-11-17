@@ -8,7 +8,7 @@ for(const model of models){
  assert(model.getObjectByName('coop-house').position.distanceTo(finished.getObjectByName('coop-house').position)<1e-6,'house anchor remains fixed');
  const run=bounds(model.getObjectByName('run-posts')),end=bounds(finished.getObjectByName('run-posts'));
  for(const axis of ['x','z']){assert.equal(run.min[axis],end.min[axis]);assert.equal(run.max[axis],end.max[axis]);}
- assert.equal(model.userData.revision,5);
+ assert.equal(model.userData.revision,6);
 }
 const frame=m=>{const g=m.getObjectByName('coop-frame');return g.children.map(o=>({matrix:o.matrixWorld.toArray().map(n=>+n.toFixed(6)),bounds:bounds(o).getSize(new THREE.Vector3()).toArray().map(n=>+n.toFixed(6))}));};
 assert.deepEqual(frame(assembly),frame(finished),'assembly framing must remain in the completed coop');

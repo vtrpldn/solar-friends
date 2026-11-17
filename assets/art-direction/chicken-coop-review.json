@@ -1,6 +1,6 @@
 {
   "source": "web/v02/library/chicken-coop.js",
-  "sha256": "047d1fd097b055cfb5deb71a0b6012d4cab2ead97c3487317ba54e2678f6c43e",
+  "sha256": "10874c2e3c4cd5ef45c50fa11cc7a1e57162cbe05e8c4301e6af72296dbee0ec",
   "status": "reviewed locally; awaiting user review",
   "evidence": [
     "assets/validation/chicken-coop/before.png",
@@ -13,7 +13,8 @@
     "Groundwork and assembly share the final rear-left house anchor and run post positions.",
     "Assembly trusses and posts persist in the finished coop; regression check compares their world transforms.",
     "Resident-scale cleaning door, separate hen hatch and ramp, nest boxes, feed and water stations visible in the desktop scene.",
-    "Day/night geometry and ground contact remain consistent."
+    "Day/night geometry and ground contact remain consistent.",
+    "Simplified after user feedback: open timber rails replace dense fence mesh, broad wall panels replace repeated boards, and the nest lid and ramp use fewer details."
   ],
   "checks": [
     "verify-v02-coop-stages.mjs",
@@ -24,7 +25,7 @@
   "triangles": {
     "groundwork": 348,
     "assembly": 732,
-    "finished": 3570
+    "finished": 2388
   },
   "limitations": [
     "Reviewed visual geometry, not a change to animal behavior or production rules."
