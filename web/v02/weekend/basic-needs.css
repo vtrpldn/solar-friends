@@ -1,13 +1,13 @@
-#basic-needs { position:fixed; z-index:5; top:100px; left:18px; display:flex; gap:6px; padding:6px; border:1px solid #c7bb97; border-radius:13px; background:#fff7e7ef; box-shadow:0 3px 12px #283a2720; }
-#basic-needs[hidden] { display:none; }
-#basic-needs button { width:158px; display:grid; gap:3px; text-align:left; padding:8px 10px; background:#f0f1df; border:1px solid transparent; border-radius:8px; box-shadow:none; color:#3e5c40; }
-#basic-needs button:hover { border-color:currentColor; }
-#basic-needs button:focus-visible { outline:3px solid #8d713b; outline-offset:2px; }
-#basic-needs .need-label { font-size:11px; font-weight:650; text-transform:uppercase; letter-spacing:.6px; }
-#basic-needs strong { font-size:14px; line-height:1.25; }
-#basic-needs small { font-size:11px; line-height:1.4; font-weight:400; letter-spacing:0; text-transform:none; }
-#basic-needs [data-status="watch"] { background:#f6ebcf; color:#775823; }
-#basic-needs [data-status="alert"] { background:#f5dfd3; color:#8a422d; }
-#basic-needs [data-status="neutral"] { background:#eeece2; color:#626858; }
-/* The summary includes tank alerts, so do not stack the older duplicate banner. */
+/* Reuse the counters' existing third line; add no overlay or new HUD row. */
+#supplies .need-status { letter-spacing:0; font-size:10px; font-weight:500; }
+#supplies [data-status="good"] .need-status { color:#527044; }
+#supplies [data-status="watch"] .need-status { color:#91652d; }
+#supplies [data-status="alert"] .need-status { color:#a2442d; font-weight:700; }
+#supplies [data-status="neutral"] .need-status { color:#817355; }
+#supplies .need-sanitation { align-self:center; position:relative; min-width:38px; width:38px; height:38px; padding:0; border-radius:50%; font-size:11px; font-weight:650; color:#686b53; background:var(--paper); box-shadow:0 2px 0 #b19a6e; }
+.need-sanitation::after { content:''; position:absolute; top:1px; right:1px; width:7px; height:7px; border:2px solid var(--paper); border-radius:50%; background:#8b8d7b; }
+.need-sanitation[data-status="good"]::after { background:#658458; }
+.need-sanitation[data-status="watch"]::after { background:#bd8a3e; }
+.need-sanitation[data-status="alert"]::after { background:#b95238; }
+#supplies .need-sanitation:focus-visible { outline:3px solid #8d713b; outline-offset:2px; }
 #tank-attention { display:none; }

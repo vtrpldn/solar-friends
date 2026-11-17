@@ -23,18 +23,17 @@ export function basicNeeds(s) {
  return [power,water,food,sanitation];
 }
 
-export function renderBasicNeeds(root,s,open) {
- const statuses=basicNeeds(s),marks={good:'✓',watch:'!',alert:'!',neutral:'–'};
- if(!root.children.length)for(const row of statuses){
-  const button=document.createElement('button');button.type='button';button.dataset.need=row.id;
-  button.innerHTML='<span class="need-label"></span><strong></strong><small></small>';
-  button.onclick=()=>open(row.panel);root.append(button);
- }
- statuses.forEach((row,i)=>{
-  const b=root.children[i];b.dataset.status=row.status;
-  b.querySelector('.need-label').textContent=`${marks[row.status]} ${row.label}`;
-  b.querySelector('strong').textContent=row.summary;b.querySelector('small').textContent=row.detail;
+export function renderBasicNeeds(root,s) {
+ const statuses=basicNeeds(s),marks={good:'✓',watch:'!',alert:'!',neutral:'·'};
+ let sanitation=root.querySelector('.need-sanitation');
+ if(!sanitation){sanitation=document.createElement('button');sanitation.type='button';sanitation.className='need-sanitation';sanitation.dataset.panel='water';sanitation.textContent='WC';root.append(sanitation);}
+ const buttons={food:root.children[1],power:root.children[2],water:root.children[3],sanitation};
+ for(const row of statuses){
+  const b=buttons[row.id];b.dataset.need=row.id;b.dataset.status=row.status;
+  const status=b.querySelector('.resource-trend');
+  if(status){status.textContent=`${marks[row.status]} ${row.summary}`;status.classList.add('need-status');}
   b.setAttribute('aria-label',`${row.label}: ${row.summary}. ${row.detail}. Open management.`);
-  b.title=row.id==='food'?'Reserve estimate: two portions per resident per day, before future spoilage. Crops that need cooking and cargo in transit are excluded.':row.id==='water'?'Camp drinking reserve. Low means under six hours at current resident count; washing and irrigation are additional demands.':row.id==='sanitation'?'Current facility stock and observed waiting. Availability does not guarantee a clear route or a free facility.':'Current requested loads. No demand does not guarantee capacity for future work or nighttime lighting.';
- });
+  const explanation=row.id==='food'?'Estimate: two portions per resident per day, before spoilage; excludes uncooked crops and cargo.':row.id==='water'?'Low reserve: under six drinking hours at camp. Washing and irrigation need additional water.':row.id==='sanitation'?'Current stock and observed waiting; access and occupancy may still limit service.':'Current requested loads; future work and nighttime lighting may need more power.';
+  b.title=`${row.label}: ${row.summary}. ${row.detail}. ${explanation} Click to manage.`;
+ }
 }

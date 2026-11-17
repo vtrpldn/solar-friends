@@ -534,7 +534,7 @@
     "description": "The scene and inspection panels show conditions and resident activity.",
     "diagram": "flowchart LR\n State[Village conditions] --> Crops[Instanced crop stage, condition and coverage]\n State --> Residents[Resident action, tools and cargo animation]\n State --> Lighting[Powered night lights]\n State --> Inspect[Bed panels, almanac, lenses and warnings]\n Inspect --> Commands[Explicit player commands]\n Commands --> State\n Seed[Stable visual seed] --> Crops\n Ambient[Birds, butterflies and other ambient animation] --> Scene[Rendered world]\n Crops --> Scene\n Residents --> Scene\n Lighting --> Scene\n Audio[Music and effect volume controls] --> Sound[Presentation audio]",
     "boundary": "Ambient wildlife is not livestock, pollination or a saved ecological population.",
-    "tip": "Check the four basic-needs buttons for shortages and reserves; click one to manage it. Availability is a current observation, not a guarantee of future supply or access.",
+    "tip": "Read the status beneath food, battery and water counters; the WC indicator shows sanitation. Hover for details or click to manage. These are current observations, not guarantees of future supply or access.",
     "facts": null
   }
 ]

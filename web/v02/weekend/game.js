@@ -1650,8 +1650,6 @@ function renderUI() {
   if (signature === uiSignature) return;
   uiSignature = signature;
   const active = s.stage !== "arrival" && !s.arrivalAnimating;
-  $("basic-needs").hidden = !active;
-  renderBasicNeeds($("basic-needs"),s,panel=>management.open(panel));
   if (active && arrivalMessageShown) message("");
   arrivalMessageShown = !active;
   if(s.arrivalAnimating) message("Our friends are arriving…");
@@ -1717,6 +1715,8 @@ function renderUI() {
     disabledReason(button, "Wait for the residents to arrive and choose a campsite to manage village supplies.");
     button.disabled = !active;
   });
+  renderBasicNeeds($("supplies"),s);
+  $("supplies").querySelector(".need-sanitation").disabled = !active;
   const minutes = 9 * 60 + Math.floor(s.time * 0.45);
   $("clock").textContent =
     s.stage === "evening"
