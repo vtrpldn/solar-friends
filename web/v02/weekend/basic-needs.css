@@ -5,7 +5,7 @@
 #basic-needs button:focus-visible { outline:3px solid #8d713b; outline-offset:2px; }
 #basic-needs .need-label { font-size:11px; font-weight:650; text-transform:uppercase; letter-spacing:.6px; }
 #basic-needs strong { font-size:14px; line-height:1.25; }
-#basic-needs small { font-size:10px; line-height:1.4; }
+#basic-needs small { font-size:11px; line-height:1.4; font-weight:400; letter-spacing:0; text-transform:none; }
 #basic-needs [data-status="watch"] { background:#f6ebcf; color:#775823; }
 #basic-needs [data-status="alert"] { background:#f5dfd3; color:#8a422d; }
 #basic-needs [data-status="neutral"] { background:#eeece2; color:#626858; }

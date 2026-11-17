@@ -1,4 +1,4 @@
-import {renderBasicNeeds} from './basic-needs.js';
+import {basicNeeds,renderBasicNeeds} from './basic-needs.js';
 import {installGuide} from './guide.js';
 let guide;
 import {ensureCultivation} from './cultivation.js';
@@ -1611,6 +1611,7 @@ let arrivalMessageShown = false;
 function renderUI() {
   farmingUI?.refresh();
   const signature = JSON.stringify([
+    basicNeeds(s),
     openPanel,
     s.stage,
     s.opening,

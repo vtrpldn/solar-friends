@@ -35,6 +35,6 @@ export function renderBasicNeeds(root,s,open) {
   b.querySelector('.need-label').textContent=`${marks[row.status]} ${row.label}`;
   b.querySelector('strong').textContent=row.summary;b.querySelector('small').textContent=row.detail;
   b.setAttribute('aria-label',`${row.label}: ${row.summary}. ${row.detail}. Open management.`);
-  b.title=row.id==='food'?'Reserve estimate: two portions per resident per day. Crops that need cooking and cargo in transit are excluded.':row.id==='water'?'Camp drinking reserve. Low means under six hours at current resident count; washing and irrigation are additional demands.':row.id==='sanitation'?'Current facility stock and observed waiting. Availability does not guarantee a clear route or a free facility.':'Current requested loads. No demand does not guarantee capacity for future work or nighttime lighting.';
+  b.title=row.id==='food'?'Reserve estimate: two portions per resident per day, before future spoilage. Crops that need cooking and cargo in transit are excluded.':row.id==='water'?'Camp drinking reserve. Low means under six hours at current resident count; washing and irrigation are additional demands.':row.id==='sanitation'?'Current facility stock and observed waiting. Availability does not guarantee a clear route or a free facility.':'Current requested loads. No demand does not guarantee capacity for future work or nighttime lighting.';
  });
 }
