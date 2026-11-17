@@ -8,7 +8,7 @@ function meshBox(group,w,h,d,color,x,y,z,opacity=1){
  if(!group.userData.boxes.has(key))group.userData.boxes.set(key,{color,opacity,parts:[]});
  group.userData.boxes.get(key).parts.push(m);return m;
 }
-export function cultivationSignature(p,s){return JSON.stringify([Math.floor(s.time/3200),(s.operations||[]).filter(o=>!o.done&&o.site===p.id&&o.farm).map(o=>[o.farm.bed,o.farm.action,Math.floor(o.work/o.farm.work*10)]),p.fieldSize,p.rotation,p.cultivation.beds.map(b=>[b.stage,b.crop,b.density,Math.floor(b.growth*20),Math.floor(b.moisture*5),Math.floor(b.cover*5),Math.floor((b.elapsed?b.stress/b.elapsed:0)*5)])]);}
+export function cultivationSignature(p,s){return JSON.stringify([Math.floor(s.time/3200),(s.operations||[]).filter(o=>!o.done&&o.site===p.id&&o.farm).map(o=>[o.farm.bed,o.farm.action,Math.floor(o.work/o.farm.work*10)]),p.fieldSize,p.rotation,p.cultivation.beds.map(b=>[b.stage,b.crop,b.density,Math.floor(b.growth*20),Math.floor(b.moisture*5),Math.floor((b.droughtDamage||0)*5),Math.floor(b.cover*5),Math.floor((b.elapsed?b.stress/b.elapsed:0)*5)])]);}
 export function createCultivationModel(p,state){
  const root=new THREE.Group(),beds=p.cultivation.beds;
  const size=p.key==='field'?p.fieldSize:p.key==='garden'?[3,6]:[4,6];

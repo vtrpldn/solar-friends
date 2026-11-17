@@ -33,6 +33,6 @@ for(const [repeat,stockRecipe] of [['preserve_meals',null],['meals',PROCESSES.pr
  const kitchen={id:v.nextId++,key:'kitchen',x:v.stock.x+3,z:v.stock.z+3,rotation:0,work:PROJECTS.kitchen.work,delivered:0,repeat,stockTarget:8};v.projects.push(kitchen);
  const sys=syncInfrastructure(v,PROJECTS);sys.nodes[kitchen.id].water[0]=sys.nodes[kitchen.id].capacity[0];sys.biogas=10;
  tick(v,.1);
- assert(v.operations?.some(o=>o.recipe===repeat&&!o.done),`${repeat} must run despite stock of the other meal type: ${kitchen.productionStatus}`);
+ assert(!v.operations?.some(o=>o.recipe===repeat&&!o.done),`legacy ${repeat} must not restart automatically`);
 }
-console.log('PASS live fresh and preserved production targets');
+console.log('PASS generic repeating recipes stay removed');

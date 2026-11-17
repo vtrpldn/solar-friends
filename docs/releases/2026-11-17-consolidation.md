@@ -1,0 +1,26 @@
+# Active-chat consolidation — 17 November 2026
+
+## Why
+
+Publish the completed active Solar Friends work together, resolve overlapping mechanics and interfaces, and retain evidence before cleaning up source checkouts.
+
+Included branch tips:
+
+- `codex/basic-needs-status` — `d9a2ab40`: Guide, charts and compact needs indicators.
+- `codex/simulation-realism` — `78b81922`: seasonal weather, watershed reserves, individual hydration, animal care, crop failure and removal of generic repeating jobs.
+- `codex/food-management` — `8fe2f238`: Food Almanac, expiry-aware reserves, optional kitchen policies and volume-based cooling.
+- `codex/shared-meals` — `7d305380`: shared meals in the Rust/v1 simulation.
+- `codex/crafting-workflow` — `4257fde2`: Make / Repair / Jobs desktop workflows.
+- `codex/farming-field-models` — `f7148c59`: field and coop models, whole-field controls and utility lenses.
+- `codex/auto-speed-64x` — `aa576217`: automatic speed, resident selection/animation, bug reports and calendar/weather controls.
+
+Integration decisions:
+
+- Generic repeat jobs stay removed. Separate opt-in Food Almanac kitchen policies remain available.
+- The clock reads the actual simulated weather instead of the earlier display-only temperature estimate.
+- The needs summary uses individual hydration demand and eligible potable water, excluding animal tanks; thirsty residents override an apparently adequate village total.
+- Whole-field management retains failed/expired crop handling, with individual bed inspection available.
+- Guide content describes these implemented flows. The existing biogas cooking fallback is documented accurately; it is not an electricity generator or bounded gas network.
+- The compact status UI stays inside existing counters. Guide/Lenses controls clear the expanded clock.
+
+Validation, deployment identity and the requested timed sessions will be recorded after their actual completion. The one-hour playtest starts only after production identity is confirmed; the separate performance hour starts after that playtest.

@@ -1717,14 +1717,13 @@ function renderUI() {
     s.stage === "evening"
       ? "Saturday · Evening"
       : `Day ${Math.floor(minutes / 1440) + 1} · ${String(Math.floor(minutes / 60) % 24).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-  $("weather-summary").textContent=weatherText(s);
   $("weather-forecast").textContent=forecast(s).map(d=>`Day ${d.day}: ${d.rain}, ${d.temperature}`).join(" · ");
   const environment=environmentInfo(s);
   $("calendar-date").textContent=environment.date;
   $("calendar-date").title=`Year ${environment.year} · ${environment.season} · 365-day game calendar`;
   $("weather").textContent=`${environment.icon} ${environment.weather}`;
-  $("temperature").textContent=`~${environment.temperature}°C`;
-  $("temperature").setAttribute('aria-label',`Estimated temperature ${environment.temperature} degrees Celsius`);
+  $("temperature").textContent=`${environment.temperature}°C`;
+  $("temperature").setAttribute('aria-label',`Simulated temperature ${environment.temperature} degrees Celsius`);
   $("tasks").replaceChildren();
   $("completed-tasks").replaceChildren();
   const builtCount = s.projects.filter(

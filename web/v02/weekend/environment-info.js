@@ -1,3 +1,4 @@
+import {weatherAt} from './weather.js';
 import {seasonAt} from './biological-production.js';
 
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -9,11 +10,10 @@ export function environmentInfo(state){
   while(day>=DAYS[month])day-=DAYS[month++];
   const hour=(minutes%1440)/60,season=seasonAt(state.time);
   const night=hour<6||hour>=18;
-  const weather=state.rain?'Rain':night?'Clear night':'Sunny';
-  const mean={'mata-atlantica':23,cerrado:26,caatinga:29}[state.worldSettings?.biome]??23;
-  // Ambient estimate for the HUD, not a new crop/health simulation input.
-  const temperature=Math.round(mean+({Summer:3,Autumn:0,Winter:-4,Spring:1}[season])+
-    4*Math.cos((hour-14)*Math.PI/12)-(state.rain?3:0));
+  const current=state.weather||weatherAt(state);
+  const raining=state.weather?current.rainMmPerHour>.05:state.rain;
+  const weather=raining?'Rain':current.cloudCover>.5?'Cloudy':night?'Clear night':'Sunny';
+  const temperature=Math.round(current.temperatureC);
   return {date:`${day+1} ${MONTHS[month]}`,year:Math.floor((304+elapsedDays)/365)+1,season,weather,
-    icon:state.rain?'☂':night?'☾':'☀',temperature};
+    icon:raining?'☂':current.cloudCover>.5?'☁':night?'☾':'☀',temperature};
 }

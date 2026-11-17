@@ -30,7 +30,7 @@ The Guide ships first with current mechanics. The five mechanics below are plann
 | 2 | Tree and perennial propagation | Established plants can supply replacement starts through nursery work. |
 | 3 | Manure recovery | Actual animal feed/care produces collectable manure usable in compost. |
 | 4 | Local repairs | Compatible tools can be repaired with local materials; specialist parts remain imports. |
-| 5 | Useful biogas | Captured gas replaces part of a defined kitchen fuel/energy demand. |
+| 5 | Useful biogas | Bounded, site-owned gas replaces the existing global cooking fallback. |
 
 Each increment must include the mechanic, persistence/migration, job and resource accounting, visible activity, Guide diagram/tip updates and regression evidence. Merge each PR only with explicit approval.
 
@@ -87,7 +87,7 @@ Define which wear a local repair can recover, material costs and any maximum rec
 
 **Player action:** connect a working digester and bounded gas storage to a compatible kitchen burner. Start with thermal use, not a new electricity generator.
 
-The current `biogas` counter is not a fuel network. Give new captured gas explicit units, capacity, leakage/loss accounting and site ownership. Calibrate conversion from the modeled digester input; treatment byproducts remain explicit. Do not reinterpret historical accumulated counters as free usable fuel: migrate them as historical totals and initialize usable storage to zero.
+The current `biogas` balance already supports kitchen work when electricity is unavailable, but it is not a bounded fuel network. Give new captured gas explicit units, capacity, leakage/loss accounting and site ownership. Calibrate conversion from the modeled digester input; treatment byproducts remain explicit. Do not reinterpret historical accumulated counters as free usable fuel: migrate them as historical totals and initialize usable storage to zero.
 
 A kitchen with a compatible installed burner withdraws gas while a cooking job actually runs. Separate cooking heat from lighting, refrigeration and other electrical loads before claiming substitution. Define the fuel-energy equivalence and conversion efficiency once. Failed gas withdrawal must pause the fuel-dependent work or use an explicitly configured alternative; never charge two fuels for the same work. Use existing infrastructure connections and completed-installation checks rather than a parallel utility engine.
 

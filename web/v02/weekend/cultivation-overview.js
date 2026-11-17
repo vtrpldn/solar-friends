@@ -1,4 +1,4 @@
-import {CROPS,farmJobError} from './cultivation.js';
+import {CROPS,farmJobError,harvestExpired} from './cultivation.js';
 import {configureBed,queueBedJob} from './simulation.js';
 
 export function configureCultivation(s,p,settings){
@@ -22,8 +22,8 @@ export function queueCultivation(s,p,action){
 
 export function renderCultivationOverview({content,s,p,changed,message,inspect,feedback}){
  const beds=p.cultivation.beds;
- const stages={unprepared:'Unworked soil',prepared:'Ready to plant',growing:'Growing',harvestable:'Ready to harvest',harvested:'Harvest complete'};
- const count=stage=>beds.filter(b=>b.stage===stage).length;
+ const stages={expired:'Harvest expired',failed:'Crop failed',planted:'Planting',unprepared:'Unworked soil',prepared:'Ready to plant',growing:'Growing',harvestable:'Ready to harvest',harvested:'Harvest complete'};
+ const count=stage=>beds.filter(b=>(harvestExpired(b,s.time)?'expired':b.stage)===stage).length;
  const busy=b=>(s.operations||[]).some(o=>!o.done&&o.site===p.id&&o.farm?.bed===b.id);
  const editable=b=>!busy(b)&&['unprepared','prepared','harvested'].includes(b.stage);
  const planting=beds.filter(editable),care=beds.filter(b=>!busy(b));
