@@ -111,6 +111,7 @@ assert(
     sys.account.generated -
       sys.account.consumed -
       sys.account.curtailed -
+      sys.account.storageLosses -
       stored,
   ) < 1e-6,
   "Energy conservation",
@@ -149,7 +150,7 @@ assert(sys.nodes[banana.id].water[3] < 10);
 assert.equal(sys.nodes[banana.id].water[0], 0);
 assert(validInfrastructure(water));
 const bad = structuredClone(water);
-bad.infrastructure.nodes[well.id].water[0] = 999;
+bad.infrastructure.nodes[well.id].water[0] = bad.infrastructure.nodes[well.id].capacity[0]+1;
 assert.equal(restore(save(bad)), null);
 console.log(
   "PASS: powered filtration, water classes, treatment, no sewage-to-fresh conversion and invalid tank rejection.",

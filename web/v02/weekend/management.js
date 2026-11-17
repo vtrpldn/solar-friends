@@ -1,3 +1,4 @@
+import {materialLedger,materialReconciliation} from './material-ledger.js';
 import {marketTerms} from './local-market.js';
 import {inventoryOwnership} from './economy-inventory.js';
 import {upkeep,upkeepText} from "./asset-upkeep.js";
@@ -253,6 +254,10 @@ export function createManagement({
       add('p',forecast.days?`Available cash could reach ${money(forecast.low)}–${money(forecast.high)} if the best or worst daily operating cash flow from the last ${forecast.days} complete days repeats. Mean operating change: ${money(forecast.mean)}/day. This is a scenario range, not guaranteed income; excludes new construction and assumes the same shopping, work and sales.`:'A forecast needs at least one complete recorded day. Future crops and unpaid exports are not included in available cash.');
       add('p',`Construction investment paid: ${money(Math.abs(f.categories.construction||0))}. Other cash spending: ${money(Math.max(0,f.expenses-Math.abs(f.categories.construction||0)))}. Stored supplies and installed buildings are assets, not spendable savings.`);
       const assets=inventoryOwnership(s,PROJECTS,PROCESSES,MATERIALS).values;
+      add('h3','Store movements');
+      const ledger=materialLedger(s),differences=materialReconciliation(s);
+      add('p',Object.keys(differences).length?'Some stock changes predate or bypass the movement record. Current physical stock remains authoritative.':'Recorded opening stock plus arrivals minus use and transfers matches current stores.');
+      for(const entry of ledger.entries.slice(-8).reverse())add('p',`${financeTime(entry.time)} · ${entry.quantity>0?'+':''}${entry.quantity} ${MATERIALS[entry.id].name} · ${entry.reason}`);
       add('h3','Where our supplies are');
       add('p',`Replacement-cost estimates: stores ${money(assets.available)}; committed to projects or sales ${money(assets.reserved)}; processing inputs ${money(assets.processing)}; goods travelling ${money(assets.transit)}; building materials installed ${money(assets.installed)}. These estimates exclude land, cars, labor, depreciation and separately installed upgrades; they are not resale quotes.`);
       add('h3','Protect everyday supplies');
@@ -308,7 +313,7 @@ export function createManagement({
         ],
         [
           "Stored energy",
-          `${nodes.reduce((v, n) => v + n.charge, 0).toFixed(1)} kWh`,
+          `${nodes.reduce((v, n) => v + n.charge, 0).toFixed(1)} kWh · 90% charging efficiency`,
         ],
         [
           "Buildings without power",

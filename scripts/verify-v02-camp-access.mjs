@@ -1,0 +1,10 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+import {createWeekend,chooseCamp,placementError,tentDoor,restore,save,tick,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+const fresh=createWeekend(42);chooseCamp(fresh,'entrance');const door=tentDoor(fresh,0);
+assert.match(placementError(fresh,'supply-0',door.x-1,door.z),/tent entrances/,'blueprints must preserve camp access');
+const s=restore(fs.readFileSync('docs/balance/evidence/2026-11-17-blocked-camp-save.json','utf8'));assert(s);enableFastNavigation(s);
+for(let i=0;i<96000;i++)tick(s,.1);
+assert(s.people.every(r=>r.energy>20),'exhausted residents enter an accessible side of existing tents');
+assert(s.people.every(r=>r.needs.hunger>10),'ordinary outside jobs and food purchases resume');
+assert(restore(save(s)));
+console.log('PASS new blueprints preserve tent doors and the recorded exhausted village recovers without resource injection');

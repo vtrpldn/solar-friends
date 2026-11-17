@@ -17,3 +17,9 @@ const denied=createWeekend(43);chooseCamp(denied,'entrance');denied.projects.pus
 for(let i=0;i<100;i++)tick(denied,.1);assert.equal(denied.materials.tools,4,'budget prevents material consumption');
 const bad=JSON.parse(save(s));bad.upkeep.vehicles[0].condition=-1;assert.equal(restore(JSON.stringify(bad)),null);
 console.log('PASS wear, automatic resident service, exact parts consumption, budget limits, vehicle mileage and save validation');
+const aged=createWeekend(45);chooseCamp(aged,'entrance');enableFastNavigation(aged);
+const pump={id:aged.nextId++,key:'water-pump',x:aged.stock.x+4,z:aged.stock.z+4,work:PROJECTS['water-pump'].work,delivered:0,assetAgeDays:3650};aged.projects.push(pump);aged.materials.pumps=1;aged.materials.plumbing=1;upkeep(aged).dailyBudget=500;
+upkeepStep(aged,PROJECTS,.1);assert(aged.upkeep.jobs.some(j=>j.replacementParts?.pumps===1));assert(restore(save(aged)));
+for(let i=0;i<180000&&pump.assetAgeDays>=3650;i++)tick(aged,.1);
+assert(pump.assetAgeDays<3650,'residents replace aged pump');assert.equal(aged.materials.pumps,0);assert.equal(aged.materials.plumbing,0);assert(restore(save(aged)));
+console.log('PASS lifetime equipment replacement consumes real parts and resident labor, with persistent age');

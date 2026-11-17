@@ -1,3 +1,4 @@
+import {recordMaterial} from './material-ledger.js';
 import {materialMass} from './material-measures.js';
 import {activeTrips} from "./trip-state.js";
 // Authored game shelf lives, not food-safety guidance. One day is 3200 sim seconds.
@@ -14,7 +15,8 @@ function merge(lots){
   const last=result.at(-1);if(last&&!!last.preserved===!!lot.preserved&&!!last.chilled===!!lot.chilled&&lot.expires-last.expires<day/24)last.n+=lot.n;else result.push({...lot});
  }return result;
 }
-export function foodChange(s,id,n,lots){
+export function foodChange(s,id,n,lots,reason='transfer'){
+ recordMaterial(s,id,n,reason);
  if(id==='wood'){s.wood+=n;return [];}
  if(!FOOD_DAYS[id]||s.mode==='sandbox'){s.materials[id]+=n;return [];}
  const f=ensureFoodStorage(s),taken=[];
@@ -25,7 +27,7 @@ export function foodChange(s,id,n,lots){
 }
 export function addOrganicWaste(s,kg){
  const f=ensureFoodStorage(s);const total=(f.wasteRemainderKg||0)+kg,whole=Math.floor(total+1e-9);
- f.wasteRemainderKg=Math.max(0,Math.round((total-whole)*1000000)/1000000);s.materials.scraps=(s.materials.scraps||0)+whole;
+ f.wasteRemainderKg=Math.max(0,Math.round((total-whole)*1000000)/1000000);recordMaterial(s,'scraps',whole,'organic residues');s.materials.scraps=(s.materials.scraps||0)+whole;
 }
 function expire(s,id,lots){
  const good=lots.filter(l=>l.expires>s.time),lost=lots.filter(l=>l.expires<=s.time).reduce((n,l)=>n+l.n,0);
@@ -35,7 +37,7 @@ function expire(s,id,lots){
 export function foodStorageStep(s,recipes,materials={}){
  if(s.mode==='sandbox')return;
  const f=ensureFoodStorage(s);
- for(const id of Object.keys(FOOD_DAYS)){const result=expire(s,id,f.lots[id]);f.lots[id]=result.good;s.materials[id]-=result.lost;}
+ for(const id of Object.keys(FOOD_DAYS)){const result=expire(s,id,f.lots[id]);f.lots[id]=result.good;recordMaterial(s,id,-result.lost,'spoilage');s.materials[id]-=result.lost;}
  for(const o of s.trade?.orders||[]){
   if(!['queued','loaded'].includes(o.status)&&!o.returnFood)continue;
   if(!FOOD_DAYS[o.material])continue;
@@ -46,7 +48,7 @@ export function foodStorageStep(s,recipes,materials={}){
  }
  for(const op of s.operations||[]){
   if(op.done||op.water)continue;const recipe=recipes[op.recipe];if(!recipe)continue;
-  const output=op.phase==='return',items=output?(op.haulRemaining||op.returnItems||op.harvestOutput||recipe.output):recipe.input;
+  const output=op.phase==='return',items=output?(op.haulRemaining||op.returnItems||op.harvestOutput||recipe.output):(op.input||recipe.input);
   const field=output?'foodOutput':'foodInput';op[field]??=Object.fromEntries(Object.entries(items).filter(([id])=>FOOD_DAYS[id]).map(([id,n])=>[id,freshLots(s,id,n,output?recipe:null)]));
   let spoiled=false;const survivors={};
   for(const [id,lots]of Object.entries(op[field])){const result=expire(s,id,lots);survivors[id]=result.good;spoiled ||= result.lost>0;}

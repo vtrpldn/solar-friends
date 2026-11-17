@@ -26,3 +26,12 @@ for(let i=0;i<64000&&!s.operations[0].done;i++){
 assert(partial);assert(s.operations[0].done);assert.equal(materialCount(s,'logs'),initial+12);assert.equal(legs,3);
 const invalid=JSON.parse(save(s));invalid.operations[0].haulRemaining.logs=13;assert.equal(restore(JSON.stringify(invalid)),null);
 console.log('PASS bounded hand loads, three physical timber trips, partial-load ownership, reload and exact settlement');
+
+// A larger food harvest keeps its original expiry across partial deliveries.
+const food=createWeekend(43);chooseCamp(food,'entrance');enableFastNavigation(food);food.emergencyFood=false;
+const greenhouse={id:food.nextId++,key:'greenhouse',x:food.stock.x+6,z:food.stock.z+4,work:PROJECTS.greenhouse.work,delivered:0};food.projects.push(greenhouse);syncInfrastructure(food,PROJECTS);
+const expiry=food.time+9600,foodJob={id:1,site:greenhouse.id,recipe:'greenhouse',phase:'return',work:PROCESSES.greenhouse.work,foodOutput:{food:[{n:48,expires:expiry}]}};food.operations=[foodJob];food.nextOperation=2;
+let split=false;for(let i=0;i<64000&&!foodJob.done;i++){tick(food,.1);if(foodJob.returningToSite){split=true;assert(restore(save(food)));}}
+assert(split&&foodJob.done);assert(food.foodStorage.lots.food.some(l=>l.expires===expiry));
+assert.equal(foodJob.foodOutput.food.length,0,'delivered lots are not retained in the producer');
+console.log('PASS multi-load food harvest retains age and restores between deliveries');

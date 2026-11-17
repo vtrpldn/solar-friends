@@ -39,7 +39,9 @@ Further local increments (17 November): separate biological growth and resident 
 
 Further implemented: ongoing crop irrigation, soil fertility and resident compost amendment, preventive food reserve budgets, mass-based spoilage, rolling observed-cash forecasts, ownership valuation, battery quantity consistency and replacement, resident demolition/salvage/relocation and optional trip consolidation, and a navigation fix for residents caught against adjacent camp structures. Current Campinas fuel was updated from the ANP 8–14 November 2026 municipality survey. An 18-case fresh-start matrix and a separate seven-day established-village replay passed; neither substitutes for the remaining full release gates.
 
-Still outstanding: remaining regional calibration, canonical physical resource units and full ownership ledger, construction/person-hour calibration, complete asset replacement, area-based agricultural yields, and full release gates. None of stages 0–7 is claimed complete. See [parameter register](economy-parameters.md) for provisional values and evidence limitations.
+Further calibration now includes area-based basic building shells with referenced wall-labor coefficients, bounded production carrying, named local buyers and price bands, a reconciled available-store movement ledger, area-based vegetable yields, juvenile orchards, timber replanting, equipment/roof replacement, charging losses and larger physical water storage. The current 18-case bootstrap matrix passes. The all-building run is still in progress; it exposed and led to a fix for blocked tent entrances.
+
+Still outstanding: remaining regional price calibration, canonical bulk-unit storage conversion and complete location-event accounting, broader supplier availability and income-strategy validation, and full release gates including ordinary-speed first-hour play. None of stages 0–7 is claimed complete. See [parameter register](economy-parameters.md) for provisional values and evidence limitations.
 
 ## Design boundaries
 

@@ -22,6 +22,8 @@ export function growthRate(s,recipe){
 export function beginBiology(s,op,r){
  const b=BIOLOGY[op.recipe];if(!b||op.planted||s.mode==='sandbox')return false;
  op.planted=true;op.phase='growing';op.growthRemaining=b.days*GAME_DAY;
+ const site=s.projects?.find(p=>p.id===op.site);
+ if(op.recipe==='fruit'&&site&&!site.orchardEstablished){op.establishmentDays=610;op.growthRemaining+=610*GAME_DAY;site.orchardEstablished=true;}
  op.status=`Growing / curing: ${b.days} game days before harvest work`;
  r.operation=null;r.cargo=false;r.action='idle';r.target=null;r.walk=[];return true;
 }
@@ -57,10 +59,11 @@ export function harvestOutput(s,op,recipe){
  return result;
 }
 export function biologyText(recipe){const b=BIOLOGY[recipe];return b?` · ${b.days} game days of growth/curing, separate from resident work${b.seasonal?'; slower in unfavorable seasons':''}${Number.isFinite(b.window)?`; harvest within ${b.window} days before gradual field losses`:''}`:'';}
-export function validBiology(s,recipes){if(!(s.projects||[]).every(p=>[p.soilMoisture,p.soilFertility].every(n=>n===undefined||(Number.isFinite(n)&&n>=0&&n<=1))))return false;return (s.operations||[]).every(o=>{
+export function validBiology(s,recipes){if(!(s.projects||[]).every(p=>[p.soilMoisture,p.soilFertility].every(n=>n===undefined||(Number.isFinite(n)&&n>=0&&n<=1))))return false;if(!(s.projects||[]).every(p=>(p.orchardEstablished===undefined||typeof p.orchardEstablished==='boolean')&&(p.harvestCount===undefined||(Number.isInteger(p.harvestCount)&&p.harvestCount>=0))))return false;return (s.operations||[]).every(o=>{
+ if(o.establishmentDays!==undefined&&(o.recipe!=='fruit'||o.establishmentDays!==610))return false;
  if(o.planted!==undefined&&typeof o.planted!=='boolean')return false;
  if(o.phase==='growing'&&(!BIOLOGY[o.recipe]||!o.planted||!Number.isFinite(o.growthRemaining)))return false;
- if(o.growthRemaining!==undefined&&(!BIOLOGY[o.recipe]||!Number.isFinite(o.growthRemaining)||o.growthRemaining<0||o.growthRemaining>BIOLOGY[o.recipe].days*GAME_DAY))return false;
+ if(o.growthRemaining!==undefined&&(!BIOLOGY[o.recipe]||!Number.isFinite(o.growthRemaining)||o.growthRemaining<0||o.growthRemaining>(BIOLOGY[o.recipe].days+(o.establishmentDays||0))*GAME_DAY))return false;
  if(o.ripeAt!==undefined&&(!Number.isFinite(o.ripeAt)||o.ripeAt<0||o.ripeAt>s.time))return false;
  return o.harvestOutput===undefined||Object.entries(o.harvestOutput).every(([id,n])=>Number.isInteger(n)&&n>=0&&n<=(recipes[o.recipe]?.output[id]??-1));
 });}
