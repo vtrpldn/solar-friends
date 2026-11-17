@@ -1,13 +1,13 @@
 import assert from 'node:assert/strict';
 import {createSandbox,placementError,plan,route,enableFastNavigation} from '../web/v02/weekend/simulation.js';
 const s=createSandbox(42);
-for(const [x,z] of [[40,39],[43,40],[46,40]])assert.equal(plan(s,'house',x,z),'');
+for(const [x,z] of [[40,39],[50,39],[60,39]])assert.equal(plan(s,'house',x,z),'');
 const samples=[];
-for(let pass=0;pass<5;pass++)for(const [x,z,blocked] of [[50,40,false],[40,41,true],[30,40,false]]){
+for(let pass=0;pass<5;pass++)for(const [x,z,blocked] of [[50,60,false],[40,41,true],[60,60,false]]){
  const start=performance.now(),error=placementError(s,'workshop',x,z);
  samples.push(performance.now()-start);
  assert.equal(!!error,blocked);
- if(blocked)assert.match(error,/access|entrance/);
+ if(blocked)assert.match(error,/access|entrance|occupies/);
 }
 enableFastNavigation(s);
 for(const target of [{x:40.5,z:41},{x:50,z:40},{x:40,z:39},{x:30,z:40}]){

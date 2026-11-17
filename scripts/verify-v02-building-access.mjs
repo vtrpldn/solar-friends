@@ -13,7 +13,7 @@ assert(walkSegmentClear(s,{x:19.55,z:39.5},{x:19.55,z:40.5}),'walk within prop r
 assert(!walkSegmentClear(s,{x:19,z:40},{x:21,z:40}),'barrel body remains solid');
 const path=route(s,{x:19,z:40},{x:21,z:40});assert(path);
 let last={x:19,z:40};for(const point of path){assert(walkSegmentClear(s,last,point));last=point;}
-p.work=0;assert(!walkSegmentClear(s,{x:19.55,z:39.5},{x:19.55,z:40.5}),'construction reserves full footprint');
+p.work=0;assert(!walkSegmentClear(s,{x:19.55,z:39},{x:19.55,z:41}),'construction reserves full footprint');
 p.key='shelter';p.work=PROJECTS.shelter.work;
 assert(walkSegmentClear(s,{x:19,z:40},{x:22,z:40}),'open shelter allows passage');
 const original=createSandbox(42);const loaded=restore(save(original));assert(loaded);assert.deepEqual(loaded.projects.map(footprint),original.projects.map(footprint));

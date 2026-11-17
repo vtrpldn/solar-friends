@@ -31,7 +31,8 @@ for (const key of ["workshop","home-cottage","home-longhouse"]) for (let rotatio
   );
   assert.ok(placementError(s, "garden", 60, 50));
   assert.equal(moveProject(s, p.id, 65, 55, (rotation + 1) % 4), "");
-  assert.equal(p.rotation, (rotation + 1) % 4);
+  assert.equal(p.rotation,rotation,'relocation waits for resident work');
+  assert.equal(p.removal.target.rotation,(rotation+1)%4);
   assert.ok(restore(save(s)));
 }
 const s = createSandbox();

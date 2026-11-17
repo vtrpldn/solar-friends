@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import {
-  createSandbox,
+  createSandbox, tick, enableFastNavigation,
   plan,
   moveProject,
   save,
@@ -82,8 +82,10 @@ assert.equal(
   elevationAt(far, far, 42, s.terrainPads),
   elevationAt(far, far, 42),
 );
-const moved = restore(save(s));
-assert.equal(moveProject(moved, moved.projects.at(-1).id, site.x + 8, site.z + 8), "");
+const moved = restore(save(s));enableFastNavigation(moved);const relocating=moved.projects.at(-1);
+assert.equal(moveProject(moved, relocating.id, site.x + 8, site.z + 8), "");
+for(let i=0;i<64000&&relocating.removal;i++)tick(moved,.1);
+assert(!relocating.removal,'resident completes relocation before the new foundation is graded');
 assert.ok(footprintRelief(site.x + 8, site.z + 8, 2, 2, 42, moved.terrainPads) < 1e-8);
 assert.ok(restore(save(moved)), "moved foundations survive reload");
 const poor = createSandbox(42);

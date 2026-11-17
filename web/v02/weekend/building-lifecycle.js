@@ -53,7 +53,7 @@ export function removalStep(s,r,dt,api){
  s.operations=(s.operations||[]).filter(o=>o.site!==p.id);
  for(const person of s.people)if(removedOperations.has(person.operation)){person.operation=null;person.cargo=false;person.action='idle';person.walk=[];person.target=null;}
  if(s.upkeep)s.upkeep.jobs=s.upkeep.jobs.filter(j=>j.target!==p.id);
- for(const person of s.people){if(person.restSite===p.id){person.restSite=null;person.tentPhase=null;}if(person.removalJob===p.id){delete person.removalJob;person.action='idle';person.walk=[];person.target=null;}}
+ for(const person of s.people){if(person.home===p.id)person.home=null;if(person.restSite===p.id){person.restSite=null;person.tentPhase=null;}if(person.removalJob===p.id){delete person.removalJob;person.action='idle';person.walk=[];person.target=null;}}
  s.buildingHistory??=[];s.buildingHistory.push({time:s.time,key:p.key,mode:job.mode,recovered,lost});s.buildingHistory=s.buildingHistory.slice(-64);
  api.invalidate(s);api.say(s,`${api.defs[p.key].name} removed. Recovered materials are back in stores.`);return true;
 }

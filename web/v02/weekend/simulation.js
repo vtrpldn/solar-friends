@@ -1075,7 +1075,11 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
       const spots=accessGeometry(complete,PROJECTS[p.key],footprint(p)).work;
       const accessible=p.work>=PROJECTS[p.key].work?proposed:{...proposed,projects:proposed.projects.map(item=>item===p?complete:item)};
       enableFastNavigation(accessible);
-      if(!spots.some(spot=>route(accessible,s.stock,spot,true)))return `${PROJECTS[p.key].name} work access is blocked. Leave its front clear or rotate it.`;
+      if(!spots.some(spot=>route(accessible,s.stock,spot,true))){
+        const doorway=accessGeometry(complete,PROJECTS[p.key],footprint(p)).entrances[0];
+        if(details)details.entrance=doorway||spots[0];
+        return `${PROJECTS[p.key].name} ${doorway?'entrance':'work access'} is blocked. Leave its front clear or rotate it.`;
+      }
     }
     if (
       ["home", "workshop", "kitchen", "wash-station", "eco_toilet"].includes(
@@ -1666,7 +1670,7 @@ export function restingDoor(s, i) {
   return buildingFront(p);
 }
 export function availableHomes(s) {
-  return s.projects.filter(p => PROJECTS[p.key]?.kind === 'home' && p.work >= PROJECTS[p.key].work);
+  return s.projects.filter(p => !p.removal && PROJECTS[p.key]?.kind === 'home' && p.work >= PROJECTS[p.key].work);
 }
 export function homeResidents(s, id) {
   return s.people.filter(r => r.home === id);
@@ -1695,7 +1699,7 @@ function chooseRestingPlace(s, r, i) {
   if (r.restSite && s.projects.some((p) => p.id === r.restSite)) return;
   const choices = s.projects.filter(
     (p) =>
-      p.work >= PROJECTS[p.key].work &&
+      !p.removal && p.work >= PROJECTS[p.key].work &&
       (PROJECTS[p.key].kind === "home" || p.key.startsWith("canvas-tent")) &&
       s.infrastructure.nodes[p.id]?.enabled !== false &&
       s.people.filter((other) => other !== r && (other.restSite === p.id || other.home === p.id))

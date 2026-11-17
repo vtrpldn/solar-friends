@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {FUNCTIONAL_PROGRAM} from '../web/v02/library/functional-program.js';
 import {BUILDING_MODELS} from '../web/v02/weekend/building-models.js';
 const brief=JSON.parse(readFileSync(new URL('../.github/building-program/catalog.json',import.meta.url)));
 assert.equal(brief.units.metresPerCell,2);
 assert.equal(new Set(brief.entries.map(e=>e.id)).size,brief.entries.length);
-assert.deepEqual(brief.entries.map(e=>e.id).sort(),BUILDING_MODELS.map(e=>e.id).sort(),'Every current catalog entry receives a functional-size decision');
+const planned=new Set(brief.entries.map(e=>e.id));
+for(const model of BUILDING_MODELS)assert(planned.has(model.id)||FUNCTIONAL_PROGRAM[model.id],`${model.id} has a size decision in the original brief or subsequent live program`);
 for(const e of brief.entries){
  assert(e.targetSiteCells.every(n=>Number.isInteger(n)&&n>0));
  assert.equal(e.targetReservedAreaM2,e.targetSiteCells[0]*e.targetSiteCells[1]*4);

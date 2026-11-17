@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {createSandbox,PROJECTS,plan,assignHome,availableHomes,removeProject,save,restore} from '../web/v02/weekend/simulation.js';
+import {removalStep} from '../web/v02/weekend/building-lifecycle.js';
+const s=createSandbox(42);assert.equal(plan(s,'house',50,50),'');const home=s.projects.at(-1);home.work=PROJECTS.house.work;
+assert.equal(assignHome(s,s.people[0].id,home.id),'');
+assert.equal(removeProject(s,home.id,'demolish'),'');
+assert(!availableHomes(s).some(p=>p.id===home.id),'dismantling homes cannot take new residents');
+assert.notEqual(assignHome(s,s.people[1].id,home.id),'');
+removalStep(s,s.people[1],home.removal.required,{defs:PROJECTS,recipes:{},workSpot:()=>({x:49,z:50}),go:()=>true,stored:()=>0,capacity:()=>10000,change:()=>{},invalidate:()=>{},say:()=>{}});
+assert(!s.projects.includes(home));assert.equal(s.people[0].home,null,'removed home releases its assignments');assert(restore(save(s)));
+console.log('PASS dismantling closes home assignments and removal releases residents without corrupting saves');
