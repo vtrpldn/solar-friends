@@ -1489,8 +1489,8 @@ body[data-tray="closed"] {
 .resident-profile p { font-size: 12px; line-height: 1.5; margin: 4px 0; color: #605d46; }
 .resident-profile small { font-size: 10px; color: #766d54; }
 
-/* Center supplies on the viewport, independently of the clock's width. */
-header { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); }
+/* Center supplies when there is room and reserve the clock's full width. */
+header { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(max-content,1fr); }
 #supplies { grid-column: 2; margin: 0; }
 header > .time { grid-column: 3; justify-self: end; }
 @media (max-width: 1100px) {
