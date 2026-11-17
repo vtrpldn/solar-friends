@@ -1193,6 +1193,10 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
     )
   )
     return "Leave the tents, trees and arrival area clear.";
+  // Roads neither block walking nor grade terrain, so they cannot close an
+  // existing entrance. Keep the site checks above, without rerouting the village
+  // for every tile in a road stroke (or every hover preview).
+  if (key === "road") return "";
   const proposed = {
     ...s,
     projects: [
