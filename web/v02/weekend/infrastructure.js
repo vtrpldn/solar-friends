@@ -104,8 +104,9 @@ export function syncInfrastructure(s, defs) {
   for (const p of s.projects) {
     if (p.work < defs[p.key].work) continue;
     const kind = defs[p.key].kind || p.key;
+    const batteryHealth=Math.max(.8,1-(p.batteryAgeDays||0)/(8*365)*.2);
     const battery =
-      { solar_farm: 36, hydro: 18, home: 0, "supply-6": 36 }[kind] || 0;
+      (defs[p.key].materials?.batteries??(["solar_farm","hydro","supply-6"].includes(kind)?1:0))*4*batteryHealth;
     sys.nodes[p.id] ??= {
       id: p.id,
       kind,
@@ -120,9 +121,14 @@ export function syncInfrastructure(s, defs) {
     };
     const node=sys.nodes[p.id];
     node.serviceFactor=serviceFactor(p);
+    if(kind!=='home'){
+      node.battery=battery;
+      if(node.charge>battery){sys.account.curtailed+=node.charge-battery;node.charge=battery;}
+    }
+    node.solarKw=(defs[p.key].materials?.panels??(kind==="solar_farm"?2:0))*.6;
     if(kind==='goat_pasture'&&node.capacity[0]<40)node.capacity[0]=40;
     if(kind==='kitchen'){node.coldStorage=!!p.coldStorage;node.coolingEnabled=p.coolingEnabled!==false;}
-    if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4:0;node.charge=Math.min(node.charge,node.battery);}
+    if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4*batteryHealth:0;if(node.charge>node.battery){sys.account.curtailed+=node.charge-node.battery;node.charge=node.battery;}}
     if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<40)) {
       // Existing starter tanks become passive without destroying stored water.
       node.kind=kind;node.capacity=[Math.max(40,node.water[0]),Math.max(40,node.water[1]),0,0];
@@ -238,7 +244,7 @@ export function infrastructureStep(s, defs, dt) {
       demand = 0;
     for (const n of component) {
       n.generation = n.enabled
-        ? { solar_farm: 6 * sun, hydro: 2.34, home: n.solarUpgrade ? 0.6 * sun : 0 }[n.kind] || 0
+        ? { solar_farm: (n.solarKw??1.2) * sun, hydro: 2.34*Math.min(1,waterFactor(s.worldSettings?.water)*(s.rain?1.2:1)), home: n.solarUpgrade ? 0.6 * sun : 0 }[n.kind] || 0
         : 0;
       const machinery=['kitchen','workshop'].includes(n.kind);
       const pumping=n.kind==='water-pump' && n.water[1]<n.capacity[1]-.01 && (riverBankAt(n.x+.5,n.z+.5,3,s.landSeed) || Object.values(sys.nodes).some(a=>a.kind==='groundwater-well' && a.enabled && a.water[1]>0 && Math.hypot(a.x-n.x,a.z-n.z)<=6));

@@ -3,7 +3,7 @@
 export const ECONOMY_REFERENCE = Object.freeze({
   region: 'Campinas, São Paulo',
   electricity: Object.freeze({baseReaisPerKwh:.739, taxAllowance:.22, capacityKw:4}),
-  transport: Object.freeze({gasolineReaisPerLiter:6.11, kmPerLiter:10,
+  transport: Object.freeze({gasolineReaisPerLiter:6.47, kmPerLiter:10,
     roadKmPerHour:40, handlingMinutes:12}),
 });
 export const GRID_TARIFF = Math.round(ECONOMY_REFERENCE.electricity.baseReaisPerKwh /

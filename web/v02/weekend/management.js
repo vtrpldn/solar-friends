@@ -389,6 +389,7 @@ export function createManagement({
         illustrate(img, PROJECTS[p.key].asset);
         const name = document.createElement("strong");
         name.textContent = `${PROJECTS[p.key].name} #${p.id} (${p.x}, ${p.z})`;
+        if(p.soilFertility!==undefined){const soil=document.createElement("p");soil.textContent=`Soil fertility: ${Math.round(p.soilFertility*100)}%. Residents apply stored compost below 70%; each application restores 30 percentage points. ${s.upkeep?.jobs.find(j=>j.target===p.id&&j.soil)?.status||""}`;el.append(soil);}
         if(p.animalHealth!==undefined){const care=document.createElement("p");care.textContent=`Animal health: ${Math.round(p.animalHealth)}%. ${p.careUntil>s.time?"Feed and water supplied":"Care due: residents need fodder and drinking water"}.`;el.append(care);}
         const choice = document.createElement("select");
         choice.setAttribute("aria-label", `Work at ${name.textContent}`);

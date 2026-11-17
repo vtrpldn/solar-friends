@@ -1340,12 +1340,13 @@ export function walkSegmentClear(s, from, to) {
       }
       if (enter <= leave) {
         // A newly unpacked tent/project can enclose someone already standing there.
-        // Permit only outward progress until their body clears that footprint.
+        // Let them leave cells already overlapping their body. Entering any
+        // additional blocked cell is still rejected. Per-cell depth reduction
+        // can deadlock someone between two adjacent occupied cells.
         const penetration = (p) =>
           Math.min(0.66 - Math.abs(p.x - x), 0.66 - Math.abs(p.z - z));
         if (
-          penetration(from) >= 0 &&
-          penetration(to) < penetration(from) - 1e-8
+          penetration(from) >= -1e-8 && Math.hypot(to.x-from.x,to.z-from.z)>1e-9
         )
           continue;
         return false;
@@ -1421,6 +1422,24 @@ export function route(s,from,to){
   try{return routeUncached(s,from,to);}finally{activeNavigation=previous;}
 }
 function routeUncached(s, from, to) {
+  // Start outside an overlapping obstacle before rounding onto the path grid.
+  // An endpoint-only escape can look valid yet move deeper into the obstacle
+  // on its first tiny animation step, trapping a resident indefinitely.
+  if(!walkSegmentClear(s,from,from)){
+    const escapes=[];
+    for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      let prior=from;
+      for(let distance=.1;distance<=2;distance+=.1){
+        const point={x:from.x+dx*distance,z:from.z+dz*distance};
+        if(!walkSegmentClear(s,prior,point))break;
+        if(walkSegmentClear(s,point,point)){escapes.push(point);break;}
+        prior=point;
+      }
+    }
+    escapes.sort((a,b)=>Math.hypot(a.x-to.x,a.z-to.z)-Math.hypot(b.x-to.x,b.z-to.z));
+    for(const point of escapes){const onward=routeUncached(s,point,to);if(onward)return [point,...onward];}
+    return null;
+  }
   // This river runs across the whole plot. Without a completed crossing,
   // searching thousands of cells on the opposite bank cannot find a route.
   const bank = point => Math.sign((point.x-32)*2 - riverCenter((point.z-32)*2,s.landSeed));
