@@ -491,7 +491,14 @@ export function maintainWater(s) {
 export function utilitySpot(s, node, r) {
   if (node.id === -1) return { x: node.x, z: node.z };
   const p = s.projects.find((p) => p.id === node.id);
-  if(!p)return {x:s.stock.x-1,z:s.stock.z+1};
+  if(!p){
+    // Existing layouts may cover the original camp service corner after a
+    // footprint update. Keep the sealed carrier moving to reachable stores.
+    const spots=[{x:s.stock.x-1,z:s.stock.z+1},{...s.stock}];
+    for(let radius=1;radius<=2;radius++)for(let dz=-radius;dz<=radius;dz++)for(let dx=-radius;dx<=radius;dx++)
+      if(Math.max(Math.abs(dx),Math.abs(dz))===radius)spots.push({x:s.stock.x+dx,z:s.stock.z+dz});
+    return spots.find(spot=>!occupied(s,spot.x,spot.z)&&route(s,r,spot));
+  }
   const spots=accessGeometry(p,PROJECTS[p.key],footprint(p)).work;
   return spots.find(spot=>!occupied(s,spot.x,spot.z)&&!s.people.some(other=>other!==r&&!other.needTask&&!other.tentPhase&&(
     Math.hypot(other.x-spot.x,other.z-spot.z)<.55 ||

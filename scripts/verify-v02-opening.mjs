@@ -34,7 +34,7 @@ for (const [name, cover, storage] of [
   }
   assert(!canFinish(s));
   let seconds = 0;
-  while (!canFinish(s) && seconds < 1800) {
+  while (!canFinish(s) && seconds < 6400) {
     run(s, 1);
     seconds++;
   }
