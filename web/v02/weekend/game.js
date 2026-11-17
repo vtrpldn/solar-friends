@@ -2306,6 +2306,8 @@ function frame(now) {
         ? "sit"
         : r.action === "wash"
           ? "wash"
+          : production?.kind === "wild-tree"
+            ? "chop"
           : tending
             ? "tend"
             : ["build", "produce", "install"].includes(r.action)

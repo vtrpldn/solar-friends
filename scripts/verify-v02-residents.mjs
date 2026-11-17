@@ -37,6 +37,7 @@ for (const id of RESIDENT_IDS) {
     "water",
     "tend",
     "work",
+    "chop",
     "wash",
     "eat", "bathe", "pee", "toilet", "read", "play",
     "carry",
@@ -49,6 +50,14 @@ for (const id of RESIDENT_IDS) {
           assert(Number.isFinite(n), `${id} ${action}`);
       });
     }
+  poseResident(a.rig, 'chop', 0);
+  assert(a.rig.axe.visible, `${id}: axe appears when chopping`);
+  const strike = a.rig.axe.getWorldPosition(new THREE.Vector3());
+  poseResident(a.rig, 'chop', .77);
+  const raised = a.rig.axe.getWorldPosition(new THREE.Vector3());
+  assert(raised.y > strike.y + .3, `${id}: visible axe wind-up`);
+  poseResident(a.rig, 'walk', 0);
+  assert(!a.rig.axe.visible, `${id}: axe hidden while walking`);
   a.toJSON();
   const catalog = createAsset(id);
   assert(

@@ -195,13 +195,18 @@ export function createResident(id = "resident") {
   box(book,.28,.025,.2,'teal',0,0,0);
   box(book,.24,.015,.17,'plaster',0,.018,0);
   arms[0].elbow.add(book);book.position.set(0,-.2,.08);book.visible=false;
+  const axe = joint(arms[1].elbow, "woodcutting-axe", 0, -.25, 0);
+  cylinder(axe, .025, .03, .65, "timberLight", 0, .22, 0, 6);
+  const blade = box(axe, .07, .18, .27, "stone", 0, .5, .06);
+  blade.rotation.x = -.12;
+  axe.visible = false;
   const joints = [
     hips,
     head,
     ...legs.flatMap((l) => [l.hip, l.knee, l.shoe]),
     ...arms.flatMap((a) => [a.shoulder, a.elbow]),
   ];
-  const rig = { root, hips, head, legs, arms, cargo, can, stream, bowl, book, joints };
+  const rig = { root, hips, head, legs, arms, cargo, can, stream, bowl, book, axe, joints };
   root.rig = rig;
   root.name = id;
   const i = RESIDENT_IDS.indexOf(id) - 1;
@@ -274,6 +279,7 @@ export function poseResident(rig, action, time, blend = 1) {
   }
   cargo.visible = action === "carry" || action === "carry-walk";
   can.visible = action === "water";
+  rig.axe.visible = action === "chop";
   rig.bowl.visible = action === "eat";
   const reading=action==="read" || action==="ground-read";
   const groundSeated=action==="fire-sit" || action==="ground-read" || action==="ground-relax";
@@ -292,6 +298,23 @@ export function poseResident(rig, action, time, blend = 1) {
       a.elbow.rotation.x = -0.12;
     });
   } else hips.position.y += Math.sin(time * 2) * 0.003;
+  if (action === "chop") {
+    // Slow wind-up, quick strike, then recover before the next swing.
+    const cycle = ((time % 1.4) + 1.4) % 1.4 / 1.4;
+    const ease = t => t * t * (3 - 2 * t);
+    const lift = cycle < .55 ? ease(cycle / .55)
+      : cycle < .72 ? 1 - ease((cycle - .55) / .17) : 0;
+    hips.rotation.x = .17 * (1 - lift);
+    hips.rotation.y = -.16 + lift * .28;
+    head.rotation.x = -.08 + lift * .12;
+    arms[1].shoulder.rotation.x = -.7 - lift * 1.9;
+    arms[1].elbow.rotation.x = -.2 - lift * .45;
+    arms[0].shoulder.rotation.x = -.45 - lift * .45;
+    arms[0].elbow.rotation.x = -.75;
+    legs[0].hip.rotation.x = -.12;
+    legs[1].hip.rotation.x = .12;
+    rig.axe.rotation.x = Math.PI - .45;
+  }
   if (action === "duck-walk") {
     hips.position.y = 0.68 + Math.sin(phase * 2) * 0.01;
     hips.rotation.x = 0.28;
