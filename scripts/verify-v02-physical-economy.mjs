@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,save,restore,tick,enableFastNavigation,sellMaterial,supplyRun,MATERIALS,materialCount,automaticSales,plan,PROJECTS} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,save,restore,tick,enableFastNavigation,sellMaterial,supplyRun,MATERIALS,materialCount,automaticSales,blueprintPurchase,plan,PROJECTS} from '../web/v02/weekend/simulation.js';
 import {cancelExport,tradeQuote,blueprintManifest,cargoSize,TRADE_RULES,transportCost,settleExports} from '../web/v02/weekend/physical-trade.js';
 import {transact} from '../web/v02/weekend/finances.js';
 import {economyPolicies} from '../web/v02/weekend/economy-policies.js';
@@ -19,4 +19,8 @@ for(let i=0;i<12000&&bought.trip;i++)tick(bought,.1);assert(!bought.trip);assert
 const manifest=blueprintManifest([{id:1,pendingMaterials:{stone:100,wood:100}},{id:2,pendingMaterials:{panels:10}}]);const items={};for(const m of manifest)for(const [id,n]of Object.entries(m.items))items[id]=(items[id]||0)+n;const load=cargoSize(items);assert(load.kg<=TRADE_RULES.cargoKg&&load.m3<=TRADE_RULES.cargoM3);assert(items.stone<100,'large order splits across trips');
 const wallet={money:10,mode:'story',time:0};for(let i=0;i<1000;i++)transact(wallet,-.0001,'electricity','Grid');assert.equal(wallet.money,9.9,'fractional metering accumulates');assert(Math.abs(wallet.finances.expenses-.1)<1e-10);
 const pol=fresh();pol.materials.bamboo=100;economyPolicies(pol).sales.bamboo={enabled:true,keep:24,above:48,daily:24};automaticSales(pol);assert.equal(pol.materials.bamboo,76);assert.equal(pol.money,220);automaticSales(pol);assert.equal(pol.materials.bamboo,76,'policy cap limits reservations');
+// Verify affordability through a real catalog entry requiring purchased goods.
+const paidKey=Object.keys(PROJECTS).find(key=>Object.keys(blueprintPurchase(fresh(),key).items).length);
+assert(paidKey);const priced=fresh(),q=blueprintPurchase(priced,paidKey);priced.money=q.cost;assert(blueprintPurchase(priced,paidKey).error,'collection needs operating money');
+const dryWallet={money:0,time:0};assert.equal(transact(dryWallet,-1.005,'purchases','Unaffordable'),0);assert.equal(dryWallet.money,0);assert.equal(dryWallet.finances.fractions.purchases,undefined,'failed spending cannot accrue a phantom fraction');
 console.log('PASS physical sale trips, demand limits, cancellation, delivery, cargo splitting, centavo metering and save validation');

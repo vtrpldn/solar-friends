@@ -711,7 +711,8 @@ export function blueprintPurchase(s, key, count = 1) {
     cost += missing * item.price / item.quantity;
   }
   cost = Math.ceil(cost * 100) / 100;
-  return {items, cost, error: cost > s.money ? `Missing materials cost R$${cost.toFixed(2)}; shared savings are too low.` : ""};
+  const transport = Object.keys(items).length ? transportCost(s) : 0;
+  return {items, cost, transport, error: cost + transport > s.money ? `Missing materials cost R$${cost.toFixed(2)} plus at least R$${transport.toFixed(2)} for collection; shared savings are too low.` : ""};
 }
 function dispatchBlueprintPickup(s) {
   const pending = s.projects.filter(p => p.pendingMaterials);
@@ -1153,6 +1154,7 @@ export function supplyRun(s, material = "wood", project = null, saleOnly = false
   if (
     !item ||
     !item.quantity ||
+    (!project && !saleOnly && !fitsCargo({[material]:item.quantity})) ||
     (!project && !saleOnly && storedMaterials(s) + item.quantity > storageCapacity(s)) ||
     s.stage !== "playing" ||
     s.trip ||

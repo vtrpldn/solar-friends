@@ -1,3 +1,4 @@
+import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {loadVillage} from './load-village.js';
 import {ensureNaturalLand} from './natural-resources.js';
 import {saveSlots} from "./save-slots.js";
@@ -1292,8 +1293,8 @@ $("toggle-building").onclick = () => {
 $("sell").onclick = () => {
   message(
     sellMaterial(s, $("purchase").value)
-      ? "Surplus sold at half the purchase price."
-      : "Not enough available supplies to sell.",
+      ? "Sale queued. A resident will take the reserved goods to town; payment is received there."
+      : tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Sale unavailable.",
   );
   persist();
   renderUI();
@@ -1629,20 +1630,20 @@ function renderUI() {
   }
   const purchase = MATERIALS[$("purchase").value];
   $("town").textContent =
-    `Fetch ${materialText($("purchase").value, purchase.quantity)} · R$${purchase.price}`;
+    `Fetch ${materialText($("purchase").value, purchase.quantity)} · R$${purchase.price + transportCost(s)} incl. trip`;
   $("town").disabled =
-    !!s.trip || s.money < purchase.price || s.stage !== "playing";
+    !!s.trip || s.money < purchase.price + transportCost(s) || s.stage !== "playing";
   $("inventory").textContent = Object.keys(MATERIALS)
     .map((id) => materialText(id, materialCount(s, id)))
     .join(" · ");
   $("sell").textContent =
-    `Sell ${materialText($("purchase").value, purchase.quantity)} · R$${Math.floor(purchase.price * 0.5)}`;
+    `Queue sale: ${materialText($("purchase").value, purchase.quantity)} · R$${Math.floor(purchase.price * 0.5)}`;
   $("sell").disabled =
-    materialCount(s, $("purchase").value) < purchase.quantity ||
-    !purchase.quantity;
+    !!tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error;
+  $("sell").title=tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Payment after trading in town; combine batches to share transport costs.";
   $("trip").textContent = s.trip
-    ? `${s.people.find((r) => r.id === s.trip.person).name}: ${{ boarding: "walking to the car", outbound: "driving to town", away: "collecting supplies in town", inbound: "driving home", unloading: "unloading supplies" }[s.trip.phase]}.`
-    : `Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. Buy essentials or sell locally produced surplus.`;
+    ? `${s.people.find((r) => r.id === s.trip.person).name}: ${{ boarding: "walking to the car", outbound: "driving to town", away: "trading in town", inbound: "driving home", unloading: "unloading supplies" }[s.trip.phase]}.`
+    : `Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. Town trip: R$${transportCost(s)}. Buy essentials or export surplus.`;
   $("rain").hidden = !s.rainSeen || s.rainResolved;
   $("boards").disabled = s.wood < 2;
   $("log").replaceChildren(

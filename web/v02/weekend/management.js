@@ -1,3 +1,4 @@
+import {transportCost} from './physical-trade.js';
 import {economyControls} from './economy-controls.js';
 import {productionTarget} from './economy-policies.js';
 import {financeSummary,financeTime} from './finances.js';
@@ -239,8 +240,10 @@ export function createManagement({
       add('h3','Ongoing costs');
       add('p',`Grid power: ${money(f.gridRate)}/hour at the current import rate. Charges change with demand, local generation and available funds.`);
       const power=document.createElement('button');power.textContent='Manage grid power';power.onclick=()=>open('power');screen.append(power);
+      const queued=(s.trade?.orders||[]).filter(o=>['queued','loaded'].includes(o.status));
+      add('p',`Exports awaiting payment: ${money(queued.reduce((n,o)=>n+o.cents/100,0))} gross in ${queued.length} batches. This is reserved stock, not cash. Next trip costs ${money(transportCost(s))}.`);
       add('h3','Where the money goes');
-      const groups={sales:'Surplus sales',construction:'Building materials',purchases:'Town purchases',electricity:'Grid electricity'};
+      const groups={transport:'Transport',sales:'Surplus sales',construction:'Building materials',purchases:'Town purchases',electricity:'Grid electricity'};
       for(const [key,label] of Object.entries(groups))add('p',`${label}: ${money(Math.abs(f.categories[key]||0))}`);
       add('h3','Recent transactions');
       if(!f.entries.length)add('p','No transactions recorded yet. Selling surplus brings income; purchases and imported power spend shared savings.');

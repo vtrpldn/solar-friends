@@ -31,9 +31,9 @@ export function transact(s,amount,category,description){
  const f=ensureFinances(s);f.fractions??={};
  const raw=amount*100+(f.fractions[category]||0);
  const cents=Math.trunc(raw+(raw<0?-1:1)*1e-8);
- f.fractions[category]=raw-cents;
  const opening=Math.round(s.money*100);
  if(opening+cents<0)return 0;
+ f.fractions[category]=raw-cents;
  recordMoney(s,cents/100,category,description);
  s.money=(opening+cents)/100;
  return cents/100;

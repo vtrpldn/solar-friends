@@ -1,6 +1,6 @@
 # Realistic economy implementation plan — v2
 
-Written 2026-11-16. Status: proposed, not implemented. This is the active v2 economy proposal, separate from the historical v1 `plan.md`.
+Written 2026-11-16. Status: implementation in progress; first physical-trade increment implemented locally. This is the active v2 economy proposal, separate from the historical v1 `plan.md`.
 
 ## Why
 
@@ -15,6 +15,19 @@ The current code already has physical construction work, resident needs, procure
 The main gaps are simplified material units and recipes, instant surplus sales, fixed trade batches and prices, generic inventory capacity, and economic rates that have not been calibrated to one coherent real-world reference. Existing three-day replays and the 68-type catalog playthrough are regression evidence, not proof of realistic balance.
 
 Relevant sources: `web/v02/weekend/catalog-rules.js`, `simulation.js`, `economy-policies.js`, infrastructure modules, `resident-needs.js`, management screens and the isolated lab. The game remains a v2 implementation; do not port v1 wholesale.
+
+## Implementation checkpoint — 2026-11-16
+
+Completed in the first playable increment:
+
+- Physical export reservations, cancellable before loading, payment in town, and persisted order ownership.
+- Shared outbound sale cargo, mass/volume limits, partial collection of large prepaid construction orders, and explicit trip operating charges.
+- Buyer demand limited per resource and game day; automatic sales use the same order path.
+- Cash postings in whole centavos with sub-cent utility accrual; sale receipts and transport expenses appear in Finances.
+- Export queue/cancellation UI, purchase transport quotes, save validation, and duplicate-settlement checks.
+- Three-day replay of an established village completed a paid house with positive food, water and cash. This is regression evidence, not a fresh-start balance certification.
+
+Still outstanding: regional calibration, canonical physical resource units and full ownership ledger, construction/person-hour calibration, complete procurement budgets and multiple simultaneous vehicles, seasonal yields/spoilage, asset upkeep, outside jobs, and full release gates. None of stages 0–7 is claimed complete. See [parameter register](economy-parameters.md) for provisional values and evidence limitations.
 
 ## Design boundaries
 

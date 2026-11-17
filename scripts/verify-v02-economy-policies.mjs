@@ -5,7 +5,7 @@ import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);s.rainSeen=s.rainResolved=true;return s;};
 const built=(s,key,x,z)=>{const p={id:s.nextId++,key,x,z,work:PROJECTS[key].work,delivered:requiredLoads(key)};s.projects.push(p);syncInfrastructure(s,PROJECTS);return p;};
 const s=fresh(),pol=economyPolicies(s);s.materials.bamboo=100;pol.sales.bamboo={enabled:true,keep:24,above:48,daily:24};
-assert.equal(salePreview(s,'bamboo',MATERIALS,PROCESSES,materialCount).quantity,24);automaticSales(s);assert.equal(s.materials.bamboo,76);assert.equal(s.money,268);automaticSales(s);assert.equal(s.materials.bamboo,76,'daily cap');
+assert.equal(salePreview(s,'bamboo',MATERIALS,PROCESSES,materialCount).quantity,24);automaticSales(s);assert.equal(s.materials.bamboo,76);assert.equal(s.money,220,'exports reserve goods rather than minting cash');automaticSales(s);assert.equal(s.materials.bamboo,76,'daily cap');
 s.time=3200;automaticSales(s);assert.equal(s.materials.bamboo,52,'daily cap resets');const restored=restore(save(s));assert(restored);automaticSales(restored);assert.equal(restored.money,s.money,'reload cannot duplicate daily sales');
 s.materials.food=25;pol.sales.food={enabled:true,keep:0,above:0,daily:0};automaticSales(s);assert.equal(s.materials.food,25,'population food reserve protected');
 const g=built(s,'garden',23,-4);g.repeat='vegetables';g.stockTarget=60;s.materials.seedlings=8;pol.sales.seedlings={enabled:true,keep:0,above:0,daily:0};automaticSales(s);assert.equal(s.materials.seedlings,8,'protect next batches before selling');

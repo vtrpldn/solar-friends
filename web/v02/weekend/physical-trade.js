@@ -63,6 +63,9 @@ export function validTrade(s,materials){
  const exports=s.trip?.exports||[];if(!Array.isArray(exports)||new Set(exports).size!==exports.length)return false;
  if(exports.some(id=>!t.orders.some(o=>o.id===id&&['loaded','sold'].includes(o.status))))return false;
  if(t.orders.some(o=>o.status==='loaded'&&!exports.includes(o.id)))return false;
+ const outbound={};for(const id of exports){const o=t.orders.find(o=>o.id===id);outbound[o.material]=(outbound[o.material]||0)+o.quantity;}
+ if(!fitsCargo(outbound))return false;
+ if(s.trip?.tradeSettled&&exports.some(id=>t.orders.find(o=>o.id===id).status!=='sold'))return false;
  if(s.trip?.saleOnly!==undefined&&typeof s.trip.saleOnly!=='boolean')return false;
  if(s.trip?.tradeSettled!==undefined&&typeof s.trip.tradeSettled!=='boolean')return false;
  return true;
