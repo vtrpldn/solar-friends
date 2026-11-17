@@ -383,9 +383,9 @@ export function infrastructureStep(s, defs, dt) {
     if(i<0||!l.enabled||l.work<l.required||!to?.enabled||to.capacity[i]-to.water[i]<=.0001)continue;
     const key=`${l.from}:${l.kind}`;counts.set(key,(counts.get(key)||0)+1);
   }
-  for(const a of nodes)for(let i=0;i<LIQUIDS.length;i++){
-    const key=`${a.id}:${LIQUIDS[i]}`,count=counts.get(key)||0;
-    shares.set(key,count?a.water[i]/count:0);
+  for(const [key,count] of counts){
+    const [id,kind]=key.split(':');
+    shares.set(key,sys.nodes[id].water[LIQUIDS.indexOf(kind)]/count);
   }
   for (const l of sys.links) {
     if (l.kind === "power" || !l.enabled || l.work < l.required) continue;

@@ -504,7 +504,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   let op = (s.operations || []).find(
     (o) => o.id === r.operation && eligible(o),
   );
-  if (!op) op = [...(s.operations || [])].sort((a,b)=>{
+  if (!op) op = (s.operations || []).filter(o=>!o.done).sort((a,b)=>{
     const priority=o=>o.water?0:((PROCESSES[o.recipe]?.output.food||PROCESSES[o.recipe]?.output.meals)&&s.infrastructure.hungry?1:2);
     return priority(a)-priority(b);
   }).find(eligible);
