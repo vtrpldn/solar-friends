@@ -34,3 +34,21 @@ That commit also corrects the growing-building service summary, groups legacy el
 ## Validation
 
 Focused checks passed for building access (including legacy obstruction), camp access, finance reconciliation and forecasting, partial trade/save persistence, production summaries and the full v2 economy regression. The site build and diff whitespace checks passed. Changes were committed directly on main under the project instructions; this run did not deploy them.
+
+## Follow-up: reported gaps addressed
+
+Implemented in `cccb1c3c` after the user requested fixes:
+
+- Residents consume eggs and milk as well as meals and ingredients. The oldest available food is used first. Whole-stock serving estimates are explicit in Resources (one meal, 1 kg ingredients, four eggs, or 2 L milk); these are simplified gameplay portions, not a nutritional model. Food reserves, sale protection, urgent hunger, the HUD, trends and food-job priorities use the same definitions. Incoming food on resident trips counts toward replenishment planning.
+- A sale-only car still boarding, outbound or trading can collect a purchase on its return journey. It charges the purchase price without another fuel bill. Newly queued exports join boarding cars within their remaining cargo capacity. The purchase button and automatic food budget account for the shared fare. This consolidates sales with a purchase; it does not introduce arbitrary multi-item shopping carts.
+- Crops offer balanced irrigation, water conservation and rain-fed growing while a batch is in progress. Water is consumed only below the selected soil-moisture target; wetter soil loses moisture faster. Conservation leaves less drought buffer, while rain-fed growing can slow or stop during dry spells. Biological calendar lengths remain unchanged. This adds a planning decision during growth, rather than claiming to eliminate all passive waiting.
+- Egg, milk and honey cycles use “Next collection,” collection timing and uncollected-output loss wording. Production-card buttons now occupy the content column, avoiding the narrow thumbnail-column layout found during visual verification.
+- With explicit user approval, Basic shelter #102 was moved through ordinary resident labor to a verified clear site. The first preview overlapped a garden and was rejected; a second preview was clear. Residents completed the move, and a resident was visible using the relocated shelter afterward.
+
+### Verification and preserved session
+
+The browser village advanced from Day 17 08:36 to 18:11 at 16× during focused checks. It ended paused with R$698.20, 24 food portions, 108 water and all 12 built structures retained. Saved as **“Playtest gaps fixed — Day 17”**. Reload retained the day, stock and conservation setting on garden #109. Sampled browser error logs were empty. This was focused verification, not another timed 30-minute run.
+
+The new regression script exercises real resident egg consumption, oldest-food selection, stock and food-lot persistence, a physically completed shared sale/purchase journey, one fuel charge, cargo capacity, irrigation water use and animal labels. Existing needs, urgent-needs, food reserve/storage, sandbox saves, physical economy, supplier stock, policy, biological production, hauling, production accounting, resource trends and economy checks passed. Site build and whitespace checks passed.
+
+Local screenshots: `artifacts/playtest-gaps/crop-controls.jpg` and `artifacts/playtest-gaps/repaired-village.jpg`. Changes are committed locally; this follow-up did not push or deploy.
