@@ -29,7 +29,7 @@ These are research inputs, not evidence that current prices match reality. Suppl
 | Export consolidation delay | 40 simulation seconds = 18 game minutes | Gameplay pacing. Existing purchase trips can take queued exports immediately. |
 | History | at most 100 trade orders, preserving active ones | Storage bound. Finance history separately retains 100 recent entries and aggregate totals. |
 
-Cargo measurements are explicit in `web/v02/weekend/physical-trade.js`. Existing resource units remain authored pieces, packs or kits. Cargo weight does **not** convert inventory into kilograms. Unknown pack types currently use a provisional 2 kg / 0.01 m³ fallback; this must be replaced during unit calibration.
+Cargo measurements are shared with processing in `web/v02/weekend/material-measures.js`; see [material accounting](material-accounting.md) for revised assumptions and named losses. Existing resource units remain authored pieces, packs or kits. Cargo weight does **not** convert inventory into kilograms. Unknown pack types currently use a provisional 2 kg / 0.01 m³ fallback; this must be replaced during unit calibration.
 
 ## Ownership and settlement
 

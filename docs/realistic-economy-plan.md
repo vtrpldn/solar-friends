@@ -25,6 +25,7 @@ Completed in the first playable increment:
 - Buyer demand limited per resource and game day; automatic sales use the same order path.
 - Cash postings in whole centavos with sub-cent utility accrual; sale receipts and transport expenses appear in Finances.
 - Export queue/cancellation UI, purchase transport quotes, save validation, and duplicate-settlement checks.
+- Shared approximate cargo/processing measurements and a versioned completion ledger for seven transformations with named loss sinks; see [material accounting](material-accounting.md). This does not complete canonical units or biological accounting.
 - Full outstanding collection budgets protected from grid bills and ordinary shopping, with available versus committed cash in Finances.
 - Diminishing crew efficiency and assembly-time estimates.
 - Task-based labor estimates for core buildings, complete material allocation, and versioned progress migration; see [construction checkpoint](construction-economy.md). Physical quantities and regional labor coefficients remain uncalibrated.
