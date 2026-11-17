@@ -1,3 +1,4 @@
+import {pantryForecast,productionStock} from './food-planning.js';
 import {CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
 import {registerGathering,gatheringStatus,gatheringState,validGathering} from './gathering.js';
 import {biologyLabel} from './biological-production.js';
@@ -509,7 +510,7 @@ function maintainFood(s) {
   if(s.time<(s.nextFoodCheck||0))return;
   s.nextFoodCheck=s.time+10;
   const incoming=activeTrips(s).filter(t=>!t.saleOnly&&!t.project&&FOOD_SERVINGS[t.material]).reduce((n,t)=>n+Math.floor((t.foodLots?.reduce((q,l)=>q+l.n,0)??MATERIALS[t.material].quantity)/FOOD_SERVINGS[t.material]),0);
-  const food=foodPortions(s)+incoming;
+  const food=pantryForecast(s).served+incoming;
   const target=Math.ceil(s.people.length*2*(s.foodReserveDays??1.5));
   if(food>=target)return;
   // Harvest existing food plots before construction or nonessential production.
@@ -2098,7 +2099,7 @@ function tickUncached(s, dt) {
     if (!p.repeat || s.operations?.some((o) => o.site === p.id && !o.done))
       continue;
     const recipe = PROCESSES[p.repeat];
-    if (recipe && materialCount(s, Object.keys(recipe.output)[0]) + (s.operations||[]).filter(o=>!o.done).reduce((n,o)=>n+(PROCESSES[o.recipe]?.output[Object.keys(recipe.output)[0]]||0),0) < productionTarget(p))
+    if (recipe && productionStock(s,recipe,PROCESSES) < productionTarget(p))
       p.productionStatus = queueProduction(s, p.id, p.repeat);
   }
 
