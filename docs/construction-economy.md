@@ -1,10 +1,12 @@
-# Construction economy checkpoint
+# Construction economy
+
+Current implementation: area-based shells and labor schema 2, described below. The first-increment figures are retained as history and are not current quotes.
 
 ## Why
 
 The previous catalog assigned 22 work units to every material item, regardless of whether it was a fastener pack or a wall section. Core construction now estimates labor by task and preserves a complete material breakdown for later regional calibration.
 
-## Current scope
+## Historical first increment (superseded by the area-based model below)
 
 Homes, open sheds, kitchens, warehouses, roads and bridges use the new estimates. First-camp recipes retain their deliberately quick assembly times. Material quantities, purchase prices, footprints and hauling requirements are unchanged. This is a labor-model foundation, **not completed real-world calibration**.
 
@@ -23,13 +25,13 @@ Each material appears once in the calculation. Earth in adobe homes belongs to e
 
 These are **authored game person-hours**. They do not claim that a real house can be built in ten hours. Hauling, travel, personal needs, skill, weather and crew coordination affect elapsed completion time separately. Preparation phases describe the estimate; they are not yet sequential construction stages or curing timers.
 
-## Provenance and remaining calibration
+## Historical calibration preparation
 
 [CAIXA SINAPI](https://www.caixa.gov.br/poder-publico/modernizacao-gestao/sinapi/Paginas/default.aspx) publishes technical construction compositions and input references. Its [methodology](https://www.caixa.gov.br/Downloads/sinapi-metodologia/Livro_SINAPI_Metodologias_Conceitos.pdf) describes task specifications, coefficients, equipment and quantity criteria. This supports structuring estimates by task; none of the coefficients in this increment is copied from or certified against SINAPI.
 
 Before applying real coefficients, define each catalog pack's physical coverage, usable building area, wall height, roof area and construction method. Then select dated regional compositions and distinguish real labor from any explicit game-time compression. Simply multiplying arbitrary packs by real square-meter prices would create false precision.
 
-## Save behavior
+## Historical schema 1 migration
 
 New saves carry `constructionLaborVersion: 1`. On loading an older save, completed structures remain completed and partial work retains its completion percentage under the revised requirement. Materials, pending purchases, delivered loads and cash are untouched. The conversion operates on the parsed state, not the original saved string. Repeated loads do not rescale progress twice. Unknown versions and impossible old progress are rejected rather than clamped.
 

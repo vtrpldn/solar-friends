@@ -16,7 +16,7 @@ Completed equipment wears over time; vehicles wear with distance. Automatic serv
 
 Hens and goats require periodic resident care, fodder and water even when production is idle. Neglect reduces health and output. This remains active independently of the equipment-maintenance toggle.
 
-New starts have R$500 / R$2,000 / R$6,000 working capital for tight / modest / comfortable settings. Land and cars are already owned. Existing saves retain their balance. An 18-case automated three-day fresh-start matrix completed basic infrastructure across all three biomes, three capital levels and near/remote access. This is not normal-speed browser evidence or a claim about the cost of establishing a real ecovila.
+New starts have R$500 / R$2,000 / R$6,000 working capital for tight / modest / comfortable settings. Land and cars are already owned. Existing saves retain their balance. The original three-day matrix used earlier prices. Current-price default and comfortable starts are tested for three days; tight starts need a longer staged route with outside work and selected local timber. This is not normal-speed browser evidence or a claim about the cost of establishing a real ecovila.
 
 ## Evidence and limits
 
@@ -24,9 +24,9 @@ Focused regression scripts exercise concurrent trips, paid freight, deferred out
 
 ## Production loads and local buyers
 
-Production returns use at most 30 kg and 0.12 m³ per hand-carried load. Residents walk back for remaining output; a 72 kg timber batch takes three deliveries. Partial batches remain owned, retain food age, and persist across reload. These are authored carrying limits. Oversized indivisible output blocks with an explanation rather than bypassing capacity.
+Production returns use at most 30 kg and 0.12 m³ per hand-carried load. Residents walk back for remaining output; a 288 kg managed timber harvest takes multiple deliveries. Partial batches remain owned, retain food age, and persist across reload. These are authored carrying limits. Oversized indivisible output blocks with an explanation rather than bypassing capacity.
 
-Town produce, café, builders’ cooperative, smallholders’ cooperative and hardware resale buyers now have explicit per-resource daily limits and two disclosed price bands. Additional batches earn less, quotes lock on reservation, cancellation releases demand, and the next calendar day renews it. Terms appear in resource tooltips. These are transparent game contracts, not researched farm-gate prices. Supplier names identify the food market, agricultural store or hardware store; supplier stock is still assumed available at the posted retail price.
+Town produce, café, builders’ cooperative, smallholders’ cooperative and hardware resale buyers now have explicit per-resource daily limits and two disclosed price bands. Additional batches earn less, quotes lock on reservation, cancellation releases demand, and the next calendar day renews it. Terms appear in resource tooltips. These are transparent game contracts, not researched farm-gate prices. Supplier names identify the food market, agricultural store or hardware store; finite supplier allocations are reserved when purchasing and replenish each game day.
 
 Equipment and roofs now also have finite replacement lifetimes: ten years for pumping equipment, twenty for roof materials, twenty-five for panels. Automatic jobs consume the actual replacement materials, respect the allowance and require 13.5 resident-hours. Routine service restores condition without resetting this lifetime clock. These intervals and work estimates are engineering/game assumptions; no vehicle replacement market is implemented.
 
