@@ -113,7 +113,9 @@ pub fn valid(journal: &Journal, state: &State, v: &Village) -> bool {
         })
         .cloned()
         .collect();
-    if state.continued_at.is_some() { expected.clear(); }
+    if state.continued_at.is_some() {
+        expected.clear();
+    }
     if !supplies::valid_receipts(journal, state, v) || state.locked_buildings != expected {
         return false;
     }

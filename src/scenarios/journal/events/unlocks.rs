@@ -29,8 +29,16 @@ fn possible(
                     .count()
                     >= *count as usize
         }
-        GoalCondition::Operating { building, count, .. } => {
-            unlocked.contains(building) || d.start.buildings.iter().filter(|b| b.kind == *building).count() >= *count as usize
+        GoalCondition::Operating {
+            building, count, ..
+        } => {
+            unlocked.contains(building)
+                || d.start
+                    .buildings
+                    .iter()
+                    .filter(|b| b.kind == *building)
+                    .count()
+                    >= *count as usize
         }
         GoalCondition::Crops { count, .. } => {
             unlocked.contains("garden")

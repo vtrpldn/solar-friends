@@ -143,7 +143,12 @@ pub(crate) fn seed_condition(
         use_units: 0.,
         automatic_deferred: deferred,
     };
-    if let Some(r) = v.maintenance.records.iter_mut().find(|r| r.equipment == equipment) {
+    if let Some(r) = v
+        .maintenance
+        .records
+        .iter_mut()
+        .find(|r| r.equipment == equipment)
+    {
         *r = record;
     } else {
         v.maintenance.records.push(record);

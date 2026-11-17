@@ -86,7 +86,8 @@ pub fn advance(v: &mut Village, minutes: f32) {
         if v.buildings[index].poultry.remaining <= 0. {
             let local =
                 food::pantry(v, id).map_or(0, |p| food::available(v, p, economy::FOOD, None));
-            let fodder = organics::available(v, logistics::Owner::Pantry(id), economy::FODDER) >= HEN_FODDER;
+            let fodder =
+                organics::available(v, logistics::Owner::Pantry(id), economy::FODDER) >= HEN_FODDER;
             if !v.supplies.feed_hens
                 || (!fodder && (v.food < HEN_FOOD_RESERVE || local < HEN_FOOD))
                 || reserved_eggs + 3 > 12

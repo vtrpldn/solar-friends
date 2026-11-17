@@ -799,7 +799,10 @@ fn road_rejections_explain_the_site_and_preserve_the_running_village() {
         assert_eq!(issue["code"], "invalid_road");
         assert_eq!(issue["path"], format!("start.roads.{index}"));
         assert_eq!(issue["at"], serde_json::json!(cells[index]));
-        assert!(issue["message"].as_str().unwrap().contains(message), "{issue}");
+        assert!(
+            issue["message"].as_str().unwrap().contains(message),
+            "{issue}"
+        );
         assert_eq!(g.snapshot(), before);
     }
 }
