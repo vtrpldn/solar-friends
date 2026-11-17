@@ -1,0 +1,20 @@
+{
+  "metresPerCell": 2,
+  "changedModels": [
+    "solar_farm",
+    "picnic-table",
+    "supply-0",
+    "eco_toilet",
+    "supply-3 (legacy preview prop)",
+    "home-shared"
+  ],
+  "changedReservedFootprints": [],
+  "views": "Each corrected model inspected with grid and resident; building gallery swept; five buildable corrected models inspected together in the desktop game.",
+  "limits": [
+    "Four rotations checked automatically for bounds; not an exhaustive visual review of every lighting angle.",
+    "Productive land, stocking, staffing and utility capacity are mechanics abstractions, not inferred from site area.",
+    "The goat pasture represents a pen, not sufficient grazing land.",
+    "Small props reserve whole cells for placement and access; their physical geometry is smaller."
+  ],
+  "preview": "/v2/?mode=sandbox&scale-preview=sites"
+}

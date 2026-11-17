@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { gableRoof } from "./roof-forms.js";
-import { box, cylinder, ball, beam, clayRoof } from "../workshop/models.js";
+import { box, cylinder, ball, beam } from "../workshop/models.js";
 
 // Human-scale scene dressing. Uses the same materials and low-segment primitives
 // as the approved studies; no textures, simulation, or random house attachments.
