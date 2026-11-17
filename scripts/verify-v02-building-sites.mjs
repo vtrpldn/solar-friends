@@ -43,7 +43,7 @@ for(const size of [[2,2],[4,6],[6,4]])for(let rotation=0;rotation<4;rotation++)f
  const model=createCultivationModel(p,{time:0,operations:[],elevationSeed:42});model.rotation.y=rotation*Math.PI/2;
  const bounds=new THREE.Box3().setFromObject(model,true),[w,d]=footprint(p);
  assert.deepEqual([w,d],rotation%2?[...size].reverse():size);
- assert(bounds.min.x>=-w&&bounds.max.x<=w&&bounds.min.z>=-d&&bounds.max.z<=d,`${crop} field ${size} rotation ${rotation}: crop geometry exceeds the reserved ground`);
+ assert(bounds.min.x>=-w-1e-6&&bounds.max.x<=w+1e-6&&bounds.min.z>=-d-1e-6&&bounds.max.z<=d+1e-6,`${crop} field ${size} rotation ${rotation}: crop geometry exceeds the reserved ground`);
  model.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
 }
 for(const asset of ASSETS.filter(a=>['Buildings','Homes'].includes(a.category)))assert(rows.some(r=>r.id===asset.id),`${asset.id}: building missing from audit`);

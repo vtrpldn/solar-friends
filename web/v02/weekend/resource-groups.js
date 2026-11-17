@@ -29,7 +29,7 @@ export const RESOURCE_GROUPS = [
   {
     name: "Food & farm supplies",
     ids: [
-      "food",
+      "food", "greens", "beans", "corn",
       "meals",
       "eggs",
       "milk",
@@ -41,7 +41,7 @@ export const RESOURCE_GROUPS = [
   },
   {
     name: "Plants & animals",
-    ids: ["seedlings", "tree_starts", "bamboo_starts", "goats", "bees", "hens"],
+    ids: ["greens_seed", "beans_seed", "corn_seed", "seedlings", "tree_starts", "bamboo_starts", "goats", "bees", "hens"],
   },
 ];
 

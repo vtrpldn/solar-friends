@@ -505,6 +505,7 @@ function drawUtilities() {
   }
 }
 const buildings = new Map();
+let selectedFieldEdge=null;
 const selectionOutline = new THREE.BoxHelper(new THREE.Object3D(), '#3b6545');
 selectionOutline.material.depthTest = false;
 selectionOutline.renderOrder = 20;
@@ -896,7 +897,9 @@ function hit(e) {
   ray.setFromCamera(mouse, camera);
   return ray.intersectObject(ground)[0]?.point;
 }
+let fieldGridPrevious=null;
 let farmingUI=installFarmingUI({state:()=>s,selected:()=>selected,scene,hit,controls,
+  placementGrid:active=>{if(active){fieldGridPrevious??={visible:grid.visible,opacity:grid.material.opacity,transparent:grid.material.transparent};grid.visible=true;grid.material.transparent=true;grid.material.opacity=.35;}else if(fieldGridPrevious!==null){grid.visible=fieldGridPrevious.visible;grid.material.opacity=fieldGridPrevious.opacity;grid.material.transparent=fieldGridPrevious.transparent;fieldGridPrevious=null;}},
   select:id=>{selected=id;syncBuildings();persist();renderUI();},
   changed:()=>{syncBuildings();persist();renderUI();},message,
   begin:()=>{placing=null;setPanel(null);ghost.visible=false;},
@@ -2036,6 +2039,7 @@ management = createManagement({
     selected = id;
     const p = s.projects.find((p) => p.id === id);
     if (p) focus(p);
+    if(p?.cultivation)farmingUI.open();
     uiSignature = "";
     renderUI();
   },
@@ -2083,7 +2087,9 @@ function frame(now) {
   syncBuildings();
   if (!placing) entranceMarker.visible = false;
   const selectedModel = buildings.get(selected)?.root;
-  selectionOutline.visible = !!selectedModel && !placing;
+  const fieldEdge=selectedModel?.userData.cultivatedField?selectedModel.getObjectByName('field-boundary'):null;
+  if(fieldEdge!==selectedFieldEdge){if(selectedFieldEdge){selectedFieldEdge.material.color.set('#b5a16c');selectedFieldEdge.material.opacity=.65;}if(fieldEdge){fieldEdge.material.color.set('#3b6545');fieldEdge.material.opacity=1;}selectedFieldEdge=fieldEdge;}
+  selectionOutline.visible = !!selectedModel && !placing && !fieldEdge;
   if (selectionOutline.visible) { selectedModel.updateWorldMatrix(true, true); selectionOutline.setFromObject(selectedModel); }
   if (!paused && !document.hidden) animalTime += dt * speed;
   for (const [id, entry] of buildings)
