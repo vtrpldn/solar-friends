@@ -24,4 +24,6 @@ The first evening did not require repeated manual water orders after the reserve
 
 A second restart defect was found: New village could overwrite the active named slot. The handler now saves and detaches the old slot before starting another village. Verified through UI: named the current village “Ordinary economy playtest — preserved”, started another village, then loaded the named village and recovered Day 1 20:39, R$1,722.16, 15 meals + 12 ingredients and 49 L water. Continued that restored village to the final observation. The earlier disposable test slot was affected before the repair; no claim is made that it was recovered.
 
-Proof images: `/tmp/solar-friends-preserved-economy-village.jpg` and `/tmp/solar-friends-economy-first-hour.jpg`. The local tab is left paused. Earlier purchases used preceding prices; the separate current-price bootstrap matrix is the budget evidence.
+Proof images: [restored village](evidence/2026-11-17-preserved-village.jpg) and [final first-hour view](evidence/2026-11-17-first-hour.jpg). The local tab is left paused. Earlier purchases used preceding prices; the separate current-price bootstrap matrix is the budget evidence.
+
+After the final simulation fixes and rebuild, reloaded the same browser tab. The village restored Day 2 21:30, R$1,721.63, five meals plus 12 ingredients and 85 L water. Paused again at 21:33; [updated-build screenshot](evidence/2026-11-17-final-build-restored.jpg). Reload resets the viewing speed to 1×; stock, time and cash were preserved.
