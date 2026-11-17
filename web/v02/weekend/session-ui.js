@@ -24,6 +24,25 @@ export function simulationFrame(accumulator, elapsed, speed, step, now = () => p
   }
   return accumulator;
 }
+// Spend hidden wall time in fixed simulation steps, using the same automatic
+// sleep/away speed as visible play. Leave enough frame time for input and paint.
+export function catchUpFrame(seconds, accumulator, speed, step, now = () => performance.now()) {
+  const start = now();
+  while (seconds > 0) {
+    const rate = speed();
+    const cost = (.1 - accumulator) / rate;
+    if (seconds + 1e-12 < cost) {
+      accumulator += seconds * rate;
+      seconds = 0;
+      break;
+    }
+    step(.1);
+    accumulator = 0;
+    seconds = Math.max(0, seconds - cost);
+    if (now() - start >= 8) break;
+  }
+  return {seconds, accumulator};
+}
 export function restoredView(view) {
   if (!view || ![1,4,8,16].includes(view.speed) || typeof view.paused !== 'boolean' ||
       ![view.position,view.target].every(v => Array.isArray(v) && v.length === 3 && v.every(n => Number.isFinite(n) && Math.abs(n)<10000)) ||

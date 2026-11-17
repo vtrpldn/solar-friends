@@ -55,7 +55,7 @@
       "time-skip",
       "time-skip-milestones"
     ],
-    "description": "Use the clock to pause or change speed. When everyone is asleep or away, time can advance at 64×.",
+    "description": "Use the clock to pause or change speed. A running village catches up when you return to its open tab. Pause to stop catch-up at the current moment. When everyone is asleep or away, time can advance at 64×.",
     "diagram": "flowchart TD\n Mode{Play mode} -->|Story| Story[Finite supplies and biological waiting]\n Mode -->|Sandbox| Sandbox[Replenished supplies and no biological waiting]\n Clock[Clock controls] --> Running{Time running?}\n Running -->|Yes| Calendar[Days, seasons and schedules advance]\n Running -->|No| Hold[Village activity pauses]\n Calendar --> Weather[Seasonal rain, cloud cover and temperature]\n Weather --> Effects[Water recharge, crop stress and hydration demand]\n Calendar --> Residents[Resident needs, trips and work]",
     "boundary": "Sandbox also skips asset upkeep and tool wear.",
     "tip": "Advance days runs the same simulation steps while you wait. Check upcoming milestones first; supplies, bills, weather and resident needs continue. Stop here keeps progress and pauses the village.",
@@ -81,7 +81,7 @@
     "description": "Terrain and access determine where buildings fit and residents can work.",
     "diagram": "flowchart LR\n Setup[Seed, biome and resource settings] --> World[Terrain, river and natural sites]\n World --> Grid[Map cells and elevation]\n Edit[Terrain edits and foundations] --> Grid\n Grid --> Check{Footprint and access valid?}\n Plan[Building or field footprint] --> Check\n Check -->|No| Reject[Explain placement constraint]\n Check -->|Yes| Place[Place project]\n Place --> Routes[Recheck walking routes]\n Grid --> Routes\n Routes --> Reach{Reachable work or service point?}\n Reach -->|Yes| Walk[Resident walks to target]\n Reach -->|No| Block[Wait or choose another action]",
     "boundary": "Terrain editing currently has no labor or cash cost.",
-    "tip": "Keep stores, work sites and water routes close and accessible.",
+    "tip": "Keep stores, work sites and water routes close. Building placement and relocation check whether residents would lose access to food or drinking water.",
     "facts": null
   },
   {
@@ -513,7 +513,7 @@
     "description": "Age and use reduce condition. Service needs parts, access and labor.",
     "diagram": "flowchart TD\n Use[Time, active assets and vehicle distance] --> Condition[Condition and age change]\n Condition --> Due{Service or replacement due?}\n Due -->|Yes| Queue[Queue maintenance job]\n Queue --> Gate{Parts, allowance and accessible site?}\n Gate -->|No| Wait[Expose missing parts, budget or access]\n Gate -->|Yes| Work[Resident collects supplies and services asset]\n Work --> Restore[Restore condition or reset replacement age]\n Restore --> Condition\n Condition --> Capacity[Service factor and battery capacity affect utilities]\n Due -->|No| Continue[Continue operation]",
     "boundary": "",
-    "tip": "Keep parts and labor available before equipment deteriorates. Local repair materials are still limited.",
+    "tip": "In Finances, set a daily feed and repair shopping budget to cover missing supplies and transport. Zero disables shopping. Residents still need to receive the goods and do the work.",
     "facts": null
   },
   {

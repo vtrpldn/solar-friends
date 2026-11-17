@@ -37,3 +37,14 @@ assert.equal(result.steps,1);assert.equal(result.completed,false);
 for(const days of [0,-1,1.5,366,NaN,Infinity])await assert.rejects(skipDays(s,days),RangeError);
 await assert.rejects(skipDays(createWeekend(42),1),/arriving/);
 console.log('PASS: one- and two-day full-state parity, save reload, yielding, cancellation, and input/arrival guards.');
+
+const {catchUpFrame,simulationFrame}=await import('../web/v02/weekend/session-ui.js');
+// Start mid-step and switch speeds while processing the absence.
+let visibleSteps=0, visibleAccumulator=.04;
+for(let frame=0;frame<400;frame++){
+  visibleAccumulator=simulationFrame(visibleAccumulator,.016,()=>visibleSteps<200?64:4,()=>visibleSteps++,()=>0);
+}
+let backgroundSteps=0, clock=0, background={seconds:400*.016,accumulator:.04};
+while(background.seconds>0)background=catchUpFrame(background.seconds,background.accumulator,()=>backgroundSteps<200?64:4,()=>backgroundSteps++,()=>clock++);
+assert.equal(backgroundSteps,visibleSteps);
+assert(Math.abs(background.accumulator-visibleAccumulator)<1e-9);
