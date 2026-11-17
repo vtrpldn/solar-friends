@@ -45,3 +45,17 @@ assert.equal(
 console.log(
   "PASS: road directions, existing anchors, persistence, blocked and unaffordable batch rollback",
 );
+
+// Exercise the full batch, including its cloned state, with a long legal road.
+// Previously each tile rerouted the camp and blocked this call for seconds.
+const longRoad = createSandbox(42);
+const started = performance.now();
+assert.equal(planRoadLine(longRoad, {x:50,z:30}, {x:50,z:90}), '');
+const elapsed = performance.now() - started;
+assert.equal(longRoad.projects.filter(p=>p.key==='road').length, 61);
+assert(elapsed < 1000, `Long road blocked placement for ${elapsed.toFixed(0)}ms`);
+assert.ok(restore(save(longRoad)), 'long road survives save restoration');
+const unchanged = JSON.stringify(longRoad);
+assert.ok(planRoadLine(longRoad, {x:50,z:90}, {x:50,z:95}));
+assert.equal(JSON.stringify(longRoad), unchanged, 'boundary failure rolls back the whole extension');
+console.log(`PASS: 61-tile road planned in ${elapsed.toFixed(1)}ms, persisted, and retained boundary checks`);
