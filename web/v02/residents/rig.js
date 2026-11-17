@@ -18,6 +18,11 @@ const looks = {
   nina: { hair: "puffs", outfit: "overalls", width: 0.88, glasses: true },
 };
 const palettes = new Map();
+function detailMaterial(color) {
+  const key = `detail-${color}`;
+  if (!palettes.has(key)) palettes.set(key, new THREE.MeshStandardMaterial({color, roughness: 1, side: THREE.DoubleSide}));
+  return palettes.get(key);
+}
 function joint(parent, name, x = 0, y = 0, z = 0) {
   const g = new THREE.Group();
   g.name = name;
@@ -40,13 +45,19 @@ export function createResident(id = "resident") {
     box(clothes, 0.29*look.width, 0.28, 0.035, material, 0, 0.18, 0.16);
     for (const x of [-0.12, 0.12])
       box(clothes, 0.045, 0.19, 0.035, material, x, 0.34, 0.15);
+    if (look.outfit === "overalls")
+      for (const x of [-0.12, 0.12])
+        box(clothes, 0.045, 0.3, 0.035, material, x, 0.29, -0.15);
     box(clothes, 0.13, 0.08, 0.015, material, 0, 0.15, 0.185);
     if(look.outfit==='apron')box(clothes,.38,.26,.04,material,0,-.06,.155);
   } else if (look.outfit === "vest") {
     for (const x of [-0.14, 0.14])
       box(clothes, 0.17, 0.36, 0.055, "earth", x, 0.20, 0.14);
     const back=box(clothes,.43,.34,.04,"earth",0,.21,-.145);
-    back.scale.x=look.width;
+    back.geometry.dispose();
+    back.geometry=new THREE.CylinderGeometry(.255,.215,.38,6,1,true,Math.PI/2,Math.PI);
+    back.position.set(0,.2,0);
+    back.scale.set(look.width,1,.7);
   }
   if(look.scarf){
     const scarf=box(clothes,.15,.15,.035,"teal",.07,.36,.15);
@@ -54,7 +65,10 @@ export function createResident(id = "resident") {
   }
   cylinder(hips, 0.075, 0.08, 0.12, "skin", 0, 0.47, 0, 6);
   ball(head, 0.235, "skin", 0, 0, 0, [0.91, 1.02, 0.88], 1);
-  if(look.hair!=="bun") ball(head, 0.245, "hair", 0, look.hair==="short"&&!look.hat?.13:.08, -0.035, [0.94, look.hair==="short"&&!look.hat?.75:.62, 0.91], 0);
+  const shortHair = look.hair === "short" && !look.hat;
+  if (look.hair !== "bun")
+    ball(head, 0.245, "hair", 0, shortHair ? 0.13 : 0.08, -0.035,
+      [0.94, shortHair ? 0.75 : 0.62, 0.91], 0);
   for (const s of [-1, 1]) {
     for(const [radius,material,x,y,z,scale] of [
       [.018,"hair",s*.075,.025,.192,[1,1.15,.5]],
@@ -100,10 +114,10 @@ export function createResident(id = "resident") {
   if (look.hair === "bun") {
     // A low bun joins the back of a fitted hair cap; the scarf follows
     // the forehead rather than forming a flat hat across the scalp.
-    const cap=new THREE.Mesh(new THREE.SphereGeometry(.247,8,3,0,Math.PI*2,0,Math.PI*.5),new THREE.MeshStandardMaterial({color:0x3a2a23,roughness:1}));
+    const cap=new THREE.Mesh(new THREE.SphereGeometry(.247,8,3,0,Math.PI*2,0,Math.PI*.5),detailMaterial("#3a2a23"));
     cap.scale.set(.93,1,.91);cap.position.set(0,.06,-.018);hairstyle.add(cap);
     ball(hairstyle, 0.105, "hair", 0, 0.015, -0.235, [1, .95, .85], 0);
-    const scarf=new THREE.Mesh(new THREE.TorusGeometry(.207,.045,3,8,Math.PI*1.3),new THREE.MeshStandardMaterial({color:0xb87351,roughness:1}));
+    const scarf=new THREE.Mesh(new THREE.TorusGeometry(.207,.045,3,8,Math.PI*1.3),detailMaterial("#b87351"));
     scarf.rotation.x=Math.PI/2;scarf.rotation.z=-Math.PI*.15;
     scarf.position.set(0,.105,-.01);hairstyle.add(scarf);
   }
@@ -124,7 +138,7 @@ export function createResident(id = "resident") {
   if(look.glasses){
     const frames=joint(head,"glasses");
     for(const side of [-1,1]){
-      const rim=new THREE.Mesh(new THREE.RingGeometry(.048,.062,8),new THREE.MeshStandardMaterial({color:'#5b4235',roughness:1,side:THREE.DoubleSide}));
+      const rim=new THREE.Mesh(new THREE.RingGeometry(.048,.062,8),detailMaterial("#5b4235"));
       rim.position.set(side*.077,.025,.213);frames.add(rim);
     }
     box(frames,.045,.014,.014,"timber",0,.025,.218);
