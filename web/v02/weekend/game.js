@@ -957,6 +957,7 @@ $("world").addEventListener("pointerup", (e) => {
           z >= p.z &&
           z < p.z + footprint(p)[1],
       )?.id || null;
+    if (selected && lenses.active && openPanel) setPanel(null);
     renderUI();
   }
 });

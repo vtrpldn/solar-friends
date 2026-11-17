@@ -27,3 +27,7 @@ body[data-lens]:not([data-lens=""]) #world { filter: saturate(.32) brightness(.6
 body[data-lens]:not([data-lens=""]) #selection { right:auto; left:22px; }
 
 #map-lenses summary, #lens-filter-label { color:#e1e9cb; }
+/* The persistent lens button also needs space after returning to normal view. */
+body[data-lens=""] #selection { top:160px; max-height:calc(100dvh - var(--dock) - 184px); }
+body:has(#lens-panel:not([hidden])) #selection { right:auto; left:22px; }
+#lens-filter { color:#40503c; background:#fff7df; }

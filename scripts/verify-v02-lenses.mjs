@@ -22,9 +22,13 @@ assert(lensData(s,'access').lines[0].points.length===3,'queued walking path incl
 const fresh=lensData(s,'water',{liquid:'fresh'}),sewage=lensData(s,'water',{liquid:'sewage'});
 assert.notDeepEqual(fresh,sewage,'liquid filters change marks and pipes');
 assert(lensData(s,'resources').marks.length>10);
+assert(lensData(s,'chains',{material:'wood'}).marks.some(m=>m.detail.includes('Upstream source: logs')),'timber traces back to raw wood sources');
 const tree=s.projects.find(p=>PROJECTS[p.key].kind==='wild-tree');tree.felled=true;
 assert(!lensData(s,'resources').marks.some(m=>m.projectId===tree.id));
 assert(lensData(s,'ecology').marks.some(m=>m.projectId===tree.id&&m.tone==='muted'));
 assert.notDeepEqual(lensData(s,'chains',{material:'food'}),lensData(s,'chains',{material:'stone'}));
+const garden=s.projects.find(p=>p.key==='garden');
+s.operations.push({id:999,site:garden.id,recipe:'vegetables',done:false,status:'Waiting for usable water'});
+assert(lensData(s,'food').marks.some(m=>m.projectId===garden.id&&m.tone==='bad'),'stalled food production needs attention');
 assert.equal(LENSES.length,13);
 console.log('PASS 13 read-only lenses, power shortages, full waste storage, urgent needs, construction completion, paths, filters and cleared trees');

@@ -25,10 +25,21 @@ const pretty=s=>String(s).replaceAll('_',' ').replaceAll('-',' ');
 export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
   const marks=[],lines=[],sys=s.infrastructure||{nodes:{},links:[]};
   const projects=s.projects||[],people=s.people||[],ops=(s.operations||[]).filter(o=>!o.done);
+  const upstream=new Set([material]);
+  if(id==='chains'){
+    // Walk recipe inputs with a visited set: recycling chains may contain cycles.
+    for(const resource of upstream)for(const recipe of Object.values(PROCESSES))if(recipe.output[resource])for(const input of Object.keys(recipe.input))upstream.add(input);
+  }
   const mark=(p,label,detail,tone='info',size=1)=>marks.push({x:p.x,z:p.z,label,detail,tone,size,projectId:p.projectId});
   const projectMark=(p,detail,tone='info')=>{const size=footprint(p);mark({x:p.x+(size[0]-1)/2,z:p.z+(size[1]-1)/2,projectId:p.id},PROJECTS[p.key].name,detail,tone,Math.max(...size));};
   const stock=()=>mark(s.stock,'Shared supplies',id==='chains'?`${pretty(material)}: ${materialCount(s,material)}`:foodIds.map(k=>`${pretty(k)}: ${materialCount(s,k)}`).join(' · '),'info',3);
   const operationText=p=>ops.filter(o=>o.site===p.id).map(o=>o.status|| (o.water?'Water service queued':`${PROCESSES[o.recipe]?.name||'Production'} queued`)).join(' · ')||p.productionStatus||'No job queued';
+  const workTone=p=>{
+    if(sys.nodes[p.id]?.enabled===false)return 'muted';
+    const jobs=ops.filter(o=>o.site===p.id);
+    if(jobs.some(o=>['Building switched off','Waiting for usable water','Waiting for power','Storage full','Storage full; output is still carried','Destination full; water remains in the sealed carrier.'].includes(o.status)))return 'bad';
+    return jobs.length?'good':'warn';
+  };
   if(['power','water','sanitation'].includes(id)) {
     const kinds=id==='power'?['power']:id==='sanitation'?['greywater','sewage']:[liquid];
     for(const n of Object.values(sys.nodes)) {
@@ -59,8 +70,8 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
     if(id==='construction'&&!done)projectMark(p,constructionStatus(s,p,d,requiredLoads(p.key)),p.delivered<requiredLoads(p.key)?'warn':'good');
     if(id==='resources'&&d.natural){const recipe=recipes.find(r=>r.deposit);projectMark(p,recipe?`${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} units remain`:ops.some(o=>o.site===p.id)?'Felling queued · yields raw wood':'Standing tree · yields raw wood',recipe&&(p.extracted||0)>=depositCapacity(s.landSeed,p,recipe)?'muted':'good');}
     if(id==='ecology'&&(d.natural||['garden','grove','orchard','greenhouse'].includes(kind)))projectMark(p,kind==='wild-tree'?(ops.some(o=>o.site===p.id)?'Marked for felling':'Standing tree'):d.natural?'Natural deposit':'Cultivated land',ops.some(o=>o.site===p.id)&&kind==='wild-tree'?'warn':'good');
-    if(id==='food'&&recipes.some(r=>foodIds.some(k=>r.output[k])))projectMark(p,done?operationText(p):'Under construction',done?'good':'warn');
-    if(id==='work'&&(!done||recipes.length)) {const crew=people.filter(r=>r.job===p.id||ops.some(o=>o.site===p.id&&r.operation===o.id)).length;projectMark(p,`${crew} assigned · ${done?operationText(p):constructionStatus(s,p,d,requiredLoads(p.key))}`,crew?'good':'warn');}
+    if(id==='food'&&recipes.some(r=>foodIds.some(k=>r.output[k])))projectMark(p,done?operationText(p):'Under construction',done?workTone(p):'warn');
+    if(id==='work'&&(!done||recipes.length)) {const crew=people.filter(r=>r.job===p.id||ops.some(o=>o.site===p.id&&r.operation===o.id)).length;projectMark(p,`${crew} assigned · ${done?operationText(p):constructionStatus(s,p,d,requiredLoads(p.key))}`,done?workTone(p):crew?'good':'warn');}
     if(id==='access'&&!d.natural&&!['road','bridge'].includes(kind))projectMark(p,`${Math.hypot(p.x-s.stock.x,p.z-s.stock.z).toFixed(1)} cells from shared supplies (straight line)`,Math.hypot(p.x-s.stock.x,p.z-s.stock.z)>25?'warn':'info');
     if(id==='comfort'&&['home','kitchen','eco_toilet','wash-station',...leisure].includes(kind)) {
       const nearest=predicate=>{const sites=Object.values(sys.nodes).filter(n=>n.enabled&&predicate(n));return sites.length?`${Math.min(...sites.map(n=>Math.hypot(n.x-p.x,n.z-p.z))).toFixed(0)} cells`:'none available';};
@@ -69,7 +80,12 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
     }
     if(id==='chains') {
       const produces=recipes.some(r=>r.output[material]),consumes=recipes.some(r=>r.input[material])||(!done&&d.materials?.[material]);
-      if(produces||consumes){projectMark(p,`${produces?'Potential producer':''}${produces&&consumes?' / ':''}${consumes?'Consumer':''} · ${done?operationText(p):'Construction materials needed'}`,produces?'good':'warn');lines.push({points:[s.stock,p],tone:produces?'good':'warn'});}
+      const inputs=recipes.flatMap(r=>Object.keys(r.output)).filter(k=>k!==material&&upstream.has(k));
+      if(produces||consumes||inputs.length){
+        const role=[produces?'Potential producer':'',consumes?'Consumer':'',inputs.length?`Upstream source: ${[...new Set(inputs)].map(pretty).join(', ')}`:''].filter(Boolean).join(' / ');
+        const tone=produces?'good':consumes?'warn':'info';
+        projectMark(p,`${role} · ${done?operationText(p):'Under construction'}`,tone);lines.push({points:[s.stock,p],tone});
+      }
     }
   }
   if(['residents','comfort','access','work'].includes(id))for(const r of people) {

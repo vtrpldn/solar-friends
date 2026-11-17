@@ -20,10 +20,14 @@ await page.keyboard.press('Escape');assert.equal(await page.locator('body').getA
 await page.keyboard.press('l');assert(await page.locator('#lens-panel').isVisible());
 await page.locator('[data-lens="power"]').click();await page.waitForTimeout(850);
 await page.screenshot({path:`${out}/power.png`});
+await page.locator('#pause').click(); // Keep buttons clickable while live values refresh.
 await page.locator('#lens-results summary').click();await page.locator('#lens-list button').filter({hasText:'Workshop'}).click();
 assert(await page.locator('#selection').isVisible());
 assert.equal(await page.locator('body').getAttribute('data-lens'),'power');
 await page.setViewportSize({width:1000,height:750});await page.screenshot({path:`${out}/small.png`});
+await page.keyboard.press('Escape');
+await page.locator('#close-selection').click();
+assert(!(await page.locator('#selection').isVisible()));
 assert.deepEqual(errors,[]);
 } finally { await browser.close();server.close(); }
 console.log('PASS every lens selector, filter, keyboard dismissal and empty states; no browser exceptions');
