@@ -13,6 +13,7 @@ import {settingsFor,BIOMES,richnessFactor} from './world-settings.js';
 import {beginArrival} from './simulation.js';
 import {depositCapacity} from './land-layout.js';
 import {profileFor,friendshipLabel} from './resident-personality.js';
+import {currentThought,aspirationStatus} from './resident-mind.js';
 import { needMeters } from "./resident-needs.js";
 import { drapeRoadGeometry } from "./road-surface.js";
 import { terraform } from "./terraform.js";
@@ -1414,7 +1415,7 @@ function renderUI() {
     selected,
     placing,
     s.log,
-    s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
+    s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), JSON.stringify(r.mind), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
     s.projects.map((p) => [
       p.id, p.delivered, p.staged,
       Math.floor((p.work / PROJECTS[p.key].work) * 100),
@@ -1592,7 +1593,7 @@ function renderUI() {
       const traits=document.createElement('p');traits.className='resident-traits';traits.textContent=profile.traits.join(' · ');
       identity.append(title,role,traits);heading.append(face,identity);detail.append(heading);
       const tabs=document.createElement('nav');tabs.className='resident-tabs';tabs.setAttribute('aria-label','Profile sections');
-      for(const label of ['Overview','Skills','Relationships']){
+      for(const label of ['Overview','Story','Skills','Relationships']){
         const tab=document.createElement('button');tab.textContent=label;tab.setAttribute('aria-pressed',String(residentTab===label));
         tab.onclick=()=>{residentTab=label;uiSignature='';renderUI();};tabs.append(tab);
       }
@@ -1601,8 +1602,22 @@ function renderUI() {
       if(residentTab==='Overview'){
         const activity=document.createElement('div');activity.className='resident-activity';activity.textContent=status.textContent;detail.append(activity);
         paragraph('Needs','h3');detail.append(needs);
+        paragraph('On my mind','h3');paragraph(currentThought(s,r,PROJECTS));
+        const wish=aspirationStatus(s,r,PROJECTS);
+        paragraph('A personal hope','h3');paragraph(`${wish.label} · ${wish.status}`);paragraph(wish.reason);
         paragraph('About '+r.name,'h3');paragraph(profile.bio);
         paragraph(profile.effect);paragraph(`Enjoys ${profile.hobby.toLowerCase()}.`);
+        paragraph('Recent memories','h3');
+        if(!r.mind?.memories.length)paragraph('Memories will appear after conversations, personal time, and meaningful village milestones.');
+        else for(const memory of r.mind.memories.slice(0,3))paragraph(memory.text);
+      } else if(residentTab==='Story'){
+        paragraph('Before the village','h3');paragraph(profile.backstory);
+        for(const [label,text] of [
+          ['What I want',profile.desire],['What drives me',profile.motivation],
+          ['What I fear',profile.fear],['Where I struggle',profile.flaw],
+          ['What I need from others',profile.boundary],['Room to grow',profile.growth],
+        ]){paragraph(label,'h3');paragraph(text);}
+
       } else if(residentTab==='Skills'){
         paragraph('Specialties · 25% faster','h3');
         const list=document.createElement('div');list.className='resident-specialties';
@@ -1613,14 +1628,17 @@ function renderUI() {
         const progress=document.createElement('progress');progress.max=15;progress.value=bonus;progress.setAttribute('aria-label','Experience bonus');detail.append(progress);
         paragraph('Hands-on work gradually improves efficiency, up to a 15% bonus.');
       } else {
-        paragraph('Growing together','h3');paragraph('Shared conversations strengthen friendships. Familiar friends are preferred when nearby.');
+        paragraph('Growing together','h3');paragraph('Residents make time for willing friends, shared interests, and listening. Sleep, urgent needs, and quiet time come first.');
         for(const friend of s.people.filter(p=>p!==r)){
           const score=r.friendships?.[friend.id]||0,row=document.createElement('div');row.className='relationship-row';
           const img=document.createElement('img');illustrate(img,friend.id);img.alt='';
           const text=document.createElement('div');const n=document.createElement('strong');n.textContent=friend.name;
           const label=document.createElement('p');label.textContent=friendshipLabel(score);
           const bar=document.createElement('progress');bar.max=100;bar.value=score;bar.setAttribute('aria-label',`Friendship with ${friend.name}`);
-          text.append(n,label,bar);row.append(img,text);detail.append(row);
+          text.append(n,label,bar);
+          const memory=r.mind?.memories.find(m=>m.other===friend.id);
+          if(memory){const note=document.createElement('p');note.textContent=memory.text;text.append(note);}
+          row.append(img,text);detail.append(row);
         }
       }
       $("resident-detail").append(detail);

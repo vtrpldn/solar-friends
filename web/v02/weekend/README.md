@@ -16,7 +16,9 @@ Normal play supports speeds through 16×. Opening management/planning screens pa
 
 ## Residents and construction
 
-Five friends have distinct identities, preferences and needs: energy, hunger, toilet, hygiene, social contact and fun. Needs can interrupt work. Residents approach service buildings, rest inside accommodation, wash, socialize and use leisure destinations with articulated animations. These remain a simplified simulation, not a complete model of human behavior.
+Five friends have distinct identities, preferences and needs: energy, hunger, toilet, hygiene, social contact and fun. Needs can interrupt work. Residents approach service buildings, rest inside accommodation, wash, socialize and use leisure destinations with articulated animations. The resident panel includes an Overview, Story, Skills, and Relationships. Each friend has an authored history, motivations, fears, flaws, boundaries, and a personal building hope. Bedtimes, social appetite, break timing, leisure preferences, and work choices differ by personality. Explicit project priorities and essential work policies remain in charge; residents do not place their own blueprints.
+
+Conversations require a willing partner and physical arrival. Residents respect sleep, urgent needs, carrying trips, and quiet time after a break. Two lonely workers can agree to stop for a conversation. Shared interests and listening affect friendship differently; declining carries no penalty. Completed conversations, personal time, and fulfilled building hopes produce up to six saved memories per resident, with current thoughts and recent memories visible in the panel. Older saves initialize this history through play. Biographies describe room for growth; they do not imply a simulated trauma, romance, conflict, or long-term personality-change system.
 
 Blueprints reserve materials; residents haul supplies and assemble projects. Money pays for purchased supplies and services, not construction labor. Build-menu auto-buy can order missing materials if affordable. Supply trips use vehicles and deliver on return. Access and terrain constraints still apply. Roads and bridges are build choices; roads require resident construction. Buildings expose applicable relocation/removal and service controls rather than universal power switches.
 
@@ -51,7 +53,9 @@ Sandbox replenishes supplies and offers optional instant buildings while residen
 - `simulation.js`: state, commands, construction, production and scheduling.
 - `catalog-rules.js`: material and recipe definitions; `economy-policies.js`: reserves, sales and work settings.
 - `game.js`: scene and game interaction; `management.js` and `economy-controls.js`: planning screens.
-- `resident-needs.js`: needs; shared `../residents/` code: rigs/animation.
+- `resident-needs.js`: needs; `resident-personality.js`: authored identities; `resident-mind.js`: invitations, preferences, thoughts and saved memories; shared `../residents/` code: rigs/animation.
 - `lab-worker.js` / `lab-runner.js`: isolated acceleration with fixed simulation steps.
 
 Run the targeted verification commands listed in the [root README](../../../README.md). The [68-type catalog playthrough](../../../docs/playtests/2026-11-08-regular-catalog.md) records actual construction through normal gameplay. The [three-day replay](../../../docs/balance/2026-11-08-economy.md) checks subsequent policy changes. Neither proves balance for every biome, seed or layout.
+
+Resident behavior checks: `node scripts/verify-v02-resident-agency.mjs`. Desktop profile checks: `node scripts/verify-v02-resident-agency-browser.mjs` (optionally set `SOLAR_EVIDENCE_DIR` for screenshots). Both also run in CI.
