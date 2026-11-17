@@ -1,3 +1,4 @@
+import {cropCondition} from './crop-stress.js';
 import * as THREE from 'three';
 import {elevationAt} from './elevation.js';
 import {CROPS,ensureCultivation,bedLayout,farmJobError,farmJobSpec} from './cultivation.js';
@@ -59,18 +60,18 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
   if(lastSite!==p.id){lastSite=p.id;bedId=0;hiddenSite=null;}
   const farm=ensureCultivation(s,p);if(!farm){panel.hidden=true;delete document.body.dataset.cultivationOpen;return;}
   panel.hidden=false;document.body.dataset.cultivationOpen='true';
-  const signature=JSON.stringify([p.id,bedId,p.fieldSize,s.materials[`${farm.beds[bedId]?.crop}_seed`],s.materials.compost,farm.beds.map(b=>[b.crop,b.stage,b.density,b.irrigation,b.residues,Math.floor(b.growth*100),Math.floor(b.moisture*100),Math.floor(b.fertility*100),Math.floor(b.cover*100),Math.floor(b.residueKg*10),Math.floor(b.irrigated)]),(s.operations||[]).filter(o=>o.site===p.id&&!o.done).map(o=>[o.id,o.status,Math.floor(o.work)])]);
+  const signature=JSON.stringify([p.id,bedId,p.fieldSize,s.materials[`${farm.beds[bedId]?.crop}_seed`],s.materials.compost,farm.beds.map(b=>[b.crop,b.stage,b.density,b.irrigation,b.residues,Math.floor((b.droughtDamage||0)*100),Math.floor(b.growth*100),Math.floor(b.moisture*100),Math.floor(b.fertility*100),Math.floor(b.cover*100),Math.floor(b.residueKg*10),Math.floor(b.irrigated)]),(s.operations||[]).filter(o=>o.site===p.id&&!o.done).map(o=>[o.id,o.status,Math.floor(o.work)])]);
   if(signature===lastRender)return;
   // Preserve focused controls while simulation updates the inspection text.
   if(panel.contains(document.activeElement)&&['SELECT','INPUT'].includes(document.activeElement.tagName))return;
   lastRender=signature;
   bedId=Math.min(bedId,farm.beds.length-1);const b=farm.beds[bedId];if(!b)return;
-  const job=s.operations?.find(o=>!o.done&&o.site===p.id&&o.farm?.bed===bedId),standing=['growing','harvestable'].includes(b.stage),locked=standing||!!job;
-  const condition=b.elapsed?1-b.stress/b.elapsed:1,max=b.w*b.d*CROPS[b.crop].yieldKg*Math.min(b.density,1.2)/(1+Math.max(0,b.density-1)*1.5)*condition;
+  const job=s.operations?.find(o=>!o.done&&o.site===p.id&&o.farm?.bed===bedId),standing=['growing','harvestable','failed'].includes(b.stage),locked=standing||!!job;
+  const condition=Math.min(b.elapsed?1-b.stress/b.elapsed:1,1-(b.droughtDamage||0)),max=b.w*b.d*CROPS[b.crop].yieldKg*Math.min(b.density,1.2)/(1+Math.max(0,b.density-1)*1.5)*condition;
   document.getElementById('farm-title').textContent=`${p.key==='field'?'Field':p.key==='greenhouse'?'Greenhouse':'Garden'} #${p.id}`;
-  const stages={unprepared:'Unworked soil',prepared:'Ready to plant',planted:'Planting',growing:'Growing',harvestable:'Ready to harvest',harvested:'Harvest complete'};
+  const stages={unprepared:'Unworked soil',prepared:'Ready to plant',planted:'Planting',growing:'Growing',harvestable:'Ready to harvest',harvested:'Harvest complete',failed:'Crop failed'};
   const primary={unprepared:['prepare','Prepare soil'],prepared:['plant','Plant bed'],harvestable:['harvest','Harvest crop'],harvested:['prepare','Prepare next planting']}[b.stage];
-  const conditionText=[b.moisture<.4?'Dry soil is slowing growth.':'',b.fertility<.5?'Low fertility is limiting growth.':'',b.density>1?'Dense spacing increases competition.':'',condition<.8?'Earlier stress has reduced this crop’s yield.':''].filter(Boolean);
+  const conditionText=[cropCondition(b),b.moisture<.4?'Dry soil is slowing growth.':'',b.fertility<.5?'Low fertility is limiting growth.':'',b.density>1?'Dense spacing increases competition.':'',condition<.8?'Earlier stress has reduced this crop’s yield.':''].filter(Boolean);
   const metric=(label,value)=>`<div class="farm-metric"><span>${label}</span><strong>${Math.round(value*100)}%</strong><meter min="0" max="1" value="${value}" aria-label="${label}"></meter></div>`;
   const details=(id,title,body)=>`<details class="farm-details" data-section="${id}" ${openSections.has(id)?'open':''}><summary>${title}</summary>${body}</details>`;
   const row=(label,value,unit='kg')=>`<div><dt>${label}</dt><dd>${value.toFixed(1)} <span>${unit}</span></dd></div>`;
@@ -89,7 +90,7 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
   for(const [id,value]of [['farm-bed',bedId],['farm-crop',b.crop],['farm-density',b.density],['farm-residues',b.residues]])content.querySelector('#'+id).value=value;
   content.querySelector('#farm-bed').onchange=e=>{bedId=Number(e.target.value);e.target.blur();refresh();};
   for(const [id,key]of [['farm-crop','crop'],['farm-density','density'],['farm-irrigation','irrigation'],['farm-residues','residues']])content.querySelector('#'+id).onchange=e=>{const value=key==='irrigation'?e.target.checked:key==='density'?Number(e.target.value):e.target.value;message(configureBed(s,p.id,bedId,{[key]:value})||'Bed settings updated.');e.target.blur();changed();};
-  const actions=[...(primary?[primary]:[]),['amend','Apply compost'],['collect','Collect residues'],...(['growing','harvestable'].includes(b.stage)?[['clear','Clear crop']]:[])];
+  const actions=[...(primary?[primary]:[]),['amend','Apply compost'],['collect','Collect residues'],...(['growing','harvestable','failed'].includes(b.stage)?[['clear','Clear crop']]:[])];
   for(const [action,label]of actions){
    const button=document.createElement('button');button.textContent=label;button.dataset.farmAction=action;
    const spec=farmJobSpec(b,action),missing=Object.entries(spec.input).find(([id,n])=>(s.materials[id]||0)<n);

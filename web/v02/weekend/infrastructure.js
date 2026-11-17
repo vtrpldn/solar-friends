@@ -36,6 +36,7 @@ export function switchBuilding(sys, id) {
   return true;
 }
 const CAPACITY = {
+  "supply-0": [0,120,0,0], "supply-1": [0,60,0,0],
   'groundwater-well':[0,40,0,0],
   'water-pump':[0,12,0,0],
   well: [1000, 1000, 0, 0],

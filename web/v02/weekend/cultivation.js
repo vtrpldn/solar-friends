@@ -1,3 +1,5 @@
+import {rainfallRate} from './weather.js';
+import {cropStress,validCropStress} from './crop-stress.js';
 import {materialMass} from './material-measures.js';
 import {GAME_DAY,growthRate} from './biological-production.js';
 // Calendar ranges: UMN Extension vegetable planning; other coefficients are
@@ -41,7 +43,7 @@ export function farmJobError(s,p,b,action){
  if(action==='prepare'&&!['unprepared','harvested'].includes(b.stage))return 'Clear this bed before preparing it.';
  if(action==='plant'&&b.stage!=='prepared')return 'Prepare the soil before planting.';
  if(action==='harvest'&&b.stage!=='harvestable')return 'This crop is not ready for harvest.';
- if(action==='clear'&&!['growing','harvestable'].includes(b.stage))return 'There is no standing crop to clear.';
+ if(action==='clear'&&!['growing','harvestable','failed'].includes(b.stage))return 'There is no standing crop to clear.';
  if(action==='collect'&&b.residueKg<1)return 'At least 1 kg of residues is needed for collection.';
  return '';
 }
@@ -56,14 +58,14 @@ export function finishFarmJob(s,p,op){
  switch(op.farm.action){
  case 'prepare':b.stage='prepared';break;
  case 'plant':
-  Object.assign(b,{stage:s.mode==='sandbox'?'harvestable':'growing',growth:s.mode==='sandbox'?1:0,stress:0,elapsed:0,plantedAt:s.time});
+  Object.assign(b,{stage:s.mode==='sandbox'?'harvestable':'growing',growth:s.mode==='sandbox'?1:0,stress:0,elapsed:0,drySeconds:0,droughtDamage:0,plantedAt:s.time});
   {const seeds=materialMass(op.input),grown=s.mode==='sandbox'?potentialBiomass(b):0;b.sownSeedKg+=seeds;b.grownBiomassKg+=grown;b.standingBiomassKg=seeds+grown;}
   if(s.mode==='sandbox')b.ripeAt=s.time;else delete b.ripeAt;
   break;
  case 'amend':b.amendmentKg+=op.input.compost;b.amendmentAppliedKg+=op.input.compost;break;
  case 'collect':{const n=Math.floor(b.residueKg);output={scraps:n};b.residueKg-=n;b.residueExportedKg+=n;break;}
  case 'clear':case 'harvest':{
-  const health=b.elapsed?Math.max(0,1-b.stress/b.elapsed):1;
+  const health=Math.min(b.elapsed?Math.max(0,1-b.stress/b.elapsed):1,1-(b.droughtDamage||0));
   const crowd=1/(1+Math.max(0,b.density-1)*1.5);
   const late=op.farm.action==='harvest'?Math.max(0,1-Math.max(0,(s.time-b.ripeAt)/GAME_DAY-crop.window)/crop.window):0;
   const kg=Math.floor(area*crop.yieldKg*Math.min(b.density,1.2)*crowd*health*late);
@@ -91,18 +93,20 @@ export function cultivationStep(s,dt,useWater,defs){
     b.residueKg-=decay;b.amendmentKg-=amend;b.decomposed+=decay+amend;
     b.soilOrganicKg+=(decay+amend)*.2;b.decomposedGasKg+=(decay+amend)*.8;b.organic=Math.min(1,b.soilOrganicKg/(area*2));b.fertility=Math.min(1,b.fertility+(decay+amend)/(area*8));b.cover=Math.min(1,b.residueKg/(area*.5));
     if(s.mode==='sandbox')continue;
-    const growing=b.stage==='growing',crop=CROPS[b.crop],capacity=area*16;
-    const demand=area*(growing?crop.water*b.density:1)*(1-.4*b.cover)*days;
-    const rain=s.rain&&p.key!=='greenhouse'?area*6*days:0;
-    const irrigate=growing&&b.irrigation&&s.infrastructure?.nodes[p.id]?.enabled!==false&&b.moisture<.75&&!rain&&useWater(s,p.id,demand,true)?demand:0;
+    const growing=b.stage==='growing',standing=growing||b.stage==='harvestable',crop=CROPS[b.crop],capacity=area*16;
+    const demand=area*(standing?crop.water*b.density:1)*(1-.4*b.cover)*days;
+    const rain=p.key!=='greenhouse'?area*rainfallRate(s)*24*days:0;
+    const irrigate=standing&&b.irrigation&&s.infrastructure?.nodes[p.id]?.enabled!==false&&b.moisture<.75&&!rain&&useWater(s,p.id,demand,true)?demand:0;
     b.irrigated+=irrigate;b.rainLiters+=rain;
     const available=b.moisture*capacity+rain+irrigate;
     b.evaporated+=Math.min(available,demand);b.drained+=Math.max(0,available-demand-capacity);
     b.moisture=Math.max(0,Math.min(1,(available-demand)/capacity));
-    if(!growing)continue;
+    if(!standing)continue;
+    if(cropStress(b,b.moisture,step)==='failed'){b.stage='failed';continue;}
     const moisture=Math.min(1,b.moisture/.4),fertility=.3+.7*b.fertility,crowd=1/(1+Math.max(0,b.density-1));
     const condition=moisture*fertility*crowd;
     b.elapsed+=step;b.stress+=step*(1-condition);
+    if(!growing)continue;
     const before=b.growth;
     b.growth=Math.min(1,b.growth+days/crop.days*condition*(p.key==='greenhouse'?1:growthRate(s,'vegetables')));
     const biomass=(b.growth-before)*potentialBiomass(b);b.grownBiomassKg+=biomass;b.standingBiomassKg+=biomass;
@@ -118,8 +122,9 @@ export function validCultivation(s){
   const layout=bedLayout(p),f=p.cultivation;
   if(!CULTIVATION_KEYS.includes(p.key)||f.version!==1||!Array.isArray(f.beds)||f.beds.length!==layout.length)return false;
   for(const [i,b]of f.beds.entries()){
+   if(!validCropStress(b))return false;
    if(b.id!==i||['x','z','w','d'].some(k=>b[k]!==layout[i][k])||!CROPS[b.crop]||![.5,1,1.5].includes(b.density)||typeof b.irrigation!=='boolean'||!['leave','collect'].includes(b.residues))return false;
-   if(!['unprepared','prepared','planted','growing','harvestable','harvested'].includes(b.stage))return false;
+   if(!['unprepared','prepared','planted','growing','harvestable','harvested','failed'].includes(b.stage))return false;
    if(['moisture','fertility','organic','cover','growth'].some(k=>!Number.isFinite(b[k])||b[k]<0||b[k]>1))return false;
    if(['residueKg','amendmentKg','stress','elapsed','irrigated','rainLiters','evaporated','drained','decomposed','exportedKg','residueExportedKg','amendmentAppliedKg','soilOrganicKg','decomposedGasKg','grownBiomassKg','sownSeedKg','standingBiomassKg','fieldLossKg'].some(k=>!Number.isFinite(b[k])||b[k]<0)||b.stress>b.elapsed+1e-6)return false;
    if(b.stage==='harvestable'&&(!Number.isFinite(b.ripeAt)||b.ripeAt>s.time||b.ripeAt<0))return false;

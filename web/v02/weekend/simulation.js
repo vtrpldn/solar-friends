@@ -14,7 +14,7 @@ import {orderDelivery,deliveryStep,validDelivery} from "./deliveries.js";
 import {activeTrips,uncollectedProjects} from "./trip-state.js";
 import {upkeepStep,performUpkeep,recordVehicleDistance,validUpkeep,ANIMAL_CARE} from "./asset-upkeep.js";
 import {tripEstimate,STARTING_CAPITAL} from "./economy-reference.js";
-import {BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology} from "./biological-production.js";
+import {CROP_CARE,BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology} from "./biological-production.js";
 import {outsideWorkStep,validOutsideWork} from "./outside-work.js";
 import {coolStoredFood} from './cold-storage.js';
 import {refreshSandboxFood,foodChange,takeFoodLots,freshLots,foodStorageStep,validFoodStorage,returnUnsoldFood,FOOD_DAYS} from './food-storage.js';
@@ -533,6 +533,11 @@ export function maintainWater(s) {
     if((fresh?n.water[0]:Math.max(n.water[0],n.water[1]))>=recipe.water)continue;
     if(fresh&&n.water[1]>=1&&n.capacity[0])queuePurification(s,n.id);
     else if(n.capacity[1])queueWater(s,-1,n.id,'irrigation');
+  }
+  for(const p of s.projects){
+    const n=sys.nodes[p.id];if(!n||!n.enabled||!n.capacity[1]||n.water[1]>=Math.min(12,n.capacity[1]*.5)||s.operations?.some(o=>!o.done&&o.water&&o.site===p.id))continue;
+    const growing=p.cultivation?.beds.some(b=>b.irrigation&&['growing','harvestable'].includes(b.stage))||s.operations?.some(o=>!o.done&&o.site===p.id&&CROP_CARE[o.recipe]&&['growing','process'].includes(o.phase)&&p.irrigationPolicy!=='rainfed');
+    if(growing)queueWater(s,-1,p.id,'irrigation');
   }
   for(const job of s.upkeep?.jobs||[]){const care=ANIMAL_CARE[job.care],n=sys.nodes[job.target];if(!care||job.done||!n||n.water[0]>=care.water||s.operations?.some(o=>!o.done&&o.water&&o.site===n.id))continue;
     const source=Object.values(sys.nodes).filter(a=>a.id!==n.id&&a.water[0]>=1).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];if(source)queueWater(s,source.id,n.id,'fresh');
