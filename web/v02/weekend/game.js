@@ -1,3 +1,4 @@
+import {forecast,weatherText} from './weather.js';
 import {ensureCultivation} from './cultivation.js';
 import {cultivationSignature,createCultivationModel} from './cultivation-models.js';
 import {installFarmingUI} from './cultivation-ui.js';
@@ -264,7 +265,7 @@ const noonColor = new THREE.Color("#ffe2a8");
 const sunsetColor = new THREE.Color("#ffad72");
 const overcastColor = new THREE.Color("#d6e3ef");
 function updateSunlight(time, dt) {
-  cloudCover += ((s.rain ? 1 : 0) - cloudCover) * (1 - Math.exp(-dt / 3));
+  cloudCover += ((s.weather?.cloudCover ?? (s.rain ? 1 : 0)) - cloudCover) * (1 - Math.exp(-dt / 3));
   const light = sunlightAt(time, cloudCover);
   sun.position.set(light.x, light.y, light.z).add(sun.target.position);
   sun.intensity = light.direct;
@@ -1714,6 +1715,8 @@ function renderUI() {
     s.stage === "evening"
       ? "Saturday · Evening"
       : `Day ${Math.floor(minutes / 1440) + 1} · ${String(Math.floor(minutes / 60) % 24).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  $("weather-summary").textContent=weatherText(s);
+  $("weather-forecast").textContent=forecast(s).map(d=>`Day ${d.day}: ${d.rain}, ${d.temperature}`).join(" · ");
   $("tasks").replaceChildren();
   $("completed-tasks").replaceChildren();
   const builtCount = s.projects.filter(

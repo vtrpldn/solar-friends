@@ -1,3 +1,4 @@
+import {solarFactor} from './weather.js';
 import {projectMaterials} from './project-materials.js';
 import {serviceFactor} from "./asset-upkeep.js";
 import {GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
@@ -265,6 +266,7 @@ export function infrastructureStep(s, defs, dt) {
         (pumping || filtering ? POWER_LOAD[n.kind] :
           ['water-pump','well'].includes(n.kind) ? 0 : (sun<.15 ? POWER_LOAD[n.kind]||0 : 0)) +
         (machinery && workingMachine(s,n) ? .45 : 0) + (n.coldStorage&&n.coolingEnabled!==false?COLD_STORAGE.kw:0);
+      if(["solar_farm","home"].includes(n.kind))n.generation*=solarFactor(s);
       n.generation*=n.serviceFactor??1;
       generation += n.generation;
       if (n.enabled) {

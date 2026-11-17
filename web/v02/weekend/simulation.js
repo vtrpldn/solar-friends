@@ -1,3 +1,4 @@
+import {weatherStep,validWeather} from './weather.js';
 import {CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
 import {registerGathering,gatheringStatus,gatheringState,validGathering} from './gathering.js';
 import {biologyLabel} from './biological-production.js';
@@ -2083,6 +2084,7 @@ function tickUncached(s, dt) {
   ensureFinances(s);
   if (s.mode === "sandbox") sandboxSupplies(s);
   s.time += dt;
+  weatherStep(s,dt);
   autoConnectUtilities(s, PROJECTS);
   upkeepStep(s,PROJECTS,dt);
   infrastructureStep(s, PROJECTS, dt);
@@ -2207,36 +2209,6 @@ function tickUncached(s, dt) {
     }
   }
   if(!s.trip&&s.secondTrip){s.trip=s.secondTrip;s.secondTrip=null;}
-  if (
-    s.stage === "playing" &&
-    (s.opening && !s.opening.complete
-      ? s.time >= 240/waterFactor(s.worldSettings?.water)
-      : s.time >= 150/waterFactor(s.worldSettings?.water) ||
-        s.projects.some(
-          (p) => !p.natural && p.key !== "gathering" && p.work >= PROJECTS[p.key].work / 2,
-        )) &&
-    !s.rainSeen &&
-    s.projects.length
-  ) {
-    s.rainSeen = true;
-    s.rainAt = s.time;
-    s.rain = true;
-    s.rainResolved = true;
-    say(s, "A short shower passes through. The supplies stay dry.");
-  }
-  if (
-    s.opening &&
-    s.rainSeen &&
-    !s.rainResolved &&
-    openingProgress(s, PROJECTS).supplies
-  ) {
-    s.rainResolved = true;
-    say(
-      s,
-      "Bento: The supplies are covered now. Good call getting that built.",
-    );
-  }
-  if (s.rainResolved && s.time > (s.rainAt ?? 150) + 35) s.rain = false;
   for (const [i, r] of s.people.entries()) {
     if(downtimeInvalid(s,r,PROJECTS)){clearDowntime(r);r.walk=[];r.target=null;}
     if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.outsideWork || r.action==='town'))clearDowntime(r);
@@ -2546,6 +2518,8 @@ export function restore(text) {
       s.projects.length > 512
     )
       return null;
+    if(!validWeather(s))return null;
+    if(s.weather===undefined)weatherStep(s);
     if(!validGathering(s))return null;
     restoreHomeAssignments(s);
     // Saves predating narrow footbridges retain their exact 8×2 occupancy,
@@ -2850,7 +2824,7 @@ export function restore(text) {
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     if(s.foodStorage?.lots)for(const id of ['greens','beans','corn'])if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
     refreshSandboxFood(s);
-    if (!validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validWeather(s) || !validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(
