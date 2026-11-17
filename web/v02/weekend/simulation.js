@@ -1877,6 +1877,18 @@ function isolatedDestination(s, start, end, step) {
       if (queue.length >= 64) return false;
     }
   }
+  if (activeNavigation?.state === s) {
+    // A rounded start on the boundary can step out of an obstacle into the pocket.
+    const possibleStarts = new Set(seen);
+    for (const [x, z] of queue) {
+      possibleStarts.add(`${x + step},${z}`);
+      possibleStarts.add(`${x - step},${z}`);
+      possibleStarts.add(`${x},${z + step}`);
+      possibleStarts.add(`${x},${z - step}`);
+    }
+    const pockets = activeNavigation.pockets ??= new Map();
+    for (const cell of seen) pockets.set(`${step}:${cell}`, possibleStarts);
+  }
   return true;
 }
 function routeUncached(s, from, to, step=1,reachOnly=false) {
@@ -1933,6 +1945,10 @@ function routeUncached(s, from, to, step=1,reachOnly=false) {
       }
     }
     return flood.seen.has(goal)&&walkSegmentClear(s,{x:end[0],z:end[1]},to)?[]:null;
+  }
+  if (activeNavigation?.state === s && activeNavigation.pockets) {
+    const possibleStarts = activeNavigation.pockets.get(`${step}:${key(...end)}`);
+    if (possibleStarts && !possibleStarts.has(key(...start))) return null;
   }
   const queue = new PathQueue(),
     parent = new Map([[key(...start), null]]),
