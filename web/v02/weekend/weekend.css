@@ -302,6 +302,8 @@ header > a {
   font-size: 11px;
   font-style: normal;
   color: #92774f;
+  max-width: 100px;
+  text-align: right;
 }
 .task.complete em {
   font-size: 16px;
@@ -1328,6 +1330,10 @@ body[data-tray="closed"] {
   text-transform: none;
   margin: 4px 0 8px;
 }
+#construction-summary { clear: both; margin: 12px 0; padding: 12px; background: #e8edcf; border-radius: 12px; }
+#construction-summary strong { display: block; font-size: 13px; line-height: 1.5; }
+#construction-summary progress { margin: 8px 0; }
+#construction-summary small { display: block; font-size: 12px; line-height: 1.5; letter-spacing: 0; text-transform: none; }
 
 /* Cached orthographic resource portraits keep their rendered proportions. */
 .resource-icon {

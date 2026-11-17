@@ -3,7 +3,7 @@ import {ensureNaturalLand} from './natural-resources.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {createCapybaraVisitors} from "./capybaras.js";
-import { constructionStatus } from "./construction-logistics.js";
+import { constructionProgress } from "./construction-logistics.js";
 import { BUILD_CATEGORIES, buildingCategory, inBuildCategory } from "./build-categories.js";
 import {createResourceTrends,resourceSnapshot,formatTrend} from './resource-trends.js';
 import {materialTooltip} from './material-tooltip.js';
@@ -1414,9 +1414,9 @@ function renderUI() {
     selected,
     placing,
     s.log,
-    s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
+    s.people.map((r) => [r.action, r.job, r.cargo, r.haulLoads, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
     s.projects.map((p) => [
-      p.id, p.delivered, p.staged,
+      p.id, p.delivered, p.staged, p.pendingMaterials,
       Math.floor((p.work / PROJECTS[p.key].work) * 100),
     ]),
   ]);
@@ -1504,23 +1504,22 @@ function renderUI() {
     const b = document.createElement("button");
     const done = p.work >= d.work;
     div.classList.toggle("complete", done);
-    b.innerHTML = `<img alt=""/><span>${d.name}</span><em>${done ? "✓" : Math.floor((p.work / d.work) * 100) + "%"}</em>`;
+    const construction = constructionProgress(s, p, d, requiredLoads(p.key));
+    b.innerHTML = `<img alt=""/><span>${d.name}</span><em>${done ? "✓" : construction.phase}</em>`;
     illustrate(b.querySelector("img"), d.asset);
     b.onclick = () => {
       selected = p.id;
       renderUI();
     };
     const progress = document.createElement("progress");
-    progress.max = d.work;
-    progress.value = p.work;
+    progress.max = 1;
+    progress.value = construction.value;
+    progress.setAttribute('aria-label', `${d.name}: ${construction.phase}`);
     div.append(b, progress);
     if (!done) {
       const workStatus = document.createElement("small");
       workStatus.className = "task-work-status";
-      const workers = s.people.filter(
-        (r) => r.job === p.id && r.action === "build",
-      ).length;
-      workStatus.textContent = constructionStatus(s, p, d, requiredLoads(p.key));
+      workStatus.textContent = `${construction.detail} · ${construction.workers}`;
       div.append(workStatus);
     }
     $(done ? "completed-tasks" : "tasks").append(div);
@@ -1689,9 +1688,13 @@ function renderUI() {
     $("copy-building").hidden = PROJECTS[p.key].natural ||
       s.mode !== "sandbox" && !PROJECTS[p.key].repeatable;
     illustrate($("selected-art"), PROJECTS[p.key].asset);
-    $("selected-state").textContent = finished(s, p.key)
-      ? "READY TO USE"
-      : `${Math.floor((p.work / PROJECTS[p.key].work) * 100)}% BUILT`;
+    const construction = constructionProgress(s, p, PROJECTS[p.key], requiredLoads(p.key));
+    $("selected-state").textContent = construction.phase;
+    $("construction-summary").hidden = p.work >= PROJECTS[p.key].work;
+    $("construction-detail").textContent = construction.detail;
+    $("construction-workers").textContent = construction.workers;
+    $("construction-progress").value = construction.value;
+    $("construction-progress").setAttribute('aria-label', construction.phase);
     const livestock =
       p.key === "coop"
         ? " Housing: 3 hens / 3 places."
