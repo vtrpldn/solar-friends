@@ -12,7 +12,7 @@ assert.equal(plan(s,'greenhouse',59,50),'');const greenhouse=s.projects.at(-1);g
 assert.equal(plan(s,'house',50,59),'');s.projects.at(-1).work=PROJECTS.house.work;
 s.people.forEach((r,i)=>{r.x=49+i*2;r.z=55;r.action='idle';r.walk=[];r.target=null;});
 s.view={speed:1,paused:true,position:[64,35,64],target:[44,0,40],zoom:1};assert(restore(save(s)));
-const server=await serve(0),browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+const server=await serve(0),browser=await chromium.launch({headless:true,args:['--mute-audio']});const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
 try{
  await page.addInitScript(({key,value})=>{if(!sessionStorage.getItem('farm-fixture')){localStorage.setItem(key,value);sessionStorage.setItem('farm-fixture','1');}},{key:SANDBOX_SAVE,value:save(s)});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await page.waitForSelector('#build-field',{state:'attached'});await page.waitForTimeout(1500);
