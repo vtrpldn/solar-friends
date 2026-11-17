@@ -12,7 +12,12 @@ import {upgradeAction, productionSearchText, productionActivity} from './project
 import {economyControls} from './economy-controls.js';
 import {productionTarget} from './economy-policies.js';
 import {financeSummary,financeTime,financeForecast} from './finances.js';
-import { RESOURCE_GROUPS } from "./resource-groups.js";
+import { productionBlocker, buildingOperatingStatus } from './simulation.js';
+import { disabledReason } from './disabled-info.js';
+import { renderCrafting } from './crafting-ui.js';
+import { equipmentSummary } from './equipment.js';
+import { ITEMS } from './items.js';
+import { inventoryGroups, EQUIPMENT_IDS } from "./resource-groups.js";
 import { resourceIcon, illustrateResources } from "./resource-icons.js";
 import {
   MATERIALS,
@@ -30,10 +35,14 @@ const $ = (id) => document.getElementById(id);
 const titles = {
   finances: "Our shared purse",
   resources: "Our shared supplies",
+  items: "Items & equipment",
+  crafting: "Crafting & repairs",
   water: "Every drop counts",
   power: "A little village energy",
 };
 const intros = {
+  crafting: "Plan work around the skills of your residents, real materials, and equipped workspaces. Jobs take time and pause for rest, needs, or unavailable tools.",
+  items: "Keep track of shared equipment and buy items from town. Open Crafting for resident-made items and repairs.",
   finances: "See what comes in, what goes out, and what keeps the village running. Click Savings at any time to return here.",
   resources:
     "Keep the essentials close, turn local materials into something useful, and plan the next trip to town.",
@@ -73,7 +82,22 @@ export function createManagement({
   function open(next) {
     if (state().stage === "arrival") return;
     beforeOpen();
+    const previousView = view;
     view = next;
+    if (view === 'resources' || view === 'items') {
+      const purchase = $('purchase'), previous = purchase.value;
+      purchase.replaceChildren();
+      for (const group of inventoryGroups(view)) {
+        const options = document.createElement('optgroup'); options.label = group.name;
+        for (const id of group.ids) {
+          const item = MATERIALS[id];
+          if (item.quantity) options.append(new Option(`${item.quantity} ${item.name} · R$${item.price}`, id));
+        }
+        if (options.children.length) purchase.append(options);
+      }
+      if ([...purchase.options].some(o => o.value === previous)) purchase.value = previous;
+      if (previousView !== view) $('resource-search').value = '';
+    }
     if (!dialog.open) {
       wasPaused = isPaused();
       setPaused(true);
@@ -177,21 +201,23 @@ export function createManagement({
       const waterJob=(state().operations||[]).find(o=>!o.done && o.water && o.site===n.id);
       const pending=!!waterJob;
       const fetch=document.createElement('button');fetch.textContent='Carry river water';
+      disabledReason(fetch,pending ? "A water job is already queued here. Wait for it to finish." : "The untreated-water storage is full. Use water or add storage first.");
       fetch.disabled=pending || n.water[1]>=n.capacity[1];
       fetch.onclick=()=>{notify(queueWater(state(),-1,n.id,'irrigation')||'Water collection queued for the next available resident.');refresh();render();};actions.append(fetch);
       if(n.capacity[0]) {
         const purify=document.createElement('button');purify.textContent='Purify by hand';
+        disabledReason(purify,pending ? "A water job is already queued here. Wait for it to finish." : n.water[1]<1 ? "Collect untreated water before purifying it." : "Drinking-water storage is full. Use water or add storage first.");
         purify.disabled=pending || n.water[1]<1 || n.capacity[0]-n.water[0]<1;
         purify.onclick=()=>{notify(queuePurification(state(),n.id)||'Purification queued for the next available resident.');refresh();render();};actions.append(purify);
       }
       if(n.capacity[0]) {const maintain=document.createElement('button');maintain.textContent=n.maintainFresh?'Maintain drinking reserve: on':'Maintain drinking reserve: off';maintain.setAttribute('aria-pressed',String(!!n.maintainFresh));maintain.onclick=()=>{n.maintainFresh=!n.maintainFresh;refresh();render();};actions.append(maintain);}
       const sources=Object.values(state().infrastructure.nodes).filter(a=>a.id!==n.id && ['groundwater-well','rain-barrel','water-pump'].includes(a.kind) && a.water[1]>=1);
-      for(const source of sources){const carry=document.createElement('button');carry.textContent=`Carry from ${label(source)}`;carry.disabled=pending||n.water[1]>=n.capacity[1];carry.onclick=()=>{notify(queueWater(state(),source.id,n.id,'irrigation')||'Water collection queued.');refresh();render();};actions.append(carry);}
+      for(const source of sources){const carry=document.createElement('button');carry.textContent=`Carry from ${label(source)}`;disabledReason(carry,pending ? "Wait for the current water job to finish." : "The receiving reservoir is full.");carry.disabled=pending||n.water[1]>=n.capacity[1];carry.onclick=()=>{notify(queueWater(state(),source.id,n.id,'irrigation')||'Water collection queued.');refresh();render();};actions.append(carry);}
       el.append(actions);
     }
     if(view==='water' && (n.capacity[2] || n.capacity[3]) && !['wetland','biodigester','banana_treatment'].includes(n.kind)) {
       const status=document.createElement('p');status.textContent=wasteWarnings(n).join(' · ') || 'Sealed waste: residents can service tanks; treatment buildings automate disposal.';el.append(status);
-      const service=document.createElement('button');service.textContent='Service waste tanks';service.disabled=n.water[2]+n.water[3]<1 || state().operations?.some(o=>!o.done&&o.water&&o.site===n.id);service.onclick=()=>{notify(queueSanitation(state(),n.id)||'Waste service queued for off-site treatment.');refresh();render();};el.append(service);
+      const service=document.createElement('button');service.textContent='Service waste tanks';disabledReason(service,n.water[2]+n.water[3]<1 ? 'There is no accumulated waste to remove.' : 'A water or sanitation job is already queued here. Wait for it to finish.');service.disabled=n.water[2]+n.water[3]<1 || state().operations?.some(o=>!o.done&&o.water&&o.site===n.id);service.onclick=()=>{notify(queueSanitation(state(),n.id)||'Waste service queued for off-site treatment.');refresh();render();};el.append(service);
       const auto=document.createElement('button');auto.textContent=n.maintainSanitation?'Maintain sanitation: on':'Maintain sanitation: off';auto.setAttribute('aria-pressed',String(!!n.maintainSanitation));auto.onclick=()=>{n.maintainSanitation=!n.maintainSanitation;refresh();render();};el.append(auto);
     }
     if(view==='water'){
@@ -222,12 +248,20 @@ export function createManagement({
     $("grid-power-status").textContent = `${grid.enabled ? (s.money <= 0 ? "No funds for grid power" : "Grid backup connected") : "Off-grid"} · ${grid.importing.toFixed(2)} kW imported now · ${grid.imported.toFixed(2)} kWh purchased · R$${grid.spent.toFixed(2)} spent`;
     $("toggle-grid-power").textContent = grid.enabled ? "Disconnect grid power" : "Connect grid backup";
     $("toggle-grid-power").setAttribute("aria-pressed", String(grid.enabled));
-    $("resource-screen").hidden = view !== "resources";
-    $("pantry-panel").hidden = view !== "resources";
-    $("network-screen").hidden = view === "resources" || view === "finances";
+    const inventoryView = view === 'resources' || view === 'items';
+    $('inventory-heading').textContent = view === 'items' ? 'Our equipment' : 'In our stores';
+    $('production-heading').textContent = view === 'items' ? 'Craft items' : 'Making things together';
+    $('resource-search').placeholder = view === 'items' ? 'Find an item…' : 'Find a resource…';
+    $('resource-search').setAttribute('aria-label', view === 'items' ? 'Find an item' : 'Find a resource');
+    document.querySelector('label[for="purchase"]').textContent = view === 'items' ? 'Town store · items & equipment' : 'Town store · resources';
+    $("resource-screen").hidden = !inventoryView;
+    $("pantry-panel").hidden = !inventoryView;
+    $("network-screen").hidden = inventoryView || view === "finances" || view === "crafting";
     $("finance-screen").hidden = view !== "finances";
+    $('crafting-screen').hidden = view !== 'crafting';
+    if(view==='crafting')renderCrafting(s,$('crafting-screen'),notify,refresh);
     $("utility-panel").hidden = true;
-    $("pantry-panel").parentElement.hidden = view !== "resources";
+    $("pantry-panel").parentElement.hidden = !inventoryView;
     $("haul-water").hidden = true;
     $("connect-utility").hidden = true;
     for (const id of ["utility-from", "utility-to", "utility-kind"]) {
@@ -283,7 +317,15 @@ export function createManagement({
         }
       }
     }
-    else if (view === "resources")
+    else if (view === 'crafting')
+      stats=[['Craft jobs',s.operations?.filter(o=>!o.done&&PROCESSES[o.recipe]?.craft).length||0],['Residents',s.people.length]];
+    else if (view === 'items')
+      stats = [
+        ['Shared savings', `R$${s.money.toFixed(2)}`],
+        ['Items owned', [...EQUIPMENT_IDS].reduce((total, id) => total + materialCount(s, id), 0)],
+        ['Crafting jobs', `${(s.operations || []).filter(o => !o.done && (PROCESSES[o.recipe]?.equipmentRepair || Object.keys(PROCESSES[o.recipe]?.output || {}).some(id => EQUIPMENT_IDS.has(id)))).length} queued`],
+      ];
+    else if (inventoryView)
       stats = [
         ["Shared savings", `R$${s.money.toFixed(2)}`],
         [
@@ -333,9 +375,11 @@ export function createManagement({
           `<div><small>${name}</small><strong>${value}</strong></div>`,
       )
       .join("");
-    if (view === "resources") {
+    if (inventoryView) {
       $("resource-grid").replaceChildren();
-      economyControls($("resource-grid"),s,MATERIALS,PROCESSES,materialCount,()=>{refresh();render();});
+      if (view === 'resources') {
+      const resourceMaterials = Object.fromEntries(Object.entries(MATERIALS).filter(([id]) => !EQUIPMENT_IDS.has(id)));
+      economyControls($("resource-grid"),s,resourceMaterials,PROCESSES,materialCount,()=>{refresh();render();});
       const reserve=document.createElement('button');
       reserve.textContent=`Automatic food purchases: ${s.emergencyFood===false?'off':'on'}`;
       reserve.title='Maintain the chosen food reserve with at most one affordable ingredient purchase per day, within the daily food budget. Growing crops cannot replace food needed today.';
@@ -348,8 +392,9 @@ export function createManagement({
       const reserveNote=document.createElement('p');reserveNote.textContent='Reserve estimate: two food portions per resident per day. A spending limit, not reserved cash; unavailable drivers, funds or storage may delay replenishment.';$("resource-grid").append(reserveNote);
       const delivery=document.createElement('button');delivery.textContent=s.deliveryOnly?'Purchases: supplier delivery':'Purchases: resident pickup';delivery.setAttribute('aria-pressed',String(!!s.deliveryOnly));delivery.onclick=()=>{s.deliveryOnly=!s.deliveryOnly;refresh();render();};$("resource-grid").append(delivery);
       const freight=document.createElement('p');freight.textContent=s.delivery?`${s.delivery.status||'Supplier delivery on its way'} · ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:s.deliveryOnly?`Supplier delivery: R$${transportCost(s).toFixed(2)} freight, up to 5 tonnes / 12 m³. About six hours plus travel; no resident driver needed.`:'Resident pickups use the village cars and their cargo limits.';$("resource-grid").append(freight);
+      }
       const search = $("resource-search").value.trim().toLowerCase(), committed=committedMaterials(s);
-      for (const group of RESOURCE_GROUPS) {
+      for (const group of inventoryGroups(view)) {
         const matches = group.ids.filter((id) =>
           MATERIALS[id].name.toLowerCase().includes(search),
         );
@@ -364,8 +409,15 @@ export function createManagement({
           b.className = "stock-card";
           b.title=materialUnitText(id);
           b.innerHTML = `${resourceIcon(id)}<span class="stock-name">${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><strong>${Math.floor(materialCount(s, id))}<small>available</small></strong><small class="stock-detail">${committed[id]?`${committed[id]} committed to projects/jobs · `:""}${item.quantity ? "Trade in town" : "Made here"}</small>`;
+          if (ITEMS[id]?.durable) {
+            const status=equipmentSummary(s,id), detail=document.createElement('small');
+            detail.className='equipment-status';
+            detail.textContent=`${status.available} available · ${status.borrowers.length} in use · ${status.broken} need repair${status.repairing ? ` · ${status.repairing} being repaired` : ""}${status.borrowers.length ? ` · Borrowed by ${status.borrowers.join(', ')}` : ''}${status.wear>0 ? ` · Wear: ${(status.wear/1800*100).toFixed(0)}% of one tool` : ''}`;
+            b.append(detail);
+          }
           illustrateResources(b);
           b.disabled = !item.quantity;
+          disabledReason(b, "This material cannot be bought or sold in town. Residents produce and use it in the village.");
           b.classList.toggle("active", $("purchase").value === id);
           b.onclick = () => {
             $("purchase").value = id;
@@ -375,8 +427,10 @@ export function createManagement({
         }
       }
       if (!$("resource-grid").querySelector(".stock-card")) {
-        const empty=document.createElement("p");empty.textContent="No matching supplies. Try another name.";$("resource-grid").append(empty);
+        const empty=document.createElement("p");empty.textContent=view === "items" ? "No matching items. Try another name." : "No matching supplies. Try another name.";$("resource-grid").append(empty);
       }
+      $('production-heading').hidden=view==='items';
+      $('production-sites').hidden=view==='items';
       $("production-sites").replaceChildren();
       const account=productionSummary(s,PROCESSES),accountNote=document.createElement('p');
       accountNote.textContent=s.mode==='sandbox'?'Processing records are disabled in sandbox. Recipe estimates below show the normal production balance.':`Processing record: ${account.batches} batches · approximately ${account.inputKg.toFixed(1)} kg input, ${account.outputKg.toFixed(1)} kg usable output and ${account.lossKg.toFixed(1)} kg process losses. Includes water used in cooking; excludes farming, animals and construction. Output may still be in transit. Earlier batches are not reconstructed.`;
@@ -385,7 +439,7 @@ export function createManagement({
       for (const p of s.projects) {
         if(PROJECTS[p.key].kind==='wild-tree')continue;
         const recipes = Object.entries(PROCESSES).filter(
-          ([, d]) => d.kind === PROJECTS[p.key].kind,
+          ([, d]) => !d.craft && d.kind === PROJECTS[p.key].kind && (view === "items") === (!!d.equipmentRepair || Object.keys(d.output).some(id => EQUIPMENT_IDS.has(id))),
         );
         if (!recipes.length || p.work < PROJECTS[p.key].work) continue;
         const searchTerms = [PROJECTS[p.key].name, ...recipes.flatMap(([, recipe]) => [
@@ -403,8 +457,9 @@ export function createManagement({
         choice.setAttribute("aria-label", `Work at ${name.textContent}`);
         for (const [id, d] of recipes) choice.add(new Option(d.name, id));
         const op = (s.operations || []).find((o) => o.site === p.id && !o.done && !o.water);
-        choice.value = p.repeat || recipeChoices.get(p.id) || recipes[0][0];
-        choice.onchange = () => recipeChoices.set(p.id, choice.value);
+        const remembered = p.repeat || recipeChoices.get(`${view}:${p.id}`);
+        choice.value = recipes.some(([id]) => id === remembered) ? remembered : recipes[0][0];
+        choice.onchange = () => recipeChoices.set(`${view}:${p.id}`, choice.value);
         const activity = productionActivity(s, p, PROCESSES);
         const status = document.createElement("p");
         status.textContent =
@@ -422,6 +477,9 @@ export function createManagement({
         const start = document.createElement("button");
         start.textContent = node?.enabled === false ? 'Switch on to produce' : activity?.label || "Start batch";
         start.disabled = node?.enabled === false || !!op || s.stage !== "playing";
+        const blocker=s.stage!=="playing"?"Choose a campsite first.":productionBlocker(s,p.id,choice.value);
+        disabledReason(start,blocker);
+        start.disabled=!!blocker;
         start.onclick = () => {
           notify(
             queueProduction(s, p.id, choice.value) ||
@@ -440,8 +498,8 @@ export function createManagement({
         };
         const locate=document.createElement('button');locate.textContent=`Find in village · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores`;locate.onclick=()=>{dialog.close();inspect(p.id);};
         const recipeInfo=document.createElement('p');
-        const describe=()=>{const r=PROCESSES[choice.value];repeat.hidden=targetLabel.hidden=!!r.installation;start.disabled=node?.enabled===false||!!op||(r.installation&&!!p.coldStorage)||s.stage!=='playing';start.textContent=node?.enabled===false?'Switch on to produce':r.installation?(p.coldStorage?'Cold storage installed':'Install cold storage'):activity?.label||'Start batch';recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||'Building upgrade'}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${biologyText(choice.value)}${r.installation?' · 40 food units, 0.08 kW average cooling load; ages food at one-quarter speed while powered.':''}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
-        choice.onchange=()=>{recipeChoices.set(p.id,choice.value);describe();};describe();
+        const describe=()=>{const r=PROCESSES[choice.value];repeat.hidden=targetLabel.hidden=!!r.installation || !!r.equipmentRepair;const error=s.stage!=='playing'?'Choose a campsite first.':productionBlocker(s,p.id,choice.value);start.disabled=!!error;disabledReason(start,error);start.textContent=node?.enabled===false?'Switch on to produce':r.installation?(p.coldStorage?'Cold storage installed':'Install cold storage'):activity?.label||'Start batch';recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||(r.equipmentRepair?'Restore one tool worth of condition':'Building upgrade')}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${biologyText(choice.value)}${r.installation?' · 40 food units, 0.08 kW average cooling load; ages food at one-quarter speed while powered.':''}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
+        choice.onchange=()=>{recipeChoices.set(`${view}:${p.id}`,choice.value);describe();};describe();
         el.append(img,name,locate,status,choice,recipeInfo,start);
         if (activity) { const bar=document.createElement('progress');bar.max=1;bar.value=activity.progress;bar.setAttribute('aria-label', `Production at ${name.textContent}`);el.append(bar); }
         if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);
@@ -451,7 +509,7 @@ export function createManagement({
       }
       if (!$("production-sites").children.length)
         $("production-sites").textContent =
-          search
+          view === 'items' ? 'Craft portable equipment at a timber workbench. Buy parts and repair supplies in Resources.' : search
             ? "No completed production sites match this search. Try another resource or building name."
             : "Build a garden, workshop or other production site to start making supplies here.";
       if (search) {

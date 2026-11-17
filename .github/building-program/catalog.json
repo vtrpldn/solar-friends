@@ -1,0 +1,1289 @@
+{
+  "why": "Replace art-driven tiny footprints with purpose-driven, human-scale models while preserving the Brazilian low-poly visual style.",
+  "units": {
+    "metresPerCell": 2,
+    "renderUnitsPerMetre": 1
+  },
+  "status": "Design contract for remodeling; capacities are not yet simulation limits.",
+  "areaDefinitions": {
+    "reserved": "Grid site including exterior clearance; never presented as indoor floor area.",
+    "shell": "External wall dimensions, excluding porches and roof overhang.",
+    "usable": "Approximate usable internal floor target after external/internal walls. Final meshes/layouts must be measured."
+  },
+  "compatibility": "User explicitly waived backwards compatibility. Replace undersized models and footprints directly; do not retain miniature legacy variants or add migration/version machinery for this remodeling pass. Preserve semantic IDs/kinds where useful for mechanics. Existing layouts may require a fresh village; do not erase player saves automatically.",
+  "sources": [
+    {
+      "url": "https://www.gov.uk/government/publications/technical-housing-standards-nationally-described-space-standard/technical-housing-standards-nationally-described-space-standard",
+      "use": "Housing-space sanity check only; English standard is not a Brazilian legal requirement."
+    },
+    {
+      "url": "https://www.fivb.com/wp-content/uploads/2025/02/FIVB-BeachVolleyball_Rules2025_2028-EN-v01.pdf",
+      "use": "Recreational court dimensions and minimum free zone."
+    }
+  ],
+  "entries": [
+    {
+      "id": "groundwater-well",
+      "purpose": "Covered water well",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        2,
+        2
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Keep human-scale wellhead and covered collection point; groundwater yield is independent of surface footprint.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 16,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "water-pump",
+      "purpose": "River intake pump",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Measured pump body plus service clearance; no enlargement to fill the cell.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "home-family",
+      "purpose": "Full home for three residents",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        6,
+        5
+      ],
+      "targetShellMetres": [
+        10,
+        8
+      ],
+      "targetUsableAreaM2": 68,
+      "designCapacity": {
+        "residents": 3
+      },
+      "layoutRequirements": "Double bedroom, single bedroom, bathroom, living/kitchen, storage and circulation.",
+      "currentSiteCells": [
+        3,
+        2
+      ],
+      "targetReservedAreaM2": 120,
+      "status": "design_target_not_live_gameplay",
+      "usableAreaBudgetM2": {
+        "doubleBedroom": 12,
+        "singleBedroom": 9,
+        "bathroom": 5,
+        "livingKitchen": 30,
+        "storage": 4,
+        "circulation": 8
+      }
+    },
+    {
+      "id": "home-shared",
+      "purpose": "Shared home for four residents",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        6,
+        6
+      ],
+      "targetShellMetres": [
+        10.5,
+        9.5
+      ],
+      "targetUsableAreaM2": 86,
+      "designCapacity": {
+        "residents": 4
+      },
+      "layoutRequirements": "Two twin bedrooms, two wash/toilet spaces, shared living/kitchen and storage; no four-bed single-room shortcut.",
+      "currentSiteCells": [
+        4,
+        2
+      ],
+      "targetReservedAreaM2": 144,
+      "status": "design_target_not_live_gameplay",
+      "usableAreaBudgetM2": {
+        "twinBedroomA": 14,
+        "twinBedroomB": 14,
+        "bathroomA": 4.5,
+        "bathroomB": 4.5,
+        "livingKitchen": 35,
+        "storage": 4,
+        "circulation": 10
+      }
+    },
+    {
+      "id": "road",
+      "purpose": "Village road",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "bridge",
+      "purpose": "Timber footbridge",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        8,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        8,
+        2
+      ],
+      "targetReservedAreaM2": 32,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "house",
+      "purpose": "Full home for two residents",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        5
+      ],
+      "targetShellMetres": [
+        8,
+        8
+      ],
+      "targetUsableAreaM2": 54,
+      "designCapacity": {
+        "residents": 2
+      },
+      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 100,
+      "status": "design_target_not_live_gameplay",
+      "usableAreaBudgetM2": {
+        "bedroom": 12,
+        "bathroom": 5,
+        "livingKitchen": 27,
+        "storage": 3,
+        "circulation": 7
+      }
+    },
+    {
+      "id": "shed",
+      "purpose": "Open shared work shelter",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        3,
+        3
+      ],
+      "targetShellMetres": [
+        5,
+        4
+      ],
+      "targetUsableAreaM2": 19.5,
+      "designCapacity": {},
+      "layoutRequirements": "Human-height roof and posts, dry work surface and open movement through the structure.",
+      "currentSiteCells": [
+        2,
+        1
+      ],
+      "targetReservedAreaM2": 36,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "orchard",
+      "purpose": "Four compact fruit trees",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        5
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "trees": 4
+      },
+      "layoutRequirements": "Initial design assumes compact cultivated trees on ~4m centers; species-dependent, mature crown spacing must be reviewed.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 100,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "goat_pasture",
+      "purpose": "Two-goat shelter and exercise pen",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        6,
+        5
+      ],
+      "targetShellMetres": [
+        3,
+        3
+      ],
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "goats": 2
+      },
+      "layoutRequirements": "9m\u00b2 shelter plus outdoor pen, water/feed trough and gate; supplied feed or separately modeled grazing remains necessary.",
+      "currentSiteCells": [
+        3,
+        2
+      ],
+      "targetReservedAreaM2": 120,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "apiary",
+      "purpose": "Small stingless-bee apiary",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        2,
+        2
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "hiveBoxes": 3
+      },
+      "layoutRequirements": "Separate raised hive boxes and working access; species and forage constrain production, not reserved area.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 16,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "hydro",
+      "purpose": "Microhydro equipment station",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        3,
+        3
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Turbine/generator housing, intake and maintenance access; power depends on head and flow, not site area.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 36,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "eco_toilet",
+      "purpose": "Single dry-toilet cubicle",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        2,
+        2
+      ],
+      "targetShellMetres": [
+        1.8,
+        2.2
+      ],
+      "targetUsableAreaM2": 2.5,
+      "designCapacity": {
+        "toilets": 1
+      },
+      "layoutRequirements": "Actual seated fixture, door opening, standing room and separate rear service access; no accessibility certification implied.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 16,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "banana_treatment",
+      "purpose": "Modular banana treatment bed",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        3,
+        4
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Separate engineered bed boundary from plant canopy; measure effective treatment area, not leaves.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 48,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "wetland",
+      "purpose": "Modular planted treatment bed",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        3,
+        5
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Show inlet, outlet, planted media and access. Record effective bed area; treatment capacity remains uncalibrated pending hydraulic loading.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 60,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "biodigester",
+      "purpose": "Small community digester",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        4,
+        4
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Dimension reactor, feed inlet, gas handling and service path; record vessel volume and avoid claiming throughput from site area.",
+      "currentSiteCells": [
+        3,
+        3
+      ],
+      "targetReservedAreaM2": 64,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "warehouse",
+      "purpose": "Small community storehouse",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        4
+      ],
+      "targetShellMetres": [
+        8,
+        6
+      ],
+      "targetUsableAreaM2": 40,
+      "designCapacity": {},
+      "layoutRequirements": "Shelves, receiving space and clear aisle. Storage volume must later be derived from racks, not floor area alone.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 80,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "solar_farm",
+      "purpose": "Six-panel ground-mounted array",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        4,
+        4
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "panels": 6
+      },
+      "layoutRequirements": "Model individual panels around1.1\u00d71.8m; retain row spacing, tilt and service access. Electrical output needs a separate rated-panel decision.",
+      "currentSiteCells": [
+        3,
+        2
+      ],
+      "targetReservedAreaM2": 64,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "streetlight",
+      "purpose": "Street light",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "kitchen",
+      "purpose": "Community kitchen and dining",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        6,
+        5
+      ],
+      "targetShellMetres": [
+        10,
+        8
+      ],
+      "targetUsableAreaM2": 68,
+      "designCapacity": {
+        "cooks": 2,
+        "diningSeats": 8
+      },
+      "layoutRequirements": "Separate preparation, cooking, washing, pantry and dining zones; access routes do not cross appliances.",
+      "currentSiteCells": [
+        4,
+        2
+      ],
+      "targetReservedAreaM2": 120,
+      "status": "design_target_not_live_gameplay",
+      "usableAreaBudgetM2": {
+        "preparationAndCooking": 18,
+        "washing": 6,
+        "pantry": 6,
+        "dining": 24,
+        "circulation": 14
+      }
+    },
+    {
+      "id": "grove",
+      "purpose": "Four banana clumps",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        4,
+        4
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "clumps": 4
+      },
+      "layoutRequirements": "Approx3m between clump centers; accessible harvesting paths. Do not imply mature output immediately.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 64,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "garden",
+      "purpose": "Four-bed vegetable plot",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        4,
+        6
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "beds": 4
+      },
+      "layoutRequirements": "Four 1.2\u00d74m beds =19.2m\u00b2 planted; central/end circulation and working clearances shown explicitly.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 96,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "greenhouse",
+      "purpose": "Small walk-in greenhouse",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        4,
+        6
+      ],
+      "targetShellMetres": [
+        6,
+        10
+      ],
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Two 1.2m-wide beds, central 1m aisle and end access; calculate planted area from final meshes.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 96,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "well",
+      "purpose": "Cistern and water-service pad",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        3,
+        3
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Dimension actual tank geometry, report geometric litres, separate clean/untreated storage and preserve maintenance access. Existing abstract water units require later calibration.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 36,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "compost",
+      "purpose": "Three-bay compost station",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        3,
+        2
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "bays": 3
+      },
+      "layoutRequirements": "Three roughly1m\u00b3 bays and wheelbarrow access; output depends on actual feedstock.",
+      "currentSiteCells": [
+        3,
+        1
+      ],
+      "targetReservedAreaM2": 24,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "square",
+      "purpose": "Small community gathering square",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        5
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "seats": 12
+      },
+      "layoutRequirements": "Human-sized seating, open gathering space and through circulation.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 100,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "workshop",
+      "purpose": "Hand woodworking and repair workshop",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        4
+      ],
+      "targetShellMetres": [
+        8,
+        6
+      ],
+      "targetUsableAreaM2": 39,
+      "designCapacity": {
+        "workstations": 2
+      },
+      "layoutRequirements": "Two 2\u00d70.85m benches, stock racks, assembly space and clear circulation; machine footprints only if machines are actually modeled.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 80,
+      "status": "design_target_not_live_gameplay",
+      "usableAreaBudgetM2": {
+        "benchWorkZones": 12,
+        "assemblyZone": 9,
+        "toolAndStockStorage": 8,
+        "circulation": 10
+      }
+    },
+    {
+      "id": "coop",
+      "purpose": "Six-hen coop and enclosed run",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        4,
+        4
+      ],
+      "targetShellMetres": [
+        2,
+        2
+      ],
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "hens": 6
+      },
+      "layoutRequirements": "4m\u00b2 coop with perches and nest boxes, separate run, feed/water and human cleaning access.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 64,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "home-veranda",
+      "purpose": "Full home for two residents",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        5
+      ],
+      "targetShellMetres": [
+        8,
+        8
+      ],
+      "targetUsableAreaM2": 54,
+      "designCapacity": {
+        "residents": 2
+      },
+      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 100,
+      "status": "design_target_not_live_gameplay",
+      "usableAreaBudgetM2": {
+        "bedroom": 12,
+        "bathroom": 5,
+        "livingKitchen": 27,
+        "storage": 3,
+        "circulation": 7
+      }
+    },
+    {
+      "id": "home-gable",
+      "purpose": "Full home for two residents",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        5
+      ],
+      "targetShellMetres": [
+        8,
+        8
+      ],
+      "targetUsableAreaM2": 54,
+      "designCapacity": {
+        "residents": 2
+      },
+      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 100,
+      "status": "design_target_not_live_gameplay",
+      "usableAreaBudgetM2": {
+        "bedroom": 12,
+        "bathroom": 5,
+        "livingKitchen": 27,
+        "storage": 3,
+        "circulation": 7
+      }
+    },
+    {
+      "id": "home-courtyard",
+      "purpose": "Full home for two residents",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        5
+      ],
+      "targetShellMetres": [
+        8,
+        8
+      ],
+      "targetUsableAreaM2": 54,
+      "designCapacity": {
+        "residents": 2
+      },
+      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 100,
+      "status": "design_target_not_live_gameplay",
+      "usableAreaBudgetM2": {
+        "bedroom": 12,
+        "bathroom": 5,
+        "livingKitchen": 27,
+        "storage": 3,
+        "circulation": 7
+      }
+    },
+    {
+      "id": "adobe-gable",
+      "purpose": "Full home for two residents",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        5
+      ],
+      "targetShellMetres": [
+        8,
+        8
+      ],
+      "targetUsableAreaM2": 54,
+      "designCapacity": {
+        "residents": 2
+      },
+      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 100,
+      "status": "design_target_not_live_gameplay",
+      "usableAreaBudgetM2": {
+        "bedroom": 12,
+        "bathroom": 5,
+        "livingKitchen": 27,
+        "storage": 3,
+        "circulation": 7
+      }
+    },
+    {
+      "id": "adobe-veranda",
+      "purpose": "Full home for two residents",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        5
+      ],
+      "targetShellMetres": [
+        8,
+        8
+      ],
+      "targetUsableAreaM2": 54,
+      "designCapacity": {
+        "residents": 2
+      },
+      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 100,
+      "status": "design_target_not_live_gameplay",
+      "usableAreaBudgetM2": {
+        "bedroom": 12,
+        "bathroom": 5,
+        "livingKitchen": 27,
+        "storage": 3,
+        "circulation": 7
+      }
+    },
+    {
+      "id": "goat-pasture-empty",
+      "purpose": "Two-goat shelter and exercise pen",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        6,
+        5
+      ],
+      "targetShellMetres": [
+        3,
+        3
+      ],
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "goats": 2
+      },
+      "layoutRequirements": "9m\u00b2 shelter plus outdoor pen, water/feed trough and gate; supplied feed or separately modeled grazing remains necessary.",
+      "currentSiteCells": [
+        3,
+        2
+      ],
+      "targetReservedAreaM2": 120,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "supply-0",
+      "purpose": "Managed timber stand",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        6,
+        6
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Tree spacing and harvest access must fit actual species/canopies; timber growth and yield remain separate calibration.",
+      "currentSiteCells": [
+        3,
+        3
+      ],
+      "targetReservedAreaM2": 144,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "supply-1",
+      "purpose": "Managed bamboo clump",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        3,
+        3
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Show mature clump extent and cutting access; canopy/roots are distinct from solid culms.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 36,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "supply-2",
+      "purpose": "Building earth",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "supply-3",
+      "purpose": "Stone deposit",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "supply-5",
+      "purpose": "Camp receiving bench",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "supply-6",
+      "purpose": "Battery station",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "rain-barrel",
+      "purpose": "Rainwater barrel",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "tool-rack",
+      "purpose": "Garden tool rack",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "seedling-bench",
+      "purpose": "Seedling bench",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "woodpile",
+      "purpose": "Seasoned firewood",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "picnic-table",
+      "purpose": "Picnic table",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        2,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        2,
+        1
+      ],
+      "targetReservedAreaM2": 8,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "garden-bench",
+      "purpose": "Garden bench",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "clothesline",
+      "purpose": "Clothesline",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        2,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        2,
+        1
+      ],
+      "targetReservedAreaM2": 8,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "hammock",
+      "purpose": "Hammock",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        2,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        2,
+        1
+      ],
+      "targetReservedAreaM2": 8,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "wayfinding-sign",
+      "purpose": "Wayfinding sign",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "wash-station",
+      "purpose": "Outdoor wash station",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "farm-gate",
+      "purpose": "Farm gate",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "fire-circle",
+      "purpose": "Fire circle",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        1,
+        1
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        1,
+        1
+      ],
+      "targetReservedAreaM2": 4,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "canvas-tent-teal",
+      "purpose": "Sage canvas tent",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        2,
+        2
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 16,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "canvas-tent-ochre",
+      "purpose": "Ochre canvas tent",
+      "decision": "retain_if_measured_human_scale_and_clearance_pass",
+      "targetSiteCells": [
+        2,
+        2
+      ],
+      "designCapacity": {},
+      "layoutRequirements": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 16,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "reading-room",
+      "purpose": "Village reading room",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        4
+      ],
+      "targetShellMetres": [
+        8,
+        6
+      ],
+      "targetUsableAreaM2": 40,
+      "designCapacity": {
+        "seats": 8
+      },
+      "layoutRequirements": "Bookshelves, reading tables, quiet seats and clear routes.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 80,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "outdoor-classroom",
+      "purpose": "Covered outdoor classroom",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        5
+      ],
+      "targetShellMetres": [
+        8,
+        8
+      ],
+      "targetUsableAreaM2": 56,
+      "designCapacity": {
+        "learnerSeats": 12,
+        "teachingPositions": 1
+      },
+      "layoutRequirements": "Human-scale seats/tables, teaching space and access aisles; roof posts cannot block seats.",
+      "currentSiteCells": [
+        3,
+        2
+      ],
+      "targetReservedAreaM2": 100,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "community-hall",
+      "purpose": "Multipurpose community hall",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        7,
+        6
+      ],
+      "targetShellMetres": [
+        12,
+        10
+      ],
+      "targetUsableAreaM2": 100,
+      "designCapacity": {
+        "seatedCapacity": 24
+      },
+      "layoutRequirements": "Flexible tables/chairs, storage and clear entrances; capacity is a game design target, not occupancy certification.",
+      "currentSiteCells": [
+        3,
+        2
+      ],
+      "targetReservedAreaM2": 168,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "exercise-garden",
+      "purpose": "Outdoor exercise area",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        5,
+        5
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {},
+      "layoutRequirements": "Full-size bars and exercise stations with movement clearances; avoid overlapping activity zones.",
+      "currentSiteCells": [
+        2,
+        2
+      ],
+      "targetReservedAreaM2": 100,
+      "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "volleyball-court",
+      "purpose": "Recreational beach volleyball court",
+      "decision": "remodel_or_verify_against_functional_layout",
+      "targetSiteCells": [
+        11,
+        7
+      ],
+      "targetShellMetres": null,
+      "targetUsableAreaM2": null,
+      "designCapacity": {
+        "players": 4
+      },
+      "layoutRequirements": "16\u00d78m playing area plus3m clear perimeter =22\u00d714m site; do not render it as a tiny decorative patch.",
+      "currentSiteCells": [
+        4,
+        3
+      ],
+      "targetReservedAreaM2": 308,
+      "status": "design_target_not_live_gameplay"
+    }
+  ]
+}

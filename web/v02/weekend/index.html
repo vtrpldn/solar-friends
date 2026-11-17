@@ -53,7 +53,7 @@
         <select id="terrain-radius"><option value="4">Small · 2 cells</option><option value="8" selected>Medium · 4 cells</option><option value="12">Large · 6 cells</option></select>
         <p id="terrain-level">Flatten uses the height of your first click.</p>
         <button id="terrain-pick">Pick a new flatten height</button>
-        <button id="terrain-undo" disabled>Undo terrain edit</button>
+        <button id="terrain-undo" data-disabled-reason="There are no terrain edits to undo in this session." disabled>Undo terrain edit</button>
         <p class="hint">Riverbanks, roads, supplies and foundations stay protected. Esc closes these tools.</p>
       </aside>
 
@@ -178,6 +178,8 @@
         </button>
         <button data-panel-toggle="terrain-panel" data-shortcut="T" aria-keyshortcuts="T" aria-controls="terrain-panel" aria-expanded="false">△ Terrain</button>
         <span class="dock-divider"></span>
+        <button data-manage="items">Items &amp; equipment</button>
+        <button data-manage="crafting">Crafting</button>
         <button data-manage="resources" data-shortcut="I" aria-keyshortcuts="I">▰ Resources</button
         ><button data-manage="water" data-shortcut="U" aria-keyshortcuts="U">♦ Water</button
         ><button data-manage="power" data-shortcut="P" aria-keyshortcuts="P">ϟ Power</button>
@@ -220,6 +222,8 @@
       </div>
       <nav class="management-tabs" aria-label="Management screens">
         <button data-manage="finances">R$ Finances</button>
+        <button data-manage="items">Items &amp; equipment</button>
+        <button data-manage="crafting">Crafting</button>
         <button data-manage="resources">▰ Resources</button
         ><button data-manage="water">♦ Water</button
         ><button data-manage="power">ϟ Power</button
@@ -230,9 +234,10 @@
       <div class="management-layout">
         <div class="management-main">
           <section id="finance-screen" hidden></section>
+          <section id="crafting-screen" hidden></section>
           <section id="resource-screen">
             <div class="management-section-title">
-              <h3>In our stores</h3>
+              <h3 id="inventory-heading">In our stores</h3>
               <input
                 id="resource-search"
                 type="search"
@@ -241,7 +246,7 @@
               />
             </div>
             <div id="resource-grid"></div>
-            <h3>Making things together</h3>
+            <h3 id="production-heading">Making things together</h3>
             <div id="production-sites"></div>
           </section>
           <section id="network-screen" hidden>
@@ -261,7 +266,7 @@
           <section id="pantry-panel">
             <h3>A trip to town</h3>
             <p id="inventory" hidden></p>
-            <label for="purchase">Bring back from town</label
+            <label for="purchase">Town store · items & supplies</label
             ><select id="purchase"></select
             ><button id="town">Send a supply run</button
             ><button id="sell">Sell one batch</button>

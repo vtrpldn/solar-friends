@@ -1,3 +1,4 @@
+import { protectedEquipment } from './equipment.js';
 // Shared by the simulation and the resource dialog; policies never create stock.
 export const WORK_GROUPS={food:'Food & water',maintenance:'Sanitation & maintenance',production:'Production & harvesting',construction:'Construction'};
 export function economyPolicies(s){
@@ -13,7 +14,7 @@ export function protectedStock(s,id,recipes){
  // next two batches at repeating sites as well, without double-counting reservations.
  let inputs=0;
  for(const p of s.projects)if(p.repeat&&productionTarget(p)>0)inputs+=(recipes[p.repeat]?.input[id]||0)*2;
- return Math.max(reserve,inputs);
+ return Math.max(reserve,inputs,protectedEquipment(s,id));
 }
 export function salePreview(s,id,materials,recipes,count){
  const item=materials[id],p=economyPolicies(s).sales[id],stock=count(s,id);
