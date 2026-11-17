@@ -473,6 +473,17 @@ export function createManagement({
       const freshnessNote=document.createElement('p');freshnessNote.textContent=foodStorageText(s)+' '+coolingText(s);$("production-sites").append(freshnessNote);
       for (const p of s.projects) {
         if(PROJECTS[p.key].kind==='wild-tree')continue;
+        if(p.cultivation){
+          if(view==='items'||p.work<PROJECTS[p.key].work)continue;
+          const beds=p.cultivation.beds,name=`${PROJECTS[p.key].name} #${p.id}`;
+          if(search&&!`${name} ${beds.map(b=>b.crop).join(' ')}`.toLowerCase().includes(search))continue;
+          const card=document.createElement('article');card.className='production-site';card.dataset.cultivationSite=p.id;
+          const img=document.createElement('img');illustrate(img,PROJECTS[p.key].asset);
+          const title=document.createElement('strong');title.textContent=name;
+          const detail=document.createElement('p');detail.textContent=`${beds.length} beds · ${beds.filter(b=>b.stage==='harvestable').length} ready to harvest · ${(s.operations||[]).filter(o=>o.site===p.id&&!o.done).length} jobs pending. Crop, density, irrigation and residues are managed per bed.`;
+          const manage=document.createElement('button');manage.textContent='Manage cultivation beds';manage.onclick=()=>{dialog.close();inspect(p.id);};
+          card.append(img,title,detail,manage);$('production-sites').append(card);continue;
+        }
         const recipes = Object.entries(PROCESSES).filter(
           ([, d]) => !d.craft && d.kind === PROJECTS[p.key].kind && (view === "items") === (!!d.equipmentRepair || Object.keys(d.output).some(id => EQUIPMENT_IDS.has(id))),
         );

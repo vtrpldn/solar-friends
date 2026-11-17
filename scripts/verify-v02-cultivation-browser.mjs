@@ -17,6 +17,11 @@ try{
  await page.addInitScript(({key,value})=>{if(!sessionStorage.getItem('farm-fixture')){localStorage.setItem(key,value);sessionStorage.setItem('farm-fixture','1');}},{key:SANDBOX_SAVE,value:save(s)});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await page.waitForSelector('#build-field',{state:'attached'});await page.waitForTimeout(1500);
  await page.locator('#completed-tasks button').filter({hasText:'Cultivated field'}).first().evaluate(e=>e.click());
+ await page.waitForSelector('#farm-bed');
+ await page.locator('[data-manage="resources"]').first().click();
+ const farmCard=page.locator(`[data-cultivation-site="${field.id}"]`);
+ assert(await farmCard.isVisible());assert.equal(await farmCard.locator('select').count(),0,'migrated beds must not expose legacy irrigation or recipe controls');
+ await farmCard.getByRole('button',{name:'Manage cultivation beds',exact:true}).click();
  await page.waitForSelector('#farm-bed');await page.locator('#farm-crop').selectOption('beans');assert.equal(await page.locator('#farm-crop').inputValue(),'beans');
  await page.locator('[data-farm-action="prepare"]').click();assert(await page.locator('#cultivation-panel').innerText().then(t=>t.includes('queued')));
  await page.locator('#cultivation-panel').evaluate(e=>e.scrollTop=0);
