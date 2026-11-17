@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import {environmentInfo} from '../web/v02/weekend/environment-info.js';
+const at=(day,hour=9,rain=false,biome='mata-atlantica')=>environmentInfo({time:(day*1440+hour*60-540)/.45,rain,worldSettings:{biome}});
+assert.equal(at(0).date,'1 Nov');assert.equal(at(30).date,'1 Dec');assert.equal(at(61).date,'1 Jan');
+assert.equal(at(61).year,2);assert.equal(at(365).date,'1 Nov');
+assert.equal(at(119).date,'28 Feb');assert.equal(at(120).date,'1 Mar');
+assert.equal(at(0,5).weather,'Clear night');assert.equal(at(0,6).weather,'Sunny');assert.equal(at(0,18).weather,'Clear night');
+assert.equal(at(0,14,true).weather,'Rain');assert.equal(at(0,14,true).temperature,at(0,14).temperature-3);
+assert(at(0,14).temperature>at(0,2).temperature);assert(at(0,14,false,'caatinga').temperature>at(0,14).temperature);
+const state={time:100,rain:false};const before=JSON.stringify(state);assert.deepEqual(environmentInfo(state),environmentInfo(state));assert.equal(JSON.stringify(state),before);
+console.log('PASS calendar boundaries, repeating non-leap years, day/night/rain labels, deterministic temperature estimate and unchanged simulation.');

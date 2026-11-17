@@ -1,5 +1,6 @@
 import {verifyGuide} from './guide-content.mjs';
 await verifyGuide();
+import {execFileSync} from 'node:child_process';
 import { rewriteSiteText } from "./site-routes.mjs";
 import { cp, mkdir, readdir, readFile, writeFile, rm } from "node:fs/promises";
 import path from "node:path";
@@ -36,6 +37,10 @@ async function rewrite(dir) {
   }
 }
 await rewrite(out);
+let revision=process.env.COMMIT_REF || process.env.GITHUB_SHA;
+if(!revision){try{revision=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();}catch{revision='unknown';}}
+await writeFile(path.join(out,'v2/build-info.js'),`export const BUILD_INFO = ${JSON.stringify({revision,builtAt:new Date().toISOString()})};\n`);
+
 // Keep immutable artwork URLs intact: resident bundle hashes include these paths.
 await writeFile(
   path.join(out, "_redirects"),

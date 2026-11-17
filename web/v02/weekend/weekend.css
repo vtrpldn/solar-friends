@@ -1651,3 +1651,7 @@ header > .time { grid-column: 3; justify-self: end; }
 .production-site > button { justify-self: start; }
 .production-site > label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .production-site > label > select { width: 100%; max-width: 100%; }
+
+/* Keep the calendar and weather together beneath the clock and time controls. */
+header > .time { display: grid; grid-template-columns: auto auto; gap: 5px 10px; }
+.time > .environment-info { grid-column: 1 / -1; justify-content: space-between; gap: 12px; border-top: 1px solid #dbcba7; padding-top: 5px; color: #766d54; font-size: 11px; font-weight: 500; }

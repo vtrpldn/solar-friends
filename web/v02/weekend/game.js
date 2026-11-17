@@ -4,6 +4,8 @@ let guide;
 import {hydrationWarning} from './hydration.js';
 import {hydrologyText} from './hydrology.js';
 import {forecast,weatherText} from './weather.js';
+import {environmentInfo} from './environment-info.js';
+import {createDiagnostics,copyDiagnostics} from './diagnostics.js';
 import {ensureCultivation} from './cultivation.js';
 import {cultivationSignature,createCultivationModel} from './cultivation-models.js';
 import {installFarmingUI} from './cultivation-ui.js';
@@ -17,7 +19,7 @@ import {constructionSpecText} from './construction-specs.js';
 import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {installLenses} from './lenses.js';
-import {simulationFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
+import {simulationSpeed, simulationFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
 import {eventHistory, eventTime} from './event-history.js';
 import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
 import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
@@ -414,8 +416,12 @@ const border = new THREE.LineLoop(
   new THREE.LineBasicMaterial({ color: "#e0dfad" }),
 );
 scene.add(border);
+const diagnostics=createDiagnostics();
+addEventListener('error',event=>diagnostics.error('error',event.error??event.message));
+addEventListener('unhandledrejection',event=>diagnostics.error('unhandledrejection',event.reason));
 const actors = s.people.map((r) => {
   const root = createResident(r.id);
+  root.userData.residentId = r.id;
   scene.add(root);
   return root;
 });
@@ -977,7 +983,8 @@ function updatePlacementPreview() {
     );
   }
 }
-$("world").addEventListener("pointerup", (e) => {
+// Handle selection on click so opening a dialog cannot receive the same click.
+$("world").addEventListener("click", (e) => {
   if (
     !down ||
     e.button !== 0 ||
@@ -1041,10 +1048,22 @@ $("world").addEventListener("pointerup", (e) => {
       $("undo-road").disabled = false;
     }
   } else {
-    // Pick the visible model, including a tree's canopy, before falling back to its cell.
-    const modelHit=ray.intersectObjects([...buildings.values()].filter(b=>b.root.visible).map(b=>b.root),true)[0];
+    // Pick the nearest visible character or building; hidden props and residents
+    // inside homes must not intercept clicks on the village behind them.
+    const roots=[...actors,...[...buildings.values()].map(b=>b.root)];
+    const modelHit=ray.intersectObjects(roots,true).find(hit=>{
+      if(!hit.object.isMesh)return false;
+      for(let object=hit.object;object;object=object.parent)if(!object.visible)return false;
+      return true;
+    });
     let picked=modelHit?.object;
-    while(picked && !picked.userData.projectId)picked=picked.parent;
+    while(picked && picked.userData.residentId===undefined && !picked.userData.projectId)picked=picked.parent;
+    if(picked?.userData.residentId!==undefined){
+      expandedResident=picked.userData.residentId;
+      residentTab='Overview';
+      setPanel('people');
+      return;
+    }
     selected = picked?.userData.projectId ||
       s.projects.find(
         (p) =>
@@ -1065,6 +1084,25 @@ $("cancel-project").onclick = () => {
 };
 guide=installGuide({button:$('open-guide'),isPaused:()=>paused,savePauseState:()=>viewPauseState(),setPaused:value=>{paused=value;updatePauseButton();}});
 let controlsWasPaused = false;
+$("copy-diagnostics").onclick = async () => {
+  const button=$("copy-diagnostics"),status=$("diagnostics-status");
+  button.disabled=true;
+  try{
+    const report=diagnostics.report(JSON.parse(saveWithView()),{
+      url:location.origin+location.pathname,mode:s.mode,paused,hidden:document.hidden,
+      selectedSpeed:speed,effectiveSpeed:simulationSpeed(s,speed),accumulator,
+      selectedProject:selected,selectedResident:expandedResident,openPanel,placing,
+      browser:navigator.userAgent,viewport:{width:innerWidth,height:innerHeight,pixelRatio:devicePixelRatio},
+    });
+    if(await copyDiagnostics(report))status.textContent='Bug report copied. Paste it into your message.';
+    else{
+      status.textContent='Automatic copying was blocked. Copy the report from the dialog.';
+      $("diagnostics-text").value=report;$("diagnostics-copy").showModal();
+      $("diagnostics-text").focus();$("diagnostics-text").select();
+    }
+  }catch(error){status.textContent='Could not prepare the bug report. Please try again.';diagnostics.error('diagnostic-export',error);}
+  finally{button.disabled=false;}
+};
 $("show-controls").onclick = () => {
   controlsWasPaused = paused; paused = true; updatePauseButton();
   $("controls-dialog").showModal();
@@ -1222,8 +1260,17 @@ $("pause").onclick = () => {
 };
 function setSpeed(value) {
   speed = value;
-  $("speed").textContent = `${speed}×`;
-  $("speed").setAttribute('aria-label', `Simulation speed ${speed}×. Keys 1 to 4 select speed.`);
+  updateSpeedButton();
+}
+function updateSpeedButton() {
+  const effective = paused ? speed : simulationSpeed(s, speed);
+  const automatic = effective !== speed;
+  const label = automatic ? '64× Auto' : `${speed}×`;
+  const description = automatic
+    ? `Automatic speed 64× while everyone is asleep or away. Selected speed ${speed}×. Keys 1 to 4 select speed.`
+    : `Simulation speed ${speed}×. Keys 1 to 4 select speed.`;
+  if ($("speed").textContent !== label) $("speed").textContent = label;
+  if ($("speed").getAttribute('aria-label') !== description) $("speed").setAttribute('aria-label', description);
 }
 setSpeed(speed);
 $("speed").onclick = () => setSpeed([1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4]);
@@ -1582,6 +1629,7 @@ function renderUI() {
     $("purchase").value,
     Math.floor(s.time * 0.45),
     s.trip && Math.ceil(s.trip.left),
+    s.rain,
     s.rainSeen,
     s.rainResolved,
     selected,
@@ -1671,6 +1719,12 @@ function renderUI() {
       : `Day ${Math.floor(minutes / 1440) + 1} · ${String(Math.floor(minutes / 60) % 24).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
   $("weather-summary").textContent=weatherText(s);
   $("weather-forecast").textContent=forecast(s).map(d=>`Day ${d.day}: ${d.rain}, ${d.temperature}`).join(" · ");
+  const environment=environmentInfo(s);
+  $("calendar-date").textContent=environment.date;
+  $("calendar-date").title=`Year ${environment.year} · ${environment.season} · 365-day game calendar`;
+  $("weather").textContent=`${environment.icon} ${environment.weather}`;
+  $("temperature").textContent=`~${environment.temperature}°C`;
+  $("temperature").setAttribute('aria-label',`Estimated temperature ${environment.temperature} degrees Celsius`);
   $("tasks").replaceChildren();
   $("completed-tasks").replaceChildren();
   const builtCount = s.projects.filter(
@@ -2031,11 +2085,13 @@ function frame(now) {
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
   if (!paused && !document.hidden) {
-    accumulator = simulationFrame(accumulator, dt, speed, step => {
+    accumulator = simulationFrame(accumulator, dt, () => simulationSpeed(s, speed), step => {
       previousMotion = captureMotion(s);
       tick(s, step);
     });
   }
+  diagnostics.observe(s);
+  updateSpeedButton();
   wildlife.update(!paused && !document.hidden ? dt : 0);
   capybaras.update(!paused && !document.hidden ? dt : 0);
   const visual = interpolateMotion(previousMotion, s, accumulator / 0.1);
@@ -2253,6 +2309,8 @@ function frame(now) {
         ? "sit"
         : r.action === "wash"
           ? "wash"
+          : production?.kind === "wild-tree"
+            ? "chop"
           : tending
             ? "tend"
             : ["build", "produce", "install"].includes(r.action)
