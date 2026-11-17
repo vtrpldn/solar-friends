@@ -1,3 +1,4 @@
+import {projectMaterials} from './project-materials.js';
 import {serviceFactor} from "./asset-upkeep.js";
 import {GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
 import {COLD_STORAGE} from './cold-storage.js';
@@ -106,7 +107,7 @@ export function syncInfrastructure(s, defs) {
     const kind = defs[p.key].kind || p.key;
     const batteryHealth=Math.max(.8,1-(p.batteryAgeDays||0)/(8*365)*.2);
     const battery =
-      (defs[p.key].materials?.batteries??(["solar_farm","hydro","supply-6"].includes(kind)?1:0))*4*batteryHealth;
+      (projectMaterials(p,defs)?.batteries??(["solar_farm","hydro","supply-6"].includes(kind)?1:0))*4*batteryHealth;
     sys.nodes[p.id] ??= {
       id: p.id,
       kind,
@@ -125,7 +126,7 @@ export function syncInfrastructure(s, defs) {
       node.battery=battery;
       if(node.charge>battery){sys.account.curtailed+=node.charge-battery;node.charge=battery;}
     }
-    node.solarKw=(defs[p.key].materials?.panels??(kind==="solar_farm"?2:0))*.6;
+    node.solarKw=(projectMaterials(p,defs)?.panels??(kind==="solar_farm"?2:0))*.6;
     if(kind==='goat_pasture'&&node.capacity[0]<40)node.capacity[0]=40;
     if(kind==='kitchen'){node.coldStorage=!!p.coldStorage;node.coolingEnabled=p.coolingEnabled!==false;}
     if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4*batteryHealth:0;if(node.charge>node.battery){sys.account.curtailed+=node.charge-node.battery;node.charge=node.battery;}}

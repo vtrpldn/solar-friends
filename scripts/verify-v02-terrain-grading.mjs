@@ -4,6 +4,8 @@ import {
   createSandbox,
   plan,
   moveProject,
+  tick,
+  enableFastNavigation,
   save,
   restore,
   placementError,
@@ -83,7 +85,11 @@ assert.equal(
   elevationAt(far, far, 42),
 );
 const moved = restore(save(s));
-assert.equal(moveProject(moved, moved.projects.at(-1).id, site.x + 8, site.z + 8), "");
+const movedGarden = moved.projects.find(p=>p.key==="garden");
+assert.equal(moveProject(moved, movedGarden.id, site.x + 8, site.z + 8), "");
+enableFastNavigation(moved);
+for(let i=0;i<64000&&movedGarden.removal;i++)tick(moved,.1);
+assert.ok(!movedGarden.removal, "residents finish relocation");
 assert.ok(footprintRelief(site.x + 8, site.z + 8, 2, 2, 42, moved.terrainPads) < 1e-8);
 assert.ok(restore(save(moved)), "moved foundations survive reload");
 const poor = createSandbox(42);

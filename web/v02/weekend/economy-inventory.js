@@ -1,3 +1,4 @@
+import {projectMaterials} from './project-materials.js';
 // Ownership is derived from authoritative orders, never from rendered vehicles.
 // Project materials stay project-owned while being hauled; a manifest is not a
 // second copy of the same stock. Values are replacement estimates, not cash.
@@ -5,7 +6,7 @@ export function inventoryOwnership(s,projects,recipes,materials){
  const rows=Object.fromEntries(Object.keys(materials).map(id=>[id,{available:id==='wood'?s.wood:s.materials[id]||0,reserved:0,processing:0,transit:0,installed:0}]));
  const add=(items,bucket)=>{for(const [id,n]of Object.entries(items||{}))if(rows[id])rows[id][bucket]+=n;};
  for(const p of s.projects||[]){const d=projects[p.key];if(!d||p.natural||p.felled)continue;
-  add(d.materials,p.work>=d.work?'installed':'reserved');
+  add(projectMaterials(p,projects),p.work>=d.work?'installed':'reserved');
  }
  for(const o of s.operations||[]){if(o.done||o.water)continue;const r=recipes[o.recipe];if(!r)continue;
   if(o.phase==='return')add(o.returnItems||o.harvestOutput||r.output,'transit');else add(r.input,'processing');

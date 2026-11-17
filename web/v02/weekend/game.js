@@ -1526,7 +1526,7 @@ function renderUI() {
       const workers = s.people.filter(
         (r) => r.job === p.id && r.action === "build",
       ).length;
-      workStatus.textContent = constructionStatus(s, p, d, requiredLoads(p.key));
+      workStatus.textContent = constructionStatus(s, p, d, requiredLoads(p));
       div.append(workStatus);
     }
     $(done ? "completed-tasks" : "tasks").append(div);
@@ -1704,7 +1704,7 @@ function renderUI() {
             ? " Housing: 0 goats / 2 places."
             : "";
     $("selected-desc").textContent =
-      `${PROJECTS[p.key].description} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+      `${PROJECTS[p.key].description} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Reserved bill: ${Object.entries(p.billOfMaterials||PROJECTS[p.key].materials).map(([id,n])=>materialText(id,n)).join(" · ")}. Delivered ${p.delivered}/${requiredLoads(p)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
   }
 }

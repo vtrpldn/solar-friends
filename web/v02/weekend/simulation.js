@@ -1,3 +1,4 @@
+import {projectMaterials,captureProjectMaterials} from './project-materials.js';
 import {dispatchReady,validLogisticsPolicy} from './logistics-policy.js';
 import {requestRemoval,removalStep,validRemovals} from './building-lifecycle.js';
 import {orderDelivery,deliveryStep,validDelivery} from "./deliveries.js";
@@ -128,6 +129,9 @@ expandProjects(PROJECTS);
 registerNaturalProjects(PROJECTS);
 Object.assign(PROJECTS, OPENING_PROJECTS);
 applyConstructionSpecs(PROJECTS);
+// Preserve the pre-calibration paid quantities for older unsnapshotted projects.
+PROJECTS.solar_farm.legacyMaterials={...PROJECTS.solar_farm.materials};
+PROJECTS.solar_farm.materials={...PROJECTS.solar_farm.materials,panels:6};
 export { PROCESSES };
 export function footprint(p) {
   const [w, d] = !p.natural && ['supply-2','supply-3'].includes(p.key) ? [1,1] : PROJECTS[p.key].size;
@@ -262,7 +266,7 @@ export function connectUtility(s, kind, from, to) {
 export function committedMaterials(s) {
   const totals={};
   const add=items=>{for(const [id,n] of Object.entries(items||{}))totals[id]=(totals[id]||0)+n;};
-  for(const p of s.projects)if(p.work<PROJECTS[p.key].work)add(PROJECTS[p.key].materials);
+  for(const p of s.projects)if(p.work<PROJECTS[p.key].work)add(projectMaterials(p,PROJECTS));
   for(const o of s.operations||[])if(!o.done&&!o.water)add(PROCESSES[o.recipe]?.input);
   return totals;
 }
@@ -735,8 +739,8 @@ export function blueprintPurchase(s, key, count = 1) {
     cost += missing * item.price / item.quantity;
   }
   cost = Math.ceil(cost * 100) / 100;
-  const budget=collectionBudget(s,items), transport=budget.cost;
-  return {items, cost, transport, error: cost + transport > s.money ? `Missing materials cost R$${cost.toFixed(2)} plus R$${transport.toFixed(2)} committed to ${budget.trips} collection trips; shared savings are too low.` : ""};
+  const budget=collectionBudget(s,items), transport=budget.cost, reserve=s.expansionReserve??0;
+  return {items, cost, transport, error: cost > 0 && cost + transport + reserve > s.money ? `Missing materials cost R$${cost.toFixed(2)} plus R$${transport.toFixed(2)} committed to ${budget.trips} collection trips, while keeping R$${reserve.toFixed(2)} for essentials; shared savings are too low.` : ""};
 }
 function dispatchBlueprintPickup(s) {
   if(!dispatchReady(s))return;
@@ -752,7 +756,7 @@ function dispatchBlueprintPickup(s) {
   }
 }
 export function requiredLoads(key) {
-  return Object.entries(PROJECTS[key].materials).reduce(
+  return Object.entries(typeof key==='string'?PROJECTS[key].materials:projectMaterials(key,PROJECTS)).reduce(
     (sum, [id, n]) => sum + Math.ceil(n / MATERIALS[id].batch),
     0,
   );
@@ -766,6 +770,8 @@ export function beginArrival(s) {
 export function createWeekend(landSeed = 0) {
   return {
     version: 2,
+    expansionReserve:100,
+    materialBillVersion:2,
     constructionLaborVersion: CONSTRUCTION_LABOR_VERSION,
     homeEnergyVersion: 1,
     landSeed,
@@ -1086,6 +1092,7 @@ export function plan(s, key, x, z, rotation = 0) {
     x,
     z,
     rotation,
+    billOfMaterials:{...def.materials},
     work: instant ? def.work : 0,
     delivered: s.mode === "sandbox" ? requiredLoads(key) : 0,
     ...(Object.keys(purchase.items).length ? {pendingMaterials: purchase.items} : {}),
@@ -1338,7 +1345,11 @@ export function walkSegmentClear(s, from, to) {
         const penetration = (p) =>
           Math.min(0.66 - Math.abs(p.x - x), 0.66 - Math.abs(p.z - z));
         if (
-          penetration(from) >= -1e-8 && Math.hypot(to.x-from.x,to.z-from.z)>1e-9
+          Math.hypot(to.x-from.x,to.z-from.z)>1e-9 && (penetration(from) >= -1e-8 || s.projects.some(p=>{
+            if(p.felled||['road','bridge'].includes(p.key))return false;
+            const [w,d]=footprint(p);
+            return from.x>=p.x-.66&&from.x<=p.x+w-.34&&from.z>=p.z-.66&&from.z<=p.z+d-.34&&x>=p.x&&x<p.x+w&&z>=p.z&&z<p.z+d;
+          }))
         )
           continue;
         return false;
@@ -1421,7 +1432,7 @@ function routeUncached(s, from, to) {
     const escapes=[];
     for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
       let prior=from;
-      for(let distance=.1;distance<=2;distance+=.1){
+      for(let distance=.1;distance<=6;distance+=.1){
         const point={x:from.x+dx*distance,z:from.z+dz*distance};
         if(!walkSegmentClear(s,prior,point))break;
         if(walkSegmentClear(s,point,point)){escapes.push(point);break;}
@@ -1445,6 +1456,9 @@ function routeUncached(s, from, to) {
         ? [{ x: to.x, z: to.z }]
         : []
       : null;
+  // A* cannot enter a blocked destination cell. Reject it before searching
+  // the entire connected bank, especially for repeatedly checked work/need spots.
+  if(occupied(s,end[0],end[1])||end[0]<CELL_MIN+1||end[0]>CELL_MAX-2||end[1]<CELL_MIN+1||end[1]>CELL_MAX-2)return null;
   const queue = new PathQueue(),
     parent = new Map([[key(...start), null]]),
     costs = new Map([[key(...start), 0]]);
@@ -1539,10 +1553,11 @@ export function restingDoor(s, i) {
   return buildingFront(p);
 }
 function chooseRestingPlace(s, r, i) {
-  if (r.restSite && s.projects.some((p) => p.id === r.restSite)) return;
+  if (r.restSite && s.projects.some((p) => p.id === r.restSite&&!p.removal)) return;
+  r.restSite=null;
   const choices = s.projects.filter(
     (p) =>
-      p.work >= PROJECTS[p.key].work &&
+      !p.removal && p.work >= PROJECTS[p.key].work &&
       (PROJECTS[p.key].kind === "home" || p.key.startsWith("canvas-tent")) &&
       s.infrastructure.nodes[p.id]?.enabled !== false &&
       s.people.filter((other) => other !== r && other.restSite === p.id)
@@ -2183,7 +2198,7 @@ function tickUncached(s, dt) {
       continue;
     }
     const dest = r.workSpot;
-    const loads = requiredLoads(p.key);
+    const loads = requiredLoads(p);
     // Reserved supplies begin at the receiving stockpile. Storage only helps
     // after a resident physically stages a larger batch there.
     const transit = s.people.filter(other => other.job === p.id && other.cargo);
@@ -2405,15 +2420,16 @@ export function restore(text) {
       s.stock.z > CELL_MAX
     )
       return null;
+    if(!captureProjectMaterials(s,PROJECTS,MATERIALS))return null;
     // Older saves counted a pair/trio as one item; preserve the actual animals.
     if (s.livestockUnits === undefined) {
       s.materials.goats *= 2;
       s.materials.hens *= 3;
       for (const p of s.projects) {
         if (p.key === "goat_pasture")
-          p.delivered = Math.min(requiredLoads(p.key), p.delivered + 1);
+          p.delivered = Math.min(requiredLoads(p), p.delivered + 1);
         if (p.key === "coop")
-          p.delivered = Math.min(requiredLoads(p.key), p.delivered + 2);
+          p.delivered = Math.min(requiredLoads(p), p.delivered + 2);
       }
       s.livestockUnits = 1;
     }
@@ -2422,7 +2438,7 @@ export function restore(text) {
     if (!s.homeEnergyVersion) {
       for (const p of s.projects) if (PROJECTS[p.key]?.kind === 'home') {
         p.solarUpgrade = true;
-        const loads = requiredLoads(p.key), units=Math.ceil(PROJECTS[p.key].size[0]/2);
+        const loads = requiredLoads(p), units=Math.ceil(PROJECTS[p.key].size[0]/2);
         const extra=['panels','batteries','electrical'].reduce((sum,id)=>sum+Math.ceil(units/MATERIALS[id].batch),0);
         if (p.delivered > loads && p.delivered <= loads + extra) p.delivered = loads;
         if (p.staged && p.delivered + p.staged <= loads + extra) p.staged = Math.min(p.staged, loads - p.delivered);
@@ -2432,7 +2448,7 @@ export function restore(text) {
     if(!migrateConstructionLabor(s,PROJECTS))return null;
     for (const p of s.projects) {
       if((p.coldStorage!==undefined&&typeof p.coldStorage!=='boolean')||(p.coolingEnabled!==undefined&&typeof p.coolingEnabled!=='boolean')||(p.coldStorage&&PROJECTS[p.key]?.kind!=='kitchen'))return null;
-      const recipe = {...PROJECTS[p.key]?.materials, ...(p.solarUpgrade ? Object.fromEntries(['panels','batteries','electrical'].map(id=>[id,Math.ceil(PROJECTS[p.key].size[0]/2)])) : {})};
+      const recipe = {...projectMaterials(p,PROJECTS), ...(p.solarUpgrade ? Object.fromEntries(['panels','batteries','electrical'].map(id=>[id,Math.ceil(PROJECTS[p.key].size[0]/2)])) : {})};
       if (p.pendingMaterials && (p.work !== 0 || p.delivered !== 0 ||
           !Object.keys(p.pendingMaterials).length || Object.entries(p.pendingMaterials).some(([id,n]) =>
             !Number.isInteger(n) || n <= 0 || !recipe[id] || n > recipe[id]))) return null;
@@ -2463,9 +2479,9 @@ export function restore(text) {
         p.work > PROJECTS[p.key].work ||
         !Number.isInteger(p.delivered) ||
         p.delivered < 0 ||
-        (p.staged !== undefined && (!Number.isInteger(p.staged) || p.staged < 0 || p.staged + p.delivered > requiredLoads(p.key))) ||
+        (p.staged !== undefined && (!Number.isInteger(p.staged) || p.staged < 0 || p.staged + p.delivered > requiredLoads(p))) ||
         (p.depot !== undefined && (!Number.isInteger(p.depot) || !s.projects.some(other => other.id === p.depot && STORAGE_KINDS.includes(PROJECTS[other.key].kind)))) ||
-        p.delivered > requiredLoads(p.key)
+        p.delivered > requiredLoads(p)
       )
         return null;
       ids.add(p.id);
@@ -2567,6 +2583,7 @@ export function restore(text) {
       r.cargo = trip.phase === "unloading";
     }
     }
+    if(s.expansionReserve!==undefined&&(!Number.isFinite(s.expansionReserve)||s.expansionReserve<0||s.expansionReserve>100000))return null;
     if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     if (!validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;

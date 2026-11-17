@@ -40,3 +40,19 @@ Still required: matching-date local prices, equipment specifications, canonical 
 A follow-up regression exposed a real boarding consolidation defect. Adding a compatible prepaid blueprint while the driver was boarding did not refresh the manifest. Boarding now repacks compatible pending orders within capacity; the derived budget excludes the already-paid first fare. Departure locks the manifest. Regression checks cover both branches, overflow trips, restored manifests and no duplicate material payments. Older blueprint checks were also updated to include explicit fuel charges introduced by physical trading.
 
 Power-screen tariff copy and new-game travel estimates now use the shared numeric model rather than independent hard-coded labels. Broader financial, trade, production, spoilage, preservation and cold-storage checks pass; accelerated fixed-step checks pass through 1024×. These remain bounded regression results, not completion of seasonal or full-catalog release gates.
+
+
+## Construction magnitude check — 17 November
+
+The [IBGE October 2026 release](https://ftp.ibge.gov.br/Precos_Custos_e_Indices_da_Construcao_Civil/Fasciculo_Indicadores_IBGE/sinapi_202610caderno.pdf), published 12 November, lists São Paulo's aggregate construction cost at R$2,096.45/m² with payroll relief, or R$2,216.38/m² without it (tables on pages 5–6). This includes labor and a reference mix of construction, not a quote for a self-built adobe home. It is a magnitude warning: the current toy catalog bills must not be described as realistic house budgets. It is not multiplied into a direct cash charge.
+
+Per-project bills are now captured when the blueprint is purchased. Hauling, ownership valuation and salvage read that captured bill. Future catalog quantity changes therefore cannot retroactively invent or remove paid materials. Historical projects without a captured bill are initialized from their applicable catalog recipe during restore; this is a prerequisite for the remaining bill-of-quantities revision.
+
+
+## Solar equipment quotes — 17 November
+
+[Minha Casa Solar's module catalog](https://www.minhacasasolar.com.br/painel-solar) lists a TSUN 600 W module at R$719 by card or R$668.67 by PIX. The model now rounds to R$700 per 0.6 kW module, excluding transport and installation. These are national retail listings, not a Campinas delivered quotation.
+
+[Buyers Solar's battery listings](https://buyersenergy.com.br/baterias/) show 4.8 kWh lithium units at R$5,499 (ZTROON), R$6,400 (EPEVER) and R$6,800 (Unipower). The game uses R$6,000 per battery and 4 kWh usable capacity; that usable allowance is an engineering simplification. Vendor-specific discounts and financing are not simulated. The old R$420 unit was incompatible with the modeled storage capacity.
+
+New solar farms now purchase six modules, matching the six modules in the model: 3.6 kW peak before sun/weather/condition. Older paid two-module installations retain their captured bill and 1.2 kW peak; no extra equipment is granted on reload. The grid remains the affordable setup option; rooftop storage is optional for homes.
