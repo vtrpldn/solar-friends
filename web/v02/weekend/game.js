@@ -1,5 +1,6 @@
+import {eventHistory, eventTime} from './event-history.js';
 import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
-import {projectLabel, upgradeAction, undoRoadPlan} from './project-ui.js';
+import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
 import {loadVillage} from './load-village.js';
 import {ensureNaturalLand} from './natural-resources.js';
 import {saveSlots} from "./save-slots.js";
@@ -94,6 +95,7 @@ import {
   planRoadLine,
   moveProject,
   prioritize,
+  cancelProject, cancelProjectError,
   supplyRun,
   resolveRain,
   finished,
@@ -995,6 +997,19 @@ $("world").addEventListener("pointerup", (e) => {
     renderUI();
   }
 });
+$("cancel-project").onclick = () => {
+  const error = cancelProject(s, selected);
+  if (!error) { selected = null; syncBuildings(); persist(); }
+  message(error || s.log[0]);
+  uiSignature = ''; renderUI();
+};
+let controlsWasPaused = false;
+$("show-controls").onclick = () => {
+  controlsWasPaused = paused; paused = true; updatePauseButton();
+  $("controls-dialog").showModal();
+};
+$("close-controls").onclick = () => $("controls-dialog").close();
+$("controls-dialog").addEventListener('close', () => { paused = controlsWasPaused; updatePauseButton(); });
 $("priority").onclick = () => {
   prioritize(s, selected);
   message(s.log[0]);
@@ -1287,11 +1302,17 @@ function renderUtilityUI() {
           .map(([id, d]) => [id, d.name])
       : [],
   );
+  const activity = p && productionActivity(s, p, PROCESSES);
+  $("production-progress").hidden = !activity;
+  $("production-progress").value = activity?.progress || 0;
+  $("production-activity").textContent = activity?.detail || "";
+  $("production-activity").hidden = !activity;
   $("production-controls").hidden = !$("production").value;
   $("queue-production").disabled = !node || !$("production").value;
   const upgrade = p && $("production").value === "solar_upgrade" ? upgradeAction(p, s.operations || []) : null;
   $("repeat-production").hidden = !!upgrade || (!!p && PROJECTS[p.key].kind==='wild-tree');
   $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : 'Start batch';
+  if (activity) { $("queue-production").textContent = activity.label; $("queue-production").disabled = true; }
   if (upgrade) { $("queue-production").textContent = upgrade.label; $("queue-production").disabled ||= upgrade.disabled; }
   $("repeat-production").disabled = !node || !$("production").value;
   $("repeat-production").textContent = p?.repeat
@@ -1390,7 +1411,7 @@ function filterBuildings() {
     const button=$(`build-${key}`);
     if(!button)continue;
     // Search the entire catalogue, even when a category was selected earlier.
-    button.hidden=query ? !`${d.name} ${d.description} ${buildingCategory(d)}`.toLowerCase().includes(query)
+    button.hidden=query ? !`${productionSearchText(d, PROCESSES, MATERIALS)} ${buildingCategory(d)}`.toLowerCase().includes(query)
       : !inBuildCategory(key,d,category);
     if(!button.hidden){count++;illustrate(button.querySelector("img"),d.asset);}
   }
@@ -1486,6 +1507,7 @@ function renderUI() {
     selected,
     placing,
     s.log,
+    s.events,
     s.people.map((r) => [r.action, r.job, r.cargo, r.haulLoads, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
     s.projects.map((p) => [
       p.id, p.delivered, p.staged, p.pendingMaterials,
@@ -1651,6 +1673,8 @@ function renderUI() {
                 actionText[r.action] ||
                 "Settling in";
     if(r.job && r.cargo && r.haulLoads) status.textContent = `Carrying ${r.haulLoads} load${r.haulLoads===1?'':'s'} to ${r.haulStage==='storage'?'nearby storage':PROJECTS[s.projects.find(p=>p.id===r.job)?.key]?.name || 'the building site'}`;
+    const jobProject = residentProject(s, r);
+    if (jobProject) status.textContent += ` · ${projectLabel(jobProject, PROJECTS)}`;
     if(r.needBlocked && !r.needTask) status.textContent += ` · ${r.needBlocked}`;
     status.className = "resident-status";
     const needs=document.createElement('div');
@@ -1687,6 +1711,12 @@ function renderUI() {
         message(`${r.name} · ${status.textContent}`);
       };
       detail.append(locate);
+      if (jobProject) {
+        const viewJob = document.createElement('button');
+        viewJob.textContent = `View project · ${projectLabel(jobProject, PROJECTS)}`;
+        viewJob.onclick = () => { setPanel(null); selected = jobProject.id; focus(jobProject); uiSignature = ''; renderUI(); };
+        detail.append(viewJob);
+      }
       const tabs=document.createElement('nav');tabs.className='resident-tabs';tabs.setAttribute('aria-label','Profile sections');
       for(const label of ['Overview','Skills','Relationships']){
         const tab=document.createElement('button');tab.textContent=label;tab.setAttribute('aria-pressed',String(residentTab===label));
@@ -1742,9 +1772,11 @@ function renderUI() {
   $("rain").hidden = !s.rainSeen || s.rainResolved;
   $("boards").disabled = s.wood < 2;
   $("log").replaceChildren(
-    ...s.log.map((t) => {
+    ...eventHistory(s).map((event) => {
       const li = document.createElement("li");
-      li.textContent = t;
+      const time = document.createElement("small");
+      time.textContent = `${eventTime(event.time)}${event.count > 1 ? ` · ×${event.count}` : ""}`;
+      li.append(time, document.createTextNode(event.text));
       return li;
     }),
   );
@@ -1795,6 +1827,12 @@ function renderUI() {
     $("selected-desc").textContent =
       `${PROJECTS[p.key].description}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
+    $("cancel-project").hidden = !!PROJECTS[p.key].natural || p.work > 0;
+    const cancelError = cancelProjectError(s, p.id);
+    $("cancel-project").disabled = !!cancelError;
+    $("cancel-project").title = cancelError || 'Remove this unstarted plan and return reserved supplies.';
+    $("cancel-project-note").textContent = p.work === 0 && !PROJECTS[p.key].natural ? cancelError : '';
+    $("cancel-project-note").hidden = !$("cancel-project-note").textContent;
   }
 }
 for (const group of RESOURCE_GROUPS) {
@@ -1811,6 +1849,7 @@ for (const group of RESOURCE_GROUPS) {
   if (options.children.length) $("purchase").append(options);
 }
 management = createManagement({
+  build: (key) => { setPanel(null); document.querySelector(".view-menu").open = false; startPlacement(key); },
   beforeOpen: () => { if (placing) cancel(); },
   state: () => s,
   refresh: () => {

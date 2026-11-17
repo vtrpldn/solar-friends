@@ -1615,3 +1615,13 @@ header > .time { grid-column: 3; justify-self: end; }
 .road-project-group { margin: 8px 0; padding: 10px; border: 1px solid var(--edge); border-radius: 12px; }
 .road-project-group > summary { cursor: pointer; font-weight: 600; }
 #undo-road { background: var(--paper); }
+
+#controls-dialog { width: 460px; max-height: calc(100vh - 80px); overflow-y: auto; }
+#controls-dialog p { line-height: 1.9; }
+#close-controls { float: right; }
+#production-activity { font-size: 12px; line-height: 1.5; }
+#production-progress, .production-site progress { width: 100%; }
+#log li { margin-bottom: 10px; }
+#log li > small { display: block; font-size: 11px; font-weight: 400; letter-spacing: normal; }
+#cancel-project { border-style: dashed; }
+#cancel-project-note { display: block; font-size: 12px; letter-spacing: normal; line-height: 1.4; }

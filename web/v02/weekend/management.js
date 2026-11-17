@@ -1,4 +1,4 @@
-import {upgradeAction} from './project-ui.js';
+import {upgradeAction, productionSearchText, productionActivity} from './project-ui.js';
 import {economyControls} from './economy-controls.js';
 import {productionTarget} from './economy-policies.js';
 import {financeSummary,financeTime} from './finances.js';
@@ -33,6 +33,7 @@ const intros = {
     "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically.",
 };
 export function createManagement({
+  build,
   beforeOpen = () => {},
   state,
   refresh,
@@ -367,6 +368,7 @@ export function createManagement({
         const op = (s.operations || []).find((o) => o.site === p.id && !o.done && !o.water);
         choice.value = p.repeat || recipeChoices.get(p.id) || recipes[0][0];
         choice.onchange = () => recipeChoices.set(p.id, choice.value);
+        const activity = productionActivity(s, p, PROCESSES);
         const status = document.createElement("p");
         status.textContent =
           (p.readyAt>s.time ? `Growing: ${Math.ceil((p.readyAt-s.time)*.45)} game minutes remaining · faster at higher speed` : op ? op.status || "Resident job queued" : p.productionStatus) ||
@@ -376,8 +378,9 @@ export function createManagement({
               ? `Keeping ${productionTarget(p)} in stock`
               : "Ready for a job");
         if(op && !s.people.some(r=>r.operation===op.id && !r.needTask && !r.tentPhase))status.textContent=`${op.status?.startsWith('Waiting')?op.status:'Waiting for an available resident'} · residents may be resting or doing higher-priority work`;
+        if (activity) status.textContent = activity.detail;
         const start = document.createElement("button");
-        start.textContent = "Start batch";
+        start.textContent = activity?.label || "Start batch";
         start.disabled = !!op || s.stage !== "playing";
         start.onclick = () => {
           notify(
@@ -400,6 +403,7 @@ export function createManagement({
         const describe=()=>{const r=PROCESSES[choice.value];recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||'Building upgrade'}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work`;};
         choice.onchange=()=>{recipeChoices.set(p.id,choice.value);describe();};describe();
         el.append(img,name,locate,status,choice,recipeInfo,start);
+        if (activity) { const bar=document.createElement('progress');bar.max=1;bar.value=activity.progress;bar.setAttribute('aria-label', `Production at ${name.textContent}`);el.append(bar); }
         if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);
         else {const action=upgradeAction(p,s.operations||[]);start.disabled=action.disabled||!!op;start.textContent=action.label;}
         $("production-sites").append(el);
@@ -409,6 +413,18 @@ export function createManagement({
           search
             ? "No completed production sites match this search. Try another resource or building name."
             : "Build a garden, workshop or other production site to start making supplies here.";
+      if (search) {
+        const producers = Object.entries(PROJECTS).filter(([,d]) => !d.natural &&
+          Object.values(PROCESSES).some(recipe => recipe.kind === d.kind) &&
+          productionSearchText(d, PROCESSES, MATERIALS).includes(search));
+        for (const [key, definition] of producers) {
+          const button = document.createElement('button');
+          button.textContent = `Build producer · ${definition.name}`;
+          button.disabled = s.mode !== 'sandbox' && !definition.repeatable && s.projects.some(p => p.key === key);
+          button.onclick = () => { dialog.addEventListener('close', () => build(key), {once:true}); dialog.close(); };
+          $("production-sites").append(button);
+        }
+      }
     } else {
       $("network-nodes").replaceChildren();
       for (const n of nodes) {

@@ -101,6 +101,7 @@
         ><select id="production"></select
         ><button id="queue-production">Start batch</button
         ><button id="repeat-production">Keep 24 in stock</button>
+        <p id="production-activity" hidden></p><progress id="production-progress" aria-label="Production work completed" max="1" value="0" hidden></progress>
       </div>
       <details class="building-notes">
         <summary>Materials &amp; building notes</summary>
@@ -111,10 +112,21 @@
       ><button id="focus-selection" data-shortcut="F" aria-keyshortcuts="F" title="F">Find in village</button
       ><button id="copy-building">Build another</button
       ><button id="move">Move building</button
+      ><button id="cancel-project">Cancel plan</button
+      ><small id="cancel-project-note" hidden></small
       ><button id="close-selection" aria-label="Close project details">
         ×
       </button>
     </section>
+    <dialog id="controls-dialog" aria-labelledby="controls-title"><button id="close-controls" aria-label="Close keyboard controls">×</button><h2 id="controls-title">Keyboard &amp; camera</h2>            <p>
+              <kbd>W A S D</kbd> Move around<br /><kbd>Q / E</kbd> Turn the
+              view<br />Scroll to zoom · Drag to pan<br /><kbd>Space</kbd> Pause
+              / resume<br /><kbd>1–4</kbd> Speed: 1× / 4× / 8× / 16×<br /><kbd>B</kbd> Build · <kbd>J</kbd> Projects · <kbd>N</kbd> Residents<br /><kbd>T</kbd> Terrain · <kbd>I</kbd> Resources<br /><kbd>U</kbd> Water · <kbd>P</kbd> Power · <kbd>M</kbd> Finances<br /><kbd>/</kbd> Search buildings or resources<br /><kbd>Home</kbd> Camp · <kbd>G</kbd> Grid ·
+              <kbd>F</kbd> Focus<br /><kbd>R</kbd> Rotate building ·
+              <kbd>Shift + R</kbd> Reverse<br /><kbd>Shift-click</kbd> Repeat
+              building / extend a straight road<br /><kbd>Esc</kbd> Cancel
+              placement / finish road plan / close panel
+            </p></dialog>
     <footer>
       <section id="build" hidden>
         <div class="build-toolbar">
@@ -171,18 +183,7 @@
         <summary>View &amp; options</summary>
         <div class="controls">
           <div class="view-control-row camera-row">
-          <details class="controls-help">
-            <summary aria-label="Camera controls">?</summary>
-            <p>
-              <kbd>W A S D</kbd> Move around<br /><kbd>Q / E</kbd> Turn the
-              view<br />Scroll to zoom · Drag to pan<br /><kbd>Space</kbd> Pause
-              / resume<br /><kbd>1–4</kbd> Speed: 1× / 4× / 8× / 16×<br /><kbd>B</kbd> Build · <kbd>J</kbd> Projects · <kbd>N</kbd> Residents<br /><kbd>T</kbd> Terrain · <kbd>I</kbd> Resources<br /><kbd>U</kbd> Water · <kbd>P</kbd> Power · <kbd>M</kbd> Finances<br /><kbd>/</kbd> Search buildings or resources<br /><kbd>Home</kbd> Camp · <kbd>G</kbd> Grid ·
-              <kbd>F</kbd> Focus<br /><kbd>R</kbd> Rotate building ·
-              <kbd>Shift + R</kbd> Reverse<br /><kbd>Shift-click</kbd> Repeat
-              building / extend road with a bend<br /><kbd>Esc</kbd> Cancel
-              placement / close panel
-            </p>
-          </details>
+          <button id="show-controls" aria-label="Keyboard and camera controls">?</button>
           <button id="rotate-left" data-shortcut="Q" aria-keyshortcuts="Q" aria-label="Rotate camera left" title="Q">
             ↶</button
           ><button id="rotate-right" data-shortcut="E" aria-keyshortcuts="E" aria-label="Rotate camera right" title="E">
