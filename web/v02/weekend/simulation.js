@@ -1,5 +1,6 @@
+import {reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment} from './physical-trade.js';
 import {economyPolicies,productionTarget,workGroup,salePreview,validatePolicies} from './economy-policies.js';
-import {ensureFinances,recordMoney} from './finances.js';
+import {ensureFinances,recordMoney,transact,validFinances} from './finances.js';
 import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
 import { STORAGE_KINDS, crewLimit, carriedLoads } from "./construction-logistics.js";
 import {registerWorld,validSettings,townDuration,waterFactor} from './world-settings.js';
@@ -193,7 +194,7 @@ export function storageCapacity(s) {
   );
 }
 export function storedMaterials(s) {
-  return s.wood + Object.values(s.materials).reduce((a, b) => a + b, 0);
+  return s.wood + Object.values(s.materials).reduce((a, b) => a + b, 0) + pendingExports(s).reduce((n,o)=>n+o.quantity,0);
 }
 function changeMaterial(s, id, n) {
   if (id === "wood") s.wood += n;
@@ -208,10 +209,7 @@ export function sellMaterial(s, id) {
     materialCount(s, id) < item.quantity
   )
     return false;
-  changeMaterial(s, id, -item.quantity);
-  recordMoney(s,Math.floor(item.price * .5),"sales",`Sold ${item.quantity} ${item.name}`);
-  s.money += Math.floor(item.price * 0.5);
-  return true;
+  return reserveExport(s,id,MATERIALS,materialCount,changeMaterial);
 }
 export function automaticSales(s) {
   if(s.stage!=='playing'||s.mode==='sandbox')return;
@@ -718,13 +716,12 @@ export function blueprintPurchase(s, key, count = 1) {
 function dispatchBlueprintPickup(s) {
   const pending = s.projects.filter(p => p.pendingMaterials);
   if (!pending.length) return;
-  // The order stays editable until the driver actually leaves the village.
-  if (s.trip) {
-    if (s.trip.project && s.trip.phase === "boarding") s.trip.projects = pending.map(p=>p.id);
-    return;
+  if(s.trip)return;
+  const shipments=blueprintManifest(pending);if(!shipments.length)return;
+  const first=s.projects.find(p=>p.id===shipments[0].project);
+  if(supplyRun(s,Object.keys(shipments[0].items)[0],first)){
+    s.trip.shipments=shipments;s.trip.projects=shipments.map(p=>p.project);
   }
-  if (supplyRun(s, Object.keys(pending[0].pendingMaterials)[0], pending[0]))
-    s.trip.projects = pending.map(p=>p.id);
 }
 export function requiredLoads(key) {
   return Object.entries(PROJECTS[key].materials).reduce(
@@ -1050,8 +1047,7 @@ export function plan(s, key, x, z, rotation = 0) {
     if (id === "wood") s.wood -= reserved;
     else s.materials[id] -= reserved;
   }
-  recordMoney(s,-purchase.cost,"construction",`Materials for ${def.name}`);
-  s.money -= purchase.cost;
+  transact(s,-purchase.cost,"construction",`Materials for ${def.name}`);
   gradeFoundation(s, key, x, z, rotation);
   const instant = key !== "road" && s.mode === "sandbox" && s.instantBuild !== false;
   s.projects.push({
@@ -1076,6 +1072,7 @@ export function plan(s, key, x, z, rotation = 0) {
       : `${def.name} planned. Materials reserved; friends will bring them over.`,
   );
   dispatchBlueprintPickup(s);
+  if(!s.trip && pendingExports(s).length && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
   return "";
 }
 export function planRoadLine(s, from, to) {
@@ -1151,15 +1148,15 @@ export function prioritize(s, id) {
     "The group will pick up this project next. Current carrying trips finish first.",
   );
 }
-export function supplyRun(s, material = "wood", project = null) {
+export function supplyRun(s, material = "wood", project = null, saleOnly = false) {
   const item = MATERIALS[material];
   if (
     !item ||
     !item.quantity ||
-    (!project && storedMaterials(s) + item.quantity > storageCapacity(s)) ||
+    (!project && !saleOnly && storedMaterials(s) + item.quantity > storageCapacity(s)) ||
     s.stage !== "playing" ||
     s.trip ||
-    (!project && s.money < item.price)
+    s.money < (project || saleOnly ? 0 : item.price) + transportCost(s)
   )
     return false;
   const vehicle = s.nextTripVehicle || 0;
@@ -1168,20 +1165,20 @@ export function supplyRun(s, material = "wood", project = null) {
     .sort((a, b) => b.energy - a.energy)
     .find(r => route(s, r, carDoor(vehicle)));
   if (!r) return false;
-  if (!project) {
-    recordMoney(s,-item.price,"purchases",`Bought ${item.quantity} ${item.name}`);
-    s.money -= item.price;
-  }
+  if (!project && !saleOnly) transact(s,-item.price,"purchases",`Bought ${item.quantity} ${item.name}`);
+  transact(s,-transportCost(s),"transport","Town trip fuel and operating cost");
   s.nextTripVehicle = 1 - vehicle;
   s.trip = {
     person: r.id,
     left: townDuration(s.worldSettings?.town),
     duration: townDuration(s.worldSettings?.town),
     material,
+    saleOnly,
     ...(project ? {project: project.id} : {}),
     vehicle,
     phase: "boarding",
   };
+  loadExports(s,s.trip);
   r.job = null;
   r.target = null;
   r.walk = [];
@@ -1192,7 +1189,7 @@ export function supplyRun(s, material = "wood", project = null) {
   if (s.opening) s.opening.townTrips++;
   say(
     s,
-    project ? `${r.name} is heading to town to collect the prepaid materials for ${PROJECTS[project.key].name}.` : `${r.name} is heading to the car for town: ${item.quantity} ${item.name} for R$${item.price}. Back in about a minute.`,
+    saleOnly ? `${r.name} is taking reserved surplus to town. Payment arrives after trading.` : project ? `${r.name} is heading to town to collect the prepaid materials for ${PROJECTS[project.key].name}.` : `${r.name} is heading to the car for town: ${item.quantity} ${item.name} for R$${item.price}. Back in about a minute.`,
   );
   return true;
 }
@@ -1833,6 +1830,7 @@ function tickUncached(s, dt) {
     },
   };
   dispatchBlueprintPickup(s);
+  if(!s.trip && pendingExports(s).length && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
   if (s.trip) {
     const trip = s.trip,
       r = s.people.find((r) => r.id === trip.person);
@@ -1868,15 +1866,15 @@ function tickUncached(s, dt) {
             item = MATERIALS[id];
           const project = s.projects.find(p => p.id === trip.project);
           const orders = trip.projects || [trip.project];
-          if (project) for (const p of s.projects.filter(p=>orders.includes(p.id))) delete p.pendingMaterials;
-          else if (id === "wood") s.wood += item.quantity;
-          else s.materials[id] += item.quantity;
+          if(trip.shipments) receiveBlueprintShipment(s,trip);
+          else if (project) for (const p of s.projects.filter(p=>orders.includes(p.id))) delete p.pendingMaterials;
+          else if (!trip.saleOnly) { if (id === "wood") s.wood += item.quantity; else s.materials[id] += item.quantity; }
           r.action = "idle";
           r.cargo = false;
           s.trip = null;
           say(
             s,
-            project ? `${r.name} unloaded reserved materials for ${orders.length === 1 ? PROJECTS[project.key].name : `${orders.length} projects`}. Construction can begin.` : `${r.name} unloaded ${item.quantity} ${item.name} from the car.`,
+            trip.saleOnly ? `${r.name} returned from selling the village surplus.` : project ? `${r.name} unloaded reserved materials for ${orders.length === 1 ? PROJECTS[project.key].name : `${orders.length} projects`}. Any remaining materials will follow on another trip.` : `${r.name} unloaded ${item.quantity} ${item.name} from the car.`,
           );
         }
       }
@@ -1890,6 +1888,7 @@ function tickUncached(s, dt) {
             : trip.left > 0
               ? "inbound"
               : "unloading";
+      if (["inbound","unloading"].includes(trip.phase)) settleExports(s,trip,transact);
       if (trip.phase === "unloading") {
         Object.assign(r, carDoor(trip.vehicle));
         r.walk = [];
@@ -2500,7 +2499,7 @@ export function restore(text) {
       const r = s.people.find((r) => r.id === s.trip.person);
       r.cargo = s.trip.phase === "unloading";
     }
-    if (!validInfrastructure(s) || !validatePolicies(s,MATERIALS)) return null;
+    if (!validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(

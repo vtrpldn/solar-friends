@@ -5,7 +5,9 @@ export function ensureFinances(s) {
 export function recordMoney(s, amount, category, description) {
   if (!Number.isFinite(amount) || amount === 0 || s.mode === 'sandbox') return;
   const f=ensureFinances(s);
-  if(amount>0)f.income+=amount;else f.expenses-=amount;
+  f.incomeCents??=Math.round(f.income*100);f.expenseCents??=Math.round(f.expenses*100);
+  if(amount>0)f.incomeCents+=Math.round(amount*100);else f.expenseCents-=Math.round(amount*100);
+  f.income=f.incomeCents/100;f.expenses=f.expenseCents/100;
   f.categories[category]=(f.categories[category]||0)+amount;
   const hour=Math.floor((s.time||0)*.45/60);
   const previous=f.entries[0];
@@ -20,4 +22,27 @@ export function financeTime(time) {
 export function financeSummary(s) {
   const f=ensureFinances(s);
   return {...f,balance:s.money,net:f.income-f.expenses,gridRate:(s.infrastructure?.grid?.importing||0)*1.2};
+}
+
+// Whole centavos are posted; sub-cent utility consumption accumulates rather
+// than being rounded away on every small simulation step.
+export function transact(s,amount,category,description){
+ if(!Number.isFinite(amount)||s.mode==='sandbox')return 0;
+ const f=ensureFinances(s);f.fractions??={};
+ const raw=amount*100+(f.fractions[category]||0);
+ const cents=Math.trunc(raw+(raw<0?-1:1)*1e-8);
+ f.fractions[category]=raw-cents;
+ const opening=Math.round(s.money*100);
+ if(opening+cents<0)return 0;
+ recordMoney(s,cents/100,category,description);
+ s.money=(opening+cents)/100;
+ return cents/100;
+}
+
+export function validFinances(s){
+ const f=s.finances;if(f===undefined)return true;
+ if(!f||!['since','opening','income','expenses'].every(k=>Number.isFinite(f[k])&&f[k]>=0)||!f.categories||!Array.isArray(f.entries)||f.entries.length>100)return false;
+ if(f.fractions && Object.values(f.fractions).some(n=>!Number.isFinite(n)||Math.abs(n)>1.000001))return false;
+ if(['incomeCents','expenseCents'].some(k=>f[k]!==undefined&&(!Number.isSafeInteger(f[k])||f[k]<0)))return false;
+ return f.entries.every(e=>e&&Number.isFinite(e.time)&&Number.isFinite(e.amount)&&typeof e.category==='string'&&typeof e.description==='string');
 }
