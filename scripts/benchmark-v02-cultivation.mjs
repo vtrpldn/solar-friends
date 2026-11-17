@@ -2,6 +2,7 @@ import {chromium} from 'playwright';
 import {serve} from './serve.mjs';
 import assert from 'node:assert/strict';
 import {writeFile} from 'node:fs/promises';
+const detail=process.env.FARM_DETAIL==='near'?'near':'distance';
 const html=`<!doctype html><html><body style="margin:0"><script type="importmap">{"imports":{"three":"/v2/workshop/vendor/three.module.js"}}</script><script type="module">
 import * as THREE from 'three';
 import {createCultivationModel} from '/v2/cultivation-models.js';
@@ -11,9 +12,10 @@ const scene=new THREE.Scene();scene.background=new THREE.Color('#bccca0');scene.
 const camera=new THREE.PerspectiveCamera(50,1440/900,.1,300);camera.position.set(40,65,65);camera.lookAt(0,0,0);
 const model=createCultivationModel(p,{operations:[],time:0});scene.add(model);
 const crops=model.children.filter(m=>m.userData.crops);
+if('${detail}'==='near')for(const lod of crops)lod.levels[1].distance=Infinity;
 window.runBenchmark=async()=>{
  const sample=async visible=>{crops.forEach(m=>m.visible=visible);for(let i=0;i<10;i++)renderer.render(scene,camera);let cpu=0;const start=performance.now();for(let i=0;i<60;i++){await new Promise(requestAnimationFrame);const before=performance.now();renderer.render(scene,camera);renderer.getContext().finish();cpu+=performance.now()-before;}return {frameMs:(performance.now()-start)/60,cpuRenderMs:cpu/60,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,geometries:renderer.info.memory.geometries,textures:renderer.info.memory.textures,heapBytes:performance.memory?.usedJSHeapSize||null};};
- const gl=renderer.getContext(),ext=gl.getExtension('WEBGL_debug_renderer_info');return {renderer:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),beds:100,plants:crops.reduce((n,m)=>n+m.userData.plants,0),withoutCrops:await sample(false),withCrops:await sample(true)};
+ const gl=renderer.getContext(),ext=gl.getExtension('WEBGL_debug_renderer_info');return {renderer:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),detail:'${detail}',beds:100,plants:crops.reduce((n,m)=>n+m.userData.plants,0),withoutCrops:await sample(false),withCrops:await sample(true)};
 };
 </script></body></html>`;
 const server=await serve(0,{handle(req,res,path){if(path!=='/farm-benchmark')return false;res.writeHead(200,{'Content-Type':'text/html'}).end(html);return true;}}),browser=await chromium.launch({headless:true,args:['--mute-audio']});

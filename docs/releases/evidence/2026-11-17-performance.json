@@ -1,0 +1,185 @@
+{
+  "environment": {
+    "platform": "macOS arm64",
+    "cpu": "Apple M3 Pro",
+    "renderer": "Chromium SwiftShader software rendering",
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  "playtest": {
+    "startedAt": "2026-11-17T18:36:38.396Z",
+    "finishedAt": "2026-11-17T19:36:38.657Z",
+    "elapsedSeconds": 3601.044,
+    "completed": true,
+    "revision": "71bf72cd91419b52996cdf475a3168cfd9471fb6"
+  },
+  "playtestCounts": {
+    "samples": 117,
+    "actions": 24,
+    "browserErrors": 0,
+    "balanceViolations": 0
+  },
+  "productionRevisionAtReload": "ecb270e94301fe3ad24571cc4a95b5137dd5e312",
+  "performanceSession": {
+    "startedAt": "2026-11-17T19:37:10Z",
+    "finishedAt": null
+  },
+  "baseline": [
+    {
+      "mode": "paused",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "frames": 194,
+      "meanMs": 103.10670103166522,
+      "p95Ms": 109,
+      "heapBytes": 97400000,
+      "readout": "8 fps \u00b7 0 motion updates/s \u00b7 p95 117 ms \u00b7 621 draw calls \u00b7 235,102 triangles"
+    },
+    {
+      "mode": "1x",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "frames": 182,
+      "meanMs": 110.11263736263736,
+      "p95Ms": 133.40000000000146,
+      "heapBytes": 97400000,
+      "readout": "8 fps \u00b7 6 motion updates/s \u00b7 p95 142 ms \u00b7 638 draw calls \u00b7 235,046 triangles"
+    },
+    {
+      "mode": "16x",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "frames": 178,
+      "meanMs": 112.51348314660319,
+      "p95Ms": 133.40000000000146,
+      "heapBytes": 97400000,
+      "readout": "8 fps \u00b7 6 motion updates/s \u00b7 p95 150 ms \u00b7 686 draw calls \u00b7 249,422 triangles"
+    }
+  ],
+  "final": [
+    {
+      "mode": "paused",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "frames": 2402,
+      "meanMs": 8.329392173149305,
+      "p95Ms": 9.200000000000728,
+      "heapBytes": 60300000,
+      "readout": "120 callbacks/s \u00b7 0 renders/s \u00b7 0 motion updates/s \u00b7 p95 9 ms \u00b7 621 draw calls in last render \u00b7 235,102 triangles"
+    },
+    {
+      "mode": "1x",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "frames": 206,
+      "meanMs": 97.25048543735618,
+      "p95Ms": 108.40000000000146,
+      "heapBytes": 60300000,
+      "readout": "13 callbacks/s \u00b7 10 renders/s \u00b7 10 motion updates/s \u00b7 p95 108 ms \u00b7 638 draw calls in last render \u00b7 235,046 triangles"
+    },
+    {
+      "mode": "16x",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "frames": 197,
+      "meanMs": 101.66142131979691,
+      "p95Ms": 116.70000000000073,
+      "heapBytes": 60300000,
+      "readout": "13 callbacks/s \u00b7 9 renders/s \u00b7 9 motion updates/s \u00b7 p95 117 ms \u00b7 710 draw calls in last render \u00b7 254,802 triangles"
+    }
+  ],
+  "repeat-before": [
+    {
+      "mode": "16x",
+      "sourceHash": "5247203cddb272ff246d73f5703c1219f469c77b39f9e91398c7a82a7ff42702",
+      "sourceRevision": "cb0f01a7",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "frames": 180,
+      "meanMs": 111.51555555502571,
+      "p95Ms": 125.89999999999782,
+      "heapBytes": 97400000,
+      "readout": "8 callbacks/s \u00b7 8 renders/s \u00b7 6 motion updates/s \u00b7 p95 133 ms \u00b7 699 draw calls in last render \u00b7 250,686 triangles"
+    }
+  ],
+  "repeat-after": [
+    {
+      "mode": "16x",
+      "sourceHash": "5b1a00d32ef16a89080dff2dbbfcd1eed4dd0e58b1be732bd14f450197719421",
+      "sourceRevision": "working-tree",
+      "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+      "frames": 192,
+      "meanMs": 104.42395833308497,
+      "p95Ms": 133.59999999999854,
+      "heapBytes": 91700000,
+      "readout": "13 callbacks/s \u00b7 9 renders/s \u00b7 9 motion updates/s \u00b7 p95 134 ms \u00b7 725 draw calls in last render \u00b7 255,102 triangles"
+    }
+  ],
+  "farm-baseline": {
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+    "beds": 100,
+    "plants": 10000,
+    "withoutCrops": {
+      "frameMs": 74.47833333412807,
+      "cpuRenderMs": 0.11833331982294719,
+      "drawCalls": 2,
+      "triangles": 72000,
+      "geometries": 2,
+      "textures": 1,
+      "heapBytes": 27600000
+    },
+    "withCrops": {
+      "frameMs": 189.36500000158946,
+      "cpuRenderMs": 0.1483333428700765,
+      "drawCalls": 3,
+      "triangles": 112000,
+      "geometries": 3,
+      "textures": 1,
+      "heapBytes": 27600000
+    },
+    "detail": "distance"
+  },
+  "farm-quad": {
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+    "beds": 100,
+    "plants": 10000,
+    "withoutCrops": {
+      "frameMs": 78.04833333492279,
+      "cpuRenderMs": 0.12500001986821493,
+      "drawCalls": 2,
+      "triangles": 72000,
+      "geometries": 2,
+      "textures": 1,
+      "heapBytes": 27600000
+    },
+    "withCrops": {
+      "frameMs": 191.63666666746138,
+      "cpuRenderMs": 0.12833334604899088,
+      "drawCalls": 3,
+      "triangles": 92000,
+      "geometries": 3,
+      "textures": 1,
+      "heapBytes": 27600000
+    },
+    "detail": "distance"
+  },
+  "farm-near": {
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+    "detail": "near",
+    "beds": 100,
+    "plants": 10000,
+    "withoutCrops": {
+      "frameMs": 87.83499999841054,
+      "cpuRenderMs": 0.196666685740153,
+      "drawCalls": 2,
+      "triangles": 72000,
+      "geometries": 2,
+      "textures": 1,
+      "heapBytes": 21700000
+    },
+    "withCrops": {
+      "frameMs": 962.7416666666667,
+      "cpuRenderMs": 0.2383333484331767,
+      "drawCalls": 3,
+      "triangles": 1472000,
+      "geometries": 3,
+      "textures": 1,
+      "heapBytes": 21700000
+    }
+  }
+}

@@ -84,7 +84,9 @@ export function createCultivationModel(p,state){
     }});near.add(fruit);
    }
   }
-  const distant=new THREE.InstancedMesh(new THREE.CircleGeometry(1,4),new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,side:THREE.DoubleSide}),items.length);
+  // A rotated quad has the same diamond silhouette as a four-segment circle,
+  // with two triangles instead of four for every distant plant.
+  const distant=new THREE.InstancedMesh(new THREE.PlaneGeometry(Math.SQRT2,Math.SQRT2).rotateZ(Math.PI/4),new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,side:THREE.DoubleSide}),items.length);
   distant.userData.ownedMaterial=true;
   items.forEach((p,i)=>{const height=CROPS[id].height*p.growth;matrix.position.set(p.x,p.y+height/2,p.z);matrix.rotation.set(-.4,p.rotation,0);matrix.scale.set(id==='corn'?.35:.25,height/2,.25);matrix.updateMatrix();distant.setMatrixAt(i,matrix.matrix);distant.setColorAt(i,new THREE.Color(p.health<.4?'#a29b4b':id==='greens'?'#679b42':'#4e843d'));});
   const lod=new THREE.LOD();lod.userData.crops=true;lod.userData.plants=items.length;lod.addLevel(near,0);lod.addLevel(distant,65);root.add(lod);

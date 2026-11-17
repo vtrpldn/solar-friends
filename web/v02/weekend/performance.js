@@ -11,12 +11,14 @@ export function performanceReadout(renderer) {
     last = previous;
   const frames = [];
   const motionFrames = [];
+  const renderedFrames = [];
   let previousMotionTime;
-  return (now, motionTime) => {
+  return (now, motionTime, rendered = true) => {
     const elapsed = now - previous;
     previous = now;
     if (elapsed > 0 && !document.hidden) {
       frames.push(elapsed);
+      renderedFrames.push(Number(rendered));
       motionFrames.push(
         previousMotionTime !== undefined &&
           Math.abs(motionTime - previousMotionTime) > 1e-7
@@ -25,6 +27,7 @@ export function performanceReadout(renderer) {
       );
       if (frames.length > 300) {
         frames.shift();
+        renderedFrames.shift();
         motionFrames.shift();
       }
     }
@@ -34,6 +37,6 @@ export function performanceReadout(renderer) {
     if (!frames.length) return;
     const sorted = [...frames].sort((a, b) => a - b);
     const mean = frames.reduce((a, b) => a + b, 0) / frames.length;
-    output.textContent = `${Math.round(1000 / mean)} fps · ${Math.round((motionFrames.reduce((a, b) => a + b, 0) * 1000) / frames.reduce((a, b) => a + b, 0))} motion updates/s · p95 ${Math.round(sorted[Math.floor(sorted.length * 0.95)] || 0)} ms · ${renderer.info.render.calls} draw calls · ${renderer.info.render.triangles.toLocaleString()} triangles`;
+    output.textContent = `${Math.round(1000 / mean)} callbacks/s · ${Math.round(renderedFrames.reduce((a,b)=>a+b,0)*1000/frames.reduce((a,b)=>a+b,0))} renders/s · ${Math.round((motionFrames.reduce((a, b) => a + b, 0) * 1000) / frames.reduce((a, b) => a + b, 0))} motion updates/s · p95 ${Math.round(sorted[Math.floor(sorted.length * 0.95)] || 0)} ms · ${renderer.info.render.calls} draw calls in last render · ${renderer.info.render.triangles.toLocaleString()} triangles`;
   };
 }

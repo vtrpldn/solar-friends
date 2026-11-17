@@ -254,7 +254,7 @@ scene.add(daylight);
 const sun = new THREE.DirectionalLight("#ffe2a8", 3.4);
 sun.position.set(-25, 45, 18);
 sun.castShadow = true;
-sun.shadow.mapSize.set(4096, 4096);
+sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, {
   left: -48,
   right: 48,
@@ -705,6 +705,17 @@ function resize() {
   camera.bottom = -23;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  // Match shadow detail to the actual drawing buffer. A 4096 map is still used
+  // on large/retina displays; ordinary desktop windows avoid four times the texels.
+  const shadowSize = THREE.MathUtils.clamp(THREE.MathUtils.ceilPowerOfTwo(
+    Math.max(renderer.domElement.width, renderer.domElement.height)), 1024, 4096);
+  sun.shadow.normalBias = .04 * 4096 / shadowSize;
+  if (sun.shadow.mapSize.x !== shadowSize) {
+    sun.shadow.mapSize.set(shadowSize, shadowSize);
+    sun.shadow.map?.dispose();
+    sun.shadow.map = null;
+    sun.shadow.needsUpdate = true;
+  }
 }
 addEventListener("resize", resize);
 resize();
@@ -2079,6 +2090,16 @@ let previous = performance.now(),
   accumulator = 0,
   latestMessage = s.log[0];
 let previousMotion = captureMotion(s);
+// Paused scenes are stable. Keep UI/camera work responsive without resubmitting
+// the same terrain, shadows and buildings until an interaction changes the view.
+let renderUntil = 0, lastVisualTime = s.time;
+const requestSceneRender = () => { renderUntil = performance.now() + 300; };
+for (const event of ['pointermove','pointerdown','pointerup','wheel','keydown','keyup','resize'])
+  addEventListener(event, requestSceneRender, {passive:true});
+renderer.domElement.addEventListener('webglcontextrestored', requestSceneRender);
+addEventListener('pageshow', requestSceneRender);
+document.addEventListener('visibilitychange', requestSceneRender);
+requestSceneRender();
 function frame(now) {
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
@@ -2090,6 +2111,17 @@ function frame(now) {
   }
   diagnostics.observe(s);
   updateSpeedButton();
+  navigation.update(dt);
+  const cameraChanged = controls.update();
+  if (paused && !s.rain && !cameraChanged && now >= renderUntil) {
+    // The interface and autosave remain live; unchanged scene transforms do not
+    // need rebuilding while the player reads or plans in a paused village.
+    if (now - lastUI > 450) { renderUI(); lastUI = now; }
+    if (!document.hidden && now - lastSave > 3000) { persist(); lastSave = now; }
+    recordPerformance(now, lastVisualTime, false);
+    requestAnimationFrame(frame);
+    return;
+  }
   wildlife.update(!paused && !document.hidden ? dt : 0);
   capybaras.update(!paused && !document.hidden ? dt : 0);
   const visual = interpolateMotion(previousMotion, s, accumulator / 0.1);
@@ -2349,8 +2381,6 @@ function frame(now) {
     persist();
     lastSave = now;
   }
-  navigation.update(dt);
-  controls.update();
   fitTerrainCamera(camera, controls.target, scene.fog);
   // Keep the shadow volume over the viewed land, not the world origin.
   // Moving light and target together preserves the time-of-day sun direction.
@@ -2364,8 +2394,10 @@ function frame(now) {
   updateUtilityLighting();
   lenses.update(now);
   accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
-  renderer.render(scene, camera);
-  recordPerformance(now, visual.time);
+  const rendered = !paused || s.rain || cameraChanged || now < renderUntil;
+  if (rendered) renderer.render(scene, camera);
+  lastVisualTime = visual.time;
+  recordPerformance(now, visual.time, rendered);
   requestAnimationFrame(frame);
 }
 const lenses = installLenses({state:()=>s,camera,world,focus,inspect:id=>{setPanel(null);selected=id;renderUI();}});
