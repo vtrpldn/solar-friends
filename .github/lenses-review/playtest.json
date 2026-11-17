@@ -57,7 +57,7 @@
     }
   ],
   "remaining_observations": [
-    "The seeded simulation at 4x caused browser input timeouts. Normal 1x running and paused interactions worked. The cause was not isolated; no high-speed performance claim is made.",
+    "Follow-up isolated severe stalls to construction pathfinding: queued Gathering place, lenses off, 4x averaged 2.7 fps; 94% of the sampled profile was inside workSpot searches. See performance.json. No simulation fix applied.",
     "This is a targeted lens playtest, not a full-game endurance test."
   ],
   "checks": [
