@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import {PROJECTS,createWeekend,save,restore} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,createWeekend,chooseCamp,requiredLoads,save,restore} from '../web/v02/weekend/simulation.js';
 import {migrateConstructionLabor,constructionSpecText} from '../web/v02/weekend/construction-specs.js';
 for(const [key,d]of Object.entries(PROJECTS)){
  if(!d.construction)continue;
@@ -17,14 +16,18 @@ for(const [key,d]of Object.entries(PROJECTS)){
  const snapshot=JSON.stringify(state);assert(migrateConstructionLabor(state,PROJECTS));assert.equal(JSON.stringify(state),snapshot);
  assert(!migrateConstructionLabor({projects:[{key,work:old+1}]},PROJECTS),'reject corrupt old progress, do not clamp');
 }
-assert(PROJECTS['home-shared'].work>PROJECTS['home-family'].work);
+assert(PROJECTS['home-shared'].work>PROJECTS['adobe-gable'].work);
 assert(PROJECTS['home-family'].work>PROJECTS.house.work);
 assert.equal(PROJECTS.shelter.work,1067,'keep first-camp recipe pacing');
-const raw=JSON.parse(fs.readFileSync('docs/playtests/evidence/2026-11-08-regular-catalog-day61-save.json','utf8'));
-const cash=raw.money,inventory=JSON.stringify({...raw.materials,cooling:0}),delivered=raw.projects.map(p=>p.delivered);
-const loaded=restore(JSON.stringify(raw));assert(loaded,'genuine historical save migrates');
-assert.equal(loaded.money,cash);assert.equal(JSON.stringify(loaded.materials),inventory);assert.deepEqual(loaded.projects.map(p=>p.delivered),delivered);
-for(const p of raw.projects){const def=PROJECTS[p.key],converted=loaded.projects.find(x=>x.id===p.id);if(p.work===(def.construction?.legacyWork??def.work))assert.equal(converted.work,def.work,`${p.key} stays complete`);}
+// Labor migration preserves a save using the current physical catalog. The
+// archived miniature-building replay predates the explicitly replaced catalog.
+const old=createWeekend(42);chooseCamp(old,'entrance');
+old.projects.push({id:old.nextId++,key:'house',x:50,z:50,work:PROJECTS.house.construction.legacyWork,delivered:requiredLoads('house')});
+delete old.constructionLaborVersion;
+const cash=old.money,inventory=structuredClone(old.materials),delivered=old.projects.map(p=>p.delivered);
+const loaded=restore(save(old));assert(loaded,'labor migration accepts a valid current-catalog layout');
+assert.equal(loaded.money,cash);assert.deepEqual(loaded.materials,inventory);assert.deepEqual(loaded.projects.map(p=>p.delivered),delivered);
+assert.equal(loaded.projects[0].work,PROJECTS.house.work,'completed house stays complete');
 assert(restore(save(loaded)),'converted save round trips');
 const fresh=createWeekend(42);assert.equal(fresh.constructionLaborVersion,1);assert(restore(save(fresh)));
 fresh.constructionLaborVersion=99;assert.equal(restore(save(fresh)),null,'unknown schema rejected');
