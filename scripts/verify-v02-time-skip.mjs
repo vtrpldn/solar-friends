@@ -1,13 +1,31 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,tick,save,restore,plan,placementError,finished,enableFastNavigation} from '../web/v02/weekend/simulation.js';
 import {DAY} from '../web/v02/weekend/weather.js';
 import {skipDays} from '../web/v02/weekend/time-skip.js';
 const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);return s;};
 for (const days of [1,2]) {
   const natural=fresh(), skipped=fresh(), start=skipped.time;
+  if (days === 1) {
+    for (const state of [natural, skipped]) {
+      let placed = false;
+      for (let z = state.stock.z - 8; !placed && z <= state.stock.z + 8; z++) {
+        for (let x = state.stock.x - 8; x <= state.stock.x + 8; x++) {
+          if (placementError(state, 'gathering', x, z)) continue;
+          assert.equal(plan(state, 'gathering', x, z), '');
+          placed = true;
+          break;
+        }
+      }
+      assert(placed);
+    }
+  }
   for(let i=0;i<days*DAY/.1;i++)tick(natural,.1);
   let yields=0;
   await skipDays(skipped,days,{yieldControl:async()=>{yields++;}});
+  if (days === 1) {
+    assert(finished(skipped, 'gathering'), 'residents finish the queued gathering site during the skip');
+    assert(skipped.people.some(r => r.work > 0));
+  }
   assert.deepEqual(save(skipped),save(natural),'all persisted consequences match natural fixed-step play');
   assert(Math.abs(skipped.time-start-days*DAY)<1e-6);
   assert(yields>1,'long skips yield for UI updates');

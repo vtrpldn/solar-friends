@@ -222,6 +222,50 @@ export function useWater(s, node, amount, irrigation = false) {
   }
   return true;
 }
+const powerPriority = {
+  "water-pump": 0, river: 0, well: 0, camp: 0, eco_toilet: 1,
+  home: 2, streetlight: 3, kitchen: 4, workshop: 5,
+};
+// Charge and demand change every tick. Component membership and service order
+// only change when a node or an active power connection changes.
+const powerNetworks = new WeakMap();
+function powerComponents(sys, nodes) {
+  const cached = powerNetworks.get(sys);
+  const powerLinks = sys.links.filter(l => l.kind === 'power' && l.enabled && l.work >= l.required);
+  if (cached && nodes.length === cached.nodes.length && powerLinks.length === cached.links.length &&
+      nodes.every((n,i) => n === cached.nodes[i] && n.id === cached.ids[i] && n.kind === cached.kinds[i]) &&
+      powerLinks.every((l,i) => l.from === cached.links[i].from && l.to === cached.links[i].to)) {
+    return cached.components;
+  }
+  const components = [], visited = new Set();
+  const powerPeers=new Map();
+  for(const l of powerLinks){
+    if(!powerPeers.has(l.from))powerPeers.set(l.from,[]);
+    if(!powerPeers.has(l.to))powerPeers.set(l.to,[]);
+    powerPeers.get(l.from).push(l.to);powerPeers.get(l.to).push(l.from);
+  }
+  for (const root of nodes) {
+    if (visited.has(root.id)) continue;
+    const component = [root];
+    visited.add(root.id);
+    for (let i = 0; i < component.length; i++) {
+      const n = component[i];
+      for (const peer of powerPeers.get(n.id)||[]) {
+        if (!visited.has(peer) && sys.nodes[peer]) {
+          visited.add(peer);
+          component.push(sys.nodes[peer]);
+        }
+      }
+    }
+    const demandOrder = component.length === 1 ? component : [...component].sort(
+      (a,b) => (powerPriority[a.kind] ?? 6) - (powerPriority[b.kind] ?? 6) || a.id - b.id,
+    );
+    components.push({component, demandOrder});
+  }
+  powerNetworks.set(sys, {nodes, ids: nodes.map(n => n.id), kinds: nodes.map(n => n.kind),
+    links: powerLinks.map(l => ({from:l.from, to:l.to})), components});
+  return components;
+}
 export function infrastructureStep(s, defs, dt) {
   const sys = syncInfrastructure(s, defs),
     hours = (dt * 0.45) / 60;
@@ -231,30 +275,8 @@ export function infrastructureStep(s, defs, dt) {
   );
   hydrologyStep(s,dt);
   sys.grid.importing = 0;
-  const nodes = Object.values(sys.nodes),
-    visited = new Set();
-  const powerPeers=new Map();
-  for(const l of sys.links){
-    if(l.kind!=='power'||!l.enabled||l.work<l.required)continue;
-    if(!powerPeers.has(l.from))powerPeers.set(l.from,[]);
-    if(!powerPeers.has(l.to))powerPeers.set(l.to,[]);
-    powerPeers.get(l.from).push(l.to);powerPeers.get(l.to).push(l.from);
-  }
-  for (const root of nodes) {
-    if (visited.has(root.id)) continue;
-    const component = [],
-      queue = [root];
-    visited.add(root.id);
-    for (let i = 0; i < queue.length; i++) {
-      const n = queue[i];
-      component.push(n);
-      for (const peer of powerPeers.get(n.id)||[]) {
-        if (!visited.has(peer) && sys.nodes[peer]) {
-          visited.add(peer);
-          queue.push(sys.nodes[peer]);
-        }
-      }
-    }
+  const nodes = Object.values(sys.nodes);
+  for (const {component, demandOrder} of powerComponents(sys, nodes)) {
     let generation = 0,
       stored = 0,
       capacity = 0,
@@ -285,21 +307,6 @@ export function infrastructureStep(s, defs, dt) {
     let remainder = stored + generated,
       used = 0;
     // Keep water services running before workshop equipment when supply is tight.
-    const priority = {
-      "water-pump": 0,
-      river: 0,
-      well: 0,
-      camp: 0,
-      eco_toilet: 1,
-      home: 2,
-      streetlight: 3,
-      kitchen: 4,
-      workshop: 5,
-    };
-    const demandOrder = [...component].sort(
-      (a, b) =>
-        (priority[a.kind] ?? 6) - (priority[b.kind] ?? 6) || a.id - b.id,
-    );
     for (const n of demandOrder) {
       const need = n.demand * hours;
       const shortfall = Math.max(0, need - remainder);
