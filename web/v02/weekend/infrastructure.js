@@ -84,6 +84,8 @@ export function ensureInfrastructure(s) {
     enabled: true,
     power: 0,
   };
+  sys.nodes[0].maintainFresh ??= true;
+  sys.nodes[0].maintainSanitation ??= true;
   sys.nodes[-1] ??= {
     id: -1,
     kind: "river",
@@ -122,6 +124,8 @@ export function syncInfrastructure(s, defs) {
       power: 0,
     };
     const node=sys.nodes[p.id];
+    if(["water-storage","well"].includes(kind))node.maintainFresh ??= true;
+    if(node.capacity[3]>0)node.maintainSanitation ??= true;
     node.serviceFactor=serviceFactor(p);
     if(kind!=='home'){
       node.battery=battery;

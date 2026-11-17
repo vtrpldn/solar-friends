@@ -1,6 +1,6 @@
 # Documentation index
 
-Updated 2026-11-16.
+Updated 2026-11-17.
 
 ## Why
 
@@ -18,7 +18,11 @@ Separate current gameplay and operational guidance from historical plans and dat
 
 ## Active plans
 
-- [Realistic v2 economy](realistic-economy-plan.md): phased accounting, construction, physical trade, farming, utilities, upkeep and balance work. Proposed; not yet implemented.
+- [Realistic v2 economy](realistic-economy-plan.md): phased accounting, construction, physical trade, farming, utilities, upkeep and balance work. Core implementation is present locally; the checkpoint distinguishes completed mechanics from ongoing release validation.
+
+- [Calibration and price provenance](economy-calibration.md)
+- [Full parameter register](economy-parameter-register.json)
+- [Material accounting](material-accounting.md), [biological cycles](economy-biology.md) and [logistics/care](economy-logistics-and-care.md)
 
 ## Recent evidence
 

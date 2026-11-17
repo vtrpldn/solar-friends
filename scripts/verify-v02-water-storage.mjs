@@ -17,3 +17,7 @@ tank.kind='well';tank.water=[50,12,0,0];tank.capacity=[75,60,0,0];
 syncInfrastructure(s,PROJECTS);
 assert.equal(tank.kind,'water-storage');assert.deepEqual(tank.water,[50,12,0,0]);assert.deepEqual(tank.capacity,[250,250,0,0]);
 console.log('PASS distinct storage capacity, no tank power service, passive delivery, rain collection and powered treatment gating');
+assert.equal(sys.nodes[0].maintainFresh,true);assert.equal(tank.maintainFresh,true);assert.equal(sys.nodes[0].maintainSanitation,true);
+tank.maintainFresh=false;sys.nodes[0].maintainSanitation=false;syncInfrastructure(s,PROJECTS);
+assert.equal(tank.maintainFresh,false);assert.equal(sys.nodes[0].maintainSanitation,false);
+console.log('PASS autonomous essential water defaults preserve explicit opt-outs');

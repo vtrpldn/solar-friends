@@ -64,4 +64,4 @@ Netlify deploys `main` through the GitHub integration using `netlify.toml`. A pu
 
 ## Documentation
 
-Start with the [documentation index](docs/README.md). The [realistic economy plan](docs/realistic-economy-plan.md) describes proposed next work, not shipped mechanics. The [v1 reference](V1.md), root plans, and dated audits preserve earlier decisions and evidence; they are not the current v2 specification. Prices, timings and production yields are game-balance assumptions, not real-world engineering guidance.
+Start with the [documentation index](docs/README.md). The [realistic economy plan](docs/realistic-economy-plan.md) tracks the implemented local economy changes and their remaining validation gates; consult its checkpoint before treating a proposal as shipped. The [v1 reference](V1.md), root plans, and dated audits preserve earlier decisions and evidence; they are not the current v2 specification. The calibration register distinguishes researched price references from engineering and gameplay assumptions; these are not real-world construction or agricultural instructions.

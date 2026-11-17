@@ -1115,6 +1115,16 @@ $("sandbox-instant").onclick = () => {
 $("restart").onclick = askReset;
 $("keep").onclick = () => $("reset-dialog").close();
 $("confirm-reset").onclick = () => {
+  // Keep the old named village intact; a new world must not autosave into it.
+  try {
+    const slots=saveSlots(localStorage),mode=s.mode||'story';
+    slots.autosave(mode,save(s),activeSaveSlot);
+    slots.detach(mode);
+    activeSaveSlot=null;
+  } catch {
+    message('Could not preserve the current save. Free some storage before starting again.');
+    return;
+  }
   // pagehide also saves: replace live state before navigating so it cannot resurrect the old camp.
   const seed = freshLandSeed();
   s = s.mode === "sandbox" ? createSandbox(seed) : createWeekend(seed);

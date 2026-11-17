@@ -40,7 +40,7 @@ const intros = {
   resources:
     "Keep the essentials close, turn local materials into something useful, and plan the next trip to town.",
   water:
-    "Enable Maintain drinking reserve to let residents collect and purify water as needed. Wells and rain barrels are manual sources; a placed powered pump supplies pipes. Untreated water stays separate.",
+    "Residents maintain drinking reserves and sanitation by default; you can switch either routine off. Wells and rain barrels are manual sources; a placed powered pump supplies pipes. Untreated water stays separate.",
   power:
     "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically.",
 };
