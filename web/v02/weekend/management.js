@@ -46,7 +46,7 @@ const titles = {
   power: "Power",
 };
 const intros = {
-  crafting: "Plan work around the skills of your residents, real materials, and equipped workspaces. Jobs take time and pause for rest, needs, or unavailable tools.",
+  crafting: "Make useful things, care for shared tools, and follow work around the village.",
   items: "Keep track of shared equipment and buy items from town. Open Crafting for resident-made items and repairs.",
   finances: "See what comes in, what goes out, and what keeps the village running. Click Savings at any time to return here.",
   resources:

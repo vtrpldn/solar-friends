@@ -88,3 +88,47 @@
 #management .crafting-skills { margin-bottom: 16px; border-bottom: 1px solid #d8ccaa; }
 #management .crafting-skills summary { cursor: pointer; padding: 8px 0 14px; font-size: 12px; font-weight: 700; }
 #management .crafting-skills > p { font-size: 12px; line-height: 1.6; }
+
+/* Crafting reads like a workshop journal: an index and one open entry. */
+#management[data-screen="crafting"] .management-main { overflow: hidden; padding: 0; min-height: 0; }
+#crafting-screen:not([hidden]) { height: 100%; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px; }
+#management .craft-tabs { display: flex; gap: 6px; border-bottom: 1px solid #d8ccaa; padding-bottom: 10px; }
+#management .craft-tabs button { background: transparent; box-shadow: none; border: 1px solid transparent; padding: 8px 18px; border-radius: 7px; font-size: 13px; }
+#management .craft-tabs button[aria-pressed="true"] { background: #40563e; color: #fff7df; }
+.craft-layout { display: grid; grid-template-columns: minmax(190px, .7fr) minmax(0, 1.3fr); min-height: 0; gap: 20px; }
+.craft-list, .craft-detail-body { overflow: auto; min-height: 0; scrollbar-width: thin; scrollbar-gutter: stable; }
+#management .craft-entry { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; border: 1px solid transparent; border-bottom-color: #d8ccaa; background: transparent; border-radius: 6px; box-shadow: none; padding: 12px 8px; margin: 0 0 4px; }
+#management .craft-entry[aria-pressed="true"] { background: #e6ead7; border-color: #8c9b72; }
+.craft-entry strong, .craft-entry small { display: block; }
+.craft-entry strong { font-size: 13px; line-height: 1.4; }
+.craft-entry small { font-size: 11px; font-weight: normal; margin-top: 4px; color: #665c46; }
+.craft-art { width: 62px; height: 48px; object-fit: contain; flex-shrink: 0; }
+.craft-detail { min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; border: 1px solid #d8ccaa; border-radius: 10px; background: #fbf3de; overflow: hidden; }
+.craft-detail-body { padding: 20px; }
+.craft-detail-heading { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
+.craft-detail-heading .craft-art { width: 82px; height: 66px; }
+#management .craft-detail h3 { margin: 3px 0 5px; font-size: 22px; }
+#management .craft-detail h4 { font-size: 13px; margin: 16px 0 8px; }
+#management .craft-detail p { font-size: 12px; line-height: 1.55; margin: 8px 0; }
+#management .craft-detail-heading p { margin: 0; }
+.craft-eyebrow { font-size: 9px; letter-spacing: 1.1px; color: #66664c; }
+.craft-materials { display: grid; grid-template-columns: 1fr auto; gap: 6px 14px; font-size: 12px; margin: 8px 0 16px; }
+.craft-materials dd { margin: 0; font-variant-numeric: tabular-nums; }
+.craft-shortage { color: #8d3d28; font-weight: 600; }
+.craft-workspace { display: block; font-size: 12px; font-weight: 600; margin: 12px 0; }
+.craft-workspace select { display: block; width: 100%; margin-top: 6px; font-size: 12px; padding: 8px; }
+.craft-note { color: #665c46; font-size: 11px; line-height: 1.5; }
+.craft-method { margin-top: 16px; padding-top: 12px; border-top: 1px solid #d8ccaa; font-size: 12px; line-height: 1.6; }
+.craft-method summary { cursor: pointer; font-weight: 600; }
+.craft-method ol { padding-left: 20px; }
+.craft-action { padding: 12px 20px; border-top: 1px solid #d8ccaa; background: #f3ecd5; }
+#management .craft-action p { margin: 0 0 8px; }
+#management .craft-action button { width: 100%; margin: 0 0 6px; padding: 10px 14px; font-size: 13px; }
+.craft-action small { display: block; }
+.craft-detail progress { width: 100%; accent-color: #40563e; }
+.craft-message { font-size: 12px; margin: 0; line-height: 1.5; }
+.craft-message:empty { display: none; }
+#management .craft-detail :is(select, summary):focus-visible { outline: 3px solid #537d78; outline-offset: 3px; }
+#management[data-screen="crafting"] .management-stats { display: none; }
+#management[data-screen="crafting"] .management-layout { grid-row: 3 / 5; }
+#management .craft-entry small, #management .craft-action small { letter-spacing: 0; font-weight: normal; }
