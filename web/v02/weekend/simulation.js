@@ -346,6 +346,7 @@ export function productionBlocker(s, site, recipe) {
     PROJECTS[p.key].kind !== def.kind
   )
     return "Choose a completed compatible building.";
+  if(def.craft && s.infrastructure.nodes[p.id]?.enabled === false)return 'Workspace is switched off. Switch it on to start work.';
   if(recipe==='cold_storage'&&p.coldStorage)return 'Cold storage is already installed.';
   if(p.cultivation&&['baby_greens','vegetables','greenhouse'].includes(recipe))return 'Use the cultivation beds to plant crops.';
   const craftError=craftingBlocker(s,def);
