@@ -1376,9 +1376,9 @@ function supply(id) {
     for (let i = 0; i < 5; i++)
       foliage(
         g,
-        Math.sin(i) * 0.65,
+        Math.sin(i) * 0.62,
         0.31 + (i % 2) * 0.18,
-        Math.cos(i) * 0.6,
+        Math.cos(i) * 0.55,
         0.5,
         "#a4a38f",
         [1, 0.7, 1],
