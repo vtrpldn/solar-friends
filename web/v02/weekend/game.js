@@ -1,3 +1,4 @@
+import {supplierError} from './supplier-stock.js';
 import {buyerQuote} from './local-market.js';
 import {activeTrips} from "./trip-state.js";
 import {setOutsideWork,outsideWorkText} from "./outside-work.js";
@@ -924,6 +925,7 @@ $("world").addEventListener("pointerup", (e) => {
       return;
     }
     chooseCamp(s, { x, z });
+    message("Camp is ready. Choose what your community needs first.");
     ghost.visible = false;
     focus(campLocation(s));
     persist();
@@ -1114,7 +1116,8 @@ $("restart").onclick = askReset;
 $("keep").onclick = () => $("reset-dialog").close();
 $("confirm-reset").onclick = () => {
   // pagehide also saves: replace live state before navigating so it cannot resurrect the old camp.
-  s = s.mode === "sandbox" ? createSandbox() : createWeekend();
+  const seed = freshLandSeed();
+  s = s.mode === "sandbox" ? createSandbox(seed) : createWeekend(seed);
   persist();
   location.reload();
 };
@@ -1641,8 +1644,9 @@ function renderUI() {
   const purchase = MATERIALS[$("purchase").value];
   $("town").textContent =
     `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · R$${(purchase.price + transportCost(s)).toFixed(2)} incl. transport`;
+  $("town").title=supplierError(s,{[$("purchase").value]:purchase.quantity},MATERIALS);
   $("town").disabled =
-    (s.deliveryOnly?!!s.delivery:(!!s.trip&&!!s.secondTrip)) || spendableMoney(s) < purchase.price + transportCost(s) || s.stage !== "playing";
+    !!$("town").title ||     (s.deliveryOnly?!!s.delivery:(!!s.trip&&!!s.secondTrip)) || spendableMoney(s) < purchase.price + transportCost(s) || s.stage !== "playing";
   $("inventory").textContent = Object.keys(MATERIALS)
     .map((id) => materialText(id, materialCount(s, id)))
     .join(" · ");

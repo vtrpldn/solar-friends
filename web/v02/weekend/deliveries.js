@@ -1,3 +1,4 @@
+import {reserveSupplier,purchaseCategory} from './supplier-stock.js';
 import {blueprintManifest,fitsCargo,receiveBlueprintShipment,transportCost} from './physical-trade.js';
 import {uncollectedProjects} from './trip-state.js';
 import {transact} from './finances.js';
@@ -11,7 +12,8 @@ export function orderDelivery(s,id,project,materials,stored,capacity){
  if(!item?.quantity||(project&&!shipments.length)||(!project&&(!fitsCargo({[id]:item.quantity},DELIVERY_LIMITS)||stored+item.quantity>capacity)))return false;
  const fare=transportCost({...s,deliveryOnly:true}),cost=project?0:item.price;
  if((project?s.money:spendableMoney(s))<fare+cost)return false;
- if(cost)transact(s,-cost,'purchases',`Supplier delivery: ${item.name}`);
+ if(!project&&!reserveSupplier(s,{[id]:item.quantity},materials))return false;
+ if(cost)transact(s,-cost,purchaseCategory(id),`Supplier delivery: ${item.name}`);
  transact(s,-fare,'transport','Supplier delivery freight');
  const duration=(360+tripEstimate(s.worldSettings?.town).minutes)/.45;
  s.delivery={material:id,quantity:project?0:item.quantity,left:duration,duration,...(shipments?{shipments}:{})};

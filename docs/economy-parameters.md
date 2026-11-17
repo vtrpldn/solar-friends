@@ -81,3 +81,12 @@ New villages keep R$100 aside when quoting blueprint auto-buy. Finances exposes 
 - Battery charging retains 90% of incoming surplus. Conversion losses are separately counted; existing stored energy is not discounted each tick. Discharge is represented by usable capacity, without another loss multiplier.
 - A passive tank has separate 250 L clean / 250 L untreated compartments; a cistern has 1,000 L of each. Their sum is total modeled volume. The river pump moves up to 600 L/hour at 0.18 kW while active; pipe/storage capacity and groundwater recharge can limit actual delivery. These are engineering assumptions, not certified equipment curves. Existing water quantities remain unchanged when capacity increases.
 - Pumps need replacement after 10 years, roofs after 20, panels after 25. Replacement consumes actual equipment/roof materials and 13.5 resident-hours, within the same daily materials allowance. Battery replacement remains at eight years. Lifetime assumptions do not promise real-world warranties.
+
+
+## Supplier and unit boundary, 17 November
+
+Supplier allocations are finite daily contracts, reserved atomically when an order is paid. Collection never purchases the same allocation again; paid orders remain collectable after the day changes. Bulk suppliers offer 128 retail batches per material per day, food 16, farm supplies 8, panels/batteries 4 and other equipment 16. These are authored local contracts, not surveyed wholesaler inventories. Household food purchases have their own finance category.
+
+Bulk quantities are now displayed and edited in kilograms, milk in liters and equipment in counts. `physicalInventory` exposes the same units for every ownership location. Existing fixed-pack save quantities and paid bills retain their original encoding behind an explicit conversion boundary; this is not a claim that the serialized stock schema has been converted to kilograms. Controls round down to whole physical packs and disclose the resulting target. Separately installed solar/cooling equipment and paid maintenance parts remain counted as owned assets.
+
+Ordinary browser play found that the in-game restart used legacy seed zero, omitting natural deposits. Restart now generates a fresh seed for both story and sandbox. The world-settings regression checks both modes, resources and save restoration.

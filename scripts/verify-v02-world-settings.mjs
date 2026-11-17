@@ -14,3 +14,18 @@ const rich=applySettings(createWeekend(56),{...DEFAULT_SETTINGS,savings:'comfort
 registerWorld(777,{...DEFAULT_SETTINGS,landscape:'gentle',resources:'sparse'});const low=elevationVertex(80,50,777),sparse=resourceRichness(777,40,40);
 registerWorld(777,{...DEFAULT_SETTINGS,landscape:'rugged',resources:'rich'});assert(elevationVertex(80,50,777)>low);assert(resourceRichness(777,40,40)>sparse);
 console.log('PASS: all biome/preset combinations persist; savings/supplies, terrain, resource richness and configured trips');
+
+// The player-facing restart must not select the legacy seed-zero demonstration map.
+const {readFileSync}=await import('node:fs');
+const gameSource=readFileSync(new URL('../web/v02/weekend/game.js',import.meta.url),'utf8');
+assert.match(gameSource,/const seed = freshLandSeed\(\);\s*s = s.mode === "sandbox" \? createSandbox\(seed\) : createWeekend\(seed\)/);
+const {freshLandSeed}=await import('../web/v02/weekend/land-layout.js');
+const {ensureNaturalLand}=await import('../web/v02/weekend/natural-resources.js');
+const {PROJECTS,createSandbox}=await import('../web/v02/weekend/simulation.js');
+for(const create of [createWeekend,createSandbox]){
+ const village=create(freshLandSeed());ensureNaturalLand(village,PROJECTS);
+ assert(village.landSeed>0);assert(village.projects.some(p=>p.key==='supply-2'));assert(village.projects.some(p=>p.key==='supply-3'));
+ assert(village.projects.some(p=>p.key.startsWith('wild-')));
+ assert(restore(save(village)));
+}
+console.log('PASS story/sandbox restart seeds retain natural resources and survive reload');

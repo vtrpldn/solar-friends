@@ -1,3 +1,5 @@
+import {quantityText} from './material-measures.js';
+import {supplierError,reserveSupplier,validSuppliers,purchaseCategory} from './supplier-stock.js';
 import {validMaterialLedger} from './material-ledger.js';
 import {productionLoad,validProductionHauling} from './production-hauling.js';
 import {projectMaterials,captureProjectMaterials} from './project-materials.js';
@@ -734,7 +736,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   return true;
 }
 export function materialText(id, n) {
-  return `${n} ${n === 1 ? MATERIALS[id].name.replace(/ies$/, "y").replace(/s$/, "") : MATERIALS[id].name}`;
+  return `${quantityText(id,n)} ${MATERIALS[id].name.replace(/ pieces| packs| bundles/g, "")}`;
 }
 export function recipeText(key) {
   return Object.entries(PROJECTS[key].materials)
@@ -762,6 +764,8 @@ export function blueprintPurchase(s, key, count = 1) {
     items[id] = missing;
     cost += missing * item.price / item.quantity;
   }
+  const supplierIssue=supplierError(s,items,MATERIALS);
+  if(supplierIssue)return {items,cost,transport:0,error:supplierIssue};
   cost = Math.ceil(cost * 100) / 100;
   const budget=collectionBudget(s,items), transport=budget.cost, reserve=s.expansionReserve??0;
   return {items, cost, transport, error: cost > 0 && cost + transport + reserve > s.money ? `Missing materials cost R$${cost.toFixed(2)} plus R$${transport.toFixed(2)} committed to ${budget.trips} collection trips, while keeping R$${reserve.toFixed(2)} for essentials; shared savings are too low.` : ""};
@@ -1087,6 +1091,7 @@ export function plan(s, key, x, z, rotation = 0) {
   if (error) return error;
   const purchase = blueprintPurchase(s, key);
   if (purchase.error) return purchase.error;
+  if(!reserveSupplier(s,purchase.items,MATERIALS))return supplierError(s,purchase.items,MATERIALS);
   for (const r of s.people)
     if (
       [
@@ -1226,7 +1231,8 @@ function startSupplyRun(s, material = "wood", project = null, saleOnly = false) 
     .sort((a, b) => b.energy - a.energy)
     .find(r => route(s, r, carDoor(vehicle)));
   if (!r) return false;
-  if (!project && !saleOnly) transact(s,-item.price,"purchases",`Bought ${item.quantity} ${item.name}`);
+  if(!project&&!saleOnly&&!reserveSupplier(s,{[material]:item.quantity},MATERIALS))return false;
+  if (!project && !saleOnly) transact(s,-item.price,purchaseCategory(material),`Bought ${item.quantity} ${item.name}`);
   transact(s,-fare,"transport","Town trip fuel");
   recordVehicleDistance(s,vehicle,tripEstimate(s.worldSettings?.town).km);
   s.nextTripVehicle = 1 - vehicle;
@@ -2621,7 +2627,7 @@ export function restore(text) {
     if(s.expansionReserve!==undefined&&(!Number.isFinite(s.expansionReserve)||s.expansionReserve<0||s.expansionReserve>100000))return null;
     if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
-    if (!validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(

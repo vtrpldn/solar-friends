@@ -1,3 +1,4 @@
+import {createWeekend,PROJECTS,PROCESSES,MATERIALS} from '../web/v02/weekend/simulation.js';
 import assert from 'node:assert/strict';
 import {inventoryOwnership} from '../web/v02/weekend/economy-inventory.js';
 const materials={wood:{price:10,quantity:1},stone:{price:2,quantity:1}};
@@ -7,3 +8,7 @@ let a=inventoryOwnership(s,projects,{},materials);assert.equal(a.rows.wood.reser
 s.projects[0].work=100;a=inventoryOwnership(s,projects,{},materials);assert.equal(a.rows.wood.installed,10);assert.equal(a.rows.wood.reserved,3);
 s.trade.orders[0].status='loaded';a=inventoryOwnership(s,projects,{},materials);assert.equal(a.rows.wood.transit,3);assert.equal(a.rows.wood.reserved,0);
 assert.equal(a.values.installed,100);console.log('PASS project ownership, no manifest duplication, individual car purchases, export reservations and replacement values');
+const upgrades=createWeekend(44);upgrades.projects.push({id:upgrades.nextId++,key:'house',work:PROJECTS.house.work,solarUpgrade:true,coldStorage:false});
+const installed=inventoryOwnership(upgrades,PROJECTS,PROCESSES,MATERIALS).rows;
+assert.equal(installed.panels.installed,PROCESSES.solar_upgrade.input.panels+(PROJECTS.house.materials.panels||0));assert.equal(installed.batteries.installed,1);
+console.log('PASS separately installed utilities remain owned assets');
