@@ -2,7 +2,7 @@ import {recordMaterial} from './material-ledger.js';
 import {materialMass} from './material-measures.js';
 import {activeTrips} from "./trip-state.js";
 // Authored game shelf lives, not food-safety guidance. One day is 3200 sim seconds.
-export const FOOD_DAYS={food:3,meals:2,eggs:7,milk:1};
+export const FOOD_DAYS={greens:3,beans:5,corn:3,food:3,meals:2,eggs:7,milk:1};
 const day=3200;
 export function freshLots(s,id,n,recipe){const duration=recipe?.preservedDays?.[id]||FOOD_DAYS[id];return duration&&n>0?[{n,expires:s.time+duration*day,...(recipe?.preservedDays?.[id]?{preserved:true}:{})}]:[];}
 export function refreshSandboxFood(s){
@@ -10,6 +10,7 @@ export function refreshSandboxFood(s){
 }
 export function ensureFoodStorage(s){
  if(!s.foodStorage)s.foodStorage={version:1,lots:Object.fromEntries(Object.keys(FOOD_DAYS).map(id=>[id,freshLots(s,id,s.materials[id]||0)])),spoiled:{}};
+ for(const id of Object.keys(FOOD_DAYS))s.foodStorage.lots[id]??=freshLots(s,id,s.materials[id]||0);
  return s.foodStorage;
 }
 function merge(lots){

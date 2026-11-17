@@ -51,7 +51,7 @@ export function useEquipment(s,r,item,task,dt,total=0) {
 }
 export function productionEquipment(recipe) {
   if(recipe.equipmentRepair)return null;
-  if(['garden','greenhouse','compost'].includes(recipe.kind))return 'garden-tools';
+  if(['garden','greenhouse','compost','cultivation'].includes(recipe.kind))return 'garden-tools';
   if(['orchard','grove'].includes(recipe.kind))return 'harvest-basket';
   if(recipe.kind==='supply-5' && !recipe.output['harvest-basket'])return 'carpentry-tools';
   return null;

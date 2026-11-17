@@ -1,3 +1,4 @@
+import {CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
 import {quantityText} from './material-measures.js';
 import {supplierError,reserveSupplier,validSuppliers,purchaseCategory} from './supplier-stock.js';
 import {validMaterialLedger} from './material-ledger.js';
@@ -139,6 +140,7 @@ export const PROJECTS = {
 expandMaterials(MATERIALS);
 expandProjects(PROJECTS);
 registerNaturalProjects(PROJECTS);
+PROJECTS.field={name:'Cultivated field',asset:'garden',kind:'garden',size:[2,2],materials:{},work:1,repeatable:true,description:'Cultivate ground in beds with working aisles. Each bed requires resident preparation and planting.'};
 Object.assign(PROJECTS, OPENING_PROJECTS);
 PROJECTS.well.materials={...PROJECTS.well.materials,tank:4};
 applyConstructionSpecs(PROJECTS);
@@ -148,7 +150,7 @@ PROJECTS.solar_farm.legacyMaterials={...PROJECTS.solar_farm.materials};
 PROJECTS.solar_farm.materials={...PROJECTS.solar_farm.materials,panels:6};
 export { PROCESSES };
 export function footprint(p) {
-  const [w, d] = !p.natural && ['supply-2','supply-3'].includes(p.key) ? [1,1] : unrotatedSiteSize(p, PROJECTS[p.key].size);
+  const [w, d] = p.key==='field' ? (p.fieldSize||[2,2]) : !p.natural && ['supply-2','supply-3'].includes(p.key) ? [1,1] : unrotatedSiteSize(p, PROJECTS[p.key].size);
   return (p.rotation || 0) % 2 ? [d, w] : [w, d];
 }
 function shelteredFrontCell(p, x, z) {
@@ -277,6 +279,49 @@ export function committedMaterials(s) {
   for(const o of s.operations||[])if(!o.done&&!o.water)add(o.input||PROCESSES[o.recipe]?.input);
   return totals;
 }
+export function configureBed(s,site,id,settings) {
+  const p=s.projects.find(p=>p.id===site),b=p&&ensureCultivation(s,p)?.beds[id];
+  if(!b)return 'Choose a cultivation bed.';
+  if((s.operations||[]).some(o=>!o.done&&o.site===site&&o.farm?.bed===id))return 'Wait for this bed’s current job to finish.';
+  if((settings.crop!==undefined||settings.density!==undefined)&&!['unprepared','prepared','harvested'].includes(b.stage))return 'Clear the standing crop before changing planting settings.';
+  if(settings.crop!==undefined&&!CROPS[settings.crop]||settings.density!==undefined&&![.5,1,1.5].includes(settings.density)||settings.irrigation!==undefined&&typeof settings.irrigation!=='boolean'||settings.residues!==undefined&&!['leave','collect'].includes(settings.residues))return 'Invalid cultivation settings.';
+  for(const key of ['crop','density','irrigation','residues'])if(settings[key]!==undefined)b[key]=settings[key];
+  return '';
+}
+export function queueBedJob(s,site,id,action) {
+  const p=s.projects.find(p=>p.id===site);
+  if(!p||p.removal||p.work<PROJECTS[p.key].work)return 'Choose a completed cultivation site.';
+  const b=ensureCultivation(s,p)?.beds[id],error=farmJobError(s,p,b,action);if(error)return error;
+  const spec=farmJobSpec(b,action);
+  for(const [item,n]of Object.entries(spec.input))if(materialCount(s,item)<n)return `Missing ${n} ${item}.`;
+  for(const [item,n]of Object.entries(spec.input))changeMaterial(s,item,-n,undefined,'cultivation input');
+  s.operations??=[];
+  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,recipe:`farm_${action}`,farm:{bed:id,action,work:spec.work},input:spec.input,work:0,phase:'pickup',done:false});
+  wakeHelpers(s);return '';
+}
+export function fieldPlacementError(s,x,z,size,rotation=0,ignore=null){
+  if(!fieldSizeValid(size))return 'Fields must be 2–32 cells on each side.';
+  return placementError(s,'field',x,z,ignore,rotation,{fieldSize:size});
+}
+export function planField(s,x,z,size,rotation=0){
+  if(s.stage!=='playing')return 'Choose a campsite first.';
+  const error=fieldPlacementError(s,x,z,size,rotation);if(error)return error;
+  const p={id:s.nextId++,key:'field',x,z,rotation,fieldSize:[...size],work:1,delivered:0,billOfMaterials:{}};
+  s.projects.push(p);ensureCultivation(s,p);syncInfrastructure(s,PROJECTS);invalidateNavigation(s);return '';
+}
+export function resizeField(s,id,size){
+  const p=s.projects.find(p=>p.id===id&&p.key==='field');if(!p)return 'Choose a field.';
+  const error=fieldPlacementError(s,p.x,p.z,size,p.rotation||0,id);if(error)return error;
+  if((s.operations||[]).some(o=>o.site===id&&!o.done))return 'Finish this field’s jobs before resizing.';
+  const old=ensureCultivation(s,p).beds,layout=bedLayout({...p,fieldSize:size});
+  // Anchor beds to their ground positions when the east/south boundaries change.
+  const dx=size[0]-p.fieldSize[0],dz=size[1]-p.fieldSize[1];
+  const find=g=>old.find(b=>b.x-dx===g.x&&b.z-dz===g.z&&b.w===g.w&&b.d===g.d);
+  if(old.some(b=>!layout.some(g=>find(g)===b)&&(!['unprepared','prepared','harvested'].includes(b.stage)||b.residueKg>0||b.amendmentKg>0)))return 'Clear crops and collect residues before shrinking occupied beds.';
+  p.fieldSize=[...size];delete p.cultivation;const farm=ensureCultivation(s,p);
+  farm.beds=farm.beds.map((b,i)=>({...find(b),...b,...(find(b)||{}),x:b.x,z:b.z,id:i}));
+  invalidateNavigation(s);return '';
+}
 export function productionBlocker(s, site, recipe) {
   const p = s.projects.find((p) => p.id === Number(site) && !p.felled),
     def = PROCESSES[recipe];
@@ -288,6 +333,7 @@ export function productionBlocker(s, site, recipe) {
   )
     return "Choose a completed compatible building.";
   if(recipe==='cold_storage'&&p.coldStorage)return 'Cold storage is already installed.';
+  if(p.cultivation&&['baby_greens','vegetables','greenhouse'].includes(recipe))return 'Use the cultivation beds to plant crops.';
   const craftError=craftingBlocker(s,def);
   if(craftError)return craftError;
   if(def.equipmentRepair && s.operations?.some(o=>!o.done && PROCESSES[o.recipe]?.equipmentRepair===def.equipmentRepair))return 'This equipment already has a repair queued.';
@@ -525,7 +571,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     }
     if (op.water || op.phase === "return") return true;
     const node = sys.nodes[op.site],
-      recipe = PROCESSES[op.recipe];
+      recipe = farmRecipe(op,PROCESSES);
     if(recipe.craft && PROJECTS[s.projects.find(p=>p.id===op.site)?.key]?.kind!==recipe.kind) {op.status='Needs a compatible crafting workspace.';return false;}
     const craftError=craftingBlocker(s,recipe,r);
     if(craftError) {op.status=craftingBlocker(s,recipe)||'Waiting for a qualified resident.';return false;}
@@ -680,7 +726,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     r.operation = null;
     return true;
   }
-  const recipe = PROCESSES[op.recipe];
+  const recipe = farmRecipe(op,PROCESSES);
   if (op.phase === "return") {
     r.action = "carry";
     r.cargo = true;
@@ -733,7 +779,10 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   }
   r.action = "carry";
   r.cargo = true;
-  const dest = utilitySpot(s, node, r);
+  const bed=op.farm&&p.cultivation.beds[op.farm.bed];
+  const center=bed&&bedWorld(p,bed,footprint(p));
+  const a=(p.rotation||0)*Math.PI/2;
+  const dest = bed ? [{x:center.x+Math.cos(a)*.5,z:center.z-Math.sin(a)*.5},{x:center.x-Math.cos(a)*.5,z:center.z+Math.sin(a)*.5}].find(point=>!occupied(s,point.x,point.z)&&route(s,r,point)) : utilitySpot(s, node, r);
   if(recipe.craft)op.status="Taking materials to the crafting workspace";
   if (!dest) {op.status="Waiting for an accessible work position";r.action="blocked";return true;}
   if (!go(s, r, dest)) return true;
@@ -794,6 +843,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if(op.work>=recipe.work*.5 && beginBiology(s,op,r))return true;
   if (op.work >= recipe.work) {
+    if(op.farm)finishFarmJob(s,p,op);
     if(BIOLOGY[op.recipe]){op.harvestOutput=harvestOutput(s,op,recipe);p.harvestCount=(p.harvestCount||0)+1;}
     recordProduction(s,op.recipe,recipe);
     op.foodOutput=Object.fromEntries(Object.entries(op.harvestOutput||recipe.output).filter(([id,n])=>FOOD_DAYS[id]&&n>0).map(([id,n])=>[id,freshLots(s,id,n,recipe)]));
@@ -1053,10 +1103,10 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
   if (!Number.isInteger(rotation) || rotation < 0 || rotation > 3)
     return "Choose a valid orientation.";
   const previous = ignore === null ? null : s.projects.find(p => p.id === ignore);
-  const candidate = { ...previous, key, x, z, rotation };
+  const candidate = { ...previous, key, x, z, rotation, ...(key==='field'&&details?.fieldSize?{fieldSize:details.fieldSize}:{}) };
   const [w, d] = footprint(candidate);
   if (
-    !["road", "bridge"].includes(key) &&
+    !["road", "bridge", "field"].includes(key) &&
     !foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads)
   )
     return "Leave a little space between foundations at different heights.";
@@ -1159,7 +1209,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
   return "";
 }
 function gradeFoundation(s, key, x, z, rotation = 0) {
-  if (["road", "bridge"].includes(key)) return;
+  if (["road", "bridge", "field"].includes(key)) return;
   const [w, d] = footprint({ key, rotation });
   const pad = foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads);
   s.terrainPads ??= [];
@@ -1998,6 +2048,7 @@ function tickUncached(s, dt) {
   upkeepStep(s,PROJECTS,dt);
   infrastructureStep(s, PROJECTS, dt);
   biologicalStep(s,dt,useWater);
+  cultivationStep(s,dt,useWater,PROJECTS);
   coolStoredFood(s,dt);
   foodStorageStep(s,PROCESSES,MATERIALS);
   deliveryStep(s,dt,MATERIALS,changeMaterial,storedMaterials(s),storageCapacity(s));
@@ -2757,7 +2808,7 @@ export function restore(text) {
     if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     refreshSandboxFood(s);
-    if (!validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(

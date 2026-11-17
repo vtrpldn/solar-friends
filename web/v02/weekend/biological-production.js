@@ -31,7 +31,7 @@ export function beginBiology(s,op,r){
 export const CROP_CARE={baby_greens:{kind:"garden",area:8,liters:24},vegetables:{kind:"garden",area:16,liters:48},greenhouse:{kind:"greenhouse",area:24,liters:48},fruit:{kind:"orchard",area:64,liters:32},bananas:{kind:"grove",area:32,liters:48}};
 export function biologicalStep(s,dt,useWater){
  const active=new Set((s.operations||[]).filter(o=>!o.done&&o.phase==='growing'&&CROP_CARE[o.recipe]).map(o=>o.site));
- for(const p of s.projects||[])if(p.soilFertility!==undefined&&!active.has(p.id))p.soilFertility=Math.min(1,p.soilFertility+dt/(180*GAME_DAY));
+ for(const p of s.projects||[])if(!p.cultivation&&p.soilFertility!==undefined&&!active.has(p.id))p.soilFertility=Math.min(1,p.soilFertility+dt/(180*GAME_DAY));
  for(const op of s.operations||[]){
   if(op.done||op.phase!=='growing')continue;
   const crop=CROP_CARE[op.recipe],site=s.projects?.find(p=>p.id===op.site);
@@ -61,6 +61,7 @@ export function harvestOutput(s,op,recipe){
 }
 export function biologyText(recipe){const b=BIOLOGY[recipe];return b?` · ${b.days} game days of growth/curing, separate from resident work${b.seasonal?'; slower in unfavorable seasons':''}${Number.isFinite(b.window)?`; harvest within ${b.window} days before gradual field losses`:''}`:'';}
 export function validBiology(s,recipes){if(!(s.projects||[]).every(p=>[p.soilMoisture,p.soilFertility].every(n=>n===undefined||(Number.isFinite(n)&&n>=0&&n<=1))))return false;if(!(s.projects||[]).every(p=>(p.starterSeedlingsUsed===undefined||typeof p.starterSeedlingsUsed==='boolean')&&(p.orchardEstablished===undefined||typeof p.orchardEstablished==='boolean')&&(p.harvestCount===undefined||(Number.isInteger(p.harvestCount)&&p.harvestCount>=0))))return false;return (s.operations||[]).every(o=>{
+ if(o.farm)return true;
  if(o.establishmentDays!==undefined&&(o.recipe!=='fruit'||o.establishmentDays!==610))return false;
  if(o.planted!==undefined&&typeof o.planted!=='boolean')return false;
  if(o.phase==='growing'&&(!BIOLOGY[o.recipe]||!o.planted||!Number.isFinite(o.growthRemaining)))return false;
