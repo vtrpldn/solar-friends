@@ -13,6 +13,7 @@ import {settingsFor,BIOMES,richnessFactor} from './world-settings.js';
 import {beginArrival} from './simulation.js';
 import {depositCapacity} from './land-layout.js';
 import {profileFor,friendshipLabel} from './resident-personality.js';
+import {conversationMotion} from './resident-motion.js';
 import {downtimeMotion,downtimeLabel} from './resident-downtime.js';
 import {currentThought,aspirationStatus} from './resident-mind.js';
 import { needMeters } from "./resident-needs.js";
@@ -1986,7 +1987,7 @@ function frame(now) {
         ? "carry-walk"
         : "walk"
       : visit?.animation
-        ? (visit.private ? "duck-walk" : visit.animation)
+        ? (visit.private ? "duck-walk" : conversationMotion(r) || visit.animation)
       : downtimeMotion(r)
         ? downtimeMotion(r)
       : seated

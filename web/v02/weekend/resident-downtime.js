@@ -20,7 +20,12 @@ export function clearDowntime(r) {
 }
 
 export function downtimeMotion(r) {
-  return r.action==='relax' && r.downtime?.arrived && !r.walk.length ? r.downtime.animation : null;
+  if(r.action!=='relax' || !r.downtime?.arrived || r.walk.length)return null;
+  const {kind,elapsed,animation}=r.downtime;
+  if(kind==='breather')return elapsed<3?'yawn':'breathe';
+  if(kind==='stretching' || kind==='walk')return elapsed<7?'neck-stretch':elapsed<14?'shoulder-roll':'stretch';
+  if(kind==='fire' && elapsed>=10 && elapsed<22)return 'ground-relax';
+  return animation;
 }
 
 export function downtimeLabel(r) {
@@ -81,6 +86,7 @@ export function idleActivity(s,r,i,dt,api) {
       -(Math.hypot(site.x-r.x,site.z-r.z)/30)-penalty(key);
     candidates.push({...choice,key,site:site.id,sheltered,score,building:site});
   }
+  if(r.energy<50 && !s.rain)candidates.push({kind:'breather',animation:'breathe',label:'Taking a breather',duration:12,key:'breather',score:7-penalty('breather')});
   if(!s.rain){
     if(hour>=6 && hour<19)candidates.push({kind:'reading',animation:'ground-read',label:'Reading outdoors',duration:42,key:'reading-outdoors',score:(profile.interests.includes('books')?5:1)-penalty('reading-outdoors')});
     candidates.push({kind:'stretching',animation:'stretch',label:'Taking a stretching break',duration:22,key:'stretching-outdoors',score:(profile.hobby==='Outdoor exercise'?5:2)-penalty('stretching-outdoors')});
