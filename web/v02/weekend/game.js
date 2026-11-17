@@ -1,3 +1,4 @@
+import {environmentInfo} from './environment-info.js';
 import {createDiagnostics,copyDiagnostics} from './diagnostics.js';
 import {ensureCultivation} from './cultivation.js';
 import {cultivationSignature,createCultivationModel} from './cultivation-models.js';
@@ -1675,6 +1676,7 @@ function renderUI() {
     $("purchase").value,
     Math.floor(s.time * 0.45),
     s.trip && Math.ceil(s.trip.left),
+    s.rain,
     s.rainSeen,
     s.rainResolved,
     selected,
@@ -1760,6 +1762,12 @@ function renderUI() {
     s.stage === "evening"
       ? "Saturday · Evening"
       : `Day ${Math.floor(minutes / 1440) + 1} · ${String(Math.floor(minutes / 60) % 24).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  const environment=environmentInfo(s);
+  $("calendar-date").textContent=environment.date;
+  $("calendar-date").title=`Year ${environment.year} · ${environment.season} · 365-day game calendar`;
+  $("weather").textContent=`${environment.icon} ${environment.weather}`;
+  $("temperature").textContent=`~${environment.temperature}°C`;
+  $("temperature").setAttribute('aria-label',`Estimated temperature ${environment.temperature} degrees Celsius`);
   $("tasks").replaceChildren();
   $("completed-tasks").replaceChildren();
   const builtCount = s.projects.filter(
