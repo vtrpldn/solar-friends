@@ -58,7 +58,8 @@ export function chooseNeed(s,r,i,api) {
  if(r.needTask || r.tentPhase || r.cargo || r.action==='town' || s.stage!=='playing' || (r.energy<25 && Math.min(ensureNeeds(r).hunger,ensureNeeds(r).bladder,ensureNeeds(r).bowels,ensureNeeds(r).hydration)>=15) || (r.needRetryAt||0)>s.time)return;
  const n=ensureNeeds(r,i);
  const temperament=profileFor(r).temperament;
- const threshold=k=>k==='social' ? (committed(r)?35:temperament.socialAt) : k==='fun' ? temperament.breakAt : k==='hunger' && mealTime(s,r) ? 80 : 30;
+ // Start drinking before thirst becomes an alert, leaving time to reach a source.
+ const threshold=k=>k==='hydration' ? 70 : k==='social' ? (committed(r)?35:temperament.socialAt) : k==='fun' ? temperament.breakAt : k==='hunger' && mealTime(s,r) ? 80 : 30;
  const pending=NEED_KEYS.filter(k=>(!r.outsideWork || physical.includes(k)) && (r.energy>=25 || physical.includes(k)) && n[k]<threshold(k) &&
    (k!=='social' || (r.mind?.quietUntil||0)<=s.time))
    .sort((a,b)=>(physical.includes(b)&&n[b]<15?1:0)-(physical.includes(a)&&n[a]<15?1:0)||n[a]/threshold(a)-n[b]/threshold(b));

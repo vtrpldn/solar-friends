@@ -102,9 +102,9 @@
       "daily-routines"
     ],
     "description": "Residents eat around breakfast, lunch and dinner, and sleep through the night. Urgent needs can interrupt work.",
-    "diagram": "flowchart TD\n Time[Time, activity and personality] --> Decay[Needs and energy change]\n Decay --> Urgent{Urgent need, meal time or scheduled sleep?}\n Urgent -->|No| Available[Available for work or downtime]\n Urgent -->|Yes| Interrupt[Suspend or defer work safely]\n Interrupt --> Target{Suitable reachable service or rest place?}\n Target -->|Yes| Travel[Walk to service or assigned / available home]\n Target -->|No| Fallback[Try fallback or expose blocked need]\n Travel --> Consume[Consume food, water or service capacity as applicable]\n Consume --> Recover[Restore need or energy]\n Recover --> Resume[Reconsider unfinished work]\n Fallback --> Resume\n Resume --> Urgent\n Heat[Heat and active work] --> Thirst[Individual hydration demand]\n Thirst --> Target\n Fresh[Potable water and travel bottles] --> Consume\n",
+    "diagram": "flowchart TD\n Time[Time, activity and personality] --> Decay[Needs and energy change]\n Decay --> Urgent{Need break, meal time or scheduled sleep?}\n Urgent -->|No| Available[Available for work or downtime]\n Urgent -->|Yes| Interrupt[Suspend or defer work safely]\n Interrupt --> Target{Suitable reachable service or rest place?}\n Target -->|Yes| Travel[Walk to service or assigned / available home]\n Target -->|No| Fallback[Try fallback or expose blocked need]\n Travel --> Consume[Consume food, water or service capacity as applicable]\n Consume --> Recover[Restore need or energy]\n Recover --> Resume[Reconsider unfinished work]\n Fallback --> Resume\n Resume --> Urgent\n Heat[Heat and active work] --> Thirst[Individual hydration demand]\n Thirst --> Target\n Fresh[Potable water and travel bottles] --> Consume\n",
     "boundary": "",
-    "tip": "Keep food, potable water and homes reachable. Residents normally sleep 7.5–9 hours; urgent bathroom breaks resume the same night’s rest.",
+    "tip": "Keep food, potable water and homes reachable. Residents seek drinks before thirst becomes urgent and normally sleep 7.5–9 hours; urgent bathroom breaks resume the same night’s rest.",
     "facts": null
   },
   {
@@ -265,12 +265,13 @@
     "tests": [
       "cultivation",
       "cultivation-browser",
-      "cultivation-bulk"
+      "cultivation-bulk",
+      "seed-autobuy"
     ],
     "description": "Manage a whole planting area or inspect one bed. Each bed keeps its own crop, care and harvest cycle.",
     "diagram": "flowchart TB\n Soil[Unprepared soil] -->|Resident preparation| Ready[Prepared bed]\n Ready -->|Seeds + planting work| Planted[Planted crop]\n Planted -->|Normal mode| Growth[Growing]\n Planted -->|Sandbox: instant growth| Mature[Harvestable]\n Growth -->|Accumulated growing conditions| Mature\n Mature -->|Resident harvesting| Harvest[Harvested bed + residues]\n Growth -->|Explicit clearing: residues only| Harvest\n Mature -->|Explicit clearing: residues only| Harvest\n Harvest -->|Prepare next planting| Ready\n Harvest --> Residues[Leave cover or collect residues]\n classDef soil fill:#f2e5d6,stroke:#c8af90,color:#654c35;\n classDef growing fill:#e9efd9,stroke:#b5c49a,color:#485d32;\n classDef mature fill:#d4e6d0,stroke:#88a67c,color:#2d5136;\n class Soil,Ready,Harvest soil;\n class Planted,Growth growing;\n class Mature,Residues mature;\n",
     "boundary": "Harvest quantities resolve once. Delayed harvest can reduce yield; clearing returns residues only. Fields snap to 2 m map cells.",
-    "tip": "Keep moisture and fertility adequate before increasing planting density. Seeds are still purchased.",
+    "tip": "Planting uses stored seeds first. With Auto-buy on and enough shared savings, missing packets are purchased and physically collected before residents plant. Keep water, work access and storage available.",
     "facts": "crops"
   },
   {
