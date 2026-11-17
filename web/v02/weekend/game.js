@@ -3,6 +3,7 @@ import {setOutsideWork,outsideWorkText} from "./outside-work.js";
 import {constructionSpecText} from './construction-specs.js';
 import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
+import {installLenses} from './lenses.js';
 import {loadVillage} from './load-village.js';
 import {ensureNaturalLand} from './natural-resources.js';
 import {saveSlots} from "./save-slots.js";
@@ -961,6 +962,7 @@ $("world").addEventListener("pointerup", (e) => {
           z >= p.z &&
           z < p.z + footprint(p)[1],
       )?.id || null;
+    if (selected && lenses.active && openPanel) setPanel(null);
     renderUI();
   }
 });
@@ -2019,10 +2021,13 @@ function frame(now) {
     top: shadowExtent, bottom: -shadowExtent, near: 1, far: 900 });
   sun.shadow.camera.updateProjectionMatrix();
   drawUtilities();
+  utilityLines.visible = !lenses.active;
+  lenses.update(now);
   renderer.render(scene, camera);
   recordPerformance(now, visual.time);
   requestAnimationFrame(frame);
 }
+const lenses = installLenses({state:()=>s,camera,world,focus,inspect:id=>{setPanel(null);selected=id;renderUI();}});
 addEventListener("pagehide", persist);
 requestAnimationFrame(frame);
 
