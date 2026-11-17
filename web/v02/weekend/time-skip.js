@@ -1,11 +1,13 @@
 import {tick} from './simulation.js';
 import {DAY} from './weather.js';
 
+const resolveYield = () => {};
+
 // Use precisely the same fixed step as simulationFrame; larger steps alter
 // scheduling, resource consumption and the ordering of resident decisions.
 export async function skipDays(state, days, {
   progress = () => {}, cancelled = () => false,
-  yieldControl = () => globalThis.scheduler?.yield?.() ?? new Promise(resolve => setTimeout(resolve, 0)),
+  yieldControl = () => globalThis.scheduler?.postTask?.(resolveYield, {priority: "background"}) ?? new Promise(resolve => setTimeout(resolve, 0)),
   now = () => performance.now(),
 } = {}) {
   if (!Number.isInteger(days) || days < 1 || days > 365) throw new RangeError('Choose 1–365 whole days.');
