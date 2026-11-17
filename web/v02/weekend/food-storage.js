@@ -90,7 +90,7 @@ export function foodStorageText(s){
  if(s.mode==='sandbox')return 'Food spoilage is disabled in sandbox.';
  const f=ensureFoodStorage(s),next=Object.values(f.lots).flat().reduce((n,l)=>Math.min(n,l.expires),Infinity),lost=Object.values(f.spoiled).reduce((n,q)=>n+q,0);
  const preserved=(f.lots.meals||[]).filter(l=>l.preserved).reduce((n,l)=>n+l.n,0);
- return `Use oldest food first. Ingredients: 3 days; fresh meals: 2; dried provisions: 10; eggs: 7; milk: 1. ${preserved} of the meals in stores are dried provisions. ${Number.isFinite(next)?`Next stored batch expires in ${Math.max(0,(next-s.time)*.45/60).toFixed(1)} game hours.`:'No perishable food in stores.'} ${lost} units spoiled into organic residues. Reserved and carried food also ages.`;
+ return `Residents use oldest food first. One camp serving: 1 meal, 1 kg ingredients, 4 cooked eggs or 2 L milk (simplified food portions). Ingredients: 3 days; fresh meals: 2; dried provisions: 10; eggs: 7; milk: 1. ${preserved} of the meals in stores are dried provisions. ${Number.isFinite(next)?`Next stored batch expires in ${Math.max(0,(next-s.time)*.45/60).toFixed(1)} game hours.`:'No perishable food in stores.'} ${lost} units spoiled into organic residues. Reserved and carried food also ages.`;
 }
 
 export function returnUnsoldFood(s,trip){
@@ -105,4 +105,21 @@ export function takeFoodLots(lots,n){
  for(const lot of lots){const quantity=Math.min(left,lot.n);if(quantity>0){taken.push({...lot,n:quantity});lot.n-=quantity;left-=quantity;}}
  for(let i=lots.length-1;i>=0;i--)if(lots[i].n<=1e-8)lots.splice(i,1);
  return taken;
+}
+
+// Whole-stock serving estimates keep saves and the physical ledger integral.
+// Eggs are prepared as a simple camp meal; these are gameplay portions, not a nutrition model.
+export const FOOD_SERVINGS={meals:1,food:1,eggs:4,milk:2};
+export function foodPortions(s){return Object.entries(FOOD_SERVINGS).reduce((n,[id,size])=>n+Math.floor((s.materials[id]||0)/size),0);}
+export function nextMeal(s){
+ const storage=ensureFoodStorage(s);
+ return Object.entries(FOOD_SERVINGS).filter(([id,size])=>(s.materials[id]||0)>=size)
+ .sort(([a],[b])=>(storage.lots[a]?.[0]?.expires??Infinity)-(storage.lots[b]?.[0]?.expires??Infinity))
+ .map(([id,quantity])=>({id,quantity}))[0]||null;
+}
+export function eatMeal(s){
+ const meal=nextMeal(s);if(!meal)return false;
+ foodChange(s,meal.id,-meal.quantity,undefined,'resident meal');
+ addOrganicWaste(s,meal.id==='eggs'?.024:meal.id==='milk'?0:.2);
+ return true;
 }

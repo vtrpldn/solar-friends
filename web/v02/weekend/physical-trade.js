@@ -46,6 +46,7 @@ export function cancelExport(s,id,change){
 }
 export function loadExports(s,trip,base={}){
  const t=ensureTrade(s),cargo={...base};trip.exports??=[];
+ for(const id of trip.exports){const o=t.orders.find(o=>o.id===id);if(o?.status==='loaded')cargo[o.material]=(cargo[o.material]||0)+o.quantity;}
  for(const o of pendingExports(s)){
   const next={...cargo,[o.material]:(cargo[o.material]||0)+o.quantity};if(!fitsCargo(next))continue;
   Object.assign(cargo,next);o.status='loaded';trip.exports.push(o.id);
@@ -101,3 +102,6 @@ export function receiveBlueprintShipment(s,trip){
  if(!Object.keys(p.pendingMaterials).length)delete p.pendingMaterials;
  }
 }
+
+export function returnPickup(s){return s.deliveryOnly?null:activeTrips(s).find(t=>t.saleOnly&&!t.tradeSettled&&['boarding','outbound','away'].includes(t.phase));}
+export function pickupFare(s){return returnPickup(s)?0:transportCost(s);}

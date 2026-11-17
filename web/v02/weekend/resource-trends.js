@@ -1,6 +1,7 @@
+import {foodPortions} from './food-storage.js';
 const HOUR=60/.45;
 export function resourceSnapshot(s){return {
- money:s.money,wood:s.wood,meals:(s.materials.meals||0)+(s.materials.food||0),
+ money:s.money,wood:s.wood,meals:foodPortions(s),
  power:Object.values(s.infrastructure?.nodes||{}).reduce((sum,n)=>sum+(n.charge||0),0),
  water:Object.values(s.infrastructure?.nodes||{}).reduce((sum,n)=>sum+(n.water[0]||0),0),
 };}

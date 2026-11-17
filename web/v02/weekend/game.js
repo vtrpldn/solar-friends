@@ -1,3 +1,5 @@
+import {returnPickup,pickupFare} from './physical-trade.js';
+import {foodPortions} from './food-storage.js';
 import {supplierError} from './supplier-stock.js';
 import {activeTrips} from "./trip-state.js";
 import {setOutsideWork,outsideWorkText} from "./outside-work.js";
@@ -1669,7 +1671,7 @@ function renderUI() {
   const trends=resourceTrends(s.time,resourceSnapshot(s));
   const counters = [
     ["money", `R$${s.money.toFixed(2)}`, "Savings", "finances"],
-    ["meals", `${s.materials.meals||0} + ${s.materials.food||0}`, "Meals + ingredients", "resources"],
+    ["meals", `${foodPortions(s)}`, "Food portions", "resources"],
     [
       "power",
       `${Object.values(s.infrastructure?.nodes || {}).reduce((a,n)=>a+(n.charge||0),0).toFixed(1)}`,
@@ -1915,12 +1917,12 @@ function renderUI() {
   }
   const purchase = MATERIALS[$("purchase").value];
   $("town").textContent =
-    `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · R$${(purchase.price + transportCost(s)).toFixed(2)} incl. transport`;
+    `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · R$${(purchase.price + pickupFare(s)).toFixed(2)} ${returnPickup(s)?"· existing trip, no extra fuel":"incl. transport"}`;
   const townHour=((540+s.time*.45)/60)%24;
   const supplierIssue=(townHour<7||townHour>=18) ? "Town opens at 07:00; pickups stop departing at 18:00. Planned construction and food pickups retry automatically." : supplierError(s,{[$("purchase").value]:purchase.quantity},MATERIALS);
   disabledReason($("town"), supplierIssue || (s.stage !== "playing" ? "Choose a campsite first." : "Wait for an available vehicle or delivery and enough uncommitted savings for supplies and transport."));
   $("town").disabled =
-    !!supplierIssue ||     (s.deliveryOnly?!!s.delivery:(!!s.trip&&!!s.secondTrip)) || spendableMoney(s) < purchase.price + transportCost(s) || s.stage !== "playing";
+    !!supplierIssue ||     (s.deliveryOnly?!!s.delivery:(!!s.trip&&!!s.secondTrip&&!returnPickup(s))) || spendableMoney(s) < purchase.price + pickupFare(s) || s.stage !== "playing";
   $("inventory").textContent = Object.keys(MATERIALS)
     .map((id) => materialText(id, materialCount(s, id)))
     .join(" · ");

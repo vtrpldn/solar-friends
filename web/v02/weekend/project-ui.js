@@ -1,3 +1,4 @@
+import {biologyLabel} from './biological-production.js';
 export function projectLabel(project, definitions) {
   return `${definitions[project.key].name} #${project.id}`;
 }
@@ -30,7 +31,7 @@ export function productionActivity(state, project, processes) {
   const recipe = processes[operation.recipe];
   const workers = state.people.filter(r => r.operation === operation.id && !r.needTask && !r.tentPhase);
   const progress = Math.min(1, operation.work / recipe.work);
-  if (operation.phase === 'growing') return {progress, label: operation.recipe === 'compost' ? 'Composting' : 'Growing', detail: `${recipe.name} · ${operation.status || 'Developing naturally'} · No resident needs to wait here`};
+  if (operation.phase === 'growing') return {progress, label: biologyLabel(operation.recipe), detail: `${recipe.name} · ${operation.status || 'Developing naturally'} · No resident needs to wait here`};
   const reportedStatus = operation.status === 'Building switched off' && state.infrastructure?.nodes[project.id]?.enabled ? '' : operation.status;
   const phase = reportedStatus || ({pickup:'Collecting supplies',process:'Working',return:'Returning from the upgrade'}[operation.phase] || 'Job queued');
   return {progress, label: operation.phase === 'return' ? 'Finishing batch' : workers.length ? 'Batch in progress' : 'Batch queued',

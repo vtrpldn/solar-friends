@@ -1,3 +1,4 @@
+import {foodPortions} from './food-storage.js';
 import {profileFor} from './resident-personality.js';
 
 const PHYSICAL = ['hunger', 'bladder', 'bowels', 'hygiene'];
@@ -47,7 +48,7 @@ export function concern(s, r) {
   if (r.energy < 35) return 'I need to rest before I take on anything else.';
   if (r.needs?.hunger < 30) return 'It is hard to think about much until I have eaten.';
   if (Math.min(r.needs?.bladder ?? 100, r.needs?.bowels ?? 100) < 30) return 'I need a toilet break first.';
-  if (r.id === 'iara' && (s.materials.food || 0) + (s.materials.meals || 0) < s.people.length)
+  if (r.id === 'iara' && foodPortions(s) < s.people.length)
     return 'The pantry is getting low. I want us to have enough to share.';
   if (r.id === 'caua' && s.infrastructure?.thirst) return 'We need reliable drinking water. I want to help sort it out.';
   if (r.id === 'nina' && r.needs?.hygiene < 40) return 'I would feel better after washing up.';
