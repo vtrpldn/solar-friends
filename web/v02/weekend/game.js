@@ -415,54 +415,11 @@ const actors = s.people.map((r) => {
   scene.add(root);
   return root;
 });
-const utilityLines = new THREE.Group();
-scene.add(utilityLines);
-let utilityDrawing = "";
 const utilityLights = [];
-function drawUtilities() {
+// Connection diagrams belong to the Water and Power lenses, not the world.
+function updateUtilityLighting() {
   const sys = s.infrastructure;
   if (!sys) return;
-  const signature = JSON.stringify(
-    sys.links.map((l) => [
-      l.id,
-      l.enabled,
-      l.work >= l.required,
-      sys.nodes[l.from].x,
-      sys.nodes[l.from].z,
-      sys.nodes[l.to].x,
-      sys.nodes[l.to].z,
-    ]),
-  );
-  if (signature !== utilityDrawing) {
-    utilityDrawing = signature;
-    for (const child of [...utilityLines.children]) {
-      child.geometry.dispose();
-      child.material.dispose();
-      utilityLines.remove(child);
-    }
-    for (const l of sys.links) {
-      const a = sys.nodes[l.from],
-        b = sys.nodes[l.to];
-      const points = [world(a.x, a.z).setY(0.12), world(b.x, b.z).setY(0.12)];
-      const line = new THREE.Line(
-        new THREE.BufferGeometry().setFromPoints(points),
-        new THREE.LineBasicMaterial({
-          color:
-            l.kind === "power"
-              ? "#e6bc5c"
-              : {
-                  fresh: "#73cce5",
-                  irrigation: "#6b9c63",
-                  greywater: "#97919a",
-                  sewage: "#815c48",
-                }[l.kind],
-          transparent: true,
-          opacity: l.enabled && l.work >= l.required ? 0.8 : 0.25,
-        }),
-      );
-      utilityLines.add(line);
-    }
-  }
   const night = 1 - sunlightAt(s.time).daylight;
   for (const [id, entry] of buildings) {
     if (entry.houseLighting)
@@ -2348,8 +2305,7 @@ function frame(now) {
   Object.assign(sun.shadow.camera, { left: -shadowExtent, right: shadowExtent,
     top: shadowExtent, bottom: -shadowExtent, near: 1, far: 900 });
   sun.shadow.camera.updateProjectionMatrix();
-  drawUtilities();
-  utilityLines.visible = !lenses.active;
+  updateUtilityLighting();
   lenses.update(now);
   accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
   renderer.render(scene, camera);
