@@ -1,3 +1,5 @@
+import {FUNCTIONAL_LAYOUTS, HOME_CHARACTER} from '../library/functional-layouts.js';
+import {METRES_PER_CELL} from '../library/scale.js';
 import {orderDelivery,deliveryStep,validDelivery} from "./deliveries.js";
 import {activeTrips,uncollectedProjects} from "./trip-state.js";
 import {upkeepStep,performUpkeep,recordVehicleDistance,validUpkeep,ANIMAL_CARE} from "./asset-upkeep.js";
@@ -145,9 +147,13 @@ export function buildingFront(p) {
   const [w, d] = footprint(p),
     angle = ((p.rotation || 0) * Math.PI) / 2;
   const reach = (unrotatedSiteSize(p, PROJECTS[p.key].size)[1] + 1) / 2;
+  // Approach from outside the reserved site, aligned with the modeled door.
+  // Courtyard homes shift their shell left to make room for the terrace.
+  const layout = FUNCTIONAL_LAYOUTS[p.key];
+  const lateral = layout ? (HOME_CHARACTER[p.key].doorX - (layout.terrace ? 1 : 0)) / METRES_PER_CELL : 0;
   return {
-    x: p.x + (w - 1) / 2 + Math.sin(angle) * reach,
-    z: p.z + (d - 1) / 2 + Math.cos(angle) * reach,
+    x: p.x + (w - 1) / 2 + Math.sin(angle) * reach + Math.cos(angle) * lateral,
+    z: p.z + (d - 1) / 2 + Math.cos(angle) * reach - Math.sin(angle) * lateral,
   };
 }
 export function crossingAt(s, x, z) {
