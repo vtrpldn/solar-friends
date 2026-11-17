@@ -519,6 +519,10 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     );
   const eligible = (op) => {
     if (op.done || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group && workGroup(op,PROCESSES)!==group)) return false;
+    if(op.water?.stagedAt){
+      const destination=sys.nodes[op.site],index=LIQUIDS.indexOf(op.water.kind);
+      if(!destination||destination.capacity[index]-destination.water[index]<=.00001)return false;
+    }
     if (op.water || op.phase === "return") return true;
     const node = sys.nodes[op.site],
       recipe = PROCESSES[op.recipe];
@@ -648,6 +652,11 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
       op.phase = "deliver";
       r.target = null;
     }
+    if(w.stagedAt){
+      r.cargo=false;r.action='fetch-water';op.status='Collecting the sealed carrier beside the reservoir';
+      if(!go(s,r,w.stagedAt))return true;
+      delete w.stagedAt;
+    }
     useEquipment(s,r,"bucket",`op:${op.id}`,0);
     op.status = "Carrying water to the reservoir";
     r.action = "carry";
@@ -659,7 +668,11 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     node.water[index] += n;
     w.amount -= n;
     if (w.amount > 0.00001) {
-      op.status = "Destination full; water remains in the sealed carrier.";
+      // Keep the undelivered water physically at the destination without
+      // forcing its carrier to wait through meals, sleep and bathroom breaks.
+      w.stagedAt={x:r.x,z:r.z};
+      r.cargo=false;r.operation=null;r.target=null;
+      op.status = "Destination full; sealed water waits beside the reservoir.";
       return true;
     }
     r.cargo = false;
@@ -2775,7 +2788,8 @@ export function restore(text) {
               (!LIQUIDS.includes(o.water.kind) ||
                 !Number.isFinite(o.water.amount) ||
                 o.water.amount < 0 ||
-                o.water.amount > 12)),
+                o.water.amount > 12 ||
+                (o.water.stagedAt!==undefined&&(!o.water.stagedAt||!Number.isFinite(o.water.stagedAt.x)||!Number.isFinite(o.water.stagedAt.z)||o.phase!=='deliver')))),
         ))
     )
       return null;
