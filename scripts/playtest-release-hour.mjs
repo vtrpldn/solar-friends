@@ -2,7 +2,7 @@
 // Browser actions use public controls; state reads inspect the game's autosave.
 import {chromium} from 'playwright';
 import {mkdir,writeFile,appendFile} from 'node:fs/promises';
-import {restore} from '../web/v02/weekend/simulation.js';
+import {restore,PROJECTS} from '../web/v02/weekend/simulation.js';
 import {STORY_SAVE} from '../web/v02/weekend/modes.js';
 const base=process.env.PLAYTEST_BASE||'https://solar-friends.paladini.dev';
 const out=process.env.PLAYTEST_OUTPUT||'/tmp/solar-release-playtest';await mkdir(out,{recursive:true});
@@ -16,11 +16,11 @@ const raw=()=>page.evaluate(key=>localStorage.getItem(key),STORY_SAVE);
 const state=async()=>JSON.parse(await raw()||'null');
 const close=async()=>{for(let i=0;i<3;i++)await page.keyboard.press('Escape');const menu=page.locator('.view-menu[open] summary');if(await menu.count())await menu.click();};
 async function inspect(view){await close();if(view==='finances')await page.locator('#supplies [data-panel="finances"]').click();else await page.locator(`[data-manage="${view}"]:visible`).first().click();await page.locator('#management').waitFor();const text=(await page.locator('#management').innerText()).slice(0,1000);await page.screenshot({path:`${out}/${String(actions.length).padStart(2,'0')}-${view}.png`});await close();return text;}
-async function place(key){await close();await page.locator('[data-panel-toggle="build"]').click();const before=(await state())?.projects.length||0;await page.locator('#build-search').fill('');const button=page.locator(`#build-${key}`);if(!await button.isVisible()||await button.isDisabled())return 'Unavailable';await button.click();for(const [x,y]of [[800,420],[900,500],[650,540],[800,600],[450,400]]){await page.mouse.click(x,y);await page.waitForTimeout(3200);const s=await state();if(s.projects.length>before){await close();return `Planned ${key}`;}}await close();return 'No valid placement found';}
+async function place(key){await close();await page.locator('[data-panel-toggle="build"]').click();const before=(await state())?.projects.length||0;await page.locator('#build-search').fill(PROJECTS[key].name);const button=page.locator(`#build-${key}`);if(!await button.isVisible()||await button.isDisabled()){await close();return 'Unavailable';}await button.click();for(const [x,y]of [[800,420],[900,500],[650,540],[800,600],[450,400]]){await page.mouse.click(x,y);await page.waitForTimeout(3200);const s=await state();if(s.projects.length>before){await close();return `Planned ${key}`;}}await close();return 'No valid placement found';}
 const tasks=[
- ()=>inspect('food'),()=>inspect('water'),()=>place('house'),()=>inspect('resources'),()=>place('kitchen'),
+ ()=>inspect('food'),()=>inspect('water'),()=>place('rain-tent'),()=>inspect('resources'),()=>place('covered-stores'),
  async()=>{await close();await page.locator('#open-guide').click();await page.locator('#guide-search').fill('water');await page.locator('#guide-topics button').first().click();await page.screenshot({path:out+'/guide-water.png'});await close();return 'Read water Guide';},
- ()=>inspect('power'),()=>place('well'),()=>inspect('crafting'),()=>inspect('food'),
+ ()=>inspect('power'),()=>place('groundwater-well'),()=>inspect('crafting'),()=>inspect('food'),
  async()=>{await close();await page.locator('[data-panel-toggle="people"]').click();const text=(await page.locator('#resident-detail').innerText()).slice(0,900);await page.screenshot({path:out+'/residents.png'});await close();return text;},
  async()=>{await close();await page.locator('.view-menu summary').click();await page.getByRole('button',{name:'Copy bug report',exact:true}).click();await page.waitForFunction(()=>document.querySelector('#diagnostics-status').textContent.startsWith('Bug report copied'));const report=JSON.parse(await page.evaluate(()=>navigator.clipboard.readText()));await writeFile(out+'/diagnostics.json',JSON.stringify(report));if(!restore(JSON.stringify(report.state)))throw Error('Diagnostic state cannot reload');await close();return 'Copied reloadable diagnostic report';},
  ()=>inspect('items'),()=>inspect('water'),()=>inspect('food'),()=>inspect('finances'),

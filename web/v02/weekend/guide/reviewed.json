@@ -67,7 +67,7 @@
     "web/v02/weekend/finances.js": "4cc93375a02274fac398c2382ed471f15fb107e57741d6be4907c64ee3b09eca",
     "web/v02/weekend/fire.js": "302e401f706d62af5818250f85adbed7baf6928d908bbf8ef6e222f2ce332df6",
     "web/v02/weekend/foliage-wind.js": "0d6caa2f01ca087bebf19acd927b0df9f815a4ad63bdb19e9692bff0067992c9",
-    "web/v02/weekend/food-controls.js": "6fc114c8241a5d0ea20fafb4c2bb332a7d9eb626f6b809c9f268621e8a01e2d1",
+    "web/v02/weekend/food-controls.js": "bc039592aa6df8d1b27189a374d784524b4a2114a537f7c2b0c56f542ce19e54",
     "web/v02/weekend/food-planning.js": "58eff9db78444d350631925a658eaa45d463592c4424d766d5b5bcdef34de298",
     "web/v02/weekend/food-policy.js": "be69fe05edf440a075bee89de6953850b93f09b2b921f9eefec6a02cbea9be36",
     "web/v02/weekend/food-storage.js": "75189616237343916d5f4017342a2bf8b8422e27a068a1953ece89b6a00fade6",
@@ -175,7 +175,7 @@
     "inventory-ownership-and-material-accounting.svg": "f5fe00a34fb5d66ecb0c9df93e6ea018f72707370e332d21faceef5a8fa26b47",
     "purchases-sales-and-physical-transport.svg": "05ae6a865088c27adbe5da38c1c131cdd70741dcb18678e466688c319f9fb28c",
     "cash-commitments-and-forecasts.svg": "1822f90d40cd454dec0f5a087b2185da8e0e4db0667e3fc55f9f8647f5f429b4",
-    "optional-outside-employment.svg": "dc1d63ed7bdbb68e59c79412836a0ddcd10ce4eb16bd9e6a2f918b9905ff7e46",
+    "optional-outside-employment.svg": "8014b049dee77e398c45ee87ac65a38b5ca381b6a431d33e40b19609505363c5",
     "asset-maintenance-and-replacement.svg": "4f242b4dd6efcd9f2c604bbc58378df3f485c8cf4d044b5439724c91901cddef",
     "save-migration-and-recovery.svg": "2316ecd0388925eeffbb0f3f7be2c3f1474c61505d1e9fc106fc7e737bd90148",
     "presentation-inspection-and-ambient-life.svg": "b3050d72e8e3f2f5275250a0aa199dba5e1bb6362dd8fed616ffbd5c4b84b33a"

@@ -18,7 +18,7 @@ export function foodControls(root,s,projects,recipes,materials,refresh){
   const field=make(controls,'label',label),input=make(field,'input');input.type='number';input.min=0;input.max=7;input.step=.5;input.value=policy[key];input.disabled=s.mode==='sandbox';
   input.onchange=()=>{policy[key]=Math.max(0,Math.min(7,Number(input.value)||0));refresh();};
  }
- make(controls,'p',s.mode==='sandbox'?'Food automation and spoilage forecasts are inactive in sandbox.':'Targets use two portions per resident per day. Whole batches only; keep one day of edible food untouched. Manually repeating kitchens follow their own recipe.');
+ make(controls,'p',s.mode==='sandbox'?'Food automation and spoilage forecasts are inactive in sandbox.':'Targets use two portions per resident per day. Whole batches only; keep one day of edible food untouched. Existing kitchen jobs finish before the policy queues another batch.');
  const cooling=make(panel,'fieldset');make(cooling,'legend','Refrigeration');make(cooling,'p',coolingText(s));
  const label=make(cooling,'label','Chill first'),select=make(label,'select');
  for(const [value,text]of [['expiry','Earliest expiry'],['meals','Prepared meals'],['ingredients','Ingredients']])select.add(new Option(text,value));select.value=policy.coolingPriority;

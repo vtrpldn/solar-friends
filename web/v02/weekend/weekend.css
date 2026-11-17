@@ -1655,3 +1655,6 @@ header > .time { grid-column: 3; justify-self: end; }
 /* Keep the calendar and weather together beneath the clock and time controls. */
 header > .time { display: grid; grid-template-columns: auto auto; gap: 5px 10px; }
 .time > .environment-info { grid-column: 1 / -1; justify-content: space-between; gap: 12px; border-top: 1px solid #dbcba7; padding-top: 5px; color: #766d54; font-size: 11px; font-weight: 500; }
+
+/* Keep the hosting badge above the dock and below game panels. */
+#nl-badge-frame { bottom: 90px !important; z-index: 2 !important; }
