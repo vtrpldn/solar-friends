@@ -1,3 +1,4 @@
+import {HOME_DESIGNS} from './home-designs.js';
 import { createEntrancePortal, createUtilityPole } from "./entrance.js";
 import { RESOURCE_IDS, resourceModel } from "./resource-models.js";
 import { openingStorage, openingAssembly } from "./opening-props.js";
@@ -1602,6 +1603,7 @@ for (const [id, name] of Object.entries({
   add(id, name, "Homes", [2, 2], () => cabin(id), [id, id + "-night"]);
 add('groundwater-well','Water well','Buildings',[2,2],()=>waterSource(),[]);
 add('water-pump','Water pump','Buildings',[1,1],()=>waterSource(true),[]);
+for(const d of HOME_DESIGNS)add(d.id,d.name,'Homes',d.site,()=>functionalHome(d.id),[]);
 add('home-cottage','Small cottage','Homes',[4,4],()=>functionalHome('home-cottage'),[]);
 add('home-longhouse','Long veranda house','Homes',[7,4],()=>functionalHome('home-longhouse'),[]);
 add('home-family','Family house','Homes',[3,2],()=>extendedHouse(3),[]);
