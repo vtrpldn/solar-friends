@@ -4,10 +4,4 @@
 #supplies [data-status="watch"] .need-status { color:#91652d; }
 #supplies [data-status="alert"] .need-status { color:#a2442d; font-weight:700; }
 #supplies [data-status="neutral"] .need-status { color:#817355; }
-#supplies .need-sanitation { align-self:center; position:relative; min-width:38px; width:38px; height:38px; padding:0; border-radius:50%; font-size:11px; font-weight:650; color:#686b53; background:var(--paper); box-shadow:0 2px 0 #b19a6e; }
-.need-sanitation::after { content:''; position:absolute; top:1px; right:1px; width:7px; height:7px; border:2px solid var(--paper); border-radius:50%; background:#8b8d7b; }
-.need-sanitation[data-status="good"]::after { background:#658458; }
-.need-sanitation[data-status="watch"]::after { background:#bd8a3e; }
-.need-sanitation[data-status="alert"]::after { background:#b95238; }
-#supplies .need-sanitation:focus-visible { outline:3px solid #8d713b; outline-offset:2px; }
 #tank-attention { display:none; }

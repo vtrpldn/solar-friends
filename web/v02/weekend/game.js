@@ -1711,7 +1711,6 @@ function renderUI() {
     button.disabled = !active;
   });
   renderBasicNeeds($("supplies"),s);
-  $("supplies").querySelector(".need-sanitation").disabled = !active;
   const minutes = 9 * 60 + Math.floor(s.time * 0.45);
   $("clock").textContent =
     s.stage === "evening"
