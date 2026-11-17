@@ -389,14 +389,15 @@ function maintainFood(s) {
   if(s.time<(s.nextFoodCheck||0))return;
   s.nextFoodCheck=s.time+10;
   const food=(s.materials.food||0)+(s.materials.meals||0);
-  if(food>=s.people.length || !s.people.some(r=>ensureNeeds(r).hunger<25))return;
+  const target=Math.ceil(s.people.length*2*(s.foodReserveDays??1.5));
+  if(food>=target)return;
   // Harvest existing food plots before construction or nonessential production.
   for(const p of s.projects) {
     const recipe=Object.entries(PROCESSES).find(([,d])=>d.kind===PROJECTS[p.key].kind&&d.output.food);
     if(recipe&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))queueProduction(s,p.id,recipe[0]);
   }
   // A visible, switchable emergency policy, paid from real savings, at most once a day.
-  if(s.emergencyFood!==false && activeTrips(s).length<2 && s.time>=(s.nextFoodTrip||0) && supplyRun(s,'food')) {
+  if(s.emergencyFood!==false && MATERIALS.food.price+transportCost(s)<=(s.foodPurchaseBudget??100) && activeTrips(s).length<2 && s.time>=(s.nextFoodTrip||0) && supplyRun(s,'food')) {
     s.nextFoodTrip=s.time+3200;
     say(s,'Food reserve is low: the community bought emergency ingredients. Change this policy in Resources.');
   }
@@ -405,7 +406,7 @@ export function maintainWater(s) {
   const sys=ensureInfrastructure(s);
   for(const op of [...(s.operations||[])]) {
     const recipe=PROCESSES[op.recipe],n=sys.nodes[op.site];
-    if(op.done||op.waterPaid||!recipe?.water||!n||s.operations.some(o=>!o.done&&o.water&&o.site===n.id))continue;
+    if(op.done||(op.waterPaid&&op.phase!=="growing")||!recipe?.water||!n||s.operations.some(o=>!o.done&&o.water&&o.site===n.id))continue;
     const fresh=['kitchen','goat_pasture','coop'].includes(recipe.kind);
     if((fresh?n.water[0]:Math.max(n.water[0],n.water[1]))>=recipe.water)continue;
     if(fresh&&n.water[1]>=1&&n.capacity[0])queuePurification(s,n.id);
@@ -1824,7 +1825,7 @@ function tickUncached(s, dt) {
   autoConnectUtilities(s, PROJECTS);
   upkeepStep(s,PROJECTS,dt);
   infrastructureStep(s, PROJECTS, dt);
-  biologicalStep(s,dt);
+  biologicalStep(s,dt,useWater);
   coolStoredFood(s,dt);
   foodStorageStep(s,PROCESSES,MATERIALS);
   deliveryStep(s,dt,MATERIALS,changeMaterial,storedMaterials(s),storageCapacity(s));
@@ -2554,6 +2555,8 @@ export function restore(text) {
       r.cargo = trip.phase === "unloading";
     }
     }
+    if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
+    if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     if (!validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&

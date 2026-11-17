@@ -38,3 +38,7 @@ A resident leaves only when rested, needs are reasonably met, no cargo is held a
 `verify-v02-biological-production.mjs` exercises actual planting, worker release, growth save/load, calendar progress and partial/total field losses. `verify-v02-outside-work.mjs` exercises departure, offsite absence, return, deferred income, fatigue and mid-shift restore. Neither is a complete balance playthrough.
 
 Seasonal coefficients, crop area/yield, juvenile orchards, ongoing care outside productive batches, mortality, construction scale and working capital still need calibration. Long biological cycles intentionally invalidate the old overnight-harvest assumptions; the complete economy must be tested with ordinary income and purchases before release.
+
+## Ongoing moisture and soil
+
+Vegetable beds represent 16 m², greenhouse beds 24 m², orchards 64 m² and banana plots 32 m² for the moisture model. Daily dry-weather irrigation is respectively 48, 48, 32 and 48 liters. These are engineering assumptions, not calibrated crop-specific irrigation prescriptions. Residents automatically queue water deliveries while a crop is growing; rain substitutes for outdoor irrigation. Dry soil stops growth, and watering restores it without deleting the crop. Each completed crop reduces fertility by ten percentage points; idle soil recovers over 180 game days. Fertility slows growth rather than creating extra harvested mass. Compost amendment and crop-specific area/yield calibration remain outstanding.

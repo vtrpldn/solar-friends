@@ -36,3 +36,7 @@ Old saves have no historical freshness data. Their existing stock and outstandin
 `verify-v02-economy-soak.mjs` runs ordinary export funding and resident construction from the genuine Day 61 village. The three-day continuation passed with food/water/cash available and the house complete. Report: `docs/balance/2026-11-17-food-storage-soak.json`. This established village test is not proof that every new-game starting preset is balanced.
 
 Production, procurement, physical trade, urgent needs, save protection and accelerated fixed-step regression checks passed. The normal-game Resources guidance was inspected in the in-app browser.
+
+## Waste mass correction
+
+Spoiled food becomes organic residues by physical mass, not by item count: twelve eggs produce approximately 0.72 kg, not twelve kilograms. Fractional kilograms remain in a saved accumulator until a whole stock unit is available. Eating produces an assumed 0.2 kg of recoverable scraps per portion; the remainder is consumed rather than becoming free compost. The accumulator is rounded to microkilograms so differently grouped expiry events retain equivalent results.

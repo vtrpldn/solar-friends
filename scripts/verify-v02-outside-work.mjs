@@ -17,3 +17,7 @@ assert.equal(loaded.finances.categories.outsideWork,80,'mid-shift reload settles
 for(let i=0;i<100;i++)tick(loaded,.1);assert.equal(loaded.finances.categories.outsideWork,80);
 const malformed=JSON.parse(savedAway);malformed.people[0].outsideWork.until=Infinity;assert.equal(restore(JSON.stringify(malformed)),null);
 console.log('PASS optional contract, walking commute, offsite work, deferred pay, energy, disable-after-shift and save settlement');
+const broke=createWeekend(42);chooseCamp(broke,'entrance');enableFastNavigation(broke);broke.money=0;setOutsideWork(broke,broke.people[0],true);
+for(let i=0;i<15000&&!broke.finances?.categories.outsideWork;i++)tick(broke,.1);
+assert.equal(broke.finances.categories.outsideWork,72,'zero cash can recover through work with employer-deducted fare');
+console.log('PASS outside work recovers from zero savings without free money or an upfront fare deadlock');

@@ -25,13 +25,27 @@ export function beginBiology(s,op,r){
  op.status=`Growing / curing: ${b.days} game days before harvest work`;
  r.operation=null;r.cargo=false;r.action='idle';r.target=null;r.walk=[];return true;
 }
-export function biologicalStep(s,dt){
+export const CROP_CARE={vegetables:{area:16,liters:48},greenhouse:{area:24,liters:48},fruit:{area:64,liters:32},bananas:{area:32,liters:48}};
+export function biologicalStep(s,dt,useWater){
+ const active=new Set((s.operations||[]).filter(o=>!o.done&&o.phase==='growing'&&CROP_CARE[o.recipe]).map(o=>o.site));
+ for(const p of s.projects||[])if(p.soilFertility!==undefined&&!active.has(p.id))p.soilFertility=Math.min(1,p.soilFertility+dt/(180*GAME_DAY));
  for(const op of s.operations||[]){
   if(op.done||op.phase!=='growing')continue;
-  op.growthRemaining=Math.max(0,op.growthRemaining-dt*growthRate(s,op.recipe));
+  const crop=CROP_CARE[op.recipe],site=s.projects?.find(p=>p.id===op.site);
+  let moisture=1,fertility=1;
+  if(crop&&site){
+   site.soilMoisture??=.75;site.soilFertility??=1;
+   const need=crop.liters*dt/GAME_DAY;
+   const rain=s.rain&&op.recipe!=='greenhouse';
+   const irrigated=!rain&&useWater?.(s,op.site,need,true);
+   site.soilMoisture=Math.max(0,Math.min(1,site.soilMoisture+(rain?2:irrigated?1:-1)*dt/GAME_DAY));
+   moisture=site.soilMoisture<.1?0:Math.min(1,site.soilMoisture/.4);
+   fertility=.5+.5*site.soilFertility;
+  }
+  op.growthRemaining=Math.max(0,op.growthRemaining-dt*growthRate(s,op.recipe)*moisture*fertility);
   const days=op.growthRemaining/GAME_DAY;
-  op.status=`${op.recipe==='compost'?'Curing':'Growing'}: ${days.toFixed(1)} growth days remaining · ${seasonAt(s.time)}`;
-  if(!op.growthRemaining){op.phase='process';op.ripeAt=s.time;op.status='Ready for resident harvest work';}
+  op.status=`${op.recipe==='compost'?'Curing':'Growing'}: ${days.toFixed(1)} growth days remaining · ${seasonAt(s.time)}${crop&&site?` · soil moisture ${Math.round(site.soilMoisture*100)}% · fertility ${Math.round(site.soilFertility*100)}% · ${crop.liters} L/day irrigation in dry weather`:""}`;
+  if(!op.growthRemaining){if(crop&&site)site.soilFertility=Math.max(0,site.soilFertility-.1);op.phase='process';op.ripeAt=s.time;op.status='Ready for resident harvest work';}
  }
 }
 export function harvestOutput(s,op,recipe){
@@ -43,7 +57,7 @@ export function harvestOutput(s,op,recipe){
  return result;
 }
 export function biologyText(recipe){const b=BIOLOGY[recipe];return b?` · ${b.days} game days of growth/curing, separate from resident work${b.seasonal?'; slower in unfavorable seasons':''}${Number.isFinite(b.window)?`; harvest within ${b.window} days before gradual field losses`:''}`:'';}
-export function validBiology(s,recipes){return (s.operations||[]).every(o=>{
+export function validBiology(s,recipes){if(!(s.projects||[]).every(p=>[p.soilMoisture,p.soilFertility].every(n=>n===undefined||(Number.isFinite(n)&&n>=0&&n<=1))))return false;return (s.operations||[]).every(o=>{
  if(o.planted!==undefined&&typeof o.planted!=='boolean')return false;
  if(o.phase==='growing'&&(!BIOLOGY[o.recipe]||!o.planted||!Number.isFinite(o.growthRemaining)))return false;
  if(o.growthRemaining!==undefined&&(!BIOLOGY[o.recipe]||!Number.isFinite(o.growthRemaining)||o.growthRemaining<0||o.growthRemaining>BIOLOGY[o.recipe].days*GAME_DAY))return false;

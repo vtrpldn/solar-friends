@@ -12,7 +12,7 @@ assert.equal(queueProduction(s,k.id,'meals'),'');
 const kitchen=s.infrastructure.nodes[k.id];kitchen.water[0]=0;
 s.people.forEach(r=>r.sleepUntil=1000);infrastructureStep(s,PROJECTS,1);
 assert.equal(kitchen.demand,0,'blocked daytime kitchen has no load');
-s.time=1600;infrastructureStep(s,PROJECTS,1);assert.equal(kitchen.demand,.025,'night light only, not cooking load');
+const night=structuredClone(s);night.time=1600;infrastructureStep(night,PROJECTS,1);assert.equal(night.infrastructure.nodes[k.id].demand,.025,'night light only, not cooking load');
 s.time=0;s.people.forEach(r=>{r.sleepUntil=0;r.energy=90;});
 const op=s.operations[0];op.phase='process';op.status='Working';s.people[0].operation=op.id;s.people[0].action='produce';infrastructureStep(s,PROJECTS,1);assert.equal(kitchen.demand,.45,'active equipment has cooking load');
 assert.equal(queueProduction(s,g.id,'vegetables'),'');

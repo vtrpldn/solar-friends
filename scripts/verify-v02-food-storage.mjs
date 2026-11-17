@@ -31,3 +31,5 @@ midTrip.materials.bamboo=24;
 for(let i=0;i<120;i++){assert(sellMaterial(midTrip,'bamboo'));assert(cancelExport(midTrip,midTrip.trade.orders.at(-1).id,foodChange));}
 assert(restore(save(midTrip)),'history pruning preserves current trip order references');
 console.log('PASS spoiled cargo persistence and trade-history pruning during an active trip');
+const eggsOnly={time:0,materials:{food:0,meals:0,eggs:12,milk:0,scraps:0}};ensureFoodStorage(eggsOnly);eggsOnly.time=7*3200;foodStorageStep(eggsOnly,PROCESSES);assert.equal(eggsOnly.materials.scraps,0);assert(Math.abs(eggsOnly.foodStorage.wasteRemainderKg-.72)<1e-8,'twelve eggs make 0.72 kg waste, not twelve kilograms');assert(validFoodStorage(eggsOnly));
+console.log('PASS spoiled egg mass cannot amplify compost inputs');

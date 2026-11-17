@@ -1,3 +1,4 @@
+import {materialMass} from './material-measures.js';
 import {activeTrips} from "./trip-state.js";
 // Authored game shelf lives, not food-safety guidance. One day is 3200 sim seconds.
 export const FOOD_DAYS={food:3,meals:2,eggs:7,milk:1};
@@ -22,9 +23,13 @@ export function foodChange(s,id,n,lots){
  }else f.lots[id]=merge([...f.lots[id],...(lots||freshLots(s,id,n))]);
  s.materials[id]+=n;return taken;
 }
+export function addOrganicWaste(s,kg){
+ const f=ensureFoodStorage(s);const total=(f.wasteRemainderKg||0)+kg,whole=Math.floor(total+1e-9);
+ f.wasteRemainderKg=Math.max(0,Math.round((total-whole)*1000000)/1000000);s.materials.scraps=(s.materials.scraps||0)+whole;
+}
 function expire(s,id,lots){
  const good=lots.filter(l=>l.expires>s.time),lost=lots.filter(l=>l.expires<=s.time).reduce((n,l)=>n+l.n,0);
- if(lost){const f=ensureFoodStorage(s);f.spoiled[id]=(f.spoiled[id]||0)+lost;s.materials.scraps=(s.materials.scraps||0)+lost;}
+ if(lost){const f=ensureFoodStorage(s);f.spoiled[id]=(f.spoiled[id]||0)+lost;addOrganicWaste(s,materialMass({[id]:lost}));}
  return {good,lost};
 }
 export function foodStorageStep(s,recipes,materials={}){
@@ -59,6 +64,7 @@ export function foodStorageStep(s,recipes,materials={}){
 }
 export function validFoodStorage(s,recipes={},materials={}){
  const f=s.foodStorage;if(f===undefined)return true;
+ if(f?.wasteRemainderKg!==undefined&&(!Number.isFinite(f.wasteRemainderKg)||f.wasteRemainderKg<0||f.wasteRemainderKg>=1))return false;
  if(!f||f.version!==1||!f.lots||!f.spoiled)return false;
  const valid=lots=>Array.isArray(lots)&&lots.length<=800&&lots.every(l=>l&&Number.isFinite(l.n)&&l.n>0&&Number.isFinite(l.expires)&&l.expires>=0&&(l.preserved===undefined||typeof l.preserved==='boolean')&&(l.chilled===undefined||typeof l.chilled==='boolean'));
  if(Object.keys(f.lots).some(id=>!FOOD_DAYS[id])||Object.entries(f.spoiled).some(([id,n])=>!FOOD_DAYS[id]||!Number.isFinite(n)||n<0))return false;

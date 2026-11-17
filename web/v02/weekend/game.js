@@ -1638,7 +1638,7 @@ function renderUI() {
   }
   const purchase = MATERIALS[$("purchase").value];
   $("town").textContent =
-    `Fetch ${materialText($("purchase").value, purchase.quantity)} · R$${purchase.price + transportCost(s)} incl. trip`;
+    `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · R$${(purchase.price + transportCost(s)).toFixed(2)} incl. transport`;
   $("town").disabled =
     (s.deliveryOnly?!!s.delivery:(!!s.trip&&!!s.secondTrip)) || spendableMoney(s) < purchase.price + transportCost(s) || s.stage !== "playing";
   $("inventory").textContent = Object.keys(MATERIALS)
@@ -1649,9 +1649,9 @@ function renderUI() {
   $("sell").disabled =
     !!tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error;
   $("sell").title=tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Payment after trading in town; combine batches to share transport costs.";
-  $("trip").textContent = s.trip
-    ? `${s.people.find((r) => r.id === s.trip.person).name}: ${{ boarding: "walking to the car", outbound: "driving to town", away: "trading in town", inbound: "driving home", unloading: "unloading supplies" }[s.trip.phase]}.`
-    : `Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. R$${spendableMoney(s).toFixed(2)} available after collection commitments. Town trip: R$${transportCost(s)}. Buy essentials or export surplus.`;
+  const journeys=activeTrips(s).map(trip=>`${s.people.find(r=>r.id===trip.person).name}: ${{boarding:"walking to the car",outbound:"driving to town",away:"trading in town",inbound:"driving home",unloading:"unloading supplies"}[trip.phase]}`);
+  if(s.delivery)journeys.push(`Supplier delivery: ${Math.ceil(s.delivery.left*.45)} game minutes remaining`);
+  $("trip").textContent = journeys.length?journeys.join(' · '):`Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. R$${spendableMoney(s).toFixed(2)} available after collection commitments. ${s.deliveryOnly?'Delivery':'Car trip'}: R$${transportCost(s).toFixed(2)}.`;
   $("rain").hidden = !s.rainSeen || s.rainResolved;
   $("boards").disabled = s.wood < 2;
   $("log").replaceChildren(

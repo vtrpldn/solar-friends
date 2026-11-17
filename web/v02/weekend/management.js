@@ -1,3 +1,4 @@
+import {inventoryOwnership} from './economy-inventory.js';
 import {upkeep,upkeepText} from "./asset-upkeep.js";
 import {biologyText} from "./biological-production.js";
 import {materialUnitText} from "./material-measures.js";
@@ -8,7 +9,7 @@ import {recipeLossText,productionSummary} from './production-accounting.js';
 import {transportCost} from './physical-trade.js';
 import {economyControls} from './economy-controls.js';
 import {productionTarget} from './economy-policies.js';
-import {financeSummary,financeTime} from './finances.js';
+import {financeSummary,financeTime,financeForecast} from './finances.js';
 import { RESOURCE_GROUPS } from "./resource-groups.js";
 import { resourceIcon, illustrateResources } from "./resource-icons.js";
 import {
@@ -246,15 +247,22 @@ export function createManagement({
       const add=(tag,text,parent=screen)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
       add('p',s.mode==='sandbox'?'Sandbox supplies and funds are unlimited; purchases are not tracked.':`Records begin ${financeTime(f.since)} with ${money(f.opening)}. Earlier purchases in an existing save are not reconstructed.`);
       add('p',`Available to spend: ${money(f.available)}. Reserved for undelivered construction supplies: ${money(f.committed)} in collection costs. This reserve stays in savings until each trip departs.`);
+      add('h3','Seven-day outlook');
+      const forecast=financeForecast(s);
+      add('p',forecast.days?`Available cash could reach ${money(forecast.low)}–${money(forecast.high)} if the best or worst daily operating cash flow from the last ${forecast.days} complete days repeats. Mean operating change: ${money(forecast.mean)}/day. This is a scenario range, not guaranteed income; excludes new construction and assumes the same shopping, work and sales.`:'A forecast needs at least one complete recorded day. Future crops and unpaid exports are not included in available cash.');
+      add('p',`Construction investment paid: ${money(Math.abs(f.categories.construction||0))}. Other cash spending: ${money(Math.max(0,f.expenses-Math.abs(f.categories.construction||0)))}. Stored supplies and installed buildings are assets, not spendable savings.`);
+      const assets=inventoryOwnership(s,PROJECTS,PROCESSES,MATERIALS).values;
+      add('h3','Where our supplies are');
+      add('p',`Replacement-cost estimates: stores ${money(assets.available)}; committed to projects or sales ${money(assets.reserved)}; processing inputs ${money(assets.processing)}; goods travelling ${money(assets.transit)}; building materials installed ${money(assets.installed)}. These estimates exclude land, cars, labor, depreciation and separately installed upgrades; they are not resale quotes.`);
       add('h3','Ongoing costs');
       add('p',`Grid power: ${money(f.gridRate)}/hour at the current import rate. Charges change with demand, local generation and available funds.`);
       const power=document.createElement('button');power.textContent='Manage grid power';power.onclick=()=>open('power');screen.append(power);
       const queued=(s.trade?.orders||[]).filter(o=>['queued','loaded'].includes(o.status));
-      add('p',`Exports awaiting payment: ${money(queued.reduce((n,o)=>n+o.cents/100,0))} gross in ${queued.length} batches. This is reserved stock, not cash. Next trip costs ${money(transportCost(s))}.`);
+      add('p',`Exports awaiting payment: ${money(queued.reduce((n,o)=>n+o.cents/100,0))} gross in ${queued.length} batches. This is reserved stock, not cash. Resident export trip costs ${money(transportCost({...s,deliveryOnly:false}))}.`);
       add('p',tripEstimateText(s.worldSettings?.town));
       add('h3','Asset upkeep');add('p',upkeepText(s));
       const service=upkeep(s),toggle=document.createElement('button');toggle.textContent=service.automatic?'Automatic upkeep: on':'Automatic upkeep: off';toggle.setAttribute('aria-pressed',String(service.automatic));toggle.onclick=()=>{service.automatic=!service.automatic;render();};screen.append(toggle);
-      const allowance=document.createElement('input');allowance.type='number';allowance.min='0';allowance.max='100000';allowance.value=service.dailyBudget;allowance.setAttribute('aria-label','Daily upkeep materials allowance in reais');allowance.onchange=()=>{service.dailyBudget=Math.max(0,Math.min(100000,Number(allowance.value)||0));render();};screen.append(allowance);
+      const allowance=document.createElement('input');allowance.type='number';allowance.min='0';allowance.max='100000';allowance.value=service.dailyBudget;allowance.setAttribute('aria-label','Daily upkeep materials allowance in reais');allowance.oninput=()=>{service.dailyBudget=Math.max(0,Math.min(100000,Number(allowance.value)||0));};allowance.onchange=()=>render();screen.append(allowance);
       add('h3','Where the money goes');
       const groups={outsideWork:'Outside work',commuting:'Commuting',transport:'Transport',sales:'Surplus sales',construction:'Building materials',purchases:'Town purchases',electricity:'Grid electricity'};
       for(const [key,label] of Object.entries(groups))add('p',`${label}: ${money(Math.abs(f.categories[key]||0))}`);
@@ -324,11 +332,15 @@ export function createManagement({
       $("resource-grid").replaceChildren();
       economyControls($("resource-grid"),s,MATERIALS,PROCESSES,materialCount,()=>{refresh();render();});
       const reserve=document.createElement('button');
-      reserve.textContent=`Emergency food purchases: ${s.emergencyFood===false?'off':'on'}`;
-      reserve.title='When food is low and residents are hungry, buy one affordable batch of ingredients, at most once per day. Existing food plots are prioritized too.';
+      reserve.textContent=`Automatic food purchases: ${s.emergencyFood===false?'off':'on'}`;
+      reserve.title='Maintain the chosen food reserve with at most one affordable ingredient purchase per day, within the daily food budget. Growing crops cannot replace food needed today.';
       reserve.setAttribute('aria-pressed',String(s.emergencyFood!==false));
       reserve.onclick=()=>{s.emergencyFood=s.emergencyFood===false;refresh();render();};
       $("resource-grid").append(reserve);
+      for(const [key,label,value,max,step] of [['foodReserveDays','Food reserve in days',1.5,7,.5],['foodPurchaseBudget','Daily food purchase budget including transport (R$)',100,100000,1]]){
+       const field=document.createElement('label');field.textContent=label;const input=document.createElement('input');input.type='number';input.min=0;input.max=max;input.step=step;input.value=s[key]??value;input.setAttribute('aria-label',label);input.oninput=()=>{s[key]=Math.max(0,Math.min(max,Number(input.value)||0));};field.append(input);$("resource-grid").append(field);
+      }
+      const reserveNote=document.createElement('p');reserveNote.textContent='Reserve estimate: two food portions per resident per day. A spending limit, not reserved cash; unavailable drivers, funds or storage may delay replenishment.';$("resource-grid").append(reserveNote);
       const delivery=document.createElement('button');delivery.textContent=s.deliveryOnly?'Purchases: supplier delivery':'Purchases: resident pickup';delivery.setAttribute('aria-pressed',String(!!s.deliveryOnly));delivery.onclick=()=>{s.deliveryOnly=!s.deliveryOnly;refresh();render();};$("resource-grid").append(delivery);
       const freight=document.createElement('p');freight.textContent=s.delivery?`${s.delivery.status||'Supplier delivery on its way'} · ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:s.deliveryOnly?`Supplier delivery: R$${transportCost(s).toFixed(2)} freight, up to 5 tonnes / 12 m³. About six hours plus travel; no resident driver needed.`:'Resident pickups use the village cars and their cargo limits.';$("resource-grid").append(freight);
       const search = $("resource-search").value.toLowerCase(), committed=committedMaterials(s);
@@ -376,7 +388,8 @@ export function createManagement({
         const img = document.createElement("img");
         illustrate(img, PROJECTS[p.key].asset);
         const name = document.createElement("strong");
-        name.textContent = `${PROJECTS[p.key].name} #${p.id}`;
+        name.textContent = `${PROJECTS[p.key].name} #${p.id} (${p.x}, ${p.z})`;
+        if(p.animalHealth!==undefined){const care=document.createElement("p");care.textContent=`Animal health: ${Math.round(p.animalHealth)}%. ${p.careUntil>s.time?"Feed and water supplied":"Care due: residents need fodder and drinking water"}.`;el.append(care);}
         const choice = document.createElement("select");
         choice.setAttribute("aria-label", `Work at ${name.textContent}`);
         for (const [id, d] of recipes) choice.add(new Option(d.name, id));

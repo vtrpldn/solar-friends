@@ -21,3 +21,9 @@ assert(growthRate({time:200*GAME_DAY,worldSettings:{biome:'caatinga'}},'vegetabl
 const bad=JSON.parse(save(s));bad.operations[0].growthRemaining=-1;assert.equal(restore(JSON.stringify(bad)),null);
 const worker={operation:1};assert.equal(beginBiology({mode:'sandbox'}, {recipe:'vegetables'},worker),false);
 console.log('PASS resident planting, autonomous calendar growth, seasonal slowdown, gradual field loss, save validation and sandbox');
+const drought={time:0,rain:false,projects:[{id:1,soilMoisture:0,soilFertility:1}],operations:[{site:1,recipe:'vegetables',phase:'growing',growthRemaining:45*GAME_DAY,planted:true}]};
+biologicalStep(drought,100,()=>false);assert.equal(drought.operations[0].growthRemaining,45*GAME_DAY,'dry soil stops growth');
+let liters=0;for(let i=0;i<3200;i++)biologicalStep(drought,1,(_s,_id,n)=>{liters+=n;return true;});
+assert(Math.abs(liters-48)<1e-6,'daily irrigation has physical liters');assert(drought.operations[0].growthRemaining<45*GAME_DAY,'water resumes growth');
+drought.rain=true;liters=0;biologicalStep(drought,100,()=>{liters++;return true;});assert.equal(liters,0,'rain replaces irrigation outdoors');
+console.log('PASS dry-soil stall, continuing irrigation demand, recovery and rain substitution');

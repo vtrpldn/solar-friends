@@ -14,15 +14,16 @@ export const OUTSIDE_JOBS={
 };
 export const COMMUTE_FARE=8;
 export function setOutsideWork(s,r,enabled){r.outsideJobEnabled=!!enabled;return true;}
-export function outsideWorkText(r){const j=OUTSIDE_JOBS[r.id];return `${j.name}: ${j.hours} hours, R$${j.pay} gross per completed shift; R$${COMMUTE_FARE} return bus fare. Weekdays, one shift a day. Meals and toilet breaks provided at work. ${r.outsideWork?`${r.outsideWork.phase==='away'?'At work':'Commuting'}; finishes the current shift if disabled.`:r.outsideJobEnabled?'Will leave in the morning when rested and free.':'Optional; currently staying in the village.'}`;}
+export function outsideWorkText(r){const j=OUTSIDE_JOBS[r.id];return `${j.name}: ${j.hours} hours, R$${j.pay} gross per completed shift; R$${COMMUTE_FARE} return bus fare (deducted from pay if savings cannot cover it). Weekdays, one shift a day. Meals and toilet breaks provided at work. ${r.outsideWork?`${r.outsideWork.phase==='away'?'At work':'Commuting'}; finishes the current shift if disabled.`:r.outsideJobEnabled?'Will leave in the morning when rested and free.':'Optional; currently staying in the village.'}`;}
 export function outsideWorkStep(s,r,dt,go,route){
  const j=OUTSIDE_JOBS[r.id];if(!j||s.mode==='sandbox')return false;
  const day=Math.floor((540+s.time*.45)/1440),hour=(9+s.time*.45/60)%24;
  if(!r.outsideWork){
-  if(!r.outsideJobEnabled||day%7>=5||r.lastOutsideDay===day||hour<8||hour>=11||r.energy<65||r.cargo||r.needTask||r.tentPhase||r.sleepUntil||r.action==='town'||Object.values(r.needs).some(n=>n<35)||spendableMoney(s)<COMMUTE_FARE)return false;
+  if(!r.outsideJobEnabled||day%7>=5||r.lastOutsideDay===day||hour<8||hour>=11||r.energy<65||r.cargo||r.needTask||r.tentPhase||r.sleepUntil||r.action==='town'||['hunger','bladder','bowels'].some(k=>r.needs[k]<20))return false;
   const exit={x:29,z:CELL_MIN+1};if(!route(s,r,exit)){r.outsideWorkBlocked='No walking route to the entrance';return false;}
-  transact(s,-COMMUTE_FARE,'commuting',`${r.name}: return bus fare`);
-  r.outsideWork={phase:'outbound',day,exit};r.lastOutsideDay=day;r.outsideWorkBlocked=null;
+  const fareDue=spendableMoney(s)<COMMUTE_FARE;
+  if(!fareDue)transact(s,-COMMUTE_FARE,'commuting',`${r.name}: return bus fare`);
+  r.outsideWork={phase:'outbound',day,exit,fareDue};r.lastOutsideDay=day;r.outsideWorkBlocked=null;
   r.job=null;r.operation=null;r.target=null;r.walk=[];
  }
  const work=r.outsideWork;
@@ -36,7 +37,7 @@ export function outsideWorkStep(s,r,dt,go,route){
   if(s.time>=work.until){work.phase='inbound';r.action='walk';}
  }else{
   r.action='walk';if(!go(s,r,s.stock))return true;
-  transact(s,j.pay,'outsideWork',`${r.name}: ${j.name}`);
+  transact(s,j.pay-(work.fareDue?COMMUTE_FARE:0),'outsideWork',`${r.name}: ${j.name}${work.fareDue?' (bus fare deducted by employer)':''}`);
   r.outsideWork=null;r.action='idle';
  }
  return true;
@@ -45,5 +46,5 @@ export function validOutsideWork(s){return s.people.every(r=>{
  if(r.outsideJobEnabled!==undefined&&typeof r.outsideJobEnabled!=='boolean')return false;
  if(r.lastOutsideDay!==undefined&&(!Number.isInteger(r.lastOutsideDay)||r.lastOutsideDay<0))return false;
  const w=r.outsideWork;if(!w)return true;if(activeTrips(s).some(t=>t.person===r.id))return false;
- return ['outbound','away','inbound'].includes(w.phase)&&Number.isInteger(w.day)&&w.day>=0&&w.day===r.lastOutsideDay&&w.exit?.x===29&&w.exit?.z===CELL_MIN+1&&(!['away','inbound'].includes(w.phase)||(Number.isFinite(w.until)&&w.until>=0&&w.until<=s.time+1200));
+ return (w.fareDue===undefined||typeof w.fareDue==='boolean')&&['outbound','away','inbound'].includes(w.phase)&&Number.isInteger(w.day)&&w.day>=0&&w.day===r.lastOutsideDay&&w.exit?.x===29&&w.exit?.z===CELL_MIN+1&&(!['away','inbound'].includes(w.phase)||(Number.isFinite(w.until)&&w.until>=0&&w.until<=s.time+1200));
 });}

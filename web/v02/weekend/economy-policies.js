@@ -8,7 +8,7 @@ export function productionTarget(p){return Number.isFinite(p.stockTarget)?Math.m
 export function workGroup(op,recipes){return op.water?(op.water.service?'maintenance':'food'):(recipes[op.recipe]?.output.food||recipes[op.recipe]?.output.meals?'food':'production');}
 export function protectedStock(s,id,recipes){
  const policy=economyPolicies(s).sales[id];let reserve=policy?.keep||0;
- if(id==='food'||id==='meals')reserve=Math.max(reserve,s.people.length*4);
+ if(id==='food'||id==='meals')reserve=Math.max(reserve,Math.ceil(s.people.length*2*(s.foodReserveDays??2)));
  // Construction and queued inputs have already left available stock. Protect the
  // next two batches at repeating sites as well, without double-counting reservations.
  let inputs=0;

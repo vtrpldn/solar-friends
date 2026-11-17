@@ -17,7 +17,7 @@ export function tripEstimate(setting='drive') {
 }
 export function tripEstimateText(setting){
  const q=tripEstimate(setting);
- return `${q.km} km round trip · about ${q.minutes} game minutes plus walking/parking · ${q.liters.toFixed(1)} L fuel · R$${q.cost.toFixed(2)}. Fuel only; vehicle wear is not yet charged.`;
+ return `${q.km} km round trip · about ${q.minutes} game minutes plus walking/parking · ${q.liters.toFixed(1)} L fuel · R$${q.cost.toFixed(2)}. Fuel charged at departure; vehicle wear requires separate service materials and resident work.`;
 }
 
 // Scenario endowment after buying the land; not an income source or a price quote.
