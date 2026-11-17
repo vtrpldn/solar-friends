@@ -25,4 +25,15 @@ const sleeper=s.people[1];sleeper.energy=10;sleeper.needs={hunger:100,bladder:10
 sleeper.action='idle';sleeper.restSite=null;sleeper.cargo=false;
 for(let i=0;i<5 && !sleeper.restSite;i++)tick(s,.1);
 assert.equal(sleeper.restSite,home.id);
+const previousRest=sleeper.restSite;
+assert.equal(assignHome(s,sleeper.id,null),'');
+assert.equal(sleeper.restSite,previousRest,'Reassignment must not interrupt an active rest');
+const reserved=createScalePreview(false,'homes'), cottage=availableHomes(reserved).find(p=>PROJECTS[p.key].beds===1);
+assert.equal(assignHome(reserved,reserved.people[0].id,cottage.id),'');
+const visitor=reserved.people[1];visitor.x=cottage.x;visitor.z=cottage.z+8;visitor.energy=10;
+visitor.needs={hunger:100,bladder:100,bowels:100,hygiene:100,social:100,fun:100};
+for(let i=0;i<5 && !visitor.restSite;i++)tick(reserved,.1);
+assert.notEqual(visitor.restSite,cottage.id,'An absent owner reserves their bed');
+reserved.infrastructure.nodes[cottage.id].enabled=false;
+assert.match(assignHome(reserved,reserved.people[2].id,cottage.id),/Reopen/);
 console.log('PASS: home capacity, reassignment, invalid targets, legacy saves, corrupt assignments and actual rest routing.');
