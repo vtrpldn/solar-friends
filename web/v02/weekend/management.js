@@ -293,6 +293,9 @@ export function createManagement({
       const assets=inventoryOwnership(s,PROJECTS,PROCESSES,MATERIALS).values;
       add('h3','Where our supplies are');
       add('p',`Replacement-cost estimates: stores ${money(assets.available)}; committed to projects or sales ${money(assets.reserved)}; processing inputs ${money(assets.processing)}; goods travelling ${money(assets.transit)}; building materials installed ${money(assets.installed)}. These estimates exclude land, cars, labor, depreciation and separately installed upgrades; they are not resale quotes.`);
+      add('h3','Protect everyday supplies');
+      add('p','Blueprint auto-buy keeps this much cash for food and other essentials. It is a planning reserve, not a charge; everyday purchases and bills can still use it. Existing paid orders keep their collection budget.');
+      const reserve=document.createElement('input');reserve.type='number';reserve.min='0';reserve.max='100000';reserve.value=s.expansionReserve??0;reserve.setAttribute('aria-label','Cash to keep before buying building materials');reserve.oninput=()=>{s.expansionReserve=Math.max(0,Math.min(100000,Number(reserve.value)||0));};screen.append(reserve);
       add('h3','Ongoing costs');
       add('p',`Grid power: ${money(f.gridRate)}/hour at the current import rate. Charges change with demand, local generation and available funds.`);
       const power=document.createElement('button');power.textContent='Manage grid power';power.onclick=()=>open('power');screen.append(power);

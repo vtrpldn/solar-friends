@@ -4,6 +4,8 @@ import {
   createSandbox,
   plan,
   moveProject,
+  tick,
+  enableFastNavigation,
   footprint,
   buildingFront,
   save,
@@ -34,6 +36,10 @@ for (const key of ["workshop","home-cottage","home-longhouse",...HOME_DESIGNS.ma
   assert.equal(moveProject(s, p.id, 65, 55, (rotation + 1) % 4), "");
   assert.equal(p.rotation,rotation,'relocation waits for resident work');
   assert.equal(p.removal.target.rotation,(rotation+1)%4);
+  enableFastNavigation(s);
+  for(let i=0;i<64000&&p.removal;i++)tick(s,.1);
+  assert.equal(p.removal, undefined, "residents finish relocation");
+  assert.equal(p.rotation, (rotation + 1) % 4);
   assert.ok(restore(save(s)));
 }
 const s = createSandbox();

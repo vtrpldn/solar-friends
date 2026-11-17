@@ -1721,7 +1721,7 @@ function renderUI() {
     const b = document.createElement("button");
     const done = p.work >= d.work;
     div.classList.toggle("complete", done);
-    const construction = constructionProgress(s, p, d, requiredLoads(p.key));
+    const construction = constructionProgress(s, p, d, requiredLoads(p));
     b.innerHTML = `<img alt=""/><span>${projectLabel(p, PROJECTS)}</span><em>${done ? "✓" : construction.phase}</em>`;
     illustrate(b.querySelector("img"), d.asset);
     b.onclick = () => {
@@ -1959,7 +1959,7 @@ function renderUI() {
     $("copy-building").hidden = PROJECTS[p.key].natural ||
       s.mode !== "sandbox" && !PROJECTS[p.key].repeatable;
     illustrate($("selected-art"), PROJECTS[p.key].asset);
-    const construction = constructionProgress(s, p, PROJECTS[p.key], requiredLoads(p.key));
+    const construction = constructionProgress(s, p, PROJECTS[p.key], requiredLoads(p));
     $("selected-state").textContent = p.removal ? `${p.removal.status} · ${Math.floor(p.removal.work/p.removal.required*100)}%` : p.work < PROJECTS[p.key].work ? construction.phase : operationalStatus(p, s.infrastructure?.nodes[p.id], productionActivity(s,p,PROCESSES));
     $("selected-benefit").textContent = buildingBenefit(PROJECTS[p.key], PROCESSES, COMMUNITY);
     $("selected-benefit").hidden = !$("selected-benefit").textContent;
@@ -1978,7 +1978,7 @@ function renderUI() {
             ? " Housing: 0 goats / 2 places."
             : "";
     $("selected-desc").textContent =
-      `${projectDescription(PROJECTS[p.key], p)} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+      `${projectDescription(PROJECTS[p.key], p)} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Reserved bill: ${Object.entries(p.billOfMaterials||PROJECTS[p.key].materials).map(([id,n])=>materialText(id,n)).join(" · ")}. Delivered ${p.delivered}/${requiredLoads(p)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     disabledReason($("priority"), "Construction is complete; this building no longer needs construction priority.");
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
     $("cancel-project").hidden = !!PROJECTS[p.key].natural || p.work > 0;

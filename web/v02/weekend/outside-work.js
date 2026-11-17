@@ -19,7 +19,7 @@ export function outsideWorkStep(s,r,dt,go,route){
  const j=OUTSIDE_JOBS[r.id];if(!j||s.mode==='sandbox')return false;
  const day=Math.floor((540+s.time*.45)/1440),hour=(9+s.time*.45/60)%24;
  if(!r.outsideWork){
-  if(!r.outsideJobEnabled||day%7>=5||r.lastOutsideDay===day||hour<8||hour>=11||r.energy<65||r.cargo||r.needTask||r.tentPhase||r.sleepUntil||r.action==='town'||['hunger','bladder','bowels'].some(k=>r.needs[k]<20))return false;
+  if(!r.outsideJobEnabled||day%7>=5||r.lastOutsideDay===day||hour<8||hour>=11||r.energy<65||r.cargo||r.needTask||r.tentPhase||r.sleepUntil||r.action==='town'||['bladder','bowels'].some(k=>r.needs[k]<20))return false;
   const exit={x:29,z:CELL_MIN+1};if(!route(s,r,exit)){r.outsideWorkBlocked='No walking route to the entrance';return false;}
   const fareDue=spendableMoney(s)<COMMUTE_FARE;
   if(!fareDue)transact(s,-COMMUTE_FARE,'commuting',`${r.name}: return bus fare`);

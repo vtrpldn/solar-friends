@@ -11,10 +11,10 @@ Reference setting: rural Campinas, São Paulo, road access and an existing grid 
 Research sources identified on 2026-11-16:
 
 - [IBGE SINAPI](https://www.ibge.gov.br/estatisticas/economicas/servicos/9270-sistema-nacional-de-pesquisa-de-custos-e-indices-da-construcao-civil.html): regional construction prices and labor references. Aggregate cost per square meter is not a substitute for a building bill of materials. No SINAPI number has been applied to the catalog yet.
-- [ANEEL tariff explanation](https://www.gov.br/aneel/pt-br/assuntos/tarifas/entenda-a-tarifa/custo-da-energia-que-chega-aos-consumidores): tariff components. A specific distributor, tariff class, month and tax treatment still need selection.
+- [ANEEL tariff explanation](https://www.gov.br/aneel/pt-br/assuntos/tarifas/entenda-a-tarifa/custo-da-energia-que-chega-aos-consumidores): tariff components. CPFL Paulista residential base and an explicit tax assumption are applied; see the calibration register.
 - [Embrapa forestry guidance](https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/eucalipto/producao/gestao/tecnica/idade-otima-de-corte): forestry rotations must be calibrated separately from short-cycle crops. Existing growth timers remain gameplay values.
 
-These are research inputs, not evidence that current prices match reality. Supplier quotes, fuel prices, crop yields, farm-gate prices and labor quantities remain research tasks.
+These are research inputs, not evidence that current prices match reality. Supplier quotes, crop yields, farm-gate prices and labor quantities remain research tasks. Fuel has a dated municipal observation.
 
 ## Implemented parameters
 
@@ -23,21 +23,21 @@ These are research inputs, not evidence that current prices match reality. Suppl
 | Cash settlement | whole centavos | Accounting rule; `transact` posts cents, retaining sub-cent utility carry. Existing `money` API remains reais for save/UI compatibility. |
 | Simulation clock | 0.45 game minutes per simulation second | Existing abstraction. Acceleration does not change this ratio. |
 | Cargo per trip | 350 kg and 1.2 m³, both enforced | Provisional game capacity, not a manufacturer specification. |
-| Fuel per round trip | R$4.89 nearby / R$7.33 normal / R$22 remote | Distance-based, historical São Paulo capital fuel proxy; excludes wear. See [calibration register](economy-calibration.md). |
+| Fuel per round trip | R$5.18 nearby / R$7.76 normal / R$23.29 remote | Distance-based, ANP Campinas observation for 8–14 November 2026; excludes wear. See [calibration register](economy-calibration.md). |
 | Export quote | floor(purchase batch price × 0.5) reais | Existing authored spread, not observed farm-gate prices. |
 | Buyer demand | eight purchase batches per resource per game day | Provisional. Demand is reserved at order acceptance; confirmed orders retain their quote across days. |
 | Export consolidation delay | 40 simulation seconds = 18 game minutes | Gameplay pacing. Existing purchase trips can take queued exports immediately. |
 | History | at most 100 trade orders, preserving active ones | Storage bound. Finance history separately retains 100 recent entries and aggregate totals. |
 
-Cargo measurements are shared with processing in `web/v02/weekend/material-measures.js`; see [material accounting](material-accounting.md) for revised assumptions and named losses. Existing resource units remain authored pieces, packs or kits. Cargo weight does **not** convert inventory into kilograms. Unknown pack types currently use a provisional 2 kg / 0.01 m³ fallback; this must be replaced during unit calibration.
+Cargo measurements are shared with processing in `web/v02/weekend/material-measures.js`; see [material accounting](material-accounting.md) for revised assumptions and named losses. Existing resource units remain authored pieces, packs or kits. Cargo weight does **not** convert inventory into kilograms. Every resource now has an explicit measurement; unknown IDs throw rather than receiving a fallback. Several kit measurements remain provisional and need specification research.
 
 ## Ownership and settlement
 
 Queued exports are removed from available inventory but still count toward store capacity. Loading moves them into vehicle ownership. The buyer pays when the vehicle starts its return journey. Order status prevents repeated settlement. Cancellation returns only queued goods; loaded goods cannot be cancelled through the UI.
 
-Purchases are prepaid. Ordinary purchases arrive on return. Construction purchases remain in each project's pending materials until unloaded; oversized orders travel in separate manifests. Outbound exports and inbound purchases use separate directional capacity. One trip is active at a time; both cars are selected in alternation, not dispatched concurrently.
+Purchases are prepaid. Ordinary purchases arrive on return. Construction purchases remain in each project's pending materials until unloaded; oversized orders travel in separate manifests. Outbound exports and inbound purchases use separate directional capacity. Both cars can travel concurrently, with separate drivers and manifests. Paid bulk supplier delivery is available without a resident driver.
 
-Blueprint affordability includes all remaining collection trips across outstanding orders. The budget packs the same manifests as dispatch, excluding already-paid active shipments. Grid charges and ordinary purchases cannot spend that reserve. Finances shows committed and available cash separately. This is a derived commitment, not an extra deduction or a separate saved wallet. Failed deliveries, provider-specific markets and paid delivery fallback remain outstanding.
+Blueprint affordability includes all remaining collection trips across outstanding orders. The budget packs the same manifests as dispatch, excluding already-paid active shipments. Grid charges and ordinary purchases cannot spend that reserve. Finances shows committed and available cash separately. This is a derived commitment, not an extra deduction or a separate saved wallet. Provider-specific markets remain outstanding; paid freight and storage-blocked delivery waiting are implemented.
 
 ## Construction estimates
 
@@ -63,3 +63,12 @@ Kitchen [dried provisions](food-preservation.md) add a 10-day meal batch with si
 Kitchen [cold storage](cold-storage.md) uses a provisional R$600 refrigeration kit (35 kg / 0.35 m³ cargo), one electrical supply and one hardware pack, plus 120 work units. Each powered installation covers 40 stored food units at one-quarter aging speed and draws 0.08 kW while enabled. These are game assumptions awaiting regional calibration.
 
 Electricity and transport now share [a reference model](economy-calibration.md), with published observations separated from tax, distance and vehicle assumptions. The historical replay figures above describe their original parameter versions.
+
+
+## Later checkpoint — 17 November
+
+The earlier three-day established-village figures above retain their original parameter versions. Current evidence includes an 18-case fresh-start matrix (`docs/balance/2026-11-17-bootstrap-matrix.json`) and a seven-day outside-income replay (`docs/balance/2026-11-17-outside-income-soak.json`). The matrix predates the new R$100 expansion reserve and the latest equipment-price revision; it is retained as comparative evidence, not a final all-parameters certificate.
+
+The ordinary-command catalog run subsequently exposed starvation recovery and blocked-navigation failures after the first few days. Its recorded failure is retained at `docs/balance/evidence/2026-11-17-starved-catalog-save.json`. `verify-v02-economic-recovery.mjs` resumes that exact village for three days and requires every resident to recover hunger and energy, wages to replenish cash, and save/load to remain valid. No stock or cash is injected.
+
+New villages keep R$100 aside when quoting blueprint auto-buy. Finances exposes this expansion reserve; it prevents optional construction from spending the last food allowance, while ordinary purchases can still use it. It is not an additional deduction or an immutable locked balance. Existing saves without the setting retain zero until the player changes it.

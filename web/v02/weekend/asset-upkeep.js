@@ -1,3 +1,4 @@
+import {projectMaterials} from './project-materials.js';
 import {activeTrips} from "./trip-state.js";
 import {CROP_CARE,GAME_DAY} from './biological-production.js';
 // Inspection/service intervals are engineering assumptions, not warranties.
@@ -12,7 +13,7 @@ export function upkeepStep(s,defs,dt){
  if(s.mode==='sandbox')return;const u=upkeep(s),day=Math.floor((540+s.time*.45)/1440);
  if(u.day!==day){u.day=day;u.used=0;}
  for(const p of s.projects){const d=defs[p.key],interval=INTERVALS[d.kind];if(p.removal||p.work<d.work)continue;
-  if((d.materials?.batteries||0)>0||p.solarUpgrade){
+  if((projectMaterials(p,defs)?.batteries||0)>0||p.solarUpgrade){
     p.batteryAgeDays=(p.batteryAgeDays||0)+dt/GAME_DAY;
     if(u.automatic&&p.batteryAgeDays>=8*365&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,battery:true,work:0,partsPaid:false,done:false});
   }
