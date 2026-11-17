@@ -11,6 +11,7 @@ import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSI
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
 import {reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment} from './physical-trade.js';
 import {recordEvent} from './event-history.js';
+import { unrotatedSiteSize, validSiteVersion } from './site-space.js';
 import {economyPolicies,productionTarget,workGroup,salePreview,validatePolicies} from './economy-policies.js';
 import {ensureFinances,recordMoney,transact,validFinances} from './finances.js';
 import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
@@ -131,7 +132,7 @@ Object.assign(PROJECTS, OPENING_PROJECTS);
 applyConstructionSpecs(PROJECTS);
 export { PROCESSES };
 export function footprint(p) {
-  const [w, d] = !p.natural && ['supply-2','supply-3'].includes(p.key) ? [1,1] : PROJECTS[p.key].size;
+  const [w, d] = !p.natural && ['supply-2','supply-3'].includes(p.key) ? [1,1] : unrotatedSiteSize(p, PROJECTS[p.key].size);
   return (p.rotation || 0) % 2 ? [d, w] : [w, d];
 }
 function shelteredFrontCell(p, x, z) {
@@ -143,7 +144,7 @@ function shelteredFrontCell(p, x, z) {
 export function buildingFront(p) {
   const [w, d] = footprint(p),
     angle = ((p.rotation || 0) * Math.PI) / 2;
-  const reach = (PROJECTS[p.key].size[1] + 1) / 2;
+  const reach = (unrotatedSiteSize(p, PROJECTS[p.key].size)[1] + 1) / 2;
   return {
     x: p.x + (w - 1) / 2 + Math.sin(angle) * reach,
     z: p.z + (d - 1) / 2 + Math.cos(angle) * reach,
@@ -941,7 +942,9 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
     return "Choose a grid square.";
   if (!Number.isInteger(rotation) || rotation < 0 || rotation > 3)
     return "Choose a valid orientation.";
-  const [w, d] = footprint({ key, rotation });
+  const previous = ignore === null ? null : s.projects.find(p => p.id === ignore);
+  const candidate = { ...previous, key, x, z, rotation };
+  const [w, d] = footprint(candidate);
   if (
     !["road", "bridge"].includes(key) &&
     !foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads)
@@ -971,7 +974,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
   if (def.kind === "hydro" && !riverBankAt(x + w / 2, z + d / 2, 3, s.landSeed))
     return "Place the river generator beside the river.";
   if (key === "bridge") {
-    const ends = bridgeEnds({ key, x, z, rotation });
+    const ends = bridgeEnds(candidate);
     if (
       !riverBankAt(x + (w - 1) / 2, z + (d - 1) / 2, 0, s.landSeed) ||
       ends.some((e) => riverBankAt(e.x, e.z, 0.7, s.landSeed))
@@ -1008,7 +1011,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
     ...s,
     projects: [
       ...s.projects.filter((p) => p.id !== ignore),
-      { id: ignore || -1, key, x, z, rotation },
+      { ...candidate, id: ignore || -1 },
     ],
   };
   enableFastNavigation(proposed);
@@ -1089,6 +1092,7 @@ export function plan(s, key, x, z, rotation = 0) {
     x,
     z,
     rotation,
+    ...(key === "bridge" ? {siteVersion: 1} : {}),
     work: instant ? def.work : 0,
     delivered: s.mode === "sandbox" ? requiredLoads(key) : 0,
     ...(Object.keys(purchase.items).length ? {pendingMaterials: purchase.items} : {}),
@@ -2234,6 +2238,12 @@ export function restore(text) {
       s.projects.length > 512
     )
       return null;
+    // Saves predating narrow footbridges retain their exact 8×2 occupancy,
+    // centre, rotations and deck width. New plans explicitly write version 1.
+    for (const project of s.projects) {
+      if (!project || !validSiteVersion(project)) return null;
+      if (project.key === 'bridge') project.siteVersion ??= 0;
+    }
     // Retired reclaimed-parts economy: remove obsolete stock, sites and jobs.
     delete s.materials?.salvage;
     const retiredSites=new Set(s.projects.filter(p=>p.key==='supply-4').map(p=>p.id));

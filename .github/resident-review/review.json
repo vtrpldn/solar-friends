@@ -1,0 +1,17 @@
+{
+  "status": "accepted-after-local-review",
+  "source": "web/v02/residents/rig.js",
+  "sha256": "0bae40b69c72e738fe8ad5f8abc2b39e13f71bdf75758e99895c817d0003bcf1",
+  "style_reference": "Existing v2 resident lineup and village rendering; procedural models, no generated raster assets.",
+  "evidence": [
+    "lineup.jpg",
+    "gameplay.jpg"
+  ],
+  "observations": [
+    "Preserved matte low-poly shapes and muted countryside palette.",
+    "Reviewed front, rear carrying view, side carrying view, and night lineup.",
+    "Reviewed the five residents beside homes and camp objects at gameplay scale.",
+    "Shared joint positions and tool anchors retained; catalog meshes range from 636 to 788 triangles for the five friends."
+  ],
+  "scope": "Appearance only; no changes to identities, personality, jobs or animation timing."
+}

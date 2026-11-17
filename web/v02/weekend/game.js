@@ -9,8 +9,12 @@ import {productionTarget} from './economy-policies.js';
 import {eventHistory, eventTime} from './event-history.js';
 import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
 import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
+import { createScalePreview } from './scale-preview.js';
+import { METRES_PER_CELL } from '../library/scale.js';
+import { bridgeWidthScale, siteDimensions, projectDescription } from './site-space.js';
 import {loadVillage} from './load-village.js';
-import {ensureNaturalLand} from './natural-resources.js';
+import {ensureNaturalLand,TREE_SPECIES} from './natural-resources.js';
+import {createFoliageWind} from './foliage-wind.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {createCapybaraVisitors} from "./capybaras.js";
@@ -118,6 +122,7 @@ import {
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
   SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
+const scalePreview = new URLSearchParams(location.search).has("scale-preview");
 const wildlifePreview = new URLSearchParams(location.search).has("wildlife-preview");
 const downtimePreview = new URLSearchParams(location.search).has("downtime-preview");
 const needsPreview = new URLSearchParams(location.search).has("needs-preview");
@@ -126,11 +131,12 @@ const utilitiesPreview = needsPreview || downtimePreview || new URLSearchParams(
 );
 const restPreview = new URLSearchParams(location.search).has("rest-preview");
 const arrivalPreview =
+  scalePreview ||
   wildlifePreview ||
   utilitiesPreview ||
   restPreview ||
   new URLSearchParams(location.search).has("arrival-preview");
-let s = utilitiesPreview
+let s = scalePreview ? createScalePreview(false,new URLSearchParams(location.search).get("scale-preview")) : utilitiesPreview
   ? createUtilitiesPreview(
       new URLSearchParams(location.search).has("interactions"),
       Number(new URLSearchParams(location.search).get("land-seed")) >>> 0,
@@ -195,13 +201,14 @@ if (s.stage === "evening") {
 enableFastNavigation(s);
 const savedView = restoredView(s.view);
 let speed = savedView?.speed || 1,
-  paused = lightingPreview || savedView?.paused || false,
+  paused = lightingPreview || scalePreview || savedView?.paused || false,
   placing = null,
   moving = null,
   selected = null,
   lastUI = 0,
   lastSave = 0;
 const scene = new THREE.Scene();
+const foliageWind=createFoliageWind();
 scene.background = new THREE.Color("#cbd5ac");
 scene.fog = new THREE.Fog("#cbd5ac", 90, 200);
 const renderer = new THREE.WebGLRenderer({
@@ -213,7 +220,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
+renderer.toneMappingExposure = 1.08;
 const camera = new THREE.OrthographicCamera(-26, 26, 20, -20, 0.1, 300);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -224,12 +231,12 @@ controls.minPolarAngle = 0.25;
 const navigation = installCameraNavigation(camera, controls, {
   home: () => focus(campLocation(s)),
 });
-const daylight = new THREE.HemisphereLight("#fff1cd", "#658658", 2);
+const daylight = new THREE.HemisphereLight("#e4eff6", "#777455", 1.4);
 scene.add(daylight);
 const sun = new THREE.DirectionalLight("#ffe2a8", 3.4);
 sun.position.set(-25, 45, 18);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.mapSize.set(4096, 4096);
 Object.assign(sun.shadow.camera, {
   left: -48,
   right: 48,
@@ -262,6 +269,7 @@ const ground = createTerrain(s.landSeed, s.elevationSeed, s.terrainPads);
 scene.add(ground);
 scene.add(compactModel(createAccessRoad()));
 const river = createRiver(s.landSeed);
+let riverTime=0;
 scene.add(compactModel(river.root), river.current);
 
 const grid = new THREE.GridHelper(
@@ -308,9 +316,9 @@ grid.visible = false;
 scene.add(grid);
 function world(x, z) {
   return new THREE.Vector3(
-    (x - 32) * 2,
-    elevationAt((x - 32) * 2, (z - 32) * 2, s.elevationSeed, s.terrainPads),
-    (z - 32) * 2,
+    (x - 32) * METRES_PER_CELL,
+    elevationAt((x - 32) * METRES_PER_CELL, (z - 32) * METRES_PER_CELL, s.elevationSeed, s.terrainPads),
+    (z - 32) * METRES_PER_CELL,
   );
 }
 function prop(id, x, z, rotation = 0) {
@@ -318,6 +326,7 @@ function prop(id, x, z, rotation = 0) {
   const rooftop=model.getObjectByName('optional-rooftop-solar');
   if(rooftop){rooftop.removeFromParent();rooftop.geometry.dispose();}
   const g = compactModel(model);
+  if(TREE_SPECIES[id])foliageWind.apply(g);
   g.position.copy(world(x, z));
   g.rotation.y = rotation;
   scene.add(g);
@@ -560,6 +569,7 @@ function syncBuildings() {
     buildings.delete(id);
   }
   syncTerrain();
+  ground.userData.surface.update(s.projects,PROJECTS,footprint);
   autoConnectUtilities(s, PROJECTS);
   for (const p of s.projects) {
     const def = PROJECTS[p.key],
@@ -611,6 +621,7 @@ function syncBuildings() {
     entry.root.position.copy(
       world(p.x + (footprint(p)[0] - 1) / 2, p.z + (footprint(p)[1] - 1) / 2),
     );
+    entry.root.scale.z = bridgeWidthScale(p);
     entry.root.rotation.y = ((p.rotation || 0) * Math.PI) / 2;
     entry.root.visible=!p.felled;
 
@@ -686,7 +697,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(s.arrivalAnimating ? s.stock : campLocation(s));
+focus(scalePreview ? (new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
 if (savedView) {
   camera.position.fromArray(savedView.position);
   controls.target.fromArray(savedView.target);
@@ -791,6 +802,7 @@ function startPlacement(key, id = null) {
   }
   wireframe = new THREE.Group();
   const model = compactModel(createAsset(PROJECTS[key].asset));
+  model.scale.z = bridgeWidthScale(s.projects.find(p => p.id === id) || {key});
   model.updateMatrixWorld(true);
   model.traverse((o) => {
     if (!o.isMesh) return;
@@ -902,7 +914,7 @@ function updatePlacementPreview() {
   if (!placing && !pitching) return;
   const size = pitching
     ? [5, 4]
-    : footprint({ key: placing, rotation: placementRotation });
+    : footprint({ ...s.projects.find(p => p.id === moving), key: placing, rotation: placementRotation });
   ghost.scale.set(size[0] / 2, size[1] / 2, 1);
   ghost.position.copy(
     world(
@@ -944,12 +956,13 @@ function updatePlacementPreview() {
     }
     message(
       hint ||
-        `${PROJECTS[placing].name} · ${size.join("×")} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats"}`,
+        `${PROJECTS[placing].name} · Site ${siteDimensions(size)} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats"}`,
     );
   } else if (hint) message(hint);
   ghost.material.color.set(error ? "#c26847" : "#d9eda5");
   if (!pitching && wireframe) {
-    ghost.visible = false;
+    // Keep the reservation visible beneath the physical object wireframe.
+    ghost.visible = true;
     wireframe.visible = true;
     wireframe.position.copy(ghost.position);
     const pad = foundationPad(
@@ -1904,7 +1917,7 @@ function renderUI() {
             ? " Housing: 0 goats / 2 places."
             : "";
     $("selected-desc").textContent =
-      `${PROJECTS[p.key].description} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+      `${projectDescription(PROJECTS[p.key], p)} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
     $("cancel-project").hidden = !!PROJECTS[p.key].natural || p.work > 0;
     const cancelError = cancelProjectError(s, p.id);
@@ -2201,7 +2214,9 @@ function frame(now) {
       paused ? 0 : dt * speed,
     );
   }
-  river.update(visual.time);
+  foliageWind.update(!paused && !document.hidden ? dt : 0);
+  riverTime+=!paused && !document.hidden ? dt : 0;
+  river.update(riverTime);
   rainMesh.visible = s.rain;
   if (s.rain) {
     for (let i = 0; i < 600; i++) {
@@ -2228,7 +2243,7 @@ function frame(now) {
   fitTerrainCamera(camera, controls.target, scene.fog);
   // Keep the shadow volume over the viewed land, not the world origin.
   // Moving light and target together preserves the time-of-day sun direction.
-  const shadowExtent = Math.max(32, Math.hypot(camera.right - camera.left, camera.top - camera.bottom) / (2 * camera.zoom) + 20);
+  const shadowExtent = Math.max(16, Math.hypot(camera.right - camera.left, camera.top - camera.bottom) / (2 * camera.zoom) + 12);
   sun.position.sub(sun.target.position).normalize().multiplyScalar(400);
   sun.target.position.copy(controls.target);
   sun.position.add(sun.target.position);

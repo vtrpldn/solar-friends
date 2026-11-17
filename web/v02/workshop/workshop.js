@@ -176,10 +176,10 @@ function rebuild() {
     disposeModel(model);
     model = null;
     const layout = [
-      ["house", -3, -2],
-      ["shed", 3, -1],
-      ["tree", 3, 4],
-      ["resident", -3, 3],
+      ["house", -5, -3],
+      ["shed", 4, -2],
+      ["tree", 5, 6],
+      ["resident", -3, 4],
     ];
     for (const [id, x, z] of layout) {
       const item = createAsset(id);
@@ -187,11 +187,7 @@ function rebuild() {
       content.add(item);
     }
     for (const [x, z] of [
-      [-3, 1],
-      [-1, 1],
-      [1, 1],
-      [3, 1],
-      [-1, 3],
+      [-8, 3],[-6, 3],[-4, 3],[-2, 3],[0, 3],[2, 3],[4, 3],[6, 3],
     ]) {
       const road = createAsset("road");
       road.position.set(x, 0, z);
@@ -207,6 +203,9 @@ function rebuild() {
   figure.visible =
     $("#human").checked && !state.together && state.id !== "resident";
   content.add(figure);
+  $("#roof").disabled=!!model?.userData.exteriorOnly||!model?.getObjectByName('functional-roof');
+  if(model?.userData.exteriorOnly)$("#roof").checked=true;
+  if(model)model.traverse(o=>{if(o.name==='functional-roof')o.visible=$("#roof").checked;});
   surface(state.surface);
   grid.visible = $("#grid").checked;
   if (footprint) footprint.visible = !state.together && grid.visible;
@@ -320,13 +319,16 @@ function renderSheet() {
     figure: figure.visible,
     footprint: footprint?.visible,
     angle: model.rotation.y,
+    roofs: [],
   };
+  model.traverse(o=>{if(o.name==='functional-roof')original.roofs.push([o,o.visible]);});
   const sheet = document.createElement("canvas");
   sheet.width = SIZE * 4;
   sheet.height = SIZE;
   const ctx = sheet.getContext("2d");
   const frames = [];
   try {
+    for(const [roof] of original.roofs)roof.visible=true;
     scene.background = null;
     ground.visible = false;
     grid.visible = false;
@@ -342,6 +344,7 @@ function renderSheet() {
       frames.push(out.domElement.toDataURL("image/png"));
     }
   } finally {
+    for(const [roof,visible] of original.roofs)roof.visible=visible;
     scene.background = original.background;
     ground.visible = original.ground;
     grid.visible = original.grid;
@@ -457,6 +460,9 @@ $("#grid").onchange = () => {
 };
 $("#human").onchange = () => {
   figure.visible = $("#human").checked;
+};
+$("#roof").onchange = () => {
+  if(model)model.traverse(o=>{if(o.name==='functional-roof')o.visible=$("#roof").checked;});
 };
 $("#reset").onclick = iso;
 $("#iso").onclick = iso;

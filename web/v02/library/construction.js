@@ -3,6 +3,99 @@ import {box,cylinder,beam} from '../workshop/models.js';
 // Construction keeps the completed asset's cell allocation and material scale.
 export function construction(def, stage) {
   const g=new THREE.Group(),[w,d]=def.footprint.map(n=>n*2-.5);
+  // Match the completed silhouette instead of giving every worksite a house roof.
+  if (['home-family','home-shared'].includes(def.id)) {
+    const frame=construction({...def,id:def.id==='home-shared'?'adobe-extended':'extended-home',footprint:[def.footprint[1],def.footprint[0]]},stage);
+    frame.rotation.y=Math.PI/2;
+    g.add(frame);
+    return g;
+  }
+  if (def.id==='kitchen') {
+    for (const x of [-2,2]) {
+      const bay=construction({...def,id:'kitchen-bay',footprint:[2,2]},stage);
+      bay.position.x=x;
+      g.add(bay);
+    }
+    return g;
+  }
+  if (def.id==='garden') {
+    for(const x of [-.95,.95]) {
+      for(const dx of [-.6,.6])for(const z of [-1.7,1.7])
+        box(g,.08,.45,.08,'timber',x+dx,.225,z);
+      if(stage===1) {
+        box(g,1.2,.09,3.4,'earth',x,.045,0);
+        for(const dx of [-.6,.6])box(g,.1,.18,3.4,'timberLight',x+dx,.09,0);
+        for(const z of [-1.7,1.7])box(g,1.2,.18,.1,'timberLight',x,.09,z);
+      }
+    }
+    return g;
+  }
+  if (def.id==='bridge') {
+    for (const z of [-.9,.9]) {
+      box(g,12,.25,.12,'timber',0,.26,z);
+      for (const x of [-4,0,4]) box(g,.26,.5,.16,'timber',x,.25,z);
+      if(stage===1)for(let x=-6;x<=6;x+=2)box(g,.16,1.2,.16,'timber',x,.95,z);
+    }
+    if(stage===1)for(let i=0;i<24;i++)box(g,.38,.16,1.75,'timberLight',-4.6+i*.4,.42,0);
+    return g;
+  }
+  if (def.id==='water-pump') {
+    box(g,1.5,.15,1.4,'stone',0,.075,0);
+    if(stage===1){
+      beam(g,[-.5,.15,-.5],[-.5,.5,-.5],.12,'teal');
+      beam(g,[-.5,.5,-.5],[0,.5,-.5],.12,'teal');
+      box(g,.6,.12,.5,'teal',.3,.21,0);
+    }
+    return g;
+  }
+  if (def.id==='groundwater-well') {
+    for(let i=0;i<12;i++){
+      const a=i*Math.PI/6;
+      const stone=box(g,.54,stage?.85:.2,.23,'stone',Math.sin(a)*1.04,stage?.425:.1,Math.cos(a)*1.04);
+      stone.rotation.y=a;
+    }
+    if(stage===1){
+      for(const x of [-1.3,1.3])box(g,.18,2.4,.18,'timber',x,1.2,0);
+      beam(g,[-1.3,2.35,0],[1.3,2.35,0],.15,'timber');
+      for(const z of [-1,1]){
+        beam(g,[-1.3,2.35,z],[0,3.1,z],.12,'timberLight');
+        beam(g,[0,3.1,z],[1.3,2.35,z],.12,'timberLight');
+      }
+      for(const x of [-1.3,1.3])beam(g,[x,2.35,-1],[x,2.35,1],.12,'timber');
+      beam(g,[0,3.1,-1],[0,3.1,1],.12,'timber');
+    }
+    return g;
+  }
+  if (def.id==='volleyball-court') {
+    for(const x of [-3.35,3.35])for(const z of [-2.4,2.4])box(g,.06,.3,.06,'timber',x,.15,z);
+    if(stage===1){
+      box(g,7.3,.035,5.3,'earth',0,.02,0);
+      for(const z of [-2.5,2.5])cylinder(g,.07,.09,1.9,'timber',0,.95,z);
+      beam(g,[0,1.8,-2.5],[0,1.8,2.5],.025,'plaster');
+    }
+    return g;
+  }
+  if (def.id==='exercise-garden') {
+    for(const x of [-.9,.2])for(const z of [-1,1])box(g,.13,stage?1.1:.25,.13,'timber',x,stage?.55:.125,z);
+    if(stage===1){
+      beam(g,[-.9,1.1,-1],[-.9,1.1,1],.12,'timberLight');
+      for(let i=0;i<4;i++)cylinder(g,.24,.27,.2+i*.06,'timberLight',1.15,.1+i*.03,-1.2+i*.75,8);
+    }
+    return g;
+  }
+  if (def.id==='coop') {
+    for(const x of [-.65,.65])for(const z of [-.6,.6])box(g,.13,stage?1.8:.55,.13,'timber',x,stage?.9:.275,z);
+    if(stage===1){
+      box(g,1.5,.12,1.4,'timberLight',0,.55,0);
+      for(const z of [-.6,.6]){
+        beam(g,[-.75,1.8,z],[0,2.25,z],.1,'timberLight');
+        beam(g,[0,2.25,z],[.75,1.8,z],.1,'timberLight');
+      }
+      beam(g,[0,2.25,-.6],[0,2.25,.6],.1,'timber');
+      for(const x of [-.65,.65])box(g,.1,.1,1.4,'timber',x,1.8,0);
+    }
+    return g;
+  }
   if (def.id === 'road') {
     for(const x of [-.88,.88]) for(const z of [-.88,.88]) {
       box(g,.055,.38,.055,'timber',x,.19,z);
@@ -39,9 +132,9 @@ export function construction(def, stage) {
       box(g,2.7,.1,.1,'stone',0,1.15,1.2);
     }
   }else if(def.id==='apiary') {
-    for(const x of [-.45,.45]){
-      box(g,.12,stage?1.1:.3,.12,'timber',x,stage?.55:.15,0);
-      if(stage===1)box(g,.5,.4,.4,'timberLight',x,1.2,0);
+    for(const x of [-.65,.65]){
+      box(g,.14,stage?.7:.3,.14,'timber',x,stage?.35:.15,0);
+      if(stage===1)box(g,.65,.36,.55,'timberLight',x,.87,0);
     }
   }else if(tank && def.id!=='eco_toilet') {
     const r=Math.min(w,d)/2-.25;
@@ -56,7 +149,7 @@ export function construction(def, stage) {
             const t=n*Math.PI/8,point=[Math.sin(a)*r*Math.cos(t),.2+1.45*Math.sin(t),Math.cos(a)*r*Math.cos(t)];
             beam(g,previous,point,.07,'timber');previous=point;
           }
-        }else beam(g,[Math.sin(a)*r,.2,Math.cos(a)*r],[Math.sin(a)*r,2.1,Math.cos(a)*r],.09,'timber');
+        }else beam(g,[Math.sin(a)*r,.2,Math.cos(a)*r],[Math.sin(a)*r,1.5,Math.cos(a)*r],.09,'timber');
       }
     }
   }else if(bed){
@@ -79,7 +172,7 @@ export function construction(def, stage) {
       if(!solar){
         box(g,.12,.12,d,'timber',0,h+.8,0);
         for(const x of [-w/2,w/2])box(g,.12,.12,d,'timber',x,h,0);
-        if(def.category==='Homes'||['warehouse','kitchen','workshop','eco_toilet'].includes(def.id)) {
+        if(def.category==='Homes'||['warehouse','kitchen','kitchen-bay','workshop','eco_toilet'].includes(def.id)) {
           const material=def.id.startsWith('adobe')?'earth':'plaster';
           box(g,w,.8,.16,material,0,.4,-d/2);
           box(g,.16,1.15,d,material,-w/2,.575,0);
