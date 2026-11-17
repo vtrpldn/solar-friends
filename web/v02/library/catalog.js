@@ -429,19 +429,19 @@ function tree(kind, variant = 0) {
     g,
     [0, 0, 0],
     [crooked ? 0.22 : 0, fork * 0.5, 0.08],
-    tall ? 0.38 : 0.28,
-    0.22,
+    kind === "timber" ? 0.11 : tall ? 0.38 : 0.28,
+    kind === "timber" ? 0.085 : 0.22,
     bark,
   );
   limb(
     g,
     [crooked ? 0.22 : 0, fork * 0.5, 0.08],
     [crooked ? -0.1 : 0, fork, 0],
-    0.22,
-    0.16,
+    kind === "timber" ? 0.085 : 0.22,
+    kind === "timber" ? 0.06 : 0.16,
     bark,
   );
-  if (tall)
+  if (tall && kind !== "timber")
     for (let i = 0; i < 5; i++) {
       const a = i * 1.256;
       limb(
@@ -465,8 +465,8 @@ function tree(kind, variant = 0) {
           ? h * 0.7 + (i % 2) * 0.12
           : h * (0.69 + variant*.025) + (Math.sin(i*1.8 + speciesSeed)+1) * (tall ? .4 : .25);
     const elbow = [x * 0.5, fork + (y - fork) * 0.5, z * 0.45];
-    limb(g, [0, fork, 0], elbow, 0.13, 0.08, bark);
-    limb(g, elbow, [x, y, z], 0.08, 0.035, bark);
+    limb(g, [0, fork, 0], elbow, kind === "timber" ? 0.045 : 0.13, kind === "timber" ? 0.025 : 0.08, bark);
+    limb(g, elbow, [x, y, z], kind === "timber" ? 0.025 : 0.08, kind === "timber" ? 0.012 : 0.035, bark);
     if (fine) {
       for (let j = 0; j < 3; j++) {
         const xx = x + Math.sin(j * 2.1) * 0.35,

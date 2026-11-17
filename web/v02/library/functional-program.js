@@ -474,7 +474,7 @@ export const FUNCTIONAL_PROGRAM = {
     "shell": null,
     "targetUsableArea": null,
     "capacity": {},
-    "requirements": "Tree spacing and harvest access must fit actual species/canopies; timber growth and yield remain separate calibration."
+    "requirements": "Four fast-growing timber trees at 3 m spacing on a 6 × 6 m plot, with 1.5 m boundary setbacks. Six favorable growing years per rotation; raw logs require processing."
   },
   "supply-1": {
     "site": [
@@ -760,7 +760,7 @@ export const FUNCTIONAL_DESCRIPTIONS = {
   square: 'An open gathering square with twelve bench seats and room to pass through.',
   'exercise-garden': 'Outdoor exercise stations with separate spaces for bars, balance and stretching.',
   'volleyball-court': 'A 16 × 8 metre sand court with three metres of clear space around the playing area.',
-  'supply-0': 'Four managed timber trees with space for tending and harvesting.',
+  'supply-0': 'Four timber trees at 3 m spacing; a six-year minimum rotation yields raw logs, with four seedlings needed to replant.',
   'supply-1': 'A mature bamboo clump with cutting and carrying space around it.',
   eco_toilet: 'Single dry-toilet building with a human-sized doorway, ventilation and rear service access.',
 };

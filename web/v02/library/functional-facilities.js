@@ -183,7 +183,7 @@ export function functionalFacility(id,{plant,tree,goat,chicken},stage=2){
     if(id==='supply-1'){
       for(let n=0;n<12;n++){const a=n*2.4,r=.4+(n%3)*.35,x=Math.sin(a)*r,z=Math.cos(a)*r,h=3.2+(n%4)*.3; cylinder(g,.05,.07,h,'leaf',x,h/2,z,7);for(let y=.4;y<h;y+=.7)cylinder(g,.075,.075,.035,'leafLight',x,y,z,4);for(let k=0;k<3;k++){const leaf=box(g,.08,.02,.7,'leaf',x+Math.sin(a+k)*.3,h-.3-k*.35,z+Math.cos(a+k)*.3);leaf.rotation.y=a+k;}}
     }else{
-      const spacing=id==='grove'?3:id==='supply-0'?5:4;
+      const spacing=id==='grove'?3:id==='supply-0'?3:4;
       for(const x of [-spacing/2,spacing/2])for(const z of [-spacing/2,spacing/2])placed(g,id==='grove'?plant('banana'):tree(id==='orchard'?'orchard':'timber'),x,z);
       g.userData.plantCount=4;g.userData.plantSpacing=spacing;
     }
