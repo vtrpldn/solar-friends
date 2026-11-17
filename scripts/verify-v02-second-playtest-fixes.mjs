@@ -17,3 +17,10 @@ assert.equal(f.finances.entries.filter(e=>e.category==='electricity').length,2,'
 assert.equal(f.finances.entries.find(e=>e.category==='outsideWork').amount,100);
 const restored=JSON.parse(JSON.stringify(f));assert.deepEqual(financeForecast(restored),financeForecast(f));
 console.log('PASS partial sale persistence, quiet water, town opening hours, autonomous growth labels, faster crop choice and daily utility history');
+const {transactionHistory}=await import('../web/v02/weekend/finances.js');
+const legacyEntries=[{time:100,category:'electricity',amount:-.03},{time:90,category:'outsideWork',amount:80},{time:50,category:'electricity',amount:-.02}];
+const history=transactionHistory(legacyEntries);
+assert.equal(history.length,2);assert.equal(history[0].amount,-.05);assert.equal(legacyEntries.length,3);
+const {buildingOperatingStatus,PROJECTS}=await import('../web/v02/weekend/simulation.js');
+assert.equal(buildingOperatingStatus({operations:[{site:1,recipe:'vegetables',phase:'growing'}],people:[]},{id:1,key:'garden',work:PROJECTS.garden.work}).state,'Growing');
+console.log('PASS legacy electricity display grouping and autonomous building service status');

@@ -396,6 +396,7 @@ export function buildingOperatingStatus(s,p) {
   const op=s.operations?.find(o=>o.site===p.id&&!o.done);
   if(op?.phase==='return')return result('Delivering',op.status||'Finished output is being carried to storage.');
   if(node?.enabled===false)return result('Switched off','Switch this building on to resume its service.');
+  if(op?.phase==='growing')return result(op.recipe==='compost'?'Composting':'Growing',op.status||'Developing naturally; no resident needs to wait here.');
   if(op) {
     const recipe=PROCESSES[op.recipe];
     const assigned=s.people.find(r=>r.operation===op.id);
@@ -1182,11 +1183,21 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
   };
   enableFastNavigation(proposed);
   if(campLocation(s)&&[0,1].some(i=>route(s,s.stock,tentDoor(s,i))&&!route(proposed,s.stock,tentDoor(proposed,i))))return "Keep the camp tent entrances reachable from the supplies.";
+  // Old saves may already contain inaccessible sites. Only reject a new
+  // obstruction; require the new/moved project itself to be accessible.
+  const alreadyBlocked = (p, spots, completed = false) => {
+    if (p.id === (ignore || -1)) return false;
+    const old = s.projects.find(item => item.id === p.id);
+    if (!old) return false;
+    const baseline = completed ? {...s,projects:s.projects.map(item=>item===old?{...old,work:PROJECTS[old.key].work}:item)} : s;
+    enableFastNavigation(baseline);
+    return !spots.some(spot=>route(baseline,s.stock,spot,true));
+  };
   for (const p of proposed.projects.filter(p=>!p.natural&&!p.felled&&!['road','bridge'].includes(p.key))) {
     const [pw,pd]=footprint(p),edges=[];
     for(let dz=0;dz<pd;dz++)edges.push({x:p.x-1,z:p.z+dz},{x:p.x+pw,z:p.z+dz});
     for(let dx=0;dx<pw;dx++)edges.push({x:p.x+dx,z:p.z-1},{x:p.x+dx,z:p.z+pd});
-    if(!edges.some(spot=>!occupied(proposed,spot.x,spot.z)&&route(proposed,s.stock,spot,true)))
+    if(!edges.some(spot=>!occupied(proposed,spot.x,spot.z)&&route(proposed,s.stock,spot,true)) && !alreadyBlocked(p,edges))
       return `${PROJECTS[p.key].name} at (${p.x}, ${p.z}) would have no reachable side. Leave a one-cell walking gap.`;
   }
   for (const p of proposed.projects) {
@@ -1195,7 +1206,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
       const spots=accessGeometry(complete,PROJECTS[p.key],footprint(p)).work;
       const accessible=p.work>=PROJECTS[p.key].work?proposed:{...proposed,projects:proposed.projects.map(item=>item===p?complete:item)};
       enableFastNavigation(accessible);
-      if(!spots.some(spot=>route(accessible,s.stock,spot,true))){
+      if(!spots.some(spot=>route(accessible,s.stock,spot,true)) && !alreadyBlocked(p,spots,true)){
         const doorway=accessGeometry(complete,PROJECTS[p.key],footprint(p)).entrances[0];
         if(details)details.entrance=doorway||spots[0];
         return `${PROJECTS[p.key].name} ${doorway?'entrance':'work access'} is blocked. Leave its front clear or rotate it.`;
@@ -1205,7 +1216,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
       (["home", "workshop", "kitchen", "wash-station", "eco_toilet"].includes(
         PROJECTS[p.key].kind,
       ) || p.key.startsWith("canvas-tent")) &&
-      !route(proposed, s.stock, buildingFront(p),true)
+      !route(proposed, s.stock, buildingFront(p),true) && !alreadyBlocked(p,[buildingFront(p)])
     ) {
       if (details) details.entrance = buildingFront(p);
       return `${PROJECTS[p.key].name} entrance at (${buildingFront(p).x}, ${buildingFront(p).z}) is blocked. Rotate it or leave a walking gap.`;

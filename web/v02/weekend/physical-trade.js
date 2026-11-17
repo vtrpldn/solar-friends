@@ -1,3 +1,4 @@
+import {quantityText} from './material-measures.js';
 import {buyerQuote,BUYERS} from './local-market.js';
 import {activeTrips} from "./trip-state.js";
 import {tripEstimate} from "./economy-reference.js";
@@ -54,7 +55,7 @@ export function loadExports(s,trip,base={}){
 }
 export function settleExports(s,trip,transact){
  if(trip.tradeSettled)return;
- for(const id of trip.exports||[]){const o=s.trade?.orders.find(o=>o.id===id);if(o?.status!=='loaded')continue;transact(s,o.cents/100,'sales',`Sold ${o.quantity} ${o.material} in town`);o.status='sold';o.settled=s.time;}
+ for(const id of trip.exports||[]){const o=s.trade?.orders.find(o=>o.id===id);if(o?.status!=='loaded')continue;transact(s,o.cents/100,'sales',`Sold ${quantityText(o.material,o.quantity)} in town`);o.status='sold';o.settled=s.time;}
  trip.tradeSettled=true;
 }
 export function validTrade(s,materials){
