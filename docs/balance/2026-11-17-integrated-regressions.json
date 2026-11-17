@@ -1,0 +1,631 @@
+{
+  "commit": "31fdd5baed148c01030ef58a0b406ebc966445cb",
+  "scripts": [
+    {
+      "file": "verify-v02-access-road-relief.mjs",
+      "code": 0,
+      "seconds": 0.598
+    },
+    {
+      "file": "verify-v02-animal-care.mjs",
+      "code": 0,
+      "seconds": 0.209
+    },
+    {
+      "file": "verify-v02-animals.mjs",
+      "code": 0,
+      "seconds": 0.083
+    },
+    {
+      "file": "verify-v02-art-revisions.mjs",
+      "code": 0,
+      "seconds": 0.214
+    },
+    {
+      "file": "verify-v02-audio.mjs",
+      "code": 0,
+      "seconds": 0.03
+    },
+    {
+      "file": "verify-v02-auto-utilities.mjs",
+      "code": 0,
+      "seconds": 9.58
+    },
+    {
+      "file": "verify-v02-biological-production.mjs",
+      "code": 0,
+      "seconds": 0.254
+    },
+    {
+      "file": "verify-v02-blocked-route.mjs",
+      "code": 0,
+      "seconds": 0.063
+    },
+    {
+      "file": "verify-v02-blueprint-purchase.mjs",
+      "code": 0,
+      "seconds": 25.965
+    },
+    {
+      "file": "verify-v02-building-access.mjs",
+      "code": 0,
+      "seconds": 0.1
+    },
+    {
+      "file": "verify-v02-building-controls.mjs",
+      "code": 0,
+      "seconds": 0.044
+    },
+    {
+      "file": "verify-v02-building-program.mjs",
+      "code": 0,
+      "seconds": 0.032
+    },
+    {
+      "file": "verify-v02-building-removal.mjs",
+      "code": 0,
+      "seconds": 1.529
+    },
+    {
+      "file": "verify-v02-building-rotation.mjs",
+      "code": 0,
+      "seconds": 2.739
+    },
+    {
+      "file": "verify-v02-building-services.mjs",
+      "code": 0,
+      "seconds": 0.509
+    },
+    {
+      "file": "verify-v02-building-sites.mjs",
+      "code": 0,
+      "seconds": 0.519
+    },
+    {
+      "file": "verify-v02-building-status.mjs",
+      "code": 0,
+      "seconds": 0.045
+    },
+    {
+      "file": "verify-v02-buildings.mjs",
+      "code": 0,
+      "seconds": 10.371
+    },
+    {
+      "file": "verify-v02-camera-depth.mjs",
+      "code": 0,
+      "seconds": 0.051
+    },
+    {
+      "file": "verify-v02-camera.mjs",
+      "code": 0,
+      "seconds": 0.049
+    },
+    {
+      "file": "verify-v02-camp-access.mjs",
+      "code": 0,
+      "seconds": 14.504
+    },
+    {
+      "file": "verify-v02-camp-placement.mjs",
+      "code": 0,
+      "seconds": 3.664
+    },
+    {
+      "file": "verify-v02-capybaras.mjs",
+      "code": 0,
+      "seconds": 0.081
+    },
+    {
+      "file": "verify-v02-cold-storage.mjs",
+      "code": 0,
+      "seconds": 0.362
+    },
+    {
+      "file": "verify-v02-community.mjs",
+      "code": 0,
+      "seconds": 1.543
+    },
+    {
+      "file": "verify-v02-concurrent-trips.mjs",
+      "code": 0,
+      "seconds": 0.526
+    },
+    {
+      "file": "verify-v02-connections.mjs",
+      "code": 0,
+      "seconds": 0.318
+    },
+    {
+      "file": "verify-v02-consistency.mjs",
+      "code": 0,
+      "seconds": 0.487
+    },
+    {
+      "file": "verify-v02-construction-logistics.mjs",
+      "code": 0,
+      "seconds": 0.784
+    },
+    {
+      "file": "verify-v02-construction-progress.mjs",
+      "code": 0,
+      "seconds": 0.03
+    },
+    {
+      "file": "verify-v02-construction-specs.mjs",
+      "code": 0,
+      "seconds": 0.065
+    },
+    {
+      "file": "verify-v02-crafting.mjs",
+      "code": 0,
+      "seconds": 0.431
+    },
+    {
+      "file": "verify-v02-deliveries.mjs",
+      "code": 0,
+      "seconds": 2.62
+    },
+    {
+      "file": "verify-v02-downtime.mjs",
+      "code": 0,
+      "seconds": 0.85
+    },
+    {
+      "file": "verify-v02-economic-recovery.mjs",
+      "code": 0,
+      "seconds": 43.838
+    },
+    {
+      "file": "verify-v02-economy-policies.mjs",
+      "code": 0,
+      "seconds": 0.263
+    },
+    {
+      "file": "verify-v02-economy-reference.mjs",
+      "code": 0,
+      "seconds": 0.044
+    },
+    {
+      "file": "verify-v02-economy-soak.mjs",
+      "code": 0,
+      "seconds": 48.319
+    },
+    {
+      "file": "verify-v02-economy.mjs",
+      "code": 0,
+      "seconds": 10.069
+    },
+    {
+      "file": "verify-v02-elevation.mjs",
+      "code": 0,
+      "seconds": 0.143
+    },
+    {
+      "file": "verify-v02-entrance-integration.mjs",
+      "code": 0,
+      "seconds": 0.458
+    },
+    {
+      "file": "verify-v02-equipment.mjs",
+      "code": 0,
+      "seconds": 1.137
+    },
+    {
+      "file": "verify-v02-expanded-map.mjs",
+      "code": 0,
+      "seconds": 0.16
+    },
+    {
+      "file": "verify-v02-expansion-reserve.mjs",
+      "code": 0,
+      "seconds": 0.064
+    },
+    {
+      "file": "verify-v02-exports.mjs",
+      "code": 0,
+      "seconds": 0.309
+    },
+    {
+      "file": "verify-v02-expressive-motion.mjs",
+      "code": 0,
+      "seconds": 0.091
+    },
+    {
+      "file": "verify-v02-finances.mjs",
+      "code": 0,
+      "seconds": 0.031
+    },
+    {
+      "file": "verify-v02-first-planting.mjs",
+      "code": 0,
+      "seconds": 0.794
+    },
+    {
+      "file": "verify-v02-food-reserve.mjs",
+      "code": 0,
+      "seconds": 0.181
+    },
+    {
+      "file": "verify-v02-food-storage.mjs",
+      "code": 0,
+      "seconds": 0.161
+    },
+    {
+      "file": "verify-v02-forecast.mjs",
+      "code": 0,
+      "seconds": 0.031
+    },
+    {
+      "file": "verify-v02-full-water-carrier.mjs",
+      "code": 0,
+      "seconds": 0.635
+    },
+    {
+      "file": "verify-v02-grid-power.mjs",
+      "code": 0,
+      "seconds": 0.062
+    },
+    {
+      "file": "verify-v02-growth.mjs",
+      "code": 0,
+      "seconds": 0.16
+    },
+    {
+      "file": "verify-v02-hauling-needs-recovery.mjs",
+      "code": 0,
+      "seconds": 9.075
+    },
+    {
+      "file": "verify-v02-home-assignment.mjs",
+      "code": 0,
+      "seconds": 0.88
+    },
+    {
+      "file": "verify-v02-home-removal.mjs",
+      "code": 0,
+      "seconds": 0.095
+    },
+    {
+      "file": "verify-v02-house-lighting.mjs",
+      "code": 0,
+      "seconds": 0.346
+    },
+    {
+      "file": "verify-v02-inventory-ownership.mjs",
+      "code": 0,
+      "seconds": 0.044
+    },
+    {
+      "file": "verify-v02-items.mjs",
+      "code": 0,
+      "seconds": 0.67
+    },
+    {
+      "file": "verify-v02-keyboard-shortcuts.mjs",
+      "code": 0,
+      "seconds": 0.029
+    },
+    {
+      "file": "verify-v02-lab.mjs",
+      "code": 0,
+      "seconds": 4.685
+    },
+    {
+      "file": "verify-v02-land-and-living.mjs",
+      "code": 0,
+      "seconds": 3.98
+    },
+    {
+      "file": "verify-v02-land.mjs",
+      "code": 0,
+      "seconds": 0.06
+    },
+    {
+      "file": "verify-v02-lenses-browser.mjs",
+      "code": 0,
+      "seconds": 68.72
+    },
+    {
+      "file": "verify-v02-lenses.mjs",
+      "code": 0,
+      "seconds": 0.33
+    },
+    {
+      "file": "verify-v02-library.mjs",
+      "code": 0,
+      "seconds": 0.71
+    },
+    {
+      "file": "verify-v02-livestock.mjs",
+      "code": 0,
+      "seconds": 0.34
+    },
+    {
+      "file": "verify-v02-local-market.mjs",
+      "code": 0,
+      "seconds": 0.05
+    },
+    {
+      "file": "verify-v02-location-accounting.mjs",
+      "code": 0,
+      "seconds": 0.38
+    },
+    {
+      "file": "verify-v02-logistics-policy.mjs",
+      "code": 0,
+      "seconds": 0.06
+    },
+    {
+      "file": "verify-v02-management-integration-browser.mjs",
+      "code": 0,
+      "seconds": 22.45
+    },
+    {
+      "file": "verify-v02-material-ledger.mjs",
+      "code": 0,
+      "seconds": 14.06
+    },
+    {
+      "file": "verify-v02-material-units.mjs",
+      "code": 0,
+      "seconds": 0.04
+    },
+    {
+      "file": "verify-v02-models.mjs",
+      "code": 0,
+      "seconds": 1.02
+    },
+    {
+      "file": "verify-v02-modes.mjs",
+      "code": 0,
+      "seconds": 0.7
+    },
+    {
+      "file": "verify-v02-natural-entrance.mjs",
+      "code": 0,
+      "seconds": 0.13
+    },
+    {
+      "file": "verify-v02-navigation-cache.mjs",
+      "code": 0,
+      "seconds": 1.25
+    },
+    {
+      "file": "verify-v02-needs.mjs",
+      "code": 0,
+      "seconds": 17.81
+    },
+    {
+      "file": "verify-v02-new-arrival.mjs",
+      "code": 0,
+      "seconds": 1.89
+    },
+    {
+      "file": "verify-v02-obstacle-escape.mjs",
+      "code": 0,
+      "seconds": 1.27
+    },
+    {
+      "file": "verify-v02-opening.mjs",
+      "code": 0,
+      "seconds": 2.1
+    },
+    {
+      "file": "verify-v02-outside-rest.mjs",
+      "code": 0,
+      "seconds": 0.38
+    },
+    {
+      "file": "verify-v02-outside-work.mjs",
+      "code": 0,
+      "seconds": 2.92
+    },
+    {
+      "file": "verify-v02-personality.mjs",
+      "code": 0,
+      "seconds": 0.05
+    },
+    {
+      "file": "verify-v02-physical-economy.mjs",
+      "code": 0,
+      "seconds": 0.64
+    },
+    {
+      "file": "verify-v02-physical-scale.mjs",
+      "code": 0,
+      "seconds": 2.95
+    },
+    {
+      "file": "verify-v02-placement-performance.mjs",
+      "code": 0,
+      "seconds": 0.85
+    },
+    {
+      "file": "verify-v02-placement-qol.mjs",
+      "code": 0,
+      "seconds": 0.25
+    },
+    {
+      "file": "verify-v02-playtest-fixes.mjs",
+      "code": 0,
+      "seconds": 5.04
+    },
+    {
+      "file": "verify-v02-presentation.mjs",
+      "code": 0,
+      "seconds": 0.03
+    },
+    {
+      "file": "verify-v02-preservation.mjs",
+      "code": 0,
+      "seconds": 0.39
+    },
+    {
+      "file": "verify-v02-procedural-land.mjs",
+      "code": 0,
+      "seconds": 0.14
+    },
+    {
+      "file": "verify-v02-procurement-budget.mjs",
+      "code": 0,
+      "seconds": 0.14
+    },
+    {
+      "file": "verify-v02-production-accounting.mjs",
+      "code": 0,
+      "seconds": 0.49
+    },
+    {
+      "file": "verify-v02-production-hauling.mjs",
+      "code": 0,
+      "seconds": 1.12
+    },
+    {
+      "file": "verify-v02-project-materials.mjs",
+      "code": 0,
+      "seconds": 0.12
+    },
+    {
+      "file": "verify-v02-project-ui.mjs",
+      "code": 0,
+      "seconds": 0.11
+    },
+    {
+      "file": "verify-v02-qol-workflows.mjs",
+      "code": 0,
+      "seconds": 0.58
+    },
+    {
+      "file": "verify-v02-resident-agency-browser.mjs",
+      "code": 0,
+      "seconds": 41.67
+    },
+    {
+      "file": "verify-v02-resident-agency.mjs",
+      "code": 0,
+      "seconds": 0.57
+    },
+    {
+      "file": "verify-v02-residents.mjs",
+      "code": 0,
+      "seconds": 0.66
+    },
+    {
+      "file": "verify-v02-resource-trends.mjs",
+      "code": 0,
+      "seconds": 0.04
+    },
+    {
+      "file": "verify-v02-retired-material.mjs",
+      "code": 0,
+      "seconds": 0.07
+    },
+    {
+      "file": "verify-v02-road-surface.mjs",
+      "code": 0,
+      "seconds": 0.25
+    },
+    {
+      "file": "verify-v02-roads.mjs",
+      "code": 0,
+      "seconds": 0.86
+    },
+    {
+      "file": "verify-v02-sandbox-food-save.mjs",
+      "code": 0,
+      "seconds": 0.09
+    },
+    {
+      "file": "verify-v02-save-slots.mjs",
+      "code": 0,
+      "seconds": 0.03
+    },
+    {
+      "file": "verify-v02-session-ui.mjs",
+      "code": 0,
+      "seconds": 0.13
+    },
+    {
+      "file": "verify-v02-soil-care.mjs",
+      "code": 0,
+      "seconds": 0.29
+    },
+    {
+      "file": "verify-v02-sunlight.mjs",
+      "code": 0,
+      "seconds": 0.03
+    },
+    {
+      "file": "verify-v02-supplier-stock.mjs",
+      "code": 0,
+      "seconds": 0.05
+    },
+    {
+      "file": "verify-v02-terraform.mjs",
+      "code": 0,
+      "seconds": 0.1
+    },
+    {
+      "file": "verify-v02-terrain-grading.mjs",
+      "code": 0,
+      "seconds": 0.6
+    },
+    {
+      "file": "verify-v02-terrain.mjs",
+      "code": 0,
+      "seconds": 0.3
+    },
+    {
+      "file": "verify-v02-town-trip.mjs",
+      "code": 0,
+      "seconds": 7.87
+    },
+    {
+      "file": "verify-v02-upkeep.mjs",
+      "code": 0,
+      "seconds": 5.44
+    },
+    {
+      "file": "verify-v02-urgent-needs.mjs",
+      "code": 0,
+      "seconds": 2.7
+    },
+    {
+      "file": "verify-v02-utility-capacity.mjs",
+      "code": 0,
+      "seconds": 0.74
+    },
+    {
+      "file": "verify-v02-water-sources.mjs",
+      "code": 0,
+      "seconds": 0.08
+    },
+    {
+      "file": "verify-v02-water-storage.mjs",
+      "code": 0,
+      "seconds": 0.05
+    },
+    {
+      "file": "verify-v02-weekend.mjs",
+      "code": 0,
+      "seconds": 3.92
+    },
+    {
+      "file": "verify-v02-wildlife.mjs",
+      "code": 0,
+      "seconds": 0.08
+    },
+    {
+      "file": "verify-v02-world-settings.mjs",
+      "code": 0,
+      "seconds": 0.08
+    }
+  ],
+  "rustTests": 792,
+  "rustFormatting": "passed",
+  "rustLint": "passed",
+  "javascriptSyntaxChecks": 1244,
+  "siteBuild": "passed",
+  "note": "Initial sandbox denied the lens browser localhost server; that check and all following checks were rerun with local-server permission and passed."
+}
