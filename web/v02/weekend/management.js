@@ -504,7 +504,7 @@ export function createManagement({
         el.append(img,name,locate,status,choice,recipeInfo,start);
         if (activity) { const bar=document.createElement('progress');bar.max=1;bar.value=activity.progress;bar.setAttribute('aria-label', `Production at ${name.textContent}`);el.append(bar); }
         if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);
-        else {const action=upgradeAction(p,s.operations||[]);start.disabled=node?.enabled===false||action.disabled||!!op;start.textContent=action.label;}
+        else {const action=upgradeAction(p,s.operations||[]);start.disabled ||= node?.enabled===false||action.disabled||!!op;start.textContent=action.label;}
         if(p.coldStorage){const cooling=document.createElement('button');cooling.textContent=p.coolingEnabled===false?'Cold storage: off':'Cold storage: on';cooling.setAttribute('aria-pressed',String(p.coolingEnabled!==false));cooling.onclick=()=>{p.coolingEnabled=p.coolingEnabled===false;refresh();render();};el.append(cooling);}
         $("production-sites").append(el);
       }
