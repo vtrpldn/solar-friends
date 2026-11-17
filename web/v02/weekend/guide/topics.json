@@ -1,0 +1,538 @@
+[
+  {
+    "id": "autonomy",
+    "title": "Growing autonomy",
+    "description": "Replace recurring purchases with local supplies, then recover useful outputs. Keep enough labor and reserves for losses.",
+    "tip": "Start with water and food reliability. Add reuse and renewable supplies before expanding demand.",
+    "boundary": "Seed saving, local tree propagation, manure recovery and useful biogas are not yet implemented.",
+    "sources": [
+      "cultivation.js",
+      "catalog-rules.js",
+      "infrastructure.js",
+      "asset-upkeep.js"
+    ],
+    "tests": [
+      "cultivation",
+      "grid-power",
+      "water-sources"
+    ],
+    "facts": null,
+    "diagram": "flowchart TB\n subgraph water[Reuse water]\n direction LR\n Fresh[Local fresh water] --> Wash[Washing]\n Wash --> Treatment[Wetland treatment]\n Treatment --> Irrigation[Irrigation water]\n end\n subgraph soil[Return organic material]\n direction LR\n Seeds[Purchased seeds] --> Crops[Crops]\n Crops --> Residues[Residues]\n Residues --> Compost[Compost and cover]\n Compost --> Crops\n end\n subgraph power[Generate locally]\n direction LR\n Nature[Sun and river flow] --> Generation[Solar and hydro]\n Parts[Imported replacement parts] --> Generation\n Generation --> Services[Local services]\n end\n water ~~~ soil\n soil ~~~ power\n"
+  },
+  {
+    "id": "system-overview",
+    "title": "System overview",
+    "sources": [
+      "simulation.js"
+    ],
+    "tests": [
+      "weekend",
+      "consistency"
+    ],
+    "description": "Land, labor, supplies and utilities constrain every village activity.",
+    "diagram": "flowchart TB\n Player[Player plans and policies] --> Work[Resident work and dispatch]\n Land[Land and access] --> Work\n Needs[Needs and social behavior] --> Work\n Work --> Build[Construction and maintenance]\n Work --> Production[Recipes and crafting]\n Work --> Farms[Cultivation and biology]\n Work --> Trade[Purchases and sales]\n Build --> Utilities[Water, sanitation and power]\n Production --> Goods[Physical inventories and hauling]\n Farms --> Goods\n Trade --> Goods\n Trade --> Money[Cash and commitments]\n Utilities --> Services[Services and productive conditions]",
+    "boundary": "",
+    "tip": "Find the missing input before expanding. A local supply must cover use, losses and replacement.",
+    "facts": null
+  },
+  {
+    "id": "clock-modes-and-simulation-stepping",
+    "title": "Clock, modes and simulation stepping",
+    "sources": [
+      "simulation.js",
+      "biological-production.js",
+      "lab-worker.js",
+      "game.js"
+    ],
+    "tests": [
+      "modes",
+      "lab",
+      "biological-production"
+    ],
+    "description": "Time advances needs, production and biology. Planning screens pause the village.",
+    "diagram": "flowchart TD\n Mode{Mode} -->|Normal| Rules[Finite supplies and biological waiting]\n Mode -->|Sandbox| Sandbox[Replenish supplies and skip biological waiting]\n Mode -->|Lab| Lab[Separate accelerated runner and storage]\n Rules --> Run{Paused or arriving?}\n Sandbox --> Run\n Lab --> Run\n Run -->|Yes| Hold[Do not advance ordinary simulation]\n Run -->|No| Tick[Advance bounded simulation step]\n Tick --> Systems[Upkeep, utilities, biology, storage and deliveries]\n Systems --> Residents[Needs, trips and resident actions]\n Residents --> Calendar[Day, season and schedules]\n Calendar --> Tick",
+    "boundary": "Sandbox also skips asset upkeep and tool wear.",
+    "tip": "Use normal mode to judge autonomy. Unlimited sandbox stock hides shortages.",
+    "facts": null
+  },
+  {
+    "id": "world-terrain-and-navigation",
+    "title": "World, terrain and navigation",
+    "sources": [
+      "world-settings.js",
+      "natural-resources.js",
+      "elevation.js",
+      "terraform.js",
+      "building-access.js",
+      "simulation.js"
+    ],
+    "tests": [
+      "world-settings",
+      "terrain",
+      "building-access",
+      "blocked-route"
+    ],
+    "description": "Terrain and access determine where buildings fit and residents can work.",
+    "diagram": "flowchart LR\n Setup[Seed, biome and resource settings] --> World[Terrain, river and natural sites]\n World --> Grid[Map cells and elevation]\n Edit[Terrain edits and foundations] --> Grid\n Grid --> Check{Footprint and access valid?}\n Plan[Building or field footprint] --> Check\n Check -->|No| Reject[Explain placement constraint]\n Check -->|Yes| Place[Place project]\n Place --> Routes[Recheck walking routes]\n Grid --> Routes\n Routes --> Reach{Reachable work or service point?}\n Reach -->|Yes| Walk[Resident walks to target]\n Reach -->|No| Block[Wait or choose another action]",
+    "boundary": "Terrain editing currently has no labor or cash cost.",
+    "tip": "Keep stores, work sites and water routes close and accessible.",
+    "facts": null
+  },
+  {
+    "id": "resident-needs-rest-and-homes",
+    "title": "Resident needs, rest and homes",
+    "sources": [
+      "resident-needs.js",
+      "resident-personality.js",
+      "simulation.js"
+    ],
+    "tests": [
+      "needs",
+      "urgent-needs",
+      "home-assignment",
+      "hauling-needs-recovery"
+    ],
+    "description": "Residents interrupt work to eat, rest and meet other needs.",
+    "diagram": "flowchart TD\n Time[Time, activity and personality] --> Decay[Needs and energy change]\n Decay --> Urgent{Urgent need or scheduled sleep?}\n Urgent -->|No| Available[Available for work or downtime]\n Urgent -->|Yes| Interrupt[Suspend or defer work safely]\n Interrupt --> Target{Suitable reachable service or rest place?}\n Target -->|Yes| Travel[Walk to service or assigned / available home]\n Target -->|No| Fallback[Try fallback or expose blocked need]\n Travel --> Consume[Consume food, water or service capacity as applicable]\n Consume --> Recover[Restore need or energy]\n Recover --> Resume[Reconsider unfinished work]\n Fallback --> Resume\n Resume --> Urgent",
+    "boundary": "This models needs and service use, not a detailed medical or demographic simulation.",
+    "tip": "Provide food, rest and sanitation near work. Exhausted residents cannot sustain a production loop.",
+    "facts": null
+  },
+  {
+    "id": "personality-relationships-and-downtime",
+    "title": "Personality, relationships and downtime",
+    "sources": [
+      "resident-mind.js",
+      "resident-personality.js",
+      "resident-downtime.js"
+    ],
+    "tests": [
+      "resident-agency",
+      "personality",
+      "downtime"
+    ],
+    "description": "Preferences influence work, leisure and willing conversations.",
+    "diagram": "flowchart TD\n Profile[Authored identity and preferences] --> Choice[Choose leisure, work preference or thought]\n State[Needs, commitments and time of day] --> Choice\n Choice --> Social{Conversation wanted and partner willing?}\n Social -->|Yes| Meet[Both residents reach meeting place]\n Meet --> Talk[Conversation]\n Talk --> Relationship[Friendship and recent memories]\n Social -->|No| Personal[Read, stretch, sit or stroll]\n Personal --> Memory[Personal-time memory]\n Hope[Completed personal building hope] --> Memory\n Relationship --> Choice\n Memory --> Choice\n Work[New work or urgent need] --> Interrupt[Interrupt casual downtime]",
+    "boundary": "Residents do not autonomously place buildings.",
+    "tip": "Leave time and reachable places for social contact and recreation.",
+    "facts": null
+  },
+  {
+    "id": "work-dispatch-and-interruption",
+    "title": "Work dispatch and interruption",
+    "sources": [
+      "simulation.js",
+      "economy-policies.js",
+      "logistics-policy.js"
+    ],
+    "tests": [
+      "economy-policies",
+      "economic-recovery",
+      "hauling-needs-recovery"
+    ],
+    "description": "Available residents choose work using needs, assignments and priorities.",
+    "diagram": "flowchart TD\n Resident[Resident chooses an action] --> Committed{Committed to trip, sleep or need?}\n Committed -->|Yes| Continue[Advance committed action]\n Committed -->|No| Existing{Unfinished assigned operation?}\n Existing -->|Yes| Resume[Try to resume work]\n Existing -->|No| Select[Evaluate services, upkeep and work priorities]\n Resume --> Gate{Inputs, tools, access and capacity available?}\n Select --> Gate\n Gate -->|Yes| Do[Travel, carry or work]\n Gate -->|No| Explain[Record blocker and consider alternatives]\n Do --> Needs[Re-evaluate needs and cargo safety]\n Explain --> Idle[Other work or finite downtime]\n Needs --> Resident",
+    "boundary": "Explicit priorities remain authoritative.",
+    "tip": "Protect essential work first. A large queue cannot replace available workers.",
+    "facts": null
+  },
+  {
+    "id": "construction-and-material-staging",
+    "title": "Construction and material staging",
+    "sources": [
+      "simulation.js",
+      "project-materials.js",
+      "construction-logistics.js",
+      "construction-specs.js"
+    ],
+    "tests": [
+      "project-materials",
+      "construction-logistics",
+      "construction-progress"
+    ],
+    "description": "Residents carry committed materials and assemble buildings.",
+    "diagram": "flowchart TD\n Blueprint[Choose valid blueprint and rotation] --> Bill[Capture material bill and work requirement]\n Bill --> Stock{Required supplies available?}\n Stock -->|No| Purchase[Purchase or produce missing supplies]\n Purchase --> Stock\n Stock -->|Yes| Reserve[Commit materials to project]\n Reserve --> Haul[Residents carry loads via stores or depot]\n Haul --> Stage[Materials staged at site]\n Stage --> Assemble[Accessible crew performs assembly]\n Assemble --> More{Materials or work remaining?}\n More -->|Yes| Haul\n More -->|No| Complete[Completed building joins available services]\n Needs[Needs and equipment] --> Assemble",
+    "boundary": "Money pays for supplies and transport; resident construction labor is not a wage charge.",
+    "tip": "Build only what your stores and carrying capacity can support.",
+    "facts": null
+  },
+  {
+    "id": "relocation-demolition-and-salvage",
+    "title": "Relocation, demolition and salvage",
+    "sources": [
+      "building-lifecycle.js",
+      "simulation.js"
+    ],
+    "tests": [
+      "building-removal",
+      "home-removal",
+      "building-controls"
+    ],
+    "description": "Moving or removing a building requires access, resident work and eligibility.",
+    "diagram": "flowchart TD\n Request[Request move, salvage or demolition] --> Validate{Eligible and no conflicting work?}\n Validate -->|No| Block[Explain blocker]\n Validate -->|Yes| Vacate[Wait for occupants to leave]\n Vacate --> Work[Resident reaches site and performs work]\n Work --> Mode{Operation}\n Mode -->|Move| Check[Revalidate destination and relocate]\n Mode -->|Remove| Capacity{Space for recoverable materials?}\n Capacity -->|No| Wait[Wait for storage space]\n Capacity -->|Yes| Return[Return recovery fraction to stores]\n Return --> Cleanup[Remove utility links and clear assignments]\n Cleanup --> Loss[Record material and stored utility losses]\n Check --> Routes[Refresh navigation]",
+    "boundary": "Salvage is not a full refund.",
+    "tip": "Salvage usable materials before replacing a building. Recovery is partial.",
+    "facts": null
+  },
+  {
+    "id": "production-and-output-hauling",
+    "title": "Production and output hauling",
+    "sources": [
+      "simulation.js",
+      "production-hauling.js",
+      "production-accounting.js"
+    ],
+    "tests": [
+      "production-hauling",
+      "production-accounting"
+    ],
+    "description": "Inputs travel to work sites. Finished output travels back to storage.",
+    "diagram": "flowchart TD\n Queue[Queue recipe or bed job] --> Validate{Site, input and job constraints pass?}\n Validate -->|No| Block[Explain missing condition]\n Validate -->|Yes| Pickup[Acquire inputs from stores]\n Pickup --> Travel[Carry inputs to reachable work position]\n Travel --> Biology{Biological waiting required?}\n Biology -->|Yes| Grow[Release worker while biology advances]\n Grow --> Process[Resident processing or collection work]\n Biology -->|No| Process\n Process --> Resolve[Finished crop or recipe output]\n Resolve --> Loads[Split output into physical loads]\n Loads --> Carry[Carry to available storage]\n Carry --> Remaining{Output remaining?}\n Remaining -->|Yes| Loads\n Remaining -->|No| Done[Mark operation complete]\n Target[Repeat target and protected reserves] --> Queue",
+    "boundary": "Biological waiting and output rules differ between cultivation and legacy/perennial recipes.",
+    "tip": "Set repeat targets above essential reserves. Leave space for returned output.",
+    "facts": null
+  },
+  {
+    "id": "crafting-and-learned-skills",
+    "title": "Crafting and learned skills",
+    "sources": [
+      "crafting.js",
+      "catalog-rules.js"
+    ],
+    "tests": [
+      "crafting"
+    ],
+    "description": "Crafting requires compatible materials, tools, workstations and skill.",
+    "diagram": "flowchart TD\n Recipe[Choose craft or repair recipe] --> Site{Compatible workstation?}\n Site -->|No| Block[Explain requirement]\n Site -->|Yes| Skill{Resident has required skill level?}\n Skill -->|No| Block\n Skill -->|Yes| Tools{Required tools usable and available?}\n Tools -->|No| Block\n Tools -->|Yes| Stages[Perform craft stages with materials]\n Stages --> Practice[Accumulate skill practice]\n Practice --> Rate[Skill affects work multiplier]\n Rate --> Stages\n Stages --> Complete[Deliver crafted item or finish repair]",
+    "boundary": "Crafting currently contains explicit skill-level gates.",
+    "tip": "Choose recipes your residents can perform with available tools and skills.",
+    "facts": null
+  },
+  {
+    "id": "shared-tools-wear-and-repair",
+    "title": "Shared tools, wear and repair",
+    "sources": [
+      "equipment.js",
+      "items.js",
+      "crafting.js"
+    ],
+    "tests": [
+      "equipment",
+      "items"
+    ],
+    "description": "Shared tools improve work. Use causes wear; repair consumes supplies.",
+    "diagram": "flowchart TD\n Task[Resident task] --> Tool{Usable tool available?}\n Tool -->|Yes| Loan[Reserve tool for resident and task]\n Loan --> Work[Apply equipment work benefit]\n Work --> Wear[Accumulate active-use wear]\n Wear --> Broken{Unit worn out?}\n Broken -->|Yes| Return[Release loan and continue basic work where allowed]\n Broken -->|No| Work\n Tool -->|No| Base[Basic work or hard craft blocker]\n Return --> Repair[Repair recipe consumes supplies and work]\n Repair --> Tool\n Break[Need, rest or task completion] --> Release[Release shared loan]",
+    "boundary": "Some crafting tools are mandatory; other equipment is a speed benefit.",
+    "tip": "Share tools and retain repair supplies. Metal parts still depend on town.",
+    "facts": null
+  },
+  {
+    "id": "natural-gathering-and-extraction",
+    "title": "Natural gathering and extraction",
+    "sources": [
+      "gathering.js",
+      "natural-resources.js",
+      "simulation.js"
+    ],
+    "tests": [
+      "gathering",
+      "land"
+    ],
+    "description": "Gathering sites are either finite or recover over time.",
+    "diagram": "flowchart TD\n Site[Generated patch, tree or deposit] --> Ready{Accessible and available?}\n Ready -->|No| Reason[Depleted, recovering or inaccessible]\n Ready -->|Yes| Gather[Resident gathers, cuts or extracts]\n Gather --> Output[Carry gathered output to stores]\n Output --> Kind{Resource behavior}\n Kind -->|Finite| Deplete[Advance extraction or felling state]\n Kind -->|Renewable patch| Cooldown[Set next ready time]\n Cooldown --> Ready\n Deplete --> Left{Capacity remains?}\n Left -->|Yes| Ready\n Left -->|No| Exhausted[No further extraction]",
+    "boundary": "Wild fruit, bamboo and forage use authored recovery periods.",
+    "tip": "Rotate renewable gathering sites. Finite deposits will eventually run out.",
+    "facts": null
+  },
+  {
+    "id": "field-and-greenhouse-cultivation",
+    "title": "Field and greenhouse cultivation",
+    "sources": [
+      "cultivation.js",
+      "cultivation-ui.js",
+      "simulation.js"
+    ],
+    "tests": [
+      "cultivation",
+      "cultivation-browser"
+    ],
+    "description": "Each bed has its own crop, spacing, care and harvest cycle.",
+    "diagram": "stateDiagram-v2\n [*] --> Unprepared\n Unprepared --> Prepared: Resident prepares soil\n Prepared --> Planted: Seeds acquired and planting starts\n Planted --> Growing: Planting work finishes in normal mode\n Planted --> Harvestable: Planting finishes in sandbox\n Growing --> Harvestable: Accumulated growth reaches maturity\n Growing --> Harvested: Explicit clearing work\n Harvestable --> Harvested: Harvest or clearing work\n Harvested --> Prepared: Prepare next planting\n Harvested --> Harvested: Collect residues or apply compost\n note right of Harvestable\n Harvest resolves output once.\n Delay can reduce yield.\n Clearing yields residues only.\n end note",
+    "boundary": "Fields snap to 2 m map cells.",
+    "tip": "Keep moisture and fertility adequate before increasing planting density. Seeds are still purchased.",
+    "facts": "crops"
+  },
+  {
+    "id": "soil-water-stress-and-residue-cycles",
+    "title": "Soil, water stress and residue cycles",
+    "sources": [
+      "cultivation.js",
+      "biological-production.js"
+    ],
+    "tests": [
+      "cultivation",
+      "soil-care"
+    ],
+    "description": "Water, fertility, cover and accumulated stress determine crop development.",
+    "diagram": "flowchart LR\n Rain[Outdoor rain] --> Moisture[Soil moisture]\n Supply[Withdrawn irrigation water] --> Moisture\n Cover[Residue surface cover] --> Evap[Reduced evaporation demand]\n Evap --> Moisture\n Moisture --> Conditions[Growth conditions and accumulated stress]\n Fertility[Available fertility] --> Conditions\n Density[Plant density and competition] --> Conditions\n Season[Outdoor season factor] --> Conditions\n Conditions --> Biomass[Growth and standing biomass]\n Biomass --> Harvest[Harvest or clearing]\n Harvest --> Export[Crop output removes fertility]\n Harvest --> Residue[Recoverable residues]\n Residue --> Cover\n Residue --> Collect[Collect once for compost ingredients]\n Compost[Applied compost] --> Decay[Decomposition over time]\n Residue --> Decay\n Decay --> Fertility\n Decay --> Organic[Retained organic matter]\n Decay --> Gas[Accounted decomposition losses]",
+    "boundary": "Late watering does not erase accumulated stress.",
+    "tip": "Leave cover or compost collected residues. Both return material with losses; neither guarantees soil balance.",
+    "facts": "compost"
+  },
+  {
+    "id": "perennial-and-other-biological-cycles",
+    "title": "Perennial and other biological cycles",
+    "sources": [
+      "biological-production.js",
+      "catalog-rules.js",
+      "simulation.js"
+    ],
+    "tests": [
+      "biological-production",
+      "growth",
+      "first-planting"
+    ],
+    "description": "Trees, perennial crops and compost develop while residents do other work.",
+    "diagram": "flowchart TD\n Inputs[Recipe inputs and initial resident work] --> Wait[Biology continues without a worker]\n First[First orchard establishment delay] --> Wait\n Factors[Recipe-specific season, moisture and fertility] --> Wait\n Wait --> Ready[Ready for resident collection or processing]\n Ready --> Delay[Delay after maturity]\n Delay --> Loss[Perishable output may decline]\n Ready --> Work[Resident collection work]\n Health[Animal health where applicable] --> Yield[Available output]\n Work --> Yield\n Loss --> Yield\n Yield --> Store[Physical hauling to storage]\n Store --> Repeat[Repeat if resources and policy allow]",
+    "boundary": "This remains separate from the new bed lifecycle.",
+    "tip": "Establish perennial crops early and stagger harvests. Timber replanting still needs purchased starts.",
+    "facts": null
+  },
+  {
+    "id": "livestock-care-and-animal-products",
+    "title": "Livestock care and animal products",
+    "sources": [
+      "asset-upkeep.js",
+      "biological-production.js",
+      "catalog-rules.js"
+    ],
+    "tests": [
+      "animal-care",
+      "livestock"
+    ],
+    "description": "Animal care consumes fodder, water and labor. Health affects supported products.",
+    "diagram": "flowchart TD\n Animals[Owned animals at compatible site] --> Due{Care period expired?}\n Due -->|Yes| Job[Queue care job]\n Job --> Feed{Fodder and water available?}\n Feed -->|No| Wait[Wait while health can decline]\n Feed -->|Yes| Work[Resident feeds and tends animals]\n Work --> Health[Restore health and extend care period]\n Due -->|No| Health\n Health --> Product[Health-modified egg or milk output]\n Timer[Biological collection timer] --> Product\n Product --> Haul[Resident collects and stores output]\n Crops[Compatible explicit feed recipes] --> Fodder[Dry fodder]\n Fodder --> Feed",
+    "boundary": "Care quantities are site-level constants.",
+    "tip": "Grow or gather sufficient fodder and provide drinking water before adding animals. Manure recovery is not implemented.",
+    "facts": null
+  },
+  {
+    "id": "water-supply-and-irrigation",
+    "title": "Water supply and irrigation",
+    "sources": [
+      "infrastructure.js",
+      "simulation.js",
+      "auto-utilities.js"
+    ],
+    "tests": [
+      "water-sources",
+      "water-storage",
+      "full-water-carrier"
+    ],
+    "description": "Collect or pump water, store it, and purify drinking water.",
+    "diagram": "flowchart LR\n River[River] --> Carry[Resident collection and hauling]\n River --> Pump[Powered pump]\n Ground[Groundwater well] --> Pump\n Rain[Rain collection] --> Untreated[Untreated water storage]\n Carry --> Untreated\n Pump --> Untreated\n Untreated --> Purify[Manual purification or powered filtering]\n Purify --> Fresh[Fresh water]\n Fresh --> Needs[Drinking and hygiene]\n Untreated --> Irrigate[Crop irrigation withdrawal]\n Fresh --> Irrigate\n Links[Completed compatible water links] --> Transfer[Capacity-limited transfers]\n Fresh --> Transfer\n Untreated --> Transfer\n Transfer --> Users[Connected storage and services]\n Capacity[Storage capacity and source exhaustion] --> Block[Transfer or task waits]",
+    "boundary": "A river connection alone is not an automatic pump.",
+    "tip": "Secure a reachable water source, storage and purification. Reuse treated greywater for irrigation.",
+    "facts": null
+  },
+  {
+    "id": "sanitation-and-wastewater-treatment",
+    "title": "Sanitation and wastewater treatment",
+    "sources": [
+      "infrastructure.js",
+      "resident-needs.js",
+      "simulation.js"
+    ],
+    "tests": [
+      "building-services",
+      "connections",
+      "utility-capacity"
+    ],
+    "description": "Waste treatment frees capacity and can recover irrigation water.",
+    "diagram": "flowchart LR\n Hygiene[Washing and hygiene] --> Grey[Greywater]\n Toilet[Toilet use] --> Sewage[Sewage / sealed waste]\n Grey --> Wetland[Wetland treatment]\n Wetland --> Reuse[85 percent to irrigation water]\n Wetland --> Loss[15 percent accounted loss]\n Sewage --> Banana[Banana treatment]\n Sewage --> Digester[Biodigester]\n Banana --> Removed[Accounted water removal]\n Digester --> Removed\n Digester --> Gas[Biogas counter]\n Sewage --> Service[Resident sanitation service]\n Full[Full or inaccessible service] --> Block[Blocked use or servicing need]",
+    "boundary": "Biogas is tracked; this chart does not claim a working biogas-to-electricity generator.",
+    "tip": "Keep waste capacity available. Wetlands recover irrigation water, not drinking water.",
+    "facts": null
+  },
+  {
+    "id": "power-generation-storage-and-loads",
+    "title": "Power generation, storage and loads",
+    "sources": [
+      "infrastructure.js",
+      "auto-utilities.js",
+      "house-lighting.js"
+    ],
+    "tests": [
+      "grid-power",
+      "sunlight",
+      "house-lighting"
+    ],
+    "description": "Local generation and batteries serve connected loads; grid backup covers affordable shortages.",
+    "diagram": "flowchart TD\n Sources[Solar, hydro and optional home solar] --> Energy[Generated energy plus battery storage]\n Demand[Active machinery, pumps, cooling and night lighting] --> Allocate[Allocate by load priority]\n Energy --> Allocate\n Allocate --> Short{Shortfall with grid connection and affordable cash?}\n Short -->|Yes| Grid[Buy capped grid energy for loads]\n Short -->|No| Unpowered[Unsupplied loads remain off]\n Grid --> Powered[Supplied services run]\n Allocate --> Powered\n Energy --> Excess[Surplus local generation]\n Excess --> Battery[Charge with 90 percent efficiency]\n Battery --> Energy\n Excess --> Curtail[Account for excess beyond capacity]\n Powered --> Visual[Window emission and nearby light spill]",
+    "boundary": "Grid backup does not charge batteries.",
+    "tip": "Match generation and batteries to actual demand before disconnecting the grid. Replacement equipment remains imported.",
+    "facts": "grid"
+  },
+  {
+    "id": "food-batches-cooking-and-spoilage",
+    "title": "Food batches, cooking and spoilage",
+    "sources": [
+      "food-storage.js",
+      "cold-storage.js",
+      "catalog-rules.js"
+    ],
+    "tests": [
+      "food-storage",
+      "cold-storage",
+      "preservation",
+      "crop-products"
+    ],
+    "description": "Food keeps its identity and age during storage, processing and transport.",
+    "diagram": "flowchart TD\n Crop[Named harvested crop or purchased food] --> Lots[Inventory with expiry-bearing lots]\n Lots --> Cook[Explicit ingredient recipe and resident work]\n Cook --> Meals[Prepared meal lots]\n Lots --> Preserve[Preservation recipe]\n Preserve --> Long[Longer-lived food lots]\n Power[Powered refrigeration] --> Slow[Slow ageing of eligible stored food]\n Slow --> Lots\n Lots --> Expired{Expired?}\n Meals --> Expired\n Long --> Expired\n Expired -->|Yes| Waste[Remove spoiled food and account organic waste]\n Expired -->|No| Use[Eating, recipe input or trade]\n Use --> Transit[Preserve batch age in cargo and reservations]",
+    "boundary": "Greens, beans and corn are not silently converted into generic edible food.",
+    "tip": "Cook or preserve only what will be used in time. Cooling needs reliable electricity.",
+    "facts": "food"
+  },
+  {
+    "id": "inventory-ownership-and-material-accounting",
+    "title": "Inventory ownership and material accounting",
+    "sources": [
+      "economy-inventory.js",
+      "material-ledger.js",
+      "material-measures.js",
+      "production-accounting.js"
+    ],
+    "tests": [
+      "inventory-ownership",
+      "material-ledger",
+      "material-units",
+      "location-accounting"
+    ],
+    "description": "Goods can be in stores, committed, carried, processed or installed.",
+    "diagram": "flowchart LR\n Stores[Available stores] --> Reserve[Construction / recipe / export commitments]\n Reserve --> Cargo[Resident or vehicle cargo]\n Cargo --> Site[Staged site inputs]\n Site --> Process[Construction or processing]\n Process --> Output[Resolved output awaiting delivery]\n Output --> Stores\n Process --> Loss[Recorded conversion losses and consumption]\n Sources[Purchases and environmental / biological inputs] --> Stores\n Stores --> Ledger[Material movements and ownership]\n Cargo --> Ledger\n Site --> Ledger\n Output --> Ledger\n Units[Item-specific mass and volume] --> Capacity[Cargo and displayed physical quantities]",
+    "boundary": "Ledger entries explain movement; they are not a second stockpile.",
+    "tip": "Check goods already reserved or in transit before buying more. A manifest is not extra stock.",
+    "facts": null
+  },
+  {
+    "id": "purchases-sales-and-physical-transport",
+    "title": "Purchases, sales and physical transport",
+    "sources": [
+      "physical-trade.js",
+      "supplier-stock.js",
+      "deliveries.js",
+      "logistics-policy.js",
+      "simulation.js"
+    ],
+    "tests": [
+      "supplier-stock",
+      "concurrent-trips",
+      "exports",
+      "deliveries"
+    ],
+    "description": "Purchases and sales need supply, demand, capacity and physical transport.",
+    "diagram": "flowchart TD\n Request[Purchase request or sale policy] --> Quote[Supplier stock or buyer quote and demand]\n Quote --> Reserve[Reserve goods, cash commitments or exports]\n Reserve --> Method{Transport method}\n Method -->|Resident pickup| Car[Available driver and car; town operating hours]\n Method -->|Paid supplier| Freight[Reserve delivery cost and capacity]\n Car --> Cargo[Load within mass and volume limits]\n Cargo --> Town[Travel to town and settle eligible sales once]\n Town --> Return[Return with purchased goods or unsold lots]\n Return --> Unload[Unload into stores or project shipment]\n Freight --> Unload\n Consolidate[Trip consolidation and protected reserves] --> Car\n Age[Perishable lot ageing in transit] --> Return",
+    "boundary": "There are two resident vehicles plus paid freight.",
+    "tip": "Sell genuine surplus after protecting food and production inputs. Combine trips when practical.",
+    "facts": null
+  },
+  {
+    "id": "cash-commitments-and-forecasts",
+    "title": "Cash, commitments and forecasts",
+    "sources": [
+      "finances.js",
+      "procurement-budget.js",
+      "economy-policies.js"
+    ],
+    "tests": [
+      "finances",
+      "forecast",
+      "procurement-budget",
+      "expansion-reserve"
+    ],
+    "description": "Income and expenses change cash; commitments reduce what can be spent.",
+    "diagram": "flowchart LR\n Income[Settled sales and outside-job income] --> Cash[Shared money balance]\n Costs[Supplies, transport and grid purchases] --> Cash\n Cash --> Budget[Subtract commitments and policy reserves]\n Budget --> Decision{New expense affordable?}\n Decision -->|Yes| Spend[Perform transaction]\n Decision -->|No| Wait[Wait or explain shortage]\n Spend --> History[Categorized money history]\n Income --> History\n History --> Days[Aggregate completed calendar days]\n Days --> Forecast[Observed operating forecast]\n Forecast --> UI[Finance inspection]",
+    "boundary": "The forecast is an estimate from observed activity, not a guaranteed future economy.",
+    "tip": "Keep a cash reserve for unavoidable imports, maintenance and transport.",
+    "facts": null
+  },
+  {
+    "id": "optional-outside-employment",
+    "title": "Optional outside employment",
+    "sources": [
+      "outside-work.js",
+      "resident-personality.js",
+      "simulation.js"
+    ],
+    "tests": [
+      "outside-work",
+      "outside-rest"
+    ],
+    "description": "Optional jobs require travel and completed shifts before pay arrives.",
+    "diagram": "stateDiagram-v2\n Disabled --> Eligible: Player enables outside job\n Eligible --> Waiting: Not scheduled or resident unavailable\n Waiting --> Eligible: Schedule and needs permit\n Eligible --> Outbound: Leave for shift\n Outbound --> Away: Reach work\n Away --> Inbound: Finish shift\n Inbound --> Eligible: Return and receive pay less any deferred fare\n Eligible --> Disabled: Player disables job\n note right of Away\n Meals and toilet breaks are provided.\n Disabling finishes the current shift.\n end note",
+    "boundary": "Jobs and pay are authored per resident.",
+    "tip": "Use outside jobs to fund early infrastructure while leaving enough workers for essential village work.",
+    "facts": null
+  },
+  {
+    "id": "asset-maintenance-and-replacement",
+    "title": "Asset maintenance and replacement",
+    "sources": [
+      "asset-upkeep.js",
+      "infrastructure.js"
+    ],
+    "tests": [
+      "upkeep",
+      "animal-care"
+    ],
+    "description": "Age and use reduce condition. Service needs parts, access and labor.",
+    "diagram": "flowchart TD\n Use[Time, active assets and vehicle distance] --> Condition[Condition and age change]\n Condition --> Due{Service or replacement due?}\n Due -->|Yes| Queue[Queue maintenance job]\n Queue --> Gate{Parts, allowance and accessible site?}\n Gate -->|No| Wait[Expose missing parts, budget or access]\n Gate -->|Yes| Work[Resident collects supplies and services asset]\n Work --> Restore[Restore condition or reset replacement age]\n Restore --> Condition\n Condition --> Capacity[Service factor and battery capacity affect utilities]\n Due -->|No| Continue[Continue operation]",
+    "boundary": "Service intervals and lifetimes are explicit simulation assumptions.",
+    "tip": "Keep parts and labor available before equipment deteriorates. Local repair materials are still limited.",
+    "facts": null
+  },
+  {
+    "id": "save-migration-and-recovery",
+    "title": "Save, migration and recovery",
+    "sources": [
+      "simulation.js",
+      "save-slots.js",
+      "load-village.js",
+      "modes.js"
+    ],
+    "tests": [
+      "save-slots",
+      "sandbox-food-save",
+      "consistency"
+    ],
+    "description": "Story and sandbox villages are saved separately. Named saves can be exported.",
+    "diagram": "flowchart TD\n Live[Village state and in-flight work] --> Save[Save current village or named snapshot]\n Save --> Storage[Browser-local storage or exported file]\n Storage --> Load[Read saved village]\n Load --> Validate{Can this village be loaded?}\n Validate -->|No| Preserve[Keep prior data and report recovery options]\n Validate -->|Yes| Migrate[Restore compatible saved systems]\n Migrate --> Legacy[Finish saved work before changing bed systems]\n Legacy --> Resume[Restore work, cargo, crops and infrastructure]\n Resume --> Live\n Mode[Separate story, sandbox and lab keys] --> Storage",
+    "boundary": "These are local saves and exports, not cloud synchronization.",
+    "tip": "Export a village before major changes. Browser saves alone are not a backup.",
+    "facts": null
+  },
+  {
+    "id": "presentation-inspection-and-ambient-life",
+    "title": "Presentation, inspection and ambient life",
+    "sources": [
+      "game.js",
+      "cultivation-models.js",
+      "house-lighting.js",
+      "lens-data.js",
+      "wildlife.js",
+      "audio.js"
+    ],
+    "tests": [
+      "cultivation-browser",
+      "lenses",
+      "house-lighting",
+      "wildlife",
+      "audio"
+    ],
+    "description": "The scene and inspection panels show conditions and resident activity.",
+    "diagram": "flowchart LR\n State[Village conditions] --> Crops[Instanced crop stage, condition and coverage]\n State --> Residents[Resident action, tools and cargo animation]\n State --> Lighting[Powered night lights]\n State --> Inspect[Bed panels, almanac, lenses and warnings]\n Inspect --> Commands[Explicit player commands]\n Commands --> State\n Seed[Stable visual seed] --> Crops\n Ambient[Birds, butterflies and other ambient animation] --> Scene[Rendered world]\n Crops --> Scene\n Residents --> Scene\n Lighting --> Scene\n Audio[Music and effect volume controls] --> Sound[Presentation audio]",
+    "boundary": "Ambient wildlife is not livestock, pollination or a saved ecological population.",
+    "tip": "Use lenses and bed inspection to locate constraints. Visible plants and wildlife do not create resources.",
+    "facts": null
+  }
+]

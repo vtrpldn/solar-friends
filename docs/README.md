@@ -8,6 +8,9 @@ Separate current gameplay and operational guidance from historical plans and dat
 
 ## Current guides
 
+- [In-game Guide maintenance](guide-maintenance.md)
+- [Autonomy mechanics implementation plan](autonomy-implementation-plan.md)
+
 - [Project setup, routes, checks and deployment](../README.md)
 - [v2 gameplay, economy, residents and infrastructure](../web/v02/weekend/README.md)
 - [3D collection](../web/v02/library/README.md)

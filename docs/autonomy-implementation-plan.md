@@ -9,6 +9,18 @@ Reduce recurring imports through physical, understandable resource cycles. Progr
 
 The Guide ships first with current mechanics. The five mechanics below are planned, not implemented by the Guide change. Existing biology, production, inventories, hauling, equipment and utilities remain authoritative.
 
+## Contents
+
+- [Delivery order](#delivery-order)
+- [Shared contracts](#shared-contracts)
+- [Seed saving](#1-seed-saving)
+- [Propagation](#2-tree-and-perennial-propagation)
+- [Manure recovery](#3-manure-recovery-and-composting)
+- [Local repair](#4-locally-supportable-equipment-repair)
+- [Useful biogas](#5-useful-biogas)
+- [Guide freshness](#guide-freshness-contract)
+- [Release acceptance](#release-acceptance)
+
 ## Delivery order
 
 | Increment | Change | Observable result |

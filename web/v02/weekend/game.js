@@ -1,3 +1,5 @@
+import {installGuide} from './guide.js';
+let guide;
 import {ensureCultivation} from './cultivation.js';
 import {cultivationSignature,createCultivationModel} from './cultivation-models.js';
 import {installFarmingUI} from './cultivation-ui.js';
@@ -754,6 +756,7 @@ function message(t) {
 let activeSaveSlot;
 try { activeSaveSlot=saveSlots(localStorage).active(s.mode||"story"); } catch {}
 function viewPauseState() {
+  if (guide?.isOpen) return guide.resumePaused;
   if (document.querySelector('.village-saves[open]')) return savesWasPaused;
   if ($('controls-dialog').open) return controlsWasPaused;
   if (management?.isOpen) return management.resumePaused;
@@ -1101,6 +1104,7 @@ $("cancel-project").onclick = () => {
   message(error || s.log[0]);
   uiSignature = ''; renderUI();
 };
+guide=installGuide({button:$('open-guide'),isPaused:()=>paused,savePauseState:()=>viewPauseState(),setPaused:value=>{paused=value;updatePauseButton();}});
 let controlsWasPaused = false;
 $("show-controls").onclick = () => {
   controlsWasPaused = paused; paused = true; updatePauseButton();
