@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import {createScalePreview} from '../web/v02/weekend/scale-preview.js';
+import {assignHome, availableHomes, homeResidents, PROJECTS, save, restore, tick} from '../web/v02/weekend/simulation.js';
+const s=createScalePreview(false,'homes'), homes=availableHomes(s), home=homes.find(p=>(PROJECTS[p.key].beds||2)===2), [a,b,c]=s.people;
+assert(home);
+assert.equal(assignHome(s,a.id,home.id),'');
+assert.equal(assignHome(s,b.id,home.id),'');
+assert.match(assignHome(s,c.id,home.id),/no free beds/);
+assert.equal(homeResidents(s,home.id).length,2);
+assert.equal(assignHome(s,a.id,home.id),'');
+assert.equal(assignHome(s,a.id,null),'');
+assert.equal(assignHome(s,c.id,home.id),'');
+assert.match(assignHome(s,a.id,s.projects.find(p=>p.key==='road').id),/completed home/);
+const unfinished=homes.find(p=>p!==home);unfinished.work=0;
+assert.match(assignHome(s,a.id,unfinished.id),/completed home/);
+assert.equal(restore(save(s)).people.find(p=>p.id===c.id).home,home.id);
+const old=JSON.parse(save(s));for(const r of old.people)delete r.home;
+assert(restore(JSON.stringify(old)).people.every(r=>r.home===null));
+const damaged=JSON.parse(save(s));damaged.people.forEach(r=>r.home=home.id);
+assert.equal(homeResidents(restore(JSON.stringify(damaged)),home.id).length,2);
+const missing=JSON.parse(save(s));missing.people[0].home=999999;
+assert.equal(restore(JSON.stringify(missing)).people[0].home,null);
+// The assigned home wins over a nearer home, using the actual rest scheduler.
+const sleeper=s.people[1];sleeper.energy=10;sleeper.needs={hunger:100,bladder:100,bowels:100,hygiene:100,social:100,fun:100};
+sleeper.action='idle';sleeper.restSite=null;sleeper.cargo=false;
+for(let i=0;i<5 && !sleeper.restSite;i++)tick(s,.1);
+assert.equal(sleeper.restSite,home.id);
+console.log('PASS: home capacity, reassignment, invalid targets, legacy saves, corrupt assignments and actual rest routing.');
