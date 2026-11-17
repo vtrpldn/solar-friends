@@ -4,6 +4,13 @@ import {profileFor} from './resident-personality.js';
 import {committed, conversationPartners, conversationFor, finishConversation, finishPersonalTime} from './resident-mind.js';
 import { useWater } from './infrastructure.js';
 export const NEED_KEYS=['hunger','bladder','bowels','hygiene','social','fun','hydration'];
+// The clock starts at 09:00 and advances 0.45 game minutes per second.
+export function mealTime(s,r) {
+ const hour=(9+s.time*.45/60)%24;
+ const window=(hour>=6.5&&hour<8.5)||(hour>=12&&hour<14)||(hour>=18&&hour<20);
+ // A late meal or an emergency snack also counts: do not eat twice in quick succession.
+ return window && (r.lastMealAt==null || (s.time-r.lastMealAt)*.45>=180);
+}
 const clamp=n=>Math.max(0,Math.min(100,n));
 export function ensureNeeds(r,i=0) {
   if(!r.needs)r.needs={hunger:76+i*3,bladder:82-i*5,bowels:88-i*3,hygiene:90-i*2,social:78+i*3,fun:82-i*2};
@@ -51,7 +58,7 @@ export function chooseNeed(s,r,i,api) {
  if(r.needTask || r.tentPhase || r.cargo || r.action==='town' || s.stage!=='playing' || (r.energy<25 && Math.min(ensureNeeds(r).hunger,ensureNeeds(r).bladder,ensureNeeds(r).bowels,ensureNeeds(r).hydration)>=15) || (r.needRetryAt||0)>s.time)return;
  const n=ensureNeeds(r,i);
  const temperament=profileFor(r).temperament;
- const threshold=k=>k==='social' ? (committed(r)?35:temperament.socialAt) : k==='fun' ? temperament.breakAt : 30;
+ const threshold=k=>k==='social' ? (committed(r)?35:temperament.socialAt) : k==='fun' ? temperament.breakAt : k==='hunger' && mealTime(s,r) ? 80 : 30;
  const pending=NEED_KEYS.filter(k=>(!r.outsideWork || physical.includes(k)) && (r.energy>=25 || physical.includes(k)) && n[k]<threshold(k) &&
    (k!=='social' || (r.mind?.quietUntil||0)<=s.time))
    .sort((a,b)=>(physical.includes(b)&&n[b]<15?1:0)-(physical.includes(a)&&n[a]<15?1:0)||n[a]/threshold(a)-n[b]/threshold(b));
@@ -148,7 +155,7 @@ export function advanceNeed(s,r,dt,api) {
   if(drinkWater(s,task.site,.5))n.hydration=Math.min(100,n.hydration+20);
   else r.needBlocked='Drinking source emptied; fetch and filter water';
  } else if(task.kind==='hunger') {
-  if(eatMeal(s)){n.hunger=90;n.bladder=clamp(n.bladder-5);n.bowels=clamp(n.bowels-4);}
+  if(eatMeal(s)){r.lastMealAt=s.time;n.hunger=90;n.bladder=clamp(n.bladder-5);n.bowels=clamp(n.bowels-4);}
  } else if(task.kind==='hygiene') {
   if(task.river || (node && useWater(s,node.id,1))){n.hygiene=task.river?78:95;r.cleanedAtWork=r.work;}
  } else if(task.kind==='bladder'||task.kind==='bowels') {
