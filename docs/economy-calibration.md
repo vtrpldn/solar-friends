@@ -36,3 +36,7 @@ Still required: matching-date local prices, equipment specifications, canonical 
 ## Evidence
 
 `verify-v02-economy-reference.mjs` checks the independently calculated fares, travel minutes and shared power forecast. Physical trade and procurement tests exercise settlement, multi-trip budget preservation, all catalog collection manifests and legacy trip restoration. These are accounting checks, not evidence of new-game economic viability.
+
+A follow-up regression exposed a real boarding consolidation defect. Adding a compatible prepaid blueprint while the driver was boarding did not refresh the manifest. Boarding now repacks compatible pending orders within capacity; the derived budget excludes the already-paid first fare. Departure locks the manifest. Regression checks cover both branches, overflow trips, restored manifests and no duplicate material payments. Older blueprint checks were also updated to include explicit fuel charges introduced by physical trading.
+
+Power-screen tariff copy and new-game travel estimates now use the shared numeric model rather than independent hard-coded labels. Broader financial, trade, production, spoilage, preservation and cold-storage checks pass; accelerated fixed-step checks pass through 1024×. These remain bounded regression results, not completion of seasonal or full-catalog release gates.

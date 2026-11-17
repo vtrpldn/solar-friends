@@ -62,3 +62,9 @@ for(const [key,def]of Object.entries(PROJECTS)){
  assert.equal(collectionBudget(state).cost,0);
 }
 console.log('PASS every catalog bill of materials reconciles quoted and actual collection fares');
+const boarding={money:100,projects:[{id:1,pendingMaterials:{wood:4}}],trip:{phase:'boarding',shipments:[{project:1,items:{wood:4}}]}};
+assert.equal(collectionBudget(boarding,{wood:4}).cost,0,'small added order shares paid boarding trip');
+assert.equal(collectionBudget(boarding,{stone:40}).cost,14.66,'overflow reserves only unpaid trips');
+boarding.trip.phase='outbound';
+assert.equal(collectionBudget(boarding,{wood:4}).cost,7.33,'departed manifest cannot accept new cargo');
+console.log('PASS boarding consolidation releases only the already-paid fare and locks on departure');

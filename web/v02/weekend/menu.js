@@ -77,7 +77,7 @@ function updatePreview(){
  ctx.fillStyle=palette[0];ctx.fillRect(px,py,4,4);ctx.fillStyle=`rgba(40,60,20,${Math.min(.55,h/20)})`;ctx.fillRect(px,py,4,4);
  if(Math.abs(x-riverCenter(z,seed))<riverWidth(z,seed)+2){ctx.fillStyle='#69aaa0';ctx.fillRect(px,py,4,4);}}
  ctx.fillStyle='#fff4d7';ctx.beginPath();ctx.arc(200,200,5,0,Math.PI*2);ctx.fill();
- $('setup-summary').textContent=pending==='sandbox'?'Sandbox keeps unlimited supplies and money. Landscape, biome, water and resources still shape the plot.':`${names[settings.savings]} · ${names[settings.supplies]} · ${townDuration(settings.town)}s town trip, plus loading and walking.`;
+ $('setup-summary').textContent=pending==='sandbox'?'Sandbox keeps unlimited supplies and money. Landscape, biome, water and resources still shape the plot.':`${names[settings.savings]} · ${names[settings.supplies]} · ${Math.round(townDuration(settings.town)*.45)} game-minute town trip, plus loading and walking.`;
 }
 $('setup-preset').onchange=()=>{const preset=PRESETS[$('setup-preset').value];if(preset)for(const [key,value] of Object.entries(preset))$('setup-'+key).value=value;updatePreview();};
 $('setup-seed').oninput=updatePreview;

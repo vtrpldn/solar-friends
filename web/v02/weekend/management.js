@@ -1,5 +1,5 @@
 import {materialUnitText} from "./material-measures.js";
-import {tripEstimateText} from "./economy-reference.js";
+import {tripEstimateText,GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
 import {coolingText} from './cold-storage.js';
 import {foodStorageText} from './food-storage.js';
 import {recipeLossText,productionSummary} from './production-accounting.js';
@@ -209,6 +209,7 @@ export function createManagement({
       b.setAttribute("aria-pressed", String(b.dataset.manage === view));
     });
     $("grid-power-panel").hidden = view !== "power";
+    $("grid-tariff-description").textContent=`Your own generation and batteries come first. Grid backup supplies up to ${ECONOMY_REFERENCE.electricity.capacityKw} kW at R$${GRID_TARIFF.toFixed(2)}/kWh. No standing charge. Collection budgets stay protected.`;
     const grid = s.infrastructure.grid;
     $("grid-power-status").textContent = `${grid.enabled ? (s.money <= 0 ? "No funds for grid power" : "Grid backup connected") : "Off-grid"} · ${grid.importing.toFixed(2)} kW imported now · ${grid.imported.toFixed(2)} kWh purchased · R$${grid.spent.toFixed(2)} spent`;
     $("toggle-grid-power").textContent = grid.enabled ? "Disconnect grid power" : "Connect grid backup";

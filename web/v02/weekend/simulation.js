@@ -727,7 +727,13 @@ export function blueprintPurchase(s, key, count = 1) {
 function dispatchBlueprintPickup(s) {
   const pending = s.projects.filter(p => p.pendingMaterials);
   if (!pending.length) return;
-  if(s.trip)return;
+  if(s.trip){
+    if(s.trip.phase==="boarding"&&s.trip.shipments){
+      s.trip.shipments=blueprintManifest(pending);
+      s.trip.projects=s.trip.shipments.map(p=>p.project);
+    }
+    return;
+  }
   const shipments=blueprintManifest(pending);if(!shipments.length)return;
   const first=s.projects.find(p=>p.id===shipments[0].project);
   if(supplyRun(s,Object.keys(shipments[0].items)[0],first)){
