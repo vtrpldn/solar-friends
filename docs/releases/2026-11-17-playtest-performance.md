@@ -16,7 +16,7 @@ Three scheduled construction attempts were hidden by catalog category filtering;
 
 ## Performance changes and measurements
 
-The separate performance session started at **19:37:10 UTC**. Its actual completion time is recorded after the hour finishes.
+The separate performance session ran **19:37:10–20:37:27 UTC** (3,617 seconds).
 
 - Paused dry scenes retain UI updates, autosaves and camera controls while skipping unchanged scene transforms and GPU submissions. Input, resize, context restoration and visibility changes request redraws; rainfall keeps rendering.
 - Shadow maps follow actual drawing-buffer size: 1024, 2048 or 4096 pixels. Retina/large displays retain 4096. Bias scales with resolution to avoid tent-roof self-shadow artifacts.
@@ -78,3 +78,7 @@ Farming, 72-bed bulk work, physical seed purchasing/delivery, all crop/enclosure
 The actual published `d19a12ae` build passed normal badge-area clicks, reloadable diagnostics, combined water/sanitation, crafting, saved field inspection, Guide, desktop resize and reload with zero browser exceptions. A subsequent publication contains the remaining integrated changes and is checked separately.
 
 `RELEASE_REVISION=<published SHA> RELEASE_SAVE=<save path> node scripts/check-production-release.mjs` verifies a specific live deployment; it is intentionally separate from the automatic local regression glob.
+
+A final isolated native-GPU sample after all mechanics were reconciled measured **8.34 ms mean / 9.2 ms p95 at 16×** on the recorded village. The earlier run that overlapped a browser regression is retained as an artifact but excluded from this comparison.
+
+The final gameplay build `17c9a1dd` passed the same live checks plus the Advance days dialog at 20:36 UTC. Later commits preserve source history, test portability and these records; they do not change game assets. GitHub’s comprehensive CI was still running when this evidence was recorded; local targeted checks and production smoke checks are the completed evidence.

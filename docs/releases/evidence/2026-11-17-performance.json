@@ -24,7 +24,8 @@
   "productionRevisionAtReload": "ecb270e94301fe3ad24571cc4a95b5137dd5e312",
   "performanceSession": {
     "startedAt": "2026-11-17T19:37:10Z",
-    "finishedAt": null
+    "finishedAt": "2026-11-17T20:37:27Z",
+    "elapsedSeconds": 3617
   },
   "baseline": [
     {
@@ -1033,5 +1034,160 @@
         "heapBytes": 23100000
       }
     }
+  },
+  "reconciledNativeMetal": [
+    {
+      "mode": "16x",
+      "sourceHash": "17a8e0ec497ec274d926bb53d8446b8172f4d696da0864fb4f641670cc47f4b8",
+      "sourceRevision": "working-tree",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+      "frames": 2399,
+      "meanMs": 8.338432680243713,
+      "p95Ms": 9.200000000000728,
+      "heapBytes": 116000000,
+      "readout": "120 callbacks/s \u00b7 120 renders/s \u00b7 120 motion updates/s \u00b7 p95 9 ms \u00b7 653 draw calls in last render \u00b7 254,158 triangles",
+      "top": [
+        {
+          "function": "(idle)",
+          "url": "",
+          "line": 0,
+          "ms": 7356.409
+        },
+        {
+          "function": "needsUpdate",
+          "url": "v2/workshop/vendor/three.module.js",
+          "line": 1759,
+          "ms": 2140.736
+        },
+        {
+          "function": "updateMatrixWorld",
+          "url": "v2/workshop/vendor/three.core.js",
+          "line": 13071,
+          "ms": 761.397
+        },
+        {
+          "function": "(program)",
+          "url": "",
+          "line": 0,
+          "ms": 631.124
+        },
+        {
+          "function": "projectObject",
+          "url": "v2/workshop/vendor/three.module.js",
+          "line": 17696,
+          "ms": 396.392
+        },
+        {
+          "function": "frame",
+          "url": "v2/game.js",
+          "line": 2181,
+          "ms": 329.612
+        },
+        {
+          "function": "elevationVertex",
+          "url": "v2/elevation.js",
+          "line": 31,
+          "ms": 280.236
+        },
+        {
+          "function": "tickUncached",
+          "url": "v2/simulation.js",
+          "line": 2124,
+          "ms": 226.447
+        },
+        {
+          "function": "projectObject",
+          "url": "v2/workshop/vendor/three.module.js",
+          "line": 17696,
+          "ms": 222.363
+        },
+        {
+          "function": "landParameters",
+          "url": "v2/land-layout.js",
+          "line": 17,
+          "ms": 187.78
+        },
+        {
+          "function": "querySelector",
+          "url": "",
+          "line": 0,
+          "ms": 180.924
+        },
+        {
+          "function": "intersectsFrustum",
+          "url": "v2/workshop/vendor/three.core.js",
+          "line": 24299,
+          "ms": 170.891
+        },
+        {
+          "function": "renderObject",
+          "url": "v2/workshop/vendor/three.module.js",
+          "line": 9365,
+          "ms": 170.169
+        },
+        {
+          "function": "getBindingState",
+          "url": "v2/workshop/vendor/three.module.js",
+          "line": 1680,
+          "ms": 168.753
+        },
+        {
+          "function": "WebGLRenderer.renderBufferDirect",
+          "url": "v2/workshop/vendor/three.module.js",
+          "line": 17023,
+          "ms": 146.385
+        },
+        {
+          "function": "updateMatrixWorld",
+          "url": "v2/workshop/vendor/three.core.js",
+          "line": 13071,
+          "ms": 136.302
+        },
+        {
+          "function": "intersectsFrustum",
+          "url": "v2/workshop/vendor/three.core.js",
+          "line": 24299,
+          "ms": 133.692
+        },
+        {
+          "function": "setup",
+          "url": "v2/workshop/vendor/three.module.js",
+          "line": 1623,
+          "ms": 127.897
+        },
+        {
+          "function": "syncBuildings",
+          "url": "v2/game.js",
+          "line": 534,
+          "ms": 125.012
+        },
+        {
+          "function": "infrastructureStep",
+          "url": "v2/infrastructure.js",
+          "line": 224,
+          "ms": 118.219
+        }
+      ]
+    }
+  ],
+  "finalProductionVerification": {
+    "checkedAt": "2026-11-17T20:36:24.832Z",
+    "build": {
+      "revision": "17c9a1dd5ba40d723321849a72210b57be308b01",
+      "builtAt": "2026-11-17T20:35:03.282Z"
+    },
+    "errors": [],
+    "passed": true,
+    "checks": [
+      "normal badge-area pointer click",
+      "reloadable diagnostic export",
+      "combined water/sanitation",
+      "crafting",
+      "Guide",
+      "advance-days dialog",
+      "desktop resize",
+      "save reload",
+      "field crop retention"
+    ]
   }
 }
