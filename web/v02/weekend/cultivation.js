@@ -15,14 +15,15 @@ export function bedLayout(p){
  if(p.key!=='field'||!fieldSizeValid(p.fieldSize))return [];
  const [w,d]=p.fieldSize.map(n=>n*2), beds=[];
  // 1.2 m beds separated by 0.8 m aisles; 1 m clear headlands.
- for(let x=-w/2+1;x<=w/2-1;x+=2)for(let z=-d/2+1;z<d/2-1;z+=5){
-  const length=Math.min(4,d/2-1-z);if(length>0)beds.push({x,z:z+length/2,w:1.2,d:length});
+ for(let x=-w/2+1;x<=w/2-1;x+=2)for(let z=-d/2+1;z<d/2-1;z+=2){
+  const length=Math.min(2,d/2-1-z);if(length>0)beds.push({x,z:z+length/2,w:1.2,d:length});
  }
  return beds;
 }
 export function ensureCultivation(s,p){
  if(!CULTIVATION_KEYS.includes(p.key)||p.felled)return null;
  if(p.cultivation)return p.cultivation;
+ if(s.upkeep?.jobs.some(j=>j.target===p.id&&j.soil&&!j.done))return null;
  if((s.operations||[]).some(o=>o.site===p.id&&!o.done&&!o.farm&&!o.water))return null;
  p.cultivation={version:1,beds:bedLayout(p).map((g,id)=>({...g,id,stage:'unprepared',crop:'greens',density:1,irrigation:true,residues:'leave',moisture:p.soilMoisture??.75,fertility:p.soilFertility??1,organic:0,cover:0,residueKg:0,amendmentKg:0,growth:0,stress:0,elapsed:0,irrigated:0,rainLiters:0,evaporated:0,drained:0,decomposed:0,exportedKg:0}))};
  delete p.repeat;

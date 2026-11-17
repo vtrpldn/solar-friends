@@ -1,3 +1,6 @@
+import {ensureCultivation} from './cultivation.js';
+import {cultivationSignature,createCultivationModel} from './cultivation-models.js';
+import {installFarmingUI} from './cultivation-ui.js';
 import {supplierError} from './supplier-stock.js';
 import {activeTrips} from "./trip-state.js";
 import {setOutsideWork,outsideWorkText} from "./outside-work.js";
@@ -585,6 +588,8 @@ function syncBuildings() {
   for (const p of s.projects) {
     const def = PROJECTS[p.key],
       fraction = p.work / def.work;
+    const cultivation=fraction>=1&&ensureCultivation(s,p);
+    const farmSignature=cultivation&&cultivationSignature(p,s);
     let id =
       p.key === "gathering" && fraction < 0.35 ? "produce-crates" : def.asset;
     if (p.key === "goat-pasture-empty" && p.stocked) id = "goat_pasture";
@@ -597,6 +602,7 @@ function syncBuildings() {
     if (
       !entry ||
       entry.asset !== id ||
+      entry.farmSignature !== farmSignature ||
       (p.key === "road" &&
         entry.groundKey !== `${p.x},${p.z},${p.rotation || 0}`)
     ) {
@@ -604,7 +610,7 @@ function syncBuildings() {
         scene.remove(entry.root);
         disposeModel(entry.root);
       }
-      const root = prop(
+      const root = cultivation ? createCultivationModel(p,s) : prop(
         id,
         p.x + (footprint(p)[0] - 1) / 2,
         p.z + (footprint(p)[1] - 1) / 2,
@@ -618,10 +624,12 @@ function syncBuildings() {
           previous.dispose();
         });
       }
+      if(cultivation)scene.add(root);
       root.userData.projectId = p.id;
       entry = {
         root,
         asset: id,
+        farmSignature,
         animals: collectAnimals(root),
         groundKey: `${p.x},${p.z},${p.rotation || 0}`,
       };
@@ -901,6 +909,11 @@ function hit(e) {
   ray.setFromCamera(mouse, camera);
   return ray.intersectObject(ground)[0]?.point;
 }
+let farmingUI=installFarmingUI({state:()=>s,selected:()=>selected,scene,hit,controls,
+  select:id=>{selected=id;syncBuildings();persist();renderUI();},
+  changed:()=>{syncBuildings();persist();renderUI();},message,
+  begin:()=>{placing=null;setPanel(null);ghost.visible=false;},
+});
 $("world").addEventListener("pointerdown", (e) => {
   down = { x: e.clientX, y: e.clientY };
 });
@@ -1413,7 +1426,7 @@ function renderUtilityUI() {
     "production",
     p
       ? Object.entries(PROCESSES)
-          .filter(([, d]) => d.kind === PROJECTS[p.key].kind)
+          .filter(([id, d]) => d.kind === PROJECTS[p.key].kind && !(p.cultivation&&['baby_greens','vegetables','greenhouse'].includes(id)))
           .map(([id, d]) => [id, d.name])
       : [],
   );
@@ -1600,6 +1613,7 @@ $("toggle-build-list").onclick = () => setPanel(null);
 filterBuildings();
 let arrivalMessageShown = false;
 function renderUI() {
+  farmingUI?.refresh();
   const signature = JSON.stringify([
     openPanel,
     s.stage,

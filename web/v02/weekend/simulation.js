@@ -315,9 +315,12 @@ export function resizeField(s,id,size){
   if((s.operations||[]).some(o=>o.site===id&&!o.done))return 'Finish this field’s jobs before resizing.';
   const old=ensureCultivation(s,p).beds,layout=bedLayout({...p,fieldSize:size});
   // Anchor beds to their ground positions when the east/south boundaries change.
-  const dx=size[0]-p.fieldSize[0],dz=size[1]-p.fieldSize[1];
+  const oldSize=footprint(p),newSize=(p.rotation||0)%2?[size[1],size[0]]:size;
+  const a=(p.rotation||0)*Math.PI/2,wx=newSize[0]-oldSize[0],wz=newSize[1]-oldSize[1];
+  const dx=Math.round(Math.cos(a)*wx-Math.sin(a)*wz),dz=Math.round(Math.sin(a)*wx+Math.cos(a)*wz);
   const find=g=>old.find(b=>b.x-dx===g.x&&b.z-dz===g.z&&b.w===g.w&&b.d===g.d);
   if(old.some(b=>!layout.some(g=>find(g)===b)&&(!['unprepared','prepared','harvested'].includes(b.stage)||b.residueKg>0||b.amendmentKg>0)))return 'Clear crops and collect residues before shrinking occupied beds.';
+  s.operations=(s.operations||[]).filter(o=>o.site!==id||!o.done);
   p.fieldSize=[...size];delete p.cultivation;const farm=ensureCultivation(s,p);
   farm.beds=farm.beds.map((b,i)=>({...find(b),...b,...(find(b)||{}),x:b.x,z:b.z,id:i}));
   invalidateNavigation(s);return '';
@@ -427,7 +430,7 @@ export function repeatProduction(s, site, recipe) {
     PROJECTS[p.key].kind !== PROCESSES[recipe].kind
   )
     return false;
-  if(PROJECTS[p.key].kind==='wild-tree')return false;
+  if(PROJECTS[p.key].kind==='wild-tree'||p.cultivation)return false;
   p.repeat = p.repeat === recipe ? null : recipe;
   return true;
 }
@@ -1506,7 +1509,7 @@ function prepareNavigation(s){
   let same=cache?.campSignature===campSignature&&cache.projects.length===s.projects.length;
   if(same)for(let i=0;i<s.projects.length;i++){
     const p=s.projects[i],old=cache.projects[i],[w,d]=footprint(p);
-    if(old.id!==p.id||old.key!==p.key||old.x!==p.x||old.z!==p.z||old.rotation!==p.rotation||old.felled!==p.felled||old.complete!==(p.work>=PROJECTS[p.key].work)||old.w!==w||old.d!==d){same=false;break;}
+    if(old.id!==p.id||old.key!==p.key||old.x!==p.x||old.z!==p.z||old.rotation!==p.rotation||old.felled!==p.felled||old.cultivated!==!!p.cultivation||old.complete!==(p.work>=PROJECTS[p.key].work)||old.w!==w||old.d!==d){same=false;break;}
   }
   if(!same){
     const obstacles=new Map();
@@ -1519,7 +1522,7 @@ function prepareNavigation(s){
           }
       }
     }
-    cache={campSignature,projects:s.projects.map(p=>{const [w,d]=footprint(p);return {id:p.id,key:p.key,x:p.x,z:p.z,rotation:p.rotation,felled:p.felled,complete:p.work>=PROJECTS[p.key].work,w,d};}),state:s,cells:new Map(),terrain:new Map(),routes:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
+    cache={campSignature,projects:s.projects.map(p=>{const [w,d]=footprint(p);return {id:p.id,key:p.key,x:p.x,z:p.z,rotation:p.rotation,felled:p.felled,cultivated:!!p.cultivation,complete:p.work>=PROJECTS[p.key].work,w,d};}),state:s,cells:new Map(),terrain:new Map(),routes:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
   }
   return cache;
 }
@@ -2807,6 +2810,7 @@ export function restore(text) {
     if(s.expansionReserve!==undefined&&(!Number.isFinite(s.expansionReserve)||s.expansionReserve<0||s.expansionReserve>100000))return null;
     if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
+    if(s.foodStorage?.lots)for(const id of ['greens','beans','corn'])if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
     refreshSandboxFood(s);
     if (!validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
