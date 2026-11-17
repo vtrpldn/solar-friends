@@ -44,7 +44,7 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
         tone=!n.enabled?'muted':id==='sanitation'?(full?'bad':'good'):(empty?'warn':'good');
         detail=indices.filter(i=>n.capacity[i]).map(i=>`${pretty(LIQUIDS[i])}: ${n.water[i].toFixed(1)}/${n.capacity[i]}`).join(' · ');
       }
-      mark(n,n.id===0?'Camp':n.id===-1?'River':PROJECTS[projects.find(p=>p.id===n.id)?.key]?.name||pretty(n.kind),detail,tone,2);
+      mark({...n,projectId:n.id>0?n.id:undefined},n.id===0?'Camp':n.id===-1?'River':PROJECTS[projects.find(p=>p.id===n.id)?.key]?.name||pretty(n.kind),detail,tone,2);
     }
     for(const l of sys.links.filter(l=>kinds.includes(l.kind))) {
       const a=sys.nodes[l.from],b=sys.nodes[l.to];if(!a||!b)continue;
@@ -57,12 +57,16 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
     const recipes=Object.values(PROCESSES).filter(r=>r.kind===kind);
     if(p.felled){if(id==='ecology')projectMark(p,'Tree cleared · does not regrow automatically','muted');continue;}
     if(id==='construction'&&!done)projectMark(p,constructionStatus(s,p,d,requiredLoads(p.key)),p.delivered<requiredLoads(p.key)?'warn':'good');
-    if(id==='resources'&&d.natural){const recipe=recipes.find(r=>r.deposit);projectMark(p,recipe?`${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} units remain`:operationText(p),recipe&&(p.extracted||0)>=depositCapacity(s.landSeed,p,recipe)?'muted':'good');}
+    if(id==='resources'&&d.natural){const recipe=recipes.find(r=>r.deposit);projectMark(p,recipe?`${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} units remain`:ops.some(o=>o.site===p.id)?'Felling queued · yields raw wood':'Standing tree · yields raw wood',recipe&&(p.extracted||0)>=depositCapacity(s.landSeed,p,recipe)?'muted':'good');}
     if(id==='ecology'&&(d.natural||['garden','grove','orchard','greenhouse'].includes(kind)))projectMark(p,kind==='wild-tree'?(ops.some(o=>o.site===p.id)?'Marked for felling':'Standing tree'):d.natural?'Natural deposit':'Cultivated land',ops.some(o=>o.site===p.id)&&kind==='wild-tree'?'warn':'good');
     if(id==='food'&&recipes.some(r=>foodIds.some(k=>r.output[k])))projectMark(p,done?operationText(p):'Under construction',done?'good':'warn');
     if(id==='work'&&(!done||recipes.length)) {const crew=people.filter(r=>r.job===p.id||ops.some(o=>o.site===p.id&&r.operation===o.id)).length;projectMark(p,`${crew} assigned · ${done?operationText(p):constructionStatus(s,p,d,requiredLoads(p.key))}`,crew?'good':'warn');}
     if(id==='access'&&!d.natural&&!['road','bridge'].includes(kind))projectMark(p,`${Math.hypot(p.x-s.stock.x,p.z-s.stock.z).toFixed(1)} cells from shared supplies (straight line)`,Math.hypot(p.x-s.stock.x,p.z-s.stock.z)>25?'warn':'info');
-    if(id==='comfort'&&['home','kitchen','eco_toilet','wash-station',...leisure].includes(kind))projectMark(p,`${pretty(kind)} · ${!done?'Under construction':sys.nodes[p.id]?.enabled===false?'Switched off':'Built'} · inspect for service details`,done?'good':'warn');
+    if(id==='comfort'&&['home','kitchen','eco_toilet','wash-station',...leisure].includes(kind)) {
+      const nearest=predicate=>{const sites=Object.values(sys.nodes).filter(n=>n.enabled&&predicate(n));return sites.length?`${Math.min(...sites.map(n=>Math.hypot(n.x-p.x,n.z-p.z))).toFixed(0)} cells`:'none available';};
+      const detail=kind==='home'&&done?`Straight-line proximity · meals at supplies ${Math.hypot(p.x-s.stock.x,p.z-s.stock.z).toFixed(0)} cells · washing ${nearest(n=>['home','wash-station','eco_toilet','camp'].includes(n.kind)&&n.water[0]>=1&&n.capacity[2]-n.water[2]>=.8)} · toilet ${nearest(n=>['home','eco_toilet'].includes(n.kind)&&n.capacity[3]-n.water[3]>=1.5)} · leisure ${nearest(n=>leisure.includes(n.kind))}`:`${pretty(kind)} · ${!done?'Under construction':sys.nodes[p.id]?.enabled===false?'Switched off':'Built'} · inspect for service details`;
+      projectMark(p,detail,done?'good':'warn');
+    }
     if(id==='chains') {
       const produces=recipes.some(r=>r.output[material]),consumes=recipes.some(r=>r.input[material])||(!done&&d.materials?.[material]);
       if(produces||consumes){projectMark(p,`${produces?'Potential producer':''}${produces&&consumes?' / ':''}${consumes?'Consumer':''} · ${done?operationText(p):'Construction materials needed'}`,produces?'good':'warn');lines.push({points:[s.stock,p],tone:produces?'good':'warn'});}

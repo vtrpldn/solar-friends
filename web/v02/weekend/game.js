@@ -1,3 +1,4 @@
+import {installLenses} from './lenses.js';
 import {loadVillage} from './load-village.js';
 import {ensureNaturalLand} from './natural-resources.js';
 import {saveSlots} from "./save-slots.js";
@@ -2012,10 +2013,13 @@ function frame(now) {
     top: shadowExtent, bottom: -shadowExtent, near: 1, far: 900 });
   sun.shadow.camera.updateProjectionMatrix();
   drawUtilities();
+  utilityLines.visible = !lenses.active;
+  lenses.update(now);
   renderer.render(scene, camera);
   recordPerformance(now, visual.time);
   requestAnimationFrame(frame);
 }
+const lenses = installLenses({state:()=>s,camera,world,focus,inspect:id=>{setPanel(null);selected=id;renderUI();}});
 addEventListener("pagehide", persist);
 requestAnimationFrame(frame);
 
