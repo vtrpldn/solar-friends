@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   createWeekend,
+  enableFastNavigation,
   tick,
   chooseCamp,
   plan,
@@ -20,7 +21,7 @@ for (const [name, cover, storage] of [
   ["permanent", "shelter", "tarp-stores"],
   ["investment", "shelter", "covered-stores"],
 ]) {
-  const s = createWeekend();
+  const s = createWeekend();enableFastNavigation(s);
   run(s, 18);
   chooseCamp(s, "clearing");
   assert.equal(plan(s, "gathering", 29, 35), "");
@@ -47,7 +48,7 @@ for (const [name, cover, storage] of [
   );
 }
 // A tarp cannot be spent twice; rejecting a plan must not consume anything.
-const scarce = createWeekend();
+const scarce = createWeekend();enableFastNavigation(scarce);
 run(scarce, 18);
 chooseCamp(scarce, "entrance");
 assert.equal(plan(scarce, "rain-tent", 34, 39), "");
@@ -64,7 +65,7 @@ assert.deepEqual(
 );
 run(scarce, 241);
 assert(scarce.rainSeen && scarce.rainResolved, "opening shower does not create a forced repair quest");
-scarce.money = 220;
+scarce.money = 2000; // Fixture funds isolate tarp ownership from current retail calibration.
 assert.equal(plan(scarce, "covered-stores", 40, 39), "");
 // Crews are now limited; carrying, breaks and construction must still finish
 // within the opening budget, rather than assuming all five residents build it.

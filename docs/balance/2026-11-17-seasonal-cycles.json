@@ -1,0 +1,413 @@
+{
+  "kind": "Diagnostic biological cycles and hypothetical single-trip unit economics; not a normal-game income playthrough",
+  "assumptions": [
+    "Healthy animals; irrigation supplied by fixture, not free in actual play",
+    "First-band buyer prices for all output; actual daily limits, batch sizes and spoilage can prevent this sale",
+    "No capital, unpaid resident labor, upkeep, crop water energy or established-orchard repeat-cycle profit included",
+    "First orchard cycle includes juvenile establishment; all six timber growth years actually advanced through seasonal model"
+  ],
+  "rows": [
+    {
+      "biome": "mata-atlantica",
+      "recipe": "vegetables",
+      "elapsedDays": 45,
+      "irrigationLiters": 2160,
+      "output": {
+        "food": 32,
+        "scraps": 4
+      },
+      "retailInputs": 6,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "mata-atlantica",
+      "recipe": "greenhouse",
+      "elapsedDays": 40,
+      "irrigationLiters": 1920,
+      "output": {
+        "food": 48,
+        "scraps": 6
+      },
+      "retailInputs": 6,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "mata-atlantica",
+      "recipe": "fruit",
+      "elapsedDays": 803,
+      "irrigationLiters": 25696,
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "mata-atlantica",
+      "recipe": "bananas",
+      "elapsedDays": 306.5,
+      "irrigationLiters": 14712,
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "mata-atlantica",
+      "recipe": "wood",
+      "elapsedDays": 2425.25,
+      "irrigationLiters": 0,
+      "output": {
+        "logs": 48
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": 192,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 184.24
+    },
+    {
+      "biome": "mata-atlantica",
+      "recipe": "bamboo",
+      "elapsedDays": 401.5,
+      "irrigationLiters": 0,
+      "output": {
+        "bamboo": 8
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": 16,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 8.24
+    },
+    {
+      "biome": "mata-atlantica",
+      "recipe": "compost",
+      "elapsedDays": 60,
+      "irrigationLiters": 0,
+      "output": {
+        "compost": 2
+      },
+      "retailInputs": null,
+      "feedCost": 0,
+      "firstBandOutputValue": 8,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "mata-atlantica",
+      "recipe": "eggs",
+      "elapsedDays": 3,
+      "irrigationLiters": 0,
+      "output": {
+        "eggs": 6
+      },
+      "retailInputs": 0,
+      "feedCost": 2,
+      "firstBandOutputValue": 9,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": -0.76
+    },
+    {
+      "biome": "mata-atlantica",
+      "recipe": "milk",
+      "elapsedDays": 1,
+      "irrigationLiters": 0,
+      "output": {
+        "milk": 4
+      },
+      "retailInputs": 0,
+      "feedCost": 6,
+      "firstBandOutputValue": 14,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 0.24
+    },
+    {
+      "biome": "mata-atlantica",
+      "recipe": "honey",
+      "elapsedDays": 90,
+      "irrigationLiters": 0,
+      "output": {
+        "honey": 3
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": 18,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 10.24
+    },
+    {
+      "biome": "cerrado",
+      "recipe": "vegetables",
+      "elapsedDays": 51,
+      "irrigationLiters": 2448,
+      "output": {
+        "food": 32,
+        "scraps": 4
+      },
+      "retailInputs": 6,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "cerrado",
+      "recipe": "greenhouse",
+      "elapsedDays": 40,
+      "irrigationLiters": 1920,
+      "output": {
+        "food": 48,
+        "scraps": 6
+      },
+      "retailInputs": 6,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "cerrado",
+      "recipe": "fruit",
+      "elapsedDays": 924,
+      "irrigationLiters": 29568,
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "cerrado",
+      "recipe": "bananas",
+      "elapsedDays": 354.75,
+      "irrigationLiters": 17028,
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "cerrado",
+      "recipe": "wood",
+      "elapsedDays": 2874.5,
+      "irrigationLiters": 0,
+      "output": {
+        "logs": 48
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": 192,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 184.24
+    },
+    {
+      "biome": "cerrado",
+      "recipe": "bamboo",
+      "elapsedDays": 457.75,
+      "irrigationLiters": 0,
+      "output": {
+        "bamboo": 8
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": 16,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 8.24
+    },
+    {
+      "biome": "cerrado",
+      "recipe": "compost",
+      "elapsedDays": 60,
+      "irrigationLiters": 0,
+      "output": {
+        "compost": 2
+      },
+      "retailInputs": null,
+      "feedCost": 0,
+      "firstBandOutputValue": 8,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "cerrado",
+      "recipe": "eggs",
+      "elapsedDays": 3,
+      "irrigationLiters": 0,
+      "output": {
+        "eggs": 6
+      },
+      "retailInputs": 0,
+      "feedCost": 2,
+      "firstBandOutputValue": 9,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": -0.76
+    },
+    {
+      "biome": "cerrado",
+      "recipe": "milk",
+      "elapsedDays": 1,
+      "irrigationLiters": 0,
+      "output": {
+        "milk": 4
+      },
+      "retailInputs": 0,
+      "feedCost": 6,
+      "firstBandOutputValue": 14,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 0.24
+    },
+    {
+      "biome": "cerrado",
+      "recipe": "honey",
+      "elapsedDays": 96,
+      "irrigationLiters": 0,
+      "output": {
+        "honey": 3
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": 18,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 10.24
+    },
+    {
+      "biome": "caatinga",
+      "recipe": "vegetables",
+      "elapsedDays": 61.25,
+      "irrigationLiters": 2940,
+      "output": {
+        "food": 32,
+        "scraps": 4
+      },
+      "retailInputs": 6,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "caatinga",
+      "recipe": "greenhouse",
+      "elapsedDays": 40,
+      "irrigationLiters": 1920,
+      "output": {
+        "food": 48,
+        "scraps": 6
+      },
+      "retailInputs": 6,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "caatinga",
+      "recipe": "fruit",
+      "elapsedDays": 1143.25,
+      "irrigationLiters": 36584,
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "caatinga",
+      "recipe": "bananas",
+      "elapsedDays": 418.75,
+      "irrigationLiters": 20100,
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": null,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "caatinga",
+      "recipe": "wood",
+      "elapsedDays": 3397.25,
+      "irrigationLiters": 0,
+      "output": {
+        "logs": 48
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": 192,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 184.24
+    },
+    {
+      "biome": "caatinga",
+      "recipe": "bamboo",
+      "elapsedDays": 520.5,
+      "irrigationLiters": 0,
+      "output": {
+        "bamboo": 8
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": 16,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 8.24
+    },
+    {
+      "biome": "caatinga",
+      "recipe": "compost",
+      "elapsedDays": 60,
+      "irrigationLiters": 0,
+      "output": {
+        "compost": 2
+      },
+      "retailInputs": null,
+      "feedCost": 0,
+      "firstBandOutputValue": 8,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": null
+    },
+    {
+      "biome": "caatinga",
+      "recipe": "eggs",
+      "elapsedDays": 3,
+      "irrigationLiters": 0,
+      "output": {
+        "eggs": 6
+      },
+      "retailInputs": 0,
+      "feedCost": 2,
+      "firstBandOutputValue": 9,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": -0.76
+    },
+    {
+      "biome": "caatinga",
+      "recipe": "milk",
+      "elapsedDays": 1,
+      "irrigationLiters": 0,
+      "output": {
+        "milk": 4
+      },
+      "retailInputs": 0,
+      "feedCost": 6,
+      "firstBandOutputValue": 14,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 0.24
+    },
+    {
+      "biome": "caatinga",
+      "recipe": "honey",
+      "elapsedDays": 106.25,
+      "irrigationLiters": 0,
+      "output": {
+        "honey": 3
+      },
+      "retailInputs": 0,
+      "feedCost": 0,
+      "firstBandOutputValue": 18,
+      "marginBeforeLaborCapitalWaterWearSpoilageAndMarketConstraints": 10.24
+    }
+  ]
+}

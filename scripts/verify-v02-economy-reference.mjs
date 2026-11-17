@@ -11,3 +11,10 @@ for(const [town,km,cost,minutes]of [['nearby',8,5.18,24],['drive',12,7.76,30],['
 assert.equal(GRID_TARIFF,.95);assert.equal(GRID_POWER.tariff,GRID_TARIFF);
 assert.equal(financeSummary({time:0,money:100,projects:[],infrastructure:{grid:{importing:2}}}).gridRate,1.9);
 console.log('PASS distance/fuel/travel quotes and consistent electricity forecasts');
+
+const {MATERIALS,PROJECTS}=await import('../web/v02/weekend/simulation.js');
+assert.equal(MATERIALS.wood.price/MATERIALS.wood.quantity,36,'calibrated timber price');
+assert.equal(MATERIALS.tank.price,320,'500 L retail reference');
+assert.equal(PROJECTS.well.materials.tank*500,2000,'new cistern buys its modeled tank volume');
+assert.equal(PROJECTS.well.legacyMaterials.tank,1,'historical cistern bill retained');
+console.log('PASS calibrated timber, tank retail and physical cistern bill');

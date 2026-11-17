@@ -39,15 +39,26 @@ export function upkeepStep(s,defs,dt){
  for(let i=0;i<2;i++)if(u.automatic&&u.vehicles[i].condition<70&&!u.jobs.some(j=>j.vehicle===i&&!j.done))u.jobs.push({vehicle:i,work:0,partsPaid:false,done:false});
  u.jobs=u.jobs.filter(j=>!j.done&&(j.vehicle!==undefined||s.projects.some(p=>p.id===j.target)));
 }
+export function serviceParts(job){return job.replacementParts||(job.care?{fodder:ANIMAL_CARE[job.care].fodder}:job.soil?{compost:job.compost}:job.battery?{batteries:1,electrical:1}:{tools:1,hardware:1});}
 export function performUpkeep(s,r,dt,go,changeMaterial,materials,carDoor,useWater,workSpot){
  const u=upkeep(s);if(r.cargo||r.removalJob||r.outsideWork||(r.operation&&r.action!=='service')||s.people.some(p=>p!==r&&p.action==='service'))return false;
- const job=u.jobs.find(j=>!j.done&&(u.automatic||j.care||j.soil)&&(!j.person||j.person===r.id||!s.people.some(p=>p.id===j.person&&p.action==='service'))&&
-  (j.vehicle===undefined||!activeTrips(s).some(t=>t.vehicle===j.vehicle)));
+ const job=u.jobs.find(j=>{
+  if(j.done||!(u.automatic||j.care||j.soil)||(j.person&&j.person!==r.id&&s.people.some(p=>p.id===j.person&&p.action==='service'))||(j.vehicle!==undefined&&activeTrips(s).some(t=>t.vehicle===j.vehicle)))return false;
+  if(j.partsPaid)return true;
+  const care=ANIMAL_CARE[j.care],parts=serviceParts(j);
+  const cost=Object.entries(parts).reduce((n,[id,q])=>n+q*materials[id].price/materials[id].quantity,0);
+  const unavailable=Object.entries(parts).some(([id,n])=>(id==='wood'?s.wood:(s.materials[id]||0))<n);
+  if(unavailable||(!care&&!j.soil&&u.used+cost>u.dailyBudget)){
+   j.status=care?'Needs animal fodder':j.soil?'Needs mature compost for soil care':j.replacementParts?'Needs replacement equipment or roof materials, or a higher service budget':j.battery?'Needs a replacement battery, electrical supplies or a higher service budget':'Needs tools, fasteners or a higher daily service budget';
+   return false;
+  }
+  return true;
+ });
  if(!job)return false;
  const p=job.vehicle===undefined?s.projects.find(p=>p.id===job.target):null;
  if(job.vehicle===undefined&&!p){job.done=true;return false;}
  const care=ANIMAL_CARE[job.care];
- const parts=job.replacementParts|| (job.soil?{compost:job.compost}:job.battery?{batteries:1,electrical:1}:{tools:1,hardware:1});
+ const parts=serviceParts(job);
  const cost=Object.entries(parts).reduce((n,[id,q])=>n+q*materials[id].price/materials[id].quantity,0);
  if(!job.partsPaid){
   if(care?s.materials.fodder<care.fodder:((!job.soil&&u.used+cost>u.dailyBudget)||Object.entries(parts).some(([id,n])=>(id==='wood'?s.wood:(s.materials[id]||0))<n))){job.status=care?'Needs animal fodder':job.soil?'Needs mature compost for soil care':job.replacementParts?'Needs replacement equipment or roof materials, or a higher service budget':job.battery?'Needs a replacement battery, electrical supplies or a higher service budget':'Needs tools, fasteners or a higher daily service budget';return false;}

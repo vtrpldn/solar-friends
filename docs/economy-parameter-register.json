@@ -1,0 +1,3102 @@
+{
+  "date": "2026-11-17",
+  "reference": {
+    "region": "Campinas, São Paulo",
+    "electricity": {
+      "baseReaisPerKwh": 0.739,
+      "taxAllowance": 0.22,
+      "capacityKw": 4
+    },
+    "transport": {
+      "gasolineReaisPerLiter": 6.47,
+      "kmPerLiter": 10,
+      "roadKmPerHour": 40,
+      "handlingMinutes": 12
+    }
+  },
+  "startingCapital": {
+    "tight": 500,
+    "modest": 2000,
+    "comfortable": 6000
+  },
+  "startingEndowment": {
+    "vehicles": 2,
+    "bookValuePerVehicle": 60000,
+    "landAlreadyOwned": true
+  },
+  "sourceDetails": "economy-calibration.md",
+  "quantitiesAreNotCertifiedConstructionDesigns": true,
+  "materials": {
+    "wood": {
+      "name": "timber pieces",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 4,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 432,
+      "kg": 4,
+      "m3": 0.012,
+      "priceBasis": "Campinas 2026 procurement plan and treated-rafter retail volume comparison",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "hardware": {
+      "name": "fastener packs",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 2,
+      "retailPackPriceReais": 30,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "roofing": {
+      "name": "roof sheets",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 6,
+      "retailPackPriceReais": 120,
+      "kg": 8,
+      "m3": 0.035,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "tarp": {
+      "name": "tarp & rope kits",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 50,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "tank": {
+      "name": "water tanks",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 320,
+      "kg": 12,
+      "m3": 0.35,
+      "priceBasis": "Telhanorte 500 L retail listing",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "plumbing": {
+      "name": "pipe & tap kits",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 40,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "sanitation": {
+      "name": "toilet kits",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 80,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "bucket": {
+      "name": "Bucket",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 30,
+      "kg": 1,
+      "m3": 0.015,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "garden-tools": {
+      "name": "Garden tools",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 95,
+      "kg": 3,
+      "m3": 0.025,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "carpentry-tools": {
+      "name": "Carpentry tools",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 120,
+      "kg": 4,
+      "m3": 0.02,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "harvest-basket": {
+      "name": "Harvest basket",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 25,
+      "kg": 1,
+      "m3": 0.04,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "cleaning-kit": {
+      "name": "Cleaning kit",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 55,
+      "kg": 2,
+      "m3": 0.02,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "watering-can": {
+      "name": "Watering can",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 45,
+      "kg": 1,
+      "m3": 0.015,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "wheelbarrow": {
+      "name": "Wheelbarrow",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 180,
+      "kg": 15,
+      "m3": 0.35,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "bicycle": {
+      "name": "Bicycle",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 450,
+      "kg": 16,
+      "m3": 0.5,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "produce-crates": {
+      "name": "Produce crate",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 25,
+      "kg": 2,
+      "m3": 0.04,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "cooling": {
+      "name": "Refrigeration kit",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 600,
+      "kg": 35,
+      "m3": 0.35,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "tool_heads": {
+      "name": "Garden tool heads",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 65,
+      "kg": 2,
+      "m3": 0.005,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "repair_supplies": {
+      "name": "Repair supplies",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 15,
+      "kg": 1,
+      "m3": 0.003,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "soap": {
+      "name": "Soap refill",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 8,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "wheel_kit": {
+      "name": "Wheel and axle kit",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 65,
+      "kg": 5,
+      "m3": 0.04,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "logs": {
+      "name": "Raw wood",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 6,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 96,
+      "kg": 6,
+      "m3": 0.015,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "planks": {
+      "name": "Planks",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 240,
+      "kg": 1.5,
+      "m3": 0.005,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "bamboo": {
+      "name": "Bamboo poles",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 48,
+      "kg": 3,
+      "m3": 0.018,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "earth": {
+      "name": "Building earth",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 20,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 18,
+      "kg": 20,
+      "m3": 0.015,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "stone": {
+      "name": "Stone",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 20,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 42,
+      "kg": 20,
+      "m3": 0.012,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "frames": {
+      "name": "Frames",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 4,
+      "retailPackPriceReais": 320,
+      "kg": 4,
+      "m3": 0.04,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "walls": {
+      "name": "Wall material",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 18,
+      "retailPackSavedUnits": 8,
+      "retailPackPriceReais": 80,
+      "kg": 18,
+      "m3": 0.025,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "tiles": {
+      "name": "Roof tiles",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 12,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 108,
+      "kg": 12,
+      "m3": 0.012,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "electrical": {
+      "name": "Electrical supplies",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 4,
+      "retailPackPriceReais": 144,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "covering": {
+      "name": "Greenhouse covering",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 80,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "panels": {
+      "name": "Solar panels",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 2,
+      "retailPackPriceReais": 1400,
+      "kg": 20,
+      "m3": 0.12,
+      "priceBasis": "Minha Casa Solar 600 W retail listing",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "batteries": {
+      "name": "Battery equipment",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 6000,
+      "kg": 30,
+      "m3": 0.05,
+      "priceBasis": "Buyers Solar lithium battery retail listings",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "pumps": {
+      "name": "Pumps",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 160,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "tools": {
+      "name": "Tool supplies",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 4,
+      "retailPackPriceReais": 36,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "food": {
+      "name": "Ingredients",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 48,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "meals": {
+      "name": "Prepared meals",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 96,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "eggs": {
+      "name": "Eggs",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 36,
+      "kg": 0.06,
+      "m3": 0.0001,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "compost": {
+      "name": "Mature compost",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 8,
+      "retailPackPriceReais": 64,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "scraps": {
+      "name": "Organic residues",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": null,
+      "retailPackPriceReais": 0,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "seedlings": {
+      "name": "Vegetable seedlings",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 8,
+      "retailPackPriceReais": 24,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "tree_starts": {
+      "name": "Timber seedlings",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 4,
+      "retailPackPriceReais": 40,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "bamboo_starts": {
+      "name": "Bamboo starts",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 4,
+      "retailPackPriceReais": 80,
+      "kg": 2,
+      "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "fodder": {
+      "name": "Dry fodder",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 12,
+      "retailPackPriceReais": 24,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "milk": {
+      "name": "Fresh milk",
+      "canonicalUnit": "L",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 6,
+      "retailPackPriceReais": 42,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "honey": {
+      "name": "Honey",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 4,
+      "retailPackPriceReais": 48,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "goats": {
+      "name": "Goats",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 2,
+      "retailPackPriceReais": 1800,
+      "kg": 40,
+      "m3": 0.4,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "bees": {
+      "name": "Bee colonies",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 1,
+      "retailPackPriceReais": 400,
+      "kg": 15,
+      "m3": 0.08,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "hens": {
+      "name": "Hens",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 3,
+      "retailPackPriceReais": 180,
+      "kg": 2,
+      "m3": 0.025,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    }
+  },
+  "biology": {
+    "parameters": {
+      "vegetables": {
+        "days": 45,
+        "window": 7,
+        "seasonal": true
+      },
+      "greenhouse": {
+        "days": 40,
+        "window": 7,
+        "seasonal": false
+      },
+      "fruit": {
+        "days": 120,
+        "window": 14,
+        "seasonal": true
+      },
+      "bananas": {
+        "days": 270,
+        "window": 14,
+        "seasonal": true
+      },
+      "wood": {
+        "days": 2190,
+        "window": null,
+        "seasonal": true
+      },
+      "bamboo": {
+        "days": 365,
+        "window": null,
+        "seasonal": true
+      },
+      "compost": {
+        "days": 60,
+        "window": null,
+        "seasonal": false
+      },
+      "eggs": {
+        "days": 3,
+        "window": 3,
+        "seasonal": false
+      },
+      "milk": {
+        "days": 1,
+        "window": 1,
+        "seasonal": false
+      },
+      "honey": {
+        "days": 90,
+        "window": 30,
+        "seasonal": true
+      }
+    },
+    "carePerGrowingArea": {
+      "vegetables": {
+        "kind": "garden",
+        "area": 16,
+        "liters": 48
+      },
+      "greenhouse": {
+        "kind": "greenhouse",
+        "area": 24,
+        "liters": 48
+      },
+      "fruit": {
+        "kind": "orchard",
+        "area": 64,
+        "liters": 32
+      },
+      "bananas": {
+        "kind": "grove",
+        "area": 32,
+        "liters": 48
+      }
+    },
+    "animalCare": {
+      "coop": {
+        "days": 3,
+        "fodder": 1,
+        "water": 2,
+        "work": 25
+      },
+      "goat_pasture": {
+        "days": 1,
+        "fodder": 3,
+        "water": 16,
+        "work": 35
+      }
+    },
+    "basis": "Mixed published cycle/yield references and engineering assumptions, documented in economy-biology.md; not species-specific yield forecasts"
+  },
+  "recipes": {
+    "solar_upgrade": {
+      "input": {
+        "panels": 1,
+        "batteries": 1,
+        "electrical": 1
+      },
+      "output": {},
+      "residentHours": 0.675,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "fell_tree": {
+      "input": {},
+      "output": {
+        "logs": 12
+      },
+      "residentHours": 0.675,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "saw_timber": {
+      "input": {
+        "logs": 6
+      },
+      "output": {
+        "wood": 4
+      },
+      "residentHours": 1.8,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "saw_planks": {
+      "input": {
+        "wood": 3
+      },
+      "output": {
+        "planks": 6
+      },
+      "residentHours": 1.2,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "frames": {
+      "input": {
+        "planks": 2,
+        "hardware": 1
+      },
+      "output": {
+        "frames": 1
+      },
+      "residentHours": 0.225,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "walls": {
+      "input": {
+        "earth": 2
+      },
+      "output": {
+        "walls": 2
+      },
+      "residentHours": 0.225,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "tiles": {
+      "input": {
+        "earth": 2,
+        "wood": 1
+      },
+      "output": {
+        "tiles": 2
+      },
+      "residentHours": 0.3,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "meals": {
+      "input": {
+        "food": 4
+      },
+      "output": {
+        "meals": 4,
+        "scraps": 1
+      },
+      "residentHours": 0.1875,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "preserve_meals": {
+      "input": {
+        "food": 6
+      },
+      "output": {
+        "meals": 4,
+        "scraps": 2
+      },
+      "residentHours": 0.5625,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "cold_storage": {
+      "input": {
+        "cooling": 1,
+        "electrical": 1,
+        "hardware": 1
+      },
+      "output": {},
+      "residentHours": 0.9,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "compost": {
+      "input": {
+        "scraps": 4
+      },
+      "output": {
+        "compost": 2
+      },
+      "residentHours": 0.3,
+      "growthDays": 60,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "wood": {
+      "input": {},
+      "output": {
+        "logs": 48
+      },
+      "residentHours": 1.8,
+      "growthDays": 2190,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "bamboo": {
+      "input": {},
+      "output": {
+        "bamboo": 8
+      },
+      "residentHours": 0.3,
+      "growthDays": 365,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "earth": {
+      "input": {},
+      "output": {
+        "earth": 12
+      },
+      "residentHours": 0.3,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "stone": {
+      "input": {},
+      "output": {
+        "stone": 8
+      },
+      "residentHours": 0.375,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "vegetables": {
+      "input": {
+        "seedlings": 2
+      },
+      "output": {
+        "food": 32,
+        "scraps": 4
+      },
+      "residentHours": 0.45,
+      "growthDays": 45,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "greenhouse": {
+      "input": {
+        "seedlings": 2
+      },
+      "output": {
+        "food": 48,
+        "scraps": 6
+      },
+      "residentHours": 0.525,
+      "growthDays": 40,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "fruit": {
+      "input": {},
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "residentHours": 0.2625,
+      "growthDays": 120,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "bananas": {
+      "input": {},
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "residentHours": 0.2625,
+      "growthDays": 270,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "eggs": {
+      "input": {},
+      "output": {
+        "eggs": 6
+      },
+      "residentHours": 0.1875,
+      "growthDays": 3,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "milk": {
+      "input": {},
+      "output": {
+        "milk": 4
+      },
+      "residentHours": 0.2625,
+      "growthDays": 1,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "honey": {
+      "input": {},
+      "output": {
+        "honey": 3
+      },
+      "residentHours": 0.2625,
+      "growthDays": 90,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "craft_garden-tools": {
+      "input": {
+        "wood": 2,
+        "tool_heads": 1
+      },
+      "output": {
+        "garden-tools": 1
+      },
+      "residentHours": 1.35,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "craft_harvest-basket": {
+      "input": {
+        "bamboo": 2
+      },
+      "output": {
+        "harvest-basket": 1
+      },
+      "residentHours": 1.8,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "craft_wheelbarrow": {
+      "input": {
+        "planks": 4,
+        "hardware": 1,
+        "wheel_kit": 1
+      },
+      "output": {
+        "wheelbarrow": 1
+      },
+      "residentHours": 2.7,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "craft_produce-crates": {
+      "input": {
+        "planks": 2,
+        "hardware": 1
+      },
+      "output": {
+        "produce-crates": 1
+      },
+      "residentHours": 0.9,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "repair_bucket": {
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "residentHours": 0.9,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "repair_garden-tools": {
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "residentHours": 0.9,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "repair_carpentry-tools": {
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "residentHours": 0.9,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "repair_harvest-basket": {
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "residentHours": 0.9,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "repair_cleaning-kit": {
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "residentHours": 0.9,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    }
+  },
+  "buildings": {
+    "gathering": {
+      "footprint": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 8,
+        "hardware": 1
+      },
+      "residentHours": 1.0050000000000001,
+      "economicSpec": null
+    },
+    "water": {
+      "footprint": [
+        3,
+        3
+      ],
+      "materials": {
+        "wood": 8,
+        "hardware": 1,
+        "tank": 1,
+        "plumbing": 1
+      },
+      "residentHours": 2.0025,
+      "economicSpec": null
+    },
+    "shelter": {
+      "footprint": [
+        3,
+        3
+      ],
+      "materials": {
+        "wood": 24,
+        "hardware": 3,
+        "roofing": 6
+      },
+      "residentHours": 8.002500000000001,
+      "economicSpec": null
+    },
+    "toilet": {
+      "footprint": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 16,
+        "hardware": 2,
+        "roofing": 2,
+        "sanitation": 1
+      },
+      "residentHours": 4.005,
+      "economicSpec": null
+    },
+    "home-studio": {
+      "footprint": [
+        3,
+        4
+      ],
+      "materials": {
+        "earth": 96,
+        "stone": 288,
+        "frames": 6,
+        "walls": 259,
+        "tiles": 192,
+        "hardware": 3,
+        "wood": 96
+      },
+      "residentHours": 324.01,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 288,
+              "earth": 96
+            },
+            "hours": 72
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 259
+            },
+            "hours": 140.64960000000002
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 96,
+              "tiles": 192
+            },
+            "hours": 63.36
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 6,
+              "hardware": 3
+            },
+            "hours": 48
+          }
+        ],
+        "hours": 324.01,
+        "legacyWork": 924,
+        "packWork": 1840,
+        "area": 48,
+        "wallArea": 58.24,
+        "roofArea": 57.599999999999994
+      }
+    },
+    "home-lane": {
+      "footprint": [
+        3,
+        5
+      ],
+      "materials": {
+        "earth": 120,
+        "stone": 360,
+        "frames": 6,
+        "walls": 296,
+        "tiles": 240,
+        "hardware": 3,
+        "wood": 120
+      },
+      "residentHours": 389.94,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 360,
+              "earth": 120
+            },
+            "hours": 90
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 296
+            },
+            "hours": 160.7424
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 120,
+              "tiles": 240
+            },
+            "hours": 79.2
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 6,
+              "hardware": 3
+            },
+            "hours": 60
+          }
+        ],
+        "hours": 389.94,
+        "legacyWork": 924,
+        "packWork": 1840,
+        "area": 60,
+        "wallArea": 66.56,
+        "roofArea": 72
+      }
+    },
+    "home-garden": {
+      "footprint": [
+        4,
+        3
+      ],
+      "materials": {
+        "earth": 96,
+        "stone": 288,
+        "frames": 8,
+        "walls": 259,
+        "tiles": 192,
+        "hardware": 4,
+        "wood": 96
+      },
+      "residentHours": 324.01,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 288,
+              "earth": 96
+            },
+            "hours": 72
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 259
+            },
+            "hours": 140.64960000000002
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 96,
+              "tiles": 192
+            },
+            "hours": 63.36
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 8,
+              "hardware": 4
+            },
+            "hours": 48
+          }
+        ],
+        "hours": 324.01,
+        "legacyWork": 1232,
+        "packWork": 2320,
+        "area": 48,
+        "wallArea": 58.24,
+        "roofArea": 57.599999999999994
+      }
+    },
+    "home-ochre": {
+      "footprint": [
+        4,
+        5
+      ],
+      "materials": {
+        "earth": 160,
+        "stone": 480,
+        "frames": 8,
+        "walls": 333,
+        "tiles": 320,
+        "hardware": 4,
+        "wood": 160
+      },
+      "residentHours": 486.44,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 480,
+              "earth": 160
+            },
+            "hours": 120
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 333
+            },
+            "hours": 180.83520000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 160,
+              "tiles": 320
+            },
+            "hours": 105.60000000000001
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 8,
+              "hardware": 4
+            },
+            "hours": 80
+          }
+        ],
+        "hours": 486.44,
+        "legacyWork": 1232,
+        "packWork": 2320,
+        "area": 80,
+        "wallArea": 74.88000000000001,
+        "roofArea": 96
+      }
+    },
+    "home-deep-porch": {
+      "footprint": [
+        4,
+        6
+      ],
+      "materials": {
+        "earth": 192,
+        "stone": 576,
+        "frames": 8,
+        "walls": 370,
+        "tiles": 384,
+        "hardware": 4,
+        "wood": 192
+      },
+      "residentHours": 567.65,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 576,
+              "earth": 192
+            },
+            "hours": 144
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 370
+            },
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 192,
+              "tiles": 384
+            },
+            "hours": 126.72
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 8,
+              "hardware": 4
+            },
+            "hours": 96
+          }
+        ],
+        "hours": 567.65,
+        "legacyWork": 1232,
+        "packWork": 2320,
+        "area": 96,
+        "wallArea": 83.2,
+        "roofArea": 115.19999999999999
+      }
+    },
+    "home-blue-gallery": {
+      "footprint": [
+        5,
+        4
+      ],
+      "materials": {
+        "earth": 160,
+        "stone": 480,
+        "frames": 10,
+        "walls": 333,
+        "tiles": 320,
+        "hardware": 5,
+        "wood": 160
+      },
+      "residentHours": 486.44,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 480,
+              "earth": 160
+            },
+            "hours": 120
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 333
+            },
+            "hours": 180.83520000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 160,
+              "tiles": 320
+            },
+            "hours": 105.60000000000001
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 10,
+              "hardware": 5
+            },
+            "hours": 80
+          }
+        ],
+        "hours": 486.44,
+        "legacyWork": 1540,
+        "packWork": 2800,
+        "area": 80,
+        "wallArea": 74.88000000000001,
+        "roofArea": 96
+      }
+    },
+    "home-paired": {
+      "footprint": [
+        6,
+        4
+      ],
+      "materials": {
+        "earth": 192,
+        "stone": 576,
+        "frames": 12,
+        "walls": 370,
+        "tiles": 384,
+        "hardware": 6,
+        "wood": 192
+      },
+      "residentHours": 567.65,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 576,
+              "earth": 192
+            },
+            "hours": 144
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 370
+            },
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 192,
+              "tiles": 384
+            },
+            "hours": 126.72
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 12,
+              "hardware": 6
+            },
+            "hours": 96
+          }
+        ],
+        "hours": 567.65,
+        "legacyWork": 1848,
+        "packWork": 3280,
+        "area": 96,
+        "wallArea": 83.2,
+        "roofArea": 115.19999999999999
+      }
+    },
+    "home-broad-veranda": {
+      "footprint": [
+        7,
+        5
+      ],
+      "materials": {
+        "earth": 280,
+        "stone": 840,
+        "frames": 14,
+        "walls": 444,
+        "tiles": 560,
+        "hardware": 7,
+        "wood": 280
+      },
+      "residentHours": 775.91,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 840,
+              "earth": 280
+            },
+            "hours": 210
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 444
+            },
+            "hours": 241.11360000000005
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 280,
+              "tiles": 560
+            },
+            "hours": 184.8
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 14,
+              "hardware": 7
+            },
+            "hours": 140
+          }
+        ],
+        "hours": 775.91,
+        "legacyWork": 2156,
+        "packWork": 3760,
+        "area": 140,
+        "wallArea": 99.84000000000002,
+        "roofArea": 168
+      }
+    },
+    "home-shaded-retreat": {
+      "footprint": [
+        6,
+        7
+      ],
+      "materials": {
+        "earth": 336,
+        "stone": 1008,
+        "frames": 12,
+        "walls": 481,
+        "tiles": 672,
+        "hardware": 6,
+        "wood": 336
+      },
+      "residentHours": 902.97,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 1008,
+              "earth": 336
+            },
+            "hours": 252
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 481
+            },
+            "hours": 261.2064000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 336,
+              "tiles": 672
+            },
+            "hours": 221.76000000000002
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 12,
+              "hardware": 6
+            },
+            "hours": 168
+          }
+        ],
+        "hours": 902.97,
+        "legacyWork": 1848,
+        "packWork": 3280,
+        "area": 168,
+        "wallArea": 108.16000000000003,
+        "roofArea": 201.6
+      }
+    },
+    "home-ranch": {
+      "footprint": [
+        8,
+        4
+      ],
+      "materials": {
+        "earth": 256,
+        "stone": 768,
+        "frames": 16,
+        "walls": 444,
+        "tiles": 512,
+        "hardware": 8,
+        "wood": 256
+      },
+      "residentHours": 730.07,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 768,
+              "earth": 256
+            },
+            "hours": 192
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 444
+            },
+            "hours": 241.11360000000005
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 256,
+              "tiles": 512
+            },
+            "hours": 168.96
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 16,
+              "hardware": 8
+            },
+            "hours": 128
+          }
+        ],
+        "hours": 730.07,
+        "legacyWork": 2464,
+        "packWork": 4240,
+        "area": 128,
+        "wallArea": 99.84000000000002,
+        "roofArea": 153.6
+      }
+    },
+    "home-cottage": {
+      "footprint": [
+        4,
+        4
+      ],
+      "materials": {
+        "earth": 128,
+        "stone": 384,
+        "frames": 8,
+        "walls": 296,
+        "tiles": 256,
+        "hardware": 4,
+        "wood": 128
+      },
+      "residentHours": 405.22,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 384,
+              "earth": 128
+            },
+            "hours": 96
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 296
+            },
+            "hours": 160.7424
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 128,
+              "tiles": 256
+            },
+            "hours": 84.48
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 8,
+              "hardware": 4
+            },
+            "hours": 64
+          }
+        ],
+        "hours": 405.22,
+        "legacyWork": 1232,
+        "packWork": 2320,
+        "area": 64,
+        "wallArea": 66.56,
+        "roofArea": 76.8
+      }
+    },
+    "home-longhouse": {
+      "footprint": [
+        7,
+        4
+      ],
+      "materials": {
+        "earth": 224,
+        "stone": 672,
+        "frames": 14,
+        "walls": 407,
+        "tiles": 448,
+        "hardware": 7,
+        "wood": 224
+      },
+      "residentHours": 648.86,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 672,
+              "earth": 224
+            },
+            "hours": 168
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 407
+            },
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 224,
+              "tiles": 448
+            },
+            "hours": 147.84000000000003
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 14,
+              "hardware": 7
+            },
+            "hours": 112
+          }
+        ],
+        "hours": 648.86,
+        "legacyWork": 2156,
+        "packWork": 3760,
+        "area": 112,
+        "wallArea": 91.52000000000001,
+        "roofArea": 134.4
+      }
+    },
+    "groundwater-well": {
+      "footprint": [
+        2,
+        2
+      ],
+      "materials": {
+        "stone": 18,
+        "wood": 8,
+        "hardware": 4,
+        "plumbing": 2,
+        "tiles": 4
+      },
+      "residentHours": 5.94,
+      "economicSpec": null
+    },
+    "water-pump": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "stone": 4,
+        "pumps": 1,
+        "plumbing": 4,
+        "electrical": 2,
+        "hardware": 2
+      },
+      "residentHours": 2.1450000000000005,
+      "economicSpec": null
+    },
+    "home-family": {
+      "footprint": [
+        6,
+        5
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 12,
+        "walls": 407,
+        "tiles": 480,
+        "hardware": 6,
+        "wood": 240
+      },
+      "residentHours": 679.42,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 720,
+              "earth": 240
+            },
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 407
+            },
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 240,
+              "tiles": 480
+            },
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 12,
+              "hardware": 6
+            },
+            "hours": 120
+          }
+        ],
+        "hours": 679.42,
+        "legacyWork": 1848,
+        "packWork": 3280,
+        "area": 120,
+        "wallArea": 91.52000000000001,
+        "roofArea": 144
+      }
+    },
+    "home-shared": {
+      "footprint": [
+        6,
+        6
+      ],
+      "materials": {
+        "earth": 1287,
+        "stone": 864,
+        "bamboo": 24,
+        "hardware": 12,
+        "tiles": 576,
+        "wood": 288
+      },
+      "residentHours": 849.6,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 864,
+              "earth": 1287
+            },
+            "hours": 216
+          },
+          {
+            "name": "Earth wall preparation and assembly",
+            "materials": {},
+            "hours": 299.52000000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 288,
+              "bamboo": 24,
+              "tiles": 576
+            },
+            "hours": 190.07999999999998
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "hardware": 12
+            },
+            "hours": 144
+          }
+        ],
+        "hours": 849.6,
+        "legacyWork": 2904,
+        "packWork": 3207.9999999999995,
+        "area": 144,
+        "wallArea": 99.84000000000002,
+        "roofArea": 172.79999999999998
+      }
+    },
+    "road": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "stone": 1,
+        "earth": 1
+      },
+      "residentHours": 0.34,
+      "economicSpec": {
+        "version": 1,
+        "basis": "Authored pack-based estimate",
+        "phases": [
+          {
+            "name": "Setting out and assembly preparation",
+            "materials": {},
+            "hours": 0.1
+          },
+          {
+            "name": "Groundwork",
+            "materials": {
+              "earth": 1,
+              "stone": 1
+            },
+            "hours": 0.24
+          }
+        ],
+        "hours": 0.34,
+        "legacyWork": 20,
+        "packWork": 45.333333333333336
+      }
+    },
+    "bridge": {
+      "footprint": [
+        8,
+        1
+      ],
+      "materials": {
+        "wood": 32,
+        "hardware": 8,
+        "stone": 8
+      },
+      "residentHours": 9.16,
+      "economicSpec": {
+        "version": 1,
+        "basis": "Authored pack-based estimate",
+        "phases": [
+          {
+            "name": "Setting out and assembly preparation",
+            "materials": {},
+            "hours": 1
+          },
+          {
+            "name": "Groundwork",
+            "materials": {
+              "stone": 8
+            },
+            "hours": 0.96
+          },
+          {
+            "name": "Structure",
+            "materials": {
+              "wood": 32
+            },
+            "hours": 4.8
+          },
+          {
+            "name": "Fasteners and utilities",
+            "materials": {
+              "hardware": 8
+            },
+            "hours": 2.4
+          }
+        ],
+        "hours": 9.16,
+        "legacyWork": 1056,
+        "packWork": 1221.3333333333333
+      }
+    },
+    "house": {
+      "footprint": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 200,
+        "stone": 600,
+        "frames": 10,
+        "walls": 370,
+        "tiles": 400,
+        "hardware": 5,
+        "wood": 200
+      },
+      "residentHours": 582.93,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 600,
+              "earth": 200
+            },
+            "hours": 150
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 370
+            },
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 200,
+              "tiles": 400
+            },
+            "hours": 132
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 10,
+              "hardware": 5
+            },
+            "hours": 100
+          }
+        ],
+        "hours": 582.93,
+        "legacyWork": 1540,
+        "packWork": 2800,
+        "area": 100,
+        "wallArea": 83.2,
+        "roofArea": 120
+      }
+    },
+    "shed": {
+      "footprint": [
+        3,
+        3
+      ],
+      "materials": {
+        "wood": 72,
+        "hardware": 1,
+        "tiles": 144,
+        "stone": 216,
+        "earth": 72
+      },
+      "residentHours": 137.52,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 216,
+              "earth": 72
+            },
+            "hours": 54
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {},
+            "hours": 0
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 72,
+              "tiles": 144
+            },
+            "hours": 47.519999999999996
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "hardware": 1
+            },
+            "hours": 36
+          }
+        ],
+        "hours": 137.52,
+        "legacyWork": 330,
+        "packWork": 533.3333333333334,
+        "area": 36,
+        "wallArea": 0,
+        "roofArea": 43.199999999999996
+      }
+    },
+    "orchard": {
+      "footprint": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 8,
+        "compost": 2,
+        "tree_starts": 4
+      },
+      "residentHours": 2.31,
+      "economicSpec": null
+    },
+    "goat_pasture": {
+      "footprint": [
+        6,
+        5
+      ],
+      "materials": {
+        "bamboo": 10,
+        "tiles": 3,
+        "hardware": 2,
+        "plumbing": 1,
+        "goats": 2
+      },
+      "residentHours": 2.97,
+      "economicSpec": null
+    },
+    "apiary": {
+      "footprint": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 3,
+        "tiles": 1,
+        "hardware": 1,
+        "bees": 1
+      },
+      "residentHours": 0.99,
+      "economicSpec": null
+    },
+    "hydro": {
+      "footprint": [
+        3,
+        3
+      ],
+      "materials": {
+        "stone": 6,
+        "bamboo": 4,
+        "hardware": 4,
+        "electrical": 2,
+        "pumps": 1,
+        "batteries": 1
+      },
+      "residentHours": 2.97,
+      "economicSpec": null
+    },
+    "eco_toilet": {
+      "footprint": [
+        2,
+        2
+      ],
+      "materials": {
+        "stone": 4,
+        "earth": 6,
+        "bamboo": 6,
+        "tiles": 3,
+        "plumbing": 2,
+        "hardware": 2
+      },
+      "residentHours": 3.7950000000000004,
+      "economicSpec": null
+    },
+    "banana_treatment": {
+      "footprint": [
+        3,
+        4
+      ],
+      "materials": {
+        "stone": 8,
+        "earth": 8,
+        "walls": 6,
+        "plumbing": 3,
+        "hardware": 2,
+        "tree_starts": 2
+      },
+      "residentHours": 4.785,
+      "economicSpec": null
+    },
+    "wetland": {
+      "footprint": [
+        3,
+        5
+      ],
+      "materials": {
+        "stone": 8,
+        "earth": 4,
+        "covering": 1,
+        "plumbing": 3,
+        "hardware": 2
+      },
+      "residentHours": 2.97,
+      "economicSpec": null
+    },
+    "biodigester": {
+      "footprint": [
+        4,
+        4
+      ],
+      "materials": {
+        "stone": 4,
+        "walls": 6,
+        "plumbing": 5,
+        "hardware": 3,
+        "tiles": 2
+      },
+      "residentHours": 3.3,
+      "economicSpec": null
+    },
+    "warehouse": {
+      "footprint": [
+        5,
+        4
+      ],
+      "materials": {
+        "stone": 480,
+        "earth": 160,
+        "bamboo": 12,
+        "hardware": 5,
+        "tiles": 320,
+        "frames": 2,
+        "walls": 333,
+        "wood": 160
+      },
+      "residentHours": 486.44,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 480,
+              "earth": 160
+            },
+            "hours": 120
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 333
+            },
+            "hours": 180.83520000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 160,
+              "bamboo": 12,
+              "tiles": 320
+            },
+            "hours": 105.60000000000001
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "hardware": 5,
+              "frames": 2
+            },
+            "hours": 80
+          }
+        ],
+        "hours": 486.44,
+        "legacyWork": 1430,
+        "packWork": 1642.6666666666667,
+        "area": 80,
+        "wallArea": 74.88000000000001,
+        "roofArea": 96
+      }
+    },
+    "solar_farm": {
+      "footprint": [
+        4,
+        4
+      ],
+      "materials": {
+        "stone": 6,
+        "hardware": 3,
+        "panels": 6,
+        "batteries": 1,
+        "electrical": 2
+      },
+      "residentHours": 2.31,
+      "economicSpec": null
+    },
+    "streetlight": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "stone": 1,
+        "wood": 2,
+        "electrical": 1,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "kitchen": {
+      "footprint": [
+        6,
+        5
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 4,
+        "walls": 407,
+        "tiles": 480,
+        "plumbing": 2,
+        "hardware": 2,
+        "wood": 240
+      },
+      "residentHours": 679.42,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 720,
+              "earth": 240
+            },
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 407
+            },
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 240,
+              "tiles": 480
+            },
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 4,
+              "plumbing": 2,
+              "hardware": 2
+            },
+            "hours": 120
+          }
+        ],
+        "hours": 679.42,
+        "legacyWork": 528,
+        "packWork": 1007.9999999999999,
+        "area": 120,
+        "wallArea": 91.52000000000001,
+        "roofArea": 144
+      }
+    },
+    "grove": {
+      "footprint": [
+        4,
+        4
+      ],
+      "materials": {
+        "earth": 6,
+        "wood": 2,
+        "tree_starts": 2
+      },
+      "residentHours": 1.65,
+      "economicSpec": null
+    },
+    "garden": {
+      "footprint": [
+        4,
+        6
+      ],
+      "materials": {
+        "earth": 4,
+        "wood": 4,
+        "seedlings": 2
+      },
+      "residentHours": 1.65,
+      "economicSpec": null
+    },
+    "greenhouse": {
+      "footprint": [
+        4,
+        6
+      ],
+      "materials": {
+        "stone": 4,
+        "earth": 2,
+        "frames": 4,
+        "hardware": 2,
+        "covering": 1,
+        "plumbing": 2,
+        "seedlings": 2
+      },
+      "residentHours": 2.805,
+      "economicSpec": null
+    },
+    "well": {
+      "footprint": [
+        3,
+        3
+      ],
+      "materials": {
+        "stone": 6,
+        "earth": 2,
+        "plumbing": 4,
+        "hardware": 2,
+        "pumps": 1,
+        "tank": 4
+      },
+      "residentHours": 2.64,
+      "economicSpec": null
+    },
+    "compost": {
+      "footprint": [
+        3,
+        2
+      ],
+      "materials": {
+        "earth": 2,
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 1.155,
+      "economicSpec": null
+    },
+    "square": {
+      "footprint": [
+        5,
+        5
+      ],
+      "materials": {
+        "stone": 10,
+        "earth": 4,
+        "frames": 4,
+        "wood": 4,
+        "hardware": 2
+      },
+      "residentHours": 3.96,
+      "economicSpec": null
+    },
+    "workshop": {
+      "footprint": [
+        5,
+        4
+      ],
+      "materials": {
+        "stone": 6,
+        "earth": 4,
+        "frames": 6,
+        "walls": 4,
+        "tiles": 4,
+        "wood": 6,
+        "hardware": 3
+      },
+      "residentHours": 5.444999999999999,
+      "economicSpec": null
+    },
+    "coop": {
+      "footprint": [
+        4,
+        4
+      ],
+      "materials": {
+        "stone": 2,
+        "frames": 2,
+        "tiles": 2,
+        "hardware": 1,
+        "hens": 3
+      },
+      "residentHours": 1.65,
+      "economicSpec": null
+    },
+    "home-veranda": {
+      "footprint": [
+        5,
+        6
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 10,
+        "walls": 407,
+        "tiles": 480,
+        "hardware": 5,
+        "wood": 240
+      },
+      "residentHours": 679.42,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 720,
+              "earth": 240
+            },
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 407
+            },
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 240,
+              "tiles": 480
+            },
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 10,
+              "hardware": 5
+            },
+            "hours": 120
+          }
+        ],
+        "hours": 679.42,
+        "legacyWork": 1540,
+        "packWork": 2800,
+        "area": 120,
+        "wallArea": 91.52000000000001,
+        "roofArea": 144
+      }
+    },
+    "home-gable": {
+      "footprint": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 200,
+        "stone": 600,
+        "frames": 10,
+        "walls": 370,
+        "tiles": 400,
+        "hardware": 5,
+        "wood": 200
+      },
+      "residentHours": 582.93,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 600,
+              "earth": 200
+            },
+            "hours": 150
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 370
+            },
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 200,
+              "tiles": 400
+            },
+            "hours": 132
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 10,
+              "hardware": 5
+            },
+            "hours": 100
+          }
+        ],
+        "hours": 582.93,
+        "legacyWork": 1540,
+        "packWork": 2800,
+        "area": 100,
+        "wallArea": 83.2,
+        "roofArea": 120
+      }
+    },
+    "home-courtyard": {
+      "footprint": [
+        6,
+        5
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 12,
+        "walls": 407,
+        "tiles": 480,
+        "hardware": 6,
+        "wood": 240
+      },
+      "residentHours": 679.42,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 720,
+              "earth": 240
+            },
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "materials": {
+              "walls": 407
+            },
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 240,
+              "tiles": 480
+            },
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "frames": 12,
+              "hardware": 6
+            },
+            "hours": 120
+          }
+        ],
+        "hours": 679.42,
+        "legacyWork": 1848,
+        "packWork": 3280,
+        "area": 120,
+        "wallArea": 91.52000000000001,
+        "roofArea": 144
+      }
+    },
+    "adobe-gable": {
+      "footprint": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 1032,
+        "stone": 600,
+        "bamboo": 20,
+        "hardware": 10,
+        "tiles": 400,
+        "wood": 200
+      },
+      "residentHours": 631.6,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 600,
+              "earth": 1032
+            },
+            "hours": 150
+          },
+          {
+            "name": "Earth wall preparation and assembly",
+            "materials": {},
+            "hours": 249.60000000000002
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 200,
+              "bamboo": 20,
+              "tiles": 400
+            },
+            "hours": 132
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "hardware": 10
+            },
+            "hours": 100
+          }
+        ],
+        "hours": 631.6,
+        "legacyWork": 2420,
+        "packWork": 2740,
+        "area": 100,
+        "wallArea": 83.2,
+        "roofArea": 120
+      }
+    },
+    "adobe-veranda": {
+      "footprint": [
+        5,
+        6
+      ],
+      "materials": {
+        "earth": 1156,
+        "stone": 720,
+        "bamboo": 20,
+        "hardware": 10,
+        "tiles": 480,
+        "wood": 240
+      },
+      "residentHours": 732.9600000000002,
+      "economicSpec": {
+        "version": 2,
+        "basis": "Area-based simple shell; engineering quantities and referenced wall labor",
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "materials": {
+              "stone": 720,
+              "earth": 1156
+            },
+            "hours": 180
+          },
+          {
+            "name": "Earth wall preparation and assembly",
+            "materials": {},
+            "hours": 274.56000000000006
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "materials": {
+              "wood": 240,
+              "bamboo": 20,
+              "tiles": 480
+            },
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "materials": {
+              "hardware": 10
+            },
+            "hours": 120
+          }
+        ],
+        "hours": 732.96,
+        "legacyWork": 2420,
+        "packWork": 2740,
+        "area": 120,
+        "wallArea": 91.52000000000001,
+        "roofArea": 144
+      }
+    },
+    "goat-pasture-empty": {
+      "footprint": [
+        6,
+        5
+      ],
+      "materials": {
+        "bamboo": 10,
+        "tiles": 3,
+        "hardware": 2,
+        "plumbing": 1
+      },
+      "residentHours": 2.64,
+      "economicSpec": null
+    },
+    "supply-0": {
+      "footprint": [
+        6,
+        6
+      ],
+      "materials": {
+        "tree_starts": 4
+      },
+      "residentHours": 0.675,
+      "economicSpec": null
+    },
+    "supply-1": {
+      "footprint": [
+        3,
+        3
+      ],
+      "materials": {
+        "bamboo_starts": 4
+      },
+      "residentHours": 0.675,
+      "economicSpec": null
+    },
+    "supply-5": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4
+      },
+      "residentHours": 0.675,
+      "economicSpec": null
+    },
+    "supply-6": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "batteries": 1,
+        "electrical": 1
+      },
+      "residentHours": 0.675,
+      "economicSpec": null
+    },
+    "rain-barrel": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "tank": 1,
+        "plumbing": 1
+      },
+      "residentHours": 0.675,
+      "economicSpec": null
+    },
+    "tool-rack": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "seedling-bench": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "woodpile": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "picnic-table": {
+      "footprint": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "garden-bench": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "clothesline": {
+      "footprint": [
+        2,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "hammock": {
+      "footprint": [
+        2,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "wayfinding-sign": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "wash-station": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "plumbing": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "farm-gate": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "fire-circle": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "canvas-tent-teal": {
+      "footprint": [
+        2,
+        2
+      ],
+      "materials": {
+        "tarp": 1,
+        "wood": 2
+      },
+      "residentHours": 0.675,
+      "economicSpec": null
+    },
+    "canvas-tent-ochre": {
+      "footprint": [
+        2,
+        2
+      ],
+      "materials": {
+        "tarp": 1,
+        "wood": 2
+      },
+      "residentHours": 0.675,
+      "economicSpec": null
+    },
+    "reading-room": {
+      "footprint": [
+        5,
+        4
+      ],
+      "materials": {
+        "wood": 12,
+        "walls": 16,
+        "tiles": 18,
+        "hardware": 3,
+        "tools": 2
+      },
+      "residentHours": 8.415000000000001,
+      "economicSpec": null
+    },
+    "outdoor-classroom": {
+      "footprint": [
+        5,
+        5
+      ],
+      "materials": {
+        "wood": 20,
+        "frames": 6,
+        "tiles": 24,
+        "hardware": 4
+      },
+      "residentHours": 8.91,
+      "economicSpec": null
+    },
+    "community-hall": {
+      "footprint": [
+        7,
+        6
+      ],
+      "materials": {
+        "wood": 20,
+        "walls": 24,
+        "frames": 8,
+        "tiles": 30,
+        "hardware": 6
+      },
+      "residentHours": 14.520000000000001,
+      "economicSpec": null
+    },
+    "exercise-garden": {
+      "footprint": [
+        5,
+        5
+      ],
+      "materials": {
+        "wood": 12,
+        "hardware": 4,
+        "stone": 6
+      },
+      "residentHours": 3.6300000000000003,
+      "economicSpec": null
+    },
+    "volleyball-court": {
+      "footprint": [
+        11,
+        7
+      ],
+      "materials": {
+        "earth": 24,
+        "wood": 4,
+        "tarp": 2,
+        "hardware": 4
+      },
+      "residentHours": 5.61,
+      "economicSpec": null
+    },
+    "rain-tent": {
+      "footprint": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 4,
+        "tarp": 1,
+        "hardware": 1
+      },
+      "residentHours": 0.825,
+      "economicSpec": null
+    },
+    "covered-stores": {
+      "footprint": [
+        2,
+        1
+      ],
+      "materials": {
+        "wood": 12,
+        "roofing": 6,
+        "hardware": 2
+      },
+      "residentHours": 1.725,
+      "economicSpec": null
+    },
+    "tarp-stores": {
+      "footprint": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "tarp": 1
+      },
+      "residentHours": 0.6375,
+      "economicSpec": null
+    }
+  }
+}
