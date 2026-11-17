@@ -1725,6 +1725,9 @@ function leisureSpot(s,r,p) {
   const [w,d]=footprint(p);
   return Array.from({length:w*d},(_,i)=>({x:p.x+i%w,z:p.z+Math.floor(i/w)}))
     .filter(spot=>shelteredFrontCell(p,spot.x,spot.z))
+    // Leave a body-width margin beneath the roof rather than stopping at its drip edge.
+    .map(spot=>({x:Math.max(p.x+Math.min(.2,(w-1)/2),Math.min(p.x+w-1-Math.min(.2,(w-1)/2),spot.x)),
+      z:Math.max(p.z+Math.min(.2,(d-1)/2),Math.min(p.z+d-1-Math.min(.2,(d-1)/2),spot.z))}))
     .sort((a,b)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z))
     .find(spot=>!s.people.some(other=>other!==r && (
       (!other.tentPhase && Math.hypot(other.x-spot.x,other.z-spot.z)<.7) ||

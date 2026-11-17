@@ -1,3 +1,4 @@
+import {FUNCTIONAL_PROGRAM} from './functional-program.js';
 // Shared footprint, construction and activity definitions; safe in the pure simulation.
 export const COMMUNITY = {
   "reading-room": {
@@ -56,3 +57,5 @@ export const COMMUNITY = {
       "A sand court with a net and spectator benches. A recreation destination; organized matches are not simulated yet.",
   },
 };
+
+for(const [id,def] of Object.entries(COMMUNITY))def.size=[...FUNCTIONAL_PROGRAM[id].site];

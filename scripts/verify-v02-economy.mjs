@@ -73,7 +73,7 @@ const layout = fresh();
 assert.equal(plan(layout, "solar_farm", 40, 40), "");
 assert.equal(plan(layout, "solar_farm", 44, 40), "");
 assert.match(placementError(layout, "streetlight", 42, 40), /occupies/);
-assert.equal(placementError(layout, "streetlight", 43, 43), "");
+assert.equal(placementError(layout, "streetlight", 44, 45), "");
 assert(restore(save(layout)));
 let hydroPlace = null;
 for (let x = 18; x < 24; x++)

@@ -10,7 +10,7 @@ for(const id of Object.keys(BIOMES)){
   assert(low>-1,`${id}: above skirt bottom`);
   view.mesh.updateMatrixWorld(true);
   for(let n=0;n<80;n++){
-    const x=-63+(n*17.31)%126,z=-63+(n*7.67)%126;
+    const x=-95+(n*17.31)%190,z=-95+(n*7.67)%190;
     const ray=new THREE.Raycaster(new THREE.Vector3(x,30,z),new THREE.Vector3(0,-1,0));
     const hit=ray.intersectObject(view.mesh)[0];
     assert(hit && Math.abs(hit.point.y-view.sample(x,z))<1e-5,`${id}: visible triangles match placement height`);
@@ -20,9 +20,9 @@ for(const id of Object.keys(BIOMES)){
   const saved=encode(records,id);assert.equal(decodeBiome(saved),id);assert.deepEqual(decode(saved),records);
   if(id!=='flat')assert(records.length>50);
 }
-const joined=[{id:'a',asset:'garden',column:45,row:45,rotation:0},{id:'b',asset:'garden',column:47,row:45,rotation:0}];
+const joined=[{id:'a',asset:'garden',column:65,row:65,rotation:0},{id:'b',asset:'garden',column:67,row:65,rotation:0}];
 const f=terrainField('mata-atlantica',joined);
-for(let x=26;x<=34;x+=.5)for(let z=26;z<=30;z+=.5)assert(Math.abs(f.sample(x,z)-f.sample(28,28))<1e-8,'joined terraces stay level');
+for(let x=34;x<=46;x+=.5)for(let z=34;z<=46;z+=.5)assert(Math.abs(f.sample(x,z)-f.sample(40,40))<1e-8,'joined terraces stay level');
 assert.equal(decodeBiome(JSON.stringify({props:[]})),'flat');
 assert.throws(()=>decodeBiome('{"biome":"unknown"}'));
 console.log('PASS: three biome landscapes, terrain height ranges, 320 raycast/height matches, joined terraces and biome scene roundtrips.');
@@ -30,8 +30,8 @@ console.log('PASS: three biome landscapes, terrain height ranges, 320 raycast/he
 const {createResident}=await import('../web/v02/residents/rig.js');
 const {ResidentDirector}=await import('../web/v02/residents/director.js');
 const {placementPosition}=await import('../web/v02/land/layout.js');
-const bench={id:'bench',asset:'garden-bench',column:46,row:46,rotation:0};
-const person={id:'person',asset:'iara',column:42,row:44,rotation:0};
+const bench={id:'bench',asset:'garden-bench',column:70,row:70,rotation:0};
+const person={id:'person',asset:'iara',column:66,row:68,rotation:0};
 const slope=terrainField('mata-atlantica',[bench,person]);
 const actor=createResident('iara');actor.userData.placement=person;
 actor.position.set(...placementPosition(person.column,person.row,[1,1]));

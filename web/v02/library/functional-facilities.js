@@ -218,7 +218,7 @@ export function functionalFacility(id,{plant,tree,goat,chicken},stage=2){
       for(const y of [.25,1.8])box(home,.7,.07,.08,'timber',-.5,y,1.11);
       for(const z of [-.45,.45])beam(home,[-.8,.8,z],[.8,.8,z],.06,'timber');
       for(const x of [-.6,0,.6])box(home,.5,.4,.45,'timber',x,.3,-.7);
-      for(let n=0;n<6;n++)placed(g,chicken(n%3),-.5+(n%3)*1.2,.3+Math.floor(n/3)*1.2);
+      for(let n=0;n<3;n++)placed(g,chicken(n%3),-.5+(n%3)*1.2,.3+Math.floor(n/3)*1.2);
     }else{
       box(home,.12,1.6,3,'timberLight',-1.5,.8,0);
       if(id==='goat_pasture')for(const x of [-1.2,1.2])placed(g,goat(),x,1);

@@ -1,3 +1,5 @@
+import {MAP_METRES} from '../land/layout.js';
+const NAV_HALF=MAP_METRES/2;
 import { poseResident, animateResident } from "./rig.js";
 import {
   INTERACTIONS,
@@ -59,13 +61,13 @@ export class ResidentDirector {
         const t = i / 20,
           x = slot.approach[0] * (1 - t) + slot.at[0] * t,
           z = slot.approach[1] * (1 - t) + slot.at[1] * t;
-        const cx = Math.floor(x + 64),
-          cz = Math.floor(z + 64);
+        const cx = Math.floor(x + NAV_HALF),
+          cz = Math.floor(z + NAV_HALF);
         if (
           cx < 0 ||
           cz < 0 ||
-          cx >= 128 ||
-          cz >= 128 ||
+          cx >= MAP_METRES ||
+          cz >= MAP_METRES ||
           finalNav.blocked.has(finalNav.key(cx, cz))
         )
           clear = false;

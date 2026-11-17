@@ -1,8 +1,9 @@
+import {FUNCTIONAL_PROGRAM} from '../web/v02/library/functional-program.js';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import {createResident,poseResident,animateResident} from '../web/v02/residents/rig.js';
 import {idleActivity,downtimeMotion,downtimeLabel,downtimeInvalid} from '../web/v02/weekend/resident-downtime.js';
-import {createWeekend,chooseCamp,tick,save,restore,PROJECTS,requiredLoads,enableFastNavigation,plan} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,tick,save,restore,PROJECTS,requiredLoads,enableFastNavigation,plan,footprint} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 import {chooseNeed,inviteConversation} from '../web/v02/weekend/resident-needs.js';
 
@@ -83,7 +84,9 @@ const api={catalog:PROJECTS,center:p=>({x:p.x,z:p.z}),sheltered:()=>false,projec
  for(let i=0;i<300;i++){
   tick(s,.1);
   if(r.downtime?.arrived && r.downtime.site===p.id){
-   indoors=true;assert(r.x>=p.x && r.x<p.x+2 && r.z>=p.z && r.z<p.z+2,'rain break is under the roof, not outside the building');
+   indoors=true;const [w,d]=footprint(p),[roofW,roofD]=FUNCTIONAL_PROGRAM[p.key].shell;
+   const localX=(r.x-p.x-(w-1)/2)*2,localZ=(r.z-p.z-(d-1)/2)*2;
+   assert(Math.abs(localX)<=roofW/2 && Math.abs(localZ)<=roofD/2,'rain break lies within the modeled roof');
   }
  }
  assert(indoors,'resident reaches shelter in actual rain');
