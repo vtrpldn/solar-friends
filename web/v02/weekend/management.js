@@ -1,3 +1,4 @@
+import {basicNeeds} from './basic-needs.js';
 import {animalCareText} from './animal-care.js';
 import {foodControls} from './food-controls.js';
 import {kitchenPlan} from './food-policy.js';
@@ -408,6 +409,10 @@ export function createManagement({
         }[k],
         `${nodes.reduce((v, n) => v + n.water[i], 0).toFixed(1)} stored`,
       ]);
+    if(view==='water'){
+      const sanitation=basicNeeds(s).find(row=>row.id==='sanitation');
+      stats.push(['Sanitation',sanitation.summary],['Toilets & washing',sanitation.detail]);
+    }
     $("management-stats").innerHTML = stats
       .map(
         ([name, value]) =>

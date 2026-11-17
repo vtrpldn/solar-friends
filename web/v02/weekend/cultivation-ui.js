@@ -40,10 +40,11 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
   }
   content.querySelector('#field-summary').textContent=error||`${w/2} × ${d/2} grid cells · ${w} × ${d} m · ${bedLayout({key:'field',fieldSize:r.size}).length} beds · 0.8 m aisles`;
   content.querySelector('#confirm-field').disabled=!!error||!pending;
+  content.querySelector('#confirm-field').dataset.disabledReason=error||'Drag across the grid to mark a field first.';
  }
  button.onclick=()=>{
   begin();panel.classList.add('farm-placement');placementGrid(true);document.getElementById('farm-title').textContent='New field';document.body.dataset.cultivationOpen='true';active=true;hiddenSite=null;panel.hidden=false;controls.enabled=false;start=null;pending=null;
-  content.innerHTML='<p class="farm-intro">Drag across the grid to mark your field. Its edges snap to whole 2 m cells.</p><label>Row direction <select id="field-direction"><option value="0">North–south</option><option value="1">East–west</option></select></label><p id="field-summary">Minimum 2 × 2 cells.</p><button id="confirm-field" disabled>Confirm field</button>';
+  content.innerHTML='<p class="farm-intro">Drag across the grid to mark your field. Its edges snap to whole 2 m cells.</p><label>Row direction <select id="field-direction"><option value="0">North–south</option><option value="1">East–west</option></select></label><p id="field-summary">Minimum 2 × 2 cells.</p><button id="confirm-field" disabled data-disabled-reason="Drag across the grid to mark a field first.">Confirm field</button>';
   content.querySelector('#field-direction').value=String(rotation);
   content.querySelector('#field-direction').onchange=e=>{rotation=Number(e.target.value);draw();};
   content.querySelector('#confirm-field').onclick=()=>{const r=rectangle(),error=planField(state(),r.x,r.z,r.size,rotation);if(error){message(error);return;}stop();select(state().projects.at(-1).id);refresh();};
@@ -94,6 +95,8 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
   ${details('balances','Water & material balances',`<dl class="farm-ledger">${row('Irrigation supplied',b.irrigated,'L')}${row('Rain received',b.rainLiters,'L')}${row('Residues on soil',b.residueKg)}${row('Compost decomposing',b.amendmentKg)}${row('Harvest carried away',b.exportedKg)}${row('Residues collected',b.residueExportedKg)}${row('Organic matter retained',b.soilOrganicKg)}${row('Decomposition losses',b.decomposedGasKg)}</dl>`)}
   ${p.key==='field'?details('resize','Field dimensions','<div class="farm-control-pair"><label>Width · grid cells<input id="farm-width" type="number" min="2" max="32" step="1"></label><label>Length · grid cells<input id="farm-depth" type="number" min="2" max="32" step="1"></label></div><button id="farm-resize">Update field</button>'):''}`;
   for(const [id,value]of [['farm-bed',bedId],['farm-crop',b.crop],['farm-density',b.density],['farm-residues',b.residues]])content.querySelector('#'+id).value=value;
+  for(const id of ['farm-crop','farm-density'])content.querySelector('#'+id).dataset.disabledReason=job?'Wait for this bed’s queued work to finish.':'Clear or harvest the current crop before changing planting settings.';
+  for(const id of ['farm-irrigation','farm-residues'])content.querySelector('#'+id).dataset.disabledReason='Wait for this bed’s queued work to finish before changing care settings.';
   content.querySelector('#farm-whole-site').onclick=()=>{wholeSite=true;lastRender=null;refresh();};
   content.querySelector('#farm-bed').onchange=e=>{bedId=Number(e.target.value);e.target.blur();refresh();};
   for(const [id,key]of [['farm-crop','crop'],['farm-density','density'],['farm-irrigation','irrigation'],['farm-residues','residues']])content.querySelector('#'+id).onchange=e=>{const value=key==='irrigation'?e.target.checked:key==='density'?Number(e.target.value):e.target.value;message(configureBed(s,p.id,bedId,{[key]:value})||'Bed settings updated.');e.target.blur();changed();};

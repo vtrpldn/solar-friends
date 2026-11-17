@@ -11,7 +11,7 @@ try{
  const s=createSandbox(42);s.view={speed:1,paused:false,position:[64,35,64],target:[0,0,0],zoom:1};
  await page.addInitScript(({key,value})=>{localStorage.setItem(key,value);localStorage.setItem('solar-friends-audio','{"music":0,"effects":0}');},{key:SANDBOX_SAVE,value:save(s)});
  console.log('Loading game');await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await page.waitForSelector('#build-field',{state:'attached'});await page.waitForTimeout(500);
- console.log('Opening Guide');await page.locator('#open-guide').click();await page.waitForSelector('#guide-topics button');assert.equal(await page.locator('#guide-topics button').count(),28);
+ console.log('Opening Guide');await page.locator('#open-guide').click();await page.waitForSelector('#guide-topics button');assert.equal(await page.locator('#guide-topics button').count(),27);
  assert.equal(await page.locator('#pause').getAttribute('aria-label'),'Resume simulation');
  await page.waitForFunction(()=>document.querySelector('.guide-diagram img')?.naturalWidth>0);console.log('Overview loaded');await page.screenshot({path:out+'/overview-1440.png'});console.log('Overview captured');
  await page.locator('#guide-search').fill('cultivation');await page.getByRole('button',{name:'Field and greenhouse cultivation',exact:true}).click();

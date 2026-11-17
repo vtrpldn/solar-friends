@@ -4,7 +4,7 @@
     "title": "Growing autonomy",
     "description": "Replace recurring purchases with local supplies, then recover useful outputs. Keep enough labor and reserves for losses.",
     "tip": "Start with water and food reliability. Add reuse and renewable supplies before expanding demand.",
-    "boundary": "Seeds and tree starts still need outside supplies. Manure recovery is not implemented. Biogas can support cooking, but does not generate electricity.",
+    "boundary": "Seeds and tree starts still need outside supplies. Biogas can fuel cooking.",
     "sources": [
       "cultivation.js",
       "catalog-rules.js",
@@ -37,26 +37,24 @@
   },
   {
     "id": "clock-modes-and-simulation-stepping",
-    "title": "Clock, modes and simulation stepping",
+    "title": "Time, seasons and play modes",
     "sources": [
       "simulation.js",
       "biological-production.js",
-      "lab-worker.js",
       "game.js",
       "weather.js",
       "environment-info.js"
     ],
     "tests": [
       "modes",
-      "lab",
       "biological-production",
       "session-ui",
       "environment-info"
     ],
-    "description": "Normal play uses finite supplies and biological time. When everyone sleeps or is away, time can advance at 64\u00d7.",
-    "diagram": "flowchart TD\n Mode{Mode} -->|Normal| Rules[Finite supplies and biological waiting]\n Mode -->|Sandbox| Sandbox[Replenish supplies and skip biological waiting]\n Mode -->|Lab| Lab[Separate accelerated runner and storage]\n Rules --> Run{Paused or arriving?}\n Sandbox --> Run\n Lab --> Run\n Run -->|Yes| Hold[Do not advance ordinary simulation]\n Run -->|No| Tick[Advance bounded simulation step]\n Tick --> Systems[Upkeep, utilities, biology, storage and deliveries]\n Systems --> Residents[Needs, trips and resident actions]\n Residents --> Calendar[Day, season and schedules]\n Calendar --> Tick\n Rules --> Weather[Seeded seasonal rain, cloud and temperature]\n Weather --> Effects[Water recharge, crop stress and hydration demand]\n",
+    "description": "Use the clock to pause or change speed. When everyone is asleep or away, time can advance at 64×.",
+    "diagram": "flowchart TD\n Mode{Play mode} -->|Story| Story[Finite supplies and biological waiting]\n Mode -->|Sandbox| Sandbox[Replenished supplies and no biological waiting]\n Clock[Clock controls] --> Running{Time running?}\n Running -->|Yes| Calendar[Days, seasons and schedules advance]\n Running -->|No| Hold[Village activity pauses]\n Calendar --> Weather[Seasonal rain, cloud cover and temperature]\n Weather --> Effects[Water recharge, crop stress and hydration demand]\n Calendar --> Residents[Resident needs, trips and work]",
     "boundary": "Sandbox also skips asset upkeep and tool wear.",
-    "tip": "Use normal mode to judge autonomy. Unlimited sandbox stock hides shortages.",
+    "tip": "Use Story mode to see whether your village can meet its needs from local supplies.",
     "facts": null
   },
   {
@@ -100,7 +98,7 @@
     ],
     "description": "Residents interrupt work to eat, rest and meet other needs.",
     "diagram": "flowchart TD\n Time[Time, activity and personality] --> Decay[Needs and energy change]\n Decay --> Urgent{Urgent need or scheduled sleep?}\n Urgent -->|No| Available[Available for work or downtime]\n Urgent -->|Yes| Interrupt[Suspend or defer work safely]\n Interrupt --> Target{Suitable reachable service or rest place?}\n Target -->|Yes| Travel[Walk to service or assigned / available home]\n Target -->|No| Fallback[Try fallback or expose blocked need]\n Travel --> Consume[Consume food, water or service capacity as applicable]\n Consume --> Recover[Restore need or energy]\n Recover --> Resume[Reconsider unfinished work]\n Fallback --> Resume\n Resume --> Urgent\n Heat[Heat and active work] --> Thirst[Individual hydration demand]\n Thirst --> Target\n Fresh[Potable water and travel bottles] --> Consume\n",
-    "boundary": "This models needs and service use, not a detailed medical or demographic simulation.",
+    "boundary": "",
     "tip": "Keep potable water and food reachable. Heat and active work increase drinking demand; thirsty residents slow down.",
     "facts": null
   },
@@ -118,7 +116,7 @@
       "downtime"
     ],
     "description": "Preferences influence work, leisure and willing conversations.",
-    "diagram": "flowchart TD\n Profile[Authored identity and preferences] --> Choice[Choose leisure, work preference or thought]\n State[Needs, commitments and time of day] --> Choice\n Choice --> Social{Conversation wanted and partner willing?}\n Social -->|Yes| Meet[Both residents reach meeting place]\n Meet --> Talk[Conversation]\n Talk --> Relationship[Friendship and recent memories]\n Social -->|No| Personal[Read, stretch, sit or stroll]\n Personal --> Memory[Personal-time memory]\n Hope[Completed personal building hope] --> Memory\n Relationship --> Choice\n Memory --> Choice\n Work[New work or urgent need] --> Interrupt[Interrupt casual downtime]",
+    "diagram": "flowchart TD\n Profile[Resident identity and preferences] --> Choice[Choose leisure, work preference or thought]\n State[Needs, commitments and time of day] --> Choice\n Choice --> Social{Conversation wanted and partner willing?}\n Social -->|Yes| Meet[Both residents reach meeting place]\n Meet --> Talk[Conversation]\n Talk --> Relationship[Friendship and recent memories]\n Social -->|No| Personal[Read, stretch, sit or stroll]\n Personal --> Memory[Personal-time memory]\n Hope[Completed personal building hope] --> Memory\n Relationship --> Choice\n Memory --> Choice\n Work[New work or urgent need] --> Interrupt[Interrupt casual downtime]",
     "boundary": "Residents do not autonomously place buildings.",
     "tip": "Leave time and reachable places for social contact and recreation.",
     "facts": null
@@ -194,8 +192,8 @@
     ],
     "description": "Inputs travel to work sites. Finished output travels back to storage.",
     "diagram": "flowchart TD\n Queue[Queue recipe or bed job] --> Validate{Site, input and job constraints pass?}\n Validate -->|No| Block[Explain missing condition]\n Validate -->|Yes| Pickup[Acquire inputs from stores]\n Pickup --> Travel[Carry inputs to reachable work position]\n Travel --> Biology{Biological waiting required?}\n Biology -->|Yes| Grow[Release worker while biology advances]\n Grow --> Process[Resident processing or collection work]\n Biology -->|No| Process\n Process --> Resolve[Finished crop or recipe output]\n Resolve --> Loads[Split output into physical loads]\n Loads --> Carry[Carry to available storage]\n Carry --> Remaining{Output remaining?}\n Remaining -->|Yes| Loads\n Remaining -->|No| Done[Mark operation complete]\n Target[Repeat target and protected reserves] --> Queue",
-    "boundary": "Biological waiting and output rules differ between cultivation and legacy/perennial recipes.",
-    "tip": "Queue work when inputs and storage are ready. Food Almanac policies can manage kitchen reserves; generic repeating jobs are removed.",
+    "boundary": "Planting beds, perennial crops and recipes have different waiting and harvest rules.",
+    "tip": "Queue work when inputs and storage are ready. Use Food Almanac policies to manage kitchen reserves.",
     "facts": null
   },
   {
@@ -210,7 +208,7 @@
     ],
     "description": "Crafting requires compatible materials, tools, workstations and skill.",
     "diagram": "flowchart TD\n Recipe[Choose craft or repair recipe] --> Site{Compatible workstation?}\n Site -->|No| Block[Explain requirement]\n Site -->|Yes| Skill{Resident has required skill level?}\n Skill -->|No| Block\n Skill -->|Yes| Tools{Required tools usable and available?}\n Tools -->|No| Block\n Tools -->|Yes| Stages[Perform craft stages with materials]\n Stages --> Practice[Accumulate skill practice]\n Practice --> Rate[Skill affects work multiplier]\n Rate --> Stages\n Stages --> Complete[Deliver crafted item or finish repair]",
-    "boundary": "Crafting currently contains explicit skill-level gates.",
+    "boundary": "Some recipes require a minimum skill level.",
     "tip": "Choose recipes your residents can perform with available tools and skills.",
     "facts": null
   },
@@ -246,7 +244,7 @@
     ],
     "description": "Gathering sites are either finite or recover over time.",
     "diagram": "flowchart TD\n Site[Generated patch, tree or deposit] --> Ready{Accessible and available?}\n Ready -->|No| Reason[Depleted, recovering or inaccessible]\n Ready -->|Yes| Gather[Resident gathers, cuts or extracts]\n Gather --> Output[Carry gathered output to stores]\n Output --> Kind{Resource behavior}\n Kind -->|Finite| Deplete[Advance extraction or felling state]\n Kind -->|Renewable patch| Cooldown[Set next ready time]\n Cooldown --> Ready\n Deplete --> Left{Capacity remains?}\n Left -->|Yes| Ready\n Left -->|No| Exhausted[No further extraction]",
-    "boundary": "Wild fruit, bamboo and forage use authored recovery periods.",
+    "boundary": "Wild fruit, bamboo and forage take time to recover after gathering.",
     "tip": "Rotate renewable gathering sites. Finite deposits will eventually run out.",
     "facts": null
   },
@@ -305,7 +303,7 @@
     ],
     "description": "Trees, perennial crops and compost develop while residents do other work.",
     "diagram": "flowchart TD\n Inputs[Recipe inputs and initial resident work] --> Wait[Biology continues without a worker]\n First[First orchard establishment delay] --> Wait\n Factors[Recipe-specific season, moisture and fertility] --> Wait\n Wait --> Ready[Ready for resident collection or processing]\n Ready --> Delay[Delay after maturity]\n Delay --> Loss[Perishable output may decline]\n Ready --> Work[Resident collection work]\n Health[Animal health where applicable] --> Yield[Available output]\n Work --> Yield\n Loss --> Yield\n Yield --> Store[Physical hauling to storage]\n Store --> Repeat[Repeat if resources and policy allow]",
-    "boundary": "This remains separate from the new bed lifecycle.",
+    "boundary": "",
     "tip": "Establish perennial crops early and stagger harvests. Timber replanting still needs purchased starts.",
     "facts": null
   },
@@ -325,8 +323,8 @@
     ],
     "description": "Animal care consumes fodder, water and labor. Health affects supported products.",
     "diagram": "flowchart TD\n Animals[Stocked animals] --> Demand[Feed and drinking-water demand]\n Care[Resident care job] --> Reserves[Finite on-site feed and water]\n Reserves --> Demand\n Demand --> Adequate{Enough reserves?}\n Adequate -->|Yes| Health[Health and product accumulation]\n Adequate -->|No| Harm[Health declines; production drops]\n Health --> Collect[Resident collects stored product]\n Collect --> Haul[Haul eggs or milk to stores]\n",
-    "boundary": "Feed and water reserves are consumed over time; collection no longer refreshes animal care.",
-    "tip": "Grow or gather sufficient fodder and provide drinking water before adding animals. Manure recovery is not implemented.",
+    "boundary": "Animals consume feed and water over time. Refill their supplies separately from collecting products.",
+    "tip": "Grow or gather sufficient fodder and provide drinking water before adding animals.",
     "facts": null
   },
   {
@@ -491,7 +489,7 @@
     ],
     "description": "Optional jobs require travel and completed shifts before pay arrives.",
     "diagram": "stateDiagram-v2\n Disabled --> Eligible: Player enables outside job\n Eligible --> Waiting: Not scheduled or resident unavailable\n Waiting --> Eligible: Schedule and needs permit\n Eligible --> Outbound: Leave for shift\n Outbound --> Away: Reach work\n Away --> Inbound: Finish shift\n Inbound --> Eligible: Return and receive pay less any deferred fare\n Eligible --> Disabled: Player disables job\n note right of Away\n Meals and toilet breaks are provided.\n Disabling finishes the current shift.\n end note",
-    "boundary": "Jobs and pay are authored per resident.",
+    "boundary": "Job schedules and pay vary by resident.",
     "tip": "Use outside jobs to fund early infrastructure while leaving enough workers for essential village work.",
     "facts": null
   },
@@ -508,54 +506,27 @@
     ],
     "description": "Age and use reduce condition. Service needs parts, access and labor.",
     "diagram": "flowchart TD\n Use[Time, active assets and vehicle distance] --> Condition[Condition and age change]\n Condition --> Due{Service or replacement due?}\n Due -->|Yes| Queue[Queue maintenance job]\n Queue --> Gate{Parts, allowance and accessible site?}\n Gate -->|No| Wait[Expose missing parts, budget or access]\n Gate -->|Yes| Work[Resident collects supplies and services asset]\n Work --> Restore[Restore condition or reset replacement age]\n Restore --> Condition\n Condition --> Capacity[Service factor and battery capacity affect utilities]\n Due -->|No| Continue[Continue operation]",
-    "boundary": "Service intervals and lifetimes are explicit simulation assumptions.",
+    "boundary": "",
     "tip": "Keep parts and labor available before equipment deteriorates. Local repair materials are still limited.",
     "facts": null
   },
   {
-    "id": "save-migration-and-recovery",
-    "title": "Save, migration and recovery",
-    "sources": [
-      "simulation.js",
-      "save-slots.js",
-      "load-village.js",
-      "modes.js"
-    ],
-    "tests": [
-      "save-slots",
-      "sandbox-food-save",
-      "consistency"
-    ],
-    "description": "Story and sandbox villages are saved separately. Named saves can be exported.",
-    "diagram": "flowchart TD\n Live[Village state and in-flight work] --> Save[Save current village or named snapshot]\n Save --> Storage[Browser-local storage or exported file]\n Storage --> Load[Read saved village]\n Load --> Validate{Can this village be loaded?}\n Validate -->|No| Preserve[Keep prior data and report recovery options]\n Validate -->|Yes| Migrate[Restore compatible saved systems]\n Migrate --> Legacy[Finish saved work before changing bed systems]\n Legacy --> Resume[Restore work, cargo, crops and infrastructure]\n Resume --> Live\n Mode[Separate story, sandbox and lab keys] --> Storage",
-    "boundary": "These are local saves and exports, not cloud synchronization.",
-    "tip": "Export a village before major changes. Browser saves alone are not a backup.",
-    "facts": null
-  },
-  {
     "id": "presentation-inspection-and-ambient-life",
-    "title": "Presentation, inspection and ambient life",
+    "title": "Inspecting village conditions",
     "sources": [
       "game.js",
-      "cultivation-models.js",
-      "house-lighting.js",
       "lens-data.js",
-      "wildlife.js",
-      "audio.js",
-      "basic-needs.js"
+      "basic-needs.js",
+      "management.js"
     ],
     "tests": [
-      "cultivation-browser",
       "lenses",
-      "house-lighting",
-      "wildlife",
-      "audio",
       "basic-needs"
     ],
-    "description": "The scene and inspection panels show conditions and resident activity.",
-    "diagram": "flowchart LR\n State[Village conditions] --> Crops[Instanced crop stage, condition and coverage]\n State --> Residents[Resident action, tools and cargo animation]\n State --> Lighting[Powered night lights]\n State --> Inspect[Bed panels, almanac, lenses and warnings]\n Inspect --> Commands[Explicit player commands]\n Commands --> State\n Seed[Stable visual seed] --> Crops\n Ambient[Birds, butterflies and other ambient animation] --> Scene[Rendered world]\n Crops --> Scene\n Residents --> Scene\n Lighting --> Scene\n Audio[Music and effect volume controls] --> Sound[Presentation audio]",
-    "boundary": "Ambient wildlife is not livestock, pollination or a saved ecological population.",
-    "tip": "Read the status beneath food, battery and water counters; the WC indicator shows sanitation. Hover for details or click to manage. These are current observations, not guarantees of future supply or access.",
+    "description": "Use the village counters, map lenses and Almanac to spot shortages and decide what needs attention.",
+    "diagram": "flowchart TD\n Village[Current village conditions] --> Counters[Food, battery, and Water & sanitation counters]\n Village --> Lenses[Map lenses show conditions by location]\n Village --> Almanac[Almanac shows supplies and work policies]\n Counters --> Details[Hover for details or click to manage]\n Lenses --> Inspect[Select a bed or building for details]\n Almanac --> Policies[Adjust policies for village work]",
+    "boundary": "",
+    "tip": "Check food, water and battery status before adding demand. Open Water & sanitation for toilet and washing conditions.",
     "facts": null
   }
 ]

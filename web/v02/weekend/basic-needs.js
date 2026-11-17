@@ -30,15 +30,21 @@ export function basicNeeds(s) {
 
 export function renderBasicNeeds(root,s) {
  const statuses=basicNeeds(s),marks={good:'✓',watch:'!',alert:'!',neutral:'·'};
- let sanitation=root.querySelector('.need-sanitation');
- if(!sanitation){sanitation=document.createElement('button');sanitation.type='button';sanitation.className='need-sanitation';sanitation.dataset.panel='water';sanitation.textContent='WC';root.append(sanitation);}
- const buttons={food:root.children[1],power:root.children[2],water:root.children[3],sanitation};
- for(const row of statuses){
-  const b=buttons[row.id];b.dataset.need=row.id;b.dataset.status=row.status;
+ const sanitation=statuses.find(row=>row.id==='sanitation');
+ const water=statuses.find(row=>row.id==='water');
+ const severity={neutral:0,good:1,watch:2,alert:3};
+ const waterStatus=severity[sanitation.status]>severity[water.status]?sanitation:water;
+ const buttons={food:root.children[1],power:root.children[2],water:root.children[3]};
+ for(const row of statuses.filter(row=>row.id!=='sanitation')){
+  const b=buttons[row.id];b.dataset.need=row.id;b.dataset.status=row.id==='water'?waterStatus.status:row.status;
   const status=b.querySelector('.resource-trend');
-  if(status){status.textContent=`${marks[row.status]} ${row.summary}`;status.classList.add('need-status');}
+  if(status){status.textContent=row.id==='water'?`${marks[waterStatus.status]} ${waterStatus===sanitation?'Sanitation: ':''}${waterStatus.summary}`:`${marks[row.status]} ${row.summary}`;status.classList.add('need-status');}
   b.setAttribute('aria-label',`${row.label}: ${row.summary}. ${row.detail}. Open management.`);
   const explanation=row.id==='food'?'Estimate: two portions per resident per day, before spoilage; excludes uncooked crops and cargo.':row.id==='water'?'Low reserve: under six drinking hours at current activity and temperature. Animal tanks are excluded; access and washing still matter.':row.id==='sanitation'?'Current stock and observed waiting; access and occupancy may still limit service.':'Current requested loads; future work and nighttime lighting may need more power.';
-  b.title=`${row.label}: ${row.summary}. ${row.detail}. ${explanation} Click to manage.`;
+  if(row.id==='water'){
+   b.querySelector('small').textContent='Water & sanitation';
+   b.setAttribute('aria-label',`Water: ${water.summary}. ${water.detail}. Sanitation: ${sanitation.summary}. ${sanitation.detail}. Open water and sanitation management.`);
+  }
+  b.title=`${row.label}: ${row.summary}. ${row.detail}. ${explanation}${row.id==='water'?` Sanitation: ${sanitation.summary}. ${sanitation.detail}.`:''} Click to manage.`;
  }
 }

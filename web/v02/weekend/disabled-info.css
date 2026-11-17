@@ -1,4 +1,8 @@
-button.has-disabled-info, select.has-disabled-info, input.has-disabled-info { padding-right: 26px !important; }
+button.has-disabled-info, input.has-disabled-info:not([type=checkbox]):not([type=radio]):not([type=number]) { padding-right: 26px !important; }
+/* Leave the native dropdown arrow its own space. */
+select.has-disabled-info, input[type=number].has-disabled-info { padding-right: 48px !important; }
+/* Native checkboxes cannot contain a hint: reserve space beside them. */
+input.has-disabled-info:is([type=checkbox], [type=radio]) { margin-right: 24px !important; flex-shrink: 0; }
 .disabled-info[popover] {
   position: fixed; inset: auto; margin: 0 !important; padding: 0 !important;
   box-sizing: border-box; width: 18px !important; height: 18px !important;

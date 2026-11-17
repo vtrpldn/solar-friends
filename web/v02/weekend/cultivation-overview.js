@@ -40,6 +40,8 @@ export function renderCultivationOverview({content,s,p,changed,message,inspect,f
  <details class="farm-details"><summary>Soil care & clearing</summary><div id="farm-secondary-actions"></div></details>
  <button id="farm-inspect-bed" class="farm-inspect">Inspect an individual bed</button>`;
  content.querySelector('#farm-feedback').textContent=feedback||'';
+ for(const id of ['farm-crop','farm-density'])content.querySelector('#'+id).dataset.disabledReason='No empty, available beds. Finish queued work or clear existing crops before changing planting settings.';
+ for(const id of ['farm-irrigation','farm-residues'])content.querySelector('#'+id).dataset.disabledReason='All beds have queued work. Wait for that work to finish before changing care settings.';
  const irrigation=content.querySelector('#farm-irrigation');irrigation.checked=common(care,'irrigation')==='true';irrigation.indeterminate=care.length>0&&common(care,'irrigation')==='';
  for(const [id,key]of [['farm-crop','crop'],['farm-density','density'],['farm-irrigation','irrigation'],['farm-residues','residues']])content.querySelector('#'+id).onchange=e=>{
   const value=key==='irrigation'?e.target.checked:key==='density'?Number(e.target.value):e.target.value;
