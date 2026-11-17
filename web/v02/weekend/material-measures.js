@@ -1,6 +1,10 @@
 // Existing stock counts remain pieces/packs. Explicit definitions avoid the old
 // silent 2 kg fallback. Except eggs, these remain engineering/game assumptions.
 export const MATERIAL_UNITS=Object.freeze({
+ bucket:['bucket',1,.015],'garden-tools':['tool set',3,.025],'carpentry-tools':['tool set',4,.02],
+ 'harvest-basket':['basket',1,.04],'cleaning-kit':['cleaning kit',2,.02],'watering-can':['watering can',1,.015],
+ wheelbarrow:['wheelbarrow',15,.35],bicycle:['bicycle',16,.5],'produce-crates':['crate',2,.04],
+ tool_heads:['tool head set',2,.005],repair_supplies:['repair pack',1,.003],soap:['soap refill',1,.002],wheel_kit:['wheel and axle',5,.04],
  wood:['timber piece',4,.012],logs:['raw wood piece',6,.015],planks:['plank',1.5,.005],
  bamboo:['pole',3,.018],earth:['20 kg earth pack',20,.015],stone:['20 kg stone pack',20,.012],
  frames:['frame',4,.04],walls:['wall-material pack',18,.025],tiles:['tile bundle',12,.012],

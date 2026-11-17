@@ -23,7 +23,10 @@ export function createScalePreview(validate = false, collection = 'village') {
     // Demonstration paths are already built, like the surrounding buildings.
     s.projects.at(-1).work=PROJECTS[key].work;
   }
-  const sites = collection==='homes' ? [
+  const sites = collection==='sites' ? [
+    ['solar_farm',44,44],['picnic-table',54,44],['eco_toilet',60,44],
+    ['supply-0',67,43],['home-shared',54,55],
+  ] : collection==='homes' ? [
     ['home-cottage',35,44],['home-longhouse',85,44],
     ['house',44,43],['home-gable',54,43],['adobe-gable',64,43],['home-family',74,43],
     ['home-veranda',44,55],['adobe-veranda',54,55],['home-courtyard',64,55],['home-shared',76,55],

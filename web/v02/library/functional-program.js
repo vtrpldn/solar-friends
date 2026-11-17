@@ -760,5 +760,5 @@ export const FUNCTIONAL_DESCRIPTIONS = {
   'volleyball-court': 'A 16 × 8 metre sand court with three metres of clear space around the playing area.',
   'supply-0': 'Four managed timber trees with space for tending and harvesting.',
   'supply-1': 'A mature bamboo clump with cutting and carrying space around it.',
-  eco_toilet: 'Single dry-toilet cubicle with a seated fixture, standing room and rear service access.',
+  eco_toilet: 'Single dry-toilet building with a human-sized doorway, ventilation and rear service access.',
 };

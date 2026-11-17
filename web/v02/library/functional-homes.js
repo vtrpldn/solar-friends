@@ -88,8 +88,8 @@ export function functionalHome(id,stage=2) {
     box(roofGroup,.16,.12,d+.5,'tileDark',-1,2.9,0);
   }else pitched(roofGroup,w,d,1.45);
   if(character.roof==='hip-porch'){
-    const porch=new THREE.Group();porch.position.set(doorX,0,d/2+.55);body.add(porch);
-    leanRoof(porch,2.8,1.3,2.35,2.8);
+    const porch=new THREE.Group();porch.position.set(doorX,0,d/2+.5);body.add(porch);
+    leanRoof(porch,2.8,1.2,2.35,2.8);
     for(const x of [-1.2,1.2])box(porch,.13,2.35,.13,'timber',x,1.175,.5);
     for(const x of [-2.3,2.3]){
       box(body,1.3,.1,.45,'timberLight',x,.5,d/2+.35);

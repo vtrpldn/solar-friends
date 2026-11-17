@@ -1,4 +1,4 @@
-import {FUNCTIONAL_PROGRAM} from './functional-program.js';
+import { FUNCTIONAL_PROGRAM } from "./functional-program.js";
 // Shared footprint, construction and activity definitions; safe in the pure simulation.
 export const COMMUNITY = {
   "reading-room": {
@@ -58,4 +58,5 @@ export const COMMUNITY = {
   },
 };
 
-for(const [id,def] of Object.entries(COMMUNITY))def.size=[...FUNCTIONAL_PROGRAM[id].site];
+// Art and simulation consumers share the same reserved grid site.
+for (const [id, def] of Object.entries(COMMUNITY)) def.size = [...FUNCTIONAL_PROGRAM[id].site];

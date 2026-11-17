@@ -1,0 +1,2011 @@
+{
+  "metresPerCell": 2,
+  "coverage": "All building-catalog models, first-camp aliases and natural-deposit replacements; associated construction states and all four rotations after material batching.",
+  "boundaryToleranceMetres": 0.005,
+  "notes": [
+    "Sites reserve clearance around physical objects; no requirement to fill each cell with geometry.",
+    "Edge clearance measures the entire visual silhouette, including canopy/roof edges. It is not a navigable-aisle guarantee.",
+    "Productive areas, occupancy assumptions and utility capacities remain separate from site size.",
+    "Existing models are retained unless replaced. No automatic save deletion."
+  ],
+  "models": [
+    {
+      "id": "home-cottage",
+      "asset": "home-cottage",
+      "name": "Small cottage",
+      "role": "placeable",
+      "siteCells": [
+        4,
+        4
+      ],
+      "siteMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        6.74,
+        4.245,
+        7.233
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.63,
+        "right": 0.63,
+        "back": 0.63,
+        "front": 0.137
+      },
+      "constructionStates": 2,
+      "review": "Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house."
+    },
+    {
+      "id": "home-longhouse",
+      "asset": "home-longhouse",
+      "name": "Long veranda house",
+      "role": "placeable",
+      "siteCells": [
+        7,
+        4
+      ],
+      "siteMetres": [
+        14,
+        8
+      ],
+      "visualBoundsMetres": [
+        12.62,
+        4.088,
+        7.181
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.69,
+        "right": 0.69,
+        "back": 0.785,
+        "front": 0.033
+      },
+      "constructionStates": 2,
+      "review": "Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house."
+    },
+    {
+      "id": "groundwater-well",
+      "asset": "groundwater-well",
+      "name": "Water well",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        2
+      ],
+      "siteMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        3.367,
+        3.61,
+        2.575
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.317,
+        "right": 0.317,
+        "back": 0.72,
+        "front": 0.705
+      },
+      "constructionStates": 2,
+      "review": "Keep human-scale wellhead and covered collection point; groundwater yield is independent of surface footprint."
+    },
+    {
+      "id": "water-pump",
+      "asset": "water-pump",
+      "name": "Water pump",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.5,
+        0.905,
+        1.41
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.25,
+        "right": 0.25,
+        "back": 0.3,
+        "front": 0.29
+      },
+      "constructionStates": 2,
+      "review": "Pump pad with service space inside the reserved site."
+    },
+    {
+      "id": "home-family",
+      "asset": "home-family",
+      "name": "Family house",
+      "role": "placeable",
+      "siteCells": [
+        6,
+        5
+      ],
+      "siteMetres": [
+        12,
+        10
+      ],
+      "visualBoundsMetres": [
+        10.45,
+        4.386,
+        8.866
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.775,
+        "right": 0.775,
+        "back": 0.69,
+        "front": 0.444
+      },
+      "constructionStates": 2,
+      "review": "Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house."
+    },
+    {
+      "id": "home-shared",
+      "asset": "home-shared",
+      "name": "Shared adobe house",
+      "role": "placeable",
+      "siteCells": [
+        6,
+        6
+      ],
+      "siteMetres": [
+        12,
+        12
+      ],
+      "visualBoundsMetres": [
+        11.24,
+        4.29,
+        11.038
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.38,
+        "right": 0.38,
+        "back": 0.88,
+        "front": 0.082
+      },
+      "constructionStates": 2,
+      "review": "Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house."
+    },
+    {
+      "id": "road",
+      "asset": "road",
+      "name": "Village road",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        2,
+        0.053,
+        2
+      ],
+      "edgeClearanceMetres": {
+        "left": 0,
+        "right": 0,
+        "back": 0,
+        "front": 0
+      },
+      "constructionStates": 2,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "bridge",
+      "asset": "bridge",
+      "name": "Timber footbridge",
+      "role": "placeable",
+      "siteCells": [
+        8,
+        1
+      ],
+      "siteMetres": [
+        16,
+        2
+      ],
+      "visualBoundsMetres": [
+        15.98,
+        1.588,
+        1.96
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.01,
+        "right": 0.01,
+        "back": 0.02,
+        "front": 0.02
+      },
+      "constructionStates": 2,
+      "review": "1.75 m walking deck. Both ends must remain reachable on dry land."
+    },
+    {
+      "id": "house",
+      "asset": "house",
+      "name": "Limewashed house",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        5
+      ],
+      "siteMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        8.74,
+        4.247,
+        9.233
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.63,
+        "right": 0.63,
+        "back": 0.63,
+        "front": 0.137
+      },
+      "constructionStates": 2,
+      "review": "Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house."
+    },
+    {
+      "id": "shed",
+      "asset": "shed",
+      "name": "Open timber shed",
+      "role": "placeable",
+      "siteCells": [
+        3,
+        3
+      ],
+      "siteMetres": [
+        6,
+        6
+      ],
+      "visualBoundsMetres": [
+        5.62,
+        3.241,
+        4.576
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.19,
+        "right": 0.19,
+        "back": 0.734,
+        "front": 0.69
+      },
+      "constructionStates": 2,
+      "review": "Open timber work shelter with a dry bench and space to move around it."
+    },
+    {
+      "id": "orchard",
+      "asset": "orchard",
+      "name": "Fruit orchard",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        5
+      ],
+      "siteMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        6.158,
+        2.807,
+        6.51
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.902,
+        "right": 1.939,
+        "back": 1.702,
+        "front": 1.788
+      },
+      "constructionStates": 2,
+      "review": "Four compact fruit trees on 4 m centres. Mature size and yield remain species-dependent."
+    },
+    {
+      "id": "goat_pasture",
+      "asset": "goat_pasture",
+      "name": "Goat pen",
+      "role": "placeable",
+      "siteCells": [
+        6,
+        5
+      ],
+      "siteMetres": [
+        12,
+        10
+      ],
+      "visualBoundsMetres": [
+        11.12,
+        3.241,
+        9.12
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.44,
+        "right": 0.44,
+        "back": 0.44,
+        "front": 0.44
+      },
+      "constructionStates": 2,
+      "review": "Two-goat pen with a 9 m² shelter and 90 m² outdoor area. Supplied feed or separate grazing is needed."
+    },
+    {
+      "id": "apiary",
+      "asset": "apiary",
+      "name": "Stingless bee apiary",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        2
+      ],
+      "siteMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        2.8,
+        1.35,
+        0.6
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.6,
+        "right": 0.6,
+        "back": 1.7,
+        "front": 1.7
+      },
+      "constructionStates": 2,
+      "review": "Three raised stingless-bee hive boxes with space to inspect each colony."
+    },
+    {
+      "id": "hydro",
+      "asset": "hydro",
+      "name": "River generator",
+      "role": "placeable",
+      "siteCells": [
+        3,
+        3
+      ],
+      "siteMetres": [
+        6,
+        6
+      ],
+      "visualBoundsMetres": [
+        2.62,
+        1.98,
+        2.56
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.69,
+        "right": 1.69,
+        "back": 1.94,
+        "front": 1.5
+      },
+      "constructionStates": 2,
+      "review": "Turbine/generator housing, intake and maintenance access; power depends on head and flow, not site area."
+    },
+    {
+      "id": "eco_toilet",
+      "asset": "eco_toilet",
+      "name": "Ecological toilet",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        2
+      ],
+      "siteMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        2.42,
+        3.314,
+        2.82
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.79,
+        "right": 0.79,
+        "back": 0.59,
+        "front": 0.59
+      },
+      "constructionStates": 2,
+      "review": "Single dry-toilet building with a human-sized doorway, ventilation and rear service access."
+    },
+    {
+      "id": "banana_treatment",
+      "asset": "banana_treatment",
+      "name": "Banana treatment bed",
+      "role": "placeable",
+      "siteCells": [
+        3,
+        4
+      ],
+      "siteMetres": [
+        6,
+        8
+      ],
+      "visualBoundsMetres": [
+        4.16,
+        3,
+        7.1
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.92,
+        "right": 0.92,
+        "back": 0.45,
+        "front": 0.45
+      },
+      "constructionStates": 2,
+      "review": "A 24-square-metre treatment bed with banana planting and separate inlet and outlet."
+    },
+    {
+      "id": "wetland",
+      "asset": "wetland",
+      "name": "Reed bed",
+      "role": "placeable",
+      "siteCells": [
+        3,
+        5
+      ],
+      "siteMetres": [
+        6,
+        10
+      ],
+      "visualBoundsMetres": [
+        4.16,
+        1.668,
+        9.1
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.92,
+        "right": 0.92,
+        "back": 0.45,
+        "front": 0.45
+      },
+      "constructionStates": 2,
+      "review": "A 32-square-metre planted treatment bed with inlet, outlet and perimeter access."
+    },
+    {
+      "id": "biodigester",
+      "asset": "biodigester",
+      "name": "Biodigester",
+      "role": "placeable",
+      "siteCells": [
+        4,
+        4
+      ],
+      "siteMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        5.78,
+        2.163,
+        4.44
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.11,
+        "right": 1.11,
+        "back": 1.78,
+        "front": 1.78
+      },
+      "constructionStates": 2,
+      "review": "Dimension reactor, feed inlet, gas handling and service path; record vessel volume and avoid claiming throughput from site area."
+    },
+    {
+      "id": "warehouse",
+      "asset": "warehouse",
+      "name": "Storage house",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        4
+      ],
+      "siteMetres": [
+        10,
+        8
+      ],
+      "visualBoundsMetres": [
+        8.62,
+        4.089,
+        6.889
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.69,
+        "right": 0.69,
+        "back": 0.686,
+        "front": 0.425
+      },
+      "constructionStates": 2,
+      "review": "Community storehouse with four shelving units, a receiving space and a central aisle."
+    },
+    {
+      "id": "solar_farm",
+      "asset": "solar_farm",
+      "name": "Solar farm",
+      "role": "placeable",
+      "siteCells": [
+        4,
+        4
+      ],
+      "siteMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        5.15,
+        1.563,
+        5.315
+      ],
+      "edgeClearanceMetres": {
+        "left": 2.1,
+        "right": 0.75,
+        "back": 1.343,
+        "front": 1.343
+      },
+      "constructionStates": 2,
+      "review": "Six 1.1 × 1.8 m panels: 11.88 m² panel surface, with row and service access. Rated output is separate."
+    },
+    {
+      "id": "streetlight",
+      "asset": "streetlight",
+      "name": "Street light",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.025,
+        3.5,
+        0.55
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.8,
+        "right": 0.175,
+        "back": 0.725,
+        "front": 0.725
+      },
+      "constructionStates": 2,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "kitchen",
+      "asset": "kitchen",
+      "name": "Community kitchen",
+      "role": "placeable",
+      "siteCells": [
+        6,
+        5
+      ],
+      "siteMetres": [
+        12,
+        10
+      ],
+      "visualBoundsMetres": [
+        10.754,
+        4.69,
+        8.337
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.623,
+        "right": 0.623,
+        "back": 0.823,
+        "front": 0.84
+      },
+      "constructionStates": 2,
+      "review": "Community kitchen with two cooking positions, washing and pantry space, and dining for eight."
+    },
+    {
+      "id": "grove",
+      "asset": "grove",
+      "name": "Banana grove",
+      "role": "placeable",
+      "siteCells": [
+        4,
+        4
+      ],
+      "siteMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        5.943,
+        2.8,
+        5.977
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.006,
+        "right": 1.052,
+        "back": 1.023,
+        "front": 1
+      },
+      "constructionStates": 2,
+      "review": "Four banana clumps on 3 m centres, with harvesting access."
+    },
+    {
+      "id": "garden",
+      "asset": "garden",
+      "name": "Vegetable garden",
+      "role": "placeable",
+      "siteCells": [
+        4,
+        6
+      ],
+      "siteMetres": [
+        8,
+        12
+      ],
+      "visualBoundsMetres": [
+        4.451,
+        0.449,
+        9.36
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.775,
+        "right": 1.773,
+        "back": 1.32,
+        "front": 1.32
+      },
+      "constructionStates": 2,
+      "review": "Four 1.2 × 4 m beds; 19.2 m² planted. Central and end aisles remain clear."
+    },
+    {
+      "id": "greenhouse",
+      "asset": "greenhouse",
+      "name": "Greenhouse",
+      "role": "placeable",
+      "siteCells": [
+        4,
+        6
+      ],
+      "siteMetres": [
+        8,
+        12
+      ],
+      "visualBoundsMetres": [
+        6.08,
+        3.533,
+        10.08
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.96,
+        "right": 0.96,
+        "back": 0.96,
+        "front": 0.96
+      },
+      "constructionStates": 2,
+      "review": "Two 1.2 × 8 m beds; 19.2 m² planted, a 1 m central aisle and 1 m end access."
+    },
+    {
+      "id": "well",
+      "asset": "well",
+      "name": "Cistern",
+      "role": "placeable",
+      "siteCells": [
+        3,
+        3
+      ],
+      "siteMetres": [
+        6,
+        6
+      ],
+      "visualBoundsMetres": [
+        3.885,
+        1.65,
+        3.56
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.065,
+        "right": 1.05,
+        "back": 1.22,
+        "front": 1.22
+      },
+      "constructionStates": 2,
+      "review": "Dimension actual tank geometry, report geometric litres, separate clean/untreated storage and preserve maintenance access. Existing abstract water units require later calibration."
+    },
+    {
+      "id": "compost",
+      "asset": "compost",
+      "name": "Compost station",
+      "role": "placeable",
+      "siteCells": [
+        3,
+        2
+      ],
+      "siteMetres": [
+        6,
+        4
+      ],
+      "visualBoundsMetres": [
+        4,
+        1.1,
+        1.2
+      ],
+      "edgeClearanceMetres": {
+        "left": 1,
+        "right": 1,
+        "back": 0.9,
+        "front": 1.9
+      },
+      "constructionStates": 2,
+      "review": "Three 1 m³ bays plus front working access. Actual output depends on feedstock."
+    },
+    {
+      "id": "square",
+      "asset": "square",
+      "name": "Community square",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        5
+      ],
+      "siteMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        7.45,
+        0.55,
+        7.45
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.275,
+        "right": 1.275,
+        "back": 1.275,
+        "front": 1.275
+      },
+      "constructionStates": 2,
+      "review": "An open gathering square with twelve bench seats and room to pass through."
+    },
+    {
+      "id": "workshop",
+      "asset": "workshop",
+      "name": "Workshop",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        4
+      ],
+      "siteMetres": [
+        10,
+        8
+      ],
+      "visualBoundsMetres": [
+        8.6,
+        3.632,
+        6.733
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.7,
+        "right": 0.7,
+        "back": 0.631,
+        "front": 0.636
+      },
+      "constructionStates": 2,
+      "review": "Two-person repair workshop with separate benches, an assembly table and stock racks."
+    },
+    {
+      "id": "coop",
+      "asset": "coop",
+      "name": "Chicken coop",
+      "role": "placeable",
+      "siteCells": [
+        4,
+        4
+      ],
+      "siteMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        7.12,
+        3.35,
+        7.12
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.44,
+        "right": 0.44,
+        "back": 0.44,
+        "front": 0.44
+      },
+      "constructionStates": 2,
+      "review": "Six-hen coop with perches, nesting boxes, feed, water and an enclosed outdoor run."
+    },
+    {
+      "id": "home-veranda",
+      "asset": "home-veranda",
+      "name": "Veranda house",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        6
+      ],
+      "siteMetres": [
+        10,
+        12
+      ],
+      "visualBoundsMetres": [
+        8.74,
+        4.247,
+        10.63
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.63,
+        "right": 0.63,
+        "back": 0.63,
+        "front": 0.74
+      },
+      "constructionStates": 2,
+      "review": "Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house."
+    },
+    {
+      "id": "home-gable",
+      "asset": "home-gable",
+      "name": "Gabled house",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        5
+      ],
+      "siteMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        8.43,
+        4.438,
+        9.173
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.785,
+        "right": 0.785,
+        "back": 0.69,
+        "front": 0.137
+      },
+      "constructionStates": 2,
+      "review": "Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house."
+    },
+    {
+      "id": "home-courtyard",
+      "asset": "home-courtyard",
+      "name": "Terrace house",
+      "role": "placeable",
+      "siteCells": [
+        6,
+        5
+      ],
+      "siteMetres": [
+        12,
+        10
+      ],
+      "visualBoundsMetres": [
+        10.445,
+        4.247,
+        8.926
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.63,
+        "right": 0.925,
+        "back": 0.63,
+        "front": 0.444
+      },
+      "constructionStates": 2,
+      "review": "Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house."
+    },
+    {
+      "id": "adobe-gable",
+      "asset": "adobe-gable",
+      "name": "Adobe gabled house",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        5
+      ],
+      "siteMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        8.62,
+        4.09,
+        8.766
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.69,
+        "right": 0.69,
+        "back": 0.79,
+        "front": 0.444
+      },
+      "constructionStates": 2,
+      "review": "Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house."
+    },
+    {
+      "id": "adobe-veranda",
+      "asset": "adobe-veranda",
+      "name": "Adobe veranda house",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        6
+      ],
+      "siteMetres": [
+        10,
+        12
+      ],
+      "visualBoundsMetres": [
+        8.62,
+        4.09,
+        10.47
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.69,
+        "right": 0.69,
+        "back": 0.79,
+        "front": 0.74
+      },
+      "constructionStates": 2,
+      "review": "Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house."
+    },
+    {
+      "id": "goat-pasture-empty",
+      "asset": "goat-pasture-empty",
+      "name": "Empty goat pen",
+      "role": "placeable",
+      "siteCells": [
+        6,
+        5
+      ],
+      "siteMetres": [
+        12,
+        10
+      ],
+      "visualBoundsMetres": [
+        11.12,
+        3.241,
+        9.12
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.44,
+        "right": 0.44,
+        "back": 0.44,
+        "front": 0.44
+      },
+      "constructionStates": 2,
+      "review": "Empty pen with a 9 m² shelter and 90 m² outdoor area. This does not include grazing land."
+    },
+    {
+      "id": "supply-0",
+      "asset": "supply-0",
+      "name": "Managed timber",
+      "role": "placeable",
+      "siteCells": [
+        6,
+        6
+      ],
+      "siteMetres": [
+        12,
+        12
+      ],
+      "visualBoundsMetres": [
+        8.131,
+        5.176,
+        8.577
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.876,
+        "right": 1.993,
+        "back": 1.707,
+        "front": 1.715
+      },
+      "constructionStates": 0,
+      "review": "Four managed timber trees with space for tending and harvesting."
+    },
+    {
+      "id": "supply-1",
+      "asset": "supply-1",
+      "name": "Bamboo stand",
+      "role": "placeable",
+      "siteCells": [
+        3,
+        3
+      ],
+      "siteMetres": [
+        6,
+        6
+      ],
+      "visualBoundsMetres": [
+        3.429,
+        4.1,
+        3.043
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.253,
+        "right": 1.318,
+        "back": 1.614,
+        "front": 1.343
+      },
+      "constructionStates": 0,
+      "review": "A mature bamboo clump with cutting and carrying space around it."
+    },
+    {
+      "id": "supply-2",
+      "asset": "supply-2",
+      "name": "Building earth",
+      "role": "legacy preview prop",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.701,
+        0.69,
+        1.606
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.149,
+        "right": 0.149,
+        "back": 0.319,
+        "front": 0.075
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "supply-3",
+      "asset": "supply-3",
+      "name": "Stone deposit",
+      "role": "legacy preview prop",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.884,
+        0.775,
+        1.945
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.105,
+        "right": 0.011,
+        "back": 0.03,
+        "front": 0.025
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "supply-5",
+      "asset": "supply-5",
+      "name": "Camp receiving bench",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        2,
+        1.519,
+        0.85
+      ],
+      "edgeClearanceMetres": {
+        "left": 0,
+        "right": 0,
+        "back": 0.575,
+        "front": 0.575
+      },
+      "constructionStates": 0,
+      "review": "A 2 × 0.85 m bench; the rest of the site is working space. Keep one neighbouring side reachable."
+    },
+    {
+      "id": "supply-6",
+      "asset": "supply-6",
+      "name": "Battery station",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        0.78,
+        0.75,
+        0.568
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.61,
+        "right": 0.61,
+        "back": 0.682,
+        "front": 0.75
+      },
+      "constructionStates": 0,
+      "review": "A compact battery unit with a whole-cell service reservation."
+    },
+    {
+      "id": "rain-barrel",
+      "asset": "rain-barrel",
+      "name": "Rainwater barrel",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        0.96,
+        1.48,
+        0.85
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.42,
+        "right": 0.62,
+        "back": 0.62,
+        "front": 0.53
+      },
+      "constructionStates": 0,
+      "review": "The reserved site includes room to reach the tap; the barrel itself is about 0.74 m across."
+    },
+    {
+      "id": "watering-can",
+      "asset": "watering-can",
+      "name": "Watering can",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        0.913,
+        0.462,
+        0.4
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.625,
+        "right": 0.462,
+        "back": 0.8,
+        "front": 0.8
+      },
+      "constructionStates": 0,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "wheelbarrow",
+      "asset": "wheelbarrow",
+      "name": "Wheelbarrow",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        0.842,
+        0.828,
+        1.795
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.579,
+        "right": 0.579,
+        "back": 0.05,
+        "front": 0.155
+      },
+      "constructionStates": 0,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "tool-rack",
+      "asset": "tool-rack",
+      "name": "Garden tool rack",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.5,
+        1.65,
+        0.35
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.25,
+        "right": 0.25,
+        "back": 0.95,
+        "front": 0.7
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "seedling-bench",
+      "asset": "seedling-bench",
+      "name": "Seedling bench",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.7,
+        1.241,
+        0.78
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.15,
+        "right": 0.15,
+        "back": 0.61,
+        "front": 0.61
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "woodpile",
+      "asset": "woodpile",
+      "name": "Seasoned firewood",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.192,
+        0.805,
+        1.22
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.404,
+        "right": 0.404,
+        "back": 0.4,
+        "front": 0.38
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "picnic-table",
+      "asset": "picnic-table",
+      "name": "Picnic table",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        2
+      ],
+      "siteMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        3.82,
+        3.083,
+        2.265
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.09,
+        "right": 0.09,
+        "back": 0.868,
+        "front": 0.868
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "garden-bench",
+      "asset": "garden-bench",
+      "name": "Garden bench",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.6,
+        0.95,
+        0.43
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.2,
+        "right": 0.2,
+        "back": 0.77,
+        "front": 0.8
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "clothesline",
+      "asset": "clothesline",
+      "name": "Clothesline",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        1
+      ],
+      "siteMetres": [
+        4,
+        2
+      ],
+      "visualBoundsMetres": [
+        2.821,
+        1.95,
+        0.7
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.589,
+        "right": 0.589,
+        "back": 0.65,
+        "front": 0.65
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "hammock",
+      "asset": "hammock",
+      "name": "Hammock",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        1
+      ],
+      "siteMetres": [
+        4,
+        2
+      ],
+      "visualBoundsMetres": [
+        2.92,
+        1.562,
+        0.9
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.54,
+        "right": 0.54,
+        "back": 0.55,
+        "front": 0.55
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "bicycle",
+      "asset": "bicycle",
+      "name": "Bicycle",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.87,
+        1.03,
+        0.46
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.065,
+        "right": 0.065,
+        "back": 0.79,
+        "front": 0.75
+      },
+      "constructionStates": 0,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "produce-crates",
+      "asset": "produce-crates",
+      "name": "Produce crates",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.32,
+        1.077,
+        0.5
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.34,
+        "right": 0.34,
+        "back": 0.75,
+        "front": 0.75
+      },
+      "constructionStates": 0,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "wayfinding-sign",
+      "asset": "wayfinding-sign",
+      "name": "Wayfinding sign",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.2,
+        1.65,
+        0.15
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.46,
+        "right": 0.34,
+        "back": 0.925,
+        "front": 0.925
+      },
+      "constructionStates": 0,
+      "review": "A small sign, with a whole-cell placement reservation. Keep a walking route beside it."
+    },
+    {
+      "id": "wash-station",
+      "asset": "wash-station",
+      "name": "Outdoor wash station",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.25,
+        1.273,
+        0.8
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.375,
+        "right": 0.375,
+        "back": 0.6,
+        "front": 0.6
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "farm-gate",
+      "asset": "farm-gate",
+      "name": "Farm gate",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.92,
+        1.2,
+        0.16
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.04,
+        "right": 0.04,
+        "back": 0.94,
+        "front": 0.9
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "fire-circle",
+      "asset": "fire-circle",
+      "name": "Fire circle",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.563,
+        0.239,
+        1.572
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.218,
+        "right": 0.218,
+        "back": 0.214,
+        "front": 0.214
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "canvas-tent-teal",
+      "asset": "canvas-tent-teal",
+      "name": "Sage canvas tent",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        2
+      ],
+      "siteMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        2.882,
+        1.538,
+        3.082
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.559,
+        "right": 0.559,
+        "back": 0.461,
+        "front": 0.457
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "canvas-tent-ochre",
+      "asset": "canvas-tent-ochre",
+      "name": "Ochre canvas tent",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        2
+      ],
+      "siteMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        2.882,
+        1.538,
+        3.082
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.559,
+        "right": 0.559,
+        "back": 0.461,
+        "front": 0.457
+      },
+      "constructionStates": 0,
+      "review": "Use measured object dimensions from the physical-scale audit; reserve working clearance separately. No uniform mesh scaling. Use the realistic narrow bridge directly; resource deposits represent exposed collection areas, not total underground volume."
+    },
+    {
+      "id": "reading-room",
+      "asset": "reading-room",
+      "name": "Village reading room",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        4
+      ],
+      "siteMetres": [
+        10,
+        8
+      ],
+      "visualBoundsMetres": [
+        8.94,
+        4.188,
+        6.94
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.53,
+        "right": 0.53,
+        "back": 0.53,
+        "front": 0.53
+      },
+      "constructionStates": 2,
+      "review": "Quiet reading room with shelves, two shared tables and eight seats."
+    },
+    {
+      "id": "outdoor-classroom",
+      "asset": "outdoor-classroom",
+      "name": "Outdoor classroom",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        5
+      ],
+      "siteMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        8.72,
+        3.691,
+        8.677
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.64,
+        "right": 0.64,
+        "back": 0.683,
+        "front": 0.64
+      },
+      "constructionStates": 2,
+      "review": "Covered classroom with twelve seats, tables and a clear teaching area."
+    },
+    {
+      "id": "community-hall",
+      "asset": "community-hall",
+      "name": "Community hall",
+      "role": "placeable",
+      "siteCells": [
+        7,
+        6
+      ],
+      "siteMetres": [
+        14,
+        12
+      ],
+      "visualBoundsMetres": [
+        12.94,
+        4.689,
+        10.94
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.53,
+        "right": 0.53,
+        "back": 0.53,
+        "front": 0.53
+      },
+      "constructionStates": 2,
+      "review": "Open-front community hall with six tables and seating for twenty-four."
+    },
+    {
+      "id": "exercise-garden",
+      "asset": "exercise-garden",
+      "name": "Exercise garden",
+      "role": "placeable",
+      "siteCells": [
+        5,
+        5
+      ],
+      "siteMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        6.298,
+        2.435,
+        5.06
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.762,
+        "right": 1.94,
+        "back": 2.94,
+        "front": 2
+      },
+      "constructionStates": 2,
+      "review": "Outdoor exercise stations with separate spaces for bars, balance and stretching."
+    },
+    {
+      "id": "volleyball-court",
+      "asset": "volleyball-court",
+      "name": "Volleyball court",
+      "role": "placeable",
+      "siteCells": [
+        11,
+        7
+      ],
+      "siteMetres": [
+        22,
+        14
+      ],
+      "visualBoundsMetres": [
+        22,
+        2.6,
+        14
+      ],
+      "edgeClearanceMetres": {
+        "left": 0,
+        "right": 0,
+        "back": 0,
+        "front": 0
+      },
+      "constructionStates": 2,
+      "review": "A 16 × 8 metre sand court with three metres of clear space around the playing area."
+    },
+    {
+      "id": "gathering",
+      "asset": "picnic-table",
+      "name": "Gathering place",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        2
+      ],
+      "siteMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        3.82,
+        3.083,
+        2.265
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.09,
+        "right": 0.09,
+        "back": 0.868,
+        "front": 0.868
+      },
+      "constructionStates": 0,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "water",
+      "asset": "well",
+      "name": "Water storage",
+      "role": "placeable",
+      "siteCells": [
+        3,
+        3
+      ],
+      "siteMetres": [
+        6,
+        6
+      ],
+      "visualBoundsMetres": [
+        3.885,
+        1.65,
+        3.56
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.065,
+        "right": 1.05,
+        "back": 1.22,
+        "front": 1.22
+      },
+      "constructionStates": 2,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "shelter",
+      "asset": "shed",
+      "name": "Basic shelter",
+      "role": "placeable",
+      "siteCells": [
+        3,
+        3
+      ],
+      "siteMetres": [
+        6,
+        6
+      ],
+      "visualBoundsMetres": [
+        5.62,
+        3.241,
+        4.576
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.19,
+        "right": 0.19,
+        "back": 0.734,
+        "front": 0.69
+      },
+      "constructionStates": 2,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "toilet",
+      "asset": "eco_toilet",
+      "name": "Private toilet",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        2
+      ],
+      "siteMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        2.42,
+        3.314,
+        2.82
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.79,
+        "right": 0.79,
+        "back": 0.59,
+        "front": 0.59
+      },
+      "constructionStates": 2,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "rain-tent",
+      "asset": "canvas-tent-ochre",
+      "name": "Shared rain tent",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        2
+      ],
+      "siteMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        2.882,
+        1.538,
+        3.082
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.559,
+        "right": 0.559,
+        "back": 0.461,
+        "front": 0.457
+      },
+      "constructionStates": 0,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "covered-stores",
+      "asset": "covered-supply-rack",
+      "name": "Covered supply rack",
+      "role": "placeable",
+      "siteCells": [
+        2,
+        1
+      ],
+      "siteMetres": [
+        4,
+        2
+      ],
+      "visualBoundsMetres": [
+        3.45,
+        2.157,
+        1.601
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.275,
+        "right": 0.275,
+        "back": 0.2,
+        "front": 0.2
+      },
+      "constructionStates": 0,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "tarp-stores",
+      "asset": "tarp-covered-supplies",
+      "name": "Tarp-covered supplies",
+      "role": "placeable",
+      "siteCells": [
+        1,
+        1
+      ],
+      "siteMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.5,
+        1,
+        1.52
+      ],
+      "edgeClearanceMetres": {
+        "left": 0.25,
+        "right": 0.25,
+        "back": 0.25,
+        "front": 0.23
+      },
+      "constructionStates": 0,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "natural:supply-2",
+      "asset": "natural-earth",
+      "name": "Earth deposit",
+      "role": "natural deposit",
+      "siteCells": [
+        4,
+        3
+      ],
+      "siteMetres": [
+        8,
+        6
+      ],
+      "visualBoundsMetres": [
+        4.911,
+        1.123,
+        5.292
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.68,
+        "right": 1.409,
+        "back": 0.419,
+        "front": 0.289
+      },
+      "constructionStates": 0,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    },
+    {
+      "id": "natural:supply-3",
+      "asset": "natural-stone",
+      "name": "Stone outcrop",
+      "role": "natural deposit",
+      "siteCells": [
+        4,
+        3
+      ],
+      "siteMetres": [
+        8,
+        6
+      ],
+      "visualBoundsMetres": [
+        4.911,
+        2.382,
+        5.292
+      ],
+      "edgeClearanceMetres": {
+        "left": 1.68,
+        "right": 1.409,
+        "back": 0.419,
+        "front": 0.289
+      },
+      "constructionStates": 0,
+      "review": "Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell."
+    }
+  ]
+}

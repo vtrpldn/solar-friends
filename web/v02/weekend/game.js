@@ -9,6 +9,7 @@ import {productionTarget} from './economy-policies.js';
 import {eventHistory, eventTime} from './event-history.js';
 import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
 import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
+import { availableHomes, homeResidents, assignHome } from './simulation.js';
 import { createScalePreview } from './scale-preview.js';
 import { METRES_PER_CELL } from '../library/scale.js';
 import { bridgeWidthScale, siteDimensions, projectDescription } from './site-space.js';
@@ -1612,7 +1613,7 @@ function renderUI() {
     placing,
     s.log,
     s.events,
-    s.people.map((r) => [r.action, r.job, r.cargo, r.haulLoads, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), JSON.stringify(r.mind), downtimeLabel(r), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
+    s.people.map((r) => [r.home, r.action, r.job, r.cargo, r.haulLoads, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), JSON.stringify(r.mind), downtimeLabel(r), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
     s.projects.map((p) => [
       p.id, p.delivered, p.staged, p.pendingMaterials,
       Math.floor((p.work / PROJECTS[p.key].work) * 100),
@@ -1833,6 +1834,22 @@ function renderUI() {
       const paragraph=(text,kind='p')=>{const el=document.createElement(kind);el.textContent=text;detail.append(el);};
       if(residentTab==='Overview'){
         const activity=document.createElement('div');activity.className='resident-activity';activity.textContent=status.textContent;detail.append(activity);
+        paragraph('Home','h3');
+        const homePicker=document.createElement('select');
+        homePicker.setAttribute('aria-label',`Assign home for ${r.name}`);
+        const campOption=document.createElement('option');campOption.value='';campOption.textContent='Unassigned · use available shelter';homePicker.append(campOption);
+        for(const home of availableHomes(s)) {
+          const option=document.createElement('option'), occupants=homeResidents(s,home.id), beds=PROJECTS[home.key].beds||2;
+          option.value=String(home.id);option.textContent=`${PROJECTS[home.key].name} · (${home.x}, ${home.z}) · ${occupants.length}/${beds} beds`;
+          option.disabled=home.id!==r.home && (occupants.length>=beds || s.infrastructure.nodes[home.id]?.enabled===false);
+          homePicker.append(option);
+        }
+        homePicker.value=r.home==null?'':String(r.home);homePicker.disabled=s.stage!=='playing';
+        homePicker.onchange=()=>{const error=assignHome(s,r.id,homePicker.value===''?null:Number(homePicker.value));message(error||'Home assignment updated. Applies at the next rest.');uiSignature='';persist();renderUI();};
+        detail.append(homePicker);
+        const housemates=homeResidents(s,r.home).filter(other=>other!==r);
+        if(r.home!=null)paragraph(housemates.length?`Lives with ${housemates.map(other=>other.name).join(', ')}.`:'Lives here alone.');
+        else if(!availableHomes(s).length)paragraph('Complete a house to assign a permanent home.');
         paragraph('Needs','h3');detail.append(needs);
         paragraph('Outside work','h3');paragraph(outsideWorkText(r));
         const jobToggle=document.createElement('button');jobToggle.textContent=r.outsideJobEnabled?'Outside work: on':'Outside work: off';jobToggle.setAttribute('aria-pressed',String(!!r.outsideJobEnabled));jobToggle.onclick=()=>{setOutsideWork(s,r,!r.outsideJobEnabled);uiSignature='';renderUI();};detail.append(jobToggle);

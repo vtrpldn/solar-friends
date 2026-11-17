@@ -182,7 +182,7 @@ export function functionalFacility(id,{plant,tree,goat,chicken},stage=2){
       for(let n=0;n<12;n++){const a=n*2.4,r=.4+(n%3)*.35,x=Math.sin(a)*r,z=Math.cos(a)*r,h=3.2+(n%4)*.3; cylinder(g,.05,.07,h,'leaf',x,h/2,z,7);for(let y=.4;y<h;y+=.7)cylinder(g,.075,.075,.035,'leafLight',x,y,z,4);for(let k=0;k<3;k++){const leaf=box(g,.08,.02,.7,'leaf',x+Math.sin(a+k)*.3,h-.3-k*.35,z+Math.cos(a+k)*.3);leaf.rotation.y=a+k;}}
     }else{
       const spacing=id==='grove'?3:id==='supply-0'?5:4;
-      for(const x of [-spacing/2,spacing/2])for(const z of [-spacing/2,spacing/2])placed(g,id==='grove'?plant('banana'):tree(id==='orchard'?'orchard':'ipe'),x,z);
+      for(const x of [-spacing/2,spacing/2])for(const z of [-spacing/2,spacing/2])placed(g,id==='grove'?plant('banana'):tree(id==='orchard'?'orchard':'timber'),x,z);
       g.userData.plantCount=4;g.userData.plantSpacing=spacing;
     }
   }else if(id==='garden'||id==='greenhouse'){
@@ -240,8 +240,14 @@ export function functionalFacility(id,{plant,tree,goat,chicken},stage=2){
       box(p,1.1,.07,1.8,'stone');box(p,1.02,.02,1.72,'glass',0,.045,0).material=solarBlue;
       for(const dx of [-.34,0,.34])box(p,.018,.025,1.72,'plaster',dx,.06,0);
       for(const dz of [-.55,0,.55])box(p,1.02,.025,.018,'plaster',0,.06,dz);
-      for(const dz of [-.65,.65])box(g,.08,1.2+dz*.35,.08,'teal',x,(1.2+dz*.35)/2,z+dz);
+      for(const dz of [-.65,.65]){
+        // Support the underside at the actual panel-plane slope, in world Z.
+        const height=1.2+Math.tan(.35)*dz-.055;
+        box(g,.08,height,.08,'teal',x,height/2,z+dz).name='solar-support';
+      }
     }
+    for(const z of [-1.8,1.8])for(const dz of [-.65,.65])
+      box(g,3.8,.06,.08,'stone',0,1.2+Math.tan(.35)*dz-.055,z+dz).name='solar-rail';
     box(g,.5,.7,.3,'teal',3,.35,0).name='shared-inverter';g.userData.panelArea=6*1.1*1.8;
   }else if(id==='wetland'||id==='banana_treatment'){
     const w=4,d=id==='wetland'?8:6;
@@ -290,11 +296,16 @@ export function functionalFacility(id,{plant,tree,goat,chicken},stage=2){
     g.userData.playingArea=128;g.userData.freeZone=3;
   }else if(id==='eco_toilet'){
     shelter(g,1.8,2.2,false);
-    for(const x of [-.8,.8])box(g,.2,2.2,2.2,'plaster',x,1.22,0);
-    box(g,1.8,2.2,.2,'plaster',0,1.22,-1);
-    for(const x of [-.65,.65])box(g,.5,2.2,.2,'plaster',x,1.22,1);
+    for(const x of [-.8,.8])box(g,.2,2.7,2.2,'plaster',x,1.47,0);
+    box(g,1.8,2.7,.2,'plaster',0,1.47,-1);
+    for(const x of [-.65,.65])box(g,.5,2.7,.2,'plaster',x,1.47,1);
     box(g,.8,2.1,.07,'teal',0,1.17,1.03);
-    box(g,.55,.45,.65,'plaster',0,.345,-.55);
+    for(const x of [-.46,.46])box(g,.09,2.2,.14,'timberLight',x,1.22,1.07);
+    box(g,1.01,.09,.14,'timberLight',0,2.32,1.07);
+    box(g,.06,.06,.08,'stone',.28,1.12,1.11);
+    for(const z of [-1.1,1.1])for(let n=0;n<3;n++)box(g,1.5-n*.48,.07,.08,'timberLight',0,2.91+n*.12,z);
+    cylinder(g,.17,.17,.05,'teal',1,3.1,-.8,8);
+    box(g,.8,.6,.2,'plaster',0,2.55,1);
     cylinder(g,.1,.1,3,'teal',1,1.5,-.8,8);
     box(g,.7,.5,.08,'timber',0,.4,-1.15);
   }

@@ -1655,6 +1655,32 @@ export function restingDoor(s, i) {
   if (!p) return tentDoor(s, i);
   return buildingFront(p);
 }
+export function availableHomes(s) {
+  return s.projects.filter(p => PROJECTS[p.key]?.kind === 'home' && p.work >= PROJECTS[p.key].work);
+}
+export function homeResidents(s, id) {
+  return s.people.filter(r => r.home === id);
+}
+export function assignHome(s, residentId, homeId) {
+  const r = s.people.find(r => r.id === residentId);
+  if (!r || s.stage !== 'playing') return 'Cannot assign a home now.';
+  if (homeId != null) {
+    const home = availableHomes(s).find(p => p.id === homeId);
+    if (!home) return 'Choose a completed home.';
+    if (s.infrastructure?.nodes[homeId]?.enabled === false) return 'Reopen this home before assigning residents.';
+    if (homeResidents(s, homeId).filter(other => other !== r).length >= (PROJECTS[home.key].beds || 2)) return 'This home has no free beds.';
+  }
+  r.home = homeId ?? null;
+  return '';
+}
+function restoreHomeAssignments(s) {
+  const counts = new Map(), homes = new Map(availableHomes(s).map(p => [p.id, p]));
+  for (const r of s.people) {
+    const home = homes.get(r.home), count = counts.get(r.home) || 0;
+    if (!home || count >= (PROJECTS[home.key].beds || 2)) r.home = null;
+    else counts.set(r.home, count + 1);
+  }
+}
 function chooseRestingPlace(s, r, i) {
   if (r.restSite && s.projects.some((p) => p.id === r.restSite)) return;
   const choices = s.projects.filter(
@@ -1662,11 +1688,12 @@ function chooseRestingPlace(s, r, i) {
       p.work >= PROJECTS[p.key].work &&
       (PROJECTS[p.key].kind === "home" || p.key.startsWith("canvas-tent")) &&
       s.infrastructure.nodes[p.id]?.enabled !== false &&
-      s.people.filter((other) => other !== r && other.restSite === p.id)
+      s.people.filter((other) => other !== r && (other.restSite === p.id || other.home === p.id))
         .length < (PROJECTS[p.key].beds || 2),
   );
   choices.sort(
     (a, b) =>
+      (b.id === r.home) - (a.id === r.home) ||
       (PROJECTS[b.key].kind === "home") - (PROJECTS[a.key].kind === "home") ||
       Math.hypot(a.x - r.x, a.z - r.z) - Math.hypot(b.x - r.x, b.z - r.z),
   );
@@ -2310,6 +2337,7 @@ export function restore(text) {
       s.projects.length > 512
     )
       return null;
+    restoreHomeAssignments(s);
     // Saves predating narrow footbridges retain their exact 8×2 occupancy,
     // centre, rotations and deck width. New plans explicitly write version 1.
     for (const project of s.projects) {

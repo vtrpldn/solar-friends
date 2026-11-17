@@ -31,5 +31,5 @@ console.log('PASS exclusive work access, interruption release, blocked entrance 
 
 const village=createSandbox(42);enableFastNavigation(village);
 assert.equal(plan(village,'house',40,39),'');
-assert.match(placementError(village,'house',40,41),/access|entrance/,'placement protects an existing entrance');
+assert.match(placementError(village,'house',40,39+PROJECTS.house.size[1]),/access|entrance/,'placement protects an existing entrance');
 console.log('PASS placement rejects obstruction of an existing building entrance');
