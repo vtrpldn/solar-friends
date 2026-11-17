@@ -18,8 +18,8 @@ export function recordMoney(s, amount, category, description) {
   if(!daily){daily={day,categories:{}};f.daily.push(daily);f.daily=f.daily.filter(d=>d.day>=day-90);}
   daily.categories[category]=(daily.categories[category]||0)+Math.round(amount*100);
   const hour=Math.floor((s.time||0)*.45/60);
-  const previous=f.entries[0];
-  if(category==='electricity' && previous?.category===category && previous.hour===hour)previous.amount+=amount;
+  const previous=category==='electricity' && f.entries.find(e=>e.category===category && Math.floor((540+e.time*.45)/1440)===day);
+  if(previous){previous.amount=Math.round((previous.amount+amount)*100)/100;previous.description='Grid electricity — daily total';}
   else f.entries.unshift({time:s.time||0,hour,amount,category,description});
   f.entries.length=Math.min(f.entries.length,100);
 }

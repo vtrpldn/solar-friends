@@ -229,10 +229,10 @@ export function sellMaterial(s, id) {
     !item ||
     !item.quantity ||
     s.stage !== "playing" ||
-    materialCount(s, id) - protectedEquipment(s,id) < item.quantity
+    materialCount(s, id) - protectedEquipment(s,id) < 1
   )
     return false;
-  return reserveExport(s,id,MATERIALS,materialCount,changeMaterial);
+  return reserveExport(s,id,MATERIALS,materialCount,changeMaterial,protectedEquipment(s,id));
 }
 export function automaticSales(s) {
   if(s.stage!=='playing'||s.mode==='sandbox')return;
@@ -301,7 +301,7 @@ export function productionBlocker(s, site, recipe) {
   if (def.deposit && (p.extracted || 0) >= depositCapacity(s.landSeed,p,def))
     return "This deposit is exhausted.";
   const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:2}:{})};
-  const starterSeeds=['vegetables','greenhouse'].includes(recipe)&&!p.starterSeedlingsUsed&&!p.harvestCount?Math.min(input.seedlings||0,projectMaterials(p,PROJECTS).seedlings||0):0;
+  const starterSeeds=['baby_greens','vegetables','greenhouse'].includes(recipe)&&!p.starterSeedlingsUsed&&!p.harvestCount?Math.min(input.seedlings||0,projectMaterials(p,PROJECTS).seedlings||0):0;
   for (const [id, n] of Object.entries(input))
     if (materialCount(s, id) < n-(id==='seedlings'?starterSeeds:0)) return `Missing ${n} ${id}.`;
   if (p.key === "goat-pasture-empty" && !p.stocked) {
@@ -315,7 +315,7 @@ export function queueProduction(s, site, recipe) {
   if(error)return error;
   const p=s.projects.find(p=>p.id===Number(site)),def=PROCESSES[recipe];
   const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:2}:{})};
-  const starterSeeds=['vegetables','greenhouse'].includes(recipe)&&!p.starterSeedlingsUsed&&!p.harvestCount?Math.min(input.seedlings||0,projectMaterials(p,PROJECTS).seedlings||0):0;
+  const starterSeeds=['baby_greens','vegetables','greenhouse'].includes(recipe)&&!p.starterSeedlingsUsed&&!p.harvestCount?Math.min(input.seedlings||0,projectMaterials(p,PROJECTS).seedlings||0):0;
   s.operations ??= [];
   if(s.operations.length>128)s.operations=[...s.operations.filter(o=>!o.done),...s.operations.filter(o=>o.done).slice(-32)];
   if(p.key==='goat-pasture-empty'&&!p.stocked) {
@@ -953,6 +953,7 @@ function sandboxSupplies(s) {
 }
 export function say(s, text, key = null) {
   recordEvent(s, text, key);
+  if (key === "water-purified") return;
   s.log.unshift(text);
   s.log = s.log.slice(0, 12);
 }
@@ -1350,6 +1351,8 @@ export function prioritize(s, id) {
   );
 }
 export function supplyRun(s,material="wood",project=null,saleOnly=false){
+ const hour=((540+s.time*.45)/60)%24;
+ if(hour<7||hour>=18)return false;
  if(s.deliveryOnly&&!saleOnly)return orderDelivery(s,material,project,MATERIALS,storedMaterials(s),storageCapacity(s));
  if(s.trip&&s.secondTrip)return false;
  if(!s.trip)return startSupplyRun(s,material,project,saleOnly);

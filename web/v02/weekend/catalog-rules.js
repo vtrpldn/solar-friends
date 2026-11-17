@@ -325,6 +325,7 @@ export const PROCESSES = {
     work: 50,
     deposit: 160,
   },
+  baby_greens: {name:"Grow baby salad greens",input:{seedlings:1},output:{food:6,scraps:1},kind:"garden",work:35,water:3,renew:180},
   vegetables: {
     name: "Plant and harvest vegetables",
     input: { seedlings: 2 },

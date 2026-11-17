@@ -1,0 +1,19 @@
+import assert from 'node:assert/strict';
+import {createWeekend,chooseCamp,save,restore,sellMaterial,supplyRun,PROCESSES,say} from '../web/v02/weekend/simulation.js';
+import {financeForecast,recordMoney} from '../web/v02/weekend/finances.js';
+import {productionActivity} from '../web/v02/weekend/project-ui.js';
+import {BIOLOGY} from '../web/v02/weekend/biological-production.js';
+const s=createWeekend(42);chooseCamp(s,'entrance');s.materials.stone=8;
+assert(sellMaterial(s,'stone'));assert.equal(s.trade.orders[0].quantity,8);assert.equal(s.materials.stone,0);
+assert(restore(save(s)), 'Partial exports survive a normal save round trip');
+const log=[...s.log];say(s,'Purified water','water-purified');assert.deepEqual(s.log,log);
+s.time=(1440+240-540)/.45;const cash=s.money;assert.equal(supplyRun(s,'wood'),false);assert.equal(s.money,cash);assert(!s.trip);
+const activity=productionActivity({people:[],operations:[{site:1,recipe:'vegetables',phase:'growing',work:60,status:'Growing: 20 days'}]},{id:1},PROCESSES);
+assert.equal(activity.label,'Growing');assert(!activity.detail.includes('Waiting for a resident'));
+assert.equal(BIOLOGY.baby_greens.days,21);assert(PROCESSES.baby_greens.output.food<PROCESSES.vegetables.output.food);
+const f={time:0,money:1000,mode:'story'};
+for(let hour=0;hour<24;hour++){f.time=hour*60/.45;recordMoney(f,-.01,'electricity','Grid');if(hour===8)recordMoney(f,100,'outsideWork','Shift');}
+assert.equal(f.finances.entries.filter(e=>e.category==='electricity').length,2,'Calendar days aggregate even across wages');
+assert.equal(f.finances.entries.find(e=>e.category==='outsideWork').amount,100);
+const restored=JSON.parse(JSON.stringify(f));assert.deepEqual(financeForecast(restored),financeForecast(f));
+console.log('PASS partial sale persistence, quiet water, town opening hours, autonomous growth labels, faster crop choice and daily utility history');

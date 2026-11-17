@@ -2,6 +2,7 @@
 // Reference durations and engineering assumptions: docs/economy-biology.md.
 export const GAME_DAY=1440/.45;
 export const BIOLOGY={
+ baby_greens:{days:21,window:3,seasonal:true},
  vegetables:{days:45,window:7,seasonal:true},greenhouse:{days:40,window:7,seasonal:false},
  fruit:{days:120,window:14,seasonal:true},bananas:{days:270,window:14,seasonal:true},
  wood:{days:6*365,window:Infinity,seasonal:true},bamboo:{days:365,window:Infinity,seasonal:true},
@@ -27,7 +28,7 @@ export function beginBiology(s,op,r){
  op.status=`Growing / curing: ${b.days} game days before harvest work`;
  r.operation=null;r.cargo=false;r.action='idle';r.target=null;r.walk=[];return true;
 }
-export const CROP_CARE={vegetables:{kind:"garden",area:16,liters:48},greenhouse:{kind:"greenhouse",area:24,liters:48},fruit:{kind:"orchard",area:64,liters:32},bananas:{kind:"grove",area:32,liters:48}};
+export const CROP_CARE={baby_greens:{kind:"garden",area:8,liters:24},vegetables:{kind:"garden",area:16,liters:48},greenhouse:{kind:"greenhouse",area:24,liters:48},fruit:{kind:"orchard",area:64,liters:32},bananas:{kind:"grove",area:32,liters:48}};
 export function biologicalStep(s,dt,useWater){
  const active=new Set((s.operations||[]).filter(o=>!o.done&&o.phase==='growing'&&CROP_CARE[o.recipe]).map(o=>o.site));
  for(const p of s.projects||[])if(p.soilFertility!==undefined&&!active.has(p.id))p.soilFertility=Math.min(1,p.soilFertility+dt/(180*GAME_DAY));
