@@ -132,7 +132,7 @@ pub fn observed_access(v: &Village, people: &[Resident]) -> (u32, bool) {
                 let Ok((route, _)) = navigation::work_route(v, [r.x, r.y], point) else {
                     continue;
                 };
-                let at = v.minutes + route.minutes + 5. * MINUTES_PER_SECOND;
+                let at = v.minutes + route.minutes + duration(v, r) * MINUTES_PER_SECOND;
                 fed[index] |= EDIBLE
                     .into_iter()
                     .any(|m| portions_at(v, p, m, Some(r.id), at) > 0);
@@ -283,6 +283,40 @@ pub fn reserved_space(v: &Village, owner: Option<Owner>) -> u32 {
         .count() as u32
         * 3
 }
+/// Routine meals leave time for neighbours to arrive; urgent snacks stay quick.
+pub fn duration(v: &Village, r: &Resident) -> f32 {
+    if meal_slot(v.minutes).is_some() && r.hunger <= 60. {
+        15.
+    } else {
+        5.
+    }
+}
+
+// Prefer company, then a kitchen, within a short walk during shared mealtimes.
+// A stable store order lets the first diners agree before anyone has arrived.
+fn dining_rank(v: &Village, r: &Resident, store: &Store, travel: f32) -> (u8, u32) {
+    if meal_slot(v.minutes).is_none() || r.hunger > 60. {
+        return (0, 0);
+    }
+    if travel > 45. {
+        return (3, 0);
+    }
+    let company = v.workforce_peers.values().flatten().any(|other| {
+        other.id != r.id && other.task == "eat" && other.activity_store == Some(store.id)
+    });
+    let kitchen = matches!(store.owner, Owner::Pantry(id) if v.buildings.iter().any(|b| b.id == id && b.kind == "kitchen"));
+    (
+        if company {
+            0
+        } else if kitchen {
+            1
+        } else {
+            2
+        },
+        store.id.0,
+    )
+}
+
 pub fn meal(v: &Village, r: &Resident) -> Option<(Id, usize, [f32; 2])> {
     meal_choice(v, r, false)
 }
@@ -308,7 +342,7 @@ fn meal_choice(v: &Village, r: &Resident, any: bool) -> Option<(Id, usize, [f32;
         };
         for material in EDIBLE {
             let available_now = available(v, p, material, Some(r.id));
-            let ready_at = v.minutes + route.minutes + 5. * MINUTES_PER_SECOND;
+            let ready_at = v.minutes + route.minutes + duration(v, r) * MINUTES_PER_SECOND;
             let future = portions_at(v, p, material, Some(r.id), ready_at);
             let edible: Vec<_> = p
                 .food_lots
@@ -330,12 +364,14 @@ fn meal_choice(v: &Village, r: &Resident, any: bool) -> Option<(Id, usize, [f32;
                     p.id,
                     material,
                     point,
+                    dining_rank(v, r, p, route.minutes),
                 ));
             }
         }
     }
     choices.sort_by(|a, b| {
         a.0.cmp(&b.0)
+            .then(a.7.cmp(&b.7))
             .then(a.1.total_cmp(&b.1))
             .then(a.2.total_cmp(&b.2))
             .then(a.3.cmp(&b.3))
@@ -518,6 +554,127 @@ mod tests {
         );
         conserved(&v);
     }
+    #[test]
+    fn daily_meal_windows_bring_residents_together_in_simulation() {
+        for start in [390., 720., 1080.] {
+            let mut g = Game::new();
+            {
+                let mut v = g.app.world_mut().resource_mut::<Village>();
+                v.minutes = start;
+                v.arrived = true;
+                logistics::fixture_stock(&mut v, MEALS, 10);
+            }
+            let mut q = g.app.world_mut().query::<&mut Resident>();
+            for mut r in q.iter_mut(g.app.world_mut()) {
+                r.task = "idle".into();
+                r.remaining = 0.;
+                r.hunger = 25. + r.id as f32 * 3.;
+                r.energy = 90.;
+                r.social = 90.;
+                r.x = CAMP.0 + r.id as f32 * 0.8;
+                r.y = CAMP.1 + 2.;
+            }
+            let mut together = 0;
+            for _ in 0..160 {
+                g.tick(0.25);
+                let mut q = g.app.world_mut().query::<&Resident>();
+                let diners: Vec<_> = q
+                    .iter(g.app.world())
+                    .filter(|r| {
+                        r.task == "eat"
+                            && r.remaining > 0.
+                            && (r.x - r.target_x).hypot(r.y - r.target_y) <= 0.12
+                    })
+                    .collect();
+                for diner in &diners {
+                    together = together.max(
+                        diners
+                            .iter()
+                            .filter(|r| r.activity_store == diner.activity_store)
+                            .count(),
+                    );
+                }
+            }
+            assert!(
+                together >= 3,
+                "At {start}, only {together} neighbours ate together"
+            );
+            assert!(g.app.world().resource::<Village>().supplies.portions_eaten >= 3);
+        }
+    }
+
+    #[test]
+    fn neighbours_choose_the_same_kitchen_and_have_time_to_eat_together() {
+        let mut g = kitchen();
+        let mut a = resident(&mut g, 0);
+        let mut b = resident(&mut g, 1);
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.minutes = 720.;
+        logistics::fixture_stock(&mut v, FOOD, 0);
+        logistics::fixture_stock(&mut v, MEALS, 4);
+        assert!(logistics::receive(&mut v, Owner::Pantry(0), MEALS, 4));
+        a.hunger = 35.;
+        b.hunger = 25.;
+        a.x = 7.;
+        a.y = 7.;
+        b.x = CAMP.0;
+        b.y = CAMP.1;
+        crate::choose(&mut a, &v);
+        v.workforce_peers.insert(a.id, Some(a.clone()));
+        crate::choose(&mut b, &v);
+        assert_eq!(a.task, "eat");
+        assert_eq!(b.task, "eat");
+        assert_eq!(a.activity_store, b.activity_store);
+        let store = v
+            .logistics
+            .as_ref()
+            .unwrap()
+            .stores
+            .iter()
+            .find(|s| Some(s.id) == a.activity_store)
+            .unwrap();
+        assert_eq!(store.owner, Owner::Pantry(0));
+        assert!(
+            a.remaining * MINUTES_PER_SECOND
+                > navigation::work_route(&v, [b.x, b.y], [b.target_x, b.target_y])
+                    .unwrap()
+                    .0
+                    .minutes
+        );
+        assert_ne!([a.target_x, a.target_y], [b.target_x, b.target_y]);
+        a.x = a.target_x;
+        a.y = a.target_y;
+        b.x = b.target_x;
+        b.y = b.target_y;
+        assert!(eat(&mut v, &mut a));
+        assert!(eat(&mut v, &mut b));
+        assert_eq!(v.supplies.portions_eaten, 2);
+        conserved(&v);
+    }
+
+    #[test]
+    fn routine_meals_must_stay_fresh_for_the_whole_break() {
+        let mut g = Game::new();
+        let mut r = resident(&mut g, 0);
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.minutes = 720.;
+        r.x = CAMP.0;
+        r.y = CAMP.1;
+        r.hunger = 35.;
+        logistics::fixture_stock(&mut v, FOOD, 0);
+        logistics::fixture_stock(&mut v, MEALS, 1);
+        for store in &mut v.logistics.as_mut().unwrap().stores {
+            for lot in &mut store.food_lots {
+                lot.expires = 750.;
+            }
+        }
+        assert!(!can_eat(&v, &r));
+        r.hunger = 80.;
+        assert!(can_eat(&v, &r));
+        crate::assign(&mut r, &v, "eat", "Urgent meal", false);
+        assert_eq!(r.remaining, 5.);
+    }
+
     #[test]
     fn meals_are_claimed_at_a_real_store_and_cannot_be_eaten_remotely() {
         let mut g = kitchen();
