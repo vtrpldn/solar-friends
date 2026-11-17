@@ -1655,3 +1655,9 @@ header > .time { grid-column: 3; justify-self: end; }
 /* Keep the calendar and weather together beneath the clock and time controls. */
 header > .time { display: grid; grid-template-columns: auto auto; gap: 5px 10px; }
 .time > .environment-info { grid-column: 1 / -1; justify-content: space-between; gap: 12px; border-top: 1px solid #dbcba7; padding-top: 5px; color: #766d54; font-size: 11px; font-weight: 500; }
+
+#time-skip-dialog { width: 620px; max-width: 620px; max-height: 85vh; overflow-y: auto; }
+#skip-milestones { padding-left: 20px; max-height: 280px; overflow-y: auto; }
+#skip-milestones li { margin: 12px 0; }
+#skip-milestones strong, #skip-milestones span { display: block; }
+#skip-milestones span { margin-top: 4px; font-size: 12px; line-height: 1.4; }

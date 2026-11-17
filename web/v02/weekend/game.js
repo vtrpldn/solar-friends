@@ -1,3 +1,4 @@
+import {upcomingMilestones, milestoneTime} from './time-skip-milestones.js';
 import {skipDays} from './time-skip.js';
 import {basicNeeds,renderBasicNeeds} from './basic-needs.js';
 import {installGuide} from './guide.js';
@@ -1277,6 +1278,24 @@ setSpeed(speed);
 $("speed").onclick = () => setSpeed([1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4]);
 let skippingTime = false, skipWasPaused = false;
 const skipDialog = $("time-skip-dialog");
+function renderSkipMilestones() {
+  const days = Number($("skip-days").value) * (skippingTime ? 1 - $("skip-progress").value : 1);
+  const events = upcomingMilestones(s, Number.isFinite(days) && days > 0 ? days : 0, {projects: PROJECTS, materials: MATERIALS});
+  const list = $("skip-milestones");
+  list.replaceChildren();
+  for (const event of events.slice(0, 8)) {
+    const row = document.createElement('li');
+    const heading = document.createElement('strong');
+    heading.textContent = `${milestoneTime(event)} · ${event.title}`;
+    const detail = document.createElement('span');
+    detail.textContent = `${event.withinSkip ? 'During this skip' : 'Beyond this skip'} · ${event.detail}`;
+    row.append(heading, detail);
+    list.append(row);
+  }
+  $("skip-milestone-empty").hidden = events.length > 0;
+  $("skip-milestone-note").textContent = `${events.length > 8 ? `Showing the next 8 of ${events.length} milestones. ` : ''}Estimates can change with weather, supplies, and resident decisions. Construction completion depends on available workers and materials.`;
+}
+$("skip-days").addEventListener('input', renderSkipMilestones);
 $("time-skip").onclick = () => {
   if (s.stage === 'arrival' || s.arrivalAnimating) { message('Choose your camp and finish arriving before advancing days.'); return; }
   if (placing) cancel();
@@ -1286,6 +1305,7 @@ $("time-skip").onclick = () => {
   updatePauseButton();
   $("skip-status").textContent = 'Life continues while you wait: residents, supplies, bills, weather, and construction.';
   $("skip-progress").hidden = true;
+  renderSkipMilestones();
   skipDialog.showModal();
 };
 skipDialog.addEventListener('cancel', event => { if (skippingTime) event.preventDefault(); });
@@ -1306,6 +1326,7 @@ $("skip-form").onsubmit = async event => {
       cancelled: () => stopped,
       progress: fraction => {
         $("skip-progress").value = fraction;
+        renderSkipMilestones();
         $("skip-status").textContent = `Simulating every moment… ${Math.floor(fraction * 100)}%`;
       },
     });
