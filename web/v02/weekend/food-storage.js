@@ -4,6 +4,9 @@ import {activeTrips} from "./trip-state.js";
 export const FOOD_DAYS={food:3,meals:2,eggs:7,milk:1};
 const day=3200;
 export function freshLots(s,id,n,recipe){const duration=recipe?.preservedDays?.[id]||FOOD_DAYS[id];return duration&&n>0?[{n,expires:s.time+duration*day,...(recipe?.preservedDays?.[id]?{preserved:true}:{})}]:[];}
+export function refreshSandboxFood(s){
+ if(s.mode==='sandbox'&&s.foodStorage)for(const id of Object.keys(FOOD_DAYS))s.foodStorage.lots[id]=freshLots(s,id,s.materials[id]||0);
+}
 export function ensureFoodStorage(s){
  if(!s.foodStorage)s.foodStorage={version:1,lots:Object.fromEntries(Object.keys(FOOD_DAYS).map(id=>[id,freshLots(s,id,s.materials[id]||0)])),spoiled:{}};
  return s.foodStorage;
@@ -16,7 +19,7 @@ function merge(lots){
 }
 export function foodChange(s,id,n,lots){
  if(id==='wood'){s.wood+=n;return [];}
- if(!FOOD_DAYS[id]||s.mode==='sandbox'){s.materials[id]+=n;return [];}
+ if(!FOOD_DAYS[id]||s.mode==='sandbox'){s.materials[id]+=n;refreshSandboxFood(s);return [];}
  const f=ensureFoodStorage(s),taken=[];
  if(n<0){let left=-n;for(const lot of f.lots[id]){const q=Math.min(left,lot.n);if(q>0){taken.push({...lot,n:q});lot.n-=q;left-=q;}}
   f.lots[id]=f.lots[id].filter(l=>l.n>1e-8);
@@ -46,12 +49,13 @@ export function foodStorageStep(s,recipes,materials={}){
  }
  for(const op of s.operations||[]){
   if(op.done||op.water)continue;const recipe=recipes[op.recipe];if(!recipe)continue;
-  const output=op.phase==='return',items=output?(op.returnItems||op.harvestOutput||recipe.output):recipe.input;
+  const output=op.phase==='return',items=output?(op.haulRemaining||op.returnItems||op.harvestOutput||recipe.output):recipe.input;
   const field=output?'foodOutput':'foodInput';op[field]??=Object.fromEntries(Object.entries(items).filter(([id])=>FOOD_DAYS[id]).map(([id,n])=>[id,freshLots(s,id,n,output?recipe:null)]));
   let spoiled=false;const survivors={};
   for(const [id,lots]of Object.entries(op[field])){const result=expire(s,id,lots);survivors[id]=result.good;spoiled ||= result.lost>0;}
   if(spoiled){
    op.returnItems=Object.fromEntries(Object.entries(items).map(([id,n])=>[id,FOOD_DAYS[id]?(survivors[id]||[]).reduce((sum,l)=>sum+l.n,0):n]));
+   if(op.haulRemaining)op.haulRemaining={...op.returnItems};
    op.foodInput={};op.foodOutput=survivors;op.phase='return';op.status='Returning usable remains after food spoilage';
   }
  }
@@ -74,7 +78,7 @@ export function validFoodStorage(s,recipes={},materials={}){
  for(const op of s.operations||[]) {
   const recipe=recipes[op.recipe];
   if(op.returnItems&&(!recipe||Object.entries(op.returnItems).some(([id,n])=>!Number.isFinite(n)||n<0||n>Math.max(recipe.input[id]||0,recipe.output[id]||0))))return false;
-  if(recipe&&!op.done)for(const [field,expected]of [['foodInput',recipe.input],['foodOutput',op.returnItems||op.harvestOutput||recipe.output]]){
+  if(recipe&&!op.done)for(const [field,expected]of [['foodInput',recipe.input],['foodOutput',op.haulRemaining||op.returnItems||op.harvestOutput||recipe.output]]){
    if(op[field])for(const [id,lots]of Object.entries(op[field]))if(lots.reduce((n,l)=>n+l.n,0)>(expected[id]||0)+1e-6)return false;
   }
  }
@@ -91,4 +95,12 @@ export function returnUnsoldFood(s,trip){
  for(const id of trip.exports||[]){const o=s.trade?.orders.find(o=>o.id===id);if(!o?.returnFood)continue;
   foodChange(s,o.material,o.foodLots.reduce((n,l)=>n+l.n,0),o.foodLots);o.foodLots=[];o.returnFood=false;
  }
+}
+
+// Split a batch without changing its age, preservation or refrigeration state.
+export function takeFoodLots(lots,n){
+ const taken=[];let left=n;
+ for(const lot of lots){const quantity=Math.min(left,lot.n);if(quantity>0){taken.push({...lot,n:quantity});lot.n-=quantity;left-=quantity;}}
+ for(let i=lots.length-1;i>=0;i--)if(lots[i].n<=1e-8)lots.splice(i,1);
+ return taken;
 }

@@ -1,3 +1,4 @@
+import {buyerQuote} from './local-market.js';
 import {activeTrips} from "./trip-state.js";
 import {setOutsideWork,outsideWorkText} from "./outside-work.js";
 import {constructionSpecText} from './construction-specs.js';
@@ -1906,8 +1907,10 @@ function renderUI() {
   $("inventory").textContent = Object.keys(MATERIALS)
     .map((id) => materialText(id, materialCount(s, id)))
     .join(" · ");
+  const market=s.trade?.market?.[$("purchase").value],marketDay=Math.floor((540+s.time*.45)/1440);
+  const sale=buyerQuote($("purchase").value,purchase,market?.day===marketDay?market.units:0);
   $("sell").textContent =
-    `Queue sale: ${materialText($("purchase").value, purchase.quantity)} · R$${Math.floor(purchase.price * 0.5)}`;
+    `Queue sale: ${materialText($("purchase").value, purchase.quantity)} · R$${(sale.cents/100).toFixed(2)}`;
   $("sell").disabled =
     !!tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error;
   $("sell").title=tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Payment after trading in town; combine batches to share transport costs.";

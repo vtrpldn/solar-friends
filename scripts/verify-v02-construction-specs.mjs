@@ -6,7 +6,9 @@ for(const [key,d]of Object.entries(PROJECTS)){
  const combined={};for(const p of d.construction.phases)for(const [id,q]of Object.entries(p.materials))combined[id]=(combined[id]||0)+q;
  assert.deepEqual(combined,d.materials,`${key}: every material allocated exactly once`);
  assert.equal(d.work,d.construction.hours*60/.45);
- assert(constructionSpecText(d).includes('regional calibration pending'));
+ assert(constructionSpecText(d).includes('Assembly estimate'));
+ if(d.construction.area){if(d.kind==='home')assert(d.construction.hours>100);assert(d.materials.stone>=d.construction.area*6);}
+ const v1={constructionLaborVersion:1,projects:[{key,work:d.construction.packWork*.5}]};assert(migrateConstructionLabor(v1,PROJECTS));assert(Math.abs(v1.projects[0].work/d.work-.5)<1e-12);
  const old=d.construction.legacyWork;
  const state={projects:[{key,work:old},{key,work:old*.37},{key,work:0}]};
  assert(migrateConstructionLabor(state,PROJECTS));
@@ -29,6 +31,6 @@ const loaded=restore(save(old));assert(loaded,'labor migration accepts a valid c
 assert.equal(loaded.money,cash);assert.deepEqual(loaded.materials,inventory);assert.deepEqual(loaded.projects.map(p=>p.delivered),delivered);
 assert.equal(loaded.projects[0].work,PROJECTS.house.work,'completed house stays complete');
 assert(restore(save(loaded)),'converted save round trips');
-const fresh=createWeekend(42);assert.equal(fresh.constructionLaborVersion,1);assert(restore(save(fresh)));
+const fresh=createWeekend(42);assert.equal(fresh.constructionLaborVersion,2);assert(restore(save(fresh)));
 fresh.constructionLaborVersion=99;assert.equal(restore(save(fresh)),null,'unknown schema rejected');
 console.log('PASS material breakdowns, labor scaling, new saves, historical migration and idempotent progress preservation');

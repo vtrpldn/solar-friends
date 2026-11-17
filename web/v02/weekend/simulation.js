@@ -1,3 +1,4 @@
+import {productionLoad,validProductionHauling} from './production-hauling.js';
 import {projectMaterials,captureProjectMaterials} from './project-materials.js';
 import {dispatchReady,validLogisticsPolicy} from './logistics-policy.js';
 import {requestRemoval,removalStep,validRemovals} from './building-lifecycle.js';
@@ -8,7 +9,7 @@ import {tripEstimate,STARTING_CAPITAL} from "./economy-reference.js";
 import {BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology} from "./biological-production.js";
 import {outsideWorkStep,validOutsideWork} from "./outside-work.js";
 import {coolStoredFood} from './cold-storage.js';
-import {foodChange,freshLots,foodStorageStep,validFoodStorage,returnUnsoldFood,FOOD_DAYS} from './food-storage.js';
+import {refreshSandboxFood,foodChange,takeFoodLots,freshLots,foodStorageStep,validFoodStorage,returnUnsoldFood,FOOD_DAYS} from './food-storage.js';
 import {recordProduction,validProductionAccounting} from './production-accounting.js';
 import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSION} from './construction-specs.js';
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
@@ -653,15 +654,36 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     r.action = "carry";
     r.cargo = true;
     op.status = op.returnItems ? "Returning usable remains after spoilage" : op.recipe === "solar_upgrade" ? "Returning after installing solar" : "Carrying output to storage";
+    const output=op.returnItems||op.harvestOutput||recipe.output;
+    if(output.wheelbarrow)op.status="Moving the assembled wheelbarrow to storage";
+    const bulk=true;
+    if(bulk){
+      op.haulRemaining??={...output};op.returningToSite??=false;
+      if(op.returningToSite){
+        r.cargo=false;r.action="walk";op.status="Returning for the next production load";
+        const source=utilitySpot(s,node,r);
+        if(!source||!go(s,r,source))return true;
+        op.returningToSite=false;r.target=null;
+      }
+    }
     if (!go(s, r, supplySpot(s, r, i))) return true;
-    const returned=op.returnItems||op.harvestOutput||recipe.output;
+    const returned=bulk?productionLoad(op.haulRemaining):output;
+    if(bulk&&!Object.keys(returned).length&&Object.values(op.haulRemaining).some(n=>n>0)){
+      op.status="Output exceeds hand-carry capacity";return true;
+    }
     const total = Object.values(returned).reduce((a, b) => a + b, 0);
     if (storedMaterials(s) + total > storageCapacity(s)) {
       op.status = "Storage full; output is still carried";
       return true;
     }
     for (const [id, n] of Object.entries(returned))
-      changeMaterial(s,id,n,op.foodOutput?.[id]);
+      changeMaterial(s,id,n,op.foodOutput?.[id]?takeFoodLots(op.foodOutput[id],n):undefined);
+    if(bulk){
+      for(const [id,n]of Object.entries(returned))op.haulRemaining[id]-=n;
+      if(Object.values(op.haulRemaining).some(n=>n>0)){
+        op.returningToSite=true;r.cargo=false;r.target=null;return true;
+      }
+    }
     op.done = true;
     r.operation = null;
     r.cargo = false;
@@ -893,6 +915,7 @@ function sandboxSupplies(s) {
   s.wood = 9999;
   for (const id of Object.keys(MATERIALS))
     if (id !== "wood") s.materials[id] = 9999;
+  refreshSandboxFood(s);
 }
 export function say(s, text, key = null) {
   recordEvent(s, text, key);
@@ -2662,7 +2685,8 @@ export function restore(text) {
     if(s.expansionReserve!==undefined&&(!Number.isFinite(s.expansionReserve)||s.expansionReserve<0||s.expansionReserve>100000))return null;
     if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
-    if (!validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    refreshSandboxFood(s);
+    if (!validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(
