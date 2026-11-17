@@ -4,7 +4,7 @@ import {townDuration} from '../web/v02/weekend/world-settings.js';
 import {transportCost} from '../web/v02/weekend/physical-trade.js';
 import {financeSummary} from '../web/v02/weekend/finances.js';
 import {GRID_POWER} from '../web/v02/weekend/infrastructure.js';
-for(const [town,km,cost,minutes]of [['nearby',8,4.89,24],['drive',12,7.33,30],['remote',36,22,66]]){
+for(const [town,km,cost,minutes]of [['nearby',8,5.18,24],['drive',12,7.76,30],['remote',36,23.29,66]]){
  const q=tripEstimate(town);assert.equal(q.km,km);assert.equal(q.cost,cost);assert.equal(q.minutes,minutes);
  assert.equal(transportCost({worldSettings:{town}}),cost);assert(Math.abs(townDuration(town)*.45-minutes)<1e-9);
 }

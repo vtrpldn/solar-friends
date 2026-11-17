@@ -1,3 +1,4 @@
+import {transportCost} from '../web/v02/weekend/physical-trade.js';
 import {enableFastNavigation} from '../web/v02/weekend/simulation.js';
 import { syncInfrastructure } from '../web/v02/weekend/infrastructure.js';
 import assert from 'node:assert/strict';
@@ -16,9 +17,9 @@ assert(!PROCESSES.craft_bicycle);
 let s = createSandbox(42); s.mode='story'; s.wood=0; for(const key of Object.keys(s.materials))s.materials[key]=0; s.materials.meals=20; s.emergencyFood=false;
 s.materials['watering-can'] = 0; s.money = 100;
 assert(supplyRun(s,'watering-can'));
-assert.equal(s.money,55);
+assert.equal(s.money,100-MATERIALS['watering-can'].price-transportCost(s));
 assert.equal(s.materials['watering-can'],0,'purchase awaits resident delivery');
-s = restore(save(s)); assert(s);
+s = restore(save(s)); assert(s);enableFastNavigation(s);
 for(let i=0;i<5000 && s.trip;i++)tick(s,.1);
 assert.equal(s.trip,null);
 assert.equal(s.materials['watering-can'],1);

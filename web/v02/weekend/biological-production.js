@@ -25,7 +25,7 @@ export function beginBiology(s,op,r){
  op.status=`Growing / curing: ${b.days} game days before harvest work`;
  r.operation=null;r.cargo=false;r.action='idle';r.target=null;r.walk=[];return true;
 }
-export const CROP_CARE={vegetables:{area:16,liters:48},greenhouse:{area:24,liters:48},fruit:{area:64,liters:32},bananas:{area:32,liters:48}};
+export const CROP_CARE={vegetables:{kind:"garden",area:16,liters:48},greenhouse:{kind:"greenhouse",area:24,liters:48},fruit:{kind:"orchard",area:64,liters:32},bananas:{kind:"grove",area:32,liters:48}};
 export function biologicalStep(s,dt,useWater){
  const active=new Set((s.operations||[]).filter(o=>!o.done&&o.phase==='growing'&&CROP_CARE[o.recipe]).map(o=>o.site));
  for(const p of s.projects||[])if(p.soilFertility!==undefined&&!active.has(p.id))p.soilFertility=Math.min(1,p.soilFertility+dt/(180*GAME_DAY));

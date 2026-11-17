@@ -50,12 +50,12 @@ const plain = route(roads, {x:49,z:51}, {x:57,z:51});
 assert(plain.every(p=>p.z===51), "Blueprints do not grant road path preference");
 assert(walkSegmentClear(roads,{x:49,z:50},{x:57,z:50}), "Road plans leave the ground walkable");
 const workers = new Set();
-for(let i=0;i<96000 && roads.projects.some(p=>p.work<PROJECTS.road.work);i++) {
+for(let i=0;i<96000 && roads.projects.some(p=>p.key==='road'&&p.work<PROJECTS.road.work);i++) {
   tick(roads,.1);
   roads.people.filter(r=>r.action==='build').forEach(r=>workers.add(r.id));
 }
 assert(workers.size>0, "Residents physically build the road");
-assert(roads.projects.every(p=>p.work===PROJECTS.road.work));
+assert(roads.projects.filter(p=>p.key==='road').every(p=>p.work===PROJECTS.road.work));
 const preferred = route(roads, { x: 49, z: 51 }, { x: 57, z: 51 });
 assert.ok(
   preferred.some((p) => p.z < 50.6),

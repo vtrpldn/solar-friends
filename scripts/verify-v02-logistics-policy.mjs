@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {createWeekend,chooseCamp,save,restore} from '../web/v02/weekend/simulation.js';
+import {logisticsPolicy,dispatchReady,validLogisticsPolicy} from '../web/v02/weekend/logistics-policy.js';
+const s=createWeekend(42);chooseCamp(s,'entrance');const policy=logisticsPolicy(s);assert.equal(dispatchReady(s),false);
+s.projects.push({id:s.nextId++,key:'gathering',x:24,z:-15,work:0,delivered:0,pendingMaterials:{wood:1}});
+assert.equal(dispatchReady(s),true,'default immediate pickup');policy.minimumLoad=.75;policy.maxWaitHours=2;
+assert.equal(dispatchReady(s),false,'small load waits');s.time+=120/.45;assert.equal(dispatchReady(s),true,'maximum wait releases an incomplete load');
+policy.waitingSince=s.time;policy.urgent=true;assert.equal(dispatchReady(s),true,'urgent overrides threshold');policy.urgent=false;
+s.projects[0].pendingMaterials={wood:70};assert.equal(dispatchReady(s),true,'large cargo releases early');
+s.projects[0].pendingMaterials={wood:1};assert(restore(save(s)),'waiting policy and real pending order restore');
+policy.minimumLoad=2;assert.equal(validLogisticsPolicy(s),false);
+console.log('PASS immediate default, cargo threshold, elapsed wait, urgent dispatch and saved settings');

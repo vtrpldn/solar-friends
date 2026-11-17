@@ -37,7 +37,9 @@ Completed in the first playable increment:
 
 Further local increments (17 November): separate biological growth and resident labor, seasonal growth modifiers and gradual harvest loss; optional paid outside work; two simultaneous resident-driven cars; paid bulk delivery; automatic animal care and equipment service. See [biology](economy-biology.md) and [logistics and care](economy-logistics-and-care.md) for assumptions and diagnostic evidence.
 
-Still outstanding: regional calibration, canonical physical resource units and full ownership ledger, construction/person-hour calibration, crop moisture and fertility, complete asset replacement, combined financial forecasts, and full release gates. None of stages 0–7 is claimed complete. See [parameter register](economy-parameters.md) for provisional values and evidence limitations.
+Further implemented: ongoing crop irrigation, soil fertility and resident compost amendment, preventive food reserve budgets, mass-based spoilage, rolling observed-cash forecasts, ownership valuation, battery quantity consistency and replacement, resident demolition/salvage/relocation and optional trip consolidation, and a navigation fix for residents caught against adjacent camp structures. Current Campinas fuel was updated from the ANP 8–14 November 2026 municipality survey. An 18-case fresh-start matrix and a separate seven-day established-village replay passed; neither substitutes for the remaining full release gates.
+
+Still outstanding: remaining regional calibration, canonical physical resource units and full ownership ledger, construction/person-hour calibration, complete asset replacement, area-based agricultural yields, and full release gates. None of stages 0–7 is claimed complete. See [parameter register](economy-parameters.md) for provisional values and evidence limitations.
 
 ## Design boundaries
 

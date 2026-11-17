@@ -30,7 +30,7 @@ export function insideSolid(point,solid,radius=0) {
 }
 export function segmentHitsSolid(from,to,solid,radius=BODY_RADIUS) {
  const penetration=p=>Math.min(solid.w/2+radius-Math.abs(p.x-solid.x),solid.d/2+radius-Math.abs(p.z-solid.z));
- if(penetration(from)>=0&&penetration(to)<penetration(from)-1e-8)return false;
+ if(penetration(from)>=0&&Math.hypot(to.x-from.x,to.z-from.z)>1e-9)return false;
  let enter=0,leave=1;
  for(const [a,b,c,width] of [[from.x,to.x,solid.x,solid.w],[from.z,to.z,solid.z,solid.d]]){
   const delta=b-a,lo=c-width/2-radius,hi=c+width/2+radius;

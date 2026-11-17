@@ -1,3 +1,4 @@
+import {logisticsPolicy} from './logistics-policy.js';
 import {foodChange} from './food-storage.js';
 import {pendingExports,cancelExport,transportCost} from './physical-trade.js';
 import {economyPolicies,salePreview,WORK_GROUPS} from './economy-policies.js';
@@ -28,6 +29,13 @@ export function economyControls(root,s,materials,recipes,count,refresh){
  make(trade,'p',s.mode==='sandbox'?'Automatic sales are disabled in sandbox. These settings apply to normal villages.':`${offer.quantity} units could be queued for R$${offer.revenue.toFixed(2)} now. Protected reserve: ${offer.reserve}. ${offer.quantity?'':offer.reason+'.'} Sales use whole trade batches. Set production targets at least one trade batch above the protected reserve.`);
  make(trade,'p','Already committed materials cannot be sold. Food and the next two batches at repeating sites stay protected. Automatic sales reserve goods for town trips. Payment arrives in town, subject to buyer demand. Transport costs are shared across batches.');
  const toggle=make(trade,'button',p.enabled?'Automatic sales: on':'Enable automatic sales');toggle.setAttribute('aria-pressed',String(p.enabled));toggle.onclick=()=>{p.enabled=!p.enabled;refresh();};
+ const logistics=make(panel,'fieldset');make(logistics,'legend','Consolidate automatic town trips');
+ const dispatch=logisticsPolicy(s);
+ make(logistics,'p','Wait for a fuller load or the time limit, whichever comes first. Food shopping and explicitly requested trips still leave promptly. Zero load threshold preserves immediate blueprint collection.');
+ for(const [key,labelText,min,max,step]of [['minimumLoad','Minimum cargo fill (0–1)',0,1,.1],['maxWaitHours','Maximum waiting time in game hours',0,24,.5]]){
+  const label=make(logistics,'label',labelText),input=make(label,'input');input.type='number';input.min=min;input.max=max;input.step=step;input.value=dispatch[key];input.oninput=()=>{dispatch[key]=Math.max(min,Math.min(max,Number(input.value)||0));};
+ }
+ const send=make(logistics,'button',dispatch.urgent?'Waiting loads marked urgent':'Send waiting loads now');send.onclick=()=>{dispatch.urgent=true;refresh();};
  const orders=make(panel,'fieldset');make(orders,'legend','Town exports');
  make(orders,'p',`Goods leave available stock when queued. Trips combine sale batches within cargo capacity. Transport: R$${transportCost(s)} per trip; the driver needs enough energy and the village must afford departure.`);
  for(const o of pendingExports(s)){

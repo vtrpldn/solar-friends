@@ -114,7 +114,7 @@ import {
   campPlacementError,
   plan,
   planRoadLine,
-  moveProject,
+  moveProject, removeProject,
   prioritize,
   cancelProject, cancelProjectError,
   supplyRun,
@@ -1108,6 +1108,7 @@ $("priority").onclick = () => {
   message(s.log[0]);
   renderUI();
 };
+for(const mode of ["salvage","demolish"])$(mode+"-building").onclick=()=>{const error=removeProject(s,selected,mode);message(error||"Resident dismantling queued.");uiSignature="";renderUI();};
 $("move").onclick = () => {
   const p = s.projects.find((p) => p.id === selected);
   if (p) startPlacement(p.key, p.id);
@@ -1954,11 +1955,12 @@ function renderUI() {
   if (p) {
     $("selected-name").textContent = projectLabel(p, PROJECTS);
     $("move").hidden=!!PROJECTS[p.key].natural;
+    for(const mode of ["salvage","demolish"]){$(mode+"-building").hidden=!!PROJECTS[p.key].natural;$(mode+"-building").disabled=!!p.removal;}
     $("copy-building").hidden = PROJECTS[p.key].natural ||
       s.mode !== "sandbox" && !PROJECTS[p.key].repeatable;
     illustrate($("selected-art"), PROJECTS[p.key].asset);
     const construction = constructionProgress(s, p, PROJECTS[p.key], requiredLoads(p.key));
-    $("selected-state").textContent = p.work < PROJECTS[p.key].work ? construction.phase : operationalStatus(p, s.infrastructure?.nodes[p.id], productionActivity(s,p,PROCESSES));
+    $("selected-state").textContent = p.removal ? `${p.removal.status} · ${Math.floor(p.removal.work/p.removal.required*100)}%` : p.work < PROJECTS[p.key].work ? construction.phase : operationalStatus(p, s.infrastructure?.nodes[p.id], productionActivity(s,p,PROCESSES));
     $("selected-benefit").textContent = buildingBenefit(PROJECTS[p.key], PROCESSES, COMMUNITY);
     $("selected-benefit").hidden = !$("selected-benefit").textContent;
     $("construction-summary").hidden = p.work >= PROJECTS[p.key].work;
