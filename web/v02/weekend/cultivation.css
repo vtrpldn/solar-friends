@@ -69,3 +69,11 @@ body[data-cultivation-open] #selection { visibility: hidden; }
 #confirm-field { width: 100%; }
 
 #cultivation-panel.farm-placement { bottom: auto; }
+
+.farm-overview-heading { display: flex; justify-content: space-between; gap: 10px; }
+.farm-stage-list { display: grid; gap: 6px; margin: 15px 0; padding: 12px; border-radius: 7px; background: #ebe8d2; }
+.farm-stage-list > div { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+.farm-stage-list strong { font-variant-numeric: tabular-nums; }
+#farm-bulk-actions { display: grid; gap: 8px; }
+#cultivation-panel .farm-care-note { margin-top: 10px; font-size: 11px; color: #72775e; }
+#cultivation-panel .farm-inspect { margin: 12px 0; width: 100%; background: transparent; border: 1px solid #cbbd97; color: var(--ink); }
