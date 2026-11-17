@@ -9,7 +9,7 @@ export function ensureFoodStorage(s){
 function merge(lots){
  const result=[];for(const lot of lots.sort((a,b)=>a.expires-b.expires)){
   // Hour-sized buckets retain the earliest expiry, never making old food fresh.
-  const last=result.at(-1);if(last&&!!last.preserved===!!lot.preserved&&lot.expires-last.expires<day/24)last.n+=lot.n;else result.push({...lot});
+  const last=result.at(-1);if(last&&!!last.preserved===!!lot.preserved&&!!last.chilled===!!lot.chilled&&lot.expires-last.expires<day/24)last.n+=lot.n;else result.push({...lot});
  }return result;
 }
 export function foodChange(s,id,n,lots){
@@ -58,7 +58,7 @@ export function foodStorageStep(s,recipes,materials={}){
 export function validFoodStorage(s,recipes={},materials={}){
  const f=s.foodStorage;if(f===undefined)return true;
  if(!f||f.version!==1||!f.lots||!f.spoiled)return false;
- const valid=lots=>Array.isArray(lots)&&lots.length<=800&&lots.every(l=>l&&Number.isFinite(l.n)&&l.n>0&&Number.isFinite(l.expires)&&l.expires>=0&&(l.preserved===undefined||typeof l.preserved==='boolean'));
+ const valid=lots=>Array.isArray(lots)&&lots.length<=800&&lots.every(l=>l&&Number.isFinite(l.n)&&l.n>0&&Number.isFinite(l.expires)&&l.expires>=0&&(l.preserved===undefined||typeof l.preserved==='boolean')&&(l.chilled===undefined||typeof l.chilled==='boolean'));
  if(Object.keys(f.lots).some(id=>!FOOD_DAYS[id])||Object.entries(f.spoiled).some(([id,n])=>!FOOD_DAYS[id]||!Number.isFinite(n)||n<0))return false;
  for(const id of Object.keys(FOOD_DAYS))if(!valid(f.lots[id])||Math.abs(f.lots[id].reduce((n,l)=>n+l.n,0)-(s.materials[id]||0))>1e-6)return false;
  for(const o of s.trade?.orders||[])if(o.foodLots!==undefined&&(!FOOD_DAYS[o.material]||!valid(o.foodLots)||(['queued','loaded'].includes(o.status)&&Math.abs(o.foodLots.reduce((n,l)=>n+l.n,0)-o.quantity)>1e-6)||o.foodLots.reduce((n,l)=>n+l.n,0)>o.quantity+1e-6))return false;

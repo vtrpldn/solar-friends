@@ -96,6 +96,7 @@ const recipes = {
   },
 };
 const extraMaterials = {
+  cooling:["Refrigeration kit",1,1,600],
   logs:['Raw wood',4,12,24],
   planks:['Planks',4,12,60],
   bamboo: ["Bamboo poles", 4, 12, 48],
@@ -275,6 +276,7 @@ export const PROCESSES = {
     preservedDays: {meals:10},
     biogas: .6,
   },
+  cold_storage:{name:"Install kitchen cold storage",kind:"kitchen",input:{cooling:1,electrical:1,hardware:1},output:{},work:120,installation:true},
   compost: {
     name: "Turn compost",
     input: { scraps: 4 },

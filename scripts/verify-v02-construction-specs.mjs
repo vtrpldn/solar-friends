@@ -21,7 +21,7 @@ assert(PROJECTS['home-shared'].work>PROJECTS['home-family'].work);
 assert(PROJECTS['home-family'].work>PROJECTS.house.work);
 assert.equal(PROJECTS.shelter.work,1067,'keep first-camp recipe pacing');
 const raw=JSON.parse(fs.readFileSync('docs/playtests/evidence/2026-11-08-regular-catalog-day61-save.json','utf8'));
-const cash=raw.money,inventory=JSON.stringify(raw.materials),delivered=raw.projects.map(p=>p.delivered);
+const cash=raw.money,inventory=JSON.stringify({...raw.materials,cooling:0}),delivered=raw.projects.map(p=>p.delivered);
 const loaded=restore(JSON.stringify(raw));assert(loaded,'genuine historical save migrates');
 assert.equal(loaded.money,cash);assert.equal(JSON.stringify(loaded.materials),inventory);assert.deepEqual(loaded.projects.map(p=>p.delivered),delivered);
 for(const p of raw.projects){const def=PROJECTS[p.key],converted=loaded.projects.find(x=>x.id===p.id);if(p.work===(def.construction?.legacyWork??def.work))assert.equal(converted.work,def.work,`${p.key} stays complete`);}

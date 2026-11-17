@@ -18,6 +18,7 @@ export const RESOURCE_IDS = [
   "covering",
   "panels",
   "batteries",
+  "cooling",
   "pumps",
   "tools",
   "food",
@@ -208,6 +209,12 @@ export function resourceModel(id, asset) {
             0.095,
             z * 0.37 - 0.185,
           );
+      break;
+    case "cooling":
+      b(.9,.8,.65,"plaster");
+      b(.94,.08,.69,"teal",0,.84);
+      b(.22,.05,.07,"stone",0,.72,.36);
+      for(const x of [-.3,.3])b(.08,.1,.08,"stone",x,.05);
       break;
     case "batteries":
       b(0.75, 0.8, 0.5, "teal");

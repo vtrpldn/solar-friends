@@ -1,3 +1,4 @@
+import {coolStoredFood} from './cold-storage.js';
 import {foodChange,freshLots,foodStorageStep,validFoodStorage,returnUnsoldFood,FOOD_DAYS} from './food-storage.js';
 import {recordProduction,validProductionAccounting} from './production-accounting.js';
 import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSION} from './construction-specs.js';
@@ -267,6 +268,7 @@ export function queueProduction(s, site, recipe) {
     PROJECTS[p.key].kind !== def.kind
   )
     return "Choose a completed compatible building.";
+  if(recipe==='cold_storage'&&p.coldStorage)return 'Cold storage is already installed.';
   if(recipe==='solar_upgrade' && p.solarUpgrade)return 'Rooftop solar is already installed.';
   s.operations ??= [];
   if (s.operations.length > 128)
@@ -306,7 +308,7 @@ export function repeatProduction(s, site, recipe) {
   const p = s.projects.find((p) => p.id === Number(site));
   if (
     !p ||
-    !PROCESSES[recipe] ||
+    !PROCESSES[recipe] || PROCESSES[recipe].installation ||
     PROJECTS[p.key].kind !== PROCESSES[recipe].kind
   )
     return false;
@@ -646,7 +648,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     op.waterPaid = true;
   }
   if (
-    recipe.kind === "kitchen" &&
+    !recipe.installation && recipe.kind === "kitchen" &&
     node.power < 0.99 &&
     !op.biogas &&
     sys.biogas >= (recipe.biogas || .2)
@@ -655,7 +657,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     op.biogas = true;
   }
   if (
-    ["workshop", "kitchen"].includes(recipe.kind) &&
+    !recipe.installation && ["workshop", "kitchen"].includes(recipe.kind) &&
     node.power < 0.99 &&
     !op.biogas
   ) {
@@ -679,6 +681,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     recordProduction(s,op.recipe,recipe);
     op.foodOutput=Object.fromEntries(Object.entries(recipe.output).filter(([id])=>FOOD_DAYS[id]).map(([id,n])=>[id,freshLots(s,id,n,recipe)]));
     if(recipe.kind==='wild-tree'){p.felled=true;invalidateNavigation(s);}
+    if(op.recipe==='cold_storage'){p.coldStorage=true;p.coolingEnabled=true;}
     if(op.recipe==='solar_upgrade')p.solarUpgrade=true;
     op.phase = "return";
     r.target = null;
@@ -1794,9 +1797,10 @@ function tickUncached(s, dt) {
   ensureFinances(s);
   if (s.mode === "sandbox") sandboxSupplies(s);
   s.time += dt;
-  foodStorageStep(s,PROCESSES,MATERIALS);
   autoConnectUtilities(s, PROJECTS);
   infrastructureStep(s, PROJECTS, dt);
+  coolStoredFood(s,dt);
+  foodStorageStep(s,PROCESSES,MATERIALS);
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
   maintainFood(s);
   maintainWater(s);
@@ -2383,6 +2387,7 @@ export function restore(text) {
     }
     if(!migrateConstructionLabor(s,PROJECTS))return null;
     for (const p of s.projects) {
+      if((p.coldStorage!==undefined&&typeof p.coldStorage!=='boolean')||(p.coolingEnabled!==undefined&&typeof p.coolingEnabled!=='boolean')||(p.coldStorage&&PROJECTS[p.key]?.kind!=='kitchen'))return null;
       const recipe = {...PROJECTS[p.key]?.materials, ...(p.solarUpgrade ? Object.fromEntries(['panels','batteries','electrical'].map(id=>[id,Math.ceil(PROJECTS[p.key].size[0]/2)])) : {})};
       if (p.pendingMaterials && (p.work !== 0 || p.delivered !== 0 ||
           !Object.keys(p.pendingMaterials).length || Object.entries(p.pendingMaterials).some(([id,n]) =>

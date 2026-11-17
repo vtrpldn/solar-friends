@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {createWeekend,chooseCamp,PROJECTS,PROCESSES,MATERIALS,queueProduction,repeatProduction,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {coolStoredFood,coolingStatus,COLD_STORAGE} from '../web/v02/weekend/cold-storage.js';
+import {foodChange,ensureFoodStorage,foodStorageStep,freshLots} from '../web/v02/weekend/food-storage.js';
+import {syncInfrastructure,infrastructureStep} from '../web/v02/weekend/infrastructure.js';
+const state=()=>({time:0,materials:{food:60,meals:0,eggs:0,milk:0,scraps:0},infrastructure:{nodes:{1:{coldStorage:true,enabled:true,power:1}}}});
+const s=state();ensureFoodStorage(s);s.time=100;coolStoredFood(s,100);
+assert.equal(s.foodStorage.lots.food.filter(l=>l.chilled).reduce((n,l)=>n+l.n,0),40,'capacity caps actual stock');
+assert.equal(s.foodStorage.lots.food.filter(l=>l.chilled)[0].expires,9675);
+assert.equal(s.foodStorage.lots.food.filter(l=>!l.chilled)[0].expires,9600,'excess stays warm');
+s.infrastructure.nodes[1].power=0;const before=s.foodStorage.lots.food.map(l=>l.expires);s.time+=100;coolStoredFood(s,100);assert.deepEqual(s.foodStorage.lots.food.map(l=>l.expires),before,'outage does not add life');
+s.infrastructure.nodes[1].power=1;s.infrastructure.nodes[1].coolingEnabled=false;assert.equal(coolingStatus(s).capacity,0);
+const expired=state();ensureFoodStorage(expired);expired.time=9700;coolStoredFood(expired,10);foodStorageStep(expired,PROCESSES);assert.equal(expired.materials.food,0,'cooling cannot revive expired food');
+const dry=state();dry.materials.food=0;ensureFoodStorage(dry);foodChange(dry,'meals',12,freshLots(dry,'meals',12,PROCESSES.preserve_meals));dry.time=10;coolStoredFood(dry,10);assert.equal(dry.foodStorage.lots.meals[0].expires,32000,'provisions do not consume cooling capacity');
+let village=createWeekend(42);chooseCamp(village,'entrance');enableFastNavigation(village);village.rainSeen=village.rainResolved=true;
+const site={id:village.nextId++,key:'kitchen',x:village.stock.x+3,z:village.stock.z+3,rotation:0,work:PROJECTS.kitchen.work,delivered:0};village.projects.push(site);
+// Diagnostic fixture supplies, followed by normal resident installation work.
+village.materials.cooling=1;village.materials.electrical=1;village.materials.hardware=1;
+assert.equal(queueProduction(village,site.id,'cold_storage'),'');assert.equal(village.materials.cooling,0);assert(!repeatProduction(village,site.id,'cold_storage'));
+for(let i=0;i<16000&&!site.coldStorage;i++)tick(village,.1);
+assert(site.coldStorage,'resident completes installation without a powered kitchen');
+assert(queueProduction(village,site.id,'cold_storage').includes('already'));
+assert(restore(save(village)),'upgrade and lots persist');
+const sys=syncInfrastructure(village,PROJECTS);sys.grid.enabled=true;
+// Isolate power demand with an explicit completed connection to the camp.
+sys.links.push({id:sys.nextLink++,kind:'power',from:0,to:site.id,work:30,required:30});
+const spentBefore=sys.grid.spent;village.time=0;infrastructureStep(village,PROJECTS,.1);const node=sys.nodes[site.id];
+assert(Math.abs(node.demand-COLD_STORAGE.kw)<1e-8,'daytime refrigeration has real demand');
+assert(node.power>.99,'grid supplies connected cooler');assert(sys.grid.spent>spentBefore,'imported cooling energy is metered as a cost');
+site.coolingEnabled=false;infrastructureStep(village,PROJECTS,.1);assert.equal(node.demand,0,'turning off cooling removes demand in daylight');
+const bad=JSON.parse(save(village));bad.projects.find(p=>p.id===site.id).coldStorage='yes';assert.equal(restore(JSON.stringify(bad)),null);
+console.log('PASS capacity, outages, no resurrection, preservation exclusion, installation, duplicate prevention, saves and billed power demand');

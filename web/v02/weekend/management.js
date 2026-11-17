@@ -1,3 +1,4 @@
+import {coolingText} from './cold-storage.js';
 import {foodStorageText} from './food-storage.js';
 import {recipeLossText,productionSummary} from './production-accounting.js';
 import {transportCost} from './physical-trade.js';
@@ -351,7 +352,7 @@ export function createManagement({
       const account=productionSummary(s,PROCESSES),accountNote=document.createElement('p');
       accountNote.textContent=s.mode==='sandbox'?'Processing records are disabled in sandbox. Recipe estimates below show the normal production balance.':`Processing record: ${account.batches} batches · approximately ${account.inputKg.toFixed(1)} kg input, ${account.outputKg.toFixed(1)} kg usable output and ${account.lossKg.toFixed(1)} kg process losses. Includes water used in cooking; excludes farming, animals and construction. Output may still be in transit. Earlier batches are not reconstructed.`;
       $("production-sites").append(accountNote);
-      const freshnessNote=document.createElement('p');freshnessNote.textContent=foodStorageText(s);$("production-sites").append(freshnessNote);
+      const freshnessNote=document.createElement('p');freshnessNote.textContent=foodStorageText(s)+' '+coolingText(s);$("production-sites").append(freshnessNote);
       for (const p of s.projects) {
         if(PROJECTS[p.key].kind==='wild-tree')continue;
         const recipes = Object.entries(PROCESSES).filter(
@@ -400,11 +401,12 @@ export function createManagement({
         };
         const locate=document.createElement('button');locate.textContent=`Find in village · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores`;locate.onclick=()=>{dialog.close();inspect(p.id);};
         const recipeInfo=document.createElement('p');
-        const describe=()=>{const r=PROCESSES[choice.value];recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||'Building upgrade'}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
+        const describe=()=>{const r=PROCESSES[choice.value];repeat.hidden=targetLabel.hidden=!!r.installation;start.disabled=!!op||(r.installation&&!!p.coldStorage)||s.stage!=='playing';start.textContent=r.installation?(p.coldStorage?'Cold storage installed':'Install cold storage'):'Start batch';recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||'Building upgrade'}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${r.installation?' · 40 food units, 0.08 kW average cooling load; ages food at one-quarter speed while powered.':''}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
         choice.onchange=()=>{recipeChoices.set(p.id,choice.value);describe();};describe();
         el.append(img,name,locate,status,choice,recipeInfo,start);
         if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);
         else {start.disabled=!!p.solarUpgrade||!!op;start.textContent=p.solarUpgrade?'Solar upgrade installed':'Install solar upgrade';}
+        if(p.coldStorage){const cooling=document.createElement('button');cooling.textContent=p.coolingEnabled===false?'Cold storage: off':'Cold storage: on';cooling.setAttribute('aria-pressed',String(p.coolingEnabled!==false));cooling.onclick=()=>{p.coolingEnabled=p.coolingEnabled===false;refresh();render();};el.append(cooling);}
         $("production-sites").append(el);
       }
       if (!$("production-sites").children.length)

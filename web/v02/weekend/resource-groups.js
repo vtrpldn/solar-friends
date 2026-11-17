@@ -20,6 +20,7 @@ export const RESOURCE_GROUPS = [
       "covering",
       "panels",
       "batteries",
+      "cooling",
       "pumps",
       "tools",
     ],

@@ -1,3 +1,4 @@
+import {COLD_STORAGE} from './cold-storage.js';
 import {spendableMoney} from './procurement-budget.js';
 import {transact} from './finances.js';
 import {waterFactor} from './world-settings.js';
@@ -11,7 +12,7 @@ export const POWER_LOAD = {
   coop: .01, streetlight: .015, home: .02,
 };
 export function workingMachine(s,node) {
-  return (s.operations||[]).some(o=>o.site===node.id && !o.done && o.phase==='process' &&
+  return (s.operations||[]).some(o=>o.site===node.id && !o.done && o.recipe!=='cold_storage' && o.phase==='process' &&
     ['Working','Waiting for power'].includes(o.status) && !o.biogas && s.people.some(r=>r.operation===o.id && ['produce','blocked'].includes(r.action) && r.energy>=25 && !r.sleepUntil));
 }
 // Capability, not instantaneous demand: lights still have a switch in daylight,
@@ -116,6 +117,7 @@ export function syncInfrastructure(s, defs) {
       power: 0,
     };
     const node=sys.nodes[p.id];
+    if(kind==='kitchen'){node.coldStorage=!!p.coldStorage;node.coolingEnabled=p.coolingEnabled!==false;}
     if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4:0;node.charge=Math.min(node.charge,node.battery);}
     if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<40)) {
       // Existing starter tanks become passive without destroying stored water.
@@ -240,7 +242,7 @@ export function infrastructureStep(s, defs, dt) {
       n.demand = !n.enabled ? 0 :
         (pumping || filtering ? POWER_LOAD[n.kind] :
           ['water-pump','well'].includes(n.kind) ? 0 : (sun<.15 ? POWER_LOAD[n.kind]||0 : 0)) +
-        (machinery && workingMachine(s,n) ? .45 : 0);
+        (machinery && workingMachine(s,n) ? .45 : 0) + (n.coldStorage&&n.coolingEnabled!==false?COLD_STORAGE.kw:0);
       generation += n.generation;
       if (n.enabled) {
         stored += n.charge;
