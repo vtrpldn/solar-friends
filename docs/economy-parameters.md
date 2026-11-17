@@ -37,12 +37,19 @@ Queued exports are removed from available inventory but still count toward store
 
 Purchases are prepaid. Ordinary purchases arrive on return. Construction purchases remain in each project's pending materials until unloaded; oversized orders travel in separate manifests. Outbound exports and inbound purchases use separate directional capacity. One trip is active at a time; both cars are selected in alternation, not dispatched concurrently.
 
-Blueprint affordability includes at least one collection fee, but full future transport budgets are **not** reserved yet. Subsequent spending can still delay collection. Multiple-trip costs, failed deliveries, provider-specific markets and paid delivery fallback remain outstanding.
+Blueprint affordability includes all remaining collection trips across outstanding orders. The budget packs the same manifests as dispatch, excluding already-paid active shipments. Grid charges and ordinary purchases cannot spend that reserve. Finances shows committed and available cash separately. This is a derived commitment, not an extra deduction or a separate saved wallet. Failed deliveries, provider-specific markets and paid delivery fallback remain outstanding.
+
+## Construction estimates
+
+Construction keeps its existing authored quantities and work requirements pending calibration. Assembly estimates convert work into game hours at the existing clock rate, excluding hauling, breaks, weather and skill. Each active worker contributes `1 / (1 + 0.12 × (crew size − 1))` of their individual output: cooperation helps, with diminishing returns. The 0.12 coordination factor is a gameplay assumption, not a researched labor coefficient. Existing work and delivery progress remain unchanged in saves.
 
 ## Evidence
 
+- `scripts/verify-v02-procurement-budget.mjs`: multi-trip reserves, consolidated orders, active/legacy shipments, restoration, protected cash and diminishing crew estimates.
 - `scripts/verify-v02-physical-economy.mjs`: reservation/cancellation, real trip stages, delivery, demand limits, save/load, cargo sizing, duplicate settlement and fractional electricity charges.
-- `scripts/verify-v02-economy-soak.mjs`: three-day automated continuation from the genuine Day 61 save; report `docs/balance/2026-11-16-physical-economy-soak.json`. This is not ordinary browser play or evidence of realistic long-term yields.
+- `scripts/verify-v02-economy-soak.mjs`: three-day automated continuation from the genuine Day 61 save; initial report `docs/balance/2026-11-16-physical-economy-soak.json`; collection-budget continuation in `docs/balance/2026-11-16-procurement-economy-soak.json` earns the transport shortfall through exports before ordering. This is not ordinary browser play or evidence of realistic long-term yields.
 - Existing finance, policies, needs, playtest-fix and acceleration regression scripts also passed during this increment.
 
 Do not declare the realistic-economy release gates complete from these tests. Fresh-start play, seasonal runs, all-biome comparisons and ordinary catalog construction must follow the later model changes.
+
+The collection-budget replay earned enough through exports after 39.735 game minutes, then completed the shared house during the following three days. Cash after placing the blueprint was R$106.02 and ended at R$1,192.02. Food and water remained positive. Fixed-step equivalence checks passed through 1024× scheduling. These results concern the established Day 61 village, not a new-game bootstrap.
