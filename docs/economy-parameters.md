@@ -2,19 +2,19 @@
 
 ## Why
 
-Keep measured references separate from authored game values. The physical-trade increment makes money and deliveries less artificial; it does not yet make the full economy a calibrated Brazilian rural economy.
+Keep measured references separate from authored game values. The current model combines dated Campinas references with explicitly estimated construction, agriculture and logistics parameters. It is a playable physical economy, not a supplier quotation or complete real-world farm budget. The exhaustive current values and classifications are in [the generated register](economy-parameter-register.json).
 
 ## Reference baseline
 
-Reference setting: rural Campinas, São Paulo, road access and an existing grid connection. Land ownership and the two starting vehicles are pre-existing assets; starting cash is working capital. Their acquisition and depreciation values remain uncalibrated.
+Reference setting: rural Campinas, São Paulo, road access and an existing grid connection. Land ownership and the two starting vehicles are pre-existing assets; starting cash is working capital. Each starting car has an authored R$60,000 opening asset estimate, not spendable cash. Vehicle acquisition markets and financial depreciation are outside this version; usage-based maintenance is simulated.
 
 Research sources identified on 2026-11-16:
 
-- [IBGE SINAPI](https://www.ibge.gov.br/estatisticas/economicas/servicos/9270-sistema-nacional-de-pesquisa-de-custos-e-indices-da-construcao-civil.html): regional construction prices and labor references. Aggregate cost per square meter is not a substitute for a building bill of materials. No SINAPI number has been applied to the catalog yet.
+- [IBGE SINAPI](https://www.ibge.gov.br/estatisticas/economicas/servicos/9270-sistema-nacional-de-pesquisa-de-custos-e-indices-da-construcao-civil.html): regional construction prices and labor references. Aggregate cost per square meter is not a substitute for a building bill of materials. A referenced wall-labor coefficient is applied; remaining shell coefficients are engineering estimates.
 - [ANEEL tariff explanation](https://www.gov.br/aneel/pt-br/assuntos/tarifas/entenda-a-tarifa/custo-da-energia-que-chega-aos-consumidores): tariff components. CPFL Paulista residential base and an explicit tax assumption are applied; see the calibration register.
-- [Embrapa forestry guidance](https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/eucalipto/producao/gestao/tecnica/idade-otima-de-corte): forestry rotations must be calibrated separately from short-cycle crops. Existing growth timers remain gameplay values.
+- [Embrapa forestry guidance](https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/eucalipto/producao/gestao/tecnica/idade-otima-de-corte): forestry rotations must be calibrated separately from short-cycle crops. Timber now has a six-year regrowth horizon; crop, establishment and animal cycles are specified separately.
 
-These are research inputs, not evidence that current prices match reality. Supplier quotes, crop yields, farm-gate prices and labor quantities remain research tasks. Fuel has a dated municipal observation.
+These are research inputs, not evidence that current prices match reality. Fuel has a dated municipal observation. Timber, tank, panel and battery retail references, a vegetable-yield proxy and wall-labor reference inform the model. Remaining rates, including buyer price bands, are labeled estimates rather than surveyed farm-gate prices.
 
 ## Implemented parameters
 
@@ -24,8 +24,8 @@ These are research inputs, not evidence that current prices match reality. Suppl
 | Simulation clock | 0.45 game minutes per simulation second | Existing abstraction. Acceleration does not change this ratio. |
 | Cargo per trip | 350 kg and 1.2 m³, both enforced | Provisional game capacity, not a manufacturer specification. |
 | Fuel per round trip | R$5.18 nearby / R$7.76 normal / R$23.29 remote | Distance-based, ANP Campinas observation for 8–14 November 2026; excludes wear. See [calibration register](economy-calibration.md). |
-| Export quote | floor(purchase batch price × 0.5) reais | Existing authored spread, not observed farm-gate prices. |
-| Buyer demand | eight purchase batches per resource per game day | Provisional. Demand is reserved at order acceptance; confirmed orders retain their quote across days. |
+| Export quote | 50% then 40% of retail; equipment 40% then 30% | Existing authored spread, not observed farm-gate prices. |
+| Buyer demand | 2–8 retail batches by buyer per game day | Provisional. Demand is reserved at order acceptance; confirmed orders retain their quote across days. |
 | Export consolidation delay | 40 simulation seconds = 18 game minutes | Gameplay pacing. Existing purchase trips can take queued exports immediately. |
 | History | at most 100 trade orders, preserving active ones | Storage bound. Finance history separately retains 100 recent entries and aggregate totals. |
 
@@ -37,11 +37,11 @@ Queued exports are removed from available inventory but still count toward store
 
 Purchases are prepaid. Ordinary purchases arrive on return. Construction purchases remain in each project's pending materials until unloaded; oversized orders travel in separate manifests. Outbound exports and inbound purchases use separate directional capacity. Both cars can travel concurrently, with separate drivers and manifests. Paid bulk supplier delivery is available without a resident driver.
 
-Blueprint affordability includes all remaining collection trips across outstanding orders. The budget packs the same manifests as dispatch, excluding already-paid active shipments. Grid charges and ordinary purchases cannot spend that reserve. Finances shows committed and available cash separately. This is a derived commitment, not an extra deduction or a separate saved wallet. Provider-specific markets remain outstanding; paid freight and storage-blocked delivery waiting are implemented.
+Blueprint affordability includes all remaining collection trips across outstanding orders. The budget packs the same manifests as dispatch, excluding already-paid active shipments. Grid charges and ordinary purchases cannot spend that reserve. Finances shows committed and available cash separately. This is a derived commitment, not an extra deduction or a separate saved wallet. Named buyer bands and supplier allocations are implemented; paid freight and storage-blocked delivery waiting are implemented.
 
 ## Construction estimates
 
-Construction keeps its existing authored quantities. Core buildings now use task-based authored labor requirements; see [construction checkpoint](construction-economy.md) for coefficients, limitations and save migration. Assembly estimates convert work into game hours at the existing clock rate, excluding hauling, breaks, weather and skill. Each active worker contributes `1 / (1 + 0.12 × (crew size − 1))` of their individual output: cooperation helps, with diminishing returns. The 0.12 coordination factor is a gameplay assumption, not a researched labor coefficient. Delivery quantities remain unchanged; older construction work migrates by completion percentage to the revised requirements.
+New core building bills derive from economic floor, wall and roof areas. Labor combines a sourced wall coefficient with stated engineering allowances; see [construction checkpoint](construction-economy.md) for coefficients, limitations and save migration. Assembly estimates convert work into game hours at the existing clock rate, excluding hauling, breaks, weather and skill. Each active worker contributes `1 / (1 + 0.12 × (crew size − 1))` of their individual output: cooperation helps, with diminishing returns. The 0.12 coordination factor is a gameplay assumption, not a researched labor coefficient. Captured paid bills retain their quantities; older construction work migrates by completion percentage to labor schema 2.
 
 ## Evidence
 
@@ -50,7 +50,7 @@ Construction keeps its existing authored quantities. Core buildings now use task
 - `scripts/verify-v02-economy-soak.mjs`: three-day automated continuation from the genuine Day 61 save; initial report `docs/balance/2026-11-16-physical-economy-soak.json`; collection-budget continuation in `docs/balance/2026-11-16-procurement-economy-soak.json` earns the transport shortfall through exports before ordering. This is not ordinary browser play or evidence of realistic long-term yields.
 - Existing finance, policies, needs, playtest-fix and acceleration regression scripts also passed during this increment.
 
-Do not declare the realistic-economy release gates complete from these tests. Fresh-start play, seasonal runs, all-biome comparisons and ordinary catalog construction must follow the later model changes.
+These historical tests alone do not establish current balance. See the dated final validation report for current-price fresh starts, seasonal cycles, income continuations and ordinary catalog construction.
 
 The collection-budget replay earned enough through exports after 39.735 game minutes, then completed the shared house during the following three days. Cash after placing the blueprint was R$106.02 and ended at R$1,192.02. Food and water remained positive. Fixed-step equivalence checks passed through 1024× scheduling. These results concern the established Day 61 village, not a new-game bootstrap.
 
@@ -75,7 +75,7 @@ New villages keep R$100 aside when quoting blueprint auto-buy. Finances exposes 
 
 ## Further calibration, 17 November
 
-- Basic shells now have explicit economic area and quantities; a 16 m² house is approximately 6.14 tonnes of supplies, 141.49 resident-hours before hauling and breaks, and R$1,922 at current modeled retail prices. A 24 m² house is 8.54 tonnes / 192.14 hours / R$2,698. A 32 m² earth-wall house is 16.98 tonnes / 272 hours / R$3,094. These are unfinished shells with local earth and aggregated materials, not turnkey SINAPI costs. Material prices remain approximate; see the construction document for coefficient provenance and limitations.
+- Basic shells now have explicit economic area and quantities; a 16 m² house is approximately 6.14 tonnes of supplies, 141.49 resident-hours before hauling and breaks, and R$3,942 at current modeled retail prices. A 24 m² house is 8.54 tonnes / 192.14 hours / R$5,543. A 32 m² earth-wall house is 16.98 tonnes / 272 hours / R$5,158. These are unfinished shells with local earth and aggregated materials, not turnkey SINAPI costs. Material prices remain approximate; see the construction document for coefficient provenance and limitations.
 - Garden/greenhouse edible yield is 2 kg/m². New orchard first production takes two favorable years; timber requires paid replanting stock after harvest.
 - Carried production is limited to 30 kg / 0.12 m³ per journey. Local buyers have named, bounded daily demand and disclosed lower second-band prices.
 - Battery charging retains 90% of incoming surplus. Conversion losses are separately counted; existing stored energy is not discounted each tick. Discharge is represented by usable capacity, without another loss multiplier.

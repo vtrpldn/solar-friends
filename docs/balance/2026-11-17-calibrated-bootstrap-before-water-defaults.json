@@ -1,0 +1,943 @@
+{
+  "kind": "Automated fresh-start commands: 14 days for tight capital, three for default/comfortable; not browser play",
+  "reference": {
+    "region": "Campinas, São Paulo",
+    "electricity": {
+      "baseReaisPerKwh": 0.739,
+      "taxAllowance": 0.22,
+      "capacityKw": 4
+    },
+    "transport": {
+      "gasolineReaisPerLiter": 6.47,
+      "kmPerLiter": 10,
+      "roadKmPerHour": 40,
+      "handlingMinutes": 12
+    }
+  },
+  "rows": [
+    {
+      "selectedTrees": [
+        65,
+        30,
+        32,
+        70,
+        71,
+        13
+      ],
+      "days": 14,
+      "seed": 42,
+      "biome": "mata-atlantica",
+      "savings": "tight",
+      "town": "nearby",
+      "opening": 500,
+      "closing": 401.96,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1.2187500000000284,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 3.1875000000024794,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 9.18749999996851,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 15,
+      "meals": 0,
+      "minHunger": 33.33790000001548,
+      "outsideIncome": 1720,
+      "restores": true
+    },
+    {
+      "selectedTrees": [
+        38,
+        23,
+        79,
+        29,
+        27,
+        59
+      ],
+      "days": 14,
+      "seed": 43,
+      "biome": "mata-atlantica",
+      "savings": "tight",
+      "town": "remote",
+      "opening": 500,
+      "closing": 40.51,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1.2500000000000355,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 5.218750000009869,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 11.218749999938952,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 16,
+      "meals": 0,
+      "minHunger": 33.96732000001491,
+      "outsideIncome": 1720,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 44,
+      "biome": "mata-atlantica",
+      "savings": "modest",
+      "town": "nearby",
+      "opening": 2000,
+      "closing": 988.98,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 26,
+      "meals": 0,
+      "minHunger": 37.03775000001417,
+      "outsideIncome": 460,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 45,
+      "biome": "mata-atlantica",
+      "savings": "modest",
+      "town": "remote",
+      "opening": 2000,
+      "closing": 1077.96,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 15,
+      "meals": 0,
+      "minHunger": 54.27200000001403,
+      "outsideIncome": 540,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 46,
+      "biome": "mata-atlantica",
+      "savings": "comfortable",
+      "town": "nearby",
+      "opening": 6000,
+      "closing": 5042.16,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 15,
+      "meals": 0,
+      "minHunger": 52.93550000001456,
+      "outsideIncome": 460,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 47,
+      "biome": "mata-atlantica",
+      "savings": "comfortable",
+      "town": "remote",
+      "opening": 6000,
+      "closing": 5077.96,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 15,
+      "meals": 0,
+      "minHunger": 55,
+      "outsideIncome": 540,
+      "restores": true
+    },
+    {
+      "selectedTrees": [
+        86,
+        87,
+        54,
+        24,
+        30,
+        17
+      ],
+      "days": 14,
+      "seed": 48,
+      "biome": "cerrado",
+      "savings": "tight",
+      "town": "nearby",
+      "opening": 500,
+      "closing": 49.4,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1.2187500000000284,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 4.187500000006118,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 11.187499999939407,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 24,
+      "meals": 0,
+      "minHunger": 32.45130000001602,
+      "outsideIncome": 1380,
+      "restores": true
+    },
+    {
+      "selectedTrees": [
+        80,
+        89,
+        59,
+        95,
+        91,
+        60
+      ],
+      "days": 14,
+      "seed": 49,
+      "biome": "cerrado",
+      "savings": "tight",
+      "town": "remote",
+      "opening": 500,
+      "closing": 41.22,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1.2500000000000355,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 4.2187500000062315,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 11.218749999938952,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 14,
+      "meals": 0,
+      "minHunger": 53.15550000001447,
+      "outsideIncome": 1800,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 50,
+      "biome": "cerrado",
+      "savings": "modest",
+      "town": "nearby",
+      "opening": 2000,
+      "closing": 1042.16,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 15,
+      "meals": 0,
+      "minHunger": 49.35609999998732,
+      "outsideIncome": 460,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 51,
+      "biome": "cerrado",
+      "savings": "modest",
+      "town": "remote",
+      "opening": 2000,
+      "closing": 1077.98,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 15,
+      "meals": 0,
+      "minHunger": 39.12197500001341,
+      "outsideIncome": 540,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 52,
+      "biome": "cerrado",
+      "savings": "comfortable",
+      "town": "nearby",
+      "opening": 6000,
+      "closing": 5042.16,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 15,
+      "meals": 0,
+      "minHunger": 42.40575000001208,
+      "outsideIncome": 460,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 53,
+      "biome": "cerrado",
+      "savings": "comfortable",
+      "town": "remote",
+      "opening": 6000,
+      "closing": 5014.67,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 26,
+      "meals": 0,
+      "minHunger": 39.077425000013264,
+      "outsideIncome": 540,
+      "restores": true
+    },
+    {
+      "selectedTrees": [
+        53,
+        72,
+        20,
+        80,
+        29,
+        50
+      ],
+      "days": 14,
+      "seed": 54,
+      "biome": "caatinga",
+      "savings": "tight",
+      "town": "nearby",
+      "opening": 500,
+      "closing": 266.77,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1.1875000000000213,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 3.1875000000024794,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 9.18749999996851,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 26,
+      "meals": 0,
+      "minHunger": 31.84135000001336,
+      "outsideIncome": 1640,
+      "restores": true
+    },
+    {
+      "selectedTrees": [
+        14,
+        33,
+        84,
+        39,
+        40,
+        83
+      ],
+      "days": 14,
+      "seed": 55,
+      "biome": "caatinga",
+      "savings": "tight",
+      "town": "remote",
+      "opening": 500,
+      "closing": 20.8,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1.2500000000000355,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 5.250000000009983,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 12.249999999923945,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 16,
+      "meals": 0,
+      "minHunger": 33.00900000001556,
+      "outsideIncome": 1700,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 56,
+      "biome": "caatinga",
+      "savings": "modest",
+      "town": "nearby",
+      "opening": 2000,
+      "closing": 1042.17,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 15,
+      "meals": 0,
+      "minHunger": 40.66115000001277,
+      "outsideIncome": 460,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 57,
+      "biome": "caatinga",
+      "savings": "modest",
+      "town": "remote",
+      "opening": 2000,
+      "closing": 1077.96,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 15,
+      "meals": 0,
+      "minHunger": 49.525500000015896,
+      "outsideIncome": 540,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 58,
+      "biome": "caatinga",
+      "savings": "comfortable",
+      "town": "nearby",
+      "opening": 6000,
+      "closing": 5042.16,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 15,
+      "meals": 0,
+      "minHunger": 51.60064999998802,
+      "outsideIncome": 460,
+      "restores": true
+    },
+    {
+      "selectedTrees": [],
+      "days": 3,
+      "seed": 59,
+      "biome": "caatinga",
+      "savings": "comfortable",
+      "town": "remote",
+      "opening": 6000,
+      "closing": 5014.67,
+      "orders": [
+        {
+          "key": "water",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "toilet",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "shelter",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "covered-stores",
+          "day": 1,
+          "error": ""
+        },
+        {
+          "key": "gathering",
+          "day": 1,
+          "error": ""
+        }
+      ],
+      "built": [
+        "water",
+        "toilet",
+        "shelter",
+        "covered-stores",
+        "gathering"
+      ],
+      "food": 26,
+      "meals": 0,
+      "minHunger": 54.51400000001394,
+      "outsideIncome": 540,
+      "restores": true
+    }
+  ]
+}

@@ -6,7 +6,7 @@ A realistic economy needs traceable physical assumptions and consistent quotes b
 
 ## Reference setting
 
-Rural Campinas, São Paulo, an already-owned plot with road access, an existing residential grid connection, and two already-owned compact four-wheel-drive cars. Land and vehicles are starting assets, not income. Their valuation and depreciation remain pending. Climate varies by selected biome; prices do not automatically change with vegetation.
+Rural Campinas, São Paulo, an already-owned plot with road access, an existing residential grid connection, and two already-owned compact four-wheel-drive cars. Land and vehicles are starting assets, not income. Each car has an authored R$60,000 asset estimate; this does not increase cash. Vehicle resale and financial depreciation are outside this version. Climate varies by selected biome; prices do not automatically change with vegetation.
 
 Research snapshot: 17 November 2026. Electricity uses a June 2026 published reference. Fuel now uses the municipal ANP observation for 8–14 November 2026. The power reference remains an earlier tariff publication; this is not presented as a single-month catalog price survey.
 
@@ -44,9 +44,9 @@ Power-screen tariff copy and new-game travel estimates now use the shared numeri
 
 ## Construction magnitude check — 17 November
 
-The [IBGE October 2026 release](https://ftp.ibge.gov.br/Precos_Custos_e_Indices_da_Construcao_Civil/Fasciculo_Indicadores_IBGE/sinapi_202610caderno.pdf), published 12 November, lists São Paulo's aggregate construction cost at R$2,096.45/m² with payroll relief, or R$2,216.38/m² without it (tables on pages 5–6). This includes labor and a reference mix of construction, not a quote for a self-built adobe home. It is a magnitude warning: the current toy catalog bills must not be described as realistic house budgets. It is not multiplied into a direct cash charge.
+The [IBGE October 2026 release](https://ftp.ibge.gov.br/Precos_Custos_e_Indices_da_Construcao_Civil/Fasciculo_Indicadores_IBGE/sinapi_202610caderno.pdf), published 12 November, lists São Paulo's aggregate construction cost at R$2,096.45/m² with payroll relief, or R$2,216.38/m² without it (tables on pages 5–6). This includes labor and a reference mix of construction, not a quote for a self-built adobe home. It is a magnitude warning: the original toy catalog bills could not be described as realistic house budgets. It is not multiplied into a direct cash charge.
 
-Per-project bills are now captured when the blueprint is purchased. Hauling, ownership valuation and salvage read that captured bill. Future catalog quantity changes therefore cannot retroactively invent or remove paid materials. Historical projects without a captured bill are initialized from their applicable catalog recipe during restore; this is a prerequisite for the remaining bill-of-quantities revision.
+Per-project bills are now captured when the blueprint is purchased. Hauling, ownership valuation and salvage read that captured bill. Future catalog quantity changes therefore cannot retroactively invent or remove paid materials. Historical projects without a captured bill are initialized from their applicable catalog recipe during restore; new area-based bills now apply only to later construction.
 
 
 ## Solar equipment quotes — 17 November

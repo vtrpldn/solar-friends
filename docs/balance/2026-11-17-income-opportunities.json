@@ -1,0 +1,99 @@
+{
+  "kind": "Analytical marginal comparison, not a playthrough or whole-village profit forecast",
+  "assumptions": "Healthy output, favorable growth, first buyer band pro-rated for comparison. Actual sales require whole batches, buyer capacity and physical trips. Shared logistics, household food, capital, electricity, water labor, depreciation and seasonal delays are not allocated; therefore these figures are not net profit. Ordinary command continuations separately measure whole-village cash.",
+  "rows": [
+    {
+      "recipe": "vegetables",
+      "favorableGrowthDays": 45,
+      "inputReplacementCost": 6,
+      "healthyOutput": {
+        "food": 32,
+        "scraps": 4
+      },
+      "proRataFirstBandGross": 64,
+      "contributionBeforeCapitalWaterUtilitiesFreightAndLabor": 58,
+      "residentHoursBeforeHauling": 0.45,
+      "roundTripFuel": 7.76,
+      "notes": "First planting may already be paid in the blueprint; recurring input shown."
+    },
+    {
+      "recipe": "greenhouse",
+      "favorableGrowthDays": 40,
+      "inputReplacementCost": 6,
+      "healthyOutput": {
+        "food": 48,
+        "scraps": 6
+      },
+      "proRataFirstBandGross": 96,
+      "contributionBeforeCapitalWaterUtilitiesFreightAndLabor": 90,
+      "residentHoursBeforeHauling": 0.53,
+      "roundTripFuel": 7.76,
+      "notes": "First planting may already be paid in the blueprint; recurring input shown."
+    },
+    {
+      "recipe": "bamboo",
+      "favorableGrowthDays": 365,
+      "inputReplacementCost": 0,
+      "healthyOutput": {
+        "bamboo": 8
+      },
+      "proRataFirstBandGross": 16,
+      "contributionBeforeCapitalWaterUtilitiesFreightAndLabor": 16,
+      "residentHoursBeforeHauling": 0.3,
+      "roundTripFuel": 7.76,
+      "notes": "First planting may already be paid in the blueprint; recurring input shown."
+    },
+    {
+      "recipe": "wood",
+      "favorableGrowthDays": 2190,
+      "inputReplacementCost": 20,
+      "healthyOutput": {
+        "logs": 48
+      },
+      "proRataFirstBandGross": 192,
+      "contributionBeforeCapitalWaterUtilitiesFreightAndLabor": 172,
+      "residentHoursBeforeHauling": 1.8,
+      "roundTripFuel": 7.76,
+      "notes": "Renewable stand only; wild starting trees are finite."
+    },
+    {
+      "recipe": "honey",
+      "favorableGrowthDays": 90,
+      "inputReplacementCost": 0,
+      "healthyOutput": {
+        "honey": 3
+      },
+      "proRataFirstBandGross": 18,
+      "contributionBeforeCapitalWaterUtilitiesFreightAndLabor": 18,
+      "residentHoursBeforeHauling": 0.26,
+      "roundTripFuel": 7.76,
+      "notes": "Three kg output may need aggregation into the retail sale batch."
+    },
+    {
+      "recipe": "eggs",
+      "favorableGrowthDays": 3,
+      "inputReplacementCost": 2,
+      "healthyOutput": {
+        "eggs": 6
+      },
+      "proRataFirstBandGross": 9,
+      "contributionBeforeCapitalWaterUtilitiesFreightAndLabor": 7,
+      "residentHoursBeforeHauling": 0.38,
+      "roundTripFuel": 7.76,
+      "notes": "Recurring feed included; health and spoilage can reduce output."
+    },
+    {
+      "recipe": "milk",
+      "favorableGrowthDays": 1,
+      "inputReplacementCost": 6,
+      "healthyOutput": {
+        "milk": 4
+      },
+      "proRataFirstBandGross": 14,
+      "contributionBeforeCapitalWaterUtilitiesFreightAndLabor": 8,
+      "residentHoursBeforeHauling": 0.53,
+      "roundTripFuel": 7.76,
+      "notes": "Recurring feed included; health and spoilage can reduce output."
+    }
+  ]
+}

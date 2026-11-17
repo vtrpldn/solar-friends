@@ -56,7 +56,7 @@ Every catalog resource now has an explicit stock-unit description and cargo meas
 
 Eggs now use an assumed representative mass of 60 g and packaged cargo volume of 0.1 L each: a dozen weighs 0.72 kg instead of 12 kg. The [MAPA weight-class table published by São Paulo's agriculture department](https://www.defesa.agricultura.sp.gov.br/legislacoes/portaria-sda-mapa-1179-de-05-09-2024%2C1943.html) supports using tens of grams, not kilograms. The selected representative weight and packaging volume are model assumptions, not a claim that every egg has identical mass. Egg count, price, nutrition and freshness remain unchanged.
 
-Other kit measurements retain their earlier assumptions explicitly; making the table exhaustive does not make those values calibrated. In particular, toilet/pump kits and generic food portions need product and nutrition definitions before changing recipes. Canonical inventory conversion and full ownership reconciliation remain outstanding.
+Other kit measurements retain their earlier assumptions explicitly; making the table exhaustive does not make those values calibrated. In particular, toilet/pump kits and generic food portions need product and nutrition definitions before changing recipes. The later physical ownership boundary below supersedes this initial checkpoint. Serialized integer packs remain an explicit compatibility choice.
 
 `verify-v02-material-units.mjs` checks full catalog coverage, every building/recipe measurement, dozen-egg mass and rejection of unknown material identifiers. Production and procurement regressions pass with the revised cargo model.
 
@@ -73,3 +73,5 @@ Project, production, export and vehicle ownership is derived separately from aut
 The implementation retains fixed integer pack counts inside legacy simulation records and converts at the player/accounting boundary. Re-encoding every existing recipe, manifest and save in fractional kilograms would add migration risk without improving the physical result. New controls explicitly convert kilograms back to complete packs. This is a deliberate implementation adjustment to the plan, not a claim that internal counters themselves are kilograms.
 
 `verify-v02-location-accounting.mjs` checks the physical available → reserved → installed → salvaged transitions through actual commands and resident work, including reload, exact ownership totals and explicit salvage loss. Other probes cover processing losses, carried partial batches, perishable transit and sale settlement. Historical movement detail is bounded; authoritative current ownership remains derivable after old entries are trimmed.
+
+First-planting seeds paid in a garden or greenhouse bill move into its first crop exactly once. Later crops consume new seed stock. Consumed seeds are excluded from installed ownership and salvage; the persisted credit flag prevents reload or repeated orders from duplicating them.
