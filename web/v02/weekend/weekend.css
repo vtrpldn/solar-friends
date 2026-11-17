@@ -1611,3 +1611,7 @@ header > .time { grid-column: 3; justify-self: end; }
 .economy-drawer summary{cursor:pointer;font-weight:750;padding:12px 0;}
 #management .economy-controls label{font-size:12px;margin:0;}
 #management .economy-controls input{flex:0 0 90px;width:90px;margin:0;}
+
+.road-project-group { margin: 8px 0; padding: 10px; border: 1px solid var(--edge); border-radius: 12px; }
+.road-project-group > summary { cursor: pointer; font-weight: 600; }
+#undo-road { background: var(--paper); }

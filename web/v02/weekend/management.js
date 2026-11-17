@@ -1,3 +1,4 @@
+import {upgradeAction} from './project-ui.js';
 import {economyControls} from './economy-controls.js';
 import {productionTarget} from './economy-policies.js';
 import {financeSummary,financeTime} from './finances.js';
@@ -32,6 +33,7 @@ const intros = {
     "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically.",
 };
 export function createManagement({
+  beforeOpen = () => {},
   state,
   refresh,
   inspect,
@@ -59,6 +61,7 @@ export function createManagement({
         : `${PROJECTS[state().projects.find((p) => p.id === n.id).key].name} #${n.id}`;
   function open(next) {
     if (state().stage === "arrival") return;
+    beforeOpen();
     view = next;
     if (!dialog.open) {
       wasPaused = isPaused();
@@ -398,7 +401,7 @@ export function createManagement({
         choice.onchange=()=>{recipeChoices.set(p.id,choice.value);describe();};describe();
         el.append(img,name,locate,status,choice,recipeInfo,start);
         if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);
-        else {start.disabled=!!p.solarUpgrade||!!op;start.textContent=p.solarUpgrade?'Solar upgrade installed':'Install solar upgrade';}
+        else {const action=upgradeAction(p,s.operations||[]);start.disabled=action.disabled||!!op;start.textContent=action.label;}
         $("production-sites").append(el);
       }
       if (!$("production-sites").children.length)
