@@ -1,3 +1,4 @@
+import {materialUnitText} from "./material-measures.js";
 import {tripEstimateText} from "./economy-reference.js";
 import {coolingText} from './cold-storage.js';
 import {foodStorageText} from './food-storage.js';
@@ -336,6 +337,7 @@ export function createManagement({
           const item = MATERIALS[id];
           const b = document.createElement("button");
           b.className = "stock-card";
+          b.title=materialUnitText(id);
           b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><small>${committed[id]?`${committed[id]} committed to projects/jobs · `:""}${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
           illustrateResources(b);
           b.disabled = !item.quantity;

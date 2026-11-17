@@ -49,3 +49,13 @@ The Resources screen shows batch totals, approximate input/output/loss mass and 
 `verify-v02-production-accounting.mjs` checks the transformation equations and their shared cargo definitions, then runs a resident through plank processing and delivery, reloads during carriage, and verifies single accounting and single delivery. Its completed workbench is an injected diagnostic fixture, not a bootstrap playthrough.
 
 `verify-v02-economy-soak.mjs` continues the genuine Day 61 village through ordinary export funding and construction. Current output: `docs/balance/2026-11-16-material-accounting-soak.json`. Earlier checkpoint reports remain intact.
+
+## Explicit unit checkpoint — 2026-11-17
+
+Every catalog resource now has an explicit stock-unit description and cargo measurement. Unknown resources fail instead of silently inheriting a 2 kg / 0.01 m³ placeholder. Resources cards expose the definition in their tooltip. Counts and recipe quantities are unchanged; this is not a silent conversion of old stock.
+
+Eggs now use an assumed representative mass of 60 g and packaged cargo volume of 0.1 L each: a dozen weighs 0.72 kg instead of 12 kg. The [MAPA weight-class table published by São Paulo's agriculture department](https://www.defesa.agricultura.sp.gov.br/legislacoes/portaria-sda-mapa-1179-de-05-09-2024%2C1943.html) supports using tens of grams, not kilograms. The selected representative weight and packaging volume are model assumptions, not a claim that every egg has identical mass. Egg count, price, nutrition and freshness remain unchanged.
+
+Other kit measurements retain their earlier assumptions explicitly; making the table exhaustive does not make those values calibrated. In particular, toilet/pump kits and generic food portions need product and nutrition definitions before changing recipes. Canonical inventory conversion and full ownership reconciliation remain outstanding.
+
+`verify-v02-material-units.mjs` checks full catalog coverage, every building/recipe measurement, dozen-egg mass and rejection of unknown material identifiers. Production and procurement regressions pass with the revised cargo model.
