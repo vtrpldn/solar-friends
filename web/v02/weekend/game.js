@@ -11,7 +11,7 @@ import {constructionSpecText} from './construction-specs.js';
 import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {installLenses} from './lenses.js';
-import {simulationFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
+import {simulationSpeed, simulationFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
 import {productionTarget} from './economy-policies.js';
 import {eventHistory, eventTime} from './event-history.js';
 import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
@@ -1259,8 +1259,17 @@ $("pause").onclick = () => {
 };
 function setSpeed(value) {
   speed = value;
-  $("speed").textContent = `${speed}×`;
-  $("speed").setAttribute('aria-label', `Simulation speed ${speed}×. Keys 1 to 4 select speed.`);
+  updateSpeedButton();
+}
+function updateSpeedButton() {
+  const effective = paused ? speed : simulationSpeed(s, speed);
+  const automatic = effective !== speed;
+  const label = automatic ? '64× Auto' : `${speed}×`;
+  const description = automatic
+    ? `Automatic speed 64× while everyone is asleep or away. Selected speed ${speed}×. Keys 1 to 4 select speed.`
+    : `Simulation speed ${speed}×. Keys 1 to 4 select speed.`;
+  if ($("speed").textContent !== label) $("speed").textContent = label;
+  if ($("speed").getAttribute('aria-label') !== description) $("speed").setAttribute('aria-label', description);
 }
 setSpeed(speed);
 $("speed").onclick = () => setSpeed([1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4]);
@@ -2074,11 +2083,12 @@ function frame(now) {
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
   if (!paused && !document.hidden) {
-    accumulator = simulationFrame(accumulator, dt, speed, step => {
+    accumulator = simulationFrame(accumulator, dt, () => simulationSpeed(s, speed), step => {
       previousMotion = captureMotion(s);
       tick(s, step);
     });
   }
+  updateSpeedButton();
   wildlife.update(!paused && !document.hidden ? dt : 0);
   capybaras.update(!paused && !document.hidden ? dt : 0);
   const visual = interpolateMotion(previousMotion, s, accumulator / 0.1);

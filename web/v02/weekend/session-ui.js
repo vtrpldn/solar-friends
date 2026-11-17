@@ -1,14 +1,28 @@
 // Keep fast-forward responsive even when routing is expensive. Slow simulated
 // time under load instead of accumulating a catch-up spiral on the UI thread.
+export function simulationSpeed(state, preferred) {
+  if (state.stage !== 'playing' || !state.people.length) return preferred;
+  const trips = [state.trip, state.secondTrip].filter(Boolean);
+  const unavailable = state.people.every(person =>
+    (person.tentPhase === 'inside' && person.sleepUntil > state.time) ||
+    person.outsideWork?.phase === 'away' ||
+    trips.some(trip => trip.person === person.id && ['outbound', 'away', 'inbound'].includes(trip.phase))
+  );
+  return unavailable ? 64 : preferred;
+}
 export function simulationFrame(accumulator, elapsed, speed, step, now = () => performance.now()) {
-  let remaining = Math.min(accumulator + elapsed * speed, 1.6);
+  let remaining = Math.min(elapsed, .1);
   const started = now();
-  while (remaining >= .1) {
+  while (remaining > 1e-9) {
+    const currentSpeed = typeof speed === 'function' ? speed() : speed;
+    const needed = (.1 - accumulator) / currentSpeed;
+    if (remaining + 1e-12 < needed) return accumulator + remaining * currentSpeed;
+    remaining = Math.max(0, remaining - needed);
+    accumulator = 0;
     step(.1);
-    remaining -= .1;
-    if (now() - started >= 8) return remaining % .1;
+    if (now() - started >= 8) return 0;
   }
-  return remaining;
+  return accumulator;
 }
 export function restoredView(view) {
   if (!view || ![1,4,8,16].includes(view.speed) || typeof view.paused !== 'boolean' ||
