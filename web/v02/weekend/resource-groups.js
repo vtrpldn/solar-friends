@@ -47,5 +47,6 @@ export const RESOURCE_GROUPS = [
 
 export const EQUIPMENT_IDS = new Set(RESOURCE_GROUPS[0].ids);
 export function inventoryGroups(view) {
+  if(view==='food')return [{name:'Food from town & the village',ids:['food','greens','beans','corn','meals','eggs','milk','honey']}];
   return RESOURCE_GROUPS.filter(group => (view === 'items') === group.ids.some(id => EQUIPMENT_IDS.has(id)));
 }

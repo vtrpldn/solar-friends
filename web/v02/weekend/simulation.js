@@ -1,3 +1,4 @@
+import {foodPolicy,validFoodPolicy,manageKitchens} from './food-policy.js';
 import {pantryForecast,productionStock} from './food-planning.js';
 import {CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
 import {registerGathering,gatheringStatus,gatheringState,validGathering} from './gathering.js';
@@ -516,7 +517,7 @@ function maintainFood(s) {
   // Harvest existing food plots before construction or nonessential production.
   for(const p of s.projects) {
     const recipe=Object.entries(PROCESSES).find(([,d])=>d.kind===PROJECTS[p.key].kind&&Object.keys(d.output).some(id=>FOOD_SERVINGS[id]));
-    if(recipe&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))queueProduction(s,p.id,recipe[0]);
+    if(recipe&&!(PROJECTS[p.key].kind==='kitchen'&&(p.repeat||foodPolicy(s).automatic))&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))queueProduction(s,p.id,recipe[0]);
   }
   // A visible, switchable emergency policy, paid from real savings, at most once a day.
   if(s.emergencyFood!==false && MATERIALS.food.price+pickupFare(s)<=(s.foodPurchaseBudget??100) && (activeTrips(s).length<2||returnPickup(s)) && s.time>=(s.nextFoodTrip||0) && supplyRun(s,'food')) {
@@ -2095,6 +2096,7 @@ function tickUncached(s, dt) {
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
   maintainFood(s);
   maintainWater(s);
+  manageKitchens(s,PROJECTS,PROCESSES,{blocker:productionBlocker,queue:queueProduction,stored:storedMaterials,capacity:storageCapacity});
   for (const p of s.projects) {
     if (!p.repeat || s.operations?.some((o) => o.site === p.id && !o.done))
       continue;
@@ -2851,7 +2853,7 @@ export function restore(text) {
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     if(s.foodStorage?.lots)for(const id of ['greens','beans','corn'])if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
     refreshSandboxFood(s);
-    if (!validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validFoodPolicy(s) || !validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(
