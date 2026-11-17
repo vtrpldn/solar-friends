@@ -38,6 +38,9 @@ function roofFrame(g,w,d,type,rise=1.3){
 export function functionalHome(id,stage=2) {
   const l=FUNCTIONAL_LAYOUTS[id],character=HOME_CHARACTER[id],g=new THREE.Group(),[w,d]=l.shell;
   const doorX=character.doorX, design=HOME_DESIGN_BY_ID[id];
+  const porchPosts=[-w/2+.2,-1.3,1.3,w/2-.2];
+  if(design && w>9)porchPosts.push(-(w/2+1.1)/2,(w/2+1.1)/2);
+  const terracePosts=design?Array.from({length:Math.ceil((d-.4)/3)+1},(_,i)=>-d/2+.2+i*(d-.4)/Math.ceil((d-.4)/3)):[-d/2+.2,d/2-.2];
   const body=new THREE.Group();g.add(body);
   // Front (+Z) verandas and side terraces occupy their own reserved cells.
   body.position.z=l.verandaDepth?-l.verandaDepth/2:0;
@@ -51,8 +54,8 @@ export function functionalHome(id,stage=2) {
   if(stage===1) {
     for(const x of [-w/2+.1,w/2-.1])for(const z of [-d/2+.1,0,d/2-.1])box(body,.14,2.7,.14,'timber',x,1.5,z);
     roofFrame(body,w,d,character.roof,character.rise||(character.roof==='side-gable'?1.1:1.45));
-    if(l.verandaDepth)for(const x of [-w/2+.2,-1.3,1.3,w/2-.2])box(g,.16,2.45,.16,'timber',x+body.position.x,1.285,d/2+l.verandaDepth/2-.15);
-    if(l.terrace)for(const z of [-d/2+.2,d/2-.2])for(const x of [w/2-.8,w/2+.8])box(g,.14,2.5,.14,'timber',x,1.25,z);
+    if(l.verandaDepth)for(const x of porchPosts)box(g,.16,2.45,.16,'timber',x+body.position.x,1.285,d/2+l.verandaDepth/2-.15);
+    if(l.terrace)for(const z of terracePosts)for(const x of [w/2-.8,w/2+.8])box(g,.14,2.5,.14,'timber',x,1.25,z);
     return g;
   }
   const wall=id.startsWith('adobe')||id==='home-shared'?'earth':'plaster';
@@ -106,7 +109,8 @@ export function functionalHome(id,stage=2) {
     const porchRoot=new THREE.Group();porchRoot.position.x=body.position.x;g.add(porchRoot);
     const front=d/2+l.verandaDepth/2;
     box(porchRoot,w,.12,l.verandaDepth,'stone',0,.06,front-l.verandaDepth/2);
-    for(const x of [-w/2+.2,-1.3,1.3,w/2-.2])box(porchRoot,.16,2.45,.16,'timber',x,1.285,front-.15);
+    for(const x of porchPosts)box(porchRoot,.16,2.45,.16,'timber',x,1.285,front-.15);
+    if(design)box(porchRoot,w,.18,.18,'timber',0,2.43,front-.15);
     const canopy=new THREE.Group();canopy.position.z=front-l.verandaDepth/2;porchRoot.add(canopy);leanRoof(canopy,w+.4,l.verandaDepth+.4,2.5,2.95);
     box(porchRoot,1.5,.1,.45,'timberLight',-w/2+1.2,.53,front-.5);
     for(const x of [-w/2+.6,-w/2+1.8])box(porchRoot,.12,.48,.38,'timber',x,.24,front-.5);
@@ -118,7 +122,7 @@ export function functionalHome(id,stage=2) {
   }
   if(l.terrace){
     box(g,2,.1,d,'stone',w/2,.05,0);
-    for(const z of [-d/2+.2,d/2-.2])for(const x of [w/2-.8,w/2+.8])box(g,.14,2.5,.14,'timber',x,1.25,z);
+    for(const z of terracePosts)for(const x of [w/2-.8,w/2+.8])box(g,.14,2.5,.14,'timber',x,1.25,z);
     for(const x of [w/2-.8,w/2+.8])box(g,.14,.16,d,'timber',x,2.45,0);
     for(let z=-d/2;z<=d/2;z+=.6)box(g,2.15,.1,.14,'timberLight',w/2,2.58,z);
     box(g,.5,.1,1.8,'timberLight',w/2+.4,.5,-1.5);

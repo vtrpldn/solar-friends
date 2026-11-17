@@ -38,10 +38,12 @@ export function createScalePreview(validate = false, collection = 'village') {
     ['rain-barrel',40,44], ['wayfinding-sign',40,47], ['supply-5',40,50],
     ['orchard',44,77], ['grove',54,77],
   ];
+  // Lay the comparison streets first: plan() then validates each house against
+  // the finished road layout instead of rechecking ten houses per road tile.
+  if(collection==='new-homes')for(const z of [51,65])for(let x=35;x<=93;x++)place('road',x,z);
   for(const [key,x,z] of sites)place(key,x,z);
-  for(let x=42;x<=(['homes','new-homes'].includes(collection)?93:74);x++) place('road',x,51);
+  if(collection!=='new-homes')for(let x=42;x<=(collection==='homes'?83:74);x++)place('road',x,51);
   if(collection==='homes')for(let x=42;x<=83;x++)place('road',x,63);
-  if(collection==='new-homes')for(let x=35;x<=93;x++)place('road',x,65);
   place('bridge',6,48);
   const legacy={id:s.nextId++,key:'bridge',x:5,z:39,rotation:0,siteVersion:0,
     work:PROJECTS.bridge.work,delivered:requiredLoads('bridge')};

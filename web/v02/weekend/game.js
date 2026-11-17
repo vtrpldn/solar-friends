@@ -659,7 +659,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(scalePreview ? (new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
+focus(scalePreview ? (new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
 
 function resize() {
   const a = innerWidth / innerHeight;
