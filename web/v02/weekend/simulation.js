@@ -2080,10 +2080,11 @@ function restoreHomeAssignments(s) {
     else counts.set(r.home, count + 1);
   }
 }
-function recoveryEnergy(s,r){
+function recoveryEnergy(s, r, constructionPending) {
   // A short construction nap must leave an outside worker rested enough to
   // accept the next shift (which requires 65 energy).
-  return r.outsideJobEnabled?80:s.projects.some(p=>p.work<PROJECTS[p.key].work)?60:80;
+  if (r.outsideJobEnabled || !constructionPending) return 80;
+  return s.projects.some(p => p.work < PROJECTS[p.key].work) ? 60 : 80;
 }
 function chooseRestingPlace(s, r, i) {
   if (r.restSite && s.projects.some((p) => p.id === r.restSite&&!p.removal)) return;
@@ -2420,8 +2421,12 @@ function tickUncached(s, dt) {
     }
   }
   if(!s.trip&&s.secondTrip){s.trip=s.secondTrip;s.secondTrip=null;}
+  // Residents can finish orders during this pass. Skip absent categories and recheck live orders before assigning them.
+  const removalsPending = s.projects.some(p => p.removal);
+  const constructionPending = removalsPending || s.projects.some(p => p.work < PROJECTS[p.key].work);
+  const operationsPending = s.operations?.some(o => !o.done);
   const animalCarePending = s.upkeep?.jobs.some(job => job.care && !job.done);
-  const farmJobsPending = s.operations?.some(op => !op.done && !op.waitingSeeds && op.phase !== 'growing' && isFarmWork(s,op));
+  const farmJobsPending = operationsPending && s.operations.some(op => !op.done && !op.waitingSeeds && op.phase !== 'growing' && isFarmWork(s,op));
   for (const [i, r] of s.people.entries()) {
     if(downtimeInvalid(s,r,PROJECTS)){clearDowntime(r);r.walk=[];r.target=null;}
     if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.outsideWork || r.action==='town'))clearDowntime(r);
@@ -2449,7 +2454,7 @@ function tickUncached(s, dt) {
         r.tentPhase = "inside";
       if (r.tentPhase === "inside") {
         r.energy = Math.min(100, r.energy + dt * (r.sleepUntil ? .13 : .45));
-        const recovered = recoveryEnergy(s,r);
+        const recovered = recoveryEnergy(s, r, constructionPending);
         if ((r.sleepUntil ? s.time >= r.sleepUntil : r.energy >= recovered) || s.stage === "evening") {
           r.sleepUntil=null;
           r.tentPhase = "exit";
@@ -2478,7 +2483,7 @@ function tickUncached(s, dt) {
         "stroll",
         "breathe",
       ].includes(r.action) &&
-      availableProject(s, r)
+      constructionPending && availableProject(s, r)
     ) {
       r.walk = [];
       r.target = null;
@@ -2548,7 +2553,7 @@ function tickUncached(s, dt) {
       !r.cargo && (r.sleepUntil || r.energy < 25 ||
       (r.action === "rest" &&
         r.energy <
-          recoveryEnergy(s,r)))
+          recoveryEnergy(s, r, constructionPending)))
     ) {
       r.action = "rest";
       r.job = null;
@@ -2580,31 +2585,40 @@ function tickUncached(s, dt) {
     }
     // Finish an assigned batch before reconsidering work categories. Otherwise
     // changing availability can shuffle the reserved slots on every tick.
-    if(r.energy>=25&&removalStep(s,r,dt,{defs:PROJECTS,recipes:PROCESSES,workSpot,go,stored:storedMaterials,capacity:storageCapacity,change:changeMaterial,invalidate:invalidateNavigation,say,placement:placementError,grade:gradeFoundation}))continue;
+    if (removalsPending && r.energy >= 25 && removalStep(s,r,dt,{defs:PROJECTS,recipes:PROCESSES,workSpot,go,stored:storedMaterials,capacity:storageCapacity,change:changeMaterial,invalidate:invalidateNavigation,say,placement:placementError,grade:gradeFoundation})) continue;
     if(outsideWorkStep(s,r,dt,go,route))continue;
     if(r.energy>=25&&performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot))continue;
-    const activeOperation=s.operations?.find(o=>o.id===r.operation&&!o.done);
+    const activeOperation = operationsPending && s.operations.find(o => o.id === r.operation && !o.done);
     if(activeOperation && !r.job && operationalWork(s,r,i,dt,false,workGroup(activeOperation,PROCESSES))) continue;
     // Needs and completed carrying trips always win. Reserve available people,
     // not fixed residents who might be asleep, for essential and income work.
-    const priorities=economyPolicies(s).work;
-    const ready=s.people.filter(a=>a.energy>=25&&!a.tentPhase&&!a.sleepUntil&&!a.needTask&&!a.cargo&&a.action!=='town'&&!a.outsideWork);
-    const slot=ready.indexOf(r),essential=slot>=0&&slot<(priorities.essentialWorkers??1),producer=slot>=0&&slot>=(priorities.essentialWorkers??1)&&slot<(priorities.essentialWorkers??1)+(priorities.productionWorkers??1);
-    let serviced=false;
-    for(const group of ['food','maintenance','production'].sort((a,b)=>(priorities[b]??2)-(priorities[a]??2))){
-      const urgent=group==='food'&&(s.infrastructure.hungry||s.infrastructure.thirst);
-      const reserved=group==='production'?producer:essential;
-      if(!r.cargo && (urgent||reserved||(priorities[group]??2)>(priorities.construction??2)) && operationalWork(s,r,i,dt,false,group)){serviced=true;break;}
+    const priorities = economyPolicies(s).work;
+    if (operationsPending) {
+      const ready = s.people.filter(a => a.energy >= 25 && !a.tentPhase && !a.sleepUntil && !a.needTask && !a.cargo && a.action !== 'town' && !a.outsideWork);
+      const slot = ready.indexOf(r);
+      const essentialSlots = priorities.essentialWorkers ?? 1;
+      const essential = slot >= 0 && slot < essentialSlots;
+      const producer = slot >= 0 && slot >= essentialSlots && slot < essentialSlots + (priorities.productionWorkers ?? 1);
+      const groups = ['food', 'maintenance', 'production'].sort((a,b) => (priorities[b] ?? 2) - (priorities[a] ?? 2));
+      let serviced = false;
+      for (const group of groups) {
+        const urgent = group === 'food' && (s.infrastructure.hungry || s.infrastructure.thirst);
+        const reserved = group === 'production' ? producer : essential;
+        if (!r.cargo && (urgent || reserved || (priorities[group] ?? 2) > (priorities.construction ?? 2)) && operationalWork(s, r, i, dt, false, group)) {
+          serviced = true;
+          break;
+        }
+      }
+      if (serviced) continue;
     }
-    if(serviced)continue;
-    let p = s.projects.find(
+    let p = r.job != null && s.projects.find(
       (p) => !p.removal && p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
     );
     if (!p) {
       r.job = null;
       r.workSpot = null;
       r.cargo = false;
-      p = availableProject(s, r);
+      p = constructionPending && availableProject(s, r);
       if (p) {
         r.operation=null;
         r.workSpot = workSpot(s, r, p);
