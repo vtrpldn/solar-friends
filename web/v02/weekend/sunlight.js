@@ -14,7 +14,7 @@ export function sunlightAt(time, cloud = 0) {
     daylight,
     warmth: (1 - Math.min(1, height * 2)) * (1 - cloud),
     direct: daylight * (2.1 + height * 1.3) * (1 - cloud * 0.88),
-    ambient: 0.65 + daylight * (1.35 + cloud * 0.25),
+    ambient: 0.65 + daylight * (0.8 + cloud * 0.35),
     shadow: daylight * (1 - cloud * 0.85),
   };
 }

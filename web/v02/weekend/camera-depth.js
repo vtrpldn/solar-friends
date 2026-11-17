@@ -21,8 +21,8 @@ export function fitTerrainCamera(camera, target, fog) {
   }
   // Preserve the atmosphere relative to the viewed land, not camera retreat.
   if (fog) {
-    fog.near = safeDistance + 35;
-    fog.far = safeDistance + 145;
+    fog.near = safeDistance + 70;
+    fog.far = safeDistance + 220;
   }
   camera.updateMatrixWorld();
 }

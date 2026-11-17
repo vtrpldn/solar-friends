@@ -1,7 +1,7 @@
-import { terrainNoise } from "./terrain-noise.js";
+import {createLandSurface,terrainMaterial} from "./land-surface.js";
 import {settingsFor,BIOMES} from './world-settings.js';
 import { MAP_CELLS, MAP_HALF } from "./map-size.js";
-import { riverCenter } from "./river-layout.js";
+import { riverCenter, riverWidth } from "./river-layout.js";
 import { elevationVertex } from "./elevation.js";
 import * as THREE from "three";
 export function createTerrain(seed = 0, elevationSeed = seed, pads = []) {
@@ -13,30 +13,23 @@ export function createTerrain(seed = 0, elevationSeed = seed, pads = []) {
   );
   geometry.rotateX(-Math.PI / 2);
   const palette=BIOMES[settingsFor(seed).biome].colors;
-  const colors = [],
-    grass = new THREE.Color(palette[0]),
-    dry = new THREE.Color(palette[1]),
-    lush = new THREE.Color(palette[2]);
+  const banks = [];
   const points = geometry.attributes.position;
   for (let i = 0; i < points.count; i++) {
     const x = points.getX(i),
       z = points.getZ(i);
     points.setY(i, elevationVertex(x, z, elevationSeed, pads));
-    const broad = terrainNoise(x / 19, z / 19, seed ^ 7321);
-    const patch = terrainNoise(x / 13, z / 13, seed ^ 8197);
-    const riverDistance = Math.abs(x - riverCenter(z, seed));
-    const moisture = Math.max(0, 1 - riverDistance / 16);
-    const color = grass.clone().lerp(lush, Math.min(.55, broad * .35 + moisture * .25));
-    const bare = Math.max(0, (patch * .65 + broad * .35 - .48) * 1.2);
-    color.lerp(dry, bare);
-    colors.push(color.r, color.g, color.b);
+    banks.push(Math.max(0,Math.abs(x-riverCenter(z,seed))-riverWidth(z,seed)));
+
   }
   geometry.computeVertexNormals();
-  geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+  geometry.setAttribute("bankDistance", new THREE.Float32BufferAttribute(banks, 1));
+  const surface=createLandSurface();
   const mesh = new THREE.Mesh(
     geometry,
-    new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1 }),
+    terrainMaterial(seed,palette,surface),
   );
+  mesh.userData.surface=surface;
   mesh.receiveShadow = true;
   return mesh;
 }

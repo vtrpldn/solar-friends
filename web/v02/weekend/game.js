@@ -1,5 +1,6 @@
 import {loadVillage} from './load-village.js';
-import {ensureNaturalLand} from './natural-resources.js';
+import {ensureNaturalLand,TREE_SPECIES} from './natural-resources.js';
+import {createFoliageWind} from './foliage-wind.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {createCapybaraVisitors} from "./capybaras.js";
@@ -175,6 +176,7 @@ let speed = 1,
   lastUI = 0,
   lastSave = 0;
 const scene = new THREE.Scene();
+const foliageWind=createFoliageWind();
 scene.background = new THREE.Color("#cbd5ac");
 scene.fog = new THREE.Fog("#cbd5ac", 90, 200);
 const renderer = new THREE.WebGLRenderer({
@@ -186,7 +188,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
+renderer.toneMappingExposure = 1.08;
 const camera = new THREE.OrthographicCamera(-26, 26, 20, -20, 0.1, 300);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -197,7 +199,7 @@ controls.minPolarAngle = 0.25;
 const navigation = installCameraNavigation(camera, controls, {
   home: () => focus(campLocation(s)),
 });
-const daylight = new THREE.HemisphereLight("#fff1cd", "#658658", 2);
+const daylight = new THREE.HemisphereLight("#e4eff6", "#777455", 1.4);
 scene.add(daylight);
 const sun = new THREE.DirectionalLight("#ffe2a8", 3.4);
 sun.position.set(-25, 45, 18);
@@ -291,6 +293,7 @@ function prop(id, x, z, rotation = 0) {
   const rooftop=model.getObjectByName('optional-rooftop-solar');
   if(rooftop){rooftop.removeFromParent();rooftop.geometry.dispose();}
   const g = compactModel(model);
+  if(TREE_SPECIES[id])foliageWind.apply(g);
   g.position.copy(world(x, z));
   g.rotation.y = rotation;
   scene.add(g);
@@ -521,6 +524,7 @@ function syncTerrain() {
 }
 function syncBuildings() {
   syncTerrain();
+  ground.userData.surface.update(s.projects,PROJECTS,footprint);
   autoConnectUtilities(s, PROJECTS);
   for (const p of s.projects) {
     const def = PROJECTS[p.key],
@@ -1977,6 +1981,7 @@ function frame(now) {
       paused ? 0 : dt * speed,
     );
   }
+  foliageWind.update(!paused && !document.hidden ? dt : 0);
   river.update(visual.time);
   rainMesh.visible = s.rain;
   if (s.rain) {
