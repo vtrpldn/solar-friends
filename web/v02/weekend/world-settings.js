@@ -1,4 +1,4 @@
-import {tripEstimate} from "./economy-reference.js";
+import {tripEstimate,STARTING_CAPITAL} from "./economy-reference.js";
 export const DEFAULT_SETTINGS={biome:'mata-atlantica',landscape:'rolling',water:'seasonal',resources:'balanced',savings:'modest',supplies:'camp',town:'drive'};
 export const OPTIONS={biome:['mata-atlantica','cerrado','caatinga'],landscape:['gentle','rolling','rugged'],water:['dry','seasonal','abundant'],resources:['sparse','balanced','rich'],savings:['tight','modest','comfortable'],supplies:['essentials','camp','prepared'],town:['nearby','drive','remote']};
 export const PRESETS={gentle:{landscape:'gentle',water:'abundant',resources:'rich',savings:'comfortable',supplies:'prepared',town:'nearby'},scratch:{landscape:'rolling',water:'seasonal',resources:'balanced',savings:'tight',supplies:'essentials',town:'drive'},remote:{landscape:'rugged',water:'dry',resources:'balanced',savings:'modest',supplies:'camp',town:'remote'}};
@@ -17,7 +17,7 @@ export const BIOMES={
 export function applySettings(s,settings){
  s.worldSettings={...DEFAULT_SETTINGS,...settings};registerWorld(s.landSeed,s.worldSettings);
  if(s.mode==='sandbox')return s;
- s.money={tight:100,modest:220,comfortable:600}[settings.savings];
+ s.money=STARTING_CAPITAL[settings.savings];
  const factor={essentials:.6,camp:1,prepared:1.7}[settings.supplies];
  s.wood=Math.round(s.wood*factor);
  for(const key of Object.keys(s.materials))s.materials[key]=Math.ceil(s.materials[key]*factor);

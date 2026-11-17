@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {BIOLOGY,GAME_DAY,biologicalStep,growthRate,harvestOutput,beginBiology} from '../web/v02/weekend/biological-production.js';
+import {createWeekend,chooseCamp,PROJECTS,PROCESSES,queueProduction,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
+const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);
+const p={id:s.nextId++,key:'garden',x:s.stock.x+3,z:s.stock.z+3,work:PROJECTS.garden.work,delivered:0};s.projects.push(p);s.materials.seedlings=2;
+const sys=syncInfrastructure(s,PROJECTS);sys.nodes[p.id].water[1]=12;
+assert.equal(queueProduction(s,p.id,'vegetables'),'');
+for(let i=0;i<8000&&!s.operations[0].planted;i++)tick(s,.1);
+const op=s.operations[0];assert(op.planted,'residents actually plant before growth starts');assert.equal(op.phase,'growing');
+assert(!s.people.some(r=>r.operation===op.id),'growth does not occupy a resident');
+assert(restore(save(s)),'growing save restores');
+const a={time:0,operations:[{recipe:'greenhouse',phase:'growing',growthRemaining:40*GAME_DAY,planted:true}]};
+for(let day=0;day<40;day++){a.time+=GAME_DAY;biologicalStep(a,GAME_DAY);}
+assert.equal(a.operations[0].phase,'process');assert.equal(a.operations[0].ripeAt,40*GAME_DAY);
+assert.equal(harvestOutput({time:45*GAME_DAY},a.operations[0],PROCESSES.greenhouse).food,20);
+assert.equal(harvestOutput({time:50.5*GAME_DAY},a.operations[0],PROCESSES.greenhouse).food,10);
+assert.equal(harvestOutput({time:54*GAME_DAY},a.operations[0],PROCESSES.greenhouse).food,0);
+assert(BIOLOGY.wood.days>BIOLOGY.bamboo.days&&BIOLOGY.bamboo.days>BIOLOGY.vegetables.days);
+assert(growthRate({time:200*GAME_DAY,worldSettings:{biome:'caatinga'}},'vegetables')<1);
+const bad=JSON.parse(save(s));bad.operations[0].growthRemaining=-1;assert.equal(restore(JSON.stringify(bad)),null);
+const worker={operation:1};assert.equal(beginBiology({mode:'sandbox'}, {recipe:'vegetables'},worker),false);
+console.log('PASS resident planting, autonomous calendar growth, seasonal slowdown, gradual field loss, save validation and sandbox');

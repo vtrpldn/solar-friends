@@ -1,3 +1,4 @@
+import {serviceFactor} from "./asset-upkeep.js";
 import {GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
 import {COLD_STORAGE} from './cold-storage.js';
 import {spendableMoney} from './procurement-budget.js';
@@ -44,7 +45,7 @@ const CAPACITY = {
   greenhouse: [4, 12, 0, 0],
   orchard: [4, 12, 0, 0],
   grove: [4, 12, 0, 0],
-  goat_pasture: [6, 0, 0, 0],
+  goat_pasture: [40, 0, 0, 0],
   coop: [6, 0, 0, 0],
   wetland: [0, 60, 24, 0],
   biodigester: [0, 0, 0, 24],
@@ -118,6 +119,8 @@ export function syncInfrastructure(s, defs) {
       power: 0,
     };
     const node=sys.nodes[p.id];
+    node.serviceFactor=serviceFactor(p);
+    if(kind==='goat_pasture'&&node.capacity[0]<40)node.capacity[0]=40;
     if(kind==='kitchen'){node.coldStorage=!!p.coldStorage;node.coolingEnabled=p.coolingEnabled!==false;}
     if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4:0;node.charge=Math.min(node.charge,node.battery);}
     if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<40)) {
@@ -244,6 +247,7 @@ export function infrastructureStep(s, defs, dt) {
         (pumping || filtering ? POWER_LOAD[n.kind] :
           ['water-pump','well'].includes(n.kind) ? 0 : (sun<.15 ? POWER_LOAD[n.kind]||0 : 0)) +
         (machinery && workingMachine(s,n) ? .45 : 0) + (n.coldStorage&&n.coolingEnabled!==false?COLD_STORAGE.kw:0);
+      n.generation*=n.serviceFactor??1;
       generation += n.generation;
       if (n.enabled) {
         stored += n.charge;
@@ -309,7 +313,7 @@ export function infrastructureStep(s, defs, dt) {
       n.water[1]+=add;sys.account.waterReceived+=add;
     }
     if(n.enabled && n.kind==='water-pump' && n.power>.99 && n.demand>0) {
-      let amount=Math.min(n.capacity[1]-n.water[1],24*hours);
+      let amount=Math.min(n.capacity[1]-n.water[1],24*hours*(n.serviceFactor??1));
       const source=Object.values(sys.nodes).filter(a=>a.kind==='groundwater-well'&&a.enabled&&Math.hypot(a.x-n.x,a.z-n.z)<=6).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
       if(source){amount=Math.min(amount,source.water[1]);source.water[1]-=amount;}
       else if(riverBankAt(n.x+.5,n.z+.5,3,s.landSeed))sys.account.waterReceived+=amount;
@@ -326,7 +330,7 @@ export function infrastructureStep(s, defs, dt) {
       const amount = Math.min(
         n.water[1],
         n.capacity[0] - n.water[0],
-        25 * hours,
+        25 * hours * (n.serviceFactor??1),
       );
       n.water[1] -= amount;
       n.water[0] += amount;

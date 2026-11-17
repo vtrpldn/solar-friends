@@ -35,7 +35,9 @@ Completed in the first playable increment:
 - Task-based labor estimates for core buildings, complete material allocation, and versioned progress migration; see [construction checkpoint](construction-economy.md). Physical quantities and regional labor coefficients remain uncalibrated.
 - Three-day replay of an established village completed a paid house with positive food, water and cash. This is regression evidence, not a fresh-start balance certification.
 
-Still outstanding: regional calibration, canonical physical resource units and full ownership ledger, construction/person-hour calibration, multiple simultaneous vehicles and delivery fallback, seasonal yields, asset upkeep, outside jobs, and full release gates. None of stages 0–7 is claimed complete. See [parameter register](economy-parameters.md) for provisional values and evidence limitations.
+Further local increments (17 November): separate biological growth and resident labor, seasonal growth modifiers and gradual harvest loss; optional paid outside work; two simultaneous resident-driven cars; paid bulk delivery; automatic animal care and equipment service. See [biology](economy-biology.md) and [logistics and care](economy-logistics-and-care.md) for assumptions and diagnostic evidence.
+
+Still outstanding: regional calibration, canonical physical resource units and full ownership ledger, construction/person-hour calibration, crop moisture and fertility, complete asset replacement, combined financial forecasts, and full release gates. None of stages 0–7 is claimed complete. See [parameter register](economy-parameters.md) for provisional values and evidence limitations.
 
 ## Design boundaries
 

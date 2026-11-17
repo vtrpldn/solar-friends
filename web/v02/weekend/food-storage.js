@@ -1,3 +1,4 @@
+import {activeTrips} from "./trip-state.js";
 // Authored game shelf lives, not food-safety guidance. One day is 3200 sim seconds.
 export const FOOD_DAYS={food:3,meals:2,eggs:7,milk:1};
 const day=3200;
@@ -40,7 +41,7 @@ export function foodStorageStep(s,recipes,materials={}){
  }
  for(const op of s.operations||[]){
   if(op.done||op.water)continue;const recipe=recipes[op.recipe];if(!recipe)continue;
-  const output=op.phase==='return',items=output?(op.returnItems||recipe.output):recipe.input;
+  const output=op.phase==='return',items=output?(op.returnItems||op.harvestOutput||recipe.output):recipe.input;
   const field=output?'foodOutput':'foodInput';op[field]??=Object.fromEntries(Object.entries(items).filter(([id])=>FOOD_DAYS[id]).map(([id,n])=>[id,freshLots(s,id,n,output?recipe:null)]));
   let spoiled=false;const survivors={};
   for(const [id,lots]of Object.entries(op[field])){const result=expire(s,id,lots);survivors[id]=result.good;spoiled ||= result.lost>0;}
@@ -49,10 +50,11 @@ export function foodStorageStep(s,recipes,materials={}){
    op.foodInput={};op.foodOutput=survivors;op.phase='return';op.status='Returning usable remains after food spoilage';
   }
  }
- const trip=s.trip;
- if(trip&&!trip.project&&!trip.saleOnly&&FOOD_DAYS[trip.material]&&!trip.foodSpoiled){
+ for(const trip of [...activeTrips(s),s.delivery].filter(Boolean)){
+ if(trip&&!trip.project&&!trip.shipments&&!trip.saleOnly&&FOOD_DAYS[trip.material]&&!trip.foodSpoiled){
   if(!trip.foodLots&&materials[trip.material])trip.foodLots=freshLots(s,trip.material,materials[trip.material].quantity);
   if(trip.foodLots){const result=expire(s,trip.material,trip.foodLots);if(result.lost){trip.foodLots=result.good;trip.foodSpoiled=true;}}
+ }
  }
 }
 export function validFoodStorage(s,recipes={},materials={}){
@@ -66,11 +68,11 @@ export function validFoodStorage(s,recipes={},materials={}){
  for(const op of s.operations||[]) {
   const recipe=recipes[op.recipe];
   if(op.returnItems&&(!recipe||Object.entries(op.returnItems).some(([id,n])=>!Number.isFinite(n)||n<0||n>Math.max(recipe.input[id]||0,recipe.output[id]||0))))return false;
-  if(recipe&&!op.done)for(const [field,expected]of [['foodInput',recipe.input],['foodOutput',op.returnItems||recipe.output]]){
+  if(recipe&&!op.done)for(const [field,expected]of [['foodInput',recipe.input],['foodOutput',op.returnItems||op.harvestOutput||recipe.output]]){
    if(op[field])for(const [id,lots]of Object.entries(op[field]))if(lots.reduce((n,l)=>n+l.n,0)>(expected[id]||0)+1e-6)return false;
   }
  }
- return !s.trip?.foodLots||(valid(s.trip.foodLots)&&(!materials[s.trip.material]||s.trip.foodLots.reduce((n,l)=>n+l.n,0)<=materials[s.trip.material].quantity+1e-6));
+ return [...activeTrips(s),s.delivery].filter(Boolean).every(t=>!t.foodLots||(valid(t.foodLots)&&(!materials[t.material]||t.foodLots.reduce((n,l)=>n+l.n,0)<=materials[t.material].quantity+1e-6)));
 }
 export function foodStorageText(s){
  if(s.mode==='sandbox')return 'Food spoilage is disabled in sandbox.';

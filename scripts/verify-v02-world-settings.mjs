@@ -9,8 +9,8 @@ for(const biome of OPTIONS.biome)for(const preset of Object.values(PRESETS)){
  assert(restore(save(s)));assert.deepEqual(settingsFor(s.landSeed),settings);chooseCamp(s,'clearing');s.money=1000;
  assert(supplyRun(s,'wood'));assert.equal(s.trip.duration,townDuration(settings.town));assert(restore(save(s)));
 }
-const tight=applySettings(createWeekend(55),{...DEFAULT_SETTINGS,savings:'tight',supplies:'essentials'});assert.equal(tight.money,100);assert.equal(tight.wood,22);
-const rich=applySettings(createWeekend(56),{...DEFAULT_SETTINGS,savings:'comfortable',supplies:'prepared'});assert.equal(rich.money,600);assert.equal(rich.wood,61);
+const tight=applySettings(createWeekend(55),{...DEFAULT_SETTINGS,savings:'tight',supplies:'essentials'});assert.equal(tight.money,500);assert.equal(tight.wood,22);
+const rich=applySettings(createWeekend(56),{...DEFAULT_SETTINGS,savings:'comfortable',supplies:'prepared'});assert.equal(rich.money,6000);assert.equal(rich.wood,61);
 registerWorld(777,{...DEFAULT_SETTINGS,landscape:'gentle',resources:'sparse'});const low=elevationVertex(80,50,777),sparse=resourceRichness(777,40,40);
 registerWorld(777,{...DEFAULT_SETTINGS,landscape:'rugged',resources:'rich'});assert(elevationVertex(80,50,777)>low);assert(resourceRichness(777,40,40)>sparse);
 console.log('PASS: all biome/preset combinations persist; savings/supplies, terrain, resource richness and configured trips');

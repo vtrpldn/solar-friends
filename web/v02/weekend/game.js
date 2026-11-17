@@ -1,3 +1,5 @@
+import {activeTrips} from "./trip-state.js";
+import {setOutsideWork,outsideWorkText} from "./outside-work.js";
 import {constructionSpecText} from './construction-specs.js';
 import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
@@ -1567,6 +1569,8 @@ function renderUI() {
                 actionText[r.action] ||
                 "Settling in";
     if(r.job && r.cargo && r.haulLoads) status.textContent = `Carrying ${r.haulLoads} load${r.haulLoads===1?'':'s'} to ${r.haulStage==='storage'?'nearby storage':PROJECTS[s.projects.find(p=>p.id===r.job)?.key]?.name || 'the building site'}`;
+    if(r.action==='service')status.textContent='Servicing village equipment';
+    if(r.outsideWork)status.textContent=r.outsideWork.phase==='away'?'Working in town':'Commuting to/from work';
     if(r.needBlocked && !r.needTask) status.textContent += ` · ${r.needBlocked}`;
     status.className = "resident-status";
     const needs=document.createElement('div');
@@ -1604,6 +1608,8 @@ function renderUI() {
       if(residentTab==='Overview'){
         const activity=document.createElement('div');activity.className='resident-activity';activity.textContent=status.textContent;detail.append(activity);
         paragraph('Needs','h3');detail.append(needs);
+        paragraph('Outside work','h3');paragraph(outsideWorkText(r));
+        const jobToggle=document.createElement('button');jobToggle.textContent=r.outsideJobEnabled?'Outside work: on':'Outside work: off';jobToggle.setAttribute('aria-pressed',String(!!r.outsideJobEnabled));jobToggle.onclick=()=>{setOutsideWork(s,r,!r.outsideJobEnabled);uiSignature='';renderUI();};detail.append(jobToggle);
         paragraph('About '+r.name,'h3');paragraph(profile.bio);
         paragraph(profile.effect);paragraph(`Enjoys ${profile.hobby.toLowerCase()}.`);
       } else if(residentTab==='Skills'){
@@ -1634,7 +1640,7 @@ function renderUI() {
   $("town").textContent =
     `Fetch ${materialText($("purchase").value, purchase.quantity)} · R$${purchase.price + transportCost(s)} incl. trip`;
   $("town").disabled =
-    !!s.trip || spendableMoney(s) < purchase.price + transportCost(s) || s.stage !== "playing";
+    (s.deliveryOnly?!!s.delivery:(!!s.trip&&!!s.secondTrip)) || spendableMoney(s) < purchase.price + transportCost(s) || s.stage !== "playing";
   $("inventory").textContent = Object.keys(MATERIALS)
     .map((id) => materialText(id, materialCount(s, id)))
     .join(" · ");
@@ -1778,10 +1784,8 @@ function frame(now) {
     if (entry.fire) animateFire(entry.fire, animalTime + id * 2.73);
   entrance.position.copy(world(s.stock.x, s.stock.z));
   for (const [index, vehicle] of vehicles.entries()) {
-      const trip = s.trip && {
-        ...s.trip,
-        left: s.trip.left + (s.time - visual.time),
-      };
+      const current=activeTrips(s).find(t=>t.vehicle===index);
+      const trip=current&&{...current,left:current.left+(s.time-visual.time)};
       const pose = s.arrivalAnimating ? {...vehiclePose(arrivalTime,index),visible:true} : townCarPose(trip, index);
       vehicle.root.visible = pose.visible;
       vehicle.root.position.set(pose.x, 0, pose.z);
@@ -1799,9 +1803,9 @@ function frame(now) {
       animateResident(g.rig,pose.walking?'walk':'idle',arrivalTime+i*.7,paused?0:dt*speed);
       continue;
     }
-    g.visible =
+    g.visible = r.outsideWork?.phase!=='away' &&
       (r.action !== "town" ||
-        ["boarding", "unloading"].includes(s.trip?.phase)) &&
+        ["boarding", "unloading"].includes(activeTrips(s).find(t=>t.person===r.id)?.phase)) &&
       r.tentPhase !== "inside" &&
       !(r.needTask?.private && r.needTask.elapsed > 1 && r.needTask.elapsed < r.needTask.duration-1);
     if (r.tentPhase) {

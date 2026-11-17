@@ -1,3 +1,9 @@
+import {orderDelivery,deliveryStep,validDelivery} from "./deliveries.js";
+import {activeTrips,uncollectedProjects} from "./trip-state.js";
+import {upkeepStep,performUpkeep,recordVehicleDistance,validUpkeep,ANIMAL_CARE} from "./asset-upkeep.js";
+import {tripEstimate,STARTING_CAPITAL} from "./economy-reference.js";
+import {BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology} from "./biological-production.js";
+import {outsideWorkStep,validOutsideWork} from "./outside-work.js";
 import {coolStoredFood} from './cold-storage.js';
 import {foodChange,freshLots,foodStorageStep,validFoodStorage,returnUnsoldFood,FOOD_DAYS} from './food-storage.js';
 import {recordProduction,validProductionAccounting} from './production-accounting.js';
@@ -390,7 +396,7 @@ function maintainFood(s) {
     if(recipe&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))queueProduction(s,p.id,recipe[0]);
   }
   // A visible, switchable emergency policy, paid from real savings, at most once a day.
-  if(s.emergencyFood!==false && !s.trip && s.time>=(s.nextFoodTrip||0) && supplyRun(s,'food')) {
+  if(s.emergencyFood!==false && activeTrips(s).length<2 && s.time>=(s.nextFoodTrip||0) && supplyRun(s,'food')) {
     s.nextFoodTrip=s.time+3200;
     say(s,'Food reserve is low: the community bought emergency ingredients. Change this policy in Resources.');
   }
@@ -404,6 +410,9 @@ export function maintainWater(s) {
     if((fresh?n.water[0]:Math.max(n.water[0],n.water[1]))>=recipe.water)continue;
     if(fresh&&n.water[1]>=1&&n.capacity[0])queuePurification(s,n.id);
     else if(n.capacity[1])queueWater(s,-1,n.id,'irrigation');
+  }
+  for(const job of s.upkeep?.jobs||[]){const care=ANIMAL_CARE[job.care],n=sys.nodes[job.target];if(!care||job.done||!n||n.water[0]>=care.water||s.operations?.some(o=>!o.done&&o.water&&o.site===n.id))continue;
+    const source=Object.values(sys.nodes).filter(a=>a.id!==n.id&&a.water[0]>=1).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];if(source)queueWater(s,source.id,n.id,'fresh');
   }
   for(const n of Object.values(sys.nodes)) {
     if(n.maintainFresh && n.capacity[0] && n.capacity[1] && n.water[0]<drinkingReserve(s,n)-Math.min(12,drinkingReserve(s,n)*.25) &&
@@ -452,7 +461,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
         !["rest", "town"].includes(other.action),
     );
   const eligible = (op) => {
-    if (op.done || reserved(op) || (waterOnly && !op.water) || (group && workGroup(op,PROCESSES)!==group)) return false;
+    if (op.done || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group && workGroup(op,PROCESSES)!==group)) return false;
     if (op.water || op.phase === "return") return true;
     const node = sys.nodes[op.site],
       recipe = PROCESSES[op.recipe];
@@ -601,7 +610,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     r.cargo = true;
     op.status = op.returnItems ? "Returning usable remains after spoilage" : "Carrying output to storage";
     if (!go(s, r, supplySpot(s, r, i))) return true;
-    const returned=op.returnItems||recipe.output;
+    const returned=op.returnItems||op.harvestOutput||recipe.output;
     const total = Object.values(returned).reduce((a, b) => a + b, 0);
     if (storedMaterials(s) + total > storageCapacity(s)) {
       op.status = "Storage full; output is still carried";
@@ -677,15 +686,17 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   op.work += dt * workMultiplier(r,p.key) * (node.power > 0.99 && recipe.kind === "workshop" ? 2 : 1);
   r.work += dt;
   r.energy = Math.max(0, r.energy - dt * 0.12);
+  if(op.work>=recipe.work*.5 && beginBiology(s,op,r))return true;
   if (op.work >= recipe.work) {
+    if(BIOLOGY[op.recipe])op.harvestOutput=harvestOutput(s,op,recipe);
     recordProduction(s,op.recipe,recipe);
-    op.foodOutput=Object.fromEntries(Object.entries(recipe.output).filter(([id])=>FOOD_DAYS[id]).map(([id,n])=>[id,freshLots(s,id,n,recipe)]));
+    op.foodOutput=Object.fromEntries(Object.entries(op.harvestOutput||recipe.output).filter(([id,n])=>FOOD_DAYS[id]&&n>0).map(([id,n])=>[id,freshLots(s,id,n,recipe)]));
     if(recipe.kind==='wild-tree'){p.felled=true;invalidateNavigation(s);}
     if(op.recipe==='cold_storage'){p.coldStorage=true;p.coolingEnabled=true;}
     if(op.recipe==='solar_upgrade')p.solarUpgrade=true;
     op.phase = "return";
     r.target = null;
-    p.readyAt = s.time + (recipe.renew || 0);
+    p.readyAt = s.time + (BIOLOGY[op.recipe] ? 0 : recipe.renew || 0);
     p.extracted = (p.extracted || 0) + output;
     op.work = recipe.work;
   }
@@ -725,19 +736,15 @@ export function blueprintPurchase(s, key, count = 1) {
   return {items, cost, transport, error: cost + transport > s.money ? `Missing materials cost R$${cost.toFixed(2)} plus R$${transport.toFixed(2)} committed to ${budget.trips} collection trips; shared savings are too low.` : ""};
 }
 function dispatchBlueprintPickup(s) {
-  const pending = s.projects.filter(p => p.pendingMaterials);
-  if (!pending.length) return;
-  if(s.trip){
-    if(s.trip.phase==="boarding"&&s.trip.shipments){
-      s.trip.shipments=blueprintManifest(pending);
-      s.trip.projects=s.trip.shipments.map(p=>p.project);
-    }
-    return;
+  if(s.deliveryOnly){const pending=uncollectedProjects(s);if(pending.length)orderDelivery(s,Object.keys(pending[0].pendingMaterials)[0],pending[0],MATERIALS,storedMaterials(s),storageCapacity(s));return;}
+  for(const trip of activeTrips(s))if(trip.phase==='boarding'&&trip.shipments){
+    trip.shipments=blueprintManifest(uncollectedProjects(s,trip));trip.projects=trip.shipments.map(p=>p.project);
   }
-  const shipments=blueprintManifest(pending);if(!shipments.length)return;
+  if(activeTrips(s).length>=2)return;
+  const shipments=blueprintManifest(uncollectedProjects(s));if(!shipments.length)return;
   const first=s.projects.find(p=>p.id===shipments[0].project);
   if(supplyRun(s,Object.keys(shipments[0].items)[0],first)){
-    s.trip.shipments=shipments;s.trip.projects=shipments.map(p=>p.project);
+    const trip=s.secondTrip||s.trip;trip.shipments=shipments;trip.projects=shipments.map(p=>p.project);
   }
 }
 export function requiredLoads(key) {
@@ -766,7 +773,7 @@ export function createWeekend(landSeed = 0) {
     arrivalElapsed: ARRIVAL_DURATION,
     camp: null,
     time: 0,
-    money: 220,
+    money: STARTING_CAPITAL.modest,
     wood: 36,
     materials: {
       ...Object.fromEntries(
@@ -1090,7 +1097,7 @@ export function plan(s, key, x, z, rotation = 0) {
       : `${def.name} planned. Materials reserved; friends will bring them over.`,
   );
   dispatchBlueprintPickup(s);
-  if(!s.trip && pendingExports(s).length && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
+  if(activeTrips(s).length<2 && pendingExports(s).length && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
   return "";
 }
 export function planRoadLine(s, from, to) {
@@ -1166,8 +1173,17 @@ export function prioritize(s, id) {
     "The group will pick up this project next. Current carrying trips finish first.",
   );
 }
-export function supplyRun(s, material = "wood", project = null, saleOnly = false) {
-  const item = MATERIALS[material];
+export function supplyRun(s,material="wood",project=null,saleOnly=false){
+ if(s.deliveryOnly&&!saleOnly)return orderDelivery(s,material,project,MATERIALS,storedMaterials(s),storageCapacity(s));
+ if(s.trip&&s.secondTrip)return false;
+ if(!s.trip)return startSupplyRun(s,material,project,saleOnly);
+ const first=s.trip;s.trip=null;s.secondTrip=first;let second=null,result=false;
+ try{result=startSupplyRun(s,material,project,saleOnly);second=s.trip;}
+ finally{s.trip=first;s.secondTrip=second;}
+ return result;
+}
+function startSupplyRun(s, material = "wood", project = null, saleOnly = false) {
+  const item = MATERIALS[material],fare=transportCost({...s,deliveryOnly:false});
   if (
     !item ||
     !item.quantity ||
@@ -1175,17 +1191,19 @@ export function supplyRun(s, material = "wood", project = null, saleOnly = false
     (!project && !saleOnly && storedMaterials(s) + item.quantity > storageCapacity(s)) ||
     s.stage !== "playing" ||
     s.trip ||
-    (project ? s.money : spendableMoney(s)) < (project || saleOnly ? 0 : item.price) + transportCost(s)
+    (project ? s.money : spendableMoney(s)) < (project || saleOnly ? 0 : item.price) + fare
   )
     return false;
-  const vehicle = s.nextTripVehicle || 0;
+  const vehicle=[s.nextTripVehicle||0,1-(s.nextTripVehicle||0)].find(i=>s.secondTrip?.vehicle!==i&&(s.upkeep?.vehicles[i]?.condition??100)>10);
+  if(vehicle===undefined)return false;
   const r = s.people
-    .filter((r) => r.energy > 35 && !r.cargo && !r.tentPhase && !r.needTask && Object.entries(ensureNeeds(r)).every(([key,value])=>["food","meals"].includes(material)?(!['bladder','bowels','hygiene'].includes(key)||value>10):value>25))
+    .filter((r) => r.energy > 35 && r.action!=='town' && !r.outsideWork && !r.cargo && !r.tentPhase && !r.needTask && Object.entries(ensureNeeds(r)).every(([key,value])=>["food","meals"].includes(material)?(!['bladder','bowels','hygiene'].includes(key)||value>10):value>25))
     .sort((a, b) => b.energy - a.energy)
     .find(r => route(s, r, carDoor(vehicle)));
   if (!r) return false;
   if (!project && !saleOnly) transact(s,-item.price,"purchases",`Bought ${item.quantity} ${item.name}`);
-  transact(s,-transportCost(s),"transport","Town trip fuel");
+  transact(s,-fare,"transport","Town trip fuel");
+  recordVehicleDistance(s,vehicle,tripEstimate(s.worldSettings?.town).km);
   s.nextTripVehicle = 1 - vehicle;
   s.trip = {
     person: r.id,
@@ -1804,9 +1822,12 @@ function tickUncached(s, dt) {
   if (s.mode === "sandbox") sandboxSupplies(s);
   s.time += dt;
   autoConnectUtilities(s, PROJECTS);
+  upkeepStep(s,PROJECTS,dt);
   infrastructureStep(s, PROJECTS, dt);
+  biologicalStep(s,dt);
   coolStoredFood(s,dt);
   foodStorageStep(s,PROCESSES,MATERIALS);
+  deliveryStep(s,dt,MATERIALS,changeMaterial,storedMaterials(s),storageCapacity(s));
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
   maintainFood(s);
   maintainWater(s);
@@ -1819,12 +1840,13 @@ function tickUncached(s, dt) {
   }
 
   for (const [i,r] of s.people.entries()) {
+    if(r.outsideWork?.phase==='away')continue;
     decayNeeds(s,r,i,dt);
     // Being awake is tiring even when no construction is underway.
     if(r.tentPhase !== 'inside') r.energy=Math.max(0,r.energy-dt*.035);
     const hours=9+s.time*.45/60, hour=hours%24, bedtime=21+(i%4)*.45;
     const sleepNight=Math.floor((hours-5)/24);
-    if(!r.sleepUntil && !r.needTask && Math.min(r.needs.bladder,r.needs.bowels)>20 && (r.needs.hunger>20 || !(s.materials.food+s.materials.meals)) && r.sleepNight!==sleepNight && (hour>=bedtime || hour<5) && !r.cargo && r.action!=='town') {
+    if(!r.sleepUntil && !r.needTask && Math.min(r.needs.bladder,r.needs.bowels)>20 && (r.needs.hunger>20 || !(s.materials.food+s.materials.meals)) && r.sleepNight!==sleepNight && (hour>=bedtime || hour<5) && !r.cargo && r.action!=='town' && !r.outsideWork) {
       r.sleepNight=sleepNight;
       r.sleepUntil=s.time+(6+3*(1-r.energy/100))*60/.45;
       r.job=null;r.operation=null;r.walk=[];r.target=null;r.action='rest';
@@ -1852,10 +1874,9 @@ function tickUncached(s, dt) {
     },
   };
   dispatchBlueprintPickup(s);
-  if(!s.trip && pendingExports(s).length && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
-  if (s.trip) {
-    const trip = s.trip,
-      r = s.people.find((r) => r.id === trip.person);
+  if(activeTrips(s).length<2 && pendingExports(s).length && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
+  for (const trip of activeTrips(s)) {
+    const r = s.people.find((r) => r.id === trip.person);
     if (trip.phase === "boarding" || trip.phase === "unloading") {
       const target =
         trip.phase === "boarding"
@@ -1894,7 +1915,7 @@ function tickUncached(s, dt) {
           returnUnsoldFood(s,trip);
           r.action = "idle";
           r.cargo = false;
-          s.trip = null;
+          if(s.trip===trip)s.trip=null;else s.secondTrip=null;
           say(
             s,
             trip.foodSpoiled ? `${r.name} returned; the purchased food spoiled during the trip.` : trip.saleOnly ? `${r.name} returned from selling the village surplus.` : project ? `${r.name} unloaded reserved materials for ${orders.length === 1 ? PROJECTS[project.key].name : `${orders.length} projects`}. Any remaining materials will follow on another trip.` : `${r.name} unloaded ${item.quantity} ${item.name} from the car.`,
@@ -1920,6 +1941,7 @@ function tickUncached(s, dt) {
       }
     }
   }
+  if(!s.trip&&s.secondTrip){s.trip=s.secondTrip;s.secondTrip=null;}
   if (
     s.stage === "playing" &&
     (s.opening && !s.opening.complete
@@ -1952,6 +1974,7 @@ function tickUncached(s, dt) {
   if (s.rainResolved && s.time > (s.rainAt ?? 150) + 35) s.rain = false;
   for (const [i, r] of s.people.entries()) {
     if (r.action === "town") continue;
+    if(r.outsideWork?.phase==='away'){outsideWorkStep(s,r,dt,go,route);continue;}
     const urgent=Math.min(r.needs.bladder,r.needs.bowels)<10 || (r.needs.hunger<15 && s.materials.food+s.materials.meals>=1);
     if((r.sleepUntil || r.tentPhase==='inside') && urgent) {
       if(r.sleepUntil)r.resumeSleepUntil=r.sleepUntil;
@@ -2099,12 +2122,14 @@ function tickUncached(s, dt) {
     }
     // Finish an assigned batch before reconsidering work categories. Otherwise
     // changing availability can shuffle the reserved slots on every tick.
+    if(outsideWorkStep(s,r,dt,go,route))continue;
+    if(r.energy>=25&&performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot))continue;
     const activeOperation=s.operations?.find(o=>o.id===r.operation&&!o.done);
     if(activeOperation && !r.job && operationalWork(s,r,i,dt,false,workGroup(activeOperation,PROCESSES))) continue;
     // Needs and completed carrying trips always win. Reserve available people,
     // not fixed residents who might be asleep, for essential and income work.
     const priorities=economyPolicies(s).work;
-    const ready=s.people.filter(a=>a.energy>=25&&!a.tentPhase&&!a.sleepUntil&&!a.needTask&&!a.cargo&&a.action!=='town');
+    const ready=s.people.filter(a=>a.energy>=25&&!a.tentPhase&&!a.sleepUntil&&!a.needTask&&!a.cargo&&a.action!=='town'&&!a.outsideWork);
     const slot=ready.indexOf(r),essential=slot>=0&&slot<(priorities.essentialWorkers??1),producer=slot>=0&&slot>=(priorities.essentialWorkers??1)&&slot<(priorities.essentialWorkers??1)+(priorities.productionWorkers??1);
     let serviced=false;
     for(const group of ['food','maintenance','production'].sort((a,b)=>(priorities[b]??2)-(priorities[a]??2))){
@@ -2399,10 +2424,12 @@ export function restore(text) {
           !Object.keys(p.pendingMaterials).length || Object.entries(p.pendingMaterials).some(([id,n]) =>
             !Number.isInteger(n) || n <= 0 || !recipe[id] || n > recipe[id]))) return null;
     }
-    if (s.trip?.project !== undefined && !s.projects.some(p => p.id === s.trip.project && p.pendingMaterials)) return null;
-    if (s.trip?.projects !== undefined && (!Array.isArray(s.trip.projects) ||
-        !s.trip.projects.includes(s.trip.project) || new Set(s.trip.projects).size !== s.trip.projects.length ||
-        s.trip.projects.some(id=>!s.projects.some(p=>p.id===id && p.pendingMaterials)))) return null;
+    for(const trip of activeTrips(s)){
+    if (trip?.project !== undefined && !s.projects.some(p => p.id === trip.project && p.pendingMaterials)) return null;
+    if (trip?.projects !== undefined && (!Array.isArray(trip.projects) ||
+        !trip.projects.includes(trip.project) || new Set(trip.projects).size !== trip.projects.length ||
+        trip.projects.some(id=>!s.projects.some(p=>p.id===id && p.pendingMaterials)))) return null;
+    }
     const ids = new Set(),
       keys = new Set();
     for (const p of s.projects) {
@@ -2497,35 +2524,37 @@ export function restore(text) {
       r.toiletSite = null;
       r.toiletTime = 0;
       r.action =
-        s.trip?.person === r.id ? "town" : r.tentPhase ? "rest" : "idle";
+        activeTrips(s).some(t=>t.person===r.id) ? "town" : r.tentPhase ? "rest" : "idle";
       r.name = fresh.people[i].name;
     }
+    if(s.secondTrip&&(!s.trip||s.secondTrip.person===s.trip.person||s.secondTrip.vehicle===s.trip.vehicle))return null;
+    if (s.nextTripVehicle !== undefined && ![0, 1].includes(s.nextTripVehicle)) return null;
+    for(const trip of activeTrips(s)) {
     if (
-      s.trip &&
-      (!Object.hasOwn(MATERIALS, s.trip.material) ||
-        !s.people.some((r) => r.id === s.trip.person) ||
-        !Number.isFinite(s.trip.left) ||
-        s.trip.left < 0 ||
-        s.trip.left > (s.trip.duration||TRIP_DURATION) ||
-        (s.trip.duration!==undefined && ![45,55,110,...['nearby','drive','remote'].map(townDuration)].includes(s.trip.duration)))
+      trip &&
+      (!Object.hasOwn(MATERIALS, trip.material) ||
+        !s.people.some((r) => r.id === trip.person) ||
+        !Number.isFinite(trip.left) ||
+        trip.left < 0 ||
+        trip.left > (trip.duration||TRIP_DURATION) ||
+        (trip.duration!==undefined && ![45,55,110,...['nearby','drive','remote'].map(townDuration)].includes(trip.duration)))
     )
       return null;
-    if (s.nextTripVehicle !== undefined && ![0, 1].includes(s.nextTripVehicle))
-      return null;
-    if (s.trip) {
-      s.trip.vehicle ??= 0;
-      s.trip.phase ??= s.trip.left > DRIVE_DURATION ? "away" : "inbound";
+    if (trip) {
+      trip.vehicle ??= 0;
+      trip.phase ??= trip.left > DRIVE_DURATION ? "away" : "inbound";
       if (
-        ![0, 1].includes(s.trip.vehicle) ||
+        ![0, 1].includes(trip.vehicle) ||
         !["boarding", "outbound", "away", "inbound", "unloading"].includes(
-          s.trip.phase,
+          trip.phase,
         )
       )
         return null;
-      const r = s.people.find((r) => r.id === s.trip.person);
-      r.cargo = s.trip.phase === "unloading";
+      const r = s.people.find((r) => r.id === trip.person);
+      r.cargo = trip.phase === "unloading";
     }
-    if (!validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    }
+    if (!validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(
@@ -2547,7 +2576,7 @@ export function restore(text) {
         s.operations.some(
           (o) =>
             !s.infrastructure?.nodes[o.site] ||
-            !["pickup", "process", "deliver", "return"].includes(o.phase) ||
+            !["pickup", "process", "growing", "deliver", "return"].includes(o.phase) ||
             (o.water &&
               o.water.from !== -1 &&
               !s.infrastructure?.nodes[o.water.from]) ||
