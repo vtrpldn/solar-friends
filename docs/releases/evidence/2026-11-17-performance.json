@@ -181,5 +181,857 @@
       "textures": 1,
       "heapBytes": 21700000
     }
+  },
+  "nativeMetal": {
+    "before": [
+      {
+        "mode": "paused",
+        "sourceHash": "5247203cddb272ff246d73f5703c1219f469c77b39f9e91398c7a82a7ff42702",
+        "sourceRevision": "cb0f01a7",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+        "frames": 2304,
+        "meanMs": 8.676475694485822,
+        "p95Ms": 9.299999999999272,
+        "heapBytes": 116000000,
+        "readout": "118 callbacks/s \u00b7 118 renders/s \u00b7 0 motion updates/s \u00b7 p95 9 ms \u00b7 621 draw calls in last render \u00b7 235,102 triangles",
+        "top": [
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "ms": 10323.931
+          },
+          {
+            "function": "needsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1759,
+            "ms": 1695.794
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 13071,
+            "ms": 872.948
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "ms": 647.876
+          },
+          {
+            "function": "projectObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17696,
+            "ms": 484.795
+          },
+          {
+            "function": "frame",
+            "url": "v2/game.js",
+            "line": 2082,
+            "ms": 339.503
+          },
+          {
+            "function": "elevationVertex",
+            "url": "v2/elevation.js",
+            "line": 31,
+            "ms": 255.63
+          },
+          {
+            "function": "landParameters",
+            "url": "v2/land-layout.js",
+            "line": 17,
+            "ms": 211.867
+          },
+          {
+            "function": "projectObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17696,
+            "ms": 188.527
+          },
+          {
+            "function": "WebGLRenderer.renderBufferDirect",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17023,
+            "ms": 166.631
+          },
+          {
+            "function": "setup",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1623,
+            "ms": 160.363
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "ms": 159.849
+          },
+          {
+            "function": "setProgram",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 18220,
+            "ms": 147.243
+          },
+          {
+            "function": "syncBuildings",
+            "url": "v2/game.js",
+            "line": 532,
+            "ms": 131.461
+          },
+          {
+            "function": "intersectsFrustum",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 24299,
+            "ms": 124.846
+          },
+          {
+            "function": "sort",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 8004,
+            "ms": 121.201
+          },
+          {
+            "function": "bindVertexArray",
+            "url": "",
+            "line": 0,
+            "ms": 110.374
+          },
+          {
+            "function": "getBindingState",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1680,
+            "ms": 108.792
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 13071,
+            "ms": 102.774
+          },
+          {
+            "function": "markUniformsLightsNeedsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 18686,
+            "ms": 102.7
+          }
+        ]
+      },
+      {
+        "mode": "1x",
+        "sourceHash": "5247203cddb272ff246d73f5703c1219f469c77b39f9e91398c7a82a7ff42702",
+        "sourceRevision": "cb0f01a7",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+        "frames": 2366,
+        "meanMs": 8.4541420118343,
+        "p95Ms": 9.299999999999272,
+        "heapBytes": 116000000,
+        "readout": "117 callbacks/s \u00b7 117 renders/s \u00b7 117 motion updates/s \u00b7 p95 9 ms \u00b7 644 draw calls in last render \u00b7 235,166 triangles",
+        "top": [
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "ms": 9297.306
+          },
+          {
+            "function": "needsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1759,
+            "ms": 1389.643
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 13071,
+            "ms": 803.633
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "ms": 765.853
+          },
+          {
+            "function": "projectObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17696,
+            "ms": 451.436
+          },
+          {
+            "function": "setup",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1623,
+            "ms": 286.184
+          },
+          {
+            "function": "frame",
+            "url": "v2/game.js",
+            "line": 2082,
+            "ms": 251.87
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "ms": 205.852
+          },
+          {
+            "function": "WebGLRenderer.renderBufferDirect",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17023,
+            "ms": 198.927
+          },
+          {
+            "function": "elevationVertex",
+            "url": "v2/elevation.js",
+            "line": 31,
+            "ms": 187.292
+          },
+          {
+            "function": "landParameters",
+            "url": "v2/land-layout.js",
+            "line": 17,
+            "ms": 170.435
+          },
+          {
+            "function": "setProgram",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 18220,
+            "ms": 161.482
+          },
+          {
+            "function": "bindVertexArray",
+            "url": "",
+            "line": 0,
+            "ms": 118.367
+          },
+          {
+            "function": "landParameters",
+            "url": "v2/land-layout.js",
+            "line": 17,
+            "ms": 117.782
+          },
+          {
+            "function": "markUniformsLightsNeedsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 18686,
+            "ms": 113.371
+          },
+          {
+            "function": "landParameters",
+            "url": "v2/land-layout.js",
+            "line": 17,
+            "ms": 112.728
+          },
+          {
+            "function": "projectObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17696,
+            "ms": 110.607
+          },
+          {
+            "function": "getBindingState",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1680,
+            "ms": 101.631
+          },
+          {
+            "function": "multiplyMatrices",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 10564,
+            "ms": 101.117
+          },
+          {
+            "function": "intersectsObject",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 26073,
+            "ms": 97.233
+          }
+        ]
+      },
+      {
+        "mode": "16x",
+        "sourceHash": "5247203cddb272ff246d73f5703c1219f469c77b39f9e91398c7a82a7ff42702",
+        "sourceRevision": "cb0f01a7",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+        "frames": 2321,
+        "meanMs": 8.618052563591274,
+        "p95Ms": 9.300000000001091,
+        "heapBytes": 116000000,
+        "readout": "115 callbacks/s \u00b7 115 renders/s \u00b7 115 motion updates/s \u00b7 p95 9 ms \u00b7 652 draw calls in last render \u00b7 255,246 triangles",
+        "top": [
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "ms": 7209.263
+          },
+          {
+            "function": "needsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1759,
+            "ms": 1725.182
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "ms": 790.728
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 13071,
+            "ms": 753.665
+          },
+          {
+            "function": "projectObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17696,
+            "ms": 448.828
+          },
+          {
+            "function": "frame",
+            "url": "v2/game.js",
+            "line": 2082,
+            "ms": 308.353
+          },
+          {
+            "function": "setup",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1623,
+            "ms": 295.253
+          },
+          {
+            "function": "needsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1759,
+            "ms": 231.466
+          },
+          {
+            "function": "WebGLRenderer.renderBufferDirect",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17023,
+            "ms": 226.44
+          },
+          {
+            "function": "elevationVertex",
+            "url": "v2/elevation.js",
+            "line": 31,
+            "ms": 217.718
+          },
+          {
+            "function": "landParameters",
+            "url": "v2/land-layout.js",
+            "line": 17,
+            "ms": 211.693
+          },
+          {
+            "function": "setProgram",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 18220,
+            "ms": 206.144
+          },
+          {
+            "function": "getBindingState",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1680,
+            "ms": 151.389
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "ms": 150.396
+          },
+          {
+            "function": "bindVertexArray",
+            "url": "",
+            "line": 0,
+            "ms": 132.723
+          },
+          {
+            "function": "renderObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 9365,
+            "ms": 128.797
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 13071,
+            "ms": 118.442
+          },
+          {
+            "function": "setValueM4",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 5066,
+            "ms": 114.246
+          },
+          {
+            "function": "tickUncached",
+            "url": "v2/simulation.js",
+            "line": 2087,
+            "ms": 112.463
+          },
+          {
+            "function": "landParameters",
+            "url": "v2/land-layout.js",
+            "line": 17,
+            "ms": 111.864
+          }
+        ]
+      }
+    ],
+    "after": [
+      {
+        "mode": "paused",
+        "sourceHash": "4bb5fbdc3c21526c5b071520b5e5b1a68fadafd6eac06e86032e0f8b8b09da8c",
+        "sourceRevision": "working-tree",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+        "frames": 2401,
+        "meanMs": 8.331695126990684,
+        "p95Ms": 9.200000000000728,
+        "heapBytes": 81400000,
+        "readout": "120 callbacks/s \u00b7 0 renders/s \u00b7 0 motion updates/s \u00b7 p95 9 ms \u00b7 621 draw calls in last render \u00b7 235,102 triangles",
+        "top": [
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "ms": 19208.459
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "ms": 445.006
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "ms": 224.081
+          },
+          {
+            "function": "requestAnimationFrame",
+            "url": "",
+            "line": 0,
+            "ms": 30.613
+          },
+          {
+            "function": "frame",
+            "url": "v2/game.js",
+            "line": 2103,
+            "ms": 26.344
+          },
+          {
+            "function": "",
+            "url": "v2/performance.js",
+            "line": 16,
+            "ms": 16.468
+          },
+          {
+            "function": "",
+            "url": "",
+            "line": 1,
+            "ms": 13.705
+          },
+          {
+            "function": "updateSpeedButton",
+            "url": "v2/game.js",
+            "line": 1276,
+            "ms": 13.293
+          },
+          {
+            "function": "now",
+            "url": "v2/diagnostics.js",
+            "line": 5,
+            "ms": 11.023
+          },
+          {
+            "function": "updateWorldMatrix",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 47253,
+            "ms": 6.339
+          },
+          {
+            "function": "update",
+            "url": "v2/workshop/vendor/OrbitControls.js",
+            "line": 695,
+            "ms": 6.31
+          },
+          {
+            "function": "querySelectorAll",
+            "url": "",
+            "line": 0,
+            "ms": 5.349
+          },
+          {
+            "function": "invert",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 10737,
+            "ms": 5.058
+          },
+          {
+            "function": "requestAnimationFrame",
+            "url": "",
+            "line": 0,
+            "ms": 4.94
+          },
+          {
+            "function": "lookAt",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 10485,
+            "ms": 3.834
+          },
+          {
+            "function": "setFromCartesianCoords",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 57595,
+            "ms": 3.833
+          },
+          {
+            "function": "copy",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 10177,
+            "ms": 3.829
+          },
+          {
+            "function": "updateWorldMatrix",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 13120,
+            "ms": 3.812
+          },
+          {
+            "function": "now",
+            "url": "",
+            "line": 0,
+            "ms": 3.765
+          },
+          {
+            "function": "",
+            "url": "v2/performance.js",
+            "line": 16,
+            "ms": 3.648
+          }
+        ]
+      },
+      {
+        "mode": "1x",
+        "sourceHash": "4bb5fbdc3c21526c5b071520b5e5b1a68fadafd6eac06e86032e0f8b8b09da8c",
+        "sourceRevision": "working-tree",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+        "frames": 2401,
+        "meanMs": 8.328488129886296,
+        "p95Ms": 9.200000000000728,
+        "heapBytes": 81400000,
+        "readout": "120 callbacks/s \u00b7 120 renders/s \u00b7 120 motion updates/s \u00b7 p95 9 ms \u00b7 656 draw calls in last render \u00b7 235,406 triangles",
+        "top": [
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "ms": 8085.431
+          },
+          {
+            "function": "needsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1759,
+            "ms": 1801.012
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 13071,
+            "ms": 775.491
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "ms": 702.485
+          },
+          {
+            "function": "projectObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17696,
+            "ms": 469.295
+          },
+          {
+            "function": "setup",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1623,
+            "ms": 309.666
+          },
+          {
+            "function": "elevationVertex",
+            "url": "v2/elevation.js",
+            "line": 31,
+            "ms": 250.148
+          },
+          {
+            "function": "frame",
+            "url": "v2/game.js",
+            "line": 2103,
+            "ms": 234.565
+          },
+          {
+            "function": "WebGLRenderer.renderBufferDirect",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17023,
+            "ms": 232.74
+          },
+          {
+            "function": "landParameters",
+            "url": "v2/land-layout.js",
+            "line": 17,
+            "ms": 205.875
+          },
+          {
+            "function": "projectObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17696,
+            "ms": 196.773
+          },
+          {
+            "function": "needsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1759,
+            "ms": 179.817
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "ms": 177.998
+          },
+          {
+            "function": "setProgram",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 18220,
+            "ms": 177.945
+          },
+          {
+            "function": "bindVertexArray",
+            "url": "",
+            "line": 0,
+            "ms": 161.497
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 13071,
+            "ms": 153.94
+          },
+          {
+            "function": "intersectsObject",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 26073,
+            "ms": 148.151
+          },
+          {
+            "function": "renderObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 9365,
+            "ms": 140.139
+          },
+          {
+            "function": "landParameters",
+            "url": "v2/land-layout.js",
+            "line": 17,
+            "ms": 135.206
+          },
+          {
+            "function": "markUniformsLightsNeedsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 18686,
+            "ms": 124.573
+          }
+        ]
+      },
+      {
+        "mode": "16x",
+        "sourceHash": "4bb5fbdc3c21526c5b071520b5e5b1a68fadafd6eac06e86032e0f8b8b09da8c",
+        "sourceRevision": "working-tree",
+        "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+        "frames": 2393,
+        "meanMs": 8.358378604262446,
+        "p95Ms": 9.200000000000728,
+        "heapBytes": 81400000,
+        "readout": "120 callbacks/s \u00b7 120 renders/s \u00b7 120 motion updates/s \u00b7 p95 9 ms \u00b7 652 draw calls in last render \u00b7 255,246 triangles",
+        "top": [
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "ms": 6193.514
+          },
+          {
+            "function": "needsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1759,
+            "ms": 1563.686
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "ms": 772.552
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 13071,
+            "ms": 752.537
+          },
+          {
+            "function": "projectObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17696,
+            "ms": 506.774
+          },
+          {
+            "function": "setup",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1623,
+            "ms": 426.468
+          },
+          {
+            "function": "needsUpdate",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1759,
+            "ms": 332.649
+          },
+          {
+            "function": "WebGLRenderer.renderBufferDirect",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17023,
+            "ms": 318.18
+          },
+          {
+            "function": "elevationVertex",
+            "url": "v2/elevation.js",
+            "line": 31,
+            "ms": 243.564
+          },
+          {
+            "function": "landParameters",
+            "url": "v2/land-layout.js",
+            "line": 17,
+            "ms": 231.598
+          },
+          {
+            "function": "frame",
+            "url": "v2/game.js",
+            "line": 2103,
+            "ms": 230.775
+          },
+          {
+            "function": "projectObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 17696,
+            "ms": 229.789
+          },
+          {
+            "function": "setProgram",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 18220,
+            "ms": 200.242
+          },
+          {
+            "function": "renderObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 9365,
+            "ms": 196.968
+          },
+          {
+            "function": "intersectsObject",
+            "url": "v2/workshop/vendor/three.core.js",
+            "line": 26073,
+            "ms": 185.097
+          },
+          {
+            "function": "bindVertexArray",
+            "url": "",
+            "line": 0,
+            "ms": 179.973
+          },
+          {
+            "function": "querySelector",
+            "url": "",
+            "line": 0,
+            "ms": 166.333
+          },
+          {
+            "function": "setup",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 1623,
+            "ms": 160.802
+          },
+          {
+            "function": "renderObject",
+            "url": "v2/workshop/vendor/three.module.js",
+            "line": 9365,
+            "ms": 157.944
+          },
+          {
+            "function": "tickUncached",
+            "url": "v2/simulation.js",
+            "line": 2087,
+            "ms": 157.491
+          }
+        ]
+      }
+    ],
+    "farmDistant": {
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+      "detail": "distance",
+      "beds": 100,
+      "plants": 10000,
+      "withoutCrops": {
+        "frameMs": 8.736666667461396,
+        "cpuRenderMs": 0.221666685740153,
+        "drawCalls": 2,
+        "triangles": 72000,
+        "geometries": 2,
+        "textures": 1,
+        "heapBytes": 23100000
+      },
+      "withCrops": {
+        "frameMs": 8.378333330154419,
+        "cpuRenderMs": 0.21666666269302368,
+        "drawCalls": 3,
+        "triangles": 92000,
+        "geometries": 3,
+        "textures": 1,
+        "heapBytes": 23100000
+      }
+    },
+    "farmFullDetail": {
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Pro, Unspecified Version)",
+      "detail": "near",
+      "beds": 100,
+      "plants": 10000,
+      "withoutCrops": {
+        "frameMs": 7.948333334922791,
+        "cpuRenderMs": 0.1816666563351949,
+        "drawCalls": 2,
+        "triangles": 72000,
+        "geometries": 2,
+        "textures": 1,
+        "heapBytes": 23100000
+      },
+      "withCrops": {
+        "frameMs": 9.728333334128061,
+        "cpuRenderMs": 0.23500000635782878,
+        "drawCalls": 3,
+        "triangles": 1472000,
+        "geometries": 3,
+        "textures": 1,
+        "heapBytes": 23100000
+      }
+    }
   }
 }

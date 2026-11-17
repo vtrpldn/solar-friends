@@ -12,7 +12,7 @@ const s=JSON.parse(await readFile(process.env.PROFILE_SAVE||'docs/releases/evide
 s.view={...s.view,paused:true,speed:1};
 const source=process.env.PROFILE_GAME_REVISION?execFileSync('git',['show',`${process.env.PROFILE_GAME_REVISION}:web/v02/weekend/game.js`],{encoding:'utf8'}):await readFile('web/v02/weekend/game.js','utf8');
 const sourceHash=createHash('sha256').update(source).digest('hex');
-const server=await serve(),browser=await chromium.launch({headless:true,args:['--mute-audio']});
+const server=await serve(),browser=await chromium.launch({headless:true,args:['--mute-audio',...(process.env.SOLAR_RENDERER?[`--use-angle=${process.env.SOLAR_RENDERER}`]:[])]});
 try{
  const page=await browser.newPage({viewport:{width:1440,height:900}});
  await page.addInitScript(({key,save})=>{localStorage.setItem(key,save);localStorage.setItem('solar-friends-audio','{"music":0,"effects":0}');},{key:STORY_SAVE,save:JSON.stringify(s)});

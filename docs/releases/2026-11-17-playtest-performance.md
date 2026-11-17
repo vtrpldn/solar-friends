@@ -49,6 +49,14 @@ Fixed farm scene: 100 beds and 10,000 leafy-green plants, with shared geometry/m
 
 Distant crop triangles halved; no frame-time improvement was demonstrated for that change. Both detail levels add one draw call for 10,000 plants, rather than one per plant.
 
+## Native GPU measurements
+
+Explicit Metal rendering confirmed `ANGLE Metal Renderer: Apple M3 Pro`. The same village was already near the display limit: 16× mean frame time changed from 8.62 to 8.36 ms, with p95 remaining 9.3 versus 9.2 ms. Paused idle scene submissions fell from about 118/s to zero. These short samples support reduced idle work, not a large native frame-rate claim.
+
+The isolated 100-bed farm measured 8.38 ms with distant crops and 9.73 ms with full-detail crops (disabled: 8.74 and 7.95 ms respectively). Both add one draw call, from two to three. Full detail uses 1,472,000 total triangles; distant detail uses 92,000. Both retain three geometries, one texture and approximately 23.1 MB JS heap. The isolated scene excludes the full game’s shadow and simulation costs.
+
+Use `SOLAR_RENDERER=metal` with the profiling and farm commands to reproduce native measurements on supported macOS hosts. Default runs retain software rendering for comparison.
+
 ## Reproduction and evidence
 
 [Recorded production save](evidence/2026-11-17-production-save.json) and [machine-readable measurements](evidence/2026-11-17-performance.json) are retained. Full local profiles, screenshots and action logs are retained separately with the task artifacts.
