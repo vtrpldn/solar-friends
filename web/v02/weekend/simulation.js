@@ -1928,7 +1928,7 @@ function tickUncached(s, dt) {
   if (s.rainResolved && s.time > (s.rainAt ?? 150) + 35) s.rain = false;
   for (const [i, r] of s.people.entries()) {
     if(downtimeInvalid(s,r,PROJECTS)){clearDowntime(r);r.walk=[];r.target=null;}
-    if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.action==='town'))clearDowntime(r);
+    if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.outsideWork || r.action==='town'))clearDowntime(r);
     if (r.action === "town") continue;
     if(r.outsideWork?.phase==='away'){outsideWorkStep(s,r,dt,go,route);continue;}
     const urgent=Math.min(r.needs.bladder,r.needs.bowels)<10 || (r.needs.hunger<15 && s.materials.food+s.materials.meals>=1);

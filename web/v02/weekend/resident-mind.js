@@ -23,7 +23,7 @@ export function committed(r) {
 
 export function wantsConversation(s, r, initiator) {
   if (r === initiator || r.needTask || r.tentPhase || r.sleepUntil || r.action === 'rest' ||
-      r.action === 'town' || r.cargo || r.energy < 35 ||
+      r.action === 'town' || r.outsideWork || r.cargo || r.energy < 35 ||
       (r.mind?.quietUntil || 0) > s.time || PHYSICAL.some(k => r.needs?.[k] < 30)) return false;
   const operation=s.operations?.find(o=>o.id===r.operation && !o.done);
   if(operation && ['return','deliver'].includes(operation.phase))return false;

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {createWeekend,chooseCamp,tick,save,restore,PROJECTS,requiredLoads,enableFastNavigation,prioritize} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
-import {chooseNeed,advanceNeed,cancelNeed} from '../web/v02/weekend/resident-needs.js';
+import {chooseNeed,advanceNeed,cancelNeed,inviteConversation} from '../web/v02/weekend/resident-needs.js';
 import {PROFILES} from '../web/v02/weekend/resident-personality.js';
 import {wantsConversation,conversationFor,finishPersonalTime,workPreference,noticeAspiration,aspirationStatus} from '../web/v02/weekend/resident-mind.js';
 
@@ -101,3 +101,13 @@ for(const [id,key] of [['iara','orchard'],['luz','kitchen'],['bento','house']]){
  assert(restore(save(loaded)));
 }
 console.log('PASS resident agency: boundaries, mutual invitations, arrival, interruption, personal rhythms, shared interests, asymmetric memories, aspirations, bounded saves and real simulation continuation');
+
+// An outside shift cannot be hijacked by a village conversation or leisure visit.
+for(const phase of ['outbound','away','inbound']){
+ const s=fresh(),[a,b]=s.people;a.needs.social=5;b.needs.social=5;
+ b.outsideWork={phase};
+ assert.equal(wantsConversation(s,b,a),false);
+ assert.equal(inviteConversation(s,b,1,api),false);
+ b.needs.fun=5;chooseNeed(s,b,1,api);assert.equal(b.needTask,undefined);
+}
+console.log('PASS outside workers keep their commute and shift commitments');

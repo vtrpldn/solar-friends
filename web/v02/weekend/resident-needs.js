@@ -46,7 +46,7 @@ export function chooseNeed(s,r,i,api) {
  const n=ensureNeeds(r,i);
  const temperament=profileFor(r).temperament;
  const threshold=k=>k==='social' ? (committed(r)?35:temperament.socialAt) : k==='fun' ? temperament.breakAt : 30;
- const pending=NEED_KEYS.filter(k=>(r.energy>=25 || physical.includes(k)) && n[k]<threshold(k) &&
+ const pending=NEED_KEYS.filter(k=>(!r.outsideWork || physical.includes(k)) && (r.energy>=25 || physical.includes(k)) && n[k]<threshold(k) &&
    (k!=='social' || (r.mind?.quietUntil||0)<=s.time))
    .sort((a,b)=>(physical.includes(b)&&n[b]<15?1:0)-(physical.includes(a)&&n[a]<15?1:0)||n[a]/threshold(a)-n[b]/threshold(b));
  if(!pending.length){r.needBlocked=null;return;}
@@ -100,7 +100,7 @@ export function chooseNeed(s,r,i,api) {
 // Both needed and spontaneous conversations share the same consent, travel,
 // completion, and cancellation rules. Fireside invitations stay local.
 export function inviteConversation(s,r,i,api,{center=api.camp(),near=null,idleOnly=false}={}) {
- if(r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.action==='town' || r.energy<35 || (r.mind?.quietUntil||0)>s.time)return false;
+ if(r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.action==='town' || r.outsideWork || r.energy<35 || (r.mind?.quietUntil||0)>s.time)return false;
  for(const partner of conversationPartners(s,r)) {
   if(idleOnly && (committed(partner) || (partner.walk.length && !partner.downtime)))continue;
   if(near && Math.hypot(partner.x-near.x,partner.z-near.z)>4)continue;
