@@ -41,7 +41,7 @@ import { needMeters } from "./resident-needs.js";
 import { drapeRoadGeometry } from "./road-surface.js";
 import { terraform } from "./terraform.js";
 import { roadLine } from "./placement-helpers.js";
-import { prepareHouseLighting, updateHouseLighting } from "./house-lighting.js";
+import { prepareHouseLighting, updateHouseLighting, selectBuildingLights } from "./house-lighting.js";
 import { autoConnectUtilities } from "./auto-utilities.js";
 import { townCarPose } from "./town-trip.js";
 import { accessRoadAt } from "./road-layout.js";
@@ -465,24 +465,7 @@ function drawUtilities() {
         night * (sys.nodes[id]?.enabled ? sys.nodes[id]?.power || 0 : 0),
       );
   }
-  const lit = Object.values(sys.nodes)
-    .filter((n) =>
-      [
-        "streetlight",
-        "home",
-        "kitchen",
-        "workshop",
-        "shed",
-        "warehouse",
-        "square",
-      ].includes(n.kind),
-    )
-    .sort(
-      (a, b) =>
-        world(a.x, a.z).distanceToSquared(controls.target) -
-        world(b.x, b.z).distanceToSquared(controls.target),
-    )
-    .slice(0, 8);
+  const lit = selectBuildingLights(sys.nodes, buildings, controls.target, world);
   for (let index = 0; index < 8; index++) {
     let light = utilityLights[index];
     if (!light) {
@@ -496,23 +479,23 @@ function drawUtilities() {
       continue;
     }
     const p = s.projects.find((p) => p.id === n.id);
-    if (!p) continue;
+    if (!p) {
+      light.intensity = 0;
+      continue;
+    }
     light.position.copy(
       world(p.x + (footprint(p)[0] - 1) / 2, p.z + (footprint(p)[1] - 1) / 2),
     );
-    light.distance = n.kind === "home" ? 5 : 10;
-    if (n.kind === "home") {
-      const entry = buildings.get(p.id);
-      const spill =
-        entry?.houseLighting?.spill.clone() || new THREE.Vector3(0.8, 1.4, 2.1);
-      spill.applyAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        ((p.rotation || 0) * Math.PI) / 2,
-      );
-      light.position.add(spill);
+    const entry = buildings.get(p.id);
+    const hasWindows = entry?.houseLighting?.panes.length > 0;
+    light.distance = hasWindows ? 5 : 10;
+    if (hasWindows) {
+      const spill = entry.houseLighting.spill.clone();
+      entry.root.updateWorldMatrix(true, false);
+      light.position.copy(entry.root.localToWorld(spill));
     } else light.position.y += n.kind === "streetlight" ? 2.7 : 1.6;
     light.intensity =
-      night * (n.enabled ? n.power || 0 : 0) * (n.kind === "home" ? 3.5 : 12);
+      night * (n.enabled ? n.power || 0 : 0) * (hasWindows ? 3.5 : 12);
   }
 }
 const buildings = new Map();
@@ -625,7 +608,7 @@ function syncBuildings() {
         animals: collectAnimals(root),
         groundKey: `${p.x},${p.z},${p.rotation || 0}`,
       };
-      if (def.kind === "home" && fraction >= 1)
+      if (fraction >= 1)
         entry.houseLighting = prepareHouseLighting(root);
       buildings.set(p.id, entry);
     }
