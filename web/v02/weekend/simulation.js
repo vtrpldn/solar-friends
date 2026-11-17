@@ -2239,7 +2239,11 @@ function tickUncached(s, dt) {
     if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.outsideWork || r.action==='town'))clearDowntime(r);
     if (r.action === "town") continue;
     if(r.outsideWork?.phase==='away'){outsideWorkStep(s,r,dt,go,route);continue;}
-    const urgent=Math.min(r.needs.bladder,r.needs.bowels,r.needs.hydration)<10 || (r.needs.hunger<15 && foodPortions(s)>=1);
+    const canDrink=r.needs.hydration<10&&Object.values(s.infrastructure.nodes).some(n=>{
+      if(!n.enabled||n.water[0]<.5||['coop','goat_pasture'].includes(n.kind))return false;
+      const spot=utilitySpot(s,n,r);return spot&&route(s,r,spot);
+    });
+    const urgent=Math.min(r.needs.bladder,r.needs.bowels)<10 || canDrink || (r.needs.hunger<15 && foodPortions(s)>=1);
     if((r.sleepUntil || r.tentPhase==='inside') && urgent) {
       if(r.sleepUntil)r.resumeSleepUntil=r.sleepUntil;
       r.sleepUntil=null;
@@ -2543,7 +2547,7 @@ export function restore(text) {
       s.projects.length > 512
     )
       return null;
-    if(!validWeather(s)||!validHydrology(s)||!validAnimalCare(s))return null;
+    if(!validWeather(s)||!validHydrology(s)||!validAnimalCare(s,PROJECTS))return null;
     ensureHydrology(s);
     if(s.weather===undefined)weatherStep(s);
     if(!validGathering(s))return null;
@@ -2851,7 +2855,7 @@ export function restore(text) {
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     if(s.foodStorage?.lots)for(const id of ['greens','beans','corn'])if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
     refreshSandboxFood(s);
-    if (!validAnimalCare(s) || !validHydrology(s) || !validWeather(s) || !validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validAnimalCare(s,PROJECTS) || !validHydrology(s) || !validWeather(s) || !validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(

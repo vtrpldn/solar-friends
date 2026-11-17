@@ -1784,7 +1784,7 @@ function renderUI() {
     energy.textContent = `${lowest[0]} ${Math.round(lowest[1])}%`;
     const status = document.createElement("span");
     status.textContent = r.needTask
-      ? (r.needTask.elapsed>0 ? r.needTask.label : {hunger:"Getting something to eat",bladder:"Heading for a toilet break",bowels:"Heading for a toilet break",hygiene:r.needTask.river?"Walking to the river to wash":"Heading to wash up",social:"Meeting a friend",fun:"Taking a recreation break"}[r.needTask.kind])
+      ? (r.needTask.elapsed>0 ? r.needTask.label : {hydration:"Walking to drinking water",hunger:"Getting something to eat",bladder:"Heading for a toilet break",bowels:"Heading for a toilet break",hygiene:r.needTask.river?"Walking to the river to wash":"Heading to wash up",social:"Meeting a friend",fun:"Taking a recreation break"}[r.needTask.kind])
       : r.tentPhase === "exit"
         ? "Leaving " +
           (r.restSite

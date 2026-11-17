@@ -8,3 +8,13 @@ assert(packDrinkingWater(s,r,1));const before=n.water[0];r.needs.hydration=0;hyd
 n.water[0]=0;assert(!drinkWater(s,0,.5));r.needRetryAt=0;r.needs.hydration=0;chooseNeed(s,r,0,{...api,route:()=>null});assert(r.needBlocked.includes('potable'));
 r.action='build';s.weather.temperatureC=40;assert.equal(hydrationDemand(s,r),5);
 console.log('PASS individual demand, actual drinking, full sewage independence, trip reserves, no duplicate consumption and unreachable-source warning');
+{
+ const {createWeekend,chooseCamp,tick,enableFastNavigation,save,restore,PROJECTS}=await import('../web/v02/weekend/simulation.js');
+ const {syncInfrastructure}=await import('../web/v02/weekend/infrastructure.js');
+ const village=createWeekend(42);chooseCamp(village,'entrance');enableFastNavigation(village);
+ const camp=syncInfrastructure(village,PROJECTS).nodes[0];camp.water[0]=camp.water[1]=0;
+ for(const person of village.people){ensureNeeds(person);person.needs.hydration=0;person.energy=0;}
+ for(let i=0;i<64000;i++)tick(village,.1);
+ assert(village.people.every(person=>person.needs.hydration>15&&person.energy>15),'exhausted dehydrated residents rest, fetch, filter, and drink without injected water');
+ assert(restore(save(village)));console.log('PASS zero-energy, zero-hydration village recovers from empty tanks through ordinary care');
+}
