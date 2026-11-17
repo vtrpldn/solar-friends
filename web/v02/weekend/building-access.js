@@ -1,3 +1,4 @@
+import {FUNCTIONAL_PROGRAM} from '../library/functional-program.js';
 import {FUNCTIONAL_LAYOUTS, HOME_CHARACTER} from '../library/functional-layouts.js';
 import {METRES_PER_CELL} from '../library/scale.js';
 import { COMMUNITY } from '../library/community-defs.js';
@@ -7,13 +8,16 @@ const small={ 'rain-barrel':[.48,.425], 'wayfinding-sign':[.18,.18], 'tool-rack'
 export function accessGeometry(p,def,size) {
  const [w,d]=size,cx=p.x+(w-1)/2,cz=p.z+(d-1)/2;
  const completed=p.work>=def.work;
- let dimensions=completed&&small[p.key];
+ const propDimensions=completed&&small[p.key];
+ const layout=FUNCTIONAL_LAYOUTS[p.key];
+ const angle=(p.rotation||0)*Math.PI/2;
+ const shell=completed&&def.kind==='home'&&FUNCTIONAL_PROGRAM[p.key]?.shell;
+ let dimensions=propDimensions||(shell&&shell.map(n=>n/METRES_PER_CELL));
  if(dimensions&&(p.rotation||0)%2)dimensions=[dimensions[1],dimensions[0]];
  const open=completed&&['shed','rain-shelter'].includes(def.kind);
- const solids=open?[]:[{x:cx,z:cz,w:dimensions?.[0]||w,d:dimensions?.[1]||d}];
- const angle=(p.rotation||0)*Math.PI/2;
+ const offset=shell&&layout?.terrace?-1/METRES_PER_CELL:0;
+ const solids=open?[]:[{x:cx+Math.cos(angle)*offset,z:cz-Math.sin(angle)*offset,w:dimensions?.[0]||w,d:dimensions?.[1]||d}];
  const depth=(p.rotation||0)%2?w:d;
- const layout=FUNCTIONAL_LAYOUTS[p.key];
  const lateral=layout?(HOME_CHARACTER[p.key].doorX-(layout.terrace?1:0))/METRES_PER_CELL:0;
  const front={x:cx+Math.round(Math.sin(angle))*(depth+1)/2+Math.round(Math.cos(angle))*lateral,z:cz+Math.round(Math.cos(angle))*(depth+1)/2-Math.round(Math.sin(angle))*lateral};
  if(completed&&COMMUNITY[def.kind]?.sheltered&&!open){
@@ -22,7 +26,7 @@ export function accessGeometry(p,def,size) {
   else {rect.d=Math.max(0,d-1);rect.z-=rotation===0?.5:-.5;}
  }
  const doorway=['home','workshop','kitchen','wash-station','eco_toilet'].includes(def.kind);
- const work=dimensions?[{x:cx+Math.round(Math.sin(angle))*.75,z:cz+Math.round(Math.cos(angle))*.75}]:[front];
+ const work=propDimensions?[{x:cx+Math.round(Math.sin(angle))*.75,z:cz+Math.round(Math.cos(angle))*.75}]:[front];
  return {solids,entrances:doorway?[front]:[],work,delivery:[front],placement:{x:cx,z:cz,w,d}};
 }
 export function insideSolid(point,solid,radius=0) {
