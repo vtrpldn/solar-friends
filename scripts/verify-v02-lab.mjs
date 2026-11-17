@@ -23,3 +23,13 @@ for(const speed of [256,512,1024]){
  for(let i=0;i<Math.round(advanced*10);i++)tick(baseline,.1);assert.equal(save(state),save(baseline));
 }
 console.log('PASS 256x, 512x and 1024x retain fixed-step equivalence');
+const cached=createWeekend(51);chooseCamp(cached,'entrance');enableFastNavigation(cached);
+const ordinary=structuredClone(cached);
+for(const state of [cached,ordinary])state.projects.push({id:900,key:'shelter',x:38,z:10,rotation:0,work:0,delivered:0});
+for(const mutation of [p=>{},p=>p.x++,p=>p.z++,p=>p.rotation=1,p=>p.work=PROJECTS.shelter.work,p=>p.felled=true,p=>p.felled=false]){
+ for(const state of [cached,ordinary])mutation(state.projects.at(-1));
+ for(const to of [{x:38,z:10},{x:39,z:11},{x:40,z:12},{x:37,z:9}])assert.deepEqual(route(cached,cached.stock,to),route(ordinary,ordinary.stock,to));
+}
+for(const state of [cached,ordinary])state.projects.pop();
+assert.deepEqual(route(cached,cached.stock,{x:38,z:10}),route(ordinary,ordinary.stock,{x:38,z:10}));
+console.log('PASS exact cache invalidation for moves, rotation, completion, felling and removal');

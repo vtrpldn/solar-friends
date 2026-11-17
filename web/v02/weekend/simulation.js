@@ -301,8 +301,9 @@ export function productionBlocker(s, site, recipe) {
   if (def.deposit && (p.extracted || 0) >= depositCapacity(s.landSeed,p,def))
     return "This deposit is exhausted.";
   const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:2}:{})};
+  const starterSeeds=['vegetables','greenhouse'].includes(recipe)&&!p.starterSeedlingsUsed&&!p.harvestCount?Math.min(input.seedlings||0,projectMaterials(p,PROJECTS).seedlings||0):0;
   for (const [id, n] of Object.entries(input))
-    if (materialCount(s, id) < n) return `Missing ${n} ${id}.`;
+    if (materialCount(s, id) < n-(id==='seedlings'?starterSeeds:0)) return `Missing ${n} ${id}.`;
   if (p.key === "goat-pasture-empty" && !p.stocked) {
     if (materialCount(s, "goats") < 2)
       return "Bring 2 goats to stock this pasture.";
@@ -314,6 +315,7 @@ export function queueProduction(s, site, recipe) {
   if(error)return error;
   const p=s.projects.find(p=>p.id===Number(site)),def=PROCESSES[recipe];
   const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:2}:{})};
+  const starterSeeds=['vegetables','greenhouse'].includes(recipe)&&!p.starterSeedlingsUsed&&!p.harvestCount?Math.min(input.seedlings||0,projectMaterials(p,PROJECTS).seedlings||0):0;
   s.operations ??= [];
   if(s.operations.length>128)s.operations=[...s.operations.filter(o=>!o.done),...s.operations.filter(o=>o.done).slice(-32)];
   if(p.key==='goat-pasture-empty'&&!p.stocked) {
@@ -321,7 +323,8 @@ export function queueProduction(s, site, recipe) {
     p.stocked = true;
   }
   const foodInput={};
-  for (const [id,n] of Object.entries(input)){const lots=changeMaterial(s,id,-n,undefined,'production input');if(FOOD_DAYS[id])foodInput[id]=lots;}
+  for (const [id,n] of Object.entries(input)){const lots=changeMaterial(s,id,-(n-(id==='seedlings'?starterSeeds:0)),undefined,'production input');if(FOOD_DAYS[id])foodInput[id]=lots;}
+  if(starterSeeds)p.starterSeedlingsUsed=true;
   s.operations.push({
     id: (s.nextOperation = (s.nextOperation || 0) + 1),
     site: p.id,
@@ -1432,9 +1435,14 @@ const fastNavigationStates=new WeakSet(), navigationCaches=new WeakMap();
 let activeNavigation=null;
 export function enableFastNavigation(s){fastNavigationStates.add(s);}
 function prepareNavigation(s){
-  const signature=JSON.stringify([s.landSeed,s.worldSettings,s.camp,s.campSite,s.projects.map(p=>[p.id,p.key,p.x,p.z,p.rotation,p.felled,p.work>=PROJECTS[p.key].work,footprint(p)])]);
+  const campSignature=JSON.stringify([s.landSeed,s.worldSettings,s.camp,s.campSite]);
   let cache=navigationCaches.get(s);
-  if(cache?.signature!==signature){
+  let same=cache?.campSignature===campSignature&&cache.projects.length===s.projects.length;
+  if(same)for(let i=0;i<s.projects.length;i++){
+    const p=s.projects[i],old=cache.projects[i],[w,d]=footprint(p);
+    if(old.id!==p.id||old.key!==p.key||old.x!==p.x||old.z!==p.z||old.rotation!==p.rotation||old.felled!==p.felled||old.complete!==(p.work>=PROJECTS[p.key].work)||old.w!==w||old.d!==d){same=false;break;}
+  }
+  if(!same){
     const obstacles=new Map();
     for(const p of s.projects){
       if(p.felled||p.key==='road'||(p.key==='bridge'&&p.work>=PROJECTS[p.key].work))continue;
@@ -1445,7 +1453,7 @@ function prepareNavigation(s){
           }
       }
     }
-    cache={signature,state:s,cells:new Map(),terrain:new Map(),routes:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
+    cache={campSignature,projects:s.projects.map(p=>{const [w,d]=footprint(p);return {id:p.id,key:p.key,x:p.x,z:p.z,rotation:p.rotation,felled:p.felled,complete:p.work>=PROJECTS[p.key].work,w,d};}),state:s,cells:new Map(),terrain:new Map(),routes:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
   }
   return cache;
 }
