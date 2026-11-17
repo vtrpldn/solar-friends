@@ -36,8 +36,8 @@
       <div class="time">
         <span id="clock"></span>
         <div>
-          <button id="pause" aria-label="Pause simulation">Ⅱ</button
-          ><button id="speed">1×</button>
+          <button id="pause" data-shortcut="Space" aria-keyshortcuts="Space" aria-label="Pause simulation">Ⅱ</button
+          ><button id="speed" data-shortcut="1–4" aria-keyshortcuts="1 2 3 4">1×</button>
         </div>
       </div>
     </header>
@@ -108,7 +108,7 @@
       </details>
       <button id="toggle-building">Switch off</button>
       <button id="priority">Do this next</button
-      ><button id="focus-selection" title="F">Find in village</button
+      ><button id="focus-selection" data-shortcut="F" aria-keyshortcuts="F" title="F">Find in village</button
       ><button id="copy-building">Build another</button
       ><button id="move">Move building</button
       ><button id="close-selection" aria-label="Close project details">
@@ -126,7 +126,8 @@
           ><input
             id="build-search"
             type="search"
-            placeholder="Find something to build…"
+            placeholder="Find something to build…  /"
+            aria-keyshortcuts="/"
             aria-label="Find a building"
           /><button id="auto-buy" aria-pressed="true" title="Automatically purchase missing building materials when savings allow.">Auto-buy: on</button><button id="toggle-build-list">Close catalog</button>
         </div>
@@ -139,31 +140,31 @@
       </div>
       <nav id="village-actions" aria-label="Village actions" hidden>
         <button
-          data-panel-toggle="build"
+          data-panel-toggle="build" data-shortcut="B" aria-keyshortcuts="B"
           aria-controls="build"
           aria-expanded="false"
         >
           ⌂ Build
         </button>
         <button
-          data-panel-toggle="projects-panel"
+          data-panel-toggle="projects-panel" data-shortcut="J" aria-keyshortcuts="J"
           aria-controls="projects-panel"
           aria-expanded="false"
         >
           ▤ Projects
         </button>
         <button
-          data-panel-toggle="people"
+          data-panel-toggle="people" data-shortcut="N" aria-keyshortcuts="N"
           aria-controls="people"
           aria-expanded="false"
         >
           ♡ Residents
         </button>
-        <button data-panel-toggle="terrain-panel" aria-controls="terrain-panel" aria-expanded="false">△ Terrain</button>
+        <button data-panel-toggle="terrain-panel" data-shortcut="T" aria-keyshortcuts="T" aria-controls="terrain-panel" aria-expanded="false">△ Terrain</button>
         <span class="dock-divider"></span>
-        <button data-manage="resources">▰ Resources</button
-        ><button data-manage="water">♦ Water</button
-        ><button data-manage="power">ϟ Power</button>
+        <button data-manage="resources" data-shortcut="I" aria-keyshortcuts="I">▰ Resources</button
+        ><button data-manage="water" data-shortcut="U" aria-keyshortcuts="U">♦ Water</button
+        ><button data-manage="power" data-shortcut="P" aria-keyshortcuts="P">ϟ Power</button>
       <span class="dock-divider" aria-hidden="true"></span>
       <details class="view-menu">
         <summary>View &amp; options</summary>
@@ -174,22 +175,22 @@
             <p>
               <kbd>W A S D</kbd> Move around<br /><kbd>Q / E</kbd> Turn the
               view<br />Scroll to zoom · Drag to pan<br /><kbd>Space</kbd> Pause
-              / resume<br /><kbd>B</kbd> Build · <kbd>G</kbd> Grid ·
+              / resume<br /><kbd>1–4</kbd> Speed: 1× / 4× / 8× / 16×<br /><kbd>B</kbd> Build · <kbd>J</kbd> Projects · <kbd>N</kbd> Residents<br /><kbd>T</kbd> Terrain · <kbd>I</kbd> Resources<br /><kbd>U</kbd> Water · <kbd>P</kbd> Power · <kbd>M</kbd> Finances<br /><kbd>/</kbd> Search buildings or resources<br /><kbd>Home</kbd> Camp · <kbd>G</kbd> Grid ·
               <kbd>F</kbd> Focus<br /><kbd>R</kbd> Rotate building ·
               <kbd>Shift + R</kbd> Reverse<br /><kbd>Shift-click</kbd> Repeat
               building / extend road with a bend<br /><kbd>Esc</kbd> Cancel
               placement / close panel
             </p>
           </details>
-          <button id="rotate-left" aria-label="Rotate camera left" title="Q">
+          <button id="rotate-left" data-shortcut="Q" aria-keyshortcuts="Q" aria-label="Rotate camera left" title="Q">
             ↶</button
-          ><button id="rotate-right" aria-label="Rotate camera right" title="E">
+          ><button id="rotate-right" data-shortcut="E" aria-keyshortcuts="E" aria-label="Rotate camera right" title="E">
             ↷</button
           ><button id="zoom-out" aria-label="Zoom out">−</button
           ><button id="zoom-in" aria-label="Zoom in">+</button
-          ></div><div class="view-control-row location-row"><button id="home" title="Home · Center on camp">⌂ Camp</button
+          ></div><div class="view-control-row location-row"><button id="home" data-shortcut="Home" aria-keyshortcuts="Home" title="Home · Center on camp">⌂ Camp</button
           ><button id="river-view">River bend</button
-          ><button id="grid">Grid</button
+          ><button id="grid" data-shortcut="G" aria-keyshortcuts="G">Grid</button
           ></div><div class="view-control-row session-row"><button id="restart">New village</button
           ><button id="main-menu">Main menu</button><button id="saved-villages">Saved villages</button>
           </div><a href="../library/">Art collection ↗</a>
@@ -230,7 +231,7 @@
               <input
                 id="resource-search"
                 type="search"
-                placeholder="Find a resource…"
+                placeholder="Find a resource…  /" aria-keyshortcuts="/"
                 aria-label="Find a resource"
               />
             </div>

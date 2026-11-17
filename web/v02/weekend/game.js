@@ -1,3 +1,4 @@
+import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
 import {loadVillage} from './load-village.js';
 import {ensureNaturalLand} from './natural-resources.js';
 import {saveSlots} from "./save-slots.js";
@@ -999,50 +1000,64 @@ addEventListener("keyup", (e) => {
   }
 });
 addEventListener("keydown", (e) => {
-  const editing =
-    e.target.closest?.('input,textarea,select,[contenteditable="true"]') ||
-    $("management").open || $("people").open;
-  if (e.key === "Shift" && !editing) {
+  const dialogOpen = !!document.querySelector('dialog[open]');
+  const editing = e.target.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"])');
+  if (e.key === "Shift" && !editing && !dialogOpen) {
     shiftPlacement = true;
     updatePlacementPreview();
   }
-  if (!editing && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) {
-    if (e.code === "KeyB" && s.stage === "playing") {
+  // Escape belongs to the topmost dialog, including saves and confirmations.
+  if (e.key === "Escape" && !dialogOpen) {
+    if (editing && e.target.type === 'search' && e.target.value) {
       e.preventDefault();
-      setPanel(openPanel === "build" ? null : "build");
+      e.target.value = '';
+      e.target.dispatchEvent(new Event('input', {bubbles: true}));
+      return;
     }
-    if (e.code === "KeyG") {
-      e.preventDefault();
-      $("grid").click();
-    }
-    if (e.code === "KeyF") {
-      e.preventDefault();
-      if (selected) $("focus-selection").click();
-      else focus(campLocation(s));
-    }
-    if (e.code === "Space" && !e.target.closest?.("button,summary,a")) {
-      e.preventDefault();
-      $("pause").click();
-    }
-  }
-  if (
-    e.code === "KeyR" &&
-    placing &&
-    !e.repeat &&
-    !e.target.closest?.("input,textarea,select,dialog")
-  ) {
-    e.preventDefault();
-    rotatePlacement(e.shiftKey ? -1 : 1);
-  }
-  if (e.key === "Escape" && !$("management").open && !$("people").open) {
     if (placing) cancel();
-    else if (selected) {
-      selected = null;
-      uiSignature = "";
-      renderUI();
-    } else if (openPanel) setPanel(null);
+    else if (selected) { selected = null; uiSignature = ''; renderUI(); }
+    else if (openPanel) setPanel(null);
+    else document.querySelector('.view-menu').open = false;
+    $("world").focus({preventScroll: true});
+    return;
+  }
+  // Search remains available inside Resources, but never steals typed text.
+  if (e.code === 'Slash' && !e.shiftKey && !ignoreGameShortcut(e) &&
+      (!dialogOpen || $("management").open && management.view === 'resources')) {
+    e.preventDefault();
+    if (!dialogOpen) {
+      if (s.stage !== 'playing') return;
+      setPanel('build');
+    }
+    const input = $(dialogOpen ? 'resource-search' : 'build-search');
+    input.focus(); input.select();
+    return;
+  }
+  if (ignoreGameShortcut(e, dialogOpen)) return;
+  if (e.code === 'KeyR' && placing) {
+    e.preventDefault(); rotatePlacement(e.shiftKey ? -1 : 1); return;
+  }
+  if (e.shiftKey) return;
+  const panel = PANEL_SHORTCUTS[e.code], screen = MANAGEMENT_SHORTCUTS[e.code];
+  if ((panel || screen) && s.stage === 'playing') {
+    e.preventDefault();
+    $("world").focus({preventScroll: true});
+    if (panel) setPanel(openPanel === panel ? null : panel);
+    else management.open(screen);
+    if (!document.querySelector('dialog[open]')) $("world").focus({preventScroll: true});
+  } else if (SPEED_SHORTCUTS[e.code]) {
+    e.preventDefault(); setSpeed(SPEED_SHORTCUTS[e.code]);
+  } else if (e.code === 'KeyG') {
+    e.preventDefault(); $("grid").click();
+  } else if (e.code === 'KeyF') {
+    e.preventDefault();
+    if (selected) $("focus-selection").click();
+    else focus(campLocation(s));
+  } else if (e.code === 'Space' && !e.target.closest?.('button,summary,a')) {
+    e.preventDefault(); $("pause").click();
   }
 });
+
 $("town").onclick = () => {
   if (supplyRun(s, $("purchase").value)) {
     message(s.log[0]);
@@ -1073,10 +1088,12 @@ $("pause").onclick = () => {
   paused = !paused;
   updatePauseButton();
 };
-$("speed").onclick = () => {
-  speed = [1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4];
+function setSpeed(value) {
+  speed = value;
   $("speed").textContent = `${speed}×`;
-};
+  $("speed").setAttribute('aria-label', `Simulation speed ${speed}×. Keys 1 to 4 select speed.`);
+}
+$("speed").onclick = () => setSpeed([1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4]);
 $("home").onclick = () => focus(campLocation(s));
 $("river-view").onclick = () => focus(riverAccess(s.landSeed));
 $("rotate-left").onclick = () => navigation.rotate(-Math.PI / 2);
@@ -1477,6 +1494,7 @@ function renderUI() {
     $("supplies").children[i].querySelector("b").textContent =
       s.mode === "sandbox" && i < 3 ? "∞" : counter[1];
     const button=$("supplies").children[i],rate=trends?.[counter[0]]??null;
+    if (i === 0) { button.dataset.shortcut = 'M'; button.setAttribute('aria-keyshortcuts', 'M'); }
     const trend=button.querySelector('.resource-trend');
     const unlimited=s.mode==='sandbox'&&i<3;
     trend.textContent=unlimited?'Unlimited':formatTrend(rate,i===0);

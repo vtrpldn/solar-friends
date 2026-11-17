@@ -53,11 +53,12 @@ export function installCameraNavigation(
     ]);
   const editing = (event) =>
     event.target?.closest?.(
-      'input,textarea,select,[contenteditable="true"],dialog[open]',
+      'input,textarea,select,[contenteditable]:not([contenteditable="false"]),dialog[open]',
     ) || document.querySelector("dialog[open]");
   addEventListener("keydown", (event) => {
     if (
       !handled.has(event.code) ||
+      event.defaultPrevented || event.isComposing ||
       event.metaKey ||
       event.ctrlKey ||
       event.altKey ||
@@ -71,6 +72,7 @@ export function installCameraNavigation(
   });
   addEventListener("keyup", (event) => keys.delete(event.code));
   addEventListener("blur", () => keys.clear());
+  document.addEventListener("focusin", () => keys.clear());
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) keys.clear();
   });

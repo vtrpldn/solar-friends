@@ -725,6 +725,19 @@ img[data-art]:not(.ready) {
 .controls-help[open] > summary {
   margin: 0;
 }
+/* Muted hints stay attached to controls, including ones whose labels update. */
+[data-shortcut]::after {
+  content: attr(data-shortcut);
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 3px;
+  border: 1px solid #84795766;
+  border-radius: 4px;
+  font: 10px/1.25 monospace;
+  color: #6d674d;
+  vertical-align: middle;
+  opacity: .8;
+}
 kbd {
   font: 11px Outfit;
   background: #e9dfbf;
