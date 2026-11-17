@@ -1,7 +1,8 @@
-import {landRandom} from './land-layout.js';
+import {landRandom,landParameters} from './land-layout.js';
 import {settingsFor,richnessFactor,BIOMES} from './world-settings.js';
 import {riverBankAt,riverCenter,riverWidth} from './river-layout.js';
-import {terrainNoise,naturalRelief} from './terrain-noise.js';
+import {terrainNoise} from './terrain-noise.js';
+import {elevationAt} from './elevation.js';
 import {accessRoadAt} from './road-layout.js';
 import {CELL_MIN,CELL_MAX} from './map-size.js';
 export const TREE_SPECIES={jequitiba:'Jequitibá',pau_brasil:'Pau-brasil',jucara:'Juçara palm',embauba:'Embaúba',pequi:'Pequi',barbatimao:'Barbatimão',umbuzeiro:'Umbuzeiro',jurema:'Jurema'};
@@ -25,12 +26,13 @@ export function ensureNaturalLand(s,defs){
    s.projects.push({id:s.nextId++,key,x,z,work:defs[key].work,delivered:0,natural:true});return true;
  };
  // Rank irregular candidate sites by habitat instead of drawing rings around camp.
+ const hillHeight=landParameters(s.landSeed).hillHeight;
  const candidates=Array.from({length:2200},()=>{
    const x=Math.floor(CELL_MIN+5+random()*(CELL_MAX-CELL_MIN-10));
    const z=Math.floor(CELL_MIN+5+random()*(CELL_MAX-CELL_MIN-10));
    const wx=(x-32)*2,wz=(z-32)*2;
    const bank=Math.max(0,Math.abs(wx-riverCenter(wz,s.landSeed))-riverWidth(wz,s.landSeed));
-   return {x,z,relief:naturalRelief(wx,wz,s.landSeed),moisture:Math.exp(-bank/22),jitter:random()};
+   return {x,z,relief:elevationAt(wx,wz,s.landSeed)/hillHeight,moisture:Math.exp(-bank/22),jitter:random()};
  });
  for(const key of ['supply-2','supply-3']){
    const sites=candidates.map(p=>({...p,score:(key==='supply-3'?p.relief:1-p.relief+p.moisture*.5)
