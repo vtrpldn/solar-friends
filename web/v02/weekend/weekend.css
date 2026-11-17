@@ -1384,7 +1384,7 @@ body[data-tray="closed"] {
 }
 
 /* Shared management layout: utility networks no longer have manual setup forms. */
-#management:not([data-screen="resources"]):not([data-screen="items"]) .management-layout {
+#management:not([data-screen="resources"]):not([data-screen="items"]):not([data-screen="food"]) .management-layout {
   grid-template-columns: minmax(0, 1fr);
 }
 .network-node {

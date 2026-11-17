@@ -20,8 +20,9 @@ assert.equal(kitchenPlan(s,p,PROCESSES,api).recipe,'cook_greens','earliest viabl
 tick(s,.1);assert.equal(s.operations.filter(o=>!o.done&&PROCESSES[o.recipe]?.output.meals).length,2);
 assert.equal(s.materials.greens,0,'two kitchens reserve different batches');
 assert.equal(s.operations.reduce((n,o)=>n+(PROCESSES[o.recipe]?.output.meals||0),0),8,'whole batches stay below ten-portion target');
-assert(restore(save(s)));
+foodPolicy(s).freshDays=2.5;foodPolicy(s).provisionDays=3;foodPolicy(s).coolingPriority='meals';assert.deepEqual(restore(save(s)).foodPolicy,s.foodPolicy);
 const repeating=fixture();repeating.kitchens[0].repeat='preserve_meals';assert.match(kitchenPlan(repeating.s,repeating.kitchens[0],PROCESSES,api).reason,/manual repeating/);
+const disabled=fixture();disabled.s.infrastructure.nodes[disabled.kitchens[0].id].enabled=false;assert.match(kitchenPlan(disabled.s,disabled.kitchens[0],PROCESSES,api).reason,/switched off/);
 const floor=fixture();foodChange(floor.s,'food',-(floor.s.materials.food-10));foodChange(floor.s,'greens',-8);foodChange(floor.s,'beans',-8);
 assert.equal(kitchenPlan(floor.s,floor.kitchens[0],PROCESSES,api).recipe,undefined,'no conversion spends the last day of food');
 const dry=fixture();foodPolicy(dry.s).freshDays=0;assert.equal(kitchenPlan(dry.s,dry.kitchens[0],PROCESSES,api).recipe,'preserve_meals');
@@ -29,7 +30,7 @@ const expiry=fixture();foodChange(expiry.s,'greens',-8);foodChange(expiry.s,'bea
 assert.equal(kitchenPlan(expiry.s,expiry.kitchens[0],PROCESSES,api).recipe,undefined);
 const full=fixture();assert.equal(kitchenPlan(full.s,full.kitchens[0],PROCESSES,{...api,capacity:()=>0}).recipe,undefined);
 for(const value of [null,{version:2},{...foodPolicy(s),freshDays:Infinity},{...foodPolicy(s),coolingPriority:'magic'}]){s.foodPolicy=value;assert(!validFoodPolicy(s));assert.equal(restore(save(s)),null);}
-delete s.foodPolicy;assert(restore(save(s)));assert.equal(foodPolicy(s).automatic,false);
+delete s.foodPolicy;foodPolicy(s).freshDays=2.5;foodPolicy(s).provisionDays=3;foodPolicy(s).coolingPriority='meals';assert.deepEqual(restore(save(s)).foodPolicy,s.foodPolicy);assert.equal(foodPolicy(s).automatic,false);
 // 80 L fits 20 kg leafy greens, or 40 meals, or 800 eggs; allocation never creates stock.
 const cold={time:0,materials:{greens:30,meals:40,eggs:12},infrastructure:{nodes:{1:{coldStorage:true,enabled:true,power:1}}}};
 ensureFoodStorage(cold);foodPolicy(cold).coolingPriority='ingredients';cold.time=1;coolStoredFood(cold,1);

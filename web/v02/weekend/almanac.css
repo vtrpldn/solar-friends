@@ -47,7 +47,7 @@
 #management .management-stats small { font-size: 10px; letter-spacing: .5px; }
 #management .management-stats strong { font-size: 21px; font-variant-numeric: tabular-nums; }
 #management .management-layout { grid-column: 2; min-width: 0; gap: 18px; grid-template-columns: minmax(0, 1fr) 235px; }
-#management:not([data-screen="resources"]):not([data-screen="items"]) .management-layout { grid-template-columns: minmax(0, 1fr); }
+#management:not([data-screen="resources"]):not([data-screen="items"]):not([data-screen="food"]) .management-layout { grid-template-columns: minmax(0, 1fr); }
 #management .management-main { padding: 0 8px 12px 0; scrollbar-gutter: stable; }
 #management .management-side { padding: 14px; border-radius: 10px; }
 #management h3 { font-size: 15px; margin: 4px 0 12px; }

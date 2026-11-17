@@ -510,7 +510,7 @@ export function nearestRiverAccess(s,origin) {
 function maintainFood(s) {
   if(s.time<(s.nextFoodCheck||0))return;
   s.nextFoodCheck=s.time+10;
-  const incoming=activeTrips(s).filter(t=>!t.saleOnly&&!t.project&&FOOD_SERVINGS[t.material]).reduce((n,t)=>n+Math.floor((t.foodLots?.reduce((q,l)=>q+l.n,0)??MATERIALS[t.material].quantity)/FOOD_SERVINGS[t.material]),0);
+  const incoming=[...activeTrips(s),s.delivery].filter(t=>t&&!t.foodSpoiled&&!t.saleOnly&&!t.project&&FOOD_SERVINGS[t.material]).reduce((n,t)=>n+Math.floor((t.foodLots?.reduce((q,l)=>q+(l.expires>s.time?l.n:0),0)??MATERIALS[t.material].quantity)/FOOD_SERVINGS[t.material]),0);
   const food=pantryForecast(s).served+incoming;
   const target=Math.ceil(s.people.length*2*(s.foodReserveDays??1.5));
   if(food>=target)return;

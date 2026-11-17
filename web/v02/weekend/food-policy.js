@@ -1,4 +1,4 @@
-import {ensureFoodStorage,FOOD_SERVINGS,foodPortions} from './food-storage.js';
+import {ensureFoodStorage,FOOD_SERVINGS} from './food-storage.js';
 import {productionStock} from './food-planning.js';
 
 export function foodPolicy(s){return s.foodPolicy??={version:1,automatic:false,freshDays:1,provisionDays:2,coolingPriority:'expiry'};}
@@ -10,6 +10,7 @@ export function kitchenPlan(s,p,recipes,api){
  const policy=foodPolicy(s);
  if(s.mode==='sandbox')return {reason:'Food automation is inactive in sandbox.'};
  if(!policy.automatic)return {reason:'Automatic food management is off.'};
+ if(s.infrastructure?.nodes[p.id]?.enabled===false)return {reason:'Kitchen is switched off.'};
  if(p.repeat)return {reason:'Following the manual repeating recipe.'};
  if(s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))return {reason:'Kitchen has a job in progress.'};
  const storage=ensureFoodStorage(s),daily=s.people.length*2;

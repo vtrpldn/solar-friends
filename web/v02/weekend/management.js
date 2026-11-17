@@ -585,7 +585,7 @@ export function createManagement({
       }
       if (!$("production-sites").children.length)
         $("production-sites").textContent =
-          view === 'items' ? 'Craft portable equipment at a timber workbench. Buy parts and repair supplies in Resources.' : search
+          view === 'food' ? 'Build a community kitchen to cook meals, prepare provisions and install refrigeration.' : view === 'items' ? 'Craft portable equipment at a timber workbench. Buy parts and repair supplies in Resources.' : search
             ? "No completed production sites match this search. Try another resource or building name."
             : "Build a garden, workshop or other production site to start making supplies here.";
       if (search) {
