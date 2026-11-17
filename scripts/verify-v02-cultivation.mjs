@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createSandbox,plan,planField,fieldPlacementError,queueBedJob,configureBed,resizeField,tick,save,restore,enableFastNavigation,PROJECTS} from '../web/v02/weekend/simulation.js';
-import {CROPS,cultivationStep,ensureCultivation,validCultivation} from '../web/v02/weekend/cultivation.js';
+import {CROPS,cultivationStep,ensureCultivation,validCultivation,farmJobSpec,finishFarmJob} from '../web/v02/weekend/cultivation.js';
 import {GAME_DAY} from '../web/v02/weekend/biological-production.js';
 let s=createSandbox(42);enableFastNavigation(s);
 let placed=false;
@@ -73,3 +73,13 @@ assert.match(resizeField(controls,cp.id,[3,3]),/Finish/);
 const tampered=JSON.parse(save(controls));tampered.operations.at(-1).farm.work=.1;assert.equal(restore(JSON.stringify(tampered)),null);
 assert(fieldPlacementError(controls,50,50,[0,2]));assert(fieldPlacementError(controls,50,50,[33,2]));
 console.log('PASS missing inputs, planting preconditions, pending-work locks and tampered job rejection; harvest transport resumes after reload');
+
+const dense={...gp.cultivation.beds[0],density:1.5},normal={...dense,density:1};
+assert(farmJobSpec(dense,'plant').work>farmJobSpec(normal,'plant').work);
+assert(farmJobSpec(dense,'plant').input[`${dense.crop}_seed`]>farmJobSpec(normal,'plant').input[`${normal.crop}_seed`]);
+const late=make(),lb=late.projects[0].cultivation.beds[0];Object.assign(lb,{stage:'harvestable',growth:1,ripeAt:0,standingBiomassKg:10});late.time=20*GAME_DAY;
+const lateJob={farm:{bed:0,action:'harvest'},input:{}};finishFarmJob(late,late.projects[0],lateJob);assert(!lateJob.harvestOutput.greens,'late crop is lost gradually, then entirely');
+const clear=make(),cb=clear.projects[0].cultivation.beds[0];Object.assign(cb,{growth:.5,standingBiomassKg:4});
+const clearJob={farm:{bed:0,action:'clear'},input:{}};finishFarmJob(clear,clear.projects[0],clearJob);assert.deepEqual(clearJob.harvestOutput,{});assert(cb.residueKg>0);assert.equal(cb.stage,'harvested');
+const amendJob={farm:{bed:0,action:'amend'},input:{compost:2}};finishFarmJob(clear,clear.projects[0],amendJob);const fertility=cb.fertility;cultivationStep(clear,GAME_DAY,()=>false,PROJECTS);assert(cb.amendmentKg<2);assert(cb.soilOrganicKg>0);assert(cb.decomposedGasKg>0);
+console.log('PASS density-dependent seeds/labor, late harvest loss, explicit clearing and amendment decomposition');

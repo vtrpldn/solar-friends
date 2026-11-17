@@ -43,3 +43,9 @@ Active bed jobs lock configuration. Standing crops must be explicitly cleared be
 - `node scripts/benchmark-v02-cultivation.mjs`: a fixed 100-bed, 10,000-plant scene with crops disabled/enabled. Records animation-frame intervals, CPU submission time, renderer, draw calls and memory counters. `FARM_BENCHMARK` selects the JSON output.
 
 The benchmark is a headless-browser measurement, not a hardware frame-rate guarantee. Crop and soil geometry is instanced. Distant crops use simplified geometry; close crops retain volumetric leaves. Renderer memory counters count resources, while the optional heap figure covers JavaScript memory rather than GPU bytes.
+
+### Recorded desktop validation — 2026-11-17
+
+The cultivation, browser, legacy biological-production, food-storage, production-hauling, production-accounting, building-access and second-playtest checks passed. Construction checks covered the existing placeable catalog and the new field, including its recipe mapping. The browser exercised field dragging, rotation, confirmation, bed settings, preparation queueing and reload without page exceptions; day/night scenes were inspected beside residents and a house.
+
+The final [100-bed benchmark](../assets/validation/farming-v1/benchmark.json) used ANGLE/SwiftShader software rendering. At 10,000 plants, enabling crops increased draw calls from 1 to 2 and triangles from 18,000 to 58,000. Observed average animation-frame intervals were 74.0 ms without crops and 184.4 ms with crops; reported JavaScript heap was 17.1 MB in both samples. Software rendering is slow here. Hardware-rendered frame rate remains unverified; this result establishes batching, not smooth large-farm performance.

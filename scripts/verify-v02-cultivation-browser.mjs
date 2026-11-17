@@ -9,6 +9,8 @@ const out=process.env.FARM_SCREENSHOTS||'/tmp/solar-farming';await mkdir(out,{re
 const s=createSandbox(42);assert.equal(planField(s,50,50,[4,4]),'');const field=s.projects.at(-1);
 field.cultivation.beds.forEach((b,i)=>Object.assign(b,{crop:['greens','beans','corn'][i%3],stage:['unprepared','prepared','growing','growing','harvestable','harvested'][i%6],growth:[0,0,.15,.6,1,0][i%6],...(i%6===4?{ripeAt:0}:{})}));
 assert.equal(plan(s,'greenhouse',59,50),'');const greenhouse=s.projects.at(-1);greenhouse.work=PROJECTS.greenhouse.work;ensureCultivation(s,greenhouse).beds.forEach((b,i)=>Object.assign(b,{crop:i?'corn':'beans',stage:'harvestable',growth:1,ripeAt:0}));
+assert.equal(plan(s,'house',50,59),'');s.projects.at(-1).work=PROJECTS.house.work;
+s.people.forEach((r,i)=>{r.x=49+i*2;r.z=55;r.action='idle';r.walk=[];r.target=null;});
 s.view={speed:1,paused:true,position:[64,35,64],target:[44,0,40],zoom:1};assert(restore(save(s)));
 const server=await serve(0),browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
 try{
@@ -17,6 +19,7 @@ try{
  await page.locator('#completed-tasks button').filter({hasText:'Cultivated field'}).first().evaluate(e=>e.click());
  await page.waitForSelector('#farm-bed');await page.locator('#farm-crop').selectOption('beans');assert.equal(await page.locator('#farm-crop').inputValue(),'beans');
  await page.locator('[data-farm-action="prepare"]').click();assert(await page.locator('#cultivation-panel').innerText().then(t=>t.includes('queued')));
+ await page.locator('#cultivation-panel').evaluate(e=>e.scrollTop=0);
  await page.screenshot({path:`${out}/field-and-greenhouse.png`});
  await page.locator('#build-field').evaluate(e=>e.click());
  // Actual desktop drag; retry distinct open areas because the terrain fixture includes trees.

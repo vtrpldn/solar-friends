@@ -293,7 +293,7 @@ export function queueBedJob(s,site,id,action) {
   if(!p||p.removal||p.work<PROJECTS[p.key].work)return 'Choose a completed cultivation site.';
   const b=ensureCultivation(s,p)?.beds[id],error=farmJobError(s,p,b,action);if(error)return error;
   const spec=farmJobSpec(b,action);
-  for(const [item,n]of Object.entries(spec.input))if(materialCount(s,item)<n)return `Missing ${n} ${item}.`;
+  for(const [item,n]of Object.entries(spec.input))if(materialCount(s,item)<n)return `Missing ${quantityText(item,n)} ${MATERIALS[item].name}.`;
   for(const [item,n]of Object.entries(spec.input))changeMaterial(s,item,-n,undefined,'cultivation input');
   s.operations??=[];
   s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,recipe:`farm_${action}`,farm:{bed:id,action,work:spec.work,crop:b.crop,density:b.density},input:spec.input,work:0,phase:'pickup',done:false});

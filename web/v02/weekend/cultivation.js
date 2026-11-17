@@ -47,7 +47,7 @@ export function farmJobError(s,p,b,action){
 }
 export function farmJobSpec(b,action){
  const area=b.w*b.d;
- return {input:action==='plant'?{[`${b.crop}_seed`]:Math.max(1,Math.ceil(area*b.density/4))}:action==='amend'?{compost:Math.ceil(area*.5)}:{},work:Math.ceil(area*({prepare:18,plant:12,harvest:15,clear:8,amend:5,collect:5}[action]))};
+ return {input:action==='plant'?{[`${b.crop}_seed`]:Math.max(1,Math.ceil(area*b.density/4))}:action==='amend'?{compost:Math.ceil(area*.5)}:{},work:Math.ceil(area*(['plant','harvest'].includes(action)?b.density:1)*({prepare:18,plant:12,harvest:15,clear:8,amend:5,collect:5}[action]))};
 }
 const potentialBiomass=b=>b.w*b.d*(CROPS[b.crop].yieldKg*Math.min(b.density,1.2)/(1+Math.max(0,b.density-1)*1.5)+CROPS[b.crop].residue);
 export function finishFarmJob(s,p,op){
@@ -132,7 +132,7 @@ export function validCultivation(s){
   const spec=farmJobSpec({...b,crop:o.farm.crop,density:o.farm.density},o.farm.action);
   if(spec.work!==o.farm.work||JSON.stringify(spec.input)!==JSON.stringify(o.input))return false;
   if(!o.input||Object.entries(o.input).some(([id,n])=>!['compost',...Object.keys(CROPS).map(c=>`${c}_seed`)].includes(id)||!Number.isInteger(n)||n<0||n>100))return false;
-  if(o.harvestOutput&&Object.entries(o.harvestOutput).some(([id,n])=>![...Object.keys(CROPS),'scraps'].includes(id)||!Number.isInteger(n)||n<0||n>(id==='scraps'?1000000:b.w*b.d*CROPS[o.farm.crop].yieldKg*1.2)))return false;
+  if(o.harvestOutput&&Object.entries(o.harvestOutput).some(([id,n])=>![o.farm.crop,'scraps'].includes(id)||!Number.isInteger(n)||n<0||n>(id==='scraps'?1000000:b.w*b.d*CROPS[o.farm.crop].yieldKg*1.2)))return false;
  }
  return true;
 }

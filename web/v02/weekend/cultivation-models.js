@@ -21,11 +21,12 @@ export function createCultivationModel(p,state){
  };
  const plants={greens:[],beans:[],corn:[]};
  for(const b of beds){
-  for(let z=-b.d/2;z<b.d/2;z+=.5){const depth=Math.min(.5,b.d/2-z),y=ground(b.x,b.z+z+depth/2);meshBox(root,b.w,.07,depth,b.stage==='unprepared'?'#71844a':b.cover>.2?'#927444':b.moisture>.4?'#57412d':'#947047',b.x,y+.025,b.z+z+depth/2);}
-  if(b.stage==='prepared')for(const dx of [-.3,0,.3])meshBox(root,.035,.025,b.d,'#493829',b.x+dx,ground(b.x+dx,b.z)+.07,b.z);
-  if(b.stage==='harvested')for(let z=-b.d/2+.2;z<b.d/2;z+=.4)meshBox(root,.06,.12,.06,'#a49155',b.x,ground(b.x,b.z+z)+.1,b.z+z);
   const job=(state.operations||[]).find(o=>!o.done&&o.site===p.id&&o.farm?.bed===b.id);
   const fraction=job?Math.min(1,job.work/job.farm.work):0;
+  for(let z=-b.d/2;z<b.d/2;z+=.5){const depth=Math.min(.5,b.d/2-z),y=ground(b.x,b.z+z+depth/2);meshBox(root,b.w,.07,depth,b.stage==='unprepared'&&!(job?.farm.action==='prepare'&&(z+b.d/2)/b.d<fraction)?'#71844a':b.cover>.2?'#927444':b.moisture>.4?'#57412d':'#947047',b.x,y+.025,b.z+z+depth/2);}
+  if(b.stage==='prepared')for(const dx of [-.3,0,.3])meshBox(root,.035,.025,b.d,'#493829',b.x+dx,ground(b.x+dx,b.z)+.07,b.z);
+  if(b.stage==='harvested')for(let z=-b.d/2+.2;z<b.d/2;z+=.4)meshBox(root,.06,.12,.06,'#a49155',b.x,ground(b.x,b.z+z)+.1,b.z+z);
+
   const planting=job?.farm.action==='plant'&&fraction>0;
   if(!['growing','harvestable'].includes(b.stage)&&!planting)continue;
   const crop=CROPS[b.crop],spacing=1/Math.sqrt(crop.plants*b.density),health=(b.elapsed?1-b.stress/b.elapsed:1)*(b.stage==='harvestable'?Math.max(.15,1-Math.max(0,(state.time-b.ripeAt)/3200-crop.window)/crop.window):1);
@@ -51,7 +52,7 @@ export function createCultivationModel(p,state){
   const distant=new THREE.InstancedMesh(new THREE.CircleGeometry(1,4),new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,side:THREE.DoubleSide}),items.length);
   distant.userData.ownedMaterial=true;
   items.forEach((p,i)=>{const height=CROPS[id].height*p.growth;matrix.position.set(p.x,p.y+height/2,p.z);matrix.rotation.set(-.4,p.rotation,0);matrix.scale.set(id==='corn'?.35:.25,height/2,.25);matrix.updateMatrix();distant.setMatrixAt(i,matrix.matrix);distant.setColorAt(i,new THREE.Color(p.health<.4?'#a29b4b':id==='greens'?'#679b42':'#4e843d'));});
-  const lod=new THREE.LOD();lod.userData.crops=true;lod.userData.plants=items.length;lod.addLevel(leaves,0);lod.addLevel(distant,35);root.add(lod);
+  const lod=new THREE.LOD();lod.userData.crops=true;lod.userData.plants=items.length;lod.addLevel(leaves,0);lod.addLevel(distant,65);root.add(lod);
   if(id==='corn'){
    const stalks=new THREE.InstancedMesh(new THREE.CylinderGeometry(.025,.035,1,5),new THREE.MeshStandardMaterial({color:'#9aa65c',roughness:1}),items.length);stalks.userData.ownedMaterial=true;
    items.forEach((p,i)=>{matrix.position.set(p.x,p.y+CROPS.corn.height*p.growth/2,p.z);matrix.rotation.set(0,0,0);matrix.scale.set(1,CROPS.corn.height*p.growth,1);matrix.updateMatrix();stalks.setMatrixAt(i,matrix.matrix);});root.add(stalks);

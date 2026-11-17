@@ -7,7 +7,7 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
  const reopen=document.createElement('button');reopen.textContent='Manage cultivation beds';reopen.hidden=true;document.getElementById('selection').append(reopen);
  const panel=document.createElement('aside');panel.id='cultivation-panel';panel.hidden=true;
  panel.style.cssText='position:fixed;right:20px;top:190px;width:340px;max-height:60vh;overflow:auto;background:#fff6dc;color:#354530;padding:16px;border:2px solid #c0ad7d;border-radius:14px;z-index:12;box-shadow:0 8px 30px #0003';
- panel.innerHTML='<strong>Cultivation</strong><button id="close-farm" style="float:right">Close</button><div id="farm-content"></div>';document.body.append(panel);
+ panel.innerHTML='<div style="position:sticky;top:-16px;background:#fff6dc;padding:12px 0;z-index:2"><strong>Cultivation</strong><button id="close-farm" style="float:right">Close</button></div><div id="farm-content"></div>';document.body.append(panel);
  let hiddenSite=null,active=false,start=null,end=null,rotation=0,pending=null,bedId=0,lastSite=null,lastRender=null;
  const content=panel.querySelector('#farm-content'),preview=new THREE.Group();scene.add(preview);
  const stop=()=>{delete document.body.dataset.cultivationOpen;lastRender=null;active=false;start=null;pending=null;controls.enabled=true;preview.clear();panel.hidden=true;};
@@ -64,7 +64,7 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
   <label>Density <select id="farm-density" ${locked?'disabled':''}><option value="0.5">Half density</option><option value="1">Standard spacing</option><option value="1.5">Dense planting</option></select></label>
   <p><label><input type="checkbox" id="farm-irrigation" ${b.irrigation?'checked':''} ${job?'disabled':''}> Irrigate from connected supplies</label></p>
   <label>Residues <select id="farm-residues" ${job?'disabled':''}><option value="leave">Leave as ground cover</option><option value="collect">Collect for compost</option></select></label>
-  <p>Moisture ${(b.moisture*100).toFixed(0)}% · fertility ${(b.fertility*100).toFixed(0)}% · organic matter ${(b.organic*100).toFixed(0)}% · cover ${(b.cover*100).toFixed(0)}%</p>
+  <p>Moisture ${(b.moisture*100).toFixed(0)}% · fertility ${(b.fertility*100).toFixed(0)}% · organic matter index ${(b.organic*100).toFixed(0)}/100 · cover ${(b.cover*100).toFixed(0)}%</p>
   <p>Water supplied ${b.irrigated.toFixed(1)} L · rain ${b.rainLiters.toFixed(1)} L<br>Residues ${b.residueKg.toFixed(1)} kg · amendments decomposing ${b.amendmentKg.toFixed(1)} kg</p>
   <p>Harvest exported ${b.exportedKg.toFixed(1)} kg · residues collected ${b.residueExportedKg.toFixed(1)} kg<br>Organic matter retained ${b.soilOrganicKg.toFixed(1)} kg · decomposition losses ${b.decomposedGasKg.toFixed(1)} kg</p>
   <p>${standing?`Potential harvest 0–${max.toFixed(1)} kg; future conditions and harvest timing still matter.`:'Preparation and planting require resident work and seeds.'}</p>
