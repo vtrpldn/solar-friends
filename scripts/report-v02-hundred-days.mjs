@@ -69,7 +69,7 @@ function sample(day){
  for(const [id,n]of Object.entries(s.materials))assert(n>=-1e-8,`${id}: negative stock`);
  for(const r of s.people)for(const [key,n]of Object.entries(r.needs))assert(n>=0&&n<=100,`${r.id}: invalid ${key}`);
  const row={day,time:s.time,money:s.money,food:s.materials.food,meals:s.materials.meals,season:seasonAt(s.time),
-  needs:s.people.map(r=>({id:r.id,energy:r.energy,...r.needs,action:r.action,blocked:r.needBlocked})),
+  needs:s.people.map(r=>({id:r.id,energy:r.energy,...r.needs,action:r.action,blocked:r.needBlocked,outsideJobEnabled:!!r.outsideJobEnabled,lastOutsideDay:r.lastOutsideDay,outsideWorkBlocked:r.outsideWorkBlocked})),
   buildings:s.projects.filter(p=>!p.natural).map(p=>({key:p.key,progress:p.work/PROJECTS[p.key].work,pending:p.pendingMaterials,condition:p.condition,animalHealth:p.animalHealth})),
   operations:(s.operations||[]).filter(o=>!o.done).map(o=>({recipe:o.recipe,phase:o.phase,status:o.status,growthRemaining:o.growthRemaining})),
   finances:{income:f.income,expenses:f.expenses,categories:f.categories}};
@@ -88,6 +88,8 @@ for(let day=1;day<=days;day++){
  while(s.time<target-.05)runner.advance(Math.min(.25,(target-s.time)/1024),Infinity,()=>0);
  sample(day);
 }
+const wageDrought=samples.find((row,index)=>index>=7&&row.finances.categories.outsideWork===samples[index-7].finances.categories.outsideWork);
+if(wageDrought)issues.push(`Enabled outside workers earned nothing in the seven-day window ending on day ${wageDrought.day}`);
 for(const [id,seconds]of Object.entries(maxStarvation))if(seconds>GAME_DAY)issues.push(`${id} spent ${(seconds/GAME_DAY).toFixed(2)} consecutive days with hunger below 5`);
 if(days>=3)assert(s.projects.some(p=>p.key==='shelter'&&p.work===PROJECTS.shelter.work),'paid opening construction completes');
 assert(s.finances.categories.outsideWork>0,'outside workers earn real income');
@@ -97,5 +99,5 @@ if(days>=100){
 }
 const reportPath=path.join(output,'report.json');
 const report=JSON.parse(fs.readFileSync(reportPath,'utf8'));report.issues=issues;report.verdict=issues.length?'failed':'passed';fs.writeFileSync(reportPath,JSON.stringify(report,null,2));
-assert.deepEqual(issues,[],'no persistent starvation');
+assert.deepEqual(issues,[],'no persistent starvation or stalled paid-work commitments');
 console.log(`PASS ${days} days at 1024x scheduling with fixed steps, accounting checks and periodic save restoration`);

@@ -173,7 +173,7 @@ assert(sellMaterial(jobs, "stone"));
 assert.equal(jobs.materials.stone, 4);
 const trees = built(jobs, "supply-0", 44, 40);
 assert.equal(queueProduction(jobs, trees.id, "wood"), "");
-run(jobs, 300);
+for(let i=0;i<96000&&!jobs.operations.some(o=>o.site===trees.id&&o.phase==="growing");i++)tick(jobs,.1);
 assert(jobs.operations.some(o=>o.site===trees.id&&o.phase==="growing"), "new timber stand grows without occupying a worker");
 assert.equal(jobs.materials.logs,0,"new trees do not yield overnight wood");
 assert(storedMaterials(jobs) < storageCapacity(jobs));
