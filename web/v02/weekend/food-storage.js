@@ -9,6 +9,8 @@ export function refreshSandboxFood(s){
  if(s.mode==='sandbox'&&s.foodStorage)for(const id of Object.keys(FOOD_DAYS))s.foodStorage.lots[id]=freshLots(s,id,s.materials[id]||0);
 }
 export function ensureFoodStorage(s){
+ // Older in-memory villages may not yet contain the new crop inventory keys.
+ for(const id of Object.keys(FOOD_DAYS))if(s.materials[id]===undefined)s.materials[id]=0;
  if(!s.foodStorage)s.foodStorage={version:1,lots:Object.fromEntries(Object.keys(FOOD_DAYS).map(id=>[id,freshLots(s,id,s.materials[id]||0)])),spoiled:{}};
  for(const id of Object.keys(FOOD_DAYS))s.foodStorage.lots[id]??=freshLots(s,id,s.materials[id]||0);
  return s.foodStorage;
