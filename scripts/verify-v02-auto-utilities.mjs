@@ -80,7 +80,10 @@ assert.ok(
 );
 assert.equal(moveProject(s, home.id, 60, 60), "");
 enableFastNavigation(s);
-for(let i=0;i<320000&&home.removal;i++)tick(s,.1);
+// Allow for travel, meals, rest and other jobs while residents perform the
+// current catalog's relocation labor. Stop immediately when the house moves.
+const relocationSteps = Math.ceil(home.removal.required * 10 / .1);
+for(let i=0;i<relocationSteps&&home.removal;i++)tick(s,.1);
 assert(!home.removal,"resident relocation completes");
 autoConnectUtilities(s, PROJECTS);
 assert.equal(sys.nodes[home.id].x, 60);
