@@ -1,3 +1,7 @@
+import { accessGeometry, insideSolid, segmentHitsSolid, BODY_RADIUS } from './building-access.js';
+import { craftingBlocker, craftStage, practiceCraft, validCraftSkills } from './crafting.js';
+import { equipmentState, equipmentSummary, protectedEquipment, releaseEquipment, useEquipment, productionEquipment, repairEquipment, validEquipment } from './equipment.js';
+import { migrateItemProjects } from "./items.js";
 import {economyPolicies,productionTarget,workGroup,salePreview,validatePolicies} from './economy-policies.js';
 import {ensureFinances,recordMoney} from './finances.js';
 import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
@@ -205,7 +209,7 @@ export function sellMaterial(s, id) {
     !item ||
     !item.quantity ||
     s.stage !== "playing" ||
-    materialCount(s, id) < item.quantity
+    materialCount(s, id) - protectedEquipment(s,id) < item.quantity
   )
     return false;
   changeMaterial(s, id, -item.quantity);
@@ -257,7 +261,7 @@ export function committedMaterials(s) {
   for(const o of s.operations||[])if(!o.done&&!o.water)add(PROCESSES[o.recipe]?.input);
   return totals;
 }
-export function queueProduction(s, site, recipe) {
+export function productionBlocker(s, site, recipe) {
   const p = s.projects.find((p) => p.id === Number(site) && !p.felled),
     def = PROCESSES[recipe];
   if (
@@ -267,14 +271,13 @@ export function queueProduction(s, site, recipe) {
     PROJECTS[p.key].kind !== def.kind
   )
     return "Choose a completed compatible building.";
+  const craftError=craftingBlocker(s,def);
+  if(craftError)return craftError;
+  if(def.equipmentRepair && s.operations?.some(o=>!o.done && PROCESSES[o.recipe]?.equipmentRepair===def.equipmentRepair))return 'This equipment already has a repair queued.';
+  if(def.equipmentRepair && equipmentSummary(s,def.equipmentRepair).borrowers.length>0)return 'Return borrowed equipment before repairing it.';
+  if(def.equipmentRepair && equipmentSummary(s,def.equipmentRepair).wear<=0)return 'This equipment does not need repair.';
   if(recipe==='solar_upgrade' && p.solarUpgrade)return 'Rooftop solar is already installed.';
-  s.operations ??= [];
-  if (s.operations.length > 128)
-    s.operations = [
-      ...s.operations.filter((o) => !o.done),
-      ...s.operations.filter((o) => o.done).slice(-32),
-    ];
-  if (s.operations.some((o) => o.site === p.id && !o.done && !o.water))
+  if ((s.operations || []).some((o) => o.site === p.id && !o.done && !o.water))
     return "This site already has a job.";
   if ((p.readyAt || 0) > s.time)
     return `Growing: ready in ${Math.ceil((p.readyAt-s.time)*.45)} game minutes (affected by simulation speed).`;
@@ -285,6 +288,16 @@ export function queueProduction(s, site, recipe) {
   if (p.key === "goat-pasture-empty" && !p.stocked) {
     if (materialCount(s, "goats") < 2)
       return "Bring 2 goats to stock this pasture.";
+  }
+  return '';
+}
+export function queueProduction(s, site, recipe) {
+  const error=productionBlocker(s,site,recipe);
+  if(error)return error;
+  const p=s.projects.find(p=>p.id===Number(site)),def=PROCESSES[recipe];
+  s.operations ??= [];
+  if(s.operations.length>128)s.operations=[...s.operations.filter(o=>!o.done),...s.operations.filter(o=>o.done).slice(-32)];
+  if(p.key==='goat-pasture-empty'&&!p.stocked) {
     changeMaterial(s, "goats", -2);
     p.stocked = true;
   }
@@ -300,11 +313,46 @@ export function queueProduction(s, site, recipe) {
   wakeHelpers(s);
   return "";
 }
+// Derived from live simulation state; never persisted as a second source of truth.
+export function buildingOperatingStatus(s,p) {
+  const def=PROJECTS[p.key],node=s.infrastructure?.nodes[p.id];
+  const result=(state,reason)=>({state,reason});
+  if(p.work<def.work)return result('Under construction',`${Math.floor(100*p.work/def.work)}% built. Residents must finish construction before use.`);
+  const op=s.operations?.find(o=>o.site===p.id&&!o.done);
+  if(op?.phase==='return')return result('Delivering',op.status||'Finished output is being carried to storage.');
+  if(node?.enabled===false)return result('Switched off','Switch this building on to resume its service.');
+  if(op) {
+    const recipe=PROCESSES[op.recipe];
+    const assigned=s.people.find(r=>r.operation===op.id);
+    const craft=recipe&&craftingBlocker(s,recipe,assigned);
+    if(craft)return result('Waiting for requirements',craft);
+    const worker=s.people.find(r=>r.operation===op.id&&!r.needTask&&!r.tentPhase&&r.energy>=25);
+    if(!worker)return result('Waiting for a resident','No resident is currently attending this job. Residents may be resting or doing other work.');
+    if(worker.action==='blocked')return result('Blocked',op.status||'The resident cannot continue this job.');
+    return result(worker.action==='produce'?'Working':'Preparing',op.status||'A resident is collecting supplies or walking to the workspace.');
+  }
+  if(p.readyAt>s.time)return result('Growing',`Ready in about ${Math.ceil((p.readyAt-s.time)*.45)} game minutes.`);
+  if(p.repeat) {
+    const blocker=productionBlocker(s,p.id,p.repeat);
+    if(blocker)return result('Waiting for requirements',blocker);
+  }
+  if(def.kind==='home')return result('Ready','Available for resident rest. Solar upgrades are separate work orders.');
+  return result('Ready',Object.values(PROCESSES).some(r=>r.kind===def.kind)?'No batch is currently in progress.':'Construction complete; available for its village service.');
+}
+export function moveCraftJob(s,operation,site) {
+  const op=s.operations?.find(o=>o.id===operation&&!o.done&&o.phase!=='return');
+  const p=s.projects.find(p=>p.id===site),recipe=PROCESSES[op?.recipe];
+  if(!recipe?.craft || !p || PROJECTS[p.key].kind!==recipe.kind || p.work<PROJECTS[p.key].work)return 'Choose a completed compatible workspace.';
+  if(s.operations.some(o=>o!==op&&!o.done&&!o.water&&o.site===site))return 'This workspace already has a job.';
+  for(const r of s.people)if(r.operation===op.id){r.operation=null;r.cargo=false;r.walk=[];r.target=null;r.action='idle';}
+  op.site=site;op.phase='pickup';op.status='Moving materials and unfinished work to the new workspace.';
+  releaseEquipment(s);wakeHelpers(s);return '';
+}
 export function repeatProduction(s, site, recipe) {
   const p = s.projects.find((p) => p.id === Number(site));
   if (
     !p ||
-    !PROCESSES[recipe] ||
+    !PROCESSES[recipe] || PROCESSES[recipe].equipmentRepair ||
     PROJECTS[p.key].kind !== PROCESSES[recipe].kind
   )
     return false;
@@ -414,29 +462,15 @@ export function maintainWater(s) {
     if(n.maintainSanitation && n.water[2]+n.water[3]>=Math.max(4,(n.capacity[2]+n.capacity[3])*.5))queueSanitation(s,n.id);
   }
 }
-function utilitySpot(s, node, r) {
+export function utilitySpot(s, node, r) {
   if (node.id === -1) return { x: node.x, z: node.z };
   const p = s.projects.find((p) => p.id === node.id);
-  if (
-    p &&
-    ["workshop", "kitchen", "wash-station", "eco_toilet", "home"].includes(
-      PROJECTS[p.key].kind,
-    )
-  ) {
-    const front = buildingFront(p);
-    if (
-      !occupied(s, front.x, front.z) &&
-      !s.people.some(
-        (other) =>
-          other !== r &&
-          (Math.hypot(other.x - front.x, other.z - front.z) < 0.55 ||
-            (other.target?.x === front.x && other.target?.z === front.z)),
-      ) &&
-      route(s, r, front)
-    )
-      return front;
-  }
-  return p ? workSpot(s, r, p) : { x: s.stock.x - 1, z: s.stock.z + 1 };
+  if(!p)return {x:s.stock.x-1,z:s.stock.z+1};
+  const spots=accessGeometry(p,PROJECTS[p.key],footprint(p)).work;
+  return spots.find(spot=>!occupied(s,spot.x,spot.z)&&!s.people.some(other=>other!==r&&!other.needTask&&!other.tentPhase&&(
+    Math.hypot(other.x-spot.x,other.z-spot.z)<.55 ||
+    (other.target&&Math.hypot(other.target.x-spot.x,other.target.z-spot.z)<.55)
+  ))&&route(s,r,spot));
 }
 function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   const sys = ensureInfrastructure(s);
@@ -452,6 +486,9 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     if (op.water || op.phase === "return") return true;
     const node = sys.nodes[op.site],
       recipe = PROCESSES[op.recipe];
+    if(recipe.craft && PROJECTS[s.projects.find(p=>p.id===op.site)?.key]?.kind!==recipe.kind) {op.status='Needs a compatible crafting workspace.';return false;}
+    const craftError=craftingBlocker(s,recipe,r);
+    if(craftError) {op.status=craftingBlocker(s,recipe)||'Waiting for a qualified resident.';return false;}
     if (!node?.enabled) {
       op.status = "Building switched off";
       return false;
@@ -538,7 +575,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     if(w.service) {
       const dest=utilitySpot(s,node,r);r.action='produce';op.status='Servicing sealed waste tanks';
       if(!dest || !go(s,r,dest))return true;
-      op.work+=dt;r.energy=Math.max(0,r.energy-dt*.06);
+      op.work+=dt*useEquipment(s,r,'cleaning-kit',`op:${op.id}`,dt);r.energy=Math.max(0,r.energy-dt*.06);
       if(op.work>=45){const amount=node.water[2]+node.water[3];node.water[2]=0;node.water[3]=0;sys.account.wasteRemoved=(sys.account.wasteRemoved||0)+amount;op.done=true;r.operation=null;say(s,`${r.name} serviced the sealed waste tanks for off-site treatment.`);}
       return true;
     }
@@ -571,14 +608,17 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
       );
       if (w.from === -1) sys.account.waterReceived += w.amount;
       else sys.nodes[w.from].water[index] -= w.amount;
+      useEquipment(s,r,"bucket",`op:${op.id}`,0);
       op.phase = "deliver";
       r.target = null;
     }
+    useEquipment(s,r,"bucket",`op:${op.id}`,0);
     op.status = "Carrying water to the reservoir";
     r.action = "carry";
     r.cargo = true;
     const dest = utilitySpot(s, node, r);
-    if (!dest || !go(s, r, dest)) return true;
+    if (!dest) {op.status="Waiting for an accessible work position";r.action="blocked";return true;}
+  if (!go(s, r, dest)) return true;
     const n = Math.min(w.amount, node.capacity[index] - node.water[index]);
     node.water[index] += n;
     w.amount -= n;
@@ -607,11 +647,14 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     op.done = true;
     r.operation = null;
     r.cargo = false;
+    if(recipe.equipmentRepair)repairEquipment(s,recipe.equipmentRepair);
     say(s, `${recipe.name}: supplies delivered to storage.`);
     return true;
   }
 
+  if(recipe.craft && craftingBlocker(s,recipe,r)) {op.status=craftingBlocker(s,recipe,r);r.action='blocked';return false;}
   if (op.phase === "pickup") {
+    if(recipe.craft)op.status="Collecting reserved crafting materials";
     r.action = "collect";
     if (!go(s, r, supplySpot(s, r, i))) return true;
     op.phase = "process";
@@ -620,7 +663,9 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   r.action = "carry";
   r.cargo = true;
   const dest = utilitySpot(s, node, r);
-  if (!dest || !go(s, r, dest)) return true;
+  if(recipe.craft)op.status="Taking materials to the crafting workspace";
+  if (!dest) {op.status="Waiting for an accessible work position";r.action="blocked";return true;}
+  if (!go(s, r, dest)) return true;
   r.cargo = false;
   if (!node.enabled) {
     op.status = "Building switched off";
@@ -652,7 +697,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     op.biogas = true;
   }
   if (
-    ["workshop", "kitchen"].includes(recipe.kind) &&
+    ["workshop", "kitchen"].includes(recipe.kind) && !recipe.craft &&
     node.power < 0.99 &&
     !op.biogas
   ) {
@@ -666,10 +711,14 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     r.action = "blocked";
     return true;
   }
-  op.status = "Working";
+  op.status = recipe.craft ? craftStage(recipe,op.work) : "Working";
   if (r.energy < 25) { r.action = "idle"; r.operation = null; return true; }
   r.action = "produce";
-  op.work += dt * workMultiplier(r,p.key) * (node.power > 0.99 && recipe.kind === "workshop" ? 2 : 1);
+  const toolBonus=useEquipment(s,r,recipe.craft?.tool || productionEquipment(recipe),`op:${op.id}`,dt);
+  if(recipe.craft) {
+    op.crafter=r.id;
+    op.work+=dt*practiceCraft(r,recipe,dt);
+  } else op.work += dt * toolBonus * workMultiplier(r,p.key) * (node.power > 0.99 && recipe.kind === "workshop" ? 2 : 1);
   r.work += dt;
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if (op.work >= recipe.work) {
@@ -984,19 +1033,27 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
       { id: ignore || -1, key, x, z, rotation },
     ],
   };
+  enableFastNavigation(proposed);
   for (const p of proposed.projects.filter(p=>!p.natural&&!p.felled&&!['road','bridge'].includes(p.key))) {
     const [pw,pd]=footprint(p),edges=[];
     for(let dz=0;dz<pd;dz++)edges.push({x:p.x-1,z:p.z+dz},{x:p.x+pw,z:p.z+dz});
     for(let dx=0;dx<pw;dx++)edges.push({x:p.x+dx,z:p.z-1},{x:p.x+dx,z:p.z+pd});
-    if(!edges.some(spot=>!occupied(proposed,spot.x,spot.z)&&route(proposed,s.stock,spot)))
+    if(!edges.some(spot=>!occupied(proposed,spot.x,spot.z)&&route(proposed,s.stock,spot,true)))
       return `${PROJECTS[p.key].name} at (${p.x}, ${p.z}) would have no reachable side. Leave a one-cell walking gap.`;
   }
   for (const p of proposed.projects) {
+    if(!p.natural&&!p.felled&&!['road','bridge'].includes(p.key)) {
+      const complete={...p,work:PROJECTS[p.key].work};
+      const spots=accessGeometry(complete,PROJECTS[p.key],footprint(p)).work;
+      const accessible=p.work>=PROJECTS[p.key].work?proposed:{...proposed,projects:proposed.projects.map(item=>item===p?complete:item)};
+      enableFastNavigation(accessible);
+      if(!spots.some(spot=>route(accessible,s.stock,spot,true)))return `${PROJECTS[p.key].name} work access is blocked. Leave its front clear or rotate it.`;
+    }
     if (
       ["home", "workshop", "kitchen", "wash-station", "eco_toilet"].includes(
         PROJECTS[p.key].kind,
       ) &&
-      !route(proposed, s.stock, buildingFront(p))
+      !route(proposed, s.stock, buildingFront(p),true)
     )
       return `${PROJECTS[p.key].name} entrance at (${buildingFront(p).x}, ${buildingFront(p).z}) is blocked. Rotate it or leave a walking gap.`;
   }
@@ -1236,9 +1293,21 @@ const fastNavigationStates=new WeakSet(), navigationCaches=new WeakMap();
 let activeNavigation=null;
 export function enableFastNavigation(s){fastNavigationStates.add(s);}
 function prepareNavigation(s){
-  const signature=JSON.stringify([s.landSeed,s.camp,s.campSite,s.projects.map(p=>[p.id,p.key,p.x,p.z,p.rotation,p.felled,p.work>=PROJECTS[p.key].work])]);
+  const signature=JSON.stringify([s.landSeed,s.camp,s.campSite,s.projects.map(p=>[p.id,p.key,p.x,p.z,p.rotation,p.felled,p.work>=PROJECTS[p.key].work,footprint(p)])]);
   let cache=navigationCaches.get(s);
-  if(cache?.signature!==signature){cache={signature,state:s,cells:new Map(),roads:new Map()};navigationCaches.set(s,cache);}
+  if(cache?.signature!==signature){
+    const obstacles=new Map();
+    for(const p of s.projects){
+      if(p.felled||p.key==='road'||(p.key==='bridge'&&p.work>=PROJECTS[p.key].work))continue;
+      for(const rect of accessGeometry(p,PROJECTS[p.key],footprint(p)).solids){
+        for(let x=Math.floor(rect.x-rect.w/2-BODY_RADIUS);x<=Math.floor(rect.x+rect.w/2+BODY_RADIUS);x++)
+          for(let z=Math.floor(rect.z-rect.d/2-BODY_RADIUS);z<=Math.floor(rect.z+rect.d/2+BODY_RADIUS);z++){
+            const key=`${x},${z}`;if(!obstacles.has(key))obstacles.set(key,[]);obstacles.get(key).push(rect);
+          }
+      }
+    }
+    cache={signature,state:s,cells:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
+  }
   return cache;
 }
 function invalidateNavigation(s){navigationCaches.delete(s);if(activeNavigation?.state===s)activeNavigation=null;}
@@ -1249,6 +1318,9 @@ function occupied(s,x,z){
   return cache.get(key);
 }
 function occupiedUncached(s, x, z) {
+  if(activeNavigation?.state===s)return (riverBankAt(x,z,.5,s.landSeed)&&!crossingAt(s,x,z)) ||
+    activeNavigation.camp.some(c=>c.x===x&&c.z===z)||
+    (activeNavigation.obstacles.get(`${Math.floor(x)},${Math.floor(z)}`)||[]).some(rect=>insideSolid({x,z},rect,BODY_RADIUS));
   return (
     (riverBankAt(x, z, 0.5, s.landSeed) && !crossingAt(s, x, z)) ||
     blockedCamp(s).some((c) => c.x === x && c.z === z) ||
@@ -1263,60 +1335,33 @@ function occupiedUncached(s, x, z) {
             (COMMUNITY[PROJECTS[p.key].kind]?.sheltered &&
               shelteredFrontCell(p, x, z)))
         ) &&
-        x >= p.x &&
-        x < p.x + footprint(p)[0] &&
-        z >= p.z &&
-        z < p.z + footprint(p)[1],
+        accessGeometry(p,PROJECTS[p.key],footprint(p)).solids.some(rect=>insideSolid({x,z},rect,BODY_RADIUS)),
     )
   );
 }
 // Test the whole swept body, not just waypoint cells. Expanded cell rectangles
 // leave shoulders clear of tents, construction sites and the riverbank.
 export function walkSegmentClear(s, from, to) {
-  const radius = 0.16;
-  const minX = Math.floor(Math.min(from.x, to.x) - 0.5 - radius);
-  const maxX = Math.ceil(Math.max(from.x, to.x) + 0.5 + radius);
-  const minZ = Math.floor(Math.min(from.z, to.z) - 0.5 - radius);
-  const maxZ = Math.ceil(Math.max(from.z, to.z) + 0.5 + radius);
-  for (let x = minX; x <= maxX; x++)
-    for (let z = minZ; z <= maxZ; z++) {
-      if (!occupied(s, x, z)) continue;
-      let enter = 0,
-        leave = 1;
-      for (const [a, b, center] of [
-        [from.x, to.x, x],
-        [from.z, to.z, z],
-      ]) {
-        const delta = b - a,
-          low = center - 0.5 - radius,
-          high = center + 0.5 + radius;
-        if (Math.abs(delta) < 1e-9) {
-          if (a < low || a > high) {
-            enter = 2;
-            break;
-          }
-        } else {
-          const t1 = (low - a) / delta,
-            t2 = (high - a) / delta;
-          enter = Math.max(enter, Math.min(t1, t2));
-          leave = Math.min(leave, Math.max(t1, t2));
-        }
-      }
-      if (enter <= leave) {
-        // A newly unpacked tent/project can enclose someone already standing there.
-        // Permit only outward progress until their body clears that footprint.
-        const penetration = (p) =>
-          Math.min(0.66 - Math.abs(p.x - x), 0.66 - Math.abs(p.z - z));
-        if (
-          penetration(from) >= 0 &&
-          penetration(to) < penetration(from) - 1e-8
-        )
-          continue;
-        return false;
-      }
+  // Terrain and camp obstacles retain their cell geometry; buildings use physical solids.
+  const minX=Math.floor(Math.min(from.x,to.x)-1),maxX=Math.ceil(Math.max(from.x,to.x)+1);
+  const minZ=Math.floor(Math.min(from.z,to.z)-1),maxZ=Math.ceil(Math.max(from.z,to.z)+1);
+  const cached=activeNavigation?.state===s?activeNavigation:null;
+  const camp=cached?.camp||blockedCamp(s),nearby=new Set();
+  for(let x=minX;x<=maxX;x++)for(let z=minZ;z<=maxZ;z++){
+    if(cached)for(const rect of cached.obstacles.get(`${x},${z}`)||[])nearby.add(rect);
+    if(((riverBankAt(x,z,.5,s.landSeed)&&!crossingAt(s,x,z))||camp.some(c=>c.x===x&&c.z===z))&&segmentHitsSolid(from,to,{x,z,w:1,d:1}))return false;
+  }
+  if(cached)return ![...nearby].some(rect=>segmentHitsSolid(from,to,rect));
+  for(const p of s.projects){
+    if(p.felled||p.key==='road'||(p.key==='bridge'&&p.work>=PROJECTS[p.key].work))continue;
+    for(const rect of accessGeometry(p,PROJECTS[p.key],footprint(p)).solids){
+      if(rect.x+rect.w/2<minX||rect.x-rect.w/2>maxX||rect.z+rect.d/2<minZ||rect.z-rect.d/2>maxZ)continue;
+      if(segmentHitsSolid(from,to,rect))return false;
     }
+  }
   return true;
 }
+
 function naturalPath(s, from, path) {
   const keepRoad =
     roadAt(s, from.x, from.z) && path.every((p) => roadAt(s, p.x, p.z));
@@ -1379,18 +1424,20 @@ function naturalPath(s, from, path) {
   return curved.slice(1);
 }
 // The grid finds a safe corridor; residents follow continuous shortcuts and bends.
-export function route(s,from,to){
-  if(!fastNavigationStates.has(s))return routeUncached(s,from,to);
+export function route(s,from,to,reachOnly=false){
+  if(!fastNavigationStates.has(s))return routeUncached(s,from,to,1,reachOnly)||routeUncached(s,from,to,.5,reachOnly);
   const previous=activeNavigation;activeNavigation=prepareNavigation(s);
-  try{return routeUncached(s,from,to);}finally{activeNavigation=previous;}
+  try{return routeUncached(s,from,to,1,reachOnly)||routeUncached(s,from,to,.5,reachOnly);}finally{activeNavigation=previous;}
 }
-function routeUncached(s, from, to) {
+function routeUncached(s, from, to, step=1,reachOnly=false) {
   // This river runs across the whole plot. Without a completed crossing,
   // searching thousands of cells on the opposite bank cannot find a route.
   const bank = point => Math.sign((point.x-32)*2 - riverCenter((point.z-32)*2,s.landSeed));
   if (bank(from) !== bank(to) && !s.projects.some(p=>p.key === "bridge" && p.work >= PROJECTS[p.key].work)) return null;
-  const start = [Math.round(from.x), Math.round(from.z)],
-    end = [Math.round(to.x), Math.round(to.z)];
+  const snap=n=>Math.round(n/step)*step;
+  const start = [snap(from.x), snap(from.z)],
+    end = [snap(to.x), snap(to.z)];
+  if(occupied(s,...end)||!walkSegmentClear(s,to,to))return null;
   const key = (x, z) => `${x},${z}`;
   if (start[0] === end[0] && start[1] === end[1])
     return walkSegmentClear(s, from, to)
@@ -1398,6 +1445,24 @@ function routeUncached(s, from, to) {
         ? [{ x: to.x, z: to.z }]
         : []
       : null;
+  if(reachOnly&&step===1&&activeNavigation?.state===s){
+    // All placement targets share one flood from stores; stop as soon as this target is found.
+    const origin=`${from.x},${from.z}`;
+    activeNavigation.reach ??= new Map();
+    let flood=activeNavigation.reach.get(origin);
+    if(!flood){flood={queue:[start],head:0,seen:new Set([key(...start)])};activeNavigation.reach.set(origin,flood);}
+    const goal=key(...end);
+    while(!flood.seen.has(goal)&&flood.head<flood.queue.length){
+      const [x,z]=flood.queue[flood.head++];
+      for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+        const nx=x+dx,nz=z+dz,k=key(nx,nz);
+        if(nx<CELL_MIN+1||nx>CELL_MAX-2||nz<CELL_MIN+1||nz>CELL_MAX-2||flood.seen.has(k)||occupied(s,nx,nz))continue;
+        if(x===start[0]&&z===start[1]&&!walkSegmentClear(s,from,{x:nx,z:nz}))continue;
+        flood.seen.add(k);flood.queue.push([nx,nz]);
+      }
+    }
+    return flood.seen.has(goal)&&walkSegmentClear(s,{x:end[0],z:end[1]},to)?[]:null;
+  }
   const queue = new PathQueue(),
     parent = new Map([[key(...start), null]]),
     costs = new Map([[key(...start), 0]]);
@@ -1406,6 +1471,7 @@ function routeUncached(s, from, to) {
     const { x, z, cost } = queue.pop();
     if (cost > costs.get(key(x, z))) continue;
     if (x === end[0] && z === end[1]) {
+      if(reachOnly)return walkSegmentClear(s,{x,z},to)?[]:null;
       const path = [];
       let k = key(x, z);
       while (parent.get(k) !== null) {
@@ -1415,6 +1481,7 @@ function routeUncached(s, from, to) {
       }
       if (path.length && (to.x !== end[0] || to.z !== end[1]))
         path.push({ x: to.x, z: to.z });
+      if(path.length&&!walkSegmentClear(s,path.at(-2)||from,path.at(-1)))return null;
       const result = [];
       let anchor = from,
         chunk = [],
@@ -1430,6 +1497,7 @@ function routeUncached(s, from, to) {
         onRoad = nextRoad;
       }
       result.push(...naturalPath(s, anchor, chunk));
+      if(!result.every((point,index)=>walkSegmentClear(s,index?result[index-1]:from,point)))return null;
       return result;
     }
     for (const [dx, dz] of [
@@ -1438,18 +1506,19 @@ function routeUncached(s, from, to) {
       [0, 1],
       [0, -1],
     ]) {
-      const nx = x + dx,
-        nz = z + dz,
+      const nx = x + dx*step,
+        nz = z + dz*step,
         k = key(nx, nz);
       if (
         nx < CELL_MIN + 1 ||
         nx > CELL_MAX - 2 ||
         nz < CELL_MIN + 1 ||
         nz > CELL_MAX - 2 ||
-        occupied(s, nx, nz)
+        occupied(s, nx, nz) || (step<1&&!walkSegmentClear(s,{x,z},{x:nx,z:nz})) ||
+        (x===start[0]&&z===start[1]&&!walkSegmentClear(s,from,{x:nx,z:nz}))
       )
         continue;
-      const nextCost = cost + (roadAt(s, nx, nz) ? 0.65 : 1);
+      const nextCost = cost + step*(roadAt(s, nx, nz) ? 0.65 : 1);
       if (nextCost >= (costs.get(k) ?? Infinity)) continue;
       costs.set(k, nextCost);
       parent.set(k, key(x, z));
@@ -1476,7 +1545,9 @@ function go(s, r, target) {
   }
   if (!r.walk.length) {
     r.target = null;
-    return Math.hypot(r.x - target.x, r.z - target.z) < 1;
+    const reached=Math.hypot(r.x-target.x,r.z-target.z)<.05;
+    if(!reached){r.action="blocked";const op=s.operations?.find(o=>o.id===r.operation&&!o.done);if(op)op.status="No reachable route to the work destination";}
+    return reached;
   }
   return false;
 }
@@ -1766,6 +1837,9 @@ export function endWeekend(s) {
   return true;
 }
 export function tick(s,dt){
+  try { return tickWithNavigation(s,dt); } finally { releaseEquipment(s); }
+}
+function tickWithNavigation(s,dt){
   if(!fastNavigationStates.has(s))return tickUncached(s,dt);
   const previous=activeNavigation;activeNavigation=prepareNavigation(s);
   try{return tickUncached(s,dt);}finally{activeNavigation=previous;}
@@ -1996,6 +2070,7 @@ function tickUncached(s, dt) {
         d = Math.hypot(dx, dz),
         desiredSpeed =
           (r.cargo ? 0.72 : 0.95) *
+          (r.cargo && s.equipment?.loans[r.id]?.item === "bucket" ? useEquipment(s,r,"bucket",s.equipment.loans[r.id].task,dt) : 1) *
           (0.92 + i * 0.035) *
           (r.energy < 35 ? 0.8 : 1),
         braking = r.walk.length === 1 ? Math.max(0.25, Math.min(1, d * 2)) : 1;
@@ -2177,6 +2252,7 @@ function tickUncached(s, dt) {
       p.work +
         dt *
           workMultiplier(r,p.key) *
+          useEquipment(s,r,"carpentry-tools",`job:${p.id}`,dt,PROJECTS[p.key].work) *
           (s.opening &&
           !s.opening.complete &&
           s.rain &&
@@ -2357,6 +2433,13 @@ export function restore(text) {
       s.livestockUnits = 1;
     }
     if (s.livestockUnits !== 1) return null;
+    migrateItemProjects(s);
+    for(const op of s.operations||[]) {
+      if(PROCESSES[op.recipe]?.craft && op.work>PROCESSES[op.recipe].work)op.work=PROCESSES[op.recipe].work;
+    }
+    if(!validEquipment(s))return null;
+    // Restore releases tools to shared storage; continuing jobs borrow again.
+    equipmentState(s).loans={};
     // Homes in older saves already paid for their rooftop equipment.
     if (!s.homeEnergyVersion) {
       for (const p of s.projects) if (PROJECTS[p.key]?.kind === 'home') {
@@ -2427,7 +2510,7 @@ export function restore(text) {
       for (const k of ["washTime", "cleanedAtWork", "toiletAt", "toiletTime"])
         if (r[k] !== undefined && (!Number.isFinite(r[k]) || r[k] < 0))
           return null;
-      if (!validNeeds(r)) return null;
+      if (!validNeeds(r) || !validCraftSkills(r)) return null;
       if(r.friendships!==undefined && (!r.friendships || typeof r.friendships!=='object' || Array.isArray(r.friendships) || Object.entries(r.friendships).some(([id,value])=>id===r.id || !fresh.people.some(p=>p.id===id) || !Number.isFinite(value) || value<0 || value>100))) return null;
       ensureNeeds(r,i);
       if (r.cargo && r.haulStage === 'site' && r.haulLoads && r.job) {

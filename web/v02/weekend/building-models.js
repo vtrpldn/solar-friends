@@ -223,18 +223,6 @@ export const BUILDING_MODELS = [
     size: [1, 1],
   },
   {
-    id: "watering-can",
-    name: "Watering can",
-    category: "Props",
-    size: [1, 1],
-  },
-  {
-    id: "wheelbarrow",
-    name: "Wheelbarrow",
-    category: "Props",
-    size: [1, 1],
-  },
-  {
     id: "tool-rack",
     name: "Garden tool rack",
     category: "Props",
@@ -275,18 +263,6 @@ export const BUILDING_MODELS = [
     name: "Hammock",
     category: "Props",
     size: [2, 1],
-  },
-  {
-    id: "bicycle",
-    name: "Bicycle",
-    category: "Props",
-    size: [1, 1],
-  },
-  {
-    id: "produce-crates",
-    name: "Produce crates",
-    category: "Props",
-    size: [1, 1],
   },
   {
     id: "wayfinding-sign",

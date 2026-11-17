@@ -1,3 +1,5 @@
+import { craftingRule } from './crafting.js';
+import { ITEMS } from "./items.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import { BUILDING_MODELS } from "./building-models.js";
 // v1 economy.rs construction recipes, expressed in v2 material IDs.
@@ -96,6 +98,10 @@ const recipes = {
   },
 };
 const extraMaterials = {
+  tool_heads:['Garden tool heads',1,1,65],
+  repair_supplies:['Repair supplies',1,1,15],
+  soap:['Soap refill',1,1,8],
+  wheel_kit:['Wheel and axle kit',1,1,65],
   logs:['Raw wood',4,12,24],
   planks:['Planks',4,12,60],
   bamboo: ["Bamboo poles", 4, 12, 48],
@@ -126,6 +132,7 @@ const extraMaterials = {
   hens: ["Hens", 1, 3, 180],
 };
 export function expandMaterials(materials) {
+  for (const [id, item] of Object.entries(ITEMS)) materials[id] = {name:item.name,batch:1,quantity:1,price:item.price,item:true,description:item.description};
   for (const [id, [name, batch, quantity, price]] of Object.entries(
     extraMaterials,
   ))
@@ -212,7 +219,7 @@ export function expandProjects(projects) {
         : COMMUNITY[model.id]?.category || category,
       repeatable: true,
       description:
-        ({'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. No electricity required.', 'well':'A cistern storing 75 clean and 60 untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
+        ({'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. They also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. No electricity required.', 'well':'A cistern storing 75 clean and 60 untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
           'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 24 untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply.'}[model.id]) ||
         COMMUNITY[model.id]?.description ||
         `${model.name}. ${model.size.join(" × ")} cells. Build with physical supplies and resident labor.${["warehouse", "supply-5"].includes(kind) ? " Nearby construction can stage bundled deliveries here to reduce hauling trips." : ""}`,
@@ -367,3 +374,16 @@ export const PROCESSES = {
     renew: 480,
   },
 };
+
+for (const [id, item] of Object.entries(ITEMS)) if (item.recipe) {
+  PROCESSES[`craft_${id}`] = {name:`Craft ${item.name.toLowerCase()}`,kind:'supply-5',input:item.recipe.input,output:{[id]:1},work:item.recipe.work};
+}
+
+for (const [id, item] of Object.entries(ITEMS)) if (item.durable) {
+  PROCESSES[`repair_${id}`] = {name:`Repair ${item.name.toLowerCase()}`,kind:'supply-5',input:{repair_supplies:1},output:{},work:45,equipmentRepair:id};
+}
+
+for (const [id, recipe] of Object.entries(PROCESSES)) {
+  const rule=craftingRule(id,recipe);
+  if(rule) {recipe.craft=rule;recipe.kind=rule.kind;recipe.work=rule.work;}
+}

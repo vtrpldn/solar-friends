@@ -1,3 +1,4 @@
+import { disabledReason, installDisabledInfo } from './disabled-info.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {DEFAULT_SETTINGS,OPTIONS,PRESETS,BIOMES,applySettings,registerWorld,townDuration} from './world-settings.js';
@@ -54,7 +55,7 @@ document.querySelectorAll("[data-start]").forEach(
   (b) =>
     (b.onclick = () => {
       pending = b.dataset.start;
-      for(const key of ["savings","supplies"]) $("setup-"+key).disabled=pending==="sandbox";
+      for(const key of ["savings","supplies"]) { $("setup-"+key).disabled=pending==="sandbox";disabledReason($("setup-"+key),"Sandbox provides unlimited savings and supplies, so this starting amount does not apply."); }
       $("setup-seed").value=freshLandSeed();
       $("world-setup").showModal();updatePreview();
     }),
@@ -90,3 +91,5 @@ $('setup-start').onclick=()=>{
 };
 
 if(new URLSearchParams(location.search).has('load-error')) $('menu-status').textContent='Your village could not be loaded. Its save has been preserved. Open Load village to export it or try the previous save; no fresh village has overwritten it.';
+
+installDisabledInfo();

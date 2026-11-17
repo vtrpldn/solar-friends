@@ -1,3 +1,7 @@
+import { accessGeometry } from './building-access.js';
+import { productionBlocker, buildingOperatingStatus } from './simulation.js';
+import { disabledReason, installDisabledInfo } from './disabled-info.js';
+import { protectedEquipment } from './equipment.js';
 import {loadVillage} from './load-village.js';
 import {ensureNaturalLand} from './natural-resources.js';
 import {saveSlots} from "./save-slots.js";
@@ -233,7 +237,8 @@ const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });
 const ground = createTerrain(s.landSeed, s.elevationSeed, s.terrainPads);
 scene.add(ground);
-scene.add(compactModel(createAccessRoad()));
+let accessRoad = compactModel(createAccessRoad(s.elevationSeed, s.terrainPads));
+scene.add(accessRoad);
 const river = createRiver(s.landSeed);
 scene.add(compactModel(river.root), river.current);
 
@@ -480,6 +485,10 @@ function syncTerrain() {
   terrainLayer = s.terrainPads;
   terrainPadCount = s.terrainPads.length;
   updateTerrain(ground, s.elevationSeed, s.terrainPads);
+  scene.remove(accessRoad);
+  disposeModel(accessRoad);
+  accessRoad = compactModel(createAccessRoad(s.elevationSeed, s.terrainPads));
+  scene.add(accessRoad);
   for (const p of s.projects.filter((p) => p.key === "road")) {
     const entry = buildings.get(p.id);
     if (entry) {
@@ -621,6 +630,23 @@ const ghost = new THREE.Mesh(
 ghost.rotation.x = -Math.PI / 2;
 ghost.visible = false;
 scene.add(ghost);
+const accessPreview=new THREE.Group();scene.add(accessPreview);
+let accessPreviewKey=null,placementPreviewPending=false;
+function previewAccess(key,x,z,rotation){
+  if(key!==accessPreviewKey){
+    for(const child of [...accessPreview.children]){child.geometry.dispose();child.material.dispose();accessPreview.remove(child);}
+    accessPreviewKey=key;
+  }
+  if(!key||['road','bridge'].includes(key))return;
+  const p={key,x,z,rotation,work:PROJECTS[key].work};
+  const geometry=accessGeometry(p,PROJECTS[key],footprint(p));
+  let index=0;
+  for(const [points,color,radius] of [[geometry.work,'#55b9d8',.24],[geometry.entrances,'#f3be55',.38]])for(const point of points){
+    const marker=accessPreview.children[index++]||new THREE.Mesh(new THREE.RingGeometry(radius,radius+.08,24),new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide,depthTest:false}));
+    marker.rotation.x=-Math.PI/2;marker.position.copy(world(point.x,point.z));marker.position.y+=.12;marker.renderOrder=10;if(marker.parent!==accessPreview)accessPreview.add(marker);
+  }
+}
+
 const drops = new THREE.BufferGeometry(),
   rainPoints = new Float32Array(600 * 3);
 for (let i = 0; i < 600; i++) {
@@ -812,9 +838,11 @@ $("world").addEventListener("pointermove", (e) => {
     roadPreview.visible = false;
     return;
   }
+  const nextCell={x:Math.round(p.x/2+32),z:Math.round(p.z/2+32)};
+  if(cell?.x===nextCell.x&&cell?.z===nextCell.z&&shiftPlacement===e.shiftKey&&(ghost.visible||wireframe?.visible))return;
   shiftPlacement = e.shiftKey;
-  cell = { x: Math.round(p.x / 2 + 32), z: Math.round(p.z / 2 + 32) };
-  updatePlacementPreview();
+  cell = nextCell;
+  if(!placementPreviewPending){placementPreviewPending=true;requestAnimationFrame(()=>{placementPreviewPending=false;updatePlacementPreview();});}
 });
 function updatePlacementPreview() {
   if (!cell) return;
@@ -837,6 +865,7 @@ function updatePlacementPreview() {
   }
   ghost.position.y += 0.04;
   ghost.visible = true;
+  previewAccess(placing,cell.x,cell.z,placementRotation);
   const error = pitching
     ? campPlacementError(s, cell.x, cell.z)
     : placementError(s, placing, cell.x, cell.z, moving, placementRotation);
@@ -862,7 +891,7 @@ function updatePlacementPreview() {
     }
     message(
       hint ||
-        `${PROJECTS[placing].name} · ${size.join("×")} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats"}`,
+        `${PROJECTS[placing].name} · ${size.join("×")} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats · Gold: entrance · Blue: work access"}`,
     );
   } else if (hint) message(hint);
   ghost.material.color.set(error ? "#c26847" : "#d9eda5");
@@ -1219,14 +1248,18 @@ function renderUtilityUI() {
       : [],
   );
   $("production-controls").hidden = !$("production").value;
-  $("queue-production").disabled = !node || !$("production").value;
+  const batchBlocker=productionBlocker(s,selected,$("production").value);
+  disabledReason($("queue-production"),batchBlocker);
+  $("queue-production").disabled=!!batchBlocker;
   $("repeat-production").hidden = !!p && PROJECTS[p.key].kind==='wild-tree';
   $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : 'Start batch';
+  disabledReason($("repeat-production"), !node ? "Finish constructing this building before repeating production." : "Select an available recipe first.");
   $("repeat-production").disabled = !node || !$("production").value;
   $("repeat-production").textContent = p?.repeat
     ? "Stop repeating"
     : "Keep 24 in stock";
   $("toggle-building").hidden = !canSwitchBuilding(sys,node);
+  disabledReason($("toggle-building"), "This structure has no switchable service.");
   $("toggle-building").disabled = !canSwitchBuilding(sys,node);
   $("toggle-building").textContent = node?.enabled ? "Switch off" : "Switch on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done);
@@ -1242,6 +1275,7 @@ function renderUtilityUI() {
           " · ",
         )} ${op ? op.status || "Resident job queued" : p.productionStatus || (p.readyAt > s.time ? `Growing: ${Math.ceil(p.readyAt - s.time)} seconds remaining` : "")}`
     : "";
+  if(p){const status=buildingOperatingStatus(s,p);$("building-service").textContent=`${status.state}: ${status.reason} · ${$("building-service").textContent}`;}
   const recipe=PROCESSES[$("production").value];
   if(p && recipe?.deposit) $("building-service").textContent+=` · Deposit: ${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} remaining`;
   $("building-service").hidden = !$("building-service").textContent.trim();
@@ -1346,6 +1380,7 @@ $("terrain-undo").onclick = () => {
   s.terrainPads = s.terrainPads.filter(p=>!p.terraform);
   if(layer) s.terrainPads.push(layer);
   syncTerrain(); syncBuildings(); persist();
+  disabledReason($("terrain-undo"), "There are no terrain edits to undo in this session.");
   $("terrain-undo").disabled = !terrainHistory.length;
   message("Terrain edit undone.");
 };
@@ -1482,6 +1517,7 @@ function renderUI() {
     trend.textContent=unlimited?'Unlimited':formatTrend(rate,i===0);
     trend.dataset.direction=rate>.05?'up':rate<-.05?'down':'flat';
     button.title=`Open ${counter[3]} management. ${unlimited?'Unlimited in sandbox.':rate===null?'Gathering trend data (first five in-game minutes).':`${i===2?'Stored energy':counter[2]}: ${formatTrend(rate,i===0)} net change over the last in-game hour, or time observed since loading. Includes spending, consumption and deliveries.`}`;
+    disabledReason(button, "Wait for the residents to arrive and choose a campsite to manage village supplies.");
     button.disabled = !active;
   });
   const minutes = 9 * 60 + Math.floor(s.time * 0.45);
@@ -1630,6 +1666,7 @@ function renderUI() {
   const purchase = MATERIALS[$("purchase").value];
   $("town").textContent =
     `Fetch ${materialText($("purchase").value, purchase.quantity)} · R$${purchase.price}`;
+  disabledReason($("town"), s.trip ? "A town trip is already in progress. Wait for the resident to return and unload." : s.stage !== "playing" ? "Choose a campsite and start village life before buying supplies." : `You need R$${purchase.price.toFixed(2)}; shared savings are R$${s.money.toFixed(2)}.`);
   $("town").disabled =
     !!s.trip || s.money < purchase.price || s.stage !== "playing";
   $("inventory").textContent = Object.keys(MATERIALS)
@@ -1637,13 +1674,15 @@ function renderUI() {
     .join(" · ");
   $("sell").textContent =
     `Sell ${materialText($("purchase").value, purchase.quantity)} · R$${Math.floor(purchase.price * 0.5)}`;
+  disabledReason($("sell"), !purchase.quantity ? "This resource cannot be sold in town." : `You need ${purchase.quantity} available ${purchase.name} to sell a batch. Borrowed and worn equipment must be returned or repaired first.`);
   $("sell").disabled =
-    materialCount(s, $("purchase").value) < purchase.quantity ||
+    materialCount(s, $("purchase").value) - protectedEquipment(s, $("purchase").value) < purchase.quantity ||
     !purchase.quantity;
   $("trip").textContent = s.trip
     ? `${s.people.find((r) => r.id === s.trip.person).name}: ${{ boarding: "walking to the car", outbound: "driving to town", away: "collecting supplies in town", inbound: "driving home", unloading: "unloading supplies" }[s.trip.phase]}.`
     : `Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. Buy essentials or sell locally produced surplus.`;
   $("rain").hidden = !s.rainSeen || s.rainResolved;
+  disabledReason($("boards"), `You need 2 timber pieces to protect the supplies; ${s.wood} are available.`);
   $("boards").disabled = s.wood < 2;
   $("log").replaceChildren(
     ...s.log.map((t) => {
@@ -1655,6 +1694,7 @@ function renderUI() {
   for (const key of Object.keys(PROJECTS)) {
     const b = $(`build-${key}`);
     if(!b)continue;
+    disabledReason(b, "This project is already planned or built. Select the existing project to manage it.");
     b.disabled =
       s.mode !== "sandbox" &&
       !PROJECTS[key].repeatable &&
@@ -1694,6 +1734,7 @@ function renderUI() {
             : "";
     $("selected-desc").textContent =
       `${PROJECTS[p.key].description}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+    disabledReason($("priority"), "Construction is complete; this building no longer needs construction priority.");
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
   }
 }
@@ -1781,8 +1822,17 @@ function frame(now) {
       };
       const pose = s.arrivalAnimating ? {...vehiclePose(arrivalTime,index),visible:true} : townCarPose(trip, index);
       vehicle.root.visible = pose.visible;
-      vehicle.root.position.set(pose.x, 0, pose.z);
-      vehicle.root.rotation.y = pose.yaw;
+      vehicle.root.position.set(pose.x, elevationAt(pose.x, pose.z, s.elevationSeed, s.terrainPads), pose.z);
+      const forwardX = Math.sin(pose.yaw), forwardZ = Math.cos(pose.yaw);
+      const height = (right, forward) => elevationAt(
+        pose.x + Math.cos(pose.yaw) * right + forwardX * forward,
+        pose.z - Math.sin(pose.yaw) * right + forwardZ * forward,
+        s.elevationSeed, s.terrainPads);
+      vehicle.root.rotation.set(
+        -Math.atan2(height(0, 1.4) - height(0, -1.4), 2.8),
+        pose.yaw,
+        Math.atan2(height(.8, 0) - height(-.8, 0), 1.6),
+        "YXZ");
       for (const wheel of vehicle.wheels) {
         wheel.rotation.set(0, 0, Math.PI / 2);
         wheel.rotateY((pose.z + 22) / 0.41);
@@ -1792,7 +1842,7 @@ function frame(now) {
     const g = actors[i];
     if(s.arrivalAnimating){
       const pose=arrivalPose(arrivalTime,i);
-      g.visible=pose.visible;g.position.set(pose.x,pose.y,pose.z);g.rotation.y=pose.yaw;
+      g.visible=pose.visible;g.position.set(pose.x,pose.y+elevationAt(pose.x,pose.z,s.elevationSeed,s.terrainPads),pose.z);g.rotation.y=pose.yaw;
       animateResident(g.rig,pose.walking?'walk':'idle',arrivalTime+i*.7,paused?0:dt*speed);
       continue;
     }
@@ -2012,6 +2062,7 @@ function frame(now) {
     top: shadowExtent, bottom: -shadowExtent, near: 1, far: 900 });
   sun.shadow.camera.updateProjectionMatrix();
   drawUtilities();
+  accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
   renderer.render(scene, camera);
   recordPerformance(now, visual.time);
   requestAnimationFrame(frame);
@@ -2020,3 +2071,5 @@ addEventListener("pagehide", persist);
 requestAnimationFrame(frame);
 
 installAudio();
+
+installDisabledInfo();

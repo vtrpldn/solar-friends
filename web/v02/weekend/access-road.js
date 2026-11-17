@@ -2,7 +2,10 @@ import { createEntrancePortal, createUtilityPole } from "../library/entrance.js"
 import { MAP_HALF } from "./map-size.js";
 import * as THREE from "three";
 import { roadCenter, PARK_Z } from "./road-layout.js";
-export function createAccessRoad() {
+import { elevationAt } from "./elevation.js";
+import { drapeRoadGeometry } from "./road-surface.js";
+export function createAccessRoad(seed = 0, pads = []) {
+  const height = (x, z) => elevationAt(x, z, seed, pads);
   const root = new THREE.Group();
   const materials = new Map();
   const mat = (color) => {
@@ -48,7 +51,8 @@ export function createAccessRoad() {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
     geo.computeVertexNormals();
-    const mesh = new THREE.Mesh(geo, mat(color));
+    const mesh = new THREE.Mesh(drapeRoadGeometry(geo, new THREE.Vector3(), 0, seed, pads), mat(color));
+    geo.dispose();
     mesh.receiveShadow = true;
     root.add(mesh);
   }
@@ -64,6 +68,14 @@ export function createAccessRoad() {
   clearing.rotation.x = -Math.PI / 2;
   clearing.scale.set(5.5, 3, 1);
   clearing.position.set(1.1, 0.036, PARK_Z + 3);
+  clearing.updateMatrix();
+  clearing.geometry.applyMatrix4(clearing.matrix);
+  const flatClearing = clearing.geometry;
+  clearing.geometry = drapeRoadGeometry(flatClearing, new THREE.Vector3(), 0, seed, pads);
+  flatClearing.dispose();
+  clearing.position.set(0, 0, 0);
+  clearing.rotation.set(0, 0, 0);
+  clearing.scale.set(1, 1, 1);
   clearing.receiveShadow = true;
   root.add(clearing);
   for (let i = 0; i < 46; i++) {
@@ -74,6 +86,7 @@ export function createAccessRoad() {
       mat(i % 3 ? "#bbb397" : "#a69a7d"),
     );
     rock.position.set(roadCenter(z) + side * (4.5 + (i % 3) * 0.12), 0.07, z);
+    rock.position.y += height(rock.position.x, z);
     rock.scale.y = 0.5;
     root.add(rock);
   }
@@ -86,6 +99,7 @@ export function createAccessRoad() {
         mat("#876749"),
       );
       post.position.set(x + dx, 0.7, -MAP_HALF + 5);
+      post.position.y += height(post.position.x, post.position.z);
       post.castShadow = true;
       root.add(post);
     }
@@ -95,6 +109,11 @@ export function createAccessRoad() {
         mat("#b19a6a"),
       );
       rail.position.set(x + side * 1.25, y, -MAP_HALF + 5);
+      const leftHeight = height(x, -MAP_HALF + 5);
+      const rightHeight = height(x + side * 2.5, -MAP_HALF + 5);
+      rail.position.y += (leftHeight + rightHeight) / 2;
+      rail.rotation.z = Math.atan2((rightHeight - leftHeight) * side, 2.5);
+      rail.scale.x = Math.hypot(2.5, rightHeight - leftHeight) / 2.5;
       rail.castShadow = true;
       root.add(rail);
     }
@@ -102,15 +121,16 @@ export function createAccessRoad() {
   const entranceZ = -MAP_HALF + 5;
   const entranceX = roadCenter(entranceZ);
   const portal = createEntrancePortal();
-  portal.position.set(entranceX,0,entranceZ);
+  portal.position.set(entranceX,height(entranceX,entranceZ),entranceZ);
   root.add(portal);
   const pole = createUtilityPole();
   pole.position.set(roadCenter(entranceZ+3)+6.8,0,entranceZ+3);
+  pole.position.y = height(pole.position.x, pole.position.z);
   root.add(pole);
   // External supply cables end at the map boundary, visibly connecting to town.
   for (const offset of [-.75,0,.75]) {
-    const a = new THREE.Vector3(pole.position.x+offset,6.55,pole.position.z);
-    const b = new THREE.Vector3(roadCenter(-MAP_HALF)+6.8+offset,6.55,-MAP_HALF);
+    const a = new THREE.Vector3(pole.position.x+offset,pole.position.y+6.55,pole.position.z);
+    const b = new THREE.Vector3(roadCenter(-MAP_HALF)+6.8+offset,height(roadCenter(-MAP_HALF)+6.8,-MAP_HALF)+6.55,-MAP_HALF);
     const mid = a.clone().lerp(b,.5); mid.y-=.4;
     const wire = new THREE.Mesh(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(a,mid,b),8,.018,4,false),mat("#334f4e"));
     root.add(wire);

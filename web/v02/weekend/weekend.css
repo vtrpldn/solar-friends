@@ -922,7 +922,8 @@ dialog button {
   background: #f5eac0;
   border-color: #dfc88b;
 }
-#management[data-screen="resources"] .management-stats {
+#management[data-screen="resources"] .management-stats,
+#management[data-screen="items"] .management-stats {
   grid-template-columns: repeat(3, 1fr);
 }
 .management-layout {
@@ -1009,19 +1010,34 @@ dialog button {
   text-align: left;
   padding: 10px !important;
   min-height: 88px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px;
+  grid-template-rows: 48px minmax(2.6em, auto) 1fr auto;
+  align-content: start;
+  column-gap: 6px;
+  row-gap: 8px;
 }
 .stock-card strong {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: start;
   font-size: 23px;
   display: block;
   line-height: 1.1;
   color: #708547;
 }
 .stock-card span {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-self: start;
   display: block;
   font-size: 12px;
-  margin: 4px 0;
+  margin: 0;
 }
 .stock-card small {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  align-self: start;
   font-size: 9px;
   font-weight: 400;
   letter-spacing: 0;
@@ -1259,13 +1275,13 @@ body[data-tray="closed"] {
   grid-template-columns: 29px auto;
 }
 .stock-card > .resource-icon {
-  float: right;
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: start;
   width: 46px;
   height: 46px;
-  margin: 0 0 4px 5px;
-}
-.stock-card > span {
-  clear: both;
+  margin: 0;
 }
 
 #opening-status {
@@ -1343,7 +1359,7 @@ body[data-tray="closed"] {
 }
 
 /* Shared management layout: utility networks no longer have manual setup forms. */
-#management:not([data-screen="resources"]) .management-layout {
+#management:not([data-screen="resources"]):not([data-screen="items"]) .management-layout {
   grid-template-columns: minmax(0, 1fr);
 }
 .network-node {
@@ -1577,3 +1593,12 @@ header > .time { grid-column: 3; justify-self: end; }
 .economy-drawer summary{cursor:pointer;font-weight:750;padding:12px 0;}
 #management .economy-controls label{font-size:12px;margin:0;}
 #management .economy-controls input{flex:0 0 90px;width:90px;margin:0;}
+
+.stock-card .equipment-status { grid-row: 4; margin: 0; color: #59653c; }
+
+.crafting-crew, .crafting-recipes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.crafting-crew article, .crafting-recipe { background: #fbf2d9; border: 1px solid #d6c59e; border-radius: 12px; padding: 14px; }
+.crafting-recipe { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.crafting-recipe h4, .crafting-recipe p { margin: 0; }
+.crafting-recipe button { margin-top: auto !important; }
+.crafting-recipe p, .crafting-crew p { font-size: 12px; line-height: 1.5; }

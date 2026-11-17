@@ -1,0 +1,16 @@
+button.has-disabled-info, select.has-disabled-info, input.has-disabled-info { padding-right: 32px !important; }
+.disabled-info[popover] {
+  position: fixed; inset: auto; margin: 0 !important; padding: 0 !important;
+  width: 20px; height: 20px; min-height: 0; border: 1px solid #72834d;
+  border-radius: 50%; background: #fff9e7; color: #4c603b; box-shadow: none;
+  font: bold 12px/18px system-ui, sans-serif; text-align: center; cursor: help;
+  transform: none !important;
+}
+.disabled-info[popover]:hover, .disabled-info[popover]:focus-visible { background: #e3edc5; outline: 2px solid #72834d; outline-offset: 2px; box-shadow: none; }
+.disabled-action-tooltip[popover] {
+  position: fixed; inset: auto; margin: 0; box-sizing: border-box;
+  width: max-content; max-width: min(340px, calc(100vw - 16px)); padding: 12px 14px;
+  background: #35482e; color: #fff9e7; border: 1px solid #72834d; border-radius: 10px;
+  box-shadow: 0 5px 18px #0003; font: 13px/1.5 system-ui, sans-serif;
+  pointer-events: none;
+}
