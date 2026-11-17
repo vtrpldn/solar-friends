@@ -13,7 +13,7 @@ export function inventoryOwnership(s,projects,recipes,materials){
   if(p.coldStorage)add(recipes.cold_storage.input,'installed');
   if(p.key==='goat-pasture-empty'&&p.stocked)add({goats:2},'installed');
  }
- for(const o of s.operations||[]){if(o.done||o.water)continue;const r=recipes[o.recipe];if(!r)continue;
+ for(const o of s.operations||[]){if(o.done||o.water||o.waitingSeeds)continue;const r=recipes[o.recipe];if(!r)continue;
   if(o.phase==='return')add(o.haulRemaining||o.returnItems||o.harvestOutput||r.output,o.returningToSite?'processing':'transit');else add(o.input||r.input,'processing');
  }
  for(const job of s.upkeep?.jobs||[])if(job.partsPaid&&!job.done)add(job.replacementParts||(job.soil?{compost:job.compost}:job.battery?{batteries:1,electrical:1}:job.care?{fodder:job.care==='coop'?1:3}:{tools:1,hardware:1}),'processing');

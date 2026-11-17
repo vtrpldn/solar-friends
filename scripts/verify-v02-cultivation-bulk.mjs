@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {configureCultivation,queueCultivation} from '../web/v02/weekend/cultivation-overview.js';
 import {ensureCultivation,finishFarmJob} from '../web/v02/weekend/cultivation.js';
 const p={id:1,key:'field',fieldSize:[9,9],work:1};
-const s={time:0,mode:'story',projects:[p],people:[],operations:[],materials:{beans_seed:3,greens_seed:0,compost:0}};
+const s={time:0,autoBuy:false,mode:'story',projects:[p],people:[],operations:[],materials:{beans_seed:3,greens_seed:0,compost:0}};
 ensureCultivation(s,p);assert.equal(p.cultivation.beds.length,72);
 assert.deepEqual(configureCultivation(s,p,{crop:'beans'}),{updated:72,skipped:0});
 assert.equal(queueCultivation(s,p,'prepare').queued,72);

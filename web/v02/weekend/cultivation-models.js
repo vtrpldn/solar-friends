@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {greenhouseShell} from './greenhouse-model.js';
 import {CROPS} from './cultivation.js';
 import {elevationAt} from './elevation.js';
 const matrix=new THREE.Object3D();
@@ -92,12 +93,7 @@ export function createCultivationModel(p,state){
   const lod=new THREE.LOD();lod.userData.crops=true;lod.userData.plants=items.length;lod.addLevel(near,0);lod.addLevel(distant,65);root.add(lod);
 
  }
- if(p.key==='greenhouse'){
-  for(const x of [-3,3])for(const z of [-5,-2.5,0,2.5,5])meshBox(root,.08,2.5,.08,'#b6a17a',x,1.25,z);
-  for(const z of [-5,-2.5,0,2.5,5])for(const side of [-1,1]){const beam=meshBox(root,.07,Math.sqrt(10),.07,'#b6a17a',side*1.5,3,z);beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(-side*3,1,0).normalize());}
-  for(const side of [-1,1]){meshBox(root,.025,2.4,10,'#c1d8c7',side*3,1.25,0,.19);const roof=meshBox(root,Math.sqrt(10),.025,10,'#c1d8c7',side*1.5,3,0,.19);roof.rotation.z=-side*Math.atan2(1,3);}
-  for(const z of [-5,5])for(const side of [-1,1])meshBox(root,2.5,2.4,.025,'#c1d8c7',side*1.75,1.25,z,.19);
- }
+ if(p.key==='greenhouse')greenhouseShell(root,meshBox);
  for(const {color,opacity,parts}of root.userData.boxes?.values()||[]){
   const batch=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshStandardMaterial({color,roughness:.9,transparent:opacity<1,opacity,depthWrite:opacity===1,side:THREE.DoubleSide}),parts.length);
   batch.userData.ownedMaterial=true;batch.castShadow=opacity===1;batch.receiveShadow=true;

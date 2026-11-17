@@ -65,8 +65,8 @@ console.log('PASS explicit biomass, organic matter and water balances');
 
 const controls=createSandbox(42);assert.equal(planField(controls,50,50,[2,2]),'');const cp=controls.projects.at(-1);
 assert.match(queueBedJob(controls,cp.id,0,'plant'),/Prepare/);
-cp.cultivation.beds[0].stage='prepared';controls.materials.greens_seed=0;
-assert.match(queueBedJob(controls,cp.id,0,'plant'),/Missing/);
+cp.cultivation.beds[0].stage='prepared';controls.materials.greens_seed=0;controls.autoBuy=false;
+assert.match(queueBedJob(controls,cp.id,0,'plant'),/Auto-buy is off/);
 controls.materials.greens_seed=10;assert.equal(queueBedJob(controls,cp.id,0,'plant'),'');
 assert.match(configureBed(controls,cp.id,0,{crop:'corn'}),/finish/);
 assert.match(resizeField(controls,cp.id,[3,3]),/Finish/);

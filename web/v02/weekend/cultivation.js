@@ -146,6 +146,7 @@ export function validCultivation(s){
   if(!CROPS[o.farm.crop]||![.5,1,1.5].includes(o.farm.density))return false;
   const spec=farmJobSpec({...b,crop:o.farm.crop,density:o.farm.density},o.farm.action);
   if(spec.work!==o.farm.work||JSON.stringify(spec.input)!==JSON.stringify(o.input))return false;
+  if(o.waitingSeeds!==undefined&&(o.waitingSeeds!==true||o.done||o.farm.action!=='plant'||o.phase!=='pickup'||o.work!==0))return false;
   if(!o.input||Object.entries(o.input).some(([id,n])=>!['compost',...Object.keys(CROPS).map(c=>`${c}_seed`)].includes(id)||!Number.isInteger(n)||n<0||n>100))return false;
   if(o.harvestOutput&&Object.entries(o.harvestOutput).some(([id,n])=>![o.farm.crop,'scraps'].includes(id)||!Number.isInteger(n)||n<0||n>(id==='scraps'?1000000:b.w*b.d*CROPS[o.farm.crop].yieldKg*1.2)))return false;
  }
