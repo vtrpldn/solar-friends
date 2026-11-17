@@ -1,3 +1,4 @@
+import {buyerQuote} from './local-market.js';
 // Shared by the simulation and the resource dialog; policies never create stock.
 export const WORK_GROUPS={food:'Food & water',maintenance:'Sanitation & maintenance',production:'Production & harvesting',construction:'Construction'};
 export function economyPolicies(s){
@@ -21,7 +22,9 @@ export function salePreview(s,id,materials,recipes,count){
  const reserve=protectedStock(s,id,recipes),day=Math.floor((540+s.time*.45)/1440);
  const sold=p.day===day?p.sold||0:0,limit=p.daily>0?Math.max(0,p.daily-sold):Infinity;
  const quantity=stock>Math.max(p.above,reserve)?Math.floor(Math.min(Math.max(0,stock-reserve),limit)/item.quantity)*item.quantity:0;
- return {quantity,revenue:quantity/item.quantity*Math.floor(item.price*.5),reserve,day,reason:quantity?'Ready to sell':stock<=Math.max(p.above,reserve)?'Reserve protected':'Daily limit or batch size'};
+ const market=s.trade?.market?.[id],used=market?.day===day?market.units:0;let revenue=0,accepted=0;
+ for(let n=0;n<quantity;n+=item.quantity){const quote=buyerQuote(id,item,used+n);if(quote.remaining<item.quantity)break;accepted+=item.quantity;revenue+=quote.cents/100;}
+ return {quantity:accepted,revenue,reserve,day,reason:accepted?'Ready to sell':quantity?'Buyer demand exhausted':stock<=Math.max(p.above,reserve)?'Reserve protected':'Daily limit or batch size'};
 }
 export function validatePolicies(s,materials){
  if(!s.projects.every(p=>p.stockTarget===undefined||(Number.isInteger(p.stockTarget)&&p.stockTarget>=0&&p.stockTarget<=10000)))return false;

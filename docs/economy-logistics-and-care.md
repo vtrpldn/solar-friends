@@ -21,3 +21,9 @@ New starts have R$500 / R$2,000 / R$6,000 working capital for tight / modest / c
 ## Evidence and limits
 
 Focused regression scripts exercise concurrent trips, paid freight, deferred outside wages, biological growth, animal care, maintenance and save restoration. They include diagnostic fixtures and therefore do not establish first-hour playability or long-run economic viability. Full-catalog normal construction, regional calibration and seasonal balance remain separate release gates in the main plan.
+
+## Production loads and local buyers
+
+Production returns use at most 30 kg and 0.12 m³ per hand-carried load. Residents walk back for remaining output; a 72 kg timber batch takes three deliveries. Partial batches remain owned, retain food age, and persist across reload. These are authored carrying limits. Oversized indivisible output blocks with an explanation rather than bypassing capacity.
+
+Town produce, café, builders’ cooperative, smallholders’ cooperative and hardware resale buyers now have explicit per-resource daily limits and two disclosed price bands. Additional batches earn less, quotes lock on reservation, cancellation releases demand, and the next calendar day renews it. Terms appear in resource tooltips. These are transparent game contracts, not researched farm-gate prices. Supplier names identify the food market, agricultural store or hardware store; supplier stock is still assumed available at the posted retail price.

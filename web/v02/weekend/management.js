@@ -1,3 +1,4 @@
+import {marketTerms} from './local-market.js';
 import {inventoryOwnership} from './economy-inventory.js';
 import {upkeep,upkeepText} from "./asset-upkeep.js";
 import {biologyText} from "./biological-production.js";
@@ -360,7 +361,7 @@ export function createManagement({
           const item = MATERIALS[id];
           const b = document.createElement("button");
           b.className = "stock-card";
-          b.title=materialUnitText(id);
+          b.title=materialUnitText(id) + " " + marketTerms(id,MATERIALS[id]);
           b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><small>${committed[id]?`${committed[id]} committed to projects/jobs · `:""}${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
           illustrateResources(b);
           b.disabled = !item.quantity;

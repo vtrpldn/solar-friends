@@ -1,3 +1,4 @@
+import {buyerQuote,BUYERS} from './local-market.js';
 import {activeTrips} from "./trip-state.js";
 import {tripEstimate} from "./economy-reference.js";
 import {materialMeasure as cargoUnit} from './material-measures.js';
@@ -15,17 +16,18 @@ export function tradeQuote(s,id,materials,count,protect=0){
  const item=materials[id],t=ensureTrade(s),day=tradeDay(s),market=t.market[id],sold=market?.day===day?market.units:0;
  if(!item?.quantity||!item.price)return {error:'This resource cannot be traded.'};
  if(count(s,id)-protect<item.quantity)return {error:'Not enough unreserved stock for a whole sale batch.'};
- if(sold+item.quantity>item.quantity*TRADE_RULES.batchesPerBuyerDay)return {error:'The local buyer has enough for today. Demand returns tomorrow.'};
+ const buyer=buyerQuote(id,item,sold);
+ if(sold+item.quantity>buyer.capacity)return {error:'The local buyer has enough for today. Demand returns tomorrow.'};
  if(!fitsCargo({[id]:item.quantity}))return {error:'This batch needs a larger delivery vehicle.'};
  if(t.orders.filter(o=>o.status==='queued').length>=32)return {error:'The sale queue is full.'};
- return {quantity:item.quantity,cents:Math.floor(item.price*.5)*100,day,error:''};
+ return {quantity:item.quantity,cents:buyer.cents,buyer:buyer.buyer,day,error:''};
 }
 export function reserveExport(s,id,materials,count,change,protect=0){
  const quote=tradeQuote(s,id,materials,count,protect);if(quote.error)return false;
  const t=ensureTrade(s);const foodLots=change(s,id,-quote.quantity);
  if(t.market[id]?.day!==quote.day)t.market[id]={day:quote.day,units:0};
  t.market[id].units+=quote.quantity;
- t.orders.push({id:t.nextId++,material:id,quantity:quote.quantity,cents:quote.cents,status:'queued',created:s.time,marketDay:quote.day,...(foodLots?.length?{foodLots}: {})});
+ t.orders.push({id:t.nextId++,material:id,quantity:quote.quantity,cents:quote.cents,buyer:quote.buyer,status:'queued',created:s.time,marketDay:quote.day,...(foodLots?.length?{foodLots}: {})});
  const active=t.orders.filter(o=>['queued','loaded'].includes(o.status)||o.returnFood||activeTrips(s).some(t=>(t.exports||[]).includes(o.id)));
  t.orders=[...t.orders.filter(o=>['sold','cancelled','spoiled'].includes(o.status)&&!active.includes(o)).slice(-(100-active.length)),...active];
  if(!t.dispatchAt)t.dispatchAt=s.time+TRADE_RULES.dispatchAfter;
@@ -54,7 +56,7 @@ export function settleExports(s,trip,transact){
 export function validTrade(s,materials){
  const t=s.trade;if(t===undefined)return true;
  if(!t||t.version!==1||!Number.isInteger(t.nextId)||t.nextId<1||!Array.isArray(t.orders)||t.orders.length>100||!t.market||!Number.isFinite(t.dispatchAt)||t.dispatchAt<0)return false;
- const ids=new Set();for(const o of t.orders){if(!o||!Number.isInteger(o.id)||o.id<1||o.id>=t.nextId||ids.has(o.id)||!materials[o.material]?.quantity||o.quantity!==materials[o.material].quantity||!Number.isSafeInteger(o.cents)||o.cents<0||!['queued','loaded','sold','cancelled','spoiled'].includes(o.status)||!Number.isFinite(o.created)||o.created<0||!Number.isInteger(o.marketDay)||o.marketDay<0)return false;ids.add(o.id);}
+ const ids=new Set();for(const o of t.orders){if(!o||(o.buyer!==undefined&&!BUYERS[o.buyer])||!Number.isInteger(o.id)||o.id<1||o.id>=t.nextId||ids.has(o.id)||!materials[o.material]?.quantity||o.quantity!==materials[o.material].quantity||!Number.isSafeInteger(o.cents)||o.cents<0||!['queued','loaded','sold','cancelled','spoiled'].includes(o.status)||!Number.isFinite(o.created)||o.created<0||!Number.isInteger(o.marketDay)||o.marketDay<0)return false;ids.add(o.id);}
  for(const [id,m]of Object.entries(t.market))if(!materials[id]?.quantity||!m||!Number.isInteger(m.day)||m.day<0||!Number.isInteger(m.units)||m.units<0)return false;
  const assigned={};for(const part of s.delivery?.shipments||[])for(const [id,n]of Object.entries(part.items))assigned[part.project+':'+id]=n;
  for(const trip of activeTrips(s))if(trip.shipments!==undefined){

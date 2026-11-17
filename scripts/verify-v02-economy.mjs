@@ -30,7 +30,7 @@ const run = (s, seconds) => {
   for (let i = 0; i < seconds * 10; i++) tick(s, 0.1);
 };
 const finishJobs = (s) => {
-  for (let i = 0; i < 6000; i++) {
+  for (let i = 0; i < 64000; i++) {
     if (s.operations?.every((o) => o.done)) return;
     tick(s, 0.1);
   }
@@ -306,7 +306,7 @@ auto.materials.food = 30;
 const autoQuarry = built(auto, "supply-3", 40, 40);
 assert(repeatProduction(auto, autoQuarry.id, "stone"));
 // Allow the longer carrying route from the map-edge unloading area.
-for (let i = 0; i < 18000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
+for (let i = 0; i < 120000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
 assert.equal(
   auto.materials.stone,
   24,
@@ -316,7 +316,7 @@ const outputBefore = auto.materials.stone;
 run(auto, 100);
 assert.equal(auto.materials.stone, outputBefore);
 assert(sellMaterial(auto, "stone"));
-for (let i = 0; i < 18000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
+for (let i = 0; i < 120000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
 assert(auto.materials.stone >= 24 && auto.materials.stone < 32);
 console.log(
   "PASS: repeat production respects its stock target and restarts after surplus is sold.",
