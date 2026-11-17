@@ -1658,3 +1658,8 @@ header > .time { display: grid; grid-template-columns: auto auto; gap: 5px 10px;
 
 /* Keep the hosting badge above the dock and below game panels. */
 #nl-badge-frame { bottom: 90px !important; z-index: 2 !important; }
+#time-skip-dialog { width: 620px; max-width: 620px; max-height: 85vh; overflow-y: auto; }
+#skip-milestones { padding-left: 20px; max-height: 280px; overflow-y: auto; }
+#skip-milestones li { margin: 12px 0; }
+#skip-milestones strong, #skip-milestones span { display: block; }
+#skip-milestones span { margin-top: 4px; font-size: 12px; line-height: 1.4; }

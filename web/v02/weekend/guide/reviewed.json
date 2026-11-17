@@ -71,7 +71,7 @@
     "web/v02/weekend/food-planning.js": "58eff9db78444d350631925a658eaa45d463592c4424d766d5b5bcdef34de298",
     "web/v02/weekend/food-policy.js": "be69fe05edf440a075bee89de6953850b93f09b2b921f9eefec6a02cbea9be36",
     "web/v02/weekend/food-storage.js": "75189616237343916d5f4017342a2bf8b8422e27a068a1953ece89b6a00fade6",
-    "web/v02/weekend/game.js": "4bb5fbdc3c21526c5b071520b5e5b1a68fadafd6eac06e86032e0f8b8b09da8c",
+    "web/v02/weekend/game.js": "06e768d4e3d39800de2e2e7992909c85bb4811fc819c1c6f574e2cf6bee4e95f",
     "web/v02/weekend/gathering.js": "584f988c2bca6a36a42bb5d5a1734102668e1af41a58e5f71d8dc251627603e1",
     "web/v02/weekend/house-lighting.js": "bc5a140f2620a5e074215bf57ddd754d9bc79197c7fffcc5a2252c27af831e43",
     "web/v02/weekend/hydration.js": "42a3037a2bc39a90f356ddcfff160ea85504c74e0724026ad526ed173d897425",
@@ -135,6 +135,8 @@
     "web/v02/weekend/terraform.js": "036f23f8ab3bf9f8a972b69bc9cfd696ea0d366bffef568fc9dd49bed5571a6f",
     "web/v02/weekend/terrain-noise.js": "218ea9f1fd5d4dc0ee2bfa18742d457c63601d131cb1ed48a9177d4a6d43e6cb",
     "web/v02/weekend/terrain.js": "da8ad5f403528b92bf81c9048493fddb68a3e401bf03009ea9d801b8986ad59a",
+    "web/v02/weekend/time-skip-milestones.js": "1ad1148322d12e7ae29a6ca02824f265382f25189f5945abb7bc697254e70adc",
+    "web/v02/weekend/time-skip.js": "7c7e3713b1daa83df5fecd9b6f6f61ff004c20760ddd0ee4c9b79393163d6b32",
     "web/v02/weekend/town-trip.js": "6cd2c9f213f90ceddcab8c51f8a1e22b36c0d8c3be62700caf9504c7a0f3ea7b",
     "web/v02/weekend/trip-state.js": "ea029ce229978a6c4c01c873d4695281cdc23b34def498b7e3197c2cd97df5bd",
     "web/v02/weekend/ui-art.js": "915ae380961d60a2f4ff82dbd1a2315ef5b7fd78808d65ca828918981837a8ac",
@@ -145,7 +147,7 @@
     "web/v02/workshop/models.js": "4c403f76f3b1ba786be6c84c1c9129de92804ed77b8b8e80c8e76d21c12067d1"
   },
   "content": {
-    "topics": "7b501df469aa48ce28af775c88bda52f6f0745f3f71a71bfc2ba2579afa9400b",
+    "topics": "3d7758febb123d0fefad086d6bd6d7b77df55fe1ea63098d722fcd9b180314ff",
     "facts": "a38be0845c3d0f82be67f883bb4c49ab11b7d63b572a583fc5ed6c02518d413e",
     "renderer": "8bd634ddece8c801ba064fe84a4d11adbf769b0ce6a9f7a299f6e0e2dd83dcca",
     "dependencies": "9cc183f2db674fa60fb2a2969ed46747343f550c3ae5e9395aab3532a841eb7a"
@@ -175,7 +177,7 @@
     "inventory-ownership-and-material-accounting.svg": "f5fe00a34fb5d66ecb0c9df93e6ea018f72707370e332d21faceef5a8fa26b47",
     "purchases-sales-and-physical-transport.svg": "05ae6a865088c27adbe5da38c1c131cdd70741dcb18678e466688c319f9fb28c",
     "cash-commitments-and-forecasts.svg": "1822f90d40cd454dec0f5a087b2185da8e0e4db0667e3fc55f9f8647f5f429b4",
-    "optional-outside-employment.svg": "391f33b0b16d20d7a16cc1795aec4cfcf0eb17e128d3ddafb41a274c7398311a",
+    "optional-outside-employment.svg": "7a9e47edf145fe7a03995e4b128116b90899d7b9ba739646177bd31b3333821a",
     "asset-maintenance-and-replacement.svg": "4f242b4dd6efcd9f2c604bbc58378df3f485c8cf4d044b5439724c91901cddef",
     "presentation-inspection-and-ambient-life.svg": "26bc59d45580499a26f44e553d8629434097af0bfc3376398d84fb025fff9add"
   }
