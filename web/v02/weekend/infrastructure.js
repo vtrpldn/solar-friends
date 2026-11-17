@@ -106,47 +106,48 @@ export function ensureInfrastructure(s) {
   sys.nodes[0].z = s.stock.z;
   return sys;
 }
+export function syncProjectNode(sys, p, defs) {
+  if (p.work < defs[p.key].work) return;
+  const kind = defs[p.key].kind || p.key;
+  const batteryHealth=Math.max(.8,1-(p.batteryAgeDays||0)/(8*365)*.2);
+  const battery =
+    (projectMaterials(p,defs)?.batteries??(["solar_farm","hydro","supply-6"].includes(kind)?1:0))*4*batteryHealth;
+  sys.nodes[p.id] ??= {
+    id: p.id,
+    kind,
+    x: p.x,
+    z: p.z,
+    capacity: CAPACITY[kind] || [0, 0, 0, 0],
+    water: [0, 0, 0, 0],
+    charge: 0,
+    battery,
+    enabled: true,
+    power: 0,
+  };
+  const node=sys.nodes[p.id];
+  if(["water-storage","well"].includes(kind))node.maintainFresh ??= true;
+  if(node.capacity[3]>0)node.maintainSanitation ??= true;
+  node.serviceFactor=serviceFactor(p);
+  if(kind!=='home'){
+    node.battery=battery;
+    if(node.charge>battery){sys.account.curtailed+=node.charge-battery;node.charge=battery;}
+  }
+  node.solarKw=(projectMaterials(p,defs)?.panels??(kind==="solar_farm"?2:0))*.6;
+  if(kind==='goat_pasture'&&node.capacity[0]<40)node.capacity[0]=40;
+  if(kind==='kitchen'){node.coldStorage=!!p.coldStorage;node.coolingEnabled=p.coolingEnabled!==false;}
+  if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4*batteryHealth:0;if(node.charge>node.battery){sys.account.curtailed+=node.charge-node.battery;node.charge=node.battery;}}
+  if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<250)) {
+    // Existing starter tanks become passive without destroying stored water.
+    node.kind=kind;node.capacity=[Math.max(250,node.water[0]),Math.max(250,node.water[1]),0,0];
+  }
+  if(kind==='well')node.capacity=[Math.max(1000,node.water[0]),Math.max(1000,node.water[1]),0,0];
+  node.x = p.x;
+  node.z = p.z;
+  if (kind === "home" && sys.nodes[p.id].capacity[3] === 0) sys.nodes[p.id].capacity = [...CAPACITY.home];
+}
 export function syncInfrastructure(s, defs) {
   const sys = ensureInfrastructure(s);
-  for (const p of s.projects) {
-    if (p.work < defs[p.key].work) continue;
-    const kind = defs[p.key].kind || p.key;
-    const batteryHealth=Math.max(.8,1-(p.batteryAgeDays||0)/(8*365)*.2);
-    const battery =
-      (projectMaterials(p,defs)?.batteries??(["solar_farm","hydro","supply-6"].includes(kind)?1:0))*4*batteryHealth;
-    sys.nodes[p.id] ??= {
-      id: p.id,
-      kind,
-      x: p.x,
-      z: p.z,
-      capacity: CAPACITY[kind] || [0, 0, 0, 0],
-      water: [0, 0, 0, 0],
-      charge: 0,
-      battery,
-      enabled: true,
-      power: 0,
-    };
-    const node=sys.nodes[p.id];
-    if(["water-storage","well"].includes(kind))node.maintainFresh ??= true;
-    if(node.capacity[3]>0)node.maintainSanitation ??= true;
-    node.serviceFactor=serviceFactor(p);
-    if(kind!=='home'){
-      node.battery=battery;
-      if(node.charge>battery){sys.account.curtailed+=node.charge-battery;node.charge=battery;}
-    }
-    node.solarKw=(projectMaterials(p,defs)?.panels??(kind==="solar_farm"?2:0))*.6;
-    if(kind==='goat_pasture'&&node.capacity[0]<40)node.capacity[0]=40;
-    if(kind==='kitchen'){node.coldStorage=!!p.coldStorage;node.coolingEnabled=p.coolingEnabled!==false;}
-    if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4*batteryHealth:0;if(node.charge>node.battery){sys.account.curtailed+=node.charge-node.battery;node.charge=node.battery;}}
-    if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<250)) {
-      // Existing starter tanks become passive without destroying stored water.
-      node.kind=kind;node.capacity=[Math.max(250,node.water[0]),Math.max(250,node.water[1]),0,0];
-    }
-    if(kind==='well')node.capacity=[Math.max(1000,node.water[0]),Math.max(1000,node.water[1]),0,0];
-    node.x = p.x;
-    node.z = p.z;
-    if (kind === "home" && sys.nodes[p.id].capacity[3] === 0) sys.nodes[p.id].capacity = [...CAPACITY.home];
-  }
+  for (const p of s.projects) syncProjectNode(sys, p, defs);
   // Old saves may contain a passive structure disabled by the former blanket
   // switch. Restore its availability now that it no longer has such a control.
   for (const node of Object.values(sys.nodes))
@@ -266,9 +267,8 @@ function powerComponents(sys, nodes) {
     links: powerLinks.map(l => ({from:l.from, to:l.to})), components});
   return components;
 }
-export function infrastructureStep(s, defs, dt) {
-  const sys = syncInfrastructure(s, defs),
-    hours = (dt * 0.45) / 60;
+export function infrastructureStep(s, defs, dt, sys = syncInfrastructure(s, defs)) {
+  const hours = (dt * 0.45) / 60;
   const sun = Math.max(
     0,
     Math.sin(((((9 + (s.time * 0.45) / 60) % 24) - 6) * Math.PI) / 12),

@@ -55,6 +55,7 @@ import { OPENING_PROJECTS, openingProgress } from "./opening.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import {
   ensureInfrastructure,
+  syncProjectNode,
   syncInfrastructure,
   infrastructureStep,
   connect,
@@ -2272,9 +2273,10 @@ function tickUncached(s, dt) {
   if (s.mode === "sandbox") sandboxSupplies(s);
   s.time += dt;
   weatherStep(s,dt);
-  autoConnectUtilities(s, PROJECTS);
-  upkeepStep(s,PROJECTS,dt);
-  infrastructureStep(s, PROJECTS, dt);
+  const sys = autoConnectUtilities(s, PROJECTS);
+  // Upkeep can reduce battery capacity and service quality before power is allocated.
+  upkeepStep(s, PROJECTS, dt, project => syncProjectNode(sys, project, PROJECTS));
+  infrastructureStep(s, PROJECTS, dt, sys);
   biologicalStep(s,dt,useWater);
   cultivationStep(s,dt,useWater,PROJECTS);
   for(const p of s.projects){
@@ -2288,7 +2290,7 @@ function tickUncached(s, dt) {
   }
   coolStoredFood(s,dt);
   foodStorageStep(s,PROCESSES,MATERIALS);
-  deliveryStep(s,dt,MATERIALS,changeMaterial,storedMaterials(s),storageCapacity(s));
+  if (s.delivery) deliveryStep(s, dt, MATERIALS, changeMaterial, storedMaterials(s), storageCapacity(s));
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
   arrangePlantingSeeds(s);
   const checkSupplies = s.time >= (s.nextFoodCheck || 0);
