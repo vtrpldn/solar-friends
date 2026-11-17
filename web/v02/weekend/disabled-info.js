@@ -39,7 +39,9 @@ export function installDisabledInfo() {
       for(let p=control.parentElement;p&&p!==document.body&&visible;p=p.parentElement){const style=getComputedStyle(p);if(/auto|scroll|hidden/.test(style.overflowY)){const pr=p.getBoundingClientRect();visible=r.top>=pr.top&&r.top+20<=pr.bottom;}}
       if(!visible){if(icon.matches(':popover-open'))icon.hidePopover();if(active===icon)hide();continue;}
       if(!icon.matches(':popover-open'))icon.showPopover();
-      icon.style.left=`${r.right-22}px`;icon.style.top=`${r.top+Math.max(3,Math.min(10,(r.height-18)/2))}px`;
+      const compact=control.matches('input[type=checkbox],input[type=radio]');
+      icon.style.left=`${compact?r.right+4:r.right-(control.tagName==='SELECT'?44:22)}px`;
+      icon.style.top=`${r.top+(r.height-18)/2}px`;
       if(active===icon&&tip.textContent!==control.dataset.disabledReason)show(icon,control);
     }
   }
