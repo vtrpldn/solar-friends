@@ -6,7 +6,7 @@ const [groundwork,assembly,finished]=models;
 const bounds=o=>new THREE.Box3().setFromObject(o,true);
 for(const model of models){
  assert(model.getObjectByName('coop-house').position.distanceTo(finished.getObjectByName('coop-house').position)<1e-6,'house anchor remains fixed');
- const run=bounds(model.getObjectByName('coop-run')),end=bounds(finished.getObjectByName('coop-run'));
+ const run=bounds(model.getObjectByName('run-posts')),end=bounds(finished.getObjectByName('run-posts'));
  for(const axis of ['x','z']){assert.equal(run.min[axis],end.min[axis]);assert.equal(run.max[axis],end.max[axis]);}
  assert.equal(model.userData.revision,5);
 }

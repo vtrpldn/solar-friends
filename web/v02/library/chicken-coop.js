@@ -10,7 +10,8 @@ function enclosure(g,stage){
  for(const z of [-3.5,3.5])for(const x of [-3.5,-1.75,1.75,3.5])posts.push([x,z]);
  for(const x of [-3.5,3.5])for(const z of [-1.75,0,1.75])posts.push([x,z]);
  posts.push([-.6,3.5],[.6,3.5],[0,-3.5]);
- for(const [x,z]of posts)box(g,.12,stage===0?.3:1.3,.12,'timber',x,stage===0?.15:.65,z);
+ const uprights=part(g,'run-posts');
+ for(const [x,z]of posts)box(uprights,.12,stage===0?.3:1.3,.12,'timber',x,stage===0?.15:.65,z);
  if(stage===0)return;
  function panel(x,z,width,turn=0){
   const p=part(g,'run-panel',x,z);p.rotation.y=turn;
