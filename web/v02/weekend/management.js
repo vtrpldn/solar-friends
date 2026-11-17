@@ -313,7 +313,7 @@ export function createManagement({
       reserve.setAttribute('aria-pressed',String(s.emergencyFood!==false));
       reserve.onclick=()=>{s.emergencyFood=s.emergencyFood===false;refresh();render();};
       $("resource-grid").append(reserve);
-      const search = $("resource-search").value.toLowerCase(), committed=committedMaterials(s);
+      const search = $("resource-search").value.trim().toLowerCase(), committed=committedMaterials(s);
       for (const group of RESOURCE_GROUPS) {
         const matches = group.ids.filter((id) =>
           MATERIALS[id].name.toLowerCase().includes(search),
@@ -348,6 +348,10 @@ export function createManagement({
           ([, d]) => d.kind === PROJECTS[p.key].kind,
         );
         if (!recipes.length || p.work < PROJECTS[p.key].work) continue;
+        const searchTerms = [PROJECTS[p.key].name, ...recipes.flatMap(([, recipe]) => [
+          recipe.name, ...Object.keys(recipe.output).map((id) => MATERIALS[id].name),
+        ])];
+        if (search && !searchTerms.some((text) => text.toLowerCase().includes(search))) continue;
         const el = document.createElement("article");
         el.className = "production-site";
         const img = document.createElement("img");
@@ -399,7 +403,9 @@ export function createManagement({
       }
       if (!$("production-sites").children.length)
         $("production-sites").textContent =
-          "Build a garden, workshop or other production site to start making supplies here.";
+          search
+            ? "No completed production sites match this search. Try another resource or building name."
+            : "Build a garden, workshop or other production site to start making supplies here.";
     } else {
       $("network-nodes").replaceChildren();
       for (const n of nodes) {
