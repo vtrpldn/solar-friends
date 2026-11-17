@@ -4,7 +4,8 @@ import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js'
 import { STORAGE_KINDS, crewLimit, carriedLoads } from "./construction-logistics.js";
 import {registerWorld,validSettings,townDuration,waterFactor} from './world-settings.js';
 import {depositCapacity} from './land-layout.js';
-import {workMultiplier} from './resident-personality.js';
+import {workMultiplier,profileFor} from './resident-personality.js';
+import {workPreference,leisurePreference,noticeAspiration,validMind} from './resident-mind.js';
 import { ensureNeeds, decayNeeds, chooseNeed, advanceNeed, validNeeds, cancelNeed } from "./resident-needs.js";
 import { validTerrainVertices } from "./terraform.js";
 import { ROAD_SHIFT } from "./road-layout.js";
@@ -476,7 +477,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   );
   if (!op) op = [...(s.operations || [])].sort((a,b)=>{
     const priority=o=>o.water?0:((PROCESSES[o.recipe]?.output.food||PROCESSES[o.recipe]?.output.meals)&&s.infrastructure.hungry?1:2);
-    return priority(a)-priority(b);
+    return priority(a)-priority(b) || workPreference(r,s.projects.find(p=>p.id===b.site)?.key)-workPreference(r,s.projects.find(p=>p.id===a.site)?.key);
   }).find(eligible);
   if ((waterOnly || group) && !op) return false;
   if (
@@ -1142,6 +1143,7 @@ export function moveProject(s, id, x, z, rotation = undefined) {
 export function prioritize(s, id) {
   const i = s.projects.findIndex((p) => p.id === id);
   if (i < 0) return;
+  for(const project of s.projects)project.prioritized=project.id===id;
   s.projects.unshift(...s.projects.splice(i, 1));
   for (const r of s.people) if (r.job && !r.cargo && !r.needTask) {
     r.job = null; r.workSpot = null; r.supplyGoal = null; r.walk = []; r.target = null;
@@ -1614,8 +1616,9 @@ function workSpot(s, r, p) {
     );
 }
 function availableProject(s, r) {
-  return s.projects.find(
-    (p) => !p.pendingMaterials && p.work < PROJECTS[p.key].work &&
+  return s.projects.filter(p=>!p.pendingMaterials && p.work<PROJECTS[p.key].work)
+    .sort((a,b)=>Number(!!b.prioritized)-Number(!!a.prioritized)||workPreference(r,b.key)-workPreference(r,a.key)).find(
+    (p) =>
       s.people.filter(other => other !== r && other.job === p.id).length < crewLimit(PROJECTS[p.key]) && workSpot(s, r, p),
   );
 }
@@ -1648,7 +1651,7 @@ function idleActivity(s, r, i, dt) {
           ].includes(PROJECTS[p.key].kind)),
   );
   if (social.length && (s.rain || cycle % 2 === 0)) {
-    const p = social[(i + Math.floor(cycle / 2)) % social.length];
+    const p = social.sort((a,b)=>leisurePreference(r,PROJECTS[b.key].kind)-leisurePreference(r,PROJECTS[a.key].kind))[0];
     let spot = workSpot(s, r, p);
     if (
       ["shed", "rain-shelter"].includes(PROJECTS[p.key].kind) ||
@@ -1685,33 +1688,11 @@ function idleActivity(s, r, i, dt) {
       return;
     }
   }
-  const activities = ["look", "stretch", "chat", "stroll", "breathe"];
-  r.action = activities[(cycle + i) % activities.length];
+  // Conversations use the same mutual invitation and arrival rules as needs.
+  // Idle animation must never commandeer a person who is resting or working.
+  r.action = cycle % 3 === 2 ? "stroll" : profileFor(r).temperament.downtime;
   r.lookAt = null;
   let goal = null;
-  if (r.action === "chat") {
-    const friend = s.people.find(
-      (other) =>
-        other !== r &&
-        !other.job &&
-        !other.walk.length &&
-        ["look", "breathe", "stretch", "chat", "relax"].includes(
-          other.action,
-        ) &&
-        Math.hypot(other.x - r.x, other.z - r.z) < 5,
-    );
-    if (friend) {
-      r.lookAt = friend.id;
-      friend.lookAt = r.id;
-      friend.action = "chat";
-      friend.idleUntil = s.time + 16;
-      friend.idleGoal = null;
-      goal = {
-        x: Math.round(friend.x) + (i % 2 ? 1 : -1),
-        z: Math.round(friend.z),
-      };
-    } else r.action = "look";
-  }
   if (r.action === "stroll" || r.action === "breathe") {
     const spots = [
       [c.x - 3, c.z + 2],
@@ -1801,9 +1782,10 @@ function tickUncached(s, dt) {
 
   for (const [i,r] of s.people.entries()) {
     decayNeeds(s,r,i,dt);
+    noticeAspiration(s,r,PROJECTS);
     // Being awake is tiring even when no construction is underway.
     if(r.tentPhase !== 'inside') r.energy=Math.max(0,r.energy-dt*.035);
-    const hours=9+s.time*.45/60, hour=hours%24, bedtime=21+(i%4)*.45;
+    const hours=9+s.time*.45/60, hour=hours%24, bedtime=profileFor(r).temperament.bedtime;
     const sleepNight=Math.floor((hours-5)/24);
     if(!r.sleepUntil && !r.needTask && Math.min(r.needs.bladder,r.needs.bowels)>20 && (r.needs.hunger>20 || !(s.materials.food+s.materials.meals)) && r.sleepNight!==sleepNight && (hour>=bedtime || hour<5) && !r.cargo && r.action!=='town') {
       r.sleepNight=sleepNight;
@@ -2386,6 +2368,7 @@ export function restore(text) {
           (!Number.isInteger(p.rotation) ||
             p.rotation < 0 ||
             p.rotation > 3)) ||
+        (p.prioritized !== undefined && typeof p.prioritized !== 'boolean') ||
         !PROJECTS[p.key] ||
         (s.mode !== "sandbox" &&
           !PROJECTS[p.key]?.repeatable &&
@@ -2427,7 +2410,7 @@ export function restore(text) {
       for (const k of ["washTime", "cleanedAtWork", "toiletAt", "toiletTime"])
         if (r[k] !== undefined && (!Number.isFinite(r[k]) || r[k] < 0))
           return null;
-      if (!validNeeds(r)) return null;
+      if (!validNeeds(r) || !validMind(r,fresh.people,s.time)) return null;
       if(r.friendships!==undefined && (!r.friendships || typeof r.friendships!=='object' || Array.isArray(r.friendships) || Object.entries(r.friendships).some(([id,value])=>id===r.id || !fresh.people.some(p=>p.id===id) || !Number.isFinite(value) || value<0 || value>100))) return null;
       ensureNeeds(r,i);
       if (r.cargo && r.haulStage === 'site' && r.haulLoads && r.job) {

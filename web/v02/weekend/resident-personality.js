@@ -103,10 +103,4 @@ export const PROFILES = {
 };
 export const profileFor=r=>PROFILES[r.id]||PROFILES.iara;
 export function workMultiplier(r,key){return (profileFor(r).strengths.includes(key)?1.25:1)*(1+Math.min(.15,Math.max(0,r.work||0)/10000));}
-export function recordConversation(a,b){
- for(const [resident,friend] of [[a,b],[b,a]]){
-  resident.friendships??={};
-  resident.friendships[friend.id]=Math.min(100,(resident.friendships[friend.id]||0)+8);
- }
-}
 export function friendshipLabel(score){return score>=64?'Close friends':score>=24?'Growing closer':'Getting to know each other';}

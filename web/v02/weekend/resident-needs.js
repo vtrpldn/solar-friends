@@ -1,4 +1,5 @@
-import {profileFor,recordConversation} from './resident-personality.js';
+import {profileFor} from './resident-personality.js';
+import {committed, conversationPartners, conversationFor, finishConversation, finishPersonalTime} from './resident-mind.js';
 import { useWater } from './infrastructure.js';
 export const NEED_KEYS=['hunger','bladder','bowels','hygiene','social','fun'];
 const clamp=n=>Math.max(0,Math.min(100,n));
@@ -15,8 +16,6 @@ export function decayNeeds(s,r,i,dt) {
  const rates={hunger:.055,bladder:.12,bowels:.047,hygiene:working?.075:.018,social:.035,fun:working?.055:.025};
  for(const key of NEED_KEYS)n[key]=clamp(n[key]-rates[key]*dt*(r.tentPhase==='inside'?.35:1)*(profileFor(r).rates[key]||1));
  if(r.tentPhase==='inside') {n.fun=clamp(n.fun+dt*.04);return;}
- // Friendly conversation during leisure also helps, but only with someone nearby.
- if(r.action==='chat' && !r.needTask && s.people.some(p=>p!==r && p.action==='chat' && Math.hypot(p.x-r.x,p.z-r.z)<2))n.social=clamp(n.social+dt*.7);
 }
 const ACTION={hunger:'eat',bladder:'toilet',bowels:'toilet',hygiene:'wash',social:'chat',fun:'play'};
 const DURATIONS={hunger:12,bladder:6,bowels:10,hygiene:14,social:18,fun:22};
@@ -43,7 +42,11 @@ export function chooseNeed(s,r,i,api) {
  if(r.needTask && s.time-r.needTask.created>240){cancelNeed(s,r);r.needRetryAt=s.time+15;}
  if(r.needTask || r.tentPhase || r.cargo || (r.operation && ['return','deliver'].includes(s.operations?.find(o=>o.id===r.operation)?.phase)) || r.action==='town' || s.stage!=='playing' || (r.energy<25 && Math.min(ensureNeeds(r).hunger,ensureNeeds(r).bladder,ensureNeeds(r).bowels)>=15) || (r.needRetryAt||0)>s.time)return;
  const n=ensureNeeds(r,i);
- const pending=NEED_KEYS.filter(k=>(r.energy>=25 || physical.includes(k)) && n[k]<(k==='social'||k==='fun'?35:30)).sort((a,b)=>n[a]-n[b]);
+ const temperament=profileFor(r).temperament;
+ const threshold=k=>k==='social' ? (committed(r)?35:temperament.socialAt) : k==='fun' ? temperament.breakAt : 30;
+ const pending=NEED_KEYS.filter(k=>(r.energy>=25 || physical.includes(k)) && n[k]<threshold(k) &&
+   (k!=='social' || (r.mind?.quietUntil||0)<=s.time))
+   .sort((a,b)=>(physical.includes(b)&&n[b]<15?1:0)-(physical.includes(a)&&n[a]<15?1:0)||n[a]/threshold(a)-n[b]/threshold(b));
  if(!pending.length){r.needBlocked=null;return;}
  const nodes=Object.values(s.infrastructure.nodes);
  const free=node=>!s.people.some(p=>p!==r && p.needTask?.site===node.id);
@@ -78,13 +81,12 @@ export function chooseNeed(s,r,i,api) {
    if(spot){assign(s,r,kind,spot,{river:true,label:'Washing by the river',animation:'bathe'});return;}
   }
   if(kind==='social') {
-   const partner=s.people.filter(p=>p!==r && !p.tentPhase && !p.needTask && !p.cargo && !p.operation && p.action!=='town' && p.energy>=35 && ['hunger','bladder','bowels','hygiene'].every(key=>ensureNeeds(p)[key]>20))
-    .sort((a,b)=>(Math.hypot(a.x-r.x,a.z-r.z)-(r.friendships?.[a.id]||0)/25)-(Math.hypot(b.x-r.x,b.z-r.z)-(r.friendships?.[b.id]||0)/25))[0];
-   if(partner) {
+   for(const partner of conversationPartners(s,r)) {
     const spot=api.groundSpot(r,api.camp(),i), other=spot && api.groundSpot(partner,spot,i+1);
     if(spot&&other&&Math.hypot(spot.x-other.x,spot.z-other.z)<=2.5){
-     assign(s,r,kind,spot,{partner:partner.id,label:`Chatting with ${partner.name}`,animation:'chat'});
-     assign(s,partner,kind,other,{partner:r.id,label:`Chatting with ${r.name}`,animation:'chat'});
+     const conversation=conversationFor(s,r,partner);
+     assign(s,r,kind,spot,{partner:partner.id,conversation,label:`Talking with ${partner.name} about ${conversation.topic}`,animation:'chat'});
+     assign(s,partner,kind,other,{partner:r.id,conversation,label:`Talking with ${r.name} about ${conversation.topic}`,animation:'chat'});
      r.lookAt=partner.id;partner.lookAt=r.id;return;
     }
    }
@@ -132,9 +134,9 @@ export function advanceNeed(s,r,dt,api) {
  } else if(task.kind==='social') {
   n.social=95;n.fun=clamp(n.fun+15);
   const partner=s.people.find(p=>p.id===task.partner);
-  if(partner?.needTask?.partner===r.id){recordConversation(r,partner);partner.needs.social=95;partner.needs.fun=clamp(partner.needs.fun+15);release(partner);partner.needRetryAt=s.time+3;}
- } else n.fun=95;
- r.needHistory??={};r.needHistory[task.kind]=(r.needHistory[task.kind]||0)+1;
+  if(partner?.needTask?.partner===r.id){finishConversation(s,r,partner,task.conversation);partner.needs.social=95;partner.needs.fun=clamp(partner.needs.fun+15);release(partner);partner.needRetryAt=s.time+3;}
+ } else {n.fun=95;finishPersonalTime(s,r,task.label || 'Taking a break');}
+ if(task.kind!=='social'){r.needHistory??={};r.needHistory[task.kind]=(r.needHistory[task.kind]||0)+1;}
  release(r);r.needRetryAt=s.time+3;
  return true;
 }
