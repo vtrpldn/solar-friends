@@ -59,3 +59,5 @@ The collection-budget replay earned enough through exports after 39.735 game min
 Perishable shelf lives are authored game values: ingredients 3 days, meals 2, eggs 7 and milk 1. Batches retain age through reservation and travel; spoilage is disabled in sandbox. No real-world safety or climate calibration is claimed. See [food storage](food-storage.md) for migration, limitations and tests.
 
 Kitchen [dried provisions](food-preservation.md) add a 10-day meal batch with six ingredients, two water, four meals, two residues, 75 work units and 0.6 biogas when unpowered. These remain provisional game values. Ordinary meals remain the default; food storage reports preserved meal counts separately.
+
+Kitchen [cold storage](cold-storage.md) uses a provisional R$600 refrigeration kit (35 kg / 0.35 m³ cargo), one electrical supply and one hardware pack, plus 120 work units. Each powered installation covers 40 stored food units at one-quarter aging speed and draws 0.08 kW while enabled. These are game assumptions awaiting regional calibration.

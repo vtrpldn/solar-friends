@@ -22,7 +22,7 @@ Old saves have no historical freshness data. Their existing stock and outstandin
 
 ## Intentional limitations
 
-- No refrigeration or biome/temperature modifiers yet. Kitchens now offer [dried provisions](food-preservation.md); warehouses do not pretend to be refrigerators.
+- Optional [kitchen refrigeration](cold-storage.md) slows aging within powered capacity. Biome/temperature modifiers remain outstanding. Kitchens now offer [dried provisions](food-preservation.md); warehouses do not pretend to be refrigerators.
 - Honey and dry supplies remain durable abstractions; not every material decays.
 - Spoilage is batch expiry rather than gradual quality loss or health simulation.
 - Organic residues enter the shared residue stock immediately; hauling waste separately is not modeled.

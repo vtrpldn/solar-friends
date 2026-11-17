@@ -35,4 +35,4 @@ Preservation starts only when resident processing completes. Inputs that spoil w
 
 The three-day continuation of the genuine Day 61 village passed with construction complete and food/water/cash available. Report: `docs/balance/2026-11-17-preservation-soak.json`. Fixed-step equivalence checks passed through 1024× scheduling. The new recipe was selected and visually inspected in the in-app browser.
 
-Refrigeration, temperature effects, crop-specific preservation and regional calibration remain outstanding. This increment does not complete the full realistic-economy plan.
+Kitchen [refrigeration](cold-storage.md) is now available. Temperature effects, crop-specific preservation and regional calibration remain outstanding. This increment does not complete the full realistic-economy plan.
