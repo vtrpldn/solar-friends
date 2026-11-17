@@ -7,11 +7,13 @@ const state=createWeekend(42);chooseCamp(state,'entrance');
 state.view={speed:4,paused:true,position:[20,35,20],target:[1,2,3],zoom:2};
 const server=await serve();let browser;
 try{
- browser=await chromium.launch({headless:true});
+ browser=await chromium.launch({headless:true,args:['--mute-audio']});
  const context=await browser.newContext({viewport:{width:1440,height:1000},permissions:['clipboard-read','clipboard-write']});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(({key,value})=>localStorage.setItem(key,value),{key:STORY_SAVE,value:save(state)});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=story`);
+ // Reproduce the production host badge that previously intercepted the options button.
+ await page.evaluate(()=>{const badge=document.createElement('iframe');badge.id='nl-badge-frame';badge.title='Hosting badge';badge.style.cssText='position:fixed;bottom:0;right:0;width:202px;height:64px;z-index:2147483645;border:0';document.body.append(badge);});
  await page.locator('.view-menu summary').click();
  await page.screenshot({path:'/tmp/solar-diagnostics-menu.png'});
  await page.getByRole('button',{name:'Copy bug report',exact:true}).click();

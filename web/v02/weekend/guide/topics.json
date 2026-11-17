@@ -94,12 +94,13 @@
       "urgent-needs",
       "home-assignment",
       "hauling-needs-recovery",
-      "realism-hydration"
+      "realism-hydration",
+      "daily-routines"
     ],
-    "description": "Residents interrupt work to eat, rest and meet other needs.",
-    "diagram": "flowchart TD\n Time[Time, activity and personality] --> Decay[Needs and energy change]\n Decay --> Urgent{Need break, mealtime or scheduled sleep?}\n Urgent -->|No| Available[Available for work or downtime]\n Urgent -->|Yes| Interrupt[Suspend or defer work safely]\n Interrupt --> Target{Suitable reachable service or rest place?}\n Target -->|Yes| Travel[Walk to service or assigned / available home]\n Target -->|No| Fallback[Try fallback or expose blocked need]\n Travel --> Consume[Consume food, water or service capacity as applicable]\n Consume --> Recover[Restore need or energy]\n Recover --> Resume[Reconsider unfinished work]\n Fallback --> Resume\n Resume --> Urgent\n Heat[Heat and active work] --> Thirst[Individual hydration demand]\n Thirst --> Target\n Fresh[Potable water and travel bottles] --> Consume\n",
+    "description": "Residents eat around breakfast, lunch and dinner, and sleep through the night. Urgent needs can interrupt work.",
+    "diagram": "flowchart TD\n Time[Time, activity and personality] --> Decay[Needs and energy change]\n Decay --> Urgent{Need break, meal time or scheduled sleep?}\n Urgent -->|No| Available[Available for work or downtime]\n Urgent -->|Yes| Interrupt[Suspend or defer work safely]\n Interrupt --> Target{Suitable reachable service or rest place?}\n Target -->|Yes| Travel[Walk to service or assigned / available home]\n Target -->|No| Fallback[Try fallback or expose blocked need]\n Travel --> Consume[Consume food, water or service capacity as applicable]\n Consume --> Recover[Restore need or energy]\n Recover --> Resume[Reconsider unfinished work]\n Fallback --> Resume\n Resume --> Urgent\n Heat[Heat and active work] --> Thirst[Individual hydration demand]\n Thirst --> Target\n Fresh[Potable water and travel bottles] --> Consume\n",
     "boundary": "",
-    "tip": "Keep potable water and food reachable. Residents seek a drink before thirst becomes urgent; heat and active work increase drinking demand.",
+    "tip": "Keep food, potable water and homes reachable. Residents seek drinks before thirst becomes urgent and normally sleep 7.5–9 hours; urgent bathroom breaks resume the same night’s rest.",
     "facts": null
   },
   {
@@ -304,7 +305,7 @@
     "description": "Trees, perennial crops and compost develop while residents do other work.",
     "diagram": "flowchart TD\n Inputs[Recipe inputs and initial resident work] --> Wait[Biology continues without a worker]\n First[First orchard establishment delay] --> Wait\n Factors[Recipe-specific season, moisture and fertility] --> Wait\n Wait --> Ready[Ready for resident collection or processing]\n Ready --> Delay[Delay after maturity]\n Delay --> Loss[Perishable output may decline]\n Ready --> Work[Resident collection work]\n Health[Animal health where applicable] --> Yield[Available output]\n Work --> Yield\n Loss --> Yield\n Yield --> Store[Physical hauling to storage]\n Store --> Repeat[Repeat if resources and policy allow]",
     "boundary": "",
-    "tip": "Establish perennial crops early and stagger harvests. Timber replanting still needs purchased starts.",
+    "tip": "Managed timber needs six favorable growing years, longer in dry or cool conditions. Each later rotation consumes four replacement seedlings; residents plant, fell and haul raw logs for processing.",
     "facts": null
   },
   {

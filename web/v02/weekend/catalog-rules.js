@@ -299,11 +299,11 @@ export const PROCESSES = {
     work: 40,
   },
   wood: {
-    name: "Harvest and replant raw wood",
+    name: "Grow and harvest timber",
     input: {},
     output: { logs: 48 },
     kind: "supply-0",
-    work: 240,
+    work: 720,
     renew: 600,
   },
   bamboo: {

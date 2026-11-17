@@ -362,7 +362,7 @@ export function productionBlocker(s, site, recipe) {
   if(def.gatherLimit&&(p.extracted||0)>=def.gatherLimit)return 'This patch has been gathered out.';
   if (def.deposit && (p.extracted || 0) >= depositCapacity(s.landSeed,p,def))
     return "This deposit is exhausted.";
-  const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:2}:{})};
+  const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:4}:{})};
   const starterSeeds=['baby_greens','vegetables','greenhouse'].includes(recipe)&&!p.starterSeedlingsUsed&&!p.harvestCount?Math.min(input.seedlings||0,projectMaterials(p,PROJECTS).seedlings||0):0;
   for (const [id, n] of Object.entries(input))
     if (materialCount(s, id) < n-(id==='seedlings'?starterSeeds:0)) return `Missing ${n} ${id}.`;
@@ -376,7 +376,7 @@ export function queueProduction(s, site, recipe) {
   const error=productionBlocker(s,site,recipe);
   if(error)return error;
   const p=s.projects.find(p=>p.id===Number(site)),def=PROCESSES[recipe];
-  const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:2}:{})};
+  const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:4}:{})};
   const starterSeeds=['baby_greens','vegetables','greenhouse'].includes(recipe)&&!p.starterSeedlingsUsed&&!p.harvestCount?Math.min(input.seedlings||0,projectMaterials(p,PROJECTS).seedlings||0):0;
   s.operations ??= [];
   if(s.operations.length>128)s.operations=[...s.operations.filter(o=>!o.done),...s.operations.filter(o=>o.done).slice(-32)];
@@ -861,7 +861,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   } else op.work += dt * toolBonus * workMultiplier(r,p.key) * (node.power > 0.99 && recipe.kind === "workshop" ? 2 : 1);
   r.work += dt;
   r.energy = Math.max(0, r.energy - dt * 0.12);
-  if(op.work>=recipe.work*.5 && beginBiology(s,op,r))return true;
+  if(op.work>=recipe.work*(BIOLOGY[op.recipe]?.plantingFraction??.5) && beginBiology(s,op,r))return true;
   if(op.farm?.action==='plant'&&op.work<recipe.work)p.cultivation.beds[op.farm.bed].stage='planted';
   if (op.work >= recipe.work) {
     if(op.farm)finishFarmJob(s,p,op);
@@ -2879,7 +2879,7 @@ export function restore(text) {
             !Number.isFinite(o.work) ||
             o.work < 0 ||
             (!o.water && !PROCESSES[o.recipe]) ||
-            (o.input!==undefined&&(!o.input||Object.entries(o.input).some(([id,n])=>!Number.isInteger(n)||n<0||n>((PROCESSES[o.recipe]?.input[id]||0)+(o.recipe==='wood'&&id==='tree_starts'?2:0))))) ||
+            (o.input!==undefined&&(!o.input||Object.entries(o.input).some(([id,n])=>!Number.isInteger(n)||n<0||n>((PROCESSES[o.recipe]?.input[id]||0)+(o.recipe==='wood'&&id==='tree_starts'?4:0))))) ||
             (o.water &&
               (!LIQUIDS.includes(o.water.kind) ||
                 !Number.isFinite(o.water.amount) ||
