@@ -17,7 +17,7 @@ import {dispatchReady,validLogisticsPolicy} from './logistics-policy.js';
 import {requestRemoval,removalStep,validRemovals} from './building-lifecycle.js';
 import {orderDelivery,deliveryStep,validDelivery} from "./deliveries.js";
 import {activeTrips,uncollectedProjects} from "./trip-state.js";
-import {upkeepStep,performUpkeep,recordVehicleDistance,validUpkeep,ANIMAL_CARE} from "./asset-upkeep.js";
+import {upkeepStep,performUpkeep,recordVehicleDistance,validUpkeep,serviceParts,ANIMAL_CARE} from "./asset-upkeep.js";
 import {tripEstimate,STARTING_CAPITAL} from "./economy-reference.js";
 import {CROP_CARE,BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology} from "./biological-production.js";
 import {outsideWorkStep,validOutsideWork} from "./outside-work.js";
@@ -331,6 +331,10 @@ function arrangePlantingSeeds(s) {
   if(supplyRun(s,id))op.status='Seed packets purchased; waiting for collection';
  }
 }
+function prepareOperationQueue(s) {
+  s.operations??=[];
+  if(s.operations.length>128)s.operations=[...s.operations.filter(o=>!o.done),...s.operations.filter(o=>o.done).slice(-32)];
+}
 export function queueBedJob(s,site,id,action) {
   const p=s.projects.find(p=>p.id===site);
   if(!p||p.removal||p.work<PROJECTS[p.key].work)return 'Choose a completed cultivation site.';
@@ -342,7 +346,7 @@ export function queueBedJob(s,site,id,action) {
    for(const [item,n]of Object.entries(spec.input))if(materialCount(s,item)<n)return `Missing ${quantityText(item,n)} ${MATERIALS[item].name}.`;
    for(const [item,n]of Object.entries(spec.input))changeMaterial(s,item,-n,undefined,'cultivation input');
   }
-  s.operations??=[];
+  prepareOperationQueue(s);
   s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,recipe:`farm_${action}`,farm:{bed:id,action,work:spec.work,crop:b.crop,density:b.density},input:spec.input,...(waitingSeeds?{waitingSeeds:true,status:'Waiting for seed purchase and collection'}:{}),work:0,phase:'pickup',done:false});
   wakeHelpers(s);return '';
 }
@@ -415,8 +419,7 @@ export function queueProduction(s, site, recipe) {
   const p=s.projects.find(p=>p.id===Number(site)),def=PROCESSES[recipe];
   const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:4}:{})};
   const starterSeeds=['baby_greens','vegetables','greenhouse'].includes(recipe)&&!p.starterSeedlingsUsed&&!p.harvestCount?Math.min(input.seedlings||0,projectMaterials(p,PROJECTS).seedlings||0):0;
-  s.operations ??= [];
-  if(s.operations.length>128)s.operations=[...s.operations.filter(o=>!o.done),...s.operations.filter(o=>o.done).slice(-32)];
+  prepareOperationQueue(s);
   if(p.key==='goat-pasture-empty'&&!p.stocked) {
     changeMaterial(s, "goats", -2);
     p.stocked = true;
@@ -533,6 +536,80 @@ export function nearestRiverAccess(s,origin) {
   points.sort((a,b)=>Math.hypot(a.x-origin.x,a.z-origin.z)-Math.hypot(b.x-origin.x,b.z-origin.z));
   return points.find(p=>p.x>CELL_MIN&&p.x<CELL_MAX&&!occupied(s,p.x,p.z)&&route(s,origin,p))||null;
 }
+const farmProducts = {orchard:'fruit', grove:'bananas', apiary:'honey', coop:'eggs', goat_pasture:'milk'};
+
+function scheduleFarmWork(s) {
+  if (s.stage !== 'playing') return;
+  const pending = (s.operations || []).filter(op => !op.done);
+  let needsForage = !pending.some(op => op.recipe === 'gather-wild-forage') &&
+    s.upkeep?.jobs.some(job => !job.done && job.care && !job.partsPaid &&
+      materialCount(s,'fodder') < ANIMAL_CARE[job.care].fodder);
+  const bedJobs = [];
+  let bedSlots = s.people.length - pending.filter(op => op.farm && !op.waitingSeeds && !op.accessRetryAt && op.phase !== 'return').length;
+  for (const p of s.projects) {
+    const def = PROJECTS[p.key];
+    if (p.removal || p.work < def.work || s.infrastructure.nodes[p.id]?.enabled === false) continue;
+    if (needsForage && p.key === 'wild-forage' && !queueProduction(s,p.id,'gather-wild-forage')) needsForage = false;
+    const product = farmProducts[def.kind];
+    if (product && !pending.some(op => op.site === p.id && !op.water) &&
+        (p.key !== 'goat-pasture-empty' || p.stocked) &&
+        (!ANIMAL_CARE[def.kind] || s.mode === 'sandbox' || animalAvailable(p))) {
+      queueProduction(s, p.id, product);
+    }
+    if (!p.cultivation || bedSlots <= 0) continue;
+    for (const b of p.cultivation.beds) {
+      if (pending.some(op => op.site === p.id && op.farm?.bed === b.id)) continue;
+      let action;
+      if (b.stage === 'harvestable') action = harvestExpired(b,s.time) ? 'clear' : 'harvest';
+      else if (b.stage === 'failed') action = 'clear';
+      else if (b.stage === 'unprepared' || b.stage === 'harvested') action = 'prepare';
+      else if (b.stage === 'prepared') action = 'plant';
+      if (action) bedJobs.push({site:p.id, bed:b, action});
+    }
+  }
+  const priority = {harvest:0, plant:1, clear:2, prepare:3};
+  bedJobs.sort((a,b) => priority[a.action] - priority[b.action]);
+  let seedOrderPending = pending.some(op => op.waitingSeeds);
+  for (const job of bedJobs) {
+    const needsSeeds = job.action === 'plant' && !Object.entries(farmJobSpec(job.bed,'plant').input)
+        .every(([id,n]) => materialCount(s,id) >= n);
+    if (needsSeeds && (s.mode === 'sandbox' || s.autoBuy === false || seedOrderPending)) continue;
+    if (queueBedJob(s,job.site,job.bed.id,job.action)) continue;
+    if (needsSeeds) seedOrderPending = true;
+    else if (--bedSlots <= 0) break;
+  }
+}
+
+function restockUpkeep(s) {
+  const u = s.upkeep;
+  if (s.stage !== 'playing' || s.mode === 'sandbox' || !u?.restockBudget) return;
+  const remaining = u.restockBudget - (u.restockSpent || 0);
+  const incoming = [...activeTrips(s),s.delivery].filter(t => t && !t.project && !t.shipments && !t.saleOnly);
+  const jobs = u.jobs.filter(j => !j.done && !j.partsPaid && (j.care || (u.automatic && !j.soil)));
+  jobs.sort((a,b) => Number(!!b.care) - Number(!!a.care));
+  for (const job of jobs) {
+    for (const [id,needed] of Object.entries(serviceParts(job))) {
+      const item = MATERIALS[id];
+      if (!item?.quantity || materialCount(s,id) >= needed || incoming.some(t=>t.material===id)) continue;
+      const localBatch = s.operations?.some(op => !op.done && !op.water && !op.waitingSeeds &&
+        !op.accessRetryAt && PROCESSES[op.recipe]?.output[id] > 0);
+      if (localBatch) continue;
+      const cost = Math.round((item.price + pickupFare(s)) * 100) / 100;
+      if (cost > remaining || !supplyRun(s,id)) continue;
+      u.restockSpent = Math.round(((u.restockSpent || 0) + cost) * 100) / 100;
+      return;
+    }
+  }
+}
+
+function isFarmWork(s,op) {
+  if (op.water) {
+    const site = s.projects.find(p => p.id === op.site);
+    return site && (site.cultivation || farmProducts[PROJECTS[site.key].kind]);
+  }
+  return op.farm || Object.hasOwn(CROP_CARE,op.recipe) || ['eggs','milk','honey','gather-wild-forage'].includes(op.recipe);
+}
+
 function maintainFood(s) {
   if(s.time<(s.nextFoodCheck||0))return;
   s.nextFoodCheck=s.time+10;
@@ -545,9 +622,13 @@ function maintainFood(s) {
     const recipe=Object.entries(PROCESSES).find(([,d])=>d.kind===PROJECTS[p.key].kind&&Object.keys(d.output).some(id=>FOOD_SERVINGS[id]));
     if(recipe&&!(PROJECTS[p.key].kind==='kitchen'&&(p.repeat||foodPolicy(s).automatic))&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))queueProduction(s,p.id,recipe[0]);
   }
-  // A visible, switchable emergency policy, paid from real savings, at most once a day.
-  if(s.emergencyFood!==false && MATERIALS.food.price+pickupFare(s)<=(s.foodPurchaseBudget??100) && (activeTrips(s).length<2||returnPickup(s)) && s.time>=(s.nextFoodTrip||0) && supplyRun(s,'food')) {
-    s.nextFoodTrip=s.time+3200;
+  // Old saves retain the cooldown for their last purchase.
+  if (s.emergencyFood === false || s.time < (s.nextFoodTrip || 0)) return;
+  const day = Math.floor((540 + s.time * .45) / 1440);
+  const spent = s.foodPurchases?.day === day ? s.foodPurchases.spent : 0;
+  const cost = MATERIALS.food.price + pickupFare(s);
+  if (Math.round((spent + cost) * 100) <= Math.round((s.foodPurchaseBudget ?? 100) * 100) && supplyRun(s,'food')) {
+    s.foodPurchases = {day, spent: Math.round((spent + cost) * 100) / 100};
     say(s,'Food reserve is low: the community bought emergency ingredients. Change this policy in Resources.');
   }
 }
@@ -610,7 +691,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     );
   const eligible = (op) => {
     if ((op.accessRetryAt?.[r.id]||0)>s.time) return false;
-    if (op.done || op.waitingSeeds || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group && workGroup(op,PROCESSES)!==group)) return false;
+    if (op.done || op.waitingSeeds || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group === 'farm' ? !isFarmWork(s,op) : group && workGroup(op,PROCESSES)!==group)) return false;
     if(op.water?.stagedAt){
       const destination=sys.nodes[op.site],index=LIQUIDS.indexOf(op.water.kind);
       if(!destination||destination.capacity[index]-destination.water[index]<=.00001)return false;
@@ -1280,6 +1361,32 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
     ) {
       if (details) details.entrance = buildingFront(p);
       return `${PROJECTS[p.key].name} entrance at (${buildingFront(p).x}, ${buildingFront(p).z}) is blocked. Rotate it or leave a walking gap.`;
+    }
+  }
+  const completedSite = {...proposed, projects:proposed.projects.map(p =>
+    p.id === (ignore || -1) ? {...p, work:def.work} : p)};
+  enableFastNavigation(completedSite);
+  const waterSources = Object.values(s.infrastructure?.nodes || {}).filter(n =>
+    n.enabled && n.water[0] >= .5 && !['coop','goat_pasture'].includes(n.kind));
+  function canEat(layout, resident) {
+    for (let ring=1; ring<=3; ring++) for (let j=0; j<12; j++) {
+      const angle = j * Math.PI / 6;
+      const spot = {x:Math.round(layout.stock.x + Math.cos(angle)*ring), z:Math.round(layout.stock.z + Math.sin(angle)*ring)};
+      if (route(layout,resident,spot,true)) return true;
+    }
+    return false;
+  }
+  function canDrink(layout, resident) {
+    return waterSources.some(node => {
+      const spot = utilitySpot(layout,node,resident);
+      return spot && route(layout,resident,spot,true);
+    });
+  }
+  for (const resident of s.people) {
+    if (resident.outsideWork?.phase === 'away' || resident.action === 'town') continue;
+    for (const [available, destination] of [[canEat,'food stores'],[canDrink,'drinking water']]) {
+      if ((!available(proposed,resident) || !available(completedSite,resident)) && available(s,resident))
+        return `Leave a walking route for ${resident.name} to reach ${destination}.`;
     }
   }
   return "";
@@ -2157,7 +2264,10 @@ function tickUncached(s, dt) {
   deliveryStep(s,dt,MATERIALS,changeMaterial,storedMaterials(s),storageCapacity(s));
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
   arrangePlantingSeeds(s);
+  const checkSupplies = s.time >= (s.nextFoodCheck || 0);
+  if (checkSupplies) scheduleFarmWork(s);
   maintainFood(s);
+  if (checkSupplies) restockUpkeep(s);
   maintainWater(s);
   manageKitchens(s,PROJECTS,PROCESSES,{blocker:productionBlocker,queue:queueProduction,stored:storedMaterials,capacity:storageCapacity});
   for (const [i,r] of s.people.entries()) {
@@ -2265,6 +2375,8 @@ function tickUncached(s, dt) {
     }
   }
   if(!s.trip&&s.secondTrip){s.trip=s.secondTrip;s.secondTrip=null;}
+  const animalCarePending = s.upkeep?.jobs.some(job => job.care && !job.done);
+  const farmJobsPending = s.operations?.some(op => !op.done && !op.waitingSeeds && op.phase !== 'growing' && isFarmWork(s,op));
   for (const [i, r] of s.people.entries()) {
     if(downtimeInvalid(s,r,PROJECTS)){clearDowntime(r);r.walk=[];r.target=null;}
     if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.outsideWork || r.action==='town'))clearDowntime(r);
@@ -2416,6 +2528,10 @@ function tickUncached(s, dt) {
       )
     ) {
       if (operationalWork(s, r, i, dt)) continue;
+    }
+    if (!r.cargo && !r.operation && !r.outsideWork && !r.removalJob && r.action !== 'service') {
+      if (animalCarePending && performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot,true)) continue;
+      if (farmJobsPending && operationalWork(s,r,i,dt,false,'farm')) continue;
     }
     // Finish an assigned batch before reconsidering work categories. Otherwise
     // changing availability can shuffle the reserved slots on every tick.
@@ -2884,6 +3000,8 @@ export function restore(text) {
     }
     if(s.expansionReserve!==undefined&&(!Number.isFinite(s.expansionReserve)||s.expansionReserve<0||s.expansionReserve>100000))return null;
     if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
+    if(s.foodPurchases!==undefined && (!s.foodPurchases || !Number.isSafeInteger(s.foodPurchases.day) || s.foodPurchases.day<0 ||
+      !Number.isFinite(s.foodPurchases.spent) || s.foodPurchases.spent<0 || s.foodPurchases.spent>100000))return null;
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     if(s.foodStorage?.lots)for(const id of ['greens','beans','corn'])if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
     refreshSandboxFood(s);

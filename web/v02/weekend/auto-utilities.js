@@ -4,9 +4,12 @@ const signatures = new WeakMap();
 export function autoConnectUtilities(s, defs) {
   const sys = syncInfrastructure(s, defs),
     nodes = Object.values(sys.nodes);
-  const signature = nodes.map((n) => `${n.id}:${n.kind}:${n.x}:${n.z}`).join("|");
-  if (signatures.get(sys) === signature) return sys;
-  signatures.set(sys, signature);
+  const previous = signatures.get(sys);
+  if (previous?.length === nodes.length && nodes.every((node,i) => {
+    const old = previous[i];
+    return node.id === old.id && node.kind === old.kind && node.x === old.x && node.z === old.z;
+  })) return sys;
+  signatures.set(sys, nodes.map(({id, kind, x, z}) => ({id, kind, x, z})));
   const wanted = [];
   const add = (kind, a, b) => {
     if (

@@ -25,6 +25,16 @@ const repeating=fixture();repeating.kitchens[0].repeat='preserve_meals';assert.m
 const disabled=fixture();disabled.s.infrastructure.nodes[disabled.kitchens[0].id].enabled=false;assert.match(kitchenPlan(disabled.s,disabled.kitchens[0],PROCESSES,api).reason,/switched off/);
 const floor=fixture();foodChange(floor.s,'food',-(floor.s.materials.food-10));foodChange(floor.s,'greens',-8);foodChange(floor.s,'beans',-8);
 assert.equal(kitchenPlan(floor.s,floor.kitchens[0],PROCESSES,api).recipe,undefined,'no conversion spends the last day of food');
+const recovery=fixture();
+foodChange(recovery.s,'food',-recovery.s.materials.food);
+recovery.s.emergencyFood=false;
+assert.equal(kitchenPlan(recovery.s,recovery.kitchens[0],PROCESSES,api).recipe,'cook_greens',
+ 'a kitchen can convert crops into meals when there are zero edible portions');
+tick(recovery.s,.1);
+const cropMeal=recovery.s.operations.find(op=>op.recipe==='cook_greens');
+assert(cropMeal,'a resident cooking job is queued');
+for(let i=0;i<16000&&!cropMeal.done;i++)tick(recovery.s,.1);
+assert(cropMeal.done,'a resident delivers the crop meals to storage');
 const dry=fixture();foodPolicy(dry.s).freshDays=0;assert.equal(kitchenPlan(dry.s,dry.kitchens[0],PROCESSES,api).recipe,'preserve_meals');
 const expiry=fixture();foodChange(expiry.s,'greens',-8);foodChange(expiry.s,'beans',-8);expiry.s.foodStorage.lots.food[0].expires=1;
 assert.equal(kitchenPlan(expiry.s,expiry.kitchens[0],PROCESSES,api).recipe,undefined);

@@ -55,7 +55,7 @@
       "time-skip",
       "time-skip-milestones"
     ],
-    "description": "Use the clock to pause or change speed. When everyone is asleep or away, time can advance at 64×.",
+    "description": "Use the clock to pause or change speed. A running village catches up when you return to its open tab. Pause to stop catch-up at the current moment. When everyone is asleep or away, time can advance at 64×.",
     "diagram": "flowchart TD\n Mode{Play mode} -->|Story| Story[Finite supplies and biological waiting]\n Mode -->|Sandbox| Sandbox[Replenished supplies and no biological waiting]\n Clock[Clock controls] --> Running{Time running?}\n Running -->|Yes| Calendar[Days, seasons and schedules advance]\n Running -->|No| Hold[Village activity pauses]\n Calendar --> Weather[Seasonal rain, cloud cover and temperature]\n Weather --> Effects[Water recharge, crop stress and hydration demand]\n Calendar --> Residents[Resident needs, trips and work]",
     "boundary": "Sandbox also skips asset upkeep and tool wear.",
     "tip": "Advance days runs the same simulation steps while you wait. Check upcoming milestones first; supplies, bills, weather and resident needs continue. Stop here keeps progress and pauses the village.",
@@ -81,7 +81,7 @@
     "description": "Terrain and access determine where buildings fit and residents can work.",
     "diagram": "flowchart LR\n Setup[Seed, biome and resource settings] --> World[Terrain, river and natural sites]\n World --> Grid[Map cells and elevation]\n Edit[Terrain edits and foundations] --> Grid\n Grid --> Check{Footprint and access valid?}\n Plan[Building or field footprint] --> Check\n Check -->|No| Reject[Explain placement constraint]\n Check -->|Yes| Place[Place project]\n Place --> Routes[Recheck walking routes]\n Grid --> Routes\n Routes --> Reach{Reachable work or service point?}\n Reach -->|Yes| Walk[Resident walks to target]\n Reach -->|No| Block[Wait or choose another action]",
     "boundary": "Terrain editing currently has no labor or cash cost.",
-    "tip": "Keep stores, work sites and water routes close and accessible.",
+    "tip": "Keep stores, work sites and water routes close. Building placement and relocation check whether residents would lose access to food or drinking water.",
     "facts": null
   },
   {
@@ -141,7 +141,7 @@
     ],
     "description": "Available residents choose work using needs, assignments and priorities.",
     "diagram": "flowchart TD\n Resident[Resident chooses an action] --> Committed{Committed to trip, sleep or need?}\n Committed -->|Yes| Continue[Advance committed action]\n Committed -->|No| Existing{Unfinished assigned operation?}\n Existing -->|Yes| Resume[Try to resume work]\n Existing -->|No| Select[Evaluate services, upkeep and work priorities]\n Resume --> Gate{Inputs, tools, access and capacity available?}\n Select --> Gate\n Gate -->|Yes| Do[Travel, carry or work]\n Gate -->|No| Explain[Record blocker and consider alternatives]\n Do --> Needs[Re-evaluate needs and cargo safety]\n Explain --> Idle[Other work or finite downtime]\n Needs --> Resident",
-    "boundary": "Explicit priorities remain authoritative.",
+    "boundary": "Available residents take farm and animal work before starting lower-priority jobs. Needs, rest and deliveries already in progress still take precedence.",
     "tip": "Protect essential work first. A large queue cannot replace available workers.",
     "facts": null
   },
@@ -271,7 +271,7 @@
     "description": "Manage a whole planting area or inspect one bed. Each bed keeps its own crop, care and harvest cycle.",
     "diagram": "flowchart TB\n Soil[Unprepared soil] -->|Resident preparation| Ready[Prepared bed]\n Ready -->|Seeds + planting work| Planted[Planted crop]\n Planted -->|Normal mode| Growth[Growing]\n Planted -->|Sandbox: instant growth| Mature[Harvestable]\n Growth -->|Accumulated growing conditions| Mature\n Mature -->|Resident harvesting| Harvest[Harvested bed + residues]\n Growth -->|Explicit clearing: residues only| Harvest\n Mature -->|Explicit clearing: residues only| Harvest\n Harvest -->|Prepare next planting| Ready\n Harvest --> Residues[Leave cover or collect residues]\n classDef soil fill:#f2e5d6,stroke:#c8af90,color:#654c35;\n classDef growing fill:#e9efd9,stroke:#b5c49a,color:#485d32;\n classDef mature fill:#d4e6d0,stroke:#88a67c,color:#2d5136;\n class Soil,Ready,Harvest soil;\n class Planted,Growth growing;\n class Mature,Residues mature;\n",
     "boundary": "Harvest quantities resolve once. Delayed harvest can reduce yield; clearing returns residues only. Fields snap to 2 m map cells.",
-    "tip": "Planting uses stored seeds first. With Auto-buy on and enough shared savings, missing packets are purchased and physically collected before residents plant. Keep water, work access and storage available.",
+    "tip": "Residents prepare beds, plant the selected crop with stored seeds, and harvest ripe beds automatically. With Auto-buy on, residents order missing seed packets when shared savings can cover them and collection. Keep water, work access and storage available.",
     "facts": "crops"
   },
   {
@@ -330,7 +330,7 @@
     "description": "Animal care consumes fodder, water and labor. Health affects supported products.",
     "diagram": "flowchart TD\n Animals[Stocked animals] --> Demand[Feed and drinking-water demand]\n Care[Resident care job] --> Reserves[Finite on-site feed and water]\n Reserves --> Demand\n Demand --> Adequate{Enough reserves?}\n Adequate -->|Yes| Health[Health and product accumulation]\n Adequate -->|No| Harm[Health declines; production drops]\n Health --> Collect[Resident collects stored product]\n Collect --> Haul[Haul eggs or milk to stores]\n",
     "boundary": "Animals consume feed and water over time. Refill their supplies separately from collecting products.",
-    "tip": "Grow or gather sufficient fodder and provide drinking water before adding animals.",
+    "tip": "Residents tend stocked animals and collect available eggs and milk even when the pantry is full. If fodder runs short, they gather it from available wild forage. Keep drinking water and a clear path to the animals.",
     "facts": null
   },
   {
@@ -415,7 +415,7 @@
     "description": "Food keeps its identity and age during storage, processing and transport.",
     "diagram": "flowchart TD\n Crop[Named harvested crop or purchased food] --> Lots[Inventory with expiry-bearing lots]\n Lots --> Cook[Explicit ingredient recipe and resident work]\n Cook --> Meals[Prepared meal lots]\n Lots --> Preserve[Preservation recipe]\n Preserve --> Long[Longer-lived food lots]\n Power[Powered refrigeration] --> Slow[Slow ageing of eligible stored food]\n Slow --> Lots\n Lots --> Expired{Expired?}\n Meals --> Expired\n Long --> Expired\n Expired -->|Yes| Waste[Remove spoiled food and account organic waste]\n Expired -->|No| Use[Eating, recipe input or trade]\n Use --> Transit[Preserve batch age in cargo and reservations]\n Lots --> Forecast[Expiry-aware pantry forecast]\n Forecast --> Policy[Optional fresh-meal and provision policies]\n Policy --> Cook\n",
     "boundary": "Refrigeration capacity is measured in liters. Uncooked greens, beans and corn do not count as ready portions.",
-    "tip": "Use the Food Almanac to inspect expiry, fresh meals, dried provisions and refrigeration. Optional kitchen policies protect a ready-food reserve before processing more.",
+    "tip": "Use the Food Almanac to inspect expiry, fresh meals, dried provisions and refrigeration. Automatic kitchens can cook harvested crops even when the pantry is empty. Recipes that consume ready-to-eat food protect a one-day reserve.",
     "facts": "food"
   },
   {
@@ -458,7 +458,7 @@
     "description": "Purchases and sales need supply, demand, capacity and physical transport.",
     "diagram": "flowchart TD\n Request[Purchase request or sale policy] --> Quote[Supplier stock or buyer quote and demand]\n Quote --> Reserve[Reserve goods, cash commitments or exports]\n Reserve --> Method{Transport method}\n Method -->|Resident pickup| Car[Available driver and car; town operating hours]\n Method -->|Paid supplier| Freight[Reserve delivery cost and capacity]\n Car --> Cargo[Load within mass and volume limits]\n Cargo --> Town[Travel to town and settle eligible sales once]\n Town --> Return[Return with purchased goods or unsold lots]\n Return --> Unload[Unload into stores or project shipment]\n Freight --> Unload\n Consolidate[Trip consolidation and protected reserves] --> Car\n Age[Perishable lot ageing in transit] --> Return",
     "boundary": "There are two resident vehicles plus paid freight.",
-    "tip": "Sell genuine surplus after protecting food and production inputs. Combine trips when practical.",
+    "tip": "Set the food reserve and daily food budget in Resources. Emergency purchases count incoming food and include transport in the budget. Sell surplus after protecting household and production supplies.",
     "facts": null
   },
   {
@@ -513,7 +513,7 @@
     "description": "Age and use reduce condition. Service needs parts, access and labor.",
     "diagram": "flowchart TD\n Use[Time, active assets and vehicle distance] --> Condition[Condition and age change]\n Condition --> Due{Service or replacement due?}\n Due -->|Yes| Queue[Queue maintenance job]\n Queue --> Gate{Parts, allowance and accessible site?}\n Gate -->|No| Wait[Expose missing parts, budget or access]\n Gate -->|Yes| Work[Resident collects supplies and services asset]\n Work --> Restore[Restore condition or reset replacement age]\n Restore --> Condition\n Condition --> Capacity[Service factor and battery capacity affect utilities]\n Due -->|No| Continue[Continue operation]",
     "boundary": "",
-    "tip": "Keep parts and labor available before equipment deteriorates. Local repair materials are still limited.",
+    "tip": "In Finances, set a daily feed and repair shopping budget to cover missing supplies and transport. Zero disables shopping. Residents still need to receive the goods and do the work.",
     "facts": null
   },
   {

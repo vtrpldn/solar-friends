@@ -3,6 +3,7 @@ import { roadLine } from "../web/v02/weekend/placement-helpers.js";
 import {
   createSandbox,
   plan,
+  moveProject,
   planRoadLine,
   save,
   restore,
@@ -59,3 +60,17 @@ const unchanged = JSON.stringify(longRoad);
 assert.ok(planRoadLine(longRoad, {x:50,z:90}, {x:50,z:95}));
 assert.equal(JSON.stringify(longRoad), unchanged, 'boundary failure rolls back the whole extension');
 console.log(`PASS: 61-tile road planned in ${elapsed.toFixed(1)}ms, persisted, and retained boundary checks`);
+
+// The last gap out of a grove is the resident's only route to the pantry.
+const enclosed=createSandbox(0);
+const resident=enclosed.people[0];
+for(let x=49;x<=51;x++)for(let z=49;z<=51;z++){
+  if(x===50&&z>=50)continue;
+  enclosed.projects.push({id:enclosed.nextId++,key:'wild-jequitiba',x,z,work:1,natural:true});
+}
+resident.x=50;resident.z=50;
+assert.match(plan(enclosed,'streetlight',50,51),/Iara.*food stores/);
+assert.equal(plan(enclosed,'streetlight',55,52),'');
+const light=enclosed.projects.at(-1);
+assert.match(moveProject(enclosed,light.id,50,51),/Iara.*food stores/);
+assert(!light.removal);

@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import {installFarmingUI} from '/v2/cultivation-ui.js';
 import {ensureCultivation,finishFarmJob} from '/v2/cultivation.js';
 const p={id:1,key:'field',fieldSize:[9,9],work:1};
-const s={time:0,mode:'story',projects:[p],people:[],operations:[],materials:{beans_seed:3,greens_seed:0,compost:0}};
+const s={time:0,autoBuy:false,mode:'story',projects:[p],people:[],operations:[],materials:{beans_seed:3,greens_seed:0,compost:0}};
 ensureCultivation(s,p);
 const ui=installFarmingUI({state:()=>s,selected:()=>p.id,scene:new THREE.Scene(),hit:()=>null,controls:{},select:()=>{},changed:()=>{},message:()=>{},begin:()=>{},placementGrid:()=>{}});
 window.fixture={s,p,ui,finish:()=>{for(const o of s.operations.filter(o=>!o.done)){finishFarmJob(s,p,o);o.done=true;}ui.refresh();}};ui.refresh();
@@ -29,7 +29,7 @@ try{
  assert(await page.locator('#farm-crop').isDisabled());
  await page.evaluate(()=>fixture.finish());
  await page.locator('[data-farm-action="plant"]').click();
- assert.match(await page.locator('#farm-feedback').innerText(),/3 beds queued.*69 beds skipped.*Missing/);
+ assert.match(await page.locator('#farm-feedback').innerText(),/3 beds queued.*69 beds skipped.*Auto-buy is off/);
  assert.equal(await page.evaluate(()=>fixture.s.materials.beans_seed),0);
  await page.evaluate(()=>{fixture.s.materials.beans_seed=69;});
  await page.locator('[data-farm-action="plant"]').click();

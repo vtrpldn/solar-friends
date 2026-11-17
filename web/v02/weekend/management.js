@@ -327,6 +327,10 @@ export function createManagement({
       add('h3','Asset upkeep');add('p',upkeepText(s));
       const service=upkeep(s),toggle=document.createElement('button');toggle.textContent=service.automatic?'Automatic upkeep: on':'Automatic upkeep: off';toggle.setAttribute('aria-pressed',String(service.automatic));toggle.onclick=()=>{service.automatic=!service.automatic;render();};screen.append(toggle);
       const allowance=document.createElement('input');allowance.type='number';allowance.min='0';allowance.max='100000';allowance.value=service.dailyBudget;allowance.setAttribute('aria-label','Daily upkeep materials allowance in reais');allowance.oninput=()=>{service.dailyBudget=Math.max(0,Math.min(100000,Number(allowance.value)||0));};allowance.onchange=()=>render();screen.append(allowance);
+      const restockLabel=add('label','Daily feed and repair shopping budget including transport (R$)');
+      const restock=document.createElement('input');restock.type='number';restock.min='0';restock.max='100000';restock.value=service.restockBudget??0;
+      restock.onchange=()=>{service.restockBudget=Math.max(0,Math.min(100000,Number(restock.value)||0));render();};restockLabel.append(restock);
+      add('p',`Spent today: ${money(service.restockSpent??0)}. Set a budget above zero to buy missing supplies for queued jobs. Residents use stores and gather available fodder first.`);
       if(service.jobs.length){
         const jobs=add('details','');add('summary',`Inspect ${service.jobs.length} upkeep jobs`,jobs);
         for(const job of service.jobs){

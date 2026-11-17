@@ -5,6 +5,10 @@ import {CROP_CARE,GAME_DAY} from './biological-production.js';
 // Inspection/service intervals are engineering assumptions, not warranties.
 const INTERVALS={home:365,shed:365,warehouse:365,kitchen:180,workshop:180,
  'water-pump':90,well:180,'groundwater-well':365,solar_farm:180,hydro:90,greenhouse:180};
+const cropByKind = new Map();
+for (const crop of Object.values(CROP_CARE)) {
+ if (!cropByKind.has(crop.kind)) cropByKind.set(crop.kind, crop);
+}
 const REPLACEMENT_YEARS={'water-pump':10,well:10,solar_farm:25,home:20,shed:20,warehouse:20,kitchen:20};
 export const ANIMAL_CARE=ANIMAL_RATIONS;
 export function upkeep(s){return s.upkeep??={version:1,automatic:true,dailyBudget:100,day:-1,used:0,vehicles:[{condition:100,km:0},{condition:100,km:0}],jobs:[]};}
@@ -13,7 +17,7 @@ export function serviceFactor(p){return Math.max(0,Math.min(1,assetCondition(p)/
 export function recordVehicleDistance(s,index,km){const v=upkeep(s).vehicles[index];v.km+=km;v.condition=Math.max(0,v.condition-km*30/5000);}
 export function upkeepStep(s,defs,dt){
  if(s.mode==='sandbox')return;const u=upkeep(s),day=Math.floor((540+s.time*.45)/1440);
- if(u.day!==day){u.day=day;u.used=0;}
+ if(u.day!==day){u.day=day;u.used=0;u.restockSpent=0;}
  for(const p of s.projects){const d=defs[p.key],interval=INTERVALS[d.kind];if(p.removal||p.work<d.work)continue;
   if(REPLACEMENT_YEARS[d.kind]){
    p.assetAgeDays=(p.assetAgeDays||0)+dt/GAME_DAY;
@@ -26,7 +30,7 @@ export function upkeepStep(s,defs,dt){
     p.batteryAgeDays=(p.batteryAgeDays||0)+dt/GAME_DAY;
     if(u.automatic&&p.batteryAgeDays>=8*365&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,battery:true,work:0,partsPaid:false,done:false});
   }
-  const crop=Object.values(CROP_CARE).find(c=>c.kind===d.kind);
+  const crop=cropByKind.get(d.kind);
   if(crop&&!p.cultivation&&(p.soilFertility??1)<.7&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,soil:true,compost:Math.ceil(crop.area*.25),work:0,partsPaid:false,done:false});
   const care=ANIMAL_CARE[d.kind];
   if(care&&(p.key!=='goat-pasture-empty'||p.stocked)){
@@ -41,10 +45,16 @@ export function upkeepStep(s,defs,dt){
  u.jobs=u.jobs.filter(j=>!j.done&&(j.vehicle!==undefined||s.projects.some(p=>p.id===j.target)));
 }
 export function serviceParts(job){return job.replacementParts||(job.care?{fodder:ANIMAL_CARE[job.care].fodder}:job.soil?{compost:job.compost}:job.battery?{batteries:1,electrical:1}:{tools:1,hardware:1});}
-export function performUpkeep(s,r,dt,go,changeMaterial,materials,carDoor,useWater,workSpot){
- const u=upkeep(s);if(r.cargo||r.removalJob||r.outsideWork||(r.operation&&r.action!=='service')||s.people.some(p=>p!==r&&p.action==='service'))return false;
+export function performUpkeep(s,r,dt,go,changeMaterial,materials,carDoor,useWater,workSpot,careOnly=false){
+ const u=upkeep(s);if(r.cargo||r.removalJob||r.outsideWork||(r.operation&&r.action!=='service'))return false;
  const job=u.jobs.find(j=>{
-  if(j.done||!(u.automatic||j.care||j.soil)||(j.person&&j.person!==r.id&&s.people.some(p=>p.id===j.person&&p.action==='service'))||(j.vehicle!==undefined&&activeTrips(s).some(t=>t.vehicle===j.vehicle)))return false;
+  if(careOnly&&!j.care)return false;
+  if(!j.care&&s.people.some(other=>other!==r&&other.action==='service'))return false;
+  const node=s.infrastructure?.nodes[j.target];
+  if(j.care&&!j.waterPaid&&node&&node.water[0]+1e-8<ANIMAL_CARE[j.care].water){
+   j.status='Waiting for animal drinking water';return false;
+  }
+  if(j.done||!(u.automatic||j.care||j.soil)||(j.person&&j.person!==r.id&&s.people.some(p=>p.id===j.person&&(p.action==='service'||(j.care&&p.action==='collect'&&!p.operation&&!p.job))))||(j.vehicle!==undefined&&activeTrips(s).some(t=>t.vehicle===j.vehicle)))return false;
   if(j.partsPaid)return true;
   const care=ANIMAL_CARE[j.care],parts=serviceParts(j);
   const cost=Object.entries(parts).reduce((n,[id,q])=>n+q*materials[id].price/materials[id].quantity,0);
@@ -63,7 +73,7 @@ export function performUpkeep(s,r,dt,go,changeMaterial,materials,carDoor,useWate
  const cost=Object.entries(parts).reduce((n,[id,q])=>n+q*materials[id].price/materials[id].quantity,0);
  if(!job.partsPaid){
   if(care?s.materials.fodder<care.fodder:((!job.soil&&u.used+cost>u.dailyBudget)||Object.entries(parts).some(([id,n])=>(id==='wood'?s.wood:(s.materials[id]||0))<n))){job.status=care?'Needs animal fodder':job.soil?'Needs mature compost for soil care':job.replacementParts?'Needs replacement equipment or roof materials, or a higher service budget':job.battery?'Needs a replacement battery, electrical supplies or a higher service budget':'Needs tools, fasteners or a higher daily service budget';return false;}
-  if(!go(s,r,s.stock)){r.action='collect';return true;}
+  if(!go(s,r,s.stock)){if(care){job.person=r.id;r.job=null;}r.action='collect';return true;}
   if(care)changeMaterial(s,'fodder',-care.fodder);else{for(const [id,n]of Object.entries(parts))changeMaterial(s,id,-n);if(!job.soil)u.used+=cost;}job.partsPaid=true;
  }
  job.person=r.id;r.job=null;r.operation=null;r.action='service';
@@ -78,5 +88,5 @@ export function performUpkeep(s,r,dt,go,changeMaterial,materials,carDoor,useWate
 export function upkeepText(s){const u=upkeep(s);return `${u.jobs.length} service jobs · R$${u.used.toFixed(2)} / R$${u.dailyBudget.toFixed(2)} daily materials allowance. Repairs use one tool pack, one fastener pack and 108 resident-minutes. Battery replacement uses a battery unit, one electrical pack and 162 resident-minutes; capacity falls to 80% over eight years. Pumps are replaced after 10 years, roofs after 20 and panels after 25; these use the actual replacement parts and 13.5 resident-hours. Supplies must already be in stores. ${u.jobs.some(j=>j.status?.startsWith('Needs'))?'Service is waiting for materials or budget.':''}`;}
 export function validUpkeep(s){if(!s.projects.every(p=>(p.assetAgeDays===undefined||(Number.isFinite(p.assetAgeDays)&&p.assetAgeDays>=0))&&(p.batteryAgeDays===undefined||(Number.isFinite(p.batteryAgeDays)&&p.batteryAgeDays>=0))&&(p.animalHealth===undefined||(Number.isFinite(p.animalHealth)&&p.animalHealth>=0&&p.animalHealth<=100))&&(p.careUntil===undefined||(Number.isFinite(p.careUntil)&&p.careUntil>=0))&&(p.condition===undefined||(Number.isFinite(p.condition)&&p.condition>=0&&p.condition<=100))))return false;
  const u=s.upkeep;if(u===undefined)return true;
- return u?.version===1&&typeof u.automatic==='boolean'&&Number.isFinite(u.dailyBudget)&&u.dailyBudget>=0&&u.dailyBudget<=100000&&Number.isFinite(u.used)&&u.used>=0&&Number.isInteger(u.day)&&Array.isArray(u.vehicles)&&u.vehicles.length===2&&u.vehicles.every(v=>Number.isFinite(v.condition)&&v.condition>=0&&v.condition<=100&&Number.isFinite(v.km)&&v.km>=0)&&Array.isArray(u.jobs)&&u.jobs.length<=514&&u.jobs.every(j=>Number.isFinite(j.work)&&j.work>=0&&j.work<=(j.replacementParts?1801:361)&&(j.replacementParts===undefined||(j.replacementParts&&Object.entries(j.replacementParts).every(([id,n])=>['panels','electrical','pumps','plumbing','tiles','roofing','wood','hardware'].includes(id)&&Number.isInteger(n)&&n>0&&n<=100000)))&&typeof j.partsPaid==='boolean'&&typeof j.done==='boolean'&&(j.battery===undefined||typeof j.battery==='boolean')&&(j.soil===undefined||(j.soil===true&&Number.isInteger(j.compost)&&j.compost>0&&j.compost<=16))&&(!j.care||!!ANIMAL_CARE[j.care])&&(j.vehicle===undefined?s.projects.some(p=>p.id===j.target):[0,1].includes(j.vehicle)))&&s.projects.every(p=>p.condition===undefined||(Number.isFinite(p.condition)&&p.condition>=0&&p.condition<=100));
+ return u?.version===1&&[u.restockBudget,u.restockSpent].every(n=>n===undefined||(Number.isFinite(n)&&n>=0&&n<=100000))&&typeof u.automatic==='boolean'&&Number.isFinite(u.dailyBudget)&&u.dailyBudget>=0&&u.dailyBudget<=100000&&Number.isFinite(u.used)&&u.used>=0&&Number.isInteger(u.day)&&Array.isArray(u.vehicles)&&u.vehicles.length===2&&u.vehicles.every(v=>Number.isFinite(v.condition)&&v.condition>=0&&v.condition<=100&&Number.isFinite(v.km)&&v.km>=0)&&Array.isArray(u.jobs)&&u.jobs.length<=514&&u.jobs.every(j=>Number.isFinite(j.work)&&j.work>=0&&j.work<=(j.replacementParts?1801:361)&&(j.replacementParts===undefined||(j.replacementParts&&Object.entries(j.replacementParts).every(([id,n])=>['panels','electrical','pumps','plumbing','tiles','roofing','wood','hardware'].includes(id)&&Number.isInteger(n)&&n>0&&n<=100000)))&&typeof j.partsPaid==='boolean'&&typeof j.done==='boolean'&&(j.battery===undefined||typeof j.battery==='boolean')&&(j.soil===undefined||(j.soil===true&&Number.isInteger(j.compost)&&j.compost>0&&j.compost<=16))&&(!j.care||!!ANIMAL_CARE[j.care])&&(j.vehicle===undefined?s.projects.some(p=>p.id===j.target):[0,1].includes(j.vehicle)))&&s.projects.every(p=>p.condition===undefined||(Number.isFinite(p.condition)&&p.condition>=0&&p.condition<=100));
 }

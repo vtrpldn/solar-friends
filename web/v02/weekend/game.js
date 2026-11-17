@@ -21,7 +21,7 @@ import {constructionSpecText} from './construction-specs.js';
 import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {installLenses} from './lenses.js';
-import {simulationSpeed, simulationFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
+import {simulationSpeed, simulationFrame, catchUpFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
 import {eventHistory, eventTime} from './event-history.js';
 import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
 import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
@@ -1258,6 +1258,7 @@ $("uphill").onclick = () => {
   message(s.log[0]);
   renderUI();
 };
+let catchUpSeconds = 0;
 function updatePauseButton() {
   $("pause").textContent = paused ? "▶" : "Ⅱ";
   $("pause").setAttribute(
@@ -1269,6 +1270,7 @@ updatePauseButton();
 $("pause").onclick = () => {
   if (roadWasPaused !== null) { cancel(); return; }
   paused = !paused;
+  if (paused) catchUpSeconds = 0;
   updatePauseButton();
 };
 function setSpeed(value) {
@@ -1278,8 +1280,10 @@ function setSpeed(value) {
 function updateSpeedButton() {
   const effective = paused ? speed : simulationSpeed(s, speed);
   const automatic = effective !== speed;
-  const label = automatic ? '64× Auto' : `${speed}×`;
-  const description = automatic
+  const label = !paused && catchUpSeconds >= 1 ? `Catching up · ${Math.ceil(catchUpSeconds)}s` : automatic ? '64× Auto' : `${speed}×`;
+  const description = !paused && catchUpSeconds >= 1
+    ? 'Catching up on time spent in a hidden tab. Pause to stop here.'
+    : automatic
     ? `Automatic speed 64× while everyone is asleep or away. Selected speed ${speed}×. Keys 1 to 4 select speed.`
     : `Simulation speed ${speed}×. Keys 1 to 4 select speed.`;
   if ($("speed").textContent !== label) $("speed").textContent = label;
@@ -1330,12 +1334,16 @@ $("skip-form").onsubmit = async event => {
   $("skip-days").disabled = true;
   $("skip-close").textContent = 'Stop here';
   let stopped = false;
+  let nextProgressUpdate = 0;
   $("skip-close").onclick = () => { stopped = true; };
   $("skip-progress").hidden = false;
   try {
     await skipDays(s, Number($("skip-days").value), {
       cancelled: () => stopped,
       progress: fraction => {
+        const now = performance.now();
+        if (fraction > 0 && fraction < 1 && now < nextProgressUpdate) return;
+        nextProgressUpdate = now + 100;
         $("skip-progress").value = fraction;
         renderSkipMilestones();
         $("skip-status").textContent = `Simulating every moment… ${Math.floor(fraction * 100)}%`;
@@ -2176,13 +2184,30 @@ for (const event of ['pointermove','pointerdown','pointerup','wheel','keydown','
   addEventListener(event, requestSceneRender, {passive:true});
 renderer.domElement.addEventListener('webglcontextrestored', requestSceneRender);
 addEventListener('pageshow', requestSceneRender);
-document.addEventListener('visibilitychange', requestSceneRender);
+let hiddenSince = document.hidden && !paused && s.stage === 'playing' ? Date.now() : null;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (!paused && !skippingTime && s.stage === 'playing') hiddenSince ??= Date.now();
+  } else {
+    if (hiddenSince !== null && !paused && !skippingTime)
+      catchUpSeconds += Math.max(0, Date.now() - hiddenSince) / 1000;
+    hiddenSince = null;
+    previous = performance.now();
+    requestSceneRender();
+  }
+});
 requestSceneRender();
 function frame(now) {
   if (skippingTime) { previous = now; requestAnimationFrame(frame); return; }
-  const dt = Math.min((now - previous) / 1000, 0.1);
+  const dt = Math.max(0, Math.min((now - previous) / 1000, 0.1));
   previous = now;
   if (!paused && !document.hidden) {
+    if (catchUpSeconds > 0) {
+      const result = catchUpFrame(catchUpSeconds, accumulator, () => simulationSpeed(s,speed), step => tick(s,step));
+      catchUpSeconds = result.seconds;
+      accumulator = result.accumulator;
+      previousMotion = captureMotion(s);
+    }
     accumulator = simulationFrame(accumulator, dt, () => simulationSpeed(s, speed), step => {
       previousMotion = captureMotion(s);
       tick(s, step);
