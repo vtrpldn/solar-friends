@@ -1,3 +1,4 @@
+import {HOME_DESIGNS} from '../web/v02/library/home-designs.js';
 import assert from "node:assert/strict";
 import {
   createSandbox,
@@ -11,7 +12,7 @@ import {
   placementError,
 } from "../web/v02/weekend/simulation.js";
 import { footprintRelief } from "../web/v02/weekend/elevation.js";
-for (const key of ["workshop","home-cottage","home-longhouse"]) for (let rotation = 0; rotation < 4; rotation++) {
+for (const key of ["workshop","home-cottage","home-longhouse",...HOME_DESIGNS.map(d=>d.id)]) for (let rotation = 0; rotation < 4; rotation++) {
   const s = createSandbox(42);
   assert.equal(plan(s, key, 60, 50, rotation), "");
   const p = s.projects.at(-1);

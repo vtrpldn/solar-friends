@@ -17,4 +17,4 @@ for(const key of Object.keys(FUNCTIONAL_LAYOUTS))for(let rotation=0;rotation<4;r
  assert(route(s,from,front),`${key} rotation ${rotation}: approach is reachable`);
 }
 assert.deepEqual(PROJECTS['picnic-table'].size,[2,2],'table reserves seating and access space');
-console.log('PASS ten home entrances in all rotations align with model doors and remain reachable; picnic access reservation');
+console.log('PASS all catalog home entrances in all rotations align with model doors and remain reachable; picnic access reservation');

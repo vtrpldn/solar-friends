@@ -1,5 +1,7 @@
+import {HOME_DESIGNS} from './home-designs.js';
 // Design targets only; production and resource rules remain separate.
 export const FUNCTIONAL_PROGRAM = {
+  ...Object.fromEntries(HOME_DESIGNS.map(d=>[d.id,{site:d.site,shell:d.shell,targetUsableArea:null,capacity:{residents:d.beds},requirements:'Exterior shell only; no rooms or indoor furnishings. The grid site includes roof and access clearance; occupancy follows existing housing assumptions.'}])) ,
   "home-cottage": {
     "site": [
       4,

@@ -1,3 +1,4 @@
+import {HOME_DESIGN_BY_ID} from './home-designs.js';
 import * as THREE from 'three';
 import { box, beam, gable, windowPane, cylinder, ball } from '../workshop/models.js';
 import {hipRoof,leanRoof,gableRoof} from './roof-forms.js';
@@ -19,7 +20,7 @@ function window(g,x,z,rotation=0,shutters='teal') {
 }
 function roofFrame(g,w,d,type,rise=1.3){
   if(type==='side-gable'){
-    const turn=new THREE.Group();turn.rotation.y=Math.PI/2;g.add(turn);roofFrame(turn,d,w,'front-gable',1.1);return;
+    const turn=new THREE.Group();turn.rotation.y=Math.PI/2;g.add(turn);roofFrame(turn,d,w,'front-gable',rise);return;
   }
   if(type==='twin-gable'){
     for(const [width,x,h] of [[4,-3,.95],[6,2,1.4]]){const wing=new THREE.Group();wing.position.x=x;g.add(wing);roofFrame(wing,width,d,'front-gable',h);}return;
@@ -36,7 +37,10 @@ function roofFrame(g,w,d,type,rise=1.3){
 }
 export function functionalHome(id,stage=2) {
   const l=FUNCTIONAL_LAYOUTS[id],character=HOME_CHARACTER[id],g=new THREE.Group(),[w,d]=l.shell;
-  const doorX=character.doorX;
+  const doorX=character.doorX, design=HOME_DESIGN_BY_ID[id];
+  const porchPosts=[-w/2+.2,-1.3,1.3,w/2-.2];
+  if(design && w>9)porchPosts.push(-(w/2+1.1)/2,(w/2+1.1)/2);
+  const terracePosts=design?Array.from({length:Math.ceil((d-.4)/3)+1},(_,i)=>-d/2+.2+i*(d-.4)/Math.ceil((d-.4)/3)):[-d/2+.2,d/2-.2];
   const body=new THREE.Group();g.add(body);
   // Front (+Z) verandas and side terraces occupy their own reserved cells.
   body.position.z=l.verandaDepth?-l.verandaDepth/2:0;
@@ -49,9 +53,9 @@ export function functionalHome(id,stage=2) {
   }
   if(stage===1) {
     for(const x of [-w/2+.1,w/2-.1])for(const z of [-d/2+.1,0,d/2-.1])box(body,.14,2.7,.14,'timber',x,1.5,z);
-    roofFrame(body,w,d,character.roof,1.45);
-    if(l.verandaDepth)for(const x of [-w/2+.2,-1.3,1.3,w/2-.2])box(g,.16,2.45,.16,'timber',x,1.285,d/2+l.verandaDepth/2-.15);
-    if(l.terrace)for(const z of [-d/2+.2,d/2-.2])for(const x of [w/2-.8,w/2+.8])box(g,.14,2.5,.14,'timber',x,1.25,z);
+    roofFrame(body,w,d,character.roof,character.rise||(character.roof==='side-gable'?1.1:1.45));
+    if(l.verandaDepth)for(const x of porchPosts)box(g,.16,2.45,.16,'timber',x+body.position.x,1.285,d/2+l.verandaDepth/2-.15);
+    if(l.terrace)for(const z of terracePosts)for(const x of [w/2-.8,w/2+.8])box(g,.14,2.5,.14,'timber',x,1.25,z);
     return g;
   }
   const wall=id.startsWith('adobe')||id==='home-shared'?'earth':'plaster';
@@ -68,7 +72,8 @@ export function functionalHome(id,stage=2) {
   box(body,1.16,.08,.24,'timberLight',doorX,2.34,d/2-.07);
   box(body,.05,.05,.06,'tileLight',doorX+.34,1.12,d/2);
   box(body,1.4,.12,.5,'stone',doorX,.06,d/2+.15);
-  for(const x of [-w*.3,w*.3])window(body,x,d/2+.015,0,character.shutters);
+  const frontWindows=design ? Array.from({length:Math.max(2,Math.floor(w/2.7))},(_,i)=>-w/2+1.2+i*(w-2.4)/(Math.max(2,Math.floor(w/2.7))-1)).filter(x=>Math.abs(x-doorX)>1.6) : [-w*.3,w*.3];
+  for(const x of frontWindows)window(body,x,d/2+.015,0,character.shutters);
   for(const side of [-1,1])for(const z of [-d*.25,d*.2])window(body,side*(w/2+.015),z,side*Math.PI/2,character.shutters);
   // Low masonry skirting grounds the wall without covering the reserved yard.
   for(const x of [-w/2,w/2])box(body,.06,.22,d,'earth',x,.25,0);
@@ -80,13 +85,13 @@ export function functionalHome(id,stage=2) {
   }
   if(character.roof.startsWith('hip'))hipRoof(roofGroup,w+.6,d+.6,2.85,1.3);
   else if(character.roof==='side-gable'){
-    const turned=new THREE.Group();turned.rotation.y=Math.PI/2;roofGroup.add(turned);pitched(turned,d,w,1.1);
+    const turned=new THREE.Group();turned.rotation.y=Math.PI/2;roofGroup.add(turned);pitched(turned,d,w,character.rise||1.1);
   }else if(character.roof==='twin-gable'){
     for(const [width,x,rise] of [[4,-3,.95],[6,2,1.4]]){
       const wing=new THREE.Group();wing.position.x=x;roofGroup.add(wing);pitched(wing,width,d,rise);
     }
     box(roofGroup,.16,.12,d+.5,'tileDark',-1,2.9,0);
-  }else pitched(roofGroup,w,d,1.45);
+  }else pitched(roofGroup,w,d,character.rise||1.45);
   if(character.roof==='hip-porch'){
     const porch=new THREE.Group();porch.position.set(doorX,0,d/2+.5);body.add(porch);
     leanRoof(porch,2.8,1.2,2.35,2.8);
@@ -96,25 +101,28 @@ export function functionalHome(id,stage=2) {
       for(const dx of [-.45,.45])box(body,.12,.45,.35,'timber',x+dx,.225,d/2+.35);
     }
   }
-  if(id==='house'||id==='home-gable'||id==='home-cottage'){
-    const hood=new THREE.Group();hood.position.set(doorX,0,d/2+.35);body.add(hood);leanRoof(hood,1.7,.9,2.35,2.65);
+  if(id==='house'||id==='home-gable'||id==='home-cottage'||character.hood){
+    const hood=new THREE.Group();hood.position.set(doorX,0,d/2+.35);body.add(hood);leanRoof(hood,character.hood||1.7,.9,2.35,2.65);
     for(const side of [-1,1])beam(body,[doorX+side*.7,2,d/2],[doorX+side*.7,2.4,d/2+.6],.07,'timber');
   }
   if(l.verandaDepth) {
+    const porchRoot=new THREE.Group();porchRoot.position.x=body.position.x;g.add(porchRoot);
     const front=d/2+l.verandaDepth/2;
-    box(g,w,.12,l.verandaDepth,'stone',0,.06,front-l.verandaDepth/2);
-    for(const x of [-w/2+.2,-1.3,1.3,w/2-.2])box(g,.16,2.45,.16,'timber',x,1.285,front-.15);
-    const canopy=new THREE.Group();canopy.position.z=front-l.verandaDepth/2;g.add(canopy);leanRoof(canopy,w+.4,l.verandaDepth+.4,2.5,2.95);
-    box(g,1.5,.1,.45,'timberLight',-w/2+1.2,.53,front-.5);
-    for(const x of [-w/2+.6,-w/2+1.8])box(g,.12,.48,.38,'timber',x,.24,front-.5);
+    box(porchRoot,w,.12,l.verandaDepth,'stone',0,.06,front-l.verandaDepth/2);
+    for(const x of porchPosts)box(porchRoot,.16,2.45,.16,'timber',x,1.285,front-.15);
+    if(design)box(porchRoot,w,.18,.18,'timber',0,2.43,front-.15);
+    const canopy=new THREE.Group();canopy.position.z=front-l.verandaDepth/2;porchRoot.add(canopy);leanRoof(canopy,w+.4,l.verandaDepth+.4,2.5,2.95);
+    box(porchRoot,1.5,.1,.45,'timberLight',-w/2+1.2,.53,front-.5);
+    for(const x of [-w/2+.6,-w/2+1.8])box(porchRoot,.12,.48,.38,'timber',x,.24,front-.5);
     for(const side of [-1,1]){
-      box(g,2.4,.1,.1,character.shutters,side*2.65,.95,front-.15);
-      for(let x=1.65;x<3.8;x+=.4)box(g,.055,.7,.055,'timberLight',side*x,.55,front-.15);
+      const railWidth=w/2-1.6;
+      box(porchRoot,railWidth,.1,.1,character.shutters,side*(1.4+railWidth/2),.95,front-.15);
+      for(let x=1.5;x<w/2-.2;x+=.4)box(porchRoot,.055,.7,.055,'timberLight',side*x,.55,front-.15);
     }
   }
   if(l.terrace){
     box(g,2,.1,d,'stone',w/2,.05,0);
-    for(const z of [-d/2+.2,d/2-.2])for(const x of [w/2-.8,w/2+.8])box(g,.14,2.5,.14,'timber',x,1.25,z);
+    for(const z of terracePosts)for(const x of [w/2-.8,w/2+.8])box(g,.14,2.5,.14,'timber',x,1.25,z);
     for(const x of [w/2-.8,w/2+.8])box(g,.14,.16,d,'timber',x,2.45,0);
     for(let z=-d/2;z<=d/2;z+=.6)box(g,2.15,.1,.14,'timberLight',w/2,2.58,z);
     box(g,.5,.1,1.8,'timberLight',w/2+.4,.5,-1.5);
@@ -125,7 +133,7 @@ export function functionalHome(id,stage=2) {
     box(body,.65,.5,.06,'timber',0,3.35,d/2);
     for(let y=3.18;y<3.6;y+=.1)box(body,.58,.035,.08,'timberLight',0,y,d/2+.04);
   }
-  if(id==='home-longhouse'){
+  if(id==='home-longhouse'||character.gallery){
     const gallery=new THREE.Group();gallery.position.set(-3,0,d/2+.35);body.add(gallery);
     leanRoof(gallery,5.4,1.1,2.35,2.75);
     for(const x of [-2.5,2.5])box(gallery,.14,2.35,.14,'timber',x,1.175,.4);
@@ -133,6 +141,20 @@ export function functionalHome(id,stage=2) {
     for(const x of [-1.7,-.3])box(gallery,.12,.45,.35,'timber',x,.225,.1);
   }
   if(id.startsWith('adobe'))for(let x=-w/2+.35;x<w/2;x+=.7)box(body,.1,.12,.5,'timber',x,2.78,d/2-.05);
+  if(character.cornerTrim)for(const x of [-w/2+.06,w/2-.06])for(const z of [-d/2+.06,d/2-.06])box(body,.16,2.7,.16,'plaster',x,1.51,z);
+  if(character.weatherboard)for(let y=.45;y<1.1;y+=.16){
+    for(const side of [-1,1])box(body,.05,.13,d,'timberLight',side*(w/2+.03),y,0);
+    box(body,w,.13,.05,'timberLight',0,y,-d/2-.03);
+  }
+  if(character.flowerBox)for(const x of frontWindows){
+    box(body,1.25,.24,.3,'timber',x,.92,d/2+.16);
+    for(let n=0;n<5;n++)ball(body,.13,'leaf',x-.45+n*.22,1.1,d/2+.18,[1,.6,1],0);
+  }
+  if(character.screen && l.verandaDepth){
+    const x=body.position.x-w/2+.2,front=d/2+l.verandaDepth/2;
+    for(let z=front-l.verandaDepth+.2;z<front;z+=.22)box(g,.07,1.6,.07,'timberLight',x,1.1,z);
+    for(const y of [.3,1.9])box(g,.12,.1,l.verandaDepth-.2,'timber',x,y,front-l.verandaDepth/2);
+  }
   // An entrance herb pot and wall-mounted light make the threshold legible.
   const potX=doorX+1.1,potZ=d/2+.3;
   cylinder(body,.23,.17,.4,'tile',potX,.2,potZ,8);

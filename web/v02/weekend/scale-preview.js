@@ -1,3 +1,4 @@
+import {HOME_DESIGNS} from '../library/home-designs.js';
 import { createSandbox, plan, placementError, PROJECTS, requiredLoads } from './simulation.js';
 import { foundationPad } from './elevation.js';
 
@@ -23,7 +24,7 @@ export function createScalePreview(validate = false, collection = 'village') {
     // Demonstration paths are already built, like the surrounding buildings.
     s.projects.at(-1).work=PROJECTS[key].work;
   }
-  const sites = collection==='sites' ? [
+  const sites = collection==='new-homes' ? HOME_DESIGNS.map((d,i)=>[d.id,35+(i%5)*12,i<5?43:57]) : collection==='sites' ? [
     ['solar_farm',44,44],['picnic-table',54,44],['eco_toilet',60,44],
     ['supply-0',67,43],['home-shared',54,55],
   ] : collection==='homes' ? [
@@ -37,8 +38,11 @@ export function createScalePreview(validate = false, collection = 'village') {
     ['rain-barrel',40,44], ['wayfinding-sign',40,47], ['supply-5',40,50],
     ['orchard',44,77], ['grove',54,77],
   ];
+  // Lay the comparison streets first: plan() then validates each house against
+  // the finished road layout instead of rechecking ten houses per road tile.
+  if(collection==='new-homes')for(const z of [51,65])for(let x=35;x<=93;x++)place('road',x,z);
   for(const [key,x,z] of sites)place(key,x,z);
-  for(let x=42;x<=(collection==='homes'?83:74);x++) place('road',x,51);
+  if(collection!=='new-homes')for(let x=42;x<=(collection==='homes'?83:74);x++)place('road',x,51);
   if(collection==='homes')for(let x=42;x<=83;x++)place('road',x,63);
   place('bridge',6,48);
   const legacy={id:s.nextId++,key:'bridge',x:5,z:39,rotation:0,siteVersion:0,
