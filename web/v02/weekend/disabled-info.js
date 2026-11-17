@@ -6,9 +6,10 @@ export function installDisabledInfo() {
   const styles=document.createElement('link');styles.rel='stylesheet';styles.href=new URL('./disabled-info.css',import.meta.url).href;document.head.append(styles);
   const entries=new Map();
   const tip=document.createElement('div');tip.id='disabled-action-tooltip';tip.role='tooltip';tip.className='disabled-action-tooltip';tip.setAttribute('popover','manual');document.body.append(tip);
-  let active=null,scheduled=false;
+  let active=null,scheduled=false,scrolling=false,scrollTimer;
   const hide=()=>{if(tip.matches(':popover-open'))tip.hidePopover();active?.removeAttribute('aria-describedby');active=null;};
   function show(icon,control) {
+    if(scrolling)return;
     hide();active=icon;tip.textContent=control.dataset.disabledReason||'This action is not available yet.';
     // Keep the tooltip inside the modal's focus scope while rendering above it.
     (control.closest('dialog[open]')||document.body).append(tip);
@@ -19,6 +20,7 @@ export function installDisabledInfo() {
   }
   function update() {
     scheduled=false;
+    if(scrolling)return;
     const modal=document.querySelector('dialog[open]');
     for(const [control,icon] of entries)if(!control.isConnected||!control.disabled){if(active===icon)hide();icon.remove();control.classList.remove('has-disabled-info');entries.delete(control);}
     for(const control of document.querySelectorAll('button:disabled,select:disabled,input:disabled')) {
@@ -43,6 +45,14 @@ export function installDisabledInfo() {
   }
   const schedule=()=>{if(!scheduled){scheduled=true;requestAnimationFrame(update);}};
   new MutationObserver(schedule).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['disabled','hidden','open','data-disabled-reason']});
-  document.addEventListener('scroll',()=>{hide();schedule();},true);window.addEventListener('resize',()=>{hide();schedule();});
+  // Top-layer hints do not move with their scroll container. Hide them during
+  // scrolling, including momentum scrolling, then measure their targets again.
+  document.addEventListener('scroll',()=>{
+    scrolling=true;hide();
+    for(const icon of entries.values())if(icon.matches(':popover-open'))icon.hidePopover();
+    clearTimeout(scrollTimer);
+    scrollTimer=setTimeout(()=>{scrolling=false;schedule();},120);
+  },true);
+  window.addEventListener('resize',()=>{hide();schedule();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();});schedule();
 }
