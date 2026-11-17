@@ -1,36 +1,35 @@
-# From camp to Bento’s first home
+# Village production, logistics and trade
 
 ## Why
 
-Banished gives players a reason to care how far a villager walks. Colonial Charter gives them a reason to ask which goods are worth making locally. Solar Friends can bring those decisions together around Bento’s wish for a comfortable home. Saving money by milling timber ties up friends who could be building, fetching water or earning wages. Buying a load can be worthwhile when the village needs those hands. The first milestone is a desktop story session in which the player makes that choice and sees someone move in.
+In Banished, a long walk between a workplace and storage costs part of a worker’s day. Colonial Charter makes that same day valuable in several places along a production chain. For Solar Friends, the design question is when a village benefits from processing its own resources, buying supplies, or selling a surplus. The answer should depend on its land, available labor, transport and household needs.
 
-## 1. Establish the cost of each route
+## 1. Measure the timber economy
 
-Save an ordinary village after camp is stable and before its first qualifying house. Check which house fulfills Bento’s hope, its bill of materials and the household assignment rules. Pick a design whose timber requirement exceeds available stock. Record the map seed, town distance, available cash and food and water reserves so both runs start from the same position.
+Use the existing timber workbench as the first experiment. It converts six raw wood into four timber, which can supply construction or feed the plank recipe. Start with a seeded village and a fixed quantity of timber required at a construction site. Save before allocating labor or ordering supplies. Run the same demand through local felling and milling, a resident pickup in town, and paid freight. Use ordinary work orders and purchases so the comparison includes competing jobs, rest and deliveries.
 
-Reload and build it twice. Buy the missing timber on one run. On the other, fell trees and use one-off work orders at the timber workbench. Its current recipe turns six raw wood into four timber. Count the cost of establishing the workbench separately from the cost of each batch. Keep other purchases and the building site the same where possible. Record trips, time spent carrying and processing, cash remaining, and when someone can first sleep in the house. Note where the player had to guess what to do next.
+For each run, record delivered units, time until the last delivery, resident-hours spent processing, hauling and driving, cash spent, and food and water reserves. Report the workbench setup cost separately. Repeat with the workbench already available and with demand large enough to require several loads. The deliverable is a table that shows what the village spends to get usable timber to the site.
 
-## 2. Help the player choose and follow the work
+## 2. Establish which layout decisions matter
 
-Use the first unexplained delay in those runs to choose the first interface change. At the house blueprint, show the shortfall after counting stock already committed or in transit. Let the player inspect the current town quote and the next available local batch, including prerequisites. During construction, make the actual delay discoverable from the project. Following a carrier should explain why the last load is taking time. Check partial deliveries and reloads so the same load never appears both available and on its way.
+On the same map, vary the distance between the trees and the delivery point while holding the order, crew and initial stocks fixed. Then vary town distance alone. Record the actual path, loads and travel time. Ask whether moving a workbench or adding storage changes the route residents actually use. If all output goes to a common destination, document that constraint before designing a placement benefit.
 
-## 3. Close the loop with Bento
+Check that extra walking consumes resident time and that partial loads survive a save and reload. Trace one delayed batch through the desktop interface. If the delay is hard to diagnose, expose its observed cause where the player inspects the order, such as timber awaiting pickup or a driver already on another trip. Validate by changing that one constraint and observing the next batch.
 
-Use his existing hope and completion memory to draw attention to the finished home. Follow the existing assignment and sleep routines through the next evening. Check that the player can discover who sleeps there and what the house meant to Bento. If nobody moves in, investigate access, assignment and capacity before adding narrative feedback.
+## 3. Test competing uses of a harvest
 
-**First playtest.** Give three first-time desktop players the same saved village and the prompt “Help Bento build a comfortable home.” Let them choose their own route. Observe whether they find a source of timber, explain one delay and notice who uses the home. Ask what they would do differently if town were twice as far away. As a proposed milestone, advance when at least two complete the project unaided and explain a tradeoff they actually encountered. Record individual observations so a common point of confusion gets another pass.
+Choose an existing crop with verified paths to household consumption, preservation and sale. Begin each run with the same harvest, food ages, reserves and buyer terms. Compare keeping it fresh, preserving a batch and selling the surplus. Follow each run through the fresh stock’s spoilage window. Count meals supplied, spoilage, processing inputs, resident-hours, export receipts and subsequent food purchases.
 
-## 4. Test whether geography supports specialization
+Check material accounting across storage, processing and cargo. A reserved unit has one destination, processing consumes the recipe inputs, and a sale earns the quoted amount on delivery. A protected food reserve should still be available when residents need to eat. Use these checks to investigate any apparently profitable strategy that leaves the village buying its next meals.
 
-Repeat the build with nearby and distant trees, then vary town distance while keeping the starting budget comparable. Include a second house so the workbench has a chance to repay its setup cost. Compare household reserves, resident time and completion dates. If one route dominates every case, inspect haul distance, batch size and purchasing costs, then retest one adjustment at a time. A reason to establish a carpentry village should emerge from a recurring need and a favorable site.
+## 4. Test specialization across seasons
 
-## 5. Apply the same test to a harvest
+Compare villages that dedicate spare labor to timber or food production with a village that buys more of its supplies. Use the same starting village for each comparison. Repeat across representative biome and town-distance settings, through both a productive period and a lean period. Record which weather and growth rules actually affected each run. Track days of food and water remaining, missed upkeep, net cash after imports, and labor left for construction.
 
-Trace one perishable crop through its supported recipes, storage options and town buyer. Start just before harvest with enough produce to divide between household meals and a sale. Include preservation if the chosen crop has a working recipe. Show the information needed before committing the harvest, including food age, protected reserves, buyer demand and any weather that actually affects this crop. Follow the choice through the next shortage or buyer trip. Advance when players can explain what they kept, what they sold or processed, and how the decision affected a later meal or purchase.
+Publish the conditions under which each strategy is viable and identify any strategy that wins across all tested conditions. Investigate the cause before tuning yields or prices. A scarce water supply, a slow trip or limited buyer demand each calls for a different design change.
 
-## Implementation references
+## First implementation milestone
 
-- [Resident hopes and preferences](../web/v02/weekend/resident-personality.js)
-- [Fulfilled hopes and resident memories](../web/v02/weekend/resident-mind.js)
-- [Production recipes](../web/v02/weekend/catalog-rules.js)
-- [Current gameplay controls](../web/v02/weekend/README.md)
+Deliver the timber comparison and one desktop replay of a measured bottleneck. A player should be able to inspect a delayed load, predict what would change delivery time, and try that change in the same save. Use the measured result to decide whether the next work belongs in routing, economic calibration or the order interface. Expand to food and seasonal comparisons once the timber results can be reproduced.
+
+[Production recipes](../web/v02/weekend/catalog-rules.js) · [Gameplay controls](../web/v02/weekend/README.md) · [Simulation lab](simulation-lab.md)
