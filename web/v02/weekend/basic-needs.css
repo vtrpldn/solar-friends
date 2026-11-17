@@ -1,0 +1,13 @@
+#basic-needs { position:fixed; z-index:5; top:100px; left:18px; display:flex; gap:6px; padding:6px; border:1px solid #c7bb97; border-radius:13px; background:#fff7e7ef; box-shadow:0 3px 12px #283a2720; }
+#basic-needs[hidden] { display:none; }
+#basic-needs button { width:158px; display:grid; gap:3px; text-align:left; padding:8px 10px; background:#f0f1df; border:1px solid transparent; border-radius:8px; box-shadow:none; color:#3e5c40; }
+#basic-needs button:hover { border-color:currentColor; }
+#basic-needs button:focus-visible { outline:3px solid #8d713b; outline-offset:2px; }
+#basic-needs .need-label { font-size:11px; font-weight:650; text-transform:uppercase; letter-spacing:.6px; }
+#basic-needs strong { font-size:14px; line-height:1.25; }
+#basic-needs small { font-size:10px; line-height:1.4; }
+#basic-needs [data-status="watch"] { background:#f6ebcf; color:#775823; }
+#basic-needs [data-status="alert"] { background:#f5dfd3; color:#8a422d; }
+#basic-needs [data-status="neutral"] { background:#eeece2; color:#626858; }
+/* The summary includes tank alerts, so do not stack the older duplicate banner. */
+#tank-attention { display:none; }

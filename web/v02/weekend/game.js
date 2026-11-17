@@ -1,3 +1,4 @@
+import {renderBasicNeeds} from './basic-needs.js';
 import {installGuide} from './guide.js';
 let guide;
 import {ensureCultivation} from './cultivation.js';
@@ -1648,6 +1649,8 @@ function renderUI() {
   if (signature === uiSignature) return;
   uiSignature = signature;
   const active = s.stage !== "arrival" && !s.arrivalAnimating;
+  $("basic-needs").hidden = !active;
+  renderBasicNeeds($("basic-needs"),s,panel=>management.open(panel));
   if (active && arrivalMessageShown) message("");
   arrivalMessageShown = !active;
   if(s.arrivalAnimating) message("Our friends are arriving…");

@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {basicNeeds} from '../web/v02/weekend/basic-needs.js';
+const node=(id,kind,water=[100,0,0,0],capacity=[100,0,100,100])=>({id,kind,enabled:true,water,capacity,power:1,demand:0});
+const s={mode:'story',people:[{},{}],materials:{meals:8,corn:100},infrastructure:{nodes:{0:node(0,'camp'),1:node(1,'home')},grid:{importing:0}}};
+const read=id=>basicNeeds(s).find(n=>n.id===id);
+assert.equal(read('power').summary,'No demand');assert.equal(read('food').status,'good');assert.equal(read('sanitation').status,'good');
+s.infrastructure.nodes[1].demand=1;s.infrastructure.nodes[1].power=.5;assert.equal(read('power').status,'alert');
+s.infrastructure.nodes[1].power=1;s.infrastructure.grid.importing=.5;assert.equal(read('power').summary,'Grid backup');
+s.infrastructure.nodes[0].water[0]=0;assert.equal(read('water').status,'alert','water elsewhere must not hide empty camp');
+s.infrastructure.nodes[0].water[0]=2;assert.equal(read('water').status,'watch');
+s.materials.meals=0;assert.equal(read('food').status,'alert','uncooked crops are not ready portions');
+s.materials.meals=1;assert.equal(read('food').status,'watch');
+s.infrastructure.nodes[1].water[3]=100;assert.equal(read('sanitation').summary,'Temporary');
+s.infrastructure.nodes[1].water[3]=95;assert.equal(read('sanitation').summary,'Tanks filling');
+s.people[0]={needBlocked:'Looking for somewhere to meet this need',needs:{hygiene:10}};assert.equal(read('sanitation').status,'alert');
+s.mode='sandbox';assert.equal(read('food').summary,'Sandbox');assert.equal(read('water').status,'watch');
+console.log('PASS needs shortages, reserves, imports, raw crops, local water, sanitation fallback and sandbox distinctions');
