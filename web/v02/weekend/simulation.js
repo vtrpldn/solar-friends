@@ -1,3 +1,4 @@
+import {validMaterialLedger} from './material-ledger.js';
 import {productionLoad,validProductionHauling} from './production-hauling.js';
 import {projectMaterials,captureProjectMaterials} from './project-materials.js';
 import {dispatchReady,validLogisticsPolicy} from './logistics-policy.js';
@@ -112,7 +113,7 @@ export const PROJECTS = {
     materials: { wood: 8, hardware: 1, tank: 1, plumbing: 1 },
     work: 267,
     description:
-      "An unpowered tank holding 40 clean and 40 untreated water in separate compartments. Residents can carry river water here and purify it by hand; no power needed. About 2 person-hours to assemble.",
+      "An unpowered tank holding 250 liters of clean and 250 liters of untreated water in separate compartments. Residents can carry river water here and purify it by hand; no power needed. About 2 person-hours to assemble.",
   },
   shelter: {
     name: "Basic shelter",
@@ -217,7 +218,7 @@ export function storageCapacity(s) {
 export function storedMaterials(s) {
   return s.wood + Object.values(s.materials).reduce((a, b) => a + b, 0) + pendingExports(s).reduce((n,o)=>n+o.quantity,0);
 }
-function changeMaterial(s,id,n,lots){return foodChange(s,id,n,lots);}
+function changeMaterial(s,id,n,lots,reason='transfer'){return foodChange(s,id,n,lots,reason);}
 export function sellMaterial(s, id) {
   const item = MATERIALS[id];
   if (
@@ -269,7 +270,7 @@ export function committedMaterials(s) {
   const totals={};
   const add=items=>{for(const [id,n] of Object.entries(items||{}))totals[id]=(totals[id]||0)+n;};
   for(const p of s.projects)if(p.work<PROJECTS[p.key].work)add(projectMaterials(p,PROJECTS));
-  for(const o of s.operations||[])if(!o.done&&!o.water)add(PROCESSES[o.recipe]?.input);
+  for(const o of s.operations||[])if(!o.done&&!o.water)add(o.input||PROCESSES[o.recipe]?.input);
   return totals;
 }
 export function productionBlocker(s, site, recipe) {
@@ -295,7 +296,8 @@ export function productionBlocker(s, site, recipe) {
     return `Growing: ready in ${Math.ceil((p.readyAt-s.time)*.45)} game minutes (affected by simulation speed).`;
   if (def.deposit && (p.extracted || 0) >= depositCapacity(s.landSeed,p,def))
     return "This deposit is exhausted.";
-  for (const [id, n] of Object.entries(def.input))
+  const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:2}:{})};
+  for (const [id, n] of Object.entries(input))
     if (materialCount(s, id) < n) return `Missing ${n} ${id}.`;
   if (p.key === "goat-pasture-empty" && !p.stocked) {
     if (materialCount(s, "goats") < 2)
@@ -307,6 +309,7 @@ export function queueProduction(s, site, recipe) {
   const error=productionBlocker(s,site,recipe);
   if(error)return error;
   const p=s.projects.find(p=>p.id===Number(site)),def=PROCESSES[recipe];
+  const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:2}:{})};
   s.operations ??= [];
   if(s.operations.length>128)s.operations=[...s.operations.filter(o=>!o.done),...s.operations.filter(o=>o.done).slice(-32)];
   if(p.key==='goat-pasture-empty'&&!p.stocked) {
@@ -314,12 +317,13 @@ export function queueProduction(s, site, recipe) {
     p.stocked = true;
   }
   const foodInput={};
-  for (const [id,n] of Object.entries(def.input)){const lots=changeMaterial(s,id,-n);if(FOOD_DAYS[id])foodInput[id]=lots;}
+  for (const [id,n] of Object.entries(input)){const lots=changeMaterial(s,id,-n,undefined,'production input');if(FOOD_DAYS[id])foodInput[id]=lots;}
   s.operations.push({
     id: (s.nextOperation = (s.nextOperation || 0) + 1),
     site: p.id,
     recipe,
     foodInput,
+    input,
     work: 0,
     phase: "pickup",
     done: false,
@@ -677,7 +681,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
       return true;
     }
     for (const [id, n] of Object.entries(returned))
-      changeMaterial(s,id,n,op.foodOutput?.[id]?takeFoodLots(op.foodOutput[id],n):undefined);
+      changeMaterial(s,id,n,op.foodOutput?.[id]?takeFoodLots(op.foodOutput[id],n):undefined,'production delivery');
     if(bulk){
       for(const [id,n]of Object.entries(returned))op.haulRemaining[id]-=n;
       if(Object.values(op.haulRemaining).some(n=>n>0)){
@@ -763,7 +767,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if(op.work>=recipe.work*.5 && beginBiology(s,op,r))return true;
   if (op.work >= recipe.work) {
-    if(BIOLOGY[op.recipe])op.harvestOutput=harvestOutput(s,op,recipe);
+    if(BIOLOGY[op.recipe]){op.harvestOutput=harvestOutput(s,op,recipe);p.harvestCount=(p.harvestCount||0)+1;}
     recordProduction(s,op.recipe,recipe);
     op.foodOutput=Object.fromEntries(Object.entries(op.harvestOutput||recipe.output).filter(([id,n])=>FOOD_DAYS[id]&&n>0).map(([id,n])=>[id,freshLots(s,id,n,recipe)]));
     if(recipe.kind==='wild-tree'){p.felled=true;invalidateNavigation(s);}
@@ -841,6 +845,7 @@ export function createWeekend(landSeed = 0) {
     expansionReserve:100,
     materialBillVersion:2,
     constructionLaborVersion: CONSTRUCTION_LABOR_VERSION,
+    biologyVersion:2,
     homeEnergyVersion: 1,
     landSeed,
     elevationSeed: landSeed,
@@ -1091,6 +1096,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
     ],
   };
   enableFastNavigation(proposed);
+  if(campLocation(s)&&[0,1].some(i=>route(s,s.stock,tentDoor(s,i))&&!route(proposed,s.stock,tentDoor(proposed,i))))return "Keep the camp tent entrances reachable from the supplies.";
   for (const p of proposed.projects.filter(p=>!p.natural&&!p.felled&&!['road','bridge'].includes(p.key))) {
     const [pw,pd]=footprint(p),edges=[];
     for(let dz=0;dz<pd;dz++)edges.push({x:p.x-1,z:p.z+dz},{x:p.x+pw,z:p.z+dz});
@@ -1111,9 +1117,9 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
       }
     }
     if (
-      ["home", "workshop", "kitchen", "wash-station", "eco_toilet"].includes(
+      (["home", "workshop", "kitchen", "wash-station", "eco_toilet"].includes(
         PROJECTS[p.key].kind,
-      ) &&
+      ) || p.key.startsWith("canvas-tent")) &&
       !route(proposed, s.stock, buildingFront(p),true)
     ) {
       if (details) details.entrance = buildingFront(p);
@@ -1167,8 +1173,7 @@ export function plan(s, key, x, z, rotation = 0) {
     s.mode === "sandbox" ? {} : def.materials,
   )) {
     const reserved = n - (purchase.items[id] || 0);
-    if (id === "wood") s.wood -= reserved;
-    else s.materials[id] -= reserved;
+    changeMaterial(s,id,-reserved,undefined,'construction reservation');
   }
   transact(s,-purchase.cost,"construction",`Materials for ${def.name}`);
   gradeFoundation(s, key, x, z, rotation);
@@ -1335,12 +1340,12 @@ function startSupplyRun(s, material = "wood", project = null, saleOnly = false) 
     (project ? s.money : spendableMoney(s)) < (project || saleOnly ? 0 : item.price) + fare
   )
     return false;
-  const vehicle=[s.nextTripVehicle||0,1-(s.nextTripVehicle||0)].find(i=>s.secondTrip?.vehicle!==i&&(s.upkeep?.vehicles[i]?.condition??100)>10);
-  if(vehicle===undefined)return false;
-  const r = s.people
+  const vehicles=[s.nextTripVehicle||0,1-(s.nextTripVehicle||0)].filter(i=>s.secondTrip?.vehicle!==i&&(s.upkeep?.vehicles[i]?.condition??100)>10);
+  const drivers = s.people
     .filter((r) => r.energy > 35 && r.action!=='town' && !r.outsideWork && !r.cargo && !r.tentPhase && !r.needTask && Object.entries(ensureNeeds(r)).every(([key,value])=>["food","meals"].includes(material)?(!['bladder','bowels','hygiene'].includes(key)||value>10):value>25))
-    .sort((a, b) => b.energy - a.energy)
-    .find(r => route(s, r, carDoor(vehicle)));
+    .sort((a, b) => b.energy - a.energy);
+  let vehicle,r;
+  for(const candidate of vehicles){const driver=drivers.find(person=>route(s,person,carDoor(candidate)));if(driver){vehicle=candidate;r=driver;break;}}
   if (!r) return false;
   if (!project && !saleOnly) transact(s,-item.price,"purchases",`Bought ${item.quantity} ${item.name}`);
   transact(s,-fare,"transport","Town trip fuel");
@@ -1376,7 +1381,7 @@ export function resolveRain(s, choice) {
   if (!s.rainSeen || s.rainResolved) return false;
   if (choice === "boards") {
     if (s.wood < 2) return false;
-    s.wood -= 2;
+    changeMaterial(s,'wood',-2,undefined,'storm repairs');
   } else if (choice !== "move") return false;
   s.rainResolved = true;
   s.rain = false;
@@ -1691,7 +1696,7 @@ function go(s, r, target) {
   }
   return false;
 }
-const restingPlaces = new WeakMap();
+const restingPlaces = new WeakMap(),campRestEntrances=new WeakMap();
 export function tentDoor(s, i) {
   const camp = campLocation(s);
   return { x: camp.x + (i % 2) * 1.5, z: camp.z };
@@ -1699,7 +1704,7 @@ export function tentDoor(s, i) {
 export function restingDoor(s, i) {
   const r = s.people[i];
   const p = s.projects.find((p) => p.id === r.restSite);
-  if (!p) return tentDoor(s, i);
+  if (!p) return campRestEntrances.get(r)||tentDoor(s,i);
   return buildingFront(p);
 }
 export function availableHomes(s) {
@@ -1750,6 +1755,14 @@ function chooseRestingPlace(s, r, i) {
     if (route(s, r, restingDoor(s, i))) return;
   }
   r.restSite = null;
+    const front=tentDoor(s,i);if(route(s,r,front)){campRestEntrances.set(r,front);return;}
+    // Older layouts could block the camp doors. Try another edge of the same
+    // tents, rather than leaving exhausted residents stuck in a walking loop.
+    const c=campLocation(s),edges=[];
+    for(let dx=-1;dx<=3;dx++)edges.push({x:c.x+dx,z:c.z-4},{x:c.x+dx,z:c.z});
+    for(let dz=-3;dz<0;dz++)edges.push({x:c.x-2,z:c.z+dz},{x:c.x+4,z:c.z+dz});
+    edges.sort((a,b)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z));
+    campRestEntrances.set(r,edges.find(edge=>route(s,r,edge))||front);
 }
 function restSpot(s, i) {
   const layout = JSON.stringify([
@@ -2511,6 +2524,8 @@ export function restore(text) {
     )
       return null;
     migrateItemProjects(s);
+    if(s.biologyVersion===undefined){for(const p of s.projects)if(PROJECTS[p.key]?.kind==='orchard')p.orchardEstablished=true;s.biologyVersion=2;}
+    if(s.biologyVersion!==2)return null;
     if(!captureProjectMaterials(s,PROJECTS,MATERIALS))return null;
     // Older saves counted a pair/trio as one item; preserve the actual animals.
     if (s.livestockUnits === undefined) {
@@ -2686,7 +2701,7 @@ export function restore(text) {
     if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     refreshSandboxFood(s);
-    if (!validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(
@@ -2715,6 +2730,7 @@ export function restore(text) {
             !Number.isFinite(o.work) ||
             o.work < 0 ||
             (!o.water && !PROCESSES[o.recipe]) ||
+            (o.input!==undefined&&(!o.input||Object.entries(o.input).some(([id,n])=>!Number.isInteger(n)||n<0||n>((PROCESSES[o.recipe]?.input[id]||0)+(o.recipe==='wood'&&id==='tree_starts'?2:0))))) ||
             (o.water &&
               (!LIQUIDS.includes(o.water.kind) ||
                 !Number.isFinite(o.water.amount) ||

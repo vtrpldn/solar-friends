@@ -37,8 +37,8 @@ export function switchBuilding(sys, id) {
 const CAPACITY = {
   'groundwater-well':[0,40,0,0],
   'water-pump':[0,12,0,0],
-  well: [75, 60, 0, 0],
-  "water-storage": [40, 40, 0, 0],
+  well: [1000, 1000, 0, 0],
+  "water-storage": [250, 250, 0, 0],
   home: [8, 0, 24, 16],
   kitchen: [6, 0, 24, 0],
   eco_toilet: [8, 0, 16, 16],
@@ -70,6 +70,7 @@ export function ensureInfrastructure(s) {
     biogas: 0,
   };
   const sys = s.infrastructure;
+  sys.account.storageLosses??=0;
   sys.grid ??= { enabled: true, imported: 0, spent: 0, importing: 0 };
   sys.nodes[0] ??= {
     id: 0,
@@ -130,10 +131,11 @@ export function syncInfrastructure(s, defs) {
     if(kind==='goat_pasture'&&node.capacity[0]<40)node.capacity[0]=40;
     if(kind==='kitchen'){node.coldStorage=!!p.coldStorage;node.coolingEnabled=p.coolingEnabled!==false;}
     if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4*batteryHealth:0;if(node.charge>node.battery){sys.account.curtailed+=node.charge-node.battery;node.charge=node.battery;}}
-    if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<40)) {
+    if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<250)) {
       // Existing starter tanks become passive without destroying stored water.
-      node.kind=kind;node.capacity=[Math.max(40,node.water[0]),Math.max(40,node.water[1]),0,0];
+      node.kind=kind;node.capacity=[Math.max(250,node.water[0]),Math.max(250,node.water[1]),0,0];
     }
+    if(kind==='well')node.capacity=[Math.max(1000,node.water[0]),Math.max(1000,node.water[1]),0,0];
     Object.assign(sys.nodes[p.id], { x: p.x, z: p.z });
     if (kind === "home" && sys.nodes[p.id].capacity[3] === 0) sys.nodes[p.id].capacity = [...CAPACITY.home];
   }
@@ -306,6 +308,11 @@ export function infrastructureStep(s, defs, dt) {
     remainder = Math.max(0, remainder);
     sys.account.generated += generated;
     sys.account.consumed += used;
+    // Charge only surplus energy. Existing stored energy is not repeatedly
+    // discounted; the loss occurs once when new energy enters the battery.
+    const chargingInput=Math.min(Math.max(0,remainder-stored),Math.max(0,capacity-stored)/.9);
+    const conversionLoss=chargingInput*.1;
+    remainder-=conversionLoss;sys.account.storageLosses+=conversionLoss;
     sys.account.curtailed += Math.max(0, remainder - capacity);
     remainder = Math.min(capacity, remainder);
     for (const n of component) {
@@ -320,7 +327,7 @@ export function infrastructureStep(s, defs, dt) {
       n.water[1]+=add;sys.account.waterReceived+=add;
     }
     if(n.enabled && n.kind==='water-pump' && n.power>.99 && n.demand>0) {
-      let amount=Math.min(n.capacity[1]-n.water[1],24*hours*(n.serviceFactor??1));
+      let amount=Math.min(n.capacity[1]-n.water[1],600*hours*(n.serviceFactor??1));
       const source=Object.values(sys.nodes).filter(a=>a.kind==='groundwater-well'&&a.enabled&&Math.hypot(a.x-n.x,a.z-n.z)<=6).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
       if(source){amount=Math.min(amount,source.water[1]);source.water[1]-=amount;}
       else if(riverBankAt(n.x+.5,n.z+.5,3,s.landSeed))sys.account.waterReceived+=amount;

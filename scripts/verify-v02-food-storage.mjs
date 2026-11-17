@@ -22,7 +22,10 @@ console.log('PASS FIFO consumption, exact expiry, cancellation, rejected spoiled
 const fraudulent=fresh();assert(sellMaterial(fraudulent,'food'));fraudulent.trade.orders[0].foodLots[0].n+=10;
 assert.equal(restore(save(fraudulent)),null,'refundable export lots cannot exceed reserved quantity');
 const run=step=>{const a={time:0,materials:{food:12,meals:4,eggs:6,milk:2,scraps:0}};ensureFoodStorage(a);while(a.time<22400){a.time=Math.min(22400,a.time+step);foodStorageStep(a,PROCESSES);}return a;};
-assert.deepEqual(run(1),run(22400),'spoilage follows elapsed simulation time, not tick count');
+const fine=run(1),coarse=run(22400);
+assert.deepEqual(fine.materialLedger.net,coarse.materialLedger.net,'recorded quantities agree regardless of observation intervals');
+delete fine.materialLedger;delete coarse.materialLedger;
+assert.deepEqual(fine,coarse,'spoilage follows elapsed simulation time, not tick count');
 console.log('PASS reservation tampering rejected and expiry is independent of observation step');
 
 const midTrip=fresh();assert(sellMaterial(midTrip,'food'));assert(supplyRun(midTrip,'wood'));midTrip.time=9600;foodStorageStep(midTrip,PROCESSES,MATERIALS);

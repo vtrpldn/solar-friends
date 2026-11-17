@@ -31,6 +31,12 @@ const loaded=restore(save(old));assert(loaded,'labor migration accepts a valid c
 assert.equal(loaded.money,cash);assert.deepEqual(loaded.materials,inventory);assert.deepEqual(loaded.projects.map(p=>p.delivered),delivered);
 assert.equal(loaded.projects[0].work,PROJECTS.house.work,'completed house stays complete');
 assert(restore(save(loaded)),'converted save round trips');
+// A completed version-two shed from the earlier two-cell catalog keeps its
+// installed status; an unfinished site does not gain construction labor.
+const resized={constructionLaborVersion:2,projects:[{id:1,key:'shed',work:4074.6666666666665,billOfMaterials:{wood:16,hardware:1,tiles:32,stone:48,earth:16}},{id:2,key:'shed',work:100,billOfMaterials:{wood:16}}],infrastructure:{nodes:{1:{id:1,kind:'shed'}}}};
+assert(migrateConstructionLabor(resized,PROJECTS));assert.equal(resized.projects[0].work,PROJECTS.shed.work);assert.equal(resized.projects[1].work,100);
+const sameBill={constructionLaborVersion:2,projects:[{id:1,key:'shed',work:100,billOfMaterials:{...PROJECTS.shed.materials}}],infrastructure:{nodes:{1:{id:1,kind:'shed'}}}};
+assert(migrateConstructionLabor(sameBill,PROJECTS));assert.equal(sameBill.projects[0].work,100,'a current-catalog inconsistency is not repaired as a historical resize');
 const fresh=createWeekend(42);assert.equal(fresh.constructionLaborVersion,2);assert(restore(save(fresh)));
 fresh.constructionLaborVersion=99;assert.equal(restore(save(fresh)),null,'unknown schema rejected');
 console.log('PASS material breakdowns, labor scaling, new saves, historical migration and idempotent progress preservation');

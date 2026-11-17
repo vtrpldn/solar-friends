@@ -221,8 +221,8 @@ export function expandProjects(projects) {
         : COMMUNITY[model.id]?.category || category,
       repeatable: true,
       description:
-        ({'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. They also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. No electricity required.', 'well':'A cistern storing 75 clean and 60 untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
-          'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 24 untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply.'}[model.id]) ||
+        ({'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. They also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. No electricity required.', 'well':'A cistern storing 1,000 liters of clean and 1,000 liters of untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
+          'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 600 liters of untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply.'}[model.id]) ||
         COMMUNITY[model.id]?.description ||
         `${model.name}. ${model.size.join(" × ")} cells. Build with physical supplies and resident labor.${["warehouse", "supply-5"].includes(kind) ? " Nearby construction can stage bundled deliveries here to reduce hauling trips." : ""}`,
     };
@@ -328,7 +328,7 @@ export const PROCESSES = {
   vegetables: {
     name: "Plant and harvest vegetables",
     input: { seedlings: 2 },
-    output: { food: 12, scraps: 2 },
+    output: { food: 32, scraps: 4 },
     kind: "garden",
     work: 60,
     water: 6,
@@ -337,7 +337,7 @@ export const PROCESSES = {
   greenhouse: {
     name: "Grow greenhouse vegetables",
     input: { seedlings: 2 },
-    output: { food: 20, scraps: 2 },
+    output: { food: 48, scraps: 6 },
     kind: "greenhouse",
     work: 70,
     water: 8,

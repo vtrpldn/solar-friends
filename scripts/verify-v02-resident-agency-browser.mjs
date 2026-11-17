@@ -13,18 +13,23 @@ s.rainSeen=s.rainResolved=true;s.people[0].needs.social=5;s.people[1].needs.soci
 for(let i=0;i<3000 && !s.people.some(r=>r.mind?.memories.some(m=>m.kind==='conversation'));i++)tick(s,.1);
 const speaker=s.people.find(r=>r.mind?.memories.some(m=>m.kind==='conversation'));
 assert(speaker,'fixture conversation must really complete');
+s.view={speed:1,paused:true,position:[20,35,20],target:[1,2,3],zoom:1};
 const directory=process.env.SOLAR_EVIDENCE_DIR;
 if(directory)await mkdir(directory,{recursive:true});
 const server=await serve();let browser;
 try {
- browser=await chromium.launch({headless:true});
+ browser=await chromium.launch({headless:true,args:process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]});
  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
+ page.setDefaultTimeout(30000);
  page.on('pageerror',error=>errors.push(error.message));
+ page.on('console',message=>{if(message.type()==='warning'||message.type()==='error')console.error(message.text());});
  await page.addInitScript(({key,snapshot})=>localStorage.setItem(key,snapshot),{key:STORY_SAVE,snapshot:save(s)});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=story`);
+ console.log('Loaded resident profile fixture');
  await page.locator('[data-panel-toggle="people"]').click();
  const detail=page.locator('#resident-detail');
- await page.waitForFunction(()=>[...document.querySelectorAll('#roster img')].every(img=>img.complete && img.naturalWidth>0));
+ await page.waitForFunction(()=>[...document.querySelectorAll('#roster img')].every(img=>img.complete && img.naturalWidth>0),null,{timeout:30000});
+ console.log('Resident portraits rendered');
  for(const r of s.people){
   await page.getByRole('button',{name:`View ${r.name}`,exact:true}).click();
   await page.getByRole('button',{name:'Story',exact:true}).click();
@@ -60,4 +65,4 @@ try {
  assert(!await page.locator('#people').isVisible());
  assert.deepEqual(errors,[]);
  console.log('PASS desktop resident profiles: all five stories, hopes, current thoughts, real saved memories, relationship context, scrolling, tabs and close control; no browser exceptions');
-} finally {await browser?.close();await new Promise(resolve=>server.close(resolve));}
+} catch(error){console.error(error);throw error;} finally {await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}

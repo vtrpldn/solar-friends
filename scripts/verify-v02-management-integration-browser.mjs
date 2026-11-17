@@ -9,7 +9,7 @@ for(const [key,x,z]of [['house',50,50],['kitchen',60,50],['supply-5',40,50]]){as
 s.view={speed:1,paused:true,position:[20,35,20],target:[1,2,3],zoom:1};
 const server=await serve();let browser;
 try{
- browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ browser=await chromium.launch({headless:true,args:process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]});const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(({key,value})=>localStorage.setItem(key,value),{key:SANDBOX_SAVE,value:save(s)});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);
  const dialog=page.locator('#management');

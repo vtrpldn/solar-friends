@@ -51,7 +51,17 @@ export function applyConstructionSpecs(projects){
  }
 }
 export function migrateConstructionLabor(s,projects){
- if(s.constructionLaborVersion===CONSTRUCTION_LABOR_VERSION)return true;
+ if(s.constructionLaborVersion===CONSTRUCTION_LABOR_VERSION){
+  // The visual footprint calibration changed some version-two shell estimates.
+  // An installed service node records completed construction; preserve that
+  // completion when its captured paid bill predates the new catalog.
+  for(const p of s.projects){const d=projects[p.key],node=s.infrastructure?.nodes?.[p.id];
+   if(!d) return false;
+   const oldBill=p.billOfMaterials&&Object.keys({...p.billOfMaterials,...d.materials}).some(id=>(p.billOfMaterials[id]||0)!==(d.materials[id]||0));
+   if(d.construction?.version===2&&oldBill&&node?.kind===d.kind&&Number.isFinite(p.work)&&p.work>0&&p.work<d.work)p.work=d.work;
+  }
+  return true;
+ }
  if(s.constructionLaborVersion!==undefined&&s.constructionLaborVersion!==1)return false;
  const oldWork=(p,d)=>{
   if(s.constructionLaborVersion!==1)return d.construction?.legacyWork??d.work;

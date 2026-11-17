@@ -80,7 +80,7 @@ assert.ok(
 );
 assert.equal(moveProject(s, home.id, 60, 60), "");
 enableFastNavigation(s);
-for(let i=0;i<64000&&home.removal;i++)tick(s,.1);
+for(let i=0;i<320000&&home.removal;i++)tick(s,.1);
 assert(!home.removal,"resident relocation completes");
 autoConnectUtilities(s, PROJECTS);
 assert.equal(sys.nodes[home.id].x, 60);

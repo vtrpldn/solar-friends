@@ -59,3 +59,9 @@ Eggs now use an assumed representative mass of 60 g and packaged cargo volume of
 Other kit measurements retain their earlier assumptions explicitly; making the table exhaustive does not make those values calibrated. In particular, toilet/pump kits and generic food portions need product and nutrition definitions before changing recipes. Canonical inventory conversion and full ownership reconciliation remain outstanding.
 
 `verify-v02-material-units.mjs` checks full catalog coverage, every building/recipe measurement, dozen-egg mass and rejection of unknown material identifiers. Production and procurement regressions pass with the revised cargo model.
+
+## Available-store movement record
+
+The bounded material ledger records an opening stock snapshot, cumulative net movement per resource, 91 daily totals and the latest 160 events. Construction reservations, production inputs/deliveries, resident meals, spoilage, residues and other transfers pass through the stock boundary. The Finances screen shows recent movements and whether opening stock plus recorded changes reconciles to current available stock. Named cash transactions remain in the separate cash ledger; water and energy retain their physical utility accounts.
+
+Project, production, export and vehicle ownership is derived separately from authoritative records, including partially delivered production output. The store ledger is not a fabricated history for older saves: recording begins when first used. Event timestamps are when a transition is observed; diagnostic tests jumping over several expiry dates can therefore differ in history timing while retaining identical net quantities. A missing event is surfaced as a reconciliation difference rather than silently rewriting stock or rejecting an otherwise usable village.

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,supplyRun,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,supplyRun,tick,save,restore,enableFastNavigation,PROJECTS,route} from '../web/v02/weekend/simulation.js';
 import {activeTrips} from '../web/v02/weekend/trip-state.js';
 import {transportCost} from '../web/v02/weekend/physical-trade.js';
 const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);s.emergencyFood=false;
@@ -16,3 +16,10 @@ for(const state of [s,loaded]){
 const bad=JSON.parse(snapshot);bad.secondTrip.vehicle=bad.trip.vehicle;assert.equal(restore(JSON.stringify(bad)),null);
 const sameDriver=JSON.parse(snapshot);sameDriver.secondTrip.person=sameDriver.trip.person;assert.equal(restore(JSON.stringify(sameDriver)),null);
 console.log('PASS concurrent cars, distinct drivers, capacity limit, dual save/load and exactly-once delivery');
+
+const obstructed=createWeekend(42);chooseCamp(obstructed,'entrance');enableFastNavigation(obstructed);
+const {carDoor}=await import('../web/v02/weekend/town-trip.js');const door=carDoor(0);
+obstructed.projects.push({id:obstructed.nextId++,key:'warehouse',x:door.x-1,z:door.z-1,work:PROJECTS.warehouse.work,delivered:0});
+assert(!route(obstructed,obstructed.people[0],carDoor(0)));assert(route(obstructed,obstructed.people[0],carDoor(1)));
+assert(supplyRun(obstructed,'food'),'food shopping tries the other car when the preferred door is blocked');assert.equal(obstructed.trip.vehicle,1);
+console.log('PASS food shopping falls back to a reachable car');

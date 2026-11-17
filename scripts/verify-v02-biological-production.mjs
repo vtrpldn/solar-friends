@@ -13,8 +13,8 @@ assert(restore(save(s)),'growing save restores');
 const a={time:0,operations:[{recipe:'greenhouse',phase:'growing',growthRemaining:40*GAME_DAY,planted:true}]};
 for(let day=0;day<40;day++){a.time+=GAME_DAY;biologicalStep(a,GAME_DAY);}
 assert.equal(a.operations[0].phase,'process');assert.equal(a.operations[0].ripeAt,40*GAME_DAY);
-assert.equal(harvestOutput({time:45*GAME_DAY},a.operations[0],PROCESSES.greenhouse).food,20);
-assert.equal(harvestOutput({time:50.5*GAME_DAY},a.operations[0],PROCESSES.greenhouse).food,10);
+assert.equal(harvestOutput({time:45*GAME_DAY},a.operations[0],PROCESSES.greenhouse).food,48);
+assert.equal(harvestOutput({time:50.5*GAME_DAY},a.operations[0],PROCESSES.greenhouse).food,24);
 assert.equal(harvestOutput({time:54*GAME_DAY},a.operations[0],PROCESSES.greenhouse).food,0);
 assert(BIOLOGY.wood.days>BIOLOGY.bamboo.days&&BIOLOGY.bamboo.days>BIOLOGY.vegetables.days);
 assert(growthRate({time:200*GAME_DAY,worldSettings:{biome:'caatinga'}},'vegetables')<1);
@@ -27,3 +27,9 @@ let liters=0;for(let i=0;i<3200;i++)biologicalStep(drought,1,(_s,_id,n)=>{liters
 assert(Math.abs(liters-48)<1e-6,'daily irrigation has physical liters');assert(drought.operations[0].growthRemaining<45*GAME_DAY,'water resumes growth');
 drought.rain=true;liters=0;biologicalStep(drought,100,()=>{liters++;return true;});assert.equal(liters,0,'rain replaces irrigation outdoors');
 console.log('PASS dry-soil stall, continuing irrigation demand, recovery and rain substitution');
+const orchard={id:1};const planting={time:0,projects:[orchard]},fruit={site:1,recipe:'fruit'};
+assert(beginBiology(planting,fruit,{}));assert.equal(fruit.growthRemaining,730*GAME_DAY,'new orchard has a juvenile establishment period');
+const repeat={site:1,recipe:'fruit'};assert(beginBiology(planting,repeat,{}));assert.equal(repeat.growthRemaining,120*GAME_DAY,'establishment does not recur for mature trees');
+const timber=createWeekend(44);chooseCamp(timber,'entrance');const stand={id:timber.nextId++,key:'supply-0',x:timber.stock.x+4,z:timber.stock.z+4,work:PROJECTS['supply-0'].work,delivered:0,harvestCount:1};timber.projects.push(stand);syncInfrastructure(timber,PROJECTS);
+assert.match(queueProduction(timber,stand.id,'wood'),/tree_starts/);timber.materials.tree_starts=2;assert.equal(queueProduction(timber,stand.id,'wood'),'');assert.equal(timber.materials.tree_starts,0);assert(restore(save(timber)));
+console.log('PASS juvenile orchard, mature repeat cycle and paid timber replanting inputs');

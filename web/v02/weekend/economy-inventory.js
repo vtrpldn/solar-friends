@@ -9,7 +9,7 @@ export function inventoryOwnership(s,projects,recipes,materials){
   add(projectMaterials(p,projects),p.work>=d.work?'installed':'reserved');
  }
  for(const o of s.operations||[]){if(o.done||o.water)continue;const r=recipes[o.recipe];if(!r)continue;
-  if(o.phase==='return')add(o.haulRemaining||o.returnItems||o.harvestOutput||r.output,o.returningToSite?'processing':'transit');else add(r.input,'processing');
+  if(o.phase==='return')add(o.haulRemaining||o.returnItems||o.harvestOutput||r.output,o.returningToSite?'processing':'transit');else add(o.input||r.input,'processing');
  }
  for(const o of s.trade?.orders||[])if(['queued','loaded'].includes(o.status))add({[o.material]:o.quantity},o.status==='queued'?'reserved':'transit');
  for(const t of [s.trip,s.secondTrip,s.delivery].filter(Boolean))if(!t.shipments&&!t.project&&!t.saleOnly)add({[t.material]:t.foodLots?t.foodLots.reduce((n,l)=>n+l.n,0):(t.quantity??materials[t.material]?.quantity??0)},'transit');

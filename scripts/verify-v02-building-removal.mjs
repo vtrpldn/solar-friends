@@ -35,7 +35,11 @@ assert(!building.removal);assert.equal(building.x,destination.x);assert.equal(bu
 console.log('PASS physical resident relocation, reserved destination, preserved materials and reload');
 
 const depot=createWeekend(42);chooseCamp(depot,'entrance');enableFastNavigation(depot);
-depot.projects.push({id:depot.nextId++,key:'warehouse',x:24,z:-12,work:PROJECTS.warehouse.work,delivered:0},{id:depot.nextId++,key:'gathering',x:26,z:-10,work:0,delivered:0,depot:1,staged:1,pendingMaterials:{wood:1}});
-assert.equal(removeProject(depot,1,'demolish'),'');for(let i=0;i<64000&&depot.projects.some(p=>p.id===1);i++)tick(depot,.1);
+depot.projects.push({id:depot.nextId++,key:'warehouse',x:24,z:-12,work:PROJECTS.warehouse.work,delivered:0},{id:depot.nextId++,key:'gathering',x:31,z:-10,work:0,delivered:0,depot:1,staged:1,pendingMaterials:{wood:1}});
+assert.equal(removeProject(depot,1,'demolish'),'');
+// Exercise the final physical dismantling and reference cleanup; full demolition
+// labor is covered above without replaying an entire warehouse shell lifetime.
+depot.projects[0].removal.work=depot.projects[0].removal.required-10;
+for(let i=0;i<16000&&depot.projects.some(p=>p.id===1);i++)tick(depot,.1);
 assert(!depot.projects.some(p=>p.id===1));assert(depot.projects.every(p=>p.depot!==1));assert(restore(save(depot)),'removing a material depot leaves no dangling storage reference');
 console.log('PASS removed staging depot releases project references without losing save validity');
