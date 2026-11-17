@@ -286,7 +286,7 @@ export function committedMaterials(s) {
   const totals={};
   const add=items=>{for(const [id,n] of Object.entries(items||{}))totals[id]=(totals[id]||0)+n;};
   for(const p of s.projects)if(p.work<PROJECTS[p.key].work)add(projectMaterials(p,PROJECTS));
-  for(const o of s.operations||[])if(!o.done&&!o.water)add(o.input||PROCESSES[o.recipe]?.input);
+  for(const o of s.operations||[])if(!o.done&&!o.water&&!o.waitingSeeds)add(o.input||PROCESSES[o.recipe]?.input);
   return totals;
 }
 export function configureBed(s,site,id,settings) {
@@ -298,15 +298,52 @@ export function configureBed(s,site,id,settings) {
   for(const key of ['crop','density','irrigation','residues'])if(settings[key]!==undefined)b[key]=settings[key];
   return '';
 }
+// Queued planting owns no seed packets until they physically reach storage.
+function incomingSeeds(s,id) {
+ return [...activeTrips(s),s.delivery].filter(t=>t&&!t.project&&!t.shipments&&!t.saleOnly&&t.material===id)
+  .reduce((n,t)=>n+(t.quantity??MATERIALS[id].quantity),0);
+}
+export function plantingPurchase(s,b) {
+ const [id,n]=Object.entries(farmJobSpec(b,'plant').input)[0];
+ const waiting=(s.operations||[]).filter(o=>!o.done&&o.waitingSeeds).reduce((sum,o)=>sum+(o.input[id]||0),0);
+ const shortage=Math.max(0,n+waiting-(materialCount(s,id)||0)-incomingSeeds(s,id));
+ const item=MATERIALS[id],batches=Math.ceil(shortage/item.quantity),cost=batches*item.price;
+ if(!shortage)return {cost:0,error:''};
+ if(s.autoBuy===false)return {cost,error:'Auto-buy is off. Buy seed packets in Resources first.'};
+ const error=supplierError(s,{[id]:batches*item.quantity},MATERIALS);
+ const total=cost+batches*transportCost(s)+(s.expansionReserve??0);
+ return {cost,error:error||(!Number.isFinite(s.money)||total>spendableMoney(s)?'Not enough shared savings for seeds and collection while keeping the essentials reserve.':'')};
+}
+function arrangePlantingSeeds(s) {
+ const attempted=new Set();
+ for(const op of s.operations||[]) {
+  if(op.done||!op.waitingSeeds)continue;
+  const [id,n]=Object.entries(op.input)[0];
+  if((materialCount(s,id)||0)>=n){
+   changeMaterial(s,id,-n,undefined,'cultivation input');delete op.waitingSeeds;
+   op.status='Seeds collected; waiting for a resident to plant';continue;
+  }
+  op.status=incomingSeeds(s,id)>0?'Waiting for seed packets to arrive':s.autoBuy===false?'Waiting for seeds · Auto-buy is off':'Waiting for a seed purchase and collection';
+  if(s.autoBuy===false||incomingSeeds(s,id)>0||attempted.has(id))continue;
+  attempted.add(id);
+  const item=MATERIALS[id];
+  if(spendableMoney(s)<item.price+transportCost(s)+(s.expansionReserve??0)) {op.status='Waiting for savings to buy seeds and pay for collection';continue;}
+  if(supplyRun(s,id))op.status='Seed packets purchased; waiting for collection';
+ }
+}
 export function queueBedJob(s,site,id,action) {
   const p=s.projects.find(p=>p.id===site);
   if(!p||p.removal||p.work<PROJECTS[p.key].work)return 'Choose a completed cultivation site.';
   const b=ensureCultivation(s,p)?.beds[id],error=farmJobError(s,p,b,action);if(error)return error;
   const spec=farmJobSpec(b,action);
-  for(const [item,n]of Object.entries(spec.input))if(materialCount(s,item)<n)return `Missing ${quantityText(item,n)} ${MATERIALS[item].name}.`;
-  for(const [item,n]of Object.entries(spec.input))changeMaterial(s,item,-n,undefined,'cultivation input');
+  const waitingSeeds=action==='plant'&&Object.entries(spec.input).some(([item,n])=>(materialCount(s,item)||0)<n);
+  if(waitingSeeds){const purchase=plantingPurchase(s,b);if(purchase.error)return purchase.error;}
+  else {
+   for(const [item,n]of Object.entries(spec.input))if(materialCount(s,item)<n)return `Missing ${quantityText(item,n)} ${MATERIALS[item].name}.`;
+   for(const [item,n]of Object.entries(spec.input))changeMaterial(s,item,-n,undefined,'cultivation input');
+  }
   s.operations??=[];
-  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,recipe:`farm_${action}`,farm:{bed:id,action,work:spec.work,crop:b.crop,density:b.density},input:spec.input,work:0,phase:'pickup',done:false});
+  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,recipe:`farm_${action}`,farm:{bed:id,action,work:spec.work,crop:b.crop,density:b.density},input:spec.input,...(waitingSeeds?{waitingSeeds:true,status:'Waiting for seed purchase and collection'}:{}),work:0,phase:'pickup',done:false});
   wakeHelpers(s);return '';
 }
 export function fieldPlacementError(s,x,z,size,rotation=0,ignore=null){
@@ -573,7 +610,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     );
   const eligible = (op) => {
     if ((op.accessRetryAt?.[r.id]||0)>s.time) return false;
-    if (op.done || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group && workGroup(op,PROCESSES)!==group)) return false;
+    if (op.done || op.waitingSeeds || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group && workGroup(op,PROCESSES)!==group)) return false;
     if(op.water?.stagedAt){
       const destination=sys.nodes[op.site],index=LIQUIDS.indexOf(op.water.kind);
       if(!destination||destination.capacity[index]-destination.water[index]<=.00001)return false;
@@ -2119,6 +2156,7 @@ function tickUncached(s, dt) {
   foodStorageStep(s,PROCESSES,MATERIALS);
   deliveryStep(s,dt,MATERIALS,changeMaterial,storedMaterials(s),storageCapacity(s));
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
+  arrangePlantingSeeds(s);
   maintainFood(s);
   maintainWater(s);
   manageKitchens(s,PROJECTS,PROCESSES,{blocker:productionBlocker,queue:queueProduction,stored:storedMaterials,capacity:storageCapacity});
