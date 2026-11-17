@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {pantryForecast,productionStock} from '../web/v02/weekend/food-planning.js';
 import {ensureFoodStorage,foodChange,freshLots} from '../web/v02/weekend/food-storage.js';
-import {createWeekend,chooseCamp,tick,enableFastNavigation,PROCESSES,save,restore} from '../web/v02/weekend/simulation.js';
+import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
+import {createWeekend,chooseCamp,tick,enableFastNavigation,PROCESSES,PROJECTS,save,restore} from '../web/v02/weekend/simulation.js';
 const pantry=()=>({time:0,people:[{},{}],materials:{food:0,meals:0,eggs:0,milk:0},operations:[]});
 const s=pantry();ensureFoodStorage(s);
 foodChange(s,'meals',20,[{n:20,expires:800}]);
@@ -24,3 +25,14 @@ foodChange(village,'food',100,[{n:100,expires:1}]);
 tick(village,.1);assert(village.trip,'shopping responds to an expiring pantry before it becomes empty');
 assert(restore(save(village)),'planning remains compatible with save validation');
 console.log('PASS expiry-aware reserves, no forecast mutation, mixed lots, separate production pools, partial hauls and live replenishment');
+
+for(const [repeat,stockRecipe] of [['preserve_meals',null],['meals',PROCESSES.preserve_meals]]){
+ const v=createWeekend(42);chooseCamp(v,'entrance');enableFastNavigation(v);ensureFoodStorage(v);
+ foodChange(v,'meals',-v.materials.meals);
+ foodChange(v,'meals',40,freshLots(v,'meals',40,stockRecipe));
+ const kitchen={id:v.nextId++,key:'kitchen',x:v.stock.x+3,z:v.stock.z+3,rotation:0,work:PROJECTS.kitchen.work,delivered:0,repeat,stockTarget:8};v.projects.push(kitchen);
+ const sys=syncInfrastructure(v,PROJECTS);sys.nodes[kitchen.id].water[0]=sys.nodes[kitchen.id].capacity[0];sys.biogas=10;
+ tick(v,.1);
+ assert(v.operations?.some(o=>o.recipe===repeat&&!o.done),`${repeat} must run despite stock of the other meal type: ${kitchen.productionStatus}`);
+}
+console.log('PASS live fresh and preserved production targets');
