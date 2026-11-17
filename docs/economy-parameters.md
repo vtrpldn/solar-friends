@@ -53,3 +53,7 @@ Construction keeps its existing authored quantities. Core buildings now use task
 Do not declare the realistic-economy release gates complete from these tests. Fresh-start play, seasonal runs, all-biome comparisons and ordinary catalog construction must follow the later model changes.
 
 The collection-budget replay earned enough through exports after 39.735 game minutes, then completed the shared house during the following three days. Cash after placing the blueprint was R$106.02 and ended at R$1,192.02. Food and water remained positive. Fixed-step equivalence checks passed through 1024× scheduling. These results concern the established Day 61 village, not a new-game bootstrap.
+
+## Food storage (2026-11-17)
+
+Perishable shelf lives are authored game values: ingredients 3 days, meals 2, eggs 7 and milk 1. Batches retain age through reservation and travel; spoilage is disabled in sandbox. No real-world safety or climate calibration is claimed. See [food storage](food-storage.md) for migration, limitations and tests.
