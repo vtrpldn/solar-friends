@@ -26,7 +26,8 @@ export function kitchenPlan(s,p,recipes,api){
    if(stocked+r.output.meals>target){reason='Waiting for room within the meal target for a whole batch.';continue;}
    const blocked=api.blocker(s,p.id,id);if(blocked){reason=blocked;continue;}
    const edibleAfter=Object.entries(FOOD_SERVINGS).reduce((n,[key,size])=>n+Math.floor(Math.max(0,(s.materials[key]||0)-(r.input[key]||0))/size),0);
-   if(edibleAfter<daily){reason='Keeping one day of edible food available before starting another batch.';continue;}
+   const usesEdibleStock=Object.keys(r.input).some(key=>FOOD_SERVINGS[key]);
+   if(usesEdibleStock&&edibleAfter<daily){reason='Keeping one day of edible food available before starting another batch.';continue;}
    if(Object.entries(r.input).some(([key,n])=>{let left=n;for(const lot of storage.lots[key]||[]){const used=Math.min(left,lot.n);if(used>0&&lot.expires<=s.time+r.work)return true;left-=used;}return false;})){
     reason='Ingredients expire too soon to finish this batch.';continue;
    }

@@ -271,7 +271,7 @@
     "description": "Manage a whole planting area or inspect one bed. Each bed keeps its own crop, care and harvest cycle.",
     "diagram": "flowchart TB\n Soil[Unprepared soil] -->|Resident preparation| Ready[Prepared bed]\n Ready -->|Seeds + planting work| Planted[Planted crop]\n Planted -->|Normal mode| Growth[Growing]\n Planted -->|Sandbox: instant growth| Mature[Harvestable]\n Growth -->|Accumulated growing conditions| Mature\n Mature -->|Resident harvesting| Harvest[Harvested bed + residues]\n Growth -->|Explicit clearing: residues only| Harvest\n Mature -->|Explicit clearing: residues only| Harvest\n Harvest -->|Prepare next planting| Ready\n Harvest --> Residues[Leave cover or collect residues]\n classDef soil fill:#f2e5d6,stroke:#c8af90,color:#654c35;\n classDef growing fill:#e9efd9,stroke:#b5c49a,color:#485d32;\n classDef mature fill:#d4e6d0,stroke:#88a67c,color:#2d5136;\n class Soil,Ready,Harvest soil;\n class Planted,Growth growing;\n class Mature,Residues mature;\n",
     "boundary": "Harvest quantities resolve once. Delayed harvest can reduce yield; clearing returns residues only. Fields snap to 2 m map cells.",
-    "tip": "Residents prepare beds, plant the selected crop with stored seeds, and harvest ripe beds automatically. If you queue planting yourself, Auto-buy can purchase missing seed packets when shared savings allow. Keep water, work access and storage available.",
+    "tip": "Residents prepare beds, plant the selected crop with stored seeds, and harvest ripe beds automatically. With Auto-buy on, residents order missing seed packets when shared savings can cover them and collection. Keep water, work access and storage available.",
     "facts": "crops"
   },
   {
@@ -415,7 +415,7 @@
     "description": "Food keeps its identity and age during storage, processing and transport.",
     "diagram": "flowchart TD\n Crop[Named harvested crop or purchased food] --> Lots[Inventory with expiry-bearing lots]\n Lots --> Cook[Explicit ingredient recipe and resident work]\n Cook --> Meals[Prepared meal lots]\n Lots --> Preserve[Preservation recipe]\n Preserve --> Long[Longer-lived food lots]\n Power[Powered refrigeration] --> Slow[Slow ageing of eligible stored food]\n Slow --> Lots\n Lots --> Expired{Expired?}\n Meals --> Expired\n Long --> Expired\n Expired -->|Yes| Waste[Remove spoiled food and account organic waste]\n Expired -->|No| Use[Eating, recipe input or trade]\n Use --> Transit[Preserve batch age in cargo and reservations]\n Lots --> Forecast[Expiry-aware pantry forecast]\n Forecast --> Policy[Optional fresh-meal and provision policies]\n Policy --> Cook\n",
     "boundary": "Refrigeration capacity is measured in liters. Uncooked greens, beans and corn do not count as ready portions.",
-    "tip": "Use the Food Almanac to inspect expiry, fresh meals, dried provisions and refrigeration. Optional kitchen policies protect a ready-food reserve before processing more.",
+    "tip": "Use the Food Almanac to inspect expiry, fresh meals, dried provisions and refrigeration. Automatic kitchens can cook harvested crops even when the pantry is empty. Recipes that consume ready-to-eat food protect a one-day reserve.",
     "facts": "food"
   },
   {

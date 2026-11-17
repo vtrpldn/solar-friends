@@ -569,10 +569,14 @@ function scheduleFarmWork(s) {
   }
   const priority = {harvest:0, plant:1, clear:2, prepare:3};
   bedJobs.sort((a,b) => priority[a.action] - priority[b.action]);
+  let seedOrderPending = pending.some(op => op.waitingSeeds);
   for (const job of bedJobs) {
-    if (job.action === 'plant' && !Object.entries(farmJobSpec(job.bed,'plant').input)
-        .every(([id,n]) => materialCount(s,id) >= n)) continue;
-    if (!queueBedJob(s,job.site,job.bed.id,job.action) && --bedSlots <= 0) break;
+    const needsSeeds = job.action === 'plant' && !Object.entries(farmJobSpec(job.bed,'plant').input)
+        .every(([id,n]) => materialCount(s,id) >= n);
+    if (needsSeeds && (s.mode === 'sandbox' || s.autoBuy === false || seedOrderPending)) continue;
+    if (queueBedJob(s,job.site,job.bed.id,job.action)) continue;
+    if (needsSeeds) seedOrderPending = true;
+    else if (--bedSlots <= 0) break;
   }
 }
 

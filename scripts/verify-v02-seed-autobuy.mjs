@@ -43,4 +43,13 @@ const run=(s,seconds,done)=>{for(let i=0;i<seconds*4;i++){tick(s,.25);if(done())
  const loaded=restore(save(s));assert(loaded);enableFastNavigation(loaded);
  assert(run(loaded,1200,()=>!loaded.operations.find(o=>o.farm).waitingSeeds),'Delivered packets unlock planting');
 }
+{
+ const {s,p}=fresh();s.autoBuy=false;
+ run(s,15,()=>false);
+ assert(!s.operations?.some(o=>o.waitingSeeds),'No automatic seed orders with Auto-buy off');
+ s.autoBuy=true;
+ assert(run(s,1800,()=>p.cultivation.beds.some(b=>b.stage==='growing')),
+   'An unattended prepared field buys, receives and plants missing seed');
+ assert.equal(s.suppliers.greens_seed.units,MATERIALS.greens_seed.quantity,'One paid pack serves the field');
+}
 console.log('PASS seed auto-buy: toggle, funds, existing stock, bulk jobs, physical pickup/delivery, no duplicates, ownership, planting and saves');
