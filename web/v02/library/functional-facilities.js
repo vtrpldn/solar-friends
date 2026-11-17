@@ -1,3 +1,4 @@
+import {chickenCoop} from './chicken-coop.js';
 import * as THREE from 'three';
 import {box,cylinder,beam,windowPane,ball} from '../workshop/models.js';
 import {hipRoof,leanRoof,metalRoof} from './roof-forms.js';
@@ -92,6 +93,7 @@ export const REMODELED_FACILITIES=new Set(['shed','workshop','kitchen','warehous
   'banana_treatment','wetland','compost','square','exercise-garden','volleyball-court','supply-0','supply-1','eco_toilet']);
 
 export function functionalFacility(id,{plant,tree,goat,chicken},stage=2){
+  if(id==='coop')return chickenCoop(chicken,stage);
   const g=group(),p=FUNCTIONAL_PROGRAM[id];
   const indoors=['shed','workshop','kitchen','warehouse','reading-room','outdoor-classroom','community-hall'];
   if(indoors.includes(id)){
@@ -204,29 +206,16 @@ export function functionalFacility(id,{plant,tree,goat,chicken},stage=2){
       box(g,1.1,.08,.08,'timberLight',0,2.2,5);
     }
     g.userData.plantedArea=id==='garden'?19.2:19.2;
-  }else if(['goat_pasture','goat-pasture-empty','coop'].includes(id)){
-    const hens=id==='coop',[w,d]=hens?[7,7]:[11,9];fence(g,w,d);
-    const home=group();placed(g,home,-w/2+2,-d/2+2);shelter(home,hens?2:3,hens?2:3,false,hens?'gable':'shed');
-    box(home,hens?2:3,1.6,.12,'timberLight',0,.8,hens?-1:-1.5);
-    if(hens){
-      for(const x of [-.95,.95])box(home,.1,2.1,2,'timberLight',x,1.17,0);
-      box(home,2,.5,.1,'timberLight',0,1.97,-1);
-      box(home,1.15,2.1,.1,'timberLight',-.425,1.17,1);
-      box(home,.35,2.1,.1,'timberLight',.825,1.17,1);
-      box(home,.5,1.4,.1,'timberLight',.4,1.52,1);
-      box(home,.75,1.85,.06,'teal',-.5,1.045,1.07);
-      for(const y of [.25,1.8])box(home,.7,.07,.08,'timber',-.5,y,1.11);
-      for(const z of [-.45,.45])beam(home,[-.8,.8,z],[.8,.8,z],.06,'timber');
-      for(const x of [-.6,0,.6])box(home,.5,.4,.45,'timber',x,.3,-.7);
-      for(let n=0;n<3;n++)placed(g,chicken(n%3),-.5+(n%3)*1.2,.3+Math.floor(n/3)*1.2);
-    }else{
-      box(home,.12,1.6,3,'timberLight',-1.5,.8,0);
-      if(id==='goat_pasture')for(const x of [-1.2,1.2])placed(g,goat(),x,1);
-    }
+  }else if(['goat_pasture','goat-pasture-empty'].includes(id)){
+    const [w,d]=[11,9];fence(g,w,d);
+    const home=group();placed(g,home,-w/2+2,-d/2+2);shelter(home,3,3,false,'shed');
+    box(home,3,1.6,.12,'timberLight',0,.8,-1.5);
+    box(home,.12,1.6,3,'timberLight',-1.5,.8,0);
+    if(id==='goat_pasture')for(const x of [-1.2,1.2])placed(g,goat(),x,1);
     box(g,1.4,.3,.45,'timberLight',w/2-1,.15,-1);
     box(g,1.2,.03,.3,'glass',w/2-1,.32,-1);
-    g.userData.shelterArea=hens?4:9;
-    g.userData.outdoorPenArea=w*d-(hens?4:9);
+    g.userData.shelterArea=9;
+    g.userData.outdoorPenArea=w*d-9;
   }else if(id==='apiary'){
     for(const x of [-1.1,0,1.1]){
       box(g,.12,.9,.12,'timber',x,.45,0);
