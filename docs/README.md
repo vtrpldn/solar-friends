@@ -9,6 +9,7 @@ Separate current gameplay and operational guidance from historical plans and dat
 ## Current guides
 
 - [Project setup, routes, checks and deployment](../README.md)
+- [High-speed simulation lab](simulation-lab.md): farming controls, breakpoints, telemetry, checkpoints and deterministic replay.
 - [v2 gameplay, economy, residents and infrastructure](../web/v02/weekend/README.md)
 - [3D collection](../web/v02/library/README.md)
 - [Model workshop](../web/v02/workshop/README.md)

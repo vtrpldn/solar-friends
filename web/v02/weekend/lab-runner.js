@@ -6,7 +6,7 @@ export class LabRunner {
     // Do not invent elapsed game time after a suspended computer wakes up.
     this.debt=Math.min(this.debt+Math.min(elapsed,.25)*this.speed,this.speed*2);
     const start=clock();let steps=0;
-    while(this.debt>=.1 && clock()-start<budget) { this.tick(this.state,.1);this.debt-=.1;steps++; }
+    while(!this.paused && this.debt>=.1 && clock()-start<budget) { this.tick(this.state,.1);this.debt-=.1;steps++; }
     return steps*.1;
   }
 }
