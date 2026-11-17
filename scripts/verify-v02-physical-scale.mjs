@@ -18,15 +18,15 @@ assert(bounds.z < 2 && bounds.z > 1.8, 'narrow bridge fits one cell including ra
 assert(bounds.x > 15.8 && bounds.x <= 16.01, 'length stays fixed');
 const garden=createAsset('garden');
 const beds=garden.children.filter(c=>c.name==='growing-bed');
-assert.equal(beds.length,2);
+assert.equal(beds.length,4);
 // Inspect raised bed borders only; foliage may overhang the soil.
 const left=new THREE.Box3().setFromObject(beds[0].children[0],true);
-const right=new THREE.Box3().setFromObject(beds[1].children[0],true);
+const right=new THREE.Box3().setFromObject(beds[2].children[0],true);
 garden.updateMatrixWorld(true);
-left.setFromObject(beds[0].children[0],true);right.setFromObject(beds[1].children[0],true);
-assert(right.min.x-left.max.x >= .69, 'soil beds leave space for the 0.6 m aisle and borders');
-assert.equal(SITE_SPACE.garden.productiveArea,8.16);
-assert.equal(SITE_SPACE.greenhouse.productiveArea,4.8);
+left.setFromObject(beds[0].children[0],true);right.setFromObject(beds[2].children[0],true);
+assert(right.min.x-left.max.x >= 1.79, 'soil beds leave space for the 1.6 m aisle and borders');
+assert.equal(SITE_SPACE.garden.productiveArea,19.2);
+assert.equal(SITE_SPACE.greenhouse.productiveArea,19.2);
 
 // Real historical save shape: no siteVersion field, all four saved rotations.
 for(let rotation=0;rotation<4;rotation++) {

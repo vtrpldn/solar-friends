@@ -119,7 +119,7 @@ const arrivalPreview =
   utilitiesPreview ||
   restPreview ||
   new URLSearchParams(location.search).has("arrival-preview");
-let s = scalePreview ? createScalePreview() : utilitiesPreview
+let s = scalePreview ? createScalePreview(false,new URLSearchParams(location.search).get("scale-preview")) : utilitiesPreview
   ? createUtilitiesPreview(
       new URLSearchParams(location.search).has("interactions"),
       Number(new URLSearchParams(location.search).get("land-seed")) >>> 0,
@@ -658,7 +658,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(scalePreview ? {x:56,z:57} : s.arrivalAnimating ? s.stock : campLocation(s));
+focus(scalePreview ? (new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
 
 function resize() {
   const a = innerWidth / innerHeight;

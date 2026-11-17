@@ -1,4 +1,6 @@
 import { METRES_PER_CELL } from '../library/scale.js';
+import {FUNCTIONAL_PROGRAM,FUNCTIONAL_DESCRIPTIONS} from '../library/functional-program.js';
+import {FUNCTIONAL_LAYOUTS,homePlan} from '../library/functional-layouts.js';
 
 // Physical dimensions exclude access reservations and roof/canopy overhangs.
 // Productive area describes the visible plot, never a production-rate multiplier.
@@ -25,6 +27,23 @@ export const SITE_SPACE = {
 };
 for (const id of ['home-veranda','home-gable','home-courtyard','adobe-gable','adobe-veranda'])
   SITE_SPACE[id] = { object: [3.4, id.includes('veranda') || id.includes('courtyard') ? 2.55 : 3.35], label: 'wall shell', note: 'Compact cabin with a porch or threshold. Keep the front approach open.' };
+
+for(const [id,l] of Object.entries(FUNCTIONAL_LAYOUTS))SITE_SPACE[id]={object:l.shell,label:'external wall shell',
+  note:`${homePlan(l).usableArea} m² net floor after exterior walls and internal partitions, before furniture. Designed for ${l.occupants} residents. Outdoor space is separate.`};
+for(const [id,p] of Object.entries(FUNCTIONAL_PROGRAM)){
+  if(FUNCTIONAL_LAYOUTS[id]||!p.shell)continue;
+  SITE_SPACE[id]={object:p.shell,label:'structure',note:FUNCTIONAL_DESCRIPTIONS[id]||'Keep the service approach clear.'};
+}
+Object.assign(SITE_SPACE,{
+  garden:{object:[4.28,9.36],productiveArea:19.2,note:'Four 1.2 × 4 m beds; 19.2 m² planted. Central and end aisles remain clear.'},
+  greenhouse:{object:[6,10],productiveArea:19.2,note:'Two 1.2 × 8 m beds; 19.2 m² planted, a 1 m central aisle and 1 m end access.'},
+  orchard:{object:[10,10],note:'Four compact fruit trees on 4 m centres. Mature size and yield remain species-dependent.'},
+  grove:{object:[8,8],note:'Four banana clumps on 3 m centres, with harvesting access.'},
+  solar_farm:{object:[5.2,5.4],note:'Six 1.1 × 1.8 m panels: 11.88 m² panel surface, with row and service access. Rated output is separate.'},
+  goat_pasture:{object:[11,9],note:'Two-goat pen with a 9 m² shelter and 90 m² outdoor area. Supplied feed or separate grazing is needed.'},
+  'goat-pasture-empty':{object:[11,9],note:'Empty pen with a 9 m² shelter and 90 m² outdoor area. This does not include grazing land.'},
+  compost:{object:[3.9,1.1],note:'Three 1 m³ bays plus front working access. Actual output depends on feedstock.'},
+});
 
 export function siteDimensions(size) {
   return `${size.map(n => n * METRES_PER_CELL).join(' × ')} m`;

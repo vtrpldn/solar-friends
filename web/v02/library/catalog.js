@@ -8,6 +8,10 @@ import { createPickup, createJimny } from "./vehicles.js";
 import { createTent } from "./camping.js";
 import { LIVESTOCK } from "./livestock.js";
 import { construction } from "./construction.js";
+import {FUNCTIONAL_LAYOUTS,homePlan} from './functional-layouts.js';
+import {FUNCTIONAL_PROGRAM,FUNCTIONAL_DESCRIPTIONS} from './functional-program.js';
+import {functionalHome} from './functional-homes.js';
+import {functionalFacility,REMODELED_FACILITIES} from './functional-facilities.js';
 import { createResident, RESIDENT_IDS } from "../residents/rig.js";
 import * as THREE from "three";
 import { PROPS } from "./props.js";
@@ -1765,6 +1769,16 @@ ASSETS.push(...PROPS);
 // exposed perimeter is drawn; editable neighbors provide the rest of the area.
 export function createConnectedAsset(id, connection) {
   if (!connection) return createAsset(id);
+  // Joined modules retain their beds, equipment and working aisles. A shared
+  // boundary must not turn service land into additional productive area.
+  if (REMODELED_FACILITIES.has(id)) {
+    const model = createAsset(id);
+    if (id === "solar_farm" && !connection.leader) {
+      const inverter = model.getObjectByName("shared-inverter");
+      inverter?.removeFromParent();
+    }
+    return model;
+  }
   const g = group(),
     def = ASSETS.find((a) => a.id === id);
   const [w, d] = def.footprint.map((n) => n * 2);
@@ -1891,7 +1905,7 @@ export function createAsset(id, variationSeed = null) {
   if (bounds.min.y < 0)
     for (const child of g.children) child.position.y -= bounds.min.y;
   g.name = id;
-  g.userData = { id, footprint: def.footprint, revision: def.revision || 1 };
+  g.userData = { ...g.userData, id, footprint: def.footprint, revision: def.revision || 1 };
   g.updateMatrixWorld(true);
   return g;
 }
@@ -2021,6 +2035,20 @@ for(const id of ["canvas-tent-ochre","covered-supply-rack","tarp-covered-supplie
 add("community-pickup", "Community pickup", "Props", [2, 3], createPickup);
 add("jimny-sage", "Sage trail SUV", "Props", [2,2], () => createJimny(0));
 add("jimny-ochre", "Ochre trail SUV", "Props", [2,2], () => createJimny(1));
+// Replacement models are dimensioned in metres, never uniformly stretched.
+// The user explicitly opted to replace miniature buildings rather than retain
+// old-size variants. Existing saved layouts are not deleted or moved here.
+for(const def of ASSETS){
+  const id=def.constructionOf||def.id,program=FUNCTIONAL_PROGRAM[id];
+  if(!program)continue;
+  def.footprint=FUNCTIONAL_LAYOUTS[id]?.site||program.site;
+  if(FUNCTIONAL_LAYOUTS[id])def.description=`A ${FUNCTIONAL_LAYOUTS[id].occupants}-person home with separate sleeping and washing spaces, a living/kitchen area, and ${homePlan(FUNCTIONAL_LAYOUTS[id]).usableArea} m² of net floor before furniture.`;
+  else if(FUNCTIONAL_DESCRIPTIONS[id])def.description=FUNCTIONAL_DESCRIPTIONS[id];
+  if(FUNCTIONAL_LAYOUTS[id]||REMODELED_FACILITIES.has(id))def.revision=4;
+  const stage=def.constructionOf?Number(def.id.at(-1)):2;
+  if(FUNCTIONAL_LAYOUTS[id])def.build=()=>functionalHome(id,stage);
+  else if(REMODELED_FACILITIES.has(id))def.build=()=>functionalFacility(id,{plant,tree,goat,chicken},stage);
+}
 export const CATEGORIES = [...new Set(ASSETS.map((a) => a.category))];
 
 // Bake static recipe pieces into one draw per material. This preserves the exact

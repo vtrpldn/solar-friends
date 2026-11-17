@@ -1,4 +1,6 @@
 import { COMMUNITY } from "../library/community-defs.js";
+import {FUNCTIONAL_PROGRAM} from '../library/functional-program.js';
+import {FUNCTIONAL_LAYOUTS} from '../library/functional-layouts.js';
 // Data-only snapshot of the shared art catalog; verified against it by the economy checks.
 export const BUILDING_MODELS = [
   {id:'groundwater-well',name:'Water well',category:'Buildings',size:[2,2]},
@@ -333,3 +335,7 @@ for (const [id, def] of Object.entries(COMMUNITY))
     category: "Buildings",
     size: def.size,
   });
+for(const model of BUILDING_MODELS){
+  const program=FUNCTIONAL_PROGRAM[model.id];
+  if(program)model.size=FUNCTIONAL_LAYOUTS[model.id]?.site||program.site;
+}

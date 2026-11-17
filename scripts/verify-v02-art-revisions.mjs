@@ -8,7 +8,6 @@ import {
 import { configureMapSun } from "../web/v02/land/lighting.js";
 for (const a of ASSETS.filter((a) => a.category === "Homes")) {
   const [width, depth] = a.footprint;
-  if (a.id === "house") continue;
   const g = createAsset(a.id);
   g.updateMatrixWorld(true);
   g.traverse((o) => {
@@ -26,8 +25,8 @@ for (const a of ASSETS.filter((a) => a.category === "Homes")) {
     }
   });
 }
-assert.deepEqual(ASSETS.find((a) => a.id === "solar_farm").footprint, [3, 2]);
-assert.deepEqual(ASSETS.find((a) => a.id === "compost").footprint, [3, 1]);
+assert.deepEqual(ASSETS.find((a) => a.id === "solar_farm").footprint, [4, 4]);
+assert.deepEqual(ASSETS.find((a) => a.id === "compost").footprint, [3, 2]);
 for (const [asset, name, count] of [
   ["solar_farm", "solar-panel", 6],
   ["compost", "compost-bin", 3],
@@ -40,18 +39,18 @@ for (const [asset, name, count] of [
 }
 const glass = compactModel(createAsset("greenhouse"));
 const panes = glass.children.filter((o) => o.material?.transparent);
-assert(panes.length >= 10);
+assert(panes.length >= 8);
 for (const p of panes) {
   assert(!p.castShadow);
-  assert(p.material.opacity >= 0.3);
+  assert(p.material.opacity >= 0.15 && p.material.opacity <= 0.4);
 }
 const sun = new THREE.DirectionalLight();
 configureMapSun(sun);
 sun.updateMatrixWorld();
 sun.target.updateMatrixWorld();
 sun.shadow.updateMatrices(sun);
-for (const x of [-64, 0, 64])
-  for (const z of [-64, 0, 64])
+for (const x of [-96, 0, 96])
+  for (const z of [-96, 0, 96])
     for (const y of [0, 9]) {
       const v = new THREE.Vector3(x, y, z).project(sun.shadow.camera);
       assert(
@@ -60,5 +59,5 @@ for (const x of [-64, 0, 64])
       );
     }
 console.log(
-  "PASS: all house sizes, foundation bounds, six-panel 3x2 solar array, three-bin 3x1 compost, sorted non-opaque glass shadows, whole-map shadow coverage through 9m height.",
+  "PASS: all house sizes, foundation bounds, six-panel 4x4 solar site, three-bin 3x2 compost site, sorted non-opaque glass shadows, whole-map shadow coverage through 9m height.",
 );
