@@ -73,6 +73,7 @@ export function createManagement({
     refresh();
     render();
   };
+  let purchaseSettingsOpen = false;
   const recipeChoices = new Map();
   const dialog = $("management");
   let view = "resources",
@@ -224,8 +225,9 @@ export function createManagement({
     }
     if(view==='water' && (n.capacity[2] || n.capacity[3]) && !['wetland','biodigester','banana_treatment'].includes(n.kind)) {
       const status=document.createElement('p');status.textContent=wasteWarnings(n).join(' · ') || 'Sealed waste: residents can service tanks; treatment buildings automate disposal.';el.append(status);
-      const service=document.createElement('button');service.textContent='Service waste tanks';disabledReason(service,n.water[2]+n.water[3]<1 ? 'There is no accumulated waste to remove.' : 'A water or sanitation job is already queued here. Wait for it to finish.');service.disabled=n.water[2]+n.water[3]<1 || state().operations?.some(o=>!o.done&&o.water&&o.site===n.id);service.onclick=()=>{notify(queueSanitation(state(),n.id)||'Waste service queued for off-site treatment.');refresh();render();};el.append(service);
-      const auto=document.createElement('button');auto.textContent=n.maintainSanitation?'Maintain sanitation: on':'Maintain sanitation: off';auto.setAttribute('aria-pressed',String(!!n.maintainSanitation));auto.onclick=()=>{n.maintainSanitation=!n.maintainSanitation;refresh();render();};el.append(auto);
+      const sanitation=document.createElement('div');sanitation.className='node-actions';el.append(sanitation);
+      const service=document.createElement('button');service.textContent='Service waste tanks';disabledReason(service,n.water[2]+n.water[3]<1 ? 'There is no accumulated waste to remove.' : 'A water or sanitation job is already queued here. Wait for it to finish.');service.disabled=n.water[2]+n.water[3]<1 || state().operations?.some(o=>!o.done&&o.water&&o.site===n.id);service.onclick=()=>{notify(queueSanitation(state(),n.id)||'Waste service queued for off-site treatment.');refresh();render();};sanitation.append(service);
+      const auto=document.createElement('button');auto.textContent=n.maintainSanitation?'Maintain sanitation: on':'Maintain sanitation: off';auto.setAttribute('aria-pressed',String(!!n.maintainSanitation));auto.onclick=()=>{n.maintainSanitation=!n.maintainSanitation;refresh();render();};sanitation.append(auto);
     }
     if(view==='water'){
       const job=state().operations?.find(o=>!o.done&&o.water&&o.site===n.id);
@@ -406,18 +408,24 @@ export function createManagement({
       if (view === 'resources') {
       const resourceMaterials = Object.fromEntries(Object.entries(MATERIALS).filter(([id]) => !EQUIPMENT_IDS.has(id)));
       economyControls($("resource-grid"),s,resourceMaterials,PROCESSES,materialCount,()=>{refresh();render();});
+      const purchaseSettings=document.createElement('details');
+      purchaseSettings.className='purchase-settings';purchaseSettings.open=purchaseSettingsOpen;
+      purchaseSettings.ontoggle=()=>{purchaseSettingsOpen=purchaseSettings.open;};
+      const settingsTitle=document.createElement('summary');settingsTitle.textContent='Food reserves & delivery';
+      const settingsBody=document.createElement('div');settingsBody.className='purchase-settings-body';
+      purchaseSettings.append(settingsTitle,settingsBody);$('resource-grid').append(purchaseSettings);
       const reserve=document.createElement('button');
       reserve.textContent=`Automatic food purchases: ${s.emergencyFood===false?'off':'on'}`;
       reserve.title='Maintain the chosen food reserve with at most one affordable ingredient purchase per day, within the daily food budget. Growing crops cannot replace food needed today.';
       reserve.setAttribute('aria-pressed',String(s.emergencyFood!==false));
       reserve.onclick=()=>{s.emergencyFood=s.emergencyFood===false;refresh();render();};
-      $("resource-grid").append(reserve);
+      settingsBody.append(reserve);
       for(const [key,label,value,max,step] of [['foodReserveDays','Food reserve in days',1.5,7,.5],['foodPurchaseBudget','Daily food purchase budget including transport (R$)',100,100000,1]]){
-       const field=document.createElement('label');field.textContent=label;const input=document.createElement('input');input.type='number';input.min=0;input.max=max;input.step=step;input.value=s[key]??value;input.setAttribute('aria-label',label);input.oninput=()=>{s[key]=Math.max(0,Math.min(max,Number(input.value)||0));};field.append(input);$("resource-grid").append(field);
+       const field=document.createElement('label');field.textContent=label;const input=document.createElement('input');input.type='number';input.min=0;input.max=max;input.step=step;input.value=s[key]??value;input.setAttribute('aria-label',label);input.oninput=()=>{s[key]=Math.max(0,Math.min(max,Number(input.value)||0));};field.append(input);settingsBody.append(field);
       }
-      const reserveNote=document.createElement('p');reserveNote.textContent='Reserve estimate: two food portions per resident per day. A spending limit, not reserved cash; unavailable drivers, funds or storage may delay replenishment.';$("resource-grid").append(reserveNote);
-      const delivery=document.createElement('button');delivery.textContent=s.deliveryOnly?'Purchases: supplier delivery':'Purchases: resident pickup';delivery.setAttribute('aria-pressed',String(!!s.deliveryOnly));delivery.onclick=()=>{s.deliveryOnly=!s.deliveryOnly;refresh();render();};$("resource-grid").append(delivery);
-      const freight=document.createElement('p');freight.textContent=s.delivery?`${s.delivery.status||'Supplier delivery on its way'} · ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:s.deliveryOnly?`Supplier delivery: R$${transportCost(s).toFixed(2)} freight, up to 5 tonnes / 12 m³. About six hours plus travel; no resident driver needed.`:'Resident pickups use the village cars and their cargo limits.';$("resource-grid").append(freight);
+      const reserveNote=document.createElement('p');reserveNote.textContent='Reserve estimate: two food portions per resident per day. A spending limit, not reserved cash; unavailable drivers, funds or storage may delay replenishment.';settingsBody.append(reserveNote);
+      const delivery=document.createElement('button');delivery.textContent=s.deliveryOnly?'Purchases: supplier delivery':'Purchases: resident pickup';delivery.setAttribute('aria-pressed',String(!!s.deliveryOnly));delivery.onclick=()=>{s.deliveryOnly=!s.deliveryOnly;refresh();render();};settingsBody.append(delivery);
+      const freight=document.createElement('p');freight.textContent=s.delivery?`${s.delivery.status||'Supplier delivery on its way'} · ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:s.deliveryOnly?`Supplier delivery: R$${transportCost(s).toFixed(2)} freight, up to 5 tonnes / 12 m³. About six hours plus travel; no resident driver needed.`:'Resident pickups use the village cars and their cargo limits.';settingsBody.append(freight);
       }
       const search = $("resource-search").value.trim().toLowerCase(), committed=committedMaterials(s);
       for (const group of inventoryGroups(view)) {

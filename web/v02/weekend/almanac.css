@@ -73,3 +73,18 @@
 #management .crafting-crew { margin-bottom: 20px; }
 #management .finance-ledger th, #management .finance-ledger td { padding: 10px 12px; font-size: 13px; }
 #management button:focus-visible { outline: 3px solid #537d78; outline-offset: 3px; }
+
+#management[data-screen] .management-stats > div { background: transparent; }
+#management .network-node button.has-disabled-info { padding-right: 32px !important; }
+#management .purchase-settings { grid-column: 1 / -1; border-bottom: 1px solid #d8ccaa; padding-bottom: 8px; }
+#management .purchase-settings summary { cursor: pointer; font-size: 12px; font-weight: 700; padding: 10px 0; }
+#management .purchase-settings-body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 10px 0; align-items: start; }
+#management .purchase-settings-body label { font-size: 12px; line-height: 1.5; }
+#management .purchase-settings-body input { display: block; width: 100%; margin-top: 6px; }
+#management .purchase-settings-body p { margin: 0; font-size: 12px; line-height: 1.6; }
+#management .purchase-settings-body button { align-self: start; padding: 9px 12px; border-width: 1px; border-radius: 8px; box-shadow: 0 2px 0 #d6c59e; }
+#management .economy-controls { grid-template-columns: minmax(0, 1fr); }
+
+#management .crafting-skills { margin-bottom: 16px; border-bottom: 1px solid #d8ccaa; }
+#management .crafting-skills summary { cursor: pointer; padding: 8px 0 14px; font-size: 12px; font-weight: 700; }
+#management .crafting-skills > p { font-size: 12px; line-height: 1.6; }
