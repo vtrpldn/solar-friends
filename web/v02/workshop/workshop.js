@@ -203,7 +203,8 @@ function rebuild() {
   figure.visible =
     $("#human").checked && !state.together && state.id !== "resident";
   content.add(figure);
-  $("#roof").disabled=!model?.getObjectByName('functional-roof');
+  $("#roof").disabled=!!model?.userData.exteriorOnly||!model?.getObjectByName('functional-roof');
+  if(model?.userData.exteriorOnly)$("#roof").checked=true;
   if(model)model.traverse(o=>{if(o.name==='functional-roof')o.visible=$("#roof").checked;});
   surface(state.surface);
   grid.visible = $("#grid").checked;

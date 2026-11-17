@@ -5,11 +5,21 @@ import {
   createAsset,
   compactModel,
 } from "../web/v02/library/catalog.js";
+import { FUNCTIONAL_LAYOUTS } from "../web/v02/library/functional-layouts.js";
 import { configureMapSun } from "../web/v02/land/lighting.js";
 for (const a of ASSETS.filter((a) => a.category === "Homes")) {
   const [width, depth] = a.footprint;
   const g = createAsset(a.id);
   g.updateMatrixWorld(true);
+  assert(g.userData.exteriorOnly, `${a.id}: houses must be exterior-only`);
+  const layout=FUNCTIONAL_LAYOUTS[a.id], [w,d]=layout.shell, offset=g.children[0].position;
+  g.traverse(o=>{
+    if(!o.isMesh)return;
+    const b=new THREE.Box3().setFromObject(o,true).translate(offset.clone().negate());
+    const interior=b.min.y>.17&&b.max.y<2.8&&b.min.x>-w/2+.25&&b.max.x<w/2-.25&&b.min.z>-d/2+.25&&b.max.z<d/2-.25;
+    assert(!interior,`${a.id}: unexpected interior mesh`);
+    if(o.name==='roof-tile')assert(!o.castShadow,`${a.id}: small tile shadows alias on walls`);
+  });
   g.traverse((o) => {
     if (!o.isMesh) return;
     const p = o.geometry.getAttribute("position");
@@ -37,6 +47,14 @@ for (const [asset, name, count] of [
   });
   assert.equal(actual, count);
 }
+// Material batching must not re-enable decorative shadows or lose receivers.
+const source=new THREE.Group(),material=new THREE.MeshStandardMaterial();
+for(const [cast,receive] of [[true,true],[false,true],[true,false]]){
+  const mesh=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),material);
+  mesh.castShadow=cast;mesh.receiveShadow=receive;source.add(mesh);
+}
+const batched=compactModel(source);
+assert.deepEqual(batched.children.map(m=>[m.castShadow,m.receiveShadow]),[[true,true],[false,true],[true,false]]);
 const glass = compactModel(createAsset("greenhouse"));
 const panes = glass.children.filter((o) => o.material?.transparent);
 assert(panes.length >= 8);

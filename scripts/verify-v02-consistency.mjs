@@ -87,18 +87,22 @@ for (const crop of [
     `${crop}: growth order`,
   );
 }
-const standardHomes = rows
-  .filter((a) => a.category === "Homes" && FUNCTIONAL_LAYOUTS[a.id]?.occupants === 2)
-  .map((a) => {const l=FUNCTIONAL_LAYOUTS[a.id];return a.triangles/(l.shell[0]*(l.shell[1]+(l.verandaDepth||0)));});
-assert(Math.max(...standardHomes) / Math.min(...standardHomes) < 1.2, "Standard house detail drift");
-const homes = rows
-  .filter((a) => a.category === "Homes")
-  .map((a) => {
-    const asset = ASSETS.find((asset) => asset.id === a.id);
-    const shell=FUNCTIONAL_LAYOUTS[a.id].shell;
-    return a.triangles / (shell[0] * (shell[1]+(FUNCTIONAL_LAYOUTS[a.id].verandaDepth||0)));
+// Compare physical tile detail, not whole-model triangle density: a compact
+// cottage has more windows/trim per square metre than a long house.
+for(const asset of ASSETS.filter(a=>a.category==='Homes')){
+  let tiles=0;
+  createAsset(asset.id).traverse(o=>{
+    if(o.name!=='roof-tile')return;
+    tiles++;
+    const p=o.geometry.attributes.position;
+    assert.equal(p.count,30,`${asset.id}: barrel tile detail`);
+    for(let i=0;i<p.count;i+=3){
+      const points=[0,1,2].map(n=>new THREE.Vector3().fromBufferAttribute(p,i+n));
+      for(let n=0;n<3;n++)assert(points[n].distanceTo(points[(n+1)%3])<.7,`${asset.id}: stretched tile`);
+    }
   });
-assert(Math.max(...homes) / Math.min(...homes) < 1.25, "House detail density drift");
+  assert(tiles>60,`${asset.id}: missing roof courses`);
+}
 if (process.argv.includes("--json")) console.log(JSON.stringify(rows, null, 2));
 else
   console.log(

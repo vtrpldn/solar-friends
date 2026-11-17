@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { box, beam, gable, windowPane, cylinder, ball } from '../workshop/models.js';
 import {hipRoof,leanRoof,gableRoof} from './roof-forms.js';
-import { FUNCTIONAL_LAYOUTS, homePlan, HOME_CHARACTER } from './functional-layouts.js';
+import { FUNCTIONAL_LAYOUTS, HOME_CHARACTER } from './functional-layouts.js';
 
 // Roof courses retain their physical spacing as the building grows. This is
 // deliberately not a stretched legacy roof (whose tile courses would elongate).
@@ -16,13 +16,6 @@ function window(g,x,z,rotation=0,shutters='teal') {
     for(let n=0;n<5;n++)box(f,.31,.035,.08,'timberLight',side*.72,-.36+n*.18,.1);
   }
   box(f,1.25,.08,.24,'timberLight',0,-.56,.06);
-}
-function bed(g,x,z,double=false) {
-  const w=double?1.4:.9;
-  box(g,w,.35,2,'timber',x,.3,z);box(g,w-.06,.18,1.94,'plaster',x,.565,z);
-  box(g,w-.08,.05,1.3,'teal',x,.68,z+.25);
-  box(g,w-.2,.12,.4,'plaster',x,.72,z-.65);
-  box(g,w,.8,.08,'timber',x,.5,z-1);
 }
 function roofFrame(g,w,d,type,rise=1.3){
   if(type==='side-gable'){
@@ -48,8 +41,7 @@ export function functionalHome(id,stage=2) {
   // Front (+Z) verandas and side terraces occupy their own reserved cells.
   body.position.z=l.verandaDepth?-l.verandaDepth/2:0;
   if(l.terrace)body.position.x=-1;
-  const plan=homePlan(l);
-  g.userData={usableArea:plan.usableArea,occupants:l.occupants};
+  g.userData={shellArea:w*d,occupants:l.occupants,exteriorOnly:true};
   box(body,w,.16,d,'stone',0,.08,0);
   if(stage===0) {
     for(const x of [-w/2,w/2])for(const z of [-d/2,d/2])box(body,.08,.5,.08,'timber',x,.25,z);
@@ -81,26 +73,9 @@ export function functionalHome(id,stage=2) {
   // Low masonry skirting grounds the wall without covering the reserved yard.
   for(const x of [-w/2,w/2])box(body,.06,.22,d,'earth',x,.25,0);
   box(body,w,.22,.06,'earth',0,.25,-d/2);
-  for(const p of plan.walls) {
-    const part=masonry(p.width,2.55,p.depth,p.x,1.435,p.z);part.name='interior-partition';
-  }
-  // Beds belong to separate bedrooms; all circulation stays outside them.
-  if(l.occupants===2)bed(body,-w/2+1.3,-d/2+1.5,true);
-  else if(l.occupants===3){bed(body,-w/2+1.5,-d/2+1.5,true);bed(body,w/2-1.2,-d/2+1.5);}
-  else for(const side of [-1,1])for(const dx of [-.9,.9])bed(body,side*(w-.4)/4+dx,-d/2+1.5);
-  const bathZ=l.occupants===2?-d/2+2.7:plan.split+1.2;
-  for(const side of l.occupants===4?[-1,1]:[1]){
-    box(body,.43,.46,.65,'plaster',side*(w/2-.8),.39,bathZ);
-    box(body,.6,.8,.45,'plaster',side*(w/2-1.5),.56,bathZ);
-    box(body,.5,.04,.35,'glass',side*(w/2-1.5),.98,bathZ);
-  }
-  box(body,2.4,.9,.65,'timberLight',w/2-1.5,.61,d/2-1);
-  box(body,2.4,.06,.68,'stone',w/2-1.5,1.09,d/2-1);
-  box(body,1.6,.09,.85,'timberLight',0,.92,0);
-  for(const x of [-.6,.6])for(const z of [-.3,.3])box(body,.09,.7,.09,'timber',x,.51,z);
   const roofGroup=new THREE.Group();roofGroup.name='functional-roof';body.add(roofGroup);
   function pitched(parent,width,depth,rise=1.3){
-    const end=gable(parent,width-.2,depth-.2,2.85,rise);end.material=wallMaterial;
+    const end=gable(parent,width,depth,2.86,rise-.01);end.material=wallMaterial;
     functionalRoof(parent,width+.3,depth+.5,2.85,rise);
   }
   if(character.roof.startsWith('hip'))hipRoof(roofGroup,w+.6,d+.6,2.85,1.3);
@@ -121,7 +96,7 @@ export function functionalHome(id,stage=2) {
       for(const dx of [-.45,.45])box(body,.12,.45,.35,'timber',x+dx,.225,d/2+.35);
     }
   }
-  if(id==='house'||id==='home-gable'){
+  if(id==='house'||id==='home-gable'||id==='home-cottage'){
     const hood=new THREE.Group();hood.position.set(doorX,0,d/2+.35);body.add(hood);leanRoof(hood,1.7,.9,2.35,2.65);
     for(const side of [-1,1])beam(body,[doorX+side*.7,2,d/2],[doorX+side*.7,2.4,d/2+.6],.07,'timber');
   }
@@ -149,6 +124,13 @@ export function functionalHome(id,stage=2) {
   if(character.roof==='front-gable'){
     box(body,.65,.5,.06,'timber',0,3.35,d/2);
     for(let y=3.18;y<3.6;y+=.1)box(body,.58,.035,.08,'timberLight',0,y,d/2+.04);
+  }
+  if(id==='home-longhouse'){
+    const gallery=new THREE.Group();gallery.position.set(-3,0,d/2+.35);body.add(gallery);
+    leanRoof(gallery,5.4,1.1,2.35,2.75);
+    for(const x of [-2.5,2.5])box(gallery,.14,2.35,.14,'timber',x,1.175,.4);
+    box(gallery,2,.1,.45,'timberLight',-1,.5,.1);
+    for(const x of [-1.7,-.3])box(gallery,.12,.45,.35,'timber',x,.225,.1);
   }
   if(id.startsWith('adobe'))for(let x=-w/2+.35;x<w/2;x+=.7)box(body,.1,.12,.5,'timber',x,2.78,d/2-.05);
   // An entrance herb pot and wall-mounted light make the threshold legible.

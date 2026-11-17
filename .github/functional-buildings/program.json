@@ -4,11 +4,11 @@
     "metresPerCell": 2,
     "renderUnitsPerMetre": 1
   },
-  "status": "Design contract for remodeling; capacities are not yet simulation limits.",
+  "status": "Exterior-only house geometry; capacities remain mechanics assumptions.",
   "areaDefinitions": {
     "reserved": "Grid site including exterior clearance; never presented as indoor floor area.",
     "shell": "External wall dimensions, excluding porches and roof overhang.",
-    "usable": "Approximate usable internal floor target after external/internal walls. Final meshes/layouts must be measured."
+    "usable": "Not measured for houses: no interior partitions or furnishings are modeled."
   },
   "compatibility": "User explicitly waived backwards compatibility. Replace undersized models and footprints directly; do not retain miniature legacy variants or add migration/version machinery for this remodeling pass. Preserve semantic IDs/kinds where useful for mechanics. Existing layouts may require a fresh village; do not erase player saves automatically.",
   "sources": [
@@ -72,11 +72,11 @@
         10,
         8
       ],
-      "targetUsableAreaM2": 68,
+      "targetUsableAreaM2": null,
       "designCapacity": {
         "residents": 3
       },
-      "layoutRequirements": "Double bedroom, single bedroom, bathroom, living/kitchen, storage and circulation.",
+      "layoutRequirements": "Exterior only; no internal rooms or furnishings.",
       "currentSiteCells": [
         3,
         2
@@ -104,11 +104,11 @@
         10.5,
         9.5
       ],
-      "targetUsableAreaM2": 86,
+      "targetUsableAreaM2": null,
       "designCapacity": {
         "residents": 4
       },
-      "layoutRequirements": "Two twin bedrooms, two wash/toilet spaces, shared living/kitchen and storage; no four-bed single-room shortcut.",
+      "layoutRequirements": "Exterior only; no internal rooms or furnishings.",
       "currentSiteCells": [
         4,
         2
@@ -171,11 +171,11 @@
         8,
         8
       ],
-      "targetUsableAreaM2": 54,
+      "targetUsableAreaM2": null,
       "designCapacity": {
         "residents": 2
       },
-      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "layoutRequirements": "Exterior only; no internal rooms or furnishings.",
       "currentSiteCells": [
         2,
         2
@@ -661,11 +661,11 @@
         8,
         8
       ],
-      "targetUsableAreaM2": 54,
+      "targetUsableAreaM2": null,
       "designCapacity": {
         "residents": 2
       },
-      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "layoutRequirements": "Exterior only; no internal rooms or furnishings.",
       "currentSiteCells": [
         2,
         2
@@ -692,11 +692,11 @@
         8,
         8
       ],
-      "targetUsableAreaM2": 54,
+      "targetUsableAreaM2": null,
       "designCapacity": {
         "residents": 2
       },
-      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "layoutRequirements": "Exterior only; no internal rooms or furnishings.",
       "currentSiteCells": [
         2,
         2
@@ -723,11 +723,11 @@
         8,
         8
       ],
-      "targetUsableAreaM2": 54,
+      "targetUsableAreaM2": null,
       "designCapacity": {
         "residents": 2
       },
-      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "layoutRequirements": "Exterior only; no internal rooms or furnishings.",
       "currentSiteCells": [
         2,
         2
@@ -754,11 +754,11 @@
         8,
         8
       ],
-      "targetUsableAreaM2": 54,
+      "targetUsableAreaM2": null,
       "designCapacity": {
         "residents": 2
       },
-      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "layoutRequirements": "Exterior only; no internal rooms or furnishings.",
       "currentSiteCells": [
         2,
         2
@@ -785,11 +785,11 @@
         8,
         8
       ],
-      "targetUsableAreaM2": 54,
+      "targetUsableAreaM2": null,
       "designCapacity": {
         "residents": 2
       },
-      "layoutRequirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation.",
+      "layoutRequirements": "Exterior only; no internal rooms or furnishings.",
       "currentSiteCells": [
         2,
         2
@@ -1284,6 +1284,36 @@
       ],
       "targetReservedAreaM2": 308,
       "status": "design_target_not_live_gameplay"
+    },
+    {
+      "id": "home-cottage",
+      "targetSiteCells": [
+        4,
+        4
+      ],
+      "targetShellMetres": [
+        6,
+        6
+      ],
+      "designCapacity": {
+        "residents": 1
+      },
+      "layoutRequirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
+    },
+    {
+      "id": "home-longhouse",
+      "targetSiteCells": [
+        7,
+        4
+      ],
+      "targetShellMetres": [
+        12,
+        6
+      ],
+      "designCapacity": {
+        "residents": 3
+      },
+      "layoutRequirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
     }
   ]
 }

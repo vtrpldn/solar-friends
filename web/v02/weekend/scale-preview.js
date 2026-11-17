@@ -24,6 +24,7 @@ export function createScalePreview(validate = false, collection = 'village') {
     s.projects.at(-1).work=PROJECTS[key].work;
   }
   const sites = collection==='homes' ? [
+    ['home-cottage',35,44],['home-longhouse',85,44],
     ['house',44,43],['home-gable',54,43],['adobe-gable',64,43],['home-family',74,43],
     ['home-veranda',44,55],['adobe-veranda',54,55],['home-courtyard',64,55],['home-shared',76,55],
   ] : [

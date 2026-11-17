@@ -3,6 +3,8 @@ import {FUNCTIONAL_PROGRAM} from '../library/functional-program.js';
 import {FUNCTIONAL_LAYOUTS} from '../library/functional-layouts.js';
 // Data-only snapshot of the shared art catalog; verified against it by the economy checks.
 export const BUILDING_MODELS = [
+  {id:"home-cottage",name:"Small cottage",category:"Homes",size:[4,4],beds:1},
+  {id:"home-longhouse",name:"Long veranda house",category:"Homes",size:[7,4],beds:3},
   {id:'groundwater-well',name:'Water well',category:'Buildings',size:[2,2]},
   {id:'water-pump',name:'Water pump',category:'Buildings',size:[1,1]},
   {id:'home-family',name:'Family house',category:'Homes',size:[3,2],beds:3},

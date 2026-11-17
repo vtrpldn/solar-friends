@@ -2,7 +2,7 @@
   "metresPerCell": 2,
   "notes": [
     "Reserved cells include clearance; visual bounds include roof overhang and vegetation, not usable floor.",
-    "Home net floor subtracts exterior walls and the union of internal partitions, before furniture. Facility clearFloorArea subtracts exterior walls, before furniture and columns.",
+    "Homes are exterior-only, with no modeled partitions, rooms or indoor furniture. No net interior floor area is claimed. Facility clearFloorArea subtracts exterior walls, before furniture and columns.",
     "Capacities are spatial design assumptions, not changes to mechanics or rated production.",
     "Original miniature building compatibility was waived by the user; saved data is not erased, but old layouts may overlap and need rebuilding.",
     "Garden and greenhouse each expose 19.2 m² planted soil; the remainder is aisles and service land.",
@@ -12,18 +12,94 @@
     "Existing well yield, cistern usable capacity and digester throughput remain uncalibrated; do not infer them from surface reservation or exterior vessel bounds."
   ],
   "visualReview": {
-    "homes": "All eight exterior designs compared at shared scale in the desktop collection; shared home cutaway and night state inspected.",
+    "homes": "Ten exterior designs compared at shared scale in the desktop collection; corrected family-home gable and eave shadows inspected close up in the desktop game.",
     "facilities": "Workshop and kitchen current exteriors inspected in desktop 3D inspector; garden/greenhouse/pen/solar and village scale inspected in the game during remodeling. Full per-model powered/unpowered review not performed."
   },
   "sourceSha256": {
-    "functional-program.js": "62824217650b1083649b59cee4f0e483133cceb8838ee7022da768aa12a5596d",
-    "functional-layouts.js": "29f4b082b7a0d69e9c868e3d2d6d956f117e7ee21fb5f791c3510cfeb500c522",
-    "functional-homes.js": "aae3dc8eb59819ed3c47c3bdca7042568d17d3437f308463cc2c92601e22bb88",
+    "functional-program.js": "2b921ed4a88e8e2d853cb0d38e54b714c0c01c43309852932d2e5113df66f5ec",
+    "functional-layouts.js": "234746efdfc7412b411a65e59be133b48fe862cc09408a6fb9459d15d25c7757",
+    "functional-homes.js": "91d04d935437885bc792b23fd937d1a52b35242ded8be3823a8a37d25b3d2234",
     "functional-facilities.js": "97528ed0635e07be96e1b805a63386b1c046684bcea157e09a8117468661ed89",
-    "roof-forms.js": "cac984a481b752c57fd0e735c710561e351d0ce0beb5f99cc9b5e5f8ec199612",
-    "catalog.js": "27c48d656eebd1cf3d1b2f60730eec73b85cc108a73a2d27393e70d85afc6203"
+    "roof-forms.js": "08f31ea3b435f71e5a6960e0c972565de620b2ed4783bc5bfaf266f1d762d8fc",
+    "catalog.js": "01da5fae8a2d0db408cdb51b0c847beb563bf085e00dc182629c37a007f3dbcc"
   },
   "buildings": [
+    {
+      "id": "home-cottage",
+      "reservedCells": [
+        4,
+        4
+      ],
+      "reservedMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        6.74,
+        4.245,
+        7.233
+      ],
+      "measuredProperties": {
+        "shellArea": 36,
+        "occupants": 1,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        6,
+        6
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 1,
+      "roof": "hip",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        0.45,
+        1.18,
+        2.935
+      ]
+    },
+    {
+      "id": "home-longhouse",
+      "reservedCells": [
+        7,
+        4
+      ],
+      "reservedMetres": [
+        14,
+        8
+      ],
+      "visualBoundsMetres": [
+        12.62,
+        4.088,
+        7.181
+      ],
+      "measuredProperties": {
+        "shellArea": 72,
+        "occupants": 3,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        12,
+        6
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 3,
+      "roof": "side-gable",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        -0.7,
+        1.18,
+        2.935
+      ]
+    },
     {
       "id": "groundwater-well",
       "reservedCells": [
@@ -74,14 +150,15 @@
         8.866
       ],
       "measuredProperties": {
-        "usableArea": 70.25,
-        "occupants": 3
+        "shellArea": 80,
+        "occupants": 3,
+        "exteriorOnly": true
       },
       "shellMetres": [
         10,
         8
       ],
-      "netFloorBeforeFurnitureM2": 70.25,
+      "exteriorOnly": true,
       "intendedResidents": 3,
       "roof": "twin-gable",
       "doorLeafMetres": [
@@ -111,14 +188,15 @@
         11.135
       ],
       "measuredProperties": {
-        "usableArea": 88.41,
-        "occupants": 4
+        "shellArea": 99.75,
+        "occupants": 4,
+        "exteriorOnly": true
       },
       "shellMetres": [
         10.5,
         9.5
       ],
-      "netFloorBeforeFurnitureM2": 88.41,
+      "exteriorOnly": true,
       "intendedResidents": 4,
       "roof": "hip-porch",
       "doorLeafMetres": [
@@ -182,14 +260,15 @@
         9.233
       ],
       "measuredProperties": {
-        "usableArea": 55.66,
-        "occupants": 2
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
       },
       "shellMetres": [
         8,
         8
       ],
-      "netFloorBeforeFurnitureM2": 55.66,
+      "exteriorOnly": true,
       "intendedResidents": 2,
       "roof": "hip",
       "doorLeafMetres": [
@@ -627,14 +706,15 @@
         10.63
       ],
       "measuredProperties": {
-        "usableArea": 55.66,
-        "occupants": 2
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
       },
       "shellMetres": [
         8,
         8
       ],
-      "netFloorBeforeFurnitureM2": 55.66,
+      "exteriorOnly": true,
       "intendedResidents": 2,
       "roof": "hip",
       "doorLeafMetres": [
@@ -664,14 +744,15 @@
         9.173
       ],
       "measuredProperties": {
-        "usableArea": 55.66,
-        "occupants": 2
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
       },
       "shellMetres": [
         8,
         8
       ],
-      "netFloorBeforeFurnitureM2": 55.66,
+      "exteriorOnly": true,
       "intendedResidents": 2,
       "roof": "front-gable",
       "doorLeafMetres": [
@@ -701,14 +782,15 @@
         8.926
       ],
       "measuredProperties": {
-        "usableArea": 55.66,
-        "occupants": 2
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
       },
       "shellMetres": [
         8,
         8
       ],
-      "netFloorBeforeFurnitureM2": 55.66,
+      "exteriorOnly": true,
       "intendedResidents": 2,
       "roof": "hip",
       "doorLeafMetres": [
@@ -738,14 +820,15 @@
         8.766
       ],
       "measuredProperties": {
-        "usableArea": 55.66,
-        "occupants": 2
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
       },
       "shellMetres": [
         8,
         8
       ],
-      "netFloorBeforeFurnitureM2": 55.66,
+      "exteriorOnly": true,
       "intendedResidents": 2,
       "roof": "side-gable",
       "doorLeafMetres": [
@@ -775,14 +858,15 @@
         10.47
       ],
       "measuredProperties": {
-        "usableArea": 55.66,
-        "occupants": 2
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
       },
       "shellMetres": [
         8,
         8
       ],
-      "netFloorBeforeFurnitureM2": 55.66,
+      "exteriorOnly": true,
       "intendedResidents": 2,
       "roof": "side-gable",
       "doorLeafMetres": [

@@ -8,7 +8,7 @@ import { createPickup, createJimny } from "./vehicles.js";
 import { createTent } from "./camping.js";
 import { LIVESTOCK } from "./livestock.js";
 import { construction } from "./construction.js";
-import {FUNCTIONAL_LAYOUTS,homePlan} from './functional-layouts.js';
+import {FUNCTIONAL_LAYOUTS} from './functional-layouts.js';
 import {FUNCTIONAL_PROGRAM,FUNCTIONAL_DESCRIPTIONS} from './functional-program.js';
 import {functionalHome} from './functional-homes.js';
 import {functionalFacility,REMODELED_FACILITIES} from './functional-facilities.js';
@@ -1602,6 +1602,8 @@ for (const [id, name] of Object.entries({
   add(id, name, "Homes", [2, 2], () => cabin(id), [id, id + "-night"]);
 add('groundwater-well','Water well','Buildings',[2,2],()=>waterSource(),[]);
 add('water-pump','Water pump','Buildings',[1,1],()=>waterSource(true),[]);
+add('home-cottage','Small cottage','Homes',[4,4],()=>functionalHome('home-cottage'),[]);
+add('home-longhouse','Long veranda house','Homes',[7,4],()=>functionalHome('home-longhouse'),[]);
 add('home-family','Family house','Homes',[3,2],()=>extendedHouse(3),[]);
 add('home-shared','Shared adobe house','Homes',[4,2],()=>extendedHouse(4),[]);
 add(
@@ -1911,6 +1913,8 @@ export function createAsset(id, variationSeed = null) {
 }
 const revised = new Set([
   "biodigester",
+  "home-cottage",
+  "home-longhouse",
   "home-veranda",
   "home-gable",
   "home-courtyard",
@@ -2042,7 +2046,7 @@ for(const def of ASSETS){
   const id=def.constructionOf||def.id,program=FUNCTIONAL_PROGRAM[id];
   if(!program)continue;
   def.footprint=FUNCTIONAL_LAYOUTS[id]?.site||program.site;
-  if(FUNCTIONAL_LAYOUTS[id])def.description=`A ${FUNCTIONAL_LAYOUTS[id].occupants}-person home with separate sleeping and washing spaces, a living/kitchen area, and ${homePlan(FUNCTIONAL_LAYOUTS[id]).usableArea} m² of net floor before furniture.`;
+  if(FUNCTIONAL_LAYOUTS[id])def.description=`A ${FUNCTIONAL_LAYOUTS[id].shell.join(" × ")} m home with an individual roofline and sheltered entrance. The reserved site includes outdoor clearance.`;
   else if(FUNCTIONAL_DESCRIPTIONS[id])def.description=FUNCTIONAL_DESCRIPTIONS[id];
   if(FUNCTIONAL_LAYOUTS[id]||REMODELED_FACILITIES.has(id))def.revision=4;
   const stage=def.constructionOf?Number(def.id.at(-1)):2;
@@ -2079,14 +2083,17 @@ export function compactModel(root) {
       transparent.push(pane);
       return;
     }
-    if (!batches.has(key)) batches.set(key, []);
-    batches.get(key).push(geometry);
+    if (!batches.has(key)) batches.set(key, new Map());
+    const shadowKey = `${o.castShadow}:${o.receiveShadow}`;
+    const groups = batches.get(key);
+    if (!groups.has(shadowKey)) groups.set(shadowKey, {parts:[],castShadow:o.castShadow,receiveShadow:o.receiveShadow});
+    groups.get(shadowKey).parts.push(geometry);
   });
   const result = group();
   result.name = root.name;
   result.userData = { ...root.userData };
   if (transparent.length) result.add(...transparent);
-  for (const [material, parts] of batches) {
+  for (const [material, groups] of batches) for (const {parts,castShadow,receiveShadow} of groups.values()) {
     const geo = new THREE.BufferGeometry();
     for (const name of ["position", "normal", "uv"]) {
       if (!parts.every((p) => p.getAttribute(name))) continue;
@@ -2105,8 +2112,8 @@ export function compactModel(root) {
     geo.computeBoundingSphere();
     const mesh = new THREE.Mesh(geo, material);
     mesh.userData.ownedMaterial = owned.has(material);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+    mesh.castShadow = castShadow;
+    mesh.receiveShadow = receiveShadow;
     result.add(mesh);
     parts.forEach((p) => p.dispose());
   }

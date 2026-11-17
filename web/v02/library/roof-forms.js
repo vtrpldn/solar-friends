@@ -3,9 +3,9 @@ import {box,beam} from '../workshop/models.js';
 
 // Each face is authored from an eave edge to a ridge edge. Barrel tiles keep
 // their ~40 cm width and ~45 cm length on gables, hips and veranda lean-tos.
-const clay=new THREE.MeshStandardMaterial({color:'#b95532',roughness:1,flatShading:true});
-const paleClay=new THREE.MeshStandardMaterial({color:'#bf633b',roughness:1,flatShading:true});
-const metal=new THREE.MeshStandardMaterial({color:'#7d8d88',roughness:.9,flatShading:true});
+const clay=new THREE.MeshStandardMaterial({color:'#b95532',roughness:1,flatShading:true,shadowSide:THREE.DoubleSide});
+const paleClay=new THREE.MeshStandardMaterial({color:'#bf633b',roughness:1,flatShading:true,shadowSide:THREE.DoubleSide});
+const metal=new THREE.MeshStandardMaterial({color:'#7d8d88',roughness:.9,flatShading:true,shadowSide:THREE.DoubleSide});
 const V=p=>new THREE.Vector3(...p);
 function face(g,a0,b0,c0,d0){
   const a=V(a0),b=V(b0),c=V(c0),d=V(d0);
@@ -34,7 +34,9 @@ function face(g,a0,b0,c0,d0){
         for(const n of [0,2,1,1,2,3])points.push(...verts[n].toArray());
       }
       const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(points,3));geometry.computeVertexNormals();
-      const tile=new THREE.Mesh(geometry,(row*3+col)%9===0?paleClay:clay);tile.name='roof-tile';tile.castShadow=true;tile.receiveShadow=true;g.add(tile);
+      // The continuous roof skin casts the shadow; sub-pixel tile shadows
+      // produce a jagged fringe on the walls at gameplay zoom.
+      const tile=new THREE.Mesh(geometry,(row*3+col)%9===0?paleClay:clay);tile.name='roof-tile';tile.castShadow=false;tile.receiveShadow=true;g.add(tile);
     }
   }
   beam(g,a0,b0,.12,'tileDark');

@@ -1,5 +1,35 @@
 // Design targets only; production and resource rules remain separate.
 export const FUNCTIONAL_PROGRAM = {
+  "home-cottage": {
+    "site": [
+      4,
+      4
+    ],
+    "shell": [
+      6,
+      6
+    ],
+    "targetUsableArea": null,
+    "capacity": {
+      "residents": 1
+    },
+    "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
+  },
+  "home-longhouse": {
+    "site": [
+      7,
+      4
+    ],
+    "shell": [
+      12,
+      6
+    ],
+    "targetUsableArea": null,
+    "capacity": {
+      "residents": 3
+    },
+    "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
+  },
   "groundwater-well": {
     "site": [
       2,
@@ -29,11 +59,11 @@ export const FUNCTIONAL_PROGRAM = {
       10,
       8
     ],
-    "targetUsableArea": 68,
+    "targetUsableArea": null,
     "capacity": {
       "residents": 3
     },
-    "requirements": "Double bedroom, single bedroom, bathroom, living/kitchen, storage and circulation."
+    "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
   },
   "home-shared": {
     "site": [
@@ -44,11 +74,11 @@ export const FUNCTIONAL_PROGRAM = {
       10.5,
       9.5
     ],
-    "targetUsableArea": 86,
+    "targetUsableArea": null,
     "capacity": {
       "residents": 4
     },
-    "requirements": "Two twin bedrooms, two wash/toilet spaces, shared living/kitchen and storage; no four-bed single-room shortcut."
+    "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
   },
   "road": {
     "site": [
@@ -79,11 +109,11 @@ export const FUNCTIONAL_PROGRAM = {
       8,
       8
     ],
-    "targetUsableArea": 54,
+    "targetUsableArea": null,
     "capacity": {
       "residents": 2
     },
-    "requirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation."
+    "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
   },
   "shed": {
     "site": [
@@ -353,11 +383,11 @@ export const FUNCTIONAL_PROGRAM = {
       8,
       8
     ],
-    "targetUsableArea": 54,
+    "targetUsableArea": null,
     "capacity": {
       "residents": 2
     },
-    "requirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation."
+    "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
   },
   "home-gable": {
     "site": [
@@ -368,11 +398,11 @@ export const FUNCTIONAL_PROGRAM = {
       8,
       8
     ],
-    "targetUsableArea": 54,
+    "targetUsableArea": null,
     "capacity": {
       "residents": 2
     },
-    "requirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation."
+    "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
   },
   "home-courtyard": {
     "site": [
@@ -383,11 +413,11 @@ export const FUNCTIONAL_PROGRAM = {
       8,
       8
     ],
-    "targetUsableArea": 54,
+    "targetUsableArea": null,
     "capacity": {
       "residents": 2
     },
-    "requirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation."
+    "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
   },
   "adobe-gable": {
     "site": [
@@ -398,11 +428,11 @@ export const FUNCTIONAL_PROGRAM = {
       8,
       8
     ],
-    "targetUsableArea": 54,
+    "targetUsableArea": null,
     "capacity": {
       "residents": 2
     },
-    "requirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation."
+    "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
   },
   "adobe-veranda": {
     "site": [
@@ -413,11 +443,11 @@ export const FUNCTIONAL_PROGRAM = {
       8,
       8
     ],
-    "targetUsableArea": 54,
+    "targetUsableArea": null,
     "capacity": {
       "residents": 2
     },
-    "requirements": "Separate bedroom, bathroom, combined living/kitchen, storage and circulation."
+    "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
   },
   "goat-pasture-empty": {
     "site": [

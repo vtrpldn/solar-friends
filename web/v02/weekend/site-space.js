@@ -1,6 +1,6 @@
 import { METRES_PER_CELL } from '../library/scale.js';
 import {FUNCTIONAL_PROGRAM,FUNCTIONAL_DESCRIPTIONS} from '../library/functional-program.js';
-import {FUNCTIONAL_LAYOUTS,homePlan} from '../library/functional-layouts.js';
+import {FUNCTIONAL_LAYOUTS} from '../library/functional-layouts.js';
 
 // Physical dimensions exclude access reservations and roof/canopy overhangs.
 // Productive area describes the visible plot, never a production-rate multiplier.
@@ -29,7 +29,7 @@ for (const id of ['home-veranda','home-gable','home-courtyard','adobe-gable','ad
   SITE_SPACE[id] = { object: [3.4, id.includes('veranda') || id.includes('courtyard') ? 2.55 : 3.35], label: 'wall shell', note: 'Compact cabin with a porch or threshold. Keep the front approach open.' };
 
 for(const [id,l] of Object.entries(FUNCTIONAL_LAYOUTS))SITE_SPACE[id]={object:l.shell,label:'external wall shell',
-  note:`${homePlan(l).usableArea} m² net floor after exterior walls and internal partitions, before furniture. Designed for ${l.occupants} residents. Outdoor space is separate.`};
+  note:`Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house.`};
 for(const [id,p] of Object.entries(FUNCTIONAL_PROGRAM)){
   if(FUNCTIONAL_LAYOUTS[id]||!p.shell)continue;
   SITE_SPACE[id]={object:p.shell,label:'structure',note:FUNCTIONAL_DESCRIPTIONS[id]||'Keep the service approach clear.'};

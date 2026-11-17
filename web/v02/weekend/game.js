@@ -209,7 +209,7 @@ scene.add(daylight);
 const sun = new THREE.DirectionalLight("#ffe2a8", 3.4);
 sun.position.set(-25, 45, 18);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.mapSize.set(4096, 4096);
 Object.assign(sun.shadow.camera, {
   left: -48,
   right: 48,
@@ -2019,7 +2019,7 @@ function frame(now) {
   fitTerrainCamera(camera, controls.target, scene.fog);
   // Keep the shadow volume over the viewed land, not the world origin.
   // Moving light and target together preserves the time-of-day sun direction.
-  const shadowExtent = Math.max(32, Math.hypot(camera.right - camera.left, camera.top - camera.bottom) / (2 * camera.zoom) + 20);
+  const shadowExtent = Math.max(16, Math.hypot(camera.right - camera.left, camera.top - camera.bottom) / (2 * camera.zoom) + 12);
   sun.position.sub(sun.target.position).normalize().multiplyScalar(400);
   sun.target.position.copy(controls.target);
   sun.position.add(sun.target.position);
