@@ -2132,7 +2132,7 @@ function tickUncached(s, dt) {
     const sleepNight=Math.floor((hours-5)/24);
     if(!r.sleepUntil && !r.needTask && Math.min(r.needs.bladder,r.needs.bowels,r.needs.hydration)>20 && (r.needs.hunger>20 || !(foodPortions(s))) && r.sleepNight!==sleepNight && (hour>=bedtime || hour<5) && !r.cargo && r.action!=='town' && !r.outsideWork) {
       r.sleepNight=sleepNight;
-      r.sleepUntil=s.time+(6+3*(1-r.energy/100))*60/.45;
+      r.sleepUntil=s.time+(7.5+1.5*(1-r.energy/100))*60/.45;
       r.job=null;r.operation=null;r.walk=[];r.target=null;r.action='rest';
       cancelNeed(s,r);
     }
@@ -2244,7 +2244,7 @@ function tickUncached(s, dt) {
       else {r.action='idle';r.walk=[];r.target=null;}
     }
     if(r.resumeSleepUntil && !r.needTask && !r.tentPhase && !r.cargo && !urgent && Math.min(r.needs.bladder,r.needs.bowels,r.needs.hydration)>30 && (r.needs.hunger>30 || foodPortions(s)<1)) {
-      if(r.resumeSleepUntil>s.time && r.energy<95){r.sleepUntil=r.resumeSleepUntil;r.action='rest';r.walk=[];r.target=null;}
+      if(r.resumeSleepUntil>s.time){r.sleepUntil=r.resumeSleepUntil;r.action='rest';r.walk=[];r.target=null;}
       r.resumeSleepUntil=null;
     }
     if (!r.sleepUntil) chooseNeed(s,r,i,needApi);
@@ -2767,6 +2767,7 @@ export function restore(text) {
       for (const k of ["washTime", "cleanedAtWork", "toiletAt", "toiletTime"])
         if (r[k] !== undefined && (!Number.isFinite(r[k]) || r[k] < 0))
           return null;
+      if (r.lastMealAt!==undefined && (!Number.isFinite(r.lastMealAt) || r.lastMealAt<0 || r.lastMealAt>s.time)) return null;
       if (!validNeeds(r) || !validCraftSkills(r) || !validMind(r,fresh.people,s.time)) return null;
       if(r.friendships!==undefined && (!r.friendships || typeof r.friendships!=='object' || Array.isArray(r.friendships) || Object.entries(r.friendships).some(([id,value])=>id===r.id || !fresh.people.some(p=>p.id===id) || !Number.isFinite(value) || value<0 || value>100))) return null;
       ensureNeeds(r,i);
