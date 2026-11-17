@@ -128,6 +128,7 @@ export function syncProjectNode(sys, p, defs) {
   };
   const node=sys.nodes[p.id];
   if(["water-storage","well"].includes(kind))node.maintainFresh ??= true;
+  if (kind === "home" && node.capacity[3] === 0) node.capacity = [...CAPACITY.home];
   if(node.capacity[3]>0)node.maintainSanitation ??= true;
   node.serviceFactor=serviceFactor(p);
   if(kind!=='home'){
@@ -145,7 +146,6 @@ export function syncProjectNode(sys, p, defs) {
   if(kind==='well')node.capacity=[Math.max(1000,node.water[0]),Math.max(1000,node.water[1]),0,0];
   node.x = p.x;
   node.z = p.z;
-  if (kind === "home" && sys.nodes[p.id].capacity[3] === 0) sys.nodes[p.id].capacity = [...CAPACITY.home];
 }
 export function syncInfrastructure(s, defs) {
   const sys = ensureInfrastructure(s);
