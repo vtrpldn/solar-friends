@@ -11,6 +11,7 @@ import {spendableMoney} from '../web/v02/weekend/procurement-budget.js';
 import {economyPolicies} from '../web/v02/weekend/economy-policies.js';
 const option=(name,fallback)=>process.argv.find(a=>a.startsWith(`--${name}=`))?.split('=').slice(1).join('=')??fallback;
 const days=Number(option('days',100)),seed=Number(option('seed',42));
+const commit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
 assert(Number.isInteger(days)&&days>0&&days<=365);
 const output=option('output','artifacts/hundred-days');fs.mkdirSync(output,{recursive:true});
 let s=createWeekend(seed);chooseCamp(s,'entrance');ensureNaturalLand(s,PROJECTS);enableFastNavigation(s);
@@ -71,7 +72,7 @@ function sample(day){
   fs.writeFileSync(path.join(output,`day-${day}-save.json`),raw);
  }
  const elapsed=(performance.now()-started)/1000;
- fs.writeFileSync(path.join(output,'report.json'),JSON.stringify({commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),method:'Fresh story village with natural terrain; ordinary player commands; no injected funds, resources or completed buildings; same 0.1-second steps scheduled at 1024x through LabRunner. Automated simulation, not browser play.',seed,daysRequested:days,daysCompleted:day,initialMoney,elapsedSeconds:elapsed,actualSpeed:s.time/elapsed,orders,samples,maxStarvation,issues},null,2));
+ fs.writeFileSync(path.join(output,'report.json'),JSON.stringify({commit,method:'Fresh story village with natural terrain; ordinary player commands; no injected funds, resources or completed buildings; same 0.1-second steps scheduled at 1024x through LabRunner. Automated simulation, not browser play.',seed,daysRequested:days,daysCompleted:day,initialMoney,elapsedSeconds:elapsed,actualSpeed:s.time/elapsed,orders,samples,maxStarvation,issues},null,2));
  console.log(`Day ${day}/${days}: R$${s.money.toFixed(2)}, food ${(s.materials.food+s.materials.meals).toFixed(1)}, ${row.buildings.filter(p=>p.progress===1).length} completed buildings, ${Math.round(s.time/elapsed)}x actual`);
 }
 for(let day=1;day<=days;day++){

@@ -30,7 +30,7 @@ jobs:
           node scripts/verify-v02-needs.mjs
           node scripts/verify-v02-urgent-needs.mjs
           node scripts/verify-v02-resident-agency-browser.mjs
-      - run: npm run dev:check
+      - run: npm run dev:check -- --v2
       - uses: actions/upload-artifact@v4
         if: always()
         continue-on-error: true
