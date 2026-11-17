@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,PROCESSES,queueProduction,queueWater,maintainWater,queueSanitation,tick,save,restore,requiredLoads} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,PROJECTS,PROCESSES,queueProduction,queueWater,maintainWater,queueSanitation,tick,save,restore,requiredLoads,enableFastNavigation} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure,infrastructureStep} from '../web/v02/weekend/infrastructure.js';
 import {autoConnectUtilities} from '../web/v02/weekend/auto-utilities.js';
 import {resourceSnapshot} from '../web/v02/weekend/resource-trends.js';
-const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'shade');s.rainSeen=true;s.rainResolved=true;return s;};
+const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'shade');enableFastNavigation(s);s.rainSeen=true;s.rainResolved=true;return s;};
 const built=(s,key,x,z)=>{const p={id:s.nextId++,key,x,z,work:PROJECTS[key].work,delivered:requiredLoads(key)};s.projects.push(p);syncInfrastructure(s,PROJECTS);return p;};
 const advance=(s,predicate)=>{for(let i=0;i<30000&&!predicate();i++)tick(s,.1);assert(predicate(),JSON.stringify(s.operations));};
-const s=fresh(),k=built(s,'kitchen',40,40),g=built(s,'garden',43,40);
+const s=fresh(),k=built(s,'kitchen',40,40),g=built(s,'garden',48,40);
 s.materials.food=20;s.materials.seedlings=20;autoConnectUtilities(s,PROJECTS);
 assert.equal(queueProduction(s,k.id,'meals'),'');
 const kitchen=s.infrastructure.nodes[k.id];kitchen.water[0]=0;
@@ -29,7 +29,7 @@ advance(water,()=>waste.water[3]===0);assert(water.infrastructure.account.wasteR
 assert.equal(queueSanitation(water,toilet.id),'No waste to service.');
 const homeKey=Object.keys(PROJECTS).find(key=>PROJECTS[key].kind==='home');
 assert(!PROJECTS[homeKey].materials.panels&&!PROJECTS[homeKey].materials.batteries);
-const house=built(water,homeKey,48,48);assert.equal(water.infrastructure.nodes[house.id].battery,0);
+const house=built(water,homeKey,55,48);assert.equal(water.infrastructure.nodes[house.id].battery,0);
 for(const [id,n] of Object.entries(PROCESSES.solar_upgrade.input))water.materials[id]=n;
 assert.equal(queueProduction(water,house.id,'solar_upgrade'),'');advance(water,()=>house.solarUpgrade);
 syncInfrastructure(water,PROJECTS);assert.equal(water.infrastructure.nodes[house.id].battery,4);

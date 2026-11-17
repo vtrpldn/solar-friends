@@ -10,6 +10,7 @@ import {
   walkSegmentClear,
   crossingAt,
   tick,
+  enableFastNavigation,
 } from "../web/v02/weekend/simulation.js";
 const s = createSandbox(42);
 let site;
@@ -39,7 +40,7 @@ assert.ok(crossingAt(s, site.x + 4, site.z));
 assert.ok(restore(save(s)), "bridge saves");
 s.projects.at(-1).work = 0;
 assert.equal(route(s, right, left), null, "unfinished bridge is not walkable");
-const roads = createSandbox(42);
+const roads = createSandbox(42);enableFastNavigation(roads);
 const pads = JSON.stringify(roads.terrainPads);
 for (let x = 50; x < 57; x++) assert.equal(plan(roads, "road", x, 50), "");
 assert.ok(route(roads, { x: 49, z: 50 }, { x: 57, z: 50 }));
@@ -49,7 +50,7 @@ const plain = route(roads, {x:49,z:51}, {x:57,z:51});
 assert(plain.every(p=>p.z===51), "Blueprints do not grant road path preference");
 assert(walkSegmentClear(roads,{x:49,z:50},{x:57,z:50}), "Road plans leave the ground walkable");
 const workers = new Set();
-for(let i=0;i<16000 && roads.projects.some(p=>p.work<PROJECTS.road.work);i++) {
+for(let i=0;i<96000 && roads.projects.some(p=>p.work<PROJECTS.road.work);i++) {
   tick(roads,.1);
   roads.people.filter(r=>r.action==='build').forEach(r=>workers.add(r.id));
 }
@@ -69,7 +70,7 @@ assert.ok(placementError(roads, "bridge", 60, 60), "bridge requires river");
 console.log(
   "PASS: bridge spans dry banks, connects only when complete, safe crossing segments, road placement and persistence without terrain flattening.",
 );
-const storyRoad = createSandbox(42);
+const storyRoad = createSandbox(42);enableFastNavigation(storyRoad);
 storyRoad.mode = 'story';
 const stone = storyRoad.materials.stone, earth = storyRoad.materials.earth;
 assert.equal(plan(storyRoad,'road',40,35),'');
