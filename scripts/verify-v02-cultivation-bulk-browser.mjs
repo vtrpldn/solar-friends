@@ -1,0 +1,46 @@
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+import {serve} from './serve.mjs';
+const html=`<!doctype html><html><head><link rel="stylesheet" href="/v2/weekend.css"><link rel="stylesheet" href="/v2/cultivation.css"><script type="importmap">{"imports":{"three":"/v2/workshop/vendor/three.module.js"}}</script></head><body><button id="build-field">Field</button><div id="selection"></div><canvas id="world"></canvas><script type="module">
+import * as THREE from 'three';
+import {installFarmingUI} from '/v2/cultivation-ui.js';
+import {ensureCultivation,finishFarmJob} from '/v2/cultivation.js';
+const p={id:1,key:'field',fieldSize:[9,9],work:1};
+const s={time:0,mode:'story',projects:[p],people:[],operations:[],materials:{beans_seed:3,greens_seed:0,compost:0}};
+ensureCultivation(s,p);
+const ui=installFarmingUI({state:()=>s,selected:()=>p.id,scene:new THREE.Scene(),hit:()=>null,controls:{},select:()=>{},changed:()=>{},message:()=>{},begin:()=>{},placementGrid:()=>{}});
+window.fixture={s,p,ui,finish:()=>{for(const o of s.operations.filter(o=>!o.done)){finishFarmJob(s,p,o);o.done=true;}ui.refresh();}};ui.refresh();
+</script></body></html>`;
+const server=await serve(0,{handle(req,res,path){if(path!=='/bulk-test')return false;res.writeHead(200,{'Content-Type':'text/html'}).end(html);return true;}});
+const browser=await chromium.launch({headless:true});
+try{
+ const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(`http://127.0.0.1:${server.address().port}/bulk-test`);await page.waitForSelector('#farm-inspect-bed');
+ assert.equal(await page.locator('#farm-bed').count(),0,'overview has no long bed dropdown');
+ assert.match(await page.locator('#farm-content').innerText(),/72 beds/);
+ await page.locator('#farm-crop').selectOption('beans');
+ assert(await page.evaluate(()=>fixture.p.cultivation.beds.every(b=>b.crop==='beans')));
+ await page.locator('#farm-density').selectOption('0.5');
+ await page.locator('#farm-irrigation').uncheck();
+ assert(await page.evaluate(()=>fixture.p.cultivation.beds.every(b=>b.density===.5&&!b.irrigation)));
+ await page.screenshot({path:process.env.FARM_BULK_SCREENSHOT||'/tmp/farming-bulk-overview.png'});
+ await page.locator('[data-farm-action="prepare"]').click();
+ assert.equal(await page.evaluate(()=>fixture.s.operations.length),72);
+ assert(await page.locator('#farm-crop').isDisabled());
+ await page.evaluate(()=>fixture.finish());
+ await page.locator('[data-farm-action="plant"]').click();
+ assert.match(await page.locator('#farm-feedback').innerText(),/3 beds queued.*69 beds skipped.*Missing/);
+ assert.equal(await page.evaluate(()=>fixture.s.materials.beans_seed),0);
+ await page.evaluate(()=>{fixture.s.materials.beans_seed=69;});
+ await page.locator('[data-farm-action="plant"]').click();
+ assert.equal(await page.evaluate(()=>fixture.s.operations.filter(o=>!o.done).length),72);
+ await page.evaluate(()=>fixture.finish());
+ await page.locator('#farm-inspect-bed').click();await page.locator('#farm-bed').selectOption('47');
+ assert.equal(await page.locator('#farm-bed').inputValue(),'47');
+ await page.locator('#farm-whole-site').click();assert.equal(await page.locator('#farm-bed').count(),0);
+ await page.locator('.farm-details summary').click();
+ page.once('dialog',dialog=>dialog.dismiss());await page.locator('[data-farm-action="clear"]').click();
+ assert.equal(await page.evaluate(()=>fixture.s.operations.filter(o=>!o.done).length),0,'cancelled clearing changes nothing');
+ assert.deepEqual(errors,[]);
+ console.log('PASS desktop 72-bed overview, bulk settings, prepare, partial planting, retry, individual inspection and cancelled clearing');
+}finally{await browser.close();server.close();}

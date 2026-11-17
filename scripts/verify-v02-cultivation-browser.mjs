@@ -18,6 +18,7 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await page.waitForSelector('#build-field',{state:'attached'});await page.waitForTimeout(1500);
  await page.locator('#completed-tasks button').filter({hasText:'Cultivated field'}).first().evaluate(e=>e.click());
  await page.waitForSelector('#farm-inspect-bed');
+ await page.screenshot({path:`${out}/whole-field.png`});
  await page.locator('#close-farm').click();
  await page.locator('[data-manage="resources"]').first().click();
  const farmCard=page.locator(`[data-cultivation-site="${field.id}"]`);
