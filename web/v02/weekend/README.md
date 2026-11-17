@@ -24,6 +24,8 @@ Blueprints reserve materials; residents haul supplies and assemble projects. Mon
 
 Raw materials come from generated deposits, cultivation and player-selected tree cutting. Raw wood can be processed into timber and planks. Workshop recipes, crops and animal products use inputs, work and storage; regrowth limits repeat harvests. Animals are counted individually. Reclaimed parts are retired from the active economy.
 
+When no work or urgent need calls, residents choose a short activity rather than stand at a leisure destination: sitting and warming their hands by the fire, reading, stretching, or walking between two places. Visits begin after arrival and end after a finite stay; recent choices discourage repetition. Evening fires, daylight reading, shelter in rain, and personal preferences affect the choice. Nearby willing residents can start a fireside conversation. New work interrupts casual downtime, and transient visits are replanned after loading. The unsaved `/v2/?downtime-preview` scene demonstrates these behaviors.
+
 ## Water, power and sanitation
 
 Separate management screens show water, power, resources and finances. Residents can carry river water and purify it; maintaining a drinking-water reserve reduces repeated orders. Wells and pumps provide other sources. Water quality and storage matter, and pending crop work does not prevent watering.
@@ -59,3 +61,5 @@ Sandbox replenishes supplies and offers optional instant buildings while residen
 Run the targeted verification commands listed in the [root README](../../../README.md). The [68-type catalog playthrough](../../../docs/playtests/2026-11-08-regular-catalog.md) records actual construction through normal gameplay. The [three-day replay](../../../docs/balance/2026-11-08-economy.md) checks subsequent policy changes. Neither proves balance for every biome, seed or layout.
 
 Resident behavior checks: `node scripts/verify-v02-resident-agency.mjs`. Desktop profile checks: `node scripts/verify-v02-resident-agency-browser.mjs` (optionally set `SOLAR_EVIDENCE_DIR` for screenshots). Both also run in CI.
+
+Downtime and seated-pose checks: `node scripts/verify-v02-downtime.mjs`.

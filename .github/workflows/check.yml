@@ -25,6 +25,7 @@ jobs:
         run: |
           node scripts/verify-v02-personality.mjs
           node scripts/verify-v02-resident-agency.mjs
+          node scripts/verify-v02-downtime.mjs
           node scripts/verify-v02-needs.mjs
           node scripts/verify-v02-urgent-needs.mjs
           node scripts/verify-v02-resident-agency-browser.mjs

@@ -29,6 +29,7 @@ export function cancelNeed(s,r) {
  release(r);
 }
 function assign(s,r,kind,spot,details={}) {
+ r.downtime=null;
  r.job=null;r.workSpot=null;r.linkJob=null;r.operation=null;r.supplyGoal=null;
  r.walk=[];r.target=null;r.idleGoal=null;r.idleUntil=0;
  r.needBlocked=null;r.action=ACTION[kind];r.needTask={kind,target:spot,elapsed:0,duration:DURATIONS[kind],created:s.time,...details};
@@ -81,24 +82,36 @@ export function chooseNeed(s,r,i,api) {
    if(spot){assign(s,r,kind,spot,{river:true,label:'Washing by the river',animation:'bathe'});return;}
   }
   if(kind==='social') {
-   for(const partner of conversationPartners(s,r)) {
-    const spot=api.groundSpot(r,api.camp(),i), other=spot && api.groundSpot(partner,spot,i+1);
-    if(spot&&other&&Math.hypot(spot.x-other.x,spot.z-other.z)<=2.5){
-     const conversation=conversationFor(s,r,partner);
-     assign(s,r,kind,spot,{partner:partner.id,conversation,label:`Talking with ${partner.name} about ${conversation.topic}`,animation:'chat'});
-     assign(s,partner,kind,other,{partner:r.id,conversation,label:`Talking with ${r.name} about ${conversation.topic}`,animation:'chat'});
-     r.lookAt=partner.id;partner.lookAt=r.id;return;
-    }
-   }
+   if(inviteConversation(s,r,i,api))return;
   }
   if(kind==='fun') {
    const facility=choose(node=>['square','reading-room','outdoor-classroom','exercise-garden','volleyball-court','community-hall','picnic-table','garden-bench','fire-circle','hammock'].includes(node.kind));
    const spot=facility?.spot || api.groundSpot(r,api.camp(),i+3);
-   if(spot){const reading=facility?.node.kind==='reading-room';assign(s,r,kind,spot,{site:facility?.node.id,label:reading?'Reading for a while':facility?'Enjoying the community space':'Taking a stretching break',animation:reading?'read':facility?'play':'stretch'});return;}
+   if(spot){
+    const place=facility?.node.kind,fire=place==='fire-circle',reading=['reading-room','outdoor-classroom','community-hall'].includes(place);
+    assign(s,r,kind,spot,{site:facility?.node.id,label:fire?'Sitting by the fire':reading?'Reading for a while':'Taking a stretching break',animation:fire?'fire-sit':reading?'read':'stretch',facing:fire?{x:facility.node.x,z:facility.node.z}:null});return;
+   }
   }
  }
  r.needBlocked=pending.includes("hunger") && !(s.materials.meals>0 || s.materials.food>0) ? "Hungry: no food in stores" : pending[0]==="social" ? "Waiting for a friend to have a break" : "Looking for somewhere to meet this need";
  r.needRetryAt=s.time+12;
+}
+// Both needed and spontaneous conversations share the same consent, travel,
+// completion, and cancellation rules. Fireside invitations stay local.
+export function inviteConversation(s,r,i,api,{center=api.camp(),near=null,idleOnly=false}={}) {
+ if(r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.action==='town' || r.energy<35 || (r.mind?.quietUntil||0)>s.time)return false;
+ for(const partner of conversationPartners(s,r)) {
+  if(idleOnly && (committed(partner) || (partner.walk.length && !partner.downtime)))continue;
+  if(near && Math.hypot(partner.x-near.x,partner.z-near.z)>4)continue;
+  const spot=api.groundSpot(r,center,i),other=spot && api.groundSpot(partner,spot,i+1);
+  if(spot&&other&&Math.hypot(spot.x-other.x,spot.z-other.z)<=2.5){
+   const conversation=conversationFor(s,r,partner);
+   assign(s,r,'social',spot,{partner:partner.id,conversation,label:`Talking with ${partner.name} about ${conversation.topic}`,animation:'chat'});
+   assign(s,partner,'social',other,{partner:r.id,conversation,label:`Talking with ${r.name} about ${conversation.topic}`,animation:'chat'});
+   r.lookAt=partner.id;partner.lookAt=r.id;return true;
+  }
+ }
+ return false;
 }
 // A task owns its route until completion. Needs improve through actions, never
 // merely because a destination was selected. Food and water settle exactly once.

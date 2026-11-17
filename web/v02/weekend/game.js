@@ -13,6 +13,7 @@ import {settingsFor,BIOMES,richnessFactor} from './world-settings.js';
 import {beginArrival} from './simulation.js';
 import {depositCapacity} from './land-layout.js';
 import {profileFor,friendshipLabel} from './resident-personality.js';
+import {downtimeMotion,downtimeLabel} from './resident-downtime.js';
 import {currentThought,aspirationStatus} from './resident-mind.js';
 import { needMeters } from "./resident-needs.js";
 import { drapeRoadGeometry } from "./road-surface.js";
@@ -104,8 +105,9 @@ import {
 const $ = (id) => document.getElementById(id),
   SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
 const wildlifePreview = new URLSearchParams(location.search).has("wildlife-preview");
+const downtimePreview = new URLSearchParams(location.search).has("downtime-preview");
 const needsPreview = new URLSearchParams(location.search).has("needs-preview");
-const utilitiesPreview = needsPreview || new URLSearchParams(location.search).has(
+const utilitiesPreview = needsPreview || downtimePreview || new URLSearchParams(location.search).has(
   "utilities-preview",
 );
 const restPreview = new URLSearchParams(location.search).has("rest-preview");
@@ -145,6 +147,14 @@ if (needsPreview) {
   });
   const home=Object.values(s.infrastructure.nodes).find(n=>n.kind==='home');
   if(home) home.water[0]=5;
+}
+if (downtimePreview) {
+  s.log=['Downtime preview: personal activities and fireside company. This scene is not saved.'];
+  s.time=1300;s.rain=false;s.rainSeen=true;s.rainResolved=true;
+  s.people.forEach((r,i)=>{
+    r.x=[32,34,33,32,34][i];r.z=[35,35,36,36,36][i];r.energy=95;
+    r.needs={hunger:95,bladder:95,bowels:95,hygiene:95,social:[70,95,75,95,95][i],fun:85};
+  });
 }
 if (restPreview) for (const resident of s.people) resident.energy = 10;
 let loadFailure = false;
@@ -1415,7 +1425,7 @@ function renderUI() {
     selected,
     placing,
     s.log,
-    s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), JSON.stringify(r.mind), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
+    s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), JSON.stringify(r.mind), downtimeLabel(r), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
     s.projects.map((p) => [
       p.id, p.delivered, p.staged,
       Math.floor((p.work / PROJECTS[p.key].work) * 100),
@@ -1561,7 +1571,7 @@ function renderUI() {
               ? PROCESSES[
                   s.operations.find((o) => o.id === r.operation)?.recipe
                 ]?.name || "Preparing supplies"
-              : (r.action === "relax" && COMMUNITY[r.leisureKind]?.activity) ||
+              : downtimeLabel(r) ||
                 actionText[r.action] ||
                 "Settling in";
     if(r.job && r.cargo && r.haulLoads) status.textContent = `Carrying ${r.haulLoads} load${r.haulLoads===1?'':'s'} to ${r.haulStage==='storage'?'nearby storage':PROJECTS[s.projects.find(p=>p.id===r.job)?.key]?.name || 'the building site'}`;
@@ -1873,6 +1883,8 @@ function frame(now) {
       const friend = s.people.find((p) => p.id === r.lookAt);
       if (friend) desiredYaw = Math.atan2(friend.x - r.x, friend.z - r.z);
     }
+    const leisureFacing=downtimeMotion(r)?r.downtime.facing:r.needTask?.elapsed>0&&!r.walk.length?r.needTask.facing:null;
+    if(leisureFacing)desiredYaw=Math.atan2(leisureFacing.x-r.x,leisureFacing.z-r.z);
     const turn = Math.atan2(
       Math.sin(desiredYaw - g.rotation.y),
       Math.cos(desiredYaw - g.rotation.y),
@@ -1975,6 +1987,8 @@ function frame(now) {
         : "walk"
       : visit?.animation
         ? (visit.private ? "duck-walk" : visit.animation)
+      : downtimeMotion(r)
+        ? downtimeMotion(r)
       : seated
         ? "sit"
         : r.action === "wash"
