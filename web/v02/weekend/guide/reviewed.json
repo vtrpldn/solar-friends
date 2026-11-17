@@ -145,7 +145,7 @@
     "web/v02/workshop/models.js": "4c403f76f3b1ba786be6c84c1c9129de92804ed77b8b8e80c8e76d21c12067d1"
   },
   "content": {
-    "topics": "53deb465a1cebec9e8518db2c3cd9d5cd252533ac8bcf2bc3437483efa5c830d",
+    "topics": "0d9425a9b170a61a10a9824124933587178a5447b456b45590a6a94015bc75f2",
     "facts": "a38be0845c3d0f82be67f883bb4c49ab11b7d63b572a583fc5ed6c02518d413e",
     "renderer": "8bd634ddece8c801ba064fe84a4d11adbf769b0ce6a9f7a299f6e0e2dd83dcca",
     "dependencies": "9cc183f2db674fa60fb2a2969ed46747343f550c3ae5e9395aab3532a841eb7a"
@@ -153,10 +153,10 @@
   "assets": {
     "autonomy.svg": "f20b17db5e9f0520a2a22766a7665772998abc916d3d51f7e3c434cd1b9fe9d7",
     "system-overview.svg": "6409b4964fd4c0081b0eab83b0e6867563cbc5558030ba00bde86155b61be93f",
-    "clock-modes-and-simulation-stepping.svg": "58877d68badca270ba002dde9f608b68cabe99fb2d51114d2359f75658795c9d",
+    "clock-modes-and-simulation-stepping.svg": "59e8f197d37b31bc5a6d250def2474b781075ef1dc5b72ab9794d4aaf6ff3bd3",
     "world-terrain-and-navigation.svg": "c8c01f1202ba6afba117437109f9b42c91454050dfdd3487bc3a8d3b6a4d8470",
     "resident-needs-rest-and-homes.svg": "15e3c03b4d34814c0f5aa7fa03af0cd21f6496914d92bdf805a19018f4fd65f5",
-    "personality-relationships-and-downtime.svg": "05aa61633d8792f59ea96261fe610d64c4e2bf378db93126fa8027cda1f71124",
+    "personality-relationships-and-downtime.svg": "e6f13dafe40c92978838a8b1de4614c70baa720e24a46c4825a60ddc54bea453",
     "work-dispatch-and-interruption.svg": "ee8085d6cfe8707a64729774f92f85ecccb9a017889b43d924c15e79e8fb1a9f",
     "construction-and-material-staging.svg": "550e321e5c84b533162df4dac4d8bc5b10e86b12153dfc05146e8b545bada4ab",
     "relocation-demolition-and-salvage.svg": "b348336fdad11421574ac30d46a0bc434b7873eacb1a5335951577b9a81de972",
@@ -175,9 +175,8 @@
     "inventory-ownership-and-material-accounting.svg": "f5fe00a34fb5d66ecb0c9df93e6ea018f72707370e332d21faceef5a8fa26b47",
     "purchases-sales-and-physical-transport.svg": "05ae6a865088c27adbe5da38c1c131cdd70741dcb18678e466688c319f9fb28c",
     "cash-commitments-and-forecasts.svg": "1822f90d40cd454dec0f5a087b2185da8e0e4db0667e3fc55f9f8647f5f429b4",
-    "optional-outside-employment.svg": "dc1d63ed7bdbb68e59c79412836a0ddcd10ce4eb16bd9e6a2f918b9905ff7e46",
+    "optional-outside-employment.svg": "24dbb4c71b5b8ba41f1d755c6cf9ab1ca41b2bceefba7deea62e21ab27545ccc",
     "asset-maintenance-and-replacement.svg": "4f242b4dd6efcd9f2c604bbc58378df3f485c8cf4d044b5439724c91901cddef",
-    "save-migration-and-recovery.svg": "2316ecd0388925eeffbb0f3f7be2c3f1474c61505d1e9fc106fc7e737bd90148",
-    "presentation-inspection-and-ambient-life.svg": "b3050d72e8e3f2f5275250a0aa199dba5e1bb6362dd8fed616ffbd5c4b84b33a"
+    "presentation-inspection-and-ambient-life.svg": "7cdf88759bae23b02676b55b1971df6f980282e3dc8ce5237693567f341d6cbc"
   }
 }
