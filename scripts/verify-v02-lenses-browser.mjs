@@ -4,7 +4,7 @@ import {serve} from './serve.mjs';
 import {mkdir} from 'node:fs/promises';
 const out=process.env.LENS_SCREENSHOTS||'/tmp/solar-lenses';await mkdir(out,{recursive:true});
 const server=await serve(0);
-const browser=await chromium.launch({headless:true,args:process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]});
+const browser=await chromium.launch({headless:true,args:['--mute-audio',...(process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[])]});
 const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
 page.on('pageerror',e=>errors.push(e.message));
 try {

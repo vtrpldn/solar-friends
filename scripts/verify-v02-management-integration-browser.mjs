@@ -12,7 +12,7 @@ const values=new Map(),slots=saveSlots({getItem:key=>values.get(key)||null,setIt
 const named=slots.create('Integration village','sandbox',save(s));
 const server=await serve();let browser;
 try{
- browser=await chromium.launch({headless:true,args:process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]});const page=await browser.newPage({viewport:{width:1440,height:1000}});page.setDefaultTimeout(30000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ browser=await chromium.launch({headless:true,args:['--mute-audio',...(process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[])]});const page=await browser.newPage({viewport:{width:1440,height:1000}});page.setDefaultTimeout(30000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(({key,value,slotKey,slotData})=>{if(!sessionStorage.getItem('integration-fixture')){localStorage.setItem(key,value);localStorage.setItem(slotKey,slotData);sessionStorage.setItem('integration-fixture','1');}},{key:SANDBOX_SAVE,value:save(s),slotKey:SLOT_KEY,slotData:values.get(SLOT_KEY)});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);
  const dialog=page.locator('#management');
