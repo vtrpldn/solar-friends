@@ -143,7 +143,8 @@ export function syncInfrastructure(s, defs) {
       node.kind=kind;node.capacity=[Math.max(250,node.water[0]),Math.max(250,node.water[1]),0,0];
     }
     if(kind==='well')node.capacity=[Math.max(1000,node.water[0]),Math.max(1000,node.water[1]),0,0];
-    Object.assign(sys.nodes[p.id], { x: p.x, z: p.z });
+    node.x = p.x;
+    node.z = p.z;
     if (kind === "home" && sys.nodes[p.id].capacity[3] === 0) sys.nodes[p.id].capacity = [...CAPACITY.home];
   }
   // Old saves may contain a passive structure disabled by the former blanket
@@ -263,7 +264,7 @@ export function infrastructureStep(s, defs, dt) {
         ? { solar_farm: (n.solarKw??1.2) * sun, hydro: 2.34*hydroFactor(s), home: n.solarUpgrade ? 0.6 * sun : 0 }[n.kind] || 0
         : 0;
       const machinery=['kitchen','workshop'].includes(n.kind);
-      const pumping=n.kind==='water-pump' && n.water[1]<n.capacity[1]-.01 && (riverBankAt(n.x+.5,n.z+.5,3,s.landSeed) || Object.values(sys.nodes).some(a=>a.kind==='groundwater-well' && a.enabled && a.water[1]>0 && Math.hypot(a.x-n.x,a.z-n.z)<=6));
+      const pumping=n.kind==='water-pump' && n.water[1]<n.capacity[1]-.01 && (riverBankAt(n.x+.5,n.z+.5,3,s.landSeed) || nodes.some(a=>a.kind==='groundwater-well' && a.enabled && a.water[1]>0 && Math.hypot(a.x-n.x,a.z-n.z)<=6));
       const filtering=n.kind==='well' && (n.water[1]>0 || s.rain) && n.water[0]<n.capacity[0]-.01;
       n.demand = !n.enabled ? 0 :
         (pumping || filtering ? POWER_LOAD[n.kind] :
@@ -336,14 +337,14 @@ export function infrastructureStep(s, defs, dt) {
     }
   }
   const catchments=rainCatchments(s,defs);
-  for (const n of Object.values(sys.nodes).sort((a,b)=>a.id-b.id)) {
+  for (const n of [...nodes].sort((a,b)=>a.id-b.id)) {
     if(n.enabled && n.kind==='groundwater-well') {
       const add=extractWater(s,"groundwater",Math.min(n.capacity[1]-n.water[1],8*hours*waterFactor(s.worldSettings?.water)));
       n.water[1]+=add;sys.account.waterReceived+=add;
     }
     if(n.enabled && n.kind==='water-pump' && n.power>.99 && n.demand>0) {
       let amount=Math.min(n.capacity[1]-n.water[1],600*hours*(n.serviceFactor??1));
-      const source=Object.values(sys.nodes).filter(a=>a.kind==='groundwater-well'&&a.enabled&&Math.hypot(a.x-n.x,a.z-n.z)<=6).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
+      const source=nodes.filter(a=>a.kind==='groundwater-well'&&a.enabled&&Math.hypot(a.x-n.x,a.z-n.z)<=6).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
       if(source){amount=Math.min(amount,source.water[1]);source.water[1]-=amount;}
       else if(riverBankAt(n.x+.5,n.z+.5,3,s.landSeed)){amount=extractWater(s,"river",amount);sys.account.waterReceived+=amount;}
       else amount=0;

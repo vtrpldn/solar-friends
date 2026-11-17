@@ -1330,12 +1330,16 @@ $("skip-form").onsubmit = async event => {
   $("skip-days").disabled = true;
   $("skip-close").textContent = 'Stop here';
   let stopped = false;
+  let nextProgressUpdate = 0;
   $("skip-close").onclick = () => { stopped = true; };
   $("skip-progress").hidden = false;
   try {
     await skipDays(s, Number($("skip-days").value), {
       cancelled: () => stopped,
       progress: fraction => {
+        const now = performance.now();
+        if (fraction > 0 && fraction < 1 && now < nextProgressUpdate) return;
+        nextProgressUpdate = now + 100;
         $("skip-progress").value = fraction;
         renderSkipMilestones();
         $("skip-status").textContent = `Simulating every moment… ${Math.floor(fraction * 100)}%`;

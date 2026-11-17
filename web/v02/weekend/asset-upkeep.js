@@ -5,6 +5,10 @@ import {CROP_CARE,GAME_DAY} from './biological-production.js';
 // Inspection/service intervals are engineering assumptions, not warranties.
 const INTERVALS={home:365,shed:365,warehouse:365,kitchen:180,workshop:180,
  'water-pump':90,well:180,'groundwater-well':365,solar_farm:180,hydro:90,greenhouse:180};
+const cropByKind = new Map();
+for (const crop of Object.values(CROP_CARE)) {
+ if (!cropByKind.has(crop.kind)) cropByKind.set(crop.kind, crop);
+}
 const REPLACEMENT_YEARS={'water-pump':10,well:10,solar_farm:25,home:20,shed:20,warehouse:20,kitchen:20};
 export const ANIMAL_CARE=ANIMAL_RATIONS;
 export function upkeep(s){return s.upkeep??={version:1,automatic:true,dailyBudget:100,day:-1,used:0,vehicles:[{condition:100,km:0},{condition:100,km:0}],jobs:[]};}
@@ -26,7 +30,7 @@ export function upkeepStep(s,defs,dt){
     p.batteryAgeDays=(p.batteryAgeDays||0)+dt/GAME_DAY;
     if(u.automatic&&p.batteryAgeDays>=8*365&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,battery:true,work:0,partsPaid:false,done:false});
   }
-  const crop=Object.values(CROP_CARE).find(c=>c.kind===d.kind);
+  const crop=cropByKind.get(d.kind);
   if(crop&&!p.cultivation&&(p.soilFertility??1)<.7&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,soil:true,compost:Math.ceil(crop.area*.25),work:0,partsPaid:false,done:false});
   const care=ANIMAL_CARE[d.kind];
   if(care&&(p.key!=='goat-pasture-empty'||p.stocked)){
