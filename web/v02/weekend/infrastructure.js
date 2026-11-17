@@ -20,12 +20,14 @@ export function workingMachine(s,node) {
   return (s.operations||[]).some(o=>o.site===node.id && !o.done && o.recipe!=='cold_storage' && o.phase==='process' &&
     ['Working','Waiting for power'].includes(o.status) && !o.biogas && s.people.some(r=>r.operation===o.id && ['produce','blocked'].includes(r.action) && r.energy>=25 && !r.sleepUntil));
 }
+function hasBuiltInPower(kind) {
+  return !!POWER_LOAD[kind] || ["solar_farm", "hydro", "home", "camp"].includes(kind);
+}
 // Capability, not instantaneous demand: lights still have a switch in daylight,
 // and pumps still have one while their tanks are empty or their pipes disabled.
 export function hasPowerService(sys, node) {
   if(node?.kind === "water-storage") return false;
-  return !!node && !!(POWER_LOAD[node.kind] || node.battery ||
-    ["solar_farm", "hydro", "home", "camp"].includes(node.kind));
+  return !!node && (hasBuiltInPower(node.kind) || !!node.battery);
 }
 export function canSwitchBuilding(sys, node) {
   return !!node && node.id > 0 && hasPowerService(sys, node);
@@ -227,16 +229,19 @@ const powerPriority = {
   "water-pump": 0, river: 0, well: 0, camp: 0, eco_toilet: 1,
   home: 2, streetlight: 3, kitchen: 4, workshop: 5,
 };
-// Charge and demand change every tick. Component membership and service order
-// only change when a node or an active power connection changes.
-const powerNetworks = new WeakMap();
-function powerComponents(sys, nodes) {
-  const cached = powerNetworks.get(sys);
+const WATER_PROCESSOR_KINDS = new Set([
+  'groundwater-well', 'water-pump', 'rain-barrel', 'well', 'wetland', 'banana_treatment', 'biodigester',
+]);
+// Node kinds and active power links determine which sites process utilities
+// and their service order. Equipment and available water change within that order.
+const utilityNetworks = new WeakMap();
+function utilityNetwork(sys, nodes) {
+  const cached = utilityNetworks.get(sys);
   const powerLinks = sys.links.filter(l => l.kind === 'power' && l.enabled && l.work >= l.required);
   if (cached && nodes.length === cached.nodes.length && powerLinks.length === cached.links.length &&
       nodes.every((n,i) => n === cached.nodes[i] && n.id === cached.ids[i] && n.kind === cached.kinds[i]) &&
       powerLinks.every((l,i) => l.from === cached.links[i].from && l.to === cached.links[i].to)) {
-    return cached.components;
+    return cached;
   }
   const components = [], visited = new Set();
   const powerPeers=new Map();
@@ -261,11 +266,14 @@ function powerComponents(sys, nodes) {
     const demandOrder = component.length === 1 ? component : [...component].sort(
       (a,b) => (powerPriority[a.kind] ?? 6) - (powerPriority[b.kind] ?? 6) || a.id - b.id,
     );
-    components.push({component, demandOrder});
+    const passive = component.length === 1 && !hasBuiltInPower(root.kind);
+    components.push({component, demandOrder, passive});
   }
-  powerNetworks.set(sys, {nodes, ids: nodes.map(n => n.id), kinds: nodes.map(n => n.kind),
-    links: powerLinks.map(l => ({from:l.from, to:l.to})), components});
-  return components;
+  const waterProcessors = nodes.filter(n => WATER_PROCESSOR_KINDS.has(n.kind)).sort((a, b) => a.id - b.id);
+  const network = {nodes, ids: nodes.map(n => n.id), kinds: nodes.map(n => n.kind),
+    links: powerLinks.map(l => ({from:l.from, to:l.to})), components, waterProcessors};
+  utilityNetworks.set(sys, network);
+  return network;
 }
 export function infrastructureStep(s, defs, dt, sys = syncInfrastructure(s, defs)) {
   const hours = (dt * 0.45) / 60;
@@ -276,7 +284,16 @@ export function infrastructureStep(s, defs, dt, sys = syncInfrastructure(s, defs
   hydrologyStep(s,dt);
   sys.grid.importing = 0;
   const nodes = Object.values(sys.nodes);
-  for (const {component, demandOrder} of powerComponents(sys, nodes)) {
+  const {components, waterProcessors} = utilityNetwork(sys, nodes);
+  for (const {component, demandOrder, passive} of components) {
+    const site = component[0];
+    if (passive && site.battery === 0 && site.charge === 0 && !site.coldStorage) {
+      site.generation = 0;
+      site.demand = 0;
+      site.power = site.enabled ? 1 : 0;
+      site.connected = false;
+      continue;
+    }
     let generation = 0,
       stored = 0,
       capacity = 0,
@@ -343,8 +360,8 @@ export function infrastructureStep(s, defs, dt, sys = syncInfrastructure(s, defs
       n.connected = component.length > 1;
     }
   }
-  const catchments=rainCatchments(s,defs);
-  for (const n of [...nodes].sort((a,b)=>a.id-b.id)) {
+  const catchments = rainCatchments(s, defs, waterProcessors);
+  for (const n of waterProcessors) {
     if(n.enabled && n.kind==='groundwater-well') {
       const add=extractWater(s,"groundwater",Math.min(n.capacity[1]-n.water[1],8*hours*waterFactor(s.worldSettings?.water)));
       n.water[1]+=add;sys.account.waterReceived+=add;
