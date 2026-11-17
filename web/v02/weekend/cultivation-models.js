@@ -52,7 +52,7 @@ export function createCultivationModel(p,state){
  for(const [id,items]of Object.entries(plants)){
   if(!items.length)continue;
   const near=new THREE.Group(),parts=id==='corn'?8:7;
-  const geo=new THREE.IcosahedronGeometry(1,1),material=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1});
+  const geo=new THREE.IcosahedronGeometry(1,0),material=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1});
   const leaves=new THREE.InstancedMesh(geo,material,items.length*parts);leaves.userData.ownedMaterial=true;leaves.castShadow=true;leaves.receiveShadow=true;let i=0;
   const color=new THREE.Color();
   for(const plant of items)for(let part=0;part<parts;part++){
