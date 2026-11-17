@@ -14,3 +14,21 @@ const healthy=p.animalHealth;const elapsed=p.careUntil-s.time+GAME_DAY;s.time+=e
 assert(p.animalHealth<healthy,'neglect reduces health even without a production order');
 assert(s.upkeep.jobs.some(j=>j.care==='coop'),'care automatically queued');
 console.log('PASS resident animal care, feed and water consumption, idle-animal neglect, automatic scheduling and save');
+
+// A full pantry must not suppress collection of produce that could spoil.
+const flock=createWeekend(42);chooseCamp(flock,'entrance');enableFastNavigation(flock);
+flock.foodReserveDays=0;
+const henhouse={...p,id:flock.nextId++,animalCare:undefined,careUntil:flock.time+GAME_DAY*3};
+flock.projects.push(henhouse);
+for(let i=0;i<40000&&!henhouse.animalCare?.collected;i++)tick(flock,.1);
+assert(henhouse.animalCare?.collected>0,'residents collect eggs without an order or pantry shortage');
+
+const hungry=createWeekend(42);chooseCamp(hungry,'entrance');enableFastNavigation(hungry);
+hungry.foodReserveDays=0;
+const coop={id:hungry.nextId++,key:'coop',x:hungry.stock.x+4,z:hungry.stock.z+4,work:PROJECTS.coop.work,delivered:0};
+hungry.projects.push(coop);hungry.materials.fodder=0;
+syncInfrastructure(hungry,PROJECTS).nodes[coop.id].water[0]=6;
+for(let i=0;i<32000&&!(coop.animalCare?.feed>0);i++)tick(hungry,.1);
+assert(hungry.operations.some(op=>op.recipe==='gather-wild-forage'&&op.done),'residents gather and deliver missing fodder');
+assert(coop.animalCare.feed>0,'residents feed the flock with gathered fodder');
+assert(restore(save(hungry)));

@@ -83,3 +83,20 @@ const clear=make(),cb=clear.projects[0].cultivation.beds[0];Object.assign(cb,{gr
 const clearJob={farm:{bed:0,action:'clear'},input:{}};finishFarmJob(clear,clear.projects[0],clearJob);assert.deepEqual(clearJob.harvestOutput,{});assert(cb.residueKg>0);assert.equal(cb.stage,'harvested');
 const amendJob={farm:{bed:0,action:'amend'},input:{compost:2}};finishFarmJob(clear,clear.projects[0],amendJob);const fertility=cb.fertility;cultivationStep(clear,GAME_DAY,()=>false,PROJECTS);assert(cb.amendmentKg<2);assert(cb.soilOrganicKg>0);assert(cb.decomposedGasKg>0);
 console.log('PASS density-dependent seeds/labor, late harvest loss, explicit clearing and amendment decomposition');
+
+// An existing farm supplies its own work even with no reserved production workers.
+const autonomous=createSandbox(42);enableFastNavigation(autonomous);
+assert.equal(planField(autonomous,50,50,[2,2]),'');
+const field=autonomous.projects.at(-1);
+autonomous.instantBuild=false;
+let constructionQueued=false;
+for(let z=46;z<=56&&!constructionQueued;z++)for(let x=46;x<=56&&!constructionQueued;x++){
+  constructionQueued=plan(autonomous,'gathering',x,z)==='';
+}
+assert(constructionQueued,'construction competes for workers');
+autonomous.materials.greens_seed=20;
+autonomous.foodReserveDays=0;
+autonomous.economyPolicies={sales:{},work:{food:0,maintenance:0,production:0,construction:3,essentialWorkers:0,productionWorkers:0}};
+for(let i=0;i<40000&&!autonomous.operations?.some(op=>op.farm?.action==='harvest'&&op.done);i++)tick(autonomous,.1);
+assert(autonomous.operations.some(op=>op.farm?.action==='harvest'&&op.done),'residents prepare, plant, harvest and deliver without player orders');
+assert(field.cultivation.beds.some(b=>b.exportedKg>0));
