@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,PROCESSES,tick,queueProduction,productionBlocker,save,restore,enableFastNavigation,materialCount,plan,removeProject} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,PROJECTS,PROCESSES,tick,queueProduction,productionBlocker,save,restore,enableFastNavigation,materialCount,plan,removeProject,footprint} from '../web/v02/weekend/simulation.js';
 import {ensureNaturalLand} from '../web/v02/weekend/natural-resources.js';
 import {GATHERING} from '../web/v02/weekend/gathering.js';
 import {registerWorld,DEFAULT_SETTINGS} from '../web/v02/weekend/world-settings.js';
@@ -27,3 +27,13 @@ for(const [key,d] of Object.entries(GATHERING)){
  else{p.extracted=d.gatherLimit;assert(productionBlocker(s,p.id,recipe).includes('gathered out'));}
 }
 console.log('PASS three-biome generation, additive old-save migration, finite gathering, regrowth cooldown, resident labor, physical hauling, duplicate prevention and save/load');
+
+// Additive gathering migration must respect rotated and expanded saved fields.
+for(const rotation of [0,1,2,3]){
+ const s=createWeekend(42);chooseCamp(s,'entrance');ensureNaturalLand(s,PROJECTS);
+ const anchor=s.projects.find(p=>GATHERING[p.key]);s.projects=s.projects.filter(p=>!GATHERING[p.key]);delete s.gatheringLandVersion;
+ const field={id:s.nextId++,key:'field',x:anchor.x-4,z:anchor.z-4,fieldSize:[8,12],rotation,work:1};s.projects.push(field);
+ ensureNaturalLand(s,PROJECTS);const [w,d]=footprint(field);
+ for(const p of s.projects.filter(p=>GATHERING[p.key])){const [pw,pd]=footprint(p);assert(!(p.x<field.x+w&&p.x+pw>field.x&&p.z<field.z+d&&p.z+pd>field.z),'new gathering patches cannot overlap a saved field');}
+}
+console.log('PASS gathering migration preserves expanded and rotated field footprints');

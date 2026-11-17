@@ -1,3 +1,4 @@
+import {unrotatedSiteSize} from './site-space.js';
 import {GATHERING} from './gathering.js';
 import {landRandom,landParameters} from './land-layout.js';
 import {settingsFor,richnessFactor,BIOMES} from './world-settings.js';
@@ -22,7 +23,9 @@ export function ensureNaturalLand(s,defs){
    for(let dx=-1;dx<=w;dx++)for(let dz=-1;dz<=d;dz++)if(riverBankAt(x+dx,z+dz,1,s.landSeed)||accessRoadAt(x+dx,z+dz,2))return false;
    if(s.projects.some(p=>{
      const gap=defs[key].kind==='wild-tree'&&defs[p.key].kind==='wild-tree'?1:2;
-     return !p.felled&&x<p.x+defs[p.key].size[0]+gap&&x+w+gap>p.x&&z<p.z+defs[p.key].size[1]+gap&&z+d+gap>p.z;
+     const size=p.key==='field'?(p.fieldSize||defs[p.key].size):unrotatedSiteSize(p,defs[p.key].size);
+     const [pw,pd]=(p.rotation||0)%2?[...size].reverse():size;
+     return !p.felled&&x<p.x+pw+gap&&x+w+gap>p.x&&z<p.z+pd+gap&&z+d+gap>p.z;
    }))return false;
    s.projects.push({id:s.nextId++,key,x,z,work:defs[key].work,delivered:0,natural:true});return true;
  };

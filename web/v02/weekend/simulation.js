@@ -789,8 +789,10 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     op.phase = "process";
     r.target = null;
   }
-  r.action = "carry";
-  r.cargo = true;
+  // Walking to a no-input job carries nothing. A blocked gathering/bed job
+  // must not suppress hunger, toilet or rest breaks through phantom cargo.
+  r.cargo = op.work===0 && Object.values(op.input||recipe.input).some(n=>n>0);
+  r.action = r.cargo ? "carry" : "walk";
   const bed=op.farm&&p.cultivation.beds[op.farm.bed];
   const center=bed&&bedWorld(p,bed,footprint(p));
   const a=(p.rotation||0)*Math.PI/2;
