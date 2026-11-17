@@ -14,7 +14,8 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);
  const dialog=page.locator('#management');
  for(const view of ['resources','items','crafting','water','power','finances']){
-  await page.locator(`[data-manage="${view}"]`).click();assert(await dialog.isVisible());
+  if(view==='finances')await page.locator('[data-manage="resources"]').first().click();
+  await page.locator(`[data-manage="${view}"]:visible`).first().click();assert(await dialog.isVisible());
   if(view==='resources'){assert(await page.locator('#production-sites').isVisible());assert((await dialog.innerText()).includes('Cold storage')||(await dialog.innerText()).includes('Processing record'));}
   if(view==='items'){assert((await dialog.innerText()).includes('Garden tools'));assert(!(await page.locator('#production-sites').isVisible()));}
   if(view==='crafting'){assert((await dialog.innerText()).includes('Resident skills'));assert(await page.locator('.crafting-recipe').count()>3);}
