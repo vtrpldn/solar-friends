@@ -18,7 +18,7 @@ const directory=process.env.SOLAR_EVIDENCE_DIR;
 if(directory)await mkdir(directory,{recursive:true});
 const server=await serve();let browser;
 try {
- browser=await chromium.launch({headless:true,args:process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[]});
+ browser=await chromium.launch({headless:true,args:['--mute-audio',...(process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[])]});
  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
  page.setDefaultTimeout(30000);
  page.on('pageerror',error=>errors.push(error.message));

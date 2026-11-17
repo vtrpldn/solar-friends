@@ -1,3 +1,4 @@
+import {CROPS,FARM_ACTIONS} from './cultivation.js';
 import { siteDescription } from './site-space.js';
 import { craftingRule } from './crafting.js';
 import { ITEMS } from "./items.js";
@@ -134,6 +135,10 @@ const extraMaterials = {
   hens: ["Hens", 1, 3, 180],
 };
 export function expandMaterials(materials) {
+  for(const [id,crop] of Object.entries(CROPS)) {
+    materials[id]={name:crop.name,batch:1,quantity:10,price:30};
+    materials[`${id}_seed`]={name:`${crop.name} seed packets`,batch:1,quantity:5,price:10};
+  }
   for (const [id, item] of Object.entries(ITEMS)) materials[id] = {name:item.name,batch:1,quantity:1,price:item.price,item:true,description:item.description};
   for (const [id, [name, batch, quantity, price]] of Object.entries(
     extraMaterials,
@@ -400,3 +405,7 @@ for (const [id, recipe] of Object.entries(PROCESSES)) {
   const rule=craftingRule(id,recipe);
   if(rule) {recipe.craft=rule;recipe.kind=rule.kind;recipe.work=rule.work;}
 }
+
+for(const action of FARM_ACTIONS)PROCESSES[`farm_${action}`]={name:`${action} bed`,bedAction:action,kind:'cultivation',input:{compost:100,greens_seed:100,beans_seed:100,corn_seed:100},output:{greens:100,beans:100,corn:100,scraps:1000000},work:1};
+for(const id of Object.keys(CROPS))PROCESSES[`cook_${id}`]={name:`Cook ${CROPS[id].name.toLowerCase()}`,kind:'kitchen',input:{[id]:4},output:{meals:4},work:40,water:2};
+PROCESSES.corn_feed={name:'Prepare corn feed supplement',kind:'supply-5',input:{corn:4},output:{fodder:1,scraps:1},work:30};

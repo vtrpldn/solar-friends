@@ -1,6 +1,8 @@
 // Existing stock counts remain pieces/packs. Explicit definitions avoid the old
 // silent 2 kg fallback. Except eggs, these remain engineering/game assumptions.
 export const MATERIAL_UNITS=Object.freeze({
+ greens:['kg leafy greens',1,.004],beans:['kg fresh beans',1,.002],corn:['kg sweet corn',1,.003],
+ greens_seed:['seed packet',.02,.0001],beans_seed:['seed packet',.1,.0002],corn_seed:['seed packet',.1,.0002],
  bucket:['bucket',1,.015],'garden-tools':['tool set',3,.025],'carpentry-tools':['tool set',4,.02],
  'harvest-basket':['basket',1,.04],'cleaning-kit':['cleaning kit',2,.02],'watering-can':['watering can',1,.015],
  wheelbarrow:['wheelbarrow',15,.35],bicycle:['bicycle',16,.5],'produce-crates':['crate',2,.04],
@@ -28,7 +30,7 @@ export function materialMass(items){return Object.entries(items).reduce((sum,[id
 // Physical read/write boundary. Old saves encode bulk goods as fixed packs;
 // player controls and accounting can use canonical mass without reinterpreting
 // an existing paid manifest. Discrete equipment remains a count, milk is liters.
-const BULK=new Set(['wood','logs','earth','stone','walls','tiles','food','fodder','compost','scraps','honey']);
+const BULK=new Set(['greens','beans','corn','wood','logs','earth','stone','walls','tiles','food','fodder','compost','scraps','honey']);
 export function physicalUnit(id){const [name,kg]=MATERIAL_UNITS[id];return {unit:BULK.has(id)?'kg':id==='milk'?'L':'units',factor:BULK.has(id)?kg:1,name};}
 export function physicalQuantity(id,stockUnits){const {unit,factor}=physicalUnit(id);return {amount:stockUnits*factor,unit};}
 export function stockQuantity(id,physicalAmount){return Math.max(0,Math.floor((physicalAmount+1e-8)/physicalUnit(id).factor));}

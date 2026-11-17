@@ -26,7 +26,7 @@ export function upkeepStep(s,defs,dt){
     if(u.automatic&&p.batteryAgeDays>=8*365&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,battery:true,work:0,partsPaid:false,done:false});
   }
   const crop=Object.values(CROP_CARE).find(c=>c.kind===d.kind);
-  if(crop&&(p.soilFertility??1)<.7&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,soil:true,compost:Math.ceil(crop.area*.25),work:0,partsPaid:false,done:false});
+  if(crop&&!p.cultivation&&(p.soilFertility??1)<.7&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,soil:true,compost:Math.ceil(crop.area*.25),work:0,partsPaid:false,done:false});
   const care=ANIMAL_CARE[d.kind];
   if(care&&(p.key!=='goat-pasture-empty'||p.stocked)){
     p.animalHealth=Math.max(0,Math.min(100,(p.animalHealth??100)+(s.time<(p.careUntil||0)?2:-15)*dt/GAME_DAY));

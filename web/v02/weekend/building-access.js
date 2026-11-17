@@ -1,3 +1,4 @@
+import {bedLayout,bedWorld} from './cultivation.js';
 import {FUNCTIONAL_PROGRAM} from '../library/functional-program.js';
 import {FUNCTIONAL_LAYOUTS, HOME_CHARACTER} from '../library/functional-layouts.js';
 import {METRES_PER_CELL} from '../library/scale.js';
@@ -8,6 +9,15 @@ const small={ 'rain-barrel':[.48,.425], 'wayfinding-sign':[.18,.18], 'tool-rack'
 export function accessGeometry(p,def,size) {
  const [w,d]=size,cx=p.x+(w-1)/2,cz=p.z+(d-1)/2;
  const completed=p.work>=def.work;
+ if(completed&&(p.cultivation||p.key==='field')){
+  const a=(p.rotation||0)*Math.PI/2,beds=bedLayout(p);
+  const solids=beds.map(b=>{const c=bedWorld(p,b,size);return {...c,w:((p.rotation||0)%2?b.d:b.w)/2,d:((p.rotation||0)%2?b.w:b.d)/2};});
+  if(p.key==='greenhouse')for(const wall of [{x:-3,z:0,w:.08,d:10},{x:3,z:0,w:.08,d:10},...[-5,5].flatMap(z=>[-1.75,1.75].map(x=>({x,z,w:2.5,d:.08})))]){
+   const c=bedWorld(p,wall,size);solids.push({...c,w:((p.rotation||0)%2?wall.d:wall.w)/2,d:((p.rotation||0)%2?wall.w:wall.d)/2});
+  }
+  const work=beds.map(b=>{const c=bedWorld(p,b,size);return {x:c.x+Math.cos(a)*.5,z:c.z-Math.sin(a)*.5};});
+  return {solids,entrances:[],work,delivery:work,placement:{x:cx,z:cz,w,d}};
+ }
  const propDimensions=completed&&small[p.key];
  const layout=FUNCTIONAL_LAYOUTS[p.key];
  const angle=(p.rotation||0)*Math.PI/2;

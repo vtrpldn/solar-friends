@@ -34,5 +34,5 @@ for(const [key,d]of choices.slice(startAt?choices.findIndex(([key])=>key===start
  }
  console.log(`PASS ${key}: legal site, resident completion, service/save${d.kind==='home'||key.startsWith('canvas-tent')?', bounded indoor sleep and exit':''}`);
 }
-for(const [recipe,d]of Object.entries(PROCESSES))assert(Object.values(PROJECTS).some(p=>p.kind===d.kind),`${recipe}: compatible production site exists`);
+for(const [recipe,d]of Object.entries(PROCESSES))assert(d.bedAction ? ['field','garden','greenhouse'].every(key=>PROJECTS[key]) : Object.values(PROJECTS).some(p=>p.kind===d.kind),`${recipe}: compatible production site exists`);
 console.log(`PASS ${choices.length} placeable building completion contracts and all recipe/site mappings; full cycles covered by dedicated production and balance checks`);

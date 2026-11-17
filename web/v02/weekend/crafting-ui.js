@@ -4,16 +4,18 @@ import { PROJECTS, PROCESSES, MATERIALS, materialCount, queueProduction, moveCra
 import { equipmentSummary } from './equipment.js';
 import { ITEMS } from './items.js';
 const chosenSites=new Map();
+let skillsOpen=false;
 export function renderCrafting(s,root,notify,refresh) {
  root.replaceChildren();
  const add=(parent,tag,text)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
- add(root,'h3','Resident skills');
- const crew=add(root,'div','');crew.className='crafting-crew';
+ const skills=add(root,'details','');skills.className='crafting-skills';skills.open=skillsOpen;skills.ontoggle=()=>{skillsOpen=skills.open;};
+ add(skills,'summary','Resident skills');
+ const crew=add(skills,'div','');crew.className='crafting-crew';
  for(const r of s.people) {
   const card=add(crew,'article','');add(card,'strong',r.name);
   add(card,'p',Object.entries(CRAFT_SKILLS).map(([id,name])=>`${name} ${skillLevel(r,id)}`).join(' · '));
  }
- add(root,'p','Levels: 0 beginner · 1 practiced · 2 skilled · 3 experienced. Practice thresholds are 18, 108 and 360 game hours. Active craft work builds skill; walking, waiting and resting do not. Shared tools are borrowed while working.');
+ add(skills,'p','Levels: 0 beginner · 1 practiced · 2 skilled · 3 experienced. Practice thresholds are 18, 108 and 360 game hours. Active craft work builds skill; walking, waiting and resting do not. Shared tools are borrowed while working.');
  add(root,'h3','Craft and repair');
  const list=add(root,'div','');list.className='crafting-recipes';
  for(const [id,recipe] of Object.entries(PROCESSES).filter(([,d])=>d.craft)) {

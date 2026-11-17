@@ -6,10 +6,12 @@ import { BUILDING_MODELS } from '../web/v02/weekend/building-models.js';
 import { COMMUNITY } from '../web/v02/library/community-defs.js';
 import { SITE_SPACE } from '../web/v02/weekend/site-space.js';
 import { FUNCTIONAL_PROGRAM, FUNCTIONAL_DESCRIPTIONS } from '../web/v02/library/functional-program.js';
+import {bedLayout} from '../web/v02/weekend/cultivation.js';
+import {createCultivationModel} from '../web/v02/weekend/cultivation-models.js';
 import { footprint, PROJECTS } from '../web/v02/weekend/simulation.js';
 const rows=[], round=n=>Number(n.toFixed(3));
 const entries=[...BUILDING_MODELS.map(m=>({...m,asset:m.id})),
-  ...Object.entries(PROJECTS).filter(([id,p])=>!p.natural&&!BUILDING_MODELS.some(m=>m.id===id)).map(([id,p])=>({id,...p})),
+  ...Object.entries(PROJECTS).filter(([id,p])=>id!=='field'&&!p.natural&&!BUILDING_MODELS.some(m=>m.id===id)).map(([id,p])=>({id,...p})),
   ...['supply-2','supply-3'].map(key=>({...PROJECTS[key],id:`natural:${key}`,key}))];
 for(const model of entries){
   const asset=ASSETS.find(a=>a.id===model.asset);
@@ -32,6 +34,17 @@ for(const model of entries){
     }
     if(state===asset)rows.push({id:model.id,asset:model.asset,name:model.name,role:model.natural?"natural deposit":PROJECTS[model.id]?.natural?"legacy preview prop":"placeable",siteCells:model.size,siteMetres:model.size.map(n=>n*2),visualBoundsMetres:visual.getSize(new THREE.Vector3()).toArray().map(round),edgeClearanceMetres:{left:round(visual.min.x+model.size[0]),right:round(model.size[0]-visual.max.x),back:round(visual.min.z+model.size[1]),front:round(model.size[1]-visual.max.z)},constructionStates:states.length-1,review:SITE_SPACE[model.id]?.note||FUNCTIONAL_DESCRIPTIONS[model.id]||FUNCTIONAL_PROGRAM[model.id]?.requirements||'Human-scale prop; the grid reservation includes access space. No enlargement to fill the cell.'});
   }
+}
+// Fields use saved dimensions and dynamic terrain-following models; the garden
+// catalog asset is their menu illustration, not their physical footprint.
+for(const size of [[2,2],[4,6],[6,4]])for(let rotation=0;rotation<4;rotation++)for(const crop of ['greens','beans','corn']){
+ const p={id:1,key:'field',fieldSize:size,x:50,z:50,rotation};
+ p.cultivation={beds:bedLayout(p).map((b,id)=>({...b,id,crop,stage:'harvestable',density:1,growth:1,moisture:.7,cover:0,elapsed:1,stress:0,ripeAt:0}))};
+ const model=createCultivationModel(p,{time:0,operations:[],elevationSeed:42});model.rotation.y=rotation*Math.PI/2;
+ const bounds=new THREE.Box3().setFromObject(model,true),[w,d]=footprint(p);
+ assert.deepEqual([w,d],rotation%2?[...size].reverse():size);
+ assert(bounds.min.x>=-w&&bounds.max.x<=w&&bounds.min.z>=-d&&bounds.max.z<=d,`${crop} field ${size} rotation ${rotation}: crop geometry exceeds the reserved ground`);
+ model.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
 }
 for(const asset of ASSETS.filter(a=>['Buildings','Homes'].includes(a.category)))assert(rows.some(r=>r.id===asset.id),`${asset.id}: building missing from audit`);
 const solar=createAsset('solar_farm');let panels=0,supports=0,rails=0;

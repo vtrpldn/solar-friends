@@ -1,0 +1,23 @@
+{
+  "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver)",
+  "beds": 100,
+  "plants": 10000,
+  "withoutCrops": {
+    "frameMs": 73.99666666984558,
+    "cpuRenderMs": 0.17666666905085246,
+    "drawCalls": 1,
+    "triangles": 18000,
+    "geometries": 1,
+    "textures": 1,
+    "heapBytes": 17100000
+  },
+  "withCrops": {
+    "frameMs": 184.375,
+    "cpuRenderMs": 0.1916666309038798,
+    "drawCalls": 2,
+    "triangles": 58000,
+    "geometries": 2,
+    "textures": 1,
+    "heapBytes": 17100000
+  }
+}

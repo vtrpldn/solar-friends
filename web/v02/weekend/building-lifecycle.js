@@ -15,6 +15,7 @@ export function removalYield(p,defs,recipes,mode){
 export function requestRemoval(s,id,mode,defs,recipes){
  const p=s.projects.find(p=>p.id===id);
  if(!p||defs[p.key].natural||!['salvage','demolish'].includes(mode))return 'Choose a constructed building.';
+ if(p.cultivation?.beds.some(b=>['planted','growing','harvestable'].includes(b.stage)))return 'Clear or harvest the standing crops before removing this site.';
  if(p.removal)return 'Resident dismantling is already queued.';
  if(p.pendingMaterials)return 'Wait for the purchased supplies to arrive before dismantling.';
  if(s.operations?.some(o=>!o.done&&o.site===id))return 'Finish the active batch or water job first.';
