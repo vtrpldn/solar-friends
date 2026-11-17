@@ -1,0 +1,23 @@
+{
+  "source": "web/v02/weekend/cultivation-models.js",
+  "sha256": "5ec9c81346a0ae9a1e85344f984418d6562dd6507193ccdb81cf634d214edddd",
+  "status": "reviewed locally; awaiting user review",
+  "evidence": "assets/validation/farming-field-models/comparison.png",
+  "comparison": "Original on left; revised on right. Each group shows greens, beans and corn at 20%, 60% and full growth.",
+  "findings": [
+    "Layered greens, branching beans and longer corn leaves have distinct silhouettes.",
+    "Warm matte foliage and soil colors retained.",
+    "Segmented raised furrows follow terrain; field perimeter closes.",
+    "Desktop field/greenhouse scene reviewed beside residents and a house, in day and night."
+  ],
+  "checks": [
+    "verify-v02-cultivation.mjs passed",
+    "verify-v02-cultivation-browser.mjs passed",
+    "benchmark-v02-cultivation.mjs: 10000 plants; 3 total distant draw calls",
+    "60 crop/stage/rotation geometry and LOD combinations passed"
+  ],
+  "limitations": [
+    "Benchmark used SwiftShader; hardware frame rate not established.",
+    "Final leaf geometry reduction reviewed in comparison render; gameplay flow checks preceded that geometry-only change."
+  ]
+}

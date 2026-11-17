@@ -2051,7 +2051,7 @@ for(const def of ASSETS){
   def.footprint=FUNCTIONAL_LAYOUTS[id]?.site||program.site;
   if(FUNCTIONAL_LAYOUTS[id])def.description=`A ${FUNCTIONAL_LAYOUTS[id].shell.join(" × ")} m home with an individual roofline and sheltered entrance. The reserved site includes outdoor clearance.`;
   else if(FUNCTIONAL_DESCRIPTIONS[id])def.description=FUNCTIONAL_DESCRIPTIONS[id];
-  if(FUNCTIONAL_LAYOUTS[id]||REMODELED_FACILITIES.has(id))def.revision=4;
+  if(FUNCTIONAL_LAYOUTS[id]||REMODELED_FACILITIES.has(id))def.revision=id==='coop'?6:4;
   const stage=def.constructionOf?Number(def.id.at(-1)):2;
   if(FUNCTIONAL_LAYOUTS[id])def.build=()=>functionalHome(id,stage);
   else if(REMODELED_FACILITIES.has(id))def.build=()=>functionalFacility(id,{plant,tree,goat,chicken},stage);
