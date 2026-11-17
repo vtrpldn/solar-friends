@@ -17,13 +17,17 @@ const old=createWeekend(42);chooseCamp(old,'entrance');ensureNaturalLand(old,PRO
 const originals=JSON.stringify(old.projects);ensureNaturalLand(old,PROJECTS);assert.equal(JSON.stringify(old.projects.filter(p=>!GATHERING[p.key])),originals);assert(old.projects.some(p=>GATHERING[p.key]));
 // Complete each job through the ordinary simulation, including multi-load hauling.
 for(const [key,d] of Object.entries(GATHERING)){
- const s=createWeekend(42);chooseCamp(s,'entrance');s.naturalLandVersion=s.gatheringLandVersion=1;s.emergencyFood=false;s.rainSeen=s.rainResolved=true;enableFastNavigation(s);
- const p={id:s.nextId++,key,x:s.stock.x+4,z:s.stock.z+4,work:1,delivered:0,natural:true};s.projects.push(p);
+ let s=createWeekend(42);chooseCamp(s,'entrance');s.naturalLandVersion=s.gatheringLandVersion=1;s.emergencyFood=false;s.rainSeen=s.rainResolved=true;enableFastNavigation(s);
+ let p={id:s.nextId++,key,x:s.stock.x+4,z:s.stock.z+4,work:1,delivered:0,natural:true};s.projects.push(p);
  const recipe=`gather-${key}`,resource=Object.keys(d.output)[0],before=materialCount(s,resource);assert.equal(queueProduction(s,p.id,recipe),'');assert(productionBlocker(s,p.id,recipe),'duplicate job prevented');
  let carried=false,reloaded=false;
- for(let i=0;i<20000&&!s.operations[0].done;i++){tick(s,.1);if(s.people.some(r=>r.cargo)){carried=true;if(!reloaded){assert(restore(save(s)),'mid-haul save valid');reloaded=true;}}}
- assert(s.operations[0].done,`${key} job completes`);assert(carried,`${key} physically carried`);assert.equal(materialCount(s,resource),before+d.output[resource]);assert(restore(save(s)));
+ for(let i=0;i<20000&&!s.operations[0].done;i++){tick(s,.1);if(s.people.some(r=>r.cargo)){carried=true;if(!reloaded){s=restore(save(s));assert(s,'mid-haul save valid');enableFastNavigation(s);reloaded=true;}}}
+ p=s.projects.find(site=>site.id===p.id);assert(s.operations[0].done,`${key} job completes`);assert(carried,`${key} physically carried`);assert.equal(materialCount(s,resource),before+d.output[resource]);assert(restore(save(s)));
  if(d.renew){assert(productionBlocker(s,p.id,recipe).includes('Recovering'));s.time=p.readyAt;assert.equal(productionBlocker(s,p.id,recipe),'');}
  else{p.extracted=d.gatherLimit;assert(productionBlocker(s,p.id,recipe).includes('gathered out'));}
 }
 console.log('PASS three-biome generation, additive old-save migration, finite gathering, regrowth cooldown, resident labor, physical hauling, duplicate prevention and save/load');
+
+const invalid=JSON.parse(save(old));const patch=invalid.projects.find(p=>GATHERING[p.key]);patch.extracted=-1;assert.equal(restore(JSON.stringify(invalid)),null);
+patch.extracted=0;patch.readyAt=Infinity;assert.equal(restore(JSON.stringify(invalid)),null);
+console.log('PASS actual mid-haul reload continuation and invalid gathering state rejection');
