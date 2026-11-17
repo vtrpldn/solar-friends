@@ -20,6 +20,7 @@ Relevant sources: `web/v02/weekend/catalog-rules.js`, `simulation.js`, `economy-
 
 Completed in the first playable increment:
 
+- Initial Campinas reference model for distance-based fuel, travel time and shared electricity tariffs; [calibration](economy-calibration.md) separates sourced observations from assumptions and missing research.
 - Physical export reservations, cancellable before loading, payment in town, and persisted order ownership.
 - Shared outbound sale cargo, mass/volume limits, partial collection of large prepaid construction orders, and explicit trip operating charges.
 - Buyer demand limited per resource and game day; automatic sales use the same order path.

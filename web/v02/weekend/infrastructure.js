@@ -1,10 +1,11 @@
+import {GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
 import {COLD_STORAGE} from './cold-storage.js';
 import {spendableMoney} from './procurement-budget.js';
 import {transact} from './finances.js';
 import {waterFactor} from './world-settings.js';
 import { riverBankAt, riverAccess } from "./river-layout.js";
 // v2 port of v1 electricity and water ownership rules. No renderer dependency.
-export const GRID_POWER = { capacity: 4, tariff: 1.2 };
+export const GRID_POWER = { capacity: ECONOMY_REFERENCE.electricity.capacityKw, tariff: GRID_TARIFF };
 export const LIQUIDS = ["fresh", "irrigation", "greywater", "sewage"];
 export const POWER_LOAD = {
   'water-pump': .18, shed: .015, kitchen: .025, workshop: .025,

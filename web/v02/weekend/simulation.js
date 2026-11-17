@@ -1179,7 +1179,7 @@ export function supplyRun(s, material = "wood", project = null, saleOnly = false
     .find(r => route(s, r, carDoor(vehicle)));
   if (!r) return false;
   if (!project && !saleOnly) transact(s,-item.price,"purchases",`Bought ${item.quantity} ${item.name}`);
-  transact(s,-transportCost(s),"transport","Town trip fuel and operating cost");
+  transact(s,-transportCost(s),"transport","Town trip fuel");
   s.nextTripVehicle = 1 - vehicle;
   s.trip = {
     person: r.id,
@@ -1203,7 +1203,7 @@ export function supplyRun(s, material = "wood", project = null, saleOnly = false
   if (s.opening) s.opening.townTrips++;
   say(
     s,
-    saleOnly ? `${r.name} is taking reserved surplus to town. Payment arrives after trading.` : project ? `${r.name} is heading to town to collect the prepaid materials for ${PROJECTS[project.key].name}.` : `${r.name} is heading to the car for town: ${item.quantity} ${item.name} for R$${item.price}. Back in about a minute.`,
+    saleOnly ? `${r.name} is taking reserved surplus to town. Payment arrives after trading.` : project ? `${r.name} is heading to town to collect the prepaid materials for ${PROJECTS[project.key].name}.` : `${r.name} is heading to the car for town: ${item.quantity} ${item.name} for R$${item.price}. Travel time depends on the distance to town.`,
   );
   return true;
 }
@@ -2501,7 +2501,7 @@ export function restore(text) {
         !Number.isFinite(s.trip.left) ||
         s.trip.left < 0 ||
         s.trip.left > (s.trip.duration||TRIP_DURATION) ||
-        (s.trip.duration!==undefined && ![45,55,110].includes(s.trip.duration)))
+        (s.trip.duration!==undefined && ![45,55,110,...['nearby','drive','remote'].map(townDuration)].includes(s.trip.duration)))
     )
       return null;
     if (s.nextTripVehicle !== undefined && ![0, 1].includes(s.nextTripVehicle))

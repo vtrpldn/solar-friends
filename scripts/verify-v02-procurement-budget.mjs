@@ -4,20 +4,20 @@ import {blueprintManifest,receiveBlueprintShipment,transportCost} from '../web/v
 import {transact,financeSummary} from '../web/v02/weekend/finances.js';
 import {createWeekend,chooseCamp,blueprintPurchase,PROJECTS,save,restore,supplyRun} from '../web/v02/weekend/simulation.js';
 const s={time:0,money:100,projects:[{id:1,pendingMaterials:{stone:40}}]};
-assert.deepEqual(collectionBudget(s),{trips:3,cost:18});
-assert.equal(spendableMoney(s),82);
+assert.deepEqual(collectionBudget(s),{trips:3,cost:21.99});
+assert.equal(spendableMoney(s),78.01);
 assert.equal(transact(s,-83,'purchases','Cannot steal transport'),0);
 assert.equal(transact(s,-83,'electricity','Cannot steal transport'),0);
 assert.equal(s.money,100);
 const before=collectionBudget(s).cost;
-transact(s,-6,'transport','Collection');s.trip={shipments:blueprintManifest(s.projects)};
-assert.equal(collectionBudget(s).cost,before-6);
-assert.equal(spendableMoney(s),82,'departure consumes reserved cash, not available money');
+transact(s,-7.33,'transport','Collection');s.trip={shipments:blueprintManifest(s.projects)};
+assert.equal(collectionBudget(s).cost,Math.round((before-7.33)*100)/100);
+assert.equal(spendableMoney(s),78.01,'departure consumes reserved cash, not available money');
 receiveBlueprintShipment(s,s.trip);s.trip=null;
-assert.equal(collectionBudget(s).cost,12,'unloading does not release a fare twice');
-assert.equal(financeSummary(s).committed,12);
-assert.equal(financeSummary(s).available,82);
-assert.equal(collectionBudget({...s,worldSettings:{town:'remote'}}).cost,24);
+assert.equal(collectionBudget(s).cost,14.66,'unloading does not release a fare twice');
+assert.equal(financeSummary(s).committed,14.66);
+assert.equal(financeSummary(s).available,78.01);
+assert.equal(collectionBudget({...s,worldSettings:{town:'remote'}}).cost,44);
 assert.equal(collectionBudget({...s,mode:'sandbox'}).cost,0);
 const merged={money:100,projects:[{id:1,pendingMaterials:{wood:4}}]};
 assert.equal(collectionBudget(merged,{wood:4}).trips,1,'compatible orders share a fare');
@@ -54,7 +54,7 @@ for(const [key,def]of Object.entries(PROJECTS)){
  while(Object.values(state.projects[0].pendingMaterials||{}).some(n=>n>0)){
   const shipments=blueprintManifest(state.projects);assert(shipments.length,key);
   const spendableBefore=spendableMoney(state);
-  transact(state,-transportCost(state),'transport','Collection');paid+=transportCost(state);
+  transact(state,-transportCost(state),'transport','Collection');paid=Math.round((paid+transportCost(state))*100)/100;
   state.trip={shipments};assert.equal(spendableMoney(state),spendableBefore,`${key} reservation release`);
   receiveBlueprintShipment(state,state.trip);state.trip=null;
  }

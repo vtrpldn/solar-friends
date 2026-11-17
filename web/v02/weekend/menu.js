@@ -63,7 +63,7 @@ $("cancel-new").onclick = () => $("replace-save").close();
 $("confirm-new").onclick = () => start(pending);
 
 const labels={biome:'Brazilian biome',landscape:'Landscape',water:'Water availability',resources:'Land resources',savings:'Starting savings',supplies:'Starting supplies',town:'Town access'};
-const names={'mata-atlantica':'Mata Atlântica',cerrado:'Cerrado',caatinga:'Caatinga',gentle:'Gentle',rolling:'Rolling',rugged:'Rugged',dry:'Dry',seasonal:'Seasonal',abundant:'Abundant',sparse:'Sparse',balanced:'Balanced',rich:'Rich',tight:'Tight · R$100',modest:'Modest · R$220',comfortable:'Comfortable · R$600',essentials:'Bare essentials · 60% supplies',camp:'Weekend camp · standard supplies',prepared:'Well prepared · 170% supplies',nearby:'Nearby · 45 seconds',drive:'A drive away · 55 seconds',remote:'Remote · 110 seconds'};
+const names={'mata-atlantica':'Mata Atlântica',cerrado:'Cerrado',caatinga:'Caatinga',gentle:'Gentle',rolling:'Rolling',rugged:'Rugged',dry:'Dry',seasonal:'Seasonal',abundant:'Abundant',sparse:'Sparse',balanced:'Balanced',rich:'Rich',tight:'Tight · R$100',modest:'Modest · R$220',comfortable:'Comfortable · R$600',essentials:'Bare essentials · 60% supplies',camp:'Weekend camp · standard supplies',prepared:'Well prepared · 170% supplies',nearby:'Nearby · 4 km',drive:'A drive away · 6 km',remote:'Remote · 18 km'};
 for(const [key,values] of Object.entries(OPTIONS)){
  const label=document.createElement('label');label.textContent=labels[key];const select=document.createElement('select');select.id='setup-'+key;
  for(const value of values){const option=document.createElement('option');option.value=value;option.textContent=names[value];select.append(option);}

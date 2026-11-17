@@ -1,3 +1,4 @@
+import {tripEstimate} from "./economy-reference.js";
 import {materialMeasure as cargoUnit} from './material-measures.js';
 // Trade quantities remain the existing authored packs. Their cargo measurements
 // are explicit approximations, not a silent conversion of existing save stock.
@@ -6,7 +7,7 @@ export {materialMeasure as cargoUnit} from './material-measures.js';
 export function cargoSize(items){return Object.entries(items).reduce((a,[id,n])=>{const u=cargoUnit(id);a.kg+=n*u.kg;a.m3+=n*u.m3;return a;},{kg:0,m3:0});}
 export function fitsCargo(items){const c=cargoSize(items);return c.kg<=TRADE_RULES.cargoKg+1e-8&&c.m3<=TRADE_RULES.cargoM3+1e-8;}
 export function tradeDay(s){return Math.floor((540+s.time*.45)/1440);}
-export function transportCost(s){return s.worldSettings?.town==='remote'?12:s.worldSettings?.town==='nearby'?4:6;}
+export function transportCost(s){return tripEstimate(s.worldSettings?.town).cost;}
 export function ensureTrade(s){return s.trade??={version:1,nextId:1,orders:[],market:{},dispatchAt:0};}
 export function pendingExports(s){return (s.trade?.orders||[]).filter(o=>o.status==='queued');}
 export function tradeQuote(s,id,materials,count,protect=0){

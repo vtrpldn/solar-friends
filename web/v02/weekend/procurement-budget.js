@@ -24,6 +24,6 @@ export function collectionBudget(s,extra={}) {
   for(const part of manifest){const p=pending.find(p=>p.id===part.project);for(const [id,n]of Object.entries(part.items))p.pendingMaterials[id]-=n;}
   trips++;
  }
- const value={trips,cost:trips*fare};cache.set(s,{key,value});return value;
+ const value={trips,cost:Math.round(trips*fare*100)/100};cache.set(s,{key,value});return value;
 }
-export function spendableMoney(s){return Math.max(0,s.money-collectionBudget(s).cost);}
+export function spendableMoney(s){return Math.max(0,Math.round((s.money-collectionBudget(s).cost)*100)/100);}

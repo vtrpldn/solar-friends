@@ -1,3 +1,4 @@
+import {GRID_TARIFF} from "./economy-reference.js";
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
 // Record actual cash movements; old saves start a ledger at their current balance.
 export function ensureFinances(s) {
@@ -22,7 +23,7 @@ export function financeTime(time) {
 }
 export function financeSummary(s) {
   const f=ensureFinances(s);
-  return {...f,balance:s.money,committed:collectionBudget(s).cost,available:spendableMoney(s),net:f.income-f.expenses,gridRate:(s.infrastructure?.grid?.importing||0)*1.2};
+  return {...f,balance:s.money,committed:collectionBudget(s).cost,available:spendableMoney(s),net:f.income-f.expenses,gridRate:(s.infrastructure?.grid?.importing||0)*GRID_TARIFF};
 }
 
 // Whole centavos are posted; sub-cent utility consumption accumulates rather
