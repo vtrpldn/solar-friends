@@ -1,3 +1,4 @@
+import {collectionBudget,spendableMoney} from './procurement-budget.js';
 // Record actual cash movements; old saves start a ledger at their current balance.
 export function ensureFinances(s) {
   return s.finances ??= {since:s.time || 0, opening:s.money, income:0, expenses:0, categories:{}, entries:[]};
@@ -21,7 +22,7 @@ export function financeTime(time) {
 }
 export function financeSummary(s) {
   const f=ensureFinances(s);
-  return {...f,balance:s.money,net:f.income-f.expenses,gridRate:(s.infrastructure?.grid?.importing||0)*1.2};
+  return {...f,balance:s.money,committed:collectionBudget(s).cost,available:spendableMoney(s),net:f.income-f.expenses,gridRate:(s.infrastructure?.grid?.importing||0)*1.2};
 }
 
 // Whole centavos are posted; sub-cent utility consumption accumulates rather
@@ -33,6 +34,7 @@ export function transact(s,amount,category,description){
  const cents=Math.trunc(raw+(raw<0?-1:1)*1e-8);
  const opening=Math.round(s.money*100);
  if(opening+cents<0)return 0;
+ if(cents<0&&!['construction','transport'].includes(category)&&-cents>Math.round(spendableMoney(s)*100))return 0;
  f.fractions[category]=raw-cents;
  recordMoney(s,cents/100,category,description);
  s.money=(opening+cents)/100;

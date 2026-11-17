@@ -1,8 +1,9 @@
+import {collectionBudget,spendableMoney} from './procurement-budget.js';
 import {reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment} from './physical-trade.js';
 import {economyPolicies,productionTarget,workGroup,salePreview,validatePolicies} from './economy-policies.js';
 import {ensureFinances,recordMoney,transact,validFinances} from './finances.js';
 import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
-import { STORAGE_KINDS, crewLimit, carriedLoads } from "./construction-logistics.js";
+import { STORAGE_KINDS, crewLimit, carriedLoads, crewEfficiency } from "./construction-logistics.js";
 import {registerWorld,validSettings,townDuration,waterFactor} from './world-settings.js';
 import {depositCapacity} from './land-layout.js';
 import {workMultiplier} from './resident-personality.js';
@@ -711,8 +712,8 @@ export function blueprintPurchase(s, key, count = 1) {
     cost += missing * item.price / item.quantity;
   }
   cost = Math.ceil(cost * 100) / 100;
-  const transport = Object.keys(items).length ? transportCost(s) : 0;
-  return {items, cost, transport, error: cost + transport > s.money ? `Missing materials cost R$${cost.toFixed(2)} plus at least R$${transport.toFixed(2)} for collection; shared savings are too low.` : ""};
+  const budget=collectionBudget(s,items), transport=budget.cost;
+  return {items, cost, transport, error: cost + transport > s.money ? `Missing materials cost R$${cost.toFixed(2)} plus R$${transport.toFixed(2)} committed to ${budget.trips} collection trips; shared savings are too low.` : ""};
 }
 function dispatchBlueprintPickup(s) {
   const pending = s.projects.filter(p => p.pendingMaterials);
@@ -1158,7 +1159,7 @@ export function supplyRun(s, material = "wood", project = null, saleOnly = false
     (!project && !saleOnly && storedMaterials(s) + item.quantity > storageCapacity(s)) ||
     s.stage !== "playing" ||
     s.trip ||
-    s.money < (project || saleOnly ? 0 : item.price) + transportCost(s)
+    (project ? s.money : spendableMoney(s)) < (project || saleOnly ? 0 : item.price) + transportCost(s)
   )
     return false;
   const vehicle = s.nextTripVehicle || 0;
@@ -2178,6 +2179,7 @@ function tickUncached(s, dt) {
       p.work +
         dt *
           workMultiplier(r,p.key) *
+          crewEfficiency(s.people.filter(other=>other.job===p.id&&other.action==='build').length) *
           (s.opening &&
           !s.opening.complete &&
           s.rain &&

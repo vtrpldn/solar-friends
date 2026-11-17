@@ -1,3 +1,4 @@
+import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {loadVillage} from './load-village.js';
 import {ensureNaturalLand} from './natural-resources.js';
@@ -1632,7 +1633,7 @@ function renderUI() {
   $("town").textContent =
     `Fetch ${materialText($("purchase").value, purchase.quantity)} · R$${purchase.price + transportCost(s)} incl. trip`;
   $("town").disabled =
-    !!s.trip || s.money < purchase.price + transportCost(s) || s.stage !== "playing";
+    !!s.trip || spendableMoney(s) < purchase.price + transportCost(s) || s.stage !== "playing";
   $("inventory").textContent = Object.keys(MATERIALS)
     .map((id) => materialText(id, materialCount(s, id)))
     .join(" · ");
@@ -1643,7 +1644,7 @@ function renderUI() {
   $("sell").title=tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Payment after trading in town; combine batches to share transport costs.";
   $("trip").textContent = s.trip
     ? `${s.people.find((r) => r.id === s.trip.person).name}: ${{ boarding: "walking to the car", outbound: "driving to town", away: "trading in town", inbound: "driving home", unloading: "unloading supplies" }[s.trip.phase]}.`
-    : `Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. Town trip: R$${transportCost(s)}. Buy essentials or export surplus.`;
+    : `Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. R$${spendableMoney(s).toFixed(2)} available after collection commitments. Town trip: R$${transportCost(s)}. Buy essentials or export surplus.`;
   $("rain").hidden = !s.rainSeen || s.rainResolved;
   $("boards").disabled = s.wood < 2;
   $("log").replaceChildren(

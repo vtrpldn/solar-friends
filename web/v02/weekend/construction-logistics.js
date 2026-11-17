@@ -11,7 +11,19 @@ export function constructionStatus(state, project, definition, loads) {
     return `Supplies ${project.delivered}/${loads} · ${moving} in transit${project.staged ? ` · ${project.staged} at nearby storage` : ''}`;
   }
   const building = crew.filter(r => r.action === 'build').length;
-  if (building) return `${building}/${crewLimit(definition)} builders · supplies ready`;
+  if (building) {const estimate=constructionEstimate(state,project,definition);return `${building}/${crewLimit(definition)} builders · ~${estimate.assemblyHours.toFixed(1)} game hours of assembly left (before skill, needs and weather)`;}
   if (state.people.every(r => r.energy < 25 || r.tentPhase || r.needTask || r.action === 'town')) return 'Supplies ready · residents resting or meeting needs';
   return 'Supplies ready · crew finishing other work';
+}
+
+// Assembly work excludes hauling and personal breaks. These are game estimates,
+// not calibrated construction-industry person-hours.
+export function crewEfficiency(workers) {
+  return 1 / (1 + 0.12 * Math.max(0, workers - 1));
+}
+export function constructionEstimate(state, project, definition) {
+  const workers=state.people.filter(r=>r.job===project.id&&r.action==='build').length;
+  const remainingHours=Math.max(0,definition.work-project.work)*.45/60;
+  return {remainingHours,workers,crewLimit:crewLimit(definition),
+    assemblyHours:workers?remainingHours/(workers*crewEfficiency(workers)):null};
 }

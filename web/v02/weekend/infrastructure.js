@@ -1,3 +1,4 @@
+import {spendableMoney} from './procurement-budget.js';
 import {transact} from './finances.js';
 import {waterFactor} from './world-settings.js';
 import { riverBankAt, riverAccess } from "./river-layout.js";
@@ -273,7 +274,7 @@ export function infrastructureStep(s, defs, dt) {
       const shortfall = Math.max(0, need - remainder);
       // Buy only energy that a load can use; never charge batteries from the grid.
       if (n.enabled && shortfall > 0 && shortfall <= gridAvailable + 1e-9 &&
-          shortfall * GRID_POWER.tariff <= s.money) {
+          shortfall * GRID_POWER.tariff <= spendableMoney(s)) {
         const cost = shortfall * GRID_POWER.tariff;
         transact(s,-cost,"electricity","Grid electricity");
         sys.grid.imported += shortfall;
