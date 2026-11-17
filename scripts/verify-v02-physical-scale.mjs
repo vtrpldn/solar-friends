@@ -61,7 +61,7 @@ assert.deepEqual(footprint(legacy.projects[0]),[8,2]);
 for(const z of [39,40])assert(route(legacy,{x:4,z},{x:13,z}),'both legacy lanes remain usable');
 p.work=0;assert.equal(route(s,...endpoints),null,'unfinished bridge does not grant a crossing');
 const seeded=createScalePreview(), validated=createScalePreview(true);
-assert.deepEqual(seeded.projects, validated.projects, 'desktop fixture matches legal planned sites');
+assert.deepEqual(seeded.projects, validated.projects.map(({billOfMaterials,...p})=>Object.hasOwn(seeded.projects.find(a=>a.id===p.id),'billOfMaterials')?{...p,billOfMaterials}:p), 'desktop fixture preserves legal planned sites while capturing missing paid bills');
 assert.deepEqual(seeded.terrainPads, validated.terrainPads);
 assert(restore(save(seeded)), 'desktop review fixture remains save-compatible');
 console.log('PASS: shared scale, catalog/site agreement, planted areas and garden aisle, narrow bridge geometry and crossing, legacy widths/rotations/occupancy, movement and save round trips.');

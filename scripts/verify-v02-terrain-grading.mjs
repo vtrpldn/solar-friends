@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import {
-  createSandbox, tick, enableFastNavigation,
+  createSandbox,
   plan,
   moveProject,
   tick,
