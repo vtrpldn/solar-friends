@@ -1,10 +1,10 @@
-import {DAY, calendar} from './weather.js';
+import {DAY} from './weather.js';
 import {BIOLOGY, CROP_CARE, growthRate} from './biological-production.js';
 import {CROPS} from './cultivation.js';
-import {activeTrips} from './trip-state.js';
+import {ANIMAL_RATIONS, animalAvailable} from './animal-care.js';
 
 // Read-only projections: never advance the village or initialize missing state.
-export function upcomingMilestones(s, days, {projects = {}, materials = {}} = {}) {
+export function upcomingMilestones(s, days, {projects = {}} = {}) {
   const events = [];
   const add = (at, title, detail, estimated = false) => {
     if (!Number.isFinite(at)) return;
@@ -22,11 +22,11 @@ export function upcomingMilestones(s, days, {projects = {}, materials = {}} = {}
           (1 + Math.max(0, b.density - 1)) * (p.key === 'greenhouse' ? 1 : growthRate(s, 'vegetables'));
         if (rate > 0) add(s.time + (1 - b.growth) * crop.days * DAY / rate, `${label}: ready to harvest`, 'At current soil and seasonal conditions; resident harvesting still required.', true);
       }
-      if (b.stage === 'harvestable') add(b.ripeAt + crop.window * DAY, `${label}: harvest losses begin`, 'Harvest before this point to avoid gradual field losses.');
+      if (b.stage === 'harvestable') add(s.time, `${label}: ready to harvest`, 'Ready now; queue harvesting before advancing time.');
     }
     for (const op of s.operations || []) {
       const biology = BIOLOGY[op.recipe];
-      if (op.done || !biology || op.farm) continue;
+      if (op.done || !biology || op.farm || ['eggs', 'milk'].includes(op.recipe)) continue;
       const p = s.projects?.find(p => p.id === op.site);
       const label = `${op.recipe.replaceAll('_', ' ')}${p ? ` · ${siteName(p)}` : ''}`;
       if (op.phase === 'growing') {
@@ -35,29 +35,41 @@ export function upcomingMilestones(s, days, {projects = {}, materials = {}} = {}
         const rate = growthRate(s, op.recipe) * (moisture < .1 ? 0 : Math.min(1, moisture / .4)) * fertility;
         if (rate > 0) add(s.time + op.growthRemaining / rate, `${label}: ready for collection`, 'At current conditions; resident collection work still required.', true);
       }
-      if (op.phase === 'process' && op.ripeAt !== undefined && Number.isFinite(biology.window)) add(op.ripeAt + biology.window * DAY, `${label}: collection losses begin`, 'Uncollected output gradually loses yield.');
+      if (op.phase === 'process' && op.ripeAt !== undefined && !op.failed) add(s.time, `${label}: ready for collection`, 'Ready now; resident collection work still required.');
     }
-    for (const [id, lots] of Object.entries(s.foodStorage?.lots || {})) {
-      const earliest = Math.min(...lots.filter(l => l.n > 0).map(l => l.expires));
-      add(earliest, `${materials[id]?.name || id}: oldest stored food expires`, 'If still in storage; consumption or preservation may change this.');
+    for (const p of s.projects || []) {
+      const kind = projects[p.key]?.kind || p.key;
+      const ration = ANIMAL_RATIONS[kind], care = p.animalCare;
+      if (!ration || !care || (projects[p.key] && p.work < projects[p.key].work)) continue;
+      const available = animalAvailable(p);
+      const product = ration.product === 'eggs' ? 'eggs' : 'L of milk';
+      if (available > 0) add(s.time, `${siteName(p)}: ${available} ${product} ready to collect`, 'Ready now; residents still need to collect the produce.');
+      if (available >= ration.batch * 2) continue;
+      const daysToNext = animalProductionDays(p, ration);
+      const suppliedDays = Math.min(care.feed / (ration.fodder / ration.days), care.water / (ration.water / ration.days));
+      const title = `${siteName(p)}: ${ration.product === 'eggs' ? 'next egg laid' : 'next litre of milk ready'}`;
+      if (daysToNext <= suppliedDays) add(s.time + daysToNext * DAY, title, 'Based on current health, feed, and drinking water; collection is separate.', true);
+      else events.push({remaining: Infinity, title, detail: 'Waiting for animal care: replenish feed and drinking water before production can reach the next unit.', estimated: true, withinSkip: false, blocked: true});
     }
-    for (const r of s.people || []) if (r.outsideWork?.phase === 'away') {
-      add(r.outsideWork.until, `${r.name}: shift ends`, 'Starts returning to the village; wages arrive after the walk back.');
-    }
-    const day = calendar(s.time).absoluteDay;
-    if (Object.values(s.suppliers || {}).some(entry => entry.day === day && entry.units > 0)) {
-      add((day + 1) * DAY - DAY * 9 / 24, 'Town suppliers restock', 'Daily purchasing allocations renew.');
-    }
-  }
-  for (const trip of activeTrips(s)) if (['outbound', 'away', 'inbound'].includes(trip.phase)) {
-    const resident = s.people?.find(r => r.id === trip.person);
-    add(s.time + trip.left, `${resident?.name || 'Town pickup'}: arrives from town`, 'Unloading and carrying supplies still remain.');
   }
   return events.sort((a, b) => a.remaining - b.remaining || a.title.localeCompare(b.title));
 }
 
 export function milestoneTime(event) {
+  if (event.blocked) return 'Needs care';
   if (event.remaining === 0) return 'Now';
   const hours = event.remaining / DAY * 24;
   return `${event.estimated ? 'About ' : 'In '}${hours < 24 ? `${Math.max(1, Math.ceil(hours))}h` : `${(hours / 24).toFixed(1)} days`}`;
+}
+
+// animalStep restores five health points per fed day and produces continuously.
+// Integrate that same recovery curve until the next whole unit is available.
+export function animalProductionDays(p, ration) {
+  const health = Math.max(0, Math.min(100, p.animalHealth ?? 100));
+  const needed = Math.max(0, 1 - p.animalCare.pending) / ration.dailyOutput;
+  const recoveryDays = (100 - health) / 5;
+  const duringRecovery = (health * recoveryDays + 2.5 * recoveryDays ** 2) / 100;
+  return needed <= duringRecovery
+    ? (200 * needed) / (Math.sqrt(health ** 2 + 1000 * needed) + health)
+    : recoveryDays + needed - duringRecovery;
 }

@@ -1288,12 +1288,12 @@ function renderSkipMilestones() {
     const heading = document.createElement('strong');
     heading.textContent = `${milestoneTime(event)} · ${event.title}`;
     const detail = document.createElement('span');
-    detail.textContent = `${event.withinSkip ? 'During this skip' : 'Beyond this skip'} · ${event.detail}`;
+    detail.textContent = `${event.blocked ? 'Production waiting' : event.withinSkip ? 'During this skip' : 'Beyond this skip'} · ${event.detail}`;
     row.append(heading, detail);
     list.append(row);
   }
   $("skip-milestone-empty").hidden = events.length > 0;
-  $("skip-milestone-note").textContent = `${events.length > 8 ? `Showing the next 8 of ${events.length} milestones. ` : ''}Estimates can change with weather, supplies, and resident decisions. Construction completion depends on available workers and materials.`;
+  $("skip-milestone-note").textContent = `${events.length > 8 ? `Showing the next 8 of ${events.length} milestones. ` : ''}Harvest and animal-production estimates change with weather, soil, feed, and water. Ready produce still needs resident collection.`;
 }
 $("skip-days").addEventListener('input', renderSkipMilestones);
 $("time-skip").onclick = () => {
