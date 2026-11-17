@@ -1,3 +1,4 @@
+import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSION} from './construction-specs.js';
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
 import {reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment} from './physical-trade.js';
 import {economyPolicies,productionTarget,workGroup,salePreview,validatePolicies} from './economy-policies.js';
@@ -115,6 +116,7 @@ expandMaterials(MATERIALS);
 expandProjects(PROJECTS);
 registerNaturalProjects(PROJECTS);
 Object.assign(PROJECTS, OPENING_PROJECTS);
+applyConstructionSpecs(PROJECTS);
 export { PROCESSES };
 export function footprint(p) {
   const [w, d] = !p.natural && ['supply-2','supply-3'].includes(p.key) ? [1,1] : PROJECTS[p.key].size;
@@ -740,6 +742,7 @@ export function beginArrival(s) {
 export function createWeekend(landSeed = 0) {
   return {
     version: 2,
+    constructionLaborVersion: CONSTRUCTION_LABOR_VERSION,
     homeEnergyVersion: 1,
     landSeed,
     elevationSeed: landSeed,
@@ -2371,6 +2374,7 @@ export function restore(text) {
       }
       s.homeEnergyVersion = 1;
     }
+    if(!migrateConstructionLabor(s,PROJECTS))return null;
     for (const p of s.projects) {
       const recipe = {...PROJECTS[p.key]?.materials, ...(p.solarUpgrade ? Object.fromEntries(['panels','batteries','electrical'].map(id=>[id,Math.ceil(PROJECTS[p.key].size[0]/2)])) : {})};
       if (p.pendingMaterials && (p.work !== 0 || p.delivered !== 0 ||

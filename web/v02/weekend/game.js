@@ -1,3 +1,4 @@
+import {constructionSpecText} from './construction-specs.js';
 import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {loadVillage} from './load-village.js';
@@ -761,7 +762,7 @@ for (const [key, d] of Object.entries(PROJECTS)) {
   const count = Object.values(d.materials).reduce((a, b) => a + b, 0);
   b.innerHTML = `<span class="material-warning" aria-hidden="true">!</span><img class="build-art" alt=""/><strong>${d.name}</strong><span class="build-cost">${s.mode === "sandbox" ? "Free" : `${count} materials`} <i>· ${d.size.join("×")}</i></span>`;
   b.setAttribute("aria-label", `${d.name}. ${recipeText(key)}`);
-  b.title = d.description;
+  b.title = `${d.description} ${constructionSpecText(d)}`;
   buildMaterialTooltip.attach(b);
   b.dataset.category = d.category;
   b.onclick = () => { setPanel(null); startPlacement(key); };
@@ -1664,7 +1665,7 @@ function renderUI() {
     const missing = missingMaterials(s, key);
     buildMaterialTooltip.update(b,missing);
     const purchase = blueprintPurchase(s, key);
-    b.title = `${PROJECTS[key].description} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: R$${purchase.cost.toFixed(2)}. Resident pickup included.` : "All materials available."}`;
+    b.title = `${PROJECTS[key].description} ${constructionSpecText(PROJECTS[key])} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: R$${purchase.cost.toFixed(2)}. Collection reserve: R$${purchase.transport.toFixed(2)} across outstanding orders.` : "All materials available."}`;
     b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? "Free"
       : s.autoBuy===false && missing.length ? 'Missing materials'
       : purchase.cost ? `Auto-buy R$${purchase.cost.toFixed(2)}`
@@ -1695,7 +1696,7 @@ function renderUI() {
             ? " Housing: 0 goats / 2 places."
             : "";
     $("selected-desc").textContent =
-      `${PROJECTS[p.key].description}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+      `${PROJECTS[p.key].description} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
   }
 }
