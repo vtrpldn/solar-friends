@@ -1,3 +1,4 @@
+import {skipDays} from './time-skip.js';
 import {basicNeeds,renderBasicNeeds} from './basic-needs.js';
 import {installGuide} from './guide.js';
 let guide;
@@ -1274,6 +1275,61 @@ function updateSpeedButton() {
 }
 setSpeed(speed);
 $("speed").onclick = () => setSpeed([1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4]);
+let skippingTime = false, skipWasPaused = false;
+const skipDialog = $("time-skip-dialog");
+$("time-skip").onclick = () => {
+  if (s.stage === 'arrival' || s.arrivalAnimating) { message('Choose your camp and finish arriving before advancing days.'); return; }
+  if (placing) cancel();
+  setPanel(null);
+  skipWasPaused = paused;
+  paused = true;
+  updatePauseButton();
+  $("skip-status").textContent = 'Life continues while you wait: residents, supplies, bills, weather, and construction.';
+  $("skip-progress").hidden = true;
+  skipDialog.showModal();
+};
+skipDialog.addEventListener('cancel', event => { if (skippingTime) event.preventDefault(); });
+skipDialog.addEventListener('close', () => { paused = skipWasPaused; updatePauseButton(); });
+$("skip-close").onclick = () => skipDialog.close();
+$("skip-form").onsubmit = async event => {
+  event.preventDefault();
+  if (skippingTime || !$("skip-form").reportValidity()) return;
+  skippingTime = true;
+  $("skip-start").disabled = true;
+  $("skip-days").disabled = true;
+  $("skip-close").textContent = 'Stop here';
+  let stopped = false;
+  $("skip-close").onclick = () => { stopped = true; };
+  $("skip-progress").hidden = false;
+  try {
+    await skipDays(s, Number($("skip-days").value), {
+      cancelled: () => stopped,
+      progress: fraction => {
+        $("skip-progress").value = fraction;
+        $("skip-status").textContent = `Simulating every moment… ${Math.floor(fraction * 100)}%`;
+      },
+    });
+    message(stopped ? 'Time advance stopped. Your village is paused.' : 'Days advanced. Your village is paused.');
+  } catch (error) {
+    console.error(error);
+    message('Time advance interrupted. Your village is paused at the last simulated moment.');
+  } finally {
+    skippingTime = false;
+    skipWasPaused = true;
+    accumulator = 0;
+    previousMotion = captureMotion(s);
+    previous = performance.now();
+    uiSignature = '';
+    renderUI();
+    persist();
+    $("skip-start").disabled = false;
+    $("skip-days").disabled = false;
+    $("skip-close").textContent = 'Cancel';
+    $("skip-close").onclick = () => skipDialog.close();
+    skipDialog.close();
+  }
+};
+
 $("home").onclick = () => focus(campLocation(s));
 $("river-view").onclick = () => focus(riverAccess(s.landSeed));
 $("rotate-left").onclick = () => navigation.rotate(-Math.PI / 2);
@@ -2080,6 +2136,7 @@ let previous = performance.now(),
   latestMessage = s.log[0];
 let previousMotion = captureMotion(s);
 function frame(now) {
+  if (skippingTime) { previous = now; requestAnimationFrame(frame); return; }
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
   if (!paused && !document.hidden) {

@@ -44,7 +44,7 @@
         <span id="clock"></span>
         <div>
           <button id="pause" data-shortcut="Space" aria-keyshortcuts="Space" aria-label="Pause simulation">Ⅱ</button
-          ><button id="speed" data-shortcut="1–4" aria-keyshortcuts="1 2 3 4">1×</button>
+          ><button id="speed" data-shortcut="1–4" aria-keyshortcuts="1 2 3 4">1×</button><button id="time-skip" aria-haspopup="dialog">Advance days…</button>
         </div>
         <div class="environment-info" aria-label="Date and weather">
           <span id="calendar-date"></span><details class="weather-forecast"><summary id="weather-summary"><span id="weather"></span> · <span id="temperature" title="Current simulated ambient temperature."></span></summary><p id="weather-forecast"></p></details>
@@ -332,6 +332,17 @@
       </p>
       <button id="confirm-reset">Start again</button
       ><button id="keep">Keep this camp</button>
+    </dialog>
+    <dialog id="time-skip-dialog" aria-labelledby="skip-title">
+      <form id="skip-form">
+        <h2 id="skip-title">Advance days</h2>
+        <p id="skip-status"></p>
+        <label for="skip-days">Days to simulate</label>
+        <input id="skip-days" type="number" min="1" max="365" step="1" value="1" required>
+        <p class="hint">Advance 1–365 days from now. The game pauses afterward so you can review what changed.</p>
+        <progress id="skip-progress" max="1" value="0" aria-label="Simulation progress" hidden></progress>
+        <div><button id="skip-close" type="button">Cancel</button><button id="skip-start" type="submit">Advance time</button></div>
+      </form>
     </dialog>
     <script type="module" src="game.js"></script>
   </body>
