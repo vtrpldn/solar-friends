@@ -15,12 +15,24 @@ function roof(g, w, d) {
   for (const x of [-w / 2 + 0.25, w / 2 - 0.25])
     for (const z of [-d / 2 + 0.25, d / 2 - 0.25])
       box(g, 0.16, 2.4, 0.16, "timber", x, 1.2, z);
+  // Tie the posts together under the eaves, with a braced truss at each end.
+  for (const x of [-w / 2 + 0.25, w / 2 - 0.25])
+    box(g, 0.18, 0.18, d - 0.35, "timber", x, 2.35, 0);
+  for (const z of [-d / 2 + 0.25, d / 2 - 0.25]) {
+    box(g, w - 0.35, 0.16, 0.16, "timber", 0, 2.35, z);
+    for (const side of [-1, 1]) {
+      const x = side * (w / 2 - 0.25);
+      beam(g, [x, 1.93, z], [x - side * 0.48, 2.35, z], 0.1, "timberLight");
+      beam(g, [x, 2.4, z], [0, 3.13, z], 0.12, "timber");
+    }
+    beam(g, [0, 2.35, z], [0, 3.13, z], 0.12, "timber");
+  }
   clayRoof(g, {
     half: w / 2,
     depth: d,
     eave: 2.4,
     rise: 0.8,
-    ridgeHeight: 3.28,
+    ridgeHeight: 3.46,
   });
 }
 function board(g, x, z) {
