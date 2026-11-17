@@ -1933,7 +1933,7 @@ function renderUI() {
   const journeys=activeTrips(s).map(trip=>`${s.people.find(r=>r.id===trip.person).name}: ${{boarding:"walking to the car",outbound:"driving to town",away:"trading in town",inbound:"driving home",unloading:"unloading supplies"}[trip.phase]}`);
   if(s.delivery)journeys.push(`Supplier delivery: ${Math.ceil(s.delivery.left*.45)} game minutes remaining`);
   $("trip").textContent = journeys.length?journeys.join(' · '):`Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. R$${spendableMoney(s).toFixed(2)} available after collection commitments. ${s.deliveryOnly?'Delivery':'Car trip'}: R$${transportCost(s).toFixed(2)}.`;
-  const equipmentBlocked = materialCount(s,$("purchase").value)-protectedEquipment(s,$("purchase").value)<1;
+  const equipmentBlocked = protectedEquipment(s,$("purchase").value)>0 && materialCount(s,$("purchase").value)-protectedEquipment(s,$("purchase").value)<1;
   $("sell").disabled ||= equipmentBlocked;
   disabledReason($("sell"),equipmentBlocked ? "Return borrowed equipment or repair worn equipment before selling it." : $("sell").title);
   $("rain").hidden = !s.rainSeen || s.rainResolved;

@@ -33,3 +33,9 @@ const village=createSandbox(42);enableFastNavigation(village);
 assert.equal(plan(village,'house',40,39),'');
 assert.match(placementError(village,'house',40,39+PROJECTS.house.size[1]),/access|entrance/,'placement protects an existing entrance');
 console.log('PASS placement rejects obstruction of an existing building entrance');
+// A legacy obstruction must not prevent unrelated expansion elsewhere.
+const oldHome=village.projects.find(p=>p.key==='house');
+const oldFront=accessGeometry({...oldHome,work:PROJECTS.house.work},PROJECTS.house,footprint(oldHome)).work[0];
+village.projects.push({id:999,key:'house',x:oldFront.x-.5,z:oldFront.z,work:PROJECTS.house.work,rotation:0});
+assert.equal(placementError(village,'garden',60,60),'','existing blocked access does not reject a distant new site');
+console.log('PASS legacy blocked entrance does not prevent unrelated expansion');

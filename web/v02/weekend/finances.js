@@ -39,9 +39,20 @@ export function financeForecast(s){
  if(!values.length)return {days:0,low:available,high:available,mean:0};
  return {days:values.length,low:available+Math.min(...values)*7,high:available+Math.max(...values)*7,mean:values.reduce((a,b)=>a+b,0)/values.length};
 }
+// Fold legacy hourly entries for display without rewriting ledger totals.
+export function transactionHistory(entries) {
+  const grouped=[],days=new Map();
+  for(const entry of entries){
+    if(entry.category!=='electricity'){grouped.push({...entry});continue;}
+    const day=Math.floor((540+entry.time*.45)/1440),existing=days.get(day);
+    if(existing)existing.amount=Math.round((existing.amount+entry.amount)*100)/100;
+    else {const row={...entry,description:'Grid electricity — recorded daily total'};days.set(day,row);grouped.push(row);}
+  }
+  return grouped;
+}
 export function financeSummary(s) {
   const f=ensureFinances(s);
-  return {...f,balance:s.money,committed:collectionBudget(s).cost,available:spendableMoney(s),net:f.income-f.expenses,gridRate:(s.infrastructure?.grid?.importing||0)*GRID_TARIFF};
+  return {...f,entries:transactionHistory(f.entries),balance:s.money,committed:collectionBudget(s).cost,available:spendableMoney(s),net:f.income-f.expenses,gridRate:(s.infrastructure?.grid?.importing||0)*GRID_TARIFF};
 }
 
 // Whole centavos are posted; sub-cent utility consumption accumulates rather
