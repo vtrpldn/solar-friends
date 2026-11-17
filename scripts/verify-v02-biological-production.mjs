@@ -31,5 +31,20 @@ const orchard={id:1};const planting={time:0,projects:[orchard]},fruit={site:1,re
 assert(beginBiology(planting,fruit,{}));assert.equal(fruit.growthRemaining,730*GAME_DAY,'new orchard has a juvenile establishment period');
 const repeat={site:1,recipe:'fruit'};assert(beginBiology(planting,repeat,{}));assert.equal(repeat.growthRemaining,120*GAME_DAY,'establishment does not recur for mature trees');
 const timber=createWeekend(44);chooseCamp(timber,'entrance');const stand={id:timber.nextId++,key:'supply-0',x:timber.stock.x+4,z:timber.stock.z+4,work:PROJECTS['supply-0'].work,delivered:0,harvestCount:1};timber.projects.push(stand);syncInfrastructure(timber,PROJECTS);
-assert.match(queueProduction(timber,stand.id,'wood'),/tree_starts/);timber.materials.tree_starts=2;assert.equal(queueProduction(timber,stand.id,'wood'),'');assert.equal(timber.materials.tree_starts,0);assert(restore(save(timber)));
+assert.match(queueProduction(timber,stand.id,'wood'),/tree_starts/);timber.materials.tree_starts=4;assert.equal(queueProduction(timber,stand.id,'wood'),'');assert.equal(timber.materials.tree_starts,0);assert(restore(save(timber)));
 console.log('PASS juvenile orchard, mature repeat cycle and paid timber replanting inputs');
+
+// Trees tolerate a short dry spell; prolonged drought still reduces the harvest.
+const dryStand={time:0,rain:false,projects:[{id:1,soilMoisture:0,soilFertility:1,irrigationPolicy:'rainfed'}],operations:[{site:1,recipe:'wood',phase:'growing',growthRemaining:BIOLOGY.wood.days*GAME_DAY,planted:true}]};
+for(let day=0;day<7;day++)biologicalStep(dryStand,GAME_DAY,()=>false);
+assert.equal(dryStand.operations[0].phase,'growing');
+assert.equal(dryStand.operations[0].droughtDamage,0,'a one-week dry spell does not kill timber');
+for(let day=7;day<44;day++)biologicalStep(dryStand,GAME_DAY,()=>false);
+assert.equal(dryStand.operations[0].droughtDamage,.5);
+assert.equal(harvestOutput({time:0},{...dryStand.operations[0],ripeAt:0},PROCESSES.wood).logs,24);
+for(let day=44;day<74;day++)biologicalStep(dryStand,GAME_DAY,()=>false);
+assert.equal(dryStand.operations[0].phase,'process');
+assert.equal(harvestOutput(dryStand,dryStand.operations[0],PROCESSES.wood).logs,0);
+const legacy=JSON.parse(save(timber));legacy.operations[0].input.tree_starts=2;
+assert(restore(JSON.stringify(legacy)),'already-paid two-seedling jobs from older saves remain valid');
+console.log('PASS timber drought tolerance, prolonged loss, failed harvest and legacy replant saves');

@@ -1,8 +1,8 @@
 import {DAY} from './weather.js';
 // Authored thresholds, not crop-specific agronomic prescriptions.
-export function cropStress(crop,moisture,dt){
+export function cropStress(crop,moisture,dt,{graceDays=1,lossDays=6}={}){
  crop.drySeconds=moisture<.1?(crop.drySeconds||0)+dt:0;
- crop.droughtDamage=Math.max(crop.droughtDamage||0,Math.min(1,Math.max(0,crop.drySeconds-DAY)/(6*DAY)));
+ crop.droughtDamage=Math.max(crop.droughtDamage||0,Math.min(1,Math.max(0,crop.drySeconds-graceDays*DAY)/(lossDays*DAY)));
  return crop.droughtDamage>=1?'failed':crop.droughtDamage>0?'damaged':moisture<.2?'wilting':'healthy';
 }
 export function validCropStress(c){return (c.drySeconds===undefined||Number.isFinite(c.drySeconds)&&c.drySeconds>=0)&&(c.droughtDamage===undefined||Number.isFinite(c.droughtDamage)&&c.droughtDamage>=0&&c.droughtDamage<=1);}
