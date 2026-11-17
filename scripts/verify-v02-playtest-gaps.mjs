@@ -20,7 +20,7 @@ assert.equal(trip.finances.entries.filter(e=>e.category==='transport').reduce((n
 assert(sellMaterial(trip,'stone'));loadExports(trip,trip.trip);const loaded=trip.trip.exports.length;loadExports(trip,trip.trip);assert.equal(trip.trip.exports.length,loaded,'loading is idempotent');
 const cargo={};for(const id of trip.trip.exports){const o=trip.trade.orders.find(o=>o.id===id);cargo[o.material]=(cargo[o.material]||0)+o.quantity;}assert(cargoSize(cargo).kg<=350);assert(restore(save(trip)));
 const grow=policy=>({time:0,rain:false,projects:[{id:1,soilMoisture:.75,soilFertility:1,irrigationPolicy:policy}],operations:[{site:1,recipe:'baby_greens',phase:'growing',growthRemaining:21*GAME_DAY,planted:true}]});
-const totals={};for(const policy of ['balanced','conserve','rainfed']){const crop=grow(policy);let water=0;for(let i=0;i<GAME_DAY;i++)biologicalStep(crop,1,(_s,_id,n)=>{water+=n;return true;});totals[policy]=water;assert(validBiology(crop,{}));if(policy==='rainfed')assert(crop.projects[0].soilMoisture<.2);}
+const totals={};for(const policy of ['balanced','conserve','rainfed']){const crop=grow(policy);let water=0;for(let i=0;i<GAME_DAY;i++)biologicalStep(crop,1,(_s,_id,n)=>{water+=n;return true;});totals[policy]=water;assert(validBiology(crop,{}));if(policy==='rainfed')assert(Math.abs(crop.projects[0].soilMoisture-(.75-24/(8*16)))<1e-9,'24 L daily crop demand is withdrawn from 128 L soil capacity');}
 assert(totals.balanced>totals.conserve);assert.equal(totals.rainfed,0);assert.equal(biologyLabel('eggs'),'Next collection');assert.equal(biologyLabel('milk'),'Next collection');
 console.log('PASS oldest-food consumption, eggs/milk portions, stock and save conservation, shared return-trip purchase, cargo limits, irrigation choices and animal labels');
 

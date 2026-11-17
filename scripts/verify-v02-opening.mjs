@@ -64,7 +64,7 @@ assert.deepEqual(
   before,
 );
 run(scarce, 241);
-assert(scarce.rainSeen && scarce.rainResolved, "opening shower does not create a forced repair quest");
+assert(scarce.rainResolved, "seasonal weather does not create a forced repair quest");
 scarce.money = 2000; // Fixture funds isolate tarp ownership from current retail calibration.
 assert.equal(plan(scarce, "covered-stores", 40, 39), "");
 // Crews are now limited; carrying, breaks and construction must still finish

@@ -29,3 +29,5 @@ Integration regressions found and corrected before publication:
 
 - Static resident catalog previews now discard the hidden chopping axe, just as they already discard cargo and watering cans. The existing geometry budget and chopping animation tests pass without relaxing their limits.
 - Expired-crop browser inspection now enters the individual-bed view introduced by whole-field management. The full field placement/configuration/reload check passes after that adjustment.
+
+Prepublication validation completed 1,474 checks (including 795 Rust behavior tests, Rust lint, JavaScript syntax and 161 v2 verification scripts). Five checks initially failed: one real catalog geometry regression and four assertions tied to superseded UI/weather/soil behavior. All five were corrected and rerun; the initial report is retained as evidence rather than relabeled green. Three 30-day ordinary-command village scenarios and the nine-environment seasonal diagnostic passed.
