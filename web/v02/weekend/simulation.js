@@ -1,3 +1,4 @@
+import {ensureHydrology,extractWater,validHydrology} from './hydrology.js';
 import {weatherStep,validWeather} from './weather.js';
 import {CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
 import {registerGathering,gatheringStatus,gatheringState,validGathering} from './gathering.js';
@@ -710,7 +711,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
         dest.capacity[index] - dest.water[index],
         w.from === -1 ? 12 : sys.nodes[w.from].water[index],
       );
-      if (w.from === -1) sys.account.waterReceived += w.amount;
+      if (w.from === -1){w.amount=extractWater(s,"river",w.amount);sys.account.waterReceived += w.amount;if(w.amount<=1e-8){op.status="River reserve is low; waiting for flow";return true;}}
       else sys.nodes[w.from].water[index] -= w.amount;
       useEquipment(s,r,"bucket",`op:${op.id}`,0);
       op.phase = "deliver";
@@ -2523,7 +2524,8 @@ export function restore(text) {
       s.projects.length > 512
     )
       return null;
-    if(!validWeather(s))return null;
+    if(!validWeather(s)||!validHydrology(s))return null;
+    ensureHydrology(s);
     if(s.weather===undefined)weatherStep(s);
     if(!validGathering(s))return null;
     restoreHomeAssignments(s);
@@ -2829,7 +2831,7 @@ export function restore(text) {
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     if(s.foodStorage?.lots)for(const id of ['greens','beans','corn'])if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
     refreshSandboxFood(s);
-    if (!validWeather(s) || !validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validHydrology(s) || !validWeather(s) || !validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(

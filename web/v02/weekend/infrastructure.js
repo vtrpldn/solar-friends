@@ -1,3 +1,4 @@
+import {hydrologyStep,extractWater,hydroFactor,rainCatchments,captureRain} from './hydrology.js';
 import {solarFactor} from './weather.js';
 import {projectMaterials} from './project-materials.js';
 import {serviceFactor} from "./asset-upkeep.js";
@@ -227,6 +228,7 @@ export function infrastructureStep(s, defs, dt) {
     0,
     Math.sin(((((9 + (s.time * 0.45) / 60) % 24) - 6) * Math.PI) / 12),
   );
+  hydrologyStep(s,dt);
   sys.grid.importing = 0;
   const nodes = Object.values(sys.nodes),
     visited = new Set();
@@ -258,7 +260,7 @@ export function infrastructureStep(s, defs, dt) {
       demand = 0;
     for (const n of component) {
       n.generation = n.enabled
-        ? { solar_farm: (n.solarKw??1.2) * sun, hydro: 2.34*Math.min(1,waterFactor(s.worldSettings?.water)*(s.rain?1.2:1)), home: n.solarUpgrade ? 0.6 * sun : 0 }[n.kind] || 0
+        ? { solar_farm: (n.solarKw??1.2) * sun, hydro: 2.34*hydroFactor(s), home: n.solarUpgrade ? 0.6 * sun : 0 }[n.kind] || 0
         : 0;
       const machinery=['kitchen','workshop'].includes(n.kind);
       const pumping=n.kind==='water-pump' && n.water[1]<n.capacity[1]-.01 && (riverBankAt(n.x+.5,n.z+.5,3,s.landSeed) || Object.values(sys.nodes).some(a=>a.kind==='groundwater-well' && a.enabled && a.water[1]>0 && Math.hypot(a.x-n.x,a.z-n.z)<=6));
@@ -333,25 +335,22 @@ export function infrastructureStep(s, defs, dt) {
       n.connected = component.length > 1;
     }
   }
-  for (const n of Object.values(sys.nodes)) {
+  const catchments=rainCatchments(s,defs);
+  for (const n of Object.values(sys.nodes).sort((a,b)=>a.id-b.id)) {
     if(n.enabled && n.kind==='groundwater-well') {
-      const add=Math.min(n.capacity[1]-n.water[1],8*hours*waterFactor(s.worldSettings?.water));
+      const add=extractWater(s,"groundwater",Math.min(n.capacity[1]-n.water[1],8*hours*waterFactor(s.worldSettings?.water)));
       n.water[1]+=add;sys.account.waterReceived+=add;
     }
     if(n.enabled && n.kind==='water-pump' && n.power>.99 && n.demand>0) {
       let amount=Math.min(n.capacity[1]-n.water[1],600*hours*(n.serviceFactor??1));
       const source=Object.values(sys.nodes).filter(a=>a.kind==='groundwater-well'&&a.enabled&&Math.hypot(a.x-n.x,a.z-n.z)<=6).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
       if(source){amount=Math.min(amount,source.water[1]);source.water[1]-=amount;}
-      else if(riverBankAt(n.x+.5,n.z+.5,3,s.landSeed))sys.account.waterReceived+=amount;
+      else if(riverBankAt(n.x+.5,n.z+.5,3,s.landSeed)){amount=extractWater(s,"river",amount);sys.account.waterReceived+=amount;}
       else amount=0;
       n.water[1]+=amount;
     }
     // Rain is non-potable until filtered; no sewage or greywater becomes drinking water.
-    if (s.rain && ["well", "rain-barrel"].includes(n.kind)) {
-      const add = Math.min(n.capacity[1] - n.water[1], 30 * hours * waterFactor(s.worldSettings?.water));
-      n.water[1] += add;
-      sys.account.waterReceived += add;
-    }
+    if(catchments.has(n.id))captureRain(s,n,catchments.get(n.id),dt);
     if (n.enabled && n.kind === "well" && n.power > 0.99 && n.demand>0) {
       const amount = Math.min(
         n.water[1],
