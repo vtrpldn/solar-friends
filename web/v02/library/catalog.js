@@ -692,17 +692,35 @@ function waterSource(pump=false){
   box(g,1.5,.15,1.4,'stone',0,.075,0);
   color(cylinder(g,.28,.28,.75,'teal',0,.53,0,10),'#518a80');
   box(g,.55,.35,.45,'teal',.4,.65,0);
-  beam(g,[-.5,.2,-.5],[-.5,.75,-.5],.12,'timberLight');
-  beam(g,[-.5,.75,-.5],[0,.75,-.5],.12,'timberLight');
-  beam(g,[0,.5,.35],[0,.5,.8],.12,'teal');
+  // Connected suction and delivery pipes, motor feet, ribs and service valve.
+  for (const x of [.25,.55]) box(g,.12,.3,.55,'teal',x,.3,0);
+  for (const y of [.25,.82]) cylinder(g,.32,.32,.07,'teal',0,y,0,10);
+  for (const x of [.24,.37,.5,.63]) box(g,.035,.39,.49,'teal',x,.65,0);
+  beam(g,[-.5,.15,-.5],[-.5,.5,-.5],.12,'teal');
+  beam(g,[-.5,.5,-.5],[0,.5,-.5],.12,'teal');
+  beam(g,[0,.5,-.5],[0,.5,0],.12,'teal');
+  beam(g,[0,.5,0],[0,.5,.65],.12,'teal');
+  beam(g,[0,.5,.65],[0,.3,.65],.12,'teal');
+  beam(g,[-.5,.5,-.5],[-.5,.72,-.5],.045,'stone');
+  box(g,.27,.045,.045,'tile',-.5,.74,-.5);
+  box(g,.25,.16,.025,'plaster',.4,.67,.24);
  }else{
   const ring=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,1,12,1,true),new THREE.MeshStandardMaterial({color:'#a89b7c',roughness:1,side:THREE.DoubleSide,flatShading:true}));ring.position.y=.5;ring.castShadow=true;g.add(ring);
   color(cylinder(g,.95,.95,.04,'teal',0,.12,0,12),'#496965');
+  for (let i=0;i<12;i++) {
+    const a=i*Math.PI/6;
+    const coping=box(g,.54,.14,.23,'stone',Math.sin(a)*1.04,1.02,Math.cos(a)*1.04);
+    coping.rotation.y=a;
+  }
+  beam(g,[-1.3,2.32,0],[1.3,2.32,0],.15,'timber');
+  for (const side of [-1,1]) beam(g,[side*1.3,1.93,0],[side*.85,2.32,0],.1,'timberLight');
+  beam(g,[1.42,1.5,0],[1.42,1.2,0],.08,'teal');
+  beam(g,[1.42,1.2,0],[1.65,1.2,0],.09,'timberLight');
   for(const x of [-1.3,1.3])box(g,.18,2.4,.18,'timber',x,1.2,0);
   beam(g,[-1.3,1.5,0],[1.3,1.5,0],.14,'timberLight');
   beam(g,[0,1.5,0],[0,.6,0],.025,'timber');
   cylinder(g,.18,.14,.28,'timberLight',0,.48,0,8);
-  clayRoof(g,{half:1.5,depth:2.4,eave:2.35,rise:.75,ridgeHeight:3.25});
+  clayRoof(g,{half:1.5,depth:2.4,eave:2.35,rise:.75,ridgeHeight:3.36});
  }
  return g;
 }
@@ -915,6 +933,11 @@ function building(id) {
     beam(g, [0, 3.4, 0], [0.55, 3.4, 0], 0.1, "teal");
     block(g, 0.42, 0.18, 0.42, "#f5d68b", 0.55, 3.25);
     box(g, 0.55, 0.08, 0.55, "teal", 0.55, 3.4, 0);
+    cylinder(g, 0.16, 0.2, 0.16, "stone", 0, 0.08, 0, 8);
+    beam(g, [0, 3.05, 0], [0.4, 3.4, 0], 0.055, "teal");
+    box(g, 0.45, 0.045, 0.45, "teal", 0.55, 3.14, 0);
+    for (const x of [0.35, 0.75])
+      for (const z of [-0.2, 0.2]) box(g, 0.035, 0.22, 0.035, "teal", x, 3.25, z);
     return g;
   }
   if (id === "compost") {
@@ -1006,10 +1029,17 @@ function building(id) {
   }
   if (id === "apiary") {
     for (const x of [-0.65, 0.65]) {
-      box(g, 0.1, 0.7, 0.1, "timber", x, 0.35, 0);
-      box(g, 0.65, 0.55, 0.55, "timberLight", x, 0.95, 0);
-      box(g, 0.8, 0.1, 0.7, "tile", x, 1.27, 0);
+      box(g, 0.14, 0.7, 0.14, "timber", x, 0.35, 0);
+      box(g, 0.5, 0.08, 0.45, "timber", x, 0.67, 0);
+      for (let level = 0; level < 3; level++)
+        box(g, 0.65, 0.17, 0.55, level === 1 ? "timber" : "timberLight", x, 0.78 + level * 0.18, 0);
+      for (const side of [-1, 1]) {
+        const lid = box(g, 0.44, 0.07, 0.75, "tile", x + side * 0.2, 1.32, 0);
+        lid.rotation.z = -side * 0.22;
+      }
+      box(g, 0.12, 0.08, 0.77, "tileLight", x, 1.37, 0);
       block(g, 0.1, 0.08, 0.025, "#3a2a23", x, 0.95, 0.285);
+      box(g, 0.25, 0.045, 0.16, "timberLight", x, 0.89, 0.34);
     }
     return g;
   }
@@ -1044,10 +1074,20 @@ function building(id) {
     dome.scale.y = 0.75;
     dome.castShadow = true;
     g.add(dome);
+    cylinder(g, 2.22, 2.22, 0.13, "stone", 0, 0.065, 0, 24);
     cylinder(g, 0.3, 0.3, 0.3, "teal", 0, 1.72, 0);
+    cylinder(g, 0.36, 0.36, 0.07, "teal", 0, 1.89, 0, 12);
+    beam(g, [0, 1.9, 0], [0, 2.12, 0], 0.065, "teal");
+    box(g, 0.3, 0.045, 0.06, "tile", 0, 2.14, 0);
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      cylinder(g, 0.035, 0.035, 0.04, "stone", Math.cos(a) * 0.28, 1.94, Math.sin(a) * 0.28, 6);
+    }
     for (const x of [-2.4, 2.4]) {
       beam(g, [x * 0.75, 0.45, 0.3], [x, 0.45, 1.35], 0.12, "teal");
       cylinder(g, 0.45, 0.45, 0.7, "stone", x, 0.35, 1.35);
+      cylinder(g, 0.49, 0.49, 0.09, "plaster", x, 0.72, 1.35, 12);
+      box(g, 0.28, 0.055, 0.06, "teal", x, 0.79, 1.35);
     }
     return g;
   }
@@ -1126,6 +1166,12 @@ function building(id) {
       ridgeHeight: 3.05,
     });
     cylinder(g, 0.07, 0.07, 3, "teal", 0.82, 1.5, -0.5);
+    cylinder(g, 0.13, 0.13, 0.06, "teal", 0.82, 3.03, -0.5, 8);
+    for (const x of [-0.42, 0.42]) box(g, 0.08, 2, 0.12, "timber", x, 1, 0.8);
+    box(g, 0.92, 0.1, 0.12, "timber", 0, 1.98, 0.8);
+    box(g, 0.07, 0.1, 0.05, "timberLight", 0.27, 1, 0.85);
+    box(g, 0.5, 0.25, 0.025, "hair", 0, 2.15, -0.765);
+    for (const y of [2.08, 2.17, 2.26]) box(g, 0.56, 0.045, 0.07, "timberLight", 0, y, -0.79);
     return g;
   }
   if (id === "coop") {
@@ -1144,6 +1190,10 @@ function building(id) {
     });
     const ramp = box(g, 0.5, 0.06, 1.2, "timberLight", 0, 0.38, 1.2);
     ramp.rotation.x = 0.55;
+    for (const z of [-0.45, -0.15, 0.15, 0.45])
+      box(ramp, 0.45, 0.035, 0.055, "timber", 0, 0.047, z);
+    for (const x of [-0.27, 0.27]) box(g, 0.07, 0.65, 0.08, "timber", x, 1, 0.75);
+    box(g, 0.61, 0.07, 0.08, "timber", 0, 1.34, 0.75);
     for (const [i,x,z] of [[0,-1.3,.6],[1,1.3,.8],[2,.8,1.5]]) { const bird=chicken(i);bird.position.set(x,0,z);g.add(bird); }
     return g;
   }
@@ -1240,7 +1290,18 @@ function building(id) {
       box(g, 0.7, 0.6, 0.65, "timberLight", x, 0.3, -0.65);
       box(g, 0.5, 0.5, 0.5, "earth", x, 0.85, -0.65);
     }
-    for (const x of [-1.3, 1.3]) box(g, 0.65, 2.1, 0.12, "teal", x, 1.05, 1.65);
+    for (const x of [-1.3, 1.3]) {
+      box(g, 0.65, 2.1, 0.12, "teal", x, 1.05, 1.65);
+      for (const y of [0.3, 1.75]) box(g, 0.65, 0.1, 0.04, "timberLight", x, y, 1.73);
+    }
+    for (const x of [-1.79, 1.79]) {
+      for (const z of [-1.1, -0.55, 0, 0.55, 1.1])
+        box(g, 0.045, 2.2, 0.065, "timber", x, 1.1, z);
+      for (const y of [0.15, 2.15]) box(g, 0.06, 0.12, 3.2, "timber", x, y, 0);
+    }
+    for (const x of [-1.1, -0.55, 0, 0.55, 1.1])
+      box(g, 0.065, 2.2, 0.045, "timber", x, 1.1, -1.63);
+    box(g, 3.4, 0.12, 0.08, "timber", 0, 0.15, -1.63);
   }
   return g;
 }
@@ -1321,6 +1382,16 @@ function supply(id) {
     block(g, 0.65, 0.65, 0.4, "#48665b");
     for (const x of [-0.2, 0.2]) block(g, 0.1, 0.1, 0.1, "#b7a979", x, 0.7);
     block(g, 0.3, 0.22, 0.015, "#d5bc85", 0, 0.4, 0.21);
+    box(g, 0.75, 0.06, 0.5, "teal", 0, 0.62, 0);
+    for (const x of [-0.35, 0.35]) {
+      box(g, 0.08, 0.08, 0.5, "stone", x, 0.04, 0);
+      box(g, 0.06, 0.12, 0.2, "timberLight", x, 0.48, 0);
+    }
+    for (const y of [0.17, 0.23, 0.29]) box(g, 0.26, 0.025, 0.02, "hair", 0, y, -0.21);
+    for (const [x, material] of [[-0.2, "hair"], [0.2, "tile"]]) {
+      beam(g, [x, 0.73, 0], [x, 0.73, -0.3], 0.035, material);
+      beam(g, [x, 0.73, -0.3], [x, 0.17, -0.3], 0.035, material);
+    }
   }
   return g;
 }
@@ -1436,7 +1507,7 @@ add("bridge", "Timber footbridge", "Buildings", [8,2], () => {
   const g=group();
   for(let i=0;i<40;i++) {
     const x=-7.8+i*.4, y=.08 + .42*Math.min(1,(8-Math.abs(x))/2);
-    box(g,.4,.16,3.5,"timberLight",x,y-.08,0);
+    box(g,.38,.16,3.5,i%5===0?"timber":"timberLight",x,y-.08,0);
   }
   for(const z of [-1.8,1.8]) {
     for(let x=-6;x<=6;x+=2) {
@@ -1444,6 +1515,10 @@ add("bridge", "Timber footbridge", "Buildings", [8,2], () => {
       if(x<6) beam(g,[x,1.4,z],[x+2,1.4,z],.11,"timberLight");
     }
     box(g,12,.25,.22,"timber",0,.26,z);
+    for (const x of [-4,0,4]) {
+      box(g,.26,.5,.26,"timber",x,.25,z);
+      for (const side of [-1,1]) beam(g,[x,.06,z],[x+side*.65,.38,z],.12,"timber");
+    }
   }
   return g;
 });

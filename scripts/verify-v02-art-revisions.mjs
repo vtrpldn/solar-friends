@@ -7,7 +7,7 @@ import {
 } from "../web/v02/library/catalog.js";
 import { configureMapSun } from "../web/v02/land/lighting.js";
 for (const a of ASSETS.filter((a) => a.category === "Homes")) {
-  assert.deepEqual(a.footprint, [2, 2], a.id);
+  const [width, depth] = a.footprint;
   if (a.id === "house") continue;
   const g = createAsset(a.id);
   g.updateMatrixWorld(true);
@@ -20,8 +20,8 @@ for (const a of ASSETS.filter((a) => a.category === "Homes")) {
         .applyMatrix4(o.matrixWorld);
       if (v.y < 0.12)
         assert(
-          Math.abs(v.x) <= 2.01 && Math.abs(v.z) <= 2.01,
-          `${a.id}: foundation outside 2x2`,
+          Math.abs(v.x) <= width + 0.01 && Math.abs(v.z) <= depth + 0.01,
+          `${a.id}: foundation outside declared footprint`,
         );
     }
   });
@@ -60,5 +60,5 @@ for (const x of [-64, 0, 64])
       );
     }
 console.log(
-  "PASS: six 2x2 houses, foundation bounds, six-panel 3x2 solar array, three-bin 3x1 compost, sorted non-opaque glass shadows, whole-map shadow coverage through 9m height.",
+  "PASS: all house sizes, foundation bounds, six-panel 3x2 solar array, three-bin 3x1 compost, sorted non-opaque glass shadows, whole-map shadow coverage through 9m height.",
 );

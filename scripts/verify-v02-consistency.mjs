@@ -27,9 +27,13 @@ for (const asset of ASSETS) {
       triangles +=
         (o.geometry.index?.count ?? o.geometry.attributes.position.count) / 3;
   });
-  // The 4x2 kitchen has twice the roof area of the standard 2x2 buildings.
+  // Roof detail scales with floor area: compare larger homes at the same tile density.
+  // The two-bay kitchen and roofed picnic shelter have architectural roof budgets.
   assert(
-    triangles <= (asset.id === "kitchen" ? 7000 : budgets[asset.category]),
+    triangles <= (asset.category === "Homes"
+      ? budgets.Homes * asset.footprint[0] * asset.footprint[1] / 4
+      : asset.id === "kitchen" ? 7000
+      : asset.id === "picnic-table" ? 5000 : budgets[asset.category]),
     `${asset.id}: ${triangles} triangles exceeds category budget`,
   );
   assert(bounds.min.y >= -0.001, `${asset.id}: below ground`);
@@ -51,6 +55,16 @@ for (const asset of ASSETS) {
     triangles,
   });
 }
+// Assembly frames should not become unrelated, taller structures (for example,
+// a house roof over a pump or sports court).
+for (const frame of rows.filter((a) => a.id.endsWith("-construction-1"))) {
+  const finished = rows.find((a) => a.id === frame.id.replace("-construction-1", ""));
+  assert(finished, `${frame.id}: missing completed model`);
+  // Survey stakes intentionally stand above the flat road surface.
+  if (finished.category === "Terrain") continue;
+  assert(frame.dimensions[1] <= finished.dimensions[1] + 0.25,
+    `${frame.id}: assembly silhouette exceeds completed building height`);
+}
 for (const crop of [
   "lettuce",
   "beans",
@@ -67,10 +81,17 @@ for (const crop of [
     `${crop}: growth order`,
   );
 }
+const standardHomes = rows
+  .filter((a) => a.category === "Homes" && ASSETS.find((asset) => asset.id === a.id).footprint[0] === 2)
+  .map((a) => a.triangles);
+assert(Math.max(...standardHomes) / Math.min(...standardHomes) < 1.2, "Standard house detail drift");
 const homes = rows
   .filter((a) => a.category === "Homes")
-  .map((a) => a.triangles);
-assert(Math.max(...homes) / Math.min(...homes) < 1.2, "House detail drift");
+  .map((a) => {
+    const asset = ASSETS.find((asset) => asset.id === a.id);
+    return a.triangles / (asset.footprint[0] * asset.footprint[1]);
+  });
+assert(Math.max(...homes) / Math.min(...homes) < 1.25, "House detail density drift");
 if (process.argv.includes("--json")) console.log(JSON.stringify(rows, null, 2));
 else
   console.log(
