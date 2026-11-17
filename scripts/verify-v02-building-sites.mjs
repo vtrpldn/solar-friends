@@ -50,7 +50,10 @@ for(const asset of ASSETS.filter(a=>['Buildings','Homes'].includes(a.category)))
 const solar=createAsset('solar_farm');let panels=0,supports=0,rails=0;
 solar.traverse(o=>{if(o.name==='solar-panel')panels++;if(o.name==='solar-support')supports++;if(o.name==='solar-rail')rails++;});
 assert.deepEqual([panels,supports,rails],[6,12,4]);
-const timber=new THREE.Box3().setFromObject(createAsset('supply-0'),true);
+const timberModel=createAsset('supply-0');
+assert.equal(timberModel.userData.plantCount,4);
+assert.equal(timberModel.userData.plantSpacing,3,'four trees reserve 3 m spacing inside the 6 m plot');
+const timber=new THREE.Box3().setFromObject(timberModel,true);
 assert(timber.max.y>5&&timber.max.y<7,'Managed timber must not silently use dwarf orchard trees');
 if(process.argv.includes('--report')){
   fs.mkdirSync('.github/building-site-review',{recursive:true});

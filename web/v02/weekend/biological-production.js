@@ -7,7 +7,7 @@ export const BIOLOGY={
  baby_greens:{days:21,window:3,seasonal:true},
  vegetables:{days:45,window:7,seasonal:true},greenhouse:{days:40,window:7,seasonal:false},
  fruit:{days:120,window:14,seasonal:true},bananas:{days:270,window:14,seasonal:true},
- wood:{days:6*365,window:Infinity,seasonal:true},bamboo:{days:365,window:Infinity,seasonal:true},
+ wood:{days:6*365,window:Infinity,seasonal:true,plantingFraction:.1},bamboo:{days:365,window:Infinity,seasonal:true},
  compost:{days:60,window:Infinity,seasonal:false},
  eggs:{days:3,window:3,seasonal:false},milk:{days:1,window:1,seasonal:false},
  honey:{days:90,window:30,seasonal:true},
@@ -51,7 +51,7 @@ export function biologicalStep(s,dt,useWater){
    site.soilMoisture=Math.max(0,Math.min(1,site.soilMoisture+(rain+(irrigated?refill:0)-need)/(crop.area*16)));
    moisture=site.soilMoisture<.1?0:Math.min(1,site.soilMoisture/.4);
    fertility=.5+.5*site.soilFertility;
-   if(cropStress(op,site.soilMoisture,dt)==='failed'){op.growthRemaining=0;op.phase='process';op.ripeAt??=s.time;op.status='Crop failed · resident clearing work remains';continue;}
+   if(cropStress(op,site.soilMoisture,dt,op.recipe==='wood'?{graceDays:14,lossDays:60}:undefined)==='failed'){op.growthRemaining=0;op.phase='process';op.ripeAt??=s.time;op.status='Crop failed · resident clearing work remains';continue;}
   }
   if(op.phase!=='growing')continue;
   op.growthRemaining=Math.max(0,op.growthRemaining-dt*growthRate(s,op.recipe)*moisture*fertility);
@@ -68,7 +68,7 @@ export function harvestOutput(s,op,recipe){
  const result={...recipe.output};for(const id of Object.keys(result))if(result[id])result[id]=Math.floor(result[id]*factor+1e-8);
  return result;
 }
-export function biologyText(recipe){const b=BIOLOGY[recipe];return b?` · ${b.days} game days ${['eggs','milk','honey'].includes(recipe)?'between collections':'of growth/curing'}, separate from resident work${b.seasonal?'; slower in unfavorable seasons':''}${Number.isFinite(b.window)?`; ${['eggs','milk','honey'].includes(recipe)?'collect':'harvest'} within ${b.window} days before gradual ${['eggs','milk','honey'].includes(recipe)?'uncollected output':'field'} losses`:''}`:'';}
+export function biologyText(recipe){const b=BIOLOGY[recipe];if(recipe==='wood')return ' · Four trees on 36 m²; six favorable growing years, longer in dry or cool conditions · 288 kg raw logs at full health, requiring processing before construction · Four replacement seedlings per later rotation · Planting, felling and hauling require resident work';return b?` · ${b.days} game days ${['eggs','milk','honey'].includes(recipe)?'between collections':'of growth/curing'}, separate from resident work${b.seasonal?'; slower in unfavorable seasons':''}${Number.isFinite(b.window)?`; ${['eggs','milk','honey'].includes(recipe)?'collect':'harvest'} within ${b.window} days before gradual ${['eggs','milk','honey'].includes(recipe)?'uncollected output':'field'} losses`:''}`:'';}
 export function validBiology(s,recipes){if(!(s.projects||[]).every(p=>p.irrigationPolicy===undefined||Object.hasOwn(IRRIGATION_POLICIES,p.irrigationPolicy)))return false;if(!(s.projects||[]).every(p=>[p.soilMoisture,p.soilFertility].every(n=>n===undefined||(Number.isFinite(n)&&n>=0&&n<=1))))return false;if(!(s.projects||[]).every(p=>(p.starterSeedlingsUsed===undefined||typeof p.starterSeedlingsUsed==='boolean')&&(p.orchardEstablished===undefined||typeof p.orchardEstablished==='boolean')&&(p.harvestCount===undefined||(Number.isInteger(p.harvestCount)&&p.harvestCount>=0))))return false;return (s.operations||[]).every(o=>{
  if(!validCropStress(o))return false;
  if(o.farm)return true;
