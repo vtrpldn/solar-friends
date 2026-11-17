@@ -1173,8 +1173,8 @@ export function cancelProjectError(s, id) {
   const p = s.projects.find(p => p.id === id);
   if (!p || PROJECTS[p.key].natural || s.stage !== 'playing') return 'This project cannot be cancelled.';
   if (p.work > 0) return 'Construction has already started.';
-  const orders = s.trip?.projects || [s.trip?.project];
-  if (orders.includes(id) && s.trip.phase !== 'boarding') return 'Materials are on their way. Cancel after delivery.';
+  const contains = trip => trip.shipments?.some(part => part.project === id) || (trip.projects || [trip.project]).includes(id);
+  if (activeTrips(s).some(trip => contains(trip) && trip.phase !== 'boarding') || (s.delivery && contains(s.delivery))) return 'Materials are on their way. Cancel after delivery.';
   return '';
 }
 
@@ -1192,13 +1192,19 @@ export function cancelProject(s, id) {
     refund = Math.ceil(refund * 100) / 100;
     if (refund) { s.money += refund; recordMoney(s, refund, 'construction', `Cancelled materials for ${PROJECTS[p.key].name}`); }
   }
-  if (s.trip && (s.trip.projects || [s.trip.project]).includes(id)) {
-    const orders = (s.trip.projects || [s.trip.project]).filter(order => order !== id);
-    if (orders.length) { s.trip.projects = orders; s.trip.project = orders[0]; }
-    else {
-      const driver = s.people.find(r => r.id === s.trip.person);
+  for (const key of ['trip', 'secondTrip']) {
+    const trip = s[key];
+    if (!trip || !(trip.shipments?.some(part => part.project === id) || (trip.projects || [trip.project]).includes(id))) continue;
+    if (trip.shipments) trip.shipments = trip.shipments.filter(part => part.project !== id);
+    const orders = trip.shipments ? trip.shipments.map(part => part.project) : (trip.projects || [trip.project]).filter(order => order !== id);
+    if (orders.length) { trip.projects = orders; trip.project = orders[0]; }
+    else if (trip.exports?.length) {
+      delete trip.project; delete trip.projects; delete trip.shipments;
+      trip.saleOnly = true;
+    } else {
+      const driver = s.people.find(r => r.id === trip.person);
       if (driver) { driver.action = 'idle'; driver.target = null; driver.walk = []; }
-      s.trip = null;
+      s[key] = null;
     }
   }
   s.projects = s.projects.filter(project => project.id !== id);
