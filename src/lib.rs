@@ -495,7 +495,7 @@ fn assign(r: &mut Resident, v: &Village, task: &str, reason: &str, requested: bo
     r.requested = requested;
     r.remaining = match task {
         "sleep" => 60.,
-        "eat" => 5.,
+        "eat" => food::duration(v, r),
         "sanitation" => 4.,
         "compost" => 3.,
         "rest" | "socialize" | "idle" => 12.,
