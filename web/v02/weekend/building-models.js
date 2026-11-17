@@ -10,7 +10,7 @@ export const BUILDING_MODELS = [
     id: "bridge",
     name: "Timber footbridge",
     category: "Buildings",
-    size: [8, 2],
+    size: [8, 1],
   },
   {
     id: "house",
@@ -32,7 +32,7 @@ export const BUILDING_MODELS = [
   },
   {
     id: "goat_pasture",
-    name: "Goat pasture",
+    name: "Goat pen",
     category: "Buildings",
     size: [3, 2],
   },
@@ -176,7 +176,7 @@ export const BUILDING_MODELS = [
   },
   {
     id: "goat-pasture-empty",
-    name: "Empty goat pasture",
+    name: "Empty goat pen",
     category: "Buildings",
     size: [3, 2],
   },

@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { METRES_PER_CELL } from "../scale.js";
+import { METRES_PER_CELL } from "../library/scale.js";
 export const CELL = METRES_PER_CELL;
 export const PALETTE = {
   plaster: "#e8d8ab",

@@ -1,3 +1,6 @@
+import { createScalePreview } from './scale-preview.js';
+import { METRES_PER_CELL } from '../library/scale.js';
+import { bridgeWidthScale, siteDimensions, projectDescription } from './site-space.js';
 import {loadVillage} from './load-village.js';
 import {ensureNaturalLand,TREE_SPECIES} from './natural-resources.js';
 import {createFoliageWind} from './foliage-wind.js';
@@ -103,6 +106,7 @@ import {
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
   SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
+const scalePreview = new URLSearchParams(location.search).has("scale-preview");
 const wildlifePreview = new URLSearchParams(location.search).has("wildlife-preview");
 const needsPreview = new URLSearchParams(location.search).has("needs-preview");
 const utilitiesPreview = needsPreview || new URLSearchParams(location.search).has(
@@ -110,11 +114,12 @@ const utilitiesPreview = needsPreview || new URLSearchParams(location.search).ha
 );
 const restPreview = new URLSearchParams(location.search).has("rest-preview");
 const arrivalPreview =
+  scalePreview ||
   wildlifePreview ||
   utilitiesPreview ||
   restPreview ||
   new URLSearchParams(location.search).has("arrival-preview");
-let s = utilitiesPreview
+let s = scalePreview ? createScalePreview() : utilitiesPreview
   ? createUtilitiesPreview(
       new URLSearchParams(location.search).has("interactions"),
       Number(new URLSearchParams(location.search).get("land-seed")) >>> 0,
@@ -169,7 +174,7 @@ if (s.stage === "evening") {
     }
 }
 let speed = 1,
-  paused = lightingPreview,
+  paused = lightingPreview || scalePreview,
   placing = null,
   moving = null,
   selected = null,
@@ -284,9 +289,9 @@ grid.visible = false;
 scene.add(grid);
 function world(x, z) {
   return new THREE.Vector3(
-    (x - 32) * 2,
-    elevationAt((x - 32) * 2, (z - 32) * 2, s.elevationSeed, s.terrainPads),
-    (z - 32) * 2,
+    (x - 32) * METRES_PER_CELL,
+    elevationAt((x - 32) * METRES_PER_CELL, (z - 32) * METRES_PER_CELL, s.elevationSeed, s.terrainPads),
+    (z - 32) * METRES_PER_CELL,
   );
 }
 function prop(id, x, z, rotation = 0) {
@@ -577,6 +582,7 @@ function syncBuildings() {
     entry.root.position.copy(
       world(p.x + (footprint(p)[0] - 1) / 2, p.z + (footprint(p)[1] - 1) / 2),
     );
+    entry.root.scale.z = bridgeWidthScale(p);
     entry.root.rotation.y = ((p.rotation || 0) * Math.PI) / 2;
     entry.root.visible=!p.felled;
 
@@ -652,7 +658,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(s.arrivalAnimating ? s.stock : campLocation(s));
+focus(scalePreview ? {x:56,z:57} : s.arrivalAnimating ? s.stock : campLocation(s));
 
 function resize() {
   const a = innerWidth / innerHeight;
@@ -721,6 +727,7 @@ function startPlacement(key, id = null) {
   }
   wireframe = new THREE.Group();
   const model = compactModel(createAsset(PROJECTS[key].asset));
+  model.scale.z = bridgeWidthScale(s.projects.find(p => p.id === id) || {key});
   model.updateMatrixWorld(true);
   model.traverse((o) => {
     if (!o.isMesh) return;
@@ -828,7 +835,7 @@ function updatePlacementPreview() {
   if (!placing && !pitching) return;
   const size = pitching
     ? [5, 4]
-    : footprint({ key: placing, rotation: placementRotation });
+    : footprint({ ...s.projects.find(p => p.id === moving), key: placing, rotation: placementRotation });
   ghost.scale.set(size[0] / 2, size[1] / 2, 1);
   ghost.position.copy(
     world(
@@ -867,12 +874,13 @@ function updatePlacementPreview() {
     }
     message(
       hint ||
-        `${PROJECTS[placing].name} · ${size.join("×")} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats"}`,
+        `${PROJECTS[placing].name} · Site ${siteDimensions(size)} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats"}`,
     );
   } else if (hint) message(hint);
   ghost.material.color.set(error ? "#c26847" : "#d9eda5");
   if (!pitching && wireframe) {
-    ghost.visible = false;
+    // Keep the reservation visible beneath the physical object wireframe.
+    ghost.visible = true;
     wireframe.visible = true;
     wireframe.position.copy(ghost.position);
     const pad = foundationPad(
@@ -1698,7 +1706,7 @@ function renderUI() {
             ? " Housing: 0 goats / 2 places."
             : "";
     $("selected-desc").textContent =
-      `${PROJECTS[p.key].description}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+      `${projectDescription(PROJECTS[p.key], p)}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
   }
 }

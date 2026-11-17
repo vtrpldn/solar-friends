@@ -19,12 +19,12 @@ export function construction(def, stage) {
     return g;
   }
   if (def.id==='bridge') {
-    for (const z of [-1.8,1.8]) {
-      box(g,12,.25,.22,'timber',0,.26,z);
-      for (const x of [-4,0,4]) box(g,.26,.5,.26,'timber',x,.25,z);
+    for (const z of [-.9,.9]) {
+      box(g,12,.25,.12,'timber',0,.26,z);
+      for (const x of [-4,0,4]) box(g,.26,.5,.16,'timber',x,.25,z);
       if(stage===1)for(let x=-6;x<=6;x+=2)box(g,.16,1.2,.16,'timber',x,.95,z);
     }
-    if(stage===1)for(let i=0;i<24;i++)box(g,.38,.16,3.5,'timberLight',-4.6+i*.4,.42,0);
+    if(stage===1)for(let i=0;i<24;i++)box(g,.38,.16,1.75,'timberLight',-4.6+i*.4,.42,0);
     return g;
   }
   if (def.id==='water-pump') {

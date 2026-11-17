@@ -850,8 +850,21 @@ function building(id) {
     return g;
   }
   if (id === "garden") {
-    bed(g);
-    planted(g, "lettuce");
+    // Two reachable beds, separated by a 0.6 m clear aisle. The 4×4 m site
+    // includes working space; only 2 × 1.2 × 3.4 m is cultivated soil.
+    for (const x of [-0.95, 0.95]) {
+      const row = group();
+      row.name = "growing-bed";
+      row.position.x = x;
+      bed(row, 1.2, 3.4);
+      for (const dx of [-0.28, 0.28])
+        for (const z of [-1.2, -0.4, 0.4, 1.2]) {
+          const crop = plant("lettuce");
+          crop.position.set(dx, 0.1, z);
+          row.add(crop);
+        }
+      g.add(row);
+    }
     return g;
   }
   if (id === "grove" || id === "banana_treatment") {
@@ -1503,20 +1516,20 @@ for (const [id, def] of Object.entries(COMMUNITY)) add(id,def.name,"Buildings",d
 add("covered-supply-rack","Covered supply rack","Props",[2,1],()=>openingStorage(false));
 add("tarp-covered-supplies","Tarp-covered supplies","Props",[1,1],()=>openingStorage(true));
 for(const id of RESOURCE_IDS)add(`resource-${id}`,`${id.replaceAll("_"," ")} · resource`,"Resource icons",[1,1],()=>resourceModel(id,createAsset));
-add("bridge", "Timber footbridge", "Buildings", [8,2], () => {
+add("bridge", "Timber footbridge", "Buildings", [8,1], () => {
   const g=group();
   for(let i=0;i<40;i++) {
     const x=-7.8+i*.4, y=.08 + .42*Math.min(1,(8-Math.abs(x))/2);
-    box(g,.38,.16,3.5,i%5===0?"timber":"timberLight",x,y-.08,0);
+    box(g,.38,.16,1.75,i%5===0?"timber":"timberLight",x,y-.08,0);
   }
-  for(const z of [-1.8,1.8]) {
+  for(const z of [-.9,.9]) {
     for(let x=-6;x<=6;x+=2) {
       box(g,.16,1.2,.16,"timber",x,.95,z);
       if(x<6) beam(g,[x,1.4,z],[x+2,1.4,z],.11,"timberLight");
     }
-    box(g,12,.25,.22,"timber",0,.26,z);
+    box(g,12,.25,.12,"timber",0,.26,z);
     for (const x of [-4,0,4]) {
-      box(g,.26,.5,.26,"timber",x,.25,z);
+      box(g,.26,.5,.16,"timber",x,.25,z);
       for (const side of [-1,1]) beam(g,[x,.06,z],[x+side*.65,.38,z],.12,"timber");
     }
   }
@@ -1524,7 +1537,7 @@ add("bridge", "Timber footbridge", "Buildings", [8,2], () => {
 });
 const names = {
   orchard: "Fruit orchard",
-  goat_pasture: "Goat pasture",
+  goat_pasture: "Goat pen",
   apiary: "Stingless bee apiary",
   hydro: "River generator",
   eco_toilet: "Ecological toilet",
@@ -1589,7 +1602,7 @@ add('home-family','Family house','Homes',[3,2],()=>extendedHouse(3),[]);
 add('home-shared','Shared adobe house','Homes',[4,2],()=>extendedHouse(4),[]);
 add(
   "goat-pasture-empty",
-  "Empty goat pasture",
+  "Empty goat pen",
   "Buildings",
   [3, 2],
   () => building("goat-pasture-empty"),
