@@ -158,6 +158,7 @@ export function renderCrafting(s, root, notify, refresh) {
         root.querySelector(`[data-craft-focus="entry-${ui.selected.jobs}"]`)?.focus({preventScroll: true});
       });
       start.disabled = !!blocker;
+      start.dataset.disabledReason = blocker;
       start.setAttribute('aria-describedby', reason.id);
     }
     add(footer, 'small', 'Village paused · Close to return to the village.', 'craft-note');
@@ -178,5 +179,6 @@ function workspaceSelect(parent, sites, chosen, key, title) {
   for (const site of sites) select.add(new Option(workspaceName(site), String(site.id)));
   if (sites.some(p => p.id === chosen)) select.value = String(chosen);
   select.disabled = !sites.length;
+  select.dataset.disabledReason = 'Complete a suitable workspace before assigning this job.';
   return select;
 }

@@ -24,5 +24,27 @@ try {
  await page.locator('#panel').evaluate(e=>{e.scrollTop=0;});await icon.waitFor({state:'visible'});
  await icon.click();assert(await page.locator('#disabled-action-tooltip').isVisible());
  await page.keyboard.press('Escape');assert.equal(await page.locator('#disabled-action-tooltip').isVisible(),false);
+ // Exercise native control geometry and CSS-hidden panels, not just buttons.
+ await page.locator('#panel').evaluate(panel=>{panel.innerHTML='<label id="check-label"><input id="check" type="checkbox" disabled title="Wait for queued work"><span>Care settings</span></label><select id="choice" disabled><option>Wide spacing</option></select><input id="amount" type="number" disabled value="12"><div id="clip" style="width:50px;overflow:hidden"><button id="clipped" style="width:180px" disabled>Clipped action</button></div>';});
+ await page.addStyleTag({content:'#check-label{display:flex;align-items:center;gap:8px}#choice,#amount{width:180px;height:38px;margin:10px 0;display:block;box-sizing:border-box}'});
+ await page.waitForFunction(()=>document.querySelectorAll('.disabled-info:popover-open').length===3);
+ const geometry=await page.evaluate(()=>{
+  const boxes=[...document.querySelectorAll('.disabled-info:popover-open')].map(e=>e.getBoundingClientRect());
+  const box=id=>document.getElementById(id).getBoundingClientRect();
+  const check=box('check'),label=document.querySelector('#check-label span').getBoundingClientRect();
+  return {checkbox:boxes.some(i=>i.left>=check.right&&i.right<=label.left&&Math.abs((i.top+i.bottom-check.top-check.bottom)/2)<1),arrows:['choice','amount'].every(id=>boxes.some(i=>i.left>box(id).left&&i.right<=box(id).right-20&&Math.abs(i.top-box(id).top-(box(id).height-18)/2)<1))};
+ });
+ assert(geometry.checkbox,'checkbox hint stays between box and label');assert(geometry.arrows,'select and number hints clear native arrows');
+ const careHint=page.getByRole('button',{name:'Why unavailable: Wait for queued work',exact:true});
+ await careHint.focus();assert.equal(await page.locator('#disabled-action-tooltip').innerText(),'Wait for queued work');
+ await page.locator('#panel').evaluate(e=>e.style.visibility='hidden');
+ await page.waitForFunction(()=>!document.querySelector('.disabled-info:popover-open'));
+ assert(!await page.locator('#disabled-action-tooltip').isVisible(),'CSS-hidden controls dismiss their explanation');
+ await page.locator('#panel').evaluate(e=>e.style.visibility='visible');
+ await careHint.waitFor({state:'visible'});
+ await page.locator('#check').evaluate(e=>e.disabled=false);
+ await careHint.waitFor({state:'detached'});
+ assert.equal(await page.locator('#check').evaluate(e=>e.classList.contains('has-disabled-info')),false);
+ console.log('PASS native arrows, checkbox spacing, horizontal clipping, CSS visibility, title explanations and re-enabled controls');
  console.log('PASS scroll dismissal, repositioning, clipping, keyboard and click explanations');
 } finally {await browser.close();server.close();}
