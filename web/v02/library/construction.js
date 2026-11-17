@@ -18,6 +18,18 @@ export function construction(def, stage) {
     }
     return g;
   }
+  if (def.id==='garden') {
+    for(const x of [-.95,.95]) {
+      for(const dx of [-.6,.6])for(const z of [-1.7,1.7])
+        box(g,.08,.45,.08,'timber',x+dx,.225,z);
+      if(stage===1) {
+        box(g,1.2,.09,3.4,'earth',x,.045,0);
+        for(const dx of [-.6,.6])box(g,.1,.18,3.4,'timberLight',x+dx,.09,0);
+        for(const z of [-1.7,1.7])box(g,1.2,.18,.1,'timberLight',x,.09,z);
+      }
+    }
+    return g;
+  }
   if (def.id==='bridge') {
     for (const z of [-.9,.9]) {
       box(g,12,.25,.12,'timber',0,.26,z);

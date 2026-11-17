@@ -24,7 +24,7 @@ export const SITE_SPACE = {
   'water-pump': { object: [1.5, 1.4], note: 'Pump pad with service space inside the reserved site.' },
 };
 for (const id of ['home-veranda','home-gable','home-courtyard','adobe-gable','adobe-veranda'])
-  SITE_SPACE[id] = { object: [3.5, 3.35], label: 'wall shell', note: 'Compact cabin with a porch or threshold. Keep the front approach open.' };
+  SITE_SPACE[id] = { object: [3.4, id.includes('veranda') || id.includes('courtyard') ? 2.55 : 3.35], label: 'wall shell', note: 'Compact cabin with a porch or threshold. Keep the front approach open.' };
 
 export function siteDimensions(size) {
   return `${size.map(n => n * METRES_PER_CELL).join(' × ')} m`;
@@ -48,6 +48,7 @@ export function bridgeWidthScale(project) {
 }
 
 export function projectDescription(def, project) {
+  const size = unrotatedSiteSize(project, def.size);
   return def.description.replace(siteDescription(def.asset, def.size),
-    siteDescription(def.asset, unrotatedSiteSize(project, def.size)));
+    siteDescription(def.asset, size)).replace(`${def.size.join(' × ')} cells.`, `${size.join(' × ')} cells.`);
 }

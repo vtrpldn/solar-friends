@@ -1,3 +1,4 @@
+import { createScalePreview } from '../web/v02/weekend/scale-preview.js';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { ASSETS, createAsset } from '../web/v02/library/catalog.js';
@@ -38,6 +39,7 @@ for(let rotation=0;rotation<4;rotation++) {
   assert.equal(bridgeWidthScale(p),2);
   assert.match(projectDescription(PROJECTS.bridge,p), /16 × 4 m/);
   assert(!projectDescription(PROJECTS.bridge,p).includes('1.75 m walking'));
+  assert(!projectDescription(PROJECTS.bridge,p).includes('8 × 1 cells'));
   assert.match(placementError(restored,'garden',60,50),/occupies/);
   assert.deepEqual(footprint(restore(save(restored)).projects[0]),footprint(p));
   p.siteVersion=2;assert.equal(restore(save(restored)),null,'unknown layouts are rejected');
@@ -58,4 +60,8 @@ assert.equal(moveProject(legacy,p.id,5,39,2),'');
 assert.deepEqual(footprint(legacy.projects[0]),[8,2]);
 for(const z of [39,40])assert(route(legacy,{x:4,z},{x:13,z}),'both legacy lanes remain usable');
 p.work=0;assert.equal(route(s,...endpoints),null,'unfinished bridge does not grant a crossing');
+const seeded=createScalePreview(), validated=createScalePreview(true);
+assert.deepEqual(seeded.projects, validated.projects, 'desktop fixture matches legal planned sites');
+assert.deepEqual(seeded.terrainPads, validated.terrainPads);
+assert(restore(save(seeded)), 'desktop review fixture remains save-compatible');
 console.log('PASS: shared scale, catalog/site agreement, planted areas and garden aisle, narrow bridge geometry and crossing, legacy widths/rotations/occupancy, movement and save round trips.');
