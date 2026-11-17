@@ -10,3 +10,10 @@ export function captureProjectMaterials(s,definitions,materials){
  }
  s.materialBillVersion=2;return true;
 }
+
+// First-planting seeds move from installed capital into the crop once.
+export function installedProjectMaterials(project,definitions){
+ const bill={...projectMaterials(project,definitions)};
+ if(['garden','greenhouse'].includes(definitions[project.key].kind)&&(project.starterSeedlingsUsed||project.harvestCount)&&bill.seedlings)bill.seedlings=Math.max(0,bill.seedlings-2);
+ return bill;
+}

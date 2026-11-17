@@ -1,7 +1,7 @@
-import {projectMaterials} from './project-materials.js';
+import {installedProjectMaterials} from './project-materials.js';
 // Dismantling conserves ownership: one project becomes recovered stock plus waste.
 export function removalYield(p,defs,recipes,mode){
- const items={...projectMaterials(p,defs)};
+ const items=installedProjectMaterials(p,defs);
  for(const recipe of [p.solarUpgrade&&'solar_upgrade',p.coldStorage&&'cold_storage'])if(recipe)for(const [id,n]of Object.entries(recipes[recipe].input))items[id]=(items[id]||0)+n;
  if(p.key==='goat-pasture-empty'&&p.stocked)items.goats=(items.goats||0)+2;
  const recovered={},lost={};

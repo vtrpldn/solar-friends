@@ -370,10 +370,17 @@ export function infrastructureStep(s, defs, dt) {
       if (n.kind === "biodigester") sys.biogas += amount * 0.15;
     }
   }
-  const shares=new Map();
-  for(const a of Object.values(sys.nodes))for(let i=0;i<LIQUIDS.length;i++) {
-    const count=sys.links.filter(l=>l.from===a.id && l.kind===LIQUIDS[i] && l.enabled && l.work>=l.required && sys.nodes[l.to]?.enabled && sys.nodes[l.to].capacity[i]-sys.nodes[l.to].water[i]>.0001).length;
-    shares.set(`${a.id}:${LIQUIDS[i]}`,count ? a.water[i]/count : 0);
+  // Count recipients once per link, rather than scanning every link for each
+  // node and liquid. Compute all shares before transfers to preserve ordering.
+  const counts=new Map(),shares=new Map();
+  for(const l of sys.links){
+    const i=LIQUIDS.indexOf(l.kind),to=sys.nodes[l.to];
+    if(i<0||!l.enabled||l.work<l.required||!to?.enabled||to.capacity[i]-to.water[i]<=.0001)continue;
+    const key=`${l.from}:${l.kind}`;counts.set(key,(counts.get(key)||0)+1);
+  }
+  for(const a of nodes)for(let i=0;i<LIQUIDS.length;i++){
+    const key=`${a.id}:${LIQUIDS[i]}`,count=counts.get(key)||0;
+    shares.set(key,count?a.water[i]/count:0);
   }
   for (const l of sys.links) {
     if (l.kind === "power" || !l.enabled || l.work < l.required) continue;

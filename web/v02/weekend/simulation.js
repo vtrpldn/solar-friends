@@ -301,8 +301,9 @@ export function queueProduction(s, site, recipe) {
   if (def.deposit && (p.extracted || 0) >= depositCapacity(s.landSeed,p,def))
     return "This deposit is exhausted.";
   const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:2}:{})};
+  const starterSeeds=['vegetables','greenhouse'].includes(recipe)&&!p.starterSeedlingsUsed&&!p.harvestCount?Math.min(input.seedlings||0,projectMaterials(p,PROJECTS).seedlings||0):0;
   for (const [id, n] of Object.entries(input))
-    if (materialCount(s, id) < n) return `Missing ${n} ${id}.`;
+    if (materialCount(s, id) < n-(id==='seedlings'?starterSeeds:0)) return `Missing ${n} ${id}.`;
   if (p.key === "goat-pasture-empty" && !p.stocked) {
     if (materialCount(s, "goats") < 2)
       return "Bring 2 goats to stock this pasture.";
@@ -310,7 +311,8 @@ export function queueProduction(s, site, recipe) {
     p.stocked = true;
   }
   const foodInput={};
-  for (const [id,n] of Object.entries(input)){const lots=changeMaterial(s,id,-n,undefined,'production input');if(FOOD_DAYS[id])foodInput[id]=lots;}
+  for (const [id,n] of Object.entries(input)){const lots=changeMaterial(s,id,-(n-(id==='seedlings'?starterSeeds:0)),undefined,'production input');if(FOOD_DAYS[id])foodInput[id]=lots;}
+  if(starterSeeds)p.starterSeedlingsUsed=true;
   s.operations.push({
     id: (s.nextOperation = (s.nextOperation || 0) + 1),
     site: p.id,
@@ -1304,9 +1306,16 @@ const fastNavigationStates=new WeakSet(), navigationCaches=new WeakMap();
 let activeNavigation=null;
 export function enableFastNavigation(s){fastNavigationStates.add(s);}
 function prepareNavigation(s){
-  const signature=JSON.stringify([s.landSeed,s.camp,s.campSite,s.projects.map(p=>[p.id,p.key,p.x,p.z,p.rotation,p.felled,p.work>=PROJECTS[p.key].work])]);
+  const campSignature=JSON.stringify([s.landSeed,s.camp,s.campSite]);
   let cache=navigationCaches.get(s);
-  if(cache?.signature!==signature){cache={signature,state:s,cells:new Map(),roads:new Map()};navigationCaches.set(s,cache);}
+  // Compare scalar geometry without allocating a full project matrix and JSON
+  // string every fixed simulation step. Retain exact equality (no hash collisions).
+  let same=cache?.campSignature===campSignature&&cache.projects.length===s.projects.length;
+  if(same)for(let i=0;i<s.projects.length;i++){
+    const p=s.projects[i],old=cache.projects[i];
+    if(old.id!==p.id||old.key!==p.key||old.x!==p.x||old.z!==p.z||old.rotation!==p.rotation||old.felled!==p.felled||old.complete!==(p.work>=PROJECTS[p.key].work)){same=false;break;}
+  }
+  if(!same){cache={campSignature,state:s,projects:s.projects.map(p=>({id:p.id,key:p.key,x:p.x,z:p.z,rotation:p.rotation,felled:p.felled,complete:p.work>=PROJECTS[p.key].work})),cells:new Map(),roads:new Map()};navigationCaches.set(s,cache);}
   return cache;
 }
 function invalidateNavigation(s){navigationCaches.delete(s);if(activeNavigation?.state===s)activeNavigation=null;}
