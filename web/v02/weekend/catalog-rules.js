@@ -406,6 +406,6 @@ for (const [id, recipe] of Object.entries(PROCESSES)) {
   if(rule) {recipe.craft=rule;recipe.kind=rule.kind;recipe.work=rule.work;}
 }
 
-for(const action of FARM_ACTIONS)PROCESSES[`farm_${action}`]={name:`${action} bed`,kind:'cultivation',input:{compost:100,greens_seed:100,beans_seed:100,corn_seed:100},output:{greens:100,beans:100,corn:100,scraps:100},work:1};
+for(const action of FARM_ACTIONS)PROCESSES[`farm_${action}`]={name:`${action} bed`,bedAction:action,kind:'cultivation',input:{compost:100,greens_seed:100,beans_seed:100,corn_seed:100},output:{greens:100,beans:100,corn:100,scraps:1000000},work:1};
 for(const id of Object.keys(CROPS))PROCESSES[`cook_${id}`]={name:`Cook ${CROPS[id].name.toLowerCase()}`,kind:'kitchen',input:{[id]:4},output:{meals:4},work:40,water:2};
 PROCESSES.corn_feed={name:'Prepare corn feed supplement',kind:'supply-5',input:{corn:4},output:{fodder:1,scraps:1},work:30};

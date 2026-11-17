@@ -9,11 +9,11 @@ const p={id:1,key:'garden',x:50,z:50,cultivation:{beds:Array.from({length:100},(
 const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(1440,900);document.body.append(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color('#bccca0');scene.add(new THREE.HemisphereLight('#fff6d5','#625742',2));
 const camera=new THREE.PerspectiveCamera(50,1440/900,.1,300);camera.position.set(40,65,65);camera.lookAt(0,0,0);
-const model=createCultivationModel(p,{operations:[]});scene.add(model);
-const crops=model.children.filter(m=>m.geometry?.type==='IcosahedronGeometry');
+const model=createCultivationModel(p,{operations:[],time:0});scene.add(model);
+const crops=model.children.filter(m=>m.userData.crops);
 window.runBenchmark=async()=>{
  const sample=async visible=>{crops.forEach(m=>m.visible=visible);for(let i=0;i<10;i++)renderer.render(scene,camera);let cpu=0;const start=performance.now();for(let i=0;i<60;i++){await new Promise(requestAnimationFrame);const before=performance.now();renderer.render(scene,camera);renderer.getContext().finish();cpu+=performance.now()-before;}return {frameMs:(performance.now()-start)/60,cpuRenderMs:cpu/60,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,geometries:renderer.info.memory.geometries,textures:renderer.info.memory.textures,heapBytes:performance.memory?.usedJSHeapSize||null};};
- return {beds:100,plants:crops.reduce((n,m)=>n+m.count/3,0),withoutCrops:await sample(false),withCrops:await sample(true)};
+ const gl=renderer.getContext(),ext=gl.getExtension('WEBGL_debug_renderer_info');return {renderer:ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),beds:100,plants:crops.reduce((n,m)=>n+m.userData.plants,0),withoutCrops:await sample(false),withCrops:await sample(true)};
 };
 </script></body></html>`;
 const server=await serve(0,{handle(req,res,path){if(path!=='/farm-benchmark')return false;res.writeHead(200,{'Content-Type':'text/html'}).end(html);return true;}}),browser=await chromium.launch({headless:true});

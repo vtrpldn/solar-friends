@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import {createSandbox,plan,planField,fieldPlacementError,queueBedJob,configureBed,resizeField,tick,save,restore,enableFastNavigation,PROJECTS} from '../web/v02/weekend/simulation.js';
 import {CROPS,cultivationStep,ensureCultivation,validCultivation} from '../web/v02/weekend/cultivation.js';
 import {GAME_DAY} from '../web/v02/weekend/biological-production.js';
-const s=createSandbox(42);enableFastNavigation(s);
+let s=createSandbox(42);enableFastNavigation(s);
 let placed=false;
 for(let z=25;z<55&&!placed;z++)for(let x=24;x<55&&!placed;x++)if(!fieldPlacementError(s,x,z,[2,2])){assert.equal(planField(s,x,z,[2,2]),'');placed=true;}
-assert(placed);const p=s.projects.at(-1);
+assert(placed);let p=s.projects.at(-1);
 function restored(){assert(validCultivation(s));assert(restore(save(s)),'cultivation save restores');}
-function job(action){assert.equal(queueBedJob(s,p.id,0,action),'');const op=s.operations.at(-1),phases=new Set();for(let i=0;i<40000&&!op.done;i++){tick(s,.1);if(!phases.has(op.phase)){phases.add(op.phase);restored();}}assert(op.done,`${action} completed: ${op.status}`);restored();}
+function job(action){assert.equal(queueBedJob(s,p.id,0,action),'');let op=s.operations.at(-1);const phases=new Set();for(let i=0;i<40000&&!op.done;i++){tick(s,.1);if(!phases.has(op.phase)){phases.add(op.phase);restored();if(op.phase==='return'){const id=p.id,operation=op.id;s=restore(save(s));enableFastNavigation(s);p=s.projects.find(p=>p.id===id);op=s.operations.find(o=>o.id===operation);}}}assert(op.done,`${action} completed: ${op.status}`);restored();}
 restored();job('prepare');
 for(const crop of Object.keys(CROPS)){
  assert.equal(configureBed(s,p.id,0,{crop}),'');s.materials[`${crop}_seed`]=100;
@@ -53,3 +53,23 @@ for(const crop of Object.keys(CROPS)){
  }
 }
 console.log('PASS actual resident greenhouse work and delivery for all crops; saves at operation phase boundaries');
+
+for(const site of [p,gp])for(const bed of site.cultivation.beds){
+ const inputs=bed.sownSeedKg+bed.grownBiomassKg+bed.amendmentAppliedKg;
+ const stored=bed.standingBiomassKg+bed.residueKg+bed.amendmentKg+bed.soilOrganicKg;
+ const outputs=bed.exportedKg+bed.residueExportedKg+bed.decomposedGasKg+bed.fieldLossKg;
+ assert(Math.abs(inputs-stored-outputs)<1e-6,'seed, biological input and amendment mass reconcile with stores and losses');
+}
+for(const state of [wet]){const b=state.projects[0].cultivation.beds[0],capacity=b.w*b.d*16;assert(Math.abs(.75*capacity+b.irrigated+b.rainLiters-b.evaporated-b.drained-b.moisture*capacity)<1e-6,'water balance reconciles');}
+console.log('PASS explicit biomass, organic matter and water balances');
+
+const controls=createSandbox(42);assert.equal(planField(controls,50,50,[2,2]),'');const cp=controls.projects.at(-1);
+assert.match(queueBedJob(controls,cp.id,0,'plant'),/Prepare/);
+cp.cultivation.beds[0].stage='prepared';controls.materials.greens_seed=0;
+assert.match(queueBedJob(controls,cp.id,0,'plant'),/Missing/);
+controls.materials.greens_seed=10;assert.equal(queueBedJob(controls,cp.id,0,'plant'),'');
+assert.match(configureBed(controls,cp.id,0,{crop:'corn'}),/finish/);
+assert.match(resizeField(controls,cp.id,[3,3]),/Finish/);
+const tampered=JSON.parse(save(controls));tampered.operations.at(-1).farm.work=.1;assert.equal(restore(JSON.stringify(tampered)),null);
+assert(fieldPlacementError(controls,50,50,[0,2]));assert(fieldPlacementError(controls,50,50,[33,2]));
+console.log('PASS missing inputs, planting preconditions, pending-work locks and tampered job rejection; harvest transport resumes after reload');

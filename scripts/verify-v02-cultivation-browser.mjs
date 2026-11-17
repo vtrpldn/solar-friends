@@ -7,7 +7,7 @@ import {ensureCultivation} from '../web/v02/weekend/cultivation.js';
 import {SANDBOX_SAVE} from '../web/v02/weekend/modes.js';
 const out=process.env.FARM_SCREENSHOTS||'/tmp/solar-farming';await mkdir(out,{recursive:true});
 const s=createSandbox(42);assert.equal(planField(s,50,50,[4,4]),'');const field=s.projects.at(-1);
-field.cultivation.beds.forEach((b,i)=>Object.assign(b,{crop:['greens','beans','corn'][i%3],stage:i===0?'unprepared':'harvestable',growth:i===0?0:1,...(i?{ripeAt:0}:{})}));
+field.cultivation.beds.forEach((b,i)=>Object.assign(b,{crop:['greens','beans','corn'][i%3],stage:['unprepared','prepared','growing','growing','harvestable','harvested'][i%6],growth:[0,0,.15,.6,1,0][i%6],...(i%6===4?{ripeAt:0}:{})}));
 assert.equal(plan(s,'greenhouse',59,50),'');const greenhouse=s.projects.at(-1);greenhouse.work=PROJECTS.greenhouse.work;ensureCultivation(s,greenhouse).beds.forEach((b,i)=>Object.assign(b,{crop:i?'corn':'beans',stage:'harvestable',growth:1,ripeAt:0}));
 s.view={speed:1,paused:true,position:[64,35,64],target:[44,0,40],zoom:1};assert(restore(save(s)));
 const server=await serve(0),browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -31,5 +31,7 @@ try{
  assert((await page.locator('#cultivation-panel').innerText()).includes('unprepared'));
  await page.locator('#farm-density').selectOption('1.5');await page.locator('#farm-irrigation').uncheck();
  await page.reload();await page.waitForSelector('#build-field',{state:'attached'});await page.waitForTimeout(500);assert.deepEqual(errors,[]);
+ const night=await browser.newPage({viewport:{width:1440,height:900}});night.on('pageerror',e=>errors.push(e.message));s.time=13*60/.45;
+ await night.addInitScript(({key,value})=>localStorage.setItem(key,value),{key:SANDBOX_SAVE,value:save(s)});await night.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await night.waitForTimeout(2000);await night.screenshot({path:`${out}/night.png`});await night.close();assert.deepEqual(errors,[]);
  console.log('PASS desktop field drag, rotated preview, confirmation, bed configuration, job queue and reload; no browser exceptions');
 }finally{await browser.close();server.close();}

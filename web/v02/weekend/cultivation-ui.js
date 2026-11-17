@@ -66,6 +66,7 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
   <label>Residues <select id="farm-residues" ${job?'disabled':''}><option value="leave">Leave as ground cover</option><option value="collect">Collect for compost</option></select></label>
   <p>Moisture ${(b.moisture*100).toFixed(0)}% · fertility ${(b.fertility*100).toFixed(0)}% · organic matter ${(b.organic*100).toFixed(0)}% · cover ${(b.cover*100).toFixed(0)}%</p>
   <p>Water supplied ${b.irrigated.toFixed(1)} L · rain ${b.rainLiters.toFixed(1)} L<br>Residues ${b.residueKg.toFixed(1)} kg · amendments decomposing ${b.amendmentKg.toFixed(1)} kg</p>
+  <p>Harvest exported ${b.exportedKg.toFixed(1)} kg · residues collected ${b.residueExportedKg.toFixed(1)} kg<br>Organic matter retained ${b.soilOrganicKg.toFixed(1)} kg · decomposition losses ${b.decomposedGasKg.toFixed(1)} kg</p>
   <p>${standing?`Potential harvest 0–${max.toFixed(1)} kg; future conditions and harvest timing still matter.`:'Preparation and planting require resident work and seeds.'}</p>
   <p>${b.moisture<.4?'Dry soil is limiting growth. ':''}${b.fertility<.5?'Low fertility is limiting growth. ':''}${b.density>1?'Dense planting increases competition. ':''}${condition<.8?'Earlier stress has reduced yield potential.':''}</p>
   <p>${job?job.status||'Resident work queued':'No bed work queued'}</p><div id="farm-actions"></div>

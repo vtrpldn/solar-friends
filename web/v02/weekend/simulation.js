@@ -296,7 +296,7 @@ export function queueBedJob(s,site,id,action) {
   for(const [item,n]of Object.entries(spec.input))if(materialCount(s,item)<n)return `Missing ${n} ${item}.`;
   for(const [item,n]of Object.entries(spec.input))changeMaterial(s,item,-n,undefined,'cultivation input');
   s.operations??=[];
-  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,recipe:`farm_${action}`,farm:{bed:id,action,work:spec.work},input:spec.input,work:0,phase:'pickup',done:false});
+  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,recipe:`farm_${action}`,farm:{bed:id,action,work:spec.work,crop:b.crop,density:b.density},input:spec.input,work:0,phase:'pickup',done:false});
   wakeHelpers(s);return '';
 }
 export function fieldPlacementError(s,x,z,size,rotation=0,ignore=null){
@@ -328,6 +328,7 @@ export function resizeField(s,id,size){
 export function productionBlocker(s, site, recipe) {
   const p = s.projects.find((p) => p.id === Number(site) && !p.felled),
     def = PROCESSES[recipe];
+  if(def?.bedAction)return 'Choose a cultivation bed for this job.';
   if (
     !p || p.removal ||
     !def ||
@@ -845,6 +846,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   r.work += dt;
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if(op.work>=recipe.work*.5 && beginBiology(s,op,r))return true;
+  if(op.farm?.action==='plant'&&op.work<recipe.work)p.cultivation.beds[op.farm.bed].stage='planted';
   if (op.work >= recipe.work) {
     if(op.farm)finishFarmJob(s,p,op);
     if(BIOLOGY[op.recipe]){op.harvestOutput=harvestOutput(s,op,recipe);p.harvestCount=(p.harvestCount||0)+1;}
@@ -1106,7 +1108,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
   if (!Number.isInteger(rotation) || rotation < 0 || rotation > 3)
     return "Choose a valid orientation.";
   const previous = ignore === null ? null : s.projects.find(p => p.id === ignore);
-  const candidate = { ...previous, key, x, z, rotation, ...(key==='field'&&details?.fieldSize?{fieldSize:details.fieldSize}:{}) };
+  const candidate = { ...previous, key, x, z, rotation, ...(key==='field'?{fieldSize:details?.fieldSize||previous?.fieldSize||[2,2]}:{}) };
   const [w, d] = footprint(candidate);
   if (
     !["road", "bridge", "field"].includes(key) &&
@@ -1223,6 +1225,7 @@ function gradeFoundation(s, key, x, z, rotation = 0) {
     s.terrainPads.push(pad);
 }
 export function plan(s, key, x, z, rotation = 0) {
+  if(key==='field')return planField(s,x,z,[2,2],rotation);
   if(PROJECTS[key]?.natural)return 'Natural resources are found on the land, not built.';
   if (s.stage !== "playing") return "Choose your campsite first.";
   const def = PROJECTS[key];
@@ -1316,6 +1319,7 @@ export function moveProject(s, id, x, z, rotation = undefined) {
   if(s.projects.find(p=>p.id===id)?.natural)return 'Natural resources cannot be moved.';
   const p = s.projects.find((p) => p.id === id);
   if (!p || p.removal || s.stage !== "playing") return "Cannot move that now.";
+  if(p.cultivation)return 'Cultivated soil stays on its land. Designate a new field instead.';
   if (
     s.people.some(
       (r) => r.restSite === id && (r.tentPhase || r.action === "rest"),

@@ -48,7 +48,10 @@ export function createCultivationModel(p,state){
    matrix.scale.set(id==='corn'?.35*plant.growth:.19*plant.growth,id==='corn'?.06*plant.growth:.1*plant.growth,id==='corn'?.09*plant.growth:.16*plant.growth);
    matrix.updateMatrix();leaves.setMatrixAt(i,matrix.matrix);color.set(plant.health<.4?'#a29b4b':id==='greens'?'#679b42':id==='beans'?'#4e843d':'#718c3b');leaves.setColorAt(i++,color);
   }
-  root.add(leaves);
+  const distant=new THREE.InstancedMesh(new THREE.CircleGeometry(1,4),new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,side:THREE.DoubleSide}),items.length);
+  distant.userData.ownedMaterial=true;
+  items.forEach((p,i)=>{const height=CROPS[id].height*p.growth;matrix.position.set(p.x,p.y+height/2,p.z);matrix.rotation.set(-.4,p.rotation,0);matrix.scale.set(id==='corn'?.35:.25,height/2,.25);matrix.updateMatrix();distant.setMatrixAt(i,matrix.matrix);distant.setColorAt(i,new THREE.Color(p.health<.4?'#a29b4b':id==='greens'?'#679b42':'#4e843d'));});
+  const lod=new THREE.LOD();lod.userData.crops=true;lod.userData.plants=items.length;lod.addLevel(leaves,0);lod.addLevel(distant,35);root.add(lod);
   if(id==='corn'){
    const stalks=new THREE.InstancedMesh(new THREE.CylinderGeometry(.025,.035,1,5),new THREE.MeshStandardMaterial({color:'#9aa65c',roughness:1}),items.length);stalks.userData.ownedMaterial=true;
    items.forEach((p,i)=>{matrix.position.set(p.x,p.y+CROPS.corn.height*p.growth/2,p.z);matrix.rotation.set(0,0,0);matrix.scale.set(1,CROPS.corn.height*p.growth,1);matrix.updateMatrix();stalks.setMatrixAt(i,matrix.matrix);});root.add(stalks);

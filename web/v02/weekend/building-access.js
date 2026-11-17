@@ -12,6 +12,9 @@ export function accessGeometry(p,def,size) {
  if(completed&&(p.cultivation||p.key==='field')){
   const a=(p.rotation||0)*Math.PI/2,beds=bedLayout(p);
   const solids=beds.map(b=>{const c=bedWorld(p,b,size);return {...c,w:((p.rotation||0)%2?b.d:b.w)/2,d:((p.rotation||0)%2?b.w:b.d)/2};});
+  if(p.key==='greenhouse')for(const wall of [{x:-3,z:0,w:.08,d:10},{x:3,z:0,w:.08,d:10},...[-5,5].flatMap(z=>[-1.75,1.75].map(x=>({x,z,w:2.5,d:.08})))]){
+   const c=bedWorld(p,wall,size);solids.push({...c,w:((p.rotation||0)%2?wall.d:wall.w)/2,d:((p.rotation||0)%2?wall.w:wall.d)/2});
+  }
   const work=beds.map(b=>{const c=bedWorld(p,b,size);return {x:c.x+Math.cos(a)*.5,z:c.z-Math.sin(a)*.5};});
   return {solids,entrances:[],work,delivery:work,placement:{x:cx,z:cz,w,d}};
  }
