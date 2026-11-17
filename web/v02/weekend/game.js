@@ -1,3 +1,4 @@
+import {createDiagnostics,copyDiagnostics} from './diagnostics.js';
 import {ensureCultivation} from './cultivation.js';
 import {cultivationSignature,createCultivationModel} from './cultivation-models.js';
 import {installFarmingUI} from './cultivation-ui.js';
@@ -410,6 +411,9 @@ const border = new THREE.LineLoop(
   new THREE.LineBasicMaterial({ color: "#e0dfad" }),
 );
 scene.add(border);
+const diagnostics=createDiagnostics();
+addEventListener('error',event=>diagnostics.error('error',event.error??event.message));
+addEventListener('unhandledrejection',event=>diagnostics.error('unhandledrejection',event.reason));
 const actors = s.people.map((r) => {
   const root = createResident(r.id);
   root.userData.residentId = r.id;
@@ -1116,6 +1120,25 @@ $("cancel-project").onclick = () => {
   uiSignature = ''; renderUI();
 };
 let controlsWasPaused = false;
+$("copy-diagnostics").onclick = async () => {
+  const button=$("copy-diagnostics"),status=$("diagnostics-status");
+  button.disabled=true;
+  try{
+    const report=diagnostics.report(JSON.parse(saveWithView()),{
+      url:location.origin+location.pathname,mode:s.mode,paused,hidden:document.hidden,
+      selectedSpeed:speed,effectiveSpeed:simulationSpeed(s,speed),accumulator,
+      selectedProject:selected,selectedResident:expandedResident,openPanel,placing,
+      browser:navigator.userAgent,viewport:{width:innerWidth,height:innerHeight,pixelRatio:devicePixelRatio},
+    });
+    if(await copyDiagnostics(report))status.textContent='Bug report copied. Paste it into your message.';
+    else{
+      status.textContent='Automatic copying was blocked. Copy the report from the dialog.';
+      $("diagnostics-text").value=report;$("diagnostics-copy").showModal();
+      $("diagnostics-text").focus();$("diagnostics-text").select();
+    }
+  }catch(error){status.textContent='Could not prepare the bug report. Please try again.';diagnostics.error('diagnostic-export',error);}
+  finally{button.disabled=false;}
+};
 $("show-controls").onclick = () => {
   controlsWasPaused = paused; paused = true; updatePauseButton();
   $("controls-dialog").showModal();
@@ -2102,6 +2125,7 @@ function frame(now) {
       tick(s, step);
     });
   }
+  diagnostics.observe(s);
   updateSpeedButton();
   wildlife.update(!paused && !document.hidden ? dt : 0);
   capybaras.update(!paused && !document.hidden ? dt : 0);

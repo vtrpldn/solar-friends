@@ -202,7 +202,10 @@
           ><button id="grid" data-shortcut="G" aria-keyshortcuts="G">Grid</button
           ></div><div class="view-control-row session-row"><button id="restart">New village</button
           ><button id="main-menu">Main menu</button><button id="saved-villages">Saved villages</button>
-          </div><a href="../library/">Art collection ↗</a>
+          </div><div class="view-control-row"><button id="copy-diagnostics">Copy bug report</button></div>
+          <small>Copies the current village, resident tasks, recent activity and errors. Paste it into your bug report.</small>
+          <small id="diagnostics-status" role="status"></small>
+          <a href="../library/">Art collection ↗</a>
           <fieldset class="audio-controls"><legend>Sound</legend>
             <label for="audio-music">Music <input id="audio-music" type="range" min="0" max="100" step="1" aria-label="Music volume" /></label>
             <label for="audio-effects">Interaction sounds <input id="audio-effects" type="range" min="0" max="100" step="1" aria-label="Interaction sounds volume" /></label>
@@ -212,6 +215,12 @@
       </details>
       </nav>
     </footer>
+    <dialog id="diagnostics-copy" aria-labelledby="diagnostics-copy-title">
+      <h2 id="diagnostics-copy-title">Copy bug report</h2>
+      <p>Automatic copying was blocked. Select the report below and copy it.</p>
+      <textarea id="diagnostics-text" aria-label="Simulation bug report" readonly style="width:min(70vw,800px);height:50vh"></textarea>
+      <form method="dialog"><button>Close</button></form>
+    </dialog>
     <dialog id="management" aria-labelledby="management-title">
       <div class="management-heading">
         <div>
