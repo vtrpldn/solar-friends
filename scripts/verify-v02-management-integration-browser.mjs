@@ -21,7 +21,7 @@ try{
   await page.locator(`[data-manage="${view}"]:visible`).first().click();assert(await dialog.isVisible());
   if(view==='resources'){assert(await page.locator('#production-sites').isVisible());assert((await dialog.innerText()).includes('Cold storage')||(await dialog.innerText()).includes('Processing record'));}
   if(view==='items'){assert((await dialog.innerText()).includes('Garden tools'));assert(!(await page.locator('#production-sites').isVisible()));}
-  if(view==='crafting'){assert((await dialog.innerText()).includes('Resident skills'));assert(await page.locator('.crafting-recipe').count()>3);}
+  if(view==='crafting'){assert(await dialog.getByRole('button',{name:'Make',exact:true}).isVisible());assert(await dialog.getByRole('button',{name:'Repair',exact:true}).isVisible());assert(await page.locator('.craft-entry').count()>3);}
   await mkdir('artifacts/integration-management',{recursive:true});
   if(['items','crafting'].includes(view))await page.screenshot({path:`artifacts/integration-management/${view}.png`});
   await page.keyboard.press('Escape');assert(!await dialog.isVisible());
