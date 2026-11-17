@@ -6,6 +6,8 @@ Long crop growth needs a practical source of interim income. Transport and routi
 
 ## Implemented behavior
 
+Resources → Village work & trade offers an optional minimum cargo fill and maximum game-hour wait for automatic construction pickups and exports. A Send waiting loads now override releases pending loads early. The default zero threshold preserves immediate blueprint pickup; essential food shopping and explicit manual trips bypass consolidation.
+
 Both cars can carry independent orders with separate drivers. Each manifest owns its quantities, and both survive save/load. Paid supplier delivery is an alternative for purchases: a 5,000 kg / 12 m³ load, six hours handling plus the selected town travel time, and R$35 plus R$0.80 per round-trip kilometer. These are scenario assumptions, not supplier quotes. Exports still require a resident trip. Goods arrive physically; freight is paid once and protected from other spending.
 
 Residents can opt into individual outside jobs. A four-hour weekday shift pays R$80–100 after returning, costs R$8 commuting, and consumes energy. Departure requires adequate needs and energy. These are authored part-time contracts, not a wage survey. Disabling a job does not cancel a shift already underway.

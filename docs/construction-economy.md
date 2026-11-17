@@ -34,3 +34,13 @@ Before applying real coefficients, define each catalog pack's physical coverage,
 New saves carry `constructionLaborVersion: 1`. On loading an older save, completed structures remain completed and partial work retains its completion percentage under the revised requirement. Materials, pending purchases, delivered loads and cash are untouched. The conversion operates on the parsed state, not the original saved string. Repeated loads do not rescale progress twice. Unknown versions and impossible old progress are rejected rather than clamped.
 
 Tests: `scripts/verify-v02-construction-specs.mjs` checks every material allocation, house ordering, first-camp pacing, new saves, the genuine historical Day 61 save, idempotency and corrupt/unknown versions. The three-day replay continues to use actual exports and resident construction; it is not a fresh-start balance test.
+
+## Removal and relocation
+
+Building details now offer **Demolish** and **Salvage**. Both require resident work: demolition uses 10% and salvage 30% of assembly labor, with a minimum 13.5 resident-minutes. Salvage returns half of each installed material, rounded down; demolition loses installed material. Unassembled reservations and livestock return intact. Separately installed solar/refrigeration inputs are included. These recovery/work fractions are explicit game assumptions, not demolition contractor estimates.
+
+Purchased supplies must arrive and active production must finish first. Recovery waits for sufficient storage, including the capacity lost when removing a warehouse. Settlement happens once, records recovery and loss in a bounded history, removes utility connections, and accounts for discarded stored water/charge. Paid materials become stock, never a cash refund. Foundation grading remains in the terrain.
+
+Relocation now reserves the destination and requires 20% of assembly labor (same minimum). Materials and utility contents remain owned by the structure. Residents finish existing deliveries and batches first; occupied sleeping places wait for occupants. Destination legality is checked again on completion. Natural deposits cannot be relocated or dismantled through these actions.
+
+`verify-v02-building-removal.mjs` constructs a gathering place through normal commands, then checks resident demolition, salvage, exact material return, duplicate requests, save/load and a physical move. It is a focused mechanics test, not a full economic playthrough.

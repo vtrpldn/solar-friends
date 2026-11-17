@@ -1,3 +1,5 @@
+import {dispatchReady,validLogisticsPolicy} from './logistics-policy.js';
+import {requestRemoval,removalStep,validRemovals} from './building-lifecycle.js';
 import {orderDelivery,deliveryStep,validDelivery} from "./deliveries.js";
 import {activeTrips,uncollectedProjects} from "./trip-state.js";
 import {upkeepStep,performUpkeep,recordVehicleDistance,validUpkeep,ANIMAL_CARE} from "./asset-upkeep.js";
@@ -268,7 +270,7 @@ export function queueProduction(s, site, recipe) {
   const p = s.projects.find((p) => p.id === Number(site) && !p.felled),
     def = PROCESSES[recipe];
   if (
-    !p ||
+    !p || p.removal ||
     !def ||
     p.work < PROJECTS[p.key].work ||
     PROJECTS[p.key].kind !== def.kind
@@ -737,6 +739,7 @@ export function blueprintPurchase(s, key, count = 1) {
   return {items, cost, transport, error: cost + transport > s.money ? `Missing materials cost R$${cost.toFixed(2)} plus R$${transport.toFixed(2)} committed to ${budget.trips} collection trips; shared savings are too low.` : ""};
 }
 function dispatchBlueprintPickup(s) {
+  if(!dispatchReady(s))return;
   if(s.deliveryOnly){const pending=uncollectedProjects(s);if(pending.length)orderDelivery(s,Object.keys(pending[0].pendingMaterials)[0],pending[0],MATERIALS,storedMaterials(s),storageCapacity(s));return;}
   for(const trip of activeTrips(s))if(trip.phase==='boarding'&&trip.shipments){
     trip.shipments=blueprintManifest(uncollectedProjects(s,trip));trip.projects=trip.shipments.map(p=>p.project);
@@ -994,6 +997,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
     )
   )
     return "Another project occupies that space.";
+  if(s.projects.some(p=>p.id!==ignore&&p.removal?.target&&(()=>{const t=p.removal.target,[rw,rd]=footprint({...p,rotation:t.rotation});return x<t.x+rw&&x+w>t.x&&z<t.z+rd&&z+d>t.z;})()))return "That space is reserved for a building relocation.";
   if (
     blockedCamp(s).some(
       (c) => c.x >= x && c.x < x + w && c.z >= z && c.z < z + d,
@@ -1098,7 +1102,7 @@ export function plan(s, key, x, z, rotation = 0) {
       : `${def.name} planned. Materials reserved; friends will bring them over.`,
   );
   dispatchBlueprintPickup(s);
-  if(activeTrips(s).length<2 && pendingExports(s).length && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
+  if(activeTrips(s).length<2 && pendingExports(s).length && dispatchReady(s) && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
   return "";
 }
 export function planRoadLine(s, from, to) {
@@ -1123,10 +1127,11 @@ export function planRoadLine(s, from, to) {
   );
   return "";
 }
+export function removeProject(s,id,mode){return requestRemoval(s,id,mode,PROJECTS,PROCESSES);}
 export function moveProject(s, id, x, z, rotation = undefined) {
   if(s.projects.find(p=>p.id===id)?.natural)return 'Natural resources cannot be moved.';
   const p = s.projects.find((p) => p.id === id);
-  if (!p || s.stage !== "playing") return "Cannot move that now.";
+  if (!p || p.removal || s.stage !== "playing") return "Cannot move that now.";
   if (
     s.people.some(
       (r) => r.restSite === id && (r.tentPhase || r.action === "rest"),
@@ -1142,24 +1147,11 @@ export function moveProject(s, id, x, z, rotation = undefined) {
   rotation ??= p.rotation || 0;
   const error = placementError(s, p.key, x, z, id, rotation);
   if (error) return error;
-  gradeFoundation(s, p.key, x, z, rotation);
-  p.x = x;
-  p.z = z;
-  p.rotation = rotation;
-  for (const r of s.people) {
-    r.target = null;
-    r.walk = [];
-    if (r.job === id) {
-      r.job = null;
-      r.workSpot = null;
-      r.cargo = false;
-      r.action = "idle";
-    }
-  }
-  say(
-    s,
-    `${PROJECTS[p.key].name} moved. Temporary camp arrangements are free to reposition.`,
-  );
+  if(s.operations?.some(o=>!o.done&&o.site===id))return "Finish the active batch or water job before moving.";
+  if(s.people.some(r=>r.job===id&&r.cargo))return "Wait for the current material delivery to finish.";
+  p.removal={mode:'move',target:{x,z,rotation},work:0,required:Math.max(30,PROJECTS[p.key].work*.2),status:'Waiting for residents to relocate the structure'};
+  for(const r of s.people)if(r.job===id){r.job=null;r.workSpot=null;r.target=null;r.walk=[];}
+  say(s,`${PROJECTS[p.key].name} relocation queued. Residents will do the work; the destination is reserved.`);
   return "";
 }
 export function prioritize(s, id) {
@@ -1670,7 +1662,7 @@ function workSpot(s, r, p) {
 }
 function availableProject(s, r) {
   return s.projects.find(
-    (p) => !p.pendingMaterials && p.work < PROJECTS[p.key].work &&
+    (p) => !p.removal && !p.pendingMaterials && p.work < PROJECTS[p.key].work &&
       s.people.filter(other => other !== r && other.job === p.id).length < crewLimit(PROJECTS[p.key]) && workSpot(s, r, p),
   );
 }
@@ -1894,7 +1886,7 @@ function tickUncached(s, dt) {
     },
   };
   dispatchBlueprintPickup(s);
-  if(activeTrips(s).length<2 && pendingExports(s).length && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
+  if(activeTrips(s).length<2 && pendingExports(s).length && dispatchReady(s) && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
   for (const trip of activeTrips(s)) {
     const r = s.people.find((r) => r.id === trip.person);
     if (trip.phase === "boarding" || trip.phase === "unloading") {
@@ -2142,6 +2134,7 @@ function tickUncached(s, dt) {
     }
     // Finish an assigned batch before reconsidering work categories. Otherwise
     // changing availability can shuffle the reserved slots on every tick.
+    if(r.energy>=25&&removalStep(s,r,dt,{defs:PROJECTS,recipes:PROCESSES,workSpot,go,stored:storedMaterials,capacity:storageCapacity,change:changeMaterial,invalidate:invalidateNavigation,say,placement:placementError,grade:gradeFoundation}))continue;
     if(outsideWorkStep(s,r,dt,go,route))continue;
     if(r.energy>=25&&performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot))continue;
     const activeOperation=s.operations?.find(o=>o.id===r.operation&&!o.done);
@@ -2159,7 +2152,7 @@ function tickUncached(s, dt) {
     }
     if(serviced)continue;
     let p = s.projects.find(
-      (p) => p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
+      (p) => !p.removal && p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
     );
     if (!p) {
       r.job = null;
@@ -2576,7 +2569,7 @@ export function restore(text) {
     }
     if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
-    if (!validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(

@@ -11,7 +11,7 @@ export function recordVehicleDistance(s,index,km){const v=upkeep(s).vehicles[ind
 export function upkeepStep(s,defs,dt){
  if(s.mode==='sandbox')return;const u=upkeep(s),day=Math.floor((540+s.time*.45)/1440);
  if(u.day!==day){u.day=day;u.used=0;}
- for(const p of s.projects){const d=defs[p.key],interval=INTERVALS[d.kind];if(p.work<d.work)continue;
+ for(const p of s.projects){const d=defs[p.key],interval=INTERVALS[d.kind];if(p.removal||p.work<d.work)continue;
   if((d.materials?.batteries||0)>0||p.solarUpgrade){
     p.batteryAgeDays=(p.batteryAgeDays||0)+dt/GAME_DAY;
     if(u.automatic&&p.batteryAgeDays>=8*365&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,battery:true,work:0,partsPaid:false,done:false});
@@ -31,7 +31,7 @@ export function upkeepStep(s,defs,dt){
  u.jobs=u.jobs.filter(j=>!j.done&&(j.vehicle!==undefined||s.projects.some(p=>p.id===j.target)));
 }
 export function performUpkeep(s,r,dt,go,changeMaterial,materials,carDoor,useWater,workSpot){
- const u=upkeep(s);if(r.cargo||r.outsideWork||(r.operation&&r.action!=='service')||s.people.some(p=>p!==r&&p.action==='service'))return false;
+ const u=upkeep(s);if(r.cargo||r.removalJob||r.outsideWork||(r.operation&&r.action!=='service')||s.people.some(p=>p!==r&&p.action==='service'))return false;
  const job=u.jobs.find(j=>!j.done&&(u.automatic||j.care||j.soil)&&(!j.person||j.person===r.id||!s.people.some(p=>p.id===j.person&&p.action==='service'))&&
   (j.vehicle===undefined||!activeTrips(s).some(t=>t.vehicle===j.vehicle)));
  if(!job)return false;
