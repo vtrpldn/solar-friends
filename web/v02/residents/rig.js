@@ -11,11 +11,11 @@ export const RESIDENT_IDS = [
 // Identity changes only the visible meshes: joint lengths and interaction anchors stay shared.
 const looks = {
   resident: { hat: true, hair: "short", outfit: "shirt", width: 1 },
-  iara: { hat: true, hair: "braid", outfit: "overalls", width: 0.94 },
-  bento: { hair: "curls", outfit: "vest", width: 1.08, beard: true },
-  luz: { hair: "bun", outfit: "apron", width: 1 },
-  caua: { hat: true, hair: "short", outfit: "vest", width: 1.04 },
-  nina: { hair: "puffs", outfit: "overalls", width: 0.94 },
+  iara: { hat: true, hair: "braid", outfit: "overalls", width: 0.9 },
+  bento: { hair: "curls", outfit: "vest", width: 1.18, beard: true },
+  luz: { hair: "bun", outfit: "apron", width: 1.07 },
+  caua: { hair: "short", outfit: "shirt", width: 0.9, shorts: true, scarf: true },
+  nina: { hair: "puffs", outfit: "overalls", width: 0.88, glasses: true },
 };
 const palettes = new Map();
 function joint(parent, name, x = 0, y = 0, z = 0) {
@@ -30,58 +30,69 @@ export function createResident(id = "resident") {
   const root = new THREE.Group(),
     hips = joint(root, "hips", 0, 0.9),
     head = joint(hips, "head", 0, 0.59);
-  const torso = cylinder(hips, 0.25, 0.21, 0.44, "shirt", 0, 0.2, 0, 8);
+  const torso = cylinder(hips, 0.25, 0.21, 0.44, "shirt", 0, 0.2, 0, 6);
   torso.scale.z = 0.68;
   torso.scale.x = look.width;
   ball(hips,.22,"trousers",0,-.015,0,[1,.55,.7],0);
   const clothes = joint(hips, "clothing");
   if (look.outfit === "overalls" || look.outfit === "apron") {
     const material = look.outfit === "apron" ? "plaster" : "trousers";
-    box(clothes, 0.29, 0.28, 0.035, material, 0, 0.18, 0.16);
+    box(clothes, 0.29*look.width, 0.28, 0.035, material, 0, 0.18, 0.16);
     for (const x of [-0.12, 0.12])
       box(clothes, 0.045, 0.19, 0.035, material, x, 0.34, 0.15);
     box(clothes, 0.13, 0.08, 0.015, material, 0, 0.15, 0.185);
-    if(look.outfit==='apron')box(clothes,.34,.22,.04,material,0,-.05,.155);
+    if(look.outfit==='apron')box(clothes,.38,.26,.04,material,0,-.06,.155);
   } else if (look.outfit === "vest") {
     for (const x of [-0.14, 0.14])
-      box(clothes, 0.13, 0.32, 0.055, "earth", x, 0.22, 0.14);
+      box(clothes, 0.17, 0.36, 0.055, "earth", x, 0.20, 0.14);
+    const back=box(clothes,.43,.34,.04,"earth",0,.21,-.145);
+    back.scale.x=look.width;
+  }
+  if(look.scarf){
+    const scarf=box(clothes,.15,.15,.035,"teal",.07,.36,.15);
+    scarf.rotation.z=-.5;
   }
   cylinder(hips, 0.075, 0.08, 0.12, "skin", 0, 0.47, 0, 6);
   ball(head, 0.235, "skin", 0, 0, 0, [0.91, 1.02, 0.88], 1);
-  if(look.hair!=="bun") ball(head, 0.238, "hair", 0, 0.08, -0.035, [0.91, 0.62, 0.88], 0);
+  if(look.hair!=="bun") ball(head, 0.245, "hair", 0, look.hair==="short"&&!look.hat?.13:.08, -0.035, [0.94, look.hair==="short"&&!look.hat?.75:.62, 0.91], 0);
   for (const s of [-1, 1]) {
-    ball(head, 0.018, "hair", s * 0.075, 0.025, 0.192, [1, 1.15, 0.5], 0);
-    ball(head, 0.046, "skin", s * 0.205, 0, -0.005, [0.6, 1, 0.65], 0);
+    for(const [radius,material,x,y,z,scale] of [
+      [.018,"hair",s*.075,.025,.192,[1,1.15,.5]],
+      [.046,"skin",s*.205,0,-.005,[.6,1,.65]],
+    ]){
+      const detail=ball(head,radius,material,x,y,z,scale,0);
+      detail.geometry.dispose();detail.geometry=new THREE.OctahedronGeometry(radius);
+    }
   }
   ball(head, 0.033, "skin", 0, -0.025, 0.211, [.9,.85,.8],0);
   const mouth=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-.035,-.087,.188),new THREE.Vector3(0,-.094,.196),new THREE.Vector3(.035,-.087,.188)]),new THREE.LineBasicMaterial({color:0x714c36}));
   head.add(mouth);
   const hairstyle = joint(head, "hairstyle");
   if (look.hat) {
-    const brim = id === "caua" ? 0.28 : 0.34;
-    cylinder(hairstyle, brim, brim, 0.045, "earth", 0, 0.19, 0, 10);
-    cylinder(hairstyle, 0.15, 0.19, 0.15, "earth", 0, 0.285, 0, 8);
+    const brim = id === "iara" ? 0.38 : 0.34;
+    cylinder(hairstyle, brim, brim, 0.045, "earth", 0, 0.19, 0, 8);
+    cylinder(hairstyle, 0.15, 0.19, 0.15, "earth", 0, 0.285, 0, 6);
     cylinder(
       hairstyle,
       0.19,
       0.195,
       0.045,
-      id === "caua" ? "teal" : "timber",
+      id === "iara" ? "teal" : "timber",
       0,
       0.23,
       0,
-      8,
+      6,
     );
   }
   if (look.hair === "braid") {
     for (let i = 0; i < 3; i++)
       ball(
         hairstyle,
-        0.085 - i * 0.012,
+        0.095 - i * 0.014,
         "hair",
-        0.14,
-        -0.08 - i * 0.1,
-        -0.12,
+        0.2,
+        -0.08 - i * 0.11,
+        0.08,
         [1, 1, 1],
         0,
       );
@@ -92,7 +103,7 @@ export function createResident(id = "resident") {
     const cap=new THREE.Mesh(new THREE.SphereGeometry(.247,8,3,0,Math.PI*2,0,Math.PI*.5),new THREE.MeshStandardMaterial({color:0x3a2a23,roughness:1}));
     cap.scale.set(.93,1,.91);cap.position.set(0,.06,-.018);hairstyle.add(cap);
     ball(hairstyle, 0.105, "hair", 0, 0.015, -0.235, [1, .95, .85], 0);
-    const scarf=new THREE.Mesh(new THREE.TorusGeometry(.207,.025,3,10,Math.PI*1.3),new THREE.MeshStandardMaterial({color:0xb87351,roughness:1}));
+    const scarf=new THREE.Mesh(new THREE.TorusGeometry(.207,.045,3,8,Math.PI*1.3),new THREE.MeshStandardMaterial({color:0xb87351,roughness:1}));
     scarf.rotation.x=Math.PI/2;scarf.rotation.z=-Math.PI*.15;
     scarf.position.set(0,.105,-.01);hairstyle.add(scarf);
   }
@@ -100,9 +111,9 @@ export function createResident(id = "resident") {
     for (const x of [-1, 1])
       ball(
         hairstyle,
-        look.hair === "puffs" ? 0.12 : 0.11,
+        look.hair === "puffs" ? 0.15 : 0.125,
         "hair",
-        x * (look.hair === "puffs" ? 0.23 : 0.14),
+        x * (look.hair === "puffs" ? 0.24 : 0.14),
         look.hair === "puffs" ? 0.2 : 0.1,
         -0.065,
         [1, 1, 1],
@@ -110,21 +121,30 @@ export function createResident(id = "resident") {
       );
     ball(hairstyle, 0.14, "hair", 0, 0.19, -0.045, [1, 0.75, 1], 0);
   }
+  if(look.glasses){
+    const frames=joint(head,"glasses");
+    for(const side of [-1,1]){
+      const rim=new THREE.Mesh(new THREE.RingGeometry(.048,.062,8),new THREE.MeshStandardMaterial({color:'#5b4235',roughness:1,side:THREE.DoubleSide}));
+      rim.position.set(side*.077,.025,.213);frames.add(rim);
+    }
+    box(frames,.045,.014,.014,"timber",0,.025,.218);
+  }
   if (look.beard)
-    ball(hairstyle, 0.15, "hair", 0, -0.13, 0.07, [1, 0.65, 0.8], 0);
+    ball(hairstyle, 0.175, "hair", 0, -0.13, 0.07, [1, 0.65, 0.8], 0);
   const legs = [],
     arms = [];
   for (const s of [-1, 1]) {
     const hip = joint(hips, `hip-${s}`, s * 0.125),
       knee = joint(hip, `knee-${s}`, 0, -0.38);
-    cylinder(hip, 0.105, 0.095, 0.38, "trousers", 0, -0.19, 0, 6);
-    cylinder(knee, 0.095, 0.075, 0.42, "trousers", 0, -0.21, 0, 6);
-    const shoe=cylinder(knee,.1,.11,.13,"timber",0,-.455,.055,8);
+    cylinder(hip, 0.105*look.width, 0.095*look.width, 0.38, "trousers", 0, -0.19, 0, 6);
+    cylinder(knee, 0.095*look.width, 0.075*look.width, 0.42, look.shorts ? "skin" : "trousers", 0, -0.21, 0, 6);
+    const shoe=cylinder(knee,.1,.11,.13,"timber",0,-.455,.055,6);
     shoe.scale.z=1.5;
     legs.push({ hip, knee, shoe });
     const shoulder = joint(hips, `shoulder-${s}`, s * 0.26, 0.29),
       elbow = joint(shoulder, `elbow-${s}`, 0, -0.26);
-    cylinder(shoulder, 0.08, 0.07, 0.26, "shirt", 0, -0.13, 0, 8);
+    cylinder(shoulder, 0.08, 0.07, 0.26, "shirt", 0, -0.13, 0, 6);
+    if(look.shorts)cylinder(shoulder,.085,.085,.045,"plaster",0,-.24,0,6);
     cylinder(elbow, 0.055, 0.05, 0.25, "skin", 0, -0.125, 0, 6);
     ball(elbow, 0.065, "skin", 0, -0.25, 0, [0.8, 1, 1], 0);
     arms.push({ shoulder, elbow });
@@ -172,12 +192,12 @@ export function createResident(id = "resident") {
   root.name = id;
   const i = RESIDENT_IDS.indexOf(id) - 1;
   if (i >= 0) {
-    const shirt = ["#d6af52", "#397c86", "#e6b987", "#7a954d", "#967caa"][i],
+    const shirt = ["#d6af52", "#397c86", "#b9684b", "#7a954d", "#967caa"][i],
       skin = ["#bb8055", "#8d573a", "#bd8159", "#b77b4e", "#915a3c"][i];
     root.traverse((o) => {
       if (!o.isMesh) return;
       const hex = o.material.color.getHexString(),
-        color = hex === "d3ad58" ? shirt : hex === "b87950" ? skin : hex === "496e62" ? ["#496e62","#555d55","#7e7560","#63745a","#5c6876"][i] : null;
+        color = hex === "d3ad58" ? shirt : hex === "b87950" ? skin : hex === "496e62" ? ["#496e62","#48535b","#7e7560","#b59a6b","#a56c4d"][i] : hex === "b68a59" && id === "bento" ? "#9a704e" : null;
       if (color) {
         if (!palettes.has(color)) {
           const m = o.material.clone();
