@@ -1,4 +1,4 @@
-import {PROJECTS,plan,planField,queueProduction,repeatProduction,queueWater,queuePurification,queueSanitation,supplyRun,sellMaterial,queueBedJob,configureBed} from './simulation.js';
+import {PROJECTS,plan,planField,queueProduction,queueWater,queuePurification,queueSanitation,supplyRun,sellMaterial,queueBedJob,configureBed} from './simulation.js';
 import {setOutsideWork} from './outside-work.js';
 import {harvestExpired,harvestYield} from './cultivation.js';
 export const SAMPLE_LIMIT=2160;
@@ -15,7 +15,7 @@ export function labCommand(s,m){
  }
  case 'outside':{const r=s.people.find(r=>r.id===m.resident);if(!r||typeof m.enabled!=='boolean')return 'Choose a resident and employment setting.';setOutsideWork(s,r,m.enabled);return '';}
  case 'produce':return queueProduction(s,m.site,m.recipe);
- case 'repeat':return repeatProduction(s,m.site,m.recipe)?'':'Cannot repeat this job.';
+ case 'repeat':return 'Automatic repeating has been removed. Queue one job at a time.';
  case 'buy':return supplyRun(s,m.material)?'':'No resident, car, storage or savings available.';
  case 'sell':return sellMaterial(s,m.material)?'':'Not enough surplus for one sale batch.';
  case 'haul':return queueWater(s,-1,m.site,'irrigation');

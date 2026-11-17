@@ -1,4 +1,3 @@
-import {automaticWorkCopy} from './automatic-work-copy.js';
 import {hydrationWarning} from './hydration.js';
 import {hydrologyText} from './hydrology.js';
 import {forecast,weatherText} from './weather.js';
@@ -103,7 +102,6 @@ import {
   crossingAt,
   bridgeDeckHeight,
   queueProduction,
-  repeatProduction,
   queueWater,
   connectUtility,
   sellMaterial,
@@ -1431,7 +1429,6 @@ function renderUtilityUI() {
   $("production-controls").hidden = !$("production").value;
   $("queue-production").disabled = !node || node.enabled === false || !$("production").value;
   const upgrade = p && $("production").value === "solar_upgrade" ? upgradeAction(p, s.operations || []) : null;
-  $("repeat-production").hidden = !!upgrade || (!!p && PROJECTS[p.key].kind==='wild-tree');
   $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : p && PROJECTS[p.key].natural ? 'Gather resources' : 'Start batch';
   if (node?.enabled === false) $("queue-production").textContent = "Switch on to produce";
   if (activity) { $("queue-production").textContent = activity.label; $("queue-production").disabled = true; }
@@ -1439,12 +1436,6 @@ function renderUtilityUI() {
   const batchBlocker=productionBlocker(s,selected,$("production").value);
   disabledReason($("queue-production"),batchBlocker);
   $("queue-production").disabled ||= !!batchBlocker;
-  $("repeat-production").disabled = !node || !$("production").value;
-  const automatic=automaticWorkCopy(p,$("production").value,PROCESSES,MATERIALS);
-  $("repeat-production").textContent=automatic.label;
-  $("repeat-production").setAttribute('aria-pressed',String(automatic.active));
-  $("automatic-work-detail").textContent=automatic.detail;
-  $("automatic-work-detail").hidden=$("repeat-production").hidden;
   $("toggle-building").hidden = !canSwitchBuilding(sys,node);
   disabledReason($("toggle-building"), "This structure has no switchable service.");
   $("toggle-building").disabled = !canSwitchBuilding(sys,node);
@@ -1497,12 +1488,6 @@ $("queue-production").onclick = () => {
     queueProduction(s, selected, $("production").value) ||
       "Resident production job queued.",
   );
-  persist();
-  renderUI();
-};
-$("repeat-production").onclick = () => {
-  repeatProduction(s, selected, s.projects.find(p=>p.id===selected)?.repeat || $("production").value);
-  uiSignature = "";
   persist();
   renderUI();
 };

@@ -1,4 +1,3 @@
-import {automaticWorkCopy} from './automatic-work-copy.js';
 import {PROJECTS,PROCESSES,MATERIALS,footprint,campLocation} from './simulation.js';
 import {riverCenter} from './river-layout.js';
 import {CULTIVATION_KEYS,CROPS,harvestExpired,harvestYield} from './cultivation.js';
@@ -33,12 +32,12 @@ function render(){if(!s)return;
  $('trade').textContent=`Available: ${$('material').value==='wood'?s.wood:s.materials[$('material').value]} · ${s.trip?'Town pickup in progress':'Car available'}`;
  const siteList=[['0','Camp stores'],...s.projects.filter(p=>!p.felled).map(p=>[String(p.id),`${PROJECTS[p.key].name} #${p.id} (${p.x}, ${p.z})`])];if($('sites').options.length!==siteList.length){opts($('sites'),siteList);}$('sites').value=selected;
  const p=s.projects.find(p=>p.id===selected),n=s.infrastructure.nodes[selected],ops=s.operations?.filter(o=>o.site===selected&&!o.done)||[];
- const key=JSON.stringify([replaying,selected,p?.work,p?.repeat,p?.readyAt,n?.water.map(v=>Math.floor(v)),n?.maintainFresh,n?.maintainSanitation,ops.map(o=>[o.id,o.status]),Math.floor(s.time/20),s.infrastructure.grid.enabled,s.emergencyFood]);
+ const key=JSON.stringify([replaying,selected,p?.work,p?.readyAt,n?.water.map(v=>Math.floor(v)),n?.maintainFresh,n?.maintainSanitation,ops.map(o=>[o.id,o.status]),Math.floor(s.time/20),s.infrastructure.grid.enabled,s.emergencyFood]);
  if(key!==inspectorKey&&!($('inspect').contains(document.activeElement)&&['SELECT','INPUT'].includes(document.activeElement.tagName))){inspectorKey=key;const panel=$('inspect');panel.replaceChildren();$('selection').textContent=selected===0?'Camp stores':p?`${PROJECTS[p.key].name} #${p.id}`:'Select a building';
  if(p){line(panel,`(${p.x}, ${p.z}) · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores · ${Math.round(100*p.work/PROJECTS[p.key].work)}% built`);
  if(p.cultivation)renderBeds(panel,p);
  if(p.animalCare)line(panel,animalCareText(p));
- if(!CULTIVATION_KEYS.includes(p.key))for(const [recipe,d]of Object.entries(PROCESSES).filter(([,d])=>d.kind===PROJECTS[p.key].kind)){button(panel,d.name,'produce',{site:p.id,recipe});if(Object.keys(d.output).length){const copy=automaticWorkCopy(p.repeat===recipe?p:{...p,repeat:null},recipe,PROCESSES,MATERIALS);button(panel,`${copy.label} · ${d.name}`,'repeat',{site:p.id,recipe});panel.lastChild.setAttribute('aria-pressed',String(copy.active));line(panel,copy.detail);}}
+ if(!CULTIVATION_KEYS.includes(p.key))for(const [recipe,d]of Object.entries(PROCESSES).filter(([,d])=>d.kind===PROJECTS[p.key].kind)){button(panel,d.name,'produce',{site:p.id,recipe});}
  if(p.readyAt>s.time)line(panel,`Growing: ${Math.ceil((p.readyAt-s.time)*.45)} game minutes remaining.`);}
  if(n){line(panel,`Water: ${n.water.map(v=>v.toFixed(1)).join(' / ')} (clean / raw / grey / sewage)`);
  if(n.capacity[1])button(panel,'Carry river water','haul',{site:selected});

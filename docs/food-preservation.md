@@ -21,7 +21,7 @@ Open Resources, find a completed community kitchen, and select **Prepare dried p
 
 Electric cooking uses the existing kitchen demand for the longer processing duration. Time and energy depend on actual work conditions; this is not a fixed cash construction fee. The shelf life and coefficients are authored game assumptions, not real-world food-preservation instructions or measured regional yields.
 
-Provisions remain in the existing meals resource; their individual lots carry preservation identity and expiry. The Resources freshness summary reports how many stored meals are provisions. Residents use the earliest-expiring meals first. Automatic meal stock targets currently count fresh and preserved meals together, rather than managing separate reserve targets. Buying prepared meals still supplies ordinary fresh meals, and provisions receive no resale price premium.
+Provisions remain in the existing meals resource; their individual lots carry preservation identity and expiry. The Resources freshness summary reports how many stored meals are provisions. Residents use the earliest-expiring meals first. Fresh and preserved meals share the same inventory total. Buying prepared meals still supplies ordinary fresh meals, and provisions receive no resale price premium.
 
 ## Accounting and saves
 

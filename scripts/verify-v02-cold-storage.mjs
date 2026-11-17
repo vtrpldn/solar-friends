@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,PROCESSES,MATERIALS,queueProduction,repeatProduction,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,PROJECTS,PROCESSES,MATERIALS,queueProduction,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
 import {coolStoredFood,coolingStatus,COLD_STORAGE} from '../web/v02/weekend/cold-storage.js';
 import {foodChange,ensureFoodStorage,foodStorageStep,freshLots} from '../web/v02/weekend/food-storage.js';
 import {syncInfrastructure,infrastructureStep} from '../web/v02/weekend/infrastructure.js';
@@ -16,7 +16,7 @@ let village=createWeekend(42);chooseCamp(village,'entrance');enableFastNavigatio
 const site={id:village.nextId++,key:'kitchen',x:village.stock.x+3,z:village.stock.z+3,rotation:0,work:PROJECTS.kitchen.work,delivered:0};village.projects.push(site);
 // Diagnostic fixture supplies, followed by normal resident installation work.
 village.materials.cooling=1;village.materials.electrical=1;village.materials.hardware=1;
-assert.equal(queueProduction(village,site.id,'cold_storage'),'');assert.equal(village.materials.cooling,0);assert(!repeatProduction(village,site.id,'cold_storage'));
+assert.equal(queueProduction(village,site.id,'cold_storage'),'');assert.equal(village.materials.cooling,0);
 for(let i=0;i<16000&&!site.coldStorage;i++)tick(village,.1);
 assert(site.coldStorage,'resident completes installation without a powered kitchen');
 assert(queueProduction(village,site.id,'cold_storage').includes('already'));

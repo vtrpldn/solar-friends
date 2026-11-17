@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 const sourceFiles=fs.readdirSync('web/v02/weekend').filter(f=>f.endsWith('.js')).sort();
 const sourceHash=createHash('sha256').update(sourceFiles.map(f=>fs.readFileSync(`web/v02/weekend/${f}`)).join('\n')).digest('hex');
-import {createWeekend,chooseCamp,enableFastNavigation,plan,placementError,tick,PROJECTS,save,restore,blueprintPurchase,supplyRun,queueProduction,repeatProduction,sellMaterial} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,enableFastNavigation,plan,placementError,tick,PROJECTS,save,restore,blueprintPurchase,supplyRun,queueProduction,sellMaterial} from '../web/v02/weekend/simulation.js';
 import {setOutsideWork} from '../web/v02/weekend/outside-work.js';
 import {GAME_DAY} from '../web/v02/weekend/biological-production.js';
 const resume=process.argv.includes('--resume'),outputPath=process.argv.find(a=>a.endsWith('.json'))||'/tmp/solar-catalog-economy.json';
@@ -28,13 +28,13 @@ for(let i=0;i<720*GAME_DAY*10;i++){
   setOutsideWork(s,s.people[4],!building);
   for(const [recipe,kind,target] of [['earth','supply-2',400],['stone','supply-3',200]]){
    const deposits=s.projects.filter(p=>PROJECTS[p.key].kind===kind&&!p.productionStatus?.includes('exhausted')).sort((a,b)=>Math.hypot(a.x-s.stock.x,a.z-s.stock.z)-Math.hypot(b.x-s.stock.x,b.z-s.stock.z));
-   if(deposits[0]){if(deposits[0].repeat!==recipe)repeatProduction(s,deposits[0].id,recipe);deposits[0].stockTarget=target;}
+   if(deposits[0]&&(s.materials[recipe]||0)<target&&!s.operations?.some(o=>!o.done&&o.site===deposits[0].id))queueProduction(s,deposits[0].id,recipe);
   }
   // Work the finite woodland through the same selectable-tree and sawmill
   // commands a player uses; retain construction timber before selling surplus.
   const saw=s.projects.find(p=>PROJECTS[p.key].kind==='supply-5'&&p.work>=PROJECTS[p.key].work);
   if(saw){
-   if(!saw.repeat)repeatProduction(s,saw.id,'saw_timber');saw.stockTarget=100;
+   if(s.wood<100&&!s.operations?.some(o=>!o.done&&o.site===saw.id))queueProduction(s,saw.id,'saw_timber');
    if(s.materials.logs<24&&!s.operations?.some(o=>o.recipe==='fell_tree'&&!o.done)){
     const tree=s.projects.filter(p=>PROJECTS[p.key].kind==='wild-tree'&&!p.felled).sort((a,b)=>Math.hypot(a.x-s.stock.x,a.z-s.stock.z)-Math.hypot(b.x-s.stock.x,b.z-s.stock.z))[0];
     if(tree)queueProduction(s,tree.id,'fell_tree');

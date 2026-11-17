@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
-import {createWeekend,chooseCamp,enableFastNavigation,plan,placementError,tick,PROJECTS,PROCESSES,save,restore,repeatProduction,supplyRun,materialCount,blueprintPurchase} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,enableFastNavigation,plan,placementError,tick,PROJECTS,PROCESSES,save,restore,queueProduction,supplyRun,materialCount,blueprintPurchase} from '../web/v02/weekend/simulation.js';
 import {ensureNaturalLand} from '../web/v02/weekend/natural-resources.js';
 import {setOutsideWork} from '../web/v02/weekend/outside-work.js';
 import {LabRunner} from '../web/v02/weekend/lab-runner.js';
@@ -48,8 +48,8 @@ function manage(day){
  }
  for(const p of s.projects){
   if(p.work<PROJECTS[p.key].work)continue;
-  const recipe=recipes[p.key];if(recipe&&!p.repeat)repeatProduction(s,p.id,recipe);
-  if(recipe)p.stockTarget=recipe==='vegetables'?60:recipe==='eggs'?24:36;
+  const recipe=recipes[p.key],goal=recipe==='vegetables'?60:recipe==='eggs'?24:36;
+  if(recipe&&materialCount(s,Object.keys(PROCESSES[recipe].output)[0])<goal&&!s.operations?.some(o=>!o.done&&o.site===p.id))queueProduction(s,p.id,recipe);
  }
  const policies=economyPolicies(s);policies.sales.eggs={enabled:true,keep:12,above:24,daily:24};
  for(const id of ['seedlings','fodder','tools','hardware']){

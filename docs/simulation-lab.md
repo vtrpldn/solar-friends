@@ -19,7 +19,7 @@ Choose a speed up to 1024×. The actual speed display reports CPU throughput. **
 4. Set **Pause when: Crop ready** and run an interval. This stops when the first bed ripens; other beds may still be growing. Harvest ready beds individually or continue until the remaining beds mature.
 5. Use a kitchen's production controls to cook harvested ingredients. Consumption remains autonomous. Trade controls fetch supplies or sell an available sale batch.
 
-Coops and goat pastures show health, feed, water, and collectible output. Their ordinary production and repeat controls collect output; care uses village supplies. Each resident has an outside-job toggle, with the contract and working conditions in its tooltip. This allows employment-heavy and farming-heavy comparisons without editing saves.
+Coops and goat pastures show health, feed, water, and collectible output. Their production controls order one collection at a time; care uses village supplies. Each resident has an outside-job toggle, with the contract and working conditions in its tooltip. This allows employment-heavy and farming-heavy comparisons without editing saves.
 
 ## Inspect a bottleneck
 

@@ -31,7 +31,7 @@ import { accessGeometry, insideSolid, segmentHitsSolid, BODY_RADIUS } from './bu
 import { craftingBlocker, craftStage, practiceCraft, validCraftSkills } from './crafting.js';
 import { equipmentState, equipmentSummary, protectedEquipment, releaseEquipment, useEquipment, productionEquipment, repairEquipment, validEquipment } from './equipment.js';
 import { migrateItemProjects } from "./items.js";
-import {economyPolicies,productionTarget,workGroup,salePreview,validatePolicies} from './economy-policies.js';
+import {economyPolicies,workGroup,salePreview,validatePolicies} from './economy-policies.js';
 import {ensureFinances,recordMoney,transact,validFinances} from './finances.js';
 import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
 import { STORAGE_KINDS, crewLimit, carriedLoads, crewEfficiency } from "./construction-logistics.js";
@@ -418,10 +418,6 @@ export function buildingOperatingStatus(s,p) {
   }
   if(gatheringStatus(s,p))return result(gatheringState(s,p),gatheringStatus(s,p));
   if(p.readyAt>s.time)return result('Growing',`Ready in about ${Math.ceil((p.readyAt-s.time)*.45)} game minutes.`);
-  if(p.repeat) {
-    const blocker=productionBlocker(s,p.id,p.repeat);
-    if(blocker)return result('Waiting for requirements',blocker);
-  }
   if(def.kind==='home')return result('Ready','Available for resident rest. Solar upgrades are separate work orders.');
   return result('Ready',Object.values(PROCESSES).some(r=>r.kind===def.kind)?'No batch is currently in progress.':'Construction complete; available for its village service.');
 }
@@ -433,18 +429,6 @@ export function moveCraftJob(s,operation,site) {
   for(const r of s.people)if(r.operation===op.id){r.operation=null;r.cargo=false;r.walk=[];r.target=null;r.action='idle';}
   op.site=site;op.phase='pickup';op.status='Moving materials and unfinished work to the new workspace.';
   releaseEquipment(s);wakeHelpers(s);return '';
-}
-export function repeatProduction(s, site, recipe) {
-  const p = s.projects.find((p) => p.id === Number(site));
-  if (
-    !p ||
-    !PROCESSES[recipe] || (PROCESSES[recipe].installation || PROCESSES[recipe].equipmentRepair) ||
-    PROJECTS[p.key].kind !== PROCESSES[recipe].kind
-  )
-    return false;
-  if(PROJECTS[p.key].kind==='wild-tree'||p.cultivation)return false;
-  p.repeat = p.repeat === recipe ? null : recipe;
-  return true;
 }
 export function queueWater(s, from, to, kind = "fresh") {
   const sys = syncInfrastructure(s, PROJECTS);
@@ -2130,14 +2114,6 @@ function tickUncached(s, dt) {
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
   maintainFood(s);
   maintainWater(s);
-  for (const p of s.projects) {
-    if (!p.repeat || s.operations?.some((o) => o.site === p.id && !o.done))
-      continue;
-    const recipe = PROCESSES[p.repeat];
-    if (recipe && materialCount(s, Object.keys(recipe.output)[0]) + (s.operations||[]).filter(o=>!o.done).reduce((n,o)=>n+(PROCESSES[o.recipe]?.output[Object.keys(recipe.output)[0]]||0),0) < productionTarget(p))
-      p.productionStatus = queueProduction(s, p.id, p.repeat);
-  }
-
   for (const [i,r] of s.people.entries()) {
     if(r.outsideWork?.phase==='away')continue;
     decayNeeds(s,r,i,dt);
@@ -2904,6 +2880,8 @@ export function restore(text) {
         ))
     )
       return null;
+    // Retire old repeat policies without cancelling paid or in-flight work.
+    for(const p of s.projects){if(p.repeat)delete p.productionStatus;delete p.repeat;delete p.stockTarget;}
     s.log = Array.isArray(s.log)
       ? s.log.filter((t) => typeof t === "string").slice(0, 12)
       : [];
