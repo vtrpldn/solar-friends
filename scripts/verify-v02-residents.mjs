@@ -14,8 +14,8 @@ import {
   findRoute,
 } from "../web/v02/residents/interactions.js";
 import { ResidentDirector } from "../web/v02/residents/director.js";
-import { createAsset } from "../web/v02/library/catalog.js";
-import { placementPosition } from "../web/v02/land/layout.js";
+import { createAsset, ASSETS } from "../web/v02/library/catalog.js";
+import { placementPosition, MAP_METRES } from "../web/v02/land/layout.js";
 import { footprint } from "../web/v02/land/editor.js";
 for (const id of RESIDENT_IDS) {
   const a = createResident(id);
@@ -132,7 +132,7 @@ a.userData.placement = {
   row: 20,
   rotation: 0,
 };
-a.position.set(-23, 0, -23);
+a.position.set(...placementPosition(20,20,[1,1]));
 assert.throws(
   () =>
     new ResidentDirector([a], [target, blocked, a.userData.placement]).start(
@@ -143,20 +143,22 @@ assert.throws(
     ),
   /No clear approach/,
 );
-const nav = { blocked: new Set(), key: (x, z) => z * 128 + x };
-for (let z = 0; z < 128; z++) if (z !== 70) nav.blocked.add(nav.key(64, z));
+const half=MAP_METRES/2;
+const nav = { blocked: new Set(), key: (x, z) => z * MAP_METRES + x };
+for (let z = 0; z < MAP_METRES; z++) if (z !== half+6) nav.blocked.add(nav.key(half, z));
 const route = findRoute([-5, 0], [5, 0], nav);
 assert(route);
 assert(route.some(([x, z]) => z === 6.5));
 for (const [x, z] of route)
-  assert(!nav.blocked.has(nav.key(Math.floor(x + 64), Math.floor(z + 64))));
-nav.blocked.add(nav.key(64, 70));
+  assert(!nav.blocked.has(nav.key(Math.floor(x + half), Math.floor(z + half))));
+nav.blocked.add(nav.key(half, half+6));
 assert.equal(findRoute([-5, 0], [5, 0], nav), null);
-assert.equal(findRoute([70, 0], [0, 0], nav), null);
+assert.equal(findRoute([half+1, 0], [0, 0], nav), null);
 const garden = { id: "g", asset: "garden", column: 30, row: 30, rotation: 0 };
 const surrounding = [];
-for (let x = 28; x <= 32; x += 2)
-  for (let z = 28; z <= 32; z += 2)
+const [gw,gd]=ASSETS.find(a=>a.id==='garden').footprint;
+for (let x = 30-gw; x <= 30+gw; x += gw)
+  for (let z = 30-gd; z <= 30+gd; z += gd)
     surrounding.push({ ...garden, id: `g${x}-${z}`, column: x, row: z });
 assert.equal(
   interactionSlots(

@@ -1,0 +1,32 @@
+{
+  "kind": "Normal-command continuation from an actual paid catalog run; no injected supplies, money or completed buildings",
+  "strategy": "vegetables",
+  "source": "evidence/2026-11-17-income-start-save.json",
+  "stock": 19,
+  "care": [],
+  "water": [
+    4,
+    8.346256249992324,
+    0,
+    0
+  ],
+  "opening": 327.84,
+  "closing": 2738.36,
+  "elapsedDays": 46.000062495596566,
+  "changes": {
+    "commuting": -464,
+    "outsideWork": 5220,
+    "construction": 0,
+    "transport": -325.92,
+    "electricity": -171.56,
+    "household": -1872,
+    "purchases": -24,
+    "sales": 48
+  },
+  "selectedTrees": [],
+  "sales": 2,
+  "restores": true,
+  "limitations": "Inherited capital built under recorded prior price revisions; one outside job (two for the long vegetable cycle) supports household food. Sales are not standalone whole-village profitability.",
+  "retainedCompletedOperations": 1,
+  "counterNote": "Completed operation and sale counts are retained history, not lifetime totals."
+}

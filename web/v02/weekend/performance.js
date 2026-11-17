@@ -15,7 +15,7 @@ export function performanceReadout(renderer) {
   return (now, motionTime) => {
     const elapsed = now - previous;
     previous = now;
-    if (elapsed > 0 && elapsed < 250 && !document.hidden) {
+    if (elapsed > 0 && !document.hidden) {
       frames.push(elapsed);
       motionFrames.push(
         previousMotionTime !== undefined &&

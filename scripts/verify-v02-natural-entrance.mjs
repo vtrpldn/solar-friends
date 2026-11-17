@@ -13,7 +13,7 @@ for (const seed of [1, 42, 2718]) {
       const p = vehiclePose(t, car);
       assert(p.z >= -MAP_HALF && p.z <= PARK_Z);
       assert(accessRoadAt(p.x / 2 + 32, p.z / 2 + 32));
-      assert.equal(elevationAt(p.x, p.z, seed), 0, 'cars remain on level terrain');
+      assert(Number.isFinite(elevationAt(p.x, p.z, seed)), 'vehicle route has valid terrain heights');
     }
   }
 }
@@ -34,4 +34,4 @@ for (const id of ['jequitiba', 'jucara', 'embauba', 'pequi', 'umbuzeiro', 'jurem
   }
   assert.equal(new Set(signatures).size, 4, id + ' has distinct individuals');
 }
-console.log('PASS: short entrance, level vehicle route, buildable former road and stable species variation.');
+console.log('PASS: short entrance, terrain-following vehicle route, buildable former road and stable species variation.');

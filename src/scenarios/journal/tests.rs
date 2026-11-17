@@ -962,9 +962,15 @@ fn physical_local_deliveries_credit_dropoff_and_preserve_activation_boundaries()
 
 #[test]
 fn challenge_deadline_is_inclusive_and_failure_freezes_exactly() {
-    let mut d = scenario(vec![chapter("opening", vec![goal("date", GoalCondition::Date { minute: 601. })])]);
+    let mut d = scenario(vec![chapter(
+        "opening",
+        vec![goal("date", GoalCondition::Date { minute: 601. })],
+    )]);
     d.start.minutes = 600.;
-    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition { deadline: 600.5, failure_message: "Time to reconsider.".into() });
+    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition {
+        deadline: 600.5,
+        failure_message: "Time to reconsider.".into(),
+    });
     let mut g = game(d.clone());
     g.tick(0.25);
     assert_eq!(state(&mut g)["challenge"]["status"], "failed");
@@ -977,7 +983,8 @@ fn challenge_deadline_is_inclusive_and_failure_freezes_exactly() {
     // A fabricated earlier failure cannot pass the native save validator.
     corrupted["village"]["progress"]["scenario_journal"]["failed_at"] = serde_json::json!(600.25);
     assert!(!g.restore(&corrupted.to_string()));
-    d.journal.as_mut().unwrap().chapters[0].goals[0].condition = GoalCondition::Date { minute: 600.5 };
+    d.journal.as_mut().unwrap().chapters[0].goals[0].condition =
+        GoalCondition::Date { minute: 600.5 };
     let mut winner = game(d);
     winner.tick(0.25);
     assert_eq!(state(&mut winner)["challenge"]["status"], "succeeded");
@@ -990,18 +997,33 @@ fn challenge_deadline_is_inclusive_and_failure_freezes_exactly() {
 
 #[test]
 fn challenge_rejects_deadlines_at_arrival_and_empty_failure_messages() {
-    let mut d = scenario(vec![chapter("opening", vec![goal("date", GoalCondition::Date { minute: 900. })])]);
-    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition { deadline: d.start.minutes, failure_message: "Too soon.".into() });
+    let mut d = scenario(vec![chapter(
+        "opening",
+        vec![goal("date", GoalCondition::Date { minute: 900. })],
+    )]);
+    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition {
+        deadline: d.start.minutes,
+        failure_message: "Too soon.".into(),
+    });
     assert!(compile(d.clone()).is_err());
-    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition { deadline: 900., failure_message: String::new() });
+    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition {
+        deadline: 900.,
+        failure_message: String::new(),
+    });
     assert!(compile(d).is_err());
 }
 
 #[test]
 fn failed_challenge_continuation_is_explicit_permanent_and_saved() {
-    let mut d = scenario(vec![chapter("opening", vec![goal("date", GoalCondition::Date { minute: 601. })])]);
+    let mut d = scenario(vec![chapter(
+        "opening",
+        vec![goal("date", GoalCondition::Date { minute: 601. })],
+    )]);
     d.start.minutes = 600.;
-    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition { deadline: 600.5, failure_message: "Missed the date.".into() });
+    d.journal.as_mut().unwrap().challenge = Some(challenge::Definition {
+        deadline: 600.5,
+        failure_message: "Missed the date.".into(),
+    });
     let mut g = game(d);
     let opening = g.snapshot();
     assert!(!g.continue_scenario_freely());
@@ -1019,7 +1041,9 @@ fn failed_challenge_continuation_is_explicit_permanent_and_saved() {
     assert!(g.restore(&continued));
     assert_eq!(g.snapshot(), continued);
     assert!(g.configure_sandbox_rules(true, true, true));
-    for _ in 0..4 { g.tick(0.25); }
+    for _ in 0..4 {
+        g.tick(0.25);
+    }
     let report = state(&mut g);
     assert_eq!(report["challenge"]["status"], "unrestricted");
     assert_eq!(report["challenge"]["eligible"], false);
@@ -1035,18 +1059,73 @@ fn failed_challenge_continuation_is_explicit_permanent_and_saved() {
 
 #[test]
 fn village_milestones_count_real_run_counters_without_starting_asset_credit() {
-    let mut d=scenario(vec![chapter("opening",vec![goal("arrive",GoalCondition::Milestone {milestone:milestones::Kind::Arrived,count:1}),goal("meal",GoalCondition::Milestone {milestone:milestones::Kind::MealsServed,count:1})])]);
-    let mut g=game(d.clone());let initial=state(&mut g);assert!(initial["chapters"][0]["goals"].as_array().unwrap().iter().all(|goal| goal["status"]=="active"));
-    {let mut v=g.app.world_mut().resource_mut::<Village>();v.arrived=true;v.meals_served=1;advance(&mut v);}
+    let mut d = scenario(vec![chapter(
+        "opening",
+        vec![
+            goal(
+                "arrive",
+                GoalCondition::Milestone {
+                    milestone: milestones::Kind::Arrived,
+                    count: 1,
+                },
+            ),
+            goal(
+                "meal",
+                GoalCondition::Milestone {
+                    milestone: milestones::Kind::MealsServed,
+                    count: 1,
+                },
+            ),
+        ],
+    )]);
+    let mut g = game(d.clone());
+    let initial = state(&mut g);
+    assert!(
+        initial["chapters"][0]["goals"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|goal| goal["status"] == "active")
+    );
+    {
+        let mut v = g.app.world_mut().resource_mut::<Village>();
+        v.arrived = true;
+        v.meals_served = 1;
+        advance(&mut v);
+    }
     assert!(state(&mut g)["finished_at"].is_number());
-    d.journal.as_mut().unwrap().chapters[0].goals[0].condition=GoalCondition::Milestone {milestone:milestones::Kind::Arrived,count:2};assert!(compile(d).is_err());
+    d.journal.as_mut().unwrap().chapters[0].goals[0].condition = GoalCondition::Milestone {
+        milestone: milestones::Kind::Arrived,
+        count: 2,
+    };
+    assert!(compile(d).is_err());
 }
 
 #[test]
 fn morning_milestone_observes_sunrise_not_the_authored_start_date() {
-    let mut d=scenario(vec![chapter("opening",vec![goal("sunrise",GoalCondition::Milestone {milestone:milestones::Kind::Mornings,count:1})])]);
-    d.start.minutes=600.;let mut g=game(d.clone());assert!(state(&mut g)["finished_at"].is_null());let saved=g.snapshot();g.tick(0.);assert_eq!(g.snapshot(),saved);
-    d.start.minutes=359.5;let mut g=game(d);g.tick(0.25);assert!(state(&mut g)["finished_at"].is_number());let saved=g.snapshot();assert!(g.restore(&saved));assert_eq!(g.snapshot(),saved);
+    let mut d = scenario(vec![chapter(
+        "opening",
+        vec![goal(
+            "sunrise",
+            GoalCondition::Milestone {
+                milestone: milestones::Kind::Mornings,
+                count: 1,
+            },
+        )],
+    )]);
+    d.start.minutes = 600.;
+    let mut g = game(d.clone());
+    assert!(state(&mut g)["finished_at"].is_null());
+    let saved = g.snapshot();
+    g.tick(0.);
+    assert_eq!(g.snapshot(), saved);
+    d.start.minutes = 359.5;
+    let mut g = game(d);
+    g.tick(0.25);
+    assert!(state(&mut g)["finished_at"].is_number());
+    let saved = g.snapshot();
+    assert!(g.restore(&saved));
+    assert_eq!(g.snapshot(), saved);
 }
 
 #[test]

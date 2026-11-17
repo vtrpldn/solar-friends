@@ -404,7 +404,11 @@ pub(crate) fn queue_plan(
     if v.pipes.lines.iter().filter(|p| p.live()).count() >= 64 || v.pipes.lines.len() >= 256 {
         return Err("Finish or remove an existing utility connection first.");
     }
-    if v.pipes.lines.iter().any(|p|p.live() && p.phase != Phase::Removing && same_pair(p,kind,plan.from,plan.to)) {
+    if v.pipes
+        .lines
+        .iter()
+        .any(|p| p.live() && p.phase != Phase::Removing && same_pair(p, kind, plan.from, plan.to))
+    {
         return Err("This connection is already planned or installed.");
     }
     let identities = if previous.is_some() || kind == Kind::Electricity {
@@ -788,8 +792,11 @@ pub fn uses_camp(v: &Village) -> bool {
 pub fn prune(v: &mut Village, people: &[Resident]) {
     // Retain at most 64 authored route records, including retired assets, so
     // frozen ownership bindings remain auditable after ordinary history pruning.
-    let authored: std::collections::HashSet<_> = v.scenario.as_ref()
-        .map(|o| o.routes.values().copied().collect()).unwrap_or_default();
+    let authored: std::collections::HashSet<_> = v
+        .scenario
+        .as_ref()
+        .map(|o| o.routes.values().copied().collect())
+        .unwrap_or_default();
     let mut history = 0;
     v.pipes.lines.reverse();
     v.pipes.lines.retain(|p| {

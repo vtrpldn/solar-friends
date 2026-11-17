@@ -43,7 +43,7 @@ const original = encode(editor.records);
 const r = editor.records.find((r) => r.asset === "shed");
 editor.update(r.id, { rotation: 90, column: 60, row: 60 });
 assert.equal(editor.records.find((x) => x.id === r.id).rotation, 90);
-assert.throws(() => editor.update(r.id, { column: 64 }));
+assert.throws(() => editor.update(r.id, { column: 96 }));
 assert.equal(editor.records.find((x) => x.id === r.id).column, 60);
 editor.add({ ...r, id: "copy", column: 0, row: 0 });
 editor.remove(r.id);

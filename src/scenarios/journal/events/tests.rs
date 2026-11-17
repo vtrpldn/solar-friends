@@ -831,16 +831,35 @@ fn disconnected_supply_destinations_wait_without_inventing_a_delivery() {
 
 #[test]
 fn unrestricted_continuation_releases_locks_without_fabricating_unlock_events() {
-    let mut d = definition(vec![event("later", EventTrigger::Date { minute: 700. }, EventEffect::UnlockBuilding { building: "home".into() })], 0, 100);
+    let mut d = definition(
+        vec![event(
+            "later",
+            EventTrigger::Date { minute: 700. },
+            EventEffect::UnlockBuilding {
+                building: "home".into(),
+            },
+        )],
+        0,
+        100,
+    );
     d.start.minutes = 600.;
     let journal = d.journal.as_mut().unwrap();
     journal.locked_buildings = vec!["home".into()];
-    journal.challenge = Some(crate::scenarios::journal::challenge::Definition { deadline: 600.5, failure_message: "Time passed.".into() });
+    journal.challenge = Some(crate::scenarios::journal::challenge::Definition {
+        deadline: 600.5,
+        failure_message: "Time passed.".into(),
+    });
     let mut g = game(d);
     g.tick(0.25);
-    assert!(!progression::unlocked(g.app.world().resource::<Village>(), "home"));
+    assert!(!progression::unlocked(
+        g.app.world().resource::<Village>(),
+        "home"
+    ));
     assert!(g.continue_scenario_freely());
-    assert!(progression::unlocked(g.app.world().resource::<Village>(), "home"));
+    assert!(progression::unlocked(
+        g.app.world().resource::<Village>(),
+        "home"
+    ));
     assert_eq!(report(&g)["events"][0]["status"], "watching");
     let saved = g.snapshot();
     assert!(g.restore(&saved));
@@ -849,9 +868,21 @@ fn unrestricted_continuation_releases_locks_without_fabricating_unlock_events() 
 
 #[test]
 fn boundary_effect_is_once_only_and_cannot_cascade_into_challenge_success() {
-    let mut d = definition(vec![event("support", EventTrigger::Date { minute: 600.5 }, EventEffect::GrantFunds { cents: 100 })], 0, 100);
+    let mut d = definition(
+        vec![event(
+            "support",
+            EventTrigger::Date { minute: 600.5 },
+            EventEffect::GrantFunds { cents: 100 },
+        )],
+        0,
+        100,
+    );
     d.start.minutes = 600.;
-    d.journal.as_mut().unwrap().challenge = Some(crate::scenarios::journal::challenge::Definition { deadline: 600.5, failure_message: "The goal was not observed in time.".into() });
+    d.journal.as_mut().unwrap().challenge =
+        Some(crate::scenarios::journal::challenge::Definition {
+            deadline: 600.5,
+            failure_message: "The goal was not observed in time.".into(),
+        });
     let mut g = game(d);
     g.tick(0.25);
     assert_eq!(report(&g)["challenge"]["status"], "failed");

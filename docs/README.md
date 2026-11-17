@@ -1,6 +1,6 @@
 # Documentation index
 
-Updated 2026-11-09.
+Updated 2026-11-17.
 
 ## Why
 
@@ -15,6 +15,15 @@ Separate current gameplay and operational guidance from historical plans and dat
 - [Editable asset garden](../web/v02/land/README.md): 64×64 cells, separate from the playable 128×128 map.
 - [Resident animation rehearsals](../web/v02/residents/README.md)
 - [Deferred gameplay ideas](gameplay-ideas.md): proposals, not promises or implemented mechanics.
+
+## Active plans
+
+- [Realistic v2 economy](realistic-economy-plan.md): phased accounting, construction, physical trade, farming, utilities, upkeep and balance work. Implementation and local calibration are complete within the documented boundaries; production deployment remains separate.
+
+- [Calibration and price provenance](economy-calibration.md)
+- [Calibration validation and evidence](balance/2026-11-17-economy-validation.md): 18 starts, three income continuations, all 68 buildings constructed, off-grid continuation and 87 focused regressions.
+- [Full parameter register](economy-parameter-register.json)
+- [Material accounting](material-accounting.md), [biological cycles](economy-biology.md) and [logistics/care](economy-logistics-and-care.md)
 
 ## Recent evidence
 

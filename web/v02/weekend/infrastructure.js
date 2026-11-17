@@ -1,8 +1,13 @@
-import {recordMoney} from './finances.js';
+import {projectMaterials} from './project-materials.js';
+import {serviceFactor} from "./asset-upkeep.js";
+import {GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
+import {COLD_STORAGE} from './cold-storage.js';
+import {spendableMoney} from './procurement-budget.js';
+import {transact} from './finances.js';
 import {waterFactor} from './world-settings.js';
 import { riverBankAt, riverAccess } from "./river-layout.js";
 // v2 port of v1 electricity and water ownership rules. No renderer dependency.
-export const GRID_POWER = { capacity: 4, tariff: 1.2 };
+export const GRID_POWER = { capacity: ECONOMY_REFERENCE.electricity.capacityKw, tariff: GRID_TARIFF };
 export const LIQUIDS = ["fresh", "irrigation", "greywater", "sewage"];
 export const POWER_LOAD = {
   'water-pump': .18, shed: .015, kitchen: .025, workshop: .025,
@@ -10,7 +15,7 @@ export const POWER_LOAD = {
   coop: .01, streetlight: .015, home: .02,
 };
 export function workingMachine(s,node) {
-  return (s.operations||[]).some(o=>o.site===node.id && !o.done && o.phase==='process' &&
+  return (s.operations||[]).some(o=>o.site===node.id && !o.done && o.recipe!=='cold_storage' && o.phase==='process' &&
     ['Working','Waiting for power'].includes(o.status) && !o.biogas && s.people.some(r=>r.operation===o.id && ['produce','blocked'].includes(r.action) && r.energy>=25 && !r.sleepUntil));
 }
 // Capability, not instantaneous demand: lights still have a switch in daylight,
@@ -32,8 +37,8 @@ export function switchBuilding(sys, id) {
 const CAPACITY = {
   'groundwater-well':[0,40,0,0],
   'water-pump':[0,12,0,0],
-  well: [75, 60, 0, 0],
-  "water-storage": [40, 40, 0, 0],
+  well: [1000, 1000, 0, 0],
+  "water-storage": [250, 250, 0, 0],
   home: [8, 0, 24, 16],
   kitchen: [6, 0, 24, 0],
   eco_toilet: [8, 0, 16, 16],
@@ -41,7 +46,7 @@ const CAPACITY = {
   greenhouse: [4, 12, 0, 0],
   orchard: [4, 12, 0, 0],
   grove: [4, 12, 0, 0],
-  goat_pasture: [6, 0, 0, 0],
+  goat_pasture: [40, 0, 0, 0],
   coop: [6, 0, 0, 0],
   wetland: [0, 60, 24, 0],
   biodigester: [0, 0, 0, 24],
@@ -65,6 +70,7 @@ export function ensureInfrastructure(s) {
     biogas: 0,
   };
   const sys = s.infrastructure;
+  sys.account.storageLosses??=0;
   sys.grid ??= { enabled: true, imported: 0, spent: 0, importing: 0 };
   sys.nodes[0] ??= {
     id: 0,
@@ -78,6 +84,8 @@ export function ensureInfrastructure(s) {
     enabled: true,
     power: 0,
   };
+  sys.nodes[0].maintainFresh ??= true;
+  sys.nodes[0].maintainSanitation ??= true;
   sys.nodes[-1] ??= {
     id: -1,
     kind: "river",
@@ -100,8 +108,9 @@ export function syncInfrastructure(s, defs) {
   for (const p of s.projects) {
     if (p.work < defs[p.key].work) continue;
     const kind = defs[p.key].kind || p.key;
+    const batteryHealth=Math.max(.8,1-(p.batteryAgeDays||0)/(8*365)*.2);
     const battery =
-      { solar_farm: 36, hydro: 18, home: 0, "supply-6": 36 }[kind] || 0;
+      (projectMaterials(p,defs)?.batteries??(["solar_farm","hydro","supply-6"].includes(kind)?1:0))*4*batteryHealth;
     sys.nodes[p.id] ??= {
       id: p.id,
       kind,
@@ -115,11 +124,22 @@ export function syncInfrastructure(s, defs) {
       power: 0,
     };
     const node=sys.nodes[p.id];
-    if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4:0;node.charge=Math.min(node.charge,node.battery);}
-    if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<40)) {
-      // Existing starter tanks become passive without destroying stored water.
-      node.kind=kind;node.capacity=[Math.max(40,node.water[0]),Math.max(40,node.water[1]),0,0];
+    if(["water-storage","well"].includes(kind))node.maintainFresh ??= true;
+    if(node.capacity[3]>0)node.maintainSanitation ??= true;
+    node.serviceFactor=serviceFactor(p);
+    if(kind!=='home'){
+      node.battery=battery;
+      if(node.charge>battery){sys.account.curtailed+=node.charge-battery;node.charge=battery;}
     }
+    node.solarKw=(projectMaterials(p,defs)?.panels??(kind==="solar_farm"?2:0))*.6;
+    if(kind==='goat_pasture'&&node.capacity[0]<40)node.capacity[0]=40;
+    if(kind==='kitchen'){node.coldStorage=!!p.coldStorage;node.coolingEnabled=p.coolingEnabled!==false;}
+    if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4*batteryHealth:0;if(node.charge>node.battery){sys.account.curtailed+=node.charge-node.battery;node.charge=node.battery;}}
+    if(kind==='water-storage' && (node.kind!==kind || node.capacity[1]<250)) {
+      // Existing starter tanks become passive without destroying stored water.
+      node.kind=kind;node.capacity=[Math.max(250,node.water[0]),Math.max(250,node.water[1]),0,0];
+    }
+    if(kind==='well')node.capacity=[Math.max(1000,node.water[0]),Math.max(1000,node.water[1]),0,0];
     Object.assign(sys.nodes[p.id], { x: p.x, z: p.z });
     if (kind === "home" && sys.nodes[p.id].capacity[3] === 0) sys.nodes[p.id].capacity = [...CAPACITY.home];
   }
@@ -208,6 +228,13 @@ export function infrastructureStep(s, defs, dt) {
   sys.grid.importing = 0;
   const nodes = Object.values(sys.nodes),
     visited = new Set();
+  const powerPeers=new Map();
+  for(const l of sys.links){
+    if(l.kind!=='power'||!l.enabled||l.work<l.required)continue;
+    if(!powerPeers.has(l.from))powerPeers.set(l.from,[]);
+    if(!powerPeers.has(l.to))powerPeers.set(l.to,[]);
+    powerPeers.get(l.from).push(l.to);powerPeers.get(l.to).push(l.from);
+  }
   for (const root of nodes) {
     if (visited.has(root.id)) continue;
     const component = [],
@@ -216,10 +243,8 @@ export function infrastructureStep(s, defs, dt) {
     for (let i = 0; i < queue.length; i++) {
       const n = queue[i];
       component.push(n);
-      for (const l of sys.links) {
-        if (l.kind !== "power" || !l.enabled || l.work < l.required) continue;
-        const peer = l.from === n.id ? l.to : l.to === n.id ? l.from : null;
-        if (peer !== null && !visited.has(peer) && sys.nodes[peer]) {
+      for (const peer of powerPeers.get(n.id)||[]) {
+        if (!visited.has(peer) && sys.nodes[peer]) {
           visited.add(peer);
           queue.push(sys.nodes[peer]);
         }
@@ -231,7 +256,7 @@ export function infrastructureStep(s, defs, dt) {
       demand = 0;
     for (const n of component) {
       n.generation = n.enabled
-        ? { solar_farm: 6 * sun, hydro: 2.34, home: n.solarUpgrade ? 0.6 * sun : 0 }[n.kind] || 0
+        ? { solar_farm: (n.solarKw??1.2) * sun, hydro: 2.34*Math.min(1,waterFactor(s.worldSettings?.water)*(s.rain?1.2:1)), home: n.solarUpgrade ? 0.6 * sun : 0 }[n.kind] || 0
         : 0;
       const machinery=['kitchen','workshop'].includes(n.kind);
       const pumping=n.kind==='water-pump' && n.water[1]<n.capacity[1]-.01 && (riverBankAt(n.x+.5,n.z+.5,3,s.landSeed) || Object.values(sys.nodes).some(a=>a.kind==='groundwater-well' && a.enabled && a.water[1]>0 && Math.hypot(a.x-n.x,a.z-n.z)<=6));
@@ -239,7 +264,8 @@ export function infrastructureStep(s, defs, dt) {
       n.demand = !n.enabled ? 0 :
         (pumping || filtering ? POWER_LOAD[n.kind] :
           ['water-pump','well'].includes(n.kind) ? 0 : (sun<.15 ? POWER_LOAD[n.kind]||0 : 0)) +
-        (machinery && workingMachine(s,n) ? .45 : 0);
+        (machinery && workingMachine(s,n) ? .45 : 0) + (n.coldStorage&&n.coolingEnabled!==false?COLD_STORAGE.kw:0);
+      n.generation*=n.serviceFactor??1;
       generation += n.generation;
       if (n.enabled) {
         stored += n.charge;
@@ -273,10 +299,9 @@ export function infrastructureStep(s, defs, dt) {
       const shortfall = Math.max(0, need - remainder);
       // Buy only energy that a load can use; never charge batteries from the grid.
       if (n.enabled && shortfall > 0 && shortfall <= gridAvailable + 1e-9 &&
-          shortfall * GRID_POWER.tariff <= s.money) {
+          shortfall * GRID_POWER.tariff <= spendableMoney(s)) {
         const cost = shortfall * GRID_POWER.tariff;
-        recordMoney(s,-cost,"electricity","Grid electricity");
-        s.money = Math.max(0, s.money - cost);
+        transact(s,-cost,"electricity","Grid electricity");
         sys.grid.imported += shortfall;
         sys.grid.spent += cost;
         sys.grid.importing += hours ? shortfall / hours : 0;
@@ -292,6 +317,11 @@ export function infrastructureStep(s, defs, dt) {
     remainder = Math.max(0, remainder);
     sys.account.generated += generated;
     sys.account.consumed += used;
+    // Charge only surplus energy. Existing stored energy is not repeatedly
+    // discounted; the loss occurs once when new energy enters the battery.
+    const chargingInput=Math.min(Math.max(0,remainder-stored),Math.max(0,capacity-stored)/.9);
+    const conversionLoss=chargingInput*.1;
+    remainder-=conversionLoss;sys.account.storageLosses+=conversionLoss;
     sys.account.curtailed += Math.max(0, remainder - capacity);
     remainder = Math.min(capacity, remainder);
     for (const n of component) {
@@ -306,7 +336,7 @@ export function infrastructureStep(s, defs, dt) {
       n.water[1]+=add;sys.account.waterReceived+=add;
     }
     if(n.enabled && n.kind==='water-pump' && n.power>.99 && n.demand>0) {
-      let amount=Math.min(n.capacity[1]-n.water[1],24*hours);
+      let amount=Math.min(n.capacity[1]-n.water[1],600*hours*(n.serviceFactor??1));
       const source=Object.values(sys.nodes).filter(a=>a.kind==='groundwater-well'&&a.enabled&&Math.hypot(a.x-n.x,a.z-n.z)<=6).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
       if(source){amount=Math.min(amount,source.water[1]);source.water[1]-=amount;}
       else if(riverBankAt(n.x+.5,n.z+.5,3,s.landSeed))sys.account.waterReceived+=amount;
@@ -323,7 +353,7 @@ export function infrastructureStep(s, defs, dt) {
       const amount = Math.min(
         n.water[1],
         n.capacity[0] - n.water[0],
-        25 * hours,
+        25 * hours * (n.serviceFactor??1),
       );
       n.water[1] -= amount;
       n.water[0] += amount;
@@ -345,10 +375,17 @@ export function infrastructureStep(s, defs, dt) {
       if (n.kind === "biodigester") sys.biogas += amount * 0.15;
     }
   }
-  const shares=new Map();
-  for(const a of Object.values(sys.nodes))for(let i=0;i<LIQUIDS.length;i++) {
-    const count=sys.links.filter(l=>l.from===a.id && l.kind===LIQUIDS[i] && l.enabled && l.work>=l.required && sys.nodes[l.to]?.enabled && sys.nodes[l.to].capacity[i]-sys.nodes[l.to].water[i]>.0001).length;
-    shares.set(`${a.id}:${LIQUIDS[i]}`,count ? a.water[i]/count : 0);
+  // Count recipients once per link, rather than scanning every link for each
+  // node and liquid. Compute all shares before transfers to preserve ordering.
+  const counts=new Map(),shares=new Map();
+  for(const l of sys.links){
+    const i=LIQUIDS.indexOf(l.kind),to=sys.nodes[l.to];
+    if(i<0||!l.enabled||l.work<l.required||!to?.enabled||to.capacity[i]-to.water[i]<=.0001)continue;
+    const key=`${l.from}:${l.kind}`;counts.set(key,(counts.get(key)||0)+1);
+  }
+  for(const [key,count] of counts){
+    const [id,kind]=key.split(':');
+    shares.set(key,sys.nodes[id].water[LIQUIDS.indexOf(kind)]/count);
   }
   for (const l of sys.links) {
     if (l.kind === "power" || !l.enabled || l.work < l.required) continue;

@@ -1,3 +1,6 @@
+import { siteDescription } from './site-space.js';
+import { craftingRule } from './crafting.js';
+import { ITEMS } from "./items.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import { BUILDING_MODELS } from "./building-models.js";
 // v1 economy.rs construction recipes, expressed in v2 material IDs.
@@ -96,18 +99,23 @@ const recipes = {
   },
 };
 const extraMaterials = {
-  logs:['Raw wood',4,12,24],
-  planks:['Planks',4,12,60],
+  cooling:["Refrigeration kit",1,1,600],
+  tool_heads:['Garden tool heads',1,1,65],
+  repair_supplies:['Repair supplies',1,1,15],
+  soap:['Soap refill',1,1,8],
+  wheel_kit:['Wheel and axle kit',1,1,65],
+  logs:['Raw wood',4,12,96],
+  planks:['Planks',4,12,240],
   bamboo: ["Bamboo poles", 4, 12, 48],
   earth: ["Building earth", 4, 12, 18],
   stone: ["Stone", 4, 12, 42],
-  frames: ["Frames", 2, 4, 72],
-  walls: ["Wall material", 4, 8, 40],
+  frames: ["Frames", 2, 4, 320],
+  walls: ["Wall material", 4, 8, 80],
   tiles: ["Roof tiles", 4, 12, 108],
   electrical: ["Electrical supplies", 1, 4, 144],
   covering: ["Greenhouse covering", 1, 1, 80],
-  panels: ["Solar panels", 1, 2, 560],
-  batteries: ["Battery equipment", 1, 1, 420],
+  panels: ["Solar panels", 1, 2, 1400],
+  batteries: ["Battery equipment", 1, 1, 6000],
   pumps: ["Pumps", 1, 1, 160],
   tools: ["Tool supplies", 1, 4, 36],
   food: ["Ingredients", 4, 12, 48],
@@ -126,6 +134,7 @@ const extraMaterials = {
   hens: ["Hens", 1, 3, 180],
 };
 export function expandMaterials(materials) {
+  for (const [id, item] of Object.entries(ITEMS)) materials[id] = {name:item.name,batch:1,quantity:1,price:item.price,item:true,description:item.description};
   for (const [id, [name, batch, quantity, price]] of Object.entries(
     extraMaterials,
   ))
@@ -212,12 +221,13 @@ export function expandProjects(projects) {
         : COMMUNITY[model.id]?.category || category,
       repeatable: true,
       description:
-        ({'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. No electricity required.', 'well':'A cistern storing 75 clean and 60 untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
-          'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 24 untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply.'}[model.id]) ||
+        ({'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. They also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. No electricity required.', 'well':'A cistern storing 1,000 liters of clean and 1,000 liters of untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
+          'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 600 liters of untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply.'}[model.id]) ||
         COMMUNITY[model.id]?.description ||
         `${model.name}. ${model.size.join(" × ")} cells. Build with physical supplies and resident labor.${["warehouse", "supply-5"].includes(kind) ? " Nearby construction can stage bundled deliveries here to reduce hauling trips." : ""}`,
     };
   }
+  for (const model of BUILDING_MODELS) projects[model.id].description += ` ${siteDescription(model.id, model.size)}`;
   for (const key of ["gathering", "water", "shelter", "toilet"]) {
     projects[key].size = BUILDING_MODELS.find(
       (m) => m.id === projects[key].asset,
@@ -234,8 +244,8 @@ export function expandProjects(projects) {
 export const PROCESSES = {
   solar_upgrade:{name:'Install rooftop solar and battery',kind:'home',input:{panels:1,batteries:1,electrical:1},output:{},work:90},
   fell_tree:{name:'Fell selected tree',input:{},output:{logs:12},kind:'wild-tree',work:90},
-  saw_timber:{name:'Saw raw wood into timber',input:{logs:6},output:{wood:4},kind:'supply-5',work:45},
-  saw_planks:{name:'Saw timber into planks',input:{wood:3},output:{planks:6},kind:'supply-5',work:35},
+  saw_timber:{name:'Saw raw wood into timber',input:{logs:6},output:{wood:4},kind:'supply-5',work:240},
+  saw_planks:{name:'Saw timber into planks',input:{wood:3},output:{planks:6},kind:'supply-5',work:160},
   frames: {
     name: "Prepare frames",
     input: { planks: 2, hardware: 1 },
@@ -265,6 +275,17 @@ export const PROCESSES = {
     work: 25,
     water: 2,
   },
+  preserve_meals: {
+    name: "Prepare dried provisions",
+    input: {food:6},
+    output: {meals:4,scraps:2},
+    kind: "kitchen",
+    work: 75,
+    water: 2,
+    preservedDays: {meals:10},
+    biogas: .6,
+  },
+  cold_storage:{name:"Install kitchen cold storage",kind:"kitchen",input:{cooling:1,electrical:1,hardware:1},output:{},work:120,installation:true},
   compost: {
     name: "Turn compost",
     input: { scraps: 4 },
@@ -275,9 +296,9 @@ export const PROCESSES = {
   wood: {
     name: "Harvest and replant raw wood",
     input: {},
-    output: { logs: 12 },
+    output: { logs: 48 },
     kind: "supply-0",
-    work: 60,
+    work: 240,
     renew: 600,
   },
   bamboo: {
@@ -307,7 +328,7 @@ export const PROCESSES = {
   vegetables: {
     name: "Plant and harvest vegetables",
     input: { seedlings: 2 },
-    output: { food: 12, scraps: 2 },
+    output: { food: 32, scraps: 4 },
     kind: "garden",
     work: 60,
     water: 6,
@@ -316,7 +337,7 @@ export const PROCESSES = {
   greenhouse: {
     name: "Grow greenhouse vegetables",
     input: { seedlings: 2 },
-    output: { food: 20, scraps: 2 },
+    output: { food: 48, scraps: 6 },
     kind: "greenhouse",
     work: 70,
     water: 8,
@@ -342,20 +363,18 @@ export const PROCESSES = {
   },
   eggs: {
     name: "Feed hens and collect eggs",
-    input: { fodder: 2 },
-    output: { eggs: 8 },
+    input: {},
+    output: { eggs: 6 },
     kind: "coop",
     work: 25,
-    water: 2,
     renew: 180,
   },
   milk: {
     name: "Feed and milk goats",
-    input: { fodder: 3 },
-    output: { milk: 8 },
+    input: {},
+    output: { milk: 4 },
     kind: "goat_pasture",
     work: 35,
-    water: 3,
     renew: 300,
   },
   honey: {
@@ -367,3 +386,16 @@ export const PROCESSES = {
     renew: 480,
   },
 };
+
+for (const [id, item] of Object.entries(ITEMS)) if (item.recipe) {
+  PROCESSES[`craft_${id}`] = {name:`Craft ${item.name.toLowerCase()}`,kind:'supply-5',input:item.recipe.input,output:{[id]:1},work:item.recipe.work};
+}
+
+for (const [id, item] of Object.entries(ITEMS)) if (item.durable) {
+  PROCESSES[`repair_${id}`] = {name:`Repair ${item.name.toLowerCase()}`,kind:'supply-5',input:{repair_supplies:1},output:{},work:45,equipmentRepair:id};
+}
+
+for (const [id, recipe] of Object.entries(PROCESSES)) {
+  const rule=craftingRule(id,recipe);
+  if(rule) {recipe.craft=rule;recipe.kind=rule.kind;recipe.work=rule.work;}
+}

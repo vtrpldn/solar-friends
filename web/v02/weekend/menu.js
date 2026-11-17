@@ -1,3 +1,4 @@
+import { disabledReason, installDisabledInfo } from './disabled-info.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {DEFAULT_SETTINGS,OPTIONS,PRESETS,BIOMES,applySettings,registerWorld,townDuration} from './world-settings.js';
@@ -54,7 +55,7 @@ document.querySelectorAll("[data-start]").forEach(
   (b) =>
     (b.onclick = () => {
       pending = b.dataset.start;
-      for(const key of ["savings","supplies"]) $("setup-"+key).disabled=pending==="sandbox";
+      for(const key of ["savings","supplies"]) { $("setup-"+key).disabled=pending==="sandbox";disabledReason($("setup-"+key),"Sandbox provides unlimited savings and supplies, so this starting amount does not apply."); }
       $("setup-seed").value=freshLandSeed();
       $("world-setup").showModal();updatePreview();
     }),
@@ -63,7 +64,7 @@ $("cancel-new").onclick = () => $("replace-save").close();
 $("confirm-new").onclick = () => start(pending);
 
 const labels={biome:'Brazilian biome',landscape:'Landscape',water:'Water availability',resources:'Land resources',savings:'Starting savings',supplies:'Starting supplies',town:'Town access'};
-const names={'mata-atlantica':'Mata Atlântica',cerrado:'Cerrado',caatinga:'Caatinga',gentle:'Gentle',rolling:'Rolling',rugged:'Rugged',dry:'Dry',seasonal:'Seasonal',abundant:'Abundant',sparse:'Sparse',balanced:'Balanced',rich:'Rich',tight:'Tight · R$100',modest:'Modest · R$220',comfortable:'Comfortable · R$600',essentials:'Bare essentials · 60% supplies',camp:'Weekend camp · standard supplies',prepared:'Well prepared · 170% supplies',nearby:'Nearby · 45 seconds',drive:'A drive away · 55 seconds',remote:'Remote · 110 seconds'};
+const names={'mata-atlantica':'Mata Atlântica',cerrado:'Cerrado',caatinga:'Caatinga',gentle:'Gentle',rolling:'Rolling',rugged:'Rugged',dry:'Dry',seasonal:'Seasonal',abundant:'Abundant',sparse:'Sparse',balanced:'Balanced',rich:'Rich',tight:'Tight · R$500',modest:'Modest · R$2,000',comfortable:'Comfortable · R$6,000',essentials:'Bare essentials · 60% supplies',camp:'Weekend camp · standard supplies',prepared:'Well prepared · 170% supplies',nearby:'Nearby · 4 km',drive:'A drive away · 6 km',remote:'Remote · 18 km'};
 for(const [key,values] of Object.entries(OPTIONS)){
  const label=document.createElement('label');label.textContent=labels[key];const select=document.createElement('select');select.id='setup-'+key;
  for(const value of values){const option=document.createElement('option');option.value=value;option.textContent=names[value];select.append(option);}
@@ -77,7 +78,7 @@ function updatePreview(){
  ctx.fillStyle=palette[0];ctx.fillRect(px,py,4,4);ctx.fillStyle=`rgba(40,60,20,${Math.min(.55,h/20)})`;ctx.fillRect(px,py,4,4);
  if(Math.abs(x-riverCenter(z,seed))<riverWidth(z,seed)+2){ctx.fillStyle='#69aaa0';ctx.fillRect(px,py,4,4);}}
  ctx.fillStyle='#fff4d7';ctx.beginPath();ctx.arc(200,200,5,0,Math.PI*2);ctx.fill();
- $('setup-summary').textContent=pending==='sandbox'?'Sandbox keeps unlimited supplies and money. Landscape, biome, water and resources still shape the plot.':`${names[settings.savings]} · ${names[settings.supplies]} · ${townDuration(settings.town)}s town trip, plus loading and walking.`;
+ $('setup-summary').textContent=pending==='sandbox'?'Sandbox keeps unlimited supplies and money. Landscape, biome, water and resources still shape the plot.':`${names[settings.savings]} · ${names[settings.supplies]} · ${Math.round(townDuration(settings.town)*.45)} game-minute town trip, plus loading and walking.`;
 }
 $('setup-preset').onchange=()=>{const preset=PRESETS[$('setup-preset').value];if(preset)for(const [key,value] of Object.entries(preset))$('setup-'+key).value=value;updatePreview();};
 $('setup-seed').oninput=updatePreview;
@@ -90,3 +91,5 @@ $('setup-start').onclick=()=>{
 };
 
 if(new URLSearchParams(location.search).has('load-error')) $('menu-status').textContent='Your village could not be loaded. Its save has been preserved. Open Load village to export it or try the previous save; no fresh village has overwritten it.';
+
+installDisabledInfo();

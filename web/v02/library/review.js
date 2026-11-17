@@ -41,10 +41,15 @@ for (const c of CATEGORIES) {
   option.textContent = c;
   document.querySelector("#category").append(option);
 }
+const requestedCategory=new URLSearchParams(location.search).get('category');
+if(CATEGORIES.includes(requestedCategory))document.querySelector('#category').value=requestedCategory;
 function review() {
   const filter = document.querySelector("#category").value;
   document.querySelector("#cards").replaceChildren();
   const assets = ASSETS.filter((a) => !filter || a.category === filter);
+  // All cards in a category use one scale, large enough for the new real-size
+  // roofs and courts. Detail mode remains available for tiny individual props.
+  const sharedSpan=Math.max(9,...assets.map(a=>Math.hypot(...a.footprint.map(n=>n*2))*1.15));
   for (const a of assets) {
     const model = compactModel(createAsset(a.id));
     model.rotation.y = (rotation * Math.PI) / 180;
@@ -63,7 +68,7 @@ function review() {
         .add(new THREE.Vector3(12, 12 / Math.sqrt(1.5), 12));
       camera.lookAt(center);
     } else {
-      Object.assign(camera, { left: -4.5, right: 4.5, top: 6.7, bottom: -2.3 });
+      Object.assign(camera, { left: -sharedSpan/2, right: sharedSpan/2, top: sharedSpan*.7, bottom: -sharedSpan*.3 });
       camera.position.set(12, 12 / Math.sqrt(1.5), 12);
       camera.lookAt(0, 0, 0);
     }

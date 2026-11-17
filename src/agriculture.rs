@@ -153,7 +153,8 @@ pub fn ready(v: &Village, b: &Building) -> bool {
     }
     if b.kind == "goat_pasture" && p.cared_until <= v.minutes {
         return organics::available(v, owner, FODDER) >= GOAT_CARE_FODDER
-            && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= GOAT_CARE_WATER;
+            && water::available(v, water::Owner::Building(b.id), water::Class::Fresh)
+                >= GOAT_CARE_WATER;
     }
     if b.kind == "apiary" && p.cared_until <= v.minutes {
         return true;
@@ -180,7 +181,8 @@ pub fn ready(v: &Village, b: &Building) -> bool {
         "goat_pasture" => {
             p.cared_until <= v.minutes
                 && organics::available(v, owner, FODDER) >= GOAT_CARE_FODDER
-                && water::available(v, water::Owner::Building(b.id), water::Class::Fresh) >= GOAT_CARE_WATER
+                && water::available(v, water::Owner::Building(b.id), water::Class::Fresh)
+                    >= GOAT_CARE_WATER
         }
         "apiary" => p.cared_until <= v.minutes,
         _ => false,
@@ -241,7 +243,13 @@ pub fn tend(v: &mut Village, id: usize) -> bool {
     }
     match b.kind.as_str() {
         "goat_pasture" => {
-            if water::draw(v, water::Owner::Building(id), water::Class::Fresh, f64::from(GOAT_CARE_WATER)) < f64::from(GOAT_CARE_WATER) {
+            if water::draw(
+                v,
+                water::Owner::Building(id),
+                water::Class::Fresh,
+                f64::from(GOAT_CARE_WATER),
+            ) < f64::from(GOAT_CARE_WATER)
+            {
                 return false;
             }
             logistics::spend(v, Some(owner), FODDER, GOAT_CARE_FODDER);

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import {
-  createSandbox,
+  createSandbox, enableFastNavigation,
   PROJECTS,
   requiredLoads,
   save,
@@ -45,7 +45,7 @@ assert.ok(!sys.nodes[unfinished.id]);
 const link = (kind, from, to) =>
   sys.links.find((l) => l.kind === kind && l.from === from && l.to === to);
 assert.ok(!sys.links.some(l=>l.from===-1), 'no invisible river pumping');
-const pump=add('water-pump',46,50),groundwater=add('groundwater-well',47,50);
+const pump=add('water-pump',43,46),groundwater=add('groundwater-well',47,46);
 autoConnectUtilities(s,PROJECTS);sys.nodes[groundwater.id].water[1]=40;
 assert.ok(link('irrigation',pump.id,well.id));
 assert.ok(link("fresh", well.id, home.id));
@@ -79,6 +79,9 @@ assert.ok(
   ),
 );
 assert.equal(moveProject(s, home.id, 60, 60), "");
+enableFastNavigation(s);
+for(let i=0;i<320000&&home.removal;i++)tick(s,.1);
+assert(!home.removal,"resident relocation completes");
 autoConnectUtilities(s, PROJECTS);
 assert.equal(sys.nodes[home.id].x, 60);
 assert.ok(validInfrastructure(s));

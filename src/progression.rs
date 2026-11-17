@@ -180,8 +180,13 @@ pub fn update(v: &mut Village) {
     if v.mode == Mode::Sandbox {
         return;
     }
-    let homes = v.buildings.iter().filter(|b| b.kind == "home" && b.progress >= 100.).count();
-    let introduction = !v.progress.completed[0] && crate::scenarios::story_adapter::requirements_met(v);
+    let homes = v
+        .buildings
+        .iter()
+        .filter(|b| b.kind == "home" && b.progress >= 100.)
+        .count();
+    let introduction =
+        !v.progress.completed[0] && crate::scenarios::story_adapter::requirements_met(v);
     let grown_food = ready(v, "grove") || ready(v, "orchard");
     let planted_material = v
         .economy

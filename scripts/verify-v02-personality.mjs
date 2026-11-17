@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {PROFILES,workMultiplier,recordConversation} from '../web/v02/weekend/resident-personality.js';
+import {PROFILES,workMultiplier} from '../web/v02/weekend/resident-personality.js';
+import {finishConversation} from '../web/v02/weekend/resident-mind.js';
 import {decayNeeds} from '../web/v02/weekend/resident-needs.js';
 import {createWeekend,save,restore} from '../web/v02/weekend/simulation.js';
 const s=createWeekend();
@@ -11,8 +12,8 @@ assert(iara.needs.hygiene>bento.needs.hygiene,'outdoorsy residents lose hygiene 
 assert(workMultiplier(bento,'house')>workMultiplier(luz,'house'));
 const base=workMultiplier(bento,'house');bento.work=10000;
 assert.equal(workMultiplier(bento,'house'),base*1.15);
-recordConversation(iara,bento);assert.equal(iara.friendships.bento,8);assert.equal(bento.friendships.iara,8);
-for(let i=0;i<20;i++)recordConversation(iara,bento);
+finishConversation(s,iara,bento,{kind:'catch-up',topic:'life in the village'});assert.equal(iara.friendships.bento,4);assert.equal(bento.friendships.iara,4);
+for(let i=0;i<30;i++)finishConversation(s,iara,bento,{kind:'catch-up',topic:'life in the village'});
 assert.equal(iara.friendships.bento,100);
 const loaded=restore(save(s));assert(loaded);assert.equal(loaded.people[0].friendships.bento,100);assert.equal(loaded.people[1].work,10000);
 iara.friendships.bento=101;assert.equal(restore(save(s)),null);

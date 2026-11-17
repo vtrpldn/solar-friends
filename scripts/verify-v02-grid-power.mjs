@@ -11,7 +11,7 @@ const s=fixture();
 infrastructureStep(s,defs,60);
 assert.equal(s.infrastructure.nodes[1].power,1);
 assert(s.money<100);
-assert(Math.abs(100-s.money-s.infrastructure.grid.imported*GRID_POWER.tariff)<1e-9);
+assert(Math.abs(100-s.money-(s.finances.fractions.electricity||0)/100-s.infrastructure.grid.imported*GRID_POWER.tariff)<1e-9);
 assert.equal(s.infrastructure.account.generated,0,'imports are not local generation');
 assert(validInfrastructure(s));
 const restored=JSON.parse(JSON.stringify(s));

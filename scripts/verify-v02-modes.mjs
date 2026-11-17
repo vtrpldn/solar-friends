@@ -30,7 +30,7 @@ assert(loaded);
 assert.equal(loaded.mode, "sandbox");
 assert.equal(loaded.instantBuild, false);
 assert(createWeekend().opening);
-assert.equal(createWeekend().money, 220);
+assert.equal(createWeekend().money, 2000);
 console.log(
   "PASS separate slots, free instant builds, resident construction, sandbox persistence and story defaults.",
 );

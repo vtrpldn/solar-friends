@@ -45,12 +45,12 @@ const a = createTerrain(42),
   b = createTerrain(42),
   c = createTerrain(43);
 assert.deepEqual(
-  a.geometry.attributes.color.array,
-  b.geometry.attributes.color.array,
+  a.geometry.attributes.bankDistance.array,
+  b.geometry.attributes.bankDistance.array,
 );
 assert.notDeepEqual(
-  a.geometry.attributes.color.array,
-  c.geometry.attributes.color.array,
+  a.geometry.attributes.bankDistance.array,
+  c.geometry.attributes.bankDistance.array,
 );
 console.log(
   "PASS: 100 distinct seeded rivers; clear camps and water access; persistent seeds; legacy restore; deterministic terrain variation.",

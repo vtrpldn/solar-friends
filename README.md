@@ -50,7 +50,7 @@ The playable game is JavaScript with Three.js rendering. `simulation.js` owns se
 
 ```sh
 node scripts/verify-v02-economy-policies.mjs
-node scripts/verify-v02-economy-soak.mjs
+node scripts/verify-v02-economic-recovery.mjs
 node scripts/verify-v02-urgent-needs.mjs
 node scripts/verify-v02-playtest-fixes.mjs
 node scripts/verify-v02-lab.mjs
@@ -58,10 +58,10 @@ npm run build:site
 git diff --check
 ```
 
-Choose additional `scripts/verify-v02-*.mjs` checks for the changed subsystem. Historical checks may encode older design assumptions; investigate failures rather than claiming the entire suite passes. The three-day economy replay uses an existing normal-game save and automated ticks; it is not a manual browser playthrough. UI changes need rendered browser checks.
+Choose additional `scripts/verify-v02-*.mjs` checks for the changed subsystem. Historical checks may encode older design assumptions; investigate failures rather than claiming the entire suite passes. The recovery replay uses an existing normal-game save and automated ticks; it is not a manual browser playthrough. UI changes need rendered browser checks.
 
 Netlify deploys `main` through the GitHub integration using `netlify.toml`. A push is not proof of publication: verify the deployed files and live UI after the build finishes. Never merge a PR without explicit approval.
 
 ## Documentation
 
-Start with the [documentation index](docs/README.md). The [v1 reference](V1.md), root plans, and dated audits preserve earlier decisions and evidence; they are not the current v2 specification. Prices, timings and production yields are game-balance assumptions, not real-world engineering guidance.
+Start with the [documentation index](docs/README.md). The [realistic economy plan](docs/realistic-economy-plan.md) records the implemented model and its deliberate boundaries; the [calibration validation report](docs/balance/2026-11-17-economy-validation.md) separates current-price fresh starts, normal-command catalog progression, diagnostic cycles and browser observations. The [v1 reference](V1.md), root plans, and dated audits preserve earlier decisions and evidence; they are not the current v2 specification. The calibration register distinguishes researched price references from engineering and gameplay assumptions; these are not real-world construction or agricultural instructions.

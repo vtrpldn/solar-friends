@@ -1,5 +1,6 @@
 import * as THREE from "three";
-export const CELL = 2;
+import { METRES_PER_CELL } from "../library/scale.js";
+export const CELL = METRES_PER_CELL;
 export const PALETTE = {
   plaster: "#e8d8ab",
   timber: "#936039",

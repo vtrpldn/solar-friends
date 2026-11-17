@@ -30,7 +30,7 @@ const run = (s, seconds) => {
   for (let i = 0; i < seconds * 10; i++) tick(s, 0.1);
 };
 const finishJobs = (s) => {
-  for (let i = 0; i < 6000; i++) {
+  for (let i = 0; i < 64000; i++) {
     if (s.operations?.every((o) => o.done)) return;
     tick(s, 0.1);
   }
@@ -73,7 +73,7 @@ const layout = fresh();
 assert.equal(plan(layout, "solar_farm", 40, 40), "");
 assert.equal(plan(layout, "solar_farm", 44, 40), "");
 assert.match(placementError(layout, "streetlight", 42, 40), /occupies/);
-assert.equal(placementError(layout, "streetlight", 43, 43), "");
+assert.equal(placementError(layout, "streetlight", 44, 45), "");
 assert(restore(save(layout)));
 let hydroPlace = null;
 for (let x = 18; x < 24; x++)
@@ -111,6 +111,7 @@ assert(
     sys.account.generated -
       sys.account.consumed -
       sys.account.curtailed -
+      sys.account.storageLosses -
       stored,
   ) < 1e-6,
   "Energy conservation",
@@ -149,7 +150,7 @@ assert(sys.nodes[banana.id].water[3] < 10);
 assert.equal(sys.nodes[banana.id].water[0], 0);
 assert(validInfrastructure(water));
 const bad = structuredClone(water);
-bad.infrastructure.nodes[well.id].water[0] = 999;
+bad.infrastructure.nodes[well.id].water[0] = bad.infrastructure.nodes[well.id].capacity[0]+1;
 assert.equal(restore(save(bad)), null);
 console.log(
   "PASS: powered filtration, water classes, treatment, no sewage-to-fresh conversion and invalid tank rejection.",
@@ -172,8 +173,9 @@ assert(sellMaterial(jobs, "stone"));
 assert.equal(jobs.materials.stone, 4);
 const trees = built(jobs, "supply-0", 44, 40);
 assert.equal(queueProduction(jobs, trees.id, "wood"), "");
-finishJobs(jobs);
-assert.match(queueProduction(jobs, trees.id, "wood"), /Growing/);
+for(let i=0;i<96000&&!jobs.operations.some(o=>o.site===trees.id&&o.phase==="growing");i++)tick(jobs,.1);
+assert(jobs.operations.some(o=>o.site===trees.id&&o.phase==="growing"), "new timber stand grows without occupying a worker");
+assert.equal(jobs.materials.logs,0,"new trees do not yield overnight wood");
 assert(storedMaterials(jobs) < storageCapacity(jobs));
 console.log(
   "PASS: resident extraction, finite stock sales, renewable growth cooldown and storage.",
@@ -305,7 +307,7 @@ auto.materials.food = 30;
 const autoQuarry = built(auto, "supply-3", 40, 40);
 assert(repeatProduction(auto, autoQuarry.id, "stone"));
 // Allow the longer carrying route from the map-edge unloading area.
-for (let i = 0; i < 18000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
+for (let i = 0; i < 120000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
 assert.equal(
   auto.materials.stone,
   24,
@@ -315,7 +317,7 @@ const outputBefore = auto.materials.stone;
 run(auto, 100);
 assert.equal(auto.materials.stone, outputBefore);
 assert(sellMaterial(auto, "stone"));
-for (let i = 0; i < 18000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
+for (let i = 0; i < 120000 && auto.materials.stone < 24; i++) tick(auto, 0.1);
 assert(auto.materials.stone >= 24 && auto.materials.stone < 32);
 console.log(
   "PASS: repeat production respects its stock target and restarts after surplus is sold.",

@@ -62,7 +62,7 @@ for (const def of ASSETS) {
   }
   if (def.id === "shed") {
     const b = originalBounds.getSize(new THREE.Vector3());
-    assert.ok(b.x > b.z * 1.8);
+    assert.ok(b.x <= def.footprint[0]*CELL && b.z <= def.footprint[1]*CELL, "remodeled shed fits its reservation");
     model.rotation.y = Math.PI / 2;
     const rotated = new THREE.Box3()
       .setFromObject(model)

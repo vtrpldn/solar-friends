@@ -6,16 +6,16 @@ pub const MAX_GOALS_PER_CHAPTER: usize = 16;
 pub const MAX_CONDITION_NODES: usize = 256;
 pub const MAX_CONDITION_DEPTH: usize = 4;
 pub const MAX_GROUP_SIZE: usize = 8;
+pub(crate) mod challenge;
 pub(crate) mod delivery;
 pub(crate) mod events;
 pub(crate) mod land_use;
-pub(crate) mod challenge;
-pub(crate) mod roles;
 pub(crate) mod milestones;
-pub(crate) mod operations;
 mod model;
-mod runtime;
 mod observation;
+pub(crate) mod operations;
+pub(crate) mod roles;
+mod runtime;
 pub(crate) mod services;
 pub use observation::observe;
 pub(crate) mod trade;
@@ -99,5 +99,12 @@ fn production_baselines(condition: &GoalCondition, v: &Village) -> BTreeMap<Stri
 /// Run-wide conditions share the same native evaluator as authored journals.
 /// The official adapter uses only present buildings and run-wide counters.
 pub(crate) fn measure_run(condition: &GoalCondition, v: &Village) -> (bool, serde_json::Value) {
-    runtime::measure(condition, &GoalState::default(), &HashSet::new(), v, None, None)
+    runtime::measure(
+        condition,
+        &GoalState::default(),
+        &HashSet::new(),
+        v,
+        None,
+        None,
+    )
 }

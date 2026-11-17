@@ -33,6 +33,8 @@ import {checkBatteryControls} from './battery-browser-checks.mjs';
 import {checkGatheringControls} from './gathering-browser-checks.mjs';
 import {checkClimateControls,checkClimateSandboxSave} from './climate-browser-checks.mjs';
 export async function checkBrowser({browser,base,output,screenshots,errors}) {
+  // These checks exercise the preserved Rust/v1 client; the root now opens v2.
+  base=new URL('/v1/',base).href;
   const context=await browser.newContext({viewport:{width:1440,height:1000},deviceScaleFactor:1});
   context.setDefaultTimeout(30000);context.setDefaultNavigationTimeout(30000);
   context.on('page',page=>{
@@ -568,7 +570,7 @@ export async function checkBrowser({browser,base,output,screenshots,errors}) {
   assert.equal(await preview.evaluate(()=>window.solarDev.snapshot().village.buildings.length),expectedVariants,'Draft previews must include all buildings and skins');
   const calibrated=await preview.evaluate(async()=>{const {buildingArt}=await import('./building-art.js?v=night-1');return buildingArt.coop.width;});assert.equal(calibrated,110);
   await preview.close();
-  const nightGallery=await context.newPage();await nightGallery.goto(new URL('/?night-preview',base).href);await nightGallery.waitForFunction(()=>window.solarDev);
+  const nightGallery=await context.newPage();await nightGallery.goto(new URL('?night-preview',base).href);await nightGallery.waitForFunction(()=>window.solarDev);
   assert((await nightGallery.locator('.artwork-preview-notice').textContent()).includes(`${expectedVariants} building variants`));
   assert.equal(await nightGallery.evaluate(()=>window.solarDev.snapshot().village.minutes%1440),1260);
   assert.equal(await nightGallery.evaluate(()=>localStorage.getItem('solar-friends-v3-story')),saved);

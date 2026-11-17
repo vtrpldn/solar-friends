@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {createWeekend,PROJECTS,MATERIALS,save,restore} from '../web/v02/weekend/simulation.js';
+import {supplierAvailable,supplierError,reserveSupplier,supplierLimit,purchaseCategory} from '../web/v02/weekend/supplier-stock.js';
+const s=createWeekend(42),limit=supplierAvailable(s,'panels',MATERIALS);
+assert.equal(limit,8);assert(reserveSupplier(s,{panels:6},MATERIALS));assert.equal(supplierAvailable(s,'panels',MATERIALS),2);
+const before=JSON.stringify(s.suppliers);assert(!reserveSupplier(s,{wood:12,panels:3},MATERIALS));assert.equal(JSON.stringify(s.suppliers),before,'failed mixed order is atomic');
+assert.match(supplierError(s,{panels:3},MATERIALS),/Stock renews tomorrow/);
+const loaded=restore(save(s));assert(loaded);assert.equal(supplierAvailable(loaded,'panels',MATERIALS),2);
+loaded.time+=3200;assert.equal(supplierAvailable(loaded,'panels',MATERIALS),8);
+for(const [key,d]of Object.entries(PROJECTS))if(!d.natural)for(const [id,n]of Object.entries(d.materials))assert(n<=supplierLimit(id,MATERIALS[id]),`${key} can obtain its bill within one supplier allocation`);
+assert.equal(purchaseCategory('food'),'household');assert.equal(purchaseCategory('fodder'),'purchases');
+console.log('PASS finite suppliers, atomic reservation, reload, replenishment, catalog feasibility and household expense classification');

@@ -1,0 +1,1421 @@
+{
+  "metresPerCell": 2,
+  "notes": [
+    "Reserved cells include clearance; visual bounds include roof overhang and vegetation, not usable floor.",
+    "Homes are exterior-only, with no modeled partitions, rooms or indoor furniture. No net interior floor area is claimed. Facility clearFloorArea subtracts exterior walls, before furniture and columns.",
+    "Capacities are spatial design assumptions, not changes to mechanics or rated production.",
+    "Original miniature building compatibility was waived by the user; saved data is not erased, but old layouts may overlap and need rebuilding.",
+    "Garden and greenhouse each expose 19.2 m² planted soil; the remainder is aisles and service land.",
+    "Goats have a 90 m² outdoor pen and 9 m² shelter, not sufficient grazing land.",
+    "Six solar panels expose 11.88 m² panel surface; output remains a mechanics decision.",
+    "Picnic table reserves 2×2 cells for seating access; veranda homes reserve 5×6 and terrace home 6×5.",
+    "Existing well yield, cistern usable capacity and digester throughput remain uncalibrated; do not infer them from surface reservation or exterior vessel bounds."
+  ],
+  "visualReview": {
+    "homes": "Ten exterior designs compared at shared scale in the desktop collection; corrected family-home gable and eave shadows inspected close up in the desktop game.",
+    "facilities": "Workshop and kitchen current exteriors inspected in desktop 3D inspector; garden/greenhouse/pen/solar and village scale inspected in the game during remodeling. Full per-model powered/unpowered review not performed."
+  },
+  "sourceSha256": {
+    "functional-program.js": "2b921ed4a88e8e2d853cb0d38e54b714c0c01c43309852932d2e5113df66f5ec",
+    "functional-layouts.js": "234746efdfc7412b411a65e59be133b48fe862cc09408a6fb9459d15d25c7757",
+    "functional-homes.js": "91d04d935437885bc792b23fd937d1a52b35242ded8be3823a8a37d25b3d2234",
+    "functional-facilities.js": "97528ed0635e07be96e1b805a63386b1c046684bcea157e09a8117468661ed89",
+    "roof-forms.js": "08f31ea3b435f71e5a6960e0c972565de620b2ed4783bc5bfaf266f1d762d8fc",
+    "catalog.js": "01da5fae8a2d0db408cdb51b0c847beb563bf085e00dc182629c37a007f3dbcc"
+  },
+  "buildings": [
+    {
+      "id": "home-cottage",
+      "reservedCells": [
+        4,
+        4
+      ],
+      "reservedMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        6.74,
+        4.245,
+        7.233
+      ],
+      "measuredProperties": {
+        "shellArea": 36,
+        "occupants": 1,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        6,
+        6
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 1,
+      "roof": "hip",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        0.45,
+        1.18,
+        2.935
+      ]
+    },
+    {
+      "id": "home-longhouse",
+      "reservedCells": [
+        7,
+        4
+      ],
+      "reservedMetres": [
+        14,
+        8
+      ],
+      "visualBoundsMetres": [
+        12.62,
+        4.088,
+        7.181
+      ],
+      "measuredProperties": {
+        "shellArea": 72,
+        "occupants": 3,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        12,
+        6
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 3,
+      "roof": "side-gable",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        -0.7,
+        1.18,
+        2.935
+      ]
+    },
+    {
+      "id": "groundwater-well",
+      "reservedCells": [
+        2,
+        2
+      ],
+      "reservedMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        3.367,
+        3.61,
+        2.575
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "water-pump",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.5,
+        0.905,
+        1.41
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "home-family",
+      "reservedCells": [
+        6,
+        5
+      ],
+      "reservedMetres": [
+        12,
+        10
+      ],
+      "visualBoundsMetres": [
+        10.45,
+        4.386,
+        8.866
+      ],
+      "measuredProperties": {
+        "shellArea": 80,
+        "occupants": 3,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        10,
+        8
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 3,
+      "roof": "twin-gable",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        0.6,
+        1.18,
+        3.935
+      ]
+    },
+    {
+      "id": "home-shared",
+      "reservedCells": [
+        6,
+        6
+      ],
+      "reservedMetres": [
+        12,
+        12
+      ],
+      "visualBoundsMetres": [
+        11.24,
+        4.29,
+        11.135
+      ],
+      "measuredProperties": {
+        "shellArea": 99.75,
+        "occupants": 4,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        10.5,
+        9.5
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 4,
+      "roof": "hip-porch",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        0,
+        1.18,
+        4.685
+      ]
+    },
+    {
+      "id": "road",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        2,
+        0.053,
+        2
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "bridge",
+      "reservedCells": [
+        8,
+        1
+      ],
+      "reservedMetres": [
+        16,
+        2
+      ],
+      "visualBoundsMetres": [
+        15.98,
+        1.588,
+        1.96
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "house",
+      "reservedCells": [
+        5,
+        5
+      ],
+      "reservedMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        8.74,
+        4.247,
+        9.233
+      ],
+      "measuredProperties": {
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        8,
+        8
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 2,
+      "roof": "hip",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        -0.65,
+        1.18,
+        3.935
+      ]
+    },
+    {
+      "id": "shed",
+      "reservedCells": [
+        3,
+        3
+      ],
+      "reservedMetres": [
+        6,
+        6
+      ],
+      "visualBoundsMetres": [
+        5.62,
+        3.241,
+        4.576
+      ],
+      "measuredProperties": {
+        "shell": [
+          5,
+          4
+        ],
+        "clearFloorArea": 20
+      }
+    },
+    {
+      "id": "orchard",
+      "reservedCells": [
+        5,
+        5
+      ],
+      "reservedMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        6.158,
+        2.807,
+        6.51
+      ],
+      "measuredProperties": {
+        "plantCount": 4,
+        "plantSpacing": 4
+      }
+    },
+    {
+      "id": "goat_pasture",
+      "reservedCells": [
+        6,
+        5
+      ],
+      "reservedMetres": [
+        12,
+        10
+      ],
+      "visualBoundsMetres": [
+        11.12,
+        3.241,
+        9.12
+      ],
+      "measuredProperties": {
+        "shelterArea": 9,
+        "outdoorPenArea": 90
+      }
+    },
+    {
+      "id": "apiary",
+      "reservedCells": [
+        2,
+        2
+      ],
+      "reservedMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        2.8,
+        1.35,
+        0.6
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "hydro",
+      "reservedCells": [
+        3,
+        3
+      ],
+      "reservedMetres": [
+        6,
+        6
+      ],
+      "visualBoundsMetres": [
+        2.62,
+        1.98,
+        2.56
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "eco_toilet",
+      "reservedCells": [
+        2,
+        2
+      ],
+      "reservedMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        2.42,
+        3.314,
+        2.82
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "banana_treatment",
+      "reservedCells": [
+        3,
+        4
+      ],
+      "reservedMetres": [
+        6,
+        8
+      ],
+      "visualBoundsMetres": [
+        4.16,
+        3,
+        7.1
+      ],
+      "measuredProperties": {
+        "effectiveBedArea": 24
+      }
+    },
+    {
+      "id": "wetland",
+      "reservedCells": [
+        3,
+        5
+      ],
+      "reservedMetres": [
+        6,
+        10
+      ],
+      "visualBoundsMetres": [
+        4.16,
+        1.668,
+        9.1
+      ],
+      "measuredProperties": {
+        "effectiveBedArea": 32
+      }
+    },
+    {
+      "id": "biodigester",
+      "reservedCells": [
+        4,
+        4
+      ],
+      "reservedMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        5.78,
+        2.163,
+        4.44
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "warehouse",
+      "reservedCells": [
+        5,
+        4
+      ],
+      "reservedMetres": [
+        10,
+        8
+      ],
+      "visualBoundsMetres": [
+        8.62,
+        4.089,
+        6.889
+      ],
+      "measuredProperties": {
+        "shelfArea": 14.040000000000001,
+        "shell": [
+          8,
+          6
+        ],
+        "clearFloorArea": 43.04
+      }
+    },
+    {
+      "id": "solar_farm",
+      "reservedCells": [
+        4,
+        4
+      ],
+      "reservedMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        5.1,
+        1.563,
+        5.315
+      ],
+      "measuredProperties": {
+        "panelArea": 11.88
+      }
+    },
+    {
+      "id": "streetlight",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.025,
+        3.5,
+        0.55
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "kitchen",
+      "reservedCells": [
+        6,
+        5
+      ],
+      "reservedMetres": [
+        12,
+        10
+      ],
+      "visualBoundsMetres": [
+        10.754,
+        4.69,
+        8.337
+      ],
+      "measuredProperties": {
+        "shell": [
+          10,
+          8
+        ],
+        "clearFloorArea": 73.44
+      }
+    },
+    {
+      "id": "grove",
+      "reservedCells": [
+        4,
+        4
+      ],
+      "reservedMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        5.943,
+        2.8,
+        5.977
+      ],
+      "measuredProperties": {
+        "plantCount": 4,
+        "plantSpacing": 3
+      }
+    },
+    {
+      "id": "garden",
+      "reservedCells": [
+        4,
+        6
+      ],
+      "reservedMetres": [
+        8,
+        12
+      ],
+      "visualBoundsMetres": [
+        4.451,
+        0.449,
+        9.36
+      ],
+      "measuredProperties": {
+        "plantedArea": 19.2
+      }
+    },
+    {
+      "id": "greenhouse",
+      "reservedCells": [
+        4,
+        6
+      ],
+      "reservedMetres": [
+        8,
+        12
+      ],
+      "visualBoundsMetres": [
+        6.08,
+        3.533,
+        10.08
+      ],
+      "measuredProperties": {
+        "plantedArea": 19.2
+      }
+    },
+    {
+      "id": "well",
+      "reservedCells": [
+        3,
+        3
+      ],
+      "reservedMetres": [
+        6,
+        6
+      ],
+      "visualBoundsMetres": [
+        3.885,
+        1.65,
+        3.56
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "compost",
+      "reservedCells": [
+        3,
+        2
+      ],
+      "reservedMetres": [
+        6,
+        4
+      ],
+      "visualBoundsMetres": [
+        4,
+        1.1,
+        1.2
+      ],
+      "measuredProperties": {
+        "bayVolume": 3
+      }
+    },
+    {
+      "id": "square",
+      "reservedCells": [
+        5,
+        5
+      ],
+      "reservedMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        7.45,
+        0.55,
+        7.45
+      ],
+      "measuredProperties": {
+        "seats": 12
+      }
+    },
+    {
+      "id": "workshop",
+      "reservedCells": [
+        5,
+        4
+      ],
+      "reservedMetres": [
+        10,
+        8
+      ],
+      "visualBoundsMetres": [
+        8.6,
+        3.632,
+        6.733
+      ],
+      "measuredProperties": {
+        "shell": [
+          8,
+          6
+        ],
+        "clearFloorArea": 43.04
+      }
+    },
+    {
+      "id": "coop",
+      "reservedCells": [
+        4,
+        4
+      ],
+      "reservedMetres": [
+        8,
+        8
+      ],
+      "visualBoundsMetres": [
+        7.12,
+        3.35,
+        7.12
+      ],
+      "measuredProperties": {
+        "shelterArea": 4,
+        "outdoorPenArea": 45
+      }
+    },
+    {
+      "id": "home-veranda",
+      "reservedCells": [
+        5,
+        6
+      ],
+      "reservedMetres": [
+        10,
+        12
+      ],
+      "visualBoundsMetres": [
+        8.74,
+        4.247,
+        10.63
+      ],
+      "measuredProperties": {
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        8,
+        8
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 2,
+      "roof": "hip",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        0,
+        1.18,
+        2.935
+      ]
+    },
+    {
+      "id": "home-gable",
+      "reservedCells": [
+        5,
+        5
+      ],
+      "reservedMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        8.43,
+        4.438,
+        9.173
+      ],
+      "measuredProperties": {
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        8,
+        8
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 2,
+      "roof": "front-gable",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        0.65,
+        1.18,
+        3.935
+      ]
+    },
+    {
+      "id": "home-courtyard",
+      "reservedCells": [
+        6,
+        5
+      ],
+      "reservedMetres": [
+        12,
+        10
+      ],
+      "visualBoundsMetres": [
+        10.445,
+        4.247,
+        8.926
+      ],
+      "measuredProperties": {
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        8,
+        8
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 2,
+      "roof": "hip",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        -1.6,
+        1.18,
+        3.935
+      ]
+    },
+    {
+      "id": "adobe-gable",
+      "reservedCells": [
+        5,
+        5
+      ],
+      "reservedMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        8.62,
+        4.09,
+        8.766
+      ],
+      "measuredProperties": {
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        8,
+        8
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 2,
+      "roof": "side-gable",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        -0.8,
+        1.18,
+        3.935
+      ]
+    },
+    {
+      "id": "adobe-veranda",
+      "reservedCells": [
+        5,
+        6
+      ],
+      "reservedMetres": [
+        10,
+        12
+      ],
+      "visualBoundsMetres": [
+        8.62,
+        4.09,
+        10.47
+      ],
+      "measuredProperties": {
+        "shellArea": 64,
+        "occupants": 2,
+        "exteriorOnly": true
+      },
+      "shellMetres": [
+        8,
+        8
+      ],
+      "exteriorOnly": true,
+      "intendedResidents": 2,
+      "roof": "side-gable",
+      "doorLeafMetres": [
+        0.94,
+        2.04,
+        0.065
+      ],
+      "doorCenterLocalMetres": [
+        0,
+        1.18,
+        2.935
+      ]
+    },
+    {
+      "id": "goat-pasture-empty",
+      "reservedCells": [
+        6,
+        5
+      ],
+      "reservedMetres": [
+        12,
+        10
+      ],
+      "visualBoundsMetres": [
+        11.12,
+        3.241,
+        9.12
+      ],
+      "measuredProperties": {
+        "shelterArea": 9,
+        "outdoorPenArea": 90
+      }
+    },
+    {
+      "id": "supply-0",
+      "reservedCells": [
+        6,
+        6
+      ],
+      "reservedMetres": [
+        12,
+        12
+      ],
+      "visualBoundsMetres": [
+        7.184,
+        2.833,
+        7.475
+      ],
+      "measuredProperties": {
+        "plantCount": 4,
+        "plantSpacing": 5
+      }
+    },
+    {
+      "id": "supply-1",
+      "reservedCells": [
+        3,
+        3
+      ],
+      "reservedMetres": [
+        6,
+        6
+      ],
+      "visualBoundsMetres": [
+        3.429,
+        4.1,
+        3.043
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "supply-2",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.701,
+        0.69,
+        1.606
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "supply-3",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.934,
+        0.775,
+        2.045
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "supply-5",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        2,
+        1.519,
+        0.85
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "supply-6",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        0.78,
+        0.75,
+        0.568
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "rain-barrel",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        0.96,
+        1.48,
+        0.85
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "watering-can",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        0.913,
+        0.462,
+        0.4
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "wheelbarrow",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        0.842,
+        0.828,
+        1.795
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "tool-rack",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.5,
+        1.65,
+        0.35
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "seedling-bench",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.7,
+        1.241,
+        0.78
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "woodpile",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.192,
+        0.805,
+        1.22
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "picnic-table",
+      "reservedCells": [
+        2,
+        2
+      ],
+      "reservedMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        3.871,
+        3.323,
+        2.1
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "garden-bench",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.6,
+        0.95,
+        0.43
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "clothesline",
+      "reservedCells": [
+        2,
+        1
+      ],
+      "reservedMetres": [
+        4,
+        2
+      ],
+      "visualBoundsMetres": [
+        2.821,
+        1.95,
+        0.7
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "hammock",
+      "reservedCells": [
+        2,
+        1
+      ],
+      "reservedMetres": [
+        4,
+        2
+      ],
+      "visualBoundsMetres": [
+        2.92,
+        1.562,
+        0.9
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "bicycle",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.87,
+        1.03,
+        0.46
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "produce-crates",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.32,
+        1.077,
+        0.5
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "wayfinding-sign",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.2,
+        1.65,
+        0.15
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "wash-station",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.25,
+        1.273,
+        0.8
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "farm-gate",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.92,
+        1.2,
+        0.16
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "fire-circle",
+      "reservedCells": [
+        1,
+        1
+      ],
+      "reservedMetres": [
+        2,
+        2
+      ],
+      "visualBoundsMetres": [
+        1.563,
+        0.239,
+        1.572
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "canvas-tent-teal",
+      "reservedCells": [
+        2,
+        2
+      ],
+      "reservedMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        2.882,
+        1.538,
+        3.082
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "canvas-tent-ochre",
+      "reservedCells": [
+        2,
+        2
+      ],
+      "reservedMetres": [
+        4,
+        4
+      ],
+      "visualBoundsMetres": [
+        2.882,
+        1.538,
+        3.082
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "reading-room",
+      "reservedCells": [
+        5,
+        4
+      ],
+      "reservedMetres": [
+        10,
+        8
+      ],
+      "visualBoundsMetres": [
+        8.94,
+        4.188,
+        6.94
+      ],
+      "measuredProperties": {
+        "shell": [
+          8,
+          6
+        ],
+        "clearFloorArea": 43.04
+      }
+    },
+    {
+      "id": "outdoor-classroom",
+      "reservedCells": [
+        5,
+        5
+      ],
+      "reservedMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        8.72,
+        3.691,
+        8.677
+      ],
+      "measuredProperties": {
+        "shell": [
+          8,
+          8
+        ],
+        "clearFloorArea": 64
+      }
+    },
+    {
+      "id": "community-hall",
+      "reservedCells": [
+        7,
+        6
+      ],
+      "reservedMetres": [
+        14,
+        12
+      ],
+      "visualBoundsMetres": [
+        12.94,
+        4.689,
+        10.94
+      ],
+      "measuredProperties": {
+        "shell": [
+          12,
+          10
+        ],
+        "clearFloorArea": 111.84
+      }
+    },
+    {
+      "id": "exercise-garden",
+      "reservedCells": [
+        5,
+        5
+      ],
+      "reservedMetres": [
+        10,
+        10
+      ],
+      "visualBoundsMetres": [
+        6.298,
+        2.435,
+        5.06
+      ],
+      "measuredProperties": {}
+    },
+    {
+      "id": "volleyball-court",
+      "reservedCells": [
+        11,
+        7
+      ],
+      "reservedMetres": [
+        22,
+        14
+      ],
+      "visualBoundsMetres": [
+        22,
+        2.6,
+        14
+      ],
+      "measuredProperties": {
+        "playingArea": 128,
+        "freeZone": 3
+      }
+    }
+  ]
+}

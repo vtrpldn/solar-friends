@@ -330,11 +330,7 @@ pub(super) fn build(d: Definition) -> Result<(Game, Report), Report> {
             None
         };
         if let Some(reason) = reason {
-            let mut error = Report::error(
-                &format!("start.roads.{i}"),
-                "invalid_road",
-                reason,
-            );
+            let mut error = Report::error(&format!("start.roads.{i}"), "invalid_road", reason);
             error.issues[0].at = Some([x, y]);
             return Err(error);
         }

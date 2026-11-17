@@ -1,0 +1,27 @@
+{
+  "kind": "Normal-command continuation from an actual paid catalog run; no injected supplies, money or completed buildings",
+  "strategy": "timber",
+  "source": "evidence/2026-11-17-income-start-save.json",
+  "opening": 327.84,
+  "closing": 477.81,
+  "elapsedDays": 1.0000312500582096,
+  "changes": {
+    "commuting": 0,
+    "outsideWork": 0,
+    "construction": 0,
+    "transport": -15.52,
+    "electricity": -2.51,
+    "household": -48,
+    "purchases": 0,
+    "sales": 216
+  },
+  "selectedTrees": [
+    63,
+    28
+  ],
+  "sales": 1,
+  "restores": true,
+  "limitations": "Inherited capital built under recorded prior price revisions; one outside job supports household food. Sales are not standalone whole-village profitability.",
+  "retainedCompletedOperations": 4,
+  "counterNote": "Completed operation and sale counts are retained history, not lifetime totals."
+}

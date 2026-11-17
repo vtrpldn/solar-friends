@@ -1,0 +1,76 @@
+{
+  "date": "2026-11-17",
+  "commit": "3789016c",
+  "method": "Same browser and viewport; unsaved utilities preview with interactions, noon lighting and land seed 42. Each 4x comparison started from a reload. Queued cases placed a Gathering place through the catalog at screen coordinate (572,925). requestAnimationFrame intervals include slow frames; the built-in HUD excludes intervals >=250ms. First interval excluded from summaries. The 1x-off sample was warm; queued samples include work startup. Single-run diagnostic measurements, not controlled statistical benchmarks.",
+  "frames": [
+    {
+      "elapsedMs": 38798.9,
+      "fps": 111.36913675387704,
+      "frames": 4321,
+      "max": 25,
+      "over250": 0,
+      "p95": 16.599999999998545,
+      "scenario": "1x-off"
+    },
+    {
+      "elapsedMs": 27495.8,
+      "fps": 80.5577579121175,
+      "frames": 2215,
+      "max": 325.6000000000022,
+      "over250": 1,
+      "p95": 17.100000000002183,
+      "scenario": "4x-off"
+    },
+    {
+      "elapsedMs": 29375,
+      "fps": 75.23404255319149,
+      "frames": 2210,
+      "max": 308.3999999999978,
+      "over250": 3,
+      "p95": 17.400000000001455,
+      "scenario": "4x-construction"
+    },
+    {
+      "elapsedMs": 28091.6,
+      "fps": 13.028805764000628,
+      "frames": 366,
+      "max": 1108.2999999999956,
+      "over250": 81,
+      "p95": 308.3000000000029,
+      "scenario": "1x-queued-off"
+    },
+    {
+      "elapsedMs": 26308.299999999996,
+      "fps": 2.6987680693925498,
+      "frames": 71,
+      "max": 1326,
+      "over250": 23,
+      "p95": 1166.699999999997,
+      "scenario": "4x-queued-off"
+    }
+  ],
+  "profile": {
+    "scenario": "4x-queued-off",
+    "durationMs": 28685.529,
+    "workSpotInclusiveMs": 26937.376,
+    "workSpotFraction": 0.9390580177203636,
+    "routeInclusiveMs": 26540.927,
+    "dominantFunctions": [
+      "tickUncached",
+      "availableProject",
+      "workSpot",
+      "routeUncached",
+      "occupied",
+      "occupiedUncached",
+      "blockedCamp",
+      "walkSegmentClear"
+    ]
+  },
+  "findings": [
+    "Severe construction-related stalls reproduce with every lens off.",
+    "Queued work at 4x reached 2.7 fps and 1.33-second maximum frame intervals; at 1x it reached 13 fps and 1.11-second maximum intervals.",
+    "The HUD reported 92 fps during the 2.7 fps capture because it excludes slow intervals.",
+    "The fresh 4x preview averaged 80.6 fps without a lens and 75.2 fps with the construction lens; that comparison did not include a queued construction project."
+  ],
+  "scope": "Diagnosis only. No simulation or FPS-counter code changed. Temporary frame probes and profiling were removed by restoring the original paused preview. Raw profiles are local artifacts."
+}

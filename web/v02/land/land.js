@@ -426,7 +426,7 @@ function overview() {
   const span = Math.max(110, (MAP_METRES * Math.SQRT2) / aspect) * 1.08;
   setFrustum(span);
   turn(0);
-  toast("64 × 64 cells · 128 × 128 metres");
+  toast("96 × 96 cells · 192 × 192 metres");
 }
 let overviewMode = false;
 function setFrustum(height) {
@@ -518,14 +518,14 @@ canvas.addEventListener("pointermove", (e) => {
     vertices.needsUpdate = true;
     cursor.geometry.computeBoundingSphere();
     $("#coordinate").textContent =
-      `Cell ${cell.column + 1}, ${cell.row + 1} · 64 × 64`;
-  } else $("#coordinate").textContent = "64 × 64 · 4,096 cells";
+      `Cell ${cell.column + 1}, ${cell.row + 1} · 96 × 96`;
+  } else $("#coordinate").textContent = "96 × 96 · 9,216 cells";
   render();
 });
 canvas.addEventListener("pointerleave", () => {
   cursor.visible = false;
   lastCell = "";
-  $("#coordinate").textContent = "64 × 64 · 4,096 cells";
+  $("#coordinate").textContent = "96 × 96 · 9,216 cells";
   render();
 });
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());

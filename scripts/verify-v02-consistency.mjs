@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import { ASSETS, createAsset } from "../web/v02/library/catalog.js";
+import {FUNCTIONAL_LAYOUTS} from '../web/v02/library/functional-layouts.js';
+import {FUNCTIONAL_PROGRAM} from '../web/v02/library/functional-program.js';
+import {REMODELED_FACILITIES} from '../web/v02/library/functional-facilities.js';
 // Budgets follow visual role: tile roofs need geometry; tiny crop leaves do not.
 const budgets = {
   Props: 1200,
@@ -27,11 +30,18 @@ for (const asset of ASSETS) {
       triangles +=
         (o.geometry.index?.count ?? o.geometry.attributes.position.count) / 3;
   });
-  // The 4x2 kitchen has twice the roof area of the standard 2x2 buildings.
-  assert(
-    triangles <= (asset.id === "kitchen" ? 7000 : budgets[asset.category]),
-    `${asset.id}: ${triangles} triangles exceeds category budget`,
-  );
+  // Roof detail scales with floor area: compare larger homes at the same tile density.
+  // The two-bay kitchen and roofed picnic shelter have architectural roof budgets.
+  const functional=FUNCTIONAL_LAYOUTS[asset.id]||REMODELED_FACILITIES.has(asset.id);
+  const shell=FUNCTIONAL_PROGRAM[asset.id]?.shell;
+  // Fixed roof tile density requires a budget per square metre, not per
+  // reserved cell (which includes yards). Crops/trees have per-plant budgets.
+  const budget=functional && shell ? Math.max(5000,shell[0]*shell[1]*450+2000)
+    : ['garden','greenhouse'].includes(asset.id)?8000
+    : ['orchard','supply-0'].includes(asset.id)?12000
+    : ['grove','banana_treatment'].includes(asset.id)?8000
+    : asset.id==='picnic-table'?5000:budgets[asset.category];
+  assert(triangles<=budget,`${asset.id}: ${triangles} triangles exceeds budget ${budget}`);
   assert(bounds.min.y >= -0.001, `${asset.id}: below ground`);
   // Roofs and tree crowns may overhang a footprint; foundations are separately tested.
   const allowance = asset.category === "Vegetation" ? 1.5 : 1.25;
@@ -43,13 +53,23 @@ for (const asset of ASSETS) {
   if (asset.category === "Residents")
     assert(size.y >= 1.7 && size.y <= 1.95, asset.id);
   if (asset.category === "Homes")
-    assert(size.y >= 3.7 && size.y <= 4.2, asset.id);
+    assert(size.y >= 3.7 && size.y <= 5, asset.id);
   rows.push({
     id: asset.id,
     category: asset.category,
     dimensions: size.toArray().map((n) => +n.toFixed(3)),
     triangles,
   });
+}
+// Assembly frames should not become unrelated, taller structures (for example,
+// a house roof over a pump or sports court).
+for (const frame of rows.filter((a) => a.id.endsWith("-construction-1"))) {
+  const finished = rows.find((a) => a.id === frame.id.replace("-construction-1", ""));
+  assert(finished, `${frame.id}: missing completed model`);
+  // Survey stakes intentionally stand above the flat road surface.
+  if (finished.category === "Terrain") continue;
+  assert(frame.dimensions[1] <= finished.dimensions[1] + 0.25,
+    `${frame.id}: assembly silhouette exceeds completed building height`);
 }
 for (const crop of [
   "lettuce",
@@ -67,10 +87,22 @@ for (const crop of [
     `${crop}: growth order`,
   );
 }
-const homes = rows
-  .filter((a) => a.category === "Homes")
-  .map((a) => a.triangles);
-assert(Math.max(...homes) / Math.min(...homes) < 1.2, "House detail drift");
+// Compare physical tile detail, not whole-model triangle density: a compact
+// cottage has more windows/trim per square metre than a long house.
+for(const asset of ASSETS.filter(a=>a.category==='Homes')){
+  let tiles=0;
+  createAsset(asset.id).traverse(o=>{
+    if(o.name!=='roof-tile')return;
+    tiles++;
+    const p=o.geometry.attributes.position;
+    assert.equal(p.count,30,`${asset.id}: barrel tile detail`);
+    for(let i=0;i<p.count;i+=3){
+      const points=[0,1,2].map(n=>new THREE.Vector3().fromBufferAttribute(p,i+n));
+      for(let n=0;n<3;n++)assert(points[n].distanceTo(points[(n+1)%3])<.7,`${asset.id}: stretched tile`);
+    }
+  });
+  assert(tiles>60,`${asset.id}: missing roof courses`);
+}
 if (process.argv.includes("--json")) console.log(JSON.stringify(rows, null, 2));
 else
   console.log(

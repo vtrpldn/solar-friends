@@ -1,9 +1,31 @@
+import {supplierError} from './supplier-stock.js';
+import {buyerQuote} from './local-market.js';
+import {activeTrips} from "./trip-state.js";
+import {setOutsideWork,outsideWorkText} from "./outside-work.js";
+import {constructionSpecText} from './construction-specs.js';
+import {spendableMoney} from './procurement-budget.js';
+import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
+import {installLenses} from './lenses.js';
+import {simulationFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
+import {productionTarget} from './economy-policies.js';
+import {eventHistory, eventTime} from './event-history.js';
+import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
+import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
+import { availableHomes, homeResidents, assignHome } from './simulation.js';
+import { createScalePreview } from './scale-preview.js';
+import { METRES_PER_CELL } from '../library/scale.js';
+import { bridgeWidthScale, siteDimensions, projectDescription } from './site-space.js';
+import { accessGeometry } from './building-access.js';
+import { productionBlocker, buildingOperatingStatus } from './simulation.js';
+import { disabledReason, installDisabledInfo } from './disabled-info.js';
+import { protectedEquipment } from './equipment.js';
 import {loadVillage} from './load-village.js';
-import {ensureNaturalLand} from './natural-resources.js';
+import {ensureNaturalLand,TREE_SPECIES} from './natural-resources.js';
+import {createFoliageWind} from './foliage-wind.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {createCapybaraVisitors} from "./capybaras.js";
-import { constructionStatus } from "./construction-logistics.js";
+import { constructionProgress } from "./construction-logistics.js";
 import { BUILD_CATEGORIES, buildingCategory, inBuildCategory } from "./build-categories.js";
 import {createResourceTrends,resourceSnapshot,formatTrend} from './resource-trends.js';
 import {materialTooltip} from './material-tooltip.js';
@@ -13,6 +35,9 @@ import {settingsFor,BIOMES,richnessFactor} from './world-settings.js';
 import {beginArrival} from './simulation.js';
 import {depositCapacity} from './land-layout.js';
 import {profileFor,friendshipLabel} from './resident-personality.js';
+import {conversationMotion} from './resident-motion.js';
+import {downtimeMotion,downtimeLabel} from './resident-downtime.js';
+import {currentThought,aspirationStatus} from './resident-mind.js';
 import { needMeters } from "./resident-needs.js";
 import { drapeRoadGeometry } from "./road-surface.js";
 import { terraform } from "./terraform.js";
@@ -61,6 +86,7 @@ import {
 } from "../library/catalog.js";
 import { createResident, animateResident } from "../residents/rig.js";
 import {
+  enableFastNavigation,
   CAMPS,
   PROJECTS,
   PROCESSES,
@@ -90,8 +116,9 @@ import {
   campPlacementError,
   plan,
   planRoadLine,
-  moveProject,
+  moveProject, removeProject,
   prioritize,
+  cancelProject, cancelProjectError,
   supplyRun,
   resolveRain,
   finished,
@@ -102,18 +129,21 @@ import {
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
   SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
+const scalePreview = new URLSearchParams(location.search).has("scale-preview");
 const wildlifePreview = new URLSearchParams(location.search).has("wildlife-preview");
+const downtimePreview = new URLSearchParams(location.search).has("downtime-preview");
 const needsPreview = new URLSearchParams(location.search).has("needs-preview");
-const utilitiesPreview = needsPreview || new URLSearchParams(location.search).has(
+const utilitiesPreview = needsPreview || downtimePreview || new URLSearchParams(location.search).has(
   "utilities-preview",
 );
 const restPreview = new URLSearchParams(location.search).has("rest-preview");
 const arrivalPreview =
+  scalePreview ||
   wildlifePreview ||
   utilitiesPreview ||
   restPreview ||
   new URLSearchParams(location.search).has("arrival-preview");
-let s = utilitiesPreview
+let s = scalePreview ? createScalePreview(false,new URLSearchParams(location.search).get("scale-preview")) : utilitiesPreview
   ? createUtilitiesPreview(
       new URLSearchParams(location.search).has("interactions"),
       Number(new URLSearchParams(location.search).get("land-seed")) >>> 0,
@@ -145,6 +175,14 @@ if (needsPreview) {
   const home=Object.values(s.infrastructure.nodes).find(n=>n.kind==='home');
   if(home) home.water[0]=5;
 }
+if (downtimePreview) {
+  s.log=['Downtime preview: personal activities and fireside company. This scene is not saved.'];
+  s.time=1300;s.rain=false;s.rainSeen=true;s.rainResolved=true;
+  s.people.forEach((r,i)=>{
+    r.x=[32,34,33,32,34][i];r.z=[35,35,36,36,36][i];r.energy=95;
+    r.needs={hunger:95,bladder:95,bowels:95,hygiene:95,social:[70,95,75,95,95][i],fun:85};
+  });
+}
 if (restPreview) for (const resident of s.people) resident.energy = 10;
 let loadFailure = false;
 try {
@@ -167,14 +205,17 @@ if (s.stage === "evening") {
       r.target = null;
     }
 }
-let speed = 1,
-  paused = lightingPreview,
+enableFastNavigation(s);
+const savedView = restoredView(s.view);
+let speed = savedView?.speed || 1,
+  paused = lightingPreview || scalePreview || savedView?.paused || false,
   placing = null,
   moving = null,
   selected = null,
   lastUI = 0,
   lastSave = 0;
 const scene = new THREE.Scene();
+const foliageWind=createFoliageWind();
 scene.background = new THREE.Color("#cbd5ac");
 scene.fog = new THREE.Fog("#cbd5ac", 90, 200);
 const renderer = new THREE.WebGLRenderer({
@@ -186,7 +227,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
+renderer.toneMappingExposure = 1.08;
 const camera = new THREE.OrthographicCamera(-26, 26, 20, -20, 0.1, 300);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -197,12 +238,12 @@ controls.minPolarAngle = 0.25;
 const navigation = installCameraNavigation(camera, controls, {
   home: () => focus(campLocation(s)),
 });
-const daylight = new THREE.HemisphereLight("#fff1cd", "#658658", 2);
+const daylight = new THREE.HemisphereLight("#e4eff6", "#777455", 1.4);
 scene.add(daylight);
 const sun = new THREE.DirectionalLight("#ffe2a8", 3.4);
 sun.position.set(-25, 45, 18);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.mapSize.set(4096, 4096);
 Object.assign(sun.shadow.camera, {
   left: -48,
   right: 48,
@@ -233,8 +274,10 @@ const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });
 const ground = createTerrain(s.landSeed, s.elevationSeed, s.terrainPads);
 scene.add(ground);
-scene.add(compactModel(createAccessRoad()));
+let accessRoad = compactModel(createAccessRoad(s.elevationSeed, s.terrainPads));
+scene.add(accessRoad);
 const river = createRiver(s.landSeed);
+let riverTime=0;
 scene.add(compactModel(river.root), river.current);
 
 const grid = new THREE.GridHelper(
@@ -281,9 +324,9 @@ grid.visible = false;
 scene.add(grid);
 function world(x, z) {
   return new THREE.Vector3(
-    (x - 32) * 2,
-    elevationAt((x - 32) * 2, (z - 32) * 2, s.elevationSeed, s.terrainPads),
-    (z - 32) * 2,
+    (x - 32) * METRES_PER_CELL,
+    elevationAt((x - 32) * METRES_PER_CELL, (z - 32) * METRES_PER_CELL, s.elevationSeed, s.terrainPads),
+    (z - 32) * METRES_PER_CELL,
   );
 }
 function prop(id, x, z, rotation = 0) {
@@ -291,6 +334,7 @@ function prop(id, x, z, rotation = 0) {
   const rooftop=model.getObjectByName('optional-rooftop-solar');
   if(rooftop){rooftop.removeFromParent();rooftop.geometry.dispose();}
   const g = compactModel(model);
+  if(TREE_SPECIES[id])foliageWind.apply(g);
   g.position.copy(world(x, z));
   g.rotation.y = rotation;
   scene.add(g);
@@ -473,6 +517,12 @@ function drawUtilities() {
   }
 }
 const buildings = new Map();
+const selectionOutline = new THREE.BoxHelper(new THREE.Object3D(), '#3b6545');
+selectionOutline.material.depthTest = false;
+selectionOutline.renderOrder = 20;
+selectionOutline.frustumCulled = false;
+selectionOutline.visible = false;
+scene.add(selectionOutline);
 const assets = new Set(ASSETS.map((a) => a.id));
 let terrainPadCount = s.terrainPads?.length || 0, terrainLayer = s.terrainPads;
 function syncTerrain() {
@@ -480,6 +530,10 @@ function syncTerrain() {
   terrainLayer = s.terrainPads;
   terrainPadCount = s.terrainPads.length;
   updateTerrain(ground, s.elevationSeed, s.terrainPads);
+  scene.remove(accessRoad);
+  disposeModel(accessRoad);
+  accessRoad = compactModel(createAccessRoad(s.elevationSeed, s.terrainPads));
+  scene.add(accessRoad);
   for (const p of s.projects.filter((p) => p.key === "road")) {
     const entry = buildings.get(p.id);
     if (entry) {
@@ -520,7 +574,14 @@ function syncTerrain() {
   }
 }
 function syncBuildings() {
+  const ids = new Set(s.projects.map(p => p.id));
+  for (const [id, entry] of buildings) if (!ids.has(id)) {
+    scene.remove(entry.root);
+    disposeModel(entry.root);
+    buildings.delete(id);
+  }
   syncTerrain();
+  ground.userData.surface.update(s.projects,PROJECTS,footprint);
   autoConnectUtilities(s, PROJECTS);
   for (const p of s.projects) {
     const def = PROJECTS[p.key],
@@ -572,6 +633,7 @@ function syncBuildings() {
     entry.root.position.copy(
       world(p.x + (footprint(p)[0] - 1) / 2, p.z + (footprint(p)[1] - 1) / 2),
     );
+    entry.root.scale.z = bridgeWidthScale(p);
     entry.root.rotation.y = ((p.rotation || 0) * Math.PI) / 2;
     entry.root.visible=!p.felled;
 
@@ -621,6 +683,23 @@ const ghost = new THREE.Mesh(
 ghost.rotation.x = -Math.PI / 2;
 ghost.visible = false;
 scene.add(ghost);
+const accessPreview=new THREE.Group();scene.add(accessPreview);
+let accessPreviewKey=null,placementPreviewPending=false;
+function previewAccess(key,x,z,rotation){
+  if(key!==accessPreviewKey){
+    for(const child of [...accessPreview.children]){child.geometry.dispose();child.material.dispose();accessPreview.remove(child);}
+    accessPreviewKey=key;
+  }
+  if(!key||['road','bridge'].includes(key))return;
+  const p={key,x,z,rotation,work:PROJECTS[key].work};
+  const geometry=accessGeometry(p,PROJECTS[key],footprint(p));
+  let index=0;
+  for(const [points,color,radius] of [[geometry.work,'#55b9d8',.24],[geometry.entrances,'#f3be55',.38]])for(const point of points){
+    const marker=accessPreview.children[index++]||new THREE.Mesh(new THREE.RingGeometry(radius,radius+.08,24),new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide,depthTest:false}));
+    marker.rotation.x=-Math.PI/2;marker.position.copy(world(point.x,point.z));marker.position.y+=.12;marker.renderOrder=10;if(marker.parent!==accessPreview)accessPreview.add(marker);
+  }
+}
+
 const drops = new THREE.BufferGeometry(),
   rainPoints = new Float32Array(600 * 3);
 for (let i = 0; i < 600; i++) {
@@ -647,7 +726,14 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(s.arrivalAnimating ? s.stock : campLocation(s));
+focus(scalePreview ? (new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
+if (savedView) {
+  camera.position.fromArray(savedView.position);
+  controls.target.fromArray(savedView.target);
+  camera.zoom = savedView.zoom;
+  camera.updateProjectionMatrix();
+  controls.update();
+}
 
 function resize() {
   const a = innerWidth / innerHeight;
@@ -660,16 +746,32 @@ function resize() {
 }
 addEventListener("resize", resize);
 resize();
+let messageTimer;
 function message(t) {
+  clearTimeout(messageTimer);
+  t ||= '';
   if ($("message").textContent !== t) $("message").textContent = t;
+  $("message").hidden = !t;
   $("management-message").textContent = t;
+  if (t && !placing && s.stage !== 'arrival' && !s.arrivalAnimating)
+    messageTimer = setTimeout(() => { $("message").textContent = ''; $("message").hidden = true; }, 6000);
 }
 let activeSaveSlot;
 try { activeSaveSlot=saveSlots(localStorage).active(s.mode||"story"); } catch {}
+function viewPauseState() {
+  if (document.querySelector('.village-saves[open]')) return savesWasPaused;
+  if ($('controls-dialog').open) return controlsWasPaused;
+  if (management?.isOpen) return management.resumePaused;
+  if (openPanel) return openPanel === 'people' ? residentsWasPaused : trayWasPaused;
+  return roadWasPaused ?? paused;
+}
+function saveWithView(pauseState = viewPauseState()) {
+  return save({...s, view: {speed, paused: pauseState, position: camera.position.toArray(), target: controls.target.toArray(), zoom: camera.zoom}});
+}
 function persist() {
   if (arrivalPreview) return;
   try {
-    saveSlots(localStorage).autosave(s.mode || "story", save(s), activeSaveSlot);
+    saveSlots(localStorage).autosave(s.mode || "story", saveWithView(), activeSaveSlot);
   } catch {
     message(
       "Progress cannot be saved in this browser. Keep this tab open to continue.",
@@ -678,8 +780,14 @@ function persist() {
 }
 let lastRoad = null,
   shiftPlacement = false;
+let roadWasPaused = null, roadHistory = [], roadsExpanded = false;
 let placementRotation = 0,
   wireframe = null;
+const entranceMarker = new THREE.Mesh(new THREE.RingGeometry(.5,.9,32), new THREE.MeshBasicMaterial({color: '#d83b23', side: THREE.DoubleSide, depthTest:false}));
+entranceMarker.rotation.x = -Math.PI/2;
+entranceMarker.renderOrder = 100;
+entranceMarker.visible = false;
+scene.add(entranceMarker);
 const rotateButton = $("rotate-placement");
 function rotatePlacement(direction = 1) {
   if (!placing) return;
@@ -689,6 +797,7 @@ function rotatePlacement(direction = 1) {
 }
 rotateButton.onclick = () => rotatePlacement();
 function cancel() {
+  const wasRoad = placing === 'road';
   placing = null;
   moving = null;
   lastRoad = null;
@@ -697,15 +806,21 @@ function cancel() {
   rotateButton.hidden = true;
   ghost.visible = false;
   $("cancel").hidden = true;
+  $("undo-road").hidden = true;
+  roadHistory = [];
+  if (roadWasPaused !== null) { paused = roadWasPaused; roadWasPaused = null; updatePauseButton(); }
   grid.visible = false;
+  message(wasRoad ? 'Road planning finished. Planned tiles kept.' : '');
   renderUI();
 }
 function startPlacement(key, id = null) {
+  if (placing) cancel();
   if (openPanel === "terrain-panel") setPanel(null);
   lastRoad = null;
   roadPreview.visible = false;
   placing = key;
   moving = id;
+  if (key === 'road' && !id) { roadWasPaused = paused; paused = true; updatePauseButton(); }
   placementRotation = s.projects.find((p) => p.id === id)?.rotation || 0;
   if (wireframe) {
     scene.remove(wireframe);
@@ -716,6 +831,7 @@ function startPlacement(key, id = null) {
   }
   wireframe = new THREE.Group();
   const model = compactModel(createAsset(PROJECTS[key].asset));
+  model.scale.z = bridgeWidthScale(s.projects.find(p => p.id === id) || {key});
   model.updateMatrixWorld(true);
   model.traverse((o) => {
     if (!o.isMesh) return;
@@ -740,12 +856,15 @@ function startPlacement(key, id = null) {
   rotateButton.textContent = `Rotate · R · ${placementRotation * 90}°`;
   ghost.visible = false;
   $("cancel").hidden = false;
+  $("cancel").textContent = key === 'road' ? 'Finish planning · Esc' : 'Cancel placement · Esc';
+  $("undo-road").hidden = key !== 'road' || !!id;
+  $("undo-road").disabled = true;
   grid.visible = true;
   message(
     key === "bridge"
       ? "Span the river with both ends on dry land. R rotates. Esc cancels."
       : key === "road"
-        ? "Mark a road route. Residents bring materials and build each section. Shift-click extends; Esc finishes planning."
+        ? "Road planning paused · Shift-click extends · Undo removes the last stroke · Esc keeps the plan."
         : "Choose a building site. R rotates. Shift-click repeats. Ground levels automatically. Esc cancels.",
   );
   renderUI();
@@ -759,7 +878,7 @@ for (const [key, d] of Object.entries(PROJECTS)) {
   const count = Object.values(d.materials).reduce((a, b) => a + b, 0);
   b.innerHTML = `<span class="material-warning" aria-hidden="true">!</span><img class="build-art" alt=""/><strong>${d.name}</strong><span class="build-cost">${s.mode === "sandbox" ? "Free" : `${count} materials`} <i>· ${d.size.join("×")}</i></span>`;
   b.setAttribute("aria-label", `${d.name}. ${recipeText(key)}`);
-  b.title = d.description;
+  b.title = `${d.description} ${constructionSpecText(d)}`;
   buildMaterialTooltip.attach(b);
   b.dataset.category = d.category;
   b.onclick = () => { setPanel(null); startPlacement(key); };
@@ -808,13 +927,16 @@ $("world").addEventListener("pointermove", (e) => {
   const p = hit(e);
   if (!p) {
     ghost.visible = false;
+    entranceMarker.visible = false;
     if (wireframe) wireframe.visible = false;
     roadPreview.visible = false;
     return;
   }
+  const nextCell={x:Math.round(p.x/2+32),z:Math.round(p.z/2+32)};
+  if(cell?.x===nextCell.x&&cell?.z===nextCell.z&&shiftPlacement===e.shiftKey&&(ghost.visible||wireframe?.visible))return;
   shiftPlacement = e.shiftKey;
-  cell = { x: Math.round(p.x / 2 + 32), z: Math.round(p.z / 2 + 32) };
-  updatePlacementPreview();
+  cell = nextCell;
+  if(!placementPreviewPending){placementPreviewPending=true;requestAnimationFrame(()=>{placementPreviewPending=false;updatePlacementPreview();});}
 });
 function updatePlacementPreview() {
   if (!cell) return;
@@ -823,7 +945,7 @@ function updatePlacementPreview() {
   if (!placing && !pitching) return;
   const size = pitching
     ? [5, 4]
-    : footprint({ key: placing, rotation: placementRotation });
+    : footprint({ ...s.projects.find(p => p.id === moving), key: placing, rotation: placementRotation });
   ghost.scale.set(size[0] / 2, size[1] / 2, 1);
   ghost.position.copy(
     world(
@@ -837,9 +959,13 @@ function updatePlacementPreview() {
   }
   ghost.position.y += 0.04;
   ghost.visible = true;
+  const placementDetails = {};
+  previewAccess(placing,cell.x,cell.z,placementRotation);
   const error = pitching
     ? campPlacementError(s, cell.x, cell.z)
-    : placementError(s, placing, cell.x, cell.z, moving, placementRotation);
+    : placementError(s, placing, cell.x, cell.z, moving, placementRotation, placementDetails);
+  entranceMarker.visible = !!placementDetails.entrance;
+  if (placementDetails.entrance) entranceMarker.position.copy(world(placementDetails.entrance.x, placementDetails.entrance.z)).add(new THREE.Vector3(0,.15,0));
   roadPreview.visible = false;
   let hint = error;
   if (placing) {
@@ -862,12 +988,13 @@ function updatePlacementPreview() {
     }
     message(
       hint ||
-        `${PROJECTS[placing].name} · ${size.join("×")} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats"}`,
+        `${PROJECTS[placing].name} · Site ${siteDimensions(size)} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats · Gold: entrance · Blue: work access"}`,
     );
   } else if (hint) message(hint);
   ghost.material.color.set(error ? "#c26847" : "#d9eda5");
   if (!pitching && wireframe) {
-    ghost.visible = false;
+    // Keep the reservation visible beneath the physical object wireframe.
+    ghost.visible = true;
     wireframe.visible = true;
     wireframe.position.copy(ghost.position);
     const pad = foundationPad(
@@ -918,6 +1045,7 @@ $("world").addEventListener("pointerup", (e) => {
       return;
     }
     chooseCamp(s, { x, z });
+    message("Camp is ready. Choose what your community needs first.");
     ghost.visible = false;
     focus(campLocation(s));
     persist();
@@ -925,6 +1053,7 @@ $("world").addEventListener("pointerup", (e) => {
     return;
   }
   if (placing) {
+    const roadBefore = placing === 'road' && !moving ? {before: structuredClone(s), lastRoad} : null;
     const error = moving
       ? moveProject(s, moving, x, z, placementRotation)
       : placing === "road" && e.shiftKey && lastRoad
@@ -943,6 +1072,10 @@ $("world").addEventListener("pointerup", (e) => {
     syncBuildings();
     persist();
     renderUI();
+    if (roadBefore) {
+      roadHistory.push({...roadBefore, after: JSON.stringify(s)});
+      $("undo-road").disabled = false;
+    }
   } else {
     // Pick the visible model, including a tree's canopy, before falling back to its cell.
     const modelHit=ray.intersectObjects([...buildings.values()].filter(b=>b.root.visible).map(b=>b.root),true)[0];
@@ -956,14 +1089,29 @@ $("world").addEventListener("pointerup", (e) => {
           z >= p.z &&
           z < p.z + footprint(p)[1],
       )?.id || null;
+    if (selected && lenses.active && openPanel) setPanel(null);
     renderUI();
   }
 });
+$("cancel-project").onclick = () => {
+  const error = cancelProject(s, selected);
+  if (!error) { selected = null; syncBuildings(); persist(); }
+  message(error || s.log[0]);
+  uiSignature = ''; renderUI();
+};
+let controlsWasPaused = false;
+$("show-controls").onclick = () => {
+  controlsWasPaused = paused; paused = true; updatePauseButton();
+  $("controls-dialog").showModal();
+};
+$("close-controls").onclick = () => $("controls-dialog").close();
+$("controls-dialog").addEventListener('close', () => { paused = controlsWasPaused; updatePauseButton(); });
 $("priority").onclick = () => {
   prioritize(s, selected);
   message(s.log[0]);
   renderUI();
 };
+for(const mode of ["salvage","demolish"])$(mode+"-building").onclick=()=>{const error=removeProject(s,selected,mode);message(error||"Resident dismantling queued.");uiSignature="";renderUI();};
 $("move").onclick = () => {
   const p = s.projects.find((p) => p.id === selected);
   if (p) startPlacement(p.key, p.id);
@@ -992,6 +1140,22 @@ $("close-selection").onclick = () => {
   renderUI();
 };
 $("cancel").onclick = cancel;
+$("undo-road").onclick = () => {
+  const entry = roadHistory.at(-1);
+  if (!undoRoadPlan(s, entry)) {
+    message("The village changed since this stroke. Finish planning to keep the current plan.");
+    return;
+  }
+  roadHistory.pop();
+  lastRoad = entry.lastRoad;
+  syncBuildings();
+  uiSignature = "";
+  renderUI();
+  persist();
+  if (roadHistory.length) roadHistory.at(-1).after = JSON.stringify(s);
+  $("undo-road").disabled = !roadHistory.length;
+  message("Last road stroke undone.");
+};
 addEventListener("keyup", (e) => {
   if (e.key === "Shift") {
     shiftPlacement = false;
@@ -999,50 +1163,64 @@ addEventListener("keyup", (e) => {
   }
 });
 addEventListener("keydown", (e) => {
-  const editing =
-    e.target.closest?.('input,textarea,select,[contenteditable="true"]') ||
-    $("management").open || $("people").open;
-  if (e.key === "Shift" && !editing) {
+  const dialogOpen = !!document.querySelector('dialog[open]');
+  const editing = e.target.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"])');
+  if (e.key === "Shift" && !editing && !dialogOpen) {
     shiftPlacement = true;
     updatePlacementPreview();
   }
-  if (!editing && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) {
-    if (e.code === "KeyB" && s.stage === "playing") {
+  // Escape belongs to the topmost dialog, including saves and confirmations.
+  if (e.key === "Escape" && !dialogOpen) {
+    if (editing && e.target.type === 'search' && e.target.value) {
       e.preventDefault();
-      setPanel(openPanel === "build" ? null : "build");
+      e.target.value = '';
+      e.target.dispatchEvent(new Event('input', {bubbles: true}));
+      return;
     }
-    if (e.code === "KeyG") {
-      e.preventDefault();
-      $("grid").click();
-    }
-    if (e.code === "KeyF") {
-      e.preventDefault();
-      if (selected) $("focus-selection").click();
-      else focus(campLocation(s));
-    }
-    if (e.code === "Space" && !e.target.closest?.("button,summary,a")) {
-      e.preventDefault();
-      $("pause").click();
-    }
-  }
-  if (
-    e.code === "KeyR" &&
-    placing &&
-    !e.repeat &&
-    !e.target.closest?.("input,textarea,select,dialog")
-  ) {
-    e.preventDefault();
-    rotatePlacement(e.shiftKey ? -1 : 1);
-  }
-  if (e.key === "Escape" && !$("management").open && !$("people").open) {
     if (placing) cancel();
-    else if (selected) {
-      selected = null;
-      uiSignature = "";
-      renderUI();
-    } else if (openPanel) setPanel(null);
+    else if (selected) { selected = null; uiSignature = ''; renderUI(); }
+    else if (openPanel) setPanel(null);
+    else document.querySelector('.view-menu').open = false;
+    $("world").focus({preventScroll: true});
+    return;
+  }
+  // Search remains available inside Resources, but never steals typed text.
+  if (e.code === 'Slash' && !e.shiftKey && !ignoreGameShortcut(e) &&
+      (!dialogOpen || $("management").open && management.view === 'resources')) {
+    e.preventDefault();
+    if (!dialogOpen) {
+      if (s.stage !== 'playing') return;
+      setPanel('build');
+    }
+    const input = $(dialogOpen ? 'resource-search' : 'build-search');
+    input.focus(); input.select();
+    return;
+  }
+  if (ignoreGameShortcut(e, dialogOpen)) return;
+  if (e.code === 'KeyR' && placing) {
+    e.preventDefault(); rotatePlacement(e.shiftKey ? -1 : 1); return;
+  }
+  if (e.shiftKey) return;
+  const panel = PANEL_SHORTCUTS[e.code], screen = MANAGEMENT_SHORTCUTS[e.code];
+  if ((panel || screen) && s.stage === 'playing') {
+    e.preventDefault();
+    $("world").focus({preventScroll: true});
+    if (panel) setPanel(openPanel === panel ? null : panel);
+    else management.open(screen);
+    if (!document.querySelector('dialog[open]')) $("world").focus({preventScroll: true});
+  } else if (SPEED_SHORTCUTS[e.code]) {
+    e.preventDefault(); setSpeed(SPEED_SHORTCUTS[e.code]);
+  } else if (e.code === 'KeyG') {
+    e.preventDefault(); $("grid").click();
+  } else if (e.code === 'KeyF') {
+    e.preventDefault();
+    if (selected) $("focus-selection").click();
+    else focus(campLocation(s));
+  } else if (e.code === 'Space' && !e.target.closest?.('button,summary,a')) {
+    e.preventDefault(); $("pause").click();
   }
 });
+
 $("town").onclick = () => {
   if (supplyRun(s, $("purchase").value)) {
     message(s.log[0]);
@@ -1070,13 +1248,17 @@ function updatePauseButton() {
 }
 updatePauseButton();
 $("pause").onclick = () => {
+  if (roadWasPaused !== null) { cancel(); return; }
   paused = !paused;
   updatePauseButton();
 };
-$("speed").onclick = () => {
-  speed = [1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4];
+function setSpeed(value) {
+  speed = value;
   $("speed").textContent = `${speed}×`;
-};
+  $("speed").setAttribute('aria-label', `Simulation speed ${speed}×. Keys 1 to 4 select speed.`);
+}
+setSpeed(speed);
+$("speed").onclick = () => setSpeed([1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4]);
 $("home").onclick = () => focus(campLocation(s));
 $("river-view").onclick = () => focus(riverAccess(s.landSeed));
 $("rotate-left").onclick = () => navigation.rotate(-Math.PI / 2);
@@ -1091,7 +1273,7 @@ function askReset() {
   $("reset-dialog").showModal();
 }
 let savesWasPaused=false;
-installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:save(s)}),beforeOpen:()=>{savesWasPaused=paused;paused=true;updatePauseButton();},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
+installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:saveWithView(savesWasPaused)}),beforeOpen:()=>{if(placing)cancel();savesWasPaused=paused;paused=true;updatePauseButton();},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
 $("main-menu").onclick = () => {
   persist();
   location.href = "./menu.html";
@@ -1106,8 +1288,19 @@ $("sandbox-instant").onclick = () => {
 $("restart").onclick = askReset;
 $("keep").onclick = () => $("reset-dialog").close();
 $("confirm-reset").onclick = () => {
+  // Keep the old named village intact; a new world must not autosave into it.
+  try {
+    const slots=saveSlots(localStorage),mode=s.mode||'story';
+    slots.autosave(mode,save(s),activeSaveSlot);
+    slots.detach(mode);
+    activeSaveSlot=null;
+  } catch {
+    message('Could not preserve the current save. Free some storage before starting again.');
+    return;
+  }
   // pagehide also saves: replace live state before navigating so it cannot resurrect the old camp.
-  s = s.mode === "sandbox" ? createSandbox() : createWeekend();
+  const seed = freshLandSeed();
+  s = s.mode === "sandbox" ? createSandbox(seed) : createWeekend(seed);
   persist();
   location.reload();
 };
@@ -1177,6 +1370,10 @@ function renderUtilityUI() {
     (key, i) =>
       `${Math.floor(nodes.reduce((a, n) => a + n.water[i], 0))} ${key}`,
   ).join(" · ");
+  const warnings = nodes.flatMap(n => wasteWarnings(n).map(text => `${labels.find(([id])=>id===n.id)?.[1]}: ${text}`));
+  $("tank-attention").hidden = !warnings.length;
+  $("tank-attention").textContent = `${warnings.length} waste tank${warnings.length===1?' needs':'s need'} attention`;
+  $("tank-attention").title = warnings.join('\n');
   $("utility-summary").textContent =
     `Power: ${generation.toFixed(1)} kW available / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}.${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Build more treatment capacity." : ""}`;
   $("utility-links").replaceChildren();
@@ -1218,20 +1415,33 @@ function renderUtilityUI() {
           .map(([id, d]) => [id, d.name])
       : [],
   );
+  const activity = p && productionActivity(s, p, PROCESSES);
+  $("production-progress").hidden = !activity;
+  $("production-progress").value = activity?.progress || 0;
+  $("production-activity").textContent = activity?.detail || "";
+  $("production-activity").hidden = !activity;
   $("production-controls").hidden = !$("production").value;
-  $("queue-production").disabled = !node || !$("production").value;
-  $("repeat-production").hidden = !!p && PROJECTS[p.key].kind==='wild-tree';
+  $("queue-production").disabled = !node || node.enabled === false || !$("production").value;
+  const upgrade = p && $("production").value === "solar_upgrade" ? upgradeAction(p, s.operations || []) : null;
+  $("repeat-production").hidden = !!upgrade || (!!p && PROJECTS[p.key].kind==='wild-tree');
   $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : 'Start batch';
+  if (node?.enabled === false) $("queue-production").textContent = "Switch on to produce";
+  if (activity) { $("queue-production").textContent = activity.label; $("queue-production").disabled = true; }
+  if (upgrade) { $("queue-production").textContent = upgrade.label; $("queue-production").disabled ||= upgrade.disabled; }
+  const batchBlocker=productionBlocker(s,selected,$("production").value);
+  disabledReason($("queue-production"),batchBlocker);
+  $("queue-production").disabled ||= !!batchBlocker;
   $("repeat-production").disabled = !node || !$("production").value;
   $("repeat-production").textContent = p?.repeat
     ? "Stop repeating"
-    : "Keep 24 in stock";
+    : `Keep ${productionTarget(p || {})} in stock`;
   $("toggle-building").hidden = !canSwitchBuilding(sys,node);
+  disabledReason($("toggle-building"), "This structure has no switchable service.");
   $("toggle-building").disabled = !canSwitchBuilding(sys,node);
   $("toggle-building").textContent = node?.enabled ? "Switch off" : "Switch on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done);
   $("building-service").textContent = node
-    ? `${hasPowerService(sys,node) ? `Power ${(node.power * 100).toFixed(0)}%` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
+    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : `Power ${(node.power * 100).toFixed(0)}%` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
         (k, i) =>
           node.capacity[i]
             ? `${k}: ${node.water[i].toFixed(1)}/${node.capacity[i]}`
@@ -1242,6 +1452,7 @@ function renderUtilityUI() {
           " · ",
         )} ${op ? op.status || "Resident job queued" : p.productionStatus || (p.readyAt > s.time ? `Growing: ${Math.ceil(p.readyAt - s.time)} seconds remaining` : "")}`
     : "";
+  if(p){const status=buildingOperatingStatus(s,p);$("building-service").textContent=`${status.state}: ${status.reason} · ${$("building-service").textContent}`;}
   const recipe=PROCESSES[$("production").value];
   if(p && recipe?.deposit) $("building-service").textContent+=` · Deposit: ${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} remaining`;
   $("building-service").hidden = !$("building-service").textContent.trim();
@@ -1292,8 +1503,8 @@ $("toggle-building").onclick = () => {
 $("sell").onclick = () => {
   message(
     sellMaterial(s, $("purchase").value)
-      ? "Surplus sold at half the purchase price."
-      : "Not enough available supplies to sell.",
+      ? "Sale queued. A resident will take the reserved goods to town; payment is received there."
+      : tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Sale unavailable.",
   );
   persist();
   renderUI();
@@ -1319,7 +1530,7 @@ function filterBuildings() {
     const button=$(`build-${key}`);
     if(!button)continue;
     // Search the entire catalogue, even when a category was selected earlier.
-    button.hidden=query ? !`${d.name} ${d.description} ${buildingCategory(d)}`.toLowerCase().includes(query)
+    button.hidden=query ? !`${productionSearchText(d, PROCESSES, MATERIALS)} ${buildingCategory(d)}`.toLowerCase().includes(query)
       : !inBuildCategory(key,d,category);
     if(!button.hidden){count++;illustrate(button.querySelector("img"),d.asset);}
   }
@@ -1346,6 +1557,7 @@ $("terrain-undo").onclick = () => {
   s.terrainPads = s.terrainPads.filter(p=>!p.terraform);
   if(layer) s.terrainPads.push(layer);
   syncTerrain(); syncBuildings(); persist();
+  disabledReason($("terrain-undo"), "There are no terrain edits to undo in this session.");
   $("terrain-undo").disabled = !terrainHistory.length;
   message("Terrain edit undone.");
 };
@@ -1384,6 +1596,7 @@ $("people").addEventListener('close',()=>{
 });
 $("toggle-build-list").onclick = () => setPanel(null);
 filterBuildings();
+let arrivalMessageShown = false;
 function renderUI() {
   const signature = JSON.stringify([
     openPanel,
@@ -1414,15 +1627,18 @@ function renderUI() {
     selected,
     placing,
     s.log,
-    s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
+    s.events,
+    s.people.map((r) => [r.home, r.action, r.job, r.cargo, r.haulLoads, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), JSON.stringify(r.mind), downtimeLabel(r), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
     s.projects.map((p) => [
-      p.id, p.delivered, p.staged,
+      p.id, p.delivered, p.staged, p.pendingMaterials,
       Math.floor((p.work / PROJECTS[p.key].work) * 100),
     ]),
   ]);
   if (signature === uiSignature) return;
   uiSignature = signature;
   const active = s.stage !== "arrival" && !s.arrivalAnimating;
+  if (active && arrivalMessageShown) message("");
+  arrivalMessageShown = !active;
   if(s.arrivalAnimating) message("Our friends are arriving…");
   else if(s.stage === "arrival") message("Click clear ground to pitch your tents.");
   $("auto-buy").hidden=s.mode==='sandbox';
@@ -1477,11 +1693,13 @@ function renderUI() {
     $("supplies").children[i].querySelector("b").textContent =
       s.mode === "sandbox" && i < 3 ? "∞" : counter[1];
     const button=$("supplies").children[i],rate=trends?.[counter[0]]??null;
+    if (i === 0) { button.dataset.shortcut = 'M'; button.setAttribute('aria-keyshortcuts', 'M'); }
     const trend=button.querySelector('.resource-trend');
     const unlimited=s.mode==='sandbox'&&i<3;
     trend.textContent=unlimited?'Unlimited':formatTrend(rate,i===0);
     trend.dataset.direction=rate>.05?'up':rate<-.05?'down':'flat';
     button.title=`Open ${counter[3]} management. ${unlimited?'Unlimited in sandbox.':rate===null?'Gathering trend data (first five in-game minutes).':`${i===2?'Stored energy':counter[2]}: ${formatTrend(rate,i===0)} net change over the last in-game hour, or time observed since loading. Includes spending, consumption and deliveries.`}`;
+    disabledReason(button, "Wait for the residents to arrive and choose a campsite to manage village supplies.");
     button.disabled = !active;
   });
   const minutes = 9 * 60 + Math.floor(s.time * 0.45);
@@ -1496,6 +1714,19 @@ function renderUI() {
   ).length;
   $("completed-panel").hidden = builtCount === 0;
   $("completed-title").textContent = `Around the village · ${builtCount} built`;
+  const roads = s.projects.filter(p => p.key === "road");
+  let roadGroup;
+  if (roads.length) {
+    roadGroup = document.createElement("details");
+    roadGroup.className = "road-project-group";
+    roadGroup.open = roadsExpanded;
+    roadGroup.ontoggle = () => { if (roadGroup.isConnected) roadsExpanded = roadGroup.open; };
+    const ready = roads.filter(p => p.work >= PROJECTS.road.work).length;
+    const summary = document.createElement("summary");
+    summary.textContent = `Roads · ${roads.length} tiles · ${ready} ready`;
+    roadGroup.append(summary);
+    $(ready === roads.length ? "completed-tasks" : "tasks").append(roadGroup);
+  }
   for (const p of s.projects) {
     if(p.natural)continue;
     const d = PROJECTS[p.key],
@@ -1504,26 +1735,25 @@ function renderUI() {
     const b = document.createElement("button");
     const done = p.work >= d.work;
     div.classList.toggle("complete", done);
-    b.innerHTML = `<img alt=""/><span>${d.name}</span><em>${done ? "✓" : Math.floor((p.work / d.work) * 100) + "%"}</em>`;
+    const construction = constructionProgress(s, p, d, requiredLoads(p));
+    b.innerHTML = `<img alt=""/><span>${projectLabel(p, PROJECTS)}</span><em>${done ? "✓" : construction.phase}</em>`;
     illustrate(b.querySelector("img"), d.asset);
     b.onclick = () => {
       selected = p.id;
       renderUI();
     };
     const progress = document.createElement("progress");
-    progress.max = d.work;
-    progress.value = p.work;
+    progress.max = 1;
+    progress.value = construction.value;
+    progress.setAttribute('aria-label', `${d.name}: ${construction.phase}`);
     div.append(b, progress);
     if (!done) {
       const workStatus = document.createElement("small");
       workStatus.className = "task-work-status";
-      const workers = s.people.filter(
-        (r) => r.job === p.id && r.action === "build",
-      ).length;
-      workStatus.textContent = constructionStatus(s, p, d, requiredLoads(p.key));
+      workStatus.textContent = `${construction.detail} · ${construction.workers}`;
       div.append(workStatus);
     }
-    $(done ? "completed-tasks" : "tasks").append(div);
+    (p.key === "road" ? roadGroup : $(done ? "completed-tasks" : "tasks")).append(div);
   }
   $("roster").replaceChildren();
   $("resident-detail").replaceChildren();
@@ -1560,10 +1790,14 @@ function renderUI() {
               ? PROCESSES[
                   s.operations.find((o) => o.id === r.operation)?.recipe
                 ]?.name || "Preparing supplies"
-              : (r.action === "relax" && COMMUNITY[r.leisureKind]?.activity) ||
+              : downtimeLabel(r) ||
                 actionText[r.action] ||
                 "Settling in";
     if(r.job && r.cargo && r.haulLoads) status.textContent = `Carrying ${r.haulLoads} load${r.haulLoads===1?'':'s'} to ${r.haulStage==='storage'?'nearby storage':PROJECTS[s.projects.find(p=>p.id===r.job)?.key]?.name || 'the building site'}`;
+    if(r.action==='service')status.textContent='Servicing village equipment';
+    if(r.outsideWork)status.textContent=r.outsideWork.phase==='away'?'Working in town':'Commuting to/from work';
+    const jobProject = residentProject(s, r);
+    if (jobProject) status.textContent += ` · ${projectLabel(jobProject, PROJECTS)}`;
     if(r.needBlocked && !r.needTask) status.textContent += ` · ${r.needBlocked}`;
     status.className = "resident-status";
     const needs=document.createElement('div');
@@ -1591,8 +1825,23 @@ function renderUI() {
       const role=document.createElement('p');role.textContent=profile.role;
       const traits=document.createElement('p');traits.className='resident-traits';traits.textContent=profile.traits.join(' · ');
       identity.append(title,role,traits);heading.append(face,identity);detail.append(heading);
+      const locate=document.createElement('button');
+      locate.textContent='Find in village';
+      locate.setAttribute('aria-label',`Find ${r.name} in village`);
+      locate.onclick=()=>{
+        setPanel(null);
+        focus(r);
+        message(`${r.name} · ${status.textContent}`);
+      };
+      detail.append(locate);
+      if (jobProject) {
+        const viewJob = document.createElement('button');
+        viewJob.textContent = `View project · ${projectLabel(jobProject, PROJECTS)}`;
+        viewJob.onclick = () => { setPanel(null); selected = jobProject.id; focus(jobProject); uiSignature = ''; renderUI(); };
+        detail.append(viewJob);
+      }
       const tabs=document.createElement('nav');tabs.className='resident-tabs';tabs.setAttribute('aria-label','Profile sections');
-      for(const label of ['Overview','Skills','Relationships']){
+      for(const label of ['Overview','Story','Skills','Relationships']){
         const tab=document.createElement('button');tab.textContent=label;tab.setAttribute('aria-pressed',String(residentTab===label));
         tab.onclick=()=>{residentTab=label;uiSignature='';renderUI();};tabs.append(tab);
       }
@@ -1600,9 +1849,41 @@ function renderUI() {
       const paragraph=(text,kind='p')=>{const el=document.createElement(kind);el.textContent=text;detail.append(el);};
       if(residentTab==='Overview'){
         const activity=document.createElement('div');activity.className='resident-activity';activity.textContent=status.textContent;detail.append(activity);
+        paragraph('Home','h3');
+        const homePicker=document.createElement('select');
+        homePicker.setAttribute('aria-label',`Assign home for ${r.name}`);
+        const campOption=document.createElement('option');campOption.value='';campOption.textContent='Unassigned · use available shelter';homePicker.append(campOption);
+        for(const home of availableHomes(s)) {
+          const option=document.createElement('option'), occupants=homeResidents(s,home.id), beds=PROJECTS[home.key].beds||2;
+          option.value=String(home.id);option.textContent=`${PROJECTS[home.key].name} · (${home.x}, ${home.z}) · ${occupants.length}/${beds} beds`;
+          option.disabled=home.id!==r.home && (occupants.length>=beds || s.infrastructure.nodes[home.id]?.enabled===false);
+          homePicker.append(option);
+        }
+        homePicker.value=r.home==null?'':String(r.home);homePicker.disabled=s.stage!=='playing';
+        homePicker.onchange=()=>{const error=assignHome(s,r.id,homePicker.value===''?null:Number(homePicker.value));message(error||'Home assignment updated. Applies at the next rest.');uiSignature='';persist();renderUI();};
+        detail.append(homePicker);
+        const housemates=homeResidents(s,r.home).filter(other=>other!==r);
+        if(r.home!=null)paragraph(housemates.length?`Lives with ${housemates.map(other=>other.name).join(', ')}.`:'Lives here alone.');
+        else if(!availableHomes(s).length)paragraph('Complete a house to assign a permanent home.');
         paragraph('Needs','h3');detail.append(needs);
+        paragraph('Outside work','h3');paragraph(outsideWorkText(r));
+        const jobToggle=document.createElement('button');jobToggle.textContent=r.outsideJobEnabled?'Outside work: on':'Outside work: off';jobToggle.setAttribute('aria-pressed',String(!!r.outsideJobEnabled));jobToggle.onclick=()=>{setOutsideWork(s,r,!r.outsideJobEnabled);uiSignature='';renderUI();};detail.append(jobToggle);
+        paragraph('On my mind','h3');paragraph(currentThought(s,r,PROJECTS));
+        const wish=aspirationStatus(s,r,PROJECTS);
+        paragraph('A personal hope','h3');paragraph(`${wish.label} · ${wish.status}`);paragraph(wish.reason);
         paragraph('About '+r.name,'h3');paragraph(profile.bio);
         paragraph(profile.effect);paragraph(`Enjoys ${profile.hobby.toLowerCase()}.`);
+        paragraph('Recent memories','h3');
+        if(!r.mind?.memories.length)paragraph('Memories will appear after conversations, personal time, and meaningful village milestones.');
+        else for(const memory of r.mind.memories.slice(0,3))paragraph(memory.text);
+      } else if(residentTab==='Story'){
+        paragraph('Before the village','h3');paragraph(profile.backstory);
+        for(const [label,text] of [
+          ['What I want',profile.desire],['What drives me',profile.motivation],
+          ['What I fear',profile.fear],['Where I struggle',profile.flaw],
+          ['What I need from others',profile.boundary],['Room to grow',profile.growth],
+        ]){paragraph(label,'h3');paragraph(text);}
+
       } else if(residentTab==='Skills'){
         paragraph('Specialties · 25% faster','h3');
         const list=document.createElement('div');list.className='resident-specialties';
@@ -1613,14 +1894,17 @@ function renderUI() {
         const progress=document.createElement('progress');progress.max=15;progress.value=bonus;progress.setAttribute('aria-label','Experience bonus');detail.append(progress);
         paragraph('Hands-on work gradually improves efficiency, up to a 15% bonus.');
       } else {
-        paragraph('Growing together','h3');paragraph('Shared conversations strengthen friendships. Familiar friends are preferred when nearby.');
+        paragraph('Growing together','h3');paragraph('Residents make time for willing friends, shared interests, and listening. Sleep, urgent needs, and quiet time come first.');
         for(const friend of s.people.filter(p=>p!==r)){
           const score=r.friendships?.[friend.id]||0,row=document.createElement('div');row.className='relationship-row';
           const img=document.createElement('img');illustrate(img,friend.id);img.alt='';
           const text=document.createElement('div');const n=document.createElement('strong');n.textContent=friend.name;
           const label=document.createElement('p');label.textContent=friendshipLabel(score);
           const bar=document.createElement('progress');bar.max=100;bar.value=score;bar.setAttribute('aria-label',`Friendship with ${friend.name}`);
-          text.append(n,label,bar);row.append(img,text);detail.append(row);
+          text.append(n,label,bar);
+          const memory=r.mind?.memories.find(m=>m.other===friend.id);
+          if(memory){const note=document.createElement('p');note.textContent=memory.text;text.append(note);}
+          row.append(img,text);detail.append(row);
         }
       }
       $("resident-detail").append(detail);
@@ -1629,32 +1913,43 @@ function renderUI() {
   }
   const purchase = MATERIALS[$("purchase").value];
   $("town").textContent =
-    `Fetch ${materialText($("purchase").value, purchase.quantity)} · R$${purchase.price}`;
+    `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · R$${(purchase.price + transportCost(s)).toFixed(2)} incl. transport`;
+  const supplierIssue=supplierError(s,{[$("purchase").value]:purchase.quantity},MATERIALS);
+  disabledReason($("town"), supplierIssue || (s.stage !== "playing" ? "Choose a campsite first." : "Wait for an available vehicle or delivery and enough uncommitted savings for supplies and transport."));
   $("town").disabled =
-    !!s.trip || s.money < purchase.price || s.stage !== "playing";
+    !!supplierIssue ||     (s.deliveryOnly?!!s.delivery:(!!s.trip&&!!s.secondTrip)) || spendableMoney(s) < purchase.price + transportCost(s) || s.stage !== "playing";
   $("inventory").textContent = Object.keys(MATERIALS)
     .map((id) => materialText(id, materialCount(s, id)))
     .join(" · ");
+  const market=s.trade?.market?.[$("purchase").value],marketDay=Math.floor((540+s.time*.45)/1440);
+  const sale=buyerQuote($("purchase").value,purchase,market?.day===marketDay?market.units:0);
   $("sell").textContent =
-    `Sell ${materialText($("purchase").value, purchase.quantity)} · R$${Math.floor(purchase.price * 0.5)}`;
+    `Queue sale: ${materialText($("purchase").value, purchase.quantity)} · R$${(sale.cents/100).toFixed(2)}`;
   $("sell").disabled =
-    materialCount(s, $("purchase").value) < purchase.quantity ||
-    !purchase.quantity;
-  $("trip").textContent = s.trip
-    ? `${s.people.find((r) => r.id === s.trip.person).name}: ${{ boarding: "walking to the car", outbound: "driving to town", away: "collecting supplies in town", inbound: "driving home", unloading: "unloading supplies" }[s.trip.phase]}.`
-    : `Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. Buy essentials or sell locally produced surplus.`;
+    !!tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error;
+  $("sell").title=tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Payment after trading in town; combine batches to share transport costs.";
+  const journeys=activeTrips(s).map(trip=>`${s.people.find(r=>r.id===trip.person).name}: ${{boarding:"walking to the car",outbound:"driving to town",away:"trading in town",inbound:"driving home",unloading:"unloading supplies"}[trip.phase]}`);
+  if(s.delivery)journeys.push(`Supplier delivery: ${Math.ceil(s.delivery.left*.45)} game minutes remaining`);
+  $("trip").textContent = journeys.length?journeys.join(' · '):`Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. R$${spendableMoney(s).toFixed(2)} available after collection commitments. ${s.deliveryOnly?'Delivery':'Car trip'}: R$${transportCost(s).toFixed(2)}.`;
+  const equipmentBlocked = materialCount(s,$("purchase").value)-protectedEquipment(s,$("purchase").value)<purchase.quantity;
+  $("sell").disabled ||= equipmentBlocked;
+  disabledReason($("sell"),equipmentBlocked ? "Return borrowed equipment or repair worn equipment before selling it." : $("sell").title);
   $("rain").hidden = !s.rainSeen || s.rainResolved;
+  disabledReason($("boards"), `You need 2 timber pieces to protect the supplies; ${s.wood} are available.`);
   $("boards").disabled = s.wood < 2;
   $("log").replaceChildren(
-    ...s.log.map((t) => {
+    ...eventHistory(s).map((event) => {
       const li = document.createElement("li");
-      li.textContent = t;
+      const time = document.createElement("small");
+      time.textContent = `${eventTime(event.time)}${event.count > 1 ? ` · ×${event.count}` : ""}`;
+      li.append(time, document.createTextNode(event.text));
       return li;
     }),
   );
   for (const key of Object.keys(PROJECTS)) {
     const b = $(`build-${key}`);
     if(!b)continue;
+    disabledReason(b, "This project is already planned or built. Select the existing project to manage it.");
     b.disabled =
       s.mode !== "sandbox" &&
       !PROJECTS[key].repeatable &&
@@ -1662,7 +1957,7 @@ function renderUI() {
     const missing = missingMaterials(s, key);
     buildMaterialTooltip.update(b,missing);
     const purchase = blueprintPurchase(s, key);
-    b.title = `${PROJECTS[key].description} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: R$${purchase.cost.toFixed(2)}. Resident pickup included.` : "All materials available."}`;
+    b.title = `${PROJECTS[key].description} ${constructionSpecText(PROJECTS[key])} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: R$${purchase.cost.toFixed(2)}. Collection reserve: R$${purchase.transport.toFixed(2)} across outstanding orders.` : "All materials available."}`;
     b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? "Free"
       : s.autoBuy===false && missing.length ? 'Missing materials'
       : purchase.cost ? `Auto-buy R$${purchase.cost.toFixed(2)}`
@@ -1675,14 +1970,21 @@ function renderUI() {
   const p = s.projects.find((p) => p.id === selected);
   $("selection").hidden = !p || s.stage === "evening";
   if (p) {
-    $("selected-name").textContent = PROJECTS[p.key].name;
+    $("selected-name").textContent = projectLabel(p, PROJECTS);
     $("move").hidden=!!PROJECTS[p.key].natural;
+    for(const mode of ["salvage","demolish"]){$(mode+"-building").hidden=!!PROJECTS[p.key].natural;$(mode+"-building").disabled=!!p.removal;}
     $("copy-building").hidden = PROJECTS[p.key].natural ||
       s.mode !== "sandbox" && !PROJECTS[p.key].repeatable;
     illustrate($("selected-art"), PROJECTS[p.key].asset);
-    $("selected-state").textContent = finished(s, p.key)
-      ? "READY TO USE"
-      : `${Math.floor((p.work / PROJECTS[p.key].work) * 100)}% BUILT`;
+    const construction = constructionProgress(s, p, PROJECTS[p.key], requiredLoads(p));
+    $("selected-state").textContent = p.removal ? `${p.removal.status} · ${Math.floor(p.removal.work/p.removal.required*100)}%` : p.work < PROJECTS[p.key].work ? construction.phase : operationalStatus(p, s.infrastructure?.nodes[p.id], productionActivity(s,p,PROCESSES));
+    $("selected-benefit").textContent = buildingBenefit(PROJECTS[p.key], PROCESSES, COMMUNITY);
+    $("selected-benefit").hidden = !$("selected-benefit").textContent;
+    $("construction-summary").hidden = p.work >= PROJECTS[p.key].work;
+    $("construction-detail").textContent = construction.detail;
+    $("construction-workers").textContent = construction.workers;
+    $("construction-progress").value = construction.value;
+    $("construction-progress").setAttribute('aria-label', construction.phase);
     const livestock =
       p.key === "coop"
         ? " Housing: 3 hens / 3 places."
@@ -1693,8 +1995,15 @@ function renderUI() {
             ? " Housing: 0 goats / 2 places."
             : "";
     $("selected-desc").textContent =
-      `${PROJECTS[p.key].description}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+      `${projectDescription(PROJECTS[p.key], p)} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Reserved bill: ${Object.entries(p.billOfMaterials||PROJECTS[p.key].materials).map(([id,n])=>materialText(id,n)).join(" · ")}. Delivered ${p.delivered}/${requiredLoads(p)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+    disabledReason($("priority"), "Construction is complete; this building no longer needs construction priority.");
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
+    $("cancel-project").hidden = !!PROJECTS[p.key].natural || p.work > 0;
+    const cancelError = cancelProjectError(s, p.id);
+    $("cancel-project").disabled = !!cancelError;
+    $("cancel-project").title = cancelError || 'Remove this unstarted plan and return reserved supplies.';
+    $("cancel-project-note").textContent = p.work === 0 && !PROJECTS[p.key].natural ? cancelError : '';
+    $("cancel-project-note").hidden = !$("cancel-project-note").textContent;
   }
 }
 for (const group of RESOURCE_GROUPS) {
@@ -1711,6 +2020,8 @@ for (const group of RESOURCE_GROUPS) {
   if (options.children.length) $("purchase").append(options);
 }
 management = createManagement({
+  build: (key) => { setPanel(null); document.querySelector(".view-menu").open = false; startPlacement(key); },
+  beforeOpen: () => { if (placing) cancel(); },
   state: () => s,
   refresh: () => {
     uiSignature = "";
@@ -1731,6 +2042,7 @@ management = createManagement({
     updatePauseButton();
   },
 });
+$("tank-attention").onclick = () => management.open("water");
 $("supplies").onclick = (event) => {
   const button = event.target.closest("[data-panel]");
   if (button) management.open(button.dataset.panel);
@@ -1754,12 +2066,10 @@ function frame(now) {
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
   if (!paused && !document.hidden) {
-    accumulator += dt * speed;
-    while (accumulator >= 0.1) {
+    accumulator = simulationFrame(accumulator, dt, speed, step => {
       previousMotion = captureMotion(s);
-      tick(s, 0.1);
-      accumulator -= 0.1;
-    }
+      tick(s, step);
+    });
   }
   wildlife.update(!paused && !document.hidden ? dt : 0);
   capybaras.update(!paused && !document.hidden ? dt : 0);
@@ -1767,6 +2077,10 @@ function frame(now) {
   const arrivalTime=Math.max(0,s.arrivalElapsed-(paused?0:0.1)+accumulator);
   drawCamp();
   syncBuildings();
+  if (!placing) entranceMarker.visible = false;
+  const selectedModel = buildings.get(selected)?.root;
+  selectionOutline.visible = !!selectedModel && !placing;
+  if (selectionOutline.visible) { selectedModel.updateWorldMatrix(true, true); selectionOutline.setFromObject(selectedModel); }
   if (!paused && !document.hidden) animalTime += dt * speed;
   for (const [id, entry] of buildings)
     if (entry.animals.length)
@@ -1775,14 +2089,21 @@ function frame(now) {
     if (entry.fire) animateFire(entry.fire, animalTime + id * 2.73);
   entrance.position.copy(world(s.stock.x, s.stock.z));
   for (const [index, vehicle] of vehicles.entries()) {
-      const trip = s.trip && {
-        ...s.trip,
-        left: s.trip.left + (s.time - visual.time),
-      };
+      const current=activeTrips(s).find(t=>t.vehicle===index);
+      const trip=current&&{...current,left:current.left+(s.time-visual.time)};
       const pose = s.arrivalAnimating ? {...vehiclePose(arrivalTime,index),visible:true} : townCarPose(trip, index);
       vehicle.root.visible = pose.visible;
-      vehicle.root.position.set(pose.x, 0, pose.z);
-      vehicle.root.rotation.y = pose.yaw;
+      vehicle.root.position.set(pose.x, elevationAt(pose.x, pose.z, s.elevationSeed, s.terrainPads), pose.z);
+      const forwardX = Math.sin(pose.yaw), forwardZ = Math.cos(pose.yaw);
+      const height = (right, forward) => elevationAt(
+        pose.x + Math.cos(pose.yaw) * right + forwardX * forward,
+        pose.z - Math.sin(pose.yaw) * right + forwardZ * forward,
+        s.elevationSeed, s.terrainPads);
+      vehicle.root.rotation.set(
+        -Math.atan2(height(0, 1.4) - height(0, -1.4), 2.8),
+        pose.yaw,
+        Math.atan2(height(.8, 0) - height(-.8, 0), 1.6),
+        "YXZ");
       for (const wheel of vehicle.wheels) {
         wheel.rotation.set(0, 0, Math.PI / 2);
         wheel.rotateY((pose.z + 22) / 0.41);
@@ -1792,13 +2113,13 @@ function frame(now) {
     const g = actors[i];
     if(s.arrivalAnimating){
       const pose=arrivalPose(arrivalTime,i);
-      g.visible=pose.visible;g.position.set(pose.x,pose.y,pose.z);g.rotation.y=pose.yaw;
+      g.visible=pose.visible;g.position.set(pose.x,pose.y+elevationAt(pose.x,pose.z,s.elevationSeed,s.terrainPads),pose.z);g.rotation.y=pose.yaw;
       animateResident(g.rig,pose.walking?'walk':'idle',arrivalTime+i*.7,paused?0:dt*speed);
       continue;
     }
-    g.visible =
+    g.visible = r.outsideWork?.phase!=='away' &&
       (r.action !== "town" ||
-        ["boarding", "unloading"].includes(s.trip?.phase)) &&
+        ["boarding", "unloading"].includes(activeTrips(s).find(t=>t.person===r.id)?.phase)) &&
       r.tentPhase !== "inside" &&
       !(r.needTask?.private && r.needTask.elapsed > 1 && r.needTask.elapsed < r.needTask.duration-1);
     if (r.tentPhase) {
@@ -1855,6 +2176,8 @@ function frame(now) {
       const friend = s.people.find((p) => p.id === r.lookAt);
       if (friend) desiredYaw = Math.atan2(friend.x - r.x, friend.z - r.z);
     }
+    const leisureFacing=downtimeMotion(r)?r.downtime.facing:r.needTask?.elapsed>0&&!r.walk.length?r.needTask.facing:null;
+    if(leisureFacing)desiredYaw=Math.atan2(leisureFacing.x-r.x,leisureFacing.z-r.z);
     const turn = Math.atan2(
       Math.sin(desiredYaw - g.rotation.y),
       Math.cos(desiredYaw - g.rotation.y),
@@ -1956,7 +2279,9 @@ function frame(now) {
         ? "carry-walk"
         : "walk"
       : visit?.animation
-        ? (visit.private ? "duck-walk" : visit.animation)
+        ? (visit.private ? "duck-walk" : conversationMotion(r) || visit.animation)
+      : downtimeMotion(r)
+        ? downtimeMotion(r)
       : seated
         ? "sit"
         : r.action === "wash"
@@ -1977,7 +2302,9 @@ function frame(now) {
       paused ? 0 : dt * speed,
     );
   }
-  river.update(visual.time);
+  foliageWind.update(!paused && !document.hidden ? dt : 0);
+  riverTime+=!paused && !document.hidden ? dt : 0;
+  river.update(riverTime);
   rainMesh.visible = s.rain;
   if (s.rain) {
     for (let i = 0; i < 600; i++) {
@@ -2004,7 +2331,7 @@ function frame(now) {
   fitTerrainCamera(camera, controls.target, scene.fog);
   // Keep the shadow volume over the viewed land, not the world origin.
   // Moving light and target together preserves the time-of-day sun direction.
-  const shadowExtent = Math.max(32, Math.hypot(camera.right - camera.left, camera.top - camera.bottom) / (2 * camera.zoom) + 20);
+  const shadowExtent = Math.max(16, Math.hypot(camera.right - camera.left, camera.top - camera.bottom) / (2 * camera.zoom) + 12);
   sun.position.sub(sun.target.position).normalize().multiplyScalar(400);
   sun.target.position.copy(controls.target);
   sun.position.add(sun.target.position);
@@ -2012,11 +2339,17 @@ function frame(now) {
     top: shadowExtent, bottom: -shadowExtent, near: 1, far: 900 });
   sun.shadow.camera.updateProjectionMatrix();
   drawUtilities();
+  utilityLines.visible = !lenses.active;
+  lenses.update(now);
+  accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
   renderer.render(scene, camera);
   recordPerformance(now, visual.time);
   requestAnimationFrame(frame);
 }
+const lenses = installLenses({state:()=>s,camera,world,focus,inspect:id=>{setPanel(null);selected=id;renderUI();}});
 addEventListener("pagehide", persist);
 requestAnimationFrame(frame);
 
 installAudio();
+
+installDisabledInfo();

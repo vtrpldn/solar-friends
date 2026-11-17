@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import {ensureFinances,recordMoney,financeForecast,validFinances} from '../web/v02/weekend/finances.js';
+const s={time:0,money:1000,mode:'story'};ensureFinances(s);
+assert.equal(financeForecast(s).days,0);
+s.time=(1440-540)/.45;recordMoney(s,100,'outsideWork','Paid shift');recordMoney(s,-20,'purchases','Food');recordMoney(s,-500,'construction','House');
+s.time=(1440*3-540)/.45;const f=financeForecast(s);
+assert.equal(f.days,2);assert.equal(f.mean,40);assert.equal(f.low,1000);assert.equal(f.high,1560);
+assert.deepEqual(financeForecast(JSON.parse(JSON.stringify(s))),f);
+assert(validFinances(s));s.finances.daily[0].categories.purchases=NaN;assert(!validFinances(s));
+console.log('PASS completed-day forecasts, quiet days, construction exclusion, persistent daily totals and corruption checks');

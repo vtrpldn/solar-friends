@@ -1,0 +1,53 @@
+import assert from 'node:assert/strict';
+import * as THREE from 'three';
+import {createLandSurface,terrainMaterial} from '../web/v02/weekend/land-surface.js';
+import {createTerrain,updateTerrain} from '../web/v02/weekend/terrain.js';
+import {createFoliageWind} from '../web/v02/weekend/foliage-wind.js';
+import {registerWorld,DEFAULT_SETTINGS,BIOMES} from '../web/v02/weekend/world-settings.js';
+const defs={tree:{kind:'wild-tree',size:[1,1]},house:{size:[2,3]},'supply-2':{size:[4,3]},'supply-3':{size:[4,3]}};
+const footprint=p=>p.rotation%2?[...defs[p.key].size].reverse():defs[p.key].size;
+const surface=createLandSurface();
+const tree={id:1,key:'tree',x:32,z:32};
+assert(surface.update([tree],defs,footprint));
+const initial=surface.texture.image.data.slice();
+assert(initial.some((v,i)=>i%4===1&&v>0),'woodland floor exists');
+assert(!surface.update([tree],defs,footprint),'unchanged scene does not upload again');
+assert(surface.update([{...tree,felled:true}],defs,footprint));
+assert(surface.texture.image.data.every(v=>v===0),'felling clears contact shade and litter');
+surface.update([{...tree,x:45}],defs,footprint);
+assert.notDeepEqual(surface.texture.image.data,initial,'moving changes ground footprint');
+for(const key of ['house','supply-2','supply-3']){
+ const p={id:2,key,x:0,z:0,natural:true};surface.update([p],defs,footprint);
+ const before=surface.texture.image.data.slice();surface.update([{...p,rotation:1}],defs,footprint);
+ assert.notDeepEqual(surface.texture.image.data,before,'rotated footprint updates');
+ if(key!=='house')assert(surface.texture.image.data.some((v,i)=>i%4===(key==='supply-2'?2:3)&&v>0));
+}
+surface.update([],defs,footprint);assert(surface.texture.image.data.every(v=>!v),'removing projects clears shade');
+for(const [biome,{colors}] of Object.entries(BIOMES)){
+ registerWorld(17,{...DEFAULT_SETTINGS,biome});
+ const terrain=createTerrain(17),old=terrain.geometry.attributes.position.array.slice();
+ updateTerrain(terrain,17,[{left:-4,right:4,top:-4,bottom:4,height:12}]);
+ assert.notDeepEqual(terrain.geometry.attributes.position.array,old,'terraform changes terrain');
+ assert(terrain.geometry.attributes.normal.array.every(Number.isFinite));
+ assert(terrain.geometry.attributes.bankDistance.array.every(v=>Number.isFinite(v)&&v>=0));
+ const shader={uniforms:{},vertexShader:THREE.ShaderLib.standard.vertexShader,fragmentShader:THREE.ShaderLib.standard.fragmentShader};
+ terrainMaterial(17,colors,surface).onBeforeCompile(shader);
+ assert(shader.uniforms.landSurface.value===surface.texture);
+ assert(shader.fragmentShader.includes('fwidth(p)'),'distant grain is filtered');
+ terrain.geometry.dispose();terrain.material.dispose();terrain.userData.surface.texture.dispose();
+}
+const wind=createFoliageWind(),root=new THREE.Group();
+const shared=new THREE.MeshStandardMaterial(),mesh=new THREE.Mesh(new THREE.BoxGeometry(1,6,1),shared);root.add(mesh);
+wind.apply(root);assert.notEqual(mesh.material,shared,'shared asset material remains untouched');
+const compile=(material,source)=>{const s={uniforms:{},vertexShader:source};material.onBeforeCompile(s);return s;};
+const visible=compile(mesh.material,THREE.ShaderLib.standard.vertexShader),shadow=compile(mesh.customDepthMaterial,THREE.ShaderLib.depth.vertexShader);
+const bend=s=>s.slice(s.indexOf('float heightWeight='),s.indexOf('#include <morphtarget_vertex>')).trim();
+assert.equal(bend(visible.vertexShader),bend(shadow.vertexShader),'visible and shadow displacement agree');
+assert.equal(visible.uniforms.windTime,shadow.uniforms.windTime);
+wind.update(.05);assert.equal(visible.uniforms.windTime.value,.05);
+wind.update(0);assert.equal(visible.uniforms.windTime.value,.05,'paused wind holds');
+wind.update(200);assert(Math.abs(visible.uniforms.windTime.value-.15)<1e-9,'large frame gaps are clamped');
+let disposed=false;mesh.customDepthMaterial.addEventListener('dispose',()=>disposed=true);
+mesh.material.dispose();assert(disposed,'removal releases custom shadow material');
+surface.texture.dispose();mesh.geometry.dispose();shared.dispose();
+console.log('PASS ground shading lifecycle, rotation, deposits, biome terrain, terraform normals, wind timing, shadow parity and disposal');

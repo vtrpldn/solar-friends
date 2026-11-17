@@ -1,0 +1,223 @@
+{
+  "metresPerCell": 2,
+  "models": [
+    {
+      "id": "home-studio",
+      "name": "Little limewash studio",
+      "siteCells": [
+        3,
+        4
+      ],
+      "siteMetres": [
+        6,
+        8
+      ],
+      "externalShellMetres": [
+        4.4,
+        6
+      ],
+      "exteriorOnly": true,
+      "bedAssumption": 1,
+      "roof": "front-gable",
+      "daylightScreenshot": "home-studio.jpg"
+    },
+    {
+      "id": "home-lane",
+      "name": "Narrow lane house",
+      "siteCells": [
+        3,
+        5
+      ],
+      "siteMetres": [
+        6,
+        10
+      ],
+      "externalShellMetres": [
+        4.4,
+        8
+      ],
+      "exteriorOnly": true,
+      "bedAssumption": 2,
+      "roof": "side-gable",
+      "daylightScreenshot": "home-lane.jpg"
+    },
+    {
+      "id": "home-garden",
+      "name": "Garden cottage",
+      "siteCells": [
+        4,
+        3
+      ],
+      "siteMetres": [
+        8,
+        6
+      ],
+      "externalShellMetres": [
+        6,
+        4
+      ],
+      "exteriorOnly": true,
+      "bedAssumption": 1,
+      "roof": "hip",
+      "daylightScreenshot": "home-garden.jpg"
+    },
+    {
+      "id": "home-ochre",
+      "name": "Ochre gable house",
+      "siteCells": [
+        4,
+        5
+      ],
+      "siteMetres": [
+        8,
+        10
+      ],
+      "externalShellMetres": [
+        6,
+        8
+      ],
+      "exteriorOnly": true,
+      "bedAssumption": 2,
+      "roof": "front-gable",
+      "daylightScreenshot": "home-ochre.jpg"
+    },
+    {
+      "id": "home-deep-porch",
+      "name": "Deep porch house",
+      "siteCells": [
+        4,
+        6
+      ],
+      "siteMetres": [
+        8,
+        12
+      ],
+      "externalShellMetres": [
+        6,
+        8
+      ],
+      "exteriorOnly": true,
+      "bedAssumption": 2,
+      "roof": "side-gable",
+      "daylightScreenshot": "home-deep-porch.jpg"
+    },
+    {
+      "id": "home-blue-gallery",
+      "name": "Sage terrace house",
+      "siteCells": [
+        5,
+        4
+      ],
+      "siteMetres": [
+        10,
+        8
+      ],
+      "externalShellMetres": [
+        6,
+        6
+      ],
+      "exteriorOnly": true,
+      "bedAssumption": 2,
+      "roof": "front-gable",
+      "daylightScreenshot": "home-blue-gallery.jpg"
+    },
+    {
+      "id": "home-paired",
+      "name": "Paired roof house",
+      "siteCells": [
+        6,
+        4
+      ],
+      "siteMetres": [
+        12,
+        8
+      ],
+      "externalShellMetres": [
+        10,
+        6
+      ],
+      "exteriorOnly": true,
+      "bedAssumption": 3,
+      "roof": "twin-gable",
+      "daylightScreenshot": "home-paired.jpg"
+    },
+    {
+      "id": "home-broad-veranda",
+      "name": "Broad veranda house",
+      "siteCells": [
+        7,
+        5
+      ],
+      "siteMetres": [
+        14,
+        10
+      ],
+      "externalShellMetres": [
+        12,
+        6
+      ],
+      "exteriorOnly": true,
+      "bedAssumption": 3,
+      "roof": "hip",
+      "daylightScreenshot": "home-broad-veranda.jpg"
+    },
+    {
+      "id": "home-shaded-retreat",
+      "name": "Shaded terrace home",
+      "siteCells": [
+        6,
+        7
+      ],
+      "siteMetres": [
+        12,
+        14
+      ],
+      "externalShellMetres": [
+        8,
+        10
+      ],
+      "exteriorOnly": true,
+      "bedAssumption": 3,
+      "roof": "hip",
+      "daylightScreenshot": "home-shaded-retreat.jpg"
+    },
+    {
+      "id": "home-ranch",
+      "name": "Long clay-roof house",
+      "siteCells": [
+        8,
+        4
+      ],
+      "siteMetres": [
+        16,
+        8
+      ],
+      "externalShellMetres": [
+        14,
+        6
+      ],
+      "exteriorOnly": true,
+      "bedAssumption": 3,
+      "roof": "side-gable",
+      "daylightScreenshot": "home-ranch.jpg"
+    }
+  ],
+  "review": "All ten inspected individually with resident and grid, then together in the desktop game. Terrace support spacing corrected during review. Shaded terrace night view and deep porch assembly spot-checked.",
+  "checks": [
+    "84 site contracts plus construction stages fit in all four rotations",
+    "359-model consistency and library checks",
+    "All ten rotation, collision, entrances, move and save checks",
+    "Legal placement of complete new-house comparison fixture and save round trip",
+    "All ten assignable to residents; assignment persists in saves",
+    "No interior geometry; shadow tile and foundation checks"
+  ],
+  "limitations": [
+    "Occupancy uses existing 1/2/3-bed assumptions, not modeled rooms.",
+    "Night and assembly views were spot checks, not an exhaustive lighting matrix."
+  ],
+  "sourceSHA256": {
+    "web/v02/library/home-designs.js": "34bdba6157cf836f6d19761f07ff65479cd5737e92552b53325cf471958906e0",
+    "web/v02/library/functional-homes.js": "59f41dbe2f7c6b5edce57bf652abc6473f8dff30ea251041d7904a2b3c50872b",
+    "web/v02/library/functional-layouts.js": "1feb7ee87b0bdcc345ca9bf044380af2ed8be5e810dace4f6e3ffc1ead95395a"
+  }
+}

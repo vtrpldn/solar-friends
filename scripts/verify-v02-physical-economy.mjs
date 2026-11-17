@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import {createWeekend,chooseCamp,save,restore,tick,enableFastNavigation,sellMaterial,supplyRun,MATERIALS,materialCount,automaticSales,blueprintPurchase,plan,PROJECTS} from '../web/v02/weekend/simulation.js';
+import {cancelExport,tradeQuote,blueprintManifest,cargoSize,TRADE_RULES,transportCost,settleExports} from '../web/v02/weekend/physical-trade.js';
+import {transact} from '../web/v02/weekend/finances.js';
+import {economyPolicies} from '../web/v02/weekend/economy-policies.js';
+const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'entrance');s.rainSeen=s.rainResolved=true;enableFastNavigation(s);return s;};
+const s=fresh();s.materials.bamboo=200;
+assert(sellMaterial(s,'bamboo'));assert.equal(s.money,2000,'reservation is not income');assert.equal(s.materials.bamboo,188);
+assert(cancelExport(s,s.trade.orders[0].id,(s,id,n)=>s.materials[id]+=n));assert.equal(s.materials.bamboo,200);assert(!cancelExport(s,1,()=>assert.fail('double refund')));
+for(let i=0;i<8;i++)assert(sellMaterial(s,'bamboo'));assert(!sellMaterial(s,'bamboo'),'limited demand');
+assert(restore(save(s)),'queued orders persist');
+const bad=JSON.parse(save(s));bad.trade.orders[1].cents=-1;assert.equal(restore(JSON.stringify(bad)),null);
+const initial=s.money;let paid=false;const phases=new Set();
+for(let i=0;i<16000;i++){tick(s,.1);if(s.trip){phases.add(s.trip.phase);if(i%100===0)assert(restore(save(s)),`restore ${s.trip.phase}`);}if(s.trade.orders.some(o=>o.status==='sold'))paid=true;if(paid&&!s.trip)break;}
+assert(paid,'real driver reaches town and sells');assert(s.money>initial,'income arrives after physical trip');assert(phases.has('boarding')&&phases.has('outbound')&&phases.has('inbound')&&phases.has('unloading'));
+const cash=s.money;for(const o of s.trade.orders.filter(o=>o.status==='sold'))settleExports(s,{exports:[o.id]},transact);assert.equal(s.money,cash,'settlement cannot repeat');
+const bought=fresh();assert(supplyRun(bought,'wood'));assert.equal(bought.money,2000-MATERIALS.wood.price-transportCost(bought));assert.equal(bought.wood,36,'prepaid purchase is not delivered early');
+for(let i=0;i<12000&&bought.trip;i++)tick(bought,.1);assert(!bought.trip);assert.equal(bought.wood,48,'purchase delivered once');assert(restore(save(bought)));
+const manifest=blueprintManifest([{id:1,pendingMaterials:{stone:100,wood:100}},{id:2,pendingMaterials:{panels:10}}]);const items={};for(const m of manifest)for(const [id,n]of Object.entries(m.items))items[id]=(items[id]||0)+n;const load=cargoSize(items);assert(load.kg<=TRADE_RULES.cargoKg&&load.m3<=TRADE_RULES.cargoM3);assert(items.stone<100,'large order splits across trips');
+const wallet={money:10,mode:'story',time:0};for(let i=0;i<1000;i++)transact(wallet,-.0001,'electricity','Grid');assert.equal(wallet.money,9.9,'fractional metering accumulates');assert(Math.abs(wallet.finances.expenses-.1)<1e-10);
+const pol=fresh();pol.materials.bamboo=100;economyPolicies(pol).sales.bamboo={enabled:true,keep:24,above:48,daily:24};automaticSales(pol);assert.equal(pol.materials.bamboo,76);assert.equal(pol.money,2000);automaticSales(pol);assert.equal(pol.materials.bamboo,76,'policy cap limits reservations');
+// Verify affordability through a real catalog entry requiring purchased goods.
+const paidKey=Object.keys(PROJECTS).find(key=>Object.keys(blueprintPurchase(fresh(),key).items).length);
+assert(paidKey);const priced=fresh(),q=blueprintPurchase(priced,paidKey);priced.money=q.cost;assert(blueprintPurchase(priced,paidKey).error,'collection needs operating money');
+const dryWallet={money:0,time:0};assert.equal(transact(dryWallet,-1.005,'purchases','Unaffordable'),0);assert.equal(dryWallet.money,0);assert.equal(dryWallet.finances.fractions.purchases,undefined,'failed spending cannot accrue a phantom fraction');
+console.log('PASS physical sale trips, demand limits, cancellation, delivery, cargo splitting, centavo metering and save validation');

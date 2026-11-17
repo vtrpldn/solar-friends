@@ -1,4 +1,4 @@
-export const MAP_CELLS = 64;
+export const MAP_CELLS = 96;
 export const CELL_METRES = 2;
 export const MAP_METRES = MAP_CELLS * CELL_METRES;
 // Cells are zero-based; even-sized props sit on cell intersections.
@@ -20,38 +20,38 @@ export const PLACEMENTS = [
   {
     id: "home",
     asset: "house",
-    column: 30,
-    row: 29,
+    column: 43,
+    row: 43,
     rotation: 0,
     label: "Limewashed house",
   },
   {
     id: "shelter",
     asset: "shed",
-    column: 34,
-    row: 30,
+    column: 51,
+    row: 45,
     rotation: 0,
     label: "Open timber shed",
   },
   {
     id: "shade",
     asset: "tree",
-    column: 29,
-    row: 34,
+    column: 42,
+    row: 51,
     rotation: 0,
     label: "Shade tree",
   },
   {
     id: "friend",
     asset: "resident",
-    column: 32,
-    row: 33,
+    column: 48,
+    row: 49,
     rotation: 0,
     label: "Resident scale study",
   },
   ...[
-    ...[30, 31, 32, 33, 34, 35].map((column) => [column, 31]),
-    ...[32, 33, 34, 35].map((row) => [32, row]),
+    ...[43,44,45,46,47,48,49,50,51,52,53,54].map((column) => [column,49]),
+    ...[50,51,52,53,54].map((row) => [48,row]),
   ].map(([column, row], i) => ({
     id: `path-${i}`,
     asset: "road",

@@ -1,178 +1,86 @@
-import { MAP_HALF } from "./map-size.js";
-import * as THREE from "three";
-// Metres in the scene, shared with placement and resident navigation through river-layout.js.
-import { riverCenter, riverWidth } from "./river-layout.js";
-export { riverCenter, riverWidth };
-export function createRiver(seed = 0) {
-  const center = (z) => riverCenter(z, seed);
-  const width = (z) => riverWidth(z, seed);
-  const root = new THREE.Group(),
-    materials = new Map();
-  const material = (color) => {
-    if (!materials.has(color))
-      materials.set(
-        color,
-        new THREE.MeshStandardMaterial({
-          color,
-          roughness: 1,
-          flatShading: true,
-          side: THREE.DoubleSide,
-        }),
-      );
-    return materials.get(color);
-  };
-  function ribbon(extra, y, color) {
-    const positions = [];
-    for (let i = 0; i < MAP_HALF * 2; i++) {
-      const za = -MAP_HALF + i,
-        zb = za + 1;
-      const xa = center(za),
-        xb = center(zb),
-        wa = width(za) + extra,
-        wb = width(zb) + extra;
-      positions.push(
-        xa - wa,
-        y,
-        za,
-        xb - wb,
-        y,
-        zb,
-        xb + wb,
-        y,
-        zb,
-        xa - wa,
-        y,
-        za,
-        xb + wb,
-        y,
-        zb,
-        xa + wa,
-        y,
-        za,
-      );
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(positions, 3),
-    );
-    geo.computeVertexNormals();
-    const mesh = new THREE.Mesh(geo, material(color));
-    mesh.receiveShadow = true;
-    root.add(mesh);
-    return mesh;
+import {MAP_HALF} from './map-size.js';
+import * as THREE from 'three';
+import {riverCenter,riverWidth} from './river-layout.js';
+import {landRandom} from './land-layout.js';
+import {terrainNoise} from './terrain-noise.js';
+import {settingsFor} from './world-settings.js';
+import {createWaterMaterial} from './river-water.js';
+export {riverCenter,riverWidth};
+
+export function createRiver(seed=0){
+ const center=z=>riverCenter(z,seed),width=z=>riverWidth(z,seed);
+ const random=landRandom(seed^0x5a1d9),root=new THREE.Group(),materials=new Map();
+ const material=color=>{
+  if(!materials.has(color))materials.set(color,new THREE.MeshStandardMaterial({color,roughness:1,flatShading:true,side:THREE.DoubleSide}));
+  return materials.get(color);
+ };
+ function ribbon(extra,y,color){
+  const positions=[];
+  for(let z=-MAP_HALF;z<MAP_HALF;z++){
+   const edge=t=>width(t)+extra*(.82+terrainNoise(t/7,2,seed)*.18);
+   const a=center(z),b=center(z+1),wa=edge(z),wb=edge(z+1);
+   positions.push(a-wa,y,z,b-wb,y,z+1,b+wb,y,z+1,a-wa,y,z,b+wb,y,z+1,a+wa,y,z);
   }
-  ribbon(1.9, 0.025, "#889768");
-  ribbon(1.1, 0.035, "#bfad7e");
-  ribbon(0.4, 0.045, "#a6b9a0");
-  ribbon(0, 0.055, "#6caaa2");
-  ribbon(-0.9, 0.065, "#468e91");
-  const stones = new THREE.Group();
-  root.add(stones);
-  for (let i = 0; i < 42; i++) {
-    const z = -60 + i * 2.9,
-      side = i % 2 ? 1 : -1,
-      x = center(z) + side * (width(z) + 0.65 + (i % 3) * 0.23);
-    const rock = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(0.2 + (i % 4) * 0.12, 0),
-      material(["#9a9d85", "#b8b69d", "#808e7b"][i % 3]),
-    );
-    rock.scale.set(1.3, 0.65, 0.9);
-    rock.position.set(x, 0.18, z);
-    rock.rotation.y = i * 1.7;
-    rock.castShadow = true;
-    rock.receiveShadow = true;
-    stones.add(rock);
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  geometry.computeVertexNormals();
+  const mesh=new THREE.Mesh(geometry,material(color));mesh.receiveShadow=true;root.add(mesh);
+ }
+ ribbon(1.9,.025,'#82906a');ribbon(1.1,.035,'#b6a780');ribbon(.3,.045,'#9fae91');
+ const rocks=[];
+ function rock(x,z,radius,inWater=false){
+  const mesh=new THREE.Mesh(new THREE.IcosahedronGeometry(radius,0),material(['#979b86','#b0ae94','#7d8b7e'][Math.floor(random()*3)]));
+  mesh.position.set(x,radius*.3,z);mesh.scale.set(1.15,.65,.85);mesh.rotation.set(0,random()*Math.PI,.1);
+  mesh.castShadow=mesh.receiveShadow=true;root.add(mesh);
+  if(inWater)rocks.push({x,z,radius:radius*.9});
+ }
+ // A few channel boulders anchor the animated eddies; the central passage stays open.
+ for(let i=0;i<8;i++){
+  const z=-MAP_HALF+18+i*29+random()*9,side=random()<.5?-1:1;
+  rock(center(z)+side*width(z)*(.55+random()*.12),z,.3+random()*.24,true);
+ }
+ const biome=settingsFor(seed).biome;
+ const reedColors=biome==='caatinga'?['#8e9059','#aaa16b']:['#627d4e','#829653'];
+ const clusters=biome==='caatinga'?22:38;
+ for(let i=0;i<clusters;i++){
+  const z=-MAP_HALF+5+random()*(MAP_HALF*2-10),side=random()<.5?-1:1;
+  const x=center(z)+side*(width(z)+.65+random()*.35);
+  // Pebble pockets vary in size and leave long stretches of bank clear.
+  for(let j=0,n=2+Math.floor(random()*5);j<n;j++){
+   const rz=z+(random()-.5)*2.6,rx=center(rz)+side*(width(rz)+.45+random()*.9);
+   rock(rx,rz,.09+random()*.18);
   }
-  // A gravel bar splits the current in the wider bend.
-  const island = new THREE.Mesh(
-    new THREE.CircleGeometry(1, 9),
-    material("#c3b58a"),
-  );
-  island.rotation.x = -Math.PI / 2;
-  island.scale.set(1.1, 3, 1);
-  island.position.set(center(13) - 0.4, 0.09, 13);
-  island.receiveShadow = true;
-  stones.add(island);
-  for (let i = 0; i < 8; i++) {
-    const rock = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(0.25 + (i % 3) * 0.14, 0),
-      material("#959b83"),
-    );
-    rock.position.set(center(13) - 0.6 + Math.sin(i) * 0.5, 0.28, 11 + i * 0.5);
-    rock.scale.y = 0.6;
-    rock.castShadow = true;
-    stones.add(rock);
+  for(let j=0,n=4+Math.floor(random()*6);j<n;j++){
+   const height=.45+random()*.65;
+   const reed=new THREE.Mesh(new THREE.ConeGeometry(.045+random()*.035,height,3),material(reedColors[j%2]));
+   reed.position.set(x+(random()-.5)*.35,height*.5+.04,z+(random()-.5)*1.5);
+   reed.rotation.set((random()-.5)*.25,random()*Math.PI,(random()-.5)*.25);root.add(reed);
   }
-  // Reeds share one material and will be batched with bank stones by the caller.
-  for (let i = 0; i < 24; i++) {
-    const z = -52 + i * 4.5,
-      side = i % 2 ? 1 : -1,
-      x = center(z) + side * (width(z) + 1.3);
-    for (let j = 0; j < 4; j++) {
-      const reed = new THREE.Mesh(
-        new THREE.ConeGeometry(0.09, 0.65 + j * 0.15, 3),
-        material("#718853"),
-      );
-      reed.position.set(
-        x + Math.cos(j * 2) * 0.2,
-        0.35 + j * 0.07,
-        z + Math.sin(j * 2) * 0.2,
-      );
-      reed.rotation.z = Math.sin(i + j) * 0.17;
-      stones.add(reed);
-    }
+ }
+ // Short weathered logs lie along the bank, inside the non-buildable river margin.
+ for(let i=0;i<5;i++){
+  const z=-MAP_HALF+12+random()*(MAP_HALF*2-24),side=random()<.5?-1:1;
+  const x=center(z)+side*(width(z)+1.15),length=1.1+random()*.65,radius=.11+random()*.055;
+  const log=new THREE.Mesh(new THREE.CylinderGeometry(radius*.8,radius,length,7),material('#79664c'));
+  const bankAt=t=>center(t)+side*(width(t)+1.15);
+  const tangent=new THREE.Vector3(bankAt(z+.5)-bankAt(z-.5),0,1).normalize();
+  log.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),tangent);
+  log.position.set(x,radius+.04,z);
+  log.name='riverbank-log';
+  log.castShadow=log.receiveShadow=true;root.add(log);
+  const end=new THREE.Mesh(new THREE.CircleGeometry(radius*.78,7),material('#b4a078'));
+  end.rotation.x=-Math.PI/2;end.position.y=length/2+.002;log.add(end);
+ }
+ // UV.x runs bank-to-bank; UV.y is metres downstream, so flow follows bends.
+ const positions=[],uvs=[];
+ for(let z=-MAP_HALF;z<MAP_HALF;z++){
+  for(const [side,t] of [[-1,z],[-1,z+1],[1,z+1],[-1,z],[1,z+1],[1,z]]){
+   positions.push(center(t)+side*width(t),.06,t);uvs.push(side,t);
   }
-  // Animated current highlights are one lightweight draw call, independent of static bank geometry.
-  const currentGeometry = new THREE.BufferGeometry(),
-    positions = new Float32Array(32 * 18);
-  currentGeometry.setAttribute(
-    "position",
-    new THREE.BufferAttribute(positions, 3),
-  );
-  const current = new THREE.Mesh(
-    currentGeometry,
-    new THREE.MeshBasicMaterial({
-      color: "#c0ded0",
-      transparent: true,
-      opacity: 0.38,
-      depthWrite: false,
-      side: THREE.DoubleSide,
-    }),
-  );
-  current.frustumCulled = false;
-  function update(time) {
-    for (let i = 0; i < 32; i++) {
-      const z =
-          ((i * ((MAP_HALF * 2) / 32) + time * 0.65) % (MAP_HALF * 2 - 2)) -
-          MAP_HALF +
-          1,
-        x = center(z) + Math.sin(i * 2.4) * (width(z) - 1.3),
-        w = 0.35 + (i % 3) * 0.16;
-      const points = [
-        x - w,
-        0.08,
-        z,
-        x + w,
-        0.08,
-        z + 0.12,
-        x + w,
-        0.08,
-        z + 0.2,
-        x - w,
-        0.08,
-        z,
-        x + w,
-        0.08,
-        z + 0.2,
-        x - w,
-        0.08,
-        z + 0.08,
-      ];
-      positions.set(points, i * 18);
-    }
-    currentGeometry.attributes.position.needsUpdate = true;
-  }
-  update(0);
-  return { root, current, update };
+ }
+ const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+ geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geometry.computeVertexNormals();geometry.computeBoundingSphere();
+ const water=createWaterMaterial(rocks,seed),current=new THREE.Mesh(geometry,water.material);
+ current.name='flowing-river';current.receiveShadow=true;current.userData.ownedMaterial=true;
+ root.traverse(mesh=>{if(mesh.isMesh)mesh.userData.ownedMaterial=true;});
+ return {root,current,update(time){water.time.value=Number.isFinite(time)?time:0;}};
 }

@@ -1,5 +1,6 @@
 import * as THREE from "three";
-import { box, cylinder, ball, beam, clayRoof } from "../workshop/models.js";
+import { gableRoof } from "./roof-forms.js";
+import { box, cylinder, ball, beam } from "../workshop/models.js";
 
 // Human-scale scene dressing. Uses the same materials and low-segment primitives
 // as the approved studies; no textures, simulation, or random house attachments.
@@ -154,8 +155,7 @@ const recipes = {
     }
     const canopy = group();
     canopy.rotation.y = Math.PI / 2;
-    clayRoof(canopy, { half: 0.94, depth: 3.7, eave: 2.4, rise: 0.55, ridgeHeight: 3.02 });
-    canopy.scale.set(0.85, 1, 0.95);
+    gableRoof(canopy, 2.1, 3.7, 2.4, .55);
     g.add(canopy);
     table(g, 2.1);
     bench(g, 0, -0.85, 2.1, false);

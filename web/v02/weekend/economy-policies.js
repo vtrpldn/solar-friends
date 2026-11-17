@@ -1,3 +1,5 @@
+import { protectedEquipment } from './equipment.js';
+import {buyerQuote} from './local-market.js';
 // Shared by the simulation and the resource dialog; policies never create stock.
 export const WORK_GROUPS={food:'Food & water',maintenance:'Sanitation & maintenance',production:'Production & harvesting',construction:'Construction'};
 export function economyPolicies(s){
@@ -8,12 +10,12 @@ export function productionTarget(p){return Number.isFinite(p.stockTarget)?Math.m
 export function workGroup(op,recipes){return op.water?(op.water.service?'maintenance':'food'):(recipes[op.recipe]?.output.food||recipes[op.recipe]?.output.meals?'food':'production');}
 export function protectedStock(s,id,recipes){
  const policy=economyPolicies(s).sales[id];let reserve=policy?.keep||0;
- if(id==='food'||id==='meals')reserve=Math.max(reserve,s.people.length*4);
+ if(id==='food'||id==='meals')reserve=Math.max(reserve,Math.ceil(s.people.length*2*(s.foodReserveDays??2)));
  // Construction and queued inputs have already left available stock. Protect the
  // next two batches at repeating sites as well, without double-counting reservations.
  let inputs=0;
  for(const p of s.projects)if(p.repeat&&productionTarget(p)>0)inputs+=(recipes[p.repeat]?.input[id]||0)*2;
- return Math.max(reserve,inputs);
+ return Math.max(reserve,inputs,protectedEquipment(s,id));
 }
 export function salePreview(s,id,materials,recipes,count){
  const item=materials[id],p=economyPolicies(s).sales[id],stock=count(s,id);
@@ -21,7 +23,9 @@ export function salePreview(s,id,materials,recipes,count){
  const reserve=protectedStock(s,id,recipes),day=Math.floor((540+s.time*.45)/1440);
  const sold=p.day===day?p.sold||0:0,limit=p.daily>0?Math.max(0,p.daily-sold):Infinity;
  const quantity=stock>Math.max(p.above,reserve)?Math.floor(Math.min(Math.max(0,stock-reserve),limit)/item.quantity)*item.quantity:0;
- return {quantity,revenue:quantity/item.quantity*Math.floor(item.price*.5),reserve,day,reason:quantity?'Ready to sell':stock<=Math.max(p.above,reserve)?'Reserve protected':'Daily limit or batch size'};
+ const market=s.trade?.market?.[id],used=market?.day===day?market.units:0;let revenue=0,accepted=0;
+ for(let n=0;n<quantity;n+=item.quantity){const quote=buyerQuote(id,item,used+n);if(quote.remaining<item.quantity)break;accepted+=item.quantity;revenue+=quote.cents/100;}
+ return {quantity:accepted,revenue,reserve,day,reason:accepted?'Ready to sell':quantity?'Buyer demand exhausted':stock<=Math.max(p.above,reserve)?'Reserve protected':'Daily limit or batch size'};
 }
 export function validatePolicies(s,materials){
  if(!s.projects.every(p=>p.stockTarget===undefined||(Number.isInteger(p.stockTarget)&&p.stockTarget>=0&&p.stockTarget<=10000)))return false;

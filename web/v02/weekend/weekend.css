@@ -302,6 +302,8 @@ header > a {
   font-size: 11px;
   font-style: normal;
   color: #92774f;
+  max-width: 100px;
+  text-align: right;
 }
 .task.complete em {
   font-size: 16px;
@@ -723,6 +725,19 @@ img[data-art]:not(.ready) {
 .controls-help[open] > summary {
   margin: 0;
 }
+/* Muted hints stay attached to controls, including ones whose labels update. */
+[data-shortcut]::after {
+  content: attr(data-shortcut);
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 3px;
+  border: 1px solid #84795766;
+  border-radius: 4px;
+  font: 10px/1.25 monospace;
+  color: #6d674d;
+  vertical-align: middle;
+  opacity: .8;
+}
 kbd {
   font: 11px Outfit;
   background: #e9dfbf;
@@ -922,7 +937,8 @@ dialog button {
   background: #f5eac0;
   border-color: #dfc88b;
 }
-#management[data-screen="resources"] .management-stats {
+#management[data-screen="resources"] .management-stats,
+#management[data-screen="items"] .management-stats {
   grid-template-columns: repeat(3, 1fr);
 }
 .management-layout {
@@ -1006,26 +1022,43 @@ dialog button {
   margin-bottom: 25px;
 }
 .stock-card {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  align-items: center;
   text-align: left;
-  padding: 10px !important;
-  min-height: 88px;
+  padding: 8px !important;
+  min-height: 62px;
 }
 .stock-card strong {
-  font-size: 23px;
+  grid-column: 3;
+  grid-row: 1 / 3;
+  text-align: right;
+  font-size: 20px;
   display: block;
   line-height: 1.1;
   color: #708547;
 }
 .stock-card span {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  align-self: start;
   display: block;
   font-size: 12px;
-  margin: 4px 0;
+  margin: 0;
 }
 .stock-card small {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  align-self: start;
   font-size: 9px;
   font-weight: 400;
   letter-spacing: 0;
 }
+.stock-card strong small { display: block; margin-top: 3px; color: #605d46; }
+.stock-card .stock-name { grid-column: 2; grid-row: 1; margin: 0; }
+.stock-card .stock-detail { grid-column: 2; grid-row: 2; color: #605d46; }
 .stock-card:disabled {
   opacity: 0.8;
 }
@@ -1259,13 +1292,13 @@ body[data-tray="closed"] {
   grid-template-columns: 29px auto;
 }
 .stock-card > .resource-icon {
-  float: right;
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: start;
   width: 46px;
   height: 46px;
-  margin: 0 0 4px 5px;
-}
-.stock-card > span {
-  clear: both;
+  margin: 0;
 }
 
 #opening-status {
@@ -1317,6 +1350,10 @@ body[data-tray="closed"] {
   text-transform: none;
   margin: 4px 0 8px;
 }
+#construction-summary { clear: both; margin: 12px 0; padding: 12px; background: #e8edcf; border-radius: 12px; }
+#construction-summary strong { display: block; font-size: 13px; line-height: 1.5; }
+#construction-summary progress { margin: 8px 0; }
+#construction-summary small { display: block; font-size: 12px; line-height: 1.5; letter-spacing: 0; text-transform: none; }
 
 /* Cached orthographic resource portraits keep their rendered proportions. */
 .resource-icon {
@@ -1326,8 +1363,12 @@ body[data-tray="closed"] {
   visibility: hidden;
 }
 .stock-card > .resource-icon {
-  width: 64px;
-  height: 48px;
+  grid-column: 1;
+  grid-row: 1 / 3;
+  float: none;
+  width: 30px;
+  height: 36px;
+  margin: 0;
 }
 
 .resource-group-title {
@@ -1343,7 +1384,7 @@ body[data-tray="closed"] {
 }
 
 /* Shared management layout: utility networks no longer have manual setup forms. */
-#management:not([data-screen="resources"]) .management-layout {
+#management:not([data-screen="resources"]):not([data-screen="items"]) .management-layout {
   grid-template-columns: minmax(0, 1fr);
 }
 .network-node {
@@ -1577,3 +1618,28 @@ header > .time { grid-column: 3; justify-self: end; }
 .economy-drawer summary{cursor:pointer;font-weight:750;padding:12px 0;}
 #management .economy-controls label{font-size:12px;margin:0;}
 #management .economy-controls input{flex:0 0 90px;width:90px;margin:0;}
+
+.road-project-group { margin: 8px 0; padding: 10px; border: 1px solid var(--edge); border-radius: 12px; }
+.road-project-group > summary { cursor: pointer; font-weight: 600; }
+#undo-road { background: var(--paper); }
+
+#controls-dialog { width: 460px; max-height: calc(100vh - 80px); overflow-y: auto; }
+#controls-dialog p { line-height: 1.9; }
+#close-controls { float: right; }
+#production-activity { font-size: 12px; line-height: 1.5; }
+#production-progress, .production-site progress { width: 100%; }
+#log li { margin-bottom: 10px; }
+#log li > small { display: block; font-size: 11px; font-weight: 400; letter-spacing: normal; }
+#cancel-project { border-style: dashed; }
+#cancel-project-note { display: block; font-size: 12px; letter-spacing: normal; line-height: 1.4; }
+
+#tank-attention { position: absolute; top: 86px; left: 16px; width: auto; background: #f7e2bb; color: #733d27; border-color: #b77b4a; font-size: 12px; padding: 6px 10px; }
+#selected-benefit { border-left: 3px solid #739166; padding-left: 10px; }
+.stock-card .equipment-status { grid-column: 1 / -1; grid-row: 3; margin: 0; color: #59653c; }
+
+.crafting-crew, .crafting-recipes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.crafting-crew article, .crafting-recipe { background: #fbf2d9; border: 1px solid #d6c59e; border-radius: 12px; padding: 14px; }
+.crafting-recipe { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+.crafting-recipe h4, .crafting-recipe p { margin: 0; }
+.crafting-recipe button { margin-top: auto !important; }
+.crafting-recipe p, .crafting-crew p { font-size: 12px; line-height: 1.5; }

@@ -3,6 +3,20 @@ export function crewLimit(definition) {
   return Math.max(2, Math.min(3, Math.max(Math.ceil(definition.work / 350), Math.ceil(definition.size[0] * definition.size[1] / 2))));
 }
 export function carriedLoads(person) { return person.cargo ? person.haulLoads || 1 : 0; }
+export function constructionProgress(state, project, definition, loads) {
+  const done = project.work >= definition.work;
+  const delivering = project.delivered < loads;
+  const phase = done ? 'Ready to use' : project.pendingMaterials ? 'Collecting materials'
+    : delivering ? 'Delivering supplies' : 'Building';
+  const value = done ? 1 : project.pendingMaterials ? 0 : delivering
+    ? project.delivered / loads : project.work / definition.work;
+  const crew = state.people.filter(r => r.job === project.id);
+  return {
+    phase, value: Math.max(0, Math.min(1, value)),
+    detail: done ? 'Construction complete' : `${!project.pendingMaterials && !delivering ? `${Math.floor(value * 100)}% built · ` : ''}${constructionStatus(state, project, definition, loads)}`,
+    workers: done ? '' : crew.length ? `Assigned: ${crew.map(r => r.name).join(', ')}` : 'No crew assigned yet',
+  };
+}
 export function constructionStatus(state, project, definition, loads) {
   const crew = state.people.filter(r => r.job === project.id);
   if (project.pendingMaterials) return (state.trip?.projects || [state.trip?.project]).includes(project.id) ? 'Materials purchased · resident collecting in town' : 'Materials purchased · waiting for town pickup';
@@ -11,7 +25,19 @@ export function constructionStatus(state, project, definition, loads) {
     return `Supplies ${project.delivered}/${loads} · ${moving} in transit${project.staged ? ` · ${project.staged} at nearby storage` : ''}`;
   }
   const building = crew.filter(r => r.action === 'build').length;
-  if (building) return `${building}/${crewLimit(definition)} builders · supplies ready`;
+  if (building) {const estimate=constructionEstimate(state,project,definition);return `${building}/${crewLimit(definition)} builders · ~${estimate.assemblyHours.toFixed(1)} game hours of assembly left (before skill, needs and weather)`;}
   if (state.people.every(r => r.energy < 25 || r.tentPhase || r.needTask || r.action === 'town')) return 'Supplies ready · residents resting or meeting needs';
   return 'Supplies ready · crew finishing other work';
+}
+
+// Assembly work excludes hauling and personal breaks. These are game estimates,
+// not calibrated construction-industry person-hours.
+export function crewEfficiency(workers) {
+  return 1 / (1 + 0.12 * Math.max(0, workers - 1));
+}
+export function constructionEstimate(state, project, definition) {
+  const workers=state.people.filter(r=>r.job===project.id&&r.action==='build').length;
+  const remainingHours=Math.max(0,definition.work-project.work)*.45/60;
+  return {remainingHours,workers,crewLimit:crewLimit(definition),
+    assemblyHours:workers?remainingHours/(workers*crewEfficiency(workers)):null};
 }

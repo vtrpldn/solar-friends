@@ -17,7 +17,8 @@ footer { bottom: var(--ui-gap); max-width: calc(100vw - 2 * var(--ui-gap)); }
 .management-tabs, .resident-tabs { flex-wrap: wrap; }
 .management-heading h2 { font-size: clamp(23px, 2.5vw, 30px); }
 .management-stats > div { min-width: 0; overflow-wrap: anywhere; }
-#resource-grid, #network-nodes { grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); }
+#network-nodes { grid-template-columns: repeat(auto-fit, minmax(min(160px, 100%), 1fr)); }
+#resource-grid { grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); gap: 6px; }
 .finance-ledger { font-size: 13px; }
 .finance-ledger th, .finance-ledger td { padding: 10px 8px; overflow-wrap: anywhere; }
 #management .economy-controls label { gap: 8px; }
