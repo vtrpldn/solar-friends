@@ -228,6 +228,13 @@ export function infrastructureStep(s, defs, dt) {
   sys.grid.importing = 0;
   const nodes = Object.values(sys.nodes),
     visited = new Set();
+  const powerPeers=new Map();
+  for(const l of sys.links){
+    if(l.kind!=='power'||!l.enabled||l.work<l.required)continue;
+    if(!powerPeers.has(l.from))powerPeers.set(l.from,[]);
+    if(!powerPeers.has(l.to))powerPeers.set(l.to,[]);
+    powerPeers.get(l.from).push(l.to);powerPeers.get(l.to).push(l.from);
+  }
   for (const root of nodes) {
     if (visited.has(root.id)) continue;
     const component = [],
@@ -236,10 +243,8 @@ export function infrastructureStep(s, defs, dt) {
     for (let i = 0; i < queue.length; i++) {
       const n = queue[i];
       component.push(n);
-      for (const l of sys.links) {
-        if (l.kind !== "power" || !l.enabled || l.work < l.required) continue;
-        const peer = l.from === n.id ? l.to : l.to === n.id ? l.from : null;
-        if (peer !== null && !visited.has(peer) && sys.nodes[peer]) {
+      for (const peer of powerPeers.get(n.id)||[]) {
+        if (!visited.has(peer) && sys.nodes[peer]) {
           visited.add(peer);
           queue.push(sys.nodes[peer]);
         }

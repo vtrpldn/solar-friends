@@ -38,11 +38,14 @@ function assign(s,r,kind,spot,details={}) {
  if(kind==='bladder'||kind==='bowels')r.toiletSite=details.site;
 }
 // Called before movement so an unladen resident can stop heading to a job.
+// A return-phase job can be between loads: only actual carried cargo defers
+// a break. Otherwise urgent toilet needs and exhaustion can trap a worker in
+// repeated sleep/exit loops while the uncollected goods remain safely at site.
 export function chooseNeed(s,r,i,api) {
  const physical=['hunger','bladder','bowels'];
  if(r.needTask && !physical.includes(r.needTask.kind) && physical.some(k=>ensureNeeds(r)[k]<10&&(k!=='hunger'||s.materials.food+s.materials.meals>0)))cancelNeed(s,r);
  if(r.needTask && s.time-r.needTask.created>240){cancelNeed(s,r);r.needRetryAt=s.time+15;}
- if(r.needTask || r.tentPhase || r.cargo || (r.operation && ['return','deliver'].includes(s.operations?.find(o=>o.id===r.operation)?.phase)) || r.action==='town' || s.stage!=='playing' || (r.energy<25 && Math.min(ensureNeeds(r).hunger,ensureNeeds(r).bladder,ensureNeeds(r).bowels)>=15) || (r.needRetryAt||0)>s.time)return;
+ if(r.needTask || r.tentPhase || r.cargo || r.action==='town' || s.stage!=='playing' || (r.energy<25 && Math.min(ensureNeeds(r).hunger,ensureNeeds(r).bladder,ensureNeeds(r).bowels)>=15) || (r.needRetryAt||0)>s.time)return;
  const n=ensureNeeds(r,i);
  const temperament=profileFor(r).temperament;
  const threshold=k=>k==='social' ? (committed(r)?35:temperament.socialAt) : k==='fun' ? temperament.breakAt : 30;
