@@ -516,16 +516,17 @@
     "sources": [
       "game.js",
       "lens-data.js",
-      "basic-needs.js"
+      "basic-needs.js",
+      "management.js"
     ],
     "tests": [
       "lenses",
       "basic-needs"
     ],
     "description": "Use the village counters, map lenses and Almanac to spot shortages and decide what needs attention.",
-    "diagram": "flowchart TD\n Village[Current village conditions] --> Counters[Food, battery, water and WC counters]\n Village --> Lenses[Map lenses show conditions by location]\n Village --> Almanac[Almanac shows supplies and work policies]\n Counters --> Details[Hover for details or click to manage]\n Lenses --> Inspect[Select a bed or building for details]\n Almanac --> Policies[Adjust policies for village work]",
+    "diagram": "flowchart TD\n Village[Current village conditions] --> Counters[Food, battery, and Water & sanitation counters]\n Village --> Lenses[Map lenses show conditions by location]\n Village --> Almanac[Almanac shows supplies and work policies]\n Counters --> Details[Hover for details or click to manage]\n Lenses --> Inspect[Select a bed or building for details]\n Almanac --> Policies[Adjust policies for village work]",
     "boundary": "",
-    "tip": "Check food, water and battery status before adding demand. The WC counter shows sanitation conditions.",
+    "tip": "Check food, water and battery status before adding demand. Open Water & sanitation for toilet and washing conditions.",
     "facts": null
   }
 ]

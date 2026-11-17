@@ -30,7 +30,7 @@
     "web/v02/weekend/asset-upkeep.js": "d2b194c4ae6868fbab90f6465ab5c82d42354bf7f4e7d6b486234745ce533fd5",
     "web/v02/weekend/audio.js": "8870a1cfb36cab6abdaaed28b2fa8b0d904f3477ee3e2d5a15c7ec0c5f5e130d",
     "web/v02/weekend/auto-utilities.js": "02ba8dee6825e0513f5eeab6fa526576df9602151134088c0d67d003c4a75d29",
-    "web/v02/weekend/basic-needs.js": "9177c889655cef047d4c28a0af2e592543bcfe3e43d2d2fba9cb80d1fac2ae48",
+    "web/v02/weekend/basic-needs.js": "18a4021e0bdeb5e3825890a290a8759f0645464d7524fd63bff6159ca68db1f7",
     "web/v02/weekend/biological-production.js": "e1bf0c206c69c0b870e600ee3cdf2f408da8bdce3f462e279b20e7b3718e3c28",
     "web/v02/weekend/build-categories.js": "f7a79298ff38cadff7a2e8684eecfbaa0530a455759333329e1aed113ce54874",
     "web/v02/weekend/build-info.js": "24b3791c5b3f24a1a8a1ae4e28587cf33c20cf5ca0c8774e9846f255a9bbe967",
@@ -71,7 +71,7 @@
     "web/v02/weekend/food-planning.js": "58eff9db78444d350631925a658eaa45d463592c4424d766d5b5bcdef34de298",
     "web/v02/weekend/food-policy.js": "be69fe05edf440a075bee89de6953850b93f09b2b921f9eefec6a02cbea9be36",
     "web/v02/weekend/food-storage.js": "75189616237343916d5f4017342a2bf8b8422e27a068a1953ece89b6a00fade6",
-    "web/v02/weekend/game.js": "4bcd95cc3986196d5cd4f147055e721e4ebe7a764546767859a9b1396668de5d",
+    "web/v02/weekend/game.js": "5247203cddb272ff246d73f5703c1219f469c77b39f9e91398c7a82a7ff42702",
     "web/v02/weekend/gathering.js": "584f988c2bca6a36a42bb5d5a1734102668e1af41a58e5f71d8dc251627603e1",
     "web/v02/weekend/house-lighting.js": "bc5a140f2620a5e074215bf57ddd754d9bc79197c7fffcc5a2252c27af831e43",
     "web/v02/weekend/hydration.js": "42a3037a2bc39a90f356ddcfff160ea85504c74e0724026ad526ed173d897425",
@@ -90,7 +90,7 @@
     "web/v02/weekend/load-village.js": "d58fe3540bf1d2f23a2954a8c2ede4dc59bd2cf9996856bf0a0ae72cdeb98133",
     "web/v02/weekend/local-market.js": "29eb3ff2024c706c069e0c986dba83a0ba10e8135a6a08ba9eb383d671f89590",
     "web/v02/weekend/logistics-policy.js": "2533bd78cbe1a9f4ed5e7f4d572766e064dd14bd44cb7fcb4f8c0551647587be",
-    "web/v02/weekend/management.js": "73f7b460a5be6e9d6faa484e155cd42a6bdc17604b7ac06f09536dffafd17269",
+    "web/v02/weekend/management.js": "fc58b6c7cb1992eaf1bbe6b6937423809baceda273daec11189d05a4f3ca4acb",
     "web/v02/weekend/map-size.js": "fc4759d046cf16a75171e1353c33ad571ae3ddda18e8023401e1b3fad9d2b3fa",
     "web/v02/weekend/material-ledger.js": "cb8771bc89112f75da778e63231cc8aa4752aa0c4697aae18613eaef039d66fd",
     "web/v02/weekend/material-measures.js": "85ac89ff549aaa3109a4925af0ea674ac8e1a24879c24665c79617956c0accd4",
@@ -145,7 +145,7 @@
     "web/v02/workshop/models.js": "4c403f76f3b1ba786be6c84c1c9129de92804ed77b8b8e80c8e76d21c12067d1"
   },
   "content": {
-    "topics": "0d9425a9b170a61a10a9824124933587178a5447b456b45590a6a94015bc75f2",
+    "topics": "2a0845964b0b62191aeb6ced8414cf9b13313ba3f232ec97e95df0d7c5570229",
     "facts": "a38be0845c3d0f82be67f883bb4c49ab11b7d63b572a583fc5ed6c02518d413e",
     "renderer": "8bd634ddece8c801ba064fe84a4d11adbf769b0ce6a9f7a299f6e0e2dd83dcca",
     "dependencies": "9cc183f2db674fa60fb2a2969ed46747343f550c3ae5e9395aab3532a841eb7a"
@@ -175,8 +175,8 @@
     "inventory-ownership-and-material-accounting.svg": "f5fe00a34fb5d66ecb0c9df93e6ea018f72707370e332d21faceef5a8fa26b47",
     "purchases-sales-and-physical-transport.svg": "05ae6a865088c27adbe5da38c1c131cdd70741dcb18678e466688c319f9fb28c",
     "cash-commitments-and-forecasts.svg": "1822f90d40cd454dec0f5a087b2185da8e0e4db0667e3fc55f9f8647f5f429b4",
-    "optional-outside-employment.svg": "24dbb4c71b5b8ba41f1d755c6cf9ab1ca41b2bceefba7deea62e21ab27545ccc",
+    "optional-outside-employment.svg": "aacd35da0235d466478a946a815450cdcbdffa224363d5d1f673970fd88b38fa",
     "asset-maintenance-and-replacement.svg": "4f242b4dd6efcd9f2c604bbc58378df3f485c8cf4d044b5439724c91901cddef",
-    "presentation-inspection-and-ambient-life.svg": "7cdf88759bae23b02676b55b1971df6f980282e3dc8ce5237693567f341d6cbc"
+    "presentation-inspection-and-ambient-life.svg": "26bc59d45580499a26f44e553d8629434097af0bfc3376398d84fb025fff9add"
   }
 }
