@@ -23,14 +23,14 @@ export function installDisabledInfo() {
     scheduled=false;
     if(scrolling)return;
     const modal=document.querySelector('dialog[open]');
-    for(const [control,icon] of entries)if(!control.isConnected||!control.disabled){if(active===icon)hide();icon.remove();control.classList.remove('has-disabled-info');entries.delete(control);}
+    for(const [control,icon] of entries)if(!control.isConnected||!control.disabled){if(active===icon)hide();icon.remove();sizes.unobserve(control);control.classList.remove('has-disabled-info');entries.delete(control);}
     for(const control of document.querySelectorAll('button:disabled,select:disabled,input:disabled')) {
       let icon=entries.get(control);
       if(!icon){
         icon=document.createElement('button');icon.type='button';icon.className='disabled-info';icon.textContent='ⓘ';icon.setAttribute('popover','manual');
         icon.addEventListener('mouseenter',()=>show(icon,control));icon.addEventListener('mouseleave',()=>{if(document.activeElement!==icon)hide();});
         icon.addEventListener('focus',()=>show(icon,control));icon.addEventListener('blur',hide);icon.addEventListener('click',()=>show(icon,control));
-        entries.set(control,icon);control.classList.add('has-disabled-info');
+        entries.set(control,icon);control.classList.add('has-disabled-info');sizes.observe(control);
       }
       const parent=control.closest('dialog[open]')||document.body;
       if(icon.parentElement!==parent)parent.append(icon);
@@ -52,6 +52,8 @@ export function installDisabledInfo() {
     }
   }
   const schedule=()=>{if(!scheduled){scheduled=true;requestAnimationFrame(update);}};
+  const sizes=new ResizeObserver(schedule);
+  styles.addEventListener('load',schedule);
   new MutationObserver(records=>{
     // Ignore our own popover positioning and focus attributes.
     if(records.some(record=>!record.target.closest?.('.disabled-info,.disabled-action-tooltip')))schedule();
