@@ -1,5 +1,5 @@
 import { CRAFT_SKILLS, skillLevel, craftStage } from './crafting.js';
-import { PROCESSES, MATERIALS, materialCount, queueProduction, moveCraftJob } from './simulation.js';
+import { MATERIALS, materialCount, queueProduction, moveCraftJob } from './simulation.js';
 import { equipmentSummary, EQUIPMENT_LIFE } from './equipment.js';
 import { ITEMS } from './items.js';
 import { illustrate } from './ui-art.js';
@@ -42,7 +42,7 @@ export function renderCrafting(s, root, notify, refresh) {
   nav.setAttribute('aria-label', 'Crafting activities');
   const jobs = craftEntries(s, 'jobs');
   for (const [id, label] of [['make', 'Make'], ['repair', 'Repair'], ['jobs', `Jobs · ${jobs.length}`]]) {
-    const tab = button(nav, label, `section-${id}`, () => {ui.section = id; redraw();});
+    const tab = button(nav, label, `section-${id}`, () => {ui.section = id; ui.message = ''; redraw();});
     tab.setAttribute('aria-pressed', String(ui.section === id));
   }
   const layout = add(root, 'div', '', 'craft-layout');
@@ -89,7 +89,6 @@ export function renderCrafting(s, root, notify, refresh) {
     add(title, 'small', job ? `JOB #${job.id} · ${recipe.equipmentRepair ? 'REPAIR' : 'MAKE'}` : recipe.equipmentRepair ? 'CARE FOR SHARED TOOLS' : 'MADE IN THE VILLAGE', 'craft-eyebrow');
     add(title, 'h3', craftName(recipe));
     add(title, 'p', recipe.equipmentRepair ? 'Restore one tool’s worth of condition.' : `Makes ${Object.values(recipe.output)[0]} · ${materialCount(s, craftItem(recipe))} in stores`);
-    if (!job && !recipe.equipmentRepair) add(body, 'p', ITEMS[craftItem(recipe)]?.description || '', 'craft-description');
     const footer = add(detail, 'div', '', 'craft-action');
     if (job) {
       const status = craftJobStatus(s, job), worker = s.people.find(r => r.operation === job.id);
@@ -119,7 +118,7 @@ export function renderCrafting(s, root, notify, refresh) {
     } else {
       if (recipe.equipmentRepair) {
         const equipment = equipmentSummary(s, recipe.equipmentRepair);
-        add(body, 'p', `${equipment.owned} owned · ${equipment.broken} broken · ${Math.ceil(equipment.wear / EQUIPMENT_LIFE * 100)}% of one tool’s lifetime in total wear`);
+        add(body, 'p', `${equipment.owned} owned · ${equipment.broken} broken · ${Math.round(Math.max(0, 1 - equipment.wear / (equipment.owned * EQUIPMENT_LIFE)) * 100)}% overall condition`);
         if (equipment.borrowers.length) add(body, 'p', `In use by ${equipment.borrowers.join(', ')}. Return borrowed tools before repairing.`);
         if (!equipment.wear) add(body, 'p', 'In good condition. No repair needed.');
       }
@@ -141,6 +140,7 @@ export function renderCrafting(s, root, notify, refresh) {
       const summary = add(more, 'summary', 'Skills & how it’s made');
       summary.dataset.craftFocus = 'method';
       more.ontoggle = () => {if (more.open) ui.expanded.add(recipeId); else ui.expanded.delete(recipeId);};
+      if (!recipe.equipmentRepair) add(more, 'p', ITEMS[craftItem(recipe)]?.description || '');
       add(more, 'p', `${CRAFT_SKILLS[rule.skill]} level ${rule.level}+${rule.tool ? ` · ${ITEMS[rule.tool].name} required` : ''}. Hand work; no electricity needed.`);
       const stages = add(more, 'ol');
       for (const stage of rule.stages) add(stages, 'li', stage);
@@ -160,7 +160,7 @@ export function renderCrafting(s, root, notify, refresh) {
       start.disabled = !!blocker;
       start.setAttribute('aria-describedby', reason.id);
     }
-    add(footer, 'small', 'Village paused · Close this dialog to resume your previous speed.', 'craft-note');
+    add(footer, 'small', 'Village paused · Close to return to the village.', 'craft-note');
   }
   const message = add(root, 'p', ui.message, 'craft-message');
   message.setAttribute('role', 'status');
@@ -172,6 +172,7 @@ export function renderCrafting(s, root, notify, refresh) {
 function workspaceSelect(parent, sites, chosen, key, title) {
   const label = add(parent, 'label', title, 'craft-workspace');
   const select = add(label, 'select');
+  select.setAttribute('aria-label', title);
   select.dataset.craftFocus = key;
   if (!sites.length) select.add(new Option('No completed workspace', ''));
   for (const site of sites) select.add(new Option(workspaceName(site), String(site.id)));

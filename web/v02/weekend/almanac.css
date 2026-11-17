@@ -132,3 +132,5 @@
 #management[data-screen="crafting"] .management-stats { display: none; }
 #management[data-screen="crafting"] .management-layout { grid-row: 3 / 5; }
 #management .craft-entry small, #management .craft-action small { letter-spacing: 0; font-weight: normal; }
+
+#management[data-screen="crafting"] #management-message { display: none; }
