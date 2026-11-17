@@ -1856,6 +1856,28 @@ export function route(s,from,to,reachOnly=false){
     return result;
   }finally{activeNavigation=previous;}
 }
+// Search from the destination only after a long forward search. This check
+// ignores swept-body collisions, so exhausting its open cells proves that
+// even a point-sized walker cannot reach the start from this pocket.
+function isolatedDestination(s, start, end, step) {
+  const queue = [end];
+  const seen = new Set([`${end[0]},${end[1]}`]);
+  for (let i = 0; i < queue.length; i++) {
+    const [x, z] = queue[i];
+    for (const [dx, dz] of [[step, 0], [-step, 0], [0, step], [0, -step]]) {
+      const nx = x + dx, nz = z + dz;
+      // A resident can start inside an obstacle and step out of it.
+      if (nx === start[0] && nz === start[1]) return false;
+      if (nx < CELL_MIN + 1 || nx > CELL_MAX - 2 || nz < CELL_MIN + 1 || nz > CELL_MAX - 2) continue;
+      const key = `${nx},${nz}`;
+      if (seen.has(key) || occupied(s, nx, nz)) continue;
+      seen.add(key);
+      queue.push([nx, nz]);
+      if (queue.length >= 64) return false;
+    }
+  }
+  return true;
+}
 function routeUncached(s, from, to, step=1,reachOnly=false) {
   // Start outside an overlapping obstacle before rounding onto the path grid.
   // An endpoint-only escape can look valid yet move deeper into the obstacle
@@ -1915,7 +1937,12 @@ function routeUncached(s, from, to, step=1,reachOnly=false) {
     parent = new Map([[key(...start), null]]),
     costs = new Map([[key(...start), 0]]);
   queue.push({ x: start[0], z: start[1], cost: 0, priority: 0 });
+  let checkedDestination = false;
   while (queue.length) {
+    if (!checkedDestination && costs.size >= 1024) {
+      checkedDestination = true;
+      if (isolatedDestination(s, start, end, step)) return null;
+    }
     const { x, z, cost } = queue.pop();
     if (cost > costs.get(key(x, z))) continue;
     if (x === end[0] && z === end[1]) {
