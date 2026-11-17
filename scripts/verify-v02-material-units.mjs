@@ -12,3 +12,7 @@ for(const r of Object.values(PROCESSES)){
 assert.equal(materialMass({eggs:12}),.72,'a dozen eggs is not twelve kilograms');
 assert.throws(()=>materialMeasure('unregistered-material'),/Missing material/);
 console.log('PASS explicit units cover every catalog/recipe resource; egg mass and unknown-unit guard');
+const {physicalUnit,physicalQuantity,stockQuantity,quantityText}=await import('../web/v02/weekend/material-measures.js');
+for(const id of Object.keys(MATERIALS))for(const n of [0,1,12,73])assert.equal(stockQuantity(id,physicalQuantity(id,n).amount),n);
+assert.deepEqual(physicalQuantity('stone',12),{amount:240,unit:'kg'});assert.equal(quantityText('wood',12),'48 kg');assert.equal(physicalUnit('milk').unit,'L');assert.equal(physicalUnit('panels').factor,1);
+console.log('PASS canonical mass/volume/count boundary round-trips every resource without changing paid pack quantities');

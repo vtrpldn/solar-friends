@@ -24,3 +24,12 @@ export function materialMeasure(id){
 }
 export function materialUnitText(id){const [unit,kg,m3]=MATERIAL_UNITS[id];return `Per stock unit: ${unit}; approximately ${kg} kg and ${(m3*1000).toFixed(1)} L cargo space. Pack sizes are model estimates.`;}
 export function materialMass(items){return Object.entries(items).reduce((sum,[id,n])=>sum+materialMeasure(id).kg*n,0);}
+
+// Physical read/write boundary. Old saves encode bulk goods as fixed packs;
+// player controls and accounting can use canonical mass without reinterpreting
+// an existing paid manifest. Discrete equipment remains a count, milk is liters.
+const BULK=new Set(['wood','logs','earth','stone','walls','tiles','food','fodder','compost','scraps','honey']);
+export function physicalUnit(id){const [name,kg]=MATERIAL_UNITS[id];return {unit:BULK.has(id)?'kg':id==='milk'?'L':'units',factor:BULK.has(id)?kg:1,name};}
+export function physicalQuantity(id,stockUnits){const {unit,factor}=physicalUnit(id);return {amount:stockUnits*factor,unit};}
+export function stockQuantity(id,physicalAmount){return Math.max(0,Math.floor((physicalAmount+1e-8)/physicalUnit(id).factor));}
+export function quantityText(id,n){const q=physicalQuantity(id,n);return `${Number(q.amount.toFixed(3))}${q.unit==='units'?'':` ${q.unit}`}`;}

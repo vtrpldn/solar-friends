@@ -1,9 +1,10 @@
+import {supplierAvailable} from './supplier-stock.js';
 import {materialLedger,materialReconciliation} from './material-ledger.js';
 import {marketTerms} from './local-market.js';
 import {inventoryOwnership} from './economy-inventory.js';
 import {upkeep,upkeepText} from "./asset-upkeep.js";
 import {biologyText} from "./biological-production.js";
-import {materialUnitText} from "./material-measures.js";
+import {materialUnitText,quantityText,physicalUnit,stockQuantity} from "./material-measures.js";
 import {tripEstimateText,GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
 import {coolingText} from './cold-storage.js';
 import {foodStorageText} from './food-storage.js';
@@ -296,9 +297,9 @@ export function createManagement({
       add('h3','Store movements');
       const ledger=materialLedger(s),differences=materialReconciliation(s);
       add('p',Object.keys(differences).length?'Some stock changes predate or bypass the movement record. Current physical stock remains authoritative.':'Recorded opening stock plus arrivals minus use and transfers matches current stores.');
-      for(const entry of ledger.entries.slice(-8).reverse())add('p',`${financeTime(entry.time)} · ${entry.quantity>0?'+':''}${entry.quantity} ${MATERIALS[entry.id].name} · ${entry.reason}`);
+      for(const entry of ledger.entries.slice(-8).reverse())add('p',`${financeTime(entry.time)} · ${entry.quantity>0?'+':''}${quantityText(entry.id,entry.quantity)} ${MATERIALS[entry.id].name} · ${entry.reason}`);
       add('h3','Where our supplies are');
-      add('p',`Replacement-cost estimates: stores ${money(assets.available)}; committed to projects or sales ${money(assets.reserved)}; processing inputs ${money(assets.processing)}; goods travelling ${money(assets.transit)}; building materials installed ${money(assets.installed)}. These estimates exclude land, cars, labor, depreciation and separately installed upgrades; they are not resale quotes.`);
+      add('p',`Replacement-cost estimates: stores ${money(assets.available)}; committed to projects or sales ${money(assets.reserved)}; processing inputs ${money(assets.processing)}; goods travelling ${money(assets.transit)}; building materials installed ${money(assets.installed)}. These estimates exclude land, cars, labor and depreciation; they are not resale quotes.`);
       add('h3','Protect everyday supplies');
       add('p','Blueprint auto-buy keeps this much cash for food and other essentials. It is a planning reserve, not a charge; everyday purchases and bills can still use it. Existing paid orders keep their collection budget.');
       const reserve=document.createElement('input');reserve.type='number';reserve.min='0';reserve.max='100000';reserve.value=s.expansionReserve??0;reserve.setAttribute('aria-label','Cash to keep before buying building materials');reserve.oninput=()=>{s.expansionReserve=Math.max(0,Math.min(100000,Number(reserve.value)||0));};screen.append(reserve);
@@ -312,7 +313,7 @@ export function createManagement({
       const service=upkeep(s),toggle=document.createElement('button');toggle.textContent=service.automatic?'Automatic upkeep: on':'Automatic upkeep: off';toggle.setAttribute('aria-pressed',String(service.automatic));toggle.onclick=()=>{service.automatic=!service.automatic;render();};screen.append(toggle);
       const allowance=document.createElement('input');allowance.type='number';allowance.min='0';allowance.max='100000';allowance.value=service.dailyBudget;allowance.setAttribute('aria-label','Daily upkeep materials allowance in reais');allowance.oninput=()=>{service.dailyBudget=Math.max(0,Math.min(100000,Number(allowance.value)||0));};allowance.onchange=()=>render();screen.append(allowance);
       add('h3','Where the money goes');
-      const groups={outsideWork:'Outside work',commuting:'Commuting',transport:'Transport',sales:'Surplus sales',construction:'Building materials',purchases:'Town purchases',electricity:'Grid electricity'};
+      const groups={outsideWork:'Outside work',commuting:'Commuting',transport:'Transport',sales:'Surplus sales',construction:'Building materials',purchases:'Operating supplies',household:'Household food',electricity:'Grid electricity'};
       for(const [key,label] of Object.entries(groups))add('p',`${label}: ${money(Math.abs(f.categories[key]||0))}`);
       add('h3','Recent transactions');
       if(!f.entries.length)add('p','No transactions recorded yet. Selling surplus brings income; purchases and imported power spend shared savings.');
@@ -416,8 +417,8 @@ export function createManagement({
           const item = MATERIALS[id];
           const b = document.createElement("button");
           b.className = "stock-card";
-          b.title=materialUnitText(id)+" "+marketTerms(id,item);
-          b.innerHTML = `${resourceIcon(id)}<span class="stock-name">${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><strong>${Math.floor(materialCount(s, id))}<small>available</small></strong><small class="stock-detail">${committed[id]?`${committed[id]} committed to projects/jobs · `:""}${item.quantity ? "Trade in town" : "Made here"}</small>`;
+          b.title=materialUnitText(id)+" "+marketTerms(id,item)+(item.quantity?` Available from the supplier today: ${quantityText(id,supplierAvailable(s,id,MATERIALS))}.`:"");
+          b.innerHTML = `${resourceIcon(id)}<span class="stock-name">${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><strong>${quantityText(id,materialCount(s,id))}<small>available</small></strong><small class="stock-detail">${committed[id]?`${quantityText(id,committed[id])} committed to projects/jobs · `:""}${item.quantity ? "Trade in town" : "Made here"}</small>`;
           if (ITEMS[id]?.durable) {
             const status=equipmentSummary(s,id), detail=document.createElement('small');
             detail.className='equipment-status';
@@ -477,7 +478,7 @@ export function createManagement({
           (p.readyAt > s.time
             ? "Growing before the next harvest"
             : p.repeat
-              ? `Keeping ${productionTarget(p)} in stock`
+              ? `Keeping ${Object.keys(PROCESSES[p.repeat].output)[0]?quantityText(Object.keys(PROCESSES[p.repeat].output)[0],productionTarget(p)):productionTarget(p)} in stock`
               : "Ready for a job");
         if(op && op.phase!=='growing' && !s.people.some(r=>r.operation===op.id && !r.needTask && !r.tentPhase))status.textContent=`${op.status?.startsWith('Waiting')?op.status:'Waiting for an available resident'} · residents may be resting or doing higher-priority work`;
         if (activity) status.textContent = activity.detail;
@@ -497,19 +498,21 @@ export function createManagement({
           );
           refresh();
         };
-        const targetLabel=document.createElement('label');targetLabel.textContent='Stock target ';
-        const target=document.createElement('input');target.type='number';target.min=0;target.max=10000;target.step=1;target.value=productionTarget(p);target.setAttribute('aria-label',`Stock target at ${name.textContent}`);
-        target.oninput=()=>{p.stockTarget=Math.max(0,Math.min(10000,Math.floor(Number(target.value)||0)));};target.onchange=()=>{refresh();render();};targetLabel.append(target);
+        const targetResource=()=>Object.keys(PROCESSES[choice.value].output)[0];
+        const targetUnit=()=>targetResource()?physicalUnit(targetResource()):{factor:1,unit:'units'};
+        const targetLabel=document.createElement('label');targetLabel.textContent=`Stock target (${targetUnit().unit}) `;
+        const target=document.createElement('input');target.type='number';target.min=0;target.max=10000*targetUnit().factor;target.step=targetUnit().factor;target.value=productionTarget(p)*targetUnit().factor;target.setAttribute('aria-label',`Stock target at ${name.textContent}`);
+        target.oninput=()=>{p.stockTarget=Math.max(0,Math.min(10000,Math.floor((Number(target.value)||0)/targetUnit().factor)));};target.onchange=()=>{refresh();render();};targetLabel.append(target);
         const repeat = document.createElement("button");
-        repeat.textContent = p.repeat ? "Stop repeating" : `Keep ${productionTarget(p)} in stock`;
+        repeat.textContent = p.repeat ? "Stop repeating" : `Keep ${targetResource()?quantityText(targetResource(),productionTarget(p)):productionTarget(p)} in stock`;
         repeat.onclick = () => {
           repeatProduction(s, p.id, p.repeat || choice.value);
           refresh();
         };
         const locate=document.createElement('button');locate.textContent=`Find in village · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores`;locate.onclick=()=>{dialog.close();inspect(p.id);};
         const recipeInfo=document.createElement('p');
-        const describe=()=>{const r=PROCESSES[choice.value];repeat.hidden=targetLabel.hidden=!!r.installation || !!r.equipmentRepair;const error=s.stage!=='playing'?'Choose a campsite first.':productionBlocker(s,p.id,choice.value);start.disabled=!!error;disabledReason(start,error);start.textContent=node?.enabled===false?'Switch on to produce':r.installation?(p.coldStorage?'Cold storage installed':'Install cold storage'):activity?.label||'Start batch';recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||(r.equipmentRepair?'Restore one tool worth of condition':'Building upgrade')}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${biologyText(choice.value)}${r.installation?' · 40 food units, 0.08 kW average cooling load; ages food at one-quarter speed while powered.':''}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
-        choice.onchange=()=>{recipeChoices.set(`${view}:${p.id}`,choice.value);describe();};describe();
+        const describe=()=>{const r=PROCESSES[choice.value];repeat.hidden=targetLabel.hidden=!!r.installation || !!r.equipmentRepair;const error=s.stage!=='playing'?'Choose a campsite first.':productionBlocker(s,p.id,choice.value);start.disabled=!!error;disabledReason(start,error);start.textContent=node?.enabled===false?'Switch on to produce':r.installation?(p.coldStorage?'Cold storage installed':'Install cold storage'):activity?.label||'Start batch';recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(', ')||(r.equipmentRepair?'Restore one tool worth of condition':'Building upgrade')}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${biologyText(choice.value)}${r.installation?' · 40 food units, 0.08 kW average cooling load; ages food at one-quarter speed while powered.':''}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
+        choice.onchange=()=>{recipeChoices.set(`${view}:${p.id}`,choice.value);target.value=productionTarget(p)*targetUnit().factor;target.step=targetUnit().factor;target.max=10000*targetUnit().factor;targetLabel.firstChild.textContent=`Stock target (${targetUnit().unit}) `;if(!p.repeat)repeat.textContent=`Keep ${targetResource()?quantityText(targetResource(),productionTarget(p)):productionTarget(p)} in stock`;describe();};describe();
         el.append(img,name,locate,status,choice,recipeInfo,start);
         if (activity) { const bar=document.createElement('progress');bar.max=1;bar.value=activity.progress;bar.setAttribute('aria-label', `Production at ${name.textContent}`);el.append(bar); }
         if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);

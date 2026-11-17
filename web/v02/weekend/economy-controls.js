@@ -1,3 +1,4 @@
+import {physicalUnit,stockQuantity,quantityText} from './material-measures.js';
 import {logisticsPolicy} from './logistics-policy.js';
 import {foodChange} from './food-storage.js';
 import {pendingExports,cancelExport,transportCost} from './physical-trade.js';
@@ -20,13 +21,14 @@ export function economyControls(root,s,materials,recipes,count,refresh){
  const trade=make(panel,'fieldset');make(trade,'legend','Sell surplus');
  const resourceLabel=make(trade,'label','Resource'),resource=make(resourceLabel,'select');for(const [id,item]of Object.entries(materials))if(item.quantity&&item.price)resource.add(new Option(item.name,id));resource.value=selected;
  resource.onchange=()=>{selected=resource.value;refresh();};
+ const unit=physicalUnit(selected);
  const p=policies.sales[selected]??={enabled:false,keep:['food','meals'].includes(selected)?s.people.length*4:12,above:['food','meals'].includes(selected)?s.people.length*4:12,daily:0};
  for(const [key,name]of [['keep','Keep at least'],['above','Sell when above'],['daily','Maximum units per day (0 = unlimited)']]){
-   const label=make(trade,'label',name),input=make(label,'input');input.type='number';input.min=0;input.max=100000;input.step=1;input.value=p[key];
-   input.oninput=()=>{p[key]=Math.max(0,Math.min(100000,Math.floor(Number(input.value)||0)));p.above=Math.max(p.above,p.keep);};input.onchange=()=>refresh();
+   const label=make(trade,'label',`${name} (${unit.unit})`),input=make(label,'input');input.type='number';input.min=0;input.max=100000*unit.factor;input.step=unit.factor;input.value=p[key]*unit.factor;
+   input.oninput=()=>{p[key]=Math.max(0,Math.min(100000,stockQuantity(selected,Number(input.value)||0)));p.above=Math.max(p.above,p.keep);};input.onchange=()=>refresh();
  }
  const offer=salePreview(s,selected,materials,recipes,count);
- make(trade,'p',s.mode==='sandbox'?'Automatic sales are disabled in sandbox. These settings apply to normal villages.':`${offer.quantity} units could be queued for R$${offer.revenue.toFixed(2)} now. Protected reserve: ${offer.reserve}. ${offer.quantity?'':offer.reason+'.'} Sales use whole trade batches. Set production targets at least one trade batch above the protected reserve.`);
+ make(trade,'p',s.mode==='sandbox'?'Automatic sales are disabled in sandbox. These settings apply to normal villages.':`${quantityText(selected,offer.quantity)} could be queued for R$${offer.revenue.toFixed(2)} now. Protected reserve: ${quantityText(selected,offer.reserve)}. ${offer.quantity?'':offer.reason+'.'} Sales use whole trade batches. Set production targets at least one trade batch above the protected reserve.`);
  make(trade,'p','Already committed materials cannot be sold. Food and the next two batches at repeating sites stay protected. Automatic sales reserve goods for town trips. Payment arrives in town, subject to buyer demand. Transport costs are shared across batches.');
  const toggle=make(trade,'button',p.enabled?'Automatic sales: on':'Enable automatic sales');toggle.setAttribute('aria-pressed',String(p.enabled));toggle.onclick=()=>{p.enabled=!p.enabled;refresh();};
  const logistics=make(panel,'fieldset');make(logistics,'legend','Consolidate automatic town trips');
@@ -39,7 +41,7 @@ export function economyControls(root,s,materials,recipes,count,refresh){
  const orders=make(panel,'fieldset');make(orders,'legend','Town exports');
  make(orders,'p',`Goods leave available stock when queued. Trips combine sale batches within cargo capacity. Transport: R$${transportCost(s)} per trip; the driver needs enough energy and the village must afford departure.`);
  for(const o of pendingExports(s)){
- const row=make(orders,'div');make(row,'span',`${o.quantity} ${materials[o.material].name} · R$${(o.cents/100).toFixed(2)} gross `);
+ const row=make(orders,'div');make(row,'span',`${quantityText(o.material,o.quantity)} ${materials[o.material].name} · R$${(o.cents/100).toFixed(2)} gross `);
  const cancel=make(row,'button','Cancel sale');cancel.onclick=()=>{cancelExport(s,o.id,foodChange);refresh();};
  }
  if(!pendingExports(s).length)make(orders,'p','No sale batches waiting.');
