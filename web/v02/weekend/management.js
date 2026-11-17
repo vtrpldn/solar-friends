@@ -327,7 +327,7 @@ export function createManagement({
           const item = MATERIALS[id];
           const b = document.createElement("button");
           b.className = "stock-card";
-          b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><small>${committed[id]?`${committed[id]} committed to projects/jobs · `:""}${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
+          b.innerHTML = `${resourceIcon(id)}<span class="stock-name">${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><strong>${Math.floor(materialCount(s, id))}<small>available</small></strong><small class="stock-detail">${committed[id]?`${committed[id]} reserved · `:""}${item.quantity ? "Trade in town" : "Made here"}</small>`;
           illustrateResources(b);
           b.disabled = !item.quantity;
           b.classList.toggle("active", $("purchase").value === id);

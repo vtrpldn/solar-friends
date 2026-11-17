@@ -1006,12 +1006,20 @@ dialog button {
   margin-bottom: 25px;
 }
 .stock-card {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  align-items: center;
   text-align: left;
-  padding: 10px !important;
-  min-height: 88px;
+  padding: 8px !important;
+  min-height: 62px;
 }
 .stock-card strong {
-  font-size: 23px;
+  grid-column: 3;
+  grid-row: 1 / 3;
+  text-align: right;
+  font-size: 20px;
   display: block;
   line-height: 1.1;
   color: #708547;
@@ -1026,6 +1034,9 @@ dialog button {
   font-weight: 400;
   letter-spacing: 0;
 }
+.stock-card strong small { display: block; margin-top: 3px; color: #605d46; }
+.stock-card .stock-name { grid-column: 2; grid-row: 1; margin: 0; }
+.stock-card .stock-detail { grid-column: 2; grid-row: 2; color: #605d46; }
 .stock-card:disabled {
   opacity: 0.8;
 }
@@ -1326,8 +1337,12 @@ body[data-tray="closed"] {
   visibility: hidden;
 }
 .stock-card > .resource-icon {
-  width: 64px;
-  height: 48px;
+  grid-column: 1;
+  grid-row: 1 / 3;
+  float: none;
+  width: 30px;
+  height: 36px;
+  margin: 0;
 }
 
 .resource-group-title {
