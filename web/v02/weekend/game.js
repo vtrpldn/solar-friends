@@ -412,6 +412,7 @@ const border = new THREE.LineLoop(
 scene.add(border);
 const actors = s.people.map((r) => {
   const root = createResident(r.id);
+  root.userData.residentId = r.id;
   scene.add(root);
   return root;
 });
@@ -1015,7 +1016,8 @@ function updatePlacementPreview() {
     );
   }
 }
-$("world").addEventListener("pointerup", (e) => {
+// Handle selection on click so opening a dialog cannot receive the same click.
+$("world").addEventListener("click", (e) => {
   if (
     !down ||
     e.button !== 0 ||
@@ -1079,10 +1081,22 @@ $("world").addEventListener("pointerup", (e) => {
       $("undo-road").disabled = false;
     }
   } else {
-    // Pick the visible model, including a tree's canopy, before falling back to its cell.
-    const modelHit=ray.intersectObjects([...buildings.values()].filter(b=>b.root.visible).map(b=>b.root),true)[0];
+    // Pick the nearest visible character or building; hidden props and residents
+    // inside homes must not intercept clicks on the village behind them.
+    const roots=[...actors,...[...buildings.values()].map(b=>b.root)];
+    const modelHit=ray.intersectObjects(roots,true).find(hit=>{
+      if(!hit.object.isMesh)return false;
+      for(let object=hit.object;object;object=object.parent)if(!object.visible)return false;
+      return true;
+    });
     let picked=modelHit?.object;
-    while(picked && !picked.userData.projectId)picked=picked.parent;
+    while(picked && picked.userData.residentId===undefined && !picked.userData.projectId)picked=picked.parent;
+    if(picked?.userData.residentId!==undefined){
+      expandedResident=picked.userData.residentId;
+      residentTab='Overview';
+      setPanel('people');
+      return;
+    }
     selected = picked?.userData.projectId ||
       s.projects.find(
         (p) =>
