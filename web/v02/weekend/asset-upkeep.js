@@ -15,7 +15,7 @@ export function upkeep(s){return s.upkeep??={version:1,automatic:true,dailyBudge
 export function assetCondition(p){return p.condition??100;}
 export function serviceFactor(p){return Math.max(0,Math.min(1,assetCondition(p)/40));}
 export function recordVehicleDistance(s,index,km){const v=upkeep(s).vehicles[index];v.km+=km;v.condition=Math.max(0,v.condition-km*30/5000);}
-export function upkeepStep(s,defs,dt){
+export function upkeepStep(s, defs, dt, refreshAsset) {
  if(s.mode==='sandbox')return;const u=upkeep(s),day=Math.floor((540+s.time*.45)/1440);
  if(u.day!==day){u.day=day;u.used=0;u.restockSpent=0;}
  for(const p of s.projects){const d=defs[p.key],interval=INTERVALS[d.kind];if(p.removal||p.work<d.work)continue;
@@ -26,7 +26,8 @@ export function upkeepStep(s,defs,dt){
     u.jobs.push({target:p.id,replacementParts:parts,work:0,partsPaid:false,done:false});
    }
   }
-  if((projectMaterials(p,defs)?.batteries||0)>0||p.solarUpgrade){
+  const agingBattery = (projectMaterials(p, defs)?.batteries || 0) > 0 || p.solarUpgrade;
+  if(agingBattery){
     p.batteryAgeDays=(p.batteryAgeDays||0)+dt/GAME_DAY;
     if(u.automatic&&p.batteryAgeDays>=8*365&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,battery:true,work:0,partsPaid:false,done:false});
   }
@@ -37,9 +38,11 @@ export function upkeepStep(s,defs,dt){
     animalStep(s,p,d.kind,dt);
     if(s.time+GAME_DAY*.25>=(p.careUntil||0)&&!u.jobs.some(j=>j.target===p.id&&j.care&&!j.done))u.jobs.push({target:p.id,care:d.kind,work:0,partsPaid:false,done:false});
   }
-  if(!interval)continue;
-  p.condition=Math.max(0,assetCondition(p)-dt/GAME_DAY*30/interval);
-  if(u.automatic&&p.condition<70&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,work:0,partsPaid:false,done:false});
+  if(interval){
+   p.condition=Math.max(0,assetCondition(p)-dt/GAME_DAY*30/interval);
+   if(u.automatic&&p.condition<70&&!u.jobs.some(j=>j.target===p.id&&!j.done))u.jobs.push({target:p.id,work:0,partsPaid:false,done:false});
+  }
+  if(interval || agingBattery) refreshAsset?.(p);
  }
  for(let i=0;i<2;i++)if(u.automatic&&u.vehicles[i].condition<70&&!u.jobs.some(j=>j.vehicle===i&&!j.done))u.jobs.push({vehicle:i,work:0,partsPaid:false,done:false});
  u.jobs=u.jobs.filter(j=>!j.done&&(j.vehicle!==undefined||s.projects.some(p=>p.id===j.target)));

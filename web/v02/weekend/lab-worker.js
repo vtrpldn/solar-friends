@@ -74,5 +74,10 @@ function loop(){const now=performance.now(),elapsed=(now-last)/1000;last=now;
  if(runner){try{advanced+=runner.advance(elapsed,24);}catch(e){pause(`Simulation error: ${e.message}. Export evidence to inspect the run.`);}
  if(now-measuredAt>=1000){actual=advanced/((now-measuredAt)/1000);advanced=0;measuredAt=now;}
  if(now-emitted>=500){snapshot();emitted=now;}}
- setTimeout(loop,0);
+ // A nested timer adds a delay between slices even when a full tick is already due.
+ if (runner && !runner.paused && runner.debt >= .1 && globalThis.scheduler?.postTask) {
+   scheduler.postTask(loop);
+ } else {
+   setTimeout(loop, 0);
+ }
 }loop();

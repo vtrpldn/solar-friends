@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createSandbox,PROJECTS,requiredLoads} from '../web/v02/weekend/simulation.js';
+import {createSandbox,PROJECTS,requiredLoads,plan,restore,save,tick} from '../web/v02/weekend/simulation.js';
 import {autoConnectUtilities} from '../web/v02/weekend/auto-utilities.js';
 import {infrastructureStep,hasPowerService,syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 const s=createSandbox();s.people=[];s.rain=true;
@@ -21,3 +21,22 @@ assert.equal(sys.nodes[0].maintainFresh,true);assert.equal(tank.maintainFresh,tr
 tank.maintainFresh=false;sys.nodes[0].maintainSanitation=false;syncInfrastructure(s,PROJECTS);
 assert.equal(tank.maintainFresh,false);assert.equal(sys.nodes[0].maintainSanitation,false);
 console.log('PASS autonomous essential water defaults preserve explicit opt-outs');
+
+const village = createSandbox(42);
+assert.equal(plan(village, 'house', 50, 50), '');
+const homeId = village.projects.at(-1).id;
+const home = syncInfrastructure(village, PROJECTS).nodes[homeId];
+home.capacity = [8, 0, 24, 0];
+home.water[2] = 21;
+delete home.maintainSanitation;
+for (const preference of [undefined, false]) {
+  if (preference !== undefined) home.maintainSanitation = preference;
+  const loaded = restore(save(village));
+  assert(loaded);
+  tick(loaded, .1);
+  const migrated = loaded.infrastructure.nodes[homeId];
+  assert.equal(migrated.capacity[3], 16);
+  assert.equal(migrated.maintainSanitation, preference ?? true);
+  assert.equal((loaded.operations ?? []).some(op => op.site === homeId && op.water?.service), preference ?? true);
+}
+console.log('PASS legacy homes migrate sanitation and honor the saved preference on the first tick');

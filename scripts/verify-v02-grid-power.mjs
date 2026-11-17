@@ -37,6 +37,22 @@ assert.equal(s.money,100);
 const empty=fixture();empty.projects=[];empty.infrastructure=undefined;
 autoConnectUtilities(empty,defs);infrastructureStep(empty,defs,60);
 assert.equal(empty.money,100,'no standing charge');
+
+const storeDefs = {store: {kind: 'covered-storage', work: 1}};
+const store = {stock: {x:32,z:20}, money:0, time:0, people:[], projects:[{id:1,key:'store',work:1,x:33,z:21}]};
+const network = autoConnectUtilities(store, storeDefs);
+const site = network.nodes[1];
+const stepStore = () => infrastructureStep(store, storeDefs, 1, network);
+stepStore();
+assert.equal(site.connected, false);
+assert.equal(site.demand, 0);
+site.coldStorage = true;
+stepStore();
+assert(site.demand > 0 && site.power === 0, 'new cooling equipment draws power on the isolated site');
+site.battery = site.charge = 1;
+stepStore();
+assert(site.power === 1 && site.charge < 1, 'a newly charged battery serves the load on the same network');
+
 const limited=fixture();limited.projects=Array.from({length:180},(_,i)=>({id:i+1,key:'shop',work:1,x:i+30,z:21}));
 limited.infrastructure=undefined;autoConnectUtilities(limited,defs);infrastructureStep(limited,defs,60);
 assert(limited.infrastructure.grid.importing<=4);

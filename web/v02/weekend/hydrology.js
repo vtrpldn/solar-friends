@@ -29,8 +29,8 @@ export function extractWater(s,source,liters){
  h.account[source==='river'?'riverExtracted':'groundwaterExtracted']+=n;return n;
 }
 export function hydroFactor(s){return Math.min(1,ensureHydrology(s).flowLitersPerDay/8000);}
-export function rainCatchments(s,defs){
- const result=new Map(),nodes=Object.values(s.infrastructure.nodes).filter(n=>n.enabled&&['well','rain-barrel'].includes(n.kind)).sort((a,b)=>a.id-b.id),claimed=new Set();
+export function rainCatchments(s, defs, candidates = Object.values(s.infrastructure.nodes)){
+ const result=new Map(),nodes=candidates.filter(n=>n.enabled&&['well','rain-barrel'].includes(n.kind)).sort((a,b)=>a.id-b.id),claimed=new Set();
  for(const n of nodes){let area=n.kind==='well'?16:1;
   const roof=s.projects.filter(p=>!claimed.has(p.id)&&p.work>=defs[p.key].work&&['home','shed','warehouse','kitchen','workshop'].includes(defs[p.key].kind)&&Math.hypot(p.x-n.x,p.z-n.z)<=6).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z)||a.id-b.id)[0];
   if(roof){claimed.add(roof.id);const size=defs[roof.key].size||[2,2];area+=size[0]*size[1]*4;}
