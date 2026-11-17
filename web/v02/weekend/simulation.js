@@ -1,3 +1,4 @@
+import {registerGathering,gatheringStatus} from './gathering.js';
 import {biologyLabel} from './biological-production.js';
 import {foodPortions,FOOD_SERVINGS} from './food-storage.js';
 import {quantityText} from './material-measures.js';
@@ -141,6 +142,7 @@ export const PROJECTS = {
 expandMaterials(MATERIALS);
 expandProjects(PROJECTS);
 registerNaturalProjects(PROJECTS);
+registerGathering(PROJECTS,PROCESSES);
 Object.assign(PROJECTS, OPENING_PROJECTS);
 PROJECTS.well.materials={...PROJECTS.well.materials,tank:4};
 applyConstructionSpecs(PROJECTS);
@@ -299,7 +301,8 @@ export function productionBlocker(s, site, recipe) {
   if ((s.operations || []).some((o) => o.site === p.id && !o.done && !o.water))
     return "This site already has a job.";
   if ((p.readyAt || 0) > s.time)
-    return `Growing: ready in ${Math.ceil((p.readyAt-s.time)*.45)} game minutes (affected by simulation speed).`;
+    return def.gathering ? gatheringStatus(s,p) : `Growing: ready in ${Math.ceil((p.readyAt-s.time)*.45)} game minutes (affected by simulation speed).`;
+  if(def.gatherLimit&&(p.extracted||0)>=def.gatherLimit)return 'This patch has been gathered out.';
   if (def.deposit && (p.extracted || 0) >= depositCapacity(s.landSeed,p,def))
     return "This deposit is exhausted.";
   const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:2}:{})};
@@ -359,6 +362,7 @@ export function buildingOperatingStatus(s,p) {
     if(worker.action==='blocked')return result('Blocked',op.status||'The resident cannot continue this job.');
     return result(worker.action==='produce'?'Working':'Preparing',op.status||'A resident is collecting supplies or walking to the workspace.');
   }
+  if(gatheringStatus(s,p))return result(p.readyAt>s.time?'Recovering':'Gathering',gatheringStatus(s,p));
   if(p.readyAt>s.time)return result('Growing',`Ready in about ${Math.ceil((p.readyAt-s.time)*.45)} game minutes.`);
   if(p.repeat) {
     const blocker=productionBlocker(s,p.id,p.repeat);
@@ -786,7 +790,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     r.action = "blocked";
     return true;
   }
-  op.status = recipe.craft ? craftStage(recipe,op.work) : "Working";
+  op.status = recipe.gathering ? "Gathering local resources" : recipe.craft ? craftStage(recipe,op.work) : "Working";
   if (r.energy < 25) { r.action = "idle"; r.operation = null; return true; }
   r.action = "produce";
   const toolBonus=useEquipment(s,r,recipe.craft?.tool || productionEquipment(recipe),`op:${op.id}`,dt);

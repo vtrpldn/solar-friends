@@ -1,3 +1,4 @@
+import {GATHERING,gatheringStatus} from './gathering.js';
 import {returnPickup,pickupFare} from './physical-trade.js';
 import {foodPortions} from './food-storage.js';
 import {supplierError} from './supplier-stock.js';
@@ -589,6 +590,7 @@ function syncBuildings() {
       fraction = p.work / def.work;
     let id =
       p.key === "gathering" && fraction < 0.35 ? "produce-crates" : def.asset;
+    if(GATHERING[p.key]&&(p.readyAt>s.time||(GATHERING[p.key].gatherLimit&&(p.extracted||0)>=GATHERING[p.key].gatherLimit)))id+='-gathered';
     if (p.key === "goat-pasture-empty" && p.stocked) id = "goat_pasture";
     if (
       fraction < 1 &&
@@ -1428,7 +1430,7 @@ function renderUtilityUI() {
   $("queue-production").disabled = !node || node.enabled === false || !$("production").value;
   const upgrade = p && $("production").value === "solar_upgrade" ? upgradeAction(p, s.operations || []) : null;
   $("repeat-production").hidden = !!upgrade || (!!p && PROJECTS[p.key].kind==='wild-tree');
-  $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : 'Start batch';
+  $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : p && PROJECTS[p.key].natural ? 'Gather resources' : 'Start batch';
   if (node?.enabled === false) $("queue-production").textContent = "Switch on to produce";
   if (activity) { $("queue-production").textContent = activity.label; $("queue-production").disabled = true; }
   if (upgrade) { $("queue-production").textContent = upgrade.label; $("queue-production").disabled ||= upgrade.disabled; }
@@ -1458,6 +1460,7 @@ function renderUtilityUI() {
     : "";
   if(p){const status=buildingOperatingStatus(s,p);$("building-service").textContent=`${status.state}: ${status.reason} · ${$("building-service").textContent}`;}
   const recipe=PROCESSES[$("production").value];
+  if(p&&recipe?.gathering)$("building-service").textContent+=` · ${gatheringStatus(s,p)}`;
   if(p && recipe?.deposit) $("building-service").textContent+=` · Deposit: ${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} remaining`;
   $("building-service").hidden = !$("building-service").textContent.trim();
 }
@@ -2258,7 +2261,7 @@ function frame(now) {
       r.action === "produce" &&
       PROCESSES[s.operations.find((o) => o.id === r.operation)?.recipe];
     const tending =
-      production &&
+      production && (production.gathering ||
       [
         "garden",
         "greenhouse",
@@ -2268,7 +2271,7 @@ function frame(now) {
         "goat_pasture",
         "compost",
         "apiary",
-      ].includes(production.kind);
+      ].includes(production.kind));
     const visit=r.needTask;
     if(visit?.private && visit.elapsed>0 && !r.walk.length) {
       const site=s.projects.find(p=>p.id===visit.site);

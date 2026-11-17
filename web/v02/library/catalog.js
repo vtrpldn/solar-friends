@@ -1,3 +1,4 @@
+import {FORAGING_ASSETS} from './foraging.js';
 import {HOME_DESIGNS} from './home-designs.js';
 import { createEntrancePortal, createUtilityPole } from "./entrance.js";
 import { RESOURCE_IDS, resourceModel } from "./resource-models.js";
@@ -1768,7 +1769,7 @@ for (let i = 0; i < 3; i++)
     [`hen-${i}`],
   );
 add("goat", "Goat", "Animals", [1, 1], goat);
-ASSETS.push(...PROPS);
+ASSETS.push(...PROPS,...FORAGING_ASSETS);
 // A connected section keeps its own origin and selection footprint. Only its
 // exposed perimeter is drawn; editable neighbors provide the rest of the area.
 export function createConnectedAsset(id, connection) {

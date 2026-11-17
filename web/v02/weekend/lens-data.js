@@ -1,3 +1,4 @@
+import {GATHERING,gatheringStatus} from './gathering.js';
 import { PROJECTS, PROCESSES, footprint, requiredLoads, materialCount } from './simulation.js';
 import { hasPowerService, LIQUIDS } from './infrastructure.js';
 import { constructionStatus } from './construction-logistics.js';
@@ -69,8 +70,8 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
     const recipes=Object.values(PROCESSES).filter(r=>r.kind===kind);
     if(p.felled){if(id==='ecology')projectMark(p,'Tree cleared · does not regrow automatically','muted');continue;}
     if(id==='construction'&&!done)projectMark(p,constructionStatus(s,p,d,requiredLoads(p)),p.delivered<requiredLoads(p)?'warn':'good');
-    if(id==='resources'&&d.natural){const recipe=recipes.find(r=>r.deposit);projectMark(p,recipe?`${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} units remain`:ops.some(o=>o.site===p.id)?'Felling queued · yields raw wood':'Standing tree · yields raw wood',recipe&&(p.extracted||0)>=depositCapacity(s.landSeed,p,recipe)?'muted':'good');}
-    if(id==='ecology'&&(d.natural||['garden','grove','orchard','greenhouse'].includes(kind)))projectMark(p,kind==='wild-tree'?(ops.some(o=>o.site===p.id)?'Marked for felling':'Standing tree'):d.natural?'Natural deposit':'Cultivated land',ops.some(o=>o.site===p.id)&&kind==='wild-tree'?'warn':'good');
+    if(id==='resources'&&d.natural){const recipe=recipes.find(r=>r.deposit);projectMark(p,GATHERING[p.key]?gatheringStatus(s,p):recipe?`${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} units remain`:ops.some(o=>o.site===p.id)?'Felling queued · yields raw wood':'Standing tree · yields raw wood',recipe&&(p.extracted||0)>=depositCapacity(s.landSeed,p,recipe)?'muted':'good');}
+    if(id==='ecology'&&(d.natural||['garden','grove','orchard','greenhouse'].includes(kind)))projectMark(p,kind==='wild-tree'?(ops.some(o=>o.site===p.id)?'Marked for felling':'Standing tree'):GATHERING[p.key]?gatheringStatus(s,p):d.natural?'Natural deposit':'Cultivated land',ops.some(o=>o.site===p.id)&&kind==='wild-tree'?'warn':'good');
     if(id==='food'&&recipes.some(r=>foodIds.some(k=>r.output[k])))projectMark(p,done?operationText(p):'Under construction',done?workTone(p):'warn');
     if(id==='work'&&(!done||recipes.length)) {const crew=people.filter(r=>r.job===p.id||ops.some(o=>o.site===p.id&&r.operation===o.id)).length;projectMark(p,`${crew} assigned · ${done?operationText(p):constructionStatus(s,p,d,requiredLoads(p))}`,done?workTone(p):crew?'good':'warn');}
     if(id==='access'&&!d.natural&&!['road','bridge'].includes(kind))projectMark(p,`${Math.hypot(p.x-s.stock.x,p.z-s.stock.z).toFixed(1)} cells from shared supplies (straight line)`,Math.hypot(p.x-s.stock.x,p.z-s.stock.z)>25?'warn':'info');

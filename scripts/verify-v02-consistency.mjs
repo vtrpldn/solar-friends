@@ -12,6 +12,7 @@ const budgets = {
   Homes: 5000,
   Buildings: 5000,
   Vegetation: 3000,
+  Gathering: 3000,
   Animals: 800,
   Residents: 800,
   Supplies: 2000,
