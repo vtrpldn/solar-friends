@@ -70,3 +70,11 @@ node scripts/verify-v02-paused-rendering.mjs
 ```
 
 The rendering regression exercises idle submission suppression, actual visible zoom, desktop resize, placement previews, resume, GPU-context recovery, paused rain and 1024/2048/4096 shadow allocations. Lighting, navigation-equivalence and motion regressions pass. Broader UI/recovery checks and final production identity are recorded after completion.
+
+## Final integration checks
+
+Farming, 72-bed bulk work, physical seed purchasing/delivery, all crop/enclosure lifecycles, daily meals/sleep, proactive drinking, forestry, building clearances, time-skip parity and production-milestone predictions passed after reconciliation. The final rendering regression passed with the combined code. The three-day recovery rerun passed before the later seed/drinking additions; it is not evidence for those later mechanics.
+
+The actual published `d19a12ae` build passed normal badge-area clicks, reloadable diagnostics, combined water/sanitation, crafting, saved field inspection, Guide, desktop resize and reload with zero browser exceptions. A subsequent publication contains the remaining integrated changes and is checked separately.
+
+`RELEASE_REVISION=<published SHA> RELEASE_SAVE=<save path> node scripts/check-production-release.mjs` verifies a specific live deployment; it is intentionally separate from the automatic local regression glob.
