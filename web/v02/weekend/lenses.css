@@ -2,32 +2,39 @@ body[data-lens]:not([data-lens=""]) #world { filter: saturate(.32) brightness(.6
 #lens-overlay { position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; }
 #map-lenses { position:fixed; right:18px; top:100px; z-index:5; width:290px; pointer-events:none; }
 #map-lenses button, #map-lenses section, #lens-panel { pointer-events:auto; }
-#lens-toggle { display:block; margin-left:auto; background:#fff7df; border:1px solid #bda77b; box-shadow:0 3px 0 #58482d33; }
-#lens-panel, #lens-legend { margin-top:8px; padding:15px; border:1px solid #7e9478; border-radius:12px; background:#203a31f5; color:#fff4d6; box-shadow:0 8px 24px #142c3240; }
+#lens-toggle { display:block; margin-left:auto; background:var(--paper); border:2px solid var(--edge); box-shadow:0 3px 0 #b19a6e; }
+#lens-panel, #lens-legend { margin-top:8px; padding:15px; border:2px solid var(--edge); border-radius:20px 20px 22px 22px; background:var(--paper); color:var(--ink); box-shadow:0 5px 0 #947c5080, 0 9px 22px #3c482326, inset 0 0 0 4px #fffdf066; }
 #lens-panel { max-height:calc(100vh - 235px); overflow:auto; }
 #lens-legend { max-height:calc(100vh - 235px); overflow:auto; }
 #lens-panel:not([hidden]) + #lens-legend { display:none; }
 .lens-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .lens-heading h2 { margin:2px 0 12px; font-size:21px; }
-.lens-heading small { letter-spacing:.15em; font-size:10px; color:#c6d5b4; }
-#map-lenses .lens-heading button { background:transparent; color:#fff4d6; border:0; padding:2px 8px; font-size:22px; box-shadow:none; }
-.lens-choices { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-#map-lenses .lens-choices button { font:inherit; text-align:left; padding:9px 8px; color:#fff4d6; background:#ffffff0c; border:1px solid #ffffff25; box-shadow:none; border-radius:6px; }
-#map-lenses .lens-choices button:hover, #map-lenses .lens-choices button[aria-pressed="true"] { background:#dce8b7; color:#203a31; border-color:#dce8b7; }
+.lens-heading small { letter-spacing:.15em; font-size:10px; color:#7d6949; }
+#map-lenses .lens-heading button { background:#fff4d3; color:var(--ink); border:2px solid var(--edge); border-radius:50%; width:30px; height:30px; padding:0; font-size:20px; line-height:1; box-shadow:none; flex-shrink:0; }
+.lens-choices { display:grid; grid-template-columns:1fr 1fr; gap:9px 7px; }
+#map-lenses .lens-choices button { font:inherit; font-weight:600; text-align:left; padding:9px 8px; color:var(--ink); background:#fff4d3; border:2px solid var(--edge); box-shadow:0 2px 0 #b19a6e; border-radius:11px; }
+#map-lenses .lens-choices button:hover { background:#fffbe9; }
+#map-lenses .lens-choices button[aria-pressed="true"] { background:#e3edc5; border-color:#7b9457; box-shadow:0 2px 0 #6f854b; }
 #lens-description, #lens-count { font-size:12px; line-height:1.5; margin:9px 0; }
-#lens-count { color:#c6d5b4; }
+#lens-count { color:#7d6949; }
 #lens-key { display:flex; flex-wrap:wrap; gap:7px 12px; font-size:11px; margin-top:12px; }
 #lens-filter-label select { width:100%; margin-top:5px; font:inherit; }
 #lens-list { max-height:180px; overflow:auto; margin-top:8px; }
-#map-lenses #lens-list button { display:block; width:100%; text-align:left; background:transparent; color:#fff4d6; border:0; border-bottom:1px solid #ffffff22; border-radius:0; font:inherit; font-size:12px; padding:8px 0; box-shadow:none; }
+#map-lenses #lens-list button { display:block; width:100%; text-align:left; background:transparent; color:var(--ink); border:0; border-bottom:1px dashed #d3c29c; border-radius:0; font:inherit; font-size:12px; padding:8px 0; box-shadow:none; }
 #lens-tooltip { position:fixed; z-index:20; pointer-events:none; width:max-content; max-width:320px; background:#fff7df; color:#273d2c; border:1px solid #bda77b; border-radius:6px; padding:9px 12px; font-size:13px; box-shadow:0 4px 15px #0003; }
 #map-lenses [hidden], #lens-overlay[hidden], #lens-tooltip[hidden] { display:none; }
-#map-lenses :focus-visible { outline:3px solid #ffc76a; outline-offset:3px; }
+#map-lenses :focus-visible { outline:3px solid #bb663d; outline-offset:3px; }
 
 body[data-lens]:not([data-lens=""]) #selection { right:auto; left:22px; }
 
-#map-lenses summary, #lens-filter-label { color:#e1e9cb; }
+#map-lenses summary, #lens-filter-label { color:#6e6047; }
 /* The persistent lens button also needs space after returning to normal view. */
 body[data-lens=""] #selection { top:160px; max-height:calc(100dvh - var(--dock) - 184px); }
 body:has(#lens-panel:not([hidden])) #selection { right:auto; left:22px; }
 #lens-filter { color:#40503c; background:#fff7df; }
+
+#lens-key span { display:inline-flex; align-items:center; gap:5px; color:var(--ink); }
+#lens-key span::before { content:""; width:9px; height:9px; flex-shrink:0; border-radius:3px; background:var(--lens-color); border:1px solid #40503c66; }
+#map-lenses #lens-list button:hover { background:#efe9cf; transform:none; }
+#lens-results { border-top:1px dashed #c8b78e; padding-top:9px; }
+#selection { z-index:4; }

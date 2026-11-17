@@ -32,7 +32,7 @@ export function installLenses({state,camera,world,focus,inspect}) {
     for(const [value,name] of options){const o=document.createElement('option');o.value=value;o.textContent=name;filter.append(o);}filter.value=id==='water'?liquid:material;
     $('lens-key').replaceChildren();
     const key=id==='land'?[['good','Gentle < 10°'],['warn','Slope 10–25°'],['bad','Steep > 25°']]:id==='chains'?[['good','Producer'],['warn','Consumer'],['info','Inputs / shared stock']]:id==='ecology'?[['good','Standing / cultivated'],['warn','Felling queued'],['muted','Cleared']]:id==='power'?[['good','Available / no demand'],['bad','Unmet demand'],['warn','Line under construction'],['muted','Off']]:id==='sanitation'?[['good','Space available'],['bad','Full'],['warn','Pipe under construction'],['muted','Off']]:[['good','Ready / active'],['warn','Waiting / limited'],['bad','Needs attention'],['info','Location'],['muted','Inactive']];
-    for(const [tone,name] of key){const item=document.createElement('span');item.style.color=COLORS[tone];item.textContent=`${glyph[tone]} ${name}`;$('lens-key').append(item);}
+    for(const [tone,name] of key){const item=document.createElement('span');item.style.setProperty('--lens-color',COLORS[tone]);item.textContent=`${glyph[tone]} ${name}`;$('lens-key').append(item);}
     menu(false);
   }
   $('lens-filter').onchange=e=>{if(active==='water')liquid=e.target.value;else material=e.target.value;last=-Infinity;};
