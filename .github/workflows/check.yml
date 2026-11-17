@@ -20,6 +20,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
+      - name: Check resident decisions and desktop profiles
+        timeout-minutes: 5
+        run: |
+          node scripts/verify-v02-personality.mjs
+          node scripts/verify-v02-resident-agency.mjs
+          node scripts/verify-v02-downtime.mjs
+          node scripts/verify-v02-expressive-motion.mjs
+          node scripts/verify-v02-needs.mjs
+          node scripts/verify-v02-urgent-needs.mjs
+          node scripts/verify-v02-resident-agency-browser.mjs
       - run: npm run dev:check
       - uses: actions/upload-artifact@v4
         if: always()

@@ -241,7 +241,9 @@ export function poseResident(rig, action, time, blend = 1) {
   cargo.visible = action === "carry" || action === "carry-walk";
   can.visible = action === "water";
   rig.bowl.visible = action === "eat";
-  rig.book.visible = action === "read";
+  const reading=action==="read" || action==="ground-read";
+  const groundSeated=action==="fire-sit" || action==="ground-read" || action==="ground-relax";
+  rig.book.visible = reading;
   if (action === "walk" || action === "carry-walk") {
     hips.position.y += 0.015 * (1 - Math.cos(phase * 2));
     hips.rotation.z = Math.sin(phase) * 0.025;
@@ -276,6 +278,23 @@ export function poseResident(rig, action, time, blend = 1) {
       l.knee.rotation.x = 1.35;
     });
     arms.forEach((a) => reach(a, 0.12, 0.29));
+  }
+  if (groundSeated) {
+    hips.position.y=.15;
+    hips.rotation.x=.06;
+    legs.forEach((l,i)=>{
+      l.hip.rotation.x=-1.61;
+      l.hip.rotation.z=(i?1:-1)*.14;
+      l.knee.rotation.x=.1;
+    });
+    head.rotation.y=Math.sin(time*.35)*.12;
+    // Alternate warming hands and resting them on the lap while watching the fire.
+    const warmth=action==='fire-sit' ? .5+.5*Math.sin(time*.65) : 0;
+    arms.forEach((a,i)=>{
+      a.shoulder.rotation.x=-.35-warmth*.35;
+      a.elbow.rotation.x=-.8-warmth*.25;
+      a.shoulder.rotation.z=(i?1:-1)*.1;
+    });
   }
   if (action === "rest") {
     hips.position.y = 0.86 + Math.sin(time * 2) * 0.003;
@@ -327,6 +346,48 @@ export function poseResident(rig, action, time, blend = 1) {
     arms[0].elbow.rotation.x = -0.65 + Math.sin(time * 2) * 0.16;
     head.rotation.y = Math.sin(time * 0.7) * 0.09;
   }
+  if (action === "wave") {
+    head.rotation.y=-.08;
+    arms[0].shoulder.rotation.z=-2.35+Math.sin(time*4.5)*.15;
+    arms[0].shoulder.rotation.x=-.15;
+    arms[0].elbow.rotation.x=-.4+Math.sin(time*4.5)*.12;
+    arms[1].elbow.rotation.x=-.12;
+  }
+  if (action === "listen") {
+    const nod=Math.max(0,Math.sin(time*1.4));
+    head.rotation.x=.04+nod*nod*.13;
+    head.rotation.z=.06;
+    arms.forEach(a=>{a.shoulder.rotation.x=-.08;a.elbow.rotation.x=-.22;});
+  }
+  if (action === "laugh") {
+    const chuckle=Math.max(0,Math.sin(time*5));
+    hips.rotation.x=-.04+chuckle*.035;
+    head.rotation.x=-.12+chuckle*.05;
+    head.rotation.z=Math.sin(time*1.4)*.05;
+    arms.forEach(a=>{a.shoulder.rotation.x=-.4+chuckle*.07;a.elbow.rotation.x=-.65;});
+  }
+  if (action === "neck-stretch") {
+    head.rotation.z=Math.sin(time*.75)*.28;
+    head.rotation.x=.08;
+    arms.forEach(a=>{a.shoulder.rotation.x=.05;a.elbow.rotation.x=-.12;});
+  }
+  if (action === "shoulder-roll") {
+    head.rotation.x=.04;
+    arms.forEach((a,i)=>{
+      a.shoulder.rotation.x=Math.sin(time*1.4+i*.35)*.2;
+      a.shoulder.rotation.z=(i?1:-1)*(.14+Math.cos(time*1.4+i*.35)*.08);
+      a.elbow.rotation.x=-.3;
+    });
+  }
+  if (action === "yawn") {
+    head.rotation.x=-.12;
+    head.rotation.z=-.06;
+    arms[1].shoulder.rotation.x=-1.05;
+    arms[1].shoulder.rotation.z=-.4;
+    arms[1].elbow.rotation.x=-1.65+Math.sin(time*1.5)*.04;
+    arms[0].shoulder.rotation.x=.1;
+    arms[0].elbow.rotation.x=-.15;
+  }
   if (action === "stretch") {
     const amount = 0.5 - 0.5 * Math.cos(time * 0.9);
     arms.forEach((a, i) => {
@@ -335,12 +396,20 @@ export function poseResident(rig, action, time, blend = 1) {
     });
     hips.rotation.z = Math.sin(time * 0.9) * 0.045;
   }
-  if (action === "eat" || action === "read") {
+  if (action === "eat" || reading) {
     head.rotation.x=.15+Math.sin(time*1.8)*.025;
     arms[0].shoulder.rotation.x=-.65;
     arms[0].elbow.rotation.x=-.9;
     arms[1].shoulder.rotation.x=action==='eat' ? -.75-Math.sin(time*2.6)*.25 : -.6;
     arms[1].elbow.rotation.x=action==='eat' ? -1.2-Math.sin(time*2.6)*.3 : -.9;
+    if(reading){
+      // Briefly reach across the open book to turn a page, then read again.
+      const turn=Math.max(0,Math.sin(time*.65))**8;
+      arms[1].shoulder.rotation.z=-turn*.55;
+      arms[1].shoulder.rotation.x-=turn*.15;
+      arms[1].elbow.rotation.x-=turn*.35;
+      head.rotation.y=Math.sin(time*.65)*.045;
+    }
   }
   if (action === "bathe") {
     hips.rotation.z=Math.sin(time*1.5)*.035;
@@ -367,17 +436,23 @@ export function poseResident(rig, action, time, blend = 1) {
     head.rotation.y=Math.sin(time)*.2;
   }
   if (cargo.visible) arms.forEach((a) => reach(a, 0.2, 0.36));
-  if(action==='eat'||action==='read'){
+  if(action==='eat'||reading){
     const forearm=hips.rotation.x+arms[0].shoulder.rotation.x+arms[0].elbow.rotation.x;
     rig.bowl.rotation.x=-forearm;
     rig.book.rotation.x=-forearm-.5;
   }
   for(const l of legs)l.shoe.rotation.x=action==='rest'?0:-(hips.rotation.x+l.hip.rotation.x+l.knee.rotation.x);
-  if(['duck-walk','tend'].includes(action)){
+  if(['duck-walk','tend','wave','listen','laugh','neck-stretch','shoulder-roll','yawn'].includes(action)){
     rig.root.updateMatrixWorld(true);
     const rootY=rig.root.getWorldPosition(new THREE.Vector3()).y;
     const sole=Math.min(...legs.map(l=>new THREE.Box3().setFromObject(l.shoe).min.y));
     hips.position.y+=(rootY-sole)/rig.root.getWorldScale(new THREE.Vector3()).y;
+  }
+  if(groundSeated){
+    rig.root.updateMatrixWorld(true);
+    const rootY=rig.root.getWorldPosition(new THREE.Vector3()).y;
+    const lowest=Math.min(...legs.map(l=>new THREE.Box3().setFromObject(l.hip).min.y));
+    hips.position.y+=Math.max(0,(rootY+.015-lowest)/rig.root.getWorldScale(new THREE.Vector3()).y);
   }
   const alpha = THREE.MathUtils.clamp(blend, 0, 1);
   for (const [g, p, q] of previous) {

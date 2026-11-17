@@ -32,7 +32,9 @@ for(let i=0;i<18000;i++)tick(tired,.1);
 assert(tired.people.some(r=>r.sleepUntil),'night schedules start sleep');
 assert(tired.people.filter(r=>!r.sleepUntil).every(r=>r.energy<80),'awake residents are tired at 22:30');
 assert(tired.people.some(r=>r.energy<60),'evening fatigue differs between residents');
-const sleepEnds=tired.people.map(r=>r.sleepUntil);
+// Personal bedtimes can fall just after the observation at 22:30.
+advance(tired,()=>tired.people.every(r=>r.sleepNight!==undefined),300);
+const sleepEnds=tired.people.map(r=>r.sleepUntil || r.resumeSleepUntil || tired.time);
 advance(tired,()=>tired.time>Math.max(...sleepEnds)+5,1200);
 assert(tired.people.every(r=>!r.sleepUntil),'residents finish one sleep per night');
 console.log('PASS generated finite deposits, deterministic trees, save/load, raw-only hauling, manual purification, one-time felling, timber/planks and nighttime fatigue');

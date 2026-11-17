@@ -16,7 +16,9 @@ import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js'
 import { STORAGE_KINDS, crewLimit, carriedLoads, crewEfficiency } from "./construction-logistics.js";
 import {registerWorld,validSettings,townDuration,waterFactor} from './world-settings.js';
 import {depositCapacity} from './land-layout.js';
-import {workMultiplier} from './resident-personality.js';
+import {idleActivity,clearDowntime,downtimeInvalid} from './resident-downtime.js';
+import {workMultiplier,profileFor} from './resident-personality.js';
+import {workPreference,noticeAspiration,validMind} from './resident-mind.js';
 import { ensureNeeds, decayNeeds, chooseNeed, advanceNeed, validNeeds, cancelNeed } from "./resident-needs.js";
 import { validTerrainVertices } from "./terraform.js";
 import { ROAD_SHIFT } from "./road-layout.js";
@@ -247,8 +249,7 @@ function wakeHelpers(s) {
     ) {
       r.walk = [];
       r.target = null;
-      r.idleUntil = 0;
-      r.idleGoal = null;
+      clearDowntime(r);
     }
 }
 export function connectUtility(s, kind, from, to) {
@@ -490,7 +491,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   );
   if (!op) op = [...(s.operations || [])].sort((a,b)=>{
     const priority=o=>o.water?0:((PROCESSES[o.recipe]?.output.food||PROCESSES[o.recipe]?.output.meals)&&s.infrastructure.hungry?1:2);
-    return priority(a)-priority(b);
+    return priority(a)-priority(b) || workPreference(r,s.projects.find(p=>p.id===b.site)?.key)-workPreference(r,s.projects.find(p=>p.id===a.site)?.key);
   }).find(eligible);
   if ((waterOnly || group) && !op) return false;
   if (
@@ -1165,6 +1166,7 @@ export function moveProject(s, id, x, z, rotation = undefined) {
 export function prioritize(s, id) {
   const i = s.projects.findIndex((p) => p.id === id);
   if (i < 0) return;
+  for(const project of s.projects)project.prioritized=project.id===id;
   s.projects.unshift(...s.projects.splice(i, 1));
   for (const r of s.people) if (r.job && !r.cargo && !r.needTask) {
     r.job = null; r.workSpot = null; r.supplyGoal = null; r.walk = []; r.target = null;
@@ -1649,132 +1651,24 @@ function workSpot(s, r, p) {
         route(s, r, spot),
     );
 }
+function leisureSpot(s,r,p) {
+  const kind=PROJECTS[p.key].kind;
+  if(!['shed','rain-shelter'].includes(kind) && !COMMUNITY[kind]?.sheltered)return workSpot(s,r,p);
+  const [w,d]=footprint(p);
+  return Array.from({length:w*d},(_,i)=>({x:p.x+i%w,z:p.z+Math.floor(i/w)}))
+    .filter(spot=>shelteredFrontCell(p,spot.x,spot.z))
+    .sort((a,b)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z))
+    .find(spot=>!s.people.some(other=>other!==r && (
+      (!other.tentPhase && Math.hypot(other.x-spot.x,other.z-spot.z)<.7) ||
+      (other.downtime && Math.hypot(other.downtime.target.x-spot.x,other.downtime.target.z-spot.z)<.8)
+    )) && route(s,r,spot));
+}
 function availableProject(s, r) {
-  return s.projects.find(
-    (p) => !p.pendingMaterials && p.work < PROJECTS[p.key].work &&
+  return s.projects.filter(p=>!p.pendingMaterials && p.work<PROJECTS[p.key].work)
+    .sort((a,b)=>Number(!!b.prioritized)-Number(!!a.prioritized)||workPreference(r,b.key)-workPreference(r,a.key)).find(
+    (p) =>
       s.people.filter(other => other !== r && other.job === p.id).length < crewLimit(PROJECTS[p.key]) && workSpot(s, r, p),
   );
-}
-function idleActivity(s, r, i, dt) {
-  if (r.idleUntil > s.time) {
-    if (r.idleGoal && go(s, r, r.idleGoal) && r.action === "stroll")
-      r.action = "look";
-    r.energy = Math.min(
-      100,
-      r.energy + dt * Math.min(.02, COMMUNITY[r.leisureKind]?.recovery || 0),
-    );
-    return;
-  }
-  const c = campLocation(s);
-  r.leisureKind = null;
-  const cycle = r.idleCycle || 0;
-  r.idleCycle = cycle + 1;
-  const social = s.projects.filter(
-    (p) =>
-      p.work >= PROJECTS[p.key].work &&
-      (s.rain
-        ? ["shed", "rain-shelter"].includes(PROJECTS[p.key].kind) ||
-          COMMUNITY[PROJECTS[p.key].kind]?.sheltered
-        : [
-            "square",
-            "picnic-table",
-            "garden-bench",
-            "fire-circle",
-            ...Object.keys(COMMUNITY),
-          ].includes(PROJECTS[p.key].kind)),
-  );
-  if (social.length && (s.rain || cycle % 2 === 0)) {
-    const p = social[(i + Math.floor(cycle / 2)) % social.length];
-    let spot = workSpot(s, r, p);
-    if (
-      ["shed", "rain-shelter"].includes(PROJECTS[p.key].kind) ||
-      COMMUNITY[PROJECTS[p.key].kind]?.sheltered
-    ) {
-      spot = Array.from(
-        { length: footprint(p)[0] * footprint(p)[1] },
-        (_, n) => ({
-          x: p.x + (n % footprint(p)[0]),
-          z: p.z + Math.floor(n / footprint(p)[0]),
-        }),
-      )
-        .filter((c) => shelteredFrontCell(p, c.x, c.z))
-        .find(
-          (candidate) =>
-            !s.people.some(
-              (other) =>
-                other !== r &&
-                (Math.hypot(other.x - candidate.x, other.z - candidate.z) <
-                  0.65 ||
-                  (other.idleGoal?.x === candidate.x &&
-                    other.idleGoal?.z === candidate.z)),
-            ) && route(s, r, candidate),
-        );
-    }
-    if (spot) {
-      r.idleGoal = spot;
-      r.idleUntil = s.time + 25 + i * 2;
-      r.action = "relax";
-      r.leisureKind = PROJECTS[p.key].kind;
-      r.lookAt = null;
-      r.target = null;
-      go(s, r, spot);
-      return;
-    }
-  }
-  const activities = ["look", "stretch", "chat", "stroll", "breathe"];
-  r.action = activities[(cycle + i) % activities.length];
-  r.lookAt = null;
-  let goal = null;
-  if (r.action === "chat") {
-    const friend = s.people.find(
-      (other) =>
-        other !== r &&
-        !other.job &&
-        !other.walk.length &&
-        ["look", "breathe", "stretch", "chat", "relax"].includes(
-          other.action,
-        ) &&
-        Math.hypot(other.x - r.x, other.z - r.z) < 5,
-    );
-    if (friend) {
-      r.lookAt = friend.id;
-      friend.lookAt = r.id;
-      friend.action = "chat";
-      friend.idleUntil = s.time + 16;
-      friend.idleGoal = null;
-      goal = {
-        x: Math.round(friend.x) + (i % 2 ? 1 : -1),
-        z: Math.round(friend.z),
-      };
-    } else r.action = "look";
-  }
-  if (r.action === "stroll" || r.action === "breathe") {
-    const spots = [
-      [c.x - 3, c.z + 2],
-      [c.x + 4, c.z + 3],
-      [c.x + 1, c.z + 4],
-      [c.x - 2, c.z + 4],
-      [c.x + 4, c.z + 1],
-    ];
-    const [x, z] = spots[(cycle * 2 + i) % spots.length];
-    goal = { x, z };
-  }
-  if (
-    goal &&
-    !occupied(s, goal.x, goal.z) &&
-    !s.people.some(
-      (other) =>
-        other !== r &&
-        (Math.hypot(other.x - goal.x, other.z - goal.z) < 0.8 ||
-          (other.idleGoal?.x === goal.x && other.idleGoal?.z === goal.z)),
-    ) &&
-    route(s, r, goal)
-  ) {
-    r.idleGoal = goal;
-    r.target = null;
-    go(s, r, goal);
-  } else r.idleGoal = null;
-  r.idleUntil = s.time + 18 + i * 2 + (cycle % 3) * 5;
 }
 export function canFinish(s) {
   if (s.mode === "sandbox") return false;
@@ -1843,9 +1737,10 @@ function tickUncached(s, dt) {
   for (const [i,r] of s.people.entries()) {
     if(r.outsideWork?.phase==='away')continue;
     decayNeeds(s,r,i,dt);
+    noticeAspiration(s,r,PROJECTS);
     // Being awake is tiring even when no construction is underway.
     if(r.tentPhase !== 'inside') r.energy=Math.max(0,r.energy-dt*.035);
-    const hours=9+s.time*.45/60, hour=hours%24, bedtime=21+(i%4)*.45;
+    const hours=9+s.time*.45/60, hour=hours%24, bedtime=profileFor(r).temperament.bedtime;
     const sleepNight=Math.floor((hours-5)/24);
     if(!r.sleepUntil && !r.needTask && Math.min(r.needs.bladder,r.needs.bowels)>20 && (r.needs.hunger>20 || !(s.materials.food+s.materials.meals)) && r.sleepNight!==sleepNight && (hour>=bedtime || hour<5) && !r.cargo && r.action!=='town' && !r.outsideWork) {
       r.sleepNight=sleepNight;
@@ -1974,6 +1869,8 @@ function tickUncached(s, dt) {
   }
   if (s.rainResolved && s.time > (s.rainAt ?? 150) + 35) s.rain = false;
   for (const [i, r] of s.people.entries()) {
+    if(downtimeInvalid(s,r,PROJECTS)){clearDowntime(r);r.walk=[];r.target=null;}
+    if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.action==='town'))clearDowntime(r);
     if (r.action === "town") continue;
     if(r.outsideWork?.phase==='away'){outsideWorkStep(s,r,dt,go,route);continue;}
     const urgent=Math.min(r.needs.bladder,r.needs.bowels)<10 || (r.needs.hunger<15 && s.materials.food+s.materials.meals>=1);
@@ -2029,8 +1926,7 @@ function tickUncached(s, dt) {
     ) {
       r.walk = [];
       r.target = null;
-      r.idleUntil = 0;
-      r.idleGoal = null;
+      clearDowntime(r);
     }
     if (r.energy < 25 && r.job && !r.cargo && !r.needTask) {
       r.walk=[]; r.target=null; r.job=null; r.supplyGoal=null;
@@ -2151,8 +2047,7 @@ function tickUncached(s, dt) {
         r.operation=null;
         r.workSpot = workSpot(s, r, p);
         r.job = p.id;
-        r.idleUntil = 0;
-        r.idleGoal = null;
+        clearDowntime(r);
         r.lookAt = null;
         r.supplyGoal = null;
         r.target = null;
@@ -2160,7 +2055,12 @@ function tickUncached(s, dt) {
     }
     if (!p) {
       if (operationalWork(s, r, i, dt)) continue;
-      idleActivity(s, r, i, dt);
+      idleActivity(s, r, i, dt, {
+        ...needApi,catalog:PROJECTS,
+        projectSpot:(p,resident)=>leisureSpot(s,resident,p),
+        center:p=>({x:p.x+(footprint(p)[0]-1)/2,z:p.z+(footprint(p)[1]-1)/2}),
+        sheltered:kind=>['shed','rain-shelter'].includes(kind)||!!COMMUNITY[kind]?.sheltered,
+      });
       // Leisure restores fun and social needs; it does not substitute for sleep.
       continue;
     }
@@ -2439,6 +2339,7 @@ export function restore(text) {
           (!Number.isInteger(p.rotation) ||
             p.rotation < 0 ||
             p.rotation > 3)) ||
+        (p.prioritized !== undefined && typeof p.prioritized !== 'boolean') ||
         !PROJECTS[p.key] ||
         (s.mode !== "sandbox" &&
           !PROJECTS[p.key]?.repeatable &&
@@ -2480,7 +2381,7 @@ export function restore(text) {
       for (const k of ["washTime", "cleanedAtWork", "toiletAt", "toiletTime"])
         if (r[k] !== undefined && (!Number.isFinite(r[k]) || r[k] < 0))
           return null;
-      if (!validNeeds(r)) return null;
+      if (!validNeeds(r) || !validMind(r,fresh.people,s.time)) return null;
       if(r.friendships!==undefined && (!r.friendships || typeof r.friendships!=='object' || Array.isArray(r.friendships) || Object.entries(r.friendships).some(([id,value])=>id===r.id || !fresh.people.some(p=>p.id===id) || !Number.isFinite(value) || value<0 || value>100))) return null;
       ensureNeeds(r,i);
       if (r.cargo && r.haulStage === 'site' && r.haulLoads && r.job) {
@@ -2488,11 +2389,12 @@ export function restore(text) {
         if(project?.depot) project.staged=(project.staged||0)+r.haulLoads;
       }
       r.haulLoads=0; r.haulStage=null;
+      r.downtime = null;
+      r.leisureRecent = [];
       r.needTask = null;
       r.needRetryAt = 0;
       r.needBlocked = null;
-      r.idleUntil = 0;
-      r.idleGoal = null;
+      clearDowntime(r);
       r.lookAt = null;
       r.supplyGoal = null;
       r.target = null;
