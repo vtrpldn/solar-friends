@@ -1,3 +1,4 @@
+import {hydrationWarning} from './hydration.js';
 import {hydrologyText} from './hydrology.js';
 import {forecast,weatherText} from './weather.js';
 import {ensureCultivation} from './cultivation.js';
@@ -1382,7 +1383,7 @@ function renderUtilityUI() {
   $("tank-attention").textContent = `${warnings.length} waste tank${warnings.length===1?' needs':'s need'} attention`;
   $("tank-attention").title = warnings.join('\n');
   $("utility-summary").textContent =
-    `Power: ${generation.toFixed(1)} kW available / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}. ${hydrologyText(s)}${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Build more treatment capacity." : ""}`;
+    `Power: ${generation.toFixed(1)} kW available / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}. ${hydrologyText(s)}${sys.thirst ? ` ${hydrationWarning(s)}.` : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Build more treatment capacity." : ""}`;
   $("utility-links").replaceChildren();
   for (const l of sys.links.filter(
     (l) => (management?.view === "power") === (l.kind === "power"),

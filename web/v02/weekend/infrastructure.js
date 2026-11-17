@@ -398,12 +398,7 @@ export function infrastructureStep(s, defs, dt) {
       transferWater(sys, l.from, l.to, l.kind, Math.min(24 * hours,shares.get(`${l.from}:${l.kind}`)||0));
     }
   }
-  // Drinking and washing at camp: preserve wastewater instead of silently deleting it.
-  const camp = sys.nodes[0],
-    drink = Math.min(camp.water[0], s.people.length * 0.6 * hours);
-  camp.water[0] -= drink;
-  sys.account.waterUsed += drink;
-  sys.thirst = drink + 1e-8 < s.people.length * 0.6 * hours;
+  sys.thirst=s.people.some(r=>r.outsideWork?.phase!=='away'&&(r.needs?.hydration??100)<30);
   const toilets = nodes.filter((n) => n.enabled && n.kind === "eco_toilet");
   sys.sanitationBlocked =
     toilets.length > 0 &&

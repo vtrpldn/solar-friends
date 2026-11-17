@@ -25,6 +25,7 @@ export function growthRate(s,recipe){
 export function biologyLabel(recipe){return ['eggs','milk','honey'].includes(recipe)?'Next collection':recipe==='compost'?'Composting':'Growing';}
 export const IRRIGATION_POLICIES={balanced:'Balanced · maintain 75% soil moisture',conserve:'Conserve water · maintain 40% soil moisture',rainfed:'Rain-fed · no stored water'};
 export function beginBiology(s,op,r){
+ if(['eggs','milk'].includes(op.recipe)&&s.mode!=='sandbox')return false;
  const b=BIOLOGY[op.recipe];if(!b||op.planted||s.mode==='sandbox')return false;
  op.planted=true;op.phase='growing';op.growthRemaining=b.days*GAME_DAY;
  const site=s.projects?.find(p=>p.id===op.site);
@@ -45,8 +46,9 @@ export function biologicalStep(s,dt,useWater){
    const need=crop.liters*dt/GAME_DAY;
    const rain=op.recipe!=='greenhouse'?rainfallRate(s)*24*dt/GAME_DAY*crop.area:0;
    const target=site.irrigationPolicy==='rainfed'?0:site.irrigationPolicy==='conserve'?.4:.75;
-   const irrigated=!rain&&site.soilMoisture<=target&&target>0&&useWater?.(s,op.site,need,true);
-   site.soilMoisture=Math.max(0,Math.min(1,site.soilMoisture+(rain+(irrigated?need:0)-need)/(crop.area*16)));
+   const refill=Math.max(0,need-rain)+crop.area*2*dt/GAME_DAY;
+   const irrigated=rain<need&&site.soilMoisture<=target&&target>0&&useWater?.(s,op.site,refill,true);
+   site.soilMoisture=Math.max(0,Math.min(1,site.soilMoisture+(rain+(irrigated?refill:0)-need)/(crop.area*16)));
    moisture=site.soilMoisture<.1?0:Math.min(1,site.soilMoisture/.4);
    fertility=.5+.5*site.soilFertility;
    if(cropStress(op,site.soilMoisture,dt)==='failed'){op.growthRemaining=0;op.phase='process';op.ripeAt??=s.time;op.status='Crop failed · resident clearing work remains';continue;}
@@ -61,7 +63,7 @@ export function biologicalStep(s,dt,useWater){
 export function harvestOutput(s,op,recipe){
  const b=BIOLOGY[op.recipe];if(!b||op.ripeAt===undefined)return {...recipe.output};
  const elapsed=Math.max(0,(s.time-op.ripeAt)/GAME_DAY);
- const health=['eggs','milk'].includes(op.recipe)?(s.projects?.find(p=>p.id===op.site)?.animalHealth??100)/100:1;
+ const health=1;
  const factor=(Number.isFinite(b.window)?Math.max(0,1-Math.max(0,elapsed-b.window)/b.window):1)*health*(1-(op.droughtDamage||0));
  const result={...recipe.output};for(const id of Object.keys(result))if(result[id])result[id]=Math.floor(result[id]*factor+1e-8);
  return result;

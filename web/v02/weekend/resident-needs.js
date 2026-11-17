@@ -1,25 +1,28 @@
+import {hydrationStep,drinkWater} from './hydration.js';
 import {foodPortions,eatMeal} from './food-storage.js';
 import {profileFor} from './resident-personality.js';
 import {committed, conversationPartners, conversationFor, finishConversation, finishPersonalTime} from './resident-mind.js';
 import { useWater } from './infrastructure.js';
-export const NEED_KEYS=['hunger','bladder','bowels','hygiene','social','fun'];
+export const NEED_KEYS=['hunger','bladder','bowels','hygiene','social','fun','hydration'];
 const clamp=n=>Math.max(0,Math.min(100,n));
 export function ensureNeeds(r,i=0) {
   if(!r.needs)r.needs={hunger:76+i*3,bladder:82-i*5,bowels:88-i*3,hygiene:90-i*2,social:78+i*3,fun:82-i*2};
+  r.needs.hydration??=100;
   return r.needs;
 }
 export function needMeters(r) {
  const n=ensureNeeds(r);
- return [['Energy',r.energy],['Hunger',n.hunger],['Toilet',Math.min(n.bladder,n.bowels)],['Hygiene',n.hygiene],['Social',n.social],['Fun',n.fun]];
+ return [['Energy',r.energy],['Hydration',n.hydration],['Hunger',n.hunger],['Toilet',Math.min(n.bladder,n.bowels)],['Hygiene',n.hygiene],['Social',n.social],['Fun',n.fun]];
 }
 export function decayNeeds(s,r,i,dt) {
  const n=ensureNeeds(r,i), working=['build','produce','install','carry','collect'].includes(r.action);
  const rates={hunger:.055,bladder:.12,bowels:.047,hygiene:working?.075:.018,social:.035,fun:working?.055:.025};
- for(const key of NEED_KEYS)n[key]=clamp(n[key]-rates[key]*dt*(r.tentPhase==='inside'?.35:1)*(profileFor(r).rates[key]||1));
+ hydrationStep(s,r,dt);
+ for(const key of NEED_KEYS.filter(k=>k!=='hydration'))n[key]=clamp(n[key]-rates[key]*dt*(r.tentPhase==='inside'?.35:1)*(profileFor(r).rates[key]||1));
  if(r.tentPhase==='inside') {n.fun=clamp(n.fun+dt*.04);return;}
 }
-const ACTION={hunger:'eat',bladder:'toilet',bowels:'toilet',hygiene:'wash',social:'chat',fun:'play'};
-const DURATIONS={hunger:12,bladder:6,bowels:10,hygiene:14,social:18,fun:22};
+const ACTION={hydration:'drink',hunger:'eat',bladder:'toilet',bowels:'toilet',hygiene:'wash',social:'chat',fun:'play'};
+const DURATIONS={hydration:2,hunger:12,bladder:6,bowels:10,hygiene:14,social:18,fun:22};
 function release(r) {
  r.needTask=null;r.walk=[];r.target=null;r.lookAt=null;
  r.toiletSite=null;r.washSite=null;r.toiletTime=0;r.washTime=0;r.action='idle';
@@ -42,10 +45,10 @@ function assign(s,r,kind,spot,details={}) {
 // a break. Otherwise urgent toilet needs and exhaustion can trap a worker in
 // repeated sleep/exit loops while the uncollected goods remain safely at site.
 export function chooseNeed(s,r,i,api) {
- const physical=['hunger','bladder','bowels'];
+ const physical=['hunger','bladder','bowels','hydration'];
  if(r.needTask && !physical.includes(r.needTask.kind) && physical.some(k=>ensureNeeds(r)[k]<10&&(k!=='hunger'||foodPortions(s)>0)))cancelNeed(s,r);
  if(r.needTask && s.time-r.needTask.created>240){cancelNeed(s,r);r.needRetryAt=s.time+15;}
- if(r.needTask || r.tentPhase || r.cargo || r.action==='town' || s.stage!=='playing' || (r.energy<25 && Math.min(ensureNeeds(r).hunger,ensureNeeds(r).bladder,ensureNeeds(r).bowels)>=15) || (r.needRetryAt||0)>s.time)return;
+ if(r.needTask || r.tentPhase || r.cargo || r.action==='town' || s.stage!=='playing' || (r.energy<25 && Math.min(ensureNeeds(r).hunger,ensureNeeds(r).bladder,ensureNeeds(r).bowels,ensureNeeds(r).hydration)>=15) || (r.needRetryAt||0)>s.time)return;
  const n=ensureNeeds(r,i);
  const temperament=profileFor(r).temperament;
  const threshold=k=>k==='social' ? (committed(r)?35:temperament.socialAt) : k==='fun' ? temperament.breakAt : 30;
@@ -65,6 +68,11 @@ export function chooseNeed(s,r,i,api) {
    return null;
  };
  for(const kind of pending) {
+  if(kind==='hydration'){
+   const facility=choose(node=>node.water[0]>=.5&&!['coop','goat_pasture'].includes(node.kind));
+   if(facility){assign(s,r,kind,facility.spot,{site:facility.node.id,label:'Drinking potable water',animation:'eat'});return;}
+   continue;
+  }
   if(kind==='hunger') {
    if(!(foodPortions(s)>0))continue;
    const spot=api.groundSpot(r,s.stock,i);
@@ -97,7 +105,7 @@ export function chooseNeed(s,r,i,api) {
    }
   }
  }
- r.needBlocked=pending.includes("hunger") && !(foodPortions(s)>0) ? "Hungry: no food in stores" : pending[0]==="social" ? "Waiting for a friend to have a break" : "Looking for somewhere to meet this need";
+ r.needBlocked=pending.includes("hydration") ? "Needs reachable potable water; fetch and filter water" : pending.includes("hunger") && !(foodPortions(s)>0) ? "Hungry: no food in stores" : pending[0]==="social" ? "Waiting for a friend to have a break" : "Looking for somewhere to meet this need";
  r.needRetryAt=s.time+12;
 }
 // Both needed and spontaneous conversations share the same consent, travel,
@@ -121,7 +129,7 @@ export function inviteConversation(s,r,i,api,{center=api.camp(),near=null,idleOn
 // merely because a destination was selected. Food and water settle exactly once.
 export function advanceNeed(s,r,dt,api) {
  const task=r.needTask;if(!task)return false;
- if(s.time-task.created>240 || (r.energy<12 && !['hunger','bladder','bowels'].includes(task.kind))) {cancelNeed(s,r);r.needRetryAt=s.time+15;return false;}
+ if(s.time-task.created>240 || (r.energy<12 && !['hunger','bladder','bowels','hydration'].includes(task.kind))) {cancelNeed(s,r);r.needRetryAt=s.time+15;return false;}
  const node=task.site==null?null:s.infrastructure.nodes[task.site];
  if(task.site!=null && !node?.enabled){cancelNeed(s,r);r.needRetryAt=s.time+5;return false;}
  r.action=ACTION[task.kind];
@@ -136,7 +144,10 @@ export function advanceNeed(s,r,dt,api) {
  if(r.action==='wash')r.washTime=task.elapsed;
  if(task.elapsed<task.duration)return true;
  const n=r.needs;
- if(task.kind==='hunger') {
+ if(task.kind==='hydration'){
+  if(drinkWater(s,task.site,.5))n.hydration=Math.min(100,n.hydration+20);
+  else r.needBlocked='Drinking source emptied; fetch and filter water';
+ } else if(task.kind==='hunger') {
   if(eatMeal(s)){n.hunger=90;n.bladder=clamp(n.bladder-5);n.bowels=clamp(n.bowels-4);}
  } else if(task.kind==='hygiene') {
   if(task.river || (node && useWater(s,node.id,1))){n.hygiene=task.river?78:95;r.cleanedAtWork=r.work;}
@@ -157,5 +168,5 @@ export function advanceNeed(s,r,dt,api) {
  return true;
 }
 export function validNeeds(r) {
- return r.needs===undefined || (r.needs && NEED_KEYS.every(k=>Number.isFinite(r.needs[k])&&r.needs[k]>=0&&r.needs[k]<=100));
+ return r.needs===undefined || (r.needs && NEED_KEYS.filter(k=>k!=='hydration'||r.needs.hydration!==undefined).every(k=>Number.isFinite(r.needs[k])&&r.needs[k]>=0&&r.needs[k]<=100));
 }

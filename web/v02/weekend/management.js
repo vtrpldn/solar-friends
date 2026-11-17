@@ -1,3 +1,4 @@
+import {animalCareText} from './animal-care.js';
 import {gatheringStatus} from './gathering.js';
 import {STARTING_ENDOWMENT} from './economy-reference.js';
 import {supplierAvailable} from './supplier-stock.js';
@@ -506,7 +507,7 @@ export function createManagement({
           const hint=document.createElement('p');hint.textContent='Change during growth: conserving saves stored water but leaves less drought buffer. Rain-fed crops rely on rain; dry soil slows or stops growth. Residents still handle harvesting.';el.append(hint);
         }
         if(p.soilFertility!==undefined){const soil=document.createElement("p");soil.textContent=`Soil fertility: ${Math.round(p.soilFertility*100)}%. Residents apply stored compost below 70%; each application restores 30 percentage points. ${s.upkeep?.jobs.find(j=>j.target===p.id&&j.soil)?.status||""}`;el.append(soil);}
-        if(p.animalHealth!==undefined){const care=document.createElement("p");care.textContent=`Animal health: ${Math.round(p.animalHealth)}%. ${p.careUntil>s.time?"Feed and water supplied":"Care due: residents need fodder and drinking water"}.`;el.append(care);}
+        if(p.animalHealth!==undefined){const care=document.createElement("p");care.textContent=animalCareText(p);el.append(care);}
         const choice = document.createElement("select");
         choice.setAttribute("aria-label", `Work at ${name.textContent}`);
         for (const [id, d] of recipes) choice.add(new Option(d.name, id));

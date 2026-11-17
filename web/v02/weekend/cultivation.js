@@ -96,7 +96,8 @@ export function cultivationStep(s,dt,useWater,defs){
     const growing=b.stage==='growing',standing=growing||b.stage==='harvestable',crop=CROPS[b.crop],capacity=area*16;
     const demand=area*(standing?crop.water*b.density:1)*(1-.4*b.cover)*days;
     const rain=p.key!=='greenhouse'?area*rainfallRate(s)*24*days:0;
-    const irrigate=standing&&b.irrigation&&s.infrastructure?.nodes[p.id]?.enabled!==false&&b.moisture<.75&&!rain&&useWater(s,p.id,demand,true)?demand:0;
+    const refill=Math.max(0,demand-rain)+area*2*days;
+    const irrigate=standing&&b.irrigation&&s.infrastructure?.nodes[p.id]?.enabled!==false&&b.moisture<.75&&rain<demand&&useWater(s,p.id,refill,true)?refill:0;
     b.irrigated+=irrigate;b.rainLiters+=rain;
     const available=b.moisture*capacity+rain+irrigate;
     b.evaporated+=Math.min(available,demand);b.drained+=Math.max(0,available-demand-capacity);
