@@ -41,7 +41,7 @@ Blueprint affordability includes all remaining collection trips across outstandi
 
 ## Construction estimates
 
-Construction keeps its existing authored quantities and work requirements pending calibration. Assembly estimates convert work into game hours at the existing clock rate, excluding hauling, breaks, weather and skill. Each active worker contributes `1 / (1 + 0.12 × (crew size − 1))` of their individual output: cooperation helps, with diminishing returns. The 0.12 coordination factor is a gameplay assumption, not a researched labor coefficient. Existing work and delivery progress remain unchanged in saves.
+Construction keeps its existing authored quantities. Core buildings now use task-based authored labor requirements; see [construction checkpoint](construction-economy.md) for coefficients, limitations and save migration. Assembly estimates convert work into game hours at the existing clock rate, excluding hauling, breaks, weather and skill. Each active worker contributes `1 / (1 + 0.12 × (crew size − 1))` of their individual output: cooperation helps, with diminishing returns. The 0.12 coordination factor is a gameplay assumption, not a researched labor coefficient. Delivery quantities remain unchanged; older construction work migrates by completion percentage to the revised requirements.
 
 ## Evidence
 

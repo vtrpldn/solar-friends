@@ -26,7 +26,8 @@ Completed in the first playable increment:
 - Cash postings in whole centavos with sub-cent utility accrual; sale receipts and transport expenses appear in Finances.
 - Export queue/cancellation UI, purchase transport quotes, save validation, and duplicate-settlement checks.
 - Full outstanding collection budgets protected from grid bills and ordinary shopping, with available versus committed cash in Finances.
-- Diminishing crew efficiency and assembly-time estimates; quantities and labor coefficients remain uncalibrated.
+- Diminishing crew efficiency and assembly-time estimates.
+- Task-based labor estimates for core buildings, complete material allocation, and versioned progress migration; see [construction checkpoint](construction-economy.md). Physical quantities and regional labor coefficients remain uncalibrated.
 - Three-day replay of an established village completed a paid house with positive food, water and cash. This is regression evidence, not a fresh-start balance certification.
 
 Still outstanding: regional calibration, canonical physical resource units and full ownership ledger, construction/person-hour calibration, multiple simultaneous vehicles and delivery fallback, seasonal yields/spoilage, asset upkeep, outside jobs, and full release gates. None of stages 0–7 is claimed complete. See [parameter register](economy-parameters.md) for provisional values and evidence limitations.
