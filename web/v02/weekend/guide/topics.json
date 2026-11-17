@@ -97,9 +97,9 @@
       "realism-hydration"
     ],
     "description": "Residents interrupt work to eat, rest and meet other needs.",
-    "diagram": "flowchart TD\n Time[Time, activity and personality] --> Decay[Needs and energy change]\n Decay --> Urgent{Urgent need or scheduled sleep?}\n Urgent -->|No| Available[Available for work or downtime]\n Urgent -->|Yes| Interrupt[Suspend or defer work safely]\n Interrupt --> Target{Suitable reachable service or rest place?}\n Target -->|Yes| Travel[Walk to service or assigned / available home]\n Target -->|No| Fallback[Try fallback or expose blocked need]\n Travel --> Consume[Consume food, water or service capacity as applicable]\n Consume --> Recover[Restore need or energy]\n Recover --> Resume[Reconsider unfinished work]\n Fallback --> Resume\n Resume --> Urgent\n Heat[Heat and active work] --> Thirst[Individual hydration demand]\n Thirst --> Target\n Fresh[Potable water and travel bottles] --> Consume\n",
+    "diagram": "flowchart TD\n Time[Time, activity and personality] --> Decay[Needs and energy change]\n Decay --> Urgent{Need break, mealtime or scheduled sleep?}\n Urgent -->|No| Available[Available for work or downtime]\n Urgent -->|Yes| Interrupt[Suspend or defer work safely]\n Interrupt --> Target{Suitable reachable service or rest place?}\n Target -->|Yes| Travel[Walk to service or assigned / available home]\n Target -->|No| Fallback[Try fallback or expose blocked need]\n Travel --> Consume[Consume food, water or service capacity as applicable]\n Consume --> Recover[Restore need or energy]\n Recover --> Resume[Reconsider unfinished work]\n Fallback --> Resume\n Resume --> Urgent\n Heat[Heat and active work] --> Thirst[Individual hydration demand]\n Thirst --> Target\n Fresh[Potable water and travel bottles] --> Consume\n",
     "boundary": "",
-    "tip": "Keep potable water and food reachable. Heat and active work increase drinking demand; thirsty residents slow down.",
+    "tip": "Keep potable water and food reachable. Residents seek a drink before thirst becomes urgent; heat and active work increase drinking demand.",
     "facts": null
   },
   {

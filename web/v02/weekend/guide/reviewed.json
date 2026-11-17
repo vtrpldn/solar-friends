@@ -114,7 +114,7 @@
     "web/v02/weekend/resident-downtime.js": "2db67415b86b7669ad33f3240644e36d76c7fd18db29b4ae448cc2cd6013d6e0",
     "web/v02/weekend/resident-mind.js": "56565944e04c9aeabb000c69dbeb90b745cc98f710cf037a9353e8f270db8785",
     "web/v02/weekend/resident-motion.js": "74d3338f66ba8ddb7fcf280f89e8a492abdc28af4876ba0f74f73e57d04aaadb",
-    "web/v02/weekend/resident-needs.js": "0221a7393f186059da232a90a296a932317ffda3bdc98b3560d7e0c21f3411c2",
+    "web/v02/weekend/resident-needs.js": "2de828016074cf112ffee68b51b4b1b02d91a266efc4fccc13413846ee82f412",
     "web/v02/weekend/resident-personality.js": "5abaf0372ac847650be17fcdde380f03de5bcc9c5e7d72b5ae95f53546d22f35",
     "web/v02/weekend/resource-groups.js": "40491d8628cd9f2e940060fbcb09b3761e54de1ce32db7209212b12084dfa742",
     "web/v02/weekend/resource-icons.js": "00046f023141d956aa7ee10bb3afd711a6b827ff81900d46e023e12d760c6d77",
@@ -128,7 +128,7 @@
     "web/v02/weekend/save-slots.js": "6655ca221ac0cbf69d2f2ed717c96d8641e14b0739b1bb47ddbd87ce7d74f94d",
     "web/v02/weekend/scale-preview.js": "416813b92e606bc2ae3c0672d6218d7e950d03c1b9a1223d8576c392528a6b4d",
     "web/v02/weekend/session-ui.js": "c4ae65e7566ae4b401d1f9b579d3169f696d9d00888e29e8212c1c73b6bba3a0",
-    "web/v02/weekend/simulation.js": "88308a55e879a3d8809e185088c6d3765b4982815567e3b2d2ece424f8bc5680",
+    "web/v02/weekend/simulation.js": "9573667a3369da5df86e84f69dcee95311116b4d9ec66a2d2083c0ed75289c86",
     "web/v02/weekend/site-space.js": "ab72657b3132544b1717899013943c3504e1e673dc7052fcf689b5d74809d414",
     "web/v02/weekend/sunlight.js": "36bba103b290454fb88ba79bff1cc03dceb0e094cf07a9620d235d4e1eaab145",
     "web/v02/weekend/supplier-stock.js": "d01ecd0f80b5581eabab65b01c34d9b1fe69f3897fa2f584eb1068eb83539604",
@@ -145,7 +145,7 @@
     "web/v02/workshop/models.js": "4c403f76f3b1ba786be6c84c1c9129de92804ed77b8b8e80c8e76d21c12067d1"
   },
   "content": {
-    "topics": "2a0845964b0b62191aeb6ced8414cf9b13313ba3f232ec97e95df0d7c5570229",
+    "topics": "16f7905f13ff6c64b673b109c815ebd8cae2a44adbbb4d07d9d925d247a9feb9",
     "facts": "a38be0845c3d0f82be67f883bb4c49ab11b7d63b572a583fc5ed6c02518d413e",
     "renderer": "8bd634ddece8c801ba064fe84a4d11adbf769b0ce6a9f7a299f6e0e2dd83dcca",
     "dependencies": "9cc183f2db674fa60fb2a2969ed46747343f550c3ae5e9395aab3532a841eb7a"
@@ -155,7 +155,7 @@
     "system-overview.svg": "6409b4964fd4c0081b0eab83b0e6867563cbc5558030ba00bde86155b61be93f",
     "clock-modes-and-simulation-stepping.svg": "59e8f197d37b31bc5a6d250def2474b781075ef1dc5b72ab9794d4aaf6ff3bd3",
     "world-terrain-and-navigation.svg": "c8c01f1202ba6afba117437109f9b42c91454050dfdd3487bc3a8d3b6a4d8470",
-    "resident-needs-rest-and-homes.svg": "15e3c03b4d34814c0f5aa7fa03af0cd21f6496914d92bdf805a19018f4fd65f5",
+    "resident-needs-rest-and-homes.svg": "5beffe71f3ef54b4c844e74883b851ca5adb0cd13949dc5beb789922a2ae9385",
     "personality-relationships-and-downtime.svg": "e6f13dafe40c92978838a8b1de4614c70baa720e24a46c4825a60ddc54bea453",
     "work-dispatch-and-interruption.svg": "ee8085d6cfe8707a64729774f92f85ecccb9a017889b43d924c15e79e8fb1a9f",
     "construction-and-material-staging.svg": "550e321e5c84b533162df4dac4d8bc5b10e86b12153dfc05146e8b545bada4ab",
