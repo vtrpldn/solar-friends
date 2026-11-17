@@ -35,7 +35,7 @@ const expansion=['garden','groundwater-well','home-cottage','workshop','kitchen'
 const recipes={garden:'vegetables',kitchen:'meals',compost:'compost',coop:'eggs'};
 function manage(day){
  // A reproducible player policy: keep two paid jobs, maintain food and supplies,
- // expand only with a seven-day cash reserve, and never inject assets or money.
+ // expand only above a R$900 uncommitted-cash threshold, and never inject assets or money.
  const pending=s.projects.filter(p=>!p.natural&&p.work<PROJECTS[p.key].work);
  if(day>=4&&pending.length<2&&spendableMoney(s)>900){
   const key=expansion.find(key=>!s.projects.some(p=>p.key===key));if(key)place(key);
@@ -87,5 +87,7 @@ if(days>=100){
  assert(new Set(samples.map(s=>s.season)).size>=2,'run crosses seasonal boundaries');
  assert(s.projects.some(p=>p.key==='garden'&&p.work===PROJECTS.garden.work),'paid expansion completes');
 }
+const reportPath=path.join(output,'report.json');
+const report=JSON.parse(fs.readFileSync(reportPath,'utf8'));report.issues=issues;report.verdict=issues.length?'failed':'passed';fs.writeFileSync(reportPath,JSON.stringify(report,null,2));
 assert.deepEqual(issues,[],'no persistent starvation');
 console.log(`PASS ${days} days at 1024x scheduling with fixed steps, accounting checks and periodic save restoration`);

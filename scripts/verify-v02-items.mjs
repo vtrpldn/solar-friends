@@ -4,7 +4,7 @@ import { syncInfrastructure } from '../web/v02/weekend/infrastructure.js';
 import assert from 'node:assert/strict';
 import { ITEMS } from '../web/v02/weekend/items.js';
 import { PROCESSES } from '../web/v02/weekend/catalog-rules.js';
-import { createSandbox, createWeekend, chooseCamp, PROJECTS, MATERIALS, plan, requiredLoads, supplyRun, tick, queueProduction, save, restore } from '../web/v02/weekend/simulation.js';
+import { createSandbox, createWeekend, chooseCamp, PROJECTS, MATERIALS, placementError, plan, requiredLoads, supplyRun, tick, queueProduction, save, restore } from '../web/v02/weekend/simulation.js';
 import { RESOURCE_GROUPS } from '../web/v02/weekend/resource-groups.js';
 for (const id of Object.keys(ITEMS)) {
   assert(!PROJECTS[id], `${id} is not a building`);
@@ -30,7 +30,10 @@ for (const id of ['wheelbarrow','produce-crates']) {
   state.wood=30; state.materials.planks=20; state.materials.wheel_kit=2; state.materials.meals=100;
   const kind=PROCESSES[`craft_${id}`].kind;
   state.materials['carpentry-tools']=1;
-  const p = {id:state.nextId++,key:kind,x:35,z:32,work:PROJECTS[kind].work,delivered:requiredLoads(kind)};
+  let location;
+  for(let z=35;z<55&&!location;z++)for(let x=35;x<55&&!location;x++)if(!placementError(state,kind,x,z))location={x,z};
+  assert(location,'a legal crafting workspace exists');
+  const p = {id:state.nextId++,key:kind,...location,work:PROJECTS[kind].work,delivered:requiredLoads(kind)};
   state.projects.push(p); syncInfrastructure(state,PROJECTS);
   state.materials[id]=0;
   const recipe = PROCESSES[`craft_${id}`];
