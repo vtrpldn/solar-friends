@@ -33,4 +33,4 @@ const totals=productionSummary(resumed,PROCESSES);assert.equal(totals.batches,1)
 assert(restore(save(resumed)),'ledger persists');
 const bad=JSON.parse(save(resumed));bad.productionAccounting.batches.saw_planks=-1;assert.equal(restore(JSON.stringify(bad)),null);
 bad.productionAccounting={version:2,since:0,batches:{}};assert(!validProductionAccounting(bad,PROCESSES));
-console.log('PASS shared mass definitions, seven balanced transformations, real processing/delivery, mid-carry reload and ledger validation');
+console.log('PASS shared mass definitions, eight balanced transformations, real processing/delivery, mid-carry reload and ledger validation');

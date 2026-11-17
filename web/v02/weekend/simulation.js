@@ -649,9 +649,9 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     recipe.kind === "kitchen" &&
     node.power < 0.99 &&
     !op.biogas &&
-    sys.biogas >= 0.2
+    sys.biogas >= (recipe.biogas || .2)
   ) {
-    sys.biogas -= 0.2;
+    sys.biogas -= recipe.biogas || .2;
     op.biogas = true;
   }
   if (
@@ -677,7 +677,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if (op.work >= recipe.work) {
     recordProduction(s,op.recipe,recipe);
-    op.foodOutput=Object.fromEntries(Object.entries(recipe.output).filter(([id])=>FOOD_DAYS[id]).map(([id,n])=>[id,freshLots(s,id,n)]));
+    op.foodOutput=Object.fromEntries(Object.entries(recipe.output).filter(([id])=>FOOD_DAYS[id]).map(([id,n])=>[id,freshLots(s,id,n,recipe)]));
     if(recipe.kind==='wild-tree'){p.felled=true;invalidateNavigation(s);}
     if(op.recipe==='solar_upgrade')p.solarUpgrade=true;
     op.phase = "return";

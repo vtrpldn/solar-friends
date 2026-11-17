@@ -265,6 +265,16 @@ export const PROCESSES = {
     work: 25,
     water: 2,
   },
+  preserve_meals: {
+    name: "Prepare dried provisions",
+    input: {food:6},
+    output: {meals:4,scraps:2},
+    kind: "kitchen",
+    work: 75,
+    water: 2,
+    preservedDays: {meals:10},
+    biogas: .6,
+  },
   compost: {
     name: "Turn compost",
     input: { scraps: 4 },
