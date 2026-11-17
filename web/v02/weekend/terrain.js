@@ -20,7 +20,6 @@ export function createTerrain(seed = 0, elevationSeed = seed, pads = []) {
       z = points.getZ(i);
     points.setY(i, elevationVertex(x, z, elevationSeed, pads));
     banks.push(Math.max(0,Math.abs(x-riverCenter(z,seed))-riverWidth(z,seed)));
-
   }
   geometry.computeVertexNormals();
   geometry.setAttribute("bankDistance", new THREE.Float32BufferAttribute(banks, 1));
