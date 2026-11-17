@@ -47,7 +47,7 @@
 #management .management-stats small { font-size: 10px; letter-spacing: .5px; }
 #management .management-stats strong { font-size: 21px; font-variant-numeric: tabular-nums; }
 #management .management-layout { grid-column: 2; min-width: 0; gap: 18px; grid-template-columns: minmax(0, 1fr) 235px; }
-#management:not([data-screen="resources"]):not([data-screen="items"]) .management-layout { grid-template-columns: minmax(0, 1fr); }
+#management:not([data-screen="resources"]):not([data-screen="items"]):not([data-screen="food"]) .management-layout { grid-template-columns: minmax(0, 1fr); }
 #management .management-main { padding: 0 8px 12px 0; scrollbar-gutter: stable; }
 #management .management-side { padding: 14px; border-radius: 10px; }
 #management h3 { font-size: 15px; margin: 4px 0 12px; }
@@ -88,3 +88,19 @@
 #management .crafting-skills { margin-bottom: 16px; border-bottom: 1px solid #d8ccaa; }
 #management .crafting-skills summary { cursor: pointer; padding: 8px 0 14px; font-size: 12px; font-weight: 700; }
 #management .crafting-skills > p { font-size: 12px; line-height: 1.6; }
+
+/* Pantry ledger follows the Almanac's warm paper and garden-green ink. */
+#management .food-management { grid-column: 1 / -1; }
+#management .food-management h3 { margin: 20px 0 8px; }
+#management .food-management > h3:first-child { margin-top: 0; }
+#management .food-management p { font-size: 12px; line-height: 1.6; }
+#management .food-management fieldset { border: 1px solid #d8ccaa; border-radius: 8px; margin: 16px 0; padding: 14px; }
+#management .food-management legend { padding: 0 8px; font-weight: 700; }
+#management .food-policy-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+#management .food-policy-controls > button, #management .food-policy-controls > p { grid-column: 1 / -1; }
+#management .food-management label { display: grid; gap: 6px; font-size: 12px; }
+#management .food-stock-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+#management .food-stock-table th, #management .food-stock-table td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #ded3b8; font-variant-numeric: tabular-nums; }
+#management .food-stock-table thead { color: #796c4b; }
+#management[data-screen="food"] .management-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+#management[data-screen="food"] .management-stats strong { font-size: 18px; }

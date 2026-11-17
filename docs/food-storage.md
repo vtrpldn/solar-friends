@@ -12,7 +12,7 @@ Residents and production jobs take the oldest stock first. Nearby expiration tim
 
 Expired stock becomes an equal count of organic residues. When part of an export batch expires, the whole quoted order is rejected without payment. Usable stock still waiting in stores is released immediately; usable cargo already loaded must return in the car. Cooking ingredients that expire before processing finishes cannot become meals: the operation returns any usable remains instead. Finished food also ages while output is being carried or waiting for storage space.
 
-Resource management explains shelf lives, next stored-batch expiry and cumulative spoiled quantities. Sandbox disables spoilage.
+The Food Almanac shows shelf lives, fresh and preserved stock, chilled quantities, committed and incoming goods, purchase settings, and an expiry-aware reserve forecast. The forecast assumes two evenly spaced portions per resident per day and current expiry deadlines; future harvests, deliveries and continued refrigeration are excluded. Automatic purchases use the same estimate, with viable incoming food preventing duplicate replenishment. Sandbox disables spoilage.
 
 ## Ownership and saves
 

@@ -1,4 +1,8 @@
 import {animalCareText} from './animal-care.js';
+import {foodControls} from './food-controls.js';
+import {kitchenPlan} from './food-policy.js';
+import {coolingStatus} from './cold-storage.js';
+import {pantryForecast} from './food-planning.js';
 import {gatheringStatus} from './gathering.js';
 import {STARTING_ENDOWMENT} from './economy-reference.js';
 import {supplierAvailable} from './supplier-stock.js';
@@ -39,6 +43,7 @@ import { illustrate } from "./ui-art.js";
 const $ = (id) => document.getElementById(id);
 const titles = {
   finances: "Finances",
+  food: "Food",
   resources: "Resources",
   items: "Items & equipment",
   crafting: "Crafting & repairs",
@@ -46,6 +51,7 @@ const titles = {
   power: "Power",
 };
 const intros = {
+  food: "Feed the village today, keep a reserve for tomorrow, and make the most of every harvest.",
   crafting: "Plan work around the skills of your residents, real materials, and equipped workspaces. Jobs take time and pause for rest, needs, or unavailable tools.",
   items: "Keep track of shared equipment and buy items from town. Open Crafting for resident-made items and repairs.",
   finances: "See what comes in, what goes out, and what keeps the village running. Click Savings at any time to return here.",
@@ -90,7 +96,7 @@ export function createManagement({
     beforeOpen();
     const previousView = view;
     view = next;
-    if (view === 'resources' || view === 'items') {
+    if (view === 'resources' || view === 'items' || view === 'food') {
       const purchase = $('purchase'), previous = purchase.value;
       purchase.replaceChildren();
       for (const group of inventoryGroups(view)) {
@@ -258,9 +264,9 @@ export function createManagement({
     $("grid-power-status").textContent = `${grid.enabled ? (s.money <= 0 ? "No funds for grid power" : "Grid backup connected") : "Off-grid"} · ${grid.importing.toFixed(2)} kW imported now · ${grid.imported.toFixed(2)} kWh purchased · R$${grid.spent.toFixed(2)} spent`;
     $("toggle-grid-power").textContent = grid.enabled ? "Disconnect grid power" : "Connect grid backup";
     $("toggle-grid-power").setAttribute("aria-pressed", String(grid.enabled));
-    const inventoryView = view === 'resources' || view === 'items';
-    $('inventory-heading').textContent = view === 'items' ? 'Our equipment' : 'In our stores';
-    $('production-heading').textContent = view === 'items' ? 'Craft items' : 'Making things together';
+    const inventoryView = view === 'resources' || view === 'items' || view === 'food';
+    $('inventory-heading').textContent = view === 'items' ? 'Our equipment' : view==='food'?'Our pantry':'In our stores';
+    $('production-heading').textContent = view === 'items' ? 'Craft items' : view==='food'?'Our kitchens':'Making things together';
     $('resource-search').placeholder = view === 'items' ? 'Find an item…' : 'Find a resource…';
     $('resource-search').setAttribute('aria-label', view === 'items' ? 'Find an item' : 'Find a resource');
     document.querySelector('label[for="purchase"]').textContent = view === 'items' ? 'Town store · items & equipment' : 'Town store · resources';
@@ -354,6 +360,10 @@ export function createManagement({
         ['Items owned', [...EQUIPMENT_IDS].reduce((total, id) => total + materialCount(s, id), 0)],
         ['Crafting jobs', `${(s.operations || []).filter(o => !o.done && (PROCESSES[o.recipe]?.equipmentRepair || Object.keys(PROCESSES[o.recipe]?.output || {}).some(id => EQUIPMENT_IDS.has(id)))).length} queued`],
       ];
+    else if(view==='food'){
+      const f=pantryForecast(s),c=coolingStatus(s);
+      stats=[['Edible portions',f.portions],['Reserve coverage',s.mode==='sandbox'?'Unlimited':`${f.days.toFixed(1)} days`],['At risk of spoilage',s.mode==='sandbox'?'Inactive':`${f.atRisk.toFixed(1)} portions`],['Powered cold storage',`${c.capacity} L`]];
+    }
     else if (inventoryView)
       stats = [
         ["Shared savings", `R$${s.money.toFixed(2)}`],
@@ -409,6 +419,10 @@ export function createManagement({
       if (view === 'resources') {
       const resourceMaterials = Object.fromEntries(Object.entries(MATERIALS).filter(([id]) => !EQUIPMENT_IDS.has(id)));
       economyControls($("resource-grid"),s,resourceMaterials,PROCESSES,materialCount,()=>{refresh();render();});
+      const link=document.createElement('button');link.textContent='Manage food in the Food Almanac';link.onclick=()=>open('food');$('resource-grid').append(link);
+      }
+      if(view==='food'){
+      foodControls($('resource-grid'),s,PROJECTS,PROCESSES,MATERIALS,()=>{refresh();render();});
       const purchaseSettings=document.createElement('details');
       purchaseSettings.className='purchase-settings';purchaseSettings.open=purchaseSettingsOpen;
       purchaseSettings.ontoggle=()=>{purchaseSettingsOpen=purchaseSettings.open;};
@@ -422,9 +436,12 @@ export function createManagement({
       reserve.onclick=()=>{s.emergencyFood=s.emergencyFood===false;refresh();render();};
       settingsBody.append(reserve);
       for(const [key,label,value,max,step] of [['foodReserveDays','Food reserve in days',1.5,7,.5],['foodPurchaseBudget','Daily food purchase budget including transport (R$)',100,100000,1]]){
-       const field=document.createElement('label');field.textContent=label;const input=document.createElement('input');input.type='number';input.min=0;input.max=max;input.step=step;input.value=s[key]??value;input.setAttribute('aria-label',label);input.oninput=()=>{s[key]=Math.max(0,Math.min(max,Number(input.value)||0));};field.append(input);settingsBody.append(field);
+       const field=document.createElement('label');field.textContent=label;const input=document.createElement('input');input.type='number';input.min=0;input.max=max;input.step=step;input.value=s[key]??value;input.setAttribute('aria-label',label);input.oninput=()=>{s[key]=Math.max(0,Math.min(max,Number(input.value)||0));};input.onchange=()=>{refresh();render();};field.append(input);settingsBody.append(field);
       }
-      const reserveNote=document.createElement('p');reserveNote.textContent='Reserve estimate: two food portions per resident per day. A spending limit, not reserved cash; unavailable drivers, funds or storage may delay replenishment.';settingsBody.append(reserveNote);
+      const forecast=pantryForecast(s);
+      const pantry=document.createElement('p');pantry.className='food-forecast';pantry.setAttribute('role','status');pantry.textContent=s.mode==='sandbox'?'Food forecasts are inactive in sandbox.':`Pantry plan · ${forecast.portions} portions in stores · ${forecast.served} of ${forecast.target} planned portions usable before expiry. ${forecast.shortfall?`${forecast.shortfall} portions short: cook, preserve or buy food to cover your reserve.`:'Your chosen reserve is covered.'}`;settingsBody.append(pantry);
+      const waste=document.createElement('p');waste.textContent=s.mode==='sandbox'?'Food does not spoil in sandbox.':forecast.atRisk>0?`About ${forecast.atRisk.toFixed(1)} portions may spoil during this reserve period. Cook short-lived ingredients, dry provisions for later, or lower production targets.`:'No stored portions are forecast to spoil during this reserve period.';settingsBody.append(waste);
+      const reserveNote=document.createElement('p');reserveNote.textContent='Planning estimate: two evenly spaced portions per resident per day, oldest food first. Includes stored food only; future harvests, deliveries and continued refrigeration can change the outcome. The purchase budget is a spending limit, not reserved cash; drivers, funds or storage may delay replenishment.';settingsBody.append(reserveNote);
       const delivery=document.createElement('button');delivery.textContent=s.deliveryOnly?'Purchases: supplier delivery':'Purchases: resident pickup';delivery.setAttribute('aria-pressed',String(!!s.deliveryOnly));delivery.onclick=()=>{s.deliveryOnly=!s.deliveryOnly;refresh();render();};settingsBody.append(delivery);
       const freight=document.createElement('p');freight.textContent=s.delivery?`${s.delivery.status||'Supplier delivery on its way'} · ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:s.deliveryOnly?`Supplier delivery: R$${transportCost(s).toFixed(2)} freight, up to 5 tonnes / 12 m³. About six hours plus travel; no resident driver needed.`:'Resident pickups use the village cars and their cargo limits.';settingsBody.append(freight);
       }
@@ -472,6 +489,7 @@ export function createManagement({
       $("production-sites").append(accountNote);
       const freshnessNote=document.createElement('p');freshnessNote.textContent=foodStorageText(s)+' '+coolingText(s);$("production-sites").append(freshnessNote);
       for (const p of s.projects) {
+        if(view==='food'&&PROJECTS[p.key].kind!=='kitchen')continue;
         if(PROJECTS[p.key].kind==='wild-tree')continue;
         if(p.cultivation){
           if(view==='items'||p.work<PROJECTS[p.key].work)continue;
@@ -522,6 +540,7 @@ export function createManagement({
             ? "Growing before the next harvest"
             : "Ready for a job");
         if(op && op.phase!=='growing' && !s.people.some(r=>r.operation===op.id && !r.needTask && !r.tentPhase))status.textContent=`${op.status?.startsWith('Waiting')?op.status:'Waiting for an available resident'} · residents may be resting or doing higher-priority work`;
+        if(view==='food'&&!op)status.textContent=kitchenPlan(s,p,PROCESSES,{blocker:productionBlocker,stored:storedMaterials,capacity:storageCapacity}).reason;
         if (activity) status.textContent = activity.detail;
         else if(gatheringStatus(s,p))status.textContent=gatheringStatus(s,p);
         const node = s.infrastructure.nodes[p.id];
@@ -542,7 +561,7 @@ export function createManagement({
         };
         const locate=document.createElement('button');locate.textContent=`Find in village · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores`;locate.onclick=()=>{dialog.close();inspect(p.id);};
         const recipeInfo=document.createElement('p');
-        const describe=()=>{const r=PROCESSES[choice.value];const error=s.stage!=='playing'?'Choose a campsite first.':productionBlocker(s,p.id,choice.value);start.disabled=!!error;disabledReason(start,error);start.textContent=node?.enabled===false?'Switch on to produce':r.installation?(p.coldStorage?'Cold storage installed':'Install cold storage'):activity?.label||(r.gathering?'Gather resources':'Start batch');recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(', ')||(r.equipmentRepair?'Restore one tool worth of condition':'Building upgrade')}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${biologyText(choice.value)}${['vegetables','greenhouse'].includes(choice.value)&&!p.starterSeedlingsUsed&&!p.harvestCount?' · First planting seeds included in the building bill.':''}${r.installation?' · 40 food units, 0.08 kW average cooling load; ages food at one-quarter speed while powered.':''}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
+        const describe=()=>{const r=PROCESSES[choice.value];const error=s.stage!=='playing'?'Choose a campsite first.':productionBlocker(s,p.id,choice.value);start.disabled=!!error;disabledReason(start,error);start.textContent=node?.enabled===false?'Switch on to produce':r.installation?(p.coldStorage?'Cold storage installed':'Install cold storage'):activity?.label||(r.gathering?'Gather resources':'Start batch');recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(', ')||(r.equipmentRepair?'Restore one tool worth of condition':'Building upgrade')}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${biologyText(choice.value)}${['vegetables','greenhouse'].includes(choice.value)&&!p.starterSeedlingsUsed&&!p.harvestCount?' · First planting seeds included in the building bill.':''}${r.installation?' · 80 L of food, 0.08 kW average cooling load; ages food at one-quarter speed while powered.':''}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
         choice.onchange=()=>{recipeChoices.set(`${view}:${p.id}`,choice.value);describe();};describe();
         el.prepend(img,name);el.append(locate,status,choice,recipeInfo,start);
         if (activity) { const bar=document.createElement('progress');bar.max=1;bar.value=activity.progress;bar.setAttribute('aria-label', `Production at ${name.textContent}`);el.append(bar); }
@@ -552,7 +571,7 @@ export function createManagement({
       }
       if (!$("production-sites").children.length)
         $("production-sites").textContent =
-          view === 'items' ? 'Craft portable equipment at a timber workbench. Buy parts and repair supplies in Resources.' : search
+          view === 'food' ? 'Build a community kitchen to cook meals, prepare provisions and install refrigeration.' : view === 'items' ? 'Craft portable equipment at a timber workbench. Buy parts and repair supplies in Resources.' : search
             ? "No completed production sites match this search. Try another resource or building name."
             : "Build a garden, workshop or other production site to start making supplies here.";
       if (search) {
