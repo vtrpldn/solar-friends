@@ -1755,6 +1755,11 @@ function restoreHomeAssignments(s) {
     else counts.set(r.home, count + 1);
   }
 }
+function recoveryEnergy(s,r){
+  // A short construction nap must leave an outside worker rested enough to
+  // accept the next shift (which requires 65 energy).
+  return r.outsideJobEnabled?80:s.projects.some(p=>p.work<PROJECTS[p.key].work)?60:80;
+}
 function chooseRestingPlace(s, r, i) {
   if (r.restSite && s.projects.some((p) => p.id === r.restSite&&!p.removal)) return;
   r.restSite=null;
@@ -2133,9 +2138,7 @@ function tickUncached(s, dt) {
         r.tentPhase = "inside";
       if (r.tentPhase === "inside") {
         r.energy = Math.min(100, r.energy + dt * (r.sleepUntil ? .13 : .45));
-        const recovered = s.projects.some((p) => p.work < PROJECTS[p.key].work)
-          ? 60
-          : 80;
+        const recovered = recoveryEnergy(s,r);
         if ((r.sleepUntil ? s.time >= r.sleepUntil : r.energy >= recovered) || s.stage === "evening") {
           r.sleepUntil=null;
           r.tentPhase = "exit";
@@ -2234,7 +2237,7 @@ function tickUncached(s, dt) {
       !r.cargo && (r.sleepUntil || r.energy < 25 ||
       (r.action === "rest" &&
         r.energy <
-          (s.projects.some((p) => p.work < PROJECTS[p.key].work) ? 60 : 80)))
+          recoveryEnergy(s,r)))
     ) {
       r.action = "rest";
       r.job = null;

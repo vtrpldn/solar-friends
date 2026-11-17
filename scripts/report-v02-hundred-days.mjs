@@ -33,14 +33,18 @@ function place(key){
  const error=plan(s,key,spot.x,spot.z);orders.push({day:s.time/GAME_DAY,key,...spot,error});assert.equal(error,'');return true;
 }
 for(const key of ['gathering','water','toilet','shelter','covered-stores'])place(key);
-const expansion=['garden','groundwater-well','home-cottage','workshop','kitchen','compost','solar_farm','coop'];
+const expansion=['garden','groundwater-well','compost','coop','workshop','kitchen','solar_farm','home-cottage'];
 const recipes={garden:'vegetables',kitchen:'meals',compost:'compost',coop:'eggs'};
 function manage(day){
  // A reproducible player policy: keep two paid jobs, maintain food and supplies,
- // expand only above a R$900 uncommitted-cash threshold, and never inject assets or money.
+ // reserve R$900 for essentials after the opening, try affordable productive
+ // investments before a home, and never inject assets or money.
  const pending=s.projects.filter(p=>!p.natural&&p.work<PROJECTS[p.key].work);
- if(day>=4&&pending.length<2&&spendableMoney(s)>900){
-  const key=expansion.find(key=>!s.projects.some(p=>p.key===key));if(key)place(key);
+ if(day>=4){
+  s.expansionReserve=900;
+  if(pending.length<2&&spendableMoney(s)>900)for(const key of expansion){
+   if(!s.projects.some(p=>p.key===key)&&place(key))break;
+  }
  }
  for(const p of s.projects){
   if(p.work<PROJECTS[p.key].work)continue;
@@ -75,7 +79,7 @@ function sample(day){
   fs.writeFileSync(path.join(output,`day-${day}-save.json`),raw);
  }
  const elapsed=(performance.now()-started)/1000;
- fs.writeFileSync(path.join(output,'report.json'),JSON.stringify({commit,method:'Fresh story village with natural terrain; ordinary player commands; no injected funds, resources or completed buildings; same 0.1-second steps scheduled at 1024x through LabRunner. Automated simulation, not browser play.',seed,daysRequested:days,daysCompleted:day,initialMoney,elapsedSeconds:elapsed,actualSpeed:s.time/elapsed,orders,samples,maxStarvation,issues},null,2));
+ fs.writeFileSync(path.join(output,'report.json'),JSON.stringify({commit,method:'Fresh story village with natural terrain; ordinary player commands; two outside workers, R$900 post-opening expansion reserve and affordable production-first expansion; no injected funds, resources or completed buildings; same 0.1-second steps scheduled at 1024x through LabRunner. Automated simulation, not browser play.',seed,daysRequested:days,daysCompleted:day,initialMoney,elapsedSeconds:elapsed,actualSpeed:s.time/elapsed,orders,samples,maxStarvation,issues},null,2));
  console.log(`Day ${day}/${days}: R$${s.money.toFixed(2)}, food ${(s.materials.food+s.materials.meals).toFixed(1)}, ${row.buildings.filter(p=>p.progress===1).length} completed buildings, ${Math.round(s.time/elapsed)}x actual`);
 }
 for(let day=1;day<=days;day++){
