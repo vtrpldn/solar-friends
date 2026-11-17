@@ -1,6 +1,6 @@
 # Documentation index
 
-Updated 2026-11-09.
+Updated 2026-11-16.
 
 ## Why
 
@@ -15,6 +15,10 @@ Separate current gameplay and operational guidance from historical plans and dat
 - [Editable asset garden](../web/v02/land/README.md): 64×64 cells, separate from the playable 128×128 map.
 - [Resident animation rehearsals](../web/v02/residents/README.md)
 - [Deferred gameplay ideas](gameplay-ideas.md): proposals, not promises or implemented mechanics.
+
+## Active plans
+
+- [Realistic v2 economy](realistic-economy-plan.md): phased accounting, construction, physical trade, farming, utilities, upkeep and balance work. Proposed; not yet implemented.
 
 ## Recent evidence
 
