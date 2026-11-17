@@ -1,3 +1,5 @@
+import {simulationFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
+import {productionTarget} from './economy-policies.js';
 import {eventHistory, eventTime} from './event-history.js';
 import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
 import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
@@ -64,6 +66,7 @@ import {
 } from "../library/catalog.js";
 import { createResident, animateResident } from "../residents/rig.js";
 import {
+  enableFastNavigation,
   CAMPS,
   PROJECTS,
   PROCESSES,
@@ -171,8 +174,10 @@ if (s.stage === "evening") {
       r.target = null;
     }
 }
-let speed = 1,
-  paused = lightingPreview,
+enableFastNavigation(s);
+const savedView = restoredView(s.view);
+let speed = savedView?.speed || 1,
+  paused = lightingPreview || savedView?.paused || false,
   placing = null,
   moving = null,
   selected = null,
@@ -664,6 +669,13 @@ function focus(c) {
   controls.update();
 }
 focus(s.arrivalAnimating ? s.stock : campLocation(s));
+if (savedView) {
+  camera.position.fromArray(savedView.position);
+  controls.target.fromArray(savedView.target);
+  camera.zoom = savedView.zoom;
+  camera.updateProjectionMatrix();
+  controls.update();
+}
 
 function resize() {
   const a = innerWidth / innerHeight;
@@ -688,10 +700,20 @@ function message(t) {
 }
 let activeSaveSlot;
 try { activeSaveSlot=saveSlots(localStorage).active(s.mode||"story"); } catch {}
+function viewPauseState() {
+  if (document.querySelector('.village-saves[open]')) return savesWasPaused;
+  if ($('controls-dialog').open) return controlsWasPaused;
+  if (management?.isOpen) return management.resumePaused;
+  if (openPanel) return openPanel === 'people' ? residentsWasPaused : trayWasPaused;
+  return roadWasPaused ?? paused;
+}
+function saveWithView(pauseState = viewPauseState()) {
+  return save({...s, view: {speed, paused: pauseState, position: camera.position.toArray(), target: controls.target.toArray(), zoom: camera.zoom}});
+}
 function persist() {
   if (arrivalPreview) return;
   try {
-    saveSlots(localStorage).autosave(s.mode || "story", save(s), activeSaveSlot);
+    saveSlots(localStorage).autosave(s.mode || "story", saveWithView(), activeSaveSlot);
   } catch {
     message(
       "Progress cannot be saved in this browser. Keep this tab open to continue.",
@@ -703,6 +725,11 @@ let lastRoad = null,
 let roadWasPaused = null, roadHistory = [], roadsExpanded = false;
 let placementRotation = 0,
   wireframe = null;
+const entranceMarker = new THREE.Mesh(new THREE.RingGeometry(.5,.9,32), new THREE.MeshBasicMaterial({color: '#d83b23', side: THREE.DoubleSide, depthTest:false}));
+entranceMarker.rotation.x = -Math.PI/2;
+entranceMarker.renderOrder = 100;
+entranceMarker.visible = false;
+scene.add(entranceMarker);
 const rotateButton = $("rotate-placement");
 function rotatePlacement(direction = 1) {
   if (!placing) return;
@@ -841,6 +868,7 @@ $("world").addEventListener("pointermove", (e) => {
   const p = hit(e);
   if (!p) {
     ghost.visible = false;
+    entranceMarker.visible = false;
     if (wireframe) wireframe.visible = false;
     roadPreview.visible = false;
     return;
@@ -870,9 +898,12 @@ function updatePlacementPreview() {
   }
   ghost.position.y += 0.04;
   ghost.visible = true;
+  const placementDetails = {};
   const error = pitching
     ? campPlacementError(s, cell.x, cell.z)
-    : placementError(s, placing, cell.x, cell.z, moving, placementRotation);
+    : placementError(s, placing, cell.x, cell.z, moving, placementRotation, placementDetails);
+  entranceMarker.visible = !!placementDetails.entrance;
+  if (placementDetails.entrance) entranceMarker.position.copy(world(placementDetails.entrance.x, placementDetails.entrance.z)).add(new THREE.Vector3(0,.15,0));
   roadPreview.visible = false;
   let hint = error;
   if (placing) {
@@ -1160,6 +1191,7 @@ function setSpeed(value) {
   $("speed").textContent = `${speed}×`;
   $("speed").setAttribute('aria-label', `Simulation speed ${speed}×. Keys 1 to 4 select speed.`);
 }
+setSpeed(speed);
 $("speed").onclick = () => setSpeed([1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4]);
 $("home").onclick = () => focus(campLocation(s));
 $("river-view").onclick = () => focus(riverAccess(s.landSeed));
@@ -1175,7 +1207,7 @@ function askReset() {
   $("reset-dialog").showModal();
 }
 let savesWasPaused=false;
-installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:save(s)}),beforeOpen:()=>{if(placing)cancel();savesWasPaused=paused;paused=true;updatePauseButton();},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
+installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:saveWithView(savesWasPaused)}),beforeOpen:()=>{if(placing)cancel();savesWasPaused=paused;paused=true;updatePauseButton();},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
 $("main-menu").onclick = () => {
   persist();
   location.href = "./menu.html";
@@ -1261,6 +1293,10 @@ function renderUtilityUI() {
     (key, i) =>
       `${Math.floor(nodes.reduce((a, n) => a + n.water[i], 0))} ${key}`,
   ).join(" · ");
+  const warnings = nodes.flatMap(n => wasteWarnings(n).map(text => `${labels.find(([id])=>id===n.id)?.[1]}: ${text}`));
+  $("tank-attention").hidden = !warnings.length;
+  $("tank-attention").textContent = `${warnings.length} waste tank${warnings.length===1?' needs':'s need'} attention`;
+  $("tank-attention").title = warnings.join('\n');
   $("utility-summary").textContent =
     `Power: ${generation.toFixed(1)} kW available / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}.${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Build more treatment capacity." : ""}`;
   $("utility-links").replaceChildren();
@@ -1308,22 +1344,23 @@ function renderUtilityUI() {
   $("production-activity").textContent = activity?.detail || "";
   $("production-activity").hidden = !activity;
   $("production-controls").hidden = !$("production").value;
-  $("queue-production").disabled = !node || !$("production").value;
+  $("queue-production").disabled = !node || node.enabled === false || !$("production").value;
   const upgrade = p && $("production").value === "solar_upgrade" ? upgradeAction(p, s.operations || []) : null;
   $("repeat-production").hidden = !!upgrade || (!!p && PROJECTS[p.key].kind==='wild-tree');
   $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : 'Start batch';
+  if (node?.enabled === false) $("queue-production").textContent = "Switch on to produce";
   if (activity) { $("queue-production").textContent = activity.label; $("queue-production").disabled = true; }
   if (upgrade) { $("queue-production").textContent = upgrade.label; $("queue-production").disabled ||= upgrade.disabled; }
   $("repeat-production").disabled = !node || !$("production").value;
   $("repeat-production").textContent = p?.repeat
     ? "Stop repeating"
-    : "Keep 24 in stock";
+    : `Keep ${productionTarget(p || {})} in stock`;
   $("toggle-building").hidden = !canSwitchBuilding(sys,node);
   $("toggle-building").disabled = !canSwitchBuilding(sys,node);
   $("toggle-building").textContent = node?.enabled ? "Switch off" : "Switch on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done);
   $("building-service").textContent = node
-    ? `${hasPowerService(sys,node) ? `Power ${(node.power * 100).toFixed(0)}%` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
+    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : `Power ${(node.power * 100).toFixed(0)}%` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
         (k, i) =>
           node.capacity[i]
             ? `${k}: ${node.water[i].toFixed(1)}/${node.capacity[i]}`
@@ -1809,7 +1846,9 @@ function renderUI() {
       s.mode !== "sandbox" && !PROJECTS[p.key].repeatable;
     illustrate($("selected-art"), PROJECTS[p.key].asset);
     const construction = constructionProgress(s, p, PROJECTS[p.key], requiredLoads(p.key));
-    $("selected-state").textContent = construction.phase;
+    $("selected-state").textContent = p.work < PROJECTS[p.key].work ? construction.phase : operationalStatus(p, s.infrastructure?.nodes[p.id], productionActivity(s,p,PROCESSES));
+    $("selected-benefit").textContent = buildingBenefit(PROJECTS[p.key], PROCESSES, COMMUNITY);
+    $("selected-benefit").hidden = !$("selected-benefit").textContent;
     $("construction-summary").hidden = p.work >= PROJECTS[p.key].work;
     $("construction-detail").textContent = construction.detail;
     $("construction-workers").textContent = construction.workers;
@@ -1871,6 +1910,7 @@ management = createManagement({
     updatePauseButton();
   },
 });
+$("tank-attention").onclick = () => management.open("water");
 $("supplies").onclick = (event) => {
   const button = event.target.closest("[data-panel]");
   if (button) management.open(button.dataset.panel);
@@ -1894,12 +1934,10 @@ function frame(now) {
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
   if (!paused && !document.hidden) {
-    accumulator += dt * speed;
-    while (accumulator >= 0.1) {
+    accumulator = simulationFrame(accumulator, dt, speed, step => {
       previousMotion = captureMotion(s);
-      tick(s, 0.1);
-      accumulator -= 0.1;
-    }
+      tick(s, step);
+    });
   }
   wildlife.update(!paused && !document.hidden ? dt : 0);
   capybaras.update(!paused && !document.hidden ? dt : 0);
@@ -1907,6 +1945,7 @@ function frame(now) {
   const arrivalTime=Math.max(0,s.arrivalElapsed-(paused?0:0.1)+accumulator);
   drawCamp();
   syncBuildings();
+  if (!placing) entranceMarker.visible = false;
   const selectedModel = buildings.get(selected)?.root;
   selectionOutline.visible = !!selectedModel && !placing;
   if (selectionOutline.visible) { selectedModel.updateWorldMatrix(true, true); selectionOutline.setFromObject(selectedModel); }

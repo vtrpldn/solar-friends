@@ -911,7 +911,7 @@ export function chooseCamp(s, id) {
 export function finished(s, key) {
   return s.projects.some((p) => p.key === key && p.work >= PROJECTS[key].work);
 }
-export function placementError(s, key, x, z, ignore = null, rotation = 0) {
+export function placementError(s, key, x, z, ignore = null, rotation = 0, details = null) {
   const def = PROJECTS[key];
   if (!def || !Number.isInteger(x) || !Number.isInteger(z))
     return "Choose a grid square.";
@@ -987,6 +987,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
       { id: ignore || -1, key, x, z, rotation },
     ],
   };
+  enableFastNavigation(proposed);
   for (const p of proposed.projects.filter(p=>!p.natural&&!p.felled&&!['road','bridge'].includes(p.key))) {
     const [pw,pd]=footprint(p),edges=[];
     for(let dz=0;dz<pd;dz++)edges.push({x:p.x-1,z:p.z+dz},{x:p.x+pw,z:p.z+dz});
@@ -1000,8 +1001,10 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
         PROJECTS[p.key].kind,
       ) &&
       !route(proposed, s.stock, buildingFront(p))
-    )
+    ) {
+      if (details) details.entrance = buildingFront(p);
       return `${PROJECTS[p.key].name} entrance at (${buildingFront(p).x}, ${buildingFront(p).z}) is blocked. Rotate it or leave a walking gap.`;
+    }
   }
   return "";
 }

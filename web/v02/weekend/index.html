@@ -32,6 +32,7 @@
       tabindex="0"
     ></canvas>
     <header>
+      <button id="tank-attention" hidden title="Review waste tanks"></button>
       <div id="supplies" aria-label="Community supplies"></div>
       <div class="time">
         <span id="clock"></span>
@@ -95,6 +96,7 @@
         <progress id="construction-progress" max="1" value="0"></progress>
         <small id="construction-workers"></small>
       </div>
+      <p id="selected-benefit" class="hint" hidden></p>
       <p id="building-service"></p>
       <div id="production-controls">
         <label for="production">Resident work</label

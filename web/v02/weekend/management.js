@@ -1,3 +1,4 @@
+import {wasteWarnings, operationalStatus} from './session-ui.js';
 import {upgradeAction, productionSearchText, productionActivity} from './project-ui.js';
 import {economyControls} from './economy-controls.js';
 import {productionTarget} from './economy-policies.js';
@@ -180,7 +181,7 @@ export function createManagement({
       el.append(actions);
     }
     if(view==='water' && (n.capacity[2] || n.capacity[3]) && !['wetland','biodigester','banana_treatment'].includes(n.kind)) {
-      const status=document.createElement('p');status.textContent=((n.capacity[2]>0 && n.water[2]>=n.capacity[2]-.1) || (n.capacity[3]>0 && n.water[3]>=n.capacity[3]-.1)) ? 'Tank full: service is blocked until waste is removed or treated.' : 'Sealed waste: residents can service tanks; treatment buildings automate disposal.';el.append(status);
+      const status=document.createElement('p');status.textContent=wasteWarnings(n).join(' · ') || 'Sealed waste: residents can service tanks; treatment buildings automate disposal.';el.append(status);
       const service=document.createElement('button');service.textContent='Service waste tanks';service.disabled=n.water[2]+n.water[3]<1 || state().operations?.some(o=>!o.done&&o.water&&o.site===n.id);service.onclick=()=>{notify(queueSanitation(state(),n.id)||'Waste service queued for off-site treatment.');refresh();render();};el.append(service);
       const auto=document.createElement('button');auto.textContent=n.maintainSanitation?'Maintain sanitation: on':'Maintain sanitation: off';auto.setAttribute('aria-pressed',String(!!n.maintainSanitation));auto.onclick=()=>{n.maintainSanitation=!n.maintainSanitation;refresh();render();};el.append(auto);
     }
@@ -379,9 +380,12 @@ export function createManagement({
               : "Ready for a job");
         if(op && !s.people.some(r=>r.operation===op.id && !r.needTask && !r.tentPhase))status.textContent=`${op.status?.startsWith('Waiting')?op.status:'Waiting for an available resident'} · residents may be resting or doing higher-priority work`;
         if (activity) status.textContent = activity.detail;
+        const node = s.infrastructure.nodes[p.id];
+        const availability = operationalStatus(p,node,null);
+        if (availability !== 'Ready to use') status.textContent = `${availability}${activity ? ' · ' + activity.detail : ''}`;
         const start = document.createElement("button");
-        start.textContent = activity?.label || "Start batch";
-        start.disabled = !!op || s.stage !== "playing";
+        start.textContent = node?.enabled === false ? 'Switch on to produce' : activity?.label || "Start batch";
+        start.disabled = node?.enabled === false || !!op || s.stage !== "playing";
         start.onclick = () => {
           notify(
             queueProduction(s, p.id, choice.value) ||
@@ -405,7 +409,7 @@ export function createManagement({
         el.append(img,name,locate,status,choice,recipeInfo,start);
         if (activity) { const bar=document.createElement('progress');bar.max=1;bar.value=activity.progress;bar.setAttribute('aria-label', `Production at ${name.textContent}`);el.append(bar); }
         if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);
-        else {const action=upgradeAction(p,s.operations||[]);start.disabled=action.disabled||!!op;start.textContent=action.label;}
+        else {const action=upgradeAction(p,s.operations||[]);start.disabled=node?.enabled===false||action.disabled||!!op;start.textContent=action.label;}
         $("production-sites").append(el);
       }
       if (!$("production-sites").children.length)
@@ -442,6 +446,7 @@ export function createManagement({
     get view() {
       return view;
     },
+    get resumePaused() { return wasPaused; },
     get isOpen() {
       return dialog.open;
     },

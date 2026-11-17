@@ -1625,3 +1625,6 @@ header > .time { grid-column: 3; justify-self: end; }
 #log li > small { display: block; font-size: 11px; font-weight: 400; letter-spacing: normal; }
 #cancel-project { border-style: dashed; }
 #cancel-project-note { display: block; font-size: 12px; letter-spacing: normal; line-height: 1.4; }
+
+#tank-attention { position: absolute; top: 86px; left: 16px; width: auto; background: #f7e2bb; color: #733d27; border-color: #b77b4a; font-size: 12px; padding: 6px 10px; }
+#selected-benefit { border-left: 3px solid #739166; padding-left: 10px; }
