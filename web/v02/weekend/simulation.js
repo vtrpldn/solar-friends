@@ -10,6 +10,7 @@ import {recordProduction,validProductionAccounting} from './production-accountin
 import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSION} from './construction-specs.js';
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
 import {reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment} from './physical-trade.js';
+import {recordEvent} from './event-history.js';
 import {economyPolicies,productionTarget,workGroup,salePreview,validatePolicies} from './economy-policies.js';
 import {ensureFinances,recordMoney,transact,validFinances} from './finances.js';
 import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
@@ -565,7 +566,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
       if(op.work>=30) {
         const amount=Math.min(12,node.water[1],node.capacity[0]-node.water[0]);
         node.water[1]-=amount;node.water[0]+=amount;op.done=true;r.operation=null;
-        say(s,`${r.name} purified ${amount.toFixed(0)} water for drinking.`);
+        say(s,`${r.name} purified ${amount.toFixed(0)} water for drinking.`, "water-purified");
       }
       return true;
     }
@@ -610,7 +611,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   if (op.phase === "return") {
     r.action = "carry";
     r.cargo = true;
-    op.status = op.returnItems ? "Returning usable remains after spoilage" : "Carrying output to storage";
+    op.status = op.returnItems ? "Returning usable remains after spoilage" : op.recipe === "solar_upgrade" ? "Returning after installing solar" : "Carrying output to storage";
     if (!go(s, r, supplySpot(s, r, i))) return true;
     const returned=op.returnItems||op.harvestOutput||recipe.output;
     const total = Object.values(returned).reduce((a, b) => a + b, 0);
@@ -623,7 +624,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     op.done = true;
     r.operation = null;
     r.cargo = false;
-    say(s, `${recipe.name}: supplies delivered to storage.`);
+    say(s, op.recipe === "solar_upgrade" ? `Solar upgrade installed at ${PROJECTS[p.key].name} #${p.id}.` : `${recipe.name}: supplies delivered to storage from ${PROJECTS[p.key].name} #${p.id}.`);
     return true;
   }
 
@@ -828,6 +829,7 @@ export function createSandbox(landSeed = 0) {
   s.arrivalElapsed = ARRIVAL_DURATION;
   chooseCamp(s, "clearing");
   sandboxSupplies(s);
+  delete s.events;
   s.log = [
     "Your land, your pace. All buildings are available; construction is free. Toggle Instant build to let residents do the work.",
   ];
@@ -839,7 +841,8 @@ function sandboxSupplies(s) {
   for (const id of Object.keys(MATERIALS))
     if (id !== "wood") s.materials[id] = 9999;
 }
-export function say(s, text) {
+export function say(s, text, key = null) {
+  recordEvent(s, text, key);
   s.log.unshift(text);
   s.log = s.log.slice(0, 12);
 }
@@ -932,7 +935,7 @@ export function chooseCamp(s, id) {
 export function finished(s, key) {
   return s.projects.some((p) => p.key === key && p.work >= PROJECTS[key].work);
 }
-export function placementError(s, key, x, z, ignore = null, rotation = 0) {
+export function placementError(s, key, x, z, ignore = null, rotation = 0, details = null) {
   const def = PROJECTS[key];
   if (!def || !Number.isInteger(x) || !Number.isInteger(z))
     return "Choose a grid square.";
@@ -1008,6 +1011,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
       { id: ignore || -1, key, x, z, rotation },
     ],
   };
+  enableFastNavigation(proposed);
   for (const p of proposed.projects.filter(p=>!p.natural&&!p.felled&&!['road','bridge'].includes(p.key))) {
     const [pw,pd]=footprint(p),edges=[];
     for(let dz=0;dz<pd;dz++)edges.push({x:p.x-1,z:p.z+dz},{x:p.x+pw,z:p.z+dz});
@@ -1021,8 +1025,10 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0) {
         PROJECTS[p.key].kind,
       ) &&
       !route(proposed, s.stock, buildingFront(p))
-    )
+    ) {
+      if (details) details.entrance = buildingFront(p);
       return `${PROJECTS[p.key].name} entrance at (${buildingFront(p).x}, ${buildingFront(p).z}) is blocked. Rotate it or leave a walking gap.`;
+    }
   }
   return "";
 }
@@ -1163,6 +1169,52 @@ export function moveProject(s, id, x, z, rotation = undefined) {
   );
   return "";
 }
+export function cancelProjectError(s, id) {
+  const p = s.projects.find(p => p.id === id);
+  if (!p || PROJECTS[p.key].natural || s.stage !== 'playing') return 'This project cannot be cancelled.';
+  if (p.work > 0) return 'Construction has already started.';
+  const orders = s.trip?.projects || [s.trip?.project];
+  if (orders.includes(id) && s.trip.phase !== 'boarding') return 'Materials are on their way. Cancel after delivery.';
+  return '';
+}
+
+export function cancelProject(s, id) {
+  const error = cancelProjectError(s, id);
+  if (error) return error;
+  const p = s.projects.find(p => p.id === id);
+  if (s.mode !== 'sandbox') {
+    let refund = 0;
+    for (const [material, count] of Object.entries(PROJECTS[p.key].materials)) {
+      const pending = p.pendingMaterials?.[material] || 0;
+      changeMaterial(s, material, count - pending);
+      if (pending) refund += pending * MATERIALS[material].price / MATERIALS[material].quantity;
+    }
+    refund = Math.ceil(refund * 100) / 100;
+    if (refund) { s.money += refund; recordMoney(s, refund, 'construction', `Cancelled materials for ${PROJECTS[p.key].name}`); }
+  }
+  if (s.trip && (s.trip.projects || [s.trip.project]).includes(id)) {
+    const orders = (s.trip.projects || [s.trip.project]).filter(order => order !== id);
+    if (orders.length) { s.trip.projects = orders; s.trip.project = orders[0]; }
+    else {
+      const driver = s.people.find(r => r.id === s.trip.person);
+      if (driver) { driver.action = 'idle'; driver.target = null; driver.walk = []; }
+      s.trip = null;
+    }
+  }
+  s.projects = s.projects.filter(project => project.id !== id);
+  for (const r of s.people) {
+    r.walk = []; r.target = null;
+    if (r.job === id) {
+      r.job = null; r.workSpot = null; r.supplyGoal = null;
+      r.cargo = false; r.haulLoads = 0; r.haulStage = null;
+      if (!r.needTask && !r.tentPhase) r.action = 'idle';
+    }
+  }
+  invalidateNavigation(s);
+  say(s, `${PROJECTS[p.key].name} #${id} plan cancelled. Reserved supplies returned${p.pendingMaterials ? ' and pending purchases refunded' : ''}.`);
+  return '';
+}
+
 export function prioritize(s, id) {
   const i = s.projects.findIndex((p) => p.id === id);
   if (i < 0) return;
@@ -2499,6 +2551,9 @@ export function restore(text) {
     s.log = Array.isArray(s.log)
       ? s.log.filter((t) => typeof t === "string").slice(0, 12)
       : [];
+    if (Array.isArray(s.events)) s.events = s.events.filter(event => event && typeof event.text === 'string' &&
+      (event.time === null || Number.isFinite(event.time) && event.time >= 0) && Number.isInteger(event.count) && event.count > 0).slice(0,48);
+    else delete s.events;
     return s;
   } catch {
     return null;

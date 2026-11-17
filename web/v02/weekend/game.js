@@ -4,12 +4,17 @@ import {constructionSpecText} from './construction-specs.js';
 import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {installLenses} from './lenses.js';
+import {simulationFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
+import {productionTarget} from './economy-policies.js';
+import {eventHistory, eventTime} from './event-history.js';
+import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
+import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
 import {loadVillage} from './load-village.js';
 import {ensureNaturalLand} from './natural-resources.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {createCapybaraVisitors} from "./capybaras.js";
-import { constructionStatus } from "./construction-logistics.js";
+import { constructionProgress } from "./construction-logistics.js";
 import { BUILD_CATEGORIES, buildingCategory, inBuildCategory } from "./build-categories.js";
 import {createResourceTrends,resourceSnapshot,formatTrend} from './resource-trends.js';
 import {materialTooltip} from './material-tooltip.js';
@@ -70,6 +75,7 @@ import {
 } from "../library/catalog.js";
 import { createResident, animateResident } from "../residents/rig.js";
 import {
+  enableFastNavigation,
   CAMPS,
   PROJECTS,
   PROCESSES,
@@ -101,6 +107,7 @@ import {
   planRoadLine,
   moveProject,
   prioritize,
+  cancelProject, cancelProjectError,
   supplyRun,
   resolveRain,
   finished,
@@ -185,8 +192,10 @@ if (s.stage === "evening") {
       r.target = null;
     }
 }
-let speed = 1,
-  paused = lightingPreview,
+enableFastNavigation(s);
+const savedView = restoredView(s.view);
+let speed = savedView?.speed || 1,
+  paused = lightingPreview || savedView?.paused || false,
   placing = null,
   moving = null,
   selected = null,
@@ -491,6 +500,12 @@ function drawUtilities() {
   }
 }
 const buildings = new Map();
+const selectionOutline = new THREE.BoxHelper(new THREE.Object3D(), '#3b6545');
+selectionOutline.material.depthTest = false;
+selectionOutline.renderOrder = 20;
+selectionOutline.frustumCulled = false;
+selectionOutline.visible = false;
+scene.add(selectionOutline);
 const assets = new Set(ASSETS.map((a) => a.id));
 let terrainPadCount = s.terrainPads?.length || 0, terrainLayer = s.terrainPads;
 function syncTerrain() {
@@ -538,6 +553,12 @@ function syncTerrain() {
   }
 }
 function syncBuildings() {
+  const ids = new Set(s.projects.map(p => p.id));
+  for (const [id, entry] of buildings) if (!ids.has(id)) {
+    scene.remove(entry.root);
+    disposeModel(entry.root);
+    buildings.delete(id);
+  }
   syncTerrain();
   autoConnectUtilities(s, PROJECTS);
   for (const p of s.projects) {
@@ -666,6 +687,13 @@ function focus(c) {
   controls.update();
 }
 focus(s.arrivalAnimating ? s.stock : campLocation(s));
+if (savedView) {
+  camera.position.fromArray(savedView.position);
+  controls.target.fromArray(savedView.target);
+  camera.zoom = savedView.zoom;
+  camera.updateProjectionMatrix();
+  controls.update();
+}
 
 function resize() {
   const a = innerWidth / innerHeight;
@@ -678,16 +706,32 @@ function resize() {
 }
 addEventListener("resize", resize);
 resize();
+let messageTimer;
 function message(t) {
+  clearTimeout(messageTimer);
+  t ||= '';
   if ($("message").textContent !== t) $("message").textContent = t;
+  $("message").hidden = !t;
   $("management-message").textContent = t;
+  if (t && !placing && s.stage !== 'arrival' && !s.arrivalAnimating)
+    messageTimer = setTimeout(() => { $("message").textContent = ''; $("message").hidden = true; }, 6000);
 }
 let activeSaveSlot;
 try { activeSaveSlot=saveSlots(localStorage).active(s.mode||"story"); } catch {}
+function viewPauseState() {
+  if (document.querySelector('.village-saves[open]')) return savesWasPaused;
+  if ($('controls-dialog').open) return controlsWasPaused;
+  if (management?.isOpen) return management.resumePaused;
+  if (openPanel) return openPanel === 'people' ? residentsWasPaused : trayWasPaused;
+  return roadWasPaused ?? paused;
+}
+function saveWithView(pauseState = viewPauseState()) {
+  return save({...s, view: {speed, paused: pauseState, position: camera.position.toArray(), target: controls.target.toArray(), zoom: camera.zoom}});
+}
 function persist() {
   if (arrivalPreview) return;
   try {
-    saveSlots(localStorage).autosave(s.mode || "story", save(s), activeSaveSlot);
+    saveSlots(localStorage).autosave(s.mode || "story", saveWithView(), activeSaveSlot);
   } catch {
     message(
       "Progress cannot be saved in this browser. Keep this tab open to continue.",
@@ -696,8 +740,14 @@ function persist() {
 }
 let lastRoad = null,
   shiftPlacement = false;
+let roadWasPaused = null, roadHistory = [], roadsExpanded = false;
 let placementRotation = 0,
   wireframe = null;
+const entranceMarker = new THREE.Mesh(new THREE.RingGeometry(.5,.9,32), new THREE.MeshBasicMaterial({color: '#d83b23', side: THREE.DoubleSide, depthTest:false}));
+entranceMarker.rotation.x = -Math.PI/2;
+entranceMarker.renderOrder = 100;
+entranceMarker.visible = false;
+scene.add(entranceMarker);
 const rotateButton = $("rotate-placement");
 function rotatePlacement(direction = 1) {
   if (!placing) return;
@@ -707,6 +757,7 @@ function rotatePlacement(direction = 1) {
 }
 rotateButton.onclick = () => rotatePlacement();
 function cancel() {
+  const wasRoad = placing === 'road';
   placing = null;
   moving = null;
   lastRoad = null;
@@ -715,15 +766,21 @@ function cancel() {
   rotateButton.hidden = true;
   ghost.visible = false;
   $("cancel").hidden = true;
+  $("undo-road").hidden = true;
+  roadHistory = [];
+  if (roadWasPaused !== null) { paused = roadWasPaused; roadWasPaused = null; updatePauseButton(); }
   grid.visible = false;
+  message(wasRoad ? 'Road planning finished. Planned tiles kept.' : '');
   renderUI();
 }
 function startPlacement(key, id = null) {
+  if (placing) cancel();
   if (openPanel === "terrain-panel") setPanel(null);
   lastRoad = null;
   roadPreview.visible = false;
   placing = key;
   moving = id;
+  if (key === 'road' && !id) { roadWasPaused = paused; paused = true; updatePauseButton(); }
   placementRotation = s.projects.find((p) => p.id === id)?.rotation || 0;
   if (wireframe) {
     scene.remove(wireframe);
@@ -758,12 +815,15 @@ function startPlacement(key, id = null) {
   rotateButton.textContent = `Rotate · R · ${placementRotation * 90}°`;
   ghost.visible = false;
   $("cancel").hidden = false;
+  $("cancel").textContent = key === 'road' ? 'Finish planning · Esc' : 'Cancel placement · Esc';
+  $("undo-road").hidden = key !== 'road' || !!id;
+  $("undo-road").disabled = true;
   grid.visible = true;
   message(
     key === "bridge"
       ? "Span the river with both ends on dry land. R rotates. Esc cancels."
       : key === "road"
-        ? "Mark a road route. Residents bring materials and build each section. Shift-click extends; Esc finishes planning."
+        ? "Road planning paused · Shift-click extends · Undo removes the last stroke · Esc keeps the plan."
         : "Choose a building site. R rotates. Shift-click repeats. Ground levels automatically. Esc cancels.",
   );
   renderUI();
@@ -826,6 +886,7 @@ $("world").addEventListener("pointermove", (e) => {
   const p = hit(e);
   if (!p) {
     ghost.visible = false;
+    entranceMarker.visible = false;
     if (wireframe) wireframe.visible = false;
     roadPreview.visible = false;
     return;
@@ -855,9 +916,12 @@ function updatePlacementPreview() {
   }
   ghost.position.y += 0.04;
   ghost.visible = true;
+  const placementDetails = {};
   const error = pitching
     ? campPlacementError(s, cell.x, cell.z)
-    : placementError(s, placing, cell.x, cell.z, moving, placementRotation);
+    : placementError(s, placing, cell.x, cell.z, moving, placementRotation, placementDetails);
+  entranceMarker.visible = !!placementDetails.entrance;
+  if (placementDetails.entrance) entranceMarker.position.copy(world(placementDetails.entrance.x, placementDetails.entrance.z)).add(new THREE.Vector3(0,.15,0));
   roadPreview.visible = false;
   let hint = error;
   if (placing) {
@@ -943,6 +1007,7 @@ $("world").addEventListener("pointerup", (e) => {
     return;
   }
   if (placing) {
+    const roadBefore = placing === 'road' && !moving ? {before: structuredClone(s), lastRoad} : null;
     const error = moving
       ? moveProject(s, moving, x, z, placementRotation)
       : placing === "road" && e.shiftKey && lastRoad
@@ -961,6 +1026,10 @@ $("world").addEventListener("pointerup", (e) => {
     syncBuildings();
     persist();
     renderUI();
+    if (roadBefore) {
+      roadHistory.push({...roadBefore, after: JSON.stringify(s)});
+      $("undo-road").disabled = false;
+    }
   } else {
     // Pick the visible model, including a tree's canopy, before falling back to its cell.
     const modelHit=ray.intersectObjects([...buildings.values()].filter(b=>b.root.visible).map(b=>b.root),true)[0];
@@ -978,6 +1047,19 @@ $("world").addEventListener("pointerup", (e) => {
     renderUI();
   }
 });
+$("cancel-project").onclick = () => {
+  const error = cancelProject(s, selected);
+  if (!error) { selected = null; syncBuildings(); persist(); }
+  message(error || s.log[0]);
+  uiSignature = ''; renderUI();
+};
+let controlsWasPaused = false;
+$("show-controls").onclick = () => {
+  controlsWasPaused = paused; paused = true; updatePauseButton();
+  $("controls-dialog").showModal();
+};
+$("close-controls").onclick = () => $("controls-dialog").close();
+$("controls-dialog").addEventListener('close', () => { paused = controlsWasPaused; updatePauseButton(); });
 $("priority").onclick = () => {
   prioritize(s, selected);
   message(s.log[0]);
@@ -1011,6 +1093,22 @@ $("close-selection").onclick = () => {
   renderUI();
 };
 $("cancel").onclick = cancel;
+$("undo-road").onclick = () => {
+  const entry = roadHistory.at(-1);
+  if (!undoRoadPlan(s, entry)) {
+    message("The village changed since this stroke. Finish planning to keep the current plan.");
+    return;
+  }
+  roadHistory.pop();
+  lastRoad = entry.lastRoad;
+  syncBuildings();
+  uiSignature = "";
+  renderUI();
+  persist();
+  if (roadHistory.length) roadHistory.at(-1).after = JSON.stringify(s);
+  $("undo-road").disabled = !roadHistory.length;
+  message("Last road stroke undone.");
+};
 addEventListener("keyup", (e) => {
   if (e.key === "Shift") {
     shiftPlacement = false;
@@ -1018,50 +1116,64 @@ addEventListener("keyup", (e) => {
   }
 });
 addEventListener("keydown", (e) => {
-  const editing =
-    e.target.closest?.('input,textarea,select,[contenteditable="true"]') ||
-    $("management").open || $("people").open;
-  if (e.key === "Shift" && !editing) {
+  const dialogOpen = !!document.querySelector('dialog[open]');
+  const editing = e.target.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"])');
+  if (e.key === "Shift" && !editing && !dialogOpen) {
     shiftPlacement = true;
     updatePlacementPreview();
   }
-  if (!editing && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) {
-    if (e.code === "KeyB" && s.stage === "playing") {
+  // Escape belongs to the topmost dialog, including saves and confirmations.
+  if (e.key === "Escape" && !dialogOpen) {
+    if (editing && e.target.type === 'search' && e.target.value) {
       e.preventDefault();
-      setPanel(openPanel === "build" ? null : "build");
+      e.target.value = '';
+      e.target.dispatchEvent(new Event('input', {bubbles: true}));
+      return;
     }
-    if (e.code === "KeyG") {
-      e.preventDefault();
-      $("grid").click();
-    }
-    if (e.code === "KeyF") {
-      e.preventDefault();
-      if (selected) $("focus-selection").click();
-      else focus(campLocation(s));
-    }
-    if (e.code === "Space" && !e.target.closest?.("button,summary,a")) {
-      e.preventDefault();
-      $("pause").click();
-    }
-  }
-  if (
-    e.code === "KeyR" &&
-    placing &&
-    !e.repeat &&
-    !e.target.closest?.("input,textarea,select,dialog")
-  ) {
-    e.preventDefault();
-    rotatePlacement(e.shiftKey ? -1 : 1);
-  }
-  if (e.key === "Escape" && !$("management").open && !$("people").open) {
     if (placing) cancel();
-    else if (selected) {
-      selected = null;
-      uiSignature = "";
-      renderUI();
-    } else if (openPanel) setPanel(null);
+    else if (selected) { selected = null; uiSignature = ''; renderUI(); }
+    else if (openPanel) setPanel(null);
+    else document.querySelector('.view-menu').open = false;
+    $("world").focus({preventScroll: true});
+    return;
+  }
+  // Search remains available inside Resources, but never steals typed text.
+  if (e.code === 'Slash' && !e.shiftKey && !ignoreGameShortcut(e) &&
+      (!dialogOpen || $("management").open && management.view === 'resources')) {
+    e.preventDefault();
+    if (!dialogOpen) {
+      if (s.stage !== 'playing') return;
+      setPanel('build');
+    }
+    const input = $(dialogOpen ? 'resource-search' : 'build-search');
+    input.focus(); input.select();
+    return;
+  }
+  if (ignoreGameShortcut(e, dialogOpen)) return;
+  if (e.code === 'KeyR' && placing) {
+    e.preventDefault(); rotatePlacement(e.shiftKey ? -1 : 1); return;
+  }
+  if (e.shiftKey) return;
+  const panel = PANEL_SHORTCUTS[e.code], screen = MANAGEMENT_SHORTCUTS[e.code];
+  if ((panel || screen) && s.stage === 'playing') {
+    e.preventDefault();
+    $("world").focus({preventScroll: true});
+    if (panel) setPanel(openPanel === panel ? null : panel);
+    else management.open(screen);
+    if (!document.querySelector('dialog[open]')) $("world").focus({preventScroll: true});
+  } else if (SPEED_SHORTCUTS[e.code]) {
+    e.preventDefault(); setSpeed(SPEED_SHORTCUTS[e.code]);
+  } else if (e.code === 'KeyG') {
+    e.preventDefault(); $("grid").click();
+  } else if (e.code === 'KeyF') {
+    e.preventDefault();
+    if (selected) $("focus-selection").click();
+    else focus(campLocation(s));
+  } else if (e.code === 'Space' && !e.target.closest?.('button,summary,a')) {
+    e.preventDefault(); $("pause").click();
   }
 });
+
 $("town").onclick = () => {
   if (supplyRun(s, $("purchase").value)) {
     message(s.log[0]);
@@ -1089,13 +1201,17 @@ function updatePauseButton() {
 }
 updatePauseButton();
 $("pause").onclick = () => {
+  if (roadWasPaused !== null) { cancel(); return; }
   paused = !paused;
   updatePauseButton();
 };
-$("speed").onclick = () => {
-  speed = [1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4];
+function setSpeed(value) {
+  speed = value;
   $("speed").textContent = `${speed}×`;
-};
+  $("speed").setAttribute('aria-label', `Simulation speed ${speed}×. Keys 1 to 4 select speed.`);
+}
+setSpeed(speed);
+$("speed").onclick = () => setSpeed([1,4,8,16][([1,4,8,16].indexOf(speed)+1)%4]);
 $("home").onclick = () => focus(campLocation(s));
 $("river-view").onclick = () => focus(riverAccess(s.landSeed));
 $("rotate-left").onclick = () => navigation.rotate(-Math.PI / 2);
@@ -1110,7 +1226,7 @@ function askReset() {
   $("reset-dialog").showModal();
 }
 let savesWasPaused=false;
-installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:save(s)}),beforeOpen:()=>{savesWasPaused=paused;paused=true;updatePauseButton();},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
+installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:saveWithView(savesWasPaused)}),beforeOpen:()=>{if(placing)cancel();savesWasPaused=paused;paused=true;updatePauseButton();},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
 $("main-menu").onclick = () => {
   persist();
   location.href = "./menu.html";
@@ -1196,6 +1312,10 @@ function renderUtilityUI() {
     (key, i) =>
       `${Math.floor(nodes.reduce((a, n) => a + n.water[i], 0))} ${key}`,
   ).join(" · ");
+  const warnings = nodes.flatMap(n => wasteWarnings(n).map(text => `${labels.find(([id])=>id===n.id)?.[1]}: ${text}`));
+  $("tank-attention").hidden = !warnings.length;
+  $("tank-attention").textContent = `${warnings.length} waste tank${warnings.length===1?' needs':'s need'} attention`;
+  $("tank-attention").title = warnings.join('\n');
   $("utility-summary").textContent =
     `Power: ${generation.toFixed(1)} kW available / ${demand.toFixed(1)} kW requested. Battery ${stored.toFixed(1)}/${capacity} kWh. Water: ${liquids}.${sys.thirst ? " Drinking water is empty! Fetch, filter and deliver water to camp." : ""}${sys.hungry ? " Food is empty. Buy ingredients or grow and cook food." : ""}${sys.sanitationBlocked ? " Sewage storage is full. Build more treatment capacity." : ""}`;
   $("utility-links").replaceChildren();
@@ -1237,20 +1357,29 @@ function renderUtilityUI() {
           .map(([id, d]) => [id, d.name])
       : [],
   );
+  const activity = p && productionActivity(s, p, PROCESSES);
+  $("production-progress").hidden = !activity;
+  $("production-progress").value = activity?.progress || 0;
+  $("production-activity").textContent = activity?.detail || "";
+  $("production-activity").hidden = !activity;
   $("production-controls").hidden = !$("production").value;
-  $("queue-production").disabled = !node || !$("production").value;
-  $("repeat-production").hidden = !!p && PROJECTS[p.key].kind==='wild-tree';
+  $("queue-production").disabled = !node || node.enabled === false || !$("production").value;
+  const upgrade = p && $("production").value === "solar_upgrade" ? upgradeAction(p, s.operations || []) : null;
+  $("repeat-production").hidden = !!upgrade || (!!p && PROJECTS[p.key].kind==='wild-tree');
   $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : 'Start batch';
+  if (node?.enabled === false) $("queue-production").textContent = "Switch on to produce";
+  if (activity) { $("queue-production").textContent = activity.label; $("queue-production").disabled = true; }
+  if (upgrade) { $("queue-production").textContent = upgrade.label; $("queue-production").disabled ||= upgrade.disabled; }
   $("repeat-production").disabled = !node || !$("production").value;
   $("repeat-production").textContent = p?.repeat
     ? "Stop repeating"
-    : "Keep 24 in stock";
+    : `Keep ${productionTarget(p || {})} in stock`;
   $("toggle-building").hidden = !canSwitchBuilding(sys,node);
   $("toggle-building").disabled = !canSwitchBuilding(sys,node);
   $("toggle-building").textContent = node?.enabled ? "Switch off" : "Switch on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done);
   $("building-service").textContent = node
-    ? `${hasPowerService(sys,node) ? `Power ${(node.power * 100).toFixed(0)}%` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
+    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : `Power ${(node.power * 100).toFixed(0)}%` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
         (k, i) =>
           node.capacity[i]
             ? `${k}: ${node.water[i].toFixed(1)}/${node.capacity[i]}`
@@ -1338,7 +1467,7 @@ function filterBuildings() {
     const button=$(`build-${key}`);
     if(!button)continue;
     // Search the entire catalogue, even when a category was selected earlier.
-    button.hidden=query ? !`${d.name} ${d.description} ${buildingCategory(d)}`.toLowerCase().includes(query)
+    button.hidden=query ? !`${productionSearchText(d, PROCESSES, MATERIALS)} ${buildingCategory(d)}`.toLowerCase().includes(query)
       : !inBuildCategory(key,d,category);
     if(!button.hidden){count++;illustrate(button.querySelector("img"),d.asset);}
   }
@@ -1403,6 +1532,7 @@ $("people").addEventListener('close',()=>{
 });
 $("toggle-build-list").onclick = () => setPanel(null);
 filterBuildings();
+let arrivalMessageShown = false;
 function renderUI() {
   const signature = JSON.stringify([
     openPanel,
@@ -1433,15 +1563,18 @@ function renderUI() {
     selected,
     placing,
     s.log,
-    s.people.map((r) => [r.action, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), JSON.stringify(r.mind), downtimeLabel(r), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
+    s.events,
+    s.people.map((r) => [r.action, r.job, r.cargo, r.haulLoads, r.tentPhase, r.needTask?.label, r.needBlocked, Math.floor(r.work/10), JSON.stringify(r.friendships), JSON.stringify(r.mind), downtimeLabel(r), r.needTask?.elapsed>0, ...needMeters(r).map(([,value])=>Math.round(value))]),
     s.projects.map((p) => [
-      p.id, p.delivered, p.staged,
+      p.id, p.delivered, p.staged, p.pendingMaterials,
       Math.floor((p.work / PROJECTS[p.key].work) * 100),
     ]),
   ]);
   if (signature === uiSignature) return;
   uiSignature = signature;
   const active = s.stage !== "arrival" && !s.arrivalAnimating;
+  if (active && arrivalMessageShown) message("");
+  arrivalMessageShown = !active;
   if(s.arrivalAnimating) message("Our friends are arriving…");
   else if(s.stage === "arrival") message("Click clear ground to pitch your tents.");
   $("auto-buy").hidden=s.mode==='sandbox';
@@ -1496,6 +1629,7 @@ function renderUI() {
     $("supplies").children[i].querySelector("b").textContent =
       s.mode === "sandbox" && i < 3 ? "∞" : counter[1];
     const button=$("supplies").children[i],rate=trends?.[counter[0]]??null;
+    if (i === 0) { button.dataset.shortcut = 'M'; button.setAttribute('aria-keyshortcuts', 'M'); }
     const trend=button.querySelector('.resource-trend');
     const unlimited=s.mode==='sandbox'&&i<3;
     trend.textContent=unlimited?'Unlimited':formatTrend(rate,i===0);
@@ -1515,6 +1649,19 @@ function renderUI() {
   ).length;
   $("completed-panel").hidden = builtCount === 0;
   $("completed-title").textContent = `Around the village · ${builtCount} built`;
+  const roads = s.projects.filter(p => p.key === "road");
+  let roadGroup;
+  if (roads.length) {
+    roadGroup = document.createElement("details");
+    roadGroup.className = "road-project-group";
+    roadGroup.open = roadsExpanded;
+    roadGroup.ontoggle = () => { if (roadGroup.isConnected) roadsExpanded = roadGroup.open; };
+    const ready = roads.filter(p => p.work >= PROJECTS.road.work).length;
+    const summary = document.createElement("summary");
+    summary.textContent = `Roads · ${roads.length} tiles · ${ready} ready`;
+    roadGroup.append(summary);
+    $(ready === roads.length ? "completed-tasks" : "tasks").append(roadGroup);
+  }
   for (const p of s.projects) {
     if(p.natural)continue;
     const d = PROJECTS[p.key],
@@ -1523,26 +1670,25 @@ function renderUI() {
     const b = document.createElement("button");
     const done = p.work >= d.work;
     div.classList.toggle("complete", done);
-    b.innerHTML = `<img alt=""/><span>${d.name}</span><em>${done ? "✓" : Math.floor((p.work / d.work) * 100) + "%"}</em>`;
+    const construction = constructionProgress(s, p, d, requiredLoads(p.key));
+    b.innerHTML = `<img alt=""/><span>${projectLabel(p, PROJECTS)}</span><em>${done ? "✓" : construction.phase}</em>`;
     illustrate(b.querySelector("img"), d.asset);
     b.onclick = () => {
       selected = p.id;
       renderUI();
     };
     const progress = document.createElement("progress");
-    progress.max = d.work;
-    progress.value = p.work;
+    progress.max = 1;
+    progress.value = construction.value;
+    progress.setAttribute('aria-label', `${d.name}: ${construction.phase}`);
     div.append(b, progress);
     if (!done) {
       const workStatus = document.createElement("small");
       workStatus.className = "task-work-status";
-      const workers = s.people.filter(
-        (r) => r.job === p.id && r.action === "build",
-      ).length;
-      workStatus.textContent = constructionStatus(s, p, d, requiredLoads(p.key));
+      workStatus.textContent = `${construction.detail} · ${construction.workers}`;
       div.append(workStatus);
     }
-    $(done ? "completed-tasks" : "tasks").append(div);
+    (p.key === "road" ? roadGroup : $(done ? "completed-tasks" : "tasks")).append(div);
   }
   $("roster").replaceChildren();
   $("resident-detail").replaceChildren();
@@ -1585,6 +1731,8 @@ function renderUI() {
     if(r.job && r.cargo && r.haulLoads) status.textContent = `Carrying ${r.haulLoads} load${r.haulLoads===1?'':'s'} to ${r.haulStage==='storage'?'nearby storage':PROJECTS[s.projects.find(p=>p.id===r.job)?.key]?.name || 'the building site'}`;
     if(r.action==='service')status.textContent='Servicing village equipment';
     if(r.outsideWork)status.textContent=r.outsideWork.phase==='away'?'Working in town':'Commuting to/from work';
+    const jobProject = residentProject(s, r);
+    if (jobProject) status.textContent += ` · ${projectLabel(jobProject, PROJECTS)}`;
     if(r.needBlocked && !r.needTask) status.textContent += ` · ${r.needBlocked}`;
     status.className = "resident-status";
     const needs=document.createElement('div');
@@ -1612,6 +1760,21 @@ function renderUI() {
       const role=document.createElement('p');role.textContent=profile.role;
       const traits=document.createElement('p');traits.className='resident-traits';traits.textContent=profile.traits.join(' · ');
       identity.append(title,role,traits);heading.append(face,identity);detail.append(heading);
+      const locate=document.createElement('button');
+      locate.textContent='Find in village';
+      locate.setAttribute('aria-label',`Find ${r.name} in village`);
+      locate.onclick=()=>{
+        setPanel(null);
+        focus(r);
+        message(`${r.name} · ${status.textContent}`);
+      };
+      detail.append(locate);
+      if (jobProject) {
+        const viewJob = document.createElement('button');
+        viewJob.textContent = `View project · ${projectLabel(jobProject, PROJECTS)}`;
+        viewJob.onclick = () => { setPanel(null); selected = jobProject.id; focus(jobProject); uiSignature = ''; renderUI(); };
+        detail.append(viewJob);
+      }
       const tabs=document.createElement('nav');tabs.className='resident-tabs';tabs.setAttribute('aria-label','Profile sections');
       for(const label of ['Overview','Story','Skills','Relationships']){
         const tab=document.createElement('button');tab.textContent=label;tab.setAttribute('aria-pressed',String(residentTab===label));
@@ -1686,9 +1849,11 @@ function renderUI() {
   $("rain").hidden = !s.rainSeen || s.rainResolved;
   $("boards").disabled = s.wood < 2;
   $("log").replaceChildren(
-    ...s.log.map((t) => {
+    ...eventHistory(s).map((event) => {
       const li = document.createElement("li");
-      li.textContent = t;
+      const time = document.createElement("small");
+      time.textContent = `${eventTime(event.time)}${event.count > 1 ? ` · ×${event.count}` : ""}`;
+      li.append(time, document.createTextNode(event.text));
       return li;
     }),
   );
@@ -1715,14 +1880,20 @@ function renderUI() {
   const p = s.projects.find((p) => p.id === selected);
   $("selection").hidden = !p || s.stage === "evening";
   if (p) {
-    $("selected-name").textContent = PROJECTS[p.key].name;
+    $("selected-name").textContent = projectLabel(p, PROJECTS);
     $("move").hidden=!!PROJECTS[p.key].natural;
     $("copy-building").hidden = PROJECTS[p.key].natural ||
       s.mode !== "sandbox" && !PROJECTS[p.key].repeatable;
     illustrate($("selected-art"), PROJECTS[p.key].asset);
-    $("selected-state").textContent = finished(s, p.key)
-      ? "READY TO USE"
-      : `${Math.floor((p.work / PROJECTS[p.key].work) * 100)}% BUILT`;
+    const construction = constructionProgress(s, p, PROJECTS[p.key], requiredLoads(p.key));
+    $("selected-state").textContent = p.work < PROJECTS[p.key].work ? construction.phase : operationalStatus(p, s.infrastructure?.nodes[p.id], productionActivity(s,p,PROCESSES));
+    $("selected-benefit").textContent = buildingBenefit(PROJECTS[p.key], PROCESSES, COMMUNITY);
+    $("selected-benefit").hidden = !$("selected-benefit").textContent;
+    $("construction-summary").hidden = p.work >= PROJECTS[p.key].work;
+    $("construction-detail").textContent = construction.detail;
+    $("construction-workers").textContent = construction.workers;
+    $("construction-progress").value = construction.value;
+    $("construction-progress").setAttribute('aria-label', construction.phase);
     const livestock =
       p.key === "coop"
         ? " Housing: 3 hens / 3 places."
@@ -1735,6 +1906,12 @@ function renderUI() {
     $("selected-desc").textContent =
       `${PROJECTS[p.key].description} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Recipe: ${recipeText(p.key)}. Delivered ${p.delivered}/${requiredLoads(p.key)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
+    $("cancel-project").hidden = !!PROJECTS[p.key].natural || p.work > 0;
+    const cancelError = cancelProjectError(s, p.id);
+    $("cancel-project").disabled = !!cancelError;
+    $("cancel-project").title = cancelError || 'Remove this unstarted plan and return reserved supplies.';
+    $("cancel-project-note").textContent = p.work === 0 && !PROJECTS[p.key].natural ? cancelError : '';
+    $("cancel-project-note").hidden = !$("cancel-project-note").textContent;
   }
 }
 for (const group of RESOURCE_GROUPS) {
@@ -1751,6 +1928,8 @@ for (const group of RESOURCE_GROUPS) {
   if (options.children.length) $("purchase").append(options);
 }
 management = createManagement({
+  build: (key) => { setPanel(null); document.querySelector(".view-menu").open = false; startPlacement(key); },
+  beforeOpen: () => { if (placing) cancel(); },
   state: () => s,
   refresh: () => {
     uiSignature = "";
@@ -1771,6 +1950,7 @@ management = createManagement({
     updatePauseButton();
   },
 });
+$("tank-attention").onclick = () => management.open("water");
 $("supplies").onclick = (event) => {
   const button = event.target.closest("[data-panel]");
   if (button) management.open(button.dataset.panel);
@@ -1794,12 +1974,10 @@ function frame(now) {
   const dt = Math.min((now - previous) / 1000, 0.1);
   previous = now;
   if (!paused && !document.hidden) {
-    accumulator += dt * speed;
-    while (accumulator >= 0.1) {
+    accumulator = simulationFrame(accumulator, dt, speed, step => {
       previousMotion = captureMotion(s);
-      tick(s, 0.1);
-      accumulator -= 0.1;
-    }
+      tick(s, step);
+    });
   }
   wildlife.update(!paused && !document.hidden ? dt : 0);
   capybaras.update(!paused && !document.hidden ? dt : 0);
@@ -1807,6 +1985,10 @@ function frame(now) {
   const arrivalTime=Math.max(0,s.arrivalElapsed-(paused?0:0.1)+accumulator);
   drawCamp();
   syncBuildings();
+  if (!placing) entranceMarker.visible = false;
+  const selectedModel = buildings.get(selected)?.root;
+  selectionOutline.visible = !!selectedModel && !placing;
+  if (selectionOutline.visible) { selectedModel.updateWorldMatrix(true, true); selectionOutline.setFromObject(selectedModel); }
   if (!paused && !document.hidden) animalTime += dt * speed;
   for (const [id, entry] of buildings)
     if (entry.animals.length)

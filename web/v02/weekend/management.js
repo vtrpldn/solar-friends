@@ -7,6 +7,8 @@ import {coolingText} from './cold-storage.js';
 import {foodStorageText} from './food-storage.js';
 import {recipeLossText,productionSummary} from './production-accounting.js';
 import {transportCost} from './physical-trade.js';
+import {wasteWarnings, operationalStatus} from './session-ui.js';
+import {upgradeAction, productionSearchText, productionActivity} from './project-ui.js';
 import {economyControls} from './economy-controls.js';
 import {productionTarget} from './economy-policies.js';
 import {financeSummary,financeTime,financeForecast} from './finances.js';
@@ -41,6 +43,8 @@ const intros = {
     "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically.",
 };
 export function createManagement({
+  build,
+  beforeOpen = () => {},
   state,
   refresh,
   inspect,
@@ -68,6 +72,7 @@ export function createManagement({
         : `${PROJECTS[state().projects.find((p) => p.id === n.id).key].name} #${n.id}`;
   function open(next) {
     if (state().stage === "arrival") return;
+    beforeOpen();
     view = next;
     if (!dialog.open) {
       wasPaused = isPaused();
@@ -185,7 +190,7 @@ export function createManagement({
       el.append(actions);
     }
     if(view==='water' && (n.capacity[2] || n.capacity[3]) && !['wetland','biodigester','banana_treatment'].includes(n.kind)) {
-      const status=document.createElement('p');status.textContent=((n.capacity[2]>0 && n.water[2]>=n.capacity[2]-.1) || (n.capacity[3]>0 && n.water[3]>=n.capacity[3]-.1)) ? 'Tank full: service is blocked until waste is removed or treated.' : 'Sealed waste: residents can service tanks; treatment buildings automate disposal.';el.append(status);
+      const status=document.createElement('p');status.textContent=wasteWarnings(n).join(' · ') || 'Sealed waste: residents can service tanks; treatment buildings automate disposal.';el.append(status);
       const service=document.createElement('button');service.textContent='Service waste tanks';service.disabled=n.water[2]+n.water[3]<1 || state().operations?.some(o=>!o.done&&o.water&&o.site===n.id);service.onclick=()=>{notify(queueSanitation(state(),n.id)||'Waste service queued for off-site treatment.');refresh();render();};el.append(service);
       const auto=document.createElement('button');auto.textContent=n.maintainSanitation?'Maintain sanitation: on':'Maintain sanitation: off';auto.setAttribute('aria-pressed',String(!!n.maintainSanitation));auto.onclick=()=>{n.maintainSanitation=!n.maintainSanitation;refresh();render();};el.append(auto);
     }
@@ -343,7 +348,7 @@ export function createManagement({
       const reserveNote=document.createElement('p');reserveNote.textContent='Reserve estimate: two food portions per resident per day. A spending limit, not reserved cash; unavailable drivers, funds or storage may delay replenishment.';$("resource-grid").append(reserveNote);
       const delivery=document.createElement('button');delivery.textContent=s.deliveryOnly?'Purchases: supplier delivery':'Purchases: resident pickup';delivery.setAttribute('aria-pressed',String(!!s.deliveryOnly));delivery.onclick=()=>{s.deliveryOnly=!s.deliveryOnly;refresh();render();};$("resource-grid").append(delivery);
       const freight=document.createElement('p');freight.textContent=s.delivery?`${s.delivery.status||'Supplier delivery on its way'} · ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:s.deliveryOnly?`Supplier delivery: R$${transportCost(s).toFixed(2)} freight, up to 5 tonnes / 12 m³. About six hours plus travel; no resident driver needed.`:'Resident pickups use the village cars and their cargo limits.';$("resource-grid").append(freight);
-      const search = $("resource-search").value.toLowerCase(), committed=committedMaterials(s);
+      const search = $("resource-search").value.trim().toLowerCase(), committed=committedMaterials(s);
       for (const group of RESOURCE_GROUPS) {
         const matches = group.ids.filter((id) =>
           MATERIALS[id].name.toLowerCase().includes(search),
@@ -358,7 +363,7 @@ export function createManagement({
           const b = document.createElement("button");
           b.className = "stock-card";
           b.title=materialUnitText(id);
-          b.innerHTML = `${resourceIcon(id)}<strong>${Math.floor(materialCount(s, id))}</strong><span>${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><small>${committed[id]?`${committed[id]} committed to projects/jobs · `:""}${item.quantity ? "Trade in town" : "Made in the village"}</small>`;
+          b.innerHTML = `${resourceIcon(id)}<span class="stock-name">${item.name.charAt(0).toUpperCase() + item.name.slice(1)}</span><strong>${Math.floor(materialCount(s, id))}<small>available</small></strong><small class="stock-detail">${committed[id]?`${committed[id]} committed to projects/jobs · `:""}${item.quantity ? "Trade in town" : "Made here"}</small>`;
           illustrateResources(b);
           b.disabled = !item.quantity;
           b.classList.toggle("active", $("purchase").value === id);
@@ -383,6 +388,10 @@ export function createManagement({
           ([, d]) => d.kind === PROJECTS[p.key].kind,
         );
         if (!recipes.length || p.work < PROJECTS[p.key].work) continue;
+        const searchTerms = [PROJECTS[p.key].name, ...recipes.flatMap(([, recipe]) => [
+          recipe.name, ...Object.keys(recipe.output).map((id) => MATERIALS[id].name),
+        ])];
+        if (search && !searchTerms.some((text) => text.toLowerCase().includes(search))) continue;
         const el = document.createElement("article");
         el.className = "production-site";
         const img = document.createElement("img");
@@ -396,6 +405,7 @@ export function createManagement({
         const op = (s.operations || []).find((o) => o.site === p.id && !o.done && !o.water);
         choice.value = p.repeat || recipeChoices.get(p.id) || recipes[0][0];
         choice.onchange = () => recipeChoices.set(p.id, choice.value);
+        const activity = productionActivity(s, p, PROCESSES);
         const status = document.createElement("p");
         status.textContent =
           (p.readyAt>s.time ? `Growing: ${Math.ceil((p.readyAt-s.time)*.45)} game minutes remaining · faster at higher speed` : op ? op.status || "Resident job queued" : p.productionStatus) ||
@@ -405,9 +415,13 @@ export function createManagement({
               ? `Keeping ${productionTarget(p)} in stock`
               : "Ready for a job");
         if(op && op.phase!=='growing' && !s.people.some(r=>r.operation===op.id && !r.needTask && !r.tentPhase))status.textContent=`${op.status?.startsWith('Waiting')?op.status:'Waiting for an available resident'} · residents may be resting or doing higher-priority work`;
+        if (activity) status.textContent = activity.detail;
+        const node = s.infrastructure.nodes[p.id];
+        const availability = operationalStatus(p,node,null);
+        if (availability !== 'Ready to use') status.textContent = `${availability}${activity ? ' · ' + activity.detail : ''}`;
         const start = document.createElement("button");
-        start.textContent = "Start batch";
-        start.disabled = !!op || s.stage !== "playing";
+        start.textContent = node?.enabled === false ? 'Switch on to produce' : activity?.label || "Start batch";
+        start.disabled = node?.enabled === false || !!op || s.stage !== "playing";
         start.onclick = () => {
           notify(
             queueProduction(s, p.id, choice.value) ||
@@ -429,14 +443,29 @@ export function createManagement({
         const describe=()=>{const r=PROCESSES[choice.value];repeat.hidden=targetLabel.hidden=!!r.installation;start.disabled=!!op||(r.installation&&!!p.coldStorage)||s.stage!=='playing';start.textContent=r.installation?(p.coldStorage?'Cold storage installed':'Install cold storage'):'Start batch';recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||'Building upgrade'}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${biologyText(choice.value)}${r.installation?' · 40 food units, 0.08 kW average cooling load; ages food at one-quarter speed while powered.':''}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
         choice.onchange=()=>{recipeChoices.set(p.id,choice.value);describe();};describe();
         el.append(img,name,locate,status,choice,recipeInfo,start);
+        if (activity) { const bar=document.createElement('progress');bar.max=1;bar.value=activity.progress;bar.setAttribute('aria-label', `Production at ${name.textContent}`);el.append(bar); }
         if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);
-        else {start.disabled=!!p.solarUpgrade||!!op;start.textContent=p.solarUpgrade?'Solar upgrade installed':'Install solar upgrade';}
+        else {const action=upgradeAction(p,s.operations||[]);start.disabled=node?.enabled===false||action.disabled||!!op;start.textContent=action.label;}
         if(p.coldStorage){const cooling=document.createElement('button');cooling.textContent=p.coolingEnabled===false?'Cold storage: off':'Cold storage: on';cooling.setAttribute('aria-pressed',String(p.coolingEnabled!==false));cooling.onclick=()=>{p.coolingEnabled=p.coolingEnabled===false;refresh();render();};el.append(cooling);}
         $("production-sites").append(el);
       }
       if (!$("production-sites").children.length)
         $("production-sites").textContent =
-          "Build a garden, workshop or other production site to start making supplies here.";
+          search
+            ? "No completed production sites match this search. Try another resource or building name."
+            : "Build a garden, workshop or other production site to start making supplies here.";
+      if (search) {
+        const producers = Object.entries(PROJECTS).filter(([,d]) => !d.natural &&
+          Object.values(PROCESSES).some(recipe => recipe.kind === d.kind) &&
+          productionSearchText(d, PROCESSES, MATERIALS).includes(search));
+        for (const [key, definition] of producers) {
+          const button = document.createElement('button');
+          button.textContent = `Build producer · ${definition.name}`;
+          button.disabled = s.mode !== 'sandbox' && !definition.repeatable && s.projects.some(p => p.key === key);
+          button.onclick = () => { dialog.addEventListener('close', () => build(key), {once:true}); dialog.close(); };
+          $("production-sites").append(button);
+        }
+      }
     } else {
       $("network-nodes").replaceChildren();
       for (const n of nodes) {
@@ -454,6 +483,7 @@ export function createManagement({
     get view() {
       return view;
     },
+    get resumePaused() { return wasPaused; },
     get isOpen() {
       return dialog.open;
     },
