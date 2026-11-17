@@ -4,7 +4,7 @@
     "web/v02/library/animal-motion.js": "5c294f45e8fde03337112d6f5de6a332c740daf9f1dafd56725fd39921e933a2",
     "web/v02/library/camping.js": "24999f1ce7ceb0aaa70bb5815a02ee9443303d4d148a9e7eb950a77ff5f7572b",
     "web/v02/library/capybara.js": "913afc841e8f1bc7abb03d339b2417abd7c508a2405a40ca178bc23179e5b97f",
-    "web/v02/library/catalog.js": "cc82882929ed2f6d12d4f8c3fb0ee0c1d0d5e214b04bb7cb98c5fc9b948ec6e4",
+    "web/v02/library/catalog.js": "9454984531a7eaadfdab9d72d13895aa5ff74f47ed926be0bd0a126d24c6644d",
     "web/v02/library/chicken-coop.js": "10874c2e3c4cd5ef45c50fa11cc7a1e57162cbe05e8c4301e6af72296dbee0ec",
     "web/v02/library/community-defs.js": "929dac21c6c4aba3c44c6d791c191a62f6a0d02d66e1585de1e7063f604d44e6",
     "web/v02/library/community.js": "2671a0b367d3a8e1e9e4dff72ae3845bee05226b0cc4c8e1099992d2f2b461ab",
@@ -175,7 +175,7 @@
     "inventory-ownership-and-material-accounting.svg": "f5fe00a34fb5d66ecb0c9df93e6ea018f72707370e332d21faceef5a8fa26b47",
     "purchases-sales-and-physical-transport.svg": "05ae6a865088c27adbe5da38c1c131cdd70741dcb18678e466688c319f9fb28c",
     "cash-commitments-and-forecasts.svg": "1822f90d40cd454dec0f5a087b2185da8e0e4db0667e3fc55f9f8647f5f429b4",
-    "optional-outside-employment.svg": "3e5340d82305939a8332b577c27de9ac678d45ee33ec35527d3d4f4d3aa6045a",
+    "optional-outside-employment.svg": "dc1d63ed7bdbb68e59c79412836a0ddcd10ce4eb16bd9e6a2f918b9905ff7e46",
     "asset-maintenance-and-replacement.svg": "4f242b4dd6efcd9f2c604bbc58378df3f485c8cf4d044b5439724c91901cddef",
     "save-migration-and-recovery.svg": "2316ecd0388925eeffbb0f3f7be2c3f1474c61505d1e9fc106fc7e737bd90148",
     "presentation-inspection-and-ambient-life.svg": "b3050d72e8e3f2f5275250a0aa199dba5e1bb6362dd8fed616ffbd5c4b84b33a"

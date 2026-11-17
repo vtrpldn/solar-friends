@@ -68,6 +68,7 @@ for (const id of RESIDENT_IDS) {
     !catalog.getObjectByName("watering-can"),
     `${id}: no hidden can in static preview`,
   );
+  assert(!catalog.getObjectByName("woodcutting-axe"), `${id}: no hidden axe in static preview`);
   const previewBounds = new THREE.Box3().setFromObject(catalog, true);
   assert(
     Math.abs(previewBounds.max.y - neutral.max.y) < 0.02,

@@ -1900,7 +1900,7 @@ export function createAsset(id, variationSeed = null) {
   }
   if (g.rig) {
     // Static catalog previews omit rehearsal-only tools before material batching.
-    for (const tool of [g.rig.cargo, g.rig.can]) {
+    for (const tool of [g.rig.cargo, g.rig.can, g.rig.axe]) {
       tool.traverse((o) => { if (o.isMesh) o.geometry.dispose(); });
       tool.removeFromParent();
     }

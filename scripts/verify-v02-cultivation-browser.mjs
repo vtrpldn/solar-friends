@@ -49,7 +49,7 @@ try{
  const oldCrop=structuredClone(s);oldCrop.time=9*3200;Object.assign(oldCrop.projects.find(p=>p.id===field.id).cultivation.beds[0],{crop:'greens',stage:'harvestable',growth:1,ripeAt:0});
  await expired.addInitScript(({key,value})=>localStorage.setItem(key,value),{key:SANDBOX_SAVE,value:save(oldCrop)});
  await expired.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await expired.waitForSelector('#build-field',{state:'attached'});
- await expired.locator('#completed-tasks button').filter({hasText:'Cultivated field'}).first().evaluate(e=>e.click());await expired.waitForSelector('#farm-bed');
+ await expired.locator('#completed-tasks button').filter({hasText:'Cultivated field'}).first().evaluate(e=>e.click());await expired.locator('#farm-inspect-bed').click();await expired.waitForSelector('#farm-bed');
  assert.equal(await expired.locator('.farm-stage').innerText(),'Harvest expired');
  assert.match(await expired.locator('.farm-estimate').innerText(),/Recoverable harvest now.*0.0 kg/s);
  assert.equal(await expired.locator('[data-farm-action="harvest"]').count(),0);

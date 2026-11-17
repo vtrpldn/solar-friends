@@ -24,3 +24,8 @@ Integration decisions:
 - The compact status UI stays inside existing counters. Guide/Lenses controls clear the expanded clock.
 
 Validation, deployment identity and the requested timed sessions will be recorded after their actual completion. The one-hour playtest starts only after production identity is confirmed; the separate performance hour starts after that playtest.
+
+Integration regressions found and corrected before publication:
+
+- Static resident catalog previews now discard the hidden chopping axe, just as they already discard cargo and watering cans. The existing geometry budget and chopping animation tests pass without relaxing their limits.
+- Expired-crop browser inspection now enters the individual-bed view introduced by whole-field management. The full field placement/configuration/reload check passes after that adjustment.
