@@ -51,8 +51,9 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
         if(n.enabled&&n.demand>0&&n.power<.99)tone='bad';
         detail=`${n.enabled?'Enabled':'Switched off'} · demand ${(n.demand||0).toFixed(2)} kW · ${n.demand>0?`${Math.round(n.power*100)}% supplied`:'no current demand'}${n.battery?` · battery ${n.charge.toFixed(1)}/${n.battery} kWh`:''}${n.generation?` · generating ${n.generation.toFixed(2)} kW`:''}`;
       }else {
+        const waste=id==='sanitation'||['greywater','sewage'].includes(liquid);
         const full=indices.some(i=>n.capacity[i]>0&&n.water[i]>=n.capacity[i]-.01),empty=indices.every(i=>!n.water[i]);
-        tone=!n.enabled?'muted':id==='sanitation'?(full?'bad':'good'):(empty?'warn':'good');
+        tone=!n.enabled?'muted':waste?(full?'bad':'good'):(empty?'warn':'good');
         detail=indices.filter(i=>n.capacity[i]).map(i=>`${pretty(LIQUIDS[i])}: ${n.water[i].toFixed(1)}/${n.capacity[i]}`).join(' · ');
       }
       mark({...n,projectId:n.id>0?n.id:undefined},n.id===0?'Camp':n.id===-1?'River':PROJECTS[projects.find(p=>p.id===n.id)?.key]?.name||pretty(n.kind),detail,tone,2);
@@ -84,7 +85,9 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
       if(produces||consumes||inputs.length){
         const role=[produces?'Potential producer':'',consumes?'Consumer':'',inputs.length?`Upstream source: ${[...new Set(inputs)].map(pretty).join(', ')}`:''].filter(Boolean).join(' / ');
         const tone=produces?'good':consumes?'warn':'info';
-        projectMark(p,`${role} · ${done?operationText(p):'Under construction'}`,tone);lines.push({points:[s.stock,p],tone});
+        projectMark(p,`${role} · ${done?operationText(p):'Under construction'}`,tone);
+        // Upstream trees remain marked without drawing a fan of unrelated-material links.
+        if(produces||consumes)lines.push({points:[s.stock,p],tone});
       }
     }
   }

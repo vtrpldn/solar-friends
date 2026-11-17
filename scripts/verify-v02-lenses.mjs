@@ -21,6 +21,10 @@ assert.equal(lensData(s,'construction').marks.length,0,'completed work disappear
 assert(lensData(s,'access').lines[0].points.length===3,'queued walking path includes resident origin');
 const fresh=lensData(s,'water',{liquid:'fresh'}),sewage=lensData(s,'water',{liquid:'sewage'});
 assert.notDeepEqual(fresh,sewage,'liquid filters change marks and pipes');
+assert(sewage.marks.some(m=>m.projectId===waste.id&&m.tone==='bad'),'full sewage storage is a warning in the water lens too');
+assert(sewage.marks.some(m=>m.label==='Camp'&&m.tone==='good'),'empty waste storage is healthy');
+assert(lensData(s,'water',{liquid:'greywater'}).marks.some(m=>m.label==='Camp'&&m.tone==='good'));
+assert(!lensData(s,'chains',{material:'wood'}).lines.some(l=>l.tone==='info'),'upstream resources stay marked without cluttering the map with stock lines');
 assert(lensData(s,'resources').marks.length>10);
 assert(lensData(s,'chains',{material:'wood'}).marks.some(m=>m.detail.includes('Upstream source: logs')),'timber traces back to raw wood sources');
 const tree=s.projects.find(p=>PROJECTS[p.key].kind==='wild-tree');tree.felled=true;

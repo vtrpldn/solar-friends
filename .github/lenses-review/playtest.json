@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-17",
+  "method": "Interactive playtest in the in-app browser, using the unsaved utilities preview with interactions, noon lighting and land seed 42. No player save was changed.",
+  "lenses": [
+    {
+      "lens": "Power",
+      "observed": "Selected Workshop from Find on map, switched it off, observed the marker/list become Switched off, and switched it back on."
+    },
+    {
+      "lens": "Water",
+      "observed": "Exercised drinking water, irrigation, greywater and sewage filters. Compared inventories. Fixed empty wastewater tanks being marked as shortages; retested healthy empty sewage and drinking-water shortages."
+    },
+    {
+      "lens": "Construction",
+      "observed": "Empty state initially. Placed a Gathering place through the build catalog; it appeared with Supplies 0/3 and 0 in transit.",
+      "limit": "Did not wait for manual construction completion; removal of completed projects is covered by the data regression check."
+    },
+    {
+      "lens": "Resources",
+      "observed": "88 deposits and trees listed, with distinct remaining quantities for deposits. Selected an Embauba and queued cutting through the normal inspector."
+    },
+    {
+      "lens": "Residents",
+      "observed": "Five resident markers, with Iara and Bento flagged at 10% energy. Selecting Iara centered the camera on her. Live activities later changed to rest/carry."
+    },
+    {
+      "lens": "Access & hauling",
+      "observed": "Distances labeled as straight-line estimates. At 1x, path count changed from zero to five and a carrying resident displayed a path. Supply focus and resident activities matched the scene."
+    },
+    {
+      "lens": "Food",
+      "observed": "Selected the idle Vegetable garden and started a batch. The lens updated from No job queued to Plant and harvest vegetables queued. Shared food counts were displayed."
+    },
+    {
+      "lens": "Sanitation",
+      "observed": "Toilet displayed sewage 10/16 and greywater 0/16, matching its building inspector. Empty waste stores showed available space."
+    },
+    {
+      "lens": "Work",
+      "observed": "Garden, animal and queued felling jobs displayed with assigned-worker counts. Resident needs remained visible."
+    },
+    {
+      "lens": "Land & slope",
+      "observed": "Gentle, moderate and steep colors rendered on seeded relief. Fixed hover being limited to sample centers; retested multiple points within one colored tile and saw consistent elevation/slope details."
+    },
+    {
+      "lens": "Comfort",
+      "observed": "House showed meals 43 cells away, usable washing 13 cells away, toilet 0 cells away and leisure 6 cells away. Its inspector confirmed the home had no fresh water, so washing correctly referred elsewhere."
+    },
+    {
+      "lens": "Ecology",
+      "observed": "Cutting queued through the resource inspector changed the selected tree from Standing tree to Marked for felling, with a yellow marker."
+    },
+    {
+      "lens": "Production chains",
+      "observed": "Switched between timber and ingredients; upstream raw-wood sources and direct consumers/producers changed. Fixed the 81-line timber fan: all 82 locations remain, with one direct shared-stock connection in this fixture."
+    }
+  ],
+  "remaining_observations": [
+    "The seeded simulation at 4x caused browser input timeouts. Normal 1x running and paused interactions worked. The cause was not isolated; no high-speed performance claim is made.",
+    "This is a targeted lens playtest, not a full-game endurance test."
+  ],
+  "checks": [
+    "Data regression script passed, including full wastewater storage, nonmutating reads, urgent needs, completion removal, filters and upstream markers.",
+    "Site build passed.",
+    "No browser error logs were returned at the end of the interactive pass."
+  ],
+  "screenshots": [
+    "playtest-water.jpg",
+    "playtest-terrain.jpg",
+    "playtest-chains.jpg"
+  ]
+}
