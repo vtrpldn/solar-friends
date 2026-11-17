@@ -1643,3 +1643,11 @@ header > .time { grid-column: 3; justify-self: end; }
 .crafting-recipe h4, .crafting-recipe p { margin: 0; }
 .crafting-recipe button { margin-top: auto !important; }
 .crafting-recipe p, .crafting-crew p { font-size: 12px; line-height: 1.5; }
+
+/* Production cards keep controls in the content column instead of squeezing
+   auto-placed buttons into the thumbnail column. */
+.production-site { grid-template-columns: 60px minmax(0, 1fr); }
+.production-site > :not(img) { grid-column: 2; min-width: 0; }
+.production-site > button { justify-self: start; }
+.production-site > label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.production-site > label > select { width: 100%; max-width: 100%; }

@@ -21,3 +21,11 @@ Geometry uses metres, two metres per cell, the existing warm palette, faceted fo
 Run `node scripts/verify-v02-library.mjs` and `node scripts/verify-v02-models.mjs` for inventory coverage, finite geometry, ground bounds, geometry-preserving batching, serialization, all four camera projections and edit history. `verify-v02-exports.mjs` checks the five existing exported reference sheets, not new PNG exports.
 
 See [art revision 02](../../../assets/art-direction/v02/art-revision-02.md) for proportions, species references and whole-map shadows. Run `node scripts/verify-v02-art-revisions.mjs` and `node scripts/verify-v02-consistency.mjs` for the corresponding geometry gates.
+
+## Local gathering patches
+
+The **Gathering** category contains five low-poly subjects and their gathered states: fruit thickets, fallen wood, bamboo, forage grasses and loose stones. They share the existing material pool, metre scale and shadows; no ground platforms or raster textures are added. The regular game generates biome-appropriate patches and uses resident production, tending animation and physical return hauling. Supplies enter the existing ingredients, raw wood, bamboo, fodder and stone inventories.
+
+Fruit, bamboo and grass recover after 30, 365 and 14 game days respectively. Fallen wood and loose stones have finite quantities. These are authored game estimates, not botanical yield claims. Select a patch and choose **Gather resources**, or find it in Resources; repeat-to-stock-target uses the existing production policy. Old villages gain patches in free locations on their next simulation tick without moving existing objects.
+
+Validation: `node scripts/verify-v02-gathering.mjs` covers three-biome placement, additive migration, resident labor, physical hauling, finite supply, cooldowns, duplicate jobs and saves. Library/model/consistency checks cover all ten models. Initial gallery silhouettes were reviewed in the in-app browser; subsequent branch scattering and bamboo ground-clearance corrections have geometry verification only. A regular-game visual gathering check remains pending because browser control became unavailable during review.

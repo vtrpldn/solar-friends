@@ -7,7 +7,7 @@ const built=(s,key,x,z)=>{const p={id:s.nextId++,key,x,z,work:PROJECTS[key].work
 const s=fresh(),pol=economyPolicies(s);s.materials.bamboo=100;pol.sales.bamboo={enabled:true,keep:24,above:48,daily:24};
 assert.equal(salePreview(s,'bamboo',MATERIALS,PROCESSES,materialCount).quantity,24);automaticSales(s);assert.equal(s.materials.bamboo,76);assert.equal(s.money,2000,'exports reserve goods rather than minting cash');automaticSales(s);assert.equal(s.materials.bamboo,76,'daily cap');
 s.time=3200;automaticSales(s);assert.equal(s.materials.bamboo,52,'daily cap resets');const restored=restore(save(s));assert(restored);automaticSales(restored);assert.equal(restored.money,s.money,'reload cannot duplicate daily sales');
-s.materials.food=25;pol.sales.food={enabled:true,keep:0,above:0,daily:0};automaticSales(s);assert.equal(s.materials.food,25,'population food reserve protected');
+s.materials.food=25;s.materials.meals=0;pol.sales.food={enabled:true,keep:0,above:0,daily:0};automaticSales(s);assert.equal(s.materials.food,25,'population food reserve protected');
 const g=built(s,'garden',23,-4);g.repeat='vegetables';g.stockTarget=60;s.materials.seedlings=8;pol.sales.seedlings={enabled:true,keep:0,above:0,daily:0};automaticSales(s);assert.equal(s.materials.seedlings,8,'protect next batches before selling');
 const bad=JSON.parse(save(s));bad.economyPolicies.sales.bamboo.keep=-1;assert.equal(restore(JSON.stringify(bad)),null);const invalid=JSON.parse(save(s));invalid.projects[0].stockTarget=-1;assert.equal(restore(JSON.stringify(invalid)),null);
 // A real production job must progress alongside resident construction, not only after it.

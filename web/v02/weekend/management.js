@@ -1,10 +1,11 @@
+import {gatheringStatus} from './gathering.js';
 import {STARTING_ENDOWMENT} from './economy-reference.js';
 import {supplierAvailable} from './supplier-stock.js';
 import {materialLedger,materialReconciliation} from './material-ledger.js';
 import {marketTerms} from './local-market.js';
 import {inventoryOwnership} from './economy-inventory.js';
 import {upkeep,upkeepText,serviceParts} from "./asset-upkeep.js";
-import {biologyText} from "./biological-production.js";
+import {biologyText,CROP_CARE,IRRIGATION_POLICIES} from "./biological-production.js";
 import {materialUnitText,quantityText,physicalUnit} from "./material-measures.js";
 import {tripEstimateText,GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
 import {coolingText} from './cold-storage.js';
@@ -475,6 +476,13 @@ export function createManagement({
         illustrate(img, PROJECTS[p.key].asset);
         const name = document.createElement("strong");
         name.textContent = `${PROJECTS[p.key].name} #${p.id} (${p.x}, ${p.z})`;
+        if(Object.values(CROP_CARE).some(c=>c.kind===PROJECTS[p.key].kind)){
+          const irrigationLabel=document.createElement('label');irrigationLabel.textContent='Crop irrigation ';
+          const irrigation=document.createElement('select');irrigation.setAttribute('aria-label',`Irrigation for ${PROJECTS[p.key].name} #${p.id}`);
+          for(const [value,text] of Object.entries(IRRIGATION_POLICIES)){const option=document.createElement('option');option.value=value;option.textContent=text;irrigation.append(option);}
+          irrigation.value=p.irrigationPolicy||'balanced';irrigation.onchange=()=>{p.irrigationPolicy=irrigation.value;refresh();render();};irrigationLabel.append(irrigation);el.append(irrigationLabel);
+          const hint=document.createElement('p');hint.textContent='Change during growth: conserving saves stored water but leaves less drought buffer. Rain-fed crops rely on rain; dry soil slows or stops growth. Residents still handle harvesting.';el.append(hint);
+        }
         if(p.soilFertility!==undefined){const soil=document.createElement("p");soil.textContent=`Soil fertility: ${Math.round(p.soilFertility*100)}%. Residents apply stored compost below 70%; each application restores 30 percentage points. ${s.upkeep?.jobs.find(j=>j.target===p.id&&j.soil)?.status||""}`;el.append(soil);}
         if(p.animalHealth!==undefined){const care=document.createElement("p");care.textContent=`Animal health: ${Math.round(p.animalHealth)}%. ${p.careUntil>s.time?"Feed and water supplied":"Care due: residents need fodder and drinking water"}.`;el.append(care);}
         const choice = document.createElement("select");
@@ -495,6 +503,7 @@ export function createManagement({
               : "Ready for a job");
         if(op && op.phase!=='growing' && !s.people.some(r=>r.operation===op.id && !r.needTask && !r.tentPhase))status.textContent=`${op.status?.startsWith('Waiting')?op.status:'Waiting for an available resident'} · residents may be resting or doing higher-priority work`;
         if (activity) status.textContent = activity.detail;
+        else if(gatheringStatus(s,p))status.textContent=gatheringStatus(s,p);
         const node = s.infrastructure.nodes[p.id];
         const availability = operationalStatus(p,node,null);
         if (availability !== 'Ready to use') status.textContent = `${availability}${activity ? ' · ' + activity.detail : ''}`;
@@ -524,9 +533,9 @@ export function createManagement({
         };
         const locate=document.createElement('button');locate.textContent=`Find in village · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores`;locate.onclick=()=>{dialog.close();inspect(p.id);};
         const recipeInfo=document.createElement('p');
-        const describe=()=>{const r=PROCESSES[choice.value];repeat.hidden=targetLabel.hidden=!!r.installation || !!r.equipmentRepair;const error=s.stage!=='playing'?'Choose a campsite first.':productionBlocker(s,p.id,choice.value);start.disabled=!!error;disabledReason(start,error);start.textContent=node?.enabled===false?'Switch on to produce':r.installation?(p.coldStorage?'Cold storage installed':'Install cold storage'):activity?.label||'Start batch';recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(', ')||(r.equipmentRepair?'Restore one tool worth of condition':'Building upgrade')}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${biologyText(choice.value)}${['vegetables','greenhouse'].includes(choice.value)&&!p.starterSeedlingsUsed&&!p.harvestCount?' · First planting seeds included in the building bill.':''}${r.installation?' · 40 food units, 0.08 kW average cooling load; ages food at one-quarter speed while powered.':''}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
+        const describe=()=>{const r=PROCESSES[choice.value];repeat.hidden=targetLabel.hidden=!!r.installation || !!r.equipmentRepair;const error=s.stage!=='playing'?'Choose a campsite first.':productionBlocker(s,p.id,choice.value);start.disabled=!!error;disabledReason(start,error);start.textContent=node?.enabled===false?'Switch on to produce':r.installation?(p.coldStorage?'Cold storage installed':'Install cold storage'):activity?.label||(r.gathering?'Gather resources':'Start batch');recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(', ')||(r.equipmentRepair?'Restore one tool worth of condition':'Building upgrade')}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}${biologyText(choice.value)}${['vegetables','greenhouse'].includes(choice.value)&&!p.starterSeedlingsUsed&&!p.harvestCount?' · First planting seeds included in the building bill.':''}${r.installation?' · 40 food units, 0.08 kW average cooling load; ages food at one-quarter speed while powered.':''}${r.preservedDays?` · Dried provisions keep for ${r.preservedDays.meals} game days from completion; extra ingredients and work are required.`:''}`;};
         choice.onchange=()=>{recipeChoices.set(`${view}:${p.id}`,choice.value);target.value=productionTarget(p)*targetUnit().factor;target.step=targetUnit().factor;target.max=10000*targetUnit().factor;targetLabel.firstChild.textContent=`Stock target (${targetUnit().unit}) `;if(!p.repeat)repeat.textContent=`Keep ${targetResource()?quantityText(targetResource(),productionTarget(p)):productionTarget(p)} in stock`;describe();};describe();
-        el.append(img,name,locate,status,choice,recipeInfo,start);
+        el.prepend(img,name);el.append(locate,status,choice,recipeInfo,start);
         if (activity) { const bar=document.createElement('progress');bar.max=1;bar.value=activity.progress;bar.setAttribute('aria-label', `Production at ${name.textContent}`);el.append(bar); }
         if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);
         else {const action=upgradeAction(p,s.operations||[]);start.disabled ||= node?.enabled===false||action.disabled||!!op;start.textContent=action.label;}

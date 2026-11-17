@@ -1,6 +1,9 @@
 import {ensureCultivation} from './cultivation.js';
 import {cultivationSignature,createCultivationModel} from './cultivation-models.js';
 import {installFarmingUI} from './cultivation-ui.js';
+import {GATHERING,gatheringStatus} from './gathering.js';
+import {returnPickup,pickupFare} from './physical-trade.js';
+import {foodPortions} from './food-storage.js';
 import {supplierError} from './supplier-stock.js';
 import {activeTrips} from "./trip-state.js";
 import {setOutsideWork,outsideWorkText} from "./outside-work.js";
@@ -592,6 +595,7 @@ function syncBuildings() {
     const farmSignature=cultivation&&cultivationSignature(p,s);
     let id =
       p.key === "gathering" && fraction < 0.35 ? "produce-crates" : def.asset;
+    if(GATHERING[p.key]&&(p.readyAt>s.time||(GATHERING[p.key].gatherLimit&&(p.extracted||0)>=GATHERING[p.key].gatherLimit)))id+='-gathered';
     if (p.key === "goat-pasture-empty" && p.stocked) id = "goat_pasture";
     if (
       fraction < 1 &&
@@ -1439,7 +1443,7 @@ function renderUtilityUI() {
   $("queue-production").disabled = !node || node.enabled === false || !$("production").value;
   const upgrade = p && $("production").value === "solar_upgrade" ? upgradeAction(p, s.operations || []) : null;
   $("repeat-production").hidden = !!upgrade || (!!p && PROJECTS[p.key].kind==='wild-tree');
-  $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : 'Start batch';
+  $("queue-production").textContent = p && PROJECTS[p.key].kind==='wild-tree' ? 'Cut this tree' : p && PROJECTS[p.key].natural ? 'Gather resources' : 'Start batch';
   if (node?.enabled === false) $("queue-production").textContent = "Switch on to produce";
   if (activity) { $("queue-production").textContent = activity.label; $("queue-production").disabled = true; }
   if (upgrade) { $("queue-production").textContent = upgrade.label; $("queue-production").disabled ||= upgrade.disabled; }
@@ -1469,6 +1473,7 @@ function renderUtilityUI() {
     : "";
   if(p){const status=buildingOperatingStatus(s,p);$("building-service").textContent=`${status.state}: ${status.reason} · ${$("building-service").textContent}`;}
   const recipe=PROCESSES[$("production").value];
+  if(p&&recipe?.gathering)$("building-service").textContent+=` · ${gatheringStatus(s,p)}`;
   if(p && recipe?.deposit) $("building-service").textContent+=` · Deposit: ${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} remaining`;
   $("building-service").hidden = !$("building-service").textContent.trim();
 }
@@ -1683,7 +1688,7 @@ function renderUI() {
   const trends=resourceTrends(s.time,resourceSnapshot(s));
   const counters = [
     ["money", `R$${s.money.toFixed(2)}`, "Savings", "finances"],
-    ["meals", `${s.materials.meals||0} + ${s.materials.food||0}`, "Meals + ingredients", "resources"],
+    ["meals", `${foodPortions(s)}`, "Food portions", "resources"],
     [
       "power",
       `${Object.values(s.infrastructure?.nodes || {}).reduce((a,n)=>a+(n.charge||0),0).toFixed(1)}`,
@@ -1929,12 +1934,12 @@ function renderUI() {
   }
   const purchase = MATERIALS[$("purchase").value];
   $("town").textContent =
-    `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · R$${(purchase.price + transportCost(s)).toFixed(2)} incl. transport`;
+    `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · R$${(purchase.price + pickupFare(s)).toFixed(2)} ${returnPickup(s)?"· existing trip, no extra fuel":"incl. transport"}`;
   const townHour=((540+s.time*.45)/60)%24;
   const supplierIssue=(townHour<7||townHour>=18) ? "Town opens at 07:00; pickups stop departing at 18:00. Planned construction and food pickups retry automatically." : supplierError(s,{[$("purchase").value]:purchase.quantity},MATERIALS);
   disabledReason($("town"), supplierIssue || (s.stage !== "playing" ? "Choose a campsite first." : "Wait for an available vehicle or delivery and enough uncommitted savings for supplies and transport."));
   $("town").disabled =
-    !!supplierIssue ||     (s.deliveryOnly?!!s.delivery:(!!s.trip&&!!s.secondTrip)) || spendableMoney(s) < purchase.price + transportCost(s) || s.stage !== "playing";
+    !!supplierIssue ||     (s.deliveryOnly?!!s.delivery:(!!s.trip&&!!s.secondTrip&&!returnPickup(s))) || spendableMoney(s) < purchase.price + pickupFare(s) || s.stage !== "playing";
   $("inventory").textContent = Object.keys(MATERIALS)
     .map((id) => materialText(id, materialCount(s, id)))
     .join(" · ");
@@ -2270,7 +2275,7 @@ function frame(now) {
       r.action === "produce" &&
       PROCESSES[s.operations.find((o) => o.id === r.operation)?.recipe];
     const tending =
-      production &&
+      production && (production.gathering ||
       [
         "garden",
         "greenhouse",
@@ -2280,7 +2285,7 @@ function frame(now) {
         "goat_pasture",
         "compost",
         "apiary",
-      ].includes(production.kind);
+      ].includes(production.kind));
     const visit=r.needTask;
     if(visit?.private && visit.elapsed>0 && !r.walk.length) {
       const site=s.projects.find(p=>p.id===visit.site);

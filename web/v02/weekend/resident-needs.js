@@ -1,4 +1,4 @@
-import {foodChange,addOrganicWaste} from './food-storage.js';
+import {foodPortions,eatMeal} from './food-storage.js';
 import {profileFor} from './resident-personality.js';
 import {committed, conversationPartners, conversationFor, finishConversation, finishPersonalTime} from './resident-mind.js';
 import { useWater } from './infrastructure.js';
@@ -43,7 +43,7 @@ function assign(s,r,kind,spot,details={}) {
 // repeated sleep/exit loops while the uncollected goods remain safely at site.
 export function chooseNeed(s,r,i,api) {
  const physical=['hunger','bladder','bowels'];
- if(r.needTask && !physical.includes(r.needTask.kind) && physical.some(k=>ensureNeeds(r)[k]<10&&(k!=='hunger'||s.materials.food+s.materials.meals>0)))cancelNeed(s,r);
+ if(r.needTask && !physical.includes(r.needTask.kind) && physical.some(k=>ensureNeeds(r)[k]<10&&(k!=='hunger'||foodPortions(s)>0)))cancelNeed(s,r);
  if(r.needTask && s.time-r.needTask.created>240){cancelNeed(s,r);r.needRetryAt=s.time+15;}
  if(r.needTask || r.tentPhase || r.cargo || r.action==='town' || s.stage!=='playing' || (r.energy<25 && Math.min(ensureNeeds(r).hunger,ensureNeeds(r).bladder,ensureNeeds(r).bowels)>=15) || (r.needRetryAt||0)>s.time)return;
  const n=ensureNeeds(r,i);
@@ -66,9 +66,9 @@ export function chooseNeed(s,r,i,api) {
  };
  for(const kind of pending) {
   if(kind==='hunger') {
-   if(!(s.materials.meals>0 || s.materials.food>0))continue;
+   if(!(foodPortions(s)>0))continue;
    const spot=api.groundSpot(r,s.stock,i);
-   if(spot){assign(s,r,kind,spot,{label:'Eating a meal',animation:'eat'});return;}
+   if(spot){assign(s,r,kind,spot,{label:'Preparing and eating a camp meal',animation:'eat'});return;}
   }
   if(kind==='bladder'||kind==='bowels') {
    const waste=kind==='bowels'?1.5:.5;
@@ -97,7 +97,7 @@ export function chooseNeed(s,r,i,api) {
    }
   }
  }
- r.needBlocked=pending.includes("hunger") && !(s.materials.meals>0 || s.materials.food>0) ? "Hungry: no food in stores" : pending[0]==="social" ? "Waiting for a friend to have a break" : "Looking for somewhere to meet this need";
+ r.needBlocked=pending.includes("hunger") && !(foodPortions(s)>0) ? "Hungry: no food in stores" : pending[0]==="social" ? "Waiting for a friend to have a break" : "Looking for somewhere to meet this need";
  r.needRetryAt=s.time+12;
 }
 // Both needed and spontaneous conversations share the same consent, travel,
@@ -137,8 +137,7 @@ export function advanceNeed(s,r,dt,api) {
  if(task.elapsed<task.duration)return true;
  const n=r.needs;
  if(task.kind==='hunger') {
-  const food=s.materials.meals>=1?'meals':s.materials.food>=1?'food':null;
-  if(food){foodChange(s,food,-1,undefined,'resident meal');addOrganicWaste(s,.2);n.hunger=90;n.bladder=clamp(n.bladder-5);n.bowels=clamp(n.bowels-4);}
+  if(eatMeal(s)){n.hunger=90;n.bladder=clamp(n.bladder-5);n.bowels=clamp(n.bowels-4);}
  } else if(task.kind==='hygiene') {
   if(task.river || (node && useWater(s,node.id,1))){n.hygiene=task.river?78:95;r.cleanedAtWork=r.work;}
  } else if(task.kind==='bladder'||task.kind==='bowels') {

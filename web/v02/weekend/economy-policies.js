@@ -1,3 +1,4 @@
+import {FOOD_SERVINGS,foodPortions} from './food-storage.js';
 import { protectedEquipment } from './equipment.js';
 import {buyerQuote} from './local-market.js';
 // Shared by the simulation and the resource dialog; policies never create stock.
@@ -7,10 +8,10 @@ export function economyPolicies(s){
  return s.economyPolicies;
 }
 export function productionTarget(p){return Number.isFinite(p.stockTarget)?Math.max(0,Math.min(10000,Math.floor(p.stockTarget))):24;}
-export function workGroup(op,recipes){return op.water?(op.water.service?'maintenance':'food'):(recipes[op.recipe]?.output.food||recipes[op.recipe]?.output.meals?'food':'production');}
+export function workGroup(op,recipes){return op.water?(op.water.service?'maintenance':'food'):(Object.keys(recipes[op.recipe]?.output||{}).some(id=>FOOD_SERVINGS[id])?'food':'production');}
 export function protectedStock(s,id,recipes){
  const policy=economyPolicies(s).sales[id];let reserve=policy?.keep||0;
- if(id==='food'||id==='meals')reserve=Math.max(reserve,Math.ceil(s.people.length*2*(s.foodReserveDays??2)));
+ if(FOOD_SERVINGS[id]){const others=foodPortions(s)-Math.floor((s.materials[id]||0)/FOOD_SERVINGS[id]);reserve=Math.max(reserve,Math.max(0,Math.ceil(s.people.length*2*(s.foodReserveDays??2))-others)*FOOD_SERVINGS[id]);}
  // Construction and queued inputs have already left available stock. Protect the
  // next two batches at repeating sites as well, without double-counting reservations.
  let inputs=0;
