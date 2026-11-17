@@ -1,3 +1,4 @@
+import {foodChange,freshLots,foodStorageStep,validFoodStorage,returnUnsoldFood,FOOD_DAYS} from './food-storage.js';
 import {recordProduction,validProductionAccounting} from './production-accounting.js';
 import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSION} from './construction-specs.js';
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
@@ -200,10 +201,7 @@ export function storageCapacity(s) {
 export function storedMaterials(s) {
   return s.wood + Object.values(s.materials).reduce((a, b) => a + b, 0) + pendingExports(s).reduce((n,o)=>n+o.quantity,0);
 }
-function changeMaterial(s, id, n) {
-  if (id === "wood") s.wood += n;
-  else s.materials[id] += n;
-}
+function changeMaterial(s,id,n,lots){return foodChange(s,id,n,lots);}
 export function sellMaterial(s, id) {
   const item = MATERIALS[id];
   if (
@@ -290,11 +288,13 @@ export function queueProduction(s, site, recipe) {
     changeMaterial(s, "goats", -2);
     p.stocked = true;
   }
-  for (const [id, n] of Object.entries(def.input)) changeMaterial(s, id, -n);
+  const foodInput={};
+  for (const [id,n] of Object.entries(def.input)){const lots=changeMaterial(s,id,-n);if(FOOD_DAYS[id])foodInput[id]=lots;}
   s.operations.push({
     id: (s.nextOperation = (s.nextOperation || 0) + 1),
     site: p.id,
     recipe,
+    foodInput,
     work: 0,
     phase: "pickup",
     done: false,
@@ -597,15 +597,16 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   if (op.phase === "return") {
     r.action = "carry";
     r.cargo = true;
-    op.status = "Carrying output to storage";
+    op.status = op.returnItems ? "Returning usable remains after spoilage" : "Carrying output to storage";
     if (!go(s, r, supplySpot(s, r, i))) return true;
-    const total = Object.values(recipe.output).reduce((a, b) => a + b, 0);
+    const returned=op.returnItems||recipe.output;
+    const total = Object.values(returned).reduce((a, b) => a + b, 0);
     if (storedMaterials(s) + total > storageCapacity(s)) {
       op.status = "Storage full; output is still carried";
       return true;
     }
-    for (const [id, n] of Object.entries(recipe.output))
-      changeMaterial(s, id, n);
+    for (const [id, n] of Object.entries(returned))
+      changeMaterial(s,id,n,op.foodOutput?.[id]);
     op.done = true;
     r.operation = null;
     r.cargo = false;
@@ -676,6 +677,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if (op.work >= recipe.work) {
     recordProduction(s,op.recipe,recipe);
+    op.foodOutput=Object.fromEntries(Object.entries(recipe.output).filter(([id])=>FOOD_DAYS[id]).map(([id,n])=>[id,freshLots(s,id,n)]));
     if(recipe.kind==='wild-tree'){p.felled=true;invalidateNavigation(s);}
     if(op.recipe==='solar_upgrade')p.solarUpgrade=true;
     op.phase = "return";
@@ -1186,6 +1188,7 @@ export function supplyRun(s, material = "wood", project = null, saleOnly = false
     vehicle,
     phase: "boarding",
   };
+  if(!project&&!saleOnly&&FOOD_DAYS[material])s.trip.foodLots=freshLots(s,material,item.quantity);
   loadExports(s,s.trip);
   r.job = null;
   r.target = null;
@@ -1791,6 +1794,7 @@ function tickUncached(s, dt) {
   ensureFinances(s);
   if (s.mode === "sandbox") sandboxSupplies(s);
   s.time += dt;
+  foodStorageStep(s,PROCESSES,MATERIALS);
   autoConnectUtilities(s, PROJECTS);
   infrastructureStep(s, PROJECTS, dt);
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
@@ -1876,13 +1880,14 @@ function tickUncached(s, dt) {
           const orders = trip.projects || [trip.project];
           if(trip.shipments) receiveBlueprintShipment(s,trip);
           else if (project) for (const p of s.projects.filter(p=>orders.includes(p.id))) delete p.pendingMaterials;
-          else if (!trip.saleOnly) { if (id === "wood") s.wood += item.quantity; else s.materials[id] += item.quantity; }
+          else if (!trip.saleOnly) changeMaterial(s,id,trip.foodSpoiled?trip.foodLots.reduce((n,l)=>n+l.n,0):item.quantity,trip.foodLots);
+          returnUnsoldFood(s,trip);
           r.action = "idle";
           r.cargo = false;
           s.trip = null;
           say(
             s,
-            trip.saleOnly ? `${r.name} returned from selling the village surplus.` : project ? `${r.name} unloaded reserved materials for ${orders.length === 1 ? PROJECTS[project.key].name : `${orders.length} projects`}. Any remaining materials will follow on another trip.` : `${r.name} unloaded ${item.quantity} ${item.name} from the car.`,
+            trip.foodSpoiled ? `${r.name} returned; the purchased food spoiled during the trip.` : trip.saleOnly ? `${r.name} returned from selling the village surplus.` : project ? `${r.name} unloaded reserved materials for ${orders.length === 1 ? PROJECTS[project.key].name : `${orders.length} projects`}. Any remaining materials will follow on another trip.` : `${r.name} unloaded ${item.quantity} ${item.name} from the car.`,
           );
         }
       }
@@ -2509,7 +2514,7 @@ export function restore(text) {
       const r = s.people.find((r) => r.id === s.trip.person);
       r.cargo = s.trip.phase === "unloading";
     }
-    if (!validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(

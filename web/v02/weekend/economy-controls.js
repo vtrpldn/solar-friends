@@ -1,3 +1,4 @@
+import {foodChange} from './food-storage.js';
 import {pendingExports,cancelExport,transportCost} from './physical-trade.js';
 import {economyPolicies,salePreview,WORK_GROUPS} from './economy-policies.js';
 let selected='bamboo',expanded=false;
@@ -31,7 +32,7 @@ export function economyControls(root,s,materials,recipes,count,refresh){
  make(orders,'p',`Goods leave available stock when queued. Trips combine sale batches within cargo capacity. Transport: R$${transportCost(s)} per trip; the driver needs enough energy and the village must afford departure.`);
  for(const o of pendingExports(s)){
  const row=make(orders,'div');make(row,'span',`${o.quantity} ${materials[o.material].name} · R$${(o.cents/100).toFixed(2)} gross `);
- const cancel=make(row,'button','Cancel sale');cancel.onclick=()=>{cancelExport(s,o.id,(state,id,n)=>{if(id==='wood')state.wood+=n;else state.materials[id]+=n;});refresh();};
+ const cancel=make(row,'button','Cancel sale');cancel.onclick=()=>{cancelExport(s,o.id,foodChange);refresh();};
  }
  if(!pendingExports(s).length)make(orders,'p','No sale batches waiting.');
  root.append(drawer);

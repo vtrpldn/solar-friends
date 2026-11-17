@@ -1,3 +1,4 @@
+import {foodStorageText} from './food-storage.js';
 import {recipeLossText,productionSummary} from './production-accounting.js';
 import {transportCost} from './physical-trade.js';
 import {economyControls} from './economy-controls.js';
@@ -350,6 +351,7 @@ export function createManagement({
       const account=productionSummary(s,PROCESSES),accountNote=document.createElement('p');
       accountNote.textContent=s.mode==='sandbox'?'Processing records are disabled in sandbox. Recipe estimates below show the normal production balance.':`Processing record: ${account.batches} batches · approximately ${account.inputKg.toFixed(1)} kg input, ${account.outputKg.toFixed(1)} kg usable output and ${account.lossKg.toFixed(1)} kg process losses. Includes water used in cooking; excludes farming, animals and construction. Output may still be in transit. Earlier batches are not reconstructed.`;
       $("production-sites").append(accountNote);
+      const freshnessNote=document.createElement('p');freshnessNote.textContent=foodStorageText(s);$("production-sites").append(freshnessNote);
       for (const p of s.projects) {
         if(PROJECTS[p.key].kind==='wild-tree')continue;
         const recipes = Object.entries(PROCESSES).filter(

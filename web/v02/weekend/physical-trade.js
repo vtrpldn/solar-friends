@@ -20,18 +20,18 @@ export function tradeQuote(s,id,materials,count,protect=0){
 }
 export function reserveExport(s,id,materials,count,change,protect=0){
  const quote=tradeQuote(s,id,materials,count,protect);if(quote.error)return false;
- const t=ensureTrade(s);change(s,id,-quote.quantity);
+ const t=ensureTrade(s);const foodLots=change(s,id,-quote.quantity);
  if(t.market[id]?.day!==quote.day)t.market[id]={day:quote.day,units:0};
  t.market[id].units+=quote.quantity;
- t.orders.push({id:t.nextId++,material:id,quantity:quote.quantity,cents:quote.cents,status:'queued',created:s.time,marketDay:quote.day});
- const active=t.orders.filter(o=>['queued','loaded'].includes(o.status));
- t.orders=[...t.orders.filter(o=>['sold','cancelled'].includes(o.status)).slice(-(100-active.length)),...active];
+ t.orders.push({id:t.nextId++,material:id,quantity:quote.quantity,cents:quote.cents,status:'queued',created:s.time,marketDay:quote.day,...(foodLots?.length?{foodLots}: {})});
+ const active=t.orders.filter(o=>['queued','loaded'].includes(o.status)||o.returnFood||(s.trip?.exports||[]).includes(o.id));
+ t.orders=[...t.orders.filter(o=>['sold','cancelled','spoiled'].includes(o.status)&&!active.includes(o)).slice(-(100-active.length)),...active];
  if(!t.dispatchAt)t.dispatchAt=s.time+TRADE_RULES.dispatchAfter;
  return true;
 }
 export function cancelExport(s,id,change){
  const t=ensureTrade(s),o=t.orders.find(o=>o.id===id&&o.status==='queued');if(!o)return false;
- change(s,o.material,o.quantity);o.status='cancelled';
+ change(s,o.material,o.quantity,o.foodLots);o.status='cancelled';
  const m=t.market[o.material];if(m?.day===o.marketDay)m.units=Math.max(0,m.units-o.quantity);
  return true;
 }
@@ -52,7 +52,7 @@ export function settleExports(s,trip,transact){
 export function validTrade(s,materials){
  const t=s.trade;if(t===undefined)return true;
  if(!t||t.version!==1||!Number.isInteger(t.nextId)||t.nextId<1||!Array.isArray(t.orders)||t.orders.length>100||!t.market||!Number.isFinite(t.dispatchAt)||t.dispatchAt<0)return false;
- const ids=new Set();for(const o of t.orders){if(!o||!Number.isInteger(o.id)||o.id<1||o.id>=t.nextId||ids.has(o.id)||!materials[o.material]?.quantity||o.quantity!==materials[o.material].quantity||!Number.isSafeInteger(o.cents)||o.cents<0||!['queued','loaded','sold','cancelled'].includes(o.status)||!Number.isFinite(o.created)||o.created<0||!Number.isInteger(o.marketDay)||o.marketDay<0)return false;ids.add(o.id);}
+ const ids=new Set();for(const o of t.orders){if(!o||!Number.isInteger(o.id)||o.id<1||o.id>=t.nextId||ids.has(o.id)||!materials[o.material]?.quantity||o.quantity!==materials[o.material].quantity||!Number.isSafeInteger(o.cents)||o.cents<0||!['queued','loaded','sold','cancelled','spoiled'].includes(o.status)||!Number.isFinite(o.created)||o.created<0||!Number.isInteger(o.marketDay)||o.marketDay<0)return false;ids.add(o.id);}
  for(const [id,m]of Object.entries(t.market))if(!materials[id]?.quantity||!m||!Number.isInteger(m.day)||m.day<0||!Number.isInteger(m.units)||m.units<0)return false;
  if(s.trip?.shipments!==undefined){
  const list=s.trip.shipments;if(!Array.isArray(list)||list.length>512)return false;
@@ -61,11 +61,12 @@ export function validTrade(s,materials){
  if(!fitsCargo(cargo))return false;
  }
  const exports=s.trip?.exports||[];if(!Array.isArray(exports)||new Set(exports).size!==exports.length)return false;
- if(exports.some(id=>!t.orders.some(o=>o.id===id&&['loaded','sold'].includes(o.status))))return false;
- if(t.orders.some(o=>o.status==='loaded'&&!exports.includes(o.id)))return false;
+ if(exports.some(id=>!t.orders.some(o=>o.id===id&&['loaded','sold','spoiled'].includes(o.status))))return false;
+ if(t.orders.some(o=>(o.status==='loaded'||o.returnFood)&&!exports.includes(o.id)))return false;
+ if(t.orders.some(o=>o.returnFood!==undefined&&(typeof o.returnFood!=='boolean'||(o.returnFood&&o.status!=='spoiled'))))return false;
  const outbound={};for(const id of exports){const o=t.orders.find(o=>o.id===id);outbound[o.material]=(outbound[o.material]||0)+o.quantity;}
  if(!fitsCargo(outbound))return false;
- if(s.trip?.tradeSettled&&exports.some(id=>t.orders.find(o=>o.id===id).status!=='sold'))return false;
+ if(s.trip?.tradeSettled&&exports.some(id=>t.orders.find(o=>o.id===id).status!=='sold'&&t.orders.find(o=>o.id===id).status!=='spoiled'))return false;
  if(s.trip?.saleOnly!==undefined&&typeof s.trip.saleOnly!=='boolean')return false;
  if(s.trip?.tradeSettled!==undefined&&typeof s.trip.tradeSettled!=='boolean')return false;
  return true;

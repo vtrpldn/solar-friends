@@ -1,3 +1,4 @@
+import {foodChange} from './food-storage.js';
 import {profileFor,recordConversation} from './resident-personality.js';
 import { useWater } from './infrastructure.js';
 export const NEED_KEYS=['hunger','bladder','bowels','hygiene','social','fun'];
@@ -119,7 +120,7 @@ export function advanceNeed(s,r,dt,api) {
  const n=r.needs;
  if(task.kind==='hunger') {
   const food=s.materials.meals>=1?'meals':s.materials.food>=1?'food':null;
-  if(food){s.materials[food]--;s.materials.scraps=(s.materials.scraps||0)+1;n.hunger=90;n.bladder=clamp(n.bladder-5);n.bowels=clamp(n.bowels-4);}
+  if(food){foodChange(s,food,-1);s.materials.scraps=(s.materials.scraps||0)+1;n.hunger=90;n.bladder=clamp(n.bladder-5);n.bowels=clamp(n.bowels-4);}
  } else if(task.kind==='hygiene') {
   if(task.river || (node && useWater(s,node.id,1))){n.hygiene=task.river?78:95;r.cleanedAtWork=r.work;}
  } else if(task.kind==='bladder'||task.kind==='bowels') {
