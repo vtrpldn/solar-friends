@@ -1591,6 +1591,15 @@ function renderUI() {
       const role=document.createElement('p');role.textContent=profile.role;
       const traits=document.createElement('p');traits.className='resident-traits';traits.textContent=profile.traits.join(' · ');
       identity.append(title,role,traits);heading.append(face,identity);detail.append(heading);
+      const locate=document.createElement('button');
+      locate.textContent='Find in village';
+      locate.setAttribute('aria-label',`Find ${r.name} in village`);
+      locate.onclick=()=>{
+        setPanel(null);
+        focus(r);
+        message(`${r.name} · ${status.textContent}`);
+      };
+      detail.append(locate);
       const tabs=document.createElement('nav');tabs.className='resident-tabs';tabs.setAttribute('aria-label','Profile sections');
       for(const label of ['Overview','Skills','Relationships']){
         const tab=document.createElement('button');tab.textContent=label;tab.setAttribute('aria-pressed',String(residentTab===label));
