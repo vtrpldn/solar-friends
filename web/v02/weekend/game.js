@@ -237,6 +237,7 @@ const ground = createTerrain(s.landSeed, s.elevationSeed, s.terrainPads);
 scene.add(ground);
 scene.add(compactModel(createAccessRoad()));
 const river = createRiver(s.landSeed);
+let riverTime=0;
 scene.add(compactModel(river.root), river.current);
 
 const grid = new THREE.GridHelper(
@@ -1982,7 +1983,8 @@ function frame(now) {
     );
   }
   foliageWind.update(!paused && !document.hidden ? dt : 0);
-  river.update(visual.time);
+  riverTime+=!paused && !document.hidden ? dt : 0;
+  river.update(riverTime);
   rainMesh.visible = s.rain;
   if (s.rain) {
     for (let i = 0; i < 600; i++) {
