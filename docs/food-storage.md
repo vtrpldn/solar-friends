@@ -6,7 +6,7 @@ Food previously lasted indefinitely. Hoarding had no cost, and reserving ingredi
 
 ## Implemented rules
 
-The authored shelf lives are ingredients 3 game days, prepared meals 2, eggs 7 and milk 1. These are gameplay parameters, not real-world food-safety guidance. A game day is 3200 simulation seconds; speed changes observation time, not expiration.
+The authored shelf lives are ingredients 3 game days, fresh prepared meals 2, eggs 7 and milk 1. Kitchen-made dried provisions keep for 10 game days. These are gameplay parameters, not real-world food-safety guidance. A game day is 3200 simulation seconds; speed changes observation time, not expiration.
 
 Residents and production jobs take the oldest stock first. Nearby expiration times are coalesced into hour-sized buckets using the earliest time, so bookkeeping stays bounded without refreshing older food. New output receives a shelf life when processing finishes, not when delivered. Purchased food starts aging at departure. Queued exports keep their original ages; cancelling an order does not reset them.
 
@@ -22,7 +22,7 @@ Old saves have no historical freshness data. Their existing stock and outstandin
 
 ## Intentional limitations
 
-- No refrigeration, preservation recipes or biome/temperature modifiers yet. Warehouses do not pretend to be refrigerators.
+- No refrigeration or biome/temperature modifiers yet. Kitchens now offer [dried provisions](food-preservation.md); warehouses do not pretend to be refrigerators.
 - Honey and dry supplies remain durable abstractions; not every material decays.
 - Spoilage is batch expiry rather than gradual quality loss or health simulation.
 - Organic residues enter the shared residue stock immediately; hauling waste separately is not modeled.

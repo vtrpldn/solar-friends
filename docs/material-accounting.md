@@ -2,7 +2,7 @@
 
 ## Why
 
-Cargo weights and processing recipes previously used inconsistent implicit units. A frame was treated as 18 kg despite its inputs weighing only 8 kg. These provisional measurements were never supplier specifications. A shared measurement table now keeps cargo and processing arithmetic consistent, and seven transformation recipes name their losses explicitly.
+Cargo weights and processing recipes previously used inconsistent implicit units. A frame was treated as 18 kg despite its inputs weighing only 8 kg. These provisional measurements were never supplier specifications. A shared measurement table now keeps cargo and processing arithmetic consistent, and eight transformation recipes name their losses explicitly.
 
 ## Measurements and limitations
 
@@ -32,6 +32,7 @@ These choices remove contradictions within the model; they do not establish real
 | Fire tiles | 44 | 24 | 20 firing moisture/fuel losses |
 | Cook meals | 6 including water | 5 including scraps | 1 evaporation |
 | Compost | 4 | 2 | 2 gas/moisture |
+| Prepare dried provisions | 8 including water | 6 including residues | 2 drying moisture |
 
 Losses are explicit sinks, not extra saleable inventory. Reusing sawdust or trimmings would require a separate recovery process. Crops, animals, extraction and construction are not claimed to be closed mass balances. Biological growth must account for environmental inputs before joining this model.
 
@@ -45,6 +46,6 @@ The Resources screen shows batch totals, approximate input/output/loss mass and 
 
 ## Evidence
 
-`verify-v02-production-accounting.mjs` checks all seven equations and their shared cargo definitions, then runs a resident through plank processing and delivery, reloads during carriage, and verifies single accounting and single delivery. Its completed workbench is an injected diagnostic fixture, not a bootstrap playthrough.
+`verify-v02-production-accounting.mjs` checks the transformation equations and their shared cargo definitions, then runs a resident through plank processing and delivery, reloads during carriage, and verifies single accounting and single delivery. Its completed workbench is an injected diagnostic fixture, not a bootstrap playthrough.
 
 `verify-v02-economy-soak.mjs` continues the genuine Day 61 village through ordinary export funding and construction. Current output: `docs/balance/2026-11-16-material-accounting-soak.json`. Earlier checkpoint reports remain intact.

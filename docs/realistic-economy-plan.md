@@ -26,13 +26,14 @@ Completed in the first playable increment:
 - Cash postings in whole centavos with sub-cent utility accrual; sale receipts and transport expenses appear in Finances.
 - Export queue/cancellation UI, purchase transport quotes, save validation, and duplicate-settlement checks.
 - Shared approximate cargo/processing measurements and a versioned completion ledger for seven transformations with named loss sinks; see [material accounting](material-accounting.md). This does not complete canonical units or biological accounting.
-- Food batch ages, oldest-first use, spoilage into residues, age-preserving reservations and physical return of usable unsold cargo (2026-11-17); see [food storage](food-storage.md). Refrigeration and preservation remain outstanding.
+- Food batch ages, oldest-first use, spoilage into residues, age-preserving reservations and physical return of usable unsold cargo (2026-11-17); see [food storage](food-storage.md). Refrigeration remains outstanding.
+- Optional kitchen dried-provisions recipe, with lower edible yield, extra labor/biogas and 10-day batch life; see [preservation checkpoint](food-preservation.md).
 - Full outstanding collection budgets protected from grid bills and ordinary shopping, with available versus committed cash in Finances.
 - Diminishing crew efficiency and assembly-time estimates.
 - Task-based labor estimates for core buildings, complete material allocation, and versioned progress migration; see [construction checkpoint](construction-economy.md). Physical quantities and regional labor coefficients remain uncalibrated.
 - Three-day replay of an established village completed a paid house with positive food, water and cash. This is regression evidence, not a fresh-start balance certification.
 
-Still outstanding: regional calibration, canonical physical resource units and full ownership ledger, construction/person-hour calibration, multiple simultaneous vehicles and delivery fallback, seasonal yields, refrigeration/preservation, asset upkeep, outside jobs, and full release gates. None of stages 0–7 is claimed complete. See [parameter register](economy-parameters.md) for provisional values and evidence limitations.
+Still outstanding: regional calibration, canonical physical resource units and full ownership ledger, construction/person-hour calibration, multiple simultaneous vehicles and delivery fallback, seasonal yields, refrigeration, asset upkeep, outside jobs, and full release gates. None of stages 0–7 is claimed complete. See [parameter register](economy-parameters.md) for provisional values and evidence limitations.
 
 ## Design boundaries
 
