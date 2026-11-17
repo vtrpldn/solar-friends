@@ -1,10 +1,11 @@
+import {STARTING_ENDOWMENT} from './economy-reference.js';
 import {supplierAvailable} from './supplier-stock.js';
 import {materialLedger,materialReconciliation} from './material-ledger.js';
 import {marketTerms} from './local-market.js';
 import {inventoryOwnership} from './economy-inventory.js';
-import {upkeep,upkeepText} from "./asset-upkeep.js";
+import {upkeep,upkeepText,serviceParts} from "./asset-upkeep.js";
 import {biologyText} from "./biological-production.js";
-import {materialUnitText,quantityText,physicalUnit,stockQuantity} from "./material-measures.js";
+import {materialUnitText,quantityText,physicalUnit} from "./material-measures.js";
 import {tripEstimateText,GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
 import {coolingText} from './cold-storage.js';
 import {foodStorageText} from './food-storage.js';
@@ -255,6 +256,7 @@ export function createManagement({
       add('p',forecast.days?`Available cash could reach ${money(forecast.low)}–${money(forecast.high)} if the best or worst daily operating cash flow from the last ${forecast.days} complete days repeats. Mean operating change: ${money(forecast.mean)}/day. This is a scenario range, not guaranteed income; excludes new construction and assumes the same shopping, work and sales.`:'A forecast needs at least one complete recorded day. Future crops and unpaid exports are not included in available cash.');
       add('p',`Construction investment paid: ${money(Math.abs(f.categories.construction||0))}. Other cash spending: ${money(Math.max(0,f.expenses-Math.abs(f.categories.construction||0)))}. Stored supplies and installed buildings are assets, not spendable savings.`);
       const assets=inventoryOwnership(s,PROJECTS,PROCESSES,MATERIALS).values;
+      add('p',`Starting circumstances: the land and ${STARTING_ENDOWMENT.vehicles} cars were already owned. Vehicle starting book value: ${money(STARTING_ENDOWMENT.bookValuePerVehicle)} each (scenario estimate, not a sale offer). Savings are working capital after buying the land; these assets do not pay cash income.`);
       add('h3','Store movements');
       const ledger=materialLedger(s),differences=materialReconciliation(s);
       add('p',Object.keys(differences).length?'Some stock changes predate or bypass the movement record. Current physical stock remains authoritative.':'Recorded opening stock plus arrivals minus use and transfers matches current stores.');
@@ -273,6 +275,17 @@ export function createManagement({
       add('h3','Asset upkeep');add('p',upkeepText(s));
       const service=upkeep(s),toggle=document.createElement('button');toggle.textContent=service.automatic?'Automatic upkeep: on':'Automatic upkeep: off';toggle.setAttribute('aria-pressed',String(service.automatic));toggle.onclick=()=>{service.automatic=!service.automatic;render();};screen.append(toggle);
       const allowance=document.createElement('input');allowance.type='number';allowance.min='0';allowance.max='100000';allowance.value=service.dailyBudget;allowance.setAttribute('aria-label','Daily upkeep materials allowance in reais');allowance.oninput=()=>{service.dailyBudget=Math.max(0,Math.min(100000,Number(allowance.value)||0));};allowance.onchange=()=>render();screen.append(allowance);
+      if(service.jobs.length){
+        const jobs=add('details','');add('summary',`Inspect ${service.jobs.length} upkeep jobs`,jobs);
+        for(const job of service.jobs){
+          const site=s.projects.find(p=>p.id===job.target),row=add('article','',jobs);
+          add('strong',site?`${PROJECTS[site.key].name} #${site.id}`:`Car ${(job.vehicle??0)+1}`,row);
+          add('p',job.status||'Waiting for an available resident',row);
+          add('p',`${job.partsPaid?'Materials already reserved':'Required supplies'}: ${Object.entries(serviceParts(job)).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(' · ')}`,row);
+          if(site){const find=add('button','Find in village',row);find.onclick=()=>{dialog.close();inspect(site.id);};}
+        }
+        const supplies=add('button','Manage service supplies',jobs);supplies.onclick=()=>open('resources');
+      }
       add('h3','Where the money goes');
       const groups={outsideWork:'Outside work',commuting:'Commuting',transport:'Transport',sales:'Surplus sales',construction:'Building materials',purchases:'Operating supplies',household:'Household food',electricity:'Grid electricity'};
       for(const [key,label] of Object.entries(groups))add('p',`${label}: ${money(Math.abs(f.categories[key]||0))}`);

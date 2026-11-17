@@ -79,11 +79,11 @@ export const CAMPS = [
   },
 ];
 export const MATERIALS = {
-  wood: { name: "timber pieces", batch: 4, quantity: 12, price: 45 },
+  wood: { name: "timber pieces", batch: 4, quantity: 12, price: 432 },
   hardware: { name: "fastener packs", batch: 1, quantity: 2, price: 30 },
   roofing: { name: "roof sheets", batch: 2, quantity: 6, price: 120 },
   tarp: { name: "tarp & rope kits", batch: 1, quantity: 1, price: 50 },
-  tank: { name: "water tanks", batch: 1, quantity: 1, price: 140 },
+  tank: { name: "water tanks", batch: 1, quantity: 1, price: 320 },
   plumbing: { name: "pipe & tap kits", batch: 1, quantity: 1, price: 40 },
   sanitation: { name: "toilet kits", batch: 1, quantity: 1, price: 80 },
 };
@@ -132,7 +132,9 @@ expandMaterials(MATERIALS);
 expandProjects(PROJECTS);
 registerNaturalProjects(PROJECTS);
 Object.assign(PROJECTS, OPENING_PROJECTS);
+PROJECTS.well.materials={...PROJECTS.well.materials,tank:4};
 applyConstructionSpecs(PROJECTS);
+PROJECTS.well.legacyMaterials={...PROJECTS.well.materials,tank:1};
 // Preserve the pre-calibration paid quantities for older unsnapshotted projects.
 PROJECTS.solar_farm.legacyMaterials={...PROJECTS.solar_farm.materials};
 PROJECTS.solar_farm.materials={...PROJECTS.solar_farm.materials,panels:6};

@@ -22,3 +22,6 @@ export function tripEstimateText(setting){
 
 // Scenario endowment after buying the land; not an income source or a price quote.
 export const STARTING_CAPITAL={tight:500,modest:2000,comfortable:6000};
+
+// Scenario book values, not sale offers or current vehicle quotations.
+export const STARTING_ENDOWMENT=Object.freeze({vehicles:2,bookValuePerVehicle:60000,landAlreadyOwned:true});

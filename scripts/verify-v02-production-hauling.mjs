@@ -19,13 +19,13 @@ for(let i=0;i<64000&&!s.operations[0].done;i++){
  if(now>previous){assert(now-previous<=5,'at most five 6 kg logs per journey');legs++;previous=now;}
  const job=s.operations[0];
  if(job.haulRemaining&&job.returningToSite&&!partial){
-  assert.equal(now+inventoryOwnership(s,PROJECTS,PROCESSES,MATERIALS).rows.logs.processing,initial+12);
+  assert.equal(now+inventoryOwnership(s,PROJECTS,PROCESSES,MATERIALS).rows.logs.processing,initial+PROCESSES.wood.output.logs);
   const loaded=restore(save(s));assert(loaded,'partially delivered batch survives reload');s=loaded;enableFastNavigation(s);partial=true;
  }
 }
-assert(partial);assert(s.operations[0].done);assert.equal(materialCount(s,'logs'),initial+12);assert.equal(legs,3);
-const invalid=JSON.parse(save(s));invalid.operations[0].haulRemaining.logs=13;assert.equal(restore(JSON.stringify(invalid)),null);
-console.log('PASS bounded hand loads, three physical timber trips, partial-load ownership, reload and exact settlement');
+assert(partial);assert(s.operations[0].done);assert.equal(materialCount(s,'logs'),initial+PROCESSES.wood.output.logs);assert.equal(legs,Math.ceil(PROCESSES.wood.output.logs/5));
+const invalid=JSON.parse(save(s));invalid.operations[0].haulRemaining.logs=PROCESSES.wood.output.logs+1;assert.equal(restore(JSON.stringify(invalid)),null);
+console.log('PASS bounded hand loads, physical timber trips, partial-load ownership, reload and exact settlement');
 
 // A larger food harvest keeps its original expiry across partial deliveries.
 const food=createWeekend(43);chooseCamp(food,'entrance');enableFastNavigation(food);food.emergencyFood=false;
