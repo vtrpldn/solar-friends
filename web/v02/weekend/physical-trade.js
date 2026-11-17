@@ -1,8 +1,8 @@
+import {materialMeasure as cargoUnit} from './material-measures.js';
 // Trade quantities remain the existing authored packs. Their cargo measurements
 // are explicit approximations, not a silent conversion of existing save stock.
 export const TRADE_RULES={version:1,cargoKg:350,cargoM3:1.2,batchesPerBuyerDay:8,dispatchAfter:40};
-const weights={wood:[4,.012],logs:[20,.04],planks:[3,.01],bamboo:[3,.018],earth:[20,.015],stone:[20,.012],frames:[18,.12],walls:[20,.025],tiles:[12,.012],roofing:[8,.035],tank:[12,.35],batteries:[30,.05],panels:[20,.12],goats:[40,.4],hens:[2,.025],bees:[15,.08]};
-export function cargoUnit(id){const [kg,m3]=weights[id]||(['food','meals','eggs','milk','honey','fodder','compost'].includes(id)?[1,.002]:[2,.01]);return {kg,m3};}
+export {materialMeasure as cargoUnit} from './material-measures.js';
 export function cargoSize(items){return Object.entries(items).reduce((a,[id,n])=>{const u=cargoUnit(id);a.kg+=n*u.kg;a.m3+=n*u.m3;return a;},{kg:0,m3:0});}
 export function fitsCargo(items){const c=cargoSize(items);return c.kg<=TRADE_RULES.cargoKg+1e-8&&c.m3<=TRADE_RULES.cargoM3+1e-8;}
 export function tradeDay(s){return Math.floor((540+s.time*.45)/1440);}

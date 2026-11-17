@@ -1,3 +1,4 @@
+import {recipeLossText,productionSummary} from './production-accounting.js';
 import {transportCost} from './physical-trade.js';
 import {economyControls} from './economy-controls.js';
 import {productionTarget} from './economy-policies.js';
@@ -346,6 +347,9 @@ export function createManagement({
         const empty=document.createElement("p");empty.textContent="No matching supplies. Try another name.";$("resource-grid").append(empty);
       }
       $("production-sites").replaceChildren();
+      const account=productionSummary(s,PROCESSES),accountNote=document.createElement('p');
+      accountNote.textContent=s.mode==='sandbox'?'Processing records are disabled in sandbox. Recipe estimates below show the normal production balance.':`Processing record: ${account.batches} batches · approximately ${account.inputKg.toFixed(1)} kg input, ${account.outputKg.toFixed(1)} kg usable output and ${account.lossKg.toFixed(1)} kg process losses. Includes water used in cooking; excludes farming, animals and construction. Output may still be in transit. Earlier batches are not reconstructed.`;
+      $("production-sites").append(accountNote);
       for (const p of s.projects) {
         if(PROJECTS[p.key].kind==='wild-tree')continue;
         const recipes = Object.entries(PROCESSES).filter(
@@ -394,7 +398,7 @@ export function createManagement({
         };
         const locate=document.createElement('button');locate.textContent=`Find in village · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores`;locate.onclick=()=>{dialog.close();inspect(p.id);};
         const recipeInfo=document.createElement('p');
-        const describe=()=>{const r=PROCESSES[choice.value];recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||'Building upgrade'}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work`;};
+        const describe=()=>{const r=PROCESSES[choice.value];recipeInfo.textContent=`${Object.entries(r.input).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(' + ')||'No material input'} → ${Object.entries(r.output).map(([id,n])=>`${n} ${MATERIALS[id].name}`).join(', ')||'Building upgrade'}${r.water?` · ${r.water} water`:''} · ${Math.ceil(r.work*.45)} game minutes of resident work${recipeLossText(choice.value,r)}`;};
         choice.onchange=()=>{recipeChoices.set(p.id,choice.value);describe();};describe();
         el.append(img,name,locate,status,choice,recipeInfo,start);
         if(PROJECTS[p.key].kind!=='home')el.append(targetLabel,repeat);

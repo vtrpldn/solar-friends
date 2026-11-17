@@ -1,3 +1,4 @@
+import {recordProduction,validProductionAccounting} from './production-accounting.js';
 import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSION} from './construction-specs.js';
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
 import {reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment} from './physical-trade.js';
@@ -674,6 +675,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   r.work += dt;
   r.energy = Math.max(0, r.energy - dt * 0.12);
   if (op.work >= recipe.work) {
+    recordProduction(s,op.recipe,recipe);
     if(recipe.kind==='wild-tree'){p.felled=true;invalidateNavigation(s);}
     if(op.recipe==='solar_upgrade')p.solarUpgrade=true;
     op.phase = "return";
@@ -2507,7 +2509,7 @@ export function restore(text) {
       const r = s.people.find((r) => r.id === s.trip.person);
       r.cargo = s.trip.phase === "unloading";
     }
-    if (!validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(
