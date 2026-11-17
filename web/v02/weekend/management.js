@@ -26,13 +26,13 @@ import { LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./i
 import { illustrate } from "./ui-art.js";
 const $ = (id) => document.getElementById(id);
 const titles = {
-  finances: "Our shared purse",
+  finances: "Village banking",
   resources: "Our shared supplies",
   water: "Every drop counts",
   power: "A little village energy",
 };
 const intros = {
-  finances: "See what comes in, what goes out, and what keeps the village running. Click Savings at any time to return here.",
+  finances: "Your shared account. A little planning for a thriving village.",
   resources:
     "Keep the essentials close, turn local materials into something useful, and plan the next trip to town.",
   water:
@@ -206,6 +206,7 @@ export function createManagement({
       nodes = Object.values(s.infrastructure.nodes);
     dialog.dataset.screen = view;
     $("management-title").textContent = titles[view];
+    dialog.querySelector(".management-heading small").textContent = view === "finances" ? "SOLAR FRIENDS · COMMUNITY BANK" : "YOUR VILLAGE ALMANAC";
     $("management-intro").textContent = intros[view];
     document.querySelectorAll(".management-tabs [data-manage]").forEach((b) => {
       b.classList.toggle("active", b.dataset.manage === view);
@@ -244,29 +245,50 @@ export function createManagement({
       const f=financeSummary(s), money=n=>`R$${n.toFixed(2)}`;
       stats=[["Shared savings",money(f.balance)],["Income recorded",money(f.income)],["Expenses recorded",money(f.expenses)],["Net change",`${f.net>=0?'+':'−'}${money(Math.abs(f.net))}`]];
       const screen=$("finance-screen");screen.replaceChildren();
-      const add=(tag,text,parent=screen)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
+      let panel=screen;
+      const add=(tag,text,parent=panel)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
+      const section=(title,className='')=>{panel=add('section','',screen);panel.className=`bank-panel ${className}`;add('h3',title);return panel;};
+      const card=section('Shared savings','bank-account');
+      add('span','VILLAGE ACCOUNT').className='bank-eyebrow';
+      add('strong',s.mode==='sandbox'?'Unlimited funds':money(f.balance)).className='bank-balance';
+      const balances=add('div','');balances.className='bank-card-balances';
+      for(const [label,value] of [['Available to spend',f.available],['Reserved for collections',f.committed]]){
+        const item=add('div','',balances);add('small',label,item);add('strong',money(value),item);
+      }
+      add('span','SHARED BY ALL. GROWN TOGETHER.').className='bank-card-footer';
+      section('Account activity','bank-activity');
+      const activity=add('div','');activity.className='bank-activity-totals';
+      for(const [label,value,kind] of [['↙ Money in',f.income,'income'],['↗ Money out',f.expenses,'expense'],['Net change',f.net,'net']]){
+        const item=add('div','',activity);item.className=kind;add('small',label,item);add('strong',money(value),item);
+      }
       add('p',s.mode==='sandbox'?'Sandbox supplies and funds are unlimited; purchases are not tracked.':`Records begin ${financeTime(f.since)} with ${money(f.opening)}. Earlier purchases in an existing save are not reconstructed.`);
       add('p',`Available to spend: ${money(f.available)}. Reserved for undelivered construction supplies: ${money(f.committed)} in collection costs. This reserve stays in savings until each trip departs.`);
-      add('h3','Seven-day outlook');
+      section('Seven-day outlook','bank-outlook');
       const forecast=financeForecast(s);
+      add('strong',forecast.days?`${money(forecast.low)} – ${money(forecast.high)}`:'Building your outlook').className='bank-forecast-value';
       add('p',forecast.days?`Available cash could reach ${money(forecast.low)}–${money(forecast.high)} if the best or worst daily operating cash flow from the last ${forecast.days} complete days repeats. Mean operating change: ${money(forecast.mean)}/day. This is a scenario range, not guaranteed income; excludes new construction and assumes the same shopping, work and sales.`:'A forecast needs at least one complete recorded day. Future crops and unpaid exports are not included in available cash.');
       add('p',`Construction investment paid: ${money(Math.abs(f.categories.construction||0))}. Other cash spending: ${money(Math.max(0,f.expenses-Math.abs(f.categories.construction||0)))}. Stored supplies and installed buildings are assets, not spendable savings.`);
       const assets=inventoryOwnership(s,PROJECTS,PROCESSES,MATERIALS).values;
-      add('h3','Where our supplies are');
+      section('Supplies & assets','bank-assets');
       add('p',`Replacement-cost estimates: stores ${money(assets.available)}; committed to projects or sales ${money(assets.reserved)}; processing inputs ${money(assets.processing)}; goods travelling ${money(assets.transit)}; building materials installed ${money(assets.installed)}. These estimates exclude land, cars, labor, depreciation and separately installed upgrades; they are not resale quotes.`);
-      add('h3','Ongoing costs');
+      section('Ongoing costs','bank-costs');
       add('p',`Grid power: ${money(f.gridRate)}/hour at the current import rate. Charges change with demand, local generation and available funds.`);
-      const power=document.createElement('button');power.textContent='Manage grid power';power.onclick=()=>open('power');screen.append(power);
+      const power=document.createElement('button');power.textContent='Manage grid power';power.onclick=()=>open('power');panel.append(power);
       const queued=(s.trade?.orders||[]).filter(o=>['queued','loaded'].includes(o.status));
       add('p',`Exports awaiting payment: ${money(queued.reduce((n,o)=>n+o.cents/100,0))} gross in ${queued.length} batches. This is reserved stock, not cash. Resident export trip costs ${money(transportCost({...s,deliveryOnly:false}))}.`);
       add('p',tripEstimateText(s.worldSettings?.town));
-      add('h3','Asset upkeep');add('p',upkeepText(s));
-      const service=upkeep(s),toggle=document.createElement('button');toggle.textContent=service.automatic?'Automatic upkeep: on':'Automatic upkeep: off';toggle.setAttribute('aria-pressed',String(service.automatic));toggle.onclick=()=>{service.automatic=!service.automatic;render();};screen.append(toggle);
-      const allowance=document.createElement('input');allowance.type='number';allowance.min='0';allowance.max='100000';allowance.value=service.dailyBudget;allowance.setAttribute('aria-label','Daily upkeep materials allowance in reais');allowance.oninput=()=>{service.dailyBudget=Math.max(0,Math.min(100000,Number(allowance.value)||0));};allowance.onchange=()=>render();screen.append(allowance);
-      add('h3','Where the money goes');
+      section('Asset upkeep','bank-upkeep');add('p',upkeepText(s));
+      const service=upkeep(s),toggle=document.createElement('button');toggle.textContent=service.automatic?'Automatic upkeep: on':'Automatic upkeep: off';toggle.setAttribute('aria-pressed',String(service.automatic));toggle.onclick=()=>{service.automatic=!service.automatic;render();};panel.append(toggle);
+      const allowanceLabel=add('label','Daily materials allowance · R$');allowanceLabel.htmlFor='bank-upkeep-allowance';
+      const allowance=document.createElement('input');allowance.id='bank-upkeep-allowance';allowance.type='number';allowance.min='0';allowance.max='100000';allowance.value=service.dailyBudget;allowance.setAttribute('aria-label','Daily upkeep materials allowance in reais');allowance.oninput=()=>{service.dailyBudget=Math.max(0,Math.min(100000,Number(allowance.value)||0));};allowance.onchange=()=>render();panel.append(allowance);
+      section('Cash flow by category','bank-categories');
       const groups={outsideWork:'Outside work',commuting:'Commuting',transport:'Transport',sales:'Surplus sales',construction:'Building materials',purchases:'Town purchases',electricity:'Grid electricity'};
-      for(const [key,label] of Object.entries(groups))add('p',`${label}: ${money(Math.abs(f.categories[key]||0))}`);
-      add('h3','Recent transactions');
+      for(const [key,label] of Object.entries(groups)){
+        const row=add('div','');row.className='bank-category';add('span',label,row);add('strong',money(Math.abs(f.categories[key]||0)),row);
+      }
+      const statement=section('Recent transactions','bank-statement');
+      screen.insertBefore(statement,card.nextElementSibling.nextElementSibling);
+      add('small','ACCOUNT STATEMENT · LATEST 30').className='bank-eyebrow';
       if(!f.entries.length)add('p','No transactions recorded yet. Selling surplus brings income; purchases and imported power spend shared savings.');
       else {
         const table=add('table','');table.className='finance-ledger';
@@ -274,7 +296,7 @@ export function createManagement({
         for(const title of ['When','Transaction','Amount'])add('th',title,heading).scope='col';
         const body=document.createElement('tbody');table.append(body);
         for(const entry of f.entries.slice(0,30)){
-          const row=add('tr','',body);add('td',financeTime(entry.time),row);add('td',entry.description,row);add('td',`${entry.amount>0?'+':'−'}${money(Math.abs(entry.amount))}`,row);
+          const row=add('tr','',body);add('td',financeTime(entry.time),row);add('td',entry.description,row);add('td',`${entry.amount>0?'+':'−'}${money(Math.abs(entry.amount))}`,row).className=entry.amount>0?'bank-credit':'bank-debit';
         }
       }
     }

@@ -1577,3 +1577,57 @@ header > .time { grid-column: 3; justify-self: end; }
 .economy-drawer summary{cursor:pointer;font-weight:750;padding:12px 0;}
 #management .economy-controls label{font-size:12px;margin:0;}
 #management .economy-controls input{flex:0 0 90px;width:90px;margin:0;}
+
+/* Village banking: enamel frame, embossed account card and paper statements. */
+#management[data-screen="finances"] {
+  background: #edf0eb;
+  color: #293e37;
+  border: 1px solid #bac7bd;
+  border-radius: 18px;
+  padding: 25px 30px;
+  box-shadow: inset 0 1px 0 #fff, 0 28px 80px #122b3466, 0 0 0 5px #e0e5dd80;
+}
+#management[data-screen="finances"] .management-heading small { color: #5d7567; letter-spacing: 2px; font-size: 10px; }
+#management[data-screen="finances"] .management-heading h2 { font-family: Georgia, serif; font-weight: normal; font-size: 32px; }
+#management[data-screen="finances"] .management-tabs { border-bottom: 1px solid #cbd4cb; }
+#management[data-screen="finances"] button { background: linear-gradient(#fffef7, #e5e9df); border: 1px solid #b5c2b4; color: #304d3e; box-shadow: inset 0 1px 0 white, 0 2px 2px #243c3020; border-radius: 7px; }
+#management[data-screen="finances"] button.active { background: linear-gradient(#365f4f,#234b3d); color: #fff7da; border-color: #1f4837; }
+#management[data-screen="finances"] button:focus-visible,
+#management[data-screen="finances"] input:focus-visible { outline: 3px solid #ae7c26; outline-offset: 3px; }
+#management[data-screen="finances"] .management-tabs span { color: #5f7164; }
+#management[data-screen="finances"] #management-intro { color: #5f7164; }
+#management[data-screen="finances"] .management-stats { display: none; }
+#management[data-screen="finances"] .management-main { padding: 5px 9px 12px 3px; scrollbar-color: #a4b5a5 transparent; }
+#finance-screen { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; align-items: start; font-variant-numeric: tabular-nums; }
+#finance-screen[hidden] { display: none; }
+#finance-screen .bank-panel { min-width: 0; padding: 22px; border: 1px solid #d2d8ce; border-radius: 11px; background: linear-gradient(115deg,#fffef9,#f7f7ef); box-shadow: 0 2px 3px #283e3210, inset 0 1px 0 white; }
+#finance-screen h3 { font-size: 17px; margin: 0 0 16px; }
+#finance-screen p { font-size: 12px; line-height: 1.65; color: #647267; margin: 12px 0 0; }
+#finance-screen .bank-account { position: relative; overflow: hidden; min-height: 230px; box-sizing: border-box; padding: 25px 28px; color: #fff7db; border-color: #274e3d; background: radial-gradient(ellipse at 100% 0,#77927760,transparent 65%), repeating-linear-gradient(125deg,#ffffff03 0 1px,transparent 1px 4px),linear-gradient(120deg,#365f4c,#173c31); box-shadow: inset 0 1px 0 #b9c8a580, 0 7px 12px #203d3426; }
+#finance-screen .bank-account::after { content: '✳'; position: absolute; right: 24px; top: 14px; color: #cfb777; font-size: 52px; text-shadow: 0 1px 1px #0008; }
+#finance-screen .bank-account h3 { margin-bottom: 18px; font-family: Georgia,serif; font-weight: normal; font-size: 23px; }
+.bank-eyebrow { display: block; font-size: 9px; letter-spacing: 1.8px; opacity: .75; }
+.bank-balance { display: block; font-size: 38px; font-weight: 500; letter-spacing: -1px; margin: 4px 0 21px; text-shadow: 0 2px 1px #0006; }
+.bank-card-balances { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-top: 1px solid #ffffff30; padding-top: 15px; }
+.bank-card-balances small { display: block; font-size: 10px; color: #c9d8c6; margin-bottom: 5px; }
+.bank-card-balances strong { font-size: 18px; font-weight: 500; }
+.bank-card-footer { display: block; margin-top: 22px; font-size: 8px; letter-spacing: 2px; color: #ccbf8f; }
+.bank-activity-totals { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.bank-activity-totals small { display: block; font-size: 11px; color: #657469; margin-bottom: 5px; }
+.bank-activity-totals strong { font-size: 23px; font-weight: 500; }
+.bank-activity-totals .income strong, .bank-credit { color: #267352; }
+.bank-activity-totals .expense strong, .bank-debit { color: #9b583d; }
+.bank-activity-totals .net { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; border-top: 1px solid #dce0d5; padding-top: 12px; }
+#finance-screen .bank-statement { grid-column: 1; grid-row: span 2; padding: 22px 0 8px; }
+#finance-screen .bank-statement > h3, #finance-screen .bank-statement > small, #finance-screen .bank-statement > p { margin-left: 22px; margin-right: 22px; }
+#finance-screen .bank-statement > p { padding-bottom: 20px; }
+#finance-screen .finance-ledger { margin-top: 18px; font-size: 12px; }
+#finance-screen .finance-ledger th { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: #637469; background: #eef0e7; }
+#finance-screen .finance-ledger td, #finance-screen .finance-ledger th { padding: 13px 16px; border-color: #e3e5db; }
+#finance-screen .finance-ledger td:first-child { font-size: 10px; color: #738073; white-space: nowrap; }
+.bank-forecast-value { display: block; font: 22px Georgia, serif; color: #365e49; }
+.bank-category { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #e2e5d9; font-size: 12px; }
+.bank-category:last-child { border-bottom: 0; }
+#finance-screen button { margin-top: 15px; padding: 9px 12px; }
+#finance-screen .bank-upkeep label { font-size: 11px; color: #647267; margin: 18px 0 7px; }
+#bank-upkeep-allowance { width: 100%; box-sizing: border-box; border: 1px solid #b7c3b2; background: #fafbf6; border-radius: 5px; padding: 10px; box-shadow: inset 0 2px 3px #263a3012; color: #294536; }
