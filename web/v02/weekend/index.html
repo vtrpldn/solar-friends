@@ -25,6 +25,7 @@
     </script>
     <link rel="stylesheet" href="./responsive.css" />
     <link rel="stylesheet" href="./lenses.css" />
+    <link rel="stylesheet" href="./almanac.css" />
   </head>
   <body data-tray="closed">
     <canvas
@@ -180,9 +181,9 @@
         <span class="dock-divider"></span>
         <button data-manage="items">Items &amp; equipment</button>
         <button data-manage="crafting">Crafting</button>
-        <button data-manage="resources" data-shortcut="I" aria-keyshortcuts="I">▰ Resources</button
-        ><button data-manage="water" data-shortcut="U" aria-keyshortcuts="U">♦ Water</button
-        ><button data-manage="power" data-shortcut="P" aria-keyshortcuts="P">ϟ Power</button>
+        <button data-manage="resources" data-shortcut="I" aria-keyshortcuts="I">Resources</button
+        ><button data-manage="water" data-shortcut="U" aria-keyshortcuts="U">Water</button
+        ><button data-manage="power" data-shortcut="P" aria-keyshortcuts="P">Power</button>
       <span class="dock-divider" aria-hidden="true"></span>
       <details class="view-menu">
         <summary>View &amp; options</summary>
@@ -213,7 +214,7 @@
     <dialog id="management" aria-labelledby="management-title">
       <div class="management-heading">
         <div>
-          <small>YOUR VILLAGE ALMANAC</small>
+          <small>VILLAGE ALMANAC</small>
           <h2 id="management-title">Resources</h2>
         </div>
         <button id="close-management" aria-label="Close management screen">
@@ -221,13 +222,13 @@
         </button>
       </div>
       <nav class="management-tabs" aria-label="Management screens">
-        <button data-manage="finances">R$ Finances</button>
+        <button data-manage="finances">Finances</button>
         <button data-manage="items">Items &amp; equipment</button>
         <button data-manage="crafting">Crafting</button>
-        <button data-manage="resources">▰ Resources</button
-        ><button data-manage="water">♦ Water</button
-        ><button data-manage="power">ϟ Power</button
-        ><span>Ⅱ Village paused while you plan</span>
+        <button data-manage="resources">Resources</button
+        ><button data-manage="water">Water</button
+        ><button data-manage="power">Power</button
+        ><span>Ⅱ Paused while you plan</span>
       </nav>
       <p id="management-intro"></p>
       <div id="management-stats" class="management-stats"></div>

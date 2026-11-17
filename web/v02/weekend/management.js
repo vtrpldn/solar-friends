@@ -37,12 +37,12 @@ import { LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./i
 import { illustrate } from "./ui-art.js";
 const $ = (id) => document.getElementById(id);
 const titles = {
-  finances: "Our shared purse",
-  resources: "Our shared supplies",
+  finances: "Finances",
+  resources: "Resources",
   items: "Items & equipment",
   crafting: "Crafting & repairs",
-  water: "Every drop counts",
-  power: "A little village energy",
+  water: "Water & sanitation",
+  power: "Power",
 };
 const intros = {
   crafting: "Plan work around the skills of your residents, real materials, and equipped workspaces. Jobs take time and pause for rest, needs, or unavailable tools.",
@@ -130,21 +130,24 @@ export function createManagement({
     const el = document.createElement("article");
     el.className = "network-node";
     const p = state().projects.find((p) => p.id === n.id);
+    const heading = document.createElement("div");
+    heading.className = "node-heading";
     const title = document.createElement("strong");
     title.textContent = label(n);
     if (p || n.id === 0) {
       const img = document.createElement("img");
       illustrate(img, p ? PROJECTS[p.key].asset : "produce-crates");
-      el.append(img);
+      heading.append(img);
     }
     if (n.id === -1) {
       const symbol = document.createElement("span");
       symbol.className = "node-symbol";
       symbol.textContent = "≈";
       symbol.setAttribute("aria-hidden", "true");
-      el.append(symbol);
+      heading.append(symbol);
     }
-    el.append(title);
+    heading.append(title);
+    el.append(heading);
     const detail = document.createElement("div");
     detail.className = "node-detail";
     if (view === "power") {
