@@ -600,9 +600,13 @@ function maintainFood(s) {
     const recipe=Object.entries(PROCESSES).find(([,d])=>d.kind===PROJECTS[p.key].kind&&Object.keys(d.output).some(id=>FOOD_SERVINGS[id]));
     if(recipe&&!(PROJECTS[p.key].kind==='kitchen'&&(p.repeat||foodPolicy(s).automatic))&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))queueProduction(s,p.id,recipe[0]);
   }
-  // A visible, switchable emergency policy, paid from real savings, at most once a day.
-  if(s.emergencyFood!==false && MATERIALS.food.price+pickupFare(s)<=(s.foodPurchaseBudget??100) && (activeTrips(s).length<2||returnPickup(s)) && s.time>=(s.nextFoodTrip||0) && supplyRun(s,'food')) {
-    s.nextFoodTrip=s.time+3200;
+  // Old saves retain the cooldown for their last purchase.
+  if (s.emergencyFood === false || s.time < (s.nextFoodTrip || 0)) return;
+  const day = Math.floor((540 + s.time * .45) / 1440);
+  const spent = s.foodPurchases?.day === day ? s.foodPurchases.spent : 0;
+  const cost = MATERIALS.food.price + pickupFare(s);
+  if (Math.round((spent + cost) * 100) <= Math.round((s.foodPurchaseBudget ?? 100) * 100) && supplyRun(s,'food')) {
+    s.foodPurchases = {day, spent: Math.round((spent + cost) * 100) / 100};
     say(s,'Food reserve is low: the community bought emergency ingredients. Change this policy in Resources.');
   }
 }
@@ -2946,6 +2950,8 @@ export function restore(text) {
     }
     if(s.expansionReserve!==undefined&&(!Number.isFinite(s.expansionReserve)||s.expansionReserve<0||s.expansionReserve>100000))return null;
     if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
+    if(s.foodPurchases!==undefined && (!s.foodPurchases || !Number.isSafeInteger(s.foodPurchases.day) || s.foodPurchases.day<0 ||
+      !Number.isFinite(s.foodPurchases.spent) || s.foodPurchases.spent<0 || s.foodPurchases.spent>100000))return null;
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     if(s.foodStorage?.lots)for(const id of ['greens','beans','corn'])if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
     refreshSandboxFood(s);

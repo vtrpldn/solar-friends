@@ -129,7 +129,7 @@
     "web/v02/weekend/save-slots.js": "6655ca221ac0cbf69d2f2ed717c96d8641e14b0739b1bb47ddbd87ce7d74f94d",
     "web/v02/weekend/scale-preview.js": "416813b92e606bc2ae3c0672d6218d7e950d03c1b9a1223d8576c392528a6b4d",
     "web/v02/weekend/session-ui.js": "c4ae65e7566ae4b401d1f9b579d3169f696d9d00888e29e8212c1c73b6bba3a0",
-    "web/v02/weekend/simulation.js": "8dffa36daa432dd40d1b625343174159dc8252d20765baf8e03a96b49b40e649",
+    "web/v02/weekend/simulation.js": "74c304adea400553bbc639655389c10cf5861e0f9c3c69eba6d29739c1627cba",
     "web/v02/weekend/site-space.js": "ab72657b3132544b1717899013943c3504e1e673dc7052fcf689b5d74809d414",
     "web/v02/weekend/sunlight.js": "36bba103b290454fb88ba79bff1cc03dceb0e094cf07a9620d235d4e1eaab145",
     "web/v02/weekend/supplier-stock.js": "d01ecd0f80b5581eabab65b01c34d9b1fe69f3897fa2f584eb1068eb83539604",
@@ -148,7 +148,7 @@
     "web/v02/workshop/models.js": "4c403f76f3b1ba786be6c84c1c9129de92804ed77b8b8e80c8e76d21c12067d1"
   },
   "content": {
-    "topics": "a8a877f0694e64d615bf8df5dc7e4fe96c8ad5b32bb8e293d1e46dc0c1e0a7cd",
+    "topics": "2513cc747c155218cdf2e98842c8d8f5e84ab62ec7e55f40ea53477580e6f6c3",
     "facts": "a38be0845c3d0f82be67f883bb4c49ab11b7d63b572a583fc5ed6c02518d413e",
     "renderer": "8bd634ddece8c801ba064fe84a4d11adbf769b0ce6a9f7a299f6e0e2dd83dcca",
     "dependencies": "9cc183f2db674fa60fb2a2969ed46747343f550c3ae5e9395aab3532a841eb7a"
