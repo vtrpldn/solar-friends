@@ -1,3 +1,4 @@
+import { siteDescription } from './site-space.js';
 import { COMMUNITY } from "../library/community-defs.js";
 import { BUILDING_MODELS } from "./building-models.js";
 // v1 economy.rs construction recipes, expressed in v2 material IDs.
@@ -218,6 +219,7 @@ export function expandProjects(projects) {
         `${model.name}. ${model.size.join(" × ")} cells. Build with physical supplies and resident labor.${["warehouse", "supply-5"].includes(kind) ? " Nearby construction can stage bundled deliveries here to reduce hauling trips." : ""}`,
     };
   }
+  for (const model of BUILDING_MODELS) projects[model.id].description += ` ${siteDescription(model.id, model.size)}`;
   for (const key of ["gathering", "water", "shelter", "toilet"]) {
     projects[key].size = BUILDING_MODELS.find(
       (m) => m.id === projects[key].asset,
