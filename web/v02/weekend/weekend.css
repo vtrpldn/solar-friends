@@ -1631,3 +1631,31 @@ header > .time { grid-column: 3; justify-self: end; }
 #finance-screen button { margin-top: 15px; padding: 9px 12px; }
 #finance-screen .bank-upkeep label { font-size: 11px; color: #647267; margin: 18px 0 7px; }
 #bank-upkeep-allowance { width: 100%; box-sizing: border-box; border: 1px solid #b7c3b2; background: #fafbf6; border-radius: 5px; padding: 10px; box-shadow: inset 0 2px 3px #263a3012; color: #294536; }
+
+/* Account portal navigation and functional banking pages. */
+#finance-screen { grid-template-columns: 170px minmax(0,1fr); gap: 24px; }
+.bank-navigation { position: sticky; top: 0; display: flex; flex-direction: column; align-self: start; padding: 16px 14px; border-right: 1px solid #cad3c7; min-height: 400px; }
+.bank-emblem { color: #987c3f; font-size: 32px; }
+.bank-brand { font: 26px Georgia,serif; margin-top: 8px; }
+.bank-navigation > small { font-size: 8px; letter-spacing: 1px; margin: 8px 0 22px; }
+#finance-screen .bank-navigation button { text-align: left; margin: 4px 0; padding: 12px 10px; }
+#finance-screen .bank-account-label { white-space: pre-line; margin-top: 38px; font-size: 10px; }
+.bank-content { min-width: 0; }
+.bank-page-heading { display: flex; justify-content: space-between; align-items: baseline; margin: 10px 0 18px; }
+.bank-page-heading span { font-size: 11px; color: #6b796d; }
+.bank-page-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 18px; align-items: start; }
+#finance-screen .bank-panel[hidden] { display: none; }
+#finance-screen .bank-outlook, #finance-screen .bank-reserves { grid-column: 1 / -1; }
+#finance-screen .bank-statement { grid-column: 1 / -1; grid-row: auto; padding: 22px; }
+#finance-screen .bank-statement > h3, #finance-screen .bank-statement > p { margin-left: 0; margin-right: 0; }
+#finance-screen .bank-statement > p { padding-bottom: 0; }
+.bank-filters { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr); gap: 12px; margin: 20px 0; }
+#management .bank-filters label { font-size: 11px; color: #53675b; }
+#management .bank-filters input, #management .bank-filters select { width: 100%; box-sizing: border-box; margin: 7px 0 0; padding: 10px; font: inherit; background: #fffef9; color: #293e37; border: 1px solid #b9c5b5; border-radius: 5px; }
+#finance-screen .finance-ledger summary { cursor: pointer; }
+#finance-screen .finance-ledger td { vertical-align: top; }
+#finance-screen .finance-ledger details p { font-size: 11px; }
+.bank-quick-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#finance-screen .bank-balance { font-size: 30px; }
+#finance-screen .bank-card-balances { grid-template-columns: 1fr; gap: 12px; }
+#management[data-screen="finances"] { width: min(1240px,calc(100vw - 72px)); }

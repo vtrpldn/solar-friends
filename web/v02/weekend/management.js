@@ -1,3 +1,4 @@
+import {mountBanking} from './banking.js';
 import {inventoryOwnership} from './economy-inventory.js';
 import {upkeep,upkeepText} from "./asset-upkeep.js";
 import {biologyText} from "./biological-production.js";
@@ -56,6 +57,7 @@ export function createManagement({
     refresh();
     render();
   };
+  const bankingUI = {page:'overview', query:'', direction:'all', period:'all'};
   const recipeChoices = new Map();
   const dialog = $("management");
   let view = "resources",
@@ -248,7 +250,7 @@ export function createManagement({
       let panel=screen;
       const add=(tag,text,parent=panel)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
       const section=(title,className='')=>{panel=add('section','',screen);panel.className=`bank-panel ${className}`;add('h3',title);return panel;};
-      const card=section('Shared savings','bank-account');
+      section('Shared savings','bank-account');
       add('span','VILLAGE ACCOUNT').className='bank-eyebrow';
       add('strong',s.mode==='sandbox'?'Unlimited funds':money(f.balance)).className='bank-balance';
       const balances=add('div','');balances.className='bank-card-balances';
@@ -271,34 +273,31 @@ export function createManagement({
       const assets=inventoryOwnership(s,PROJECTS,PROCESSES,MATERIALS).values;
       section('Supplies & assets','bank-assets');
       add('p',`Replacement-cost estimates: stores ${money(assets.available)}; committed to projects or sales ${money(assets.reserved)}; processing inputs ${money(assets.processing)}; goods travelling ${money(assets.transit)}; building materials installed ${money(assets.installed)}. These estimates exclude land, cars, labor, depreciation and separately installed upgrades; they are not resale quotes.`);
+      section('Reserved funds','bank-reserves');
+      add('strong',money(f.committed)).className='bank-forecast-value';
+      add('p',`Held for collection trips for undelivered construction supplies. This money stays in the account until departure. Available after reserves: ${money(f.available)}.`);
       section('Ongoing costs','bank-costs');
       add('p',`Grid power: ${money(f.gridRate)}/hour at the current import rate. Charges change with demand, local generation and available funds.`);
       const power=document.createElement('button');power.textContent='Manage grid power';power.onclick=()=>open('power');panel.append(power);
       const queued=(s.trade?.orders||[]).filter(o=>['queued','loaded'].includes(o.status));
       add('p',`Exports awaiting payment: ${money(queued.reduce((n,o)=>n+o.cents/100,0))} gross in ${queued.length} batches. This is reserved stock, not cash. Resident export trip costs ${money(transportCost({...s,deliveryOnly:false}))}.`);
       add('p',tripEstimateText(s.worldSettings?.town));
-      section('Asset upkeep','bank-upkeep');add('p',upkeepText(s));
+      section('Asset upkeep','bank-upkeep');const upkeepSummary=add('p',upkeepText(s));
       const service=upkeep(s),toggle=document.createElement('button');toggle.textContent=service.automatic?'Automatic upkeep: on':'Automatic upkeep: off';toggle.setAttribute('aria-pressed',String(service.automatic));toggle.onclick=()=>{service.automatic=!service.automatic;render();};panel.append(toggle);
       const allowanceLabel=add('label','Daily materials allowance · R$');allowanceLabel.htmlFor='bank-upkeep-allowance';
-      const allowance=document.createElement('input');allowance.id='bank-upkeep-allowance';allowance.type='number';allowance.min='0';allowance.max='100000';allowance.value=service.dailyBudget;allowance.setAttribute('aria-label','Daily upkeep materials allowance in reais');allowance.oninput=()=>{service.dailyBudget=Math.max(0,Math.min(100000,Number(allowance.value)||0));};allowance.onchange=()=>render();panel.append(allowance);
+      const allowance=document.createElement('input');allowance.id='bank-upkeep-allowance';allowance.type='number';allowance.min='0';allowance.step='0.01';allowance.required=true;allowance.max='100000';allowance.value=service.dailyBudget;allowance.setAttribute('aria-label','Daily upkeep materials allowance in reais');panel.append(allowance);
+      const saveAllowance=add('button','Save daily allowance');
+      const saved=add('p','');saved.setAttribute('role','status');
+      saveAllowance.onclick=()=>{if(!allowance.reportValidity())return;service.dailyBudget=Number(allowance.value);upkeepSummary.textContent=upkeepText(s);saved.textContent=`Daily allowance saved: ${money(service.dailyBudget)}.`;};
       section('Cash flow by category','bank-categories');
       const groups={outsideWork:'Outside work',commuting:'Commuting',transport:'Transport',sales:'Surplus sales',construction:'Building materials',purchases:'Town purchases',electricity:'Grid electricity'};
+      for(const key of Object.keys(f.categories))if(!groups[key])groups[key]=key;
+      add('p','All recorded activity. Positive amounts are income; negative amounts are spending.');
       for(const [key,label] of Object.entries(groups)){
-        const row=add('div','');row.className='bank-category';add('span',label,row);add('strong',money(Math.abs(f.categories[key]||0)),row);
+        const row=add('div','');row.className='bank-category';add('span',label,row);const amount=f.categories[key]||0;add('strong',`${amount>0?'+':amount<0?'−':''}${money(Math.abs(amount))}`,row).className=amount>0?'bank-credit':'bank-debit';
       }
-      const statement=section('Recent transactions','bank-statement');
-      screen.insertBefore(statement,card.nextElementSibling.nextElementSibling);
-      add('small','ACCOUNT STATEMENT · LATEST 30').className='bank-eyebrow';
-      if(!f.entries.length)add('p','No transactions recorded yet. Selling surplus brings income; purchases and imported power spend shared savings.');
-      else {
-        const table=add('table','');table.className='finance-ledger';
-        const head=document.createElement('thead');table.append(head);const heading=add('tr','',head);
-        for(const title of ['When','Transaction','Amount'])add('th',title,heading).scope='col';
-        const body=document.createElement('tbody');table.append(body);
-        for(const entry of f.entries.slice(0,30)){
-          const row=add('tr','',body);add('td',financeTime(entry.time),row);add('td',entry.description,row);add('td',`${entry.amount>0?'+':'−'}${money(Math.abs(entry.amount))}`,row).className=entry.amount>0?'bank-credit':'bank-debit';
-        }
-      }
+      section('Account statement','bank-statement');
+      mountBanking(screen,f,s,bankingUI);
     }
     else if (view === "resources")
       stats = [
