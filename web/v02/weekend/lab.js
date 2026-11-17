@@ -1,3 +1,4 @@
+import {automaticWorkCopy} from './automatic-work-copy.js';
 import {PROJECTS,PROCESSES,MATERIALS,footprint,campLocation} from './simulation.js';
 import {riverCenter} from './river-layout.js';
 import {CULTIVATION_KEYS,CROPS,harvestExpired,harvestYield} from './cultivation.js';
@@ -37,7 +38,7 @@ function render(){if(!s)return;
  if(p){line(panel,`(${p.x}, ${p.z}) · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores · ${Math.round(100*p.work/PROJECTS[p.key].work)}% built`);
  if(p.cultivation)renderBeds(panel,p);
  if(p.animalCare)line(panel,animalCareText(p));
- if(!CULTIVATION_KEYS.includes(p.key))for(const [recipe,d]of Object.entries(PROCESSES).filter(([,d])=>d.kind===PROJECTS[p.key].kind)){button(panel,d.name,'produce',{site:p.id,recipe});if(Object.keys(d.output).length)button(panel,p.repeat===recipe?'Stop repeating':'Keep 24: '+d.name,'repeat',{site:p.id,recipe});}
+ if(!CULTIVATION_KEYS.includes(p.key))for(const [recipe,d]of Object.entries(PROCESSES).filter(([,d])=>d.kind===PROJECTS[p.key].kind)){button(panel,d.name,'produce',{site:p.id,recipe});if(Object.keys(d.output).length){const copy=automaticWorkCopy(p.repeat===recipe?p:{...p,repeat:null},recipe,PROCESSES,MATERIALS);button(panel,`${copy.label} · ${d.name}`,'repeat',{site:p.id,recipe});panel.lastChild.setAttribute('aria-pressed',String(copy.active));line(panel,copy.detail);}}
  if(p.readyAt>s.time)line(panel,`Growing: ${Math.ceil((p.readyAt-s.time)*.45)} game minutes remaining.`);}
  if(n){line(panel,`Water: ${n.water.map(v=>v.toFixed(1)).join(' / ')} (clean / raw / grey / sewage)`);
  if(n.capacity[1])button(panel,'Carry river water','haul',{site:selected});

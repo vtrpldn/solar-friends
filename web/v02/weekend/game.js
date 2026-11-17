@@ -1,3 +1,4 @@
+import {automaticWorkCopy} from './automatic-work-copy.js';
 import {hydrationWarning} from './hydration.js';
 import {hydrologyText} from './hydrology.js';
 import {forecast,weatherText} from './weather.js';
@@ -15,7 +16,6 @@ import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {installLenses} from './lenses.js';
 import {simulationFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
-import {productionTarget} from './economy-policies.js';
 import {eventHistory, eventTime} from './event-history.js';
 import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
 import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
@@ -1440,9 +1440,11 @@ function renderUtilityUI() {
   disabledReason($("queue-production"),batchBlocker);
   $("queue-production").disabled ||= !!batchBlocker;
   $("repeat-production").disabled = !node || !$("production").value;
-  $("repeat-production").textContent = p?.repeat
-    ? "Stop repeating"
-    : `Keep ${productionTarget(p || {})} in stock`;
+  const automatic=automaticWorkCopy(p,$("production").value,PROCESSES,MATERIALS);
+  $("repeat-production").textContent=automatic.label;
+  $("repeat-production").setAttribute('aria-pressed',String(automatic.active));
+  $("automatic-work-detail").textContent=automatic.detail;
+  $("automatic-work-detail").hidden=$("repeat-production").hidden;
   $("toggle-building").hidden = !canSwitchBuilding(sys,node);
   disabledReason($("toggle-building"), "This structure has no switchable service.");
   $("toggle-building").disabled = !canSwitchBuilding(sys,node);
@@ -1499,7 +1501,7 @@ $("queue-production").onclick = () => {
   renderUI();
 };
 $("repeat-production").onclick = () => {
-  repeatProduction(s, selected, $("production").value);
+  repeatProduction(s, selected, s.projects.find(p=>p.id===selected)?.repeat || $("production").value);
   uiSignature = "";
   persist();
   renderUI();
