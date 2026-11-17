@@ -1,5 +1,5 @@
 import {CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
-import {registerGathering,gatheringStatus} from './gathering.js';
+import {registerGathering,gatheringStatus,gatheringState,validGathering} from './gathering.js';
 import {biologyLabel} from './biological-production.js';
 import {foodPortions,FOOD_SERVINGS} from './food-storage.js';
 import {quantityText} from './material-measures.js';
@@ -412,7 +412,7 @@ export function buildingOperatingStatus(s,p) {
     if(worker.action==='blocked')return result('Blocked',op.status||'The resident cannot continue this job.');
     return result(worker.action==='produce'?'Working':'Preparing',op.status||'A resident is collecting supplies or walking to the workspace.');
   }
-  if(gatheringStatus(s,p))return result(p.readyAt>s.time?'Recovering':'Gathering',gatheringStatus(s,p));
+  if(gatheringStatus(s,p))return result(gatheringState(s,p),gatheringStatus(s,p));
   if(p.readyAt>s.time)return result('Growing',`Ready in about ${Math.ceil((p.readyAt-s.time)*.45)} game minutes.`);
   if(p.repeat) {
     const blocker=productionBlocker(s,p.id,p.repeat);
@@ -2546,6 +2546,7 @@ export function restore(text) {
       s.projects.length > 512
     )
       return null;
+    if(!validGathering(s))return null;
     restoreHomeAssignments(s);
     // Saves predating narrow footbridges retain their exact 8×2 occupancy,
     // centre, rotations and deck width. New plans explicitly write version 1.

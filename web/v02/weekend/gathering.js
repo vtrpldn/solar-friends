@@ -19,3 +19,17 @@ export function gatheringStatus(s,p){
  if(p.readyAt>s.time)return `Recovering · ${((p.readyAt-s.time)/3200).toFixed(1)} game days until gathering`;
  return 'Ready to gather · a resident will collect and carry the materials to stores';
 }
+
+export function gatheringState(s,p){
+ const d=GATHERING[p.key];if(!d)return null;
+ return d.gatherLimit&&(p.extracted||0)>=d.gatherLimit?'Gathered out':p.readyAt>s.time?'Recovering':'Ready to gather';
+}
+export function validGathering(s){
+ if(s.gatheringLandVersion!==undefined&&s.gatheringLandVersion!==1)return false;
+ return s.projects.every(p=>{
+  const d=GATHERING[p.key];if(!d)return true;
+  const batch=Object.values(d.output).reduce((sum,n)=>sum+n,0);
+  return (p.extracted===undefined||(Number.isSafeInteger(p.extracted)&&p.extracted>=0&&p.extracted%batch===0&&(!d.gatherLimit||p.extracted<=d.gatherLimit)))&&
+   (p.readyAt===undefined||(Number.isFinite(p.readyAt)&&p.readyAt>=0&&p.readyAt<=s.time+(d.renew||0)));
+ });
+}
