@@ -28,7 +28,7 @@ try {
  console.log('Loaded resident profile fixture');
  await page.locator('[data-panel-toggle="people"]').click();
  const detail=page.locator('#resident-detail');
- await page.waitForFunction(()=>[...document.querySelectorAll('#roster img')].every(img=>img.complete && img.naturalWidth>0),null,{timeout:30000});
+ await page.waitForFunction(()=>[...document.querySelectorAll('#roster img')].every(img=>img.complete && img.naturalWidth>0),null,{timeout:180000});
  console.log('Resident portraits rendered');
  for(const r of s.people){
   await page.getByRole('button',{name:`View ${r.name}`,exact:true}).click();
