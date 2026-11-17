@@ -18,7 +18,7 @@
 #guide-article h3 { margin:0 0 8px; font-size:25px; }
 #guide-article p { font-size:14px; line-height:1.5; }
 .guide-intro { margin:0 0 18px; max-width:75ch; }
-.guide-diagram { overflow:auto; max-height:58vh; border:1px solid #d6dcc6; border-radius:8px; padding:18px; background:#fbfcf6; }
+.guide-diagram { overflow:auto; max-height:58vh; border:1px solid #dddcc8; border-radius:14px; padding:24px; background-color:#fbf9ef; background-image:radial-gradient(#8b9c7926 .7px,transparent .7px); background-size:16px 16px; }
 .guide-diagram img { display:block; width:100%; height:auto; margin:0 auto; }
 .guide-chart-controls { display:flex; gap:8px; margin:10px 0 18px; }
 .guide-chart-controls button { font-size:11px; padding:6px 10px; min-height:30px; }

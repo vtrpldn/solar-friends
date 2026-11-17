@@ -17,7 +17,7 @@
       "water-sources"
     ],
     "facts": null,
-    "diagram": "flowchart TB\n subgraph water[Reuse water]\n direction LR\n Fresh[Local fresh water] --> Wash[Washing]\n Wash --> Treatment[Wetland treatment]\n Treatment --> Irrigation[Irrigation water]\n end\n subgraph soil[Return organic material]\n direction LR\n Seeds[Purchased seeds] --> Crops[Crops]\n Crops --> Residues[Residues]\n Residues --> Compost[Compost and cover]\n Compost --> Crops\n end\n subgraph power[Generate locally]\n direction LR\n Nature[Sun and river flow] --> Generation[Solar and hydro]\n Parts[Imported replacement parts] --> Generation\n Generation --> Services[Local services]\n end\n water ~~~ soil\n soil ~~~ power\n"
+    "diagram": "flowchart TB\n subgraph water[Reuse water]\n direction LR\n Fresh[Local fresh water] --> Wash[Washing]\n Wash --> Treatment[Wetland treatment]\n Treatment --> Irrigation[Irrigation water]\n end\n subgraph soil[Return organic material]\n direction LR\n Seeds[Purchased seeds] --> Crops[Crops]\n Crops --> Residues[Residues]\n Residues --> Compost[Compost and cover]\n Compost --> Crops\n end\n subgraph power[Generate locally]\n direction LR\n Nature[Sun and river flow] --> Generation[Solar and hydro]\n Parts[Imported replacement parts] --> Generation\n Generation --> Services[Local services]\n end\n water ~~~ soil\n soil ~~~ power\n classDef water fill:#deedf0,stroke:#9abfc4,color:#285461;\n classDef work fill:#fff7e8,stroke:#d8c5a2,color:#645033;\n classDef output fill:#dcebd8,stroke:#9fba92,color:#34553a;\n classDef imported fill:#f4e2d6,stroke:#d3ae92,color:#754d37;\n class Fresh,Nature water;\n class Wash,Treatment,Crops,Generation work;\n class Irrigation,Residues,Compost,Services output;\n class Seeds,Parts imported;\n style water fill:#f0f6f4,stroke:#cbded7\n style soil fill:#f4f5e9,stroke:#d9dfc2\n style power fill:#faf3e4,stroke:#e4d8b9\n"
   },
   {
     "id": "system-overview",
@@ -257,8 +257,8 @@
       "cultivation-browser"
     ],
     "description": "Each bed has its own crop, spacing, care and harvest cycle.",
-    "diagram": "stateDiagram-v2\n [*] --> Unprepared\n Unprepared --> Prepared: Resident prepares soil\n Prepared --> Planted: Seeds acquired and planting starts\n Planted --> Growing: Planting work finishes in normal mode\n Planted --> Harvestable: Planting finishes in sandbox\n Growing --> Harvestable: Accumulated growth reaches maturity\n Growing --> Harvested: Explicit clearing work\n Harvestable --> Harvested: Harvest or clearing work\n Harvested --> Prepared: Prepare next planting\n Harvested --> Harvested: Collect residues or apply compost\n note right of Harvestable\n Harvest resolves output once.\n Delay can reduce yield.\n Clearing yields residues only.\n end note",
-    "boundary": "Fields snap to 2 m map cells.",
+    "diagram": "flowchart TB\n Soil[Unprepared soil] -->|Resident preparation| Ready[Prepared bed]\n Ready -->|Seeds + planting work| Planted[Planted crop]\n Planted -->|Normal mode| Growth[Growing]\n Planted -->|Sandbox: instant growth| Mature[Harvestable]\n Growth -->|Accumulated growing conditions| Mature\n Mature -->|Resident harvesting| Harvest[Harvested bed + residues]\n Growth -->|Explicit clearing: residues only| Harvest\n Mature -->|Explicit clearing: residues only| Harvest\n Harvest -->|Prepare next planting| Ready\n Harvest --> Residues[Leave cover or collect residues]\n classDef soil fill:#f2e5d6,stroke:#c8af90,color:#654c35;\n classDef growing fill:#e9efd9,stroke:#b5c49a,color:#485d32;\n classDef mature fill:#d4e6d0,stroke:#88a67c,color:#2d5136;\n class Soil,Ready,Harvest soil;\n class Planted,Growth growing;\n class Mature,Residues mature;\n",
+    "boundary": "Harvest quantities resolve once. Delayed harvest can reduce yield; clearing returns residues only. Fields snap to 2 m map cells.",
     "tip": "Keep moisture and fertility adequate before increasing planting density. Seeds are still purchased.",
     "facts": "crops"
   },
