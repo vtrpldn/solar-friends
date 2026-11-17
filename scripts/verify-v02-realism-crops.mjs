@@ -8,3 +8,14 @@ let [s,b]=make();step(s,365);assert.equal(b.stage,'failed');assert.equal(b.droug
 [s,b]=make();Object.assign(b,{stage:'harvestable',growth:1,ripeAt:0,irrigation:true});let calls=0;step(s,1,()=>{calls++;return true;});assert(calls>0);assert.equal(b.droughtDamage,0);
 [s,b]=make();s.weather.rainMmPerHour=1;step(s,1);assert(Math.abs(b.rainLiters-b.w*b.d*24)<1e-8);
 console.log('PASS drought failure, irreversible damage, rescue, ripe irrigation, physical rainfall and cleared biomass');
+// Current yield and expiry must agree with actual settlement, including late harvest.
+const {harvestYield,harvestExpired}=await import('../web/v02/weekend/cultivation.js');
+for(const [days,expected]of [[0,9],[4,9],[6,4],[8,0],[11,0]]){
+ [s,b]=make();Object.assign(b,{stage:'harvestable',growth:1,ripeAt:0,moisture:1,standingBiomassKg:11.08});s.time=days*DAY;
+ assert.equal(harvestYield(b,s.time),expected);assert.equal(harvestExpired(b,s.time),days>=8);
+ const op={farm:{bed:0,action:'harvest'}};finishFarmJob(s,s.projects[0],op);assert.equal(op.harvestOutput.greens||0,expected);
+ assert(Math.abs(b.exportedKg+b.fieldLossKg+b.residueKg-11.08)<1e-9);
+}
+[s,b]=make();Object.assign(b,{stage:'harvestable',growth:1,ripeAt:0,irrigation:true});s.time=8*DAY;
+assert.match(farmJobError(s,s.projects[0],b,'harvest'),/expired/);assert.equal(farmJobError(s,s.projects[0],b,'clear'),'');calls=0;step(s,1,()=>{calls++;return true;});assert.equal(calls,0,'expired harvest stops automatic irrigation');
+console.log('PASS late-harvest estimate agrees with settlement, expiry directs clearing and stops irrigation');

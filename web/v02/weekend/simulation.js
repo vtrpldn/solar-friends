@@ -2,7 +2,7 @@ import {ensureAnimalCare,animalAvailable,collectAnimal,validAnimalCare} from './
 import {packDrinkingWater,hydrationWorkFactor} from './hydration.js';
 import {ensureHydrology,extractWater,validHydrology} from './hydrology.js';
 import {weatherStep,validWeather} from './weather.js';
-import {CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
+import {harvestExpired,CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
 import {registerGathering,gatheringStatus,gatheringState,validGathering} from './gathering.js';
 import {biologyLabel} from './biological-production.js';
 import {foodPortions,FOOD_SERVINGS} from './food-storage.js';
@@ -539,7 +539,7 @@ export function maintainWater(s) {
   }
   for(const p of s.projects){
     const n=sys.nodes[p.id];if(!n||!n.enabled||!n.capacity[1]||n.water[1]>=Math.min(12,n.capacity[1]*.5)||s.operations?.some(o=>!o.done&&o.water&&o.site===p.id))continue;
-    const growing=p.cultivation?.beds.some(b=>b.irrigation&&['growing','harvestable'].includes(b.stage))||s.operations?.some(o=>!o.done&&o.site===p.id&&CROP_CARE[o.recipe]&&['growing','process'].includes(o.phase)&&p.irrigationPolicy!=='rainfed');
+    const growing=p.cultivation?.beds.some(b=>b.irrigation&&['growing','harvestable'].includes(b.stage)&&!harvestExpired(b,s.time))||s.operations?.some(o=>!o.done&&o.site===p.id&&CROP_CARE[o.recipe]&&['growing','process'].includes(o.phase)&&p.irrigationPolicy!=='rainfed');
     if(growing)queueWater(s,-1,p.id,'irrigation');
   }
   for(const job of s.upkeep?.jobs||[]){const care=ANIMAL_CARE[job.care],n=sys.nodes[job.target];if(!care||job.done||!n||n.water[0]>=care.water||s.operations?.some(o=>!o.done&&o.water&&o.site===n.id))continue;
@@ -585,6 +585,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
         !["rest", "town"].includes(other.action),
     );
   const eligible = (op) => {
+    if ((op.accessRetryAt?.[r.id]||0)>s.time) return false;
     if (op.done || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group && workGroup(op,PROCESSES)!==group)) return false;
     if(op.water?.stagedAt){
       const destination=sys.nodes[op.site],index=LIQUIDS.indexOf(op.water.kind);
@@ -808,7 +809,15 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   const a=(p.rotation||0)*Math.PI/2;
   const dest = bed ? [{x:center.x+Math.cos(a)*.5,z:center.z-Math.sin(a)*.5},{x:center.x-Math.cos(a)*.5,z:center.z+Math.sin(a)*.5}].find(point=>!occupied(s,point.x,point.z)&&route(s,r,point)) : utilitySpot(s, node, r);
   if(recipe.craft)op.status="Taking materials to the crafting workspace";
-  if (!dest) {op.status="Waiting for an accessible work position";r.action="blocked";return true;}
+  if (!dest) {
+    op.status="Waiting for an accessible work position; residents can do other work";
+    // Keep reserved materials with the operation, not a worker waiting forever.
+    // Retry per resident because another resident may be on the accessible side.
+    (op.accessRetryAt??={})[r.id]=s.time+30;
+    r.operation=null;r.cargo=false;r.target=null;r.walk=[];r.action='idle';
+    return false;
+  }
+  if(op.accessRetryAt)delete op.accessRetryAt[r.id];
   if (!go(s, r, dest)) return true;
   r.cargo = false;
   if (!node.enabled) {
@@ -2109,9 +2118,9 @@ function tickUncached(s, dt) {
   for(const p of s.projects){
     const beds=p.cultivation?.beds;
     if(!beds)continue;
-    const warning=beds.some(b=>b.stage==='failed')?'failed':beds.some(b=>['growing','harvestable'].includes(b.stage)&&(b.droughtDamage||0)>0)?'damaged':beds.some(b=>['growing','harvestable'].includes(b.stage)&&b.moisture<.2)?'wilting':'healthy';
+    const warning=beds.some(b=>b.stage==='failed')?'failed':beds.some(b=>harvestExpired(b,s.time))?'expired':beds.some(b=>['growing','harvestable'].includes(b.stage)&&(b.droughtDamage||0)>0)?'damaged':beds.some(b=>['growing','harvestable'].includes(b.stage)&&b.moisture<.2)?'wilting':'healthy';
     if(warning!==p.cropWarning){
-      if(warning!=='healthy')say(s,`${PROJECTS[p.key].name} #${p.id}: crops ${warning}. ${warning==='failed'?'Clear failed beds before replanting.':'Restore irrigation; earlier damage cannot be reversed.'}`,`crop-condition-${p.id}-${warning}`);
+      if(warning!=='healthy')say(s,`${PROJECTS[p.key].name} #${p.id}: crops ${warning}. ${warning==='failed'?'Clear failed beds before replanting.':warning==='expired'?'The harvest window has closed. Clear expired crops before replanting.':'Restore irrigation; earlier damage cannot be reversed.'}`,`crop-condition-${p.id}-${warning}`);
       p.cropWarning=warning;
     }
   }
@@ -2881,6 +2890,7 @@ export function restore(text) {
             (o.water &&
               o.water.from !== -1 &&
               !s.infrastructure?.nodes[o.water.from]) ||
+            (o.accessRetryAt!==undefined&&(!o.accessRetryAt||Array.isArray(o.accessRetryAt)||typeof o.accessRetryAt!=='object'||Object.entries(o.accessRetryAt).some(([id,t])=>!s.people.some(r=>r.id===id)||!Number.isFinite(t)||t<0||t>s.time+30.0001))) ||
             !Number.isFinite(o.work) ||
             o.work < 0 ||
             (!o.water && !PROCESSES[o.recipe]) ||

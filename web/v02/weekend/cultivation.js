@@ -9,6 +9,16 @@ export const CROPS={
  beans:{name:'Bush beans',days:60,window:7,plants:8,yieldKg:1.2,water:3,residue:.6,height:.65},
  corn:{name:'Sweet corn',days:85,window:5,plants:4,yieldKg:1.5,water:4,residue:1,height:2},
 };
+// Use the same timing and yield calculation for settlement, care and inspection.
+export function harvestFactor(b,time){
+ const crop=CROPS[b.crop];
+ return b.stage==='harvestable'?Math.max(0,1-Math.max(0,(time-b.ripeAt)/GAME_DAY-crop.window)/crop.window):1;
+}
+export const harvestExpired=(b,time)=>b.stage==='harvestable'&&harvestFactor(b,time)===0;
+export function harvestYield(b,time){
+ const health=b.stage==='failed'?0:Math.min(b.elapsed?Math.max(0,1-b.stress/b.elapsed):1,1-(b.droughtDamage||0));
+ return Math.floor(b.w*b.d*CROPS[b.crop].yieldKg*Math.min(b.density,1.2)/(1+Math.max(0,b.density-1)*1.5)*health*harvestFactor(b,time));
+}
 export const FARM_ACTIONS=['prepare','plant','harvest','clear','amend','collect'];
 export const CULTIVATION_KEYS=['field','garden','greenhouse'];
 export const fieldSizeValid=size=>Array.isArray(size)&&size.length===2&&size.every(n=>Number.isInteger(n)&&n>=2&&n<=32);
@@ -42,6 +52,7 @@ export function farmJobError(s,p,b,action){
  if((s.operations||[]).some(o=>o.site===p.id&&!o.done&&(o.farm?.bed===b.id||(!o.farm&&!o.water))))return 'This bed already has work pending.';
  if(action==='prepare'&&!['unprepared','harvested'].includes(b.stage))return 'Clear this bed before preparing it.';
  if(action==='plant'&&b.stage!=='prepared')return 'Prepare the soil before planting.';
+ if(action==='harvest'&&harvestExpired(b,s.time))return 'The harvest has expired. Clear this bed before replanting.';
  if(action==='harvest'&&b.stage!=='harvestable')return 'This crop is not ready for harvest.';
  if(action==='clear'&&!['growing','harvestable','failed'].includes(b.stage))return 'There is no standing crop to clear.';
  if(action==='collect'&&b.residueKg<1)return 'At least 1 kg of residues is needed for collection.';
@@ -66,9 +77,7 @@ export function finishFarmJob(s,p,op){
  case 'collect':{const n=Math.floor(b.residueKg);output={scraps:n};b.residueKg-=n;b.residueExportedKg+=n;break;}
  case 'clear':case 'harvest':{
   const health=Math.min(b.elapsed?Math.max(0,1-b.stress/b.elapsed):1,1-(b.droughtDamage||0));
-  const crowd=1/(1+Math.max(0,b.density-1)*1.5);
-  const late=op.farm.action==='harvest'?Math.max(0,1-Math.max(0,(s.time-b.ripeAt)/GAME_DAY-crop.window)/crop.window):0;
-  const kg=Math.floor(area*crop.yieldKg*Math.min(b.density,1.2)*crowd*health*late);
+  const kg=op.farm.action==='harvest'?harvestYield(b,s.time):0;
   if(kg)output[b.crop]=kg;
   const residues=area*crop.residue*b.growth*health;
   b.fieldLossKg+=Math.max(0,b.standingBiomassKg-kg-residues);b.standingBiomassKg=0;
@@ -97,7 +106,7 @@ export function cultivationStep(s,dt,useWater,defs){
     const demand=area*(standing?crop.water*b.density:1)*(1-.4*b.cover)*days;
     const rain=p.key!=='greenhouse'?area*rainfallRate(s)*24*days:0;
     const refill=Math.max(0,demand-rain)+area*2*days;
-    const irrigate=standing&&b.irrigation&&s.infrastructure?.nodes[p.id]?.enabled!==false&&b.moisture<.75&&rain<demand&&useWater(s,p.id,refill,true)?refill:0;
+    const irrigate=standing&&!harvestExpired(b,s.time)&&b.irrigation&&s.infrastructure?.nodes[p.id]?.enabled!==false&&b.moisture<.75&&rain<demand&&useWater(s,p.id,refill,true)?refill:0;
     b.irrigated+=irrigate;b.rainLiters+=rain;
     const available=b.moisture*capacity+rain+irrigate;
     b.evaporated+=Math.min(available,demand);b.drained+=Math.max(0,available-demand-capacity);

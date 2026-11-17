@@ -44,5 +44,16 @@ try{
  await page.reload();await page.waitForSelector('#build-field',{state:'attached'});await page.waitForTimeout(500);assert.deepEqual(errors,[]);
  const night=await browser.newPage({viewport:{width:1440,height:900}});night.on('pageerror',e=>errors.push(e.message));s.time=13*60/.45;
  await night.addInitScript(({key,value})=>localStorage.setItem(key,value),{key:SANDBOX_SAVE,value:save(s)});await night.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await night.waitForTimeout(2000);await night.screenshot({path:`${out}/night.png`});await night.close();assert.deepEqual(errors,[]);
+ const expired=await browser.newPage({viewport:{width:1440,height:900}});expired.on('pageerror',e=>errors.push(e.message));
+ const oldCrop=structuredClone(s);oldCrop.time=9*3200;Object.assign(oldCrop.projects.find(p=>p.id===field.id).cultivation.beds[0],{crop:'greens',stage:'harvestable',growth:1,ripeAt:0});
+ await expired.addInitScript(({key,value})=>localStorage.setItem(key,value),{key:SANDBOX_SAVE,value:save(oldCrop)});
+ await expired.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await expired.waitForSelector('#build-field',{state:'attached'});
+ await expired.locator('#completed-tasks button').filter({hasText:'Cultivated field'}).first().evaluate(e=>e.click());await expired.waitForSelector('#farm-bed');
+ assert.equal(await expired.locator('.farm-stage').innerText(),'Harvest expired');
+ assert.match(await expired.locator('.farm-estimate').innerText(),/Recoverable harvest now.*0.0 kg/s);
+ assert.equal(await expired.locator('[data-farm-action="harvest"]').count(),0);
+ assert.equal(await expired.locator('[data-farm-action="clear"]').count(),1);
+ assert(await expired.getByRole('button',{name:'Clear expired crop',exact:true}).isVisible());
+ await expired.screenshot({path:`${out}/expired-harvest.png`});await expired.close();assert.deepEqual(errors,[]);
  console.log('PASS desktop field drag, rotated preview, confirmation, bed configuration, job queue and reload; no browser exceptions');
 }finally{await browser.close();server.close();}
