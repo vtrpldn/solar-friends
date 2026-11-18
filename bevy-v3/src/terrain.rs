@@ -2,6 +2,8 @@ use bevy::{
     asset::RenderAssetUsages, mesh::Indices, prelude::*, render::render_resource::PrimitiveTopology,
 };
 
+use crate::arrival::{MAP_START, ROAD_END, road_center, road_width};
+
 const CELLS: u32 = 128;
 const HALF_WIDTH: f64 = 128.0;
 
@@ -107,6 +109,24 @@ impl Terrain {
                 let a = row * stride + column;
                 let b = a + stride;
                 indices.extend_from_slice(&[a, b, a + 1, b, b + 1, a + 1]);
+            }
+        }
+        surface_mesh(positions, indices)
+    }
+
+    pub fn road_mesh(&self) -> Mesh {
+        let mut positions = Vec::new();
+        let mut indices = Vec::new();
+        let rows = (ROAD_END - MAP_START) as u32;
+        for row in 0..=rows {
+            let z = MAP_START + row as f32;
+            let width = road_width(z);
+            for x in [road_center(z) - width, road_center(z) + width] {
+                positions.push([x, self.height_at(x, z) + 0.04, z]);
+            }
+            if row < rows {
+                let a = row * 2;
+                indices.extend_from_slice(&[a, a + 2, a + 1, a + 2, a + 3, a + 1]);
             }
         }
         surface_mesh(positions, indices)

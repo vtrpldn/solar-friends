@@ -4,6 +4,7 @@ use bevy::{
     window::{PrimaryWindow, WindowResolution},
 };
 
+mod arrival;
 mod setup;
 mod terrain;
 mod village;
@@ -58,6 +59,7 @@ fn setup_scene(mut commands: Commands) {
     commands.spawn((
         DirectionalLight {
             illuminance: 15_000.0,
+            shadows_enabled: true,
             ..default()
         },
         Transform::from_xyz(-40.0, 65.0, 27.0).looking_at(Vec3::ZERO, Vec3::Y),
@@ -85,6 +87,11 @@ fn update_land(
         LandMesh,
         Mesh3d(meshes.add(terrain.ground_mesh())),
         MeshMaterial3d(materials.add(setup.ground_color())),
+    ));
+    commands.spawn((
+        LandMesh,
+        Mesh3d(meshes.add(terrain.road_mesh())),
+        MeshMaterial3d(materials.add(Color::srgb_u8(159, 120, 82))),
     ));
     commands.spawn((
         LandMesh,
