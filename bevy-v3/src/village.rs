@@ -16,6 +16,7 @@ use crate::{
     catalog::Catalog,
     construction::{Construction, ConstructionSite, TownClock},
     land::Land,
+    resident_animation::{Motion, ResidentAnimation},
     save,
     setup::{Mode, WorldSetup},
     stock::Stock,
@@ -100,6 +101,22 @@ impl Village {
 
     pub fn is_paused(&self) -> bool {
         self.paused
+    }
+
+    pub fn motion(&self, index: usize) -> Motion {
+        if self.camp.is_some() {
+            return self.construction.resident_motion(index);
+        }
+        if self.arrival_time < ARRIVAL_DURATION && resident_pose(self.arrival_time, index).visible {
+            let now = resident_pose(self.arrival_time, index).position;
+            if !resident_pose(self.arrival_time + 0.05, index)
+                .position
+                .abs_diff_eq(now, 0.001)
+            {
+                return Motion::Walk;
+            }
+        }
+        Motion::Idle
     }
 
     pub fn tree_felled(&self, index: usize) -> bool {
@@ -308,6 +325,7 @@ fn village_input(
             commands.spawn((
                 VillageEntity,
                 ArrivalActor::Resident(index),
+                ResidentAnimation(index),
                 Name::new(name),
                 opening_model(&assets, index),
                 Visibility::Hidden,

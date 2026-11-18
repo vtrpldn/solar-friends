@@ -1,4 +1,5 @@
 use crate::{
+    resident_animation::Motion,
     residents::NeedTask,
     setup::WorldSetup,
     weather::{DAY, HOUR, game_hour, weather_at},
@@ -352,6 +353,69 @@ impl Construction {
             Need::Rest | Need::Sleep => {}
         }
         self.residents[index].health.retry_at = clock + 3.0;
+    }
+
+    pub fn resident_motion(&self, index: usize) -> Motion {
+        let worker = &self.residents[index];
+        if let Some(task) = &worker.health.task {
+            if !worker.path.is_empty() {
+                return if task.returning {
+                    Motion::CarryWalk
+                } else {
+                    Motion::Walk
+                };
+            }
+            return match task.kind {
+                Need::Hunger | Need::Hydration => Motion::Eat,
+                Need::Hygiene => Motion::Wash,
+                Need::Social => Motion::Chat,
+                Need::Fun => Motion::Stretch,
+                Need::Sleep | Need::Rest => Motion::Rest,
+                Need::FilterWater | Need::FetchWater => Motion::Work,
+                _ => Motion::Idle,
+            };
+        }
+        if let Some(job) = &worker.assignment {
+            return match job.activity {
+                Activity::Build => Motion::Work,
+                Activity::Carry => Motion::CarryWalk,
+                _ => Motion::Walk,
+            };
+        }
+        if let Some(job) = self
+            .production
+            .jobs
+            .iter()
+            .find(|job| job.worker == Some(index))
+        {
+            return match job.phase {
+                crate::production::Phase::Approach | crate::production::Phase::Return
+                    if !worker.path.is_empty() =>
+                {
+                    Motion::CarryWalk
+                }
+                crate::production::Phase::Work => Motion::Work,
+                _ if !worker.path.is_empty() => Motion::Walk,
+                _ => Motion::Idle,
+            };
+        }
+        if let Some(job) = self
+            .gathering
+            .orders
+            .values()
+            .find(|job| job.worker == Some(index))
+        {
+            return match job.phase {
+                GatherPhase::Return => Motion::CarryWalk,
+                GatherPhase::Work => Motion::Chop,
+                _ => Motion::Walk,
+            };
+        }
+        if !worker.path.is_empty() {
+            Motion::Walk
+        } else {
+            Motion::Idle
+        }
     }
 
     pub fn resident_sleeping(&self, index: usize) -> bool {

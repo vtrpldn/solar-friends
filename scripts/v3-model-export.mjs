@@ -10,7 +10,7 @@ globalThis.FileReader = class {
   }
 };
 
-export async function exportModels(models, path) {
+export async function exportModels(models, path, animations = []) {
   const scenes = models.map(([name, model]) => {
     model.traverse((node) => {
       node.userData = {};
@@ -21,6 +21,6 @@ export async function exportModels(models, path) {
     scene.add(model);
     return scene;
   });
-  const bytes = await new GLTFExporter().parseAsync(scenes, { binary: true });
+  const bytes = await new GLTFExporter().parseAsync(scenes, { binary: true, animations });
   await writeFile(path, Buffer.from(bytes));
 }

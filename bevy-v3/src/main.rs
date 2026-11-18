@@ -13,6 +13,7 @@ mod land;
 mod market;
 mod navigation;
 mod production;
+mod resident_animation;
 mod residents;
 mod save;
 mod setup;
@@ -28,27 +29,31 @@ const CAMERA_HOME: Vec3 = Vec3::new(-26.0, 3.0, -12.0);
 const CAMERA_HEIGHT: f32 = 40.0;
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Solar Friends V3".into(),
-                resolution: WindowResolution::new(1280, 800),
-                ..default()
-            }),
+    let mut app = App::new();
+    if std::env::args().any(|argument| argument == "--play") {
+        app.insert_resource(WorldSetup::default().session());
+    }
+    app.add_plugins(DefaultPlugins.set(WindowPlugin {
+        primary_window: Some(Window {
+            title: "Solar Friends V3".into(),
+            resolution: WindowResolution::new(1280, 800),
             ..default()
-        }))
-        .add_plugins((
-            WorldSetupPlugin,
-            village::VillagePlugin,
-            ui_font::UiFontPlugin,
-            audio::VillageAudio,
-            land::LandPlugin,
-            weather::WeatherPlugin,
-        ))
-        .add_systems(Startup, setup_scene)
-        .add_systems(PostUpdate, update_land)
-        .add_systems(Update, camera_controls)
-        .run();
+        }),
+        ..default()
+    }))
+    .add_plugins((
+        WorldSetupPlugin,
+        village::VillagePlugin,
+        ui_font::UiFontPlugin,
+        audio::VillageAudio,
+        land::LandPlugin,
+        weather::WeatherPlugin,
+        resident_animation::ResidentAnimationPlugin,
+    ))
+    .add_systems(Startup, setup_scene)
+    .add_systems(PostUpdate, update_land)
+    .add_systems(Update, camera_controls)
+    .run();
 }
 
 #[derive(Component)]
