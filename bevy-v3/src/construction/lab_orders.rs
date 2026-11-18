@@ -1,7 +1,7 @@
 use super::*;
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 #[serde(tag = "type", rename_all = "kebab-case")]
 pub(crate) enum LabOrder {
     Build {

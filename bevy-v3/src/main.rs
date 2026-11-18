@@ -39,15 +39,18 @@ const CAMERA_HEIGHT: f32 = 40.0;
 
 fn main() {
     let mut args = std::env::args_os().skip(1);
-    if args.next().is_some_and(|argument| argument == "--lab") {
-        let scenario = args.next().map(std::path::PathBuf::from);
+    let option = args.next();
+    if let Some(flag) = option.as_deref()
+        && (flag == "--lab" || flag == "--lab-replay")
+    {
+        let path = args.next().map(std::path::PathBuf::from);
         let save = args.next().map(std::path::PathBuf::from);
-        let result = if let Some(scenario) = scenario.filter(|_| args.next().is_none()) {
-            village::lab::run_file(&scenario, save.as_deref())
-        } else {
-            Err(std::io::Error::other(
-                "Usage: solar-friends-v3 --lab scenario.json [village.json]",
-            ))
+        let result = match (path, save, args.next(), flag == "--lab-replay") {
+            (Some(path), save, None, false) => village::lab::run_file(&path, save.as_deref()),
+            (Some(path), None, None, true) => village::lab::replay_file(&path),
+            _ => Err(std::io::Error::other(
+                "Usage: solar-friends-v3 --lab scenario.json [village.json] or --lab-replay report.json",
+            )),
         };
         if let Err(error) = result {
             eprintln!("{error}");
