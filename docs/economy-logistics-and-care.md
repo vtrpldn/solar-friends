@@ -16,7 +16,7 @@ Completed equipment wears over time; vehicles wear with distance. Automatic serv
 
 Hens and goats consume stored feed and water daily, even when collection is idle. Resident care refills those reserves; it does not immediately heal animals. Neglect reduces health and accumulated output. This remains active independently of the equipment-maintenance toggle.
 
-New starts have R$500 / R$2,000 / R$6,000 working capital for tight / modest / comfortable settings. Land and cars are already owned. Existing saves retain their balance. The original three-day matrix used earlier prices. Current-price default and comfortable starts are tested for three days; tight starts need a longer staged route with outside work and selected local timber. This is not normal-speed browser evidence or a claim about the cost of establishing a real ecovila.
+New Story villages start with R$3,000 (tight), R$10,000 (modest) or R$20,000 (comfortable). The friends already own their land and cars. With standard camp supplies and normal town access, the starter studio requires R$8,110 in materials and R$333.68 for collection. The modest start covers that bill and keeps R$1,556.32 for other expenses. Existing villages keep their saved balance.
 
 ## Evidence and limits
 

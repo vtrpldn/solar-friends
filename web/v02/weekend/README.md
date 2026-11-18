@@ -8,7 +8,7 @@ Build an ecovila through planning, resource tradeoffs and resident activity. The
 
 ## Starting and navigating
 
-New game opens setup for Mata Atlântica, Cerrado or Caatinga, landscape, water availability, land resources, savings, supplies and town access. Defaults include R$2,000 of working capital and standard camp supplies; tight starts have R$500 and comfortable starts R$6,000. Land and both vehicles are already owned, not purchased from this cash. Terrain, elevation, river, trees and deposits vary with the seed on a 128×128-cell map. Arrival uses two Jimny-inspired vehicles. Follow the on-screen camp placement prompt, then choose what to build.
+New game opens setup for Mata Atlântica, Cerrado or Caatinga, landscape, water availability, land resources, savings, supplies and town access. Defaults include R$10,000 of working capital and standard camp supplies. Tight starts have R$3,000 and comfortable starts have R$20,000. Land and both vehicles are already owned, not purchased from this cash. Terrain, elevation, river, trees and deposits vary with the seed on a 128×128-cell map. Arrival uses two Jimny-inspired vehicles. Follow the on-screen camp placement prompt, then choose what to build.
 
 WASD/arrows or left-drag pan; Shift pans faster. Q/E or right-drag rotate the camera. Scroll or +/− zoom; Home centers camp. Placement supports a model wireframe and rotation. Buildings and tents can level their footprint; basic terrain tools do not currently charge money or labor.
 

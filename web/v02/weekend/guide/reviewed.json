@@ -59,7 +59,7 @@
     "web/v02/weekend/economy-controls.js": "6461172dcd5f34c510da615da3e1047063ec49c4863dc0664c29dad59cda03c3",
     "web/v02/weekend/economy-inventory.js": "abf4e70b04829ce80e69431b4fbf7c9b72f305ccfe73b5bb874c9b922a414cf3",
     "web/v02/weekend/economy-policies.js": "f43f23ca2f93913ff43208fa96502c42e96fbcf806bff1e3cd38bf1319fe4429",
-    "web/v02/weekend/economy-reference.js": "9dbcef8917aeb6610b9c7984e5f3daf3dbcdcee453e6494ed3b2e357bed46749",
+    "web/v02/weekend/economy-reference.js": "76ac138973282516c968d0db30f76a6cc24752524ddc6434e56cb631200c692c",
     "web/v02/weekend/elevation.js": "6e7ec71b5a4a637d8cabf8f854d2dadc2b60bcfd87c639e2c7b86c7697dd6f63",
     "web/v02/weekend/environment-info.js": "b0d9ef760bafe3dcbbdcbfb71ed462a5800b61bdb56f912f0809a3340bcfb370",
     "web/v02/weekend/equipment.js": "b08d9ac331f52b53a4809b1bdfe7e7f297c8b7fae169a4143c52d85a335f9c24",
@@ -97,7 +97,7 @@
     "web/v02/weekend/material-measures.js": "85ac89ff549aaa3109a4925af0ea674ac8e1a24879c24665c79617956c0accd4",
     "web/v02/weekend/material-tooltip.js": "2e37e835d308c797c088b086834b6a7a3b54ae747096d0b6db161df419427ffc",
     "web/v02/weekend/menu-scene.js": "8b5963cbe03ce8a821e8e2c0db244b171e998cdd7b5d71f1f32d54bcd3449ed0",
-    "web/v02/weekend/menu.js": "9ff70fe613c8fa0e2cb5ce8faddd19aa822d6275f9ddb04937501e9f9618a988",
+    "web/v02/weekend/menu.js": "2de030be8d734bb85b0efcdb7aaf1f0fe0058a06d96647342630e0b7d024e545",
     "web/v02/weekend/modes.js": "19f61d4cd38023fb6b34e2146bdcbab285f203b6cb4af3726ad05da53f98b12a",
     "web/v02/weekend/natural-resources.js": "3d0d0281025e41dabf44918c1cd13f8cee072c8df9deca54d2f993d20d5f24dc",
     "web/v02/weekend/opening.js": "87580a8f3ccea1b5f3626eb545c5bf27b490432146d813d3d36a7086da5fe168",
@@ -178,7 +178,7 @@
     "inventory-ownership-and-material-accounting.svg": "f5fe00a34fb5d66ecb0c9df93e6ea018f72707370e332d21faceef5a8fa26b47",
     "purchases-sales-and-physical-transport.svg": "05ae6a865088c27adbe5da38c1c131cdd70741dcb18678e466688c319f9fb28c",
     "cash-commitments-and-forecasts.svg": "1822f90d40cd454dec0f5a087b2185da8e0e4db0667e3fc55f9f8647f5f429b4",
-    "optional-outside-employment.svg": "cca1a4178b63945d9ec85dd6d73b9bf055764944dc9372794fb1ee10c5f7fa68",
+    "optional-outside-employment.svg": "28c41ae6f7652d33f746126513de4ced38f91e93e6eaab5eb6037c9acb6f5886",
     "asset-maintenance-and-replacement.svg": "4f242b4dd6efcd9f2c604bbc58378df3f485c8cf4d044b5439724c91901cddef",
     "presentation-inspection-and-ambient-life.svg": "26bc59d45580499a26f44e553d8629434097af0bfc3376398d84fb025fff9add"
   }
