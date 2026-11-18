@@ -34,6 +34,10 @@ pub(super) struct WaterJob {
 }
 
 impl WaterJob {
+    pub(super) fn assigned_to(&self, index: usize) -> bool {
+        self.worker == Some(index)
+    }
+
     fn label(&self) -> &'static str {
         match (self.action, self.phase) {
             (WaterAction::Purify, _) => "Purifying water by hand",
@@ -351,6 +355,7 @@ impl Construction {
     pub(super) fn tick_water_work(
         &mut self,
         catalog: &Catalog,
+        stock: &mut Stock,
         site: ConstructionSite,
         clock: f64,
         dt: f32,
@@ -360,7 +365,7 @@ impl Construction {
         for id in ids {
             // Keep the slot occupied while choosing a worker for another job.
             let mut job = self.water_jobs.remove(&id).expect("queued water job");
-            if !self.step_water(id, &mut job, catalog, site, clock, dt) {
+            if !self.step_water(id, &mut job, (catalog, stock), site, clock, dt) {
                 self.water_jobs.insert(id, job);
             }
         }
@@ -370,7 +375,7 @@ impl Construction {
         &mut self,
         id: usize,
         job: &mut WaterJob,
-        catalog: &Catalog,
+        (catalog, stock): (&Catalog, &mut Stock),
         site: ConstructionSite,
         clock: f64,
         dt: f32,
@@ -440,7 +445,19 @@ impl Construction {
             index
         };
 
-        self.residents[worker].move_along_path(dt, matches!(job.phase, WaterPhase::Deliver));
+        let carrying = matches!(job.phase, WaterPhase::Deliver);
+        let boost = if carrying && !self.residents[worker].path.is_empty() {
+            stock.use_tool(
+                worker,
+                "bucket",
+                ToolTask::Water(id),
+                f64::from(dt),
+                self.repairing(catalog, "bucket"),
+            )
+        } else {
+            1.0
+        };
+        self.residents[worker].move_along_path(dt * boost as f32, carrying);
         if !self.residents[worker].path.is_empty() {
             return false;
         }
@@ -479,7 +496,18 @@ impl Construction {
 
         self.residents[worker].health.energy =
             (self.residents[worker].health.energy - f64::from(dt) * 0.06).max(0.0);
-        job.work += f64::from(dt);
+        let boost = if matches!(job.action, WaterAction::Sanitation) {
+            stock.use_tool(
+                worker,
+                "cleaning-kit",
+                ToolTask::Water(id),
+                f64::from(dt),
+                self.repairing(catalog, "cleaning-kit"),
+            )
+        } else {
+            1.0
+        };
+        job.work += f64::from(dt) * boost;
         match job.action {
             WaterAction::Purify if job.work >= 30.0 => self.utilities.purify_water(id),
             WaterAction::Sanitation if job.work >= 45.0 => self.utilities.service_waste(id),
@@ -506,6 +534,7 @@ mod tests {
             camp: IVec2::new(36, 36),
         };
         let mut town = Construction::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
         town.utilities.sync(
             [Facility {
                 id: 1,
@@ -529,14 +558,14 @@ mod tests {
             },
         )
         .unwrap();
-        town.tick_water_work(&catalog, site, 0.0, 0.1);
+        town.tick_water_work(&catalog, &mut stock, site, 0.0, 0.1);
         assert_eq!(amount(&town, 0), 0.0);
         assert_eq!(amount(&town, 1), 8.0);
         assert_eq!(town.water_jobs[&0].carried, 12.0);
         town.utilities.deliver_water(0, 1, 58.0);
 
         for step in 1..400 {
-            town.tick_water_work(&catalog, site, f64::from(step) * 0.1, 0.1);
+            town.tick_water_work(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
             if matches!(town.water_jobs[&0].phase, WaterPhase::Staged(_)) {
                 break;
             }
@@ -550,7 +579,7 @@ mod tests {
 
         town.utilities.take_water(Some(0), 1, 11.0);
         for step in 400..500 {
-            town.tick_water_work(&catalog, site, f64::from(step) * 0.1, 0.1);
+            town.tick_water_work(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
         }
         assert!(town.water_jobs.is_empty());
         assert_eq!(amount(&town, 0), 59.0);
@@ -559,7 +588,7 @@ mod tests {
         assert!(town.utilities.drink(0, 12.0));
         town.queue_water(0, WaterAction::Purify).unwrap();
         for step in 500..900 {
-            town.tick_water_work(&catalog, site, f64::from(step) * 0.1, 0.1);
+            town.tick_water_work(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
         }
         assert!(town.water_jobs.is_empty());
         assert_eq!(amount(&town, 0), 47.0);

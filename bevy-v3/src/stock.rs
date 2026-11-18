@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     catalog::Catalog,
+    equipment::{Equipment, Task},
     food::{self, FoodLots, Pantry, SERVINGS},
     setup::{Mode, WorldSetup},
 };
@@ -20,6 +21,8 @@ pub struct Stock {
     #[serde(default)]
     pub pantry: Pantry,
     materials: BTreeMap<String, u32>,
+    #[serde(default)]
+    pub equipment: Equipment,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
@@ -72,7 +75,36 @@ impl Stock {
             sandbox: settings.mode == Mode::Sandbox,
             pantry: Pantry::default(),
             materials,
+            equipment: Equipment::default(),
         }
+    }
+
+    pub fn use_tool(
+        &mut self,
+        worker: usize,
+        item: &str,
+        task: Task,
+        dt: f64,
+        repairing: bool,
+    ) -> f64 {
+        let owned = self.available(item);
+        if owned == 0 {
+            return 1.0;
+        }
+        let mut no_soap = 0;
+        let soap = if item == "cleaning-kit" {
+            self.materials.entry("soap".into()).or_default()
+        } else {
+            &mut no_soap
+        };
+        self.equipment.use_tool(
+            (worker, task),
+            item,
+            dt,
+            owned,
+            (self.sandbox, repairing),
+            soap,
+        )
     }
 
     pub fn available(&self, id: &str) -> u32 {

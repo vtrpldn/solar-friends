@@ -95,7 +95,9 @@ impl Trade {
         if item.pack == 0 || item.price == 0.0 {
             return Err("There is no local buyer for this resource.");
         }
-        let quantity = stock.available(id).saturating_sub(protect).min(item.pack);
+        let owned = stock.available(id);
+        let protect = protect.max(stock.equipment.protected(id, owned));
+        let quantity = owned.saturating_sub(protect).min(item.pack);
         if quantity == 0 {
             return Err("No unreserved stock to sell.");
         }

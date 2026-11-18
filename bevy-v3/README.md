@@ -34,6 +34,8 @@ Press L to advance between 1 and 365 days. Exact replay uses normal simulation s
 
 Choose Cultivated field in the build menu. Use brackets to change its width, Shift with brackets for depth, and R to rotate. To resize a field already on the map, select it, open Beds with K, and use the same bracket controls. Existing beds stay anchored to their ground.
 
+Residents share equipment from storage. Tools wear as residents use them. Select a timber workbench and open Recipes with C to schedule a repair. Use Page Up or Page Down to browse its recipes.
+
 Select a kitchen with cold storage and press L to switch cooling. A kitchen can cook with stored biogas when electrical power is unavailable.
 
 Select a completed home and open Recipes with C to install a rooftop panel and battery. Residents bring the parts from storage and install them on site.

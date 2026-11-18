@@ -10,6 +10,8 @@ pub struct Production {
     #[serde(skip)]
     pub selected: Option<usize>,
     #[serde(skip)]
+    pub page: usize,
+    #[serde(skip)]
     pub notice: String,
     #[serde(default)]
     pub growing_sites: std::collections::BTreeMap<usize, growth::Ground>,

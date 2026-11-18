@@ -78,6 +78,8 @@ pub struct ProductionRecipe {
     pub preserved: BTreeMap<String, f64>,
     pub biology: Option<Biology>,
     pub biogas: Option<f64>,
+    pub repair: Option<String>,
+    pub tool: Option<String>,
 }
 
 #[derive(Deserialize)]

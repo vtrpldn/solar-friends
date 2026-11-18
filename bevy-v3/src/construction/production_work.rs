@@ -23,10 +23,11 @@ impl Construction {
             })
             .map(|(index, _)| index);
         self.production.open = false;
+        self.production.page = 0;
         self.production.notice.clear();
     }
 
-    fn recipes<'a>(
+    pub(super) fn recipes<'a>(
         &self,
         catalog: &'a Catalog,
         index: usize,
@@ -37,11 +38,13 @@ impl Construction {
             return Vec::new();
         }
         let kind = &definition.kind;
-        catalog
+        let mut recipes: Vec<_> = catalog
             .production
             .iter()
             .filter(|(_, recipe)| recipe.kind == *kind)
-            .collect()
+            .collect();
+        recipes.sort_by_key(|(_, recipe)| recipe.repair.is_some());
+        recipes
     }
 
     pub fn production_input(
@@ -74,10 +77,19 @@ impl Construction {
         if !self.production.open || self.menu {
             return;
         }
+        let pages = recipes.len().div_ceil(PAGE_KEYS.len()).max(1);
+        if keyboard.just_pressed(KeyCode::PageDown) {
+            self.production.page = (self.production.page + 1) % pages;
+        } else if keyboard.just_pressed(KeyCode::PageUp) {
+            self.production.page = (self.production.page + pages - 1) % pages;
+        }
         let Some(number) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key)) else {
             return;
         };
-        let Some((id, _)) = recipes.get(number).copied() else {
+        let Some((id, _)) = recipes
+            .get(self.production.page * PAGE_KEYS.len() + number)
+            .copied()
+        else {
             return;
         };
         self.queue_batch(catalog, stock, index, id);
@@ -85,6 +97,21 @@ impl Construction {
 
     fn queue_batch(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize, id: &str) {
         let recipe = &catalog.production[id];
+        if let Some(tool) = &recipe.repair
+            && (self.repairing(catalog, tool)
+                || stock.equipment.borrowed(tool) > 0
+                || stock.equipment.wear(tool) == 0.0)
+        {
+            self.production.notice = if self.repairing(catalog, tool) {
+                "A repair is already queued for this equipment."
+            } else if stock.equipment.borrowed(tool) > 0 {
+                "Wait for the borrowed equipment to be returned."
+            } else {
+                "This equipment does not need repair."
+            }
+            .into();
+            return;
+        }
         if id == "solar_upgrade" && self.utilities.has_rooftop_solar(index) {
             self.production.notice = "Rooftop solar is already installed.".into();
             return;
@@ -159,7 +186,12 @@ impl Construction {
         self.production.notice.clear();
     }
 
-    pub fn selected_production(&self, catalog: &Catalog, clock: f64) -> Option<String> {
+    pub fn selected_production(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: f64,
+    ) -> Option<String> {
         let index = self.production.selected?;
         let site = self.plans.get(index)?;
         let name = &catalog.projects[&site.key].name;
@@ -232,12 +264,32 @@ impl Construction {
             ));
         }
         if self.production.open {
-            for (index, (_, recipe)) in recipes.iter().enumerate().take(PAGE_KEYS.len()) {
+            for (index, (_, recipe)) in recipes
+                .iter()
+                .skip(self.production.page * PAGE_KEYS.len())
+                .take(PAGE_KEYS.len())
+                .enumerate()
+            {
                 text.push_str(&format!("\n{} {}", index + 1, recipe.name));
+            }
+            let pages = recipes.len().div_ceil(PAGE_KEYS.len());
+            if pages > 1 {
+                text.push_str(&format!(
+                    "\nPage Up/Down · {}/{}",
+                    self.production.page + 1,
+                    pages
+                ));
             }
             text.push_str("\nC Close recipes");
         } else if !recipes.is_empty() && !self.menu {
             text.push_str(" · C Recipes");
+        }
+        if catalog.projects[&site.key].kind == "supply-5" {
+            let tools = stock.equipment.summary(|item| stock.available(item));
+            if !tools.is_empty() {
+                text.push('\n');
+                text.push_str(&tools);
+            }
         }
         if !self.production.notice.is_empty() {
             text.push('\n');
@@ -456,6 +508,8 @@ impl Construction {
                 }
                 Phase::Approach => self.production.jobs[index].phase = Phase::Work,
                 Phase::Work => {
+                    let tool = production_tool(recipe);
+                    let repairing = tool.is_some_and(|tool| self.repairing(catalog, tool));
                     let job = &mut self.production.jobs[index];
                     if !self.utilities.enabled(job.site) {
                         continue;
@@ -494,7 +548,16 @@ impl Construction {
                         }
                         job.water_to_deliver = ration.water;
                     }
-                    job.work = (job.work + f64::from(dt)).min(recipe.work);
+                    let boost = tool.map_or(1.0, |tool| {
+                        stock.use_tool(
+                            worker_index,
+                            tool,
+                            ToolTask::Production(job.site),
+                            f64::from(dt),
+                            repairing,
+                        )
+                    });
+                    job.work = (job.work + f64::from(dt) * boost).min(recipe.work);
                     if !stock.sandbox
                         && job.growth.is_none()
                         && let Some(biology) = &recipe.biology
@@ -583,6 +646,9 @@ impl Construction {
                         stock.receive_with_lots(output, lots.clone());
                     } else {
                         stock.receive(output);
+                    }
+                    if let Some(tool) = &recipe.repair {
+                        stock.equipment.repair(tool);
                     }
                     self.production.jobs.remove(index);
                     self.production.notice = format!("{}: batch in stores.", recipe.name);
@@ -751,6 +817,18 @@ fn perimeter(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec2> {
     cells
 }
 
+fn production_tool(recipe: &ProductionRecipe) -> Option<&str> {
+    if recipe.repair.is_some() {
+        return None;
+    }
+    recipe.tool.as_deref().or(match recipe.kind.as_str() {
+        "garden" | "greenhouse" | "compost" => Some("garden-tools"),
+        "orchard" | "grove" => Some("harvest-basket"),
+        "supply-5" if !recipe.output.contains_key("harvest-basket") => Some("carpentry-tools"),
+        _ => None,
+    })
+}
+
 fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
     !recipe.handcraft
         && id != "cold_storage"
@@ -760,6 +838,58 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn a_workbench_repair_restores_a_worn_tool() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction {
+            selection: Some("supply-5".into()),
+            ..default()
+        };
+        village.plan(
+            &catalog,
+            &mut stock,
+            site,
+            IVec2::new(44, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
+        );
+        stock.sandbox = false;
+        stock.receive(&BTreeMap::from([
+            ("garden-tools".into(), 1),
+            ("repair_supplies".into(), 1),
+        ]));
+        let task = ToolTask::Cultivation(2, 0);
+        assert_eq!(stock.use_tool(0, "garden-tools", task, 1.0, false), 1.25);
+        village.queue_batch(&catalog, &mut stock, 0, "repair_garden-tools");
+        assert!(village.production.jobs.is_empty());
+        stock.equipment.release(|_, _| false);
+        let parts = stock.available("repair_supplies");
+        village.queue_batch(&catalog, &mut stock, 0, "repair_garden-tools");
+        assert_eq!(stock.available("repair_supplies"), parts - 1);
+        for step in 0..4_000 {
+            village.tick_production(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
+            if village.production.jobs.is_empty() {
+                break;
+            }
+        }
+        assert!(village.production.jobs.is_empty());
+        assert_eq!(stock.equipment.wear("garden-tools"), 0.0);
+        assert!(stock.equipment.valid(|id| stock.available(id)));
+    }
 
     #[test]
     fn cooking_without_grid_power_reserves_biogas_once_per_batch() {

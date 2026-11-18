@@ -24,6 +24,7 @@ impl Construction {
                 continue;
             }
             let assigned = self.gathering.orders[&index].worker;
+            let basket_in_repair = self.repairing(catalog, "harvest-basket");
             if let Some(worker_index) = assigned {
                 let worker = &mut self.residents[worker_index];
                 let phase = &self.gathering.orders[&index].phase;
@@ -35,7 +36,14 @@ impl Construction {
                 match job.phase {
                     GatherPhase::Approach => job.phase = GatherPhase::Work,
                     GatherPhase::Work => {
-                        job.work = (job.work + f64::from(dt)).min(recipe.work);
+                        let boost = stock.use_tool(
+                            worker_index,
+                            "harvest-basket",
+                            ToolTask::Gathering(index),
+                            f64::from(dt),
+                            basket_in_repair,
+                        );
+                        job.work = (job.work + f64::from(dt) * boost).min(recipe.work);
                         if job.work < recipe.work {
                             continue;
                         }

@@ -8,6 +8,7 @@ mod arrival;
 mod audio;
 mod catalog;
 mod construction;
+mod equipment;
 mod farming;
 mod food;
 mod gathering;

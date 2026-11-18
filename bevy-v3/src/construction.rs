@@ -23,6 +23,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     arrival::{ARRIVAL_SPOTS, MAP_START, ROAD_END, road_center, road_width, world_position},
     catalog::{Catalog, Project},
+    equipment::Task as ToolTask,
     farming::Farming,
     gathering::{GatherPhase, Gathering},
     land::Land,
@@ -983,6 +984,48 @@ impl Construction {
             })
     }
 
+    fn repairing(&self, catalog: &Catalog, item: &str) -> bool {
+        self.production
+            .jobs
+            .iter()
+            .any(|job| catalog.production[&job.recipe].repair.as_deref() == Some(item))
+    }
+
+    fn active_tool_task(&self, index: usize, task: ToolTask) -> bool {
+        let resident = &self.residents[index];
+        if resident.health.task.is_some()
+            || resident.town_work.active()
+            || resident.health.energy < 25.0
+        {
+            return false;
+        }
+        match task {
+            ToolTask::Building(site) => resident
+                .assignment
+                .as_ref()
+                .is_some_and(|job| job.project == site && job.activity == Activity::Build),
+            ToolTask::Production(site) => self
+                .production
+                .jobs
+                .iter()
+                .any(|job| job.site == site && job.worker == Some(index)),
+            ToolTask::Cultivation(site, bed) => self
+                .farming
+                .jobs
+                .iter()
+                .any(|job| job.site == site && job.bed == bed && job.worker == Some(index)),
+            ToolTask::Gathering(site) => self
+                .gathering
+                .orders
+                .get(&site)
+                .is_some_and(|job| job.worker == Some(index)),
+            ToolTask::Water(id) => self
+                .water_jobs
+                .get(&id)
+                .is_some_and(|job| job.assigned_to(index)),
+        }
+    }
+
     pub fn tick(
         &mut self,
         catalog: &Catalog,
@@ -996,6 +1039,9 @@ impl Construction {
             land,
             camp,
         } = site;
+        stock
+            .equipment
+            .release(|worker, task| self.active_tool_task(worker, task));
         let space = self.storage_space(catalog, stock);
         let order_in_progress = self.trip.as_ref().is_some_and(|trip| trip.market_order);
         self.trade.age_shipments(
@@ -1021,7 +1067,7 @@ impl Construction {
             crate::market::fare_cents(clock.round_trip_km),
         );
         self.tick_changes(catalog, stock, site, dt);
-        self.tick_water_work(catalog, site, clock.seconds, dt);
+        self.tick_water_work(catalog, stock, site, clock.seconds, dt);
         self.tick_shifts(catalog, stock, site, clock, dt);
         self.tick_trip(catalog, stock, site, clock, dt);
         self.tick_gathering(catalog, stock, site, clock.seconds, dt);
@@ -1053,6 +1099,7 @@ impl Construction {
                     self.residents[index].retry = 2.0;
                 }
             }
+            let tools_in_repair = self.repairing(catalog, "carpentry-tools");
             let worker = &mut self.residents[index];
             let Some(mut job) = worker.assignment.take() else {
                 continue;
@@ -1091,9 +1138,17 @@ impl Construction {
                     let skill = if skilled { 1.25 } else { 1.0 };
                     let experience = 1.0 + (worker.experience / 10_000.0).min(0.15);
                     let efficiency = 1.0 / (1.0 + 0.12 * crew as f64);
+                    let tools = stock.use_tool(
+                        index,
+                        "carpentry-tools",
+                        ToolTask::Building(job.project),
+                        f64::from(dt),
+                        tools_in_repair,
+                    );
                     project.work = (project.work
                         + f64::from(dt)
                             * skill
+                            * tools
                             * experience
                             * efficiency
                             * worker.health.hydration_factor())
@@ -1104,6 +1159,9 @@ impl Construction {
             }
             self.residents[index].assignment = Some(job);
         }
+        stock
+            .equipment
+            .release(|worker, task| self.active_tool_task(worker, task));
     }
 
     fn assign(
@@ -1298,10 +1356,9 @@ mod tests {
         let before = stock.available("wood");
         construction.select_facility(IVec2::new(44, 36));
         construction.production.open = true;
-        let index = catalog
-            .production
-            .iter()
-            .filter(|(_, recipe)| recipe.kind == "supply-5")
+        let index = construction
+            .recipes(&catalog, 0)
+            .into_iter()
             .position(|(id, _)| id == "saw_timber")
             .unwrap();
         let mut keyboard = ButtonInput::default();

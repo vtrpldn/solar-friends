@@ -282,6 +282,7 @@ impl Village {
             || self.clock < 0.0
             || !self.clock.is_finite()
             || !self.stock.valid_food()
+            || !self.stock.equipment.valid(|id| self.stock.available(id))
             || !self.terrain_editor.valid()
         {
             return false;
@@ -1133,9 +1134,10 @@ fn show_hud(
         }
         None => {}
     }
-    if let Some(production) = village
-        .construction
-        .selected_production(&catalog, village.clock)
+    if let Some(production) =
+        village
+            .construction
+            .selected_production(&catalog, &village.stock, village.clock)
     {
         label.push('\n');
         label.push_str(&production);

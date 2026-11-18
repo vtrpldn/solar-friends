@@ -2787,7 +2787,8 @@
       },
       "work": 180,
       "handcraft": true,
-      "preserved": {}
+      "preserved": {},
+      "tool": "carpentry-tools"
     },
     "craft_harvest-basket": {
       "name": "Craft harvest basket",
@@ -2800,7 +2801,8 @@
       },
       "work": 240,
       "handcraft": true,
-      "preserved": {}
+      "preserved": {},
+      "tool": "carpentry-tools"
     },
     "craft_wheelbarrow": {
       "name": "Craft wheelbarrow",
@@ -2815,7 +2817,8 @@
       },
       "work": 360,
       "handcraft": true,
-      "preserved": {}
+      "preserved": {},
+      "tool": "carpentry-tools"
     },
     "craft_produce-crates": {
       "name": "Craft produce crate",
@@ -2829,7 +2832,72 @@
       },
       "work": 120,
       "handcraft": true,
-      "preserved": {}
+      "preserved": {},
+      "tool": "carpentry-tools"
+    },
+    "repair_bucket": {
+      "name": "Repair bucket",
+      "kind": "supply-5",
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "repair": "bucket",
+      "tool": "carpentry-tools"
+    },
+    "repair_garden-tools": {
+      "name": "Repair garden tools",
+      "kind": "supply-5",
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "repair": "garden-tools",
+      "tool": "carpentry-tools"
+    },
+    "repair_carpentry-tools": {
+      "name": "Repair carpentry tools",
+      "kind": "supply-5",
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "repair": "carpentry-tools"
+    },
+    "repair_harvest-basket": {
+      "name": "Repair harvest basket",
+      "kind": "supply-5",
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "repair": "harvest-basket",
+      "tool": "carpentry-tools"
+    },
+    "repair_cleaning-kit": {
+      "name": "Repair cleaning kit",
+      "kind": "supply-5",
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "repair": "cleaning-kit",
+      "tool": "carpentry-tools"
     },
     "cook_greens": {
       "name": "Cook leafy greens",

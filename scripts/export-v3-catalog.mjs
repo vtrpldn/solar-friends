@@ -49,9 +49,11 @@ const gathering = Object.fromEntries(Object.entries(PROCESSES)
 
 const production = Object.fromEntries(Object.entries(PROCESSES)
   .filter(([id, recipe]) => (!BIOLOGY[id] || !["baby_greens", "vegetables", "greenhouse"].includes(id)) && !recipe.deposit && !recipe.gathering &&
-    recipe.kind !== "wild-tree" && recipe.kind !== "cultivation" && (Object.keys(recipe.output).length || ["cold_storage", "solar_upgrade"].includes(id)))
+    recipe.kind !== "wild-tree" && recipe.kind !== "cultivation" && (Object.keys(recipe.output).length || recipe.equipmentRepair || ["cold_storage", "solar_upgrade"].includes(id)))
   .map(([id, recipe]) => [id, {name: recipe.name, kind: recipe.kind, input: recipe.input,
     output: recipe.output, work: recipe.work, handcraft: Boolean(recipe.craft), preserved: recipe.preservedDays || {},
+    ...(recipe.equipmentRepair ? {repair: recipe.equipmentRepair} : {}),
+    ...(recipe.craft?.tool ? {tool: recipe.craft.tool} : {}),
     ...(recipe.biogas ? {biogas: recipe.biogas} : {}),
     ...(!BIOLOGY[id] || ["eggs", "milk"].includes(id) ? {} : {biology: {
       days: BIOLOGY[id].days, window: Number.isFinite(BIOLOGY[id].window) ? BIOLOGY[id].window : null,
