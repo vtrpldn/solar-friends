@@ -14,7 +14,7 @@ impl Construction {
             if !trip.boarded {
                 driver.move_along_path(dt, false);
                 if driver.path.is_empty() {
-                    let fare = if trip.export {
+                    let fare = if trip.market_order {
                         self.trade.orders.front().expect("active export").fare
                     } else if let Some(bed) = trip.farm_bed {
                         self.farming
@@ -31,12 +31,16 @@ impl Construction {
                 }
             } else {
                 trip.elapsed = (trip.elapsed + f64::from(dt)).min(trip.duration);
-                if trip.export && trip.elapsed >= trip.duration * 0.5 {
+                if trip.market_order && trip.elapsed >= trip.duration * 0.5 {
                     self.trade.settle(stock);
                 }
                 if trip.elapsed >= trip.duration {
-                    if trip.export {
-                        self.trade.orders.pop_front();
+                    if trip.market_order {
+                        let space = self.storage_space(catalog, stock);
+                        if !self.trade.finish_trip(stock, space) {
+                            self.trip = Some(trip);
+                            return;
+                        }
                     } else if let Some(bed) = trip.farm_bed {
                         self.farming
                             .jobs
@@ -70,8 +74,8 @@ impl Construction {
             .find(|job| job.pickups > 0)
             .map(|job| (job.site, Some(job.bed)));
         let next = construction.or(farming);
-        let export = next.is_none() && !self.trade.orders.is_empty();
-        let Some((project, farm_bed)) = next.or_else(|| export.then_some((0, None))) else {
+        let market_order = next.is_none() && !self.trade.orders.is_empty();
+        let Some((project, farm_bed)) = next.or_else(|| market_order.then_some((0, None))) else {
             return;
         };
         let door = IVec2::new(30, -15);
@@ -103,7 +107,7 @@ impl Construction {
             self.trip = Some(TownTrip {
                 project,
                 farm_bed,
-                export,
+                market_order,
                 driver: index,
                 elapsed: 0.0,
                 duration: trip_seconds(clock.round_trip_km),

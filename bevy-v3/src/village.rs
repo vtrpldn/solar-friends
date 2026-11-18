@@ -120,6 +120,10 @@ impl Village {
         self.clock
     }
 
+    pub fn trade_open(&self) -> bool {
+        self.utility_panel == Some(UtilityPanel::Trade)
+    }
+
     pub fn advance_open(&self) -> bool {
         self.advance.open
     }

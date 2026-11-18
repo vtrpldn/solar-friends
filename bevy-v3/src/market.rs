@@ -116,6 +116,89 @@ impl Market {
         }
     }
 
+    pub fn buy_pack(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        id: &str,
+        (day, fare, freight): (u64, u64, bool),
+    ) -> Result<(u32, u64), &'static str> {
+        let item = &catalog.materials[id];
+        let quantity = item.pack;
+        if quantity == 0 || item.price <= 0.0 {
+            return Err("This resource is produced locally.");
+        }
+        let (mass_limit, volume_limit) = if freight {
+            (5000.0, 12.0)
+        } else {
+            (350.0, 1.2)
+        };
+        if item.mass * f64::from(quantity) > mass_limit + 1e-8
+            || item.volume * f64::from(quantity) > volume_limit + 1e-8
+        {
+            return Err("This pack is too large for the chosen vehicle.");
+        }
+        let used = self
+            .suppliers
+            .get(id)
+            .filter(|entry| entry.day == day)
+            .map_or(0, |entry| entry.units);
+        if item.supplier.saturating_sub(used) < quantity {
+            return Err("The supplier has not got enough stock today.");
+        }
+        let price = (item.price * 100.0).round() as u64;
+        if stock.balance().saturating_sub(self.committed_fares) < price + fare {
+            return Err("Shared savings cannot cover the order and transport.");
+        }
+        let entry = self
+            .suppliers
+            .entry(id.into())
+            .or_insert(Allocation { day, units: 0 });
+        if entry.day != day {
+            *entry = Allocation { day, units: 0 };
+        }
+        entry.units += quantity;
+        stock.debit(
+            price,
+            if matches!(id, "food" | "meals" | "eggs" | "milk" | "honey") {
+                CashKind::Food
+            } else {
+                CashKind::Materials
+            },
+        );
+        if freight {
+            stock.debit(fare, CashKind::Freight);
+        } else {
+            self.committed_fares += fare;
+        }
+        Ok((quantity, price))
+    }
+
+    pub fn cancel_pack(
+        &mut self,
+        stock: &mut Stock,
+        id: &str,
+        day: u64,
+        quantity: u32,
+        price: u64,
+        fare: u64,
+    ) {
+        if let Some(entry) = self.suppliers.get_mut(id)
+            && entry.day == day
+        {
+            entry.units = entry.units.saturating_sub(quantity);
+        }
+        stock.credit(
+            price,
+            if matches!(id, "food" | "meals" | "eggs" | "milk" | "honey") {
+                CashKind::Food
+            } else {
+                CashKind::Materials
+            },
+        );
+        self.release_fare(fare);
+    }
+
     pub fn hold_fare(&mut self, stock: &Stock, fare: u64) -> bool {
         if stock.balance().saturating_sub(self.committed_fares) < fare {
             return false;

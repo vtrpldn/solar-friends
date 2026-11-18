@@ -276,6 +276,10 @@ impl Construction {
                     }
                 }
                 FarmPhase::Return => {
+                    let units: u64 = job.output.values().map(|v| u64::from(*v)).sum();
+                    if self.storage_space(catalog, stock) < units {
+                        continue;
+                    }
                     stock.receive(&job.output);
                     self.farming.jobs.remove(job_index);
                 }

@@ -79,8 +79,8 @@ struct TownTrip {
     project: usize,
     #[serde(default)]
     farm_bed: Option<usize>,
-    #[serde(default)]
-    export: bool,
+    #[serde(default, alias = "export")]
+    market_order: bool,
     driver: usize,
     elapsed: f64,
     duration: f64,
@@ -562,6 +562,32 @@ impl Construction {
 }
 
 impl Construction {
+    pub fn storage(&self, catalog: &Catalog, stock: &Stock) -> (u64, u64) {
+        if stock.sandbox {
+            return (stock.units(), 1_000_000);
+        }
+        let loaded = self
+            .trip
+            .as_ref()
+            .is_some_and(|trip| trip.market_order && trip.boarded);
+        let used = stock.units() + self.trade.reserved_at_home(loaded);
+        let expansions = self
+            .plans
+            .iter()
+            .filter(|project| {
+                let definition = &catalog.projects[&project.key];
+                project.work >= definition.work
+                    && matches!(definition.kind.as_str(), "warehouse" | "covered-storage")
+            })
+            .count() as u64;
+        (used, 600 * (1 + expansions))
+    }
+
+    fn storage_space(&self, catalog: &Catalog, stock: &Stock) -> u64 {
+        let (used, capacity) = self.storage(catalog, stock);
+        capacity.saturating_sub(used)
+    }
+
     pub fn tick_services(
         &mut self,
         catalog: &Catalog,
@@ -603,7 +629,7 @@ impl Construction {
         let active = self
             .trip
             .as_ref()
-            .filter(|trip| trip.boarded && trip.farm_bed.is_none() && !trip.export)
+            .filter(|trip| trip.boarded && trip.farm_bed.is_none() && !trip.market_order)
             .map(|trip| trip.project);
         let fares = self
             .plans
@@ -627,7 +653,7 @@ impl Construction {
         let export_paid = self
             .trip
             .as_ref()
-            .is_some_and(|trip| trip.export && trip.boarded);
+            .is_some_and(|trip| trip.market_order && trip.boarded);
         let fares = self
             .trade
             .orders
@@ -642,7 +668,7 @@ impl Construction {
             });
         let trip_valid = self.trip.as_ref().is_none_or(|trip| {
             trip.driver < self.residents.len()
-                && if trip.export {
+                && if trip.market_order {
                     self.trade.orders.front().is_some()
                 } else if let Some(bed) = trip.farm_bed {
                     self.farming
@@ -770,6 +796,15 @@ impl Construction {
             land,
             camp,
         } = site;
+        let space = self.storage_space(catalog, stock);
+        self.trade.receive_goods(stock, space, clock.seconds);
+        let space = self.storage_space(catalog, stock);
+        self.trade.maintain_pantry(
+            catalog,
+            stock,
+            &mut self.market,
+            (clock.seconds, clock.round_trip_km, space),
+        );
         self.trade.auto_sell(
             catalog,
             stock,

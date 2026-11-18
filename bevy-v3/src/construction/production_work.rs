@@ -309,7 +309,12 @@ impl Construction {
                     self.production.jobs[index].phase = Phase::Return;
                 }
                 Phase::Return => {
-                    stock.receive(job.delivered_output.as_ref().unwrap_or(&recipe.output));
+                    let output = job.delivered_output.as_ref().unwrap_or(&recipe.output);
+                    let units: u64 = output.values().map(|v| u64::from(*v)).sum();
+                    if self.storage_space(catalog, stock) < units {
+                        continue;
+                    }
+                    stock.receive(output);
                     self.production.jobs.remove(index);
                     self.production.notice = format!("{}: batch in stores.", recipe.name);
                 }

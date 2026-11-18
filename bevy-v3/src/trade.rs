@@ -10,10 +10,14 @@ use crate::{
 
 #[derive(Default, Deserialize, Serialize)]
 pub struct Trade {
-    pub orders: VecDeque<Export>,
+    pub orders: VecDeque<Shipment>,
     bought: BTreeMap<String, Daily>,
     pub policies: BTreeMap<String, Policy>,
     pub receipts: u64,
+    #[serde(default)]
+    pub purchases: u64,
+    #[serde(default)]
+    pub delivery: Option<Delivery>,
     #[serde(skip)]
     pub selected: usize,
     #[serde(skip)]
@@ -21,16 +25,29 @@ pub struct Trade {
     #[serde(skip)]
     pub notice: String,
     next_scan: f64,
+    #[serde(default)]
+    next_pantry_check: f64,
+    #[serde(default)]
+    pub household_restock_off: bool,
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct Export {
+pub struct Shipment {
     pub material: String,
     pub quantity: u32,
     pub cents: u64,
     pub fare: u64,
     pub day: u64,
     pub settled: bool,
+    #[serde(default)]
+    pub buying: bool,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct Delivery {
+    pub material: String,
+    pub quantity: u32,
+    pub eta: f64,
 }
 
 #[derive(Default, Deserialize, Serialize)]
@@ -124,22 +141,161 @@ impl Trade {
             *entry = Daily { day, units: 0 };
         }
         entry.units += quantity;
-        self.orders.push_back(Export {
+        self.orders.push_back(Shipment {
             material: id.into(),
             quantity,
             cents,
             fare,
             day,
             settled: false,
+            buying: false,
         });
         Ok(quantity)
+    }
+
+    pub fn buy(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        market: &mut Market,
+        id: &str,
+        (clock, distance, freight): (f64, u32, bool),
+    ) -> Result<(), &'static str> {
+        if freight && self.delivery.is_some() {
+            return Err("A freight order is already on the way.");
+        }
+        if !freight && self.orders.len() >= 32 {
+            return Err("The town order queue is full.");
+        }
+        let day = ((540.0 + clock * 0.45) / 1440.0).floor() as u64;
+        let fare = if freight {
+            3500 + u64::from(distance) * 80
+        } else {
+            crate::market::fare_cents(distance)
+        };
+        let (quantity, cents) = market.buy_pack(catalog, stock, id, (day, fare, freight))?;
+        if freight {
+            let eta = clock + 360.0 / 0.45 + crate::market::trip_seconds(distance);
+            self.delivery = Some(Delivery {
+                material: id.into(),
+                quantity,
+                eta,
+            });
+        } else {
+            self.orders.push_back(Shipment {
+                material: id.into(),
+                quantity,
+                cents,
+                fare,
+                day,
+                settled: false,
+                buying: true,
+            });
+        }
+        Ok(())
+    }
+
+    pub fn maintain_pantry(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        market: &mut Market,
+        (clock, distance, space): (f64, u32, u64),
+    ) {
+        if stock.sandbox || self.household_restock_off || clock < self.next_pantry_check {
+            return;
+        }
+        self.next_pantry_check = clock + 10.0;
+        let household = |id: &str| matches!(id, "food" | "meals");
+        let incoming = self
+            .orders
+            .iter()
+            .filter(|order| order.buying && household(&order.material))
+            .map(|order| order.quantity)
+            .sum::<u32>()
+            + self
+                .delivery
+                .as_ref()
+                .filter(|order| household(&order.material))
+                .map_or(0, |order| order.quantity);
+        if stock.food_portions().saturating_add(incoming) >= 23 {
+            return;
+        }
+        let free = space.saturating_sub(self.inbound());
+        let cheapest = ["food", "meals"];
+        for id in cheapest {
+            if u64::from(catalog.materials[id].pack) <= free
+                && self
+                    .buy(catalog, stock, market, id, (clock, distance, false))
+                    .is_ok()
+            {
+                return;
+            }
+        }
+    }
+
+    pub fn reserved_at_home(&self, started: bool) -> u64 {
+        self.orders
+            .iter()
+            .enumerate()
+            .filter(|(index, order)| !order.buying && (*index != 0 || !started))
+            .map(|(_, order)| u64::from(order.quantity))
+            .sum()
+    }
+
+    pub fn inbound(&self) -> u64 {
+        self.orders
+            .iter()
+            .filter(|order| order.buying)
+            .map(|order| u64::from(order.quantity))
+            .sum::<u64>()
+            + self
+                .delivery
+                .as_ref()
+                .map_or(0, |order| u64::from(order.quantity))
+    }
+
+    pub fn receive_goods(&mut self, stock: &mut Stock, space: u64, clock: f64) {
+        let Some(order) = &self.delivery else { return };
+        if order.eta <= clock && u64::from(order.quantity) <= space {
+            let order = self.delivery.take().expect("arrived freight");
+            stock.receive(&BTreeMap::from([(order.material, order.quantity)]));
+            self.purchases = self.purchases.saturating_add(1);
+        }
+    }
+
+    pub fn finish_trip(&mut self, stock: &mut Stock, space: u64) -> bool {
+        let Some(order) = self.orders.front() else {
+            return true;
+        };
+        if order.buying && u64::from(order.quantity) > space {
+            return false;
+        }
+        let order = self.orders.pop_front().expect("completed town trip");
+        if order.buying {
+            stock.receive(&BTreeMap::from([(order.material, order.quantity)]));
+            self.purchases = self.purchases.saturating_add(1);
+        }
+        true
     }
 
     pub fn cancel_last(&mut self, stock: &mut Stock, market: &mut Market, active: bool) {
         if self.orders.len() <= usize::from(active) {
             return;
         }
-        let order = self.orders.pop_back().expect("queued sale");
+        let order = self.orders.pop_back().expect("queued order");
+        if order.buying {
+            market.cancel_pack(
+                stock,
+                &order.material,
+                order.day,
+                order.quantity,
+                order.cents,
+                order.fare,
+            );
+            self.notice = "Purchase canceled. Shared savings refunded.".into();
+            return;
+        }
         stock.receive(&BTreeMap::from([(order.material.clone(), order.quantity)]));
         market.release_fare(order.fare);
         if let Some(entry) = self.bought.get_mut(&order.material)
@@ -152,6 +308,7 @@ impl Trade {
 
     pub fn settle(&mut self, stock: &mut Stock) {
         if let Some(order) = self.orders.front_mut()
+            && !order.buying
             && !order.settled
         {
             order.settled = true;
@@ -215,7 +372,13 @@ impl Trade {
     }
 
     pub fn valid(&self, catalog: &Catalog) -> bool {
-        self.orders.len() <= 32
+        self.delivery.as_ref().is_none_or(|order| {
+            order.eta >= 0.0
+                && catalog
+                    .materials
+                    .get(&order.material)
+                    .is_some_and(|item| order.quantity == item.pack)
+        }) && self.orders.len() <= 32
             && self.orders.iter().all(|order| {
                 catalog.materials.get(&order.material).is_some_and(|item| {
                     order.quantity > 0 && order.quantity <= item.pack && order.fare <= 10_000
@@ -234,6 +397,28 @@ impl Trade {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn freight_waits_for_storage_after_its_scheduled_arrival() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut market = Market::default();
+        let mut trade = Trade::default();
+        let before = stock.balance();
+        let wood = stock.available("wood");
+        trade
+            .buy(&catalog, &mut stock, &mut market, "wood", (0.0, 12, true))
+            .unwrap();
+        let eta = trade.delivery.as_ref().unwrap().eta;
+        assert_eq!(stock.balance(), before - 43_200 - 4_460);
+        trade.receive_goods(&mut stock, 200, eta - 0.1);
+        trade.receive_goods(&mut stock, 10, eta);
+        assert_eq!(stock.available("wood"), wood);
+        assert!(trade.delivery.is_some());
+        trade.receive_goods(&mut stock, 12, eta);
+        assert_eq!(stock.available("wood"), wood + 12);
+        assert!(trade.delivery.is_none());
+    }
 
     #[test]
     fn automatic_sales_protect_the_food_reserve_and_receipts_settle_once() {

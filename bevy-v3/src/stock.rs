@@ -27,6 +27,8 @@ pub enum CashKind {
     Commuting,
     TownWages,
     Sales,
+    Food,
+    Freight,
 }
 
 impl CashKind {
@@ -38,6 +40,8 @@ impl CashKind {
             Self::Commuting => "Bus fares",
             Self::TownWages => "Town wages",
             Self::Sales => "Town sales",
+            Self::Food => "Food purchases",
+            Self::Freight => "Delivery freight",
         }
     }
 }
@@ -90,6 +94,10 @@ impl Stock {
         [("meals", 1), ("food", 1), ("eggs", 4), ("milk", 2)]
             .into_iter()
             .find(|(id, quantity)| self.available(id) >= *quantity)
+    }
+
+    pub fn units(&self) -> u64 {
+        self.materials.values().map(|units| u64::from(*units)).sum()
     }
 
     pub fn food_portions(&self) -> u32 {

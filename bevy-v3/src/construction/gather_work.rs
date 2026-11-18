@@ -66,6 +66,10 @@ impl Construction {
                         );
                     }
                     GatherPhase::Return => {
+                        let units: u64 = recipe.output.values().map(|v| u64::from(*v)).sum();
+                        if self.storage_space(catalog, stock) < units {
+                            continue;
+                        }
                         stock.receive(&recipe.output);
                         self.gathering.orders.remove(&index);
                     }
