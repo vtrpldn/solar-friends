@@ -93,6 +93,7 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
     }
   }
   if(['residents','comfort','access','work'].includes(id))for(const r of people) {
+    if (r.outsideWork?.phase === 'away') continue;
     const needs=[['energy',r.energy],...Object.entries(r.needs||{})].filter(([,v])=>v<30);
     mark(r,r.name,`${pretty(r.action||'idle')}${r.needBlocked?` · ${r.needBlocked}`:''}${needs.length?' · '+needs.map(([k,v])=>`${pretty(k)} ${Math.round(v)}%`).join(', '):' · no needs below 30'}`,needs.length?'bad':'good');
     if(id==='access'&&r.walk?.length)lines.push({points:[r,...r.walk.map(p=>Array.isArray(p)?{x:p[0],z:p[1]}:p)],tone:r.cargo?'warn':'info'});

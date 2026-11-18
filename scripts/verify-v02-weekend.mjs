@@ -1,3 +1,4 @@
+import {STARTING_CAPITAL} from '../web/v02/weekend/economy-reference.js';
 import assert from 'node:assert/strict';
 import {createWeekend,chooseCamp,plan,placementError,tick,finished,canFinish,endWeekend,supplyRun,save,restore,PROJECTS,MATERIALS,enableFastNavigation} from '../web/v02/weekend/simulation.js';
 import {ensureInfrastructure} from '../web/v02/weekend/infrastructure.js';
@@ -17,7 +18,7 @@ function place(s,key){
 // coordinates. Detailed work, collision, needs, removal and recipe behavior is
 // covered in the dedicated construction, navigation and production regressions.
 for(const camp of ['shade','entrance','clearing']){
- const s=fresh(camp);assert.equal(s.money,2000);
+ const s=fresh(camp);assert.equal(s.money,STARTING_CAPITAL.modest);
  for(const key of ['gathering','shelter','tarp-stores'])place(s,key);
  assert(!canFinish(s));runUntil(s,6400,()=>canFinish(s));
  for(const key of ['gathering','shelter','tarp-stores'])assert(finished(s,key),`${camp}: ${key}`);

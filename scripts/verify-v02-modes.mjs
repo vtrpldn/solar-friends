@@ -1,3 +1,4 @@
+import {STARTING_CAPITAL} from '../web/v02/weekend/economy-reference.js';
 import assert from "node:assert/strict";
 import {
   createSandbox,
@@ -30,7 +31,7 @@ assert(loaded);
 assert.equal(loaded.mode, "sandbox");
 assert.equal(loaded.instantBuild, false);
 assert(createWeekend().opening);
-assert.equal(createWeekend().money, 2000);
+assert.equal(createWeekend().money, STARTING_CAPITAL.modest);
 console.log(
   "PASS separate slots, free instant builds, resident construction, sandbox persistence and story defaults.",
 );
