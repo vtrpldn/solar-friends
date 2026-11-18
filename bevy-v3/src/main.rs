@@ -174,9 +174,25 @@ fn camera_controls(
         return;
     };
     if keyboard.just_pressed(KeyCode::Home) {
-        view.target = CAMERA_HOME;
-        view.heading = 0.0;
-        ortho.scale = 1.0;
+        if let Some(camp) = village.camp_focus(&setup)
+            && !keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+        {
+            view.target = camp;
+        } else {
+            view.target = CAMERA_HOME;
+            view.heading = 0.0;
+            ortho.scale = 1.0;
+        }
+    }
+    if keyboard.just_pressed(KeyCode::End) {
+        let terrain = village.terrain(&setup);
+        let (center, width) = terrain.river(0.0);
+        let x = if terrain.seed == 0 {
+            -20.0
+        } else {
+            ((center + width + 3.0) / 2.0).ceil() as f32 * 2.0
+        };
+        view.target = Vec3::new(x, terrain.height_at(x, 0.0), 0.0);
     }
     let axis = |positive, negative| {
         i32::from(keyboard.any_pressed(positive)) as f32

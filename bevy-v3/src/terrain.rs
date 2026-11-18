@@ -13,6 +13,43 @@ use crate::arrival::{MAP_START, ROAD_END, road_center, road_width, world_positio
 const CELLS: u32 = 128;
 const HALF_WIDTH: f64 = 128.0;
 
+#[derive(Default)]
+pub struct TerrainGrid {
+    key: Option<(u64, u64, usize)>,
+    lines: Vec<Vec<Vec3>>,
+}
+
+impl TerrainGrid {
+    pub fn draw(&mut self, key: (u64, u64, usize), terrain: &Terrain, gizmos: &mut Gizmos) {
+        if self.key != Some(key) {
+            self.lines.clear();
+            let edge = HALF_WIDTH as f32;
+            for index in 0..CELLS {
+                let fixed = index as f32 * 2.0 - edge + 1.0;
+                for across in [true, false] {
+                    self.lines.push(
+                        (0..=CELLS * 2)
+                            .map(|step| {
+                                let along = step as f32 - edge;
+                                let (x, z) = if across {
+                                    (along, fixed)
+                                } else {
+                                    (fixed, along)
+                                };
+                                Vec3::new(x, terrain.height_at(x, z) + 0.12, z)
+                            })
+                            .collect(),
+                    );
+                }
+            }
+            self.key = Some(key);
+        }
+        for line in &self.lines {
+            gizmos.linestrip(line.iter().copied(), Color::srgba(0.48, 0.72, 0.65, 0.35));
+        }
+    }
+}
+
 #[derive(Clone, Resource)]
 pub struct Terrain {
     pub seed: u32,

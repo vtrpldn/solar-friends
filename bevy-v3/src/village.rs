@@ -119,6 +119,8 @@ pub struct Village {
     #[serde(skip)]
     lenses: LensPicker,
     #[serde(skip)]
+    show_grid: bool,
+    #[serde(skip)]
     open_projects_only: bool,
     #[serde(skip)]
     housing_notice: String,
@@ -236,6 +238,12 @@ enum UtilityPanel {
 }
 
 impl Village {
+    pub fn camp_focus(&self, setup: &WorldSetup) -> Option<Vec3> {
+        let camp = self.camp?;
+        let Vec2 { x, y: z } = world_position(camp.x as f32, camp.y as f32);
+        Some(Vec3::new(x, self.terrain(setup).height_at(x, z), z))
+    }
+
     pub fn terrain_key(&self) -> (u64, u64, usize) {
         (
             self.session_serial,
@@ -593,6 +601,14 @@ fn village_input(
             village.lenses.network_site = Some(id);
             camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
         }
+        return;
+    }
+
+    if village.camp.is_some()
+        && keyboard.just_pressed(KeyCode::KeyG)
+        && keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+    {
+        village.show_grid = !village.show_grid;
         return;
     }
 
@@ -1292,7 +1308,7 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · Shift+L Map lenses",
+            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · Shift+L Map lenses · Shift+G Grid",
         );
     }
     match village.utility_panel {
@@ -1448,13 +1464,20 @@ fn draw_blueprints(
     pointer: Res<CampPointer>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut gizmos: Gizmos,
-    (mut map_notice, mut land_lens): (ResMut<MapNotice>, Local<land_lens::LandLens>),
+    (mut map_notice, mut land_lens, mut grid): (
+        ResMut<MapNotice>,
+        Local<land_lens::LandLens>,
+        Local<crate::terrain::TerrainGrid>,
+    ),
 ) {
     let mut notice = None;
     if !setup.open
         && let Some(camp) = village.camp
     {
         let terrain = village.terrain(&setup);
+        if village.show_grid {
+            grid.draw(village.terrain_key(), &terrain, &mut gizmos);
+        }
         let construction_notice = village.construction.draw(
             &catalog,
             &terrain,
