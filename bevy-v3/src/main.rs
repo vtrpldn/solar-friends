@@ -41,15 +41,20 @@ fn main() {
     let mut args = std::env::args_os().skip(1);
     let option = args.next();
     if let Some(flag) = option.as_deref()
-        && (flag == "--lab" || flag == "--lab-replay")
+        && (flag == "--lab" || flag == "--lab-replay" || flag == "--lab-ui")
     {
         let path = args.next().map(std::path::PathBuf::from);
         let save = args.next().map(std::path::PathBuf::from);
-        let result = match (path, save, args.next(), flag == "--lab-replay") {
-            (Some(path), save, None, false) => village::lab::run_file(&path, save.as_deref()),
-            (Some(path), None, None, true) => village::lab::replay_file(&path),
+        let result = match (path, save, args.next(), flag.to_str()) {
+            (Some(path), save, None, Some("--lab")) => {
+                village::lab::run_file(&path, save.as_deref())
+            }
+            (Some(path), None, None, Some("--lab-replay")) => village::lab::replay_file(&path),
+            (Some(path), save, None, Some("--lab-ui")) => {
+                village::lab::run_ui(&path, save.as_deref())
+            }
             _ => Err(std::io::Error::other(
-                "Usage: solar-friends-v3 --lab scenario.json [village.json] or --lab-replay report.json",
+                "Usage: solar-friends-v3 --lab or --lab-ui scenario.json [village.json], or --lab-replay report.json",
             )),
         };
         if let Err(error) = result {

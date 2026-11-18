@@ -86,3 +86,5 @@ Order types include `build`, `produce`, `buy`, `sell`, `bed`, `configure-bed`, `
 Set `"stop"` in the scenario to `"harvest"`, `"crop-failed"`, `"hydration"`, or `"water"` to stop at that condition. The report includes the actual end step and a final sample.
 
 Verify a lab report with `cargo run --locked --manifest-path bevy-v3/Cargo.toml -- --lab-replay report.json`. The verifier replays the bundled starting village and orders and exits with an error if the results diverge.
+
+Use `--lab-ui scenario.json [village.json]` to open the native lab window. Press **Space** to run or pause, **J** for one simulation step, or **1–4** to change speed.

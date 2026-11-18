@@ -53,14 +53,23 @@ struct Report {
 
 pub(crate) fn run_file(scenario: &Path, save: Option<&Path>) -> io::Result<()> {
     let catalog = Catalog::default();
-    let input = crate::save::read_bytes(scenario, 1024 * 1024)?;
-    let scenario = serde_json::from_slice(&input)?;
-    let village = save
-        .map(|path| crate::save::read(path, &catalog))
-        .transpose()?;
+    let (scenario, village) = load_inputs(scenario, save, &catalog)?;
     let report = run(scenario, village, &catalog)?;
     serde_json::to_writer(io::stdout().lock(), &report)?;
     Ok(())
+}
+
+fn load_inputs(
+    scenario: &Path,
+    save: Option<&Path>,
+    catalog: &Catalog,
+) -> io::Result<(Scenario, Option<Village>)> {
+    let input = crate::save::read_bytes(scenario, 1024 * 1024)?;
+    let scenario = serde_json::from_slice(&input)?;
+    let village = save
+        .map(|path| crate::save::read(path, catalog))
+        .transpose()?;
+    Ok((scenario, village))
 }
 
 pub(crate) fn replay_file(path: &Path) -> io::Result<()> {
@@ -106,120 +115,317 @@ fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Resu
     Ok(end_step)
 }
 
-fn run(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::Result<Report> {
-    const SAMPLE_LIMIT: usize = 2160;
-    const STEP: f64 = 0.1;
-    if scenario
-        .orders
-        .iter()
-        .any(|order| order.step > scenario.steps)
-        || scenario
+const STEP: f64 = 0.1;
+const SAMPLE_LIMIT: usize = 2160;
+
+#[derive(Resource)]
+struct Runner {
+    scenario: Scenario,
+    initial: serde_json::Value,
+    village: Village,
+    setup: WorldSetup,
+    camp: IVec2,
+    land: Land,
+    terrain: crate::terrain::Terrain,
+    terrain_key: (u64, u64, usize),
+    index: u64,
+    next_order: usize,
+    samples: Vec<Sample>,
+    outcomes: Vec<Outcome>,
+    reason: Option<&'static str>,
+    stride: u64,
+}
+
+impl Runner {
+    fn new(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::Result<Self> {
+        if scenario
             .orders
-            .windows(2)
-            .any(|pair| pair[1].step < pair[0].step)
-    {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "Orders must be sorted and within the run.",
-        ));
-    }
-    let mut village = village.unwrap_or_else(|| {
-        let setup = WorldSetup::default().session();
-        Village {
-            setup: Some(setup.clone()),
-            camp: Some(CAMP_SITES[2].1),
-            arrival_time: ARRIVAL_DURATION,
-            stock: Stock::for_start(&setup, catalog),
-            ..default()
+            .iter()
+            .any(|order| order.step > scenario.steps)
+            || scenario
+                .orders
+                .windows(2)
+                .any(|pair| pair[1].step < pair[0].step)
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Orders must be sorted and within the run.",
+            ));
         }
-    });
-    let initial = serde_json::to_value(&village)?;
-    let camp = village
-        .camp
-        .ok_or_else(|| io::Error::other("Place camp before running the lab."))?;
-    let setup = village
-        .setup
-        .as_ref()
-        .ok_or_else(|| io::Error::other("Village setup is missing."))?
-        .clone();
-    let land = Land::generate(&setup);
-    let mut orders = scenario.orders.iter().peekable();
-    let mut outcomes = Vec::new();
-    let mut samples = Vec::new();
-    let stride = scenario.steps.div_ceil((SAMPLE_LIMIT - 1) as u64).max(1);
-    let mut terrain = village.terrain(&setup);
-    let mut terrain_key = village.terrain_key();
-    let mut index = 0;
-    let (end_step, stop_reason) = loop {
-        while orders.peek().is_some_and(|order| order.step == index) {
-            let order = orders.next().expect("scheduled order");
-            let ground = ConstructionSite {
-                terrain: &terrain,
-                land: &land,
-                camp,
-            };
-            let clock = TownClock {
-                seconds: village.clock,
-                round_trip_km: setup.round_trip_km(),
-            };
-            let error = village
-                .construction
-                .lab_order(catalog, &mut village.stock, ground, clock, &order.order)
-                .err();
-            outcomes.push(Outcome { step: index, error });
-            if village.terrain_key() != terrain_key {
-                terrain = village.terrain(&setup);
-                terrain_key = village.terrain_key();
+        let village = village.unwrap_or_else(|| {
+            let setup = WorldSetup::default().session();
+            Village {
+                setup: Some(setup.clone()),
+                camp: Some(CAMP_SITES[2].1),
+                arrival_time: ARRIVAL_DURATION,
+                stock: Stock::for_start(&setup, catalog),
+                ..default()
             }
+        });
+        let camp = village
+            .camp
+            .ok_or_else(|| io::Error::other("Place camp before running the lab."))?;
+        let setup = village
+            .setup
+            .as_ref()
+            .ok_or_else(|| io::Error::other("Village setup is missing."))?
+            .clone();
+        let stride = scenario.steps.div_ceil((SAMPLE_LIMIT - 1) as u64).max(1);
+        let mut runner = Self {
+            scenario,
+            initial: serde_json::to_value(&village)?,
+            land: Land::generate(&setup),
+            terrain: village.terrain(&setup),
+            terrain_key: village.terrain_key(),
+            village,
+            setup,
+            camp,
+            index: 0,
+            next_order: 0,
+            samples: Vec::new(),
+            outcomes: Vec::new(),
+            reason: None,
+            stride,
+        };
+        runner.observe(catalog);
+        Ok(runner)
+    }
+
+    fn done(&self) -> bool {
+        self.reason.is_some() || self.index == self.scenario.steps
+    }
+
+    fn sync_terrain(&mut self) {
+        let key = self.village.terrain_key();
+        if key != self.terrain_key {
+            self.terrain = self.village.terrain(&self.setup);
+            self.terrain_key = key;
         }
-        let reason = village
-            .construction
-            .lab_stop_reason(scenario.stop, village.clock);
-        if reason.is_some() || index == scenario.steps || index.is_multiple_of(stride) {
-            samples.push(Sample {
-                step: index,
-                seconds: village.clock,
-                cash_centavos: village.stock.balance(),
-                timber: village.stock.available("wood"),
-                meals: village.stock.available("meals"),
-                potable_liters: village.construction.potable_liters(),
-                minimum_hydration: village.construction.minimum_hydration(),
-                residents: village
-                    .construction
-                    .resident_status(catalog, &village.stock, 0),
-            });
-        }
-        if reason.is_some() || index == scenario.steps {
-            break (index, reason);
+    }
+
+    fn advance(&mut self, catalog: &Catalog) {
+        if self.done() {
+            return;
         }
         step(
-            &mut village,
+            &mut self.village,
             catalog,
-            &setup,
+            &self.setup,
             ConstructionSite {
-                terrain: &terrain,
-                land: &land,
-                camp,
+                terrain: &self.terrain,
+                land: &self.land,
+                camp: self.camp,
             },
             STEP,
         );
-        if village.terrain_key() != terrain_key {
-            terrain = village.terrain(&setup);
-            terrain_key = village.terrain_key();
+        self.sync_terrain();
+        self.index += 1;
+        self.observe(catalog);
+    }
+
+    fn observe(&mut self, catalog: &Catalog) {
+        while let Some(order) = self
+            .scenario
+            .orders
+            .get(self.next_order)
+            .filter(|order| order.step == self.index)
+        {
+            let ground = ConstructionSite {
+                terrain: &self.terrain,
+                land: &self.land,
+                camp: self.camp,
+            };
+            let clock = TownClock {
+                seconds: self.village.clock,
+                round_trip_km: self.setup.round_trip_km(),
+            };
+            let error = self
+                .village
+                .construction
+                .lab_order(
+                    catalog,
+                    &mut self.village.stock,
+                    ground,
+                    clock,
+                    &order.order,
+                )
+                .err();
+            self.outcomes.push(Outcome {
+                step: self.index,
+                error,
+            });
+            self.next_order += 1;
+            self.sync_terrain();
         }
-        index += 1;
-    };
-    Ok(Report {
-        version: 1,
-        scenario,
-        initial,
-        step_seconds: STEP,
-        end_step,
-        stop_reason,
-        samples,
-        orders: outcomes,
-        village,
-    })
+        self.reason = self
+            .village
+            .construction
+            .lab_stop_reason(self.scenario.stop, self.village.clock);
+        if self.done() || self.index.is_multiple_of(self.stride) {
+            self.samples.push(Sample {
+                step: self.index,
+                seconds: self.village.clock,
+                cash_centavos: self.village.stock.balance(),
+                timber: self.village.stock.available("wood"),
+                meals: self.village.stock.available("meals"),
+                potable_liters: self.village.construction.potable_liters(),
+                minimum_hydration: self.village.construction.minimum_hydration(),
+                residents: self.village.construction.resident_status(
+                    catalog,
+                    &self.village.stock,
+                    0,
+                ),
+            });
+        }
+    }
+
+    fn into_report(self) -> Report {
+        Report {
+            version: 1,
+            scenario: self.scenario,
+            initial: self.initial,
+            step_seconds: STEP,
+            end_step: self.index,
+            stop_reason: self.reason,
+            samples: self.samples,
+            orders: self.outcomes,
+            village: self.village,
+        }
+    }
+}
+
+fn run(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::Result<Report> {
+    let mut runner = Runner::new(scenario, village, catalog)?;
+    while !runner.done() {
+        runner.advance(catalog);
+    }
+    Ok(runner.into_report())
+}
+
+pub(crate) fn run_ui(scenario: &Path, save: Option<&Path>) -> io::Result<()> {
+    let catalog = Catalog::default();
+    let (scenario, village) = load_inputs(scenario, save, &catalog)?;
+    let runner = Runner::new(scenario, village, &catalog)?;
+    App::new()
+        .insert_resource(catalog)
+        .insert_resource(runner)
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "Solar Friends V3 · Simulation lab".into(),
+                ..default()
+            }),
+            ..default()
+        }))
+        .add_plugins(crate::ui_font::UiFontPlugin)
+        .add_systems(Startup, setup_lab_window)
+        .add_systems(Update, update_lab_window)
+        .run();
+    Ok(())
+}
+
+fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
+    commands.spawn(Camera2d);
+    commands.spawn((
+        Text::default(),
+        ui_font(&assets, 18.0),
+        Node {
+            margin: UiRect::all(px(24)),
+            ..default()
+        },
+    ));
+}
+
+struct Playback {
+    running: bool,
+    speed: usize,
+    debt: f64,
+}
+
+impl Default for Playback {
+    fn default() -> Self {
+        Self {
+            running: false,
+            speed: 2,
+            debt: 0.0,
+        }
+    }
+}
+
+fn update_lab_window(
+    mut runner: ResMut<Runner>,
+    catalog: Res<Catalog>,
+    time: Res<Time>,
+    keys: Res<ButtonInput<KeyCode>>,
+    mut playback: Local<Playback>,
+    mut panel: Single<&mut Text>,
+) {
+    let rates = [1, 8, 32, 128];
+    for (index, key) in [
+        KeyCode::Digit1,
+        KeyCode::Digit2,
+        KeyCode::Digit3,
+        KeyCode::Digit4,
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        if keys.just_pressed(key) {
+            playback.speed = index;
+            playback.debt = 0.0;
+        }
+    }
+    if keys.just_pressed(KeyCode::Space) && !runner.done() {
+        playback.running = !playback.running;
+        playback.debt = 0.0;
+    }
+    if keys.just_pressed(KeyCode::KeyJ) && !playback.running {
+        runner.advance(&catalog);
+    }
+    if playback.running {
+        let speed = f64::from(rates[playback.speed]);
+        playback.debt = (playback.debt + time.delta_secs_f64().min(0.25) * speed).min(speed * 2.0);
+        let start = std::time::Instant::now();
+        while playback.debt >= STEP && !runner.done() && start.elapsed().as_millis() < 8 {
+            runner.advance(&catalog);
+            playback.debt -= STEP;
+        }
+    }
+    if runner.done() {
+        playback.running = false;
+    }
+    let village = &runner.village;
+    let status = runner.reason.unwrap_or(if runner.done() {
+        "Scenario complete"
+    } else if playback.running {
+        "Running"
+    } else {
+        "Paused"
+    });
+    let last = runner.outcomes.last().map_or_else(
+        || "No scheduled orders processed".into(),
+        |order| {
+            format!(
+                "Last order at step {} · {}",
+                order.step,
+                order.error.as_deref().unwrap_or("Accepted")
+            )
+        },
+    );
+    let text = format!(
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water\n{last}\n\n{}",
+        runner.index,
+        runner.scenario.steps,
+        village.clock,
+        rates[playback.speed],
+        village.stock.balance() as f64 / 100.0,
+        village.stock.available("wood"),
+        village.stock.available("meals"),
+        village.construction.potable_liters(),
+        village
+            .construction
+            .resident_status(&catalog, &village.stock, 0)
+    );
+    panel.set_if_neq(Text::new(text));
 }
 
 #[cfg(test)]
