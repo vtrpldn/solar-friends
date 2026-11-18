@@ -567,7 +567,7 @@ fn village_input(
         return;
     }
 
-    if village.camp.is_some() && village.lenses.controls(&keyboard) {
+    if village.camp.is_some() && village.lenses.controls(&keyboard, catalog.materials.len()) {
         return;
     }
 
@@ -1471,6 +1471,22 @@ fn draw_blueprints(
                 pointer.hovered.map(|hit| hit.cell),
                 &mut gizmos,
             )),
+            Some(MapLens::Chains) => {
+                catalog
+                    .materials
+                    .keys()
+                    .nth(village.lenses.material)
+                    .map(|material| {
+                        village.construction.draw_chains_lens(
+                            &catalog,
+                            &terrain,
+                            (&village.stock, &land),
+                            material,
+                            pointer.hovered.map(|hit| hit.cell),
+                            &mut gizmos,
+                        )
+                    })
+            }
             Some(MapLens::Food) => Some(village.construction.draw_food_lens(
                 &catalog,
                 &terrain,

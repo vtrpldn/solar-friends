@@ -1,3 +1,4 @@
+mod chains_lens;
 mod events;
 mod farm_work;
 mod food_lens;

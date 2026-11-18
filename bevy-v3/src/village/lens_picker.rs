@@ -12,6 +12,7 @@ pub(super) enum MapLens {
     Sanitation,
     Work,
     Food,
+    Chains,
 }
 
 const LENSES: [(KeyCode, MapLens, &str); 9] = [
@@ -26,15 +27,21 @@ const LENSES: [(KeyCode, MapLens, &str); 9] = [
     (KeyCode::Digit9, MapLens::Work, "Work"),
 ];
 
+const SECOND_PAGE: [(KeyCode, MapLens, &str); 2] = [
+    (KeyCode::Digit1, MapLens::Food, "Food"),
+    (KeyCode::Digit2, MapLens::Chains, "Material chains"),
+];
+
 #[derive(Default)]
 pub(super) struct LensPicker {
     pub open: bool,
     pub active: Option<MapLens>,
     next_page: bool,
+    pub material: usize,
 }
 
 impl LensPicker {
-    pub(super) fn controls(&mut self, keys: &ButtonInput<KeyCode>) -> bool {
+    pub(super) fn controls(&mut self, keys: &ButtonInput<KeyCode>, material_count: usize) -> bool {
         let shift = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
         if shift && keys.just_pressed(KeyCode::KeyL) {
             self.open = !self.open;
@@ -50,9 +57,11 @@ impl LensPicker {
             } else if keys.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
                 self.next_page = !self.next_page;
             } else if self.next_page {
-                if keys.just_pressed(KeyCode::Digit1) {
-                    self.active = Some(MapLens::Food);
-                    self.open = false;
+                for (key, lens, _) in SECOND_PAGE {
+                    if keys.just_pressed(key) {
+                        self.active = Some(lens);
+                        self.open = false;
+                    }
                 }
             } else if let Some(&(_, lens, _)) =
                 LENSES.iter().find(|(key, _, _)| keys.just_pressed(*key))
@@ -61,6 +70,16 @@ impl LensPicker {
                 self.open = false;
             }
             return true;
+        }
+        if shift && self.active == Some(MapLens::Chains) && material_count > 0 {
+            if keys.just_pressed(KeyCode::PageUp) {
+                self.material = (self.material + material_count - 1) % material_count;
+                return true;
+            }
+            if keys.just_pressed(KeyCode::PageDown) {
+                self.material = (self.material + 1) % material_count;
+                return true;
+            }
         }
         let shortcuts = [
             (
@@ -95,14 +114,12 @@ impl LensPicker {
         }
         let page = if self.next_page { 2 } else { 1 };
         let mut text = format!("Map lenses · {page}/2 · Page Up/Down · Esc Close\n0 Normal view");
-        if self.next_page {
-            text.push_str("\n1 Food");
-            if self.active == Some(MapLens::Food) {
-                text.push_str(" · Active");
-            }
-            return Some(text);
-        }
-        for (index, &(_, lens, label)) in LENSES.iter().enumerate() {
+        let options = if self.next_page {
+            SECOND_PAGE.as_slice()
+        } else {
+            LENSES.as_slice()
+        };
+        for (index, &(_, lens, label)) in options.iter().enumerate() {
             let active = if self.active == Some(lens) {
                 " · Active"
             } else {
