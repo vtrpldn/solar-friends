@@ -32,6 +32,8 @@ In Story, press H for finances and paid town shifts. Book one day shift or turn 
 
 Press L to advance between 1 and 365 days. Exact replay uses normal simulation steps. Fast approximate uses larger steps. Press L while advancing to stop at the time shown.
 
+Press N to view residents and assign beds. Pick a resident with 1–5, click a completed home, then press T to assign it or Y to clear the assignment. Residents prefer their assigned home and can use spare beds or the camp tents when needed.
+
 Press F4 after pitching camp to edit terrain. Use 1–4 for Raise, Lower, Flatten, or Smooth. Use brackets to change the brush radius, then click the terrain. Flatten keeps the height of the first click until you reselect it. Press Z to undo an edit. Your edits are saved with the village. New building plans and completed moves grade their footprint. Foundations stay in the terrain after a project moves or is removed.
 
 Press F5 to save the current village and F9 to reload it. Press F6 to name, load, rename, recover, or export villages. An active named village autosaves and retains its previous snapshot. Story and Sandbox have separate save files under `Solar Friends V3` in the local application data directory.

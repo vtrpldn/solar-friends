@@ -90,7 +90,9 @@ pub struct Village {
     #[serde(skip)]
     utility_panel: Option<UtilityPanel>,
     #[serde(skip)]
-    finance_resident: usize,
+    selected_resident: usize,
+    #[serde(skip)]
+    housing_notice: String,
     #[serde(skip)]
     camp_error: Option<&'static str>,
     #[serde(skip)]
@@ -486,14 +488,14 @@ fn village_input(
             .iter()
             .position(|key| keyboard.just_pressed(*key))
             {
-                town.finance_resident = index;
+                town.selected_resident = index;
             }
             if keyboard.just_pressed(KeyCode::KeyT) {
-                town.construction.toggle_shift(town.finance_resident);
+                town.construction.toggle_shift(town.selected_resident);
             }
             if keyboard.just_pressed(KeyCode::KeyY) {
                 town.construction
-                    .toggle_weekday_shift(town.finance_resident);
+                    .toggle_weekday_shift(town.selected_resident);
             }
         }
         if town.utility_panel == Some(UtilityPanel::Pantry) && keyboard.just_pressed(KeyCode::KeyT)
@@ -539,6 +541,34 @@ fn village_input(
             && let Some(index) = town.construction.production.selected
         {
             town.construction.utilities.toggle(index);
+        }
+        if town.utility_panel == Some(UtilityPanel::Residents) {
+            if let Some(index) = [
+                KeyCode::Digit1,
+                KeyCode::Digit2,
+                KeyCode::Digit3,
+                KeyCode::Digit4,
+                KeyCode::Digit5,
+            ]
+            .iter()
+            .position(|key| keyboard.just_pressed(*key))
+            {
+                town.selected_resident = index;
+                town.housing_notice.clear();
+            }
+            if let Some(hit) = pointer.clicked {
+                town.construction.select_facility(hit.cell);
+                town.housing_notice.clear();
+            }
+            if keyboard.just_pressed(KeyCode::KeyT) {
+                town.housing_notice = town
+                    .construction
+                    .assign_selected_home(town.selected_resident, &catalog)
+                    .unwrap_or_else(str::to_owned);
+            } else if keyboard.just_pressed(KeyCode::KeyY) {
+                town.housing_notice = town.construction.clear_home(town.selected_resident);
+            }
+            return;
         }
         if town.stock.sandbox && keyboard.just_pressed(KeyCode::KeyI) {
             town.construction.toggle_sandbox_construction();
@@ -901,14 +931,23 @@ fn show_hud(
         }
         Some(UtilityPanel::Residents) => {
             label.push('\n');
-            label.push_str(&village.construction.resident_status(&catalog));
+            label.push_str("1–5 Select resident · Click home · T Assign · Y Clear\n");
+            if !village.housing_notice.is_empty() {
+                label.push_str(&village.housing_notice);
+                label.push('\n');
+            }
+            label.push_str(
+                &village
+                    .construction
+                    .resident_status(&catalog, village.selected_resident),
+            );
         }
         Some(UtilityPanel::Finances) => {
             label.push('\n');
             label.push_str(
                 &village
                     .construction
-                    .finance_summary(&village.stock, village.finance_resident),
+                    .finance_summary(&village.stock, village.selected_resident),
             );
             label.push_str("\nTab Town trade");
         }

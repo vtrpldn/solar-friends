@@ -286,6 +286,12 @@ impl Utilities {
             .is_some_and(|node| node.enabled && node.powered)
     }
 
+    pub fn enabled(&self, building: usize) -> bool {
+        self.nodes
+            .get(&(building + 1))
+            .is_none_or(|node| node.enabled)
+    }
+
     pub fn toggle(&mut self, building: usize) {
         if let Some(node) = self.nodes.get_mut(&(building + 1))
             && (light_load(&node.kind) > 0.0

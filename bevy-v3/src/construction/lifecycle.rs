@@ -295,6 +295,11 @@ impl Construction {
 
     fn remove_project(&mut self, index: usize) {
         self.plans[index].removed = true;
+        for resident in &mut self.residents {
+            if resident.home == Some(index) {
+                resident.home = None;
+            }
+        }
         self.plans[index].purchase = None;
         if self.production.selected == Some(index) {
             self.production.selected = None;

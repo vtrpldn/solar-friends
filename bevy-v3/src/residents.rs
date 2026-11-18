@@ -84,6 +84,12 @@ impl Health {
             .task
             .as_ref()
             .is_some_and(|task| task.kind == Need::Sleep && task.elapsed > 0.0);
+        let resting = self.task.as_ref().is_some_and(|task| {
+            matches!(task.kind, Need::Sleep | Need::Rest) && task.elapsed > 0.0
+        });
+        if !resting {
+            self.energy = (self.energy - dt * 0.035).max(0.0);
+        }
         let scale = if asleep { 0.35 } else { 1.0 };
         let rates = [
             0.055,

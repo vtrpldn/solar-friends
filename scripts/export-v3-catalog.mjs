@@ -40,6 +40,7 @@ const projects = Object.fromEntries(options
       category: buildingCategory(definition) ?? definition.category,
       campEssential: inBuildCategory(id, definition, "Camp essentials"),
       repeatable: Boolean(definition.repeatable),
+      ...(definition.beds ? { beds: definition.beds } : {}),
     },
   ]));
 

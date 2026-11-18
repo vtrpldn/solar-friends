@@ -1066,7 +1066,8 @@
       "work": 43201.33333333333,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 1
     },
     "home-lane": {
       "name": "Narrow lane house",
@@ -1088,7 +1089,8 @@
       "work": 51992,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 2
     },
     "home-garden": {
       "name": "Garden cottage",
@@ -1110,7 +1112,8 @@
       "work": 43201.33333333333,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 1
     },
     "home-ochre": {
       "name": "Ochre gable house",
@@ -1132,7 +1135,8 @@
       "work": 64858.66666666667,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 2
     },
     "home-deep-porch": {
       "name": "Deep porch house",
@@ -1154,7 +1158,8 @@
       "work": 75686.66666666667,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 2
     },
     "home-blue-gallery": {
       "name": "Sage terrace house",
@@ -1176,7 +1181,8 @@
       "work": 64858.66666666667,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 2
     },
     "home-paired": {
       "name": "Paired roof house",
@@ -1198,7 +1204,8 @@
       "work": 75686.66666666667,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 3
     },
     "home-broad-veranda": {
       "name": "Broad veranda house",
@@ -1220,7 +1227,8 @@
       "work": 103454.66666666666,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 3
     },
     "home-shaded-retreat": {
       "name": "Shaded terrace home",
@@ -1242,7 +1250,8 @@
       "work": 120396,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 3
     },
     "home-ranch": {
       "name": "Long clay-roof house",
@@ -1264,7 +1273,8 @@
       "work": 97342.66666666667,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 3
     },
     "home-cottage": {
       "name": "Small cottage",
@@ -1286,7 +1296,8 @@
       "work": 54029.333333333336,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 1
     },
     "home-longhouse": {
       "name": "Long veranda house",
@@ -1308,7 +1319,8 @@
       "work": 86514.66666666666,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 3
     },
     "groundwater-well": {
       "name": "Water well",
@@ -1370,7 +1382,8 @@
       "work": 90589.33333333333,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 3
     },
     "home-shared": {
       "name": "Shared adobe house",
@@ -1391,7 +1404,8 @@
       "work": 113280,
       "category": "Homes & shelter",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "beds": 4
     },
     "road": {
       "name": "Village road",

@@ -182,6 +182,8 @@ pub struct Worker {
     #[serde(default)]
     health: Health,
     #[serde(default)]
+    home: Option<usize>,
+    #[serde(default)]
     town_work: TownWork,
 }
 
@@ -219,6 +221,7 @@ impl Default for Construction {
                     experience: 0.0,
                     retry: 0.0,
                     health: Health::new(index),
+                    home: None,
                     town_work: TownWork::default(),
                 }
             }),
@@ -819,7 +822,8 @@ impl Construction {
                             && target.rotation <= 3
                     })
             });
-        if !changes_valid
+        if !self.valid_homes(catalog)
+            || !changes_valid
             || !self.trade.valid(catalog)
             || !animals_valid
             || !farms_valid

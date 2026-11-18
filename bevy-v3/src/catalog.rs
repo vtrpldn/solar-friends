@@ -49,6 +49,7 @@ pub struct Project {
     pub work: f64,
     pub camp_essential: bool,
     pub repeatable: bool,
+    pub beds: Option<usize>,
 }
 
 #[derive(Deserialize)]

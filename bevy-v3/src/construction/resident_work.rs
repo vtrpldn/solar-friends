@@ -70,14 +70,21 @@ impl Construction {
         let profile = &catalog.residents[index];
         let mut options = health.pending(profile, clock, stock.has_meal());
         let hour = game_hour(clock);
-        let night = (clock / DAY + 9.0 / 24.0).floor() as u64;
+        let night = ((clock + 4.0 * HOUR) / DAY).floor() as u64;
         let urgent = options.iter().any(|need| {
             matches!(
                 need,
                 Need::Hunger | Need::Hydration | Need::Bladder | Need::Bowels
             ) && health.levels[*need as usize] < 15.0
         });
-        if !urgent && hour >= profile.temperament.bedtime && health.last_night != Some(night) {
+        let ready_for_sleep = [Need::Bladder, Need::Bowels, Need::Hydration]
+            .into_iter()
+            .all(|need| health.levels[need as usize] > 20.0)
+            && (health.levels[Need::Hunger as usize] > 20.0 || !stock.has_meal());
+        if ready_for_sleep
+            && (hour >= profile.temperament.bedtime || hour < 5.0)
+            && health.last_night != Some(night)
+        {
             options.insert(0, Need::Sleep);
         } else if !urgent && health.energy < 25.0 {
             options.insert(0, Need::Rest);
@@ -128,7 +135,19 @@ impl Construction {
                 Need::Social => 18.0,
                 Need::Fun => 22.0,
                 Need::Sleep => (7.5 + 1.5 * (1.0 - health.energy / 100.0)) * HOUR,
-                Need::Rest => ((55.0 - health.energy) / 0.45).max(1.0),
+                Need::Rest => {
+                    let shift = &self.residents[index].town_work;
+                    let construction_pending = self
+                        .plans
+                        .iter()
+                        .any(|plan| !plan.removed && plan.work < catalog.projects[&plan.key].work);
+                    let target = if shift.booked || shift.repeating || !construction_pending {
+                        80.0
+                    } else {
+                        60.0
+                    };
+                    ((target - health.energy) / 0.45).max(1.0)
+                }
                 Need::FetchWater => 4.0,
                 Need::FilterWater => 18.0,
             },
@@ -216,9 +235,147 @@ impl Construction {
                     .find_map(|(id, loc, size)| facility_path(id, loc, size))
                     .or_else(|| fallback(camp + IVec2::new(index as i32 - 3, 3)))
             }
-            Need::Rest | Need::Sleep => fallback(camp + IVec2::new((index % 2) as i32 * 2, 0)),
+            Need::Rest | Need::Sleep => self.rest_route(index, catalog, site, &path),
             Need::Fun | Need::Social => fallback(camp + IVec2::new(index as i32 - 2, 1)),
         }
+    }
+
+    fn completed_shelter<'a>(&self, catalog: &'a Catalog, index: usize) -> Option<&'a Project> {
+        let plan = self.plans.get(index)?;
+        let definition = catalog.projects.get(&plan.key)?;
+        (!plan.removed
+            && plan.work >= definition.work
+            && (definition.kind == "home" || plan.key.starts_with("canvas-tent")))
+        .then_some(definition)
+    }
+
+    pub(super) fn valid_homes(&self, catalog: &Catalog) -> bool {
+        self.residents.iter().all(|resident| {
+            resident.home.is_none_or(|home| {
+                self.completed_shelter(catalog, home)
+                    .is_some_and(|definition| {
+                        definition.kind == "home"
+                            && self
+                                .residents
+                                .iter()
+                                .filter(|other| other.home == Some(home))
+                                .count()
+                                <= definition.beds.unwrap_or(2)
+                    })
+            })
+        })
+    }
+
+    pub fn assign_selected_home(
+        &mut self,
+        index: usize,
+        catalog: &Catalog,
+    ) -> Result<String, &'static str> {
+        let home = self
+            .production
+            .selected
+            .ok_or("Select a completed home on the map.")?;
+        let definition = self
+            .completed_shelter(catalog, home)
+            .filter(|definition| definition.kind == "home" && !self.changes.contains_key(&home))
+            .ok_or("Select a completed home on the map.")?;
+        if !self.utilities.enabled(home) {
+            return Err("Reopen this home before assigning residents.");
+        }
+        let people = self
+            .residents
+            .iter()
+            .enumerate()
+            .filter(|&(id, other)| id != index && other.home == Some(home))
+            .count();
+        if people >= definition.beds.unwrap_or(2) {
+            return Err("This home has no free beds.");
+        }
+        self.residents[index].home = Some(home);
+        Ok(format!(
+            "{} assigned to {} #{}.",
+            NAMES[index],
+            definition.name,
+            home + 1
+        ))
+    }
+
+    pub fn clear_home(&mut self, index: usize) -> String {
+        self.residents[index].home = None;
+        format!("{} can use any free bed.", NAMES[index])
+    }
+
+    fn rest_route(
+        &self,
+        index: usize,
+        catalog: &Catalog,
+        site: ConstructionSite,
+        path: &impl Fn(IVec2) -> Option<VecDeque<Vec2>>,
+    ) -> Option<(Option<usize>, VecDeque<Vec2>)> {
+        let resident = &self.residents[index];
+        let mut choices = self
+            .plans
+            .iter()
+            .enumerate()
+            .filter_map(|(id, plan)| {
+                let definition = self.completed_shelter(catalog, id)?;
+                if self.changes.contains_key(&id) || !self.utilities.enabled(id) {
+                    return None;
+                }
+                let occupied = self
+                    .residents
+                    .iter()
+                    .enumerate()
+                    .filter(|&(other, worker)| {
+                        other != index
+                            && (worker.home == Some(id)
+                                || worker.health.task.as_ref().is_some_and(|task| {
+                                    matches!(task.kind, Need::Rest | Need::Sleep)
+                                        && task.facility == Some(id + 1)
+                                }))
+                    })
+                    .count();
+                (occupied < definition.beds.unwrap_or(2)).then_some((id, plan, definition))
+            })
+            .collect::<Vec<_>>();
+        choices.sort_by(|(a, left, a_def), (b, right, b_def)| {
+            (resident.home != Some(*a), a_def.kind != "home")
+                .cmp(&(resident.home != Some(*b), b_def.kind != "home"))
+                .then_with(|| {
+                    left.position
+                        .as_vec2()
+                        .distance_squared(resident.position)
+                        .total_cmp(&right.position.as_vec2().distance_squared(resident.position))
+                })
+        });
+        choices
+            .into_iter()
+            .find_map(|(id, plan, _)| {
+                let start = plan.position;
+                let size = plan.size;
+                let front = start
+                    + match plan.rotation {
+                        0 => IVec2::new(size.x / 2, size.y),
+                        1 => IVec2::new(size.x, size.y / 2),
+                        2 => IVec2::new(size.x / 2, -1),
+                        _ => IVec2::new(-1, size.y / 2),
+                    };
+                path(front).map(|route| (Some(id + 1), route))
+            })
+            .or_else(|| {
+                let camp = site.camp;
+                path(camp + IVec2::new((index % 2) as i32 * 2, 0))
+                    .or_else(|| {
+                        approach_points(
+                            camp + IVec2::new(-1, -3),
+                            IVec2::new(5, 3),
+                            resident.position,
+                        )
+                        .into_iter()
+                        .find_map(path)
+                    })
+                    .map(|route| (None, route))
+            })
     }
 
     fn conversation_partner(
@@ -434,7 +591,7 @@ impl Construction {
             .is_some_and(|task| matches!(task.kind, Need::Rest | Need::Sleep) && task.elapsed > 0.0)
     }
 
-    pub fn resident_status(&self, catalog: &Catalog) -> String {
+    pub fn resident_status(&self, catalog: &Catalog, selected: usize) -> String {
         self.residents
             .iter()
             .enumerate()
@@ -461,8 +618,13 @@ impl Construction {
                 };
                 let health = &worker.health;
                 let profile = &catalog.residents[index];
+                let home = worker.home.map_or_else(
+                    || "Any free bed".to_owned(),
+                    |id| format!("{} #{}", catalog.projects[&self.plans[id].key].name, id + 1),
+                );
+                let marker = if index == selected { "› " } else { "" };
                 format!(
-                    "{} · {}\n{} · Energy {:.0}% · Water {:.0}% · Food {:.0}%\n{}",
+                    "{marker}{} · {} · {home}\n{} · Energy {:.0}% · Water {:.0}% · Food {:.0}%\n{}",
                     NAMES[index],
                     profile.role,
                     action,
@@ -499,6 +661,71 @@ pub(super) fn approach_points(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn home_assignments_reserve_beds_and_guide_residents_at_night() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let mut construction = Construction::default();
+        for target in [IVec2::new(44, 36), IVec2::new(52, 36)] {
+            construction.selection = Some("home-cottage".into());
+            construction.plan(
+                &catalog,
+                &mut stock,
+                site,
+                target,
+                TownClock {
+                    seconds: 0.0,
+                    round_trip_km: 12,
+                },
+            );
+        }
+        construction.select_facility(IVec2::new(52, 36));
+        construction.assign_selected_home(0, &catalog).unwrap();
+        assert_eq!(
+            construction.assign_selected_home(1, &catalog),
+            Err("This home has no free beds.")
+        );
+        construction.residents[0].position = Vec2::new(42.0, 40.0);
+        construction.residents[1].position = Vec2::new(50.0, 41.0);
+        let night = 15.0 * HOUR;
+        construction.choose_need(0, &catalog, &stock, site, night);
+        construction.choose_need(1, &catalog, &stock, site, night);
+        assert_eq!(
+            construction.residents[0]
+                .health
+                .task
+                .as_ref()
+                .unwrap()
+                .facility,
+            Some(2)
+        );
+        assert_eq!(
+            construction.residents[1]
+                .health
+                .task
+                .as_ref()
+                .unwrap()
+                .facility,
+            Some(1)
+        );
+        let json = serde_json::to_string(&construction).unwrap();
+        let mut saved: Construction = serde_json::from_str(&json).unwrap();
+        assert!(saved.valid_homes(&catalog));
+        assert_eq!(saved.residents[0].home, Some(1));
+        saved.clear_home(0);
+        assert!(saved.residents[0].home.is_none());
+    }
 
     #[test]
     fn thirsty_resident_walks_to_water_and_consumes_half_a_liter() {
