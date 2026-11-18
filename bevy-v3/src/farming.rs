@@ -86,7 +86,7 @@ impl Stage {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Bed {
     pub offset: Vec2,
     pub dimensions: Vec2,
@@ -174,6 +174,52 @@ impl Plot {
             beds,
             remainders: [0.0; 3],
         })
+    }
+
+    pub fn field_size_valid(size: IVec2) -> bool {
+        size.cmpge(IVec2::splat(2)).all() && size.cmple(IVec2::splat(32)).all()
+    }
+
+    pub fn resize_field(&mut self, size: IVec2, shift: IVec2) -> Result<(), &'static str> {
+        let mut layout = Self::new("field", size).expect("valid field dimensions");
+        let mut remaining: BTreeMap<_, _> = self
+            .beds
+            .iter()
+            .map(|bed| {
+                let offset = bed.offset - shift.as_vec2();
+                (
+                    (offset.x as i32, offset.y as i32, bed.dimensions.y as i32),
+                    bed,
+                )
+            })
+            .collect();
+        for bed in &mut layout.beds {
+            let key = (
+                bed.offset.x as i32,
+                bed.offset.y as i32,
+                bed.dimensions.y as i32,
+            );
+            if let Some(old) = remaining.remove(&key) {
+                let offset = bed.offset;
+                *bed = old.clone();
+                bed.offset = offset;
+            }
+        }
+        if remaining.values().any(|bed| {
+            !matches!(
+                bed.stage,
+                Stage::Unprepared | Stage::Prepared | Stage::Harvested
+            ) || bed.residue_kg >= 1.0
+                || bed.amendment_kg >= 1.0
+        }) {
+            return Err("Clear crops and collect residues before shrinking occupied beds.");
+        }
+        for bed in remaining.values() {
+            layout.beds[0].residue_kg += bed.residue_kg;
+            layout.beds[0].amendment_kg += bed.amendment_kg;
+        }
+        self.beds = layout.beds;
+        Ok(())
     }
 
     pub fn finish(&mut self, job: &FarmJob, clock: f64, sandbox: bool) -> BTreeMap<String, u32> {
@@ -430,9 +476,11 @@ impl Farming {
         self.plots.iter().all(|(&id, plot)| {
             has_plot(id)
                 && !plot.beds.is_empty()
-                && plot.beds.len() <= 512
+                && plot.beds.len() <= 32 * 31
                 && plot.beds.iter().all(|bed| {
-                    bed.dimensions.x == 1.2
+                    bed.offset.is_finite()
+                        && bed.dimensions.is_finite()
+                        && bed.dimensions.x == 1.2
                         && bed.dimensions.y >= 1.0
                         && [0.5, 1.0, 1.5].contains(&bed.density)
                         && [bed.moisture, bed.fertility, bed.growth]

@@ -412,7 +412,11 @@ fn read_camp_pointer(
         *input = None;
     }
     let clicked = mouse.just_released(MouseButton::Left) && input.take().is_some();
-    if !clicked && !village.terrain_editor.open && !village.planning_roads() {
+    if !clicked
+        && !village.terrain_editor.open
+        && !village.planning_roads()
+        && !village.construction.placing_field()
+    {
         return;
     }
     let (camera, transform) = *camera;
@@ -716,6 +720,11 @@ fn village_input(
                     &catalog,
                     &mut town.stock,
                     &keyboard,
+                    ConstructionSite {
+                        terrain: &terrain,
+                        land: &land,
+                        camp: cell,
+                    },
                     TownClock {
                         seconds: town.clock,
                         round_trip_km: setup.round_trip_km(),
@@ -1150,12 +1159,14 @@ fn show_hud(
 fn draw_blueprints(
     setup: Res<WorldSetup>,
     village: Res<Village>,
-    catalog: Res<Catalog>,
+    (catalog, land): (Res<Catalog>, Res<Land>),
     pointer: Res<CampPointer>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut gizmos: Gizmos,
 ) {
-    if !setup.open && village.camp.is_some() {
+    if !setup.open
+        && let Some(camp) = village.camp
+    {
         let terrain = village.terrain(&setup);
         village.construction.draw(&catalog, &terrain, &mut gizmos);
         if matches!(
@@ -1178,6 +1189,18 @@ fn draw_blueprints(
                 village
                     .construction
                     .draw_road_route(&terrain, hit.cell, extend, &mut gizmos);
+            } else if village.construction.placing_field() {
+                village.construction.draw_field_site(
+                    ConstructionSite {
+                        terrain: &terrain,
+                        land: &land,
+                        camp,
+                    },
+                    &catalog,
+                    village.stock.sandbox,
+                    hit.cell,
+                    &mut gizmos,
+                );
             }
         }
     }

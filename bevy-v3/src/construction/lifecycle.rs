@@ -2,7 +2,7 @@ use crate::farming::Stage;
 
 use super::{resident_work::approach_points, *};
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub(super) struct Purchase {
     pub units: BTreeMap<String, u32>,
     pub price: u64,
@@ -172,6 +172,12 @@ impl Construction {
         position: IVec2,
         index: usize,
     ) {
+        if self.plans[index].key == "field" {
+            self.status =
+                "Cultivated soil stays on its land. Designate a new field instead.".into();
+            self.moving = None;
+            return;
+        }
         let plan = &self.plans[index];
         let definition = &catalog.projects[&plan.key];
         let target = Destination {

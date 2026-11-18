@@ -110,6 +110,8 @@ pub struct Construction {
     page: usize,
     #[serde(skip)]
     rotation: u8,
+    #[serde(skip, default = "default_field_size")]
+    field_size: IVec2,
     #[serde(skip)]
     status: String,
     #[serde(default)]
@@ -144,7 +146,7 @@ pub struct Construction {
     residents: [Worker; 5],
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 struct Blueprint {
     key: String,
     position: IVec2,
@@ -207,6 +209,7 @@ impl Default for Construction {
             category: 0,
             page: 0,
             rotation: 0,
+            field_size: default_field_size(),
             status: String::new(),
             slow_sandbox: false,
             plans: Vec::new(),
@@ -341,7 +344,13 @@ impl Construction {
         {
             self.selection = Some((*id).clone());
             self.rotation = 0;
+            self.field_size = default_field_size();
             self.status.clear();
+        }
+        if self.selection.as_deref() == Some("field")
+            && let Some(delta) = field_size_input(keyboard)
+        {
+            self.field_size = (self.field_size + delta).clamp(IVec2::splat(2), IVec2::splat(32));
         }
         if self.selection.is_some() && keyboard.just_pressed(KeyCode::KeyR) {
             self.rotation = (self.rotation + 1) % 4;
@@ -402,6 +411,15 @@ impl Construction {
                 self.status
             );
         }
+        if self.selection.as_deref() == Some("field") {
+            return format!(
+                "Cultivated field · {} × {} cells\n[ ] Width · Shift [ ] Depth · R Rotate {}°\nClick to designate · B Close\n{}",
+                self.field_size.x,
+                self.field_size.y,
+                u32::from(self.rotation) * 90,
+                self.status
+            );
+        }
         if let Some(key) = &self.selection {
             let definition = &catalog.projects[key];
             let degrees = u32::from(self.rotation) * 90;
@@ -449,6 +467,7 @@ impl Construction {
             return;
         }
         let Some(key) = &self.selection else { return };
+        let is_field = key == "field";
         let ConstructionSite {
             terrain,
             land,
@@ -458,7 +477,11 @@ impl Construction {
         let mut blueprint = Blueprint {
             key: key.clone(),
             position,
-            size: size(definition, self.rotation),
+            size: if is_field {
+                rotated_size(self.field_size, self.rotation)
+            } else {
+                size(definition, self.rotation)
+            },
             rotation: self.rotation,
             loads: catalog.loads(definition),
             delivered: 0,
@@ -485,7 +508,7 @@ impl Construction {
             self.status = error;
             return;
         }
-        self.status = if stock.sandbox && !self.slow_sandbox && key != "road" {
+        self.status = if is_field || (stock.sandbox && !self.slow_sandbox) {
             blueprint.delivered = blueprint.loads;
             blueprint.work = definition.work;
             format!("{} built.", definition.name)
@@ -503,6 +526,13 @@ impl Construction {
             && let Some(pad) = terrain.foundation(blueprint.position, blueprint.size)
         {
             self.add_foundation(pad);
+        }
+        if is_field {
+            self.farming.plots.insert(
+                self.plans.len(),
+                crate::farming::Plot::new("field", self.field_size)
+                    .expect("valid field dimensions"),
+            );
         }
         self.plans.push(blueprint);
         self.selection = None;
@@ -877,7 +907,11 @@ impl Construction {
                     plan.rotation <= 3
                         && plan.position.cmpge(IVec2::splat(-30)).all()
                         && plan.position.cmple(IVec2::splat(94)).all()
-                        && plan.size == size(definition, plan.rotation)
+                        && if plan.key == "field" {
+                            crate::farming::Plot::field_size_valid(plan.size)
+                        } else {
+                            plan.size == size(definition, plan.rotation)
+                        }
                         && (plan.position + plan.size).cmple(IVec2::splat(94)).all()
                         && plan.loads == catalog.loads(definition)
                         && plan.delivered <= plan.loads
@@ -1195,12 +1229,30 @@ fn access_road(cell: IVec2) -> bool {
 }
 
 fn size(definition: &Project, rotation: u8) -> IVec2 {
-    let [width, depth] = definition.size;
+    rotated_size(IVec2::from_array(definition.size), rotation)
+}
+
+fn rotated_size(size: IVec2, rotation: u8) -> IVec2 {
     if rotation.is_multiple_of(2) {
-        IVec2::new(width, depth)
+        size
     } else {
-        IVec2::new(depth, width)
+        IVec2::new(size.y, size.x)
     }
+}
+
+fn default_field_size() -> IVec2 {
+    IVec2::splat(2)
+}
+
+fn field_size_input(keyboard: &ButtonInput<KeyCode>) -> Option<IVec2> {
+    let amount = i32::from(keyboard.just_pressed(KeyCode::BracketRight))
+        - i32::from(keyboard.just_pressed(KeyCode::BracketLeft));
+    let axis = if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+        IVec2::Y
+    } else {
+        IVec2::X
+    };
+    (amount != 0).then_some(axis * amount)
 }
 
 #[cfg(test)]
