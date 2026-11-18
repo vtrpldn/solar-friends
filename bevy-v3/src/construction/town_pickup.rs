@@ -124,6 +124,10 @@ impl Construction {
             let space = self.storage_space(catalog, stock);
             if self.trade.finish_trip(trip.project, stock, space) {
                 self.removed_trade_order(trip.project);
+                self.record_event(
+                    clock.seconds,
+                    format!("Vehicle {} returned from a trade trip.", trip.vehicle + 1),
+                );
                 return true;
             }
             return false;
@@ -142,6 +146,10 @@ impl Construction {
                 plan.purchase = None;
             }
         }
+        self.record_event(
+            clock.seconds,
+            format!("Vehicle {} returned with supplies.", trip.vehicle + 1),
+        );
         true
     }
 

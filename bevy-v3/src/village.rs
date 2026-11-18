@@ -100,6 +100,8 @@ pub struct Village {
     #[serde(skip)]
     finance_history_page: usize,
     #[serde(skip)]
+    event_page: usize,
+    #[serde(skip)]
     housing_notice: String,
     #[serde(skip)]
     camp_error: Option<&'static str>,
@@ -209,6 +211,7 @@ enum UtilityPanel {
     Trade,
     Pantry,
     Upkeep,
+    Events,
 }
 
 impl Village {
@@ -694,6 +697,23 @@ fn village_input(
                 Some(UtilityPanel::Residents)
             };
         }
+        if keyboard.just_pressed(KeyCode::F8) {
+            town.utility_panel = if town.utility_panel == Some(UtilityPanel::Events) {
+                None
+            } else {
+                Some(UtilityPanel::Events)
+            };
+            town.event_page = 0;
+        }
+        if town.utility_panel == Some(UtilityPanel::Events) {
+            let pages = town.construction.event_log(town.event_page).0;
+            if keyboard.just_pressed(KeyCode::PageDown) {
+                town.event_page = (town.event_page + 1) % pages;
+            } else if keyboard.just_pressed(KeyCode::PageUp) {
+                town.event_page = (town.event_page + pages - 1) % pages;
+            }
+            return;
+        }
         if keyboard.just_pressed(KeyCode::F7) && !town.stock.sandbox {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Upkeep) {
                 None
@@ -870,6 +890,9 @@ fn village_input(
     village.camp = Some(cell);
     let clock = village.clock;
     village.stock.update_finance_clock(clock);
+    village
+        .construction
+        .record_event(clock, "Camp is ready.".into());
     camera.target = spawn_tents(&mut commands, &assets, &setup, cell);
 }
 
@@ -1124,13 +1147,17 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance",
+            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events",
         );
     }
     match village.utility_panel {
         Some(UtilityPanel::Power) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.power_summary());
+        }
+        Some(UtilityPanel::Events) => {
+            label.push('\n');
+            label.push_str(&village.construction.event_log(village.event_page).1);
         }
         Some(UtilityPanel::Upkeep) => {
             label.push('\n');

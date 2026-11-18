@@ -1,3 +1,4 @@
+mod events;
 mod farm_work;
 mod gather_work;
 mod kitchen_work;
@@ -123,6 +124,8 @@ pub struct Construction {
     slow_sandbox: bool,
     plans: Vec<Blueprint>,
     #[serde(default)]
+    events: events::VillageEvents,
+    #[serde(default)]
     pub foundations: Arc<Vec<Foundation>>,
     #[serde(default)]
     market: Market,
@@ -224,6 +227,7 @@ impl Default for Construction {
             status: String::new(),
             slow_sandbox: false,
             plans: Vec::new(),
+            events: events::VillageEvents::default(),
             foundations: Arc::default(),
             market: Market::default(),
             trade: Trade::default(),
@@ -555,6 +559,7 @@ impl Construction {
             );
         }
         self.plans.push(blueprint);
+        self.record_event(clock.seconds, self.status.clone());
         self.selection = None;
     }
 
@@ -924,7 +929,8 @@ impl Construction {
                             && target.rotation <= 3
                     })
             });
-        if !self.production.kitchen_policy.valid()
+        if !self.events.valid()
+            || !self.production.kitchen_policy.valid()
             || !self.upkeep.valid(self.plans.len())
             || !self.valid_water_jobs()
             || !self.valid_homes(catalog)
@@ -1191,6 +1197,12 @@ impl Construction {
                             * efficiency
                             * worker.health.hydration_factor())
                     .min(catalog.projects[&project.key].work);
+                    if project.work >= catalog.projects[&project.key].work {
+                        self.events.record(
+                            clock.seconds,
+                            format!("{} completed.", catalog.projects[&project.key].name),
+                        );
+                    }
                     worker.experience += f64::from(dt);
                     worker.health.energy = (worker.health.energy - f64::from(dt) * 0.16).max(0.0);
                 }

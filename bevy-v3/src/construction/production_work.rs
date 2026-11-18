@@ -710,6 +710,7 @@ impl Construction {
                     }
                     self.production.jobs.remove(index);
                     self.production.notice = format!("{}: batch in stores.", recipe.name);
+                    self.record_event(clock, self.production.notice.clone());
                 }
             }
         }
