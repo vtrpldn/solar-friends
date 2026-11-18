@@ -1,0 +1,1540 @@
+{
+  "materials": {
+    "wood": {
+      "name": "timber pieces",
+      "batch": 4,
+      "starting": 36
+    },
+    "hardware": {
+      "name": "fastener packs",
+      "batch": 1,
+      "starting": 7
+    },
+    "roofing": {
+      "name": "roof sheets",
+      "batch": 2,
+      "starting": 8
+    },
+    "tarp": {
+      "name": "tarp & rope kits",
+      "batch": 1,
+      "starting": 1
+    },
+    "tank": {
+      "name": "water tanks",
+      "batch": 1,
+      "starting": 1
+    },
+    "plumbing": {
+      "name": "pipe & tap kits",
+      "batch": 1,
+      "starting": 1
+    },
+    "sanitation": {
+      "name": "toilet kits",
+      "batch": 1,
+      "starting": 1
+    },
+    "greens": {
+      "name": "Leafy greens",
+      "batch": 1,
+      "starting": 0
+    },
+    "greens_seed": {
+      "name": "Leafy greens seed packets",
+      "batch": 1,
+      "starting": 0
+    },
+    "beans": {
+      "name": "Bush beans",
+      "batch": 1,
+      "starting": 0
+    },
+    "beans_seed": {
+      "name": "Bush beans seed packets",
+      "batch": 1,
+      "starting": 0
+    },
+    "corn": {
+      "name": "Sweet corn",
+      "batch": 1,
+      "starting": 0
+    },
+    "corn_seed": {
+      "name": "Sweet corn seed packets",
+      "batch": 1,
+      "starting": 0
+    },
+    "bucket": {
+      "name": "Bucket",
+      "batch": 1,
+      "starting": 0
+    },
+    "garden-tools": {
+      "name": "Garden tools",
+      "batch": 1,
+      "starting": 0
+    },
+    "carpentry-tools": {
+      "name": "Carpentry tools",
+      "batch": 1,
+      "starting": 0
+    },
+    "harvest-basket": {
+      "name": "Harvest basket",
+      "batch": 1,
+      "starting": 0
+    },
+    "cleaning-kit": {
+      "name": "Cleaning kit",
+      "batch": 1,
+      "starting": 0
+    },
+    "watering-can": {
+      "name": "Watering can",
+      "batch": 1,
+      "starting": 0
+    },
+    "wheelbarrow": {
+      "name": "Wheelbarrow",
+      "batch": 1,
+      "starting": 0
+    },
+    "bicycle": {
+      "name": "Bicycle",
+      "batch": 1,
+      "starting": 0
+    },
+    "produce-crates": {
+      "name": "Produce crate",
+      "batch": 1,
+      "starting": 0
+    },
+    "cooling": {
+      "name": "Refrigeration kit",
+      "batch": 1,
+      "starting": 0
+    },
+    "tool_heads": {
+      "name": "Garden tool heads",
+      "batch": 1,
+      "starting": 0
+    },
+    "repair_supplies": {
+      "name": "Repair supplies",
+      "batch": 1,
+      "starting": 0
+    },
+    "soap": {
+      "name": "Soap refill",
+      "batch": 1,
+      "starting": 0
+    },
+    "wheel_kit": {
+      "name": "Wheel and axle kit",
+      "batch": 1,
+      "starting": 0
+    },
+    "logs": {
+      "name": "Raw wood",
+      "batch": 4,
+      "starting": 0
+    },
+    "planks": {
+      "name": "Planks",
+      "batch": 4,
+      "starting": 0
+    },
+    "bamboo": {
+      "name": "Bamboo poles",
+      "batch": 4,
+      "starting": 0
+    },
+    "earth": {
+      "name": "Building earth",
+      "batch": 4,
+      "starting": 0
+    },
+    "stone": {
+      "name": "Stone",
+      "batch": 4,
+      "starting": 0
+    },
+    "frames": {
+      "name": "Frames",
+      "batch": 2,
+      "starting": 0
+    },
+    "walls": {
+      "name": "Wall material",
+      "batch": 4,
+      "starting": 0
+    },
+    "tiles": {
+      "name": "Roof tiles",
+      "batch": 4,
+      "starting": 0
+    },
+    "electrical": {
+      "name": "Electrical supplies",
+      "batch": 1,
+      "starting": 0
+    },
+    "covering": {
+      "name": "Greenhouse covering",
+      "batch": 1,
+      "starting": 0
+    },
+    "panels": {
+      "name": "Solar panels",
+      "batch": 1,
+      "starting": 0
+    },
+    "batteries": {
+      "name": "Battery equipment",
+      "batch": 1,
+      "starting": 0
+    },
+    "pumps": {
+      "name": "Pumps",
+      "batch": 1,
+      "starting": 0
+    },
+    "tools": {
+      "name": "Tool supplies",
+      "batch": 1,
+      "starting": 4
+    },
+    "food": {
+      "name": "Ingredients",
+      "batch": 4,
+      "starting": 12
+    },
+    "meals": {
+      "name": "Prepared meals",
+      "batch": 4,
+      "starting": 20
+    },
+    "eggs": {
+      "name": "Eggs",
+      "batch": 4,
+      "starting": 0
+    },
+    "compost": {
+      "name": "Mature compost",
+      "batch": 4,
+      "starting": 0
+    },
+    "scraps": {
+      "name": "Organic residues",
+      "batch": 4,
+      "starting": 0
+    },
+    "seedlings": {
+      "name": "Vegetable seedlings",
+      "batch": 4,
+      "starting": 0
+    },
+    "tree_starts": {
+      "name": "Timber seedlings",
+      "batch": 2,
+      "starting": 0
+    },
+    "bamboo_starts": {
+      "name": "Bamboo starts",
+      "batch": 2,
+      "starting": 0
+    },
+    "fodder": {
+      "name": "Dry fodder",
+      "batch": 4,
+      "starting": 0
+    },
+    "milk": {
+      "name": "Fresh milk",
+      "batch": 4,
+      "starting": 0
+    },
+    "honey": {
+      "name": "Honey",
+      "batch": 4,
+      "starting": 0
+    },
+    "goats": {
+      "name": "Goats",
+      "batch": 1,
+      "starting": 0
+    },
+    "bees": {
+      "name": "Bee colonies",
+      "batch": 1,
+      "starting": 0
+    },
+    "hens": {
+      "name": "Hens",
+      "batch": 1,
+      "starting": 0
+    }
+  },
+  "projects": {
+    "gathering": {
+      "name": "Gathering place",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 8,
+        "hardware": 1
+      },
+      "work": 134,
+      "category": "Community & leisure",
+      "campEssential": true,
+      "repeatable": true
+    },
+    "shelter": {
+      "name": "Basic shelter",
+      "size": [
+        3,
+        3
+      ],
+      "materials": {
+        "wood": 24,
+        "hardware": 3,
+        "roofing": 6
+      },
+      "work": 1067,
+      "category": "Homes & shelter",
+      "campEssential": true,
+      "repeatable": true
+    },
+    "toilet": {
+      "name": "Private toilet",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 16,
+        "hardware": 2,
+        "roofing": 2,
+        "sanitation": 1
+      },
+      "work": 534,
+      "category": "Water & sanitation",
+      "campEssential": true,
+      "repeatable": true
+    },
+    "home-studio": {
+      "name": "Little limewash studio",
+      "size": [
+        3,
+        4
+      ],
+      "materials": {
+        "earth": 96,
+        "stone": 288,
+        "frames": 6,
+        "walls": 259,
+        "tiles": 192,
+        "hardware": 3,
+        "wood": 96
+      },
+      "work": 43201.33333333333,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-lane": {
+      "name": "Narrow lane house",
+      "size": [
+        3,
+        5
+      ],
+      "materials": {
+        "earth": 120,
+        "stone": 360,
+        "frames": 6,
+        "walls": 296,
+        "tiles": 240,
+        "hardware": 3,
+        "wood": 120
+      },
+      "work": 51992,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-garden": {
+      "name": "Garden cottage",
+      "size": [
+        4,
+        3
+      ],
+      "materials": {
+        "earth": 96,
+        "stone": 288,
+        "frames": 8,
+        "walls": 259,
+        "tiles": 192,
+        "hardware": 4,
+        "wood": 96
+      },
+      "work": 43201.33333333333,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-ochre": {
+      "name": "Ochre gable house",
+      "size": [
+        4,
+        5
+      ],
+      "materials": {
+        "earth": 160,
+        "stone": 480,
+        "frames": 8,
+        "walls": 333,
+        "tiles": 320,
+        "hardware": 4,
+        "wood": 160
+      },
+      "work": 64858.66666666667,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-deep-porch": {
+      "name": "Deep porch house",
+      "size": [
+        4,
+        6
+      ],
+      "materials": {
+        "earth": 192,
+        "stone": 576,
+        "frames": 8,
+        "walls": 370,
+        "tiles": 384,
+        "hardware": 4,
+        "wood": 192
+      },
+      "work": 75686.66666666667,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-blue-gallery": {
+      "name": "Sage terrace house",
+      "size": [
+        5,
+        4
+      ],
+      "materials": {
+        "earth": 160,
+        "stone": 480,
+        "frames": 10,
+        "walls": 333,
+        "tiles": 320,
+        "hardware": 5,
+        "wood": 160
+      },
+      "work": 64858.66666666667,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-paired": {
+      "name": "Paired roof house",
+      "size": [
+        6,
+        4
+      ],
+      "materials": {
+        "earth": 192,
+        "stone": 576,
+        "frames": 12,
+        "walls": 370,
+        "tiles": 384,
+        "hardware": 6,
+        "wood": 192
+      },
+      "work": 75686.66666666667,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-broad-veranda": {
+      "name": "Broad veranda house",
+      "size": [
+        7,
+        5
+      ],
+      "materials": {
+        "earth": 280,
+        "stone": 840,
+        "frames": 14,
+        "walls": 444,
+        "tiles": 560,
+        "hardware": 7,
+        "wood": 280
+      },
+      "work": 103454.66666666666,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-shaded-retreat": {
+      "name": "Shaded terrace home",
+      "size": [
+        6,
+        7
+      ],
+      "materials": {
+        "earth": 336,
+        "stone": 1008,
+        "frames": 12,
+        "walls": 481,
+        "tiles": 672,
+        "hardware": 6,
+        "wood": 336
+      },
+      "work": 120396,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-ranch": {
+      "name": "Long clay-roof house",
+      "size": [
+        8,
+        4
+      ],
+      "materials": {
+        "earth": 256,
+        "stone": 768,
+        "frames": 16,
+        "walls": 444,
+        "tiles": 512,
+        "hardware": 8,
+        "wood": 256
+      },
+      "work": 97342.66666666667,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-cottage": {
+      "name": "Small cottage",
+      "size": [
+        4,
+        4
+      ],
+      "materials": {
+        "earth": 128,
+        "stone": 384,
+        "frames": 8,
+        "walls": 296,
+        "tiles": 256,
+        "hardware": 4,
+        "wood": 128
+      },
+      "work": 54029.333333333336,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-longhouse": {
+      "name": "Long veranda house",
+      "size": [
+        7,
+        4
+      ],
+      "materials": {
+        "earth": 224,
+        "stone": 672,
+        "frames": 14,
+        "walls": 407,
+        "tiles": 448,
+        "hardware": 7,
+        "wood": 224
+      },
+      "work": 86514.66666666666,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "groundwater-well": {
+      "name": "Water well",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "stone": 18,
+        "wood": 8,
+        "hardware": 4,
+        "plumbing": 2,
+        "tiles": 4
+      },
+      "work": 792,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "water-pump": {
+      "name": "Water pump",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "stone": 4,
+        "pumps": 1,
+        "plumbing": 4,
+        "electrical": 2,
+        "hardware": 2
+      },
+      "work": 286,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-family": {
+      "name": "Family house",
+      "size": [
+        6,
+        5
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 12,
+        "walls": 407,
+        "tiles": 480,
+        "hardware": 6,
+        "wood": 240
+      },
+      "work": 90589.33333333333,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-shared": {
+      "name": "Shared adobe house",
+      "size": [
+        6,
+        6
+      ],
+      "materials": {
+        "earth": 1287,
+        "stone": 864,
+        "bamboo": 24,
+        "hardware": 12,
+        "tiles": 576,
+        "wood": 288
+      },
+      "work": 113280,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "road": {
+      "name": "Village road",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "stone": 1,
+        "earth": 1
+      },
+      "work": 45.333333333333336,
+      "category": "Paths & boundaries",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "bridge": {
+      "name": "Timber footbridge",
+      "size": [
+        8,
+        1
+      ],
+      "materials": {
+        "wood": 32,
+        "hardware": 8,
+        "stone": 8
+      },
+      "work": 1221.3333333333333,
+      "category": "Paths & boundaries",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "house": {
+      "name": "Limewashed house",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 200,
+        "stone": 600,
+        "frames": 10,
+        "walls": 370,
+        "tiles": 400,
+        "hardware": 5,
+        "wood": 200
+      },
+      "work": 77723.99999999999,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "shed": {
+      "name": "Open timber shed",
+      "size": [
+        3,
+        3
+      ],
+      "materials": {
+        "wood": 72,
+        "hardware": 1,
+        "tiles": 144,
+        "stone": 216,
+        "earth": 72
+      },
+      "work": 18336,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "orchard": {
+      "name": "Fruit orchard",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 8,
+        "compost": 2,
+        "tree_starts": 4
+      },
+      "work": 308,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "goat_pasture": {
+      "name": "Goat pen",
+      "size": [
+        6,
+        5
+      ],
+      "materials": {
+        "bamboo": 10,
+        "tiles": 3,
+        "hardware": 2,
+        "plumbing": 1,
+        "goats": 2
+      },
+      "work": 396,
+      "category": "Animals",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "apiary": {
+      "name": "Stingless bee apiary",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 3,
+        "tiles": 1,
+        "hardware": 1,
+        "bees": 1
+      },
+      "work": 132,
+      "category": "Animals",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "hydro": {
+      "name": "River generator",
+      "size": [
+        3,
+        3
+      ],
+      "materials": {
+        "stone": 6,
+        "bamboo": 4,
+        "hardware": 4,
+        "electrical": 2,
+        "pumps": 1,
+        "batteries": 1
+      },
+      "work": 396,
+      "category": "Power",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "eco_toilet": {
+      "name": "Ecological toilet",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "stone": 4,
+        "earth": 6,
+        "bamboo": 6,
+        "tiles": 3,
+        "plumbing": 2,
+        "hardware": 2
+      },
+      "work": 506,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "banana_treatment": {
+      "name": "Banana treatment bed",
+      "size": [
+        3,
+        4
+      ],
+      "materials": {
+        "stone": 8,
+        "earth": 8,
+        "walls": 6,
+        "plumbing": 3,
+        "hardware": 2,
+        "tree_starts": 2
+      },
+      "work": 638,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "wetland": {
+      "name": "Reed bed",
+      "size": [
+        3,
+        5
+      ],
+      "materials": {
+        "stone": 8,
+        "earth": 4,
+        "covering": 1,
+        "plumbing": 3,
+        "hardware": 2
+      },
+      "work": 396,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "biodigester": {
+      "name": "Biodigester",
+      "size": [
+        4,
+        4
+      ],
+      "materials": {
+        "stone": 4,
+        "walls": 6,
+        "plumbing": 5,
+        "hardware": 3,
+        "tiles": 2
+      },
+      "work": 440,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "warehouse": {
+      "name": "Storage house",
+      "size": [
+        5,
+        4
+      ],
+      "materials": {
+        "stone": 480,
+        "earth": 160,
+        "bamboo": 12,
+        "hardware": 5,
+        "tiles": 320,
+        "frames": 2,
+        "walls": 333,
+        "wood": 160
+      },
+      "work": 64858.66666666667,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "solar_farm": {
+      "name": "Solar farm",
+      "size": [
+        4,
+        4
+      ],
+      "materials": {
+        "stone": 6,
+        "hardware": 3,
+        "panels": 6,
+        "batteries": 1,
+        "electrical": 2
+      },
+      "work": 308,
+      "category": "Power",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "streetlight": {
+      "name": "Street light",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "stone": 1,
+        "wood": 2,
+        "electrical": 1,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Power",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "kitchen": {
+      "name": "Community kitchen",
+      "size": [
+        6,
+        5
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 4,
+        "walls": 407,
+        "tiles": 480,
+        "plumbing": 2,
+        "hardware": 2,
+        "wood": 240
+      },
+      "work": 90589.33333333333,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "grove": {
+      "name": "Banana grove",
+      "size": [
+        4,
+        4
+      ],
+      "materials": {
+        "earth": 6,
+        "wood": 2,
+        "tree_starts": 2
+      },
+      "work": 220,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "garden": {
+      "name": "Vegetable garden",
+      "size": [
+        4,
+        6
+      ],
+      "materials": {
+        "earth": 4,
+        "wood": 4,
+        "seedlings": 2
+      },
+      "work": 220,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "greenhouse": {
+      "name": "Greenhouse",
+      "size": [
+        4,
+        6
+      ],
+      "materials": {
+        "stone": 4,
+        "earth": 2,
+        "frames": 4,
+        "hardware": 2,
+        "covering": 1,
+        "plumbing": 2,
+        "seedlings": 2
+      },
+      "work": 374,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "well": {
+      "name": "Cistern",
+      "size": [
+        3,
+        3
+      ],
+      "materials": {
+        "stone": 6,
+        "earth": 2,
+        "plumbing": 4,
+        "hardware": 2,
+        "pumps": 1,
+        "tank": 4
+      },
+      "work": 352,
+      "category": "Water & sanitation",
+      "campEssential": true,
+      "repeatable": true
+    },
+    "compost": {
+      "name": "Compost station",
+      "size": [
+        3,
+        2
+      ],
+      "materials": {
+        "earth": 2,
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 154,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "square": {
+      "name": "Community square",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "stone": 10,
+        "earth": 4,
+        "frames": 4,
+        "wood": 4,
+        "hardware": 2
+      },
+      "work": 528,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "workshop": {
+      "name": "Workshop",
+      "size": [
+        5,
+        4
+      ],
+      "materials": {
+        "stone": 6,
+        "earth": 4,
+        "frames": 6,
+        "walls": 4,
+        "tiles": 4,
+        "wood": 6,
+        "hardware": 3
+      },
+      "work": 726,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "coop": {
+      "name": "Chicken coop",
+      "size": [
+        4,
+        4
+      ],
+      "materials": {
+        "stone": 2,
+        "frames": 2,
+        "tiles": 2,
+        "hardware": 1,
+        "hens": 3
+      },
+      "work": 220,
+      "category": "Animals",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-veranda": {
+      "name": "Veranda house",
+      "size": [
+        5,
+        6
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 10,
+        "walls": 407,
+        "tiles": 480,
+        "hardware": 5,
+        "wood": 240
+      },
+      "work": 90589.33333333333,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-gable": {
+      "name": "Gabled house",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 200,
+        "stone": 600,
+        "frames": 10,
+        "walls": 370,
+        "tiles": 400,
+        "hardware": 5,
+        "wood": 200
+      },
+      "work": 77723.99999999999,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-courtyard": {
+      "name": "Terrace house",
+      "size": [
+        6,
+        5
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 12,
+        "walls": 407,
+        "tiles": 480,
+        "hardware": 6,
+        "wood": 240
+      },
+      "work": 90589.33333333333,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "adobe-gable": {
+      "name": "Adobe gabled house",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 1032,
+        "stone": 600,
+        "bamboo": 20,
+        "hardware": 10,
+        "tiles": 400,
+        "wood": 200
+      },
+      "work": 84213.33333333333,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "adobe-veranda": {
+      "name": "Adobe veranda house",
+      "size": [
+        5,
+        6
+      ],
+      "materials": {
+        "earth": 1156,
+        "stone": 720,
+        "bamboo": 20,
+        "hardware": 10,
+        "tiles": 480,
+        "wood": 240
+      },
+      "work": 97728.00000000001,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "supply-0": {
+      "name": "Managed timber",
+      "size": [
+        6,
+        6
+      ],
+      "materials": {
+        "tree_starts": 4
+      },
+      "work": 90,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "supply-1": {
+      "name": "Bamboo stand",
+      "size": [
+        3,
+        3
+      ],
+      "materials": {
+        "bamboo_starts": 4
+      },
+      "work": 90,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "supply-5": {
+      "name": "Timber workbench",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4
+      },
+      "work": 90,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "supply-6": {
+      "name": "Battery station",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "batteries": 1,
+        "electrical": 1
+      },
+      "work": 90,
+      "category": "Power",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "rain-barrel": {
+      "name": "Rainwater barrel",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "tank": 1,
+        "plumbing": 1
+      },
+      "work": 90,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "tool-rack": {
+      "name": "Garden tool rack",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "seedling-bench": {
+      "name": "Seedling bench",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "woodpile": {
+      "name": "Seasoned firewood",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "picnic-table": {
+      "name": "Picnic table",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "garden-bench": {
+      "name": "Garden bench",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "clothesline": {
+      "name": "Clothesline",
+      "size": [
+        2,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "hammock": {
+      "name": "Hammock",
+      "size": [
+        2,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "wayfinding-sign": {
+      "name": "Wayfinding sign",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Paths & boundaries",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "wash-station": {
+      "name": "Outdoor wash station",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "plumbing": 1
+      },
+      "work": 110,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "farm-gate": {
+      "name": "Farm gate",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Paths & boundaries",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "fire-circle": {
+      "name": "Fire circle",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "canvas-tent-teal": {
+      "name": "Sage canvas tent",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "tarp": 1,
+        "wood": 2
+      },
+      "work": 90,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "canvas-tent-ochre": {
+      "name": "Ochre canvas tent",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "tarp": 1,
+        "wood": 2
+      },
+      "work": 90,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "reading-room": {
+      "name": "Village reading room",
+      "size": [
+        5,
+        4
+      ],
+      "materials": {
+        "wood": 12,
+        "walls": 16,
+        "tiles": 18,
+        "hardware": 3,
+        "tools": 2
+      },
+      "work": 1122,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "outdoor-classroom": {
+      "name": "Outdoor classroom",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "wood": 20,
+        "frames": 6,
+        "tiles": 24,
+        "hardware": 4
+      },
+      "work": 1188,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "community-hall": {
+      "name": "Community hall",
+      "size": [
+        7,
+        6
+      ],
+      "materials": {
+        "wood": 20,
+        "walls": 24,
+        "frames": 8,
+        "tiles": 30,
+        "hardware": 6
+      },
+      "work": 1936,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "exercise-garden": {
+      "name": "Exercise garden",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "wood": 12,
+        "hardware": 4,
+        "stone": 6
+      },
+      "work": 484,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "volleyball-court": {
+      "name": "Volleyball court",
+      "size": [
+        11,
+        7
+      ],
+      "materials": {
+        "earth": 24,
+        "wood": 4,
+        "tarp": 2,
+        "hardware": 4
+      },
+      "work": 748,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "field": {
+      "name": "Cultivated field",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {},
+      "work": 1,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    }
+  }
+}

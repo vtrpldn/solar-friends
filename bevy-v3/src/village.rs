@@ -12,6 +12,8 @@ use crate::{
         ARRIVAL_DURATION, MAP_START, ROAD_END, resident_pose, road_center, road_width,
         vehicle_pose, world_position,
     },
+    catalog::Catalog,
+    construction::Construction,
     setup::WorldSetup,
     stock::Stock,
     ui_font::ui_font,
@@ -31,12 +33,14 @@ impl Plugin for VillagePlugin {
         embedded_asset!(app, "opening.glb");
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
+            .init_resource::<Catalog>()
             .insert_resource(Time::<Fixed>::from_hz(10.0))
             .add_systems(Startup, spawn_hud)
             .add_systems(
                 Update,
                 (read_camp_pointer, village_input, animate_arrival, show_hud).chain(),
             )
+            .add_systems(Update, draw_blueprints)
             .add_systems(FixedUpdate, advance_clock);
     }
 }
@@ -50,6 +54,7 @@ pub struct Village {
     paused: bool,
     camp_error: Option<&'static str>,
     stock: Stock,
+    construction: Construction,
 }
 
 #[derive(Component)]
@@ -104,7 +109,7 @@ fn read_camp_pointer(
     pointer.0 = None;
     if !window.focused
         || setup.open
-        || village.camp.is_some()
+        || (village.camp.is_some() && !village.construction.is_placing())
         || village.arrival_time < ARRIVAL_DURATION
     {
         *input = None;
@@ -166,7 +171,7 @@ fn village_input(
     mut village: ResMut<Village>,
     mut camera: Single<&mut VillageCamera>,
     entities: Query<Entity, With<VillageEntity>>,
-    assets: Res<AssetServer>,
+    (assets, catalog): (Res<AssetServer>, Res<Catalog>),
 ) {
     if setup.open {
         if setup.is_changed() {
@@ -183,7 +188,7 @@ fn village_input(
         }
         *village = Village {
             setup: Some(setup.session()),
-            stock: Stock::for_start(&setup),
+            stock: Stock::for_start(&setup, &catalog),
             ..default()
         };
         camera.target = Vec3::new(0.0, 2.0, -86.0);
@@ -208,7 +213,18 @@ fn village_input(
     if keyboard.just_pressed(KeyCode::Space) && village.camp.is_some() {
         village.paused = !village.paused;
     }
-    if village.camp.is_some() || village.arrival_time < ARRIVAL_DURATION {
+    if let Some(cell) = village.camp {
+        let town = &mut *village;
+        if keyboard.get_just_pressed().len() > 0 {
+            town.construction.input(&keyboard, &catalog);
+        }
+        if let Some(position) = pointer.0 {
+            town.construction
+                .plan(&catalog, &mut town.stock, &terrain, cell, position);
+        }
+        return;
+    }
+    if village.arrival_time < ARRIVAL_DURATION {
         return;
     }
     let preset = CAMP_SITES
@@ -288,6 +304,7 @@ fn show_hud(
     setup: Res<WorldSetup>,
     village: Res<Village>,
     mut hud: Single<(&mut Text, &mut Node), With<VillageHud>>,
+    catalog: Res<Catalog>,
 ) {
     if !setup.is_changed() && !village.is_changed() {
         return;
@@ -302,15 +319,16 @@ fn show_hud(
     let hour = minute / 60 % 24;
     let day = minute / 1440 + 1;
     let controls = if village.arrival_time < ARRIVAL_DURATION {
-        "Arriving at the village"
+        "Arriving at the village".into()
     } else if village.camp.is_none() {
         village
             .camp_error
             .unwrap_or("Click to choose camp · 1 Shade · 2 Entrance · 3 Clearing")
-    } else if village.paused {
-        "Space to resume"
+            .into()
+    } else if village.paused && !village.construction.menu {
+        "B Build · Space Resume".into()
     } else {
-        "Space to pause"
+        village.construction.instructions(&catalog)
     };
     let label = format!(
         "Day {day}   {hour:02}:{:02}   R${}\n{} timber · {} meals\n{controls}",
@@ -321,5 +339,15 @@ fn show_hud(
     );
     if text.0 != label {
         text.0 = label;
+    }
+}
+
+fn draw_blueprints(setup: Res<WorldSetup>, village: Res<Village>, mut gizmos: Gizmos) {
+    if !setup.open
+        && let Some(camp) = village.camp
+    {
+        village
+            .construction
+            .draw(&setup.terrain().with_camp(camp), &mut gizmos);
     }
 }
