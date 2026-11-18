@@ -86,7 +86,10 @@ impl Plugin for VillagePlugin {
                 )
                     .chain(),
             )
-            .add_systems(Update, autosave_named)
+            .add_systems(
+                Update,
+                (autosave_named, autosave_continue.after(village_input)),
+            )
             .add_systems(FixedUpdate, advance_clock);
     }
 }
@@ -353,6 +356,7 @@ impl Village {
 
 fn save_controls(
     keyboard: Res<ButtonInput<KeyCode>>,
+    buttons: Query<(&Interaction, &crate::setup::Action), Changed<Interaction>>,
     window: Single<&Window, With<PrimaryWindow>>,
     catalog: Res<Catalog>,
     mut setup: ResMut<WorldSetup>,
@@ -362,8 +366,18 @@ fn save_controls(
     if !window.focused || saves.open {
         return;
     }
-    if keyboard.just_pressed(KeyCode::F9) {
-        match save::location(setup.mode).and_then(|path| save::read(&path, &catalog)) {
+    let resume = setup.open
+        && village.setup.is_none()
+        && buttons.iter().any(|(interaction, action)| {
+            *interaction == Interaction::Pressed && matches!(action, crate::setup::Action::Continue)
+        });
+    if resume || keyboard.just_pressed(KeyCode::F9) {
+        let path = if resume {
+            save::autosave_location(setup.mode)
+        } else {
+            save::location(setup.mode)
+        };
+        match path.and_then(|path| save::read(&path, &catalog)) {
             Ok(mut loaded) => {
                 *setup = loaded.setup.as_ref().expect("validated setup").session();
                 loaded.save_notice = "Village loaded.".into();
@@ -387,6 +401,25 @@ fn save_controls(
                 Err(error) => format!("Could not save village: {error}"),
             }
         };
+    }
+}
+
+fn autosave_continue(
+    time: Res<Time<Real>>,
+    setup: Res<WorldSetup>,
+    saves: Res<SaveMenu>,
+    mut village: ResMut<Village>,
+    mut next: Local<f64>,
+) {
+    let now = time.elapsed_secs_f64();
+    if setup.open || saves.open || village.camp.is_none() || now < next.max(10.0) {
+        return;
+    }
+    *next = now + 10.0;
+    let Some(mode) = village.mode() else { return };
+    if let Err(error) = save::autosave_location(mode).and_then(|path| save::write(&path, &village))
+    {
+        village.save_notice = format!("Could not autosave village: {error}");
     }
 }
 

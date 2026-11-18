@@ -40,6 +40,14 @@ pub fn location(mode: Mode) -> io::Result<PathBuf> {
         .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "no local game data folder"))
 }
 
+pub fn autosave_location(mode: Mode) -> io::Result<PathBuf> {
+    let name = match mode {
+        Mode::Story => "story-autosave.json",
+        Mode::Sandbox => "sandbox-autosave.json",
+    };
+    Ok(location(mode)?.with_file_name(name))
+}
+
 pub fn write(path: &Path, village: &Village) -> io::Result<()> {
     let json = serde_json::to_vec(&SaveFile {
         version: VERSION,

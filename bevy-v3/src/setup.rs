@@ -266,12 +266,13 @@ impl WorldSetup {
             Action::Explore if has_village => "Start new village".into(),
             Action::Explore => "Enter village".into(),
             Action::Resume => "Resume current village".into(),
+            Action::Continue => "Continue last autosave".into(),
         }
     }
 }
 
 #[derive(Component, Clone, Copy)]
-enum Action {
+pub(crate) enum Action {
     Mode,
     Preset,
     Biome,
@@ -285,6 +286,7 @@ enum Action {
     Reroll,
     Explore,
     Resume,
+    Continue,
 }
 
 #[derive(Component)]
@@ -343,6 +345,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Seed,
                 Action::Reroll,
                 Action::Resume,
+                Action::Continue,
                 Action::Explore,
             ] {
                 panel
@@ -350,7 +353,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                         action,
                         Button,
                         Node {
-                            display: if matches!(action, Action::Resume) {
+                            display: if matches!(action, Action::Resume | Action::Continue) {
                                 Display::None
                             } else {
                                 Display::Flex
@@ -476,6 +479,7 @@ fn setup_input(
                     setup.open = false;
                 }
             }
+            Action::Continue => {}
             Action::Resume => {
                 if let Some(active) = village.session_setup() {
                     *setup = active.session();
@@ -502,12 +506,24 @@ fn refresh_panel(
     };
     let has_village = village.session_setup().is_some();
     for (action, children, mut button) in &mut buttons {
-        if matches!(action, Action::Resume) {
-            button.display = if has_village {
-                Display::Flex
-            } else {
-                Display::None
-            };
+        match action {
+            Action::Resume => {
+                button.display = if has_village {
+                    Display::Flex
+                } else {
+                    Display::None
+                };
+            }
+            Action::Continue => {
+                let available = !has_village
+                    && crate::save::autosave_location(setup.mode).is_ok_and(|path| path.is_file());
+                button.display = if available {
+                    Display::Flex
+                } else {
+                    Display::None
+                };
+            }
+            _ => {}
         }
         if let Some(child) = children.first()
             && let Ok(mut label) = labels.get_mut(*child)
