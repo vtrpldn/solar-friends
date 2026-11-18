@@ -1,5 +1,6 @@
 mod cultivation_surface;
 mod guide;
+mod land_lens;
 mod library_ui;
 mod road_surface;
 
@@ -57,7 +58,7 @@ impl Plugin for VillagePlugin {
         app.add_systems(PostUpdate, cultivation_surface::show_beds);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
-            .init_resource::<PlacementNotice>()
+            .init_resource::<MapNotice>()
             .init_resource::<Catalog>()
             .init_resource::<SaveMenu>()
             .insert_resource(Time::<Fixed>::from_hz(10.0))
@@ -110,6 +111,8 @@ pub struct Village {
     projects_page: usize,
     #[serde(skip)]
     guide: guide::Guide,
+    #[serde(skip)]
+    show_land_lens: bool,
     #[serde(skip)]
     open_projects_only: bool,
     #[serde(skip)]
@@ -407,7 +410,7 @@ struct CampPointer {
 }
 
 #[derive(Resource, Default, PartialEq)]
-struct PlacementNotice(Option<String>);
+struct MapNotice(Option<String>);
 
 #[derive(Clone, Copy)]
 struct GroundHit {
@@ -452,6 +455,7 @@ fn read_camp_pointer(
         && !village.terrain_editor.open
         && !village.planning_roads()
         && !village.construction.placing_project()
+        && !village.show_land_lens
     {
         return;
     }
@@ -557,6 +561,10 @@ fn village_input(
 
     if village.guide.controls(&keyboard) {
         return;
+    }
+
+    if village.camp.is_some() && keyboard.just_pressed(KeyCode::F2) {
+        village.show_land_lens = !village.show_land_lens;
     }
 
     if village.planning_roads()
@@ -1140,7 +1148,7 @@ fn show_hud(
     village: Res<Village>,
     mut hud: Single<(&mut Text, &mut Node), With<VillageHud>>,
     (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
-    placement: Res<PlacementNotice>,
+    placement: Res<MapNotice>,
 ) {
     if !saves.is_changed()
         && !setup.is_changed()
@@ -1245,7 +1253,7 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects",
+            "\nP Power · V Water · N Residents · H Finances · F2 Land & slope · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects",
         );
     }
     match village.utility_panel {
@@ -1401,7 +1409,7 @@ fn draw_blueprints(
     pointer: Res<CampPointer>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut gizmos: Gizmos,
-    mut placement: ResMut<PlacementNotice>,
+    (mut map_notice, mut land_lens): (ResMut<MapNotice>, Local<land_lens::LandLens>),
 ) {
     let mut notice = None;
     if !setup.open
@@ -1418,6 +1426,14 @@ fn draw_blueprints(
                 village.utility_panel == Some(UtilityPanel::Power),
                 &mut gizmos,
             );
+        }
+        if village.show_land_lens {
+            notice = Some(land_lens.draw(
+                village.terrain_key(),
+                &terrain,
+                pointer.hovered.map(|hit| hit.world),
+                &mut gizmos,
+            ));
         }
         if let Some(hit) = pointer.hovered {
             if village.terrain_editor.open {
@@ -1448,7 +1464,7 @@ fn draw_blueprints(
             }
         }
     }
-    placement.set_if_neq(PlacementNotice(notice));
+    map_notice.set_if_neq(MapNotice(notice));
 }
 
 fn show_construction(
