@@ -936,11 +936,11 @@ fn show_hud(
                 label.push_str(&village.housing_notice);
                 label.push('\n');
             }
-            label.push_str(
-                &village
-                    .construction
-                    .resident_status(&catalog, village.selected_resident),
-            );
+            label.push_str(&village.construction.resident_status(
+                &catalog,
+                &village.stock,
+                village.selected_resident,
+            ));
         }
         Some(UtilityPanel::Finances) => {
             label.push('\n');

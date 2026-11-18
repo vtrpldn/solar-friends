@@ -85,6 +85,16 @@ pub struct Profile {
     pub rates: BTreeMap<String, f64>,
     pub strengths: Vec<String>,
     pub temperament: Temperament,
+    pub interests: Vec<String>,
+    pub aspiration: Aspiration,
+    pub reflection: String,
+}
+
+#[derive(Deserialize)]
+pub struct Aspiration {
+    pub key: String,
+    pub label: String,
+    pub reason: String,
 }
 
 #[derive(Deserialize)]

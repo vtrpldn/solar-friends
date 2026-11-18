@@ -1,6 +1,9 @@
 use crate::{
     resident_animation::Motion,
-    residents::NeedTask,
+    residents::{
+        NeedTask,
+        mind::{Conversation, MemoryKind},
+    },
     setup::WorldSetup,
     weather::{DAY, HOUR, game_hour, weather_at},
 };
@@ -29,6 +32,22 @@ impl Construction {
                 || self.production.has_worker(index)
                 || self.farming.has_worker(index)
                 || self.changes.values().any(|job| job.worker == Some(index));
+            let aspiration = &catalog.residents[index].aspiration;
+            if !resident.health.mind.fulfilled
+                && self.plans.iter().any(|plan| {
+                    !plan.removed
+                        && plan.key == aspiration.key
+                        && plan.work >= catalog.projects[&plan.key].work
+                })
+            {
+                resident.health.mind.fulfilled = true;
+                resident.health.mind.remember(
+                    MemoryKind::Milestone,
+                    format!("{} is built. {}", aspiration.label, aspiration.reason),
+                    clock,
+                    None,
+                );
+            }
             resident.health.decay(
                 &catalog.residents[index],
                 temperature,
@@ -90,8 +109,22 @@ impl Construction {
             options.insert(0, Need::Rest);
         }
         let mut selected = options.into_iter().find_map(|kind| {
-            self.need_route(index, catalog, site, kind)
-                .map(|(facility, path)| (kind, facility, path))
+            if kind == Need::Social {
+                if health.mind.quiet_until > clock
+                    || health.energy < 35.0
+                    || (self.residents[index].assignment.is_some()
+                        && health.levels[Need::Social as usize] >= 35.0)
+                {
+                    return None;
+                }
+                let (partner, their_path) =
+                    self.conversation_partner(index, catalog, site, clock)?;
+                let (_, path) = self.need_route(index, catalog, site, kind)?;
+                Some((kind, None, path, Some((partner, their_path))))
+            } else {
+                self.need_route(index, catalog, site, kind)
+                    .map(|(facility, path)| (kind, facility, path, None))
+            }
         });
         let idle = self.residents[index].assignment.is_none();
         if selected.is_none()
@@ -116,10 +149,10 @@ impl Construction {
             {
                 selected = self
                     .need_route(index, catalog, site, kind)
-                    .map(|(facility, path)| (kind, facility, path));
+                    .map(|(facility, path)| (kind, facility, path, None));
             }
         }
-        let Some((kind, facility, path)) = selected else {
+        let Some((kind, facility, path, partner_route)) = selected else {
             return;
         };
         let mut task = NeedTask {
@@ -154,13 +187,14 @@ impl Construction {
             returning: false,
             water: 0.0,
             partner: None,
+            conversation: None,
         };
-        if kind == Need::Social {
-            let Some((partner, route)) = self.conversation_partner(index, catalog, site) else {
-                return;
-            };
+        if let Some((partner, route)) = partner_route {
+            let conversation = self.conversation(index, partner, catalog, stock);
             task.partner = Some(partner);
+            task.conversation = Some(conversation.clone());
             let resident = &mut self.residents[partner];
+            resident.assignment = None;
             resident.health.task = Some(NeedTask {
                 kind,
                 partner: Some(index),
@@ -169,6 +203,7 @@ impl Construction {
                 duration: 18.0,
                 returning: false,
                 water: 0.0,
+                conversation: Some(conversation),
             });
             resident.path = route;
         }
@@ -383,29 +418,129 @@ impl Construction {
         index: usize,
         catalog: &Catalog,
         site: ConstructionSite,
+        clock: f64,
     ) -> Option<(usize, VecDeque<Vec2>)> {
-        self.residents
+        let initiator = &self.residents[index];
+        let score = |id: usize| {
+            let other = &self.residents[id];
+            let shared = catalog.residents[id]
+                .interests
+                .iter()
+                .filter(|topic| catalog.residents[index].interests.contains(topic))
+                .count() as f64;
+            (100.0 - other.health.levels[Need::Social as usize]) / 10.0
+                + f64::from(initiator.health.friendships[id]) / 20.0
+                + shared * 2.0
+                - f64::from(other.position.distance(initiator.position)) / 3.0
+        };
+        let mut partners = self
+            .residents
             .iter()
             .enumerate()
-            .filter(|(id, resident)| {
-                *id != index
-                    && resident.assignment.is_none()
-                    && resident.health.task.is_none()
-                    && resident.health.energy >= 35.0
-                    && resident.health.levels[Need::Social as usize]
-                        < catalog.residents[*id].temperament.accepts_at
-                    && !self.gathering.workers_at_site(*id)
-                    && !self.production.has_worker(*id)
+            .filter(|&(id, resident)| {
+                let health = &resident.health;
+                let social = health.levels[Need::Social as usize];
+                let willing = if let Some(job) = &resident.assignment {
+                    job.activity != Activity::Carry && social < 35.0
+                } else {
+                    let threshold = catalog.residents[id].temperament.accepts_at
+                        + if health.friendships[index] >= 64 {
+                            10.0
+                        } else {
+                            0.0
+                        };
+                    social < threshold
+                        || (initiator.health.levels[Need::Social as usize] < 15.0
+                            && health.energy >= 45.0)
+                };
+                id != index
+                    && willing
+                    && health.task.is_none()
+                    && health.energy >= 35.0
+                    && health.mind.quiet_until <= clock
+                    && [Need::Hunger, Need::Bladder, Need::Bowels, Need::Hygiene]
+                        .into_iter()
+                        .all(|need| health.levels[need as usize] >= 30.0)
+                    && !self.gathering.workers_at_site(id)
+                    && !self.production.has_worker(id)
                     && !resident.town_work.active()
-                    && !self.farming.has_worker(*id)
-                    && !self.working_change(*id)
-                    && !self.trip.as_ref().is_some_and(|trip| trip.driver == *id)
+                    && !self.farming.has_worker(id)
+                    && !self.working_change(id)
+                    && !self.trip.as_ref().is_some_and(|trip| trip.driver == id)
             })
-            .find_map(|(id, resident)| {
-                let target = site.camp + IVec2::new(index as i32 - 2, 2);
-                self.resident_route(catalog, site, resident.position, target)
-                    .map(|path| (id, path))
-            })
+            .collect::<Vec<_>>();
+        partners.sort_by(|(a, _), (b, _)| score(*b).total_cmp(&score(*a)));
+        partners.into_iter().find_map(|(id, resident)| {
+            let target = site.camp + IVec2::new(index as i32 - 2, 2);
+            self.resident_route(catalog, site, resident.position, target)
+                .map(|path| (id, path))
+        })
+    }
+
+    fn concern(&self, index: usize, catalog: &Catalog, stock: &Stock) -> Option<&'static str> {
+        let health = &self.residents[index].health;
+        let level = |need: Need| health.levels[need as usize];
+        if health.energy < 35.0 {
+            Some("I need to rest before I take on anything else.")
+        } else if level(Need::Hunger) < 30.0 {
+            Some("It is hard to think about much until I have eaten.")
+        } else if level(Need::Bladder).min(level(Need::Bowels)) < 30.0 {
+            Some("I need a toilet break first.")
+        } else if index == 0 && stock.food_portions() < self.residents.len() as u32 {
+            Some("The pantry is getting low. I want us to have enough to share.")
+        } else if index == 3
+            && self
+                .residents
+                .iter()
+                .any(|worker| worker.health.levels[Need::Hydration as usize] < 30.0)
+        {
+            Some("We need reliable drinking water. I want to help sort it out.")
+        } else if index == 4 && level(Need::Hygiene) < 40.0 {
+            Some("I would feel better after washing up.")
+        } else if level(Need::Social) < 35.0 {
+            if index == 2 {
+                Some("I miss sitting down with someone without rushing.")
+            } else {
+                Some("I would like a little company.")
+            }
+        } else if level(Need::Fun) < catalog.residents[index].temperament.break_at {
+            Some("I need a little time for something I enjoy.")
+        } else {
+            None
+        }
+    }
+
+    fn conversation(
+        &self,
+        index: usize,
+        partner: usize,
+        catalog: &Catalog,
+        stock: &Stock,
+    ) -> Conversation {
+        for resident in [index, partner] {
+            if let Some(reason) = self.concern(resident, catalog, stock) {
+                return Conversation::Support {
+                    resident,
+                    reason: reason.into(),
+                };
+            }
+        }
+        let interests = catalog.residents[index]
+            .interests
+            .iter()
+            .filter(|topic| catalog.residents[partner].interests.contains(topic))
+            .collect::<Vec<_>>();
+        if interests.is_empty() {
+            return Conversation::CatchUp;
+        }
+        let count = self.residents[index]
+            .health
+            .mind
+            .memories
+            .iter()
+            .filter(|memory| memory.kind == MemoryKind::Conversation)
+            .count();
+        Conversation::interest(interests[count % interests.len()])
     }
 
     pub(super) fn resident_route(
@@ -455,6 +590,10 @@ impl Construction {
             resident.health.task = Some(task);
             return;
         }
+        if task.kind == Need::Social {
+            self.finish_conversation(index, catalog, task, clock);
+            return;
+        }
         let health = &mut resident.health;
         let levels = &mut health.levels;
         match task.kind {
@@ -496,14 +635,18 @@ impl Construction {
                         (levels[Need::Hygiene as usize] - 8.0).max(0.0);
                 }
             }
-            Need::Social => {
-                levels[Need::Social as usize] = 95.0;
-                levels[Need::Fun as usize] = (levels[Need::Fun as usize] + 15.0).min(100.0);
-                if let Some(partner) = task.partner {
-                    health.friendships[partner] = (health.friendships[partner] + 4).min(100);
-                }
+            Need::Social => unreachable!("conversation handled as a pair"),
+            Need::Fun => {
+                levels[Need::Fun as usize] = 95.0;
+                health.mind.remember(
+                    MemoryKind::Personal,
+                    format!("Took a break. {}", catalog.residents[index].reflection),
+                    clock,
+                    None,
+                );
+                health.mind.quiet_until =
+                    clock + 100.0 - catalog.residents[index].temperament.accepts_at;
             }
-            Need::Fun => levels[Need::Fun as usize] = 95.0,
             Need::FilterWater => self.utilities.purify_camp_water(),
             Need::FetchWater if task.returning => self.utilities.put_camp_water(task.water),
             Need::FetchWater => {
@@ -518,6 +661,34 @@ impl Construction {
             Need::Rest | Need::Sleep => {}
         }
         self.residents[index].health.retry_at = clock + 3.0;
+    }
+
+    fn finish_conversation(&mut self, index: usize, catalog: &Catalog, task: NeedTask, clock: f64) {
+        self.residents[index].health.retry_at = clock + 3.0;
+        let Some(partner) = task.partner.filter(|&partner| partner != index) else {
+            return;
+        };
+        if !self.residents[partner]
+            .health
+            .task
+            .as_ref()
+            .is_some_and(|other| other.kind == Need::Social && other.partner == Some(index))
+        {
+            return;
+        }
+        let conversation = task.conversation.unwrap_or(Conversation::CatchUp);
+        for (id, other) in [(index, partner), (partner, index)] {
+            let health = &mut self.residents[id].health;
+            health.task = None;
+            health.retry_at = clock + 3.0;
+            conversation.finish(
+                health,
+                &catalog.residents[id],
+                id,
+                (other, NAMES[other]),
+                clock,
+            );
+        }
     }
 
     pub fn resident_motion(&self, index: usize) -> Motion {
@@ -591,8 +762,9 @@ impl Construction {
             .is_some_and(|task| matches!(task.kind, Need::Rest | Need::Sleep) && task.elapsed > 0.0)
     }
 
-    pub fn resident_status(&self, catalog: &Catalog, selected: usize) -> String {
-        self.residents
+    pub fn resident_status(&self, catalog: &Catalog, stock: &Stock, selected: usize) -> String {
+        let mut rows = self
+            .residents
             .iter()
             .enumerate()
             .map(|(index, worker)| {
@@ -624,18 +796,86 @@ impl Construction {
                 );
                 let marker = if index == selected { "› " } else { "" };
                 format!(
-                    "{marker}{} · {} · {home}\n{} · Energy {:.0}% · Water {:.0}% · Food {:.0}%\n{}",
+                    "{marker}{} · {} · {home}\n{} · Energy {:.0}% · Water {:.0}% · Food {:.0}%",
                     NAMES[index],
                     profile.role,
                     action,
                     health.energy,
                     health.levels[Need::Hydration as usize],
                     health.levels[Need::Hunger as usize],
-                    profile.bio
                 )
             })
             .collect::<Vec<_>>()
-            .join("\n\n")
+            .join("\n");
+
+        use std::fmt::Write;
+        let worker = &self.residents[selected];
+        let profile = &catalog.residents[selected];
+        let mind = &worker.health.mind;
+        let wish = &profile.aspiration;
+        let stage = if self.plans.iter().any(|plan| {
+            !plan.removed && plan.key == wish.key && plan.work >= catalog.projects[&plan.key].work
+        }) {
+            "Built"
+        } else if self
+            .plans
+            .iter()
+            .any(|plan| !plan.removed && plan.key == wish.key)
+        {
+            "Taking shape"
+        } else {
+            "Hoping for this"
+        };
+        let thought = match worker.health.task.as_ref().map(|task| task.kind) {
+            Some(Need::Social) => {
+                let topic = worker
+                    .health
+                    .task
+                    .as_ref()
+                    .and_then(|task| task.conversation.as_ref())
+                    .map_or("life in the village", Conversation::topic);
+                format!("Making time to talk about {topic}.")
+            }
+            Some(Need::Fun) => profile.reflection.clone(),
+            Some(Need::Sleep | Need::Rest) => "Time to rest. The village can wait a little.".into(),
+            _ => self
+                .concern(selected, catalog, stock)
+                .map(str::to_owned)
+                .unwrap_or_else(|| {
+                    if mind.fulfilled {
+                        "Something I hoped for is here. I want to enjoy it too.".into()
+                    } else {
+                        wish.reason.clone()
+                    }
+                }),
+        };
+        let _ = write!(
+            rows,
+            "\n\n{}\n{stage} · {}\n{thought}",
+            profile.bio, wish.label
+        );
+        let ties = worker
+            .health
+            .friendships
+            .iter()
+            .enumerate()
+            .filter(|&(id, score)| id != selected && *score > 0)
+            .map(|(id, score)| {
+                let relationship = match score {
+                    64.. => "Close friends",
+                    24.. => "Growing closer",
+                    _ => "Getting to know each other",
+                };
+                format!("{} · {relationship}", NAMES[id])
+            })
+            .collect::<Vec<_>>();
+        if !ties.is_empty() {
+            let _ = write!(rows, "\n{}", ties.join("  |  "));
+        }
+        for memory in mind.memories.iter().take(2) {
+            let _ = write!(rows, "\n{}", memory.text);
+        }
+        rows
     }
 }
 
@@ -661,6 +901,59 @@ pub(super) fn approach_points(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_shared_concern_records_one_memory_for_each_resident() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction::default();
+        for (index, resident) in village.residents.iter_mut().enumerate() {
+            resident.position = (camp + IVec2::new(index as i32 - 2, 3)).as_vec2();
+            resident.health.levels = [100.0; 7];
+            resident.health.mind.quiet_until = if index > 1 { 200.0 } else { 0.0 };
+        }
+        village.residents[0].health.levels[Need::Social as usize] = 25.0;
+        village.residents[1].health.levels[Need::Social as usize] = 40.0;
+        village.choose_need(0, &catalog, &stock, site, 0.0);
+        assert!(
+            village.residents[0]
+                .health
+                .task
+                .as_ref()
+                .is_some_and(|task| task.partner == Some(1))
+        );
+        for tick in 0..250 {
+            village.tick_health(
+                &catalog,
+                &setup,
+                &mut stock,
+                site,
+                f64::from(tick) / 10.0,
+                0.1,
+            );
+        }
+        assert_eq!(village.residents[0].health.friendships[1], 8);
+        assert_eq!(village.residents[1].health.friendships[0], 4);
+        assert_eq!(village.residents[0].health.mind.memories.len(), 1);
+        assert_eq!(village.residents[1].health.mind.memories.len(), 1);
+        assert!(
+            village.residents[0].health.mind.memories[0]
+                .text
+                .contains("Bento listened")
+        );
+        let json = serde_json::to_string(&village).unwrap();
+        let loaded: Construction = serde_json::from_str(&json).unwrap();
+        assert_eq!(loaded.residents[1].health.mind.memories[0].partner, Some(0));
+    }
 
     #[test]
     fn home_assignments_reserve_beds_and_guide_residents_at_night() {

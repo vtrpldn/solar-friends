@@ -1,3 +1,5 @@
+pub mod mind;
+
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -15,6 +17,8 @@ pub struct Health {
     pub retry_at: f64,
     #[serde(default)]
     pub friendships: [i16; 5],
+    #[serde(default)]
+    pub mind: mind::Mind,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
@@ -42,6 +46,8 @@ pub struct NeedTask {
     pub returning: bool,
     #[serde(default)]
     pub partner: Option<usize>,
+    #[serde(default)]
+    pub conversation: Option<mind::Conversation>,
 }
 
 impl Default for Health {
@@ -69,6 +75,7 @@ impl Health {
             last_night: None,
             retry_at: 0.0,
             friendships: [0; 5],
+            mind: mind::Mind::default(),
         }
     }
 
@@ -166,11 +173,19 @@ impl Health {
                 .levels
                 .iter()
                 .all(|value| (0.0..=100.0).contains(value))
+            && self
+                .friendships
+                .iter()
+                .all(|score| (0..=100).contains(score))
+            && self.mind.valid()
             && self.task.as_ref().is_none_or(|task| {
                 task.elapsed >= 0.0
                     && task.duration > 0.0
                     && (0.0..=12.0).contains(&task.water)
                     && task.partner.is_none_or(|partner| partner < 5)
+                    && task.conversation.as_ref().is_none_or(|conversation| {
+                        task.kind == Need::Social && conversation.valid()
+                    })
             })
     }
 }
