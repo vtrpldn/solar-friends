@@ -52,6 +52,7 @@ const production = Object.fromEntries(Object.entries(PROCESSES)
     recipe.kind !== "wild-tree" && recipe.kind !== "cultivation" && (Object.keys(recipe.output).length || ["cold_storage", "solar_upgrade"].includes(id)))
   .map(([id, recipe]) => [id, {name: recipe.name, kind: recipe.kind, input: recipe.input,
     output: recipe.output, work: recipe.work, handcraft: Boolean(recipe.craft), preserved: recipe.preservedDays || {},
+    ...(recipe.biogas ? {biogas: recipe.biogas} : {}),
     ...(!BIOLOGY[id] || ["eggs", "milk"].includes(id) ? {} : {biology: {
       days: BIOLOGY[id].days, window: Number.isFinite(BIOLOGY[id].window) ? BIOLOGY[id].window : null,
       seasonal: BIOLOGY[id].seasonal, on_site_water: recipe.water || 0, planting_fraction: BIOLOGY[id].plantingFraction ?? 0.5,

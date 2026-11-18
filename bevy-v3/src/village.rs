@@ -676,6 +676,11 @@ fn village_input(
         {
             town.construction.utilities.toggle(index);
         }
+        if keyboard.just_pressed(KeyCode::KeyL)
+            && let Some(index) = town.construction.production.selected
+        {
+            town.construction.utilities.toggle_cooling(index);
+        }
         if town.utility_panel == Some(UtilityPanel::Residents) {
             if let Some(index) = [
                 KeyCode::Digit1,

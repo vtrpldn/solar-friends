@@ -77,6 +77,7 @@ pub struct ProductionRecipe {
     #[serde(default)]
     pub preserved: BTreeMap<String, f64>,
     pub biology: Option<Biology>,
+    pub biogas: Option<f64>,
 }
 
 #[derive(Deserialize)]

@@ -154,6 +154,7 @@ impl Construction {
             delivered_output: None,
             growth: None,
             watered: false,
+            using_biogas: false,
         });
         self.production.notice.clear();
     }
@@ -169,6 +170,9 @@ impl Construction {
             let state = match job.phase {
                 Phase::Pickup => "Collecting ingredients".into(),
                 Phase::Approach => "Bringing ingredients".into(),
+                Phase::Work if job.using_biogas => {
+                    format!("{:.0}% worked · Biogas", job.work / recipe.work * 100.0)
+                }
                 Phase::Work
                     if needs_power(&job.recipe, recipe) && !self.utilities.powered(job.site) =>
                 {
@@ -367,6 +371,8 @@ impl Construction {
                         && catalog.production.get(&job.recipe).is_some_and(|recipe| {
                             definition.kind == recipe.kind
                                 && (0.0..=recipe.work).contains(&job.work)
+                                && (!job.using_biogas
+                                    || recipe.kind == "kitchen" && needs_power(&job.recipe, recipe))
                                 && match (&job.growth, &recipe.biology) {
                                     (Some(growth), Some(bio)) => {
                                         let limit = bio.days
@@ -451,8 +457,19 @@ impl Construction {
                 Phase::Approach => self.production.jobs[index].phase = Phase::Work,
                 Phase::Work => {
                     let job = &mut self.production.jobs[index];
-                    if needs_power(&job.recipe, recipe) && !self.utilities.powered(job.site) {
+                    if !self.utilities.enabled(job.site) {
                         continue;
+                    }
+                    if needs_power(&job.recipe, recipe)
+                        && !self.utilities.powered(job.site)
+                        && !job.using_biogas
+                    {
+                        if recipe.kind != "kitchen"
+                            || !self.utilities.burn_biogas(recipe.biogas.unwrap_or(0.2))
+                        {
+                            continue;
+                        }
+                        job.using_biogas = true;
                     }
                     if !stock.sandbox
                         && !job.watered
@@ -743,6 +760,54 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn cooking_without_grid_power_reserves_biogas_once_per_batch() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction {
+            selection: Some("kitchen".into()),
+            ..default()
+        };
+        village.plan(
+            &catalog,
+            &mut stock,
+            site,
+            IVec2::new(44, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
+        );
+        stock.sandbox = false;
+        let recipe = &catalog.production["cook_greens"];
+        stock.receive(&recipe.input);
+        let before = stock.available("meals");
+        village.utilities.grid_off = true;
+        village.utilities.biogas = 1.0;
+        village.queue_batch(&catalog, &mut stock, 0, "cook_greens");
+        for step in 0..4_000 {
+            let clock = f64::from(step) * 0.1;
+            village.tick_services(&catalog, &setup, &mut stock, clock, 0.1);
+            village.tick_production(&catalog, &mut stock, site, clock, 0.1);
+            if village.production.jobs.is_empty() {
+                break;
+            }
+        }
+        assert!(village.production.jobs.is_empty());
+        assert_eq!(stock.available("meals"), before + recipe.output["meals"]);
+        assert!((village.utilities.biogas - 0.8).abs() < 1e-9);
+    }
 
     #[test]
     fn compost_cures_with_the_worker_released_and_is_later_delivered() {

@@ -780,6 +780,7 @@ impl Construction {
                     let working = self.production.jobs.iter().any(|job| {
                         job.site == index
                             && job.phase == crate::production::Phase::Work
+                            && !job.using_biogas
                             && !catalog.production[&job.recipe].handcraft
                             && job.recipe != "cold_storage"
                     });

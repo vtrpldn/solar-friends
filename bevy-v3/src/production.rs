@@ -35,6 +35,8 @@ pub struct Batch {
     pub growth: Option<growth::Growth>,
     #[serde(default)]
     pub watered: bool,
+    #[serde(default)]
+    pub using_biogas: bool,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]

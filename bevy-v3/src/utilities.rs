@@ -60,6 +60,8 @@ struct Node {
     #[serde(default)]
     cold_storage: bool,
     #[serde(default)]
+    cooling_paused: bool,
+    #[serde(default)]
     maintain_fresh: bool,
     #[serde(default)]
     maintain_sanitation: bool,
@@ -126,6 +128,7 @@ impl Utilities {
             solar_upgrade: false,
             demanding: false,
             cold_storage: false,
+            cooling_paused: false,
             maintain_fresh: false,
             maintain_sanitation: false,
         });
@@ -149,6 +152,7 @@ impl Utilities {
                 solar_upgrade: false,
                 demanding: false,
                 cold_storage: false,
+                cooling_paused: false,
                 maintain_fresh: false,
                 maintain_sanitation: false,
             });
@@ -198,6 +202,8 @@ impl Utilities {
                 && ground.runoff >= 0.0
                 && ground.flow >= 0.0
         }) && (0.0..1.0).contains(&self.grid_debt_cents)
+            && self.biogas.is_finite()
+            && self.biogas >= 0.0
     }
 
     pub fn water_sources(&self) -> impl Iterator<Item = (usize, IVec2, IVec2)> + '_ {
@@ -450,7 +456,26 @@ impl Utilities {
     pub fn install_cold_storage(&mut self, building: usize) {
         if let Some(node) = self.nodes.get_mut(&(building + 1)) {
             node.cold_storage = true;
+            node.cooling_paused = false;
         }
+    }
+
+    pub fn toggle_cooling(&mut self, building: usize) {
+        if let Some(node) = self
+            .nodes
+            .get_mut(&(building + 1))
+            .filter(|node| node.cold_storage)
+        {
+            node.cooling_paused = !node.cooling_paused;
+        }
+    }
+
+    pub fn burn_biogas(&mut self, units: f64) -> bool {
+        if self.biogas < units {
+            return false;
+        }
+        self.biogas -= units;
+        true
     }
 
     pub fn has_cold_storage(&self, building: usize) -> bool {
@@ -462,7 +487,9 @@ impl Utilities {
     pub fn powered_cold_storage(&self) -> f64 {
         self.nodes
             .values()
-            .filter(|node| node.cold_storage && node.enabled && node.powered)
+            .filter(|node| {
+                node.cold_storage && !node.cooling_paused && node.enabled && node.powered
+            })
             .count() as f64
             * 80.0
     }
@@ -489,6 +516,17 @@ impl Utilities {
                 status.push_str(" · ");
             }
             status.push_str(&format!("Water {:.1} L", node.water[0] + node.water[1]));
+        }
+        if node.cold_storage {
+            status.push_str("\nCold storage ");
+            status.push_str(if node.cooling_paused {
+                "off"
+            } else if node.enabled && node.powered {
+                "active"
+            } else {
+                "waiting for power"
+            });
+            status.push_str(" · L Switch cooling");
         }
         if node.solar_upgrade {
             if !status.is_empty() {
@@ -636,7 +674,7 @@ impl Utilities {
             if node.demanding && matches!(node.kind.as_str(), "kitchen" | "workshop") {
                 kw += 0.45;
             }
-            if node.cold_storage {
+            if node.cold_storage && !node.cooling_paused {
                 kw += 0.08;
             }
             demand.push((circuit_of(id), priority(&node.kind), id, kw));
@@ -1145,6 +1183,42 @@ fn capacity(kind: &str) -> [f64; 4] {
 mod tests {
     use super::*;
     use crate::catalog::Catalog;
+
+    #[test]
+    fn cooling_switch_removes_load_without_switching_off_the_kitchen() {
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &Catalog::default());
+        let mut utilities = Utilities::default();
+        utilities.sync(
+            [Facility {
+                id: 1,
+                kind: "kitchen",
+                location: IVec2::new(44, 36),
+                size: IVec2::ONE,
+                batteries: 0,
+                panels: 0,
+                working: false,
+            }]
+            .into_iter(),
+        );
+        utilities.install_cold_storage(0);
+        utilities.tick(&setup, &mut stock, 0, 1.0, 0.1);
+        assert_eq!(utilities.powered_cold_storage(), 80.0);
+        assert_eq!(utilities.demand_kw, 0.08);
+        utilities.toggle_cooling(0);
+        utilities.tick(&setup, &mut stock, 0, 2.0, 0.1);
+        assert_eq!(utilities.powered_cold_storage(), 0.0);
+        assert_eq!(utilities.demand_kw, 0.0);
+        assert!(utilities.powered(0));
+        let save = serde_json::to_string(&utilities).unwrap();
+        let loaded: Utilities = serde_json::from_str(&save).unwrap();
+        assert!(
+            loaded
+                .facility_status(0)
+                .unwrap()
+                .contains("Cold storage off")
+        );
+    }
 
     #[test]
     fn automatic_links_use_nearby_nodes_and_keep_isolated_power_local() {

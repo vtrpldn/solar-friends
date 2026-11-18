@@ -2607,7 +2607,8 @@
       "handcraft": false,
       "preserved": {
         "meals": 10
-      }
+      },
+      "biogas": 0.6
     },
     "cold_storage": {
       "name": "Install kitchen cold storage",
