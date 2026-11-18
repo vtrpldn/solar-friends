@@ -1184,6 +1184,14 @@ fn step(
     town.construction
         .tick_animals(catalog, &mut town.stock, site.land, town.clock, dt);
     town.construction.tick_crops(catalog, setup, town.clock, dt);
+    town.construction.schedule_crop_work(
+        catalog,
+        &mut town.stock,
+        TownClock {
+            seconds: town.clock,
+            round_trip_km: setup.round_trip_km(),
+        },
+    );
     town.construction
         .tick_growth(catalog, setup, &mut town.stock, town.clock, dt);
     town.construction

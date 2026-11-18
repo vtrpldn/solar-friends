@@ -1,6 +1,6 @@
 use super::*;
 use crate::{
-    farming::{CropClimate, FarmAction, FarmJob, FarmPhase, Plot},
+    farming::{CropClimate, FarmAction, FarmJob, FarmPhase, Plot, Stage},
     setup::WorldSetup,
     weather::{growing_season, weather_at},
 };
@@ -125,38 +125,37 @@ impl Construction {
         else {
             return;
         };
-        let (inputs, required) = match bed.requirements(action, clock.seconds) {
-            Ok(requirements) => requirements,
-            Err(error) => {
-                self.farming.notice = error.into();
-                return;
-            }
-        };
+        match self.queue_bed_job(catalog, stock, (site, index, action), clock) {
+            Ok(()) => self.farming.notice.clear(),
+            Err(error) => self.farming.notice = error,
+        }
+    }
+
+    fn queue_bed_job(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        (site, bed, action): (usize, usize, FarmAction),
+        clock: TownClock,
+    ) -> Result<(), String> {
+        let (inputs, required) =
+            self.farming.plots[&site].beds[bed].requirements(action, clock.seconds)?;
         let mut pickups = 0;
         let mut fare = 0;
         if !stock.sandbox {
             if stock.missing(&inputs).is_some() && action != FarmAction::Plant {
-                self.farming.notice = "Not enough compost in supplies.".into();
-                return;
+                return Err("Not enough compost in supplies.".into());
             }
             let quote =
-                match self
-                    .market
-                    .quote(catalog, &inputs, stock, clock.seconds, clock.round_trip_km)
-                {
-                    Ok(quote) => quote,
-                    Err(error) => {
-                        self.farming.notice = error;
-                        return;
-                    }
-                };
+                self.market
+                    .quote(catalog, &inputs, stock, clock.seconds, clock.round_trip_km)?;
             pickups = quote.trips;
             fare = quote.fare;
             self.market.reserve(stock, &inputs, &quote);
         }
         self.farming.jobs.push(FarmJob {
             site,
-            bed: index,
+            bed,
             action,
             worker: None,
             phase: FarmPhase::Pickup,
@@ -169,7 +168,70 @@ impl Construction {
             pickups,
             fare,
         });
-        self.farming.notice.clear();
+        Ok(())
+    }
+
+    pub fn schedule_crop_work(&mut self, catalog: &Catalog, stock: &mut Stock, clock: TownClock) {
+        let jobs = &self.farming.jobs;
+        let mut slots = self.residents.len().saturating_sub(
+            jobs.iter()
+                .filter(|job| job.pickups == 0 && job.phase != FarmPhase::Return)
+                .count(),
+        );
+        if slots == 0 {
+            return;
+        }
+        let busy: std::collections::HashSet<_> =
+            jobs.iter().map(|job| (job.site, job.bed)).collect();
+        let mut buying_seeds = jobs.iter().any(|job| job.pickups > 0);
+        let mut candidates = Vec::new();
+        for (&site, plot) in &self.farming.plots {
+            if self.changes.contains_key(&site) || !self.utilities.enabled(site) {
+                continue;
+            }
+            for (index, bed) in plot.beds.iter().enumerate() {
+                if busy.contains(&(site, index)) {
+                    continue;
+                }
+                let (priority, action) = match bed.stage {
+                    Stage::Harvestable
+                        if bed.requirements(FarmAction::Harvest, clock.seconds).is_ok() =>
+                    {
+                        (0, FarmAction::Harvest)
+                    }
+                    Stage::Prepared => (1, FarmAction::Plant),
+                    Stage::Failed | Stage::Harvestable => (2, FarmAction::Clear),
+                    Stage::Unprepared | Stage::Harvested => (3, FarmAction::Prepare),
+                    Stage::Growing => continue,
+                };
+                candidates.push((priority, site, index, action));
+            }
+        }
+        candidates.sort_unstable_by_key(|&(priority, site, bed, _)| (priority, site, bed));
+        for (_, site, bed, action) in candidates {
+            let needs_seeds = !stock.sandbox
+                && action == FarmAction::Plant
+                && self.farming.plots[&site].beds[bed]
+                    .requirements(action, clock.seconds)
+                    .is_ok_and(|(inputs, _)| stock.missing(&inputs).is_some());
+            if needs_seeds && (buying_seeds || self.market.auto_buy_off) {
+                continue;
+            }
+            if self
+                .queue_bed_job(catalog, stock, (site, bed, action), clock)
+                .is_err()
+            {
+                continue;
+            }
+            if needs_seeds {
+                buying_seeds = true;
+            } else {
+                slots -= 1;
+                if slots == 0 {
+                    break;
+                }
+            }
+        }
     }
 
     fn resize_field(
@@ -580,6 +642,36 @@ mod resize_tests {
         assert!(
             !worker_cell.cmpge(corner).all() || !worker_cell.cmplt(corner + IVec2::splat(8)).all()
         );
+    }
+
+    #[test]
+    fn autonomous_crop_work_prioritizes_planting_and_limits_pending_jobs() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let mut village = Construction::default();
+        let field = village.proposed_site(&catalog, "field", IVec2::new(44, 36));
+        village.plans.push(field);
+        let mut plot = Plot::new("field", IVec2::splat(8)).unwrap();
+        plot.beds[0].stage = Stage::Unprepared;
+        plot.beds[1].stage = Stage::Prepared;
+        plot.beds[2].stage = Stage::Failed;
+        village.farming.plots.insert(0, plot);
+        for _ in 0..2 {
+            village.schedule_crop_work(
+                &catalog,
+                &mut stock,
+                TownClock {
+                    seconds: 0.0,
+                    round_trip_km: 12,
+                },
+            );
+        }
+        assert_eq!(village.farming.jobs.len(), village.residents.len());
+        assert_eq!(village.farming.jobs[0].bed, 1);
+        assert_eq!(village.farming.jobs[1].bed, 2);
+        assert_eq!(village.farming.jobs[2].bed, 0);
     }
 
     #[test]
