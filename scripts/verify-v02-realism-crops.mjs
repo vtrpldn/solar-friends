@@ -14,7 +14,7 @@ for(const [days,expected]of [[0,9],[4,9],[6,4],[8,0],[11,0]]){
  [s,b]=make();Object.assign(b,{stage:'harvestable',growth:1,ripeAt:0,moisture:1,standingBiomassKg:11.08});s.time=days*DAY;
  assert.equal(harvestYield(b,s.time),expected);assert.equal(harvestExpired(b,s.time),days>=8);
  const op={farm:{bed:0,action:'harvest'}};finishFarmJob(s,s.projects[0],op);assert.equal(op.harvestOutput.greens||0,expected);
- assert(Math.abs(b.exportedKg+b.fieldLossKg+b.residueKg-11.08)<1e-9);
+ assert(Math.abs(b.exportedKg+b.fieldLossKg+b.residueKg+s.projects[0].harvestRemainder.greens-11.08)<1e-9);
 }
 [s,b]=make();Object.assign(b,{stage:'harvestable',growth:1,ripeAt:0,irrigation:true});s.time=8*DAY;
 assert.match(farmJobError(s,s.projects[0],b,'harvest'),/expired/);assert.equal(farmJobError(s,s.projects[0],b,'clear'),'');calls=0;step(s,1,()=>{calls++;return true;});assert.equal(calls,0,'expired harvest stops automatic irrigation');
