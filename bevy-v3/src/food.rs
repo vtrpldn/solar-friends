@@ -305,6 +305,43 @@ impl Pantry {
         )
     }
 
+    pub fn batches(&self, catalog: &Catalog, page: usize) -> (usize, String) {
+        use std::fmt::Write;
+
+        const ROWS: usize = 8;
+        let mut batches: Vec<_> = self
+            .lots
+            .iter()
+            .flat_map(|(id, lots)| lots.iter().map(move |lot| (id, lot)))
+            .collect();
+        batches.sort_by(|(_, a), (_, b)| a.expires.total_cmp(&b.expires));
+        let pages = batches.len().div_ceil(ROWS).max(1);
+        let page = page.min(pages - 1);
+        let mut text = format!(
+            "Food batches · {}/{}\nPage Up/Down · R Pantry",
+            page + 1,
+            pages
+        );
+        if batches.is_empty() {
+            text.push_str("\nNo perishable food in shared stores.");
+        }
+        for (id, lot) in batches.into_iter().skip(page * ROWS).take(ROWS) {
+            let storage = match (lot.preserved, lot.chilled) {
+                (true, true) => "Preserved · Chilled",
+                (true, false) => "Preserved",
+                (false, true) => "Chilled",
+                (false, false) => "Ambient",
+            };
+            let hours = ((lot.expires - self.clock) / HOUR).max(0.0);
+            let _ = write!(
+                text,
+                "\n{} · {} units · {storage} · {hours:.1} game hours remaining",
+                catalog.materials[id].name, lot.units
+            );
+        }
+        (pages, text)
+    }
+
     pub fn valid(&self, amounts: &BTreeMap<String, u32>) -> bool {
         !self.initialized
             || (self.clock >= 0.0

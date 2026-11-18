@@ -136,6 +136,8 @@ pub struct Village {
     #[serde(skip)]
     finance_history_page: usize,
     #[serde(skip)]
+    pantry_batch_page: Option<usize>,
+    #[serde(skip)]
     event_page: usize,
     #[serde(skip)]
     inventory_page: usize,
@@ -825,6 +827,23 @@ fn village_input(
             }
         }
         if town.utility_panel == Some(UtilityPanel::Pantry) {
+            if keyboard.just_pressed(KeyCode::KeyR) {
+                town.pantry_batch_page = town.pantry_batch_page.is_none().then_some(0);
+                return;
+            }
+            if let Some(page) = town.pantry_batch_page {
+                if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
+                    let pages = town.stock.pantry.batches(&catalog, page).0;
+                    let page = page.min(pages - 1);
+                    let next = if keyboard.just_pressed(KeyCode::PageDown) {
+                        (page + 1) % pages
+                    } else {
+                        (page + pages - 1) % pages
+                    };
+                    town.pantry_batch_page = Some(next);
+                }
+                return;
+            }
             town.construction.kitchen_controls(&keyboard);
             if keyboard.just_pressed(KeyCode::KeyT) {
                 town.stock.pantry.priority = town.stock.pantry.priority.next();
@@ -1504,6 +1523,17 @@ fn show_hud(
             ));
             label.push_str("\nTab Pantry");
         }
+        Some(UtilityPanel::Pantry) if village.pantry_batch_page.is_some() => {
+            label.push('\n');
+            label.push_str(
+                &village
+                    .stock
+                    .pantry
+                    .batches(&catalog, village.pantry_batch_page.unwrap_or_default())
+                    .1,
+            );
+            label.push_str("\nTab Finances");
+        }
         Some(UtilityPanel::Pantry) => {
             label.push('\n');
             label.push_str(&village.stock.pantry.status(
@@ -1519,7 +1549,7 @@ fn show_hud(
             );
             label.push('\n');
             label.push_str(&village.construction.production.kitchen_policy.status());
-            label.push_str("\nTab Finances");
+            label.push_str("\nR Food batches · Tab Finances");
         }
         None => {}
     }
