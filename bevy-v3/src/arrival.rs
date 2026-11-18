@@ -6,7 +6,7 @@ pub const ROAD_END: f32 = PARK_Z + 6.0;
 pub const MAP_START: f32 = -128.0;
 const PARK_TIME: f32 = 6.0;
 
-const ARRIVAL_SPOTS: [(f32, f32); 5] = [
+pub const ARRIVAL_SPOTS: [(f32, f32); 5] = [
     (30.0, -11.3),
     (30.8, -10.8),
     (31.7, -11.4),

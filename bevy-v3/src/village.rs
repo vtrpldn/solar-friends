@@ -40,7 +40,7 @@ impl Plugin for VillagePlugin {
                 Update,
                 (read_camp_pointer, village_input, animate_arrival, show_hud).chain(),
             )
-            .add_systems(Update, draw_blueprints)
+            .add_systems(Update, (draw_blueprints, show_construction))
             .add_systems(FixedUpdate, advance_clock);
     }
 }
@@ -62,6 +62,9 @@ struct VillageEntity;
 
 #[derive(Component)]
 struct VillageHud;
+
+#[derive(Component)]
+struct BuiltProject(usize);
 
 #[derive(Component)]
 enum ArrivalActor {
@@ -277,6 +280,15 @@ fn animate_arrival(
     }
     for (actor, mut transform, mut visibility) in &mut actors {
         let pose = match *actor {
+            ArrivalActor::Resident(index) if village.camp.is_some() => {
+                let worker = village.construction.worker(index);
+                crate::arrival::Pose {
+                    position: world_position(worker.position.x, worker.position.y),
+                    yaw: worker.yaw,
+                    step_height: 0.0,
+                    visible: true,
+                }
+            }
             ArrivalActor::Resident(index) => resident_pose(village.arrival_time, index),
             ArrivalActor::Car(index) => vehicle_pose(village.arrival_time, index),
         };
@@ -294,9 +306,20 @@ fn animate_arrival(
     }
 }
 
-fn advance_clock(time: Res<Time<Fixed>>, setup: Res<WorldSetup>, mut village: ResMut<Village>) {
-    if !setup.open && !village.paused && village.camp.is_some() {
+fn advance_clock(
+    time: Res<Time<Fixed>>,
+    setup: Res<WorldSetup>,
+    mut village: ResMut<Village>,
+    catalog: Res<Catalog>,
+) {
+    if setup.open || village.paused {
+        return;
+    }
+    if let Some(camp) = village.camp {
         village.clock += time.delta_secs_f64();
+        village
+            .construction
+            .tick(&catalog, &setup.terrain(), camp, time.delta_secs());
     }
 }
 
@@ -330,24 +353,61 @@ fn show_hud(
     } else {
         village.construction.instructions(&catalog)
     };
-    let label = format!(
+    let mut label = format!(
         "Day {day}   {hour:02}:{:02}   R${}\n{} timber · {} meals\n{controls}",
         minute % 60,
         village.stock.cash,
         village.stock.available("wood"),
         village.stock.available("meals"),
     );
+    if let Some(progress) = village.construction.latest_progress(&catalog) {
+        label.push('\n');
+        label.push_str(&progress);
+    }
     if text.0 != label {
         text.0 = label;
     }
 }
 
-fn draw_blueprints(setup: Res<WorldSetup>, village: Res<Village>, mut gizmos: Gizmos) {
+fn draw_blueprints(
+    setup: Res<WorldSetup>,
+    village: Res<Village>,
+    catalog: Res<Catalog>,
+    mut gizmos: Gizmos,
+) {
     if !setup.open
         && let Some(camp) = village.camp
     {
         village
             .construction
-            .draw(&setup.terrain().with_camp(camp), &mut gizmos);
+            .draw(&catalog, &setup.terrain().with_camp(camp), &mut gizmos);
+    }
+}
+
+fn show_construction(
+    mut commands: Commands,
+    setup: Res<WorldSetup>,
+    village: Res<Village>,
+    catalog: Res<Catalog>,
+    assets: Res<AssetServer>,
+    displayed: Query<&BuiltProject>,
+) {
+    if setup.open || !village.is_changed() {
+        return;
+    }
+    let Some(camp) = village.camp else { return };
+    let terrain = setup.terrain().with_camp(camp);
+    for (project, asset, position, yaw) in village.construction.finished_models(&catalog) {
+        if displayed.iter().any(|model| model.0 == project) {
+            continue;
+        }
+        let Vec2 { x, y: z } = position;
+        commands.spawn((
+            VillageEntity,
+            BuiltProject(project),
+            opening_model(&assets, asset),
+            Transform::from_xyz(x, terrain.height_at(x, z), z)
+                .with_rotation(Quat::from_rotation_y(yaw)),
+        ));
     }
 }

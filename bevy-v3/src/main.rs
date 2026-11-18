@@ -7,6 +7,7 @@ use bevy::{
 mod arrival;
 mod catalog;
 mod construction;
+mod navigation;
 mod setup;
 mod stock;
 mod terrain;

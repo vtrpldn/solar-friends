@@ -2,6 +2,7 @@
 import { writeFile } from "node:fs/promises";
 import { MeshBasicMaterial, Scene } from "three";
 import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
+import { compactModel, createAsset } from "../web/v02/library/catalog.js";
 import { createTent } from "../web/v02/library/camping.js";
 import { createJimny } from "../web/v02/library/vehicles.js";
 import { createResident, RESIDENT_IDS } from "../web/v02/residents/rig.js";
@@ -20,6 +21,7 @@ const models = [
     [`tent-${variant}`, createTent(variant)],
     [`car-${variant}`, createJimny(variant)],
   ]),
+  ...["picnic-table", "well", "shed", "eco_toilet"].map((id) => [id, compactModel(createAsset(id))]),
 ];
 const scenes = models.map(([name, model]) => {
   model.traverse((node) => {

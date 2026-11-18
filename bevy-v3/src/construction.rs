@@ -1,8 +1,11 @@
+use std::collections::VecDeque;
+
 use bevy::prelude::*;
 
 use crate::{
-    arrival::{MAP_START, ROAD_END, road_center, road_width, world_position},
+    arrival::{ARRIVAL_SPOTS, MAP_START, ROAD_END, road_center, road_width, world_position},
     catalog::{Catalog, Project},
+    navigation::route,
     stock::Stock,
     terrain::Terrain,
 };
@@ -14,19 +17,100 @@ const ESSENTIALS: [(KeyCode, &str); 4] = [
     (KeyCode::Digit4, "toilet"),
 ];
 
-#[derive(Default)]
+const STOCKPILE: IVec2 = IVec2::new(32, -13);
+const SUPPLY_SPOTS: [IVec2; 5] = [
+    IVec2::new(31, -13),
+    IVec2::new(33, -13),
+    IVec2::new(32, -12),
+    IVec2::new(31, -12),
+    IVec2::new(33, -12),
+];
+
 pub struct Construction {
     pub menu: bool,
     selection: Option<&'static str>,
     rotation: u8,
     status: String,
     plans: Vec<Blueprint>,
+    residents: [Worker; 5],
 }
 
 struct Blueprint {
     key: &'static str,
     position: IVec2,
     size: IVec2,
+    rotation: u8,
+    loads: u32,
+    delivered: u32,
+    work: f64,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+enum Activity {
+    Collect,
+    Carry,
+    Walk,
+    Build,
+}
+
+struct Assignment {
+    project: usize,
+    spot: IVec2,
+    activity: Activity,
+    to_site: VecDeque<Vec2>,
+}
+
+pub struct Worker {
+    pub position: Vec2,
+    pub yaw: f32,
+    speed: f32,
+    path: VecDeque<Vec2>,
+    assignment: Option<Assignment>,
+    experience: f64,
+    retry: f32,
+}
+
+impl Default for Construction {
+    fn default() -> Self {
+        Self {
+            menu: false,
+            selection: None,
+            rotation: 0,
+            status: String::new(),
+            plans: Vec::new(),
+            residents: ARRIVAL_SPOTS.map(|(x, z)| Worker {
+                position: Vec2::new(x, z),
+                yaw: 0.0,
+                speed: 0.0,
+                path: VecDeque::new(),
+                assignment: None,
+                experience: 0.0,
+                retry: 0.0,
+            }),
+        }
+    }
+}
+
+impl Worker {
+    fn move_along_path(&mut self, dt: f32, carrying: bool) {
+        let Some(&next) = self.path.front() else {
+            self.speed = 0.0;
+            return;
+        };
+        let offset = next - self.position;
+        let distance = offset.length();
+        self.speed = (self.speed + dt * 1.8).min(if carrying { 0.72 } else { 0.95 });
+        let step = self.speed * dt;
+        if distance > 0.001 {
+            self.yaw = offset.x.atan2(offset.y);
+        }
+        if distance <= step {
+            self.position = next;
+            self.path.pop_front();
+        } else {
+            self.position += offset / distance * step;
+        }
+    }
 }
 
 impl Construction {
@@ -96,6 +180,10 @@ impl Construction {
             key,
             position,
             size: size(definition, self.rotation),
+            rotation: self.rotation,
+            loads: catalog.loads(definition),
+            delivered: 0,
+            work: 0.0,
         };
         if let Some(error) = self.placement_error(terrain, camp, &blueprint, definition.repeatable)
         {
@@ -137,7 +225,7 @@ impl Construction {
         if overlaps(camp + IVec2::new(-1, -3), camp + IVec2::new(4, 1)) {
             return Some("Leave the tents clear.");
         }
-        if overlaps(IVec2::new(32, -13), IVec2::new(33, -12)) {
+        if overlaps(STOCKPILE, STOCKPILE + IVec2::ONE) {
             return Some("Leave the supplies accessible.");
         }
         if self
@@ -164,8 +252,12 @@ impl Construction {
         None
     }
 
-    pub fn draw(&self, terrain: &Terrain, gizmos: &mut Gizmos) {
-        for plan in &self.plans {
+    pub fn draw(&self, catalog: &Catalog, terrain: &Terrain, gizmos: &mut Gizmos) {
+        for plan in self
+            .plans
+            .iter()
+            .filter(|plan| plan.work < catalog.projects[plan.key].work)
+        {
             let left_top =
                 world_position(plan.position.x as f32, plan.position.y as f32) - Vec2::ONE;
             let right_bottom = left_top + plan.size.as_vec2() * 2.0;
@@ -186,6 +278,203 @@ impl Construction {
     }
 }
 
+impl Construction {
+    pub fn latest_progress(&self, catalog: &Catalog) -> Option<String> {
+        let project = self.plans.last()?;
+        let definition = &catalog.projects[project.key];
+        let status = if project.work >= definition.work {
+            "Ready".into()
+        } else if project.delivered < project.loads {
+            format!("{} of {} loads delivered", project.delivered, project.loads)
+        } else {
+            format!("{:.0}% built", project.work / definition.work * 100.0)
+        };
+        Some(format!("{}: {status}", definition.name))
+    }
+
+    pub fn worker(&self, index: usize) -> &Worker {
+        &self.residents[index]
+    }
+
+    pub fn finished_models<'a>(
+        &'a self,
+        catalog: &'a Catalog,
+    ) -> impl Iterator<Item = (usize, usize, Vec2, f32)> + 'a {
+        self.plans
+            .iter()
+            .enumerate()
+            .filter_map(|(index, project)| {
+                if project.work < catalog.projects[project.key].work {
+                    return None;
+                }
+                let model = 9 + ESSENTIALS.iter().position(|(_, key)| *key == project.key)?;
+                let base = project.position.as_vec2() + (project.size.as_vec2() - Vec2::ONE) * 0.5;
+                Some((
+                    index,
+                    model,
+                    world_position(base.x, base.y),
+                    f32::from(project.rotation) * std::f32::consts::FRAC_PI_2,
+                ))
+            })
+    }
+
+    pub fn tick(&mut self, catalog: &Catalog, terrain: &Terrain, camp: IVec2, dt: f32) {
+        for index in 0..self.residents.len() {
+            if let Some(job) = &self.residents[index].assignment {
+                let project = &self.plans[job.project];
+                if project.work >= catalog.projects[project.key].work {
+                    self.residents[index].assignment = None;
+                    self.residents[index].path.clear();
+                }
+            }
+            if self.residents[index].assignment.is_none() {
+                self.residents[index].retry -= dt;
+                if self.residents[index].retry <= 0.0 {
+                    self.assign(index, catalog, terrain, camp);
+                    self.residents[index].retry = 2.0;
+                }
+            }
+            let worker = &mut self.residents[index];
+            let Some(mut job) = worker.assignment.take() else {
+                continue;
+            };
+            worker.move_along_path(dt, job.activity == Activity::Carry);
+            if !worker.path.is_empty() {
+                worker.assignment = Some(job);
+                continue;
+            }
+            let project = &mut self.plans[job.project];
+            match job.activity {
+                Activity::Collect => {
+                    worker.path = std::mem::take(&mut job.to_site);
+                    job.activity = Activity::Carry;
+                }
+                Activity::Carry => {
+                    project.delivered += 1;
+                    if project.delivered < project.loads {
+                        continue;
+                    }
+                    job.activity = Activity::Build;
+                }
+                Activity::Walk => job.activity = Activity::Build,
+                Activity::Build => {
+                    let crew = self
+                        .residents
+                        .iter()
+                        .filter(|other| {
+                            other.assignment.as_ref().is_some_and(|other| {
+                                other.project == job.project && other.activity == Activity::Build
+                            })
+                        })
+                        .count();
+                    let worker = &mut self.residents[index];
+                    let skilled = matches!(
+                        (index, project.key),
+                        (1, "shelter") | (2, "gathering") | (3, "well") | (4, "toilet")
+                    );
+                    let skill = if skilled { 1.25 } else { 1.0 };
+                    let experience = 1.0 + (worker.experience / 10_000.0).min(0.15);
+                    let efficiency = 1.0 / (1.0 + 0.12 * crew as f64);
+                    project.work = (project.work + f64::from(dt) * skill * experience * efficiency)
+                        .min(catalog.projects[project.key].work);
+                    worker.experience += f64::from(dt);
+                }
+            }
+            self.residents[index].assignment = Some(job);
+        }
+    }
+
+    fn assign(&mut self, index: usize, catalog: &Catalog, terrain: &Terrain, camp: IVec2) {
+        let position = self.residents[index].position;
+        for (id, project) in self.plans.iter().enumerate() {
+            let definition = &catalog.projects[project.key];
+            if project.work >= definition.work {
+                continue;
+            }
+            let crew: Vec<_> = self
+                .residents
+                .iter()
+                .filter_map(|worker| worker.assignment.as_ref().filter(|job| job.project == id))
+                .collect();
+            let limit = ((definition.work / 350.0).ceil() as usize)
+                .max(((project.size.x * project.size.y) as usize).div_ceil(2))
+                .clamp(2, 3);
+            if crew.len() >= limit
+                || (project.delivered < project.loads
+                    && project.delivered + crew.len() as u32 >= project.loads)
+            {
+                continue;
+            }
+            let hauling = project.delivered < project.loads;
+            let supply = SUPPLY_SPOTS[index];
+            let start = if hauling { supply.as_vec2() } else { position };
+            let mut spots = Vec::new();
+            for z in 0..project.size.y {
+                spots.extend([IVec2::new(-1, z), IVec2::new(project.size.x, z)]);
+            }
+            for x in 0..project.size.x {
+                spots.extend([IVec2::new(x, project.size.y), IVec2::new(x, -1)]);
+            }
+            spots.iter_mut().for_each(|spot| *spot += project.position);
+            spots.sort_by(|a, b| {
+                a.as_vec2()
+                    .distance_squared(start)
+                    .total_cmp(&b.as_vec2().distance_squared(start))
+            });
+            let path = |from, to| {
+                route(
+                    from,
+                    to,
+                    |cell| self.blocked(terrain, camp, cell),
+                    access_road,
+                )
+            };
+            let Some((spot, to_site)) = spots
+                .into_iter()
+                .filter(|spot| !crew.iter().any(|worker| worker.spot == *spot))
+                .find_map(|spot| path(start, spot).map(|route| (spot, route)))
+            else {
+                continue;
+            };
+            let (path, to_site, activity) = if hauling {
+                let Some(to_supply) = path(position, supply) else {
+                    continue;
+                };
+                (to_supply, to_site, Activity::Collect)
+            } else {
+                (to_site, VecDeque::new(), Activity::Walk)
+            };
+            let worker = &mut self.residents[index];
+            worker.path = path;
+            worker.assignment = Some(Assignment {
+                project: id,
+                spot,
+                to_site,
+                activity,
+            });
+            return;
+        }
+    }
+
+    fn blocked(&self, terrain: &Terrain, camp: IVec2, cell: IVec2) -> bool {
+        let Vec2 { x, y: z } = world_position(cell.x as f32, cell.y as f32);
+        let (center, width) = terrain.river(f64::from(z));
+        let inside = |start: IVec2, end: IVec2| cell.cmpge(start).all() && cell.cmplt(end).all();
+        (f64::from(x) - center).abs() <= width + 1.9
+            || cell == STOCKPILE
+            || inside(camp + IVec2::new(-1, -3), camp + IVec2::new(4, 0))
+            || self
+                .plans
+                .iter()
+                .any(|plan| inside(plan.position, plan.position + plan.size))
+    }
+}
+
+fn access_road(cell: IVec2) -> bool {
+    let Vec2 { x, y: z } = world_position(cell.x as f32, cell.y as f32);
+    (MAP_START..=ROAD_END).contains(&z) && (x - road_center(z)).abs() < road_width(z)
+}
+
 fn size(definition: &Project, rotation: u8) -> IVec2 {
     let [width, depth] = definition.size;
     if rotation.is_multiple_of(2) {
@@ -199,6 +488,35 @@ fn size(definition: &Project, rotation: u8) -> IVec2 {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn residents_haul_all_reserved_loads_before_assembling() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let terrain = setup.terrain();
+        let camp = IVec2::new(36, 36);
+        let mut construction = Construction {
+            selection: Some("gathering"),
+            ..default()
+        };
+        construction.plan(&catalog, &mut stock, &terrain, camp, IVec2::new(44, 36));
+        let loads = catalog.loads(&catalog.projects["gathering"]);
+        for _ in 0..8_000 {
+            construction.tick(&catalog, &terrain, camp, 0.1);
+            let project = &construction.plans[0];
+            assert!(project.delivered <= loads);
+            if project.delivered < loads {
+                assert_eq!(project.work, 0.0);
+            }
+            if construction.finished_models(&catalog).next().is_some() {
+                break;
+            }
+        }
+        assert_eq!(construction.finished_models(&catalog).count(), 1);
+        assert_eq!(construction.plans[0].delivered, loads);
+        assert_eq!(stock.available("wood"), 28);
+    }
 
     #[test]
     fn blueprint_reserves_supplies_only_after_valid_placement() {
