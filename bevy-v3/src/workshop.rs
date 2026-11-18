@@ -1,4 +1,8 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    render::view::screenshot::{Screenshot, ScreenshotCaptured},
+    scene::{SceneInstance, SceneSpawner},
+};
 
 use crate::{catalog::Catalog, ui_font::ui_font, village::building_model};
 
@@ -9,6 +13,7 @@ struct Workshop {
     heading: f32,
     zoom: f32,
     night: bool,
+    export_notice: String,
 }
 
 pub fn run() {
@@ -31,9 +36,10 @@ pub fn run() {
         heading: 0.0,
         zoom: 1.0,
         night: false,
+        export_notice: String::new(),
     })
     .add_systems(Startup, setup)
-    .add_systems(Update, (controls, show_model).chain());
+    .add_systems(Update, (controls, show_model, capture_preview).chain());
     crate::village::register_building_models(&mut app);
     app.run();
 }
@@ -74,7 +80,15 @@ fn setup(
     ));
 }
 
-fn controls(keys: Res<ButtonInput<KeyCode>>, time: Res<Time>, mut workshop: ResMut<Workshop>) {
+fn controls(
+    keys: Res<ButtonInput<KeyCode>>,
+    time: Res<Time>,
+    pending: Query<(), With<Screenshot>>,
+    mut workshop: ResMut<Workshop>,
+) {
+    if !pending.is_empty() {
+        return;
+    }
     let len = workshop.projects.len();
     if keys.just_pressed(KeyCode::ArrowRight) {
         workshop.selected = (workshop.selected + 1) % len;
@@ -141,8 +155,65 @@ fn show_model(
         "Day"
     };
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · Q/E Orbit · +/− Zoom · N Lighting · Home Reset",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · Q/E Orbit · +/− Zoom · N Lighting · Home Reset · F5 Export PNG\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
-        project.size[0] * 2, project.size[1] * 2, project.category,
+        project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
+}
+
+fn capture_preview(
+    mut commands: Commands,
+    keys: Res<ButtonInput<KeyCode>>,
+    mut workshop: ResMut<Workshop>,
+    mut panel: Single<&mut Node, With<Text>>,
+    pending: Query<(), With<Screenshot>>,
+    scene: Query<&SceneInstance>,
+    spawner: Res<SceneSpawner>,
+) {
+    if !pending.is_empty() {
+        return;
+    }
+    panel.display = Display::Flex;
+    if !keys.just_pressed(KeyCode::F5) {
+        return;
+    }
+    if !scene
+        .single()
+        .is_ok_and(|instance| spawner.instance_is_ready(**instance))
+    {
+        workshop.export_notice = "Wait for the model to finish loading.".into();
+        return;
+    }
+    let path = crate::save::location(crate::setup::Mode::Story).and_then(|save| {
+        let stamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(std::io::Error::other)?;
+        let dir = save.with_file_name("workshop");
+        std::fs::create_dir_all(&dir)?;
+        let model = &workshop.projects[workshop.selected];
+        let light = if workshop.night { "night" } else { "day" };
+        Ok(dir.join(format!("{model}-{light}-{}.png", stamp.as_nanos())))
+    });
+    let path = match path {
+        Ok(path) => path,
+        Err(error) => {
+            workshop.export_notice = format!("Could not prepare export · {error}");
+            return;
+        }
+    };
+    panel.display = Display::None;
+    commands.spawn(Screenshot::primary_window()).observe(
+        move |event: On<ScreenshotCaptured>, mut workshop: ResMut<Workshop>| {
+            let result = event
+                .image
+                .clone()
+                .try_into_dynamic()
+                .map_err(|error| error.to_string())
+                .and_then(|img| img.to_rgb8().save(&path).map_err(|error| error.to_string()));
+            workshop.export_notice = match result {
+                Ok(()) => format!("Saved {}", path.display()),
+                Err(error) => format!("Could not export PNG · {error}"),
+            };
+        },
+    );
 }

@@ -94,3 +94,5 @@ In the native lab, press **O** to enter a JSON order at the current step and **F
 ## Model workshop
 
 Pass `--workshop` to inspect the bundled building scenes. Use **←/→** to browse, **Q/E** to orbit, **+/−** to zoom, **N** to change lighting, and **Home** to reset the view.
+
+Press **F5** to export the current workshop view as a PNG without the controls overlay. The workshop shows the saved path.
