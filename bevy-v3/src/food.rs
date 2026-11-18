@@ -41,6 +41,12 @@ pub struct Pantry {
     pub priority: CoolingPriority,
 }
 
+pub struct Forecast {
+    pub served: u32,
+    pub target: u32,
+    pub at_risk: f64,
+}
+
 #[derive(Default, Clone, Copy, Deserialize, Serialize)]
 pub enum CoolingPriority {
     #[default]
@@ -185,6 +191,83 @@ impl Pantry {
         for lots in self.lots.values_mut() {
             merge(lots);
         }
+    }
+
+    pub fn forecast(&self, clock: f64, half_days: u8, owned: impl Fn(&str) -> u32) -> Forecast {
+        const MEALS_PER_DAY: u32 = 15;
+        let target = (MEALS_PER_DAY * u32::from(half_days)).div_ceil(2);
+        let mut lots: [Vec<Lot>; 4] = SERVINGS.map(|(id, _)| {
+            if self.initialized {
+                let mut batches = self.lots.get(id).cloned().unwrap_or_default();
+                batches.sort_by(|a, b| a.expires.total_cmp(&b.expires));
+                batches
+            } else {
+                let days = FOODS
+                    .iter()
+                    .find(|&&(food, _)| food == id)
+                    .expect("serving shelf life")
+                    .1;
+                vec![Lot {
+                    units: owned(id),
+                    expires: clock + days * DAY,
+                    preserved: false,
+                    chilled: false,
+                }]
+            }
+        });
+        let mut forecast = Forecast {
+            served: 0,
+            target,
+            at_risk: 0.0,
+        };
+        fn expire(lots: &mut [Vec<Lot>; 4], until: f64) -> f64 {
+            lots.iter_mut()
+                .zip(SERVINGS)
+                .map(|(batches, (_, serving))| {
+                    batches
+                        .iter_mut()
+                        .filter(|lot| lot.expires <= until)
+                        .map(|lot| f64::from(std::mem::take(&mut lot.units)) / f64::from(serving))
+                        .sum::<f64>()
+                })
+                .sum()
+        }
+        for slot in 0..target {
+            forecast.at_risk += expire(
+                &mut lots,
+                clock + f64::from(slot) * DAY / f64::from(MEALS_PER_DAY),
+            );
+            let chosen = lots
+                .iter()
+                .enumerate()
+                .filter_map(|(index, batches)| {
+                    let (_, units) = SERVINGS[index];
+                    if batches
+                        .iter()
+                        .map(|batch| u64::from(batch.units))
+                        .sum::<u64>()
+                        < u64::from(units)
+                    {
+                        return None;
+                    }
+                    Some((index, batches.iter().find(|batch| batch.units > 0)?.expires))
+                })
+                .min_by(|a, b| a.1.total_cmp(&b.1));
+            let Some((index, _)) = chosen else { break };
+            let remaining = &mut lots[index];
+            let mut units = SERVINGS[index].1;
+            for batch in remaining {
+                let take = batch.units.min(units);
+                batch.units -= take;
+                units -= take;
+                if units == 0 {
+                    break;
+                }
+            }
+            forecast.served += 1;
+        }
+        forecast.at_risk += expire(&mut lots, clock + f64::from(half_days) * 0.5 * DAY);
+        forecast
     }
 
     pub fn status(&self, catalog: &Catalog, capacity: f64) -> String {

@@ -1172,7 +1172,7 @@ fn show_hud(
                 &village
                     .construction
                     .trade
-                    .pantry_purchase_status(village.clock),
+                    .pantry_purchase_status(&village.stock, village.clock),
             );
             label.push_str("\nTab Finances");
         }

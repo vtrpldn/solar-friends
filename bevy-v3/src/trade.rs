@@ -262,8 +262,8 @@ impl Trade {
                 .delivery
                 .as_ref()
                 .map_or(0, |order| servings(&order.material, order.quantity));
-        let target = (15 * u32::from(self.pantry_purchase.reserve_half_days)).div_ceil(2);
-        if stock.food_portions().saturating_add(incoming) >= target {
+        let forecast = self.pantry_forecast(stock, clock);
+        if forecast.served.saturating_add(incoming) >= forecast.target {
             return;
         }
         let free = space.saturating_sub(self.inbound());
@@ -301,7 +301,16 @@ impl Trade {
             .min(10_000_000);
     }
 
-    pub fn pantry_purchase_status(&self, clock: f64) -> String {
+    fn pantry_forecast(&self, stock: &Stock, clock: f64) -> food::Forecast {
+        stock
+            .pantry
+            .forecast(clock, self.pantry_purchase.reserve_half_days, |id| {
+                stock.available(id)
+            })
+    }
+
+    pub fn pantry_purchase_status(&self, stock: &Stock, clock: f64) -> String {
+        let forecast = self.pantry_forecast(stock, clock);
         let policy = &self.pantry_purchase;
         let state = if self.household_restock_off {
             "off"
@@ -314,10 +323,13 @@ impl Trade {
             0
         };
         format!(
-            "U Automatic food purchases {state}\n[ ] Reserve {:.1} days · Shift [ ] Daily limit R${:.0}\nR${:.2} reserved today including fuel",
+            "U Automatic food purchases {state}\n[ ] Reserve {:.1} days · Shift [ ] Daily limit R${:.0}\nR${:.2} reserved today including fuel\nStored food covers {}/{} meals · {:.1} servings may spoil",
             f64::from(policy.reserve_half_days) / 2.0,
             policy.allowance_cents as f64 / 100.0,
-            used as f64 / 100.0
+            used as f64 / 100.0,
+            forecast.served,
+            forecast.target,
+            forecast.at_risk
         )
     }
 
@@ -579,6 +591,26 @@ fn pantry_day(clock: f64) -> u64 {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn automatic_restock_uses_the_forecast_when_food_will_expire_first() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut market = Market::default();
+        let mut trade = Trade::default();
+        stock.age_food(&catalog, 0.0, 0.1, 0.0);
+        for lot in stock.pantry.lots.values_mut().flatten() {
+            lot.expires = 1.0;
+        }
+        assert!(stock.food_portions() >= 23);
+        let forecast = trade.pantry_forecast(&stock, 0.0);
+        assert_eq!(forecast.served, 1);
+        assert_eq!(forecast.target, 23);
+        assert!(forecast.at_risk >= 22.0);
+        trade.maintain_pantry(&catalog, &mut stock, &mut market, (0.0, 12, 500));
+        assert_eq!(trade.orders.len(), 1);
+        assert_eq!(trade.orders[0].material, "food");
+    }
 
     #[test]
     fn emergency_food_budget_counts_each_reserved_pack_and_its_fare() {
