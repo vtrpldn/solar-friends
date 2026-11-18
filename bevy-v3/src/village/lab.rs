@@ -227,6 +227,40 @@ mod tests {
     use super::*;
 
     #[test]
+    fn scripted_field_orders_reuse_the_bed_queue_validation() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps": 0,
+            "orders": [
+                {"step": 0, "order": {"type": "build", "key": "field", "x": 40, "z": 36, "size": [2, 2]}},
+                {"step": 0, "order": {"type": "configure-bed", "site": 1, "bed": 1, "crop": "Beans"}},
+                {"step": 0, "order": {"type": "bed", "site": 1, "bed": 1, "action": "Prepare"}},
+                {"step": 0, "order": {"type": "bed", "site": 1, "bed": 1, "action": "Prepare"}},
+                {"step": 0, "order": {"type": "outside", "resident": 2, "enabled": true, "recurring": true}}
+            ]
+        }"#).unwrap();
+        let report = run(scenario, None, &catalog).unwrap();
+        assert!(
+            report.orders[..3].iter().all(|order| order.error.is_none()),
+            "{:?}",
+            report
+                .orders
+                .iter()
+                .map(|order| &order.error)
+                .collect::<Vec<_>>()
+        );
+        assert!(
+            report.orders[3]
+                .error
+                .as_deref()
+                .unwrap()
+                .contains("current bed job")
+        );
+        assert!(report.orders[4].error.is_none());
+        assert_eq!(report.village.construction.farming.jobs.len(), 1);
+    }
+
+    #[test]
     fn a_report_replays_and_detects_a_changed_result() {
         let catalog = Catalog::default();
         let scenario = Scenario {

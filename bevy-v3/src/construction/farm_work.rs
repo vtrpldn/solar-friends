@@ -140,15 +140,31 @@ impl Construction {
         }
     }
 
-    fn queue_bed_job(
+    pub(super) fn queue_bed_job(
         &mut self,
         catalog: &Catalog,
         stock: &mut Stock,
         (site, bed, action): (usize, usize, FarmAction),
         clock: TownClock,
     ) -> Result<(), String> {
-        let (inputs, required) =
-            self.farming.plots[&site].beds[bed].requirements(action, clock.seconds)?;
+        let bed_data = self
+            .farming
+            .plots
+            .get(&site)
+            .and_then(|plot| plot.beds.get(bed))
+            .ok_or("Choose a completed planting bed.")?;
+        if self.changes.contains_key(&site) || !self.utilities.enabled(site) {
+            return Err("The growing site is closed.".into());
+        }
+        if self
+            .farming
+            .jobs
+            .iter()
+            .any(|job| job.site == site && job.bed == bed)
+        {
+            return Err("Finish the current bed job first.".into());
+        }
+        let (inputs, required) = bed_data.requirements(action, clock.seconds)?;
         let mut pickups = 0;
         let mut fare = 0;
         if !stock.sandbox {

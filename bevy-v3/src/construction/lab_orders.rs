@@ -1,6 +1,8 @@
 use super::*;
 use serde::Deserialize;
 
+use crate::farming::{Crop, FarmAction};
+
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "type", rename_all = "kebab-case")]
 pub(crate) enum LabOrder {
@@ -10,6 +12,8 @@ pub(crate) enum LabOrder {
         z: i32,
         #[serde(default)]
         rotation: u8,
+        #[serde(default)]
+        size: Option<[i32; 2]>,
     },
     Produce {
         site: usize,
@@ -19,6 +23,31 @@ pub(crate) enum LabOrder {
         material: String,
         #[serde(default)]
         freight: bool,
+    },
+    Sell {
+        material: String,
+    },
+    Bed {
+        site: usize,
+        bed: usize,
+        action: FarmAction,
+    },
+    ConfigureBed {
+        site: usize,
+        bed: usize,
+        crop: Option<Crop>,
+        density: Option<f64>,
+        irrigation: Option<bool>,
+        collect_residues: Option<bool>,
+    },
+    Outside {
+        resident: usize,
+        enabled: bool,
+        #[serde(default)]
+        recurring: bool,
+    },
+    FoodPolicy {
+        enabled: bool,
     },
     Grid {
         enabled: bool,
@@ -60,6 +89,7 @@ impl Construction {
                 x,
                 z,
                 rotation,
+                size,
             } => {
                 if !catalog.projects.contains_key(key)
                     || *rotation > 3
@@ -68,11 +98,18 @@ impl Construction {
                 {
                     return Err("Choose a valid blueprint, location and rotation.".into());
                 }
+                let size = size.map_or_else(default_field_size, |[w, h]| IVec2::new(w, h));
+                if key == "field" && !crate::farming::Plot::field_size_valid(size) {
+                    return Err("Fields must be 2–32 cells on each side.".into());
+                }
+                let original_size = self.field_size;
+                self.field_size = size;
                 let previous = self.plans.len();
                 self.selection = Some(key.clone());
                 self.rotation = *rotation;
                 self.plan(catalog, stock, ground, IVec2::new(*x, *z), clock);
                 self.selection = None;
+                self.field_size = original_size;
                 if self.plans.len() == previous {
                     return Err(self.status.clone());
                 }
@@ -107,6 +144,85 @@ impl Construction {
                     (clock.seconds, clock.round_trip_km, *freight),
                 )?;
             }
+            LabOrder::Sell { material } => {
+                if !catalog.materials.contains_key(material) {
+                    return Err("Unknown material.".into());
+                }
+                let day = ((540.0 + clock.seconds * 0.45) / 1440.0).floor() as u64;
+                let fare = crate::market::fare_cents(clock.round_trip_km);
+                self.trade
+                    .reserve(catalog, stock, &mut self.market, material, (day, fare, 0))?;
+            }
+            LabOrder::Bed { site, bed, action } => {
+                let site = site.checked_sub(1).ok_or("Project numbers start at 1.")?;
+                let bed = bed.checked_sub(1).ok_or("Bed numbers start at 1.")?;
+                self.queue_bed_job(catalog, stock, (site, bed, *action), clock)?;
+            }
+            LabOrder::ConfigureBed {
+                site,
+                bed,
+                crop,
+                density,
+                irrigation,
+                collect_residues,
+            } => {
+                let site = site.checked_sub(1).ok_or("Project numbers start at 1.")?;
+                let bed = bed.checked_sub(1).ok_or("Bed numbers start at 1.")?;
+                let bed_data = self
+                    .farming
+                    .plots
+                    .get_mut(&site)
+                    .and_then(|plot| plot.beds.get_mut(bed))
+                    .ok_or("Choose a completed planting bed.")?;
+                if crop.is_some() || density.is_some() {
+                    if !bed_data.editable()
+                        || self
+                            .farming
+                            .jobs
+                            .iter()
+                            .any(|job| job.site == site && job.bed == bed)
+                    {
+                        return Err("Choose a bed without standing crops or queued work.".into());
+                    }
+                    if density.is_some_and(|density| ![0.5, 1.0, 1.5].contains(&density)) {
+                        return Err("Density must be 0.5, 1.0, or 1.5.".into());
+                    }
+                }
+                if let Some(crop) = crop {
+                    bed_data.crop = *crop;
+                }
+                if let Some(density) = density {
+                    bed_data.density = *density;
+                }
+                if let Some(irrigation) = irrigation {
+                    bed_data.irrigation = *irrigation;
+                }
+                if let Some(collect) = collect_residues {
+                    bed_data.collect_residues = *collect;
+                }
+            }
+            LabOrder::Outside {
+                resident,
+                enabled,
+                recurring,
+            } => {
+                if stock.sandbox {
+                    return Err("Town employment is available in Story.".into());
+                }
+                let work = &mut resident
+                    .checked_sub(1)
+                    .and_then(|id| self.residents.get_mut(id))
+                    .ok_or("Choose a resident from 1 to 5.")?
+                    .town_work;
+                if *recurring {
+                    work.repeating = *enabled;
+                } else if work.active() {
+                    return Err("The resident already started a shift.".into());
+                } else {
+                    work.booked = *enabled;
+                }
+            }
+            LabOrder::FoodPolicy { enabled } => self.trade.household_restock_off = !enabled,
             LabOrder::Grid { enabled } => self.utilities.grid_off = !enabled,
             LabOrder::CollectWater { site } => self.queue_water(
                 *site,

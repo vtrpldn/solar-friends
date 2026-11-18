@@ -81,7 +81,7 @@ An example scenario with one construction order:
 }
 ```
 
-Order types include `build`, `produce`, `buy`, `grid`, `collect-water`, `purify`, and `service-water`. Use project numbers starting at 1 for production and water orders, with 0 for the camp water facility. Build coordinates use map cells, and rotation takes 0–3 quarter turns.
+Order types include `build`, `produce`, `buy`, `sell`, `bed`, `configure-bed`, `outside`, `food-policy`, `grid`, `collect-water`, `purify`, and `service-water`. Project, bed, and resident numbers start at 1. Use site 0 for the camp water facility. Build coordinates use map cells, rotation takes 0–3 quarter turns, and fields accept a `size` pair in cells.
 
 Set `"stop"` in the scenario to `"harvest"`, `"crop-failed"`, `"hydration"`, or `"water"` to stop at that condition. The report includes the actual end step and a final sample.
 
