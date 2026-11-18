@@ -280,6 +280,7 @@ mod tests {
             GizmoPlugin,
         ))
         .init_asset::<Mesh>()
+        .init_asset::<Image>()
         .init_asset::<StandardMaterial>()
         .init_asset::<Scene>()
         .init_asset::<Font>()

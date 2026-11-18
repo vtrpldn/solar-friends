@@ -1,4 +1,9 @@
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::{
+    asset::RenderAssetUsages,
+    prelude::*,
+    render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+    window::PrimaryWindow,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::{save_library::SaveMenu, terrain::Terrain, ui_font::ui_font};
@@ -218,13 +223,24 @@ enum Action {
 #[derive(Component)]
 struct SetupPanel;
 
+#[derive(Component)]
+struct PlotPreview;
+
+#[derive(Component)]
+struct PlotPreviewImage;
+
+const PREVIEW_SIZE: u32 = 128;
+
 pub struct WorldSetupPlugin;
 
 impl Plugin for WorldSetupPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<WorldSetup>()
             .add_systems(Startup, spawn_panel)
-            .add_systems(Update, (setup_input, refresh_panel).chain());
+            .add_systems(
+                Update,
+                (setup_input, refresh_panel, refresh_preview).chain(),
+            );
     }
 }
 
@@ -281,6 +297,36 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                         ui_font(&assets, 17.0),
                     ));
             }
+        });
+    commands
+        .spawn((
+            PlotPreview,
+            Node {
+                position_type: PositionType::Absolute,
+                right: px(32),
+                top: px(32),
+                padding: UiRect::all(px(16)),
+                flex_direction: FlexDirection::Column,
+                row_gap: px(8),
+                ..default()
+            },
+            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+        ))
+        .with_children(|panel| {
+            panel.spawn((Text::new("Plot preview"), ui_font(&assets, 20.0)));
+            panel.spawn((
+                PlotPreviewImage,
+                ImageNode::default(),
+                Node {
+                    width: px(272),
+                    height: px(272),
+                    ..default()
+                },
+            ));
+            panel.spawn((
+                Text::new("Blue river · Tan access road"),
+                ui_font(&assets, 15.0),
+            ));
         });
 }
 
@@ -400,4 +446,76 @@ fn refresh_panel(
             label.0 = setup.label(*action, has_village);
         }
     }
+}
+
+fn refresh_preview(
+    setup: Res<WorldSetup>,
+    mut panel: Single<&mut Node, With<PlotPreview>>,
+    mut image: Single<&mut ImageNode, With<PlotPreviewImage>>,
+    mut images: ResMut<Assets<Image>>,
+    mut drawn: Local<Option<(u32, usize, usize, usize)>>,
+) {
+    if !setup.is_changed() {
+        return;
+    }
+    panel.display = if setup.open {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    if !setup.open {
+        return;
+    }
+    let mut preview = setup.clone();
+    if let Some(seed) = setup
+        .seed_entry
+        .as_deref()
+        .and_then(|entry| entry.parse::<std::num::NonZeroU32>().ok())
+    {
+        preview.seed = seed.get();
+    }
+    let key = (
+        preview.seed,
+        preview.biome,
+        preview.landscape,
+        preview.water,
+    );
+    if *drawn == Some(key) {
+        return;
+    }
+    let terrain = preview.terrain();
+    let base = preview.ground_color().to_srgba();
+    let mut pixels = Vec::with_capacity((PREVIEW_SIZE * PREVIEW_SIZE * 4) as usize);
+    for row in 0..PREVIEW_SIZE {
+        let z = (row as f64 + 0.5) * 256.0 / f64::from(PREVIEW_SIZE) - 128.0;
+        let (river, width) = terrain.river(z);
+        for column in 0..PREVIEW_SIZE {
+            let x = (column as f64 + 0.5) * 256.0 / f64::from(PREVIEW_SIZE) - 128.0;
+            let rgb = if (x - river).abs() <= width {
+                [105, 170, 160]
+            } else if (crate::arrival::MAP_START..=crate::arrival::ROAD_END).contains(&(z as f32))
+                && (x as f32 - crate::arrival::road_center(z as f32)).abs()
+                    <= crate::arrival::road_width(z as f32)
+            {
+                [181, 142, 96]
+            } else {
+                let shade = (1.0 - terrain.height_at(x as f32, z as f32) * 0.047).clamp(0.45, 1.0);
+                [base.red, base.green, base.blue]
+                    .map(|channel| (channel * shade * 255.0).round() as u8)
+            };
+            pixels.extend_from_slice(&[rgb[0], rgb[1], rgb[2], 255]);
+        }
+    }
+    image.image = images.add(Image::new(
+        Extent3d {
+            width: PREVIEW_SIZE,
+            height: PREVIEW_SIZE,
+            depth_or_array_layers: 1,
+        },
+        TextureDimension::D2,
+        pixels,
+        TextureFormat::Rgba8UnormSrgb,
+        RenderAssetUsages::RENDER_WORLD,
+    ));
+    *drawn = Some(key);
 }
