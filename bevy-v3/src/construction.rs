@@ -956,6 +956,10 @@ impl Construction {
         &self.residents[index]
     }
 
+    pub fn has_cultivation_surface(&self, project: usize) -> bool {
+        matches!(self.plans[project].key.as_str(), "field" | "garden")
+    }
+
     pub fn finished_models<'a>(
         &'a self,
         catalog: &'a Catalog,

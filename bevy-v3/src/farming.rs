@@ -325,6 +325,10 @@ impl Bed {
         (1.0 - ((clock - self.ripe_at) / DAY - window).max(0.0) / window).max(0.0)
     }
 
+    pub fn visual_health(&self, clock: f64) -> f64 {
+        self.health() * self.harvest_factor(clock).max(0.15)
+    }
+
     pub fn yield_kg(&self, clock: f64) -> f64 {
         self.area() * self.crop.yield_kg() * self.density.min(1.2)
             / (1.0 + (self.density - 1.0).max(0.0) * 1.5)

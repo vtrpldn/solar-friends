@@ -2,13 +2,29 @@
 import { PROJECTS } from "../web/v02/weekend/simulation.js";
 import { isBuildOption } from "../web/v02/weekend/build-categories.js";
 import { compactModel, createAsset } from "../web/v02/library/catalog.js";
+import { BoxGeometry, Group, Mesh, MeshStandardMaterial } from "three";
+import { greenhouseShell } from "../web/v02/weekend/greenhouse-model.js";
 import { exportModels } from "./v3-model-export.mjs";
 
 const ids = [...new Set(Object.entries(PROJECTS)
   .filter(([id, project]) => isBuildOption(id, project))
   .map(([, project]) => project.asset))].sort();
 
+function bareGreenhouse() {
+  const shell = new Group();
+  greenhouseShell(shell, (root, w, h, d, color, x, y, z, opacity) => {
+    const model = new Mesh(new BoxGeometry(w, h, d), new MeshStandardMaterial({
+      color, opacity, transparent: opacity < 1, roughness: 0.9,
+    }));
+    model.position.set(x, y, z);
+    root.add(model);
+    return model;
+  });
+  return shell;
+}
+
 const models = ids.map((id) => {
+  if (id === "greenhouse") return [id, bareGreenhouse()];
   const model = createAsset(id);
   model.getObjectByName("optional-rooftop-solar")?.removeFromParent();
   return [id, compactModel(model)];

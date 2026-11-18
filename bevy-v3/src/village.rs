@@ -1,3 +1,4 @@
+mod cultivation_surface;
 mod library_ui;
 mod road_surface;
 
@@ -52,6 +53,7 @@ impl Plugin for VillagePlugin {
         embedded_asset!(app, "opening.glb");
         embedded_asset!(app, "buildings.glb");
         road_surface::install(app);
+        app.add_systems(PostUpdate, cultivation_surface::show_beds);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
             .init_resource::<Catalog>()
@@ -1260,15 +1262,18 @@ fn show_construction(
                     index: project,
                     rooftop_solar,
                 },
-                SceneRoot(
+                Visibility::Inherited,
+                place,
+            ));
+            if !village.construction.has_cultivation_surface(project) {
+                building.insert(SceneRoot(
                     assets.load(
                         models
                             .clone()
                             .with_label(GltfAssetLabel::Scene(asset).to_string()),
                     ),
-                ),
-                place,
-            ));
+                ));
+            }
             if village.construction.is_road(project) {
                 building.insert(road_surface::RoadSurface);
             }
