@@ -93,6 +93,8 @@ struct TownTrip {
     #[serde(default, alias = "export")]
     market_order: bool,
     driver: usize,
+    #[serde(default)]
+    vehicle: usize,
     elapsed: f64,
     duration: f64,
     boarded: bool,
@@ -386,7 +388,7 @@ impl Construction {
     pub fn car_trip(&self, index: usize) -> Option<(f64, f64)> {
         self.trip
             .as_ref()
-            .filter(|trip| index == 0 && trip.boarded)
+            .filter(|trip| index == trip.vehicle && trip.boarded)
             .map(|trip| (trip.elapsed, trip.duration))
     }
 
@@ -856,6 +858,7 @@ impl Construction {
             });
         let trip_valid = self.trip.as_ref().is_none_or(|trip| {
             trip.driver < self.residents.len()
+                && trip.vehicle < 2
                 && if trip.market_order {
                     self.trade.orders.front().is_some()
                 } else if let Some(bed) = trip.farm_bed {

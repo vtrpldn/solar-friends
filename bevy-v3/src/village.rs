@@ -888,7 +888,7 @@ fn animate_arrival(
             ArrivalActor::Resident(index) => resident_pose(village.arrival_time, index),
             ArrivalActor::Car(index) => village.construction.car_trip(index).map_or_else(
                 || vehicle_pose(village.arrival_time, index),
-                |(elapsed, duration)| town_vehicle_pose(elapsed, duration),
+                |(elapsed, duration)| town_vehicle_pose(elapsed, duration, index),
             ),
         };
         let Vec2 { x, y: z } = pose.position;

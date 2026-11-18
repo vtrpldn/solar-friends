@@ -13,6 +13,10 @@ pub(super) struct Upkeep {
     used: u64,
     assets: BTreeMap<usize, Asset>,
     jobs: BTreeMap<usize, Service>,
+    #[serde(default)]
+    vehicles: [Vehicle; 2],
+    #[serde(default)]
+    next_vehicle: usize,
 }
 
 impl Default for Upkeep {
@@ -24,8 +28,33 @@ impl Default for Upkeep {
             used: 0,
             assets: BTreeMap::new(),
             jobs: BTreeMap::new(),
+            vehicles: std::array::from_fn(|_| Vehicle::default()),
+            next_vehicle: 0,
         }
     }
+}
+
+#[derive(Deserialize, Serialize)]
+struct Vehicle {
+    condition: f64,
+    kilometers: u64,
+    service: Option<Service>,
+}
+
+impl Default for Vehicle {
+    fn default() -> Self {
+        Self {
+            condition: 100.0,
+            kilometers: 0,
+            service: None,
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+enum Target {
+    Building(usize),
+    Vehicle(usize),
 }
 
 #[derive(Deserialize, Serialize)]
@@ -83,7 +112,16 @@ struct Service {
 
 impl Upkeep {
     pub(super) fn valid(&self, count: usize) -> bool {
-        self.budget <= 10_000_000
+        self.next_vehicle < self.vehicles.len()
+            && self.vehicles.iter().all(|vehicle| {
+                (0.0..=100.0).contains(&vehicle.condition)
+                    && vehicle.service.as_ref().is_none_or(|job| {
+                        matches!(job.kind, Kind::Service)
+                            && (0.0..=job.kind.duration()).contains(&job.work)
+                            && job.worker.is_none_or(|id| id < 5)
+                    })
+            })
+            && self.budget <= 10_000_000
             && self.used <= 10_000_000
             && self.assets.iter().all(|(&id, asset)| {
                 id < count
@@ -112,7 +150,37 @@ impl Upkeep {
     }
 
     fn activity(&self, index: usize) -> Option<&Service> {
-        self.jobs.values().find(|job| job.worker == Some(index))
+        self.services().find(|job| job.worker == Some(index))
+    }
+    fn services(&self) -> impl Iterator<Item = &Service> {
+        self.jobs.values().chain(
+            self.vehicles
+                .iter()
+                .filter_map(|vehicle| vehicle.service.as_ref()),
+        )
+    }
+
+    pub(super) fn trip_vehicles(&self) -> impl Iterator<Item = usize> {
+        [self.next_vehicle, 1 - self.next_vehicle]
+            .into_iter()
+            .filter(|&index| {
+                let vehicle = &self.vehicles[index];
+                vehicle.condition > 10.0
+                    && vehicle
+                        .service
+                        .as_ref()
+                        .is_none_or(|job| job.worker.is_none() && !job.parts_paid)
+            })
+    }
+
+    pub(super) fn dispatch_vehicle(&mut self, vehicle: usize) {
+        self.next_vehicle = 1 - vehicle;
+    }
+
+    pub(super) fn record_distance(&mut self, index: usize, kilometers: u32) {
+        let car = &mut self.vehicles[index];
+        car.kilometers = car.kilometers.saturating_add(u64::from(kilometers));
+        car.condition = (car.condition - f64::from(kilometers) * 30.0 / 5000.0).max(0.0);
     }
 }
 
@@ -136,6 +204,21 @@ impl Construction {
             u.used as f64 / 100.0,
             u.budget as f64 / 100.0
         );
+        for (index, car) in u.vehicles.iter().enumerate() {
+            let service = car.service.as_ref().map_or_else(String::new, |job| {
+                if job.parts_paid {
+                    format!(" · service {:.0}%", job.work / job.kind.duration() * 100.0)
+                } else {
+                    " · service queued".into()
+                }
+            });
+            text.push_str(&format!(
+                "\nVehicle {} · {:.0}% condition · {} km{service}",
+                index + 1,
+                car.condition,
+                car.kilometers
+            ));
+        }
         for (&index, job) in u.jobs.iter().take(6) {
             let name = &catalog.projects[&self.plans[index].key].name;
             let status = if job.worker.is_some() {
@@ -187,6 +270,18 @@ impl Construction {
         if self.upkeep.day != day {
             self.upkeep.day = day;
             self.upkeep.used = 0;
+        }
+        if self.upkeep.automatic {
+            for vehicle in &mut self.upkeep.vehicles {
+                if vehicle.condition < 70.0 && vehicle.service.is_none() {
+                    vehicle.service = Some(Service {
+                        kind: Kind::Service,
+                        worker: None,
+                        parts_paid: false,
+                        work: 0.0,
+                    });
+                }
+            }
         }
         for (index, plan) in self.plans.iter().enumerate() {
             let def = &catalog.projects[&plan.key];
@@ -270,35 +365,66 @@ impl Construction {
         let targets: Vec<_> = self.upkeep.jobs.keys().copied().collect();
         for id in targets {
             let mut job = self.upkeep.jobs.remove(&id).expect("queued service");
-            if !self.step_service(id, &mut job, (catalog, stock), site, dt) {
+            if !self.step_service(Target::Building(id), &mut job, (catalog, stock), site, dt) {
                 self.upkeep.jobs.insert(id, job);
+            }
+        }
+        for index in 0..self.upkeep.vehicles.len() {
+            if self.trip.as_ref().is_some_and(|trip| trip.vehicle == index) {
+                continue;
+            }
+            let Some(mut job) = self.upkeep.vehicles[index].service.take() else {
+                continue;
+            };
+            if !self.step_service(Target::Vehicle(index), &mut job, (catalog, stock), site, dt) {
+                self.upkeep.vehicles[index].service = Some(job);
             }
         }
     }
 
     fn step_service(
         &mut self,
-        id: usize,
+        target: Target,
         job: &mut Service,
         (catalog, stock): (&Catalog, &mut Stock),
         site: ConstructionSite,
         dt: f32,
     ) -> bool {
-        let project = &self.plans[id];
-        if project.removed {
-            return true;
-        }
-        if self.changes.contains_key(&id) {
-            return false;
-        }
-        let definition = &catalog.projects[&project.key];
+        let project = match target {
+            Target::Building(id) => {
+                let project = &self.plans[id];
+                if project.removed {
+                    return true;
+                }
+                if self.changes.contains_key(&id) {
+                    return false;
+                }
+                Some(project)
+            }
+            Target::Vehicle(_) => None,
+        };
+        let service_path = |construction: &Self, from| match target {
+            Target::Building(_) => {
+                let project = project.expect("building service");
+                approach_points(project.position, project.size, from)
+                    .into_iter()
+                    .find_map(|cell| construction.resident_route(catalog, site, from, cell))
+            }
+            Target::Vehicle(index) => {
+                construction.resident_route(catalog, site, from, crate::arrival::car_door(index))
+            }
+        };
         if !self.upkeep.automatic && !matches!(job.kind, Kind::Soil) {
             if let Some(worker) = job.worker.take() {
                 self.residents[worker].path.clear();
             }
             return false;
         }
-        let parts = parts(job.kind, definition, catalog);
+        let parts = parts(
+            job.kind,
+            project.map(|project| &catalog.projects[&project.key]),
+            catalog,
+        );
         let cost = if matches!(job.kind, Kind::Soil) {
             0
         } else {
@@ -316,9 +442,7 @@ impl Construction {
         };
         let target_path = |index: usize, from: Vec2| {
             if job.parts_paid {
-                approach_points(project.position, project.size, from)
-                    .into_iter()
-                    .find_map(|cell| self.resident_route(catalog, site, from, cell))
+                service_path(self, from)
             } else {
                 self.resident_route(catalog, site, from, SUPPLY_SPOTS[index])
             }
@@ -336,8 +460,7 @@ impl Construction {
             if (!job.parts_paid && !affordable(stock, self.upkeep.used))
                 || self
                     .upkeep
-                    .jobs
-                    .values()
+                    .services()
                     .any(|service| service.worker.is_some())
             {
                 return false;
@@ -368,10 +491,7 @@ impl Construction {
                 return false;
             }
             let from = self.residents[worker].position;
-            let Some(path) = approach_points(project.position, project.size, from)
-                .into_iter()
-                .find_map(|cell| self.resident_route(catalog, site, from, cell))
-            else {
+            let Some(path) = service_path(self, from) else {
                 job.worker = None;
                 return false;
             };
@@ -387,6 +507,13 @@ impl Construction {
         if job.work < job.kind.duration() {
             return false;
         }
+        let id = match target {
+            Target::Building(index) => index,
+            Target::Vehicle(index) => {
+                self.upkeep.vehicles[index].condition = 100.0;
+                return true;
+            }
+        };
         let asset = self.upkeep.assets.entry(id).or_default();
         match job.kind {
             Kind::Service => asset.condition = 100.0,
@@ -405,12 +532,13 @@ impl Construction {
     }
 }
 
-fn parts(kind: Kind, definition: &Project, catalog: &Catalog) -> BTreeMap<String, u32> {
+fn parts(kind: Kind, definition: Option<&Project>, catalog: &Catalog) -> BTreeMap<String, u32> {
     let pair = |a: &str, b: &str| BTreeMap::from([(a.into(), 1), (b.into(), 1)]);
     match kind {
         Kind::Service => pair("tools", "hardware"),
         Kind::Battery => pair("batteries", "electrical"),
         Kind::Soil => {
+            let definition = definition.expect("soil amendment target");
             let area = catalog
                 .production
                 .values()
@@ -423,31 +551,34 @@ fn parts(kind: Kind, definition: &Project, catalog: &Catalog) -> BTreeMap<String
                 .unwrap_or(16.0);
             BTreeMap::from([("compost".into(), (area * 0.25).ceil() as u32)])
         }
-        Kind::Replacement => match definition.kind.as_str() {
-            "solar_farm" => BTreeMap::from([
-                (
-                    "panels".into(),
-                    definition.materials.get("panels").copied().unwrap_or(1),
-                ),
-                ("electrical".into(), 1),
-            ]),
-            "well" | "water-pump" => pair("pumps", "plumbing"),
-            _ => ["tiles", "roofing", "wood", "hardware"]
-                .into_iter()
-                .filter_map(|id| {
-                    definition.materials.get(id).map(|&units| {
-                        (
-                            id.into(),
-                            if id == "wood" {
-                                units.div_ceil(4)
-                            } else {
-                                units
-                            },
-                        )
+        Kind::Replacement => {
+            let definition = definition.expect("replacement target");
+            match definition.kind.as_str() {
+                "solar_farm" => BTreeMap::from([
+                    (
+                        "panels".into(),
+                        definition.materials.get("panels").copied().unwrap_or(1),
+                    ),
+                    ("electrical".into(), 1),
+                ]),
+                "well" | "water-pump" => pair("pumps", "plumbing"),
+                _ => ["tiles", "roofing", "wood", "hardware"]
+                    .into_iter()
+                    .filter_map(|id| {
+                        definition.materials.get(id).map(|&units| {
+                            (
+                                id.into(),
+                                if id == "wood" {
+                                    units.div_ceil(4)
+                                } else {
+                                    units
+                                },
+                            )
+                        })
                     })
-                })
-                .collect(),
-        },
+                    .collect(),
+            }
+        }
     }
 }
 
@@ -455,6 +586,67 @@ fn parts(kind: Kind, definition: &Project, catalog: &Catalog) -> BTreeMap<String
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn a_returning_vehicle_records_mileage_and_recovers_with_service() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction {
+            selection: Some("kitchen".into()),
+            ..default()
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village.plan(&catalog, &mut stock, site, IVec2::new(44, 36), clock);
+        stock.sandbox = false;
+        stock.receive(&parts(Kind::Service, None, &catalog));
+        village.upkeep.record_distance(1, 5_000);
+        village.plans[0].pickups = 1;
+        village.trip = Some(TownTrip {
+            project: 0,
+            farm_bed: None,
+            market_order: false,
+            driver: 4,
+            vehicle: 1,
+            elapsed: 54.95,
+            duration: 55.0,
+            boarded: true,
+        });
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.trip.is_none());
+        assert_eq!(village.upkeep.vehicles[1].kilometers, 5_012);
+        assert!(village.upkeep.vehicles[1].condition < 70.0);
+        assert_eq!(village.upkeep.vehicles[0].kilometers, 0);
+
+        village.upkeep.budget = 20_000;
+        village.age_assets(&catalog, 0.1, 0.1);
+        for _ in 0..6_000 {
+            village.tick_upkeep(&catalog, &mut stock, site, 0.1);
+            if village.upkeep.vehicles[1].service.is_none() {
+                break;
+            }
+        }
+        assert_eq!(village.upkeep.vehicles[1].condition, 100.0);
+        assert_eq!(village.upkeep.vehicles[1].kilometers, 5_012);
+        village.upkeep.dispatch_vehicle(0);
+        assert_eq!(village.upkeep.trip_vehicles().collect::<Vec<_>>(), [1, 0]);
+        let save = serde_json::to_string(&village).unwrap();
+        let restored: Construction = serde_json::from_str(&save).unwrap();
+        assert_eq!(restored.upkeep.trip_vehicles().next(), Some(1));
+        assert_eq!(restored.upkeep.vehicles[1].kilometers, 5_012);
+    }
 
     #[test]
     fn scheduled_maintenance_uses_parts_and_restores_building_condition() {
@@ -487,7 +679,7 @@ mod tests {
         stock.sandbox = false;
         stock.receive(&parts(
             Kind::Service,
-            &catalog.projects["kitchen"],
+            Some(&catalog.projects["kitchen"]),
             &catalog,
         ));
         let tools = stock.available("tools");

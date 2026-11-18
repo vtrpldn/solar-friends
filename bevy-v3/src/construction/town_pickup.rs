@@ -30,7 +30,12 @@ impl Construction {
                     trip.boarded = true;
                 }
             } else {
+                let previous = trip.elapsed;
                 trip.elapsed = (trip.elapsed + f64::from(dt)).min(trip.duration);
+                if previous < trip.duration && trip.elapsed == trip.duration && !stock.sandbox {
+                    self.upkeep
+                        .record_distance(trip.vehicle, clock.round_trip_km);
+                }
                 if trip.market_order && trip.elapsed >= trip.duration * 0.5 {
                     self.trade.settle(stock);
                 }
@@ -82,45 +87,50 @@ impl Construction {
         let Some((project, farm_bed)) = next.or_else(|| market_order.then_some((0, None))) else {
             return;
         };
-        let door = IVec2::new(30, -15);
+        let vehicles: Vec<_> = self.upkeep.trip_vehicles().collect();
         let ConstructionSite {
             terrain,
             land,
             camp,
         } = site;
-        for index in (0..self.residents.len()).rev() {
-            let worker = &self.residents[index];
-            if worker.assignment.is_some()
-                || self.gathering.workers_at_site(index)
-                || self.production.has_worker(index)
-                || self.farming.has_worker(index)
-                || self.working_change(index)
-                || self.working_water(index)
-                || self.working_upkeep(index)
-                || self.residents[index].health.task.is_some()
-                || self.residents[index].town_work.active()
-            {
-                continue;
+        for vehicle in vehicles {
+            let door = crate::arrival::car_door(vehicle);
+            for index in (0..self.residents.len()).rev() {
+                let worker = &self.residents[index];
+                if worker.assignment.is_some()
+                    || self.gathering.workers_at_site(index)
+                    || self.production.has_worker(index)
+                    || self.farming.has_worker(index)
+                    || self.working_change(index)
+                    || self.working_water(index)
+                    || self.working_upkeep(index)
+                    || self.residents[index].health.task.is_some()
+                    || self.residents[index].town_work.active()
+                {
+                    continue;
+                }
+                let Some(path) = route(
+                    worker.position,
+                    door,
+                    |cell| self.blocked(catalog, terrain, land, camp, cell),
+                    access_road,
+                ) else {
+                    continue;
+                };
+                self.residents[index].path = path;
+                self.trip = Some(TownTrip {
+                    project,
+                    farm_bed,
+                    market_order,
+                    driver: index,
+                    vehicle,
+                    elapsed: 0.0,
+                    duration: trip_seconds(clock.round_trip_km),
+                    boarded: false,
+                });
+                self.upkeep.dispatch_vehicle(vehicle);
+                return;
             }
-            let Some(path) = route(
-                worker.position,
-                door,
-                |cell| self.blocked(catalog, terrain, land, camp, cell),
-                access_road,
-            ) else {
-                continue;
-            };
-            self.residents[index].path = path;
-            self.trip = Some(TownTrip {
-                project,
-                farm_bed,
-                market_order,
-                driver: index,
-                elapsed: 0.0,
-                duration: trip_seconds(clock.round_trip_km),
-                boarded: false,
-            });
-            return;
         }
     }
 }

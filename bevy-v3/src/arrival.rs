@@ -54,9 +54,13 @@ pub fn vehicle_pose(elapsed: f32, index: usize) -> Pose {
     }
 }
 
-pub fn town_vehicle_pose(elapsed: f64, duration: f64) -> Pose {
+pub fn car_door(index: usize) -> IVec2 {
+    IVec2::new(if index == 0 { 30 } else { 35 }, 32 + (PARK_Z / 2.0) as i32)
+}
+
+pub fn town_vehicle_pose(elapsed: f64, duration: f64, vehicle: usize) -> Pose {
     const DRIVE: f64 = 18.0;
-    let parked = vehicle_pose(ARRIVAL_DURATION, 0);
+    let parked = vehicle_pose(ARRIVAL_DURATION, vehicle);
     if elapsed >= DRIVE && elapsed < duration - DRIVE {
         return Pose {
             visible: false,
