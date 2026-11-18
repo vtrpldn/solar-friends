@@ -38,7 +38,9 @@ export function setOutsideWork(s, r, enabled) {
 
 export function outsideWorkText(r) {
   const job = OUTSIDE_JOBS[r.id];
-  return `${job.name}: ${job.hours} hours, R$${job.pay} gross per weekday shift; R$${COMMUTE_FARE} return bus fare. Meals, drinking water and toilet breaks are provided at work. ${r.outsideJobEnabled ? 'Scheduled on weekday mornings when rested and free.' : 'Weekday shifts are off.'}`;
+  const schedule = r.outsideJobEnabled ? 'Scheduled on weekday mornings when rested and free.' : 'Weekday shifts are off.';
+  const current = r.outsideWork ? ' The current shift finishes on return.' : '';
+  return `${job.name} · ${job.hours} hours · R$${job.pay} gross per weekday shift. The R$${COMMUTE_FARE} return fare can come out of wages. Meals, drinking water and toilet breaks are provided at work. ${schedule}${current}`;
 }
 
 function departureBlocker(s, r) {

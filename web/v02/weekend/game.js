@@ -16,7 +16,8 @@ import {returnPickup,pickupFare} from './physical-trade.js';
 import {foodPortions} from './food-storage.js';
 import {supplierError} from './supplier-stock.js';
 import {activeTrips} from "./trip-state.js";
-import {setOutsideWork,outsideWorkText} from "./outside-work.js";
+import {OUTSIDE_JOBS, setOutsideWork} from "./outside-work.js";
+import {dayShiftControls} from './day-shift-ui.js';
 import {constructionSpecText} from './construction-specs.js';
 import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
@@ -1908,7 +1909,11 @@ function renderUI() {
                 "Settling in";
     if(r.job && r.cargo && r.haulLoads) status.textContent = `Carrying ${r.haulLoads} load${r.haulLoads===1?'':'s'} to ${r.haulStage==='storage'?'nearby storage':PROJECTS[s.projects.find(p=>p.id===r.job)?.key]?.name || 'the building site'}`;
     if(r.action==='service')status.textContent='Servicing village equipment';
-    if(r.outsideWork)status.textContent=r.outsideWork.phase==='away'?'Working in town':'Commuting to/from work';
+    if (r.outsideWork) status.textContent = {
+      outbound: 'Leaving for work in town',
+      away: 'Working in town',
+      inbound: 'Returning from work',
+    }[r.outsideWork.phase];
     const jobProject = residentProject(s, r);
     if (jobProject) status.textContent += ` · ${projectLabel(jobProject, PROJECTS)}`;
     if(r.needBlocked && !r.needTask) status.textContent += ` · ${r.needBlocked}`;
@@ -1941,6 +1946,10 @@ function renderUI() {
       const locate=document.createElement('button');
       locate.textContent='Find in village';
       locate.setAttribute('aria-label',`Find ${r.name} in village`);
+      if (r.outsideWork?.phase === 'away') {
+        locate.disabled = true;
+        disabledReason(locate, `${r.name} is working in town.`);
+      }
       locate.onclick=()=>{
         setPanel(null);
         focus(r);
@@ -1962,6 +1971,23 @@ function renderUI() {
       const paragraph=(text,kind='p')=>{const el=document.createElement(kind);el.textContent=text;detail.append(el);};
       if(residentTab==='Overview'){
         const activity=document.createElement('div');activity.className='resident-activity';activity.textContent=status.textContent;detail.append(activity);
+        if (s.mode !== 'sandbox') {
+          const refreshWork = () => { uiSignature = ''; persist(); renderUI(); };
+          const work = dayShiftControls(s, r, refreshWork);
+          const schedule = document.createElement('label');
+          const repeat = document.createElement('input');
+          repeat.type = 'checkbox';
+          repeat.checked = !!r.outsideJobEnabled;
+          repeat.onchange = () => {
+            setOutsideWork(s, r, repeat.checked);
+            refreshWork();
+            $('resident-detail').querySelector('.day-shift input')?.focus();
+          };
+          const job = OUTSIDE_JOBS[r.id];
+          schedule.append(repeat, `Repeat a ${job.hours}-hour shift on weekdays (R$${job.pay} gross)`);
+          work.append(schedule);
+          detail.append(work);
+        }
         paragraph('Home','h3');
         const homePicker=document.createElement('select');
         homePicker.setAttribute('aria-label',`Assign home for ${r.name}`);
@@ -1979,8 +2005,6 @@ function renderUI() {
         if(r.home!=null)paragraph(housemates.length?`Lives with ${housemates.map(other=>other.name).join(', ')}.`:'Lives here alone.');
         else if(!availableHomes(s).length)paragraph('Complete a house to assign a permanent home.');
         paragraph('Needs','h3');detail.append(needs);
-        paragraph('Outside work','h3');paragraph(outsideWorkText(r));
-        const jobToggle=document.createElement('button');jobToggle.textContent=r.outsideJobEnabled?'Outside work: on':'Outside work: off';jobToggle.setAttribute('aria-pressed',String(!!r.outsideJobEnabled));jobToggle.onclick=()=>{setOutsideWork(s,r,!r.outsideJobEnabled);uiSignature='';renderUI();};detail.append(jobToggle);
         paragraph('On my mind','h3');paragraph(currentThought(s,r,PROJECTS));
         const wish=aspirationStatus(s,r,PROJECTS);
         paragraph('A personal hope','h3');paragraph(`${wish.label} · ${wish.status}`);paragraph(wish.reason);
