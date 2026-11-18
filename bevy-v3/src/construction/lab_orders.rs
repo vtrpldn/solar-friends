@@ -34,6 +34,17 @@ pub(crate) enum LabOrder {
     },
 }
 
+#[derive(Clone, Copy, Default, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub(crate) enum LabStop {
+    #[default]
+    None,
+    Harvest,
+    CropFailed,
+    Hydration,
+    Water,
+}
+
 impl Construction {
     pub(crate) fn lab_order(
         &mut self,
@@ -108,5 +119,56 @@ impl Construction {
             LabOrder::ServiceWater { site } => self.queue_water(*site, WaterAction::Sanitation)?,
         }
         Ok(())
+    }
+}
+
+impl Construction {
+    pub(crate) fn potable_liters(&self) -> f64 {
+        self.utilities
+            .water_ids()
+            .map(|id| self.utilities.potable_at(id))
+            .sum()
+    }
+
+    pub(crate) fn minimum_hydration(&self) -> f64 {
+        self.residents
+            .iter()
+            .map(|worker| worker.health.levels[Need::Hydration as usize])
+            .fold(100.0, f64::min)
+    }
+
+    pub(crate) fn lab_stop_reason(&self, condition: LabStop, clock: f64) -> Option<&'static str> {
+        use crate::farming::{FarmAction, Stage};
+
+        match condition {
+            LabStop::None => None,
+            LabStop::Harvest | LabStop::CropFailed => {
+                let harvest = matches!(condition, LabStop::Harvest);
+                self.farming
+                    .plots
+                    .values()
+                    .flat_map(|plot| &plot.beds)
+                    .any(|bed| {
+                        let ready = bed.stage == Stage::Harvestable;
+                        let usable = ready && bed.requirements(FarmAction::Harvest, clock).is_ok();
+                        if harvest {
+                            usable
+                        } else {
+                            bed.stage == Stage::Failed || (ready && !usable)
+                        }
+                    })
+                    .then_some(if harvest {
+                        "A crop is ready to harvest."
+                    } else {
+                        "A crop has failed or expired."
+                    })
+            }
+            LabStop::Hydration => {
+                (self.minimum_hydration() < 20.0).then_some("A resident has urgent thirst.")
+            }
+            LabStop::Water => (self.utilities.camp_water().is_some()
+                && self.potable_liters() < 0.5)
+                .then_some("Less than 0.5 L of drinking water remains."),
+        }
     }
 }

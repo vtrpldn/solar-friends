@@ -3,13 +3,15 @@ use std::{io, path::Path};
 use serde::{Deserialize, Serialize};
 
 use super::*;
-use crate::construction::LabOrder;
+use crate::construction::{LabOrder, LabStop};
 
 #[derive(Deserialize)]
 struct Scenario {
     steps: u64,
     #[serde(default)]
     orders: Vec<ScheduledOrder>,
+    #[serde(default)]
+    stop: LabStop,
 }
 
 #[derive(Deserialize)]
@@ -25,6 +27,8 @@ struct Sample {
     cash_centavos: u64,
     timber: u32,
     meals: u32,
+    potable_liters: f64,
+    minimum_hydration: f64,
     residents: String,
 }
 
@@ -37,6 +41,8 @@ struct Outcome {
 #[derive(Serialize)]
 struct Report {
     step_seconds: f64,
+    end_step: u64,
+    stop_reason: Option<&'static str>,
     samples: Vec<Sample>,
     orders: Vec<Outcome>,
     village: Village,
@@ -96,7 +102,8 @@ fn run(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::R
     let stride = scenario.steps.div_ceil((SAMPLE_LIMIT - 1) as u64).max(1);
     let mut terrain = village.terrain(&setup);
     let mut terrain_key = village.terrain_key();
-    for index in 0..=scenario.steps {
+    let mut index = 0;
+    let (end_step, stop_reason) = loop {
         while orders.peek().is_some_and(|order| order.step == index) {
             let order = orders.next().expect("scheduled order");
             let ground = ConstructionSite {
@@ -118,40 +125,88 @@ fn run(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::R
                 terrain_key = village.terrain_key();
             }
         }
-        if index == scenario.steps || index.is_multiple_of(stride) {
+        let reason = village
+            .construction
+            .lab_stop_reason(scenario.stop, village.clock);
+        if reason.is_some() || index == scenario.steps || index.is_multiple_of(stride) {
             samples.push(Sample {
                 step: index,
                 seconds: village.clock,
                 cash_centavos: village.stock.balance(),
                 timber: village.stock.available("wood"),
                 meals: village.stock.available("meals"),
+                potable_liters: village.construction.potable_liters(),
+                minimum_hydration: village.construction.minimum_hydration(),
                 residents: village
                     .construction
                     .resident_status(catalog, &village.stock, 0),
             });
         }
-        if index < scenario.steps {
-            step(
-                &mut village,
-                catalog,
-                &setup,
-                ConstructionSite {
-                    terrain: &terrain,
-                    land: &land,
-                    camp,
-                },
-                STEP,
-            );
-            if village.terrain_key() != terrain_key {
-                terrain = village.terrain(&setup);
-                terrain_key = village.terrain_key();
-            }
+        if reason.is_some() || index == scenario.steps {
+            break (index, reason);
         }
-    }
+        step(
+            &mut village,
+            catalog,
+            &setup,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &land,
+                camp,
+            },
+            STEP,
+        );
+        if village.terrain_key() != terrain_key {
+            terrain = village.terrain(&setup);
+            terrain_key = village.terrain_key();
+        }
+        index += 1;
+    };
     Ok(Report {
         step_seconds: STEP,
+        end_step,
+        stop_reason,
         samples,
         orders: outcomes,
         village,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_water_stop_includes_the_final_sample_and_skips_future_orders() {
+        let catalog = Catalog::default();
+        let first = run(
+            Scenario {
+                steps: 1,
+                orders: Vec::new(),
+                stop: LabStop::None,
+            },
+            None,
+            &catalog,
+        )
+        .unwrap();
+        let mut village = first.village;
+        village.construction.utilities.take_water(Some(0), 0, 40.0);
+        let report = run(
+            Scenario {
+                steps: 100,
+                orders: vec![ScheduledOrder {
+                    step: 1,
+                    order: LabOrder::Grid { enabled: false },
+                }],
+                stop: LabStop::Water,
+            },
+            Some(village),
+            &catalog,
+        )
+        .unwrap();
+        assert_eq!(report.end_step, 0);
+        assert!(report.stop_reason.is_some());
+        assert_eq!(report.samples[0].potable_liters, 0.0);
+        assert!(report.orders.is_empty());
+    }
 }
