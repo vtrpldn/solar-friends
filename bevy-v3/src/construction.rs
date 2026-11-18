@@ -4,6 +4,7 @@ mod leisure;
 mod lifecycle;
 mod production_work;
 mod resident_work;
+mod roads;
 mod town_pickup;
 mod trade_work;
 mod work_shift;
@@ -96,6 +97,8 @@ struct TownTrip {
 pub struct Construction {
     #[serde(skip)]
     pub menu: bool,
+    #[serde(skip)]
+    road_planning: roads::RoadPlanning,
     #[serde(skip)]
     selection: Option<String>,
     #[serde(skip)]
@@ -194,6 +197,7 @@ impl Default for Construction {
     fn default() -> Self {
         Self {
             menu: false,
+            road_planning: roads::RoadPlanning::default(),
             selection: None,
             category: 0,
             page: 0,
@@ -386,6 +390,12 @@ impl Construction {
         if !self.menu {
             return "B Build · Space Pause · 1–4 Speed".into();
         }
+        if self.planning_roads() {
+            return format!(
+                "Village road · Click to start · Shift-click to extend\nZ Undo stroke · B or Esc Finish\n{}",
+                self.status
+            );
+        }
         if let Some(key) = &self.selection {
             let definition = &catalog.projects[key];
             let degrees = u32::from(self.rotation) * 90;
@@ -428,6 +438,10 @@ impl Construction {
             self.queue_move(catalog, stock, site, position, index);
             return;
         }
+        if self.planning_roads() {
+            self.plan_roads(catalog, stock, site, position, clock, false);
+            return;
+        }
         let Some(key) = &self.selection else { return };
         let ConstructionSite {
             terrain,
@@ -459,31 +473,11 @@ impl Construction {
             self.status = error.into();
             return;
         }
-        if !stock.sandbox {
-            let quote = match self.market.quote(
-                catalog,
-                &definition.materials,
-                stock,
-                clock.seconds,
-                clock.round_trip_km,
-            ) {
-                Ok(quote) => quote,
-                Err(error) => {
-                    self.status = error;
-                    return;
-                }
-            };
-            blueprint.pickups = quote.trips;
-            blueprint.fare = quote.fare;
-            if quote.trips > 0 {
-                blueprint.purchase = Some(lifecycle::Purchase {
-                    units: quote.units.clone(),
-                    price: quote.price,
-                    day: quote.day,
-                    trips: quote.trips,
-                });
-            }
-            self.market.reserve(stock, &definition.materials, &quote);
+        if let Err(error) =
+            Self::reserve_project(&mut self.market, stock, catalog, &mut blueprint, clock)
+        {
+            self.status = error;
+            return;
         }
         self.status = if stock.sandbox && !self.slow_sandbox && key != "road" {
             blueprint.delivered = blueprint.loads;
@@ -506,6 +500,38 @@ impl Construction {
         }
         self.plans.push(blueprint);
         self.selection = None;
+    }
+
+    fn reserve_project(
+        market: &mut Market,
+        stock: &mut Stock,
+        catalog: &Catalog,
+        blueprint: &mut Blueprint,
+        clock: TownClock,
+    ) -> Result<(), String> {
+        if stock.sandbox {
+            return Ok(());
+        }
+        let materials = &catalog.projects[&blueprint.key].materials;
+        let quote = market.quote(
+            catalog,
+            materials,
+            stock,
+            clock.seconds,
+            clock.round_trip_km,
+        )?;
+        blueprint.pickups = quote.trips;
+        blueprint.fare = quote.fare;
+        if quote.trips > 0 {
+            blueprint.purchase = Some(lifecycle::Purchase {
+                units: quote.units.clone(),
+                price: quote.price,
+                day: quote.day,
+                trips: quote.trips,
+            });
+        }
+        market.reserve(stock, materials, &quote);
+        Ok(())
     }
 
     fn uses_foundation(key: &str) -> bool {

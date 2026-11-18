@@ -194,7 +194,7 @@ fn camera_controls(
     let heading = view.heading + std::f32::consts::FRAC_PI_4;
     let orientation = Quat::from_rotation_y(heading);
     view.target += orientation * pan * (24.0 * dash * ortho.scale.sqrt() * delta);
-    if mouse.pressed(MouseButton::Left) {
+    if mouse.pressed(MouseButton::Left) && !village.planning_roads() {
         let distance_per_pixel = CAMERA_HEIGHT * ortho.scale / window.height().max(1.0);
         let drag = Vec3::new(-motion.delta.x, 0.0, -motion.delta.y);
         view.target += orientation * drag * distance_per_pixel;

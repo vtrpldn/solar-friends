@@ -31,7 +31,7 @@ pub struct Lot {
     pub chilled: bool,
 }
 
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Clone, Default, Deserialize, Serialize)]
 pub struct Pantry {
     pub lots: FoodLots,
     pub clock: f64,

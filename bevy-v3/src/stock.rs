@@ -8,7 +8,7 @@ use crate::{
     setup::{Mode, WorldSetup},
 };
 
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Clone, Default, Deserialize, Serialize)]
 pub struct Stock {
     pub cash: u32,
     #[serde(default)]

@@ -11,14 +11,14 @@ const RESERVE: u64 = 10_000;
 const CARGO_MASS: f64 = 350.0;
 const CARGO_VOLUME: f64 = 1.2;
 
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Clone, Default, Deserialize, Serialize)]
 pub struct Market {
     suppliers: BTreeMap<String, Allocation>,
     pub auto_buy_off: bool,
     committed_fares: u64,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 struct Allocation {
     day: u64,
     units: u32,

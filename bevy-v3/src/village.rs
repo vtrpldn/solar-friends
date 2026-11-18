@@ -154,8 +154,12 @@ impl Village {
         self.advance.open
     }
 
+    pub fn planning_roads(&self) -> bool {
+        self.construction.planning_roads()
+    }
+
     pub fn is_paused(&self) -> bool {
-        self.paused || self.advance.open || self.terrain_editor.open
+        self.paused || self.advance.open || self.terrain_editor.open || self.planning_roads()
     }
 
     pub fn motion(&self, index: usize) -> Motion {
@@ -280,7 +284,7 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
 #[derive(Resource, Default)]
 struct CampPointer {
     clicked: Option<GroundHit>,
-    hovered: Option<Vec3>,
+    hovered: Option<GroundHit>,
 }
 
 #[derive(Clone, Copy)]
@@ -318,7 +322,7 @@ fn read_camp_pointer(
         *input = None;
     }
     let clicked = mouse.just_released(MouseButton::Left) && input.take().is_some();
-    if !clicked && !village.terrain_editor.open {
+    if !clicked && !village.terrain_editor.open && !village.planning_roads() {
         return;
     }
     let (camera, transform) = *camera;
@@ -329,12 +333,13 @@ fn read_camp_pointer(
     let settings = MeshRayCastSettings::default().with_filter(&filter);
     if let Some((_, hit)) = raycast.cast_ray(ray, &settings).first() {
         let cell = hit.point.xz() * 0.5 + Vec2::splat(32.5);
-        pointer.hovered = Some(hit.point);
+        let hit = GroundHit {
+            cell: cell.floor().as_ivec2(),
+            world: hit.point,
+        };
+        pointer.hovered = Some(hit);
         if clicked {
-            pointer.clicked = Some(GroundHit {
-                cell: cell.floor().as_ivec2(),
-                world: hit.point,
-            });
+            pointer.clicked = Some(hit);
         }
     }
 }
@@ -420,6 +425,34 @@ fn village_input(
         }
     }
 
+    if village.planning_roads()
+        && let Some(camp) = village.camp
+    {
+        let terrain = village.terrain(&setup);
+        let town = &mut *village;
+        if keyboard.any_just_pressed([KeyCode::KeyB, KeyCode::Escape]) {
+            town.construction.finish_roads();
+        } else if keyboard.just_pressed(KeyCode::KeyZ) {
+            town.construction.undo_roads(&mut town.stock);
+        } else if let Some(hit) = pointer.clicked {
+            town.construction.plan_roads(
+                &catalog,
+                &mut town.stock,
+                ConstructionSite {
+                    terrain: &terrain,
+                    land: &land,
+                    camp,
+                },
+                hit.cell,
+                TownClock {
+                    seconds: town.clock,
+                    round_trip_km: setup.round_trip_km(),
+                },
+                keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]),
+            );
+        }
+        return;
+    }
     if keyboard.just_pressed(KeyCode::KeyF) {
         village.show_forecast = !village.show_forecast;
     }
@@ -1012,17 +1045,23 @@ fn draw_blueprints(
     village: Res<Village>,
     catalog: Res<Catalog>,
     pointer: Res<CampPointer>,
+    keyboard: Res<ButtonInput<KeyCode>>,
     mut gizmos: Gizmos,
 ) {
     if !setup.open && village.camp.is_some() {
         let terrain = village.terrain(&setup);
         village.construction.draw(&catalog, &terrain, &mut gizmos);
-        if village.terrain_editor.open
-            && let Some(point) = pointer.hovered
-        {
-            village
-                .terrain_editor
-                .draw_preview(&terrain, point, &mut gizmos);
+        if let Some(hit) = pointer.hovered {
+            if village.terrain_editor.open {
+                village
+                    .terrain_editor
+                    .draw_preview(&terrain, hit.world, &mut gizmos);
+            } else if village.planning_roads() {
+                let extend = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+                village
+                    .construction
+                    .draw_road_route(&terrain, hit.cell, extend, &mut gizmos);
+            }
         }
     }
 }
