@@ -1,6 +1,11 @@
 use crate::{
     catalog::ProductionRecipe,
-    production::{Batch, Phase},
+    production::{
+        Batch, Phase,
+        growth::{Conditions, Growth},
+    },
+    setup::WorldSetup,
+    weather::{DAY, growing_season, weather_at},
 };
 
 use super::*;
@@ -52,6 +57,17 @@ impl Construction {
             return;
         };
         let recipes = self.recipes(catalog, index);
+        if keyboard.just_pressed(KeyCode::KeyT)
+            && recipes.iter().any(|(_, recipe)| {
+                recipe
+                    .biology
+                    .as_ref()
+                    .is_some_and(|bio| bio.care.is_some())
+            })
+        {
+            let ground = self.production.growing_sites.entry(index).or_default();
+            ground.irrigation = ground.irrigation.cycle();
+        }
         if keyboard.just_pressed(KeyCode::KeyC) && !recipes.is_empty() {
             self.production.open = !self.production.open;
         }
@@ -104,14 +120,24 @@ impl Construction {
             return;
         }
         let food_input = if !stock.sandbox {
-            if let Some(material) = stock.missing(&recipe.input) {
+            let mut inputs = recipe.input.clone();
+            if id == "wood"
+                && self
+                    .production
+                    .growing_sites
+                    .get(&index)
+                    .is_some_and(|ground| ground.harvests > 0)
+            {
+                inputs.insert("tree_starts".into(), 4);
+            }
+            if let Some(material) = stock.missing(&inputs) {
                 self.production.notice = format!(
                     "Not enough {} in supplies.",
                     catalog.materials[material].name
                 );
                 return;
             }
-            Some(stock.reserve_available(&recipe.input))
+            Some(stock.reserve_available(&inputs))
         } else {
             None
         };
@@ -126,11 +152,13 @@ impl Construction {
             food_input,
             food_output: None,
             delivered_output: None,
+            growth: None,
+            watered: false,
         });
         self.production.notice.clear();
     }
 
-    pub fn selected_production(&self, catalog: &Catalog) -> Option<String> {
+    pub fn selected_production(&self, catalog: &Catalog, clock: f64) -> Option<String> {
         let index = self.production.selected?;
         let site = self.plans.get(index)?;
         let name = &catalog.projects[&site.key].name;
@@ -151,6 +179,27 @@ impl Construction {
                 }
                 Phase::Work => format!("{:.0}% worked", job.work / recipe.work * 100.0),
                 Phase::Return => "Carrying output to stores".into(),
+                Phase::Growing => format!(
+                    "{:.1} game days remaining",
+                    job.growth
+                        .as_ref()
+                        .map_or(0.0, |growth| growth.remaining / DAY)
+                ),
+                Phase::Harvest => {
+                    let expired = job
+                        .growth
+                        .as_ref()
+                        .zip(recipe.biology.as_ref())
+                        .is_some_and(|(growth, biology)| {
+                            growth.output(biology, clock, &recipe.output).is_empty()
+                        });
+                    if expired {
+                        "Crop lost · awaiting clearing"
+                    } else {
+                        "Ready for resident collection"
+                    }
+                    .into()
+                }
             };
             text.push_str(&format!(" · {} · {state}", recipe.name));
         }
@@ -161,6 +210,21 @@ impl Construction {
                 animals.feed,
                 animals.water,
                 animals.available()
+            ));
+        }
+        if let Some(ground) = self.production.growing_sites.get(&index)
+            && recipes.iter().any(|(_, recipe)| {
+                recipe
+                    .biology
+                    .as_ref()
+                    .is_some_and(|bio| bio.care.is_some())
+            })
+        {
+            text.push_str(&format!(
+                "\nSoil {:.0}% moisture · {:.0}% fertility · T Irrigation: {}",
+                ground.moisture * 100.0,
+                ground.fertility * 100.0,
+                ground.irrigation.label()
             ));
         }
         if self.production.open {
@@ -208,8 +272,92 @@ impl Construction {
         }
     }
 
+    pub fn tick_growth(
+        &mut self,
+        catalog: &Catalog,
+        setup: &WorldSetup,
+        stock: &mut Stock,
+        clock: f64,
+        elapsed: f64,
+    ) {
+        if stock.sandbox {
+            return;
+        }
+        let rain = weather_at(clock, setup.biome(), setup.seed()).rain;
+        let season = growing_season(clock, setup.biome());
+        for (&site, ground) in &mut self.production.growing_sites {
+            if !self
+                .production
+                .jobs
+                .iter()
+                .any(|job| job.site == site && job.phase == Phase::Growing)
+            {
+                ground.fertility = (ground.fertility + elapsed / (180.0 * DAY)).min(1.0);
+            }
+        }
+        for job in &mut self.production.jobs {
+            if job.phase == Phase::Return {
+                continue;
+            }
+            let Some(growth) = &mut job.growth else {
+                continue;
+            };
+            let Some(biology) = &catalog.production[&job.recipe].biology else {
+                continue;
+            };
+            let ground = self.production.growing_sites.entry(job.site).or_default();
+            growth.tick(
+                biology,
+                ground,
+                Conditions {
+                    clock,
+                    elapsed,
+                    rain,
+                    season,
+                    timber: job.recipe == "wood",
+                },
+                |liters| self.utilities.irrigate(job.site, liters),
+            );
+            if job.phase == Phase::Growing && growth.ripe_at.is_some() {
+                job.phase = Phase::Harvest;
+            }
+        }
+        let queued = self
+            .plans
+            .iter()
+            .enumerate()
+            .filter_map(|(index, plan)| {
+                let definition = &catalog.projects[&plan.key];
+                if plan.removed
+                    || plan.work < definition.work
+                    || self.changes.contains_key(&index)
+                    || !self.utilities.enabled(index)
+                    || self.production.jobs.iter().any(|job| job.site == index)
+                {
+                    return None;
+                }
+                let recipe = match definition.kind.as_str() {
+                    "orchard" => "fruit",
+                    "grove" => "bananas",
+                    "apiary" => "honey",
+                    _ => return None,
+                };
+                Some((index, recipe))
+            })
+            .collect::<Vec<_>>();
+        for (site, recipe) in queued {
+            self.queue_batch(catalog, stock, site, recipe);
+        }
+    }
+
     pub(super) fn valid_production(&self, catalog: &Catalog) -> bool {
-        self.production.jobs.len() <= self.plans.len()
+        self.production
+            .growing_sites
+            .iter()
+            .all(|(&index, ground)| {
+                ground.valid() && self.plans.get(index).is_some_and(|plan| !plan.removed)
+            })
+            && self.production.jobs.len() <= self.plans.len()
             && self.production.jobs.iter().all(|job| {
                 self.plans.get(job.site).is_some_and(|site| {
                     let Some(definition) = catalog.projects.get(&site.key) else {
@@ -219,6 +367,26 @@ impl Construction {
                         && catalog.production.get(&job.recipe).is_some_and(|recipe| {
                             definition.kind == recipe.kind
                                 && (0.0..=recipe.work).contains(&job.work)
+                                && match (&job.growth, &recipe.biology) {
+                                    (Some(growth), Some(bio)) => {
+                                        let limit = bio.days
+                                            + if job.recipe == "fruit" { 610.0 } else { 0.0 };
+                                        growth.valid(limit)
+                                            && match job.phase {
+                                                Phase::Growing => {
+                                                    job.worker.is_none() && growth.ripe_at.is_none()
+                                                }
+                                                Phase::Harvest | Phase::Work | Phase::Return => {
+                                                    growth.ripe_at.is_some()
+                                                }
+                                                _ => false,
+                                            }
+                                    }
+                                    (None, _) => {
+                                        !matches!(job.phase, Phase::Growing | Phase::Harvest)
+                                    }
+                                    (Some(_), None) => false,
+                                }
                         })
                 }) && job.worker.is_none_or(|index| index < self.residents.len())
                     && job.retry_at >= 0.0
@@ -236,11 +404,11 @@ impl Construction {
         self.expire_batch_food(catalog, stock, site, clock);
         for index in (0..self.production.jobs.len()).rev() {
             let job = &self.production.jobs[index];
-            if clock < job.retry_at {
+            if job.phase == Phase::Growing || clock < job.retry_at {
                 continue;
             }
             let Some(worker_index) = job.worker else {
-                self.assign_producer(index, catalog, site);
+                self.assign_producer(index, catalog, site, stock.sandbox);
                 self.production.jobs[index].retry_at = clock + 1.0;
                 continue;
             };
@@ -266,6 +434,8 @@ impl Construction {
                 )
             };
             match phase {
+                Phase::Growing => unreachable!("growth is handled before resident work"),
+                Phase::Harvest => self.production.jobs[index].phase = Phase::Work,
                 Phase::Pickup => {
                     let facility = &self.plans[job.site];
                     let Some(path) = perimeter(facility.position, facility.size, position)
@@ -280,8 +450,22 @@ impl Construction {
                 }
                 Phase::Approach => self.production.jobs[index].phase = Phase::Work,
                 Phase::Work => {
+                    let job = &mut self.production.jobs[index];
                     if needs_power(&job.recipe, recipe) && !self.utilities.powered(job.site) {
                         continue;
+                    }
+                    if !stock.sandbox
+                        && !job.watered
+                        && let Some(biology) = &recipe.biology
+                        && biology.on_site_water > 0.0
+                    {
+                        if !self.utilities.irrigate(job.site, biology.on_site_water) {
+                            job.worker = None;
+                            job.phase = Phase::Pickup;
+                            job.retry_at = clock + 12.0;
+                            continue;
+                        }
+                        job.watered = true;
                     }
                     let animal = catalog.animal_rations.get(&recipe.kind);
                     if job.recipe.starts_with("care-")
@@ -291,10 +475,21 @@ impl Construction {
                         if !stock.sandbox && !self.utilities.drink(job.site + 1, ration.water) {
                             continue;
                         }
-                        self.production.jobs[index].water_to_deliver = ration.water;
+                        job.water_to_deliver = ration.water;
                     }
-                    let job = &mut self.production.jobs[index];
                     job.work = (job.work + f64::from(dt)).min(recipe.work);
+                    if !stock.sandbox
+                        && job.growth.is_none()
+                        && let Some(biology) = &recipe.biology
+                        && job.work >= recipe.work * biology.planting_fraction
+                    {
+                        let ground = self.production.growing_sites.entry(job.site).or_default();
+                        job.growth = Some(Growth::start(&job.recipe, biology, ground));
+                        job.phase = Phase::Growing;
+                        job.worker = None;
+                        job.food_input = None;
+                        continue;
+                    }
                     if job.work < recipe.work {
                         continue;
                     }
@@ -340,6 +535,16 @@ impl Construction {
                         }
                     }
                     let job = &mut self.production.jobs[index];
+                    if let Some(growth) = &job.growth
+                        && let Some(biology) = &recipe.biology
+                    {
+                        job.delivered_output = Some(growth.output(biology, clock, &recipe.output));
+                        self.production
+                            .growing_sites
+                            .entry(job.site)
+                            .or_default()
+                            .harvests += 1;
+                    }
                     if job.food_output.is_none() {
                         job.food_output = Some(crate::food::fresh(
                             job.delivered_output.as_ref().unwrap_or(&recipe.output),
@@ -435,8 +640,28 @@ impl Construction {
         }
     }
 
-    fn assign_producer(&mut self, job: usize, catalog: &Catalog, site: ConstructionSite) {
-        let returning = self.production.jobs[job].phase == Phase::Return;
+    fn assign_producer(
+        &mut self,
+        job: usize,
+        catalog: &Catalog,
+        site: ConstructionSite,
+        sandbox: bool,
+    ) {
+        let batch = &self.production.jobs[job];
+        if !sandbox
+            && batch.phase != Phase::Return
+            && !batch.watered
+            && let Some(biology) = &catalog.production[&batch.recipe].biology
+            && biology.on_site_water > 0.0
+            && !self
+                .utilities
+                .water_site(batch.site + 1)
+                .is_some_and(|node| node.levels[0] + node.levels[1] >= biology.on_site_water)
+        {
+            return;
+        }
+        let phase = self.production.jobs[job].phase;
+        let returning = phase == Phase::Return;
         let project = &self.plans[self.production.jobs[job].site];
         let ConstructionSite {
             terrain,
@@ -462,6 +687,17 @@ impl Construction {
                 || self.residents[index].town_work.active()
                 || self.trip.as_ref().is_some_and(|trip| trip.driver == index)
             {
+                continue;
+            }
+            if phase == Phase::Harvest {
+                if let Some(path) = perimeter(project.position, project.size, resident.position)
+                    .into_iter()
+                    .find_map(|cell| path(resident.position, cell))
+                {
+                    self.residents[index].path = path;
+                    self.production.jobs[job].worker = Some(index);
+                    return;
+                }
                 continue;
             }
             let supply = SUPPLY_SPOTS[index];
@@ -507,7 +743,74 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
-    use crate::setup::WorldSetup;
+
+    #[test]
+    fn compost_cures_with_the_worker_released_and_is_later_delivered() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction {
+            selection: Some("compost".into()),
+            ..default()
+        };
+        village.plan(
+            &catalog,
+            &mut stock,
+            site,
+            IVec2::new(44, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
+        );
+        stock.sandbox = false;
+        let recipe = &catalog.production["compost"];
+        stock.receive(&recipe.input);
+        let before = stock.available("compost");
+        village.queue_batch(&catalog, &mut stock, 0, "compost");
+        for step in 0..3_000 {
+            village.tick_production(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
+            if village.production.jobs[0].phase == Phase::Growing {
+                break;
+            }
+        }
+        let curing = &village.production.jobs[0];
+        assert!(curing.phase == Phase::Growing);
+        assert!(curing.worker.is_none());
+        assert_eq!(stock.available("compost"), before);
+        let save = serde_json::to_string(&village).unwrap();
+        let mut village: Construction = serde_json::from_str(&save).unwrap();
+        assert!(village.valid_save(&catalog, &stock));
+        village.tick_growth(&catalog, &setup, &mut stock, 61.0 * DAY, 60.0 * DAY);
+        assert!(village.production.jobs[0].phase == Phase::Harvest);
+        assert_eq!(stock.available("compost"), before);
+        for step in 0..3_000 {
+            village.tick_production(
+                &catalog,
+                &mut stock,
+                site,
+                61.0 * DAY + f64::from(step) * 0.1,
+                0.1,
+            );
+            if village.production.jobs.is_empty() {
+                break;
+            }
+        }
+        assert!(village.production.jobs.is_empty());
+        assert_eq!(
+            stock.available("compost"),
+            before + recipe.output["compost"]
+        );
+    }
 
     #[test]
     fn residents_install_solar_from_stock_and_the_finished_home_charges() {

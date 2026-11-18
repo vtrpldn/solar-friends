@@ -6,7 +6,7 @@ import { buyerFor } from "../web/v02/weekend/local-market.js";
 import { materialMeasure } from "../web/v02/weekend/material-measures.js";
 import { PROFILES } from "../web/v02/weekend/resident-personality.js";
 import { ANIMAL_RATIONS } from "../web/v02/weekend/animal-care.js";
-import { BIOLOGY } from "../web/v02/weekend/biological-production.js";
+import { BIOLOGY, CROP_CARE } from "../web/v02/weekend/biological-production.js";
 import { supplierLimit } from "../web/v02/weekend/supplier-stock.js";
 
 const startingVillage = createWeekend();
@@ -48,10 +48,15 @@ const gathering = Object.fromEntries(Object.entries(PROCESSES)
   .filter(([, recipe]) => recipe.deposit || recipe.gathering || recipe.kind === "wild-tree"));
 
 const production = Object.fromEntries(Object.entries(PROCESSES)
-  .filter(([id, recipe]) => (!BIOLOGY[id] || ["eggs", "milk"].includes(id)) && !recipe.deposit && !recipe.gathering &&
+  .filter(([id, recipe]) => (!BIOLOGY[id] || !["baby_greens", "vegetables", "greenhouse"].includes(id)) && !recipe.deposit && !recipe.gathering &&
     recipe.kind !== "wild-tree" && recipe.kind !== "cultivation" && (Object.keys(recipe.output).length || ["cold_storage", "solar_upgrade"].includes(id)))
   .map(([id, recipe]) => [id, {name: recipe.name, kind: recipe.kind, input: recipe.input,
-    output: recipe.output, work: recipe.work, handcraft: Boolean(recipe.craft), preserved: recipe.preservedDays || {}}]));
+    output: recipe.output, work: recipe.work, handcraft: Boolean(recipe.craft), preserved: recipe.preservedDays || {},
+    ...(!BIOLOGY[id] || ["eggs", "milk"].includes(id) ? {} : {biology: {
+      days: BIOLOGY[id].days, window: Number.isFinite(BIOLOGY[id].window) ? BIOLOGY[id].window : null,
+      seasonal: BIOLOGY[id].seasonal, on_site_water: recipe.water || 0, planting_fraction: BIOLOGY[id].plantingFraction ?? 0.5,
+      care: CROP_CARE[id] ? [CROP_CARE[id].area, CROP_CARE[id].liters] : null,
+    }})}]));
 
 for (const [kind, ration] of Object.entries(ANIMAL_RATIONS)) {
   production[ration.product].name = `Collect ${ration.product}`;

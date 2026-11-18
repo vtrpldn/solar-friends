@@ -952,6 +952,8 @@ fn step(
         .tick_animals(catalog, &mut town.stock, town.clock, dt);
     town.construction.tick_crops(catalog, setup, town.clock, dt);
     town.construction
+        .tick_growth(catalog, setup, &mut town.stock, town.clock, dt);
+    town.construction
         .tick_health(catalog, setup, &mut town.stock, site, town.clock, dt as f32);
     let clock = TownClock {
         seconds: town.clock,
@@ -1126,7 +1128,10 @@ fn show_hud(
         }
         None => {}
     }
-    if let Some(production) = village.construction.selected_production(&catalog) {
+    if let Some(production) = village
+        .construction
+        .selected_production(&catalog, village.clock)
+    {
         label.push('\n');
         label.push_str(&production);
     }

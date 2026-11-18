@@ -76,6 +76,17 @@ pub struct ProductionRecipe {
     pub handcraft: bool,
     #[serde(default)]
     pub preserved: BTreeMap<String, f64>,
+    pub biology: Option<Biology>,
+}
+
+#[derive(Deserialize)]
+pub struct Biology {
+    pub days: f64,
+    pub window: Option<f64>,
+    pub seasonal: bool,
+    pub planting_fraction: f64,
+    pub on_site_water: f64,
+    pub care: Option<[f64; 2]>,
 }
 
 #[derive(Deserialize)]

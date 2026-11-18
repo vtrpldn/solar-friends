@@ -2622,6 +2622,117 @@
       "handcraft": false,
       "preserved": {}
     },
+    "compost": {
+      "name": "Turn compost",
+      "kind": "compost",
+      "input": {
+        "scraps": 4
+      },
+      "output": {
+        "compost": 2
+      },
+      "work": 40,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 60,
+        "window": null,
+        "seasonal": false,
+        "on_site_water": 0,
+        "planting_fraction": 0.5,
+        "care": null
+      }
+    },
+    "wood": {
+      "name": "Grow and harvest timber",
+      "kind": "supply-0",
+      "input": {},
+      "output": {
+        "logs": 48
+      },
+      "work": 720,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 2190,
+        "window": null,
+        "seasonal": true,
+        "on_site_water": 0,
+        "planting_fraction": 0.1,
+        "care": [
+          36,
+          36
+        ]
+      }
+    },
+    "bamboo": {
+      "name": "Cut mature bamboo",
+      "kind": "supply-1",
+      "input": {},
+      "output": {
+        "bamboo": 8
+      },
+      "work": 40,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 365,
+        "window": null,
+        "seasonal": true,
+        "on_site_water": 0,
+        "planting_fraction": 0.5,
+        "care": [
+          16,
+          24
+        ]
+      }
+    },
+    "fruit": {
+      "name": "Harvest orchard fruit",
+      "kind": "orchard",
+      "input": {},
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "work": 35,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 120,
+        "window": 14,
+        "seasonal": true,
+        "on_site_water": 4,
+        "planting_fraction": 0.5,
+        "care": [
+          64,
+          32
+        ]
+      }
+    },
+    "bananas": {
+      "name": "Harvest bananas",
+      "kind": "grove",
+      "input": {},
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "work": 35,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 270,
+        "window": 14,
+        "seasonal": true,
+        "on_site_water": 4,
+        "planting_fraction": 0.5,
+        "care": [
+          32,
+          48
+        ]
+      }
+    },
     "eggs": {
       "name": "Collect eggs",
       "kind": "coop",
@@ -2643,6 +2754,25 @@
       "work": 35,
       "handcraft": false,
       "preserved": {}
+    },
+    "honey": {
+      "name": "Tend hives and collect honey",
+      "kind": "apiary",
+      "input": {},
+      "output": {
+        "honey": 3
+      },
+      "work": 35,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 90,
+        "window": 30,
+        "seasonal": true,
+        "on_site_water": 0,
+        "planting_fraction": 0.5,
+        "care": null
+      }
     },
     "craft_garden-tools": {
       "name": "Craft garden tools",

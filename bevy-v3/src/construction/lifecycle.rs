@@ -316,6 +316,7 @@ impl Construction {
             self.farming.open = false;
         }
         self.farming.plots.remove(&index);
+        self.production.growing_sites.remove(&index);
         self.livestock.animals.remove(&index);
         self.utilities.remove_facility(index);
         self.changes.remove(&index);

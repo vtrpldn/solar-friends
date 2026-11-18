@@ -1,3 +1,5 @@
+pub mod growth;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Deserialize, Serialize)]
@@ -9,6 +11,8 @@ pub struct Production {
     pub selected: Option<usize>,
     #[serde(skip)]
     pub notice: String,
+    #[serde(default)]
+    pub growing_sites: std::collections::BTreeMap<usize, growth::Ground>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -27,6 +31,10 @@ pub struct Batch {
     pub food_output: Option<crate::food::FoodLots>,
     #[serde(default)]
     pub delivered_output: Option<std::collections::BTreeMap<String, u32>>,
+    #[serde(default)]
+    pub growth: Option<growth::Growth>,
+    #[serde(default)]
+    pub watered: bool,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
@@ -35,6 +43,8 @@ pub enum Phase {
     Approach,
     Work,
     Return,
+    Growing,
+    Harvest,
 }
 
 impl Production {

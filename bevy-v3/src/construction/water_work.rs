@@ -277,6 +277,33 @@ impl Construction {
                                 && matches!(bed.stage, Stage::Growing | Stage::Harvestable)
                         })
                 });
+            let crop_or_grove = irrigate
+                || id.checked_sub(1).is_some_and(|site_id| {
+                    site.capacity[1] > 0.0
+                        && site.levels[1] < (site.capacity[1] * 0.5).min(12.0)
+                        && self
+                            .production
+                            .growing_sites
+                            .get(&site_id)
+                            .is_some_and(|soil| soil.irrigation.target() > 0.0)
+                        && self.production.jobs.iter().any(|job| {
+                            job.site == site_id
+                                && job.phase == crate::production::Phase::Growing
+                                && matches!(
+                                    job.recipe.as_str(),
+                                    "fruit" | "bananas" | "wood" | "bamboo"
+                                )
+                        })
+                });
+            let batch_water = id.checked_sub(1).is_some_and(|site_id| {
+                site.capacity[1] > 0.0
+                    && site.levels[0] + site.levels[1] < 4.0
+                    && self.production.jobs.iter().any(|job| {
+                        job.site == site_id
+                            && !job.watered
+                            && matches!(job.recipe.as_str(), "fruit" | "bananas")
+                    })
+            });
             let action = if site.maintain_fresh && below_reserve {
                 if site.levels[1] >= site.space(0).min(12.0)
                     || (site.levels[0] < 10.0 && site.levels[1] >= 1.0)
@@ -307,7 +334,7 @@ impl Construction {
                     .any(|i| site.capacity[i] > 0.0 && site.levels[i] >= site.capacity[i] * 0.5)
             {
                 Some(WaterAction::Sanitation)
-            } else if irrigate {
+            } else if crop_or_grove || batch_water {
                 Some(WaterAction::Carry {
                     source: None,
                     channel: 1,
