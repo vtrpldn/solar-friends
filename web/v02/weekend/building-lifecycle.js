@@ -31,12 +31,16 @@ export function removalStep(s,r,dt,api){
  const p=s.projects.find(p=>p.removal&&!s.people.some(a=>a!==r&&a.removalJob===p.id&&!a.needTask&&!a.tentPhase&&a.energy>=25));if(!p)return false;
  const job=p.removal;
  if(s.people.some(a=>a.restSite===p.id&&a.tentPhase)){job.status='Waiting for residents to leave';return false;}
+ if(job.work>=job.required && job.mode!=="move" && job.status==="Make storage space for recovered materials before removal"){
+  const recovered=removalYield(p,api.defs,api.recipes,job.mode).recovered;
+  if(api.stored(s)+Object.values(recovered).reduce((a,b)=>a+b,0)>api.capacity({...s,projects:s.projects.filter(a=>a!==p)})){if(r.removalJob===p.id)delete r.removalJob;return false;}
+ }
  const spot=api.workSpot(s,r,p);if(!spot){job.status='Needs an accessible work position';return false;}
  for(const other of s.people)if(other!==r&&other.removalJob===p.id)delete other.removalJob;
  r.removalJob=p.id;r.job=null;r.action='build';
  if(!api.go(s,r,spot))return true;
  job.status=job.mode==='move'?'Preparing and relocating the structure':job.mode==='salvage'?'Carefully recovering materials':'Dismantling';
- job.work=Math.min(job.required,job.work+dt);r.work+=dt;r.energy=Math.max(0,r.energy-dt*.12);
+ const labor=Math.min(dt,job.required-job.work);job.work+=labor;r.work+=labor;r.energy=Math.max(0,r.energy-labor*.12);
  if(job.work<job.required)return true;
  if(job.mode==='move'){
   const t=job.target,error=api.placement(s,p.key,t.x,t.z,p.id,t.rotation);if(error){job.status=error;return true;}

@@ -661,7 +661,7 @@ export function maintainWater(s) {
         queueWater(s,source?.id??-1,n.id,'irrigation');
       }
     }
-    if(n.maintainSanitation && n.water[2]+n.water[3]>=Math.max(4,(n.capacity[2]+n.capacity[3])*.5))queueSanitation(s,n.id);
+    if(n.maintainSanitation && [2,3].some(i=>n.capacity[i]>0 && n.water[i]>=n.capacity[i]*.5))queueSanitation(s,n.id);
   }
 }
 export function utilitySpot(s, node, r) {
@@ -965,7 +965,8 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     return true;
   }
   const output = Object.values(recipe.output).reduce((a, b) => a + b, 0);
-  if (storedMaterials(s) + output > storageCapacity(s)) {
+  const expectedOutput = s.mode!=="sandbox" && ["eggs","milk"].includes(op.recipe) ? Math.min(output,animalAvailable(p)) : output;
+  if (storedMaterials(s) + expectedOutput > storageCapacity(s)) {
     op.status = "Storage full";
     r.action = "blocked";
     return true;
@@ -1562,6 +1563,7 @@ export function cancelProject(s, id) {
   }
   s.projects = s.projects.filter(project => project.id !== id);
   for (const r of s.people) {
+    if(r.removalJob===id){delete r.removalJob;r.action="idle";}
     r.walk = []; r.target = null;
     if (r.job === id) {
       r.job = null; r.workSpot = null; r.supplyGoal = null;
@@ -2750,9 +2752,10 @@ export function restore(text) {
       !Array.isArray(s.people) ||
       s.people.length !== 5 ||
       !Array.isArray(s.projects) ||
-      s.projects.length > 512
+      s.projects.length > 128 * 128
     )
       return null;
+    for(const r of s.people)if(r?.removalJob!==undefined&&!s.projects.some(p=>p?.id===r.removalJob))delete r.removalJob;
     if(!validWeather(s)||!validHydrology(s)||!validAnimalCare(s,PROJECTS))return null;
     ensureHydrology(s);
     if(s.weather===undefined)weatherStep(s);

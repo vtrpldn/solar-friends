@@ -1,6 +1,6 @@
 import {DAY} from './weather.js';
 import {BIOLOGY, CROP_CARE, growthRate} from './biological-production.js';
-import {CROPS} from './cultivation.js';
+import {CROPS, harvestExpired} from './cultivation.js';
 import {ANIMAL_RATIONS, animalAvailable} from './animal-care.js';
 
 // Read-only projections: never advance the village or initialize missing state.
@@ -22,7 +22,7 @@ export function upcomingMilestones(s, days, {projects = {}} = {}) {
           (1 + Math.max(0, b.density - 1)) * (p.key === 'greenhouse' ? 1 : growthRate(s, 'vegetables'));
         if (rate > 0) add(s.time + (1 - b.growth) * crop.days * DAY / rate, `${label}: ready to harvest`, 'At current soil and seasonal conditions; resident harvesting still required.', true);
       }
-      if (b.stage === 'harvestable') add(s.time, `${label}: ready to harvest`, 'Ready now; queue harvesting before advancing time.');
+      if (b.stage === 'harvestable' && !harvestExpired(b,s.time)) add(s.time, `${label}: ready to harvest`, 'Ready now; queue harvesting before advancing time.');
     }
     for (const op of s.operations || []) {
       const biology = BIOLOGY[op.recipe];

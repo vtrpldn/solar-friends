@@ -31,7 +31,7 @@ export function kitchenPlan(s,p,recipes,api){
    if(Object.entries(r.input).some(([key,n])=>{let left=n;for(const lot of storage.lots[key]||[]){const used=Math.min(left,lot.n);if(used>0&&lot.expires<=s.time+r.work)return true;left-=used;}return false;})){
     reason='Ingredients expire too soon to finish this batch.';continue;
    }
-   const pending=(s.operations||[]).filter(o=>!o.done&&!o.water).reduce((n,o)=>n+Object.values(o.haulRemaining||o.returnItems||o.harvestOutput||recipes[o.recipe]?.output||{}).reduce((a,b)=>a+b,0),0);
+   const pending=(s.operations||[]).filter(o=>!o.done&&!o.water).reduce((n,o)=>n+Object.values(o.haulRemaining||o.returnItems||o.harvestOutput||(o.farm?{}:recipes[o.recipe]?.output)||{}).reduce((a,b)=>a+b,0),0);
    if(api.stored(s)+pending+Object.values(r.output).reduce((a,b)=>a+b,0)>api.capacity(s)){reason='Make storage space for the finished batch.';continue;}
    return {recipe:id,reason:`Next: ${r.name}`};
   }
