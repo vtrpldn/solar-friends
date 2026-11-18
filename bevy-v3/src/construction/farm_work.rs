@@ -1,4 +1,4 @@
-use super::{resident_work::approach_points, *};
+use super::*;
 use crate::{
     farming::{CropClimate, FarmAction, FarmJob, FarmPhase, Plot},
     setup::WorldSetup,
@@ -381,14 +381,10 @@ impl Construction {
             }
             let position = worker.position;
             let job = &self.farming.jobs[job_index];
-            let parcel = &self.plans[job.site];
             match phase {
                 FarmPhase::Pickup => {
-                    let Some(path) = approach_points(parcel.position, parcel.size, position)
-                        .into_iter()
-                        .find_map(|cell| self.resident_route(catalog, site, position, cell))
-                    else {
-                        self.farming.jobs[job_index].retry = clock + 5.0;
+                    let Some(path) = self.path_to_bed(catalog, site, job, position) else {
+                        self.release_farm_worker(job_index, clock);
                         continue;
                     };
                     self.residents[index].path = path;
@@ -396,13 +392,27 @@ impl Construction {
                 }
                 FarmPhase::Walk => self.farming.jobs[job_index].phase = FarmPhase::Work,
                 FarmPhase::Work => {
+                    let Some(aisle) = self
+                        .bed_aisles(job)
+                        .into_iter()
+                        .find(|&access| position.distance(access.work) <= 0.01)
+                    else {
+                        if let Some(path) = self.path_to_bed(catalog, site, job, position) {
+                            self.residents[index].path = path;
+                            self.farming.jobs[job_index].phase = FarmPhase::Walk;
+                        } else {
+                            self.release_farm_worker(job_index, clock);
+                        }
+                        continue;
+                    };
                     let job = &mut self.farming.jobs[job_index];
                     job.work = (job.work + f64::from(dt)).min(job.required);
                     if job.work < job.required {
                         continue;
                     }
-                    let Some(path) =
-                        self.resident_route(catalog, site, position, SUPPLY_SPOTS[index])
+                    let job = &self.farming.jobs[job_index];
+                    let Some(mut path) =
+                        self.path_from_bed(catalog, site, job, aisle.work, SUPPLY_SPOTS[index])
                     else {
                         self.farming.jobs[job_index].retry = clock + 5.0;
                         continue;
@@ -417,11 +427,10 @@ impl Construction {
                     job.food_output =
                         Some(crate::food::fresh(&job.output, clock, &Default::default()));
                     if job.output.is_empty() {
-                        self.farming.jobs.remove(job_index);
-                    } else {
-                        job.phase = FarmPhase::Return;
-                        self.residents[index].path = path;
+                        path.truncate(3);
                     }
+                    job.phase = FarmPhase::Return;
+                    self.residents[index].path = path;
                 }
                 FarmPhase::Return => {
                     let units: u64 = job.output.values().map(|v| u64::from(*v)).sum();
@@ -439,18 +448,100 @@ impl Construction {
         }
     }
 
+    fn release_farm_worker(&mut self, job: usize, clock: f64) {
+        self.farming.jobs[job].worker = None;
+        self.farming.jobs[job].phase = FarmPhase::Pickup;
+        self.farming.jobs[job].retry = clock + 5.0;
+    }
+
+    fn bed_aisles(&self, job: &FarmJob) -> Vec<BedAccess> {
+        let plan = &self.plans[job.site];
+        let bed = &self.farming.plots[&job.site].beds[job.bed];
+        let half = rotated_size(plan.size, plan.rotation).as_vec2() * 0.5;
+        let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
+        let rotation = Mat2::from_angle(-f32::from(plan.rotation) * std::f32::consts::FRAC_PI_2);
+        let world = |x, z| center + rotation * Vec2::new(x, z);
+        let bed_x = bed.offset.x * 0.5;
+        let bed_z = bed.offset.y * 0.5;
+        let x_choices = if plan.key == "field" {
+            vec![bed_x - 0.5, bed_x + 0.5]
+        } else {
+            vec![0.0]
+        };
+        let mut accesses = Vec::new();
+        for x in x_choices {
+            for end in [-1.0, 1.0] {
+                let gate_x = if plan.key == "greenhouse" { 0.0 } else { x };
+                let outside = world(gate_x, end * (half.y + 0.5));
+                let aisle = world(x, end * (half.y + 0.2));
+                accesses.push(BedAccess {
+                    anchor: outside.round().as_ivec2(),
+                    outside,
+                    aisle,
+                    work: world(x, bed_z),
+                });
+            }
+        }
+        accesses
+    }
+
+    fn path_to_bed(
+        &self,
+        catalog: &Catalog,
+        site: ConstructionSite,
+        job: &FarmJob,
+        from: Vec2,
+    ) -> Option<VecDeque<Vec2>> {
+        let mut choices = self.bed_aisles(job);
+        choices.sort_by(|a, b| a.cost_from(from).total_cmp(&b.cost_from(from)));
+        choices.into_iter().find_map(|access| {
+            let mut path = self.resident_route(catalog, site, from, access.anchor)?;
+            path.extend([access.outside, access.aisle, access.work]);
+            Some(path)
+        })
+    }
+
+    fn path_from_bed(
+        &self,
+        catalog: &Catalog,
+        site: ConstructionSite,
+        job: &FarmJob,
+        from: Vec2,
+        to: IVec2,
+    ) -> Option<VecDeque<Vec2>> {
+        let mut choices = self.bed_aisles(job);
+        choices.retain(|access| access.work.distance(from) <= 0.01);
+        choices.sort_by(|a, b| {
+            a.cost_from(to.as_vec2())
+                .total_cmp(&b.cost_from(to.as_vec2()))
+        });
+        choices.into_iter().find_map(|access| {
+            let route = self.resident_route(catalog, site, access.anchor.as_vec2(), to)?;
+            let mut path = VecDeque::from([access.aisle, access.outside, access.anchor.as_vec2()]);
+            path.extend(route);
+            Some(path)
+        })
+    }
+
     fn try_farm_worker(&mut self, job: usize, catalog: &Catalog, site: ConstructionSite) {
+        if self.farming.jobs[job].inputs.is_empty() {
+            for (index, worker) in self.residents.iter().enumerate() {
+                if self.free_for_leisure(index) {
+                    let Some(path) =
+                        self.path_to_bed(catalog, site, &self.farming.jobs[job], worker.position)
+                    else {
+                        continue;
+                    };
+                    self.farming.jobs[job].worker = Some(index);
+                    self.farming.jobs[job].phase = FarmPhase::Walk;
+                    self.residents[index].path = path;
+                    return;
+                }
+            }
+            return;
+        }
         for (index, worker) in self.residents.iter().enumerate() {
-            if worker.health.task.is_some()
-                || worker.town_work.active()
-                || worker.assignment.is_some()
-                || self.gathering.workers_at_site(index)
-                || self.production.has_worker(index)
-                || self.farming.has_worker(index)
-                || self.working_change(index)
-                || self.working_water(index)
-                || self.trip.as_ref().is_some_and(|trip| trip.driver == index)
-            {
+            if !self.free_for_leisure(index) {
                 continue;
             }
             let Some(path) =
@@ -465,10 +556,85 @@ impl Construction {
     }
 }
 
+#[derive(Clone, Copy)]
+struct BedAccess {
+    anchor: IVec2,
+    outside: Vec2,
+    aisle: Vec2,
+    work: Vec2,
+}
+
+impl BedAccess {
+    fn cost_from(self, point: Vec2) -> f32 {
+        self.outside.distance(point) + self.aisle.distance(self.work)
+    }
+}
+
 #[cfg(test)]
 mod resize_tests {
     use super::*;
     use crate::farming::{Crop, Stage};
+
+    #[test]
+    fn field_work_uses_the_interior_aisle_and_leaves_before_releasing_the_worker() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let ground = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction {
+            selection: Some("field".into()),
+            field_size: IVec2::splat(8),
+            rotation: 1,
+            ..default()
+        };
+        let corner = IVec2::new(44, 36);
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village.plan(&catalog, &mut stock, ground, corner, clock);
+        village.select_facility(corner);
+        village.farming.bed = 24;
+        let mut input = ButtonInput::default();
+        input.press(KeyCode::KeyK);
+        input.press(KeyCode::Digit1);
+        village.farm_input(&catalog, &mut stock, &input, ground, clock);
+        assert_eq!(village.farming.jobs.len(), 1);
+        village.residents[0].position = (corner - IVec2::X).as_vec2();
+        let mut reached_bed = false;
+        for step in 0..1_800 {
+            village.tick_farm_jobs(&catalog, &mut stock, ground, f64::from(step) * 0.1, 0.1);
+            let Some(job) = village.farming.jobs.first() else {
+                break;
+            };
+            if job.phase == FarmPhase::Work {
+                let position = village.residents[0].position;
+                assert!(position.x > corner.x as f32 + 1.0);
+                assert!(position.x < corner.x as f32 + 6.0);
+                assert!(
+                    village
+                        .bed_aisles(job)
+                        .iter()
+                        .any(|access| access.work == position)
+                );
+                reached_bed = true;
+            }
+        }
+        assert!(reached_bed);
+        assert!(village.farming.jobs.is_empty());
+        assert!(village.farming.plots[&0].beds[24].stage == Stage::Prepared);
+        let worker_cell = village.residents[0].position.round().as_ivec2();
+        assert!(
+            !worker_cell.cmpge(corner).all() || !worker_cell.cmplt(corner + IVec2::splat(8)).all()
+        );
+    }
 
     #[test]
     fn resizing_keeps_planted_beds_on_the_same_ground() {

@@ -805,6 +805,19 @@ impl Construction {
                 _ => Motion::Walk,
             };
         }
+        if let Some(job) = self
+            .farming
+            .jobs
+            .iter()
+            .find(|job| job.worker == Some(index))
+        {
+            return match job.phase {
+                crate::farming::FarmPhase::Work => Motion::Work,
+                crate::farming::FarmPhase::Return if !job.output.is_empty() => Motion::CarryWalk,
+                crate::farming::FarmPhase::Walk if !job.inputs.is_empty() => Motion::CarryWalk,
+                _ => Motion::Walk,
+            };
+        }
         if let Some(motion) = self.water_motion(index) {
             return motion;
         }
