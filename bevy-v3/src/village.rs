@@ -1,3 +1,4 @@
+use crate::utilities::NetworkView;
 mod cultivation_surface;
 mod guide;
 mod land_lens;
@@ -1426,13 +1427,25 @@ fn draw_blueprints(
             pointer.hovered.map(|hit| hit.cell),
             &mut gizmos,
         );
-        if matches!(
-            village.utility_panel,
-            Some(UtilityPanel::Power | UtilityPanel::Water)
-        ) {
+        let network_lens = match village.lenses.active {
+            Some(MapLens::Power) => Some(NetworkView::Power),
+            Some(MapLens::Water) => Some(NetworkView::Water),
+            Some(MapLens::Sanitation) => Some(NetworkView::Sanitation),
+            _ => None,
+        };
+        if network_lens.is_none()
+            && matches!(
+                village.utility_panel,
+                Some(UtilityPanel::Power | UtilityPanel::Water)
+            )
+        {
             village.construction.utilities.draw_network(
                 &terrain,
-                village.utility_panel == Some(UtilityPanel::Power),
+                if village.utility_panel == Some(UtilityPanel::Power) {
+                    NetworkView::Power
+                } else {
+                    NetworkView::Water
+                },
                 &mut gizmos,
             );
         }
@@ -1459,7 +1472,16 @@ fn draw_blueprints(
                 &mut gizmos,
             )),
             Some(MapLens::Construction) => construction_notice,
-            None => None,
+            Some(MapLens::Power | MapLens::Water | MapLens::Sanitation) | None => {
+                network_lens.map(|view| {
+                    village.construction.utilities.draw_lens(
+                        &terrain,
+                        view,
+                        pointer.hovered.map(|hit| hit.cell),
+                        &mut gizmos,
+                    )
+                })
+            }
         };
         if let Some(hit) = pointer.hovered {
             if village.terrain_editor.open {

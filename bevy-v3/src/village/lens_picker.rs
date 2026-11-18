@@ -7,14 +7,20 @@ pub(super) enum MapLens {
     Ecology,
     Access,
     Construction,
+    Power,
+    Water,
+    Sanitation,
 }
 
-const LENSES: [(KeyCode, MapLens, &str); 5] = [
+const LENSES: [(KeyCode, MapLens, &str); 8] = [
     (KeyCode::Digit1, MapLens::Land, "Land & slope"),
     (KeyCode::Digit2, MapLens::Resources, "Resources"),
     (KeyCode::Digit3, MapLens::Ecology, "Ecology"),
     (KeyCode::Digit4, MapLens::Access, "Access"),
     (KeyCode::Digit5, MapLens::Construction, "Construction"),
+    (KeyCode::Digit6, MapLens::Power, "Power"),
+    (KeyCode::Digit7, MapLens::Water, "Water"),
+    (KeyCode::Digit8, MapLens::Sanitation, "Sanitation"),
 ];
 
 #[derive(Default)]

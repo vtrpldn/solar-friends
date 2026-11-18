@@ -14,6 +14,13 @@ use crate::{
 const GRID_CAPACITY: f64 = 4.0;
 const GRID_TARIFF_CENTS: f64 = 95.0;
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum NetworkView {
+    Power,
+    Water,
+    Sanitation,
+}
+
 #[derive(Default, Deserialize, Serialize)]
 pub struct Utilities {
     nodes: BTreeMap<usize, Node>,
@@ -1010,7 +1017,8 @@ impl Utilities {
         links
     }
 
-    pub fn draw_network(&self, terrain: &Terrain, power: bool, gizmos: &mut Gizmos) {
+    pub fn draw_network(&self, terrain: &Terrain, view: NetworkView, gizmos: &mut Gizmos) {
+        let power = view == NetworkView::Power;
         let center = |node: &Node| {
             let cell = node.location.as_vec2() + (node.size.as_vec2() - Vec2::ONE) * 0.5;
             world_position(cell.x, cell.y)
@@ -1051,6 +1059,9 @@ impl Utilities {
                 Color::srgb_u8(234, 163, 90),
             ];
             for pipe in &self.links {
+                if view == NetworkView::Sanitation && pipe.channel < 2 {
+                    continue;
+                }
                 draw(
                     gizmos,
                     (pipe.from, pipe.to),
@@ -1059,6 +1070,100 @@ impl Utilities {
                 );
             }
         }
+    }
+
+    pub fn draw_lens(
+        &self,
+        terrain: &Terrain,
+        view: NetworkView,
+        hovered: Option<IVec2>,
+        gizmos: &mut Gizmos,
+    ) -> String {
+        use std::fmt::Write;
+
+        self.draw_network(terrain, view, gizmos);
+        let mut label = match view {
+            NetworkView::Power => "Power · Green available · Red unmet demand · Gray off or idle",
+            NetworkView::Water => {
+                "Water · Blue fresh · Green irrigation · Purple greywater · Orange sewage"
+            }
+            NetworkView::Sanitation => {
+                "Sanitation · Purple greywater · Orange sewage · Red storage full"
+            }
+        }
+        .to_owned();
+        for node in self.nodes.values() {
+            let channels = if view == NetworkView::Sanitation {
+                2..4
+            } else {
+                0..4
+            };
+            let (color, detail) = match view {
+                NetworkView::Power => {
+                    if !(light_load(&node.kind) > 0.0
+                        || node.solar_kw > 0.0
+                        || node.battery > 0.0
+                        || node.kind == "hydro"
+                        || node.demanding)
+                    {
+                        continue;
+                    }
+                    let (state, color) = if !node.enabled {
+                        ("Switched off", Color::srgb_u8(147, 146, 140))
+                    } else if node.powered {
+                        ("Powered", Color::srgb_u8(136, 220, 148))
+                    } else if node.demanding {
+                        ("Waiting for power", Color::srgb_u8(222, 112, 96))
+                    } else {
+                        ("Idle", Color::srgb_u8(147, 146, 140))
+                    };
+                    (color, state)
+                }
+                NetworkView::Water | NetworkView::Sanitation => {
+                    if !channels.clone().any(|channel| node.capacity[channel] > 0.0) {
+                        continue;
+                    }
+                    if !node.enabled {
+                        (Color::srgb_u8(147, 146, 140), "Switched off")
+                    } else if view == NetworkView::Sanitation
+                        && channels.clone().any(|channel| {
+                            node.capacity[channel] > 0.0
+                                && node.water[channel] >= node.capacity[channel] - 0.01
+                        })
+                    {
+                        (Color::srgb_u8(222, 112, 96), "Storage full")
+                    } else {
+                        (Color::srgb_u8(101, 214, 255), "Enabled")
+                    }
+                }
+            };
+            let center = node.location.as_vec2() + (node.size.as_vec2() - Vec2::ONE) * 0.5;
+            let Vec2 { x, y: z } = world_position(center.x, center.y);
+            let ground = Vec3::new(x, terrain.height_at(x, z), z);
+            let tip = ground + Vec3::Y * 6.0;
+            gizmos.line(ground, tip, color);
+            for axis in [Vec3::X, Vec3::Z] {
+                gizmos.line(tip - axis * 0.6, tip + axis * 0.6, color);
+            }
+            if hovered.is_some_and(|cell| {
+                cell.cmpge(node.location).all() && cell.cmplt(node.location + node.size).all()
+            }) {
+                let _ = write!(label, "\n{} · {detail}", node.kind.replace('-', " "));
+                if view == NetworkView::Power && node.battery > 0.0 {
+                    let _ = write!(label, " · {:.2}/{:.2} kWh", node.charge, node.battery);
+                } else if view != NetworkView::Power {
+                    let names = ["Fresh", "Irrigation", "Greywater", "Sewage"];
+                    for channel in channels.filter(|&channel| node.capacity[channel] > 0.0) {
+                        let _ = write!(
+                            label,
+                            " · {} {:.1}/{:.1} L",
+                            names[channel], node.water[channel], node.capacity[channel]
+                        );
+                    }
+                }
+            }
+        }
+        label
     }
 
     fn transfer(&mut self, hours: f64) {
