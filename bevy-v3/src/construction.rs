@@ -5,6 +5,8 @@ mod food_lens;
 mod gather_work;
 mod inventory;
 mod kitchen_work;
+mod lab_orders;
+pub(crate) use lab_orders::LabOrder;
 mod leisure;
 mod lifecycle;
 mod production_work;

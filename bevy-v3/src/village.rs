@@ -3,6 +3,7 @@ mod building_preview;
 mod cultivation_surface;
 mod diagnostics;
 mod guide;
+pub(crate) mod lab;
 mod land_lens;
 mod lens_picker;
 use lens_picker::{LensPicker, MapLens};

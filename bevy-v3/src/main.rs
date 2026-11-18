@@ -38,6 +38,23 @@ const CAMERA_HOME: Vec3 = Vec3::new(-26.0, 3.0, -12.0);
 const CAMERA_HEIGHT: f32 = 40.0;
 
 fn main() {
+    let mut args = std::env::args_os().skip(1);
+    if args.next().is_some_and(|argument| argument == "--lab") {
+        let scenario = args.next().map(std::path::PathBuf::from);
+        let save = args.next().map(std::path::PathBuf::from);
+        let result = if let Some(scenario) = scenario.filter(|_| args.next().is_none()) {
+            village::lab::run_file(&scenario, save.as_deref())
+        } else {
+            Err(std::io::Error::other(
+                "Usage: solar-friends-v3 --lab scenario.json [village.json]",
+            ))
+        };
+        if let Err(error) = result {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+        return;
+    }
     let mut app = App::new();
     if std::env::args().any(|argument| argument == "--play") {
         app.insert_resource(WorldSetup::default().session());

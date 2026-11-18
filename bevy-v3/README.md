@@ -59,3 +59,26 @@ Refresh the construction data with `node scripts/export-v3-catalog.mjs`.
 Regenerate native trees, deposits, and scenery with `node scripts/export-v3-land-models.mjs`.
 
 Regenerate the build catalog models with `node scripts/export-v3-building-models.mjs`.
+
+## Simulation lab
+
+Run a headless scenario through the same 0.1-second simulation steps as the desktop game.
+
+```sh
+cargo run --locked --manifest-path bevy-v3/Cargo.toml -- --lab scenario.json > report.json
+```
+
+Pass a V3 save path after the scenario path to start from that village. With no save path, the lab starts from the default Story camp. The JSON report includes sampled resident activity and supplies, each order's result, and the final village state.
+
+An example scenario with one construction order:
+
+```json
+{
+  "steps": 1200,
+  "orders": [
+    {"step": 0, "order": {"type": "build", "key": "gathering", "x": 40, "z": 36}}
+  ]
+}
+```
+
+Order types include `build`, `produce`, `buy`, `grid`, `collect-water`, `purify`, and `service-water`. Use project numbers starting at 1 for production and water orders, with 0 for the camp water facility. Build coordinates use map cells, and rotation takes 0–3 quarter turns.
