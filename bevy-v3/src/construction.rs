@@ -13,6 +13,7 @@ mod town_pickup;
 mod trade_work;
 mod upkeep;
 mod water_work;
+mod work_lens;
 mod work_shift;
 
 pub use water_work::WaterAction;

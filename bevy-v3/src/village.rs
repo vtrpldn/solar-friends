@@ -1471,6 +1471,12 @@ fn draw_blueprints(
                 pointer.hovered.map(|hit| hit.cell),
                 &mut gizmos,
             )),
+            Some(MapLens::Work) => Some(village.construction.draw_work_lens(
+                &catalog,
+                &terrain,
+                pointer.hovered.map(|hit| hit.cell),
+                &mut gizmos,
+            )),
             Some(MapLens::Construction) => construction_notice,
             Some(MapLens::Power | MapLens::Water | MapLens::Sanitation) | None => {
                 network_lens.map(|view| {
