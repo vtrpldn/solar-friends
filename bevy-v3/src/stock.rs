@@ -17,6 +17,8 @@ pub struct Stock {
     #[serde(default)]
     ledger: BTreeMap<CashKind, i64>,
     #[serde(default)]
+    cash_flow: CashFlow,
+    #[serde(default)]
     pub sandbox: bool,
     #[serde(default)]
     pub pantry: Pantry,
@@ -25,8 +27,16 @@ pub struct Stock {
     pub equipment: Equipment,
 }
 
+#[derive(Clone, Default, Deserialize, Serialize)]
+struct CashFlow {
+    started_day: Option<u64>,
+    day: u64,
+    operating: BTreeMap<u64, i64>,
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
 pub enum CashKind {
+    Construction,
     Materials,
     Fuel,
     Electricity,
@@ -40,6 +50,7 @@ pub enum CashKind {
 impl CashKind {
     fn label(self) -> &'static str {
         match self {
+            Self::Construction => "Construction",
             Self::Materials => "Materials",
             Self::Fuel => "Fuel",
             Self::Electricity => "Grid electricity",
@@ -72,6 +83,7 @@ impl Stock {
             cash: settings.starting_cash(),
             centavos: 0,
             ledger: BTreeMap::new(),
+            cash_flow: CashFlow::default(),
             sandbox: settings.mode == Mode::Sandbox,
             pantry: Pantry::default(),
             materials,
@@ -233,8 +245,7 @@ impl Stock {
             .checked_sub(cents)
             .expect("purchase was quoted against available balance");
         self.set_balance(balance);
-        let counter = self.ledger.entry(category).or_default();
-        *counter = counter.saturating_sub(cents as i64);
+        self.record_cash(category, -(cents as i64));
     }
 
     pub fn credit(&mut self, cents: u64, category: CashKind) {
@@ -242,8 +253,63 @@ impl Stock {
         let before = self.balance();
         let after = before.saturating_add(cents).min(maximum);
         self.set_balance(after);
+        self.record_cash(category, (after - before) as i64);
+    }
+
+    pub fn update_finance_clock(&mut self, clock: f64) {
+        let day = ((540.0 + clock * 0.45) / 1440.0).floor() as u64;
+        self.cash_flow.started_day.get_or_insert(day);
+        if self.cash_flow.day != day {
+            self.cash_flow.day = day;
+            self.cash_flow
+                .operating
+                .retain(|&recorded, _| recorded >= day.saturating_sub(90));
+        }
+    }
+
+    fn record_cash(&mut self, category: CashKind, cents: i64) {
         let counter = self.ledger.entry(category).or_default();
-        *counter = counter.saturating_add((after - before) as i64);
+        *counter = counter.saturating_add(cents);
+        if category != CashKind::Construction && !self.sandbox && cents != 0 {
+            let total = self
+                .cash_flow
+                .operating
+                .entry(self.cash_flow.day)
+                .or_default();
+            *total = total.saturating_add(cents);
+        }
+    }
+
+    pub fn valid_cash_flow(&self) -> bool {
+        let flow = &self.cash_flow;
+        flow.operating.len() <= 91
+            && flow.started_day.is_none_or(|day| day <= flow.day)
+            && flow
+                .operating
+                .keys()
+                .all(|&day| (flow.day.saturating_sub(90)..=flow.day).contains(&day))
+    }
+
+    fn cash_forecast(&self, committed: u64) -> Option<(u64, f64, f64, f64)> {
+        let flow = &self.cash_flow;
+        let start = (flow.started_day?.saturating_add(1)).max(flow.day.saturating_sub(7));
+        if start >= flow.day {
+            return None;
+        }
+        let days = flow.day - start;
+        let (low, high, total) = (start..flow.day)
+            .map(|day| *flow.operating.get(&day).unwrap_or(&0) as f64 / 100.0)
+            .fold(
+                (f64::INFINITY, f64::NEG_INFINITY, 0.0),
+                |(min, max, sum), change| (min.min(change), max.max(change), sum + change),
+            );
+        let available = self.balance().saturating_sub(committed) as f64 / 100.0;
+        Some((
+            days,
+            available + 7.0 * low,
+            available + 7.0 * high,
+            total / days as f64,
+        ))
     }
 
     fn set_balance(&mut self, value: u64) {
@@ -263,6 +329,11 @@ impl Stock {
                 kind.label(),
                 *cents as f64 / 100.0
             ));
+        }
+        if let Some((days, low, high, mean)) = self.cash_forecast(committed) {
+            display.push_str(&format!("\n7-day cash scenarios · R${low:.2} to R${high:.2}\n{days} completed days · Mean R${mean:+.2}/day · Excludes new construction"));
+        } else {
+            display.push_str("\nCash forecast needs one full recorded day.");
         }
         display
     }
@@ -289,5 +360,39 @@ impl Stock {
             }
         }
         food
+    }
+}
+
+#[cfg(test)]
+mod finance_tests {
+    use super::*;
+    use crate::weather::DAY;
+
+    #[test]
+    fn cash_scenarios_use_completed_operating_days_and_skip_construction() {
+        let mut stock = Stock::for_start(&WorldSetup::default(), &Catalog::default());
+        stock.update_finance_clock(0.0);
+        stock.credit(700, CashKind::Sales);
+        stock.update_finance_clock(DAY);
+        stock.debit(1_000, CashKind::Construction);
+        stock.debit(400, CashKind::Electricity);
+        stock.update_finance_clock(2.0 * DAY);
+        stock.update_finance_clock(3.0 * DAY);
+        stock.credit(800, CashKind::Sales);
+        stock.update_finance_clock(4.0 * DAY);
+        stock.credit(10_000, CashKind::Sales);
+        let committed = 500;
+        let available = (stock.balance() - committed) as f64 / 100.0;
+        let (days, low, high, mean) = stock.cash_forecast(committed).unwrap();
+        assert_eq!(days, 3);
+        assert_eq!(low, available - 28.0);
+        assert_eq!(high, available + 56.0);
+        assert!((mean - 4.0 / 3.0).abs() < 1e-9);
+        let save = serde_json::to_string(&stock).unwrap();
+        let restored: Stock = serde_json::from_str(&save).unwrap();
+        assert_eq!(
+            restored.cash_forecast(committed),
+            Some((days, low, high, mean))
+        );
     }
 }

@@ -283,6 +283,7 @@ impl Village {
             || self.clock < 0.0
             || !self.clock.is_finite()
             || !self.stock.valid_food()
+            || !self.stock.valid_cash_flow()
             || !self.stock.equipment.valid(|id| self.stock.available(id))
             || !self.terrain_editor.valid()
         {
@@ -849,6 +850,8 @@ fn village_input(
     }
     village.camp_error = None;
     village.camp = Some(cell);
+    let clock = village.clock;
+    village.stock.update_finance_clock(clock);
     camera.target = spawn_tents(&mut commands, &assets, &setup, cell);
 }
 
@@ -982,6 +985,7 @@ fn step(
     dt: f64,
 ) {
     town.clock += dt;
+    town.stock.update_finance_clock(town.clock);
     town.construction
         .tick_services(catalog, setup, &mut town.stock, town.clock, dt);
     let cooling = town.construction.utilities.powered_cold_storage();

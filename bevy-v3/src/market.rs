@@ -99,7 +99,7 @@ impl Market {
 
     pub fn reserve(&mut self, stock: &mut Stock, bill: &BTreeMap<String, u32>, quote: &Quote) {
         stock.reserve_available(bill);
-        stock.debit(quote.price, CashKind::Materials);
+        stock.debit(quote.price, CashKind::Construction);
         self.committed_fares += quote.fare * u64::from(quote.trips);
         for (id, units) in &quote.units {
             let allocation = self.suppliers.entry(id.clone()).or_insert(Allocation {
@@ -224,7 +224,7 @@ impl Market {
                 entry.units = entry.units.saturating_sub(*quantity);
             }
         }
-        stock.credit(price, CashKind::Materials);
+        stock.credit(price, CashKind::Construction);
         self.release_fare(travel);
     }
 
