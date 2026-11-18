@@ -113,6 +113,10 @@ impl Construction {
         self.plans.extend(added);
     }
 
+    pub fn is_road(&self, project: usize) -> bool {
+        self.plans[project].key == "road"
+    }
+
     fn has_road(&self, cell: IVec2) -> bool {
         self.plans
             .iter()

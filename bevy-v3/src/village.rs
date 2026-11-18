@@ -1,4 +1,5 @@
 mod library_ui;
+mod road_surface;
 
 use library_ui::{autosave_named, library_controls};
 
@@ -50,6 +51,7 @@ impl Plugin for VillagePlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "opening.glb");
         embedded_asset!(app, "buildings.glb");
+        road_surface::install(app);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
             .init_resource::<Catalog>()
@@ -1103,7 +1105,7 @@ fn show_construction(
             }
             continue;
         }
-        commands.spawn((
+        let mut building = commands.spawn((
             VillageEntity,
             BuiltProject(project),
             SceneRoot(
@@ -1115,6 +1117,9 @@ fn show_construction(
             ),
             place,
         ));
+        if village.construction.is_road(project) {
+            building.insert(road_surface::RoadSurface);
+        }
     }
 }
 
