@@ -414,6 +414,7 @@ struct CampPointer {
 enum MapLens {
     Land,
     Resources,
+    Ecology,
 }
 
 #[derive(Resource, Default, PartialEq)]
@@ -574,6 +575,7 @@ fn village_input(
         for (key, lens) in [
             (KeyCode::F2, MapLens::Land),
             (KeyCode::F3, MapLens::Resources),
+            (KeyCode::F12, MapLens::Ecology),
         ] {
             if keyboard.just_pressed(key) {
                 village.map_lens = (village.map_lens != Some(lens)).then_some(lens);
@@ -1268,7 +1270,7 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F2 Slope · F3 Resources · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects",
+            "\nP Power · V Water · N Residents · H Finances · F2 Slope · F3 Resources · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · F12 Ecology",
         );
     }
     match village.utility_panel {
@@ -1449,13 +1451,13 @@ fn draw_blueprints(
                 pointer.hovered.map(|hit| hit.world),
                 &mut gizmos,
             )),
-            Some(MapLens::Resources) => Some(resource_lens::draw(
+            Some(lens @ (MapLens::Resources | MapLens::Ecology)) => Some(resource_lens::draw(
                 &village,
                 &setup,
                 &terrain,
                 &catalog,
                 &land,
-                pointer.hovered,
+                (pointer.hovered, lens == MapLens::Ecology),
                 &mut gizmos,
             )),
             None => None,

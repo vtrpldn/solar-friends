@@ -9,12 +9,19 @@ pub(super) fn draw(
     terrain: &crate::terrain::Terrain,
     catalog: &Catalog,
     land: &Land,
-    hovered: Option<GroundHit>,
+    (hovered, ecology): (Option<GroundHit>, bool),
     gizmos: &mut Gizmos,
 ) -> String {
-    let hovered = hovered.and_then(|hit| land.site_at(hit.cell));
-    let mut legend =
-        String::from("Resources · Green available · Gold queued or recovering · Gray depleted");
+    use std::fmt::Write;
+
+    let cell = hovered.map(|hit| hit.cell);
+    let hovered_site = cell.and_then(|cell| land.site_at(cell));
+    let mut legend = if ecology {
+        "Ecology · Green standing or available · Gold queued or recovering · Gray cleared · Blue cultivated"
+    } else {
+        "Resources · Green available · Gold queued or recovering · Gray depleted"
+    }
+    .to_owned();
     for (index, site) in land.sites() {
         let status = village.construction.gathering.resource_status(
             index,
@@ -27,22 +34,52 @@ pub(super) fn draw(
             ResourceStatus::Queued | ResourceStatus::Recovering(_) => Color::srgb_u8(243, 200, 108),
             _ => Color::srgb_u8(136, 220, 148),
         };
-        let center = site.position.as_vec2() + (site.size.as_vec2() - Vec2::ONE) * 0.5;
-        let Vec2 { x, y: z } = world_position(center.x, center.y);
-        let point = Vec3::new(x, terrain.height_at(x, z), z);
-        let tip = point + Vec3::Y * 4.0;
-        gizmos.line(point + Vec3::Y * 0.2, tip, color);
-        for axis in [Vec3::X, Vec3::Z] {
-            gizmos.line(tip - axis * 0.7, tip + axis * 0.7, color);
+        draw_marker(terrain, site.position, site.size, color, gizmos);
+        if hovered_site == Some(index) {
+            let detail = if ecology && site.recipe() == "fell_tree" {
+                match status {
+                    ResourceStatus::Cleared => "Cleared tree".into(),
+                    ResourceStatus::Queued => "Tree marked for felling".into(),
+                    _ => "Standing tree".into(),
+                }
+            } else {
+                format!("{} · {status}", catalog.gathering[site.recipe()].name)
+            };
+            let _ = write!(legend, "\n{detail}");
         }
-        if hovered == Some(index) {
-            use std::fmt::Write;
-            let _ = write!(
-                legend,
-                "\n{} · {status}",
-                catalog.gathering[site.recipe()].name
+    }
+    if ecology {
+        for (name, position, size) in village.construction.cultivated_sites(catalog) {
+            draw_marker(
+                terrain,
+                position,
+                size,
+                Color::srgb_u8(109, 220, 255),
+                gizmos,
             );
+            if cell
+                .is_some_and(|cell| cell.cmpge(position).all() && cell.cmplt(position + size).all())
+            {
+                let _ = write!(legend, "\n{name} · Cultivated land");
+            }
         }
     }
     legend
+}
+
+fn draw_marker(
+    terrain: &crate::terrain::Terrain,
+    position: IVec2,
+    size: IVec2,
+    color: Color,
+    gizmos: &mut Gizmos,
+) {
+    let center = position.as_vec2() + (size.as_vec2() - Vec2::ONE) * 0.5;
+    let Vec2 { x, y: z } = world_position(center.x, center.y);
+    let point = Vec3::new(x, terrain.height_at(x, z), z);
+    let tip = point + Vec3::Y * 4.0;
+    gizmos.line(point + Vec3::Y * 0.2, tip, color);
+    for axis in [Vec3::X, Vec3::Z] {
+        gizmos.line(tip - axis * 0.7, tip + axis * 0.7, color);
+    }
 }

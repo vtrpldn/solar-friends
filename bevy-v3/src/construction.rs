@@ -1101,6 +1101,22 @@ impl Construction {
         &self.residents[index]
     }
 
+    pub fn cultivated_sites<'a>(
+        &'a self,
+        catalog: &'a Catalog,
+    ) -> impl Iterator<Item = (&'a str, IVec2, IVec2)> {
+        self.plans.iter().filter_map(|plan| {
+            let definition = &catalog.projects[&plan.key];
+            (!plan.removed
+                && plan.work >= definition.work
+                && matches!(
+                    definition.kind.as_str(),
+                    "field" | "garden" | "grove" | "orchard" | "greenhouse"
+                ))
+            .then_some((definition.name.as_str(), plan.position, plan.size))
+        })
+    }
+
     pub fn has_cultivation_surface(&self, project: usize) -> bool {
         matches!(self.plans[project].key.as_str(), "field" | "garden")
     }
