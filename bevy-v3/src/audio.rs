@@ -115,7 +115,10 @@ fn audio_controls(
     sinks: Query<&AudioSink, With<Music>>,
     buttons: Query<&Interaction, (Changed<Interaction>, With<Button>)>,
 ) {
-    if keyboard.just_pressed(KeyCode::KeyM) && window.focused {
+    if keyboard.just_pressed(KeyCode::KeyM)
+        && window.focused
+        && !keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+    {
         soundscape.muted = !soundscape.muted;
     }
     if !soundscape.started

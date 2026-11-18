@@ -29,7 +29,7 @@ pub struct Quote {
     pub price: u64,
     pub trips: u32,
     pub fare: u64,
-    day: u64,
+    pub day: u64,
 }
 
 impl Market {
@@ -209,6 +209,23 @@ impl Market {
 
     pub fn release_fare(&mut self, fare: u64) {
         self.committed_fares -= fare;
+    }
+
+    pub fn refund_construction(
+        &mut self,
+        stock: &mut Stock,
+        units: &BTreeMap<String, u32>,
+        (day, price, travel): (u64, u64, u64),
+    ) {
+        for (id, quantity) in units {
+            if let Some(entry) = self.suppliers.get_mut(id)
+                && entry.day == day
+            {
+                entry.units = entry.units.saturating_sub(*quantity);
+            }
+        }
+        stock.credit(price, CashKind::Materials);
+        self.release_fare(travel);
     }
 
     pub fn depart(&mut self, stock: &mut Stock, fare: u64) {

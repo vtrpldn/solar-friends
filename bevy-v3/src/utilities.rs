@@ -116,11 +116,23 @@ impl Utilities {
                 demanding: false,
                 cold_storage: false,
             });
+            if node.location != facility.location || node.size != facility.size {
+                node.location = facility.location;
+                node.size = facility.size;
+                changed = true;
+            }
             node.demanding = facility.working;
         }
         if changed {
             self.links = self.connections();
             self.topology_valid = true;
+        }
+    }
+
+    pub fn remove_facility(&mut self, building: usize) {
+        if let Some(node) = self.nodes.remove(&(building + 1)) {
+            self.curtailed_kwh += node.charge;
+            self.topology_valid = false;
         }
     }
 

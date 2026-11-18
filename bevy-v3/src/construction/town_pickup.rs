@@ -49,7 +49,11 @@ impl Construction {
                             .expect("booked seed pickup")
                             .pickups -= 1;
                     } else {
-                        self.plans[trip.project].pickups -= 1;
+                        let plan = &mut self.plans[trip.project];
+                        plan.pickups -= 1;
+                        if plan.pickups == 0 {
+                            plan.purchase = None;
+                        }
                     }
                     return;
                 }
@@ -65,7 +69,7 @@ impl Construction {
         let construction = self
             .plans
             .iter()
-            .position(|plan| plan.pickups > 0)
+            .position(|plan| !plan.removed && plan.pickups > 0)
             .map(|index| (index, None));
         let farming = self
             .farming
@@ -90,6 +94,7 @@ impl Construction {
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
                 || self.farming.has_worker(index)
+                || self.working_change(index)
                 || self.residents[index].health.task.is_some()
                 || self.residents[index].town_work.active()
             {

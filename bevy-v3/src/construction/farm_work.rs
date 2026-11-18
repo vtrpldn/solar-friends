@@ -11,7 +11,8 @@ impl Construction {
         let season = growing_season(clock, setup.biome());
         for (index, plan) in self.plans.iter().enumerate() {
             let definition = &catalog.projects[&plan.key];
-            if plan.work >= definition.work
+            if !plan.removed
+                && plan.work >= definition.work
                 && !self.farming.plots.contains_key(&index)
                 && let Some(plot) = Plot::new(&plan.key, IVec2::from_array(definition.size))
             {
@@ -48,6 +49,10 @@ impl Construction {
         let Some(site) = self.production.selected else {
             return;
         };
+        if self.changes.contains_key(&site) {
+            self.farming.open = false;
+            return;
+        }
         let Some(plot) = self.farming.plots.get_mut(&site) else {
             self.farming.open = false;
             return;
@@ -314,6 +319,7 @@ impl Construction {
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
                 || self.farming.has_worker(index)
+                || self.working_change(index)
                 || self.trip.as_ref().is_some_and(|trip| trip.driver == index)
             {
                 continue;

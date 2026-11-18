@@ -508,6 +508,10 @@ fn village_input(
                     },
                 );
             }
+            if town.utility_panel.is_none() {
+                town.construction
+                    .lifecycle_input(&catalog, &mut town.stock, &keyboard);
+            }
             if !town.construction.menu
                 && !town.construction.production.open
                 && !town.construction.farming.open
@@ -539,11 +543,10 @@ fn village_input(
                     round_trip_km: setup.round_trip_km(),
                 },
             );
-        }
-        if let Some(position) = pointer.0
+        } else if let Some(position) = pointer.0
             && !town.construction.menu
         {
-            town.construction.select_facility(&catalog, position);
+            town.construction.select_facility(position);
             town.construction
                 .gathering
                 .select(&land, land.site_at(position));
@@ -878,6 +881,15 @@ fn show_hud(
         label.push('\n');
         label.push_str(&production);
     }
+    if let Some(status) = village.construction.lifecycle_status(&catalog) {
+        label.push('\n');
+        label.push_str(&status);
+    }
+    let notice = village.construction.construction_notice();
+    if !notice.is_empty() && !village.construction.menu {
+        label.push('\n');
+        label.push_str(notice);
+    }
     if let Some(farm) = village.construction.farm_status(village.clock) {
         label.push('\n');
         label.push_str(&farm);
@@ -918,7 +930,7 @@ fn show_construction(
     village: Res<Village>,
     catalog: Res<Catalog>,
     assets: Res<AssetServer>,
-    displayed: Query<&BuiltProject>,
+    mut displayed: Query<(Entity, &BuiltProject, &mut Transform)>,
 ) {
     if setup.open || !village.is_changed() {
         return;
@@ -926,11 +938,27 @@ fn show_construction(
     let Some(camp) = village.camp else { return };
     let terrain = setup.terrain().with_camp(camp);
     let models = AssetPath::from_path_buf(embedded_path!("buildings.glb")).with_source("embedded");
-    for (project, asset, position, yaw) in village.construction.finished_models(&catalog) {
-        if displayed.iter().any(|model| model.0 == project) {
+    let models_to_show: Vec<_> = village.construction.finished_models(&catalog).collect();
+    for (entity, shown, _) in &displayed {
+        if !models_to_show
+            .iter()
+            .any(|(index, _, _, _)| *index == shown.0)
+        {
+            commands.entity(entity).despawn();
+        }
+    }
+    for (project, asset, position, yaw) in models_to_show {
+        let Vec2 { x, y: z } = position;
+        let place = Transform::from_xyz(x, terrain.height_at(x, z), z)
+            .with_rotation(Quat::from_rotation_y(yaw));
+        if let Some((_, _, mut placed)) =
+            displayed.iter_mut().find(|(_, view, _)| view.0 == project)
+        {
+            if *placed != place {
+                *placed = place;
+            }
             continue;
         }
-        let Vec2 { x, y: z } = position;
         commands.spawn((
             VillageEntity,
             BuiltProject(project),
@@ -941,8 +969,7 @@ fn show_construction(
                         .with_label(GltfAssetLabel::Scene(asset).to_string()),
                 ),
             ),
-            Transform::from_xyz(x, terrain.height_at(x, z), z)
-                .with_rotation(Quat::from_rotation_y(yaw)),
+            place,
         ));
     }
 }

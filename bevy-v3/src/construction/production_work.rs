@@ -6,7 +6,7 @@ use crate::{
 use super::*;
 
 impl Construction {
-    pub fn select_facility(&mut self, catalog: &Catalog, cell: IVec2) {
+    pub fn select_facility(&mut self, cell: IVec2) {
         self.production.selected = self
             .plans
             .iter()
@@ -14,7 +14,7 @@ impl Construction {
             .find(|(_, plan)| {
                 cell.cmpge(plan.position).all()
                     && cell.cmplt(plan.position + plan.size).all()
-                    && plan.work >= catalog.projects[&plan.key].work
+                    && !plan.removed
             })
             .map(|(index, _)| index);
         self.production.open = false;
@@ -26,7 +26,12 @@ impl Construction {
         catalog: &'a Catalog,
         index: usize,
     ) -> Vec<(&'a String, &'a ProductionRecipe)> {
-        let kind = &catalog.projects[&self.plans[index].key].kind;
+        let plan = &self.plans[index];
+        let definition = &catalog.projects[&plan.key];
+        if plan.removed || self.changes.contains_key(&index) || plan.work < definition.work {
+            return Vec::new();
+        }
+        let kind = &definition.kind;
         catalog
             .production
             .iter()
@@ -173,7 +178,7 @@ impl Construction {
         let mut care = Vec::new();
         for (index, project) in self.plans.iter().enumerate() {
             let definition = &catalog.projects[&project.key];
-            if project.work < definition.work {
+            if project.removed || project.work < definition.work {
                 continue;
             }
             let Some(ration) = catalog.animal_rations.get(&definition.kind) else {
@@ -440,6 +445,7 @@ impl Construction {
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
                 || self.farming.has_worker(index)
+                || self.working_change(index)
                 || self.residents[index].health.task.is_some()
                 || self.residents[index].town_work.active()
                 || self.trip.as_ref().is_some_and(|trip| trip.driver == index)

@@ -1,12 +1,13 @@
 mod farm_work;
 mod gather_work;
+mod lifecycle;
 mod production_work;
 mod resident_work;
 mod town_pickup;
 mod trade_work;
 mod work_shift;
 
-use std::collections::VecDeque;
+use std::collections::{BTreeMap, VecDeque};
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -119,6 +120,12 @@ pub struct Construction {
     #[serde(default)]
     pub utilities: Utilities,
     #[serde(default)]
+    changes: BTreeMap<usize, lifecycle::ChangeJob>,
+    #[serde(skip)]
+    moving: Option<usize>,
+    #[serde(default)]
+    priority: Option<usize>,
+    #[serde(default)]
     trip: Option<TownTrip>,
     residents: [Worker; 5],
 }
@@ -136,6 +143,10 @@ struct Blueprint {
     pickups: u32,
     #[serde(default)]
     fare: u64,
+    #[serde(default)]
+    removed: bool,
+    #[serde(default)]
+    purchase: Option<lifecycle::Purchase>,
 }
 
 #[derive(Clone, Copy, PartialEq, Deserialize, Serialize)]
@@ -187,6 +198,9 @@ impl Default for Construction {
             livestock: Livestock::default(),
             production: Production::default(),
             utilities: Utilities::default(),
+            changes: BTreeMap::new(),
+            moving: None,
+            priority: None,
             trip: None,
             residents: std::array::from_fn(|index| {
                 let (x, z) = ARRIVAL_SPOTS[index];
@@ -230,7 +244,7 @@ impl Worker {
 
 impl Construction {
     pub fn is_placing(&self) -> bool {
-        self.selection.is_some()
+        self.selection.is_some() || self.moving.is_some()
     }
 
     fn options<'a>(&self, catalog: &'a Catalog) -> Vec<(&'a String, &'a Project)> {
@@ -254,6 +268,16 @@ impl Construction {
     }
 
     pub fn input(&mut self, keyboard: &ButtonInput<KeyCode>, catalog: &Catalog) {
+        if self.moving.is_some() {
+            if keyboard.just_pressed(KeyCode::KeyR) {
+                self.rotation = (self.rotation + 1) % 4;
+            }
+            if keyboard.just_pressed(KeyCode::KeyB) {
+                self.moving = None;
+                self.status.clear();
+            }
+            return;
+        }
         if keyboard.just_pressed(KeyCode::KeyB) {
             self.menu = !self.menu;
             self.selection = None;
@@ -329,6 +353,13 @@ impl Construction {
     }
 
     pub fn instructions(&self, catalog: &Catalog) -> String {
+        if self.moving.is_some() {
+            return format!(
+                "Click destination · R Rotate {}° · B Cancel move\n{}",
+                u32::from(self.rotation) * 90,
+                self.status
+            );
+        }
         if !self.menu {
             return "B Build · Space Pause · 1–4 Speed".into();
         }
@@ -370,6 +401,10 @@ impl Construction {
         position: IVec2,
         clock: TownClock,
     ) {
+        if let Some(index) = self.moving {
+            self.queue_move(catalog, stock, site, position, index);
+            return;
+        }
         let Some(key) = &self.selection else { return };
         let ConstructionSite {
             terrain,
@@ -387,6 +422,8 @@ impl Construction {
             work: 0.0,
             pickups: 0,
             fare: 0,
+            removed: false,
+            purchase: None,
         };
         if let Some(error) = self.placement_error(
             terrain,
@@ -394,7 +431,7 @@ impl Construction {
             camp,
             &blueprint,
             definition,
-            (catalog, stock.sandbox),
+            (catalog, stock.sandbox, None),
         ) {
             self.status = error.into();
             return;
@@ -415,6 +452,14 @@ impl Construction {
             };
             blueprint.pickups = quote.trips;
             blueprint.fare = quote.fare;
+            if quote.trips > 0 {
+                blueprint.purchase = Some(lifecycle::Purchase {
+                    units: quote.units.clone(),
+                    price: quote.price,
+                    day: quote.day,
+                    trips: quote.trips,
+                });
+            }
             self.market.reserve(stock, &definition.materials, &quote);
         }
         self.status = if stock.sandbox && !self.slow_sandbox && key != "road" {
@@ -442,14 +487,13 @@ impl Construction {
         camp: IVec2,
         blueprint: &Blueprint,
         definition: &Project,
-        (catalog, sandbox): (&Catalog, bool),
+        (catalog, sandbox, ignore): (&Catalog, bool, Option<usize>),
     ) -> Option<&'static str> {
         if !sandbox
             && !definition.repeatable
-            && self
-                .plans
-                .iter()
-                .any(|project| project.key == blueprint.key)
+            && self.plans.iter().enumerate().any(|(index, project)| {
+                !project.removed && ignore != Some(index) && project.key == blueprint.key
+            })
         {
             return Some("Already planned.");
         }
@@ -489,7 +533,8 @@ impl Construction {
         if definition.kind == "water-pump"
             && !near_river(start.as_vec2() + Vec2::splat(0.5), 3.0)
             && !self.plans.iter().any(|project| {
-                project.key == "groundwater-well"
+                !project.removed
+                    && project.key == "groundwater-well"
                     && project.work >= catalog.projects[&project.key].work
                     && (project.position - start).as_vec2().length() <= 6.0
             })
@@ -505,11 +550,17 @@ impl Construction {
         if overlaps(STOCKPILE, STOCKPILE + IVec2::ONE) {
             return Some("Leave the supplies accessible.");
         }
-        if self
-            .plans
-            .iter()
-            .any(|other| overlaps(other.position, other.position + other.size))
-        {
+        if self.plans.iter().enumerate().any(|(index, other)| {
+            ignore != Some(index)
+                && !other.removed
+                && overlaps(other.position, other.position + other.size)
+        }) || self.changes.iter().any(|(index, job)| {
+            ignore != Some(*index)
+                && job
+                    .target
+                    .as_ref()
+                    .is_some_and(|target| overlaps(target.position, target.position + target.size))
+        }) {
             return Some("Another project occupies that space.");
         }
         for column in start.x..end.x {
@@ -539,7 +590,7 @@ impl Construction {
         for plan in self
             .plans
             .iter()
-            .filter(|plan| plan.work < catalog.projects[&plan.key].work)
+            .filter(|plan| !plan.removed && plan.work < catalog.projects[&plan.key].work)
         {
             let left_top =
                 world_position(plan.position.x as f32, plan.position.y as f32) - Vec2::ONE;
@@ -576,7 +627,8 @@ impl Construction {
             .iter()
             .filter(|project| {
                 let definition = &catalog.projects[&project.key];
-                project.work >= definition.work
+                !project.removed
+                    && project.work >= definition.work
                     && matches!(definition.kind.as_str(), "warehouse" | "covered-storage")
             })
             .count() as u64;
@@ -602,7 +654,7 @@ impl Construction {
                 .enumerate()
                 .filter_map(|(index, project)| {
                     let definition = &catalog.projects[&project.key];
-                    if project.work < definition.work {
+                    if project.removed || project.work < definition.work {
                         return None;
                     }
                     let working = self.production.jobs.iter().any(|job| {
@@ -702,7 +754,19 @@ impl Construction {
                 .and_then(|definition| catalog.animal_rations.get(&definition.kind))
                 .is_some_and(|ration| pen.valid(ration))
         });
-        if !self.trade.valid(catalog)
+        let changes_valid = self.priority.is_none_or(|index| index < self.plans.len())
+            && self.changes.iter().all(|(&index, job)| {
+                self.plans.get(index).is_some_and(|plan| !plan.removed)
+                    && (0.0..=job.required).contains(&job.work)
+                    && job.worker.is_none_or(|index| index < self.residents.len())
+                    && job.target.as_ref().is_none_or(|target| {
+                        target.position.cmpge(IVec2::splat(-30)).all()
+                            && target.position.cmple(IVec2::splat(94)).all()
+                            && target.rotation <= 3
+                    })
+            });
+        if !changes_valid
+            || !self.trade.valid(catalog)
             || !animals_valid
             || !farms_valid
             || !services_valid
@@ -744,7 +808,7 @@ impl Construction {
     }
 
     pub fn latest_progress(&self, catalog: &Catalog) -> Option<String> {
-        let project = self.plans.last()?;
+        let project = self.plans.iter().rev().find(|plan| !plan.removed)?;
         let definition = &catalog.projects[&project.key];
         let status = if project.work >= definition.work {
             "Ready".into()
@@ -770,7 +834,7 @@ impl Construction {
             .iter()
             .enumerate()
             .filter_map(|(index, project)| {
-                if project.work < catalog.projects[&project.key].work {
+                if project.removed || project.work < catalog.projects[&project.key].work {
                     return None;
                 }
                 let model = catalog.projects[&project.key].model;
@@ -821,6 +885,7 @@ impl Construction {
             clock.seconds,
             crate::market::fare_cents(clock.round_trip_km),
         );
+        self.tick_changes(catalog, stock, site, dt);
         self.tick_shifts(catalog, stock, site, clock, dt);
         self.tick_trip(catalog, stock, site, clock, dt);
         self.tick_gathering(catalog, stock, site, clock.seconds, dt);
@@ -833,12 +898,13 @@ impl Construction {
                 || self.farming.has_worker(index)
                 || self.residents[index].health.task.is_some()
                 || self.residents[index].town_work.active()
+                || self.working_change(index)
             {
                 continue;
             }
             if let Some(job) = &self.residents[index].assignment {
                 let project = &self.plans[job.project];
-                if project.work >= catalog.projects[&project.key].work {
+                if project.removed || project.work >= catalog.projects[&project.key].work {
                     self.residents[index].assignment = None;
                     self.residents[index].path.clear();
                 }
@@ -912,9 +978,18 @@ impl Construction {
         camp: IVec2,
     ) {
         let position = self.residents[index].position;
-        for (id, project) in self.plans.iter().enumerate() {
+        let candidates = self
+            .priority
+            .into_iter()
+            .chain((0..self.plans.len()).filter(|index| Some(*index) != self.priority));
+        for id in candidates {
+            let project = &self.plans[id];
             let definition = &catalog.projects[&project.key];
-            if project.pickups > 0 || project.work >= definition.work {
+            if project.removed
+                || self.changes.contains_key(&id)
+                || project.pickups > 0
+                || project.work >= definition.work
+            {
                 continue;
             }
             let crew: Vec<_> = self
@@ -994,7 +1069,8 @@ impl Construction {
         let (center, width) = terrain.river(f64::from(z));
         let inside = |start: IVec2, end: IVec2| cell.cmpge(start).all() && cell.cmplt(end).all();
         let crossing = self.plans.iter().any(|plan| {
-            plan.key == "bridge"
+            !plan.removed
+                && plan.key == "bridge"
                 && plan.work >= catalog.projects[&plan.key].work
                 && inside(plan.position, plan.position + plan.size)
         });
@@ -1007,10 +1083,11 @@ impl Construction {
                 .site_at(cell)
                 .is_some_and(|index| !self.gathering.felled(index))
             || inside(camp + IVec2::new(-1, -3), camp + IVec2::new(4, 0))
-            || self
-                .plans
-                .iter()
-                .any(|plan| plan.key != "road" && inside(plan.position, plan.position + plan.size))
+            || self.plans.iter().any(|plan| {
+                !plan.removed
+                    && plan.key != "road"
+                    && inside(plan.position, plan.position + plan.size)
+            })
     }
 }
 
@@ -1064,7 +1141,7 @@ mod tests {
         let recipe = &catalog.production["saw_timber"];
         stock.receive(&recipe.input);
         let before = stock.available("wood");
-        construction.select_facility(&catalog, IVec2::new(44, 36));
+        construction.select_facility(IVec2::new(44, 36));
         construction.production.open = true;
         let index = catalog
             .production

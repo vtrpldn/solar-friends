@@ -114,6 +114,7 @@ impl Construction {
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
                 || self.farming.has_worker(index)
+                || self.changes.values().any(|job| job.worker == Some(index))
                 || self.trip.as_ref().is_some_and(|trip| trip.driver == index)
             {
                 continue;

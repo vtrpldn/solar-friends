@@ -27,7 +27,8 @@ impl Construction {
                 .is_some_and(|job| job.activity != Activity::Walk)
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
-                || self.farming.has_worker(index);
+                || self.farming.has_worker(index)
+                || self.changes.values().any(|job| job.worker == Some(index));
             resident.health.decay(
                 &catalog.residents[index],
                 temperature,
@@ -45,6 +46,7 @@ impl Construction {
                 && !self.production.has_worker(index)
                 && !self.residents[index].town_work.active()
                 && !self.farming.has_worker(index)
+                && !self.working_change(index)
                 && !self.residents[index]
                     .assignment
                     .as_ref()
@@ -239,6 +241,7 @@ impl Construction {
                     && !self.production.has_worker(*id)
                     && !resident.town_work.active()
                     && !self.farming.has_worker(*id)
+                    && !self.working_change(*id)
                     && !self.trip.as_ref().is_some_and(|trip| trip.driver == *id)
             })
             .find_map(|(id, resident)| {
