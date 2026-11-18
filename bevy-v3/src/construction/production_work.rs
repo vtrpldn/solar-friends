@@ -354,8 +354,16 @@ impl Construction {
         Some(text)
     }
 
-    pub fn tick_animals(&mut self, catalog: &Catalog, stock: &mut Stock, clock: f64, dt: f64) {
-        let mut care = Vec::new();
+    pub fn tick_animals(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        land: &crate::land::Land,
+        clock: f64,
+        dt: f64,
+    ) {
+        let mut batches = Vec::new();
+        let mut forage_origin = None;
         for (index, project) in self.plans.iter().enumerate() {
             let definition = &catalog.projects[&project.key];
             if project.removed || project.work < definition.work {
@@ -369,15 +377,28 @@ impl Construction {
                 continue;
             }
             pen.tick(ration, clock, dt);
-            if pen.fed_days(ration) <= 0.25
-                && self.utilities.potable_at(index + 1) >= ration.water
-                && stock.available("fodder") >= ration.fodder
-                && !self.production.jobs.iter().any(|job| job.site == index)
+            if self.changes.contains_key(&index)
+                || !self.utilities.enabled(index)
+                || self.production.jobs.iter().any(|job| job.site == index)
             {
-                care.push((index, format!("care-{}", definition.kind)));
+                continue;
+            }
+            if pen.fed_days(ration) <= 0.25 {
+                if stock.available("fodder") < ration.fodder {
+                    forage_origin.get_or_insert(project.position);
+                } else if self.utilities.potable_at(index + 1) >= ration.water {
+                    batches.push((index, format!("care-{}", definition.kind)));
+                    continue;
+                }
+            }
+            if pen.available() > 0 {
+                batches.push((index, ration.product.clone()));
             }
         }
-        for (index, id) in care {
+        if let Some(origin) = forage_origin {
+            self.gathering.queue_forage(land, origin, clock);
+        }
+        for (index, id) in batches {
             if stock.missing(&catalog.production[&id].input).is_none() {
                 self.queue_batch(catalog, stock, index, &id);
             }
@@ -924,6 +945,37 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn livestock_schedules_forage_and_collection_without_player_orders() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let land = Land::generate(&setup);
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.reserve_available(&BTreeMap::from([(
+            "fodder".into(),
+            stock.available("fodder"),
+        )]));
+        let mut village = Construction::default();
+        let mut coop = village.proposed_site(&catalog, "coop", IVec2::new(41, 36));
+        coop.work = catalog.projects["coop"].work;
+        village.plans.push(coop);
+
+        for _ in 0..2 {
+            village.tick_animals(&catalog, &mut stock, &land, 0.1, 0.1);
+        }
+        assert_eq!(village.gathering.orders.len(), 1);
+        let forage = *village.gathering.orders.keys().next().unwrap();
+        assert_eq!(land.site(forage).unwrap().recipe(), "gather-wild-forage");
+
+        let ration = &catalog.animal_rations["coop"];
+        let pen = village.livestock.animals.get_mut(&0).unwrap();
+        pen.feed(ration, ration.water);
+        pen.tick(ration, DAY, DAY);
+        village.tick_animals(&catalog, &mut stock, &land, DAY + 0.1, 0.1);
+        assert_eq!(village.production.jobs.len(), 1);
+        assert_eq!(village.production.jobs[0].recipe, "eggs");
+    }
 
     #[test]
     fn a_workbench_repair_restores_a_worn_tool() {

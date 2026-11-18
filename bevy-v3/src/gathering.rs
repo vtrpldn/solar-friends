@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use bevy::prelude::IVec2;
 use serde::{Deserialize, Serialize};
 
 use crate::{catalog::Catalog, land::Land, terrain::land_random};
@@ -177,6 +178,34 @@ impl Gathering {
             }
         }
         self.notice.clear();
+        self.queue_site(index);
+    }
+
+    pub fn queue_forage(&mut self, land: &Land, origin: IVec2, clock: f64) {
+        const FORAGE: &str = "gather-wild-forage";
+        if self
+            .orders
+            .keys()
+            .any(|&index| land.site(index).is_some_and(|site| site.recipe() == FORAGE))
+        {
+            return;
+        }
+        if let Some((index, _)) = land
+            .sites()
+            .filter(|(index, site)| {
+                site.recipe() == FORAGE
+                    && self
+                        .markers
+                        .get(index)
+                        .is_none_or(|state| !state.removed && state.ready <= clock)
+            })
+            .min_by_key(|(_, site)| (site.position - origin).length_squared())
+        {
+            self.queue_site(index);
+        }
+    }
+
+    fn queue_site(&mut self, index: usize) {
         self.orders.insert(
             index,
             GatherJob {

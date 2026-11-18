@@ -1182,7 +1182,7 @@ fn step(
     let cooling = town.construction.utilities.powered_cold_storage();
     town.stock.age_food(catalog, town.clock, dt, cooling);
     town.construction
-        .tick_animals(catalog, &mut town.stock, town.clock, dt);
+        .tick_animals(catalog, &mut town.stock, site.land, town.clock, dt);
     town.construction.tick_crops(catalog, setup, town.clock, dt);
     town.construction
         .tick_growth(catalog, setup, &mut town.stock, town.clock, dt);
