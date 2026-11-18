@@ -104,6 +104,10 @@ pub struct Village {
     #[serde(skip)]
     inventory_page: usize,
     #[serde(skip)]
+    projects_page: usize,
+    #[serde(skip)]
+    open_projects_only: bool,
+    #[serde(skip)]
     housing_notice: String,
     #[serde(skip)]
     camp_error: Option<&'static str>,
@@ -215,6 +219,7 @@ enum UtilityPanel {
     Upkeep,
     Events,
     Inventory,
+    Projects,
 }
 
 impl Village {
@@ -700,6 +705,41 @@ fn village_input(
                 Some(UtilityPanel::Residents)
             };
         }
+        if keyboard.just_pressed(KeyCode::F11) {
+            town.utility_panel = if town.utility_panel == Some(UtilityPanel::Projects) {
+                None
+            } else {
+                Some(UtilityPanel::Projects)
+            };
+            town.projects_page = 0;
+        }
+        if town.utility_panel == Some(UtilityPanel::Projects) {
+            if keyboard.just_pressed(KeyCode::Tab) {
+                town.open_projects_only = !town.open_projects_only;
+                town.projects_page = 0;
+            }
+            if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
+                let pages = town
+                    .construction
+                    .projects_panel(&catalog, town.projects_page, town.open_projects_only)
+                    .0;
+                town.projects_page = if keyboard.just_pressed(KeyCode::PageDown) {
+                    (town.projects_page + 1) % pages
+                } else {
+                    (town.projects_page + pages - 1) % pages
+                };
+            }
+            if let Some(point) = town.construction.focus_project(
+                &catalog,
+                &keyboard,
+                town.projects_page,
+                town.open_projects_only,
+            ) {
+                camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+                town.utility_panel = None;
+            }
+            return;
+        }
         if keyboard.just_pressed(KeyCode::F10) {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Inventory) {
                 None
@@ -1172,13 +1212,22 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores",
+            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects",
         );
     }
     match village.utility_panel {
         Some(UtilityPanel::Power) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.power_summary());
+        }
+        Some(UtilityPanel::Projects) => {
+            label.push('\n');
+            label.push_str(
+                &village
+                    .construction
+                    .projects_panel(&catalog, village.projects_page, village.open_projects_only)
+                    .1,
+            );
         }
         Some(UtilityPanel::Inventory) => {
             label.push('\n');

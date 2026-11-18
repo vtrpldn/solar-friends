@@ -12,7 +12,7 @@ use super::*;
 
 impl Construction {
     pub fn select_facility(&mut self, cell: IVec2) {
-        self.production.selected = self
+        let index = self
             .plans
             .iter()
             .enumerate()
@@ -22,6 +22,11 @@ impl Construction {
                     && !plan.removed
             })
             .map(|(index, _)| index);
+        self.select_project(index);
+    }
+
+    pub(super) fn select_project(&mut self, index: Option<usize>) {
+        self.production.selected = index;
         self.production.open = false;
         self.production.page = 0;
         self.production.notice.clear();

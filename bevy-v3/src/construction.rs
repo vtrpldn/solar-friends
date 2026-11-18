@@ -6,6 +6,7 @@ mod kitchen_work;
 mod leisure;
 mod lifecycle;
 mod production_work;
+mod project_list;
 mod resident_work;
 mod roads;
 mod town_pickup;
