@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     arrival::{ARRIVAL_SPOTS, MAP_START, ROAD_END, road_center, road_width, world_position},
     catalog::{Catalog, Project},
+    land::Land,
     navigation::route,
     stock::Stock,
     terrain::Terrain,
@@ -180,6 +181,7 @@ impl Construction {
         catalog: &Catalog,
         stock: &mut Stock,
         terrain: &Terrain,
+        land: &Land,
         camp: IVec2,
         position: IVec2,
     ) {
@@ -194,7 +196,8 @@ impl Construction {
             delivered: 0,
             work: 0.0,
         };
-        if let Some(error) = self.placement_error(terrain, camp, &blueprint, definition.repeatable)
+        if let Some(error) =
+            self.placement_error(terrain, land, camp, &blueprint, definition.repeatable)
         {
             self.status = error.into();
             return;
@@ -211,6 +214,7 @@ impl Construction {
     fn placement_error(
         &self,
         terrain: &Terrain,
+        land: &Land,
         camp: IVec2,
         blueprint: &Blueprint,
         repeatable: bool,
@@ -246,6 +250,9 @@ impl Construction {
         }
         for column in start.x..end.x {
             for row in start.y..end.y {
+                if land.occupied(IVec2::new(column, row)) {
+                    return Some("A tree or natural resource occupies that space.");
+                }
                 let Vec2 { x, y: z } = world_position(column as f32, row as f32);
                 if (MAP_START..=ROAD_END).contains(&z)
                     && (x - road_center(z)).abs() < road_width(z) + 1.0
@@ -357,7 +364,14 @@ impl Construction {
             })
     }
 
-    pub fn tick(&mut self, catalog: &Catalog, terrain: &Terrain, camp: IVec2, dt: f32) {
+    pub fn tick(
+        &mut self,
+        catalog: &Catalog,
+        terrain: &Terrain,
+        land: &Land,
+        camp: IVec2,
+        dt: f32,
+    ) {
         for index in 0..self.residents.len() {
             if let Some(job) = &self.residents[index].assignment {
                 let project = &self.plans[job.project];
@@ -369,7 +383,7 @@ impl Construction {
             if self.residents[index].assignment.is_none() {
                 self.residents[index].retry -= dt;
                 if self.residents[index].retry <= 0.0 {
-                    self.assign(index, catalog, terrain, camp);
+                    self.assign(index, catalog, terrain, land, camp);
                     self.residents[index].retry = 2.0;
                 }
             }
@@ -423,7 +437,14 @@ impl Construction {
         }
     }
 
-    fn assign(&mut self, index: usize, catalog: &Catalog, terrain: &Terrain, camp: IVec2) {
+    fn assign(
+        &mut self,
+        index: usize,
+        catalog: &Catalog,
+        terrain: &Terrain,
+        land: &Land,
+        camp: IVec2,
+    ) {
         let position = self.residents[index].position;
         for (id, project) in self.plans.iter().enumerate() {
             let definition = &catalog.projects[&project.key];
@@ -464,7 +485,7 @@ impl Construction {
                 route(
                     from,
                     to,
-                    |cell| self.blocked(terrain, camp, cell),
+                    |cell| self.blocked(terrain, land, camp, cell),
                     access_road,
                 )
             };
@@ -495,12 +516,13 @@ impl Construction {
         }
     }
 
-    fn blocked(&self, terrain: &Terrain, camp: IVec2, cell: IVec2) -> bool {
+    fn blocked(&self, terrain: &Terrain, land: &Land, camp: IVec2, cell: IVec2) -> bool {
         let Vec2 { x, y: z } = world_position(cell.x as f32, cell.y as f32);
         let (center, width) = terrain.river(f64::from(z));
         let inside = |start: IVec2, end: IVec2| cell.cmpge(start).all() && cell.cmplt(end).all();
         (f64::from(x) - center).abs() <= width + 1.9
             || cell == STOCKPILE
+            || land.occupied(cell)
             || inside(camp + IVec2::new(-1, -3), camp + IVec2::new(4, 0))
             || self
                 .plans
@@ -534,15 +556,23 @@ mod tests {
         let catalog = Catalog::default();
         let mut stock = Stock::for_start(&setup, &catalog);
         let terrain = setup.terrain();
+        let land = Land::default();
         let camp = IVec2::new(36, 36);
         let mut construction = Construction {
             selection: Some("gathering"),
             ..default()
         };
-        construction.plan(&catalog, &mut stock, &terrain, camp, IVec2::new(44, 36));
+        construction.plan(
+            &catalog,
+            &mut stock,
+            &terrain,
+            &land,
+            camp,
+            IVec2::new(44, 36),
+        );
         let loads = catalog.loads(&catalog.projects["gathering"]);
         for _ in 0..8_000 {
-            construction.tick(&catalog, &terrain, camp, 0.1);
+            construction.tick(&catalog, &terrain, &land, camp, 0.1);
             let project = &construction.plans[0];
             assert!(project.delivered <= loads);
             if project.delivered < loads {
@@ -563,23 +593,38 @@ mod tests {
         let catalog = Catalog::default();
         let mut stock = Stock::for_start(&setup, &catalog);
         let terrain = setup.terrain();
+        let land = Land::default();
         let camp = IVec2::new(36, 36);
         let mut construction = Construction {
             selection: Some("gathering"),
             ..default()
         };
 
-        construction.plan(&catalog, &mut stock, &terrain, camp, camp);
+        construction.plan(&catalog, &mut stock, &terrain, &land, camp, camp);
         assert_eq!(stock.available("wood"), 36);
         assert!(construction.plans.is_empty());
 
-        construction.plan(&catalog, &mut stock, &terrain, camp, IVec2::new(44, 36));
+        construction.plan(
+            &catalog,
+            &mut stock,
+            &terrain,
+            &land,
+            camp,
+            IVec2::new(44, 36),
+        );
         assert_eq!(stock.available("wood"), 28);
         assert_eq!(stock.available("hardware"), 6);
         assert_eq!(construction.plans.len(), 1);
 
         construction.selection = Some("well");
-        construction.plan(&catalog, &mut stock, &terrain, camp, IVec2::new(50, 36));
+        construction.plan(
+            &catalog,
+            &mut stock,
+            &terrain,
+            &land,
+            camp,
+            IVec2::new(50, 36),
+        );
         assert_eq!(stock.available("hardware"), 6);
         assert_eq!(construction.plans.len(), 1);
     }

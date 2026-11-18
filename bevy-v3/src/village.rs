@@ -15,6 +15,7 @@ use crate::{
     },
     catalog::Catalog,
     construction::Construction,
+    land::Land,
     save,
     setup::WorldSetup,
     stock::Stock,
@@ -248,7 +249,7 @@ fn village_input(
     mut village: ResMut<Village>,
     mut camera: Single<&mut VillageCamera>,
     entities: Query<Entity, With<VillageEntity>>,
-    (assets, catalog): (Res<AssetServer>, Res<Catalog>),
+    (assets, catalog, land): (Res<AssetServer>, Res<Catalog>, Res<Land>),
 ) {
     if setup.open {
         if setup.is_changed() {
@@ -311,7 +312,7 @@ fn village_input(
         }
         if let Some(position) = pointer.0 {
             town.construction
-                .plan(&catalog, &mut town.stock, &terrain, cell, position);
+                .plan(&catalog, &mut town.stock, &terrain, &land, cell, position);
         }
         return;
     }
@@ -324,9 +325,16 @@ fn village_input(
     let Some(cell) = preset.or(pointer.0) else {
         return;
     };
-    if preset.is_none()
-        && let Some(error) = custom_camp_error(&terrain, cell)
-    {
+    let natural_site = (cell.x - 1..=cell.x + 3)
+        .any(|x| (cell.y - 3..=cell.y).any(|z| land.occupied(IVec2::new(x, z))));
+    let placement_error = if natural_site {
+        Some("Leave the trees and natural resources clear.")
+    } else if preset.is_none() {
+        custom_camp_error(&terrain, cell)
+    } else {
+        None
+    };
+    if let Some(error) = placement_error {
         village.camp_error = Some(error);
         return;
     }
@@ -407,7 +415,7 @@ fn advance_clock(
     time: Res<Time<Fixed>>,
     setup: Res<WorldSetup>,
     mut village: ResMut<Village>,
-    catalog: Res<Catalog>,
+    (catalog, land): (Res<Catalog>, Res<Land>),
 ) {
     if setup.open || village.paused {
         return;
@@ -418,7 +426,7 @@ fn advance_clock(
             village.clock += time.delta_secs_f64();
             village
                 .construction
-                .tick(&catalog, &terrain, camp, time.delta_secs());
+                .tick(&catalog, &terrain, &land, camp, time.delta_secs());
         }
     }
 }
@@ -535,6 +543,7 @@ mod tests {
         let setup = WorldSetup::default().session();
         let catalog = Catalog::default();
         let terrain = setup.terrain();
+        let land = Land::default();
         let camp = IVec2::new(36, 36);
         let mut village = Village {
             setup: Some(setup.clone()),
@@ -553,11 +562,14 @@ mod tests {
             &catalog,
             &mut village.stock,
             &terrain,
+            &land,
             camp,
             IVec2::new(44, 36),
         );
         for _ in 0..200 {
-            village.construction.tick(&catalog, &terrain, camp, 0.1);
+            village
+                .construction
+                .tick(&catalog, &terrain, &land, camp, 0.1);
         }
 
         let path =
@@ -567,8 +579,12 @@ mod tests {
         std::fs::remove_file(path).unwrap();
 
         for _ in 0..2_000 {
-            village.construction.tick(&catalog, &terrain, camp, 0.1);
-            resumed.construction.tick(&catalog, &terrain, camp, 0.1);
+            village
+                .construction
+                .tick(&catalog, &terrain, &land, camp, 0.1);
+            resumed
+                .construction
+                .tick(&catalog, &terrain, &land, camp, 0.1);
         }
         assert_eq!(
             serde_json::to_value(village).unwrap(),

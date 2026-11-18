@@ -13,7 +13,7 @@ pub struct Terrain {
     offset: f64,
     bend: f64,
     width: f64,
-    hill_height: f64,
+    pub hill_height: f64,
     foundation: Option<Foundation>,
 }
 
@@ -27,13 +27,7 @@ struct Foundation {
 
 impl Terrain {
     pub fn new(seed: u32, water: f64, relief: f64) -> Self {
-        let mut state = seed;
-        let mut random = || {
-            state = state.wrapping_add(0x6d2b79f5);
-            let mut value = (state ^ (state >> 15)).wrapping_mul(1 | state);
-            value ^= value.wrapping_add((value ^ (value >> 7)).wrapping_mul(61 | value));
-            f64::from(value ^ (value >> 14)) / 4294967296.0
-        };
+        let mut random = land_random(seed);
         let offset = -65.0 + random() * 29.0;
         let bend = 4.0 + random() * 10.0;
         // The original generator reserves draws for the phase and frequency.
@@ -210,7 +204,17 @@ fn surface_mesh(positions: Vec<[f32; 3]>, indices: Vec<u32>) -> Mesh {
     mesh
 }
 
-fn noise(x: f64, z: f64, seed: u32) -> f64 {
+pub fn land_random(seed: u32) -> impl FnMut() -> f64 {
+    let mut state = seed;
+    move || {
+        state = state.wrapping_add(0x6d2b79f5);
+        let mut value = (state ^ (state >> 15)).wrapping_mul(1 | state);
+        value ^= value.wrapping_add((value ^ (value >> 7)).wrapping_mul(61 | value));
+        f64::from(value ^ (value >> 14)) / 4294967296.0
+    }
+}
+
+pub fn noise(x: f64, z: f64, seed: u32) -> f64 {
     let ix = x.floor() as i32;
     let iz = z.floor() as i32;
     let fade = |t: f64| t * t * t * (t * (t * 6.0 - 15.0) + 10.0);

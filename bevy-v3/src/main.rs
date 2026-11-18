@@ -8,6 +8,7 @@ mod arrival;
 mod audio;
 mod catalog;
 mod construction;
+mod land;
 mod navigation;
 mod save;
 mod setup;
@@ -35,6 +36,7 @@ fn main() {
             village::VillagePlugin,
             ui_font::UiFontPlugin,
             audio::VillageAudio,
+            land::LandPlugin,
         ))
         .add_systems(Startup, setup_scene)
         .add_systems(PostUpdate, update_land)

@@ -5,6 +5,7 @@ use crate::{terrain::Terrain, ui_font::ui_font};
 
 const BIOMES: [&str; 3] = ["Mata Atlântica", "Cerrado", "Caatinga"];
 const LANDSCAPES: [&str; 3] = ["Gentle", "Rolling", "Rugged"];
+const RESOURCES: [&str; 3] = ["Sparse", "Balanced", "Rich"];
 const SAVINGS: [&str; 3] = [
     "Tight · R$3,000",
     "Modest · R$10,000",
@@ -21,8 +22,14 @@ pub struct WorldSetup {
     biome: usize,
     landscape: usize,
     water: usize,
+    #[serde(default = "balanced_resources")]
+    resources: usize,
     savings: usize,
     supplies: usize,
+}
+
+fn balanced_resources() -> usize {
+    1
 }
 
 impl Default for WorldSetup {
@@ -33,6 +40,7 @@ impl Default for WorldSetup {
             biome: 0,
             landscape: 1,
             water: 1,
+            resources: 1,
             savings: 1,
             supplies: 1,
         }
@@ -51,8 +59,17 @@ impl WorldSetup {
         self.biome < BIOMES.len()
             && self.landscape < LANDSCAPES.len()
             && self.water < WATER.len()
+            && self.resources < RESOURCES.len()
             && self.savings < SAVINGS.len()
             && self.supplies < SUPPLIES.len()
+    }
+
+    pub fn biome(&self) -> usize {
+        self.biome
+    }
+
+    pub fn richness(&self) -> f64 {
+        [0.6, 1.0, 1.6][self.resources]
     }
 
     pub fn starting_cash(&self) -> u32 {
@@ -81,6 +98,7 @@ impl WorldSetup {
             Action::Biome => format!("Biome   ·   {}", BIOMES[self.biome]),
             Action::Landscape => format!("Landscape   ·   {}", LANDSCAPES[self.landscape]),
             Action::Water => format!("Water   ·   {}", WATER[self.water]),
+            Action::Resources => format!("Resources   ·   {}", RESOURCES[self.resources]),
             Action::Savings => SAVINGS[self.savings].into(),
             Action::Supplies => format!("Supplies   ·   {}", SUPPLIES[self.supplies]),
             Action::Seed => format!("Land seed   ·   {}", self.seed),
@@ -94,6 +112,7 @@ enum Action {
     Biome,
     Landscape,
     Water,
+    Resources,
     Savings,
     Supplies,
     Seed,
@@ -136,6 +155,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Biome,
                 Action::Landscape,
                 Action::Water,
+                Action::Resources,
                 Action::Savings,
                 Action::Supplies,
                 Action::Seed,
@@ -179,6 +199,7 @@ fn setup_input(
             Action::Biome => setup.biome = (setup.biome + 1) % BIOMES.len(),
             Action::Landscape => setup.landscape = (setup.landscape + 1) % LANDSCAPES.len(),
             Action::Water => setup.water = (setup.water + 1) % WATER.len(),
+            Action::Resources => setup.resources = (setup.resources + 1) % RESOURCES.len(),
             Action::Savings => setup.savings = (setup.savings + 1) % SAVINGS.len(),
             Action::Supplies => setup.supplies = (setup.supplies + 1) % SUPPLIES.len(),
             Action::Seed => setup.seed = setup.seed.wrapping_add(1),
