@@ -31,6 +31,7 @@ mod ui_font;
 mod utilities;
 mod village;
 mod weather;
+mod wildlife;
 use setup::{WorldSetup, WorldSetupPlugin};
 
 const CAMERA_HOME: Vec3 = Vec3::new(-26.0, 3.0, -12.0);
@@ -57,6 +58,7 @@ fn main() {
         land::LandPlugin,
         weather::WeatherPlugin,
         resident_animation::ResidentAnimationPlugin,
+        wildlife::WildlifePlugin,
     ))
     .add_systems(Startup, setup_scene)
     .add_systems(PostUpdate, update_land)
@@ -297,6 +299,7 @@ mod tests {
             ui_font::UiFontPlugin,
             land::LandPlugin,
             weather::WeatherPlugin,
+            wildlife::WildlifePlugin,
         ))
         .add_systems(Startup, setup_scene)
         .add_systems(PostUpdate, update_land)
@@ -322,6 +325,19 @@ mod tests {
             app.world().resource::<village::Village>().camp,
             Some(IVec2::new(36, 36))
         );
+        app.world_mut().run_schedule(PostUpdate);
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_secs(24));
+        app.world_mut().run_schedule(PostUpdate);
+        let world = app.world_mut();
+        let visitors = world
+            .query::<&Name>()
+            .iter(world)
+            .filter(|name| name.as_str() == "Wildlife visitor")
+            .count();
+        assert!((1..=4).contains(&visitors));
+
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .reset_all();
