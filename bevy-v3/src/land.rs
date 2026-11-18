@@ -314,26 +314,39 @@ fn generate_land(
     }
 }
 
+#[derive(Default)]
+struct LandDetailDraw {
+    camp: Option<IVec2>,
+    terrain: (u64, u64),
+}
+
 fn draw_land(
     mut commands: Commands,
     land: Res<Land>,
     setup: Res<WorldSetup>,
     village: Res<Village>,
     assets: Res<AssetServer>,
-    existing: Query<Entity, With<LandDetail>>,
-    mut previous_camp: Local<Option<IVec2>>,
+    mut existing: Query<(Entity, &mut Transform), With<LandDetail>>,
+    mut previous: Local<LandDetailDraw>,
 ) {
     let camp = if setup.open { None } else { village.camp };
-    if !land.is_changed() && camp == *previous_camp {
+    let terrain_key = village.terrain_key();
+    let rebuild = land.is_changed() || camp != previous.camp;
+    if !rebuild && terrain_key == previous.terrain {
         return;
     }
-    *previous_camp = camp;
-    for entity in &existing {
-        commands.entity(entity).despawn();
+    previous.camp = camp;
+    previous.terrain = terrain_key;
+    let terrain = village.terrain(&setup);
+    if !rebuild {
+        for (_, mut transform) in &mut existing {
+            transform.translation.y =
+                terrain.height_at(transform.translation.x, transform.translation.z);
+        }
+        return;
     }
-    let mut terrain = setup.terrain();
-    if let Some(cell) = camp {
-        terrain = terrain.with_camp(cell);
+    for (entity, _) in &existing {
+        commands.entity(entity).despawn();
     }
     let path = AssetPath::from_path_buf(embedded_path!("land.glb")).with_source("embedded");
     let sites = land.sites.iter().enumerate().map(|(index, site)| {

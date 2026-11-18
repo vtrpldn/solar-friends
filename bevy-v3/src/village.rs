@@ -25,6 +25,7 @@ use crate::{
     save_library::{self, SaveMenu},
     setup::{Mode, WorldSetup},
     stock::Stock,
+    terrain::{Terrain, TerrainEditor},
     time_advance::Advance,
     ui_font::ui_font,
     weather::{forecast, weather_at},
@@ -98,6 +99,8 @@ pub struct Village {
     rebuild_scene: bool,
     #[serde(skip)]
     session_serial: u64,
+    #[serde(default)]
+    terrain_editor: TerrainEditor,
     stock: Stock,
     construction: Construction,
 }
@@ -113,6 +116,18 @@ enum UtilityPanel {
 }
 
 impl Village {
+    pub fn terrain_key(&self) -> (u64, u64) {
+        (self.session_serial, self.terrain_editor.revision)
+    }
+
+    pub fn terrain(&self, setup: &WorldSetup) -> Terrain {
+        let terrain = setup.terrain();
+        match self.camp.filter(|_| !setup.open) {
+            Some(cell) => self.terrain_editor.terrain(terrain.with_camp(cell)),
+            None => terrain,
+        }
+    }
+
     pub fn mode(&self) -> Option<Mode> {
         self.setup.as_ref().map(|setup| setup.mode)
     }
@@ -130,7 +145,7 @@ impl Village {
     }
 
     pub fn is_paused(&self) -> bool {
-        self.paused || self.advance.open
+        self.paused || self.advance.open || self.terrain_editor.open
     }
 
     pub fn motion(&self, index: usize) -> Motion {
@@ -164,6 +179,7 @@ impl Village {
             || self.clock < 0.0
             || !self.clock.is_finite()
             || !self.stock.valid_food()
+            || !self.terrain_editor.valid()
         {
             return false;
         }
@@ -252,7 +268,16 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
 }
 
 #[derive(Resource, Default)]
-struct CampPointer(Option<IVec2>);
+struct CampPointer {
+    clicked: Option<GroundHit>,
+    hovered: Option<Vec3>,
+}
+
+#[derive(Clone, Copy)]
+struct GroundHit {
+    cell: IVec2,
+    world: Vec3,
+}
 
 fn read_camp_pointer(
     (setup, village): (Res<WorldSetup>, Res<Village>),
@@ -266,7 +291,8 @@ fn read_camp_pointer(
     mut input: Local<Option<Vec2>>,
     mut pointer: ResMut<CampPointer>,
 ) {
-    pointer.0 = None;
+    pointer.clicked = None;
+    pointer.hovered = None;
     if !window.focused || setup.open || village.arrival_time < ARRIVAL_DURATION {
         *input = None;
         return;
@@ -281,7 +307,8 @@ fn read_camp_pointer(
     if input.is_some_and(|start| start.distance(cursor) > 5.0) {
         *input = None;
     }
-    if !mouse.just_released(MouseButton::Left) || input.take().is_none() {
+    let clicked = mouse.just_released(MouseButton::Left) && input.take().is_some();
+    if !clicked && !village.terrain_editor.open {
         return;
     }
     let (camera, transform) = *camera;
@@ -292,7 +319,13 @@ fn read_camp_pointer(
     let settings = MeshRayCastSettings::default().with_filter(&filter);
     if let Some((_, hit)) = raycast.cast_ray(ray, &settings).first() {
         let cell = hit.point.xz() * 0.5 + Vec2::splat(32.5);
-        pointer.0 = Some(cell.floor().as_ivec2());
+        pointer.hovered = Some(hit.point);
+        if clicked {
+            pointer.clicked = Some(GroundHit {
+                cell: cell.floor().as_ivec2(),
+                world: hit.point,
+            });
+        }
     }
 }
 
@@ -340,7 +373,6 @@ fn village_input(
         }
         return;
     }
-    let terrain = setup.terrain();
     let new_world = village.setup.as_ref() != Some(&setup.session());
     if new_world || village.rebuild_scene {
         for entity in &entities {
@@ -381,17 +413,33 @@ fn village_input(
     if keyboard.just_pressed(KeyCode::KeyF) {
         village.show_forecast = !village.show_forecast;
     }
-    if keyboard.just_pressed(KeyCode::Space) && village.camp.is_some() {
+    if keyboard.just_pressed(KeyCode::Space)
+        && village.camp.is_some()
+        && !village.terrain_editor.open
+    {
         village.paused = !village.paused;
     }
-    if village.camp.is_some() && keyboard.get_just_pressed().len() > 0 {
+    if village.camp.is_some()
+        && !village.terrain_editor.open
+        && keyboard.get_just_pressed().len() > 0
+    {
         village.advance.controls(&keyboard);
     }
     if village.advance.open {
         return;
     }
+    let terrain = village.terrain(&setup);
     if let Some(cell) = village.camp {
         let town = &mut *village;
+        town.terrain_editor.controls(&keyboard);
+        if town.terrain_editor.open {
+            if let Some(hit) = pointer.clicked {
+                town.terrain_editor.stroke(&terrain, hit.world, |cell| {
+                    town.construction.protects_terrain(cell)
+                });
+            }
+            return;
+        }
         if keyboard.just_pressed(KeyCode::KeyH) && !town.stock.sandbox {
             town.utility_panel = if matches!(
                 town.utility_panel,
@@ -526,7 +574,7 @@ fn village_input(
                 town.speed = speed;
             }
         }
-        if let Some(position) = pointer.0
+        if let Some(position) = pointer.clicked.map(|hit| hit.cell)
             && town.construction.is_placing()
         {
             town.construction.plan(
@@ -543,7 +591,7 @@ fn village_input(
                     round_trip_km: setup.round_trip_km(),
                 },
             );
-        } else if let Some(position) = pointer.0
+        } else if let Some(position) = pointer.clicked.map(|hit| hit.cell)
             && !town.construction.menu
         {
             town.construction.select_facility(position);
@@ -568,7 +616,7 @@ fn village_input(
     let preset = CAMP_SITES
         .into_iter()
         .find_map(|(key, cell)| keyboard.just_pressed(key).then_some(cell));
-    let Some(cell) = preset.or(pointer.0) else {
+    let Some(cell) = preset.or(pointer.clicked.map(|hit| hit.cell)) else {
         return;
     };
     let natural_site = (cell.x - 1..=cell.x + 3)
@@ -625,10 +673,7 @@ fn animate_arrival(
     if village.arrival_time < ARRIVAL_DURATION {
         village.arrival_time = (village.arrival_time + time.delta_secs()).min(ARRIVAL_DURATION);
     }
-    let mut terrain = setup.terrain();
-    if let Some(cell) = village.camp {
-        terrain = terrain.with_camp(cell);
-    }
+    let terrain = village.terrain(&setup);
     for (actor, mut transform, mut visibility) in &mut actors {
         let pose = match *actor {
             ArrivalActor::Resident(index) if village.camp.is_some() => {
@@ -672,7 +717,7 @@ fn advance_clock(
         return;
     }
     let Some(camp) = village.camp else { return };
-    let terrain = setup.terrain();
+    let terrain = village.terrain(&setup);
     let site = ConstructionSite {
         terrain: &terrain,
         land: &land,
@@ -694,7 +739,7 @@ fn advance_days(
     let (Some(camp), Some(mut run)) = (village.camp, village.advance.running.take()) else {
         return;
     };
-    let terrain = setup.terrain();
+    let terrain = village.terrain(&setup);
     let site = ConstructionSite {
         terrain: &terrain,
         land: &land,
@@ -817,6 +862,10 @@ fn show_hud(
         label.push('\n');
         label.push_str(&village.advance.status());
     }
+    if village.terrain_editor.open {
+        label.push('\n');
+        label.push_str(&village.terrain_editor.label());
+    }
     if let Some(progress) = village.construction.latest_progress(&catalog) {
         label.push('\n');
         label.push_str(&progress);
@@ -831,7 +880,7 @@ fn show_hud(
         label.push_str(&natural);
     }
     if village.camp.is_some() {
-        label.push_str("\nP Power · V Water · N Residents · H Finances");
+        label.push_str("\nP Power · V Water · N Residents · H Finances · F4 Terrain");
     }
     match village.utility_panel {
         Some(UtilityPanel::Power) => {
@@ -913,14 +962,19 @@ fn draw_blueprints(
     setup: Res<WorldSetup>,
     village: Res<Village>,
     catalog: Res<Catalog>,
+    pointer: Res<CampPointer>,
     mut gizmos: Gizmos,
 ) {
-    if !setup.open
-        && let Some(camp) = village.camp
-    {
-        village
-            .construction
-            .draw(&catalog, &setup.terrain().with_camp(camp), &mut gizmos);
+    if !setup.open && village.camp.is_some() {
+        let terrain = village.terrain(&setup);
+        village.construction.draw(&catalog, &terrain, &mut gizmos);
+        if village.terrain_editor.open
+            && let Some(point) = pointer.hovered
+        {
+            village
+                .terrain_editor
+                .draw_preview(&terrain, point, &mut gizmos);
+        }
     }
 }
 
@@ -935,8 +989,10 @@ fn show_construction(
     if setup.open || !village.is_changed() {
         return;
     }
-    let Some(camp) = village.camp else { return };
-    let terrain = setup.terrain().with_camp(camp);
+    if village.camp.is_none() {
+        return;
+    }
+    let terrain = village.terrain(&setup);
     let models = AssetPath::from_path_buf(embedded_path!("buildings.glb")).with_source("embedded");
     let models_to_show: Vec<_> = village.construction.finished_models(&catalog).collect();
     for (entity, shown, _) in &displayed {

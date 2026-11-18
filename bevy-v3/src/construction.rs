@@ -243,6 +243,16 @@ impl Worker {
 }
 
 impl Construction {
+    pub fn protects_terrain(&self, cell: IVec2) -> bool {
+        self.plans.iter().any(|plan| {
+            !plan.removed
+                && cell.cmpge(plan.position - IVec2::splat(2)).all()
+                && cell
+                    .cmplt(plan.position + plan.size + IVec2::splat(2))
+                    .all()
+        })
+    }
+
     pub fn is_placing(&self) -> bool {
         self.selection.is_some() || self.moving.is_some()
     }

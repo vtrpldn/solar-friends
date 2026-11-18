@@ -105,6 +105,8 @@ struct LandMesh;
 #[derive(Component)]
 struct GroundMesh;
 
+type LandDrawKey = (WorldSetup, Option<IVec2>, (u64, u64));
+
 fn update_land(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -112,10 +114,10 @@ fn update_land(
     setup: Res<WorldSetup>,
     old_land: Query<Entity, With<LandMesh>>,
     village: Res<village::Village>,
-    mut drawn: Local<Option<(WorldSetup, Option<IVec2>)>>,
+    mut drawn: Local<Option<LandDrawKey>>,
 ) {
     let camp = if setup.open { None } else { village.camp };
-    let key = (setup.session(), camp);
+    let key = (setup.session(), camp, village.terrain_key());
     if drawn.as_ref() == Some(&key) {
         return;
     }
@@ -123,10 +125,7 @@ fn update_land(
     for entity in &old_land {
         commands.entity(entity).despawn();
     }
-    let mut terrain = setup.terrain();
-    if let Some(cell) = camp {
-        terrain = terrain.with_camp(cell);
-    }
+    let terrain = village.terrain(&setup);
     commands.spawn((
         LandMesh,
         GroundMesh,

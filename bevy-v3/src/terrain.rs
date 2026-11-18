@@ -1,6 +1,12 @@
+use std::{
+    collections::{BTreeMap, VecDeque},
+    sync::Arc,
+};
+
 use bevy::{
     asset::RenderAssetUsages, mesh::Indices, prelude::*, render::render_resource::PrimitiveTopology,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::arrival::{MAP_START, ROAD_END, road_center, road_width, world_position};
 
@@ -15,6 +21,7 @@ pub struct Terrain {
     width: f64,
     pub hill_height: f64,
     foundation: Option<Foundation>,
+    edits: Arc<BTreeMap<u16, f64>>,
 }
 
 struct Foundation {
@@ -23,6 +30,203 @@ struct Foundation {
     top: f64,
     bottom: f64,
     height: f64,
+}
+
+#[derive(Clone, Copy, Default)]
+enum Brush {
+    #[default]
+    Raise,
+    Lower,
+    Flatten,
+    Smooth,
+}
+
+type TerrainVertices = Arc<BTreeMap<u16, f64>>;
+
+#[derive(Default, Deserialize, Serialize)]
+pub struct TerrainEditor {
+    vertices: TerrainVertices,
+    #[serde(skip)]
+    history: VecDeque<TerrainVertices>,
+    #[serde(skip)]
+    pub open: bool,
+    #[serde(skip)]
+    brush: Brush,
+    #[serde(skip)]
+    radius_index: usize,
+    #[serde(skip)]
+    level: Option<f64>,
+    #[serde(skip)]
+    pub revision: u64,
+    #[serde(skip)]
+    status: &'static str,
+}
+
+impl TerrainEditor {
+    const RADII: [f64; 3] = [8.0, 12.0, 4.0];
+
+    pub fn valid(&self) -> bool {
+        self.vertices.iter().all(|(&index, height)| {
+            u32::from(index) < (CELLS + 1).pow(2) && (0.0..=12.0).contains(height)
+        })
+    }
+
+    pub fn controls(&mut self, keyboard: &ButtonInput<KeyCode>) {
+        if keyboard.just_pressed(KeyCode::F4) {
+            self.open = !self.open;
+            self.level = None;
+            self.status = "";
+        }
+        if !self.open {
+            return;
+        }
+        for (key, brush) in [
+            (KeyCode::Digit1, Brush::Raise),
+            (KeyCode::Digit2, Brush::Lower),
+            (KeyCode::Digit3, Brush::Flatten),
+            (KeyCode::Digit4, Brush::Smooth),
+        ] {
+            if keyboard.just_pressed(key) {
+                self.brush = brush;
+                self.level = None;
+            }
+        }
+        if keyboard.just_pressed(KeyCode::KeyZ) {
+            self.undo();
+        }
+        if keyboard.just_pressed(KeyCode::BracketLeft) {
+            self.radius_index = (self.radius_index + 2) % Self::RADII.len();
+        }
+        if keyboard.just_pressed(KeyCode::BracketRight) {
+            self.radius_index = (self.radius_index + 1) % Self::RADII.len();
+        }
+    }
+
+    fn undo(&mut self) {
+        let Some(previous) = self.history.pop_back() else {
+            self.status = "No terrain edits to undo.";
+            return;
+        };
+        self.vertices = previous;
+        self.revision = self.revision.wrapping_add(1);
+        self.status = "Terrain edit undone.";
+    }
+
+    pub fn draw_preview(&self, terrain: &Terrain, point: Vec3, gizmos: &mut Gizmos) {
+        let radius = Self::RADII[self.radius_index] as f32;
+        let outline = (0..=48).map(|index| {
+            let angle = index as f32 * std::f32::consts::TAU / 48.0;
+            let offset = Vec2::from_angle(angle) * radius;
+            let (x, z) = (point.x + offset.x, point.z + offset.y);
+            Vec3::new(x, terrain.height_at(x, z) + 0.08, z)
+        });
+        gizmos.linestrip(outline, Color::srgb_u8(255, 225, 160));
+    }
+
+    pub fn label(&self) -> String {
+        let tool = match self.brush {
+            Brush::Raise => "Raise",
+            Brush::Lower => "Lower",
+            Brush::Flatten => "Flatten",
+            Brush::Smooth => "Smooth",
+        };
+        let level = self
+            .level
+            .map_or_else(String::new, |h| format!(" · Grade {h:.2} m"));
+        let instruction = match (self.brush, self.level) {
+            (Brush::Flatten, None) => "Click to sample a grade",
+            _ => "Click to shape the ground",
+        };
+        format!(
+            "Terrain · {tool} · {} m radius{level}
+1 Raise · 2 Lower · 3 Flatten · 4 Smooth
+{instruction} · [ ] Radius · Z Undo · F4 Close
+{}",
+            Self::RADII[self.radius_index],
+            self.status
+        )
+    }
+
+    pub fn terrain(&self, mut terrain: Terrain) -> Terrain {
+        terrain.edits = Arc::clone(&self.vertices);
+        terrain
+    }
+
+    pub fn stroke(&mut self, terrain: &Terrain, point: Vec3, occupied: impl Fn(IVec2) -> bool) {
+        let (x, z) = (f64::from(point.x), f64::from(point.z));
+        if !(-HALF_WIDTH..=HALF_WIDTH).contains(&x) || !(-HALF_WIDTH..=HALF_WIDTH).contains(&z) {
+            return;
+        }
+        if matches!(self.brush, Brush::Flatten) && self.level.is_none() {
+            let height = f64::from(point.y);
+            if !(0.0..=12.0).contains(&height) {
+                self.status = "Choose a grade between 0 and 12 m.";
+                return;
+            }
+            self.level = Some(height);
+        }
+
+        let radius = Self::RADII[self.radius_index];
+        let bounds = |center: f64| {
+            let min = ((center - radius) / 2.0).ceil().max(-HALF_WIDTH / 2.0) as i32;
+            let max = ((center + radius) / 2.0).floor().min(HALF_WIDTH / 2.0) as i32;
+            min..=max
+        };
+        let previous = Arc::clone(&self.vertices);
+        let mut changed = false;
+        for column in bounds(x) {
+            for row in bounds(z) {
+                let (a, b) = (f64::from(column * 2), f64::from(row * 2));
+                let distance = (a - x).hypot(b - z);
+                let cell = IVec2::new(column + 32, row + 32);
+                if distance >= radius || terrain.protected_vertex(a, b) || occupied(cell) {
+                    continue;
+                }
+                let old = terrain.elevation(a, b);
+                let weight = (1.0 - distance / radius).powi(2);
+                let next = match self.brush {
+                    Brush::Raise => old + 0.6 * weight,
+                    Brush::Lower => old - 0.6 * weight,
+                    Brush::Flatten => {
+                        old + (self.level.unwrap_or(old) - old) * (2.0 * weight).min(1.0)
+                    }
+                    Brush::Smooth => {
+                        let average = (terrain.elevation(a - 2.0, b)
+                            + terrain.elevation(a + 2.0, b)
+                            + terrain.elevation(a, b - 2.0)
+                            + terrain.elevation(a, b + 2.0))
+                            / 4.0;
+                        old + (average - old) * (2.0 * weight).min(1.0)
+                    }
+                }
+                .clamp(0.0, 12.0);
+                if (next - old).abs() >= 0.00001 {
+                    Arc::make_mut(&mut self.vertices)
+                        .insert(vertex_index(a, b).expect("bounded vertex"), next);
+                    changed = true;
+                }
+            }
+        }
+        self.status = if changed {
+            ""
+        } else {
+            "No ground changed at this location."
+        };
+        if changed {
+            if self.history.len() == 20 {
+                self.history.pop_front();
+            }
+            self.history.push_back(previous);
+            self.revision = self.revision.wrapping_add(1);
+        }
+    }
+}
+
+fn vertex_index(x: f64, z: f64) -> Option<u16> {
+    let column = (x + HALF_WIDTH) / 2.0;
+    let row = (z + HALF_WIDTH) / 2.0;
+    let in_grid = |value: f64| (0.0..=f64::from(CELLS)).contains(&value) && value.fract() == 0.0;
+    (in_grid(column) && in_grid(row)).then(|| (row as u32 * (CELLS + 1) + column as u32) as u16)
 }
 
 impl Terrain {
@@ -40,6 +244,7 @@ impl Terrain {
             width: (2.1 + random() * 1.3) * water.sqrt(),
             hill_height: (4.0 + random() * 5.0) * relief,
             foundation: None,
+            edits: Arc::default(),
         }
     }
 
@@ -58,6 +263,18 @@ impl Terrain {
         (center, width)
     }
 
+    fn protected_vertex(&self, x: f64, z: f64) -> bool {
+        let (center, width) = self.river(z);
+        let road = (f64::from(MAP_START)..=f64::from(ROAD_END)).contains(&z)
+            && (x - f64::from(road_center(z as f32))).abs() < f64::from(road_width(z as f32)) + 3.0;
+        let stock = x.hypot(z + 90.0) < 10.0;
+        let camp = self.foundation.as_ref().is_some_and(|pad| {
+            (pad.left - 2.0..=pad.right + 2.0).contains(&x)
+                && (pad.top - 2.0..=pad.bottom + 2.0).contains(&z)
+        });
+        (x - center).abs() <= width + 4.9 || road || stock || camp
+    }
+
     pub fn with_camp(mut self, cell: IVec2) -> Self {
         let start = world_position((cell.x - 1) as f32, (cell.y - 3) as f32) - Vec2::splat(2.0);
         let end = world_position((cell.x + 4) as f32, (cell.y + 1) as f32);
@@ -73,7 +290,9 @@ impl Terrain {
     }
 
     pub fn elevation(&self, x: f64, z: f64) -> f64 {
-        let natural = self.natural_elevation(x, z);
+        let natural = vertex_index(x, z)
+            .and_then(|index| self.edits.get(&index).copied())
+            .unwrap_or_else(|| self.natural_elevation(x, z));
         let Some(pad) = &self.foundation else {
             return natural;
         };
@@ -236,6 +455,55 @@ pub fn noise(x: f64, z: f64, seed: u32) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn strokes_use_one_snapshot_and_save_edited_vertices() {
+        let mut editor = TerrainEditor::default();
+        let base = || Terrain::new(0, 1.0, 1.0);
+        let at = Vec3::new(40.0, 0.0, 24.0);
+        let terrain = editor.terrain(base());
+        editor.stroke(&terrain, at, |cell| cell == IVec2::new(53, 44));
+        let raised = editor.terrain(base());
+        assert_eq!(raised.elevation(40.0, 24.0), 0.6);
+        assert_eq!(raised.elevation(42.0, 24.0), 0.0);
+        assert!((raised.elevation(40.0, 22.0) - 0.3375).abs() < 1e-12);
+        assert_eq!(terrain.elevation(40.0, 24.0), 0.0);
+
+        editor.brush = Brush::Smooth;
+        editor.stroke(&raised, at, |_| false);
+        let json = serde_json::to_string(&editor).unwrap();
+        let restored: TerrainEditor = serde_json::from_str(&json).unwrap();
+        assert!(restored.valid());
+        let smoothed = restored.terrain(base());
+        assert!((smoothed.elevation(40.0, 24.0) - 0.253125).abs() < 1e-12);
+        assert_eq!(smoothed.elevation(48.0, 24.0), 0.0);
+        editor.undo();
+        assert_eq!(editor.terrain(base()).elevation(40.0, 24.0), 0.6);
+    }
+
+    #[test]
+    fn brushes_preserve_water_road_and_camp_and_reuse_the_flatten_grade() {
+        let mut editor = TerrainEditor {
+            brush: Brush::Flatten,
+            ..default()
+        };
+        let base = || Terrain::new(0, 1.0, 1.0).with_camp(IVec2::new(36, 36));
+        editor.stroke(&base(), Vec3::new(40.0, 1.25, 24.0), |_| false);
+        for point in [
+            Vec3::new(40.0, 0.0, 46.0),
+            Vec3::new(-32.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, -110.0),
+            Vec3::new(8.0, 0.0, 8.0),
+        ] {
+            editor.stroke(&editor.terrain(base()), point, |_| false);
+        }
+        let terrain = editor.terrain(base());
+        assert_eq!(terrain.elevation(40.0, 24.0), 1.25);
+        assert_eq!(terrain.elevation(40.0, 46.0), 1.25);
+        assert_eq!(terrain.elevation(-32.0, 0.0), 0.0);
+        assert_eq!(terrain.elevation(0.0, -110.0), 0.0);
+        assert_eq!(terrain.elevation(8.0, 8.0), 0.0);
+    }
 
     #[test]
     fn camp_grading_matches_the_reference_foundation() {
