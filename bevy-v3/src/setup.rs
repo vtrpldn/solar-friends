@@ -20,6 +20,46 @@ const SAVINGS: [&str; 3] = [
 const SUPPLIES: [&str; 3] = ["Essentials", "Camp", "Prepared"];
 const WATER: [&str; 3] = ["Dry", "Seasonal", "Abundant"];
 
+struct Preset {
+    name: &'static str,
+    landscape: usize,
+    water: usize,
+    resources: usize,
+    savings: usize,
+    supplies: usize,
+    town: usize,
+}
+
+const PRESETS: [Preset; 3] = [
+    Preset {
+        name: "Gentle beginning",
+        landscape: 0,
+        water: 2,
+        resources: 2,
+        savings: 2,
+        supplies: 2,
+        town: 0,
+    },
+    Preset {
+        name: "Starting from scratch",
+        landscape: 1,
+        water: 1,
+        resources: 1,
+        savings: 0,
+        supplies: 0,
+        town: 1,
+    },
+    Preset {
+        name: "Remote homestead",
+        landscape: 2,
+        water: 0,
+        resources: 1,
+        savings: 1,
+        supplies: 1,
+        town: 2,
+    },
+];
+
 #[derive(Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub enum Mode {
     #[default]
@@ -175,6 +215,28 @@ impl WorldSetup {
         }
     }
 
+    fn preset(&self) -> Option<usize> {
+        PRESETS.iter().position(|preset| {
+            self.landscape == preset.landscape
+                && self.water == preset.water
+                && self.resources == preset.resources
+                && self.savings == preset.savings
+                && self.supplies == preset.supplies
+                && self.town == preset.town
+        })
+    }
+
+    fn cycle_preset(&mut self) {
+        let index = self.preset().map_or(0, |index| (index + 1) % PRESETS.len());
+        let preset = &PRESETS[index];
+        self.landscape = preset.landscape;
+        self.water = preset.water;
+        self.resources = preset.resources;
+        self.savings = preset.savings;
+        self.supplies = preset.supplies;
+        self.town = preset.town;
+    }
+
     fn label(&self, action: Action, has_village: bool) -> String {
         match action {
             Action::Mode => match self.mode {
@@ -182,6 +244,10 @@ impl WorldSetup {
                 Mode::Sandbox => "Mode   ·   Sandbox",
             }
             .into(),
+            Action::Preset => format!(
+                "Starting point   ·   {}",
+                self.preset().map_or("Custom", |index| PRESETS[index].name)
+            ),
             Action::Biome => format!("Biome   ·   {}", BIOMES[self.biome]),
             Action::Landscape => format!("Landscape   ·   {}", LANDSCAPES[self.landscape]),
             Action::Water => format!("Water   ·   {}", WATER[self.water]),
@@ -207,6 +273,7 @@ impl WorldSetup {
 #[derive(Component, Clone, Copy)]
 enum Action {
     Mode,
+    Preset,
     Biome,
     Landscape,
     Water,
@@ -265,6 +332,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
             panel.spawn((Text::new("Choose the land"), ui_font(&assets, 18.0)));
             for action in [
                 Action::Mode,
+                Action::Preset,
                 Action::Biome,
                 Action::Landscape,
                 Action::Water,
@@ -368,6 +436,7 @@ fn setup_input(
                     Mode::Sandbox => Mode::Story,
                 }
             }
+            Action::Preset => setup.cycle_preset(),
             Action::Biome => setup.biome = (setup.biome + 1) % BIOMES.len(),
             Action::Landscape => setup.landscape = (setup.landscape + 1) % LANDSCAPES.len(),
             Action::Water => setup.water = (setup.water + 1) % WATER.len(),
