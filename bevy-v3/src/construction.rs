@@ -756,10 +756,12 @@ impl Construction {
         if stock.sandbox {
             return (stock.units(), 1_000_000);
         }
-        let loaded = self
+        let boarded: Vec<_> = self
             .active_trips()
-            .any(|trip| trip.market_order && trip.boarded);
-        let used = stock.units() + self.trade.reserved_at_home(loaded);
+            .filter(|trip| trip.market_order && trip.boarded)
+            .map(|trip| trip.project)
+            .collect();
+        let used = stock.units() + self.trade.reserved_at_home(&boarded);
         let expansions = self
             .plans
             .iter()
@@ -848,16 +850,18 @@ impl Construction {
                     .saturating_mul(u64::from(job.pickups.saturating_sub(u32::from(paid)))),
             )
         });
-        let export_paid = self
+        let export_paid: Vec<_> = self
             .active_trips()
-            .any(|trip| trip.market_order && trip.boarded);
+            .filter(|trip| trip.market_order && trip.boarded)
+            .map(|trip| trip.project)
+            .collect();
         let fares = self
             .trade
             .orders
             .iter()
             .enumerate()
             .fold(fares, |total, (index, order)| {
-                if index == 0 && export_paid {
+                if export_paid.contains(&index) {
                     total
                 } else {
                     total.saturating_add(order.fare)
@@ -870,7 +874,7 @@ impl Construction {
                 && (1.0..=500.0).contains(&trip.duration)
                 && (trip.boarded || trip.elapsed == 0.0)
                 && if trip.market_order {
-                    trip.farm_bed.is_none() && self.trade.orders.front().is_some()
+                    trip.farm_bed.is_none() && self.trade.orders.get(trip.project).is_some()
                 } else if let Some(bed) = trip.farm_bed {
                     self.farming
                         .jobs
@@ -885,7 +889,7 @@ impl Construction {
             a.driver != b.driver
                 && a.vehicle != b.vehicle
                 && if a.market_order || b.market_order {
-                    a.market_order != b.market_order
+                    a.market_order != b.market_order || a.project != b.project
                 } else {
                     (a.project, a.farm_bed) != (b.project, b.farm_bed)
                 }
@@ -1074,14 +1078,13 @@ impl Construction {
             .equipment
             .release(|worker, task| self.active_tool_task(worker, task));
         let space = self.storage_space(catalog, stock);
-        let order_in_progress = self.active_trips().any(|trip| trip.market_order);
-        self.trade.age_shipments(
-            catalog,
-            stock,
-            &mut self.market,
-            clock.seconds,
-            order_in_progress,
-        );
+        let locked = self.booked_trade_orders();
+        for index in
+            self.trade
+                .age_shipments(catalog, stock, &mut self.market, clock.seconds, &locked)
+        {
+            self.removed_trade_order(index);
+        }
         self.trade.receive_goods(stock, space, clock.seconds);
         let space = self.storage_space(catalog, stock);
         self.trade.maintain_pantry(

@@ -253,11 +253,11 @@ impl Trade {
         }
     }
 
-    pub fn reserved_at_home(&self, started: bool) -> u64 {
+    pub fn reserved_at_home(&self, boarded: &[usize]) -> u64 {
         self.orders
             .iter()
             .enumerate()
-            .filter(|(index, order)| !order.buying && (*index != 0 || !started))
+            .filter(|(index, order)| !order.buying && !boarded.contains(index))
             .map(|(_, order)| u64::from(order.quantity))
             .sum()
     }
@@ -288,14 +288,14 @@ impl Trade {
         }
     }
 
-    pub fn finish_trip(&mut self, stock: &mut Stock, space: u64) -> bool {
-        let Some(order) = self.orders.front() else {
+    pub fn finish_trip(&mut self, index: usize, stock: &mut Stock, space: u64) -> bool {
+        let Some(order) = self.orders.get(index) else {
             return true;
         };
         if (order.buying || order.spoiled) && u64::from(order.quantity) > space {
             return false;
         }
-        let order = self.orders.pop_front().expect("completed town trip");
+        let order = self.orders.remove(index).expect("completed town trip");
         if order.buying || order.spoiled {
             let goods = BTreeMap::from([(order.material, order.quantity)]);
             if let Some(lots) = order.food {
@@ -310,11 +310,16 @@ impl Trade {
         true
     }
 
-    pub fn cancel_last(&mut self, stock: &mut Stock, market: &mut Market, active: bool) {
-        if self.orders.len() <= usize::from(active) {
-            return;
-        }
-        let order = self.orders.pop_back().expect("queued order");
+    pub fn cancel_last(
+        &mut self,
+        stock: &mut Stock,
+        market: &mut Market,
+        active: &[usize],
+    ) -> Option<usize> {
+        let index = (0..self.orders.len())
+            .rev()
+            .find(|index| !active.contains(index))?;
+        let order = self.orders.remove(index).expect("queued order");
         if order.buying {
             market.cancel_pack(
                 stock,
@@ -325,7 +330,7 @@ impl Trade {
                 order.fare,
             );
             self.notice = "Purchase canceled. Shared savings refunded.".into();
-            return;
+            return Some(index);
         }
         let goods = BTreeMap::from([(order.material.clone(), order.quantity)]);
         if let Some(lots) = order.food {
@@ -340,10 +345,11 @@ impl Trade {
             entry.units = entry.units.saturating_sub(order.quantity);
         }
         self.notice = "Sale canceled. Goods returned to stock.".into();
+        Some(index)
     }
 
-    pub fn settle(&mut self, stock: &mut Stock) {
-        if let Some(order) = self.orders.front_mut()
+    pub fn settle(&mut self, index: usize, stock: &mut Stock) {
+        if let Some(order) = self.orders.get_mut(index)
             && !order.buying
             && !order.spoiled
             && !order.settled
@@ -414,10 +420,10 @@ impl Trade {
         stock: &mut Stock,
         market: &mut Market,
         clock: f64,
-        head_locked: bool,
-    ) {
+        locked: &[usize],
+    ) -> Vec<usize> {
         if stock.sandbox {
-            return;
+            return Vec::new();
         }
         if let Some(delivery) = &mut self.delivery
             && let Some(lots) = &mut delivery.food
@@ -428,6 +434,7 @@ impl Trade {
                 .saturating_sub(loss.get(&delivery.material).copied().unwrap_or(0));
             stock.record_spoilage(catalog, &loss);
         }
+        let mut removed = Vec::new();
         for index in (0..self.orders.len()).rev() {
             let order = &mut self.orders[index];
             if order.settled {
@@ -455,15 +462,17 @@ impl Trade {
                 entry.units = entry.units.saturating_sub(reserved);
             }
             order.spoiled = true;
-            if index == 0 && head_locked {
+            if locked.contains(&index) {
                 continue;
             }
+            removed.push(index);
             let order = self.orders.remove(index).expect("spoiled queued sale");
             let goods = BTreeMap::from([(order.material, order.quantity)]);
             stock.receive_with_lots(&goods, order.food.unwrap_or_default());
             market.release_fare(order.fare);
             self.notice = "Reserved food spoiled before sale.".into();
         }
+        removed
     }
 
     pub fn valid(&self, catalog: &Catalog) -> bool {
@@ -537,8 +546,8 @@ mod tests {
         assert_eq!(stock.balance(), before);
         assert_eq!(market.committed_fares(), 776);
         market.depart(&mut stock, 776);
-        trade.settle(&mut stock);
-        trade.settle(&mut stock);
+        trade.settle(0, &mut stock);
+        trade.settle(0, &mut stock);
         assert_eq!(trade.receipts, 1);
         assert_eq!(stock.balance(), before - 776 + 21_600);
     }

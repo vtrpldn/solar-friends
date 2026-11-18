@@ -64,8 +64,10 @@ impl Construction {
                 };
         }
         if keys.just_pressed(KeyCode::Backspace) {
-            let active = self.active_trips().any(|trip| trip.market_order);
-            self.trade.cancel_last(stock, &mut self.market, active);
+            let active = self.booked_trade_orders();
+            if let Some(index) = self.trade.cancel_last(stock, &mut self.market, &active) {
+                self.removed_trade_order(index);
+            }
         }
         let policy = self.trade.policies.entry(id.into()).or_default();
         if keys.just_pressed(KeyCode::KeyT) {

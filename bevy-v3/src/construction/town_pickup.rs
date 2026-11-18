@@ -9,8 +9,12 @@ impl Construction {
         clock: TownClock,
         dt: f32,
     ) {
-        for (slot, existing) in [self.trip, self.second_trip].into_iter().enumerate() {
-            if let Some(mut trip) = existing {
+        for slot in 0..2 {
+            if let Some(mut trip) = if slot == 0 {
+                self.trip
+            } else {
+                self.second_trip
+            } {
                 let finished = self.advance_trip(catalog, stock, clock, &mut trip, dt);
                 self.set_trip(slot, (!finished).then_some(trip));
             }
@@ -32,6 +36,24 @@ impl Construction {
             let slot = usize::from(self.trip.is_some());
             self.set_trip(slot, Some(trip));
             self.upkeep.dispatch_vehicle(vehicle);
+        }
+    }
+
+    pub(super) fn booked_trade_orders(&self) -> Vec<usize> {
+        self.active_trips()
+            .filter(|trip| trip.market_order)
+            .map(|trip| trip.project)
+            .collect()
+    }
+
+    pub(super) fn removed_trade_order(&mut self, index: usize) {
+        for trip in [&mut self.trip, &mut self.second_trip]
+            .into_iter()
+            .flatten()
+        {
+            if trip.market_order && trip.project > index {
+                trip.project -= 1;
+            }
         }
     }
 
@@ -66,7 +88,11 @@ impl Construction {
             driver.move_along_path(dt, false);
             if driver.path.is_empty() {
                 let fare = if trip.market_order {
-                    self.trade.orders.front().expect("active export").fare
+                    self.trade
+                        .orders
+                        .get(trip.project)
+                        .expect("active town order")
+                        .fare
                 } else if let Some(bed) = trip.farm_bed {
                     self.farming
                         .jobs
@@ -89,14 +115,18 @@ impl Construction {
                 .record_distance(trip.vehicle, clock.round_trip_km);
         }
         if trip.market_order && trip.elapsed >= trip.duration * 0.5 {
-            self.trade.settle(stock);
+            self.trade.settle(trip.project, stock);
         }
         if trip.elapsed < trip.duration {
             return false;
         }
         if trip.market_order {
             let space = self.storage_space(catalog, stock);
-            return self.trade.finish_trip(stock, space);
+            if self.trade.finish_trip(trip.project, stock, space) {
+                self.removed_trade_order(trip.project);
+                return true;
+            }
+            return false;
         }
         if let Some(bed) = trip.farm_bed {
             self.farming
@@ -139,10 +169,13 @@ impl Construction {
             .find(|job| job.pickups > 0 && !booked(job.site, Some(job.bed)))
             .map(|job| (job.site, Some(job.bed)));
         let pickup = construction.or(farming);
-        let market_order = pickup.is_none()
-            && !self.trade.orders.is_empty()
-            && !self.active_trips().any(|trip| trip.market_order);
-        let (project, farm_bed) = pickup.or_else(|| market_order.then_some((0, None)))?;
+        let order = (0..self.trade.orders.len()).find(|&index| {
+            !self
+                .active_trips()
+                .any(|trip| trip.market_order && trip.project == index)
+        });
+        let market_order = pickup.is_none();
+        let (project, farm_bed) = pickup.or_else(|| order.map(|index| (index, None)))?;
         let door = crate::arrival::car_door(vehicle);
         let (driver, path) = (0..self.residents.len())
             .rev()
@@ -170,6 +203,72 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn a_purchase_can_return_before_an_earlier_sale() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let before = stock.available("food");
+        village
+            .trade
+            .reserve(
+                &catalog,
+                &mut stock,
+                &mut village.market,
+                "wood",
+                (0, crate::market::fare_cents(12), 0),
+            )
+            .unwrap();
+        village
+            .trade
+            .buy(
+                &catalog,
+                &mut stock,
+                &mut village.market,
+                "food",
+                (0.0, 12, false),
+            )
+            .unwrap();
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert_eq!(village.booked_trade_orders(), [0, 1]);
+        for driver in [
+            village.trip.unwrap().driver,
+            village.second_trip.unwrap().driver,
+        ] {
+            village.residents[driver].path.clear();
+        }
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        let second = village.second_trip.as_mut().unwrap();
+        second.elapsed = second.duration - 0.05;
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert_eq!(
+            stock.available("food"),
+            before + catalog.materials["food"].pack
+        );
+        assert_eq!(village.trade.purchases, 1);
+        assert_eq!(village.trade.receipts, 0);
+        assert_eq!(village.booked_trade_orders(), [0]);
+        assert!(village.valid_save(&catalog, &stock));
+        let first = village.trip.as_mut().unwrap();
+        first.elapsed = first.duration - 0.05;
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.trade.orders.is_empty());
+        assert_eq!(village.trade.receipts, 1);
+        assert_eq!(village.market.committed_fares(), 0);
+    }
 
     #[test]
     fn two_pickups_reserve_distinct_drivers_and_resume_after_save() {
