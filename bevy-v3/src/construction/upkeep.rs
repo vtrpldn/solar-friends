@@ -316,6 +316,27 @@ impl Construction {
         }
     }
 
+    pub(super) fn service_materials<'a>(
+        &'a self,
+        catalog: &'a Catalog,
+    ) -> impl Iterator<Item = BTreeMap<String, u32>> + 'a {
+        self.upkeep
+            .jobs
+            .iter()
+            .filter(|(_, job)| job.parts_paid)
+            .map(|(&index, job)| {
+                parts(
+                    job.kind,
+                    Some(&catalog.projects[&self.plans[index].key]),
+                    catalog,
+                )
+            })
+            .chain(self.upkeep.vehicles.iter().filter_map(|vehicle| {
+                let job = vehicle.service.as_ref()?;
+                job.parts_paid.then(|| parts(job.kind, None, catalog))
+            }))
+    }
+
     pub fn upkeep_status(&self, catalog: &Catalog) -> String {
         let u = &self.upkeep;
         let setting = if u.automatic { "on" } else { "off" };

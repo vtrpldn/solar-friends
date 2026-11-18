@@ -1510,6 +1510,12 @@ fn show_hud(
                         .construction
                         .finance_summary(&village.stock, village.selected_resident),
                 );
+                label.push('\n');
+                label.push_str(
+                    &village
+                        .construction
+                        .replacement_costs(&catalog, &village.stock),
+                );
                 label.push_str("\nR Recent transactions");
             }
             label.push_str("\nTab Town trade");

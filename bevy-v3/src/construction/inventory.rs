@@ -82,6 +82,9 @@ impl Construction {
                 record(&mut ledger, &job.inputs, Location::Processing);
             }
         }
+        for inputs in self.service_materials(catalog) {
+            record(&mut ledger, &inputs, Location::Processing);
+        }
         for (index, order) in self
             .trade
             .orders
@@ -108,6 +111,21 @@ impl Construction {
             );
         }
         ledger
+    }
+
+    pub fn replacement_costs(&self, catalog: &Catalog, stock: &Stock) -> String {
+        let mut totals = [0.0; 5];
+        for (id, amounts) in self.inventory(catalog, stock) {
+            let item = &catalog.materials[id];
+            let unit_price = item.price / f64::from(item.pack.max(1));
+            for (total, amount) in totals.iter_mut().zip(amounts) {
+                *total += unit_price * amount as f64;
+            }
+        }
+        let [stored, reserved, processing, transit, installed] = totals;
+        format!(
+            "Material replacement estimates\nStores R${stored:.2} · Reserved R${reserved:.2} · In work R${processing:.2}\nIn transit R${transit:.2} · Installed R${installed:.2}"
+        )
     }
 
     pub fn inventory_panel(
