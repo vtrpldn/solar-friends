@@ -1,8 +1,10 @@
 use std::collections::BTreeMap;
 
+use serde::{Deserialize, Serialize};
+
 use crate::{catalog::Catalog, setup::WorldSetup};
 
-#[derive(Default)]
+#[derive(Default, Deserialize, Serialize)]
 pub struct Stock {
     pub cash: u32,
     materials: BTreeMap<String, u32>,

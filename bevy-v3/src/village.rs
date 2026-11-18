@@ -5,6 +5,7 @@ use bevy::{
     prelude::*,
     window::PrimaryWindow,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::{
     GroundMesh, VillageCamera,
@@ -14,11 +15,18 @@ use crate::{
     },
     catalog::Catalog,
     construction::Construction,
+    save,
     setup::WorldSetup,
     stock::Stock,
     ui_font::ui_font,
 };
 
+const SPEEDS: [(KeyCode, u8); 4] = [
+    (KeyCode::Digit1, 1),
+    (KeyCode::Digit2, 4),
+    (KeyCode::Digit3, 8),
+    (KeyCode::Digit4, 16),
+];
 const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 const CAMP_SITES: [(KeyCode, IVec2); 3] = [
     (KeyCode::Digit1, IVec2::new(28, 31)),
@@ -38,23 +46,89 @@ impl Plugin for VillagePlugin {
             .add_systems(Startup, spawn_hud)
             .add_systems(
                 Update,
-                (read_camp_pointer, village_input, animate_arrival, show_hud).chain(),
+                (
+                    save_controls,
+                    read_camp_pointer,
+                    village_input,
+                    animate_arrival,
+                    show_hud,
+                    show_construction,
+                )
+                    .chain(),
             )
-            .add_systems(Update, (draw_blueprints, show_construction))
+            .add_systems(Update, draw_blueprints)
             .add_systems(FixedUpdate, advance_clock);
     }
 }
 
-#[derive(Resource, Default)]
+#[derive(Resource, Default, Deserialize, Serialize)]
 pub struct Village {
     setup: Option<WorldSetup>,
     pub camp: Option<IVec2>,
     clock: f64,
     arrival_time: f32,
     paused: bool,
+    speed: usize,
+    #[serde(skip)]
     camp_error: Option<&'static str>,
+    #[serde(skip)]
+    save_notice: String,
+    #[serde(skip)]
+    rebuild_scene: bool,
     stock: Stock,
     construction: Construction,
+}
+
+impl Village {
+    pub fn valid_save(&self, catalog: &Catalog) -> bool {
+        let Some(setup) = &self.setup else {
+            return false;
+        };
+        if !setup.valid_save()
+            || !(0.0..=ARRIVAL_DURATION).contains(&self.arrival_time)
+            || self.speed >= SPEEDS.len()
+            || self.clock < 0.0
+            || !self.clock.is_finite()
+        {
+            return false;
+        }
+        if let Some(camp) = self.camp
+            && (self.arrival_time < ARRIVAL_DURATION
+                || (custom_camp_error(&setup.terrain(), camp).is_some()
+                    && !CAMP_SITES.iter().any(|(_, preset)| *preset == camp)))
+        {
+            return false;
+        }
+        self.construction.valid_save(catalog)
+    }
+}
+
+fn save_controls(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    window: Single<&Window, With<PrimaryWindow>>,
+    catalog: Res<Catalog>,
+    mut setup: ResMut<WorldSetup>,
+    mut village: ResMut<Village>,
+) {
+    if !window.focused {
+        return;
+    }
+    if keyboard.just_pressed(KeyCode::F9) {
+        match save::location().and_then(|path| save::read(&path, &catalog)) {
+            Ok(mut loaded) => {
+                *setup = loaded.setup.as_ref().expect("validated setup").session();
+                loaded.save_notice = "Village loaded.".into();
+                loaded.rebuild_scene = true;
+                *village = loaded;
+            }
+            Err(error) => village.save_notice = format!("Could not load village: {error}"),
+        }
+    } else if keyboard.just_pressed(KeyCode::F5) && !setup.open && village.setup.is_some() {
+        village.save_notice = match save::location().and_then(|path| save::write(&path, &village)) {
+            Ok(()) => "Village saved.".into(),
+            Err(error) => format!("Could not save village: {error}"),
+        };
+    }
 }
 
 #[derive(Component)]
@@ -185,16 +259,23 @@ fn village_input(
         return;
     }
     let terrain = setup.terrain();
-    if village.setup.as_ref() != Some(&setup.session()) {
+    let new_world = village.setup.as_ref() != Some(&setup.session());
+    if new_world || village.rebuild_scene {
         for entity in &entities {
             commands.entity(entity).despawn();
         }
-        *village = Village {
-            setup: Some(setup.session()),
-            stock: Stock::for_start(&setup, &catalog),
-            ..default()
-        };
+        if new_world {
+            *village = Village {
+                setup: Some(setup.session()),
+                stock: Stock::for_start(&setup, &catalog),
+                ..default()
+            };
+        }
+        village.rebuild_scene = false;
         camera.target = Vec3::new(0.0, 2.0, -86.0);
+        if let Some(cell) = village.camp {
+            camera.target = spawn_tents(&mut commands, &assets, &setup, cell);
+        }
         for (index, name) in NAMES.into_iter().enumerate() {
             commands.spawn((
                 VillageEntity,
@@ -220,6 +301,13 @@ fn village_input(
         let town = &mut *village;
         if keyboard.get_just_pressed().len() > 0 {
             town.construction.input(&keyboard, &catalog);
+            if !town.construction.menu
+                && let Some(speed) = SPEEDS
+                    .iter()
+                    .position(|(key, _)| keyboard.just_pressed(*key))
+            {
+                town.speed = speed;
+            }
         }
         if let Some(position) = pointer.0 {
             town.construction
@@ -244,18 +332,27 @@ fn village_input(
     }
     village.camp_error = None;
     village.camp = Some(cell);
-    let terrain = terrain.with_camp(cell);
+    camera.target = spawn_tents(&mut commands, &assets, &setup, cell);
+}
+
+fn spawn_tents(
+    commands: &mut Commands,
+    assets: &AssetServer,
+    setup: &WorldSetup,
+    cell: IVec2,
+) -> Vec3 {
+    let terrain = setup.terrain().with_camp(cell);
     let Vec2 { x, y: z } = world_position(cell.x as f32, cell.y as f32);
-    camera.target = Vec3::new(x, terrain.height_at(x, z), z);
     for index in 0..2 {
         let tent_x = x + index as f32 * 3.0;
         let tent_z = z - 3.0;
         commands.spawn((
             VillageEntity,
-            opening_model(&assets, NAMES.len() + index * 2),
+            opening_model(assets, NAMES.len() + index * 2),
             Transform::from_xyz(tent_x, terrain.height_at(tent_x, tent_z), tent_z),
         ));
     }
+    Vec3::new(x, terrain.height_at(x, z), z)
 }
 
 fn animate_arrival(
@@ -316,10 +413,13 @@ fn advance_clock(
         return;
     }
     if let Some(camp) = village.camp {
-        village.clock += time.delta_secs_f64();
-        village
-            .construction
-            .tick(&catalog, &setup.terrain(), camp, time.delta_secs());
+        let terrain = setup.terrain();
+        for _ in 0..SPEEDS[village.speed].1 {
+            village.clock += time.delta_secs_f64();
+            village
+                .construction
+                .tick(&catalog, &terrain, camp, time.delta_secs());
+        }
     }
 }
 
@@ -333,11 +433,20 @@ fn show_hud(
         return;
     }
     let (text, node) = &mut *hud;
-    node.display = if setup.open {
-        Display::None
-    } else {
-        Display::Flex
-    };
+    if setup.open {
+        node.display = if village.save_notice.is_empty() {
+            Display::None
+        } else {
+            Display::Flex
+        };
+        node.top = Val::Auto;
+        node.bottom = px(20);
+        text.0.clone_from(&village.save_notice);
+        return;
+    }
+    node.display = Display::Flex;
+    node.top = px(20);
+    node.bottom = Val::Auto;
     let minute = (540.0 + village.clock * 0.45) as u64;
     let hour = minute / 60 % 24;
     let day = minute / 1440 + 1;
@@ -353,8 +462,9 @@ fn show_hud(
     } else {
         village.construction.instructions(&catalog)
     };
+    let speed = SPEEDS[village.speed].1;
     let mut label = format!(
-        "Day {day}   {hour:02}:{:02}   R${}\n{} timber · {} meals\n{controls}",
+        "Day {day}   {hour:02}:{:02}   R${}   {speed}×\n{} timber · {} meals\n{controls}",
         minute % 60,
         village.stock.cash,
         village.stock.available("wood"),
@@ -363,6 +473,10 @@ fn show_hud(
     if let Some(progress) = village.construction.latest_progress(&catalog) {
         label.push('\n');
         label.push_str(&progress);
+    }
+    if !village.save_notice.is_empty() {
+        label.push('\n');
+        label.push_str(&village.save_notice);
     }
     if text.0 != label {
         text.0 = label;
@@ -409,5 +523,56 @@ fn show_construction(
             Transform::from_xyz(x, terrain.height_at(x, z), z)
                 .with_rotation(Quat::from_rotation_y(yaw)),
         ));
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn save_resumes_a_village_during_a_material_delivery() {
+        let setup = WorldSetup::default().session();
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let camp = IVec2::new(36, 36);
+        let mut village = Village {
+            setup: Some(setup.clone()),
+            camp: Some(camp),
+            clock: 0.0,
+            arrival_time: ARRIVAL_DURATION,
+            stock: Stock::for_start(&setup, &catalog),
+            ..default()
+        };
+
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::KeyB);
+        keys.press(KeyCode::Digit1);
+        village.construction.input(&keys, &catalog);
+        village.construction.plan(
+            &catalog,
+            &mut village.stock,
+            &terrain,
+            camp,
+            IVec2::new(44, 36),
+        );
+        for _ in 0..200 {
+            village.construction.tick(&catalog, &terrain, camp, 0.1);
+        }
+
+        let path =
+            std::env::temp_dir().join(format!("solar-v3-save-test-{}.json", std::process::id()));
+        save::write(&path, &village).unwrap();
+        let mut resumed = save::read(&path, &catalog).unwrap();
+        std::fs::remove_file(path).unwrap();
+
+        for _ in 0..2_000 {
+            village.construction.tick(&catalog, &terrain, camp, 0.1);
+            resumed.construction.tick(&catalog, &terrain, camp, 0.1);
+        }
+        assert_eq!(
+            serde_json::to_value(village).unwrap(),
+            serde_json::to_value(resumed).unwrap()
+        );
     }
 }

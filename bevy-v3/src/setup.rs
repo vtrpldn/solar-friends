@@ -1,4 +1,5 @@
 use bevy::{prelude::*, window::PrimaryWindow};
+use serde::{Deserialize, Serialize};
 
 use crate::{terrain::Terrain, ui_font::ui_font};
 
@@ -12,8 +13,9 @@ const SAVINGS: [&str; 3] = [
 const SUPPLIES: [&str; 3] = ["Essentials", "Camp", "Prepared"];
 const WATER: [&str; 3] = ["Dry", "Seasonal", "Abundant"];
 
-#[derive(Resource, Clone, PartialEq, Eq)]
+#[derive(Resource, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct WorldSetup {
+    #[serde(skip)]
     pub open: bool,
     seed: u32,
     biome: usize,
@@ -43,6 +45,14 @@ impl WorldSetup {
             open: false,
             ..self.clone()
         }
+    }
+
+    pub fn valid_save(&self) -> bool {
+        self.biome < BIOMES.len()
+            && self.landscape < LANDSCAPES.len()
+            && self.water < WATER.len()
+            && self.savings < SAVINGS.len()
+            && self.supplies < SUPPLIES.len()
     }
 
     pub fn starting_cash(&self) -> u32 {

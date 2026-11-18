@@ -1,6 +1,7 @@
 use std::collections::VecDeque;
 
 use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     arrival::{ARRIVAL_SPOTS, MAP_START, ROAD_END, road_center, road_width, world_position},
@@ -26,17 +27,23 @@ const SUPPLY_SPOTS: [IVec2; 5] = [
     IVec2::new(33, -12),
 ];
 
+#[derive(Deserialize, Serialize)]
 pub struct Construction {
+    #[serde(skip)]
     pub menu: bool,
+    #[serde(skip)]
     selection: Option<&'static str>,
+    #[serde(skip)]
     rotation: u8,
+    #[serde(skip)]
     status: String,
     plans: Vec<Blueprint>,
     residents: [Worker; 5],
 }
 
+#[derive(Deserialize, Serialize)]
 struct Blueprint {
-    key: &'static str,
+    key: String,
     position: IVec2,
     size: IVec2,
     rotation: u8,
@@ -45,7 +52,7 @@ struct Blueprint {
     work: f64,
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Deserialize, Serialize)]
 enum Activity {
     Collect,
     Carry,
@@ -53,6 +60,7 @@ enum Activity {
     Build,
 }
 
+#[derive(Deserialize, Serialize)]
 struct Assignment {
     project: usize,
     spot: IVec2,
@@ -60,6 +68,7 @@ struct Assignment {
     to_site: VecDeque<Vec2>,
 }
 
+#[derive(Deserialize, Serialize)]
 pub struct Worker {
     pub position: Vec2,
     pub yaw: f32,
@@ -143,7 +152,7 @@ impl Construction {
 
     pub fn instructions(&self, catalog: &Catalog) -> String {
         if !self.menu {
-            return "B Build · Space Pause".into();
+            return "B Build · Space Pause · 1–4 Speed".into();
         }
         if let Some(key) = self.selection {
             let definition = &catalog.projects[key];
@@ -177,7 +186,7 @@ impl Construction {
         let Some(key) = self.selection else { return };
         let definition = &catalog.projects[key];
         let blueprint = Blueprint {
-            key,
+            key: key.into(),
             position,
             size: size(definition, self.rotation),
             rotation: self.rotation,
@@ -256,7 +265,7 @@ impl Construction {
         for plan in self
             .plans
             .iter()
-            .filter(|plan| plan.work < catalog.projects[plan.key].work)
+            .filter(|plan| plan.work < catalog.projects[&plan.key].work)
         {
             let left_top =
                 world_position(plan.position.x as f32, plan.position.y as f32) - Vec2::ONE;
@@ -279,9 +288,39 @@ impl Construction {
 }
 
 impl Construction {
+    pub fn valid_save(&self, catalog: &Catalog) -> bool {
+        self.plans.len() <= 128 * 128
+            && self.plans.iter().all(|plan| {
+                catalog.projects.get(&plan.key).is_some_and(|definition| {
+                    plan.rotation <= 3
+                        && plan.position.cmpge(IVec2::splat(-30)).all()
+                        && plan.position.cmple(IVec2::splat(94)).all()
+                        && plan.size == size(definition, plan.rotation)
+                        && (plan.position + plan.size).cmple(IVec2::splat(94)).all()
+                        && plan.loads == catalog.loads(definition)
+                        && plan.delivered <= plan.loads
+                        && (0.0..=definition.work).contains(&plan.work)
+                        && (plan.delivered == plan.loads || plan.work == 0.0)
+                })
+            })
+            && self.residents.iter().all(|worker| {
+                let in_bounds = |point: Vec2| {
+                    point.cmpge(Vec2::splat(-31.0)).all() && point.cmple(Vec2::splat(94.0)).all()
+                };
+                in_bounds(worker.position)
+                    && worker.path.len() <= 128 * 128
+                    && worker.path.iter().copied().all(in_bounds)
+                    && worker.assignment.as_ref().is_none_or(|job| {
+                        job.project < self.plans.len()
+                            && job.to_site.len() <= 128 * 128
+                            && job.to_site.iter().copied().all(in_bounds)
+                    })
+            })
+    }
+
     pub fn latest_progress(&self, catalog: &Catalog) -> Option<String> {
         let project = self.plans.last()?;
-        let definition = &catalog.projects[project.key];
+        let definition = &catalog.projects[&project.key];
         let status = if project.work >= definition.work {
             "Ready".into()
         } else if project.delivered < project.loads {
@@ -304,7 +343,7 @@ impl Construction {
             .iter()
             .enumerate()
             .filter_map(|(index, project)| {
-                if project.work < catalog.projects[project.key].work {
+                if project.work < catalog.projects[&project.key].work {
                     return None;
                 }
                 let model = 9 + ESSENTIALS.iter().position(|(_, key)| *key == project.key)?;
@@ -322,7 +361,7 @@ impl Construction {
         for index in 0..self.residents.len() {
             if let Some(job) = &self.residents[index].assignment {
                 let project = &self.plans[job.project];
-                if project.work >= catalog.projects[project.key].work {
+                if project.work >= catalog.projects[&project.key].work {
                     self.residents[index].assignment = None;
                     self.residents[index].path.clear();
                 }
@@ -369,14 +408,14 @@ impl Construction {
                         .count();
                     let worker = &mut self.residents[index];
                     let skilled = matches!(
-                        (index, project.key),
+                        (index, project.key.as_str()),
                         (1, "shelter") | (2, "gathering") | (3, "well") | (4, "toilet")
                     );
                     let skill = if skilled { 1.25 } else { 1.0 };
                     let experience = 1.0 + (worker.experience / 10_000.0).min(0.15);
                     let efficiency = 1.0 / (1.0 + 0.12 * crew as f64);
                     project.work = (project.work + f64::from(dt) * skill * experience * efficiency)
-                        .min(catalog.projects[project.key].work);
+                        .min(catalog.projects[&project.key].work);
                     worker.experience += f64::from(dt);
                 }
             }
@@ -387,7 +426,7 @@ impl Construction {
     fn assign(&mut self, index: usize, catalog: &Catalog, terrain: &Terrain, camp: IVec2) {
         let position = self.residents[index].position;
         for (id, project) in self.plans.iter().enumerate() {
-            let definition = &catalog.projects[project.key];
+            let definition = &catalog.projects[&project.key];
             if project.work >= definition.work {
                 continue;
             }

@@ -5,9 +5,11 @@ use bevy::{
 };
 
 mod arrival;
+mod audio;
 mod catalog;
 mod construction;
 mod navigation;
+mod save;
 mod setup;
 mod stock;
 mod terrain;
@@ -32,6 +34,7 @@ fn main() {
             WorldSetupPlugin,
             village::VillagePlugin,
             ui_font::UiFontPlugin,
+            audio::VillageAudio,
         ))
         .add_systems(Startup, setup_scene)
         .add_systems(PostUpdate, update_land)

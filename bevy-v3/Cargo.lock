@@ -4443,6 +4443,7 @@ name = "solar-friends-v3"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "glam",
  "serde",
  "serde_json",
 ]

@@ -12,6 +12,10 @@ After the cars arrive, click the ground to place camp or select a preset with 1 
 
 V3 runs as a standalone Bevy desktop application. The preview covers land generation, navigation, the opening camp, and construction with materials already in stock. The V2 browser game remains available at `/v2/`.
 
+Use 1–4 to change simulation speed with the build menu closed. Press M to mute music and interface sounds.
+
+Press F5 to save the current village and F9 to reload it. The native save lives in the operating system's local application data directory under `Solar Friends V3/village.json`.
+
 The opening models are embedded in the executable. To regenerate them after changing the source artwork, run `npm ci` and `node scripts/export-v3-opening-models.mjs` from the repository root.
 
 Refresh the construction data with `node scripts/export-v3-catalog.mjs`.
