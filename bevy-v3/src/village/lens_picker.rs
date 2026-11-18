@@ -42,6 +42,7 @@ pub(super) struct LensPicker {
     pub active: Option<MapLens>,
     next_page: bool,
     pub material: usize,
+    pub liquid: usize,
 }
 
 impl LensPicker {
@@ -75,14 +76,23 @@ impl LensPicker {
             }
             return true;
         }
-        if shift && self.active == Some(MapLens::Chains) && material_count > 0 {
-            if keys.just_pressed(KeyCode::PageUp) {
-                self.material = (self.material + material_count - 1) % material_count;
-                return true;
-            }
-            if keys.just_pressed(KeyCode::PageDown) {
-                self.material = (self.material + 1) % material_count;
-                return true;
+        if shift {
+            let filter = match self.active {
+                Some(MapLens::Chains) if material_count > 0 => {
+                    Some((&mut self.material, material_count))
+                }
+                Some(MapLens::Water) => Some((&mut self.liquid, 4)),
+                _ => None,
+            };
+            if let Some((index, count)) = filter {
+                if keys.just_pressed(KeyCode::PageUp) {
+                    *index = (*index + count - 1) % count;
+                    return true;
+                }
+                if keys.just_pressed(KeyCode::PageDown) {
+                    *index = (*index + 1) % count;
+                    return true;
+                }
             }
         }
         let shortcuts = [

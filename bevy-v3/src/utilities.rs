@@ -18,7 +18,21 @@ const GRID_TARIFF_CENTS: f64 = 95.0;
 pub enum NetworkView {
     Power,
     Water,
+    Liquid(usize),
     Sanitation,
+}
+
+const LIQUID_NAMES: [&str; 4] = ["Drinking water", "Irrigation", "Greywater", "Sewage"];
+
+impl NetworkView {
+    fn channels(self) -> std::ops::Range<usize> {
+        match self {
+            Self::Power => 0..0,
+            Self::Water => 0..LIQUID_NAMES.len(),
+            Self::Liquid(channel) => channel..channel + 1,
+            Self::Sanitation => 2..LIQUID_NAMES.len(),
+        }
+    }
 }
 
 #[derive(Default, Deserialize, Serialize)]
@@ -1059,7 +1073,7 @@ impl Utilities {
                 Color::srgb_u8(234, 163, 90),
             ];
             for pipe in &self.links {
-                if view == NetworkView::Sanitation && pipe.channel < 2 {
+                if !view.channels().contains(&pipe.channel) {
                     continue;
                 }
                 draw(
@@ -1083,21 +1097,22 @@ impl Utilities {
 
         self.draw_network(terrain, view, gizmos);
         let mut label = match view {
-            NetworkView::Power => "Power · Green available · Red unmet demand · Gray off or idle",
+            NetworkView::Power => {
+                "Power · Green available · Red unmet demand · Gray off or idle".into()
+            }
             NetworkView::Water => {
-                "Water · Blue fresh · Green irrigation · Purple greywater · Orange sewage"
+                "Water · Blue fresh · Green irrigation · Purple greywater · Orange sewage".into()
             }
+            NetworkView::Liquid(channel) => format!(
+                "Water · {} · Shift+Page Up/Down Change liquid\nBlue enabled · Gold empty supply · Red waste storage full · Gray off",
+                LIQUID_NAMES[channel]
+            ),
             NetworkView::Sanitation => {
-                "Sanitation · Purple greywater · Orange sewage · Red storage full"
+                "Sanitation · Purple greywater · Orange sewage pipes · Red storage full".into()
             }
-        }
-        .to_owned();
+        };
         for node in self.nodes.values() {
-            let channels = if view == NetworkView::Sanitation {
-                2..4
-            } else {
-                0..4
-            };
+            let channels = view.channels();
             let (color, detail) = match view {
                 NetworkView::Power => {
                     if !(light_load(&node.kind) > 0.0
@@ -1119,19 +1134,22 @@ impl Utilities {
                     };
                     (color, state)
                 }
-                NetworkView::Water | NetworkView::Sanitation => {
+                NetworkView::Water | NetworkView::Liquid(_) | NetworkView::Sanitation => {
                     if !channels.clone().any(|channel| node.capacity[channel] > 0.0) {
                         continue;
                     }
                     if !node.enabled {
                         (Color::srgb_u8(147, 146, 140), "Switched off")
-                    } else if view == NetworkView::Sanitation
-                        && channels.clone().any(|channel| {
-                            node.capacity[channel] > 0.0
-                                && node.water[channel] >= node.capacity[channel] - 0.01
-                        })
-                    {
+                    } else if channels.clone().any(|channel| {
+                        channel >= 2
+                            && node.capacity[channel] > 0.0
+                            && node.water[channel] >= node.capacity[channel] - 0.01
+                    }) {
                         (Color::srgb_u8(222, 112, 96), "Storage full")
+                    } else if let NetworkView::Liquid(channel @ 0..=1) = view
+                        && node.water[channel] < 0.01
+                    {
+                        (Color::srgb_u8(243, 200, 108), "Empty")
                     } else {
                         (Color::srgb_u8(101, 214, 255), "Enabled")
                     }
@@ -1152,12 +1170,11 @@ impl Utilities {
                 if view == NetworkView::Power && node.battery > 0.0 {
                     let _ = write!(label, " · {:.2}/{:.2} kWh", node.charge, node.battery);
                 } else if view != NetworkView::Power {
-                    let names = ["Fresh", "Irrigation", "Greywater", "Sewage"];
                     for channel in channels.filter(|&channel| node.capacity[channel] > 0.0) {
                         let _ = write!(
                             label,
                             " · {} {:.1}/{:.1} L",
-                            names[channel], node.water[channel], node.capacity[channel]
+                            LIQUID_NAMES[channel], node.water[channel], node.capacity[channel]
                         );
                     }
                 }

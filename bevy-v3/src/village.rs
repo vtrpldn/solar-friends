@@ -1429,7 +1429,7 @@ fn draw_blueprints(
         );
         let network_lens = match village.lenses.active {
             Some(MapLens::Power) => Some(NetworkView::Power),
-            Some(MapLens::Water) => Some(NetworkView::Water),
+            Some(MapLens::Water) => Some(NetworkView::Liquid(village.lenses.liquid)),
             Some(MapLens::Sanitation) => Some(NetworkView::Sanitation),
             _ => None,
         };
