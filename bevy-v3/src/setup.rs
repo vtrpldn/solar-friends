@@ -30,6 +30,8 @@ pub struct WorldSetup {
     restart: u64,
     #[serde(skip)]
     confirming_new: bool,
+    #[serde(skip)]
+    seed_entry: Option<String>,
     #[serde(default)]
     pub mode: Mode,
     seed: u32,
@@ -54,6 +56,7 @@ impl Default for WorldSetup {
             open: true,
             restart: 0,
             confirming_new: false,
+            seed_entry: None,
             mode: Mode::Story,
             seed: 42,
             biome: 0,
@@ -72,6 +75,7 @@ impl WorldSetup {
         Self {
             open: false,
             confirming_new: false,
+            seed_entry: None,
             ..self.clone()
         }
     }
@@ -127,6 +131,45 @@ impl WorldSetup {
         Color::srgb_u8(red, green, blue)
     }
 
+    fn edit_seed(&mut self, keyboard: &ButtonInput<KeyCode>) {
+        let Some(entry) = &mut self.seed_entry else {
+            return;
+        };
+        if keyboard.just_pressed(KeyCode::Escape) {
+            self.seed_entry = None;
+            return;
+        }
+        if keyboard.just_pressed(KeyCode::Enter) || keyboard.just_pressed(KeyCode::NumpadEnter) {
+            if let Ok(value) = entry.parse::<std::num::NonZeroU32>() {
+                self.seed = value.get();
+                self.seed_entry = None;
+            }
+            return;
+        }
+        if keyboard.just_pressed(KeyCode::Backspace) {
+            entry.pop();
+        }
+        for (digit, (top, keypad)) in [
+            (KeyCode::Digit0, KeyCode::Numpad0),
+            (KeyCode::Digit1, KeyCode::Numpad1),
+            (KeyCode::Digit2, KeyCode::Numpad2),
+            (KeyCode::Digit3, KeyCode::Numpad3),
+            (KeyCode::Digit4, KeyCode::Numpad4),
+            (KeyCode::Digit5, KeyCode::Numpad5),
+            (KeyCode::Digit6, KeyCode::Numpad6),
+            (KeyCode::Digit7, KeyCode::Numpad7),
+            (KeyCode::Digit8, KeyCode::Numpad8),
+            (KeyCode::Digit9, KeyCode::Numpad9),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            if entry.len() < 10 && keyboard.any_just_pressed([top, keypad]) {
+                entry.push(char::from(b'0' + digit as u8));
+            }
+        }
+    }
+
     fn label(&self, action: Action, has_village: bool) -> String {
         match action {
             Action::Mode => match self.mode {
@@ -143,7 +186,11 @@ impl WorldSetup {
             Action::Supplies if self.mode == Mode::Sandbox => "Supplies   ·   Unlimited".into(),
             Action::Supplies => format!("Supplies   ·   {}", SUPPLIES[self.supplies]),
             Action::Town => format!("Town   ·   {}", TOWN[self.town]),
-            Action::Seed => format!("Land seed   ·   {}", self.seed),
+            Action::Seed => match &self.seed_entry {
+                Some(entry) => format!("Seed {entry}▏\nEnter apply · Esc cancel"),
+                None => format!("Land seed   ·   {}", self.seed),
+            },
+            Action::Reroll => "New plot".into(),
             Action::Explore if self.confirming_new => "Confirm new village".into(),
             Action::Explore if has_village => "Start new village".into(),
             Action::Explore => "Enter village".into(),
@@ -163,6 +210,7 @@ enum Action {
     Supplies,
     Town,
     Seed,
+    Reroll,
     Explore,
     Resume,
 }
@@ -191,7 +239,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 padding: UiRect::all(px(24)),
                 width: px(340),
                 flex_direction: FlexDirection::Column,
-                row_gap: px(10),
+                row_gap: px(8),
                 ..default()
             },
             BackgroundColor(Color::srgb_u8(31, 45, 35)),
@@ -209,6 +257,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Supplies,
                 Action::Town,
                 Action::Seed,
+                Action::Reroll,
                 Action::Resume,
                 Action::Explore,
             ] {
@@ -222,7 +271,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                             } else {
                                 Display::Flex
                             },
-                            padding: UiRect::axes(px(14), px(10)),
+                            padding: UiRect::axes(px(14), px(8)),
                             ..default()
                         },
                         BackgroundColor(Color::srgb_u8(62, 83, 65)),
@@ -255,6 +304,10 @@ fn setup_input(
         }
         return;
     }
+    if setup.seed_entry.is_some() && keyboard.get_just_pressed().len() > 0 {
+        setup.edit_seed(&keyboard);
+        return;
+    }
     for (interaction, action) in &buttons {
         if *interaction != Interaction::Pressed {
             continue;
@@ -281,8 +334,25 @@ fn setup_input(
             }
             Action::Savings | Action::Supplies => {}
             Action::Town => setup.town = (setup.town + 1) % TOWN.len(),
-            Action::Seed => setup.seed = setup.seed.wrapping_add(1),
+            Action::Seed => {
+                setup.seed_entry = Some(String::new());
+            }
+            Action::Reroll => {
+                let time = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap_or_default();
+                let entropy =
+                    time.subsec_nanos() ^ time.as_secs() as u32 ^ setup.seed.rotate_left(13);
+                let seed = (crate::terrain::land_random(entropy)() * f64::from(u32::MAX)) as u32;
+                setup.seed = if seed == 0 || seed == setup.seed {
+                    setup.seed.wrapping_add(1).max(1)
+                } else {
+                    seed
+                };
+                setup.seed_entry = None;
+            }
             Action::Explore => {
+                setup.seed_entry = None;
                 if village.session_setup().is_some() && !setup.confirming_new {
                     setup.confirming_new = true;
                 } else {
