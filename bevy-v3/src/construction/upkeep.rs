@@ -1,0 +1,516 @@
+use crate::{
+    resident_animation::Motion,
+    weather::{DAY, HOUR},
+};
+
+use super::{resident_work::approach_points, *};
+
+#[derive(Deserialize, Serialize)]
+pub(super) struct Upkeep {
+    pub(super) automatic: bool,
+    budget: u64,
+    day: u64,
+    used: u64,
+    assets: BTreeMap<usize, Asset>,
+    jobs: BTreeMap<usize, Service>,
+}
+
+impl Default for Upkeep {
+    fn default() -> Self {
+        Self {
+            automatic: true,
+            budget: 10_000,
+            day: 0,
+            used: 0,
+            assets: BTreeMap::new(),
+            jobs: BTreeMap::new(),
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+struct Asset {
+    condition: f64,
+    age: f64,
+    battery_age: f64,
+}
+
+impl Default for Asset {
+    fn default() -> Self {
+        Self {
+            condition: 100.0,
+            age: 0.0,
+            battery_age: 0.0,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Deserialize, Serialize)]
+enum Kind {
+    Service,
+    Battery,
+    Replacement,
+    Soil,
+}
+
+impl Kind {
+    fn duration(self) -> f64 {
+        match self {
+            Self::Service => 240.0,
+            Self::Battery => 360.0,
+            Self::Replacement => 1800.0,
+            Self::Soil => 60.0,
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::Service => "Servicing equipment",
+            Self::Battery => "Replacing batteries",
+            Self::Replacement => "Replacing worn parts",
+            Self::Soil => "Amending soil",
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+struct Service {
+    kind: Kind,
+    worker: Option<usize>,
+    parts_paid: bool,
+    work: f64,
+}
+
+impl Upkeep {
+    pub(super) fn valid(&self, count: usize) -> bool {
+        self.budget <= 10_000_000
+            && self.used <= 10_000_000
+            && self.assets.iter().all(|(&id, asset)| {
+                id < count
+                    && (0.0..=100.0).contains(&asset.condition)
+                    && asset.age.is_finite()
+                    && asset.age >= 0.0
+                    && asset.battery_age.is_finite()
+                    && asset.battery_age >= 0.0
+            })
+            && self.jobs.iter().all(|(&id, job)| {
+                id < count
+                    && (0.0..=job.kind.duration()).contains(&job.work)
+                    && job.worker.is_none_or(|index| index < 5)
+            })
+    }
+
+    pub(super) fn remove(&mut self, index: usize) {
+        self.assets.remove(&index);
+        self.jobs.remove(&index);
+    }
+
+    pub(super) fn servicing(&self, index: usize) -> bool {
+        self.jobs
+            .get(&index)
+            .is_some_and(|job| job.worker.is_some() || job.parts_paid)
+    }
+
+    fn activity(&self, index: usize) -> Option<&Service> {
+        self.jobs.values().find(|job| job.worker == Some(index))
+    }
+}
+
+impl Construction {
+    pub fn upkeep_input(&mut self, keys: &ButtonInput<KeyCode>) {
+        if keys.just_pressed(KeyCode::KeyT) {
+            self.upkeep.automatic = !self.upkeep.automatic;
+        }
+        if keys.just_pressed(KeyCode::BracketLeft) {
+            self.upkeep.budget = self.upkeep.budget.saturating_sub(2_500);
+        } else if keys.just_pressed(KeyCode::BracketRight) {
+            self.upkeep.budget = (self.upkeep.budget + 2_500).min(10_000_000);
+        }
+    }
+
+    pub fn upkeep_status(&self, catalog: &Catalog) -> String {
+        let u = &self.upkeep;
+        let setting = if u.automatic { "on" } else { "off" };
+        let mut text = format!(
+            "Maintenance · Automatic {setting} · T Switch\nR${:.0} / R${:.0} parts today · [ ] Budget",
+            u.used as f64 / 100.0,
+            u.budget as f64 / 100.0
+        );
+        for (&index, job) in u.jobs.iter().take(6) {
+            let name = &catalog.projects[&self.plans[index].key].name;
+            let status = if job.worker.is_some() {
+                format!("{:.0}% complete", job.work / job.kind.duration() * 100.0)
+            } else {
+                "Awaiting worker, parts, or budget".into()
+            };
+            text.push_str(&format!(
+                "\n{name} #{} · {} · {status}",
+                index + 1,
+                job.kind.label()
+            ));
+        }
+        if let Some(index) = self.production.selected
+            && let Some(asset) = u.assets.get(&index)
+        {
+            text.push_str(&format!(
+                "\nSelected · Condition {:.0}% · Age {:.1} years · Battery {:.1} years",
+                asset.condition,
+                asset.age / 365.0,
+                asset.battery_age / 365.0
+            ));
+        }
+        text
+    }
+
+    pub(super) fn working_upkeep(&self, worker: usize) -> bool {
+        self.upkeep.activity(worker).is_some()
+    }
+
+    pub(super) fn service_motion(&self, worker: usize) -> Option<Motion> {
+        self.upkeep.activity(worker).map(|job| {
+            if self.residents[worker].path.is_empty() {
+                Motion::Work
+            } else if job.parts_paid {
+                Motion::CarryWalk
+            } else {
+                Motion::Walk
+            }
+        })
+    }
+
+    pub(super) fn service_activity(&self, worker: usize) -> Option<&'static str> {
+        self.upkeep.activity(worker).map(|job| job.kind.label())
+    }
+
+    pub(super) fn age_assets(&mut self, catalog: &Catalog, clock: f64, dt: f64) {
+        let day = ((clock + 9.0 * HOUR) / DAY).floor() as u64;
+        if self.upkeep.day != day {
+            self.upkeep.day = day;
+            self.upkeep.used = 0;
+        }
+        for (index, plan) in self.plans.iter().enumerate() {
+            let def = &catalog.projects[&plan.key];
+            if plan.removed || plan.work < def.work || self.changes.contains_key(&index) {
+                continue;
+            }
+            let interval = match def.kind.as_str() {
+                "home" | "shed" | "warehouse" | "groundwater-well" => 365.0,
+                "kitchen" | "workshop" | "well" | "solar_farm" | "greenhouse" => 180.0,
+                "water-pump" | "hydro" => 90.0,
+                _ => 0.0,
+            };
+            let replacement_years = match def.kind.as_str() {
+                "water-pump" | "well" => 10.0,
+                "home" | "shed" | "warehouse" | "kitchen" => 20.0,
+                "solar_farm" => 25.0,
+                _ => 0.0,
+            };
+            let battery = def.materials.get("batteries").copied().unwrap_or(0) as f64
+                + if self.utilities.has_rooftop_solar(index) {
+                    1.0
+                } else {
+                    0.0
+                };
+            let poor_soil = self
+                .production
+                .growing_sites
+                .get(&index)
+                .is_some_and(|soil| soil.fertility < 0.7);
+            if interval <= 0.0 && battery <= 0.0 && !poor_soil {
+                continue;
+            }
+            let asset = self.upkeep.assets.entry(index).or_default();
+            if interval > 0.0 {
+                asset.condition = (asset.condition - dt / DAY * 30.0 / interval).max(0.0);
+            }
+            if replacement_years > 0.0 {
+                asset.age += dt / DAY;
+            }
+            if battery > 0.0 {
+                asset.battery_age += dt / DAY;
+            }
+            self.utilities.update_condition(
+                index,
+                (asset.condition / 40.0).min(1.0),
+                battery * 4.0 * (1.0 - asset.battery_age / (8.0 * 365.0) * 0.2).max(0.8),
+            );
+            let kind = if self.upkeep.automatic
+                && replacement_years > 0.0
+                && asset.age >= replacement_years * 365.0
+            {
+                Kind::Replacement
+            } else if self.upkeep.automatic && asset.battery_age >= 8.0 * 365.0 {
+                Kind::Battery
+            } else if poor_soil {
+                Kind::Soil
+            } else if self.upkeep.automatic && asset.condition < 70.0 {
+                Kind::Service
+            } else {
+                continue;
+            };
+            self.upkeep.jobs.entry(index).or_insert(Service {
+                kind,
+                worker: None,
+                parts_paid: false,
+                work: 0.0,
+            });
+        }
+    }
+
+    pub(super) fn tick_upkeep(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        dt: f32,
+    ) {
+        if stock.sandbox {
+            return;
+        }
+        let targets: Vec<_> = self.upkeep.jobs.keys().copied().collect();
+        for id in targets {
+            let mut job = self.upkeep.jobs.remove(&id).expect("queued service");
+            if !self.step_service(id, &mut job, (catalog, stock), site, dt) {
+                self.upkeep.jobs.insert(id, job);
+            }
+        }
+    }
+
+    fn step_service(
+        &mut self,
+        id: usize,
+        job: &mut Service,
+        (catalog, stock): (&Catalog, &mut Stock),
+        site: ConstructionSite,
+        dt: f32,
+    ) -> bool {
+        let project = &self.plans[id];
+        if project.removed {
+            return true;
+        }
+        if self.changes.contains_key(&id) {
+            return false;
+        }
+        let definition = &catalog.projects[&project.key];
+        if !self.upkeep.automatic && !matches!(job.kind, Kind::Soil) {
+            if let Some(worker) = job.worker.take() {
+                self.residents[worker].path.clear();
+            }
+            return false;
+        }
+        let parts = parts(job.kind, definition, catalog);
+        let cost = if matches!(job.kind, Kind::Soil) {
+            0
+        } else {
+            parts
+                .iter()
+                .map(|(id, units)| {
+                    let item = &catalog.materials[id];
+                    (100.0 * item.price * f64::from(*units) / f64::from(item.pack.max(1))).round()
+                        as u64
+                })
+                .sum()
+        };
+        let affordable = |stock: &Stock, used: u64| {
+            stock.missing(&parts).is_none() && used + cost <= self.upkeep.budget
+        };
+        let target_path = |index: usize, from: Vec2| {
+            if job.parts_paid {
+                approach_points(project.position, project.size, from)
+                    .into_iter()
+                    .find_map(|cell| self.resident_route(catalog, site, from, cell))
+            } else {
+                self.resident_route(catalog, site, from, SUPPLY_SPOTS[index])
+            }
+        };
+        if let Some(worker) = job.worker
+            && self.residents[worker].health.energy < 25.0
+        {
+            self.residents[worker].path.clear();
+            job.worker = None;
+            return false;
+        }
+        let worker = if let Some(index) = job.worker {
+            index
+        } else {
+            if (!job.parts_paid && !affordable(stock, self.upkeep.used))
+                || self
+                    .upkeep
+                    .jobs
+                    .values()
+                    .any(|service| service.worker.is_some())
+            {
+                return false;
+            }
+            let picked = (0..self.residents.len())
+                .filter(|&index| {
+                    self.free_for_leisure(index) && self.residents[index].health.energy >= 25.0
+                })
+                .find_map(|index| {
+                    target_path(index, self.residents[index].position).map(|path| (index, path))
+                });
+            let Some((index, path)) = picked else {
+                return false;
+            };
+            job.worker = Some(index);
+            self.residents[index].path = path;
+            self.residents[index].leisure.visit = None;
+            index
+        };
+        let resident = &mut self.residents[worker];
+        resident.move_along_path(dt, job.parts_paid);
+        if !resident.path.is_empty() {
+            return false;
+        }
+        if !job.parts_paid {
+            if !affordable(stock, self.upkeep.used) {
+                job.worker = None;
+                return false;
+            }
+            let from = self.residents[worker].position;
+            let Some(path) = approach_points(project.position, project.size, from)
+                .into_iter()
+                .find_map(|cell| self.resident_route(catalog, site, from, cell))
+            else {
+                job.worker = None;
+                return false;
+            };
+            stock.reserve_available(&parts);
+            self.upkeep.used += cost;
+            job.parts_paid = true;
+            self.residents[worker].path = path;
+            return false;
+        }
+        let resident = &mut self.residents[worker];
+        resident.health.energy = (resident.health.energy - f64::from(dt) * 0.12).max(0.0);
+        job.work = (job.work + f64::from(dt)).min(job.kind.duration());
+        if job.work < job.kind.duration() {
+            return false;
+        }
+        let asset = self.upkeep.assets.entry(id).or_default();
+        match job.kind {
+            Kind::Service => asset.condition = 100.0,
+            Kind::Replacement => {
+                asset.condition = 100.0;
+                asset.age = 0.0;
+            }
+            Kind::Battery => asset.battery_age = 0.0,
+            Kind::Soil => {
+                if let Some(soil) = self.production.growing_sites.get_mut(&id) {
+                    soil.fertility = (soil.fertility + 0.3).min(1.0);
+                }
+            }
+        }
+        true
+    }
+}
+
+fn parts(kind: Kind, definition: &Project, catalog: &Catalog) -> BTreeMap<String, u32> {
+    let pair = |a: &str, b: &str| BTreeMap::from([(a.into(), 1), (b.into(), 1)]);
+    match kind {
+        Kind::Service => pair("tools", "hardware"),
+        Kind::Battery => pair("batteries", "electrical"),
+        Kind::Soil => {
+            let area = catalog
+                .production
+                .values()
+                .find_map(|recipe| {
+                    (recipe.kind == definition.kind)
+                        .then(|| recipe.biology.as_ref()?.care)
+                        .flatten()
+                        .map(|[area, _]| area)
+                })
+                .unwrap_or(16.0);
+            BTreeMap::from([("compost".into(), (area * 0.25).ceil() as u32)])
+        }
+        Kind::Replacement => match definition.kind.as_str() {
+            "solar_farm" => BTreeMap::from([
+                (
+                    "panels".into(),
+                    definition.materials.get("panels").copied().unwrap_or(1),
+                ),
+                ("electrical".into(), 1),
+            ]),
+            "well" | "water-pump" => pair("pumps", "plumbing"),
+            _ => ["tiles", "roofing", "wood", "hardware"]
+                .into_iter()
+                .filter_map(|id| {
+                    definition.materials.get(id).map(|&units| {
+                        (
+                            id.into(),
+                            if id == "wood" {
+                                units.div_ceil(4)
+                            } else {
+                                units
+                            },
+                        )
+                    })
+                })
+                .collect(),
+        },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::setup::WorldSetup;
+
+    #[test]
+    fn scheduled_maintenance_uses_parts_and_restores_building_condition() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction {
+            selection: Some("kitchen".into()),
+            ..default()
+        };
+        village.plan(
+            &catalog,
+            &mut stock,
+            site,
+            IVec2::new(44, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
+        );
+        stock.sandbox = false;
+        stock.receive(&parts(
+            Kind::Service,
+            &catalog.projects["kitchen"],
+            &catalog,
+        ));
+        let tools = stock.available("tools");
+        village.upkeep.budget = 0;
+        village.age_assets(&catalog, 185.0 * DAY, 185.0 * DAY);
+        assert!(village.upkeep.assets[&0].condition < 70.0);
+        village.tick_upkeep(&catalog, &mut stock, site, 0.1);
+        assert!(village.upkeep.jobs[&0].worker.is_none());
+        assert_eq!(stock.available("tools"), tools);
+
+        village.upkeep.budget = 20_000;
+        for _ in 0..6_000 {
+            village.tick_upkeep(&catalog, &mut stock, site, 0.1);
+            if village.upkeep.jobs.is_empty() {
+                break;
+            }
+        }
+        assert_eq!(village.upkeep.assets[&0].condition, 100.0);
+        assert_eq!(stock.available("tools"), tools - 1);
+        assert!(village.upkeep.used > 0);
+        let json = serde_json::to_string(&village).unwrap();
+        let loaded: Construction = serde_json::from_str(&json).unwrap();
+        assert_eq!(loaded.upkeep.assets[&0].condition, 100.0);
+        assert!(loaded.valid_save(&catalog, &stock));
+    }
+}

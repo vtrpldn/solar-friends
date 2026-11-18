@@ -133,6 +133,9 @@ impl Construction {
     }
 
     fn can_change(&self, index: usize) -> Option<&'static str> {
+        if self.upkeep.servicing(index) {
+            return Some("Wait for the resident to finish servicing this asset.");
+        }
         if self.water_job_at(index) {
             return Some("Wait for the queued water job to finish.");
         }
@@ -316,6 +319,7 @@ impl Construction {
             self.farming.open = false;
         }
         self.farming.plots.remove(&index);
+        self.upkeep.remove(index);
         self.production.growing_sites.remove(&index);
         self.livestock.animals.remove(&index);
         self.utilities.remove_facility(index);
@@ -432,6 +436,7 @@ impl Construction {
                     || self.farming.has_worker(worker_index)
                     || self.working_change(worker_index)
                     || self.working_water(worker_index)
+                    || self.working_upkeep(worker_index)
                     || self
                         .trip
                         .as_ref()

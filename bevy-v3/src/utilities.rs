@@ -56,6 +56,8 @@ struct Node {
     solar_kw: f64,
     #[serde(default)]
     solar_upgrade: bool,
+    #[serde(default = "full_service")]
+    service_factor: f64,
     demanding: bool,
     #[serde(default)]
     cold_storage: bool,
@@ -126,6 +128,7 @@ impl Utilities {
             charge: 0.0,
             solar_kw: 0.0,
             solar_upgrade: false,
+            service_factor: full_service(),
             demanding: false,
             cold_storage: false,
             cooling_paused: false,
@@ -150,6 +153,7 @@ impl Utilities {
                 charge: 0.0,
                 solar_kw: f64::from(facility.panels) * 0.6,
                 solar_upgrade: false,
+                service_factor: full_service(),
                 demanding: false,
                 cold_storage: false,
                 cooling_paused: false,
@@ -192,8 +196,11 @@ impl Utilities {
                     .iter()
                     .zip(node.capacity)
                     .all(|(amount, cap)| (0.0..=cap + 1e-8).contains(amount))
+                && (0.0..=1.0).contains(&node.service_factor)
                 && (!node.solar_upgrade
-                    || node.kind == "home" && node.solar_kw == 0.6 && node.battery == 4.0)
+                    || node.kind == "home"
+                        && node.solar_kw == 0.6
+                        && (3.2..=4.0).contains(&node.battery))
                 && (0.0..=node.battery + 1e-8).contains(&node.charge)
         }) && self.ground.as_ref().is_none_or(|ground| {
             ground.capacity > 0.0
@@ -432,6 +439,17 @@ impl Utilities {
         }
     }
 
+    pub fn update_condition(&mut self, building: usize, service_factor: f64, battery: f64) {
+        if let Some(node) = self.nodes.get_mut(&(building + 1)) {
+            node.service_factor = service_factor;
+            if node.charge > battery {
+                self.curtailed_kwh += node.charge - battery;
+                node.charge = battery;
+            }
+            node.battery = battery;
+        }
+    }
+
     pub fn install_rooftop_solar(&mut self, building: usize) -> bool {
         let Some(node) = self
             .nodes
@@ -648,7 +666,7 @@ impl Utilities {
                 _ => 0.0,
             };
             let circuit = circuits.entry(circuit_of(id)).or_default();
-            circuit.generation += output;
+            circuit.generation += output * node.service_factor;
             circuit.capacity += node.battery;
             circuit.stored += node.charge;
             let mut kw = match node.kind.as_str() {
@@ -801,7 +819,9 @@ impl Utilities {
                 "water-pump" if node.powered && node.water[1] < node.capacity[1] - 0.01 => {
                     pumping.push(id)
                 }
-                "well" if node.powered => transform_water(node, 1, 0, 25.0 * hours, 1.0),
+                "well" if node.powered => {
+                    transform_water(node, 1, 0, 25.0 * hours * node.service_factor, 1.0)
+                }
                 "wetland" => transform_water(node, 2, 1, 10.0 * hours, 0.85),
                 "banana_treatment" | "biodigester" => {
                     let used = (8.0 * hours).min(node.water[3]);
@@ -816,7 +836,8 @@ impl Utilities {
         for id in pumping {
             let pump = &self.nodes[&id];
             let location = pump.location;
-            let volume = (600.0 * hours).min(pump.capacity[1] - pump.water[1]);
+            let volume =
+                (600.0 * hours * pump.service_factor).min(pump.capacity[1] - pump.water[1]);
             let well = self
                 .nodes
                 .iter_mut()
@@ -1155,6 +1176,10 @@ fn light_load(kind: &str) -> f64 {
         "coop" => 0.01,
         _ => 0.0,
     }
+}
+
+fn full_service() -> f64 {
+    1.0
 }
 
 fn capacity(kind: &str) -> [f64; 4] {

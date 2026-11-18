@@ -7,6 +7,7 @@ mod resident_work;
 mod roads;
 mod town_pickup;
 mod trade_work;
+mod upkeep;
 mod water_work;
 mod work_shift;
 
@@ -138,6 +139,8 @@ pub struct Construction {
     changes: BTreeMap<usize, lifecycle::ChangeJob>,
     #[serde(default)]
     water_jobs: BTreeMap<usize, water_work::WaterJob>,
+    #[serde(default)]
+    upkeep: upkeep::Upkeep,
     #[serde(skip)]
     moving: Option<usize>,
     #[serde(default)]
@@ -226,6 +229,7 @@ impl Default for Construction {
             utilities: Utilities::default(),
             changes: BTreeMap::new(),
             water_jobs: BTreeMap::new(),
+            upkeep: upkeep::Upkeep::default(),
             moving: None,
             priority: None,
             trip: None,
@@ -799,6 +803,9 @@ impl Construction {
                     })
                 }),
         );
+        if !stock.sandbox {
+            self.age_assets(catalog, clock, dt);
+        }
         self.utilities
             .tick(setup, stock, self.market.committed_fares(), clock, dt);
     }
@@ -893,7 +900,8 @@ impl Construction {
                             && target.rotation <= 3
                     })
             });
-        if !self.valid_water_jobs()
+        if !self.upkeep.valid(self.plans.len())
+            || !self.valid_water_jobs()
             || !self.valid_homes(catalog)
             || !changes_valid
             || !self.trade.valid(catalog)
@@ -1072,6 +1080,7 @@ impl Construction {
         );
         self.tick_changes(catalog, stock, site, dt);
         self.tick_water_work(catalog, stock, site, clock.seconds, dt);
+        self.tick_upkeep(catalog, stock, site, dt);
         self.tick_shifts(catalog, stock, site, clock, dt);
         self.tick_trip(catalog, stock, site, clock, dt);
         self.tick_gathering(catalog, stock, site, clock.seconds, dt);
@@ -1086,6 +1095,7 @@ impl Construction {
                 || self.residents[index].town_work.active()
                 || self.working_change(index)
                 || self.working_water(index)
+                || self.working_upkeep(index)
             {
                 continue;
             }

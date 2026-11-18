@@ -67,6 +67,7 @@ impl Construction {
                 && !self.farming.has_worker(index)
                 && !self.working_change(index)
                 && !self.working_water(index)
+                && !self.working_upkeep(index)
                 && !self.residents[index]
                     .assignment
                     .as_ref()
@@ -465,6 +466,7 @@ impl Construction {
                     && !self.farming.has_worker(id)
                     && !self.working_change(id)
                     && !self.working_water(id)
+                    && !self.working_upkeep(id)
                     && !self.trip.as_ref().is_some_and(|trip| trip.driver == id)
             })
             .collect::<Vec<_>>();
@@ -818,7 +820,10 @@ impl Construction {
                 _ => Motion::Walk,
             };
         }
-        if let Some(motion) = self.water_motion(index) {
+        if let Some(motion) = self
+            .service_motion(index)
+            .or_else(|| self.water_motion(index))
+        {
             return motion;
         }
         if let Some(visit) = &worker.leisure.visit {
@@ -862,7 +867,10 @@ impl Construction {
                     "In production"
                 } else if self.gathering.workers_at_site(index) {
                     "Gathering"
-                } else if let Some(activity) = self.water_activity(index) {
+                } else if let Some(activity) = self
+                    .service_activity(index)
+                    .or_else(|| self.water_activity(index))
+                {
                     activity
                 } else if let Some(visit) = &worker.leisure.visit {
                     visit.label()

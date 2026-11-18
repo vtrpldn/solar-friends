@@ -204,6 +204,7 @@ enum UtilityPanel {
     Finances,
     Trade,
     Pantry,
+    Upkeep,
 }
 
 impl Village {
@@ -657,6 +658,20 @@ fn village_input(
                 Some(UtilityPanel::Residents)
             };
         }
+        if keyboard.just_pressed(KeyCode::F7) && !town.stock.sandbox {
+            town.utility_panel = if town.utility_panel == Some(UtilityPanel::Upkeep) {
+                None
+            } else {
+                Some(UtilityPanel::Upkeep)
+            };
+        }
+        if town.utility_panel == Some(UtilityPanel::Upkeep) {
+            if let Some(hit) = pointer.clicked {
+                town.construction.select_facility(hit.cell);
+            }
+            town.construction.upkeep_input(&keyboard);
+            return;
+        }
         if keyboard.just_pressed(KeyCode::KeyV) {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Water) {
                 None
@@ -1067,12 +1082,18 @@ fn show_hud(
         label.push_str(&natural);
     }
     if village.camp.is_some() {
-        label.push_str("\nP Power · V Water · N Residents · H Finances · F4 Terrain");
+        label.push_str(
+            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance",
+        );
     }
     match village.utility_panel {
         Some(UtilityPanel::Power) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.power_summary());
+        }
+        Some(UtilityPanel::Upkeep) => {
+            label.push('\n');
+            label.push_str(&village.construction.upkeep_status(&catalog));
         }
         Some(UtilityPanel::Water) => {
             label.push('\n');

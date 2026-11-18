@@ -52,7 +52,7 @@ impl Construction {
         let day = (clock.seconds / DAY + 9.0 / 24.0).floor() as u64;
         let hour = game_hour(clock.seconds);
         for (index, &(job_name, wages)) in JOBS.iter().enumerate() {
-            let tending_water = self.working_water(index);
+            let tending_services = self.working_water(index) || self.working_upkeep(index);
             let worker = &mut self.residents[index];
             if let Some(mut shift) = worker.town_work.shift.take() {
                 match shift.phase {
@@ -105,7 +105,7 @@ impl Construction {
                 || !(worker.town_work.booked || worker.town_work.repeating && day % 7 < 5)
                 || worker.health.energy < 65.0
                 || worker.health.task.is_some()
-                || tending_water
+                || tending_services
                 || [Need::Bladder, Need::Bowels, Need::Hydration]
                     .iter()
                     .any(|kind| worker.health.levels[*kind as usize] < 20.0)
