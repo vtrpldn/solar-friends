@@ -109,6 +109,7 @@ export const MATERIALS = {
 export const PROJECTS = {
   gathering: {
     name: "Gathering place",
+    repeatable: true,
     asset: "picnic-table",
     size: [2, 2],
     materials: {
@@ -130,6 +131,7 @@ export const PROJECTS = {
   },
   shelter: {
     name: "Basic shelter",
+    repeatable: true,
     asset: "shed",
     size: [2, 2],
     materials: { wood: 24, hardware: 3, roofing: 6 },
@@ -139,6 +141,7 @@ export const PROJECTS = {
   },
   toilet: {
     name: "Private toilet",
+    repeatable: true,
     asset: "eco_toilet",
     size: [2, 2],
     materials: { wood: 16, hardware: 2, roofing: 2, sanitation: 1 },

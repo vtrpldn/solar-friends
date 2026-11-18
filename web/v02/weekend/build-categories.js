@@ -1,6 +1,11 @@
 // Functional categories are stable; Camp essentials is a curated starter shortcut.
 export const BUILD_CATEGORIES = ['Camp essentials', 'Homes & shelter', 'Food & farming', 'Animals', 'Water & sanitation', 'Power', 'Storage & production', 'Paths & boundaries', 'Community & leisure', 'All'];
-const essentials = new Set(['gathering', 'water', 'shelter', 'toilet', 'rain-tent', 'covered-stores', 'tarp-stores']);
+const essentials = new Set(['gathering', 'well', 'shelter', 'toilet']);
+// Retain definitions for existing villages while retiring these build choices.
+const retired = new Set(['rain-tent', 'covered-stores', 'tarp-stores', 'goat-pasture-empty', 'water']);
+export function isBuildOption(key, definition) {
+  return !definition.natural && !retired.has(key);
+}
 const groups = {
   'Homes & shelter': ['home', 'shed', 'rain-shelter', 'canvas-tent-teal', 'canvas-tent-ochre'],
   'Food & farming': ['kitchen', 'garden', 'greenhouse', 'grove', 'orchard', 'compost', 'seedling-bench'],

@@ -1,3 +1,4 @@
+import { isBuildOption } from "./build-categories.js";
 import {basicNeeds} from './basic-needs.js';
 import {animalCareText} from './animal-care.js';
 import {foodControls} from './food-controls.js';
@@ -593,7 +594,7 @@ export function createManagement({
             ? "No completed production sites match this search. Try another resource or building name."
             : "Build a garden, workshop or other production site to start making supplies here.";
       if (search) {
-        const producers = Object.entries(PROJECTS).filter(([,d]) => !d.natural &&
+        const producers = Object.entries(PROJECTS).filter(([key,d]) => isBuildOption(key, d) &&
           Object.values(PROCESSES).some(recipe => recipe.kind === d.kind) &&
           productionSearchText(d, PROCESSES, MATERIALS).includes(search));
         for (const [key, definition] of producers) {

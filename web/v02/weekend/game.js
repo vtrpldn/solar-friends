@@ -41,7 +41,7 @@ import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {createCapybaraVisitors} from "./capybaras.js";
 import { constructionProgress } from "./construction-logistics.js";
-import { BUILD_CATEGORIES, buildingCategory, inBuildCategory } from "./build-categories.js";
+import { BUILD_CATEGORIES, buildingCategory, inBuildCategory, isBuildOption } from "./build-categories.js";
 import {createResourceTrends,resourceSnapshot,formatTrend} from './resource-trends.js';
 import {materialTooltip} from './material-tooltip.js';
 import {createWildlife} from './wildlife.js';
@@ -849,7 +849,7 @@ function startPlacement(key, id = null) {
 
 const buildMaterialTooltip = materialTooltip();
 for (const [key, d] of Object.entries(PROJECTS)) {
-  if(d.natural)continue;
+  if (!isBuildOption(key, d)) continue;
   const b = document.createElement("button");
   b.id = `build-${key}`;
   const count = Object.values(d.materials).reduce((a, b) => a + b, 0);
