@@ -1435,6 +1435,7 @@ impl Construction {
         self.tick_changes(catalog, stock, site, dt);
         self.tick_water_work(catalog, stock, site, clock.seconds, dt);
         self.tick_upkeep(catalog, stock, site, dt);
+        self.restock_upkeep(catalog, stock, site.land, clock);
         self.tick_shifts(catalog, stock, site, clock, dt);
         self.tick_trip(catalog, stock, site, clock, dt);
         self.tick_gathering(catalog, stock, site, clock.seconds, dt);

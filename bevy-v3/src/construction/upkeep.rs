@@ -11,6 +11,13 @@ pub(super) struct Upkeep {
     budget: u64,
     day: u64,
     used: u64,
+    #[serde(default)]
+    restock_budget: u64,
+    #[serde(default)]
+    restock_used: u64,
+    #[serde(skip)]
+    next_restock: f64,
+
     assets: BTreeMap<usize, Asset>,
     jobs: BTreeMap<usize, Service>,
     #[serde(default)]
@@ -26,6 +33,9 @@ impl Default for Upkeep {
             budget: 10_000,
             day: 0,
             used: 0,
+            restock_budget: 0,
+            restock_used: 0,
+            next_restock: 0.0,
             assets: BTreeMap::new(),
             jobs: BTreeMap::new(),
             vehicles: std::array::from_fn(|_| Vehicle::default()),
@@ -123,6 +133,8 @@ impl Upkeep {
             })
             && self.budget <= 10_000_000
             && self.used <= 10_000_000
+            && self.restock_budget <= 10_000_000
+            && self.restock_used <= 10_000_000
             && self.assets.iter().all(|(&id, asset)| {
                 id < count
                     && (0.0..=100.0).contains(&asset.condition)
@@ -189,10 +201,118 @@ impl Construction {
         if keys.just_pressed(KeyCode::KeyT) {
             self.upkeep.automatic = !self.upkeep.automatic;
         }
+        let budget = if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+            &mut self.upkeep.restock_budget
+        } else {
+            &mut self.upkeep.budget
+        };
         if keys.just_pressed(KeyCode::BracketLeft) {
-            self.upkeep.budget = self.upkeep.budget.saturating_sub(2_500);
+            *budget = budget.saturating_sub(2_500);
         } else if keys.just_pressed(KeyCode::BracketRight) {
-            self.upkeep.budget = (self.upkeep.budget + 2_500).min(10_000_000);
+            *budget = (*budget + 2_500).min(10_000_000);
+        }
+    }
+
+    pub(super) fn restock_upkeep(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        land: &Land,
+        clock: TownClock,
+    ) {
+        let remaining = self
+            .upkeep
+            .restock_budget
+            .saturating_sub(self.upkeep.restock_used);
+        if stock.sandbox || remaining == 0 || clock.seconds < self.upkeep.next_restock {
+            return;
+        }
+        self.upkeep.next_restock = clock.seconds + 10.0;
+        let local_forage = self.gathering.orders.keys().any(|&id| {
+            land.site(id)
+                .is_some_and(|site| site.recipe() == "gather-wild-forage")
+        });
+        let mut supplies = Vec::new();
+        if !local_forage {
+            for (&index, pen) in &self.livestock.animals {
+                let project = &catalog.projects[&self.plans[index].key];
+                let ration = &catalog.animal_rations[&project.kind];
+                if self.utilities.enabled(index)
+                    && !self.changes.contains_key(&index)
+                    && pen.fed_days(ration) <= 0.25
+                {
+                    supplies.push(("fodder".to_owned(), ration.fodder));
+                }
+            }
+        }
+        if self.upkeep.automatic {
+            for (&index, job) in &self.upkeep.jobs {
+                if !job.parts_paid && !matches!(job.kind, Kind::Soil) {
+                    supplies.extend(parts(
+                        job.kind,
+                        Some(&catalog.projects[&self.plans[index].key]),
+                        catalog,
+                    ));
+                }
+            }
+            for job in self
+                .upkeep
+                .vehicles
+                .iter()
+                .filter_map(|car| car.service.as_ref())
+            {
+                if !job.parts_paid {
+                    supplies.extend(parts(job.kind, None, catalog));
+                }
+            }
+        }
+        let fare = crate::market::fare_cents(clock.round_trip_km);
+        let free = self
+            .storage_space(catalog, stock)
+            .saturating_sub(self.trade.inbound());
+        for (id, units) in supplies {
+            let item = &catalog.materials[&id];
+            let cost = (item.price * 100.0).round() as u64 + fare;
+            if stock.available(&id) >= units
+                || item.pack == 0
+                || cost > remaining
+                || u64::from(item.pack) > free
+                || self
+                    .trade
+                    .orders
+                    .iter()
+                    .any(|order| order.buying && order.material == id)
+                || self
+                    .trade
+                    .delivery
+                    .as_ref()
+                    .is_some_and(|order| order.material == id)
+                || self
+                    .production
+                    .jobs
+                    .iter()
+                    .any(|job| catalog.production[&job.recipe].output.contains_key(&id))
+            {
+                continue;
+            }
+            if self
+                .trade
+                .buy(
+                    catalog,
+                    stock,
+                    &mut self.market,
+                    &id,
+                    (clock.seconds, clock.round_trip_km, false),
+                )
+                .is_ok()
+            {
+                self.upkeep.restock_used += cost;
+                self.record_event(
+                    clock.seconds,
+                    format!("Ordered {} for maintenance and animal care.", item.name),
+                );
+                break;
+            }
         }
     }
 
@@ -200,9 +320,11 @@ impl Construction {
         let u = &self.upkeep;
         let setting = if u.automatic { "on" } else { "off" };
         let mut text = format!(
-            "Maintenance · Automatic {setting} · T Switch\nR${:.0} / R${:.0} parts today · [ ] Budget",
+            "Maintenance · Automatic {setting} · T Switch\nR${:.0} / R${:.0} parts today · [ ] Budget\nR${:.0} / R${:.0} restocking today · Shift+[ ] Budget",
             u.used as f64 / 100.0,
-            u.budget as f64 / 100.0
+            u.budget as f64 / 100.0,
+            u.restock_used as f64 / 100.0,
+            u.restock_budget as f64 / 100.0,
         );
         for (index, car) in u.vehicles.iter().enumerate() {
             let service = car.service.as_ref().map_or_else(String::new, |job| {
@@ -270,6 +392,7 @@ impl Construction {
         if self.upkeep.day != day {
             self.upkeep.day = day;
             self.upkeep.used = 0;
+            self.upkeep.restock_used = 0;
         }
         if self.upkeep.automatic {
             for vehicle in &mut self.upkeep.vehicles {
@@ -586,6 +709,37 @@ fn parts(kind: Kind, definition: Option<&Project>, catalog: &Catalog) -> BTreeMa
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn upkeep_restock_reserves_fare_and_does_not_duplicate_an_inbound_pack() {
+        let catalog = Catalog::default();
+        let setup = crate::setup::WorldSetup::default();
+        let land = Land::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.reserve_available(&BTreeMap::from([(
+            "hardware".into(),
+            stock.available("hardware"),
+        )]));
+        stock.receive(&BTreeMap::from([("tools".into(), 1)]));
+        let mut village = Construction::default();
+        village.upkeep.vehicles[0].condition = 60.0;
+        village.age_assets(&catalog, 0.0, 0.1);
+        let fare = crate::market::fare_cents(12);
+        let price = (catalog.materials["hardware"].price * 100.0).round() as u64;
+        village.upkeep.restock_budget = price + fare - 1;
+        let clock = |seconds| TownClock {
+            seconds,
+            round_trip_km: 12,
+        };
+        village.restock_upkeep(&catalog, &mut stock, &land, clock(0.0));
+        assert!(village.trade.orders.is_empty());
+        village.upkeep.restock_budget = (price + fare) * 2;
+        village.restock_upkeep(&catalog, &mut stock, &land, clock(10.0));
+        village.restock_upkeep(&catalog, &mut stock, &land, clock(20.0));
+        assert_eq!(village.trade.orders.len(), 1);
+        assert_eq!(village.trade.orders[0].material, "hardware");
+        assert_eq!(village.upkeep.restock_used, price + fare);
+    }
 
     #[test]
     fn a_returning_vehicle_records_mileage_and_recovers_with_service() {
