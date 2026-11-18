@@ -6,7 +6,9 @@ use bevy::{
 
 mod arrival;
 mod setup;
+mod stock;
 mod terrain;
+mod ui_font;
 mod village;
 use setup::{WorldSetup, WorldSetupPlugin};
 
@@ -23,7 +25,11 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins((WorldSetupPlugin, village::VillagePlugin))
+        .add_plugins((
+            WorldSetupPlugin,
+            village::VillagePlugin,
+            ui_font::UiFontPlugin,
+        ))
         .add_systems(Startup, setup_scene)
         .add_systems(PostUpdate, update_land)
         .add_systems(Update, camera_controls)

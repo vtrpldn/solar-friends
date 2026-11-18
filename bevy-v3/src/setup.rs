@@ -1,9 +1,15 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use crate::terrain::Terrain;
+use crate::{terrain::Terrain, ui_font::ui_font};
 
 const BIOMES: [&str; 3] = ["Mata Atlântica", "Cerrado", "Caatinga"];
 const LANDSCAPES: [&str; 3] = ["Gentle", "Rolling", "Rugged"];
+const SAVINGS: [&str; 3] = [
+    "Tight · R$3,000",
+    "Modest · R$10,000",
+    "Comfortable · R$20,000",
+];
+const SUPPLIES: [&str; 3] = ["Essentials", "Camp", "Prepared"];
 const WATER: [&str; 3] = ["Dry", "Seasonal", "Abundant"];
 
 #[derive(Resource, Clone, PartialEq, Eq)]
@@ -13,6 +19,8 @@ pub struct WorldSetup {
     biome: usize,
     landscape: usize,
     water: usize,
+    savings: usize,
+    supplies: usize,
 }
 
 impl Default for WorldSetup {
@@ -23,6 +31,8 @@ impl Default for WorldSetup {
             biome: 0,
             landscape: 1,
             water: 1,
+            savings: 1,
+            supplies: 1,
         }
     }
 }
@@ -33,6 +43,14 @@ impl WorldSetup {
             open: false,
             ..self.clone()
         }
+    }
+
+    pub fn starting_cash(&self) -> u32 {
+        [3_000, 10_000, 20_000][self.savings]
+    }
+
+    pub fn supply_scale(&self) -> (u32, u32) {
+        [(6, 10), (1, 1), (17, 10)][self.supplies]
     }
 
     pub fn terrain(&self) -> Terrain {
@@ -53,6 +71,8 @@ impl WorldSetup {
             Action::Biome => format!("Biome   ·   {}", BIOMES[self.biome]),
             Action::Landscape => format!("Landscape   ·   {}", LANDSCAPES[self.landscape]),
             Action::Water => format!("Water   ·   {}", WATER[self.water]),
+            Action::Savings => SAVINGS[self.savings].into(),
+            Action::Supplies => format!("Supplies   ·   {}", SUPPLIES[self.supplies]),
             Action::Seed => format!("Land seed   ·   {}", self.seed),
             Action::Explore => "Enter village".into(),
         }
@@ -64,6 +84,8 @@ enum Action {
     Biome,
     Landscape,
     Water,
+    Savings,
+    Supplies,
     Seed,
     Explore,
 }
@@ -81,7 +103,7 @@ impl Plugin for WorldSetupPlugin {
     }
 }
 
-fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>) {
+fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<AssetServer>) {
     commands
         .spawn((
             SetupPanel,
@@ -98,12 +120,14 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>) {
             BackgroundColor(Color::srgb_u8(31, 45, 35)),
         ))
         .with_children(|panel| {
-            panel.spawn((Text::new("Solar Friends"), TextFont::from_font_size(30.0)));
-            panel.spawn((Text::new("Choose the land"), TextFont::from_font_size(18.0)));
+            panel.spawn((Text::new("Solar Friends"), ui_font(&assets, 30.0)));
+            panel.spawn((Text::new("Choose the land"), ui_font(&assets, 18.0)));
             for action in [
                 Action::Biome,
                 Action::Landscape,
                 Action::Water,
+                Action::Savings,
+                Action::Supplies,
                 Action::Seed,
                 Action::Explore,
             ] {
@@ -117,10 +141,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>) {
                         },
                         BackgroundColor(Color::srgb_u8(62, 83, 65)),
                     ))
-                    .with_child((
-                        Text::new(setup.label(action)),
-                        TextFont::from_font_size(17.0),
-                    ));
+                    .with_child((Text::new(setup.label(action)), ui_font(&assets, 17.0)));
             }
         });
 }
@@ -148,6 +169,8 @@ fn setup_input(
             Action::Biome => setup.biome = (setup.biome + 1) % BIOMES.len(),
             Action::Landscape => setup.landscape = (setup.landscape + 1) % LANDSCAPES.len(),
             Action::Water => setup.water = (setup.water + 1) % WATER.len(),
+            Action::Savings => setup.savings = (setup.savings + 1) % SAVINGS.len(),
+            Action::Supplies => setup.supplies = (setup.supplies + 1) % SUPPLIES.len(),
             Action::Seed => setup.seed = setup.seed.wrapping_add(1),
             Action::Explore => setup.open = false,
         }

@@ -13,6 +13,8 @@ use crate::{
         vehicle_pose, world_position,
     },
     setup::WorldSetup,
+    stock::Stock,
+    ui_font::ui_font,
 };
 
 const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
@@ -47,6 +49,7 @@ pub struct Village {
     arrival_time: f32,
     paused: bool,
     camp_error: Option<&'static str>,
+    stock: Stock,
 }
 
 #[derive(Component)]
@@ -66,11 +69,11 @@ fn opening_model(assets: &AssetServer, index: usize) -> SceneRoot {
     SceneRoot(assets.load(path.with_label(GltfAssetLabel::Scene(index).to_string())))
 }
 
-fn spawn_hud(mut commands: Commands) {
+fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn((
         VillageHud,
         Text::default(),
-        TextFont::from_font_size(17.0),
+        ui_font(&assets, 17.0),
         Node {
             display: Display::None,
             position_type: PositionType::Absolute,
@@ -180,6 +183,7 @@ fn village_input(
         }
         *village = Village {
             setup: Some(setup.session()),
+            stock: Stock::for_start(&setup),
             ..default()
         };
         camera.target = Vec3::new(0.0, 2.0, -86.0);
@@ -308,7 +312,13 @@ fn show_hud(
     } else {
         "Space to pause"
     };
-    let label = format!("Day {day}   {hour:02}:{:02}\n{controls}", minute % 60);
+    let label = format!(
+        "Day {day}   {hour:02}:{:02}   R${}\n{} timber · {} meals\n{controls}",
+        minute % 60,
+        village.stock.cash,
+        village.stock.available("wood"),
+        village.stock.available("meals"),
+    );
     if text.0 != label {
         text.0 = label;
     }
