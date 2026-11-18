@@ -18,6 +18,7 @@ mod production;
 mod resident_animation;
 mod residents;
 mod save;
+mod save_library;
 mod setup;
 mod stock;
 mod terrain;
@@ -149,10 +150,14 @@ fn camera_controls(
     (motion, scroll): (Res<AccumulatedMouseMotion>, Res<AccumulatedMouseScroll>),
     window: Single<&Window, With<PrimaryWindow>>,
     time: Res<Time>,
-    (setup, village): (Res<WorldSetup>, Res<village::Village>),
+    (setup, village, saves): (
+        Res<WorldSetup>,
+        Res<village::Village>,
+        Res<save_library::SaveMenu>,
+    ),
     mut camera: Single<(&mut Transform, &mut Projection, &mut VillageCamera)>,
 ) {
-    if setup.open || village.advance_open() || !window.focused {
+    if setup.open || saves.open || village.advance_open() || !window.focused {
         return;
     }
     let (transform, projection, view) = &mut *camera;
@@ -234,6 +239,7 @@ mod tests {
         .init_asset::<Font>()
         .init_resource::<ClearColor>()
         .init_resource::<GlobalAmbientLight>()
+        .add_message::<bevy::input::keyboard::KeyboardInput>()
         .init_resource::<ButtonInput<KeyCode>>()
         .init_resource::<ButtonInput<MouseButton>>()
         .init_resource::<AccumulatedMouseMotion>()

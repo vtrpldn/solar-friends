@@ -9,8 +9,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{catalog::Catalog, setup::Mode, village::Village};
 
-const VERSION: u32 = 1;
-const MAX_BYTES: u64 = 16 * 1024 * 1024;
+pub(crate) const VERSION: u32 = 1;
+pub(crate) const MAX_BYTES: u64 = 16 * 1024 * 1024;
 
 #[derive(Serialize, Deserialize)]
 struct SaveFile<T> {
@@ -45,7 +45,11 @@ pub fn write(path: &Path, village: &Village) -> io::Result<()> {
         version: VERSION,
         village,
     })?;
-    if json.len() as u64 > MAX_BYTES {
+    atomic_write(path, &json, MAX_BYTES)
+}
+
+pub(crate) fn atomic_write(path: &Path, json: &[u8], max_bytes: u64) -> io::Result<()> {
+    if json.len() as u64 > max_bytes {
         return Err(io::Error::other("the village save exceeds its size limit"));
     }
     if let Some(directory) = path.parent() {
@@ -61,7 +65,7 @@ pub fn write(path: &Path, village: &Village) -> io::Result<()> {
         .write(true)
         .open(&pending)?;
     let result = (|| {
-        file.write_all(&json)?;
+        file.write_all(json)?;
         file.sync_all()?;
         drop(file);
         fs::rename(&pending, path)
@@ -73,16 +77,7 @@ pub fn write(path: &Path, village: &Village) -> io::Result<()> {
 }
 
 pub fn read(path: &Path, catalog: &Catalog) -> io::Result<Village> {
-    let mut bytes = Vec::new();
-    File::open(path)?
-        .take(MAX_BYTES + 1)
-        .read_to_end(&mut bytes)?;
-    if bytes.len() as u64 > MAX_BYTES {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidData,
-            "save file is too large",
-        ));
-    }
+    let bytes = read_bytes(path, MAX_BYTES)?;
     let save: SaveFile<Village> = serde_json::from_slice(&bytes)?;
     if save.version != VERSION || !save.village.valid_save(catalog) {
         return Err(io::Error::new(
@@ -91,4 +86,16 @@ pub fn read(path: &Path, catalog: &Catalog) -> io::Result<Village> {
         ));
     }
     Ok(save.village)
+}
+
+pub(crate) fn read_bytes(path: &Path, limit: u64) -> io::Result<Vec<u8>> {
+    let mut bytes = Vec::new();
+    File::open(path)?.take(limit + 1).read_to_end(&mut bytes)?;
+    if bytes.len() as u64 > limit {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidData,
+            "save file is too large",
+        ));
+    }
+    Ok(bytes)
 }

@@ -1,3 +1,7 @@
+mod library_ui;
+
+use library_ui::{autosave_named, library_controls};
+
 use bevy::{
     asset::{AssetPath, embedded_asset, embedded_path},
     gltf::GltfAssetLabel,
@@ -18,6 +22,7 @@ use crate::{
     land::Land,
     resident_animation::{Motion, ResidentAnimation},
     save,
+    save_library::{self, SaveMenu},
     setup::{Mode, WorldSetup},
     stock::Stock,
     time_advance::Advance,
@@ -47,12 +52,14 @@ impl Plugin for VillagePlugin {
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
             .init_resource::<Catalog>()
+            .init_resource::<SaveMenu>()
             .insert_resource(Time::<Fixed>::from_hz(10.0))
             .add_systems(Startup, spawn_hud)
             .add_systems(
                 Update,
                 (
                     save_controls,
+                    library_controls,
                     read_camp_pointer,
                     village_input,
                     advance_days,
@@ -62,7 +69,7 @@ impl Plugin for VillagePlugin {
                 )
                     .chain(),
             )
-            .add_systems(Update, draw_blueprints)
+            .add_systems(Update, (draw_blueprints, autosave_named))
             .add_systems(FixedUpdate, advance_clock);
     }
 }
@@ -89,6 +96,8 @@ pub struct Village {
     save_notice: String,
     #[serde(skip)]
     rebuild_scene: bool,
+    #[serde(skip)]
+    session_serial: u64,
     stock: Stock,
     construction: Construction,
 }
@@ -103,6 +112,10 @@ enum UtilityPanel {
 }
 
 impl Village {
+    pub fn mode(&self) -> Option<Mode> {
+        self.setup.as_ref().map(|setup| setup.mode)
+    }
+
     pub fn seconds(&self) -> f64 {
         self.clock
     }
@@ -169,8 +182,9 @@ fn save_controls(
     catalog: Res<Catalog>,
     mut setup: ResMut<WorldSetup>,
     mut village: ResMut<Village>,
+    mut saves: ResMut<SaveMenu>,
 ) {
-    if !window.focused {
+    if !window.focused || saves.open {
         return;
     }
     if keyboard.just_pressed(KeyCode::F9) {
@@ -179,6 +193,8 @@ fn save_controls(
                 *setup = loaded.setup.as_ref().expect("validated setup").session();
                 loaded.save_notice = "Village loaded.".into();
                 loaded.rebuild_scene = true;
+                loaded.session_serial = village.session_serial.wrapping_add(1);
+                saves.attached = None;
                 *village = loaded;
             }
             Err(error) => village.save_notice = format!("Could not load village: {error}"),
@@ -301,12 +317,15 @@ fn custom_camp_error(terrain: &crate::terrain::Terrain, cell: IVec2) -> Option<&
 fn village_input(
     mut commands: Commands,
     setup: Res<WorldSetup>,
-    (keyboard, pointer): (Res<ButtonInput<KeyCode>>, Res<CampPointer>),
+    (keyboard, pointer, saves): (Res<ButtonInput<KeyCode>>, Res<CampPointer>, Res<SaveMenu>),
     mut village: ResMut<Village>,
     mut camera: Single<&mut VillageCamera>,
     entities: Query<Entity, With<VillageEntity>>,
     (assets, catalog, land): (Res<AssetServer>, Res<Catalog>, Res<Land>),
 ) {
+    if saves.open {
+        return;
+    }
     if setup.open {
         if setup.is_changed() {
             for entity in &entities {
@@ -323,6 +342,7 @@ fn village_input(
         }
         if new_world {
             *village = Village {
+                session_serial: village.session_serial.wrapping_add(1),
                 setup: Some(setup.session()),
                 stock: Stock::for_start(&setup, &catalog),
                 ..default()
@@ -632,9 +652,9 @@ fn advance_clock(
     time: Res<Time<Fixed>>,
     setup: Res<WorldSetup>,
     mut village: ResMut<Village>,
-    (catalog, land): (Res<Catalog>, Res<Land>),
+    (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
 ) {
-    if setup.open || village.is_paused() {
+    if setup.open || saves.open || village.is_paused() {
         return;
     }
     let Some(camp) = village.camp else { return };
@@ -652,9 +672,9 @@ fn advance_clock(
 fn advance_days(
     setup: Res<WorldSetup>,
     mut village: ResMut<Village>,
-    (catalog, land): (Res<Catalog>, Res<Land>),
+    (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
 ) {
-    if setup.open || village.advance.running.is_none() {
+    if setup.open || saves.open || village.advance.running.is_none() {
         return;
     }
     let (Some(camp), Some(mut run)) = (village.camp, village.advance.running.take()) else {
@@ -707,12 +727,23 @@ fn show_hud(
     setup: Res<WorldSetup>,
     village: Res<Village>,
     mut hud: Single<(&mut Text, &mut Node), With<VillageHud>>,
-    (catalog, land): (Res<Catalog>, Res<Land>),
+    (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
 ) {
-    if !setup.is_changed() && !village.is_changed() {
+    if !saves.is_changed() && !setup.is_changed() && !village.is_changed() {
         return;
     }
     let (text, node) = &mut *hud;
+    if saves.open {
+        node.display = Display::Flex;
+        node.left = Val::Auto;
+        node.right = px(20);
+        node.top = px(20);
+        node.bottom = Val::Auto;
+        text.0 = saves.label();
+        return;
+    }
+    node.left = px(20);
+    node.right = Val::Auto;
     if setup.open {
         node.display = if village.save_notice.is_empty() {
             Display::None
@@ -898,6 +929,42 @@ fn show_construction(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn named_save_preserves_and_restores_previous_snapshot() {
+        let setup = WorldSetup::default().session();
+        let catalog = Catalog::default();
+        let mut village = Village {
+            setup: Some(setup.clone()),
+            clock: 0.0,
+            stock: Stock::for_start(&setup, &catalog),
+            ..default()
+        };
+        let directory =
+            std::env::temp_dir().join(format!("solar-v3-slot-test-{}", std::process::id()));
+        let id = save_library::create(&directory, Mode::Story, "First village", &village).unwrap();
+        village.clock = 120.0;
+        save_library::autosave(&directory, id, Mode::Story, &village, &catalog).unwrap();
+        save_library::rename(&directory, id, Mode::Story, "River camp").unwrap();
+        let rows = save_library::list(&directory, Mode::Story).unwrap();
+        assert_eq!(rows[0].name, "River camp");
+        assert!(rows[0].recovery);
+        assert_eq!(
+            save_library::load(&directory, id, Mode::Story, &catalog)
+                .unwrap()
+                .clock,
+            120.0
+        );
+        assert_eq!(
+            save_library::recover(&directory, id, Mode::Story, &catalog)
+                .unwrap()
+                .clock,
+            0.0
+        );
+        let exported = save_library::export(&directory, id, Mode::Story, &catalog).unwrap();
+        assert_eq!(save::read(&exported, &catalog).unwrap().clock, 0.0);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
 
     #[test]
     fn save_resumes_a_village_during_a_material_delivery() {

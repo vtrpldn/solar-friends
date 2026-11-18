@@ -32,7 +32,7 @@ In Story, press H for finances and paid town shifts. Book one day shift or turn 
 
 Press L to advance between 1 and 365 days. Exact replay uses normal simulation steps. Fast approximate uses larger steps. Press L while advancing to stop at the time shown.
 
-Press F5 to save the current village and F9 to reload it. Story and Sandbox have separate save files under `Solar Friends V3` in the local application data directory.
+Press F5 to save the current village and F9 to reload it. Press F6 to name, load, rename, recover, or export villages. An active named village autosaves and retains its previous snapshot. Story and Sandbox have separate save files under `Solar Friends V3` in the local application data directory.
 
 The opening models are embedded in the executable. To regenerate them after changing the source artwork, run `npm ci` and `node scripts/export-v3-opening-models.mjs` from the repository root.
 

@@ -1,7 +1,7 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 use serde::{Deserialize, Serialize};
 
-use crate::{terrain::Terrain, ui_font::ui_font};
+use crate::{save_library::SaveMenu, terrain::Terrain, ui_font::ui_font};
 
 const BIOMES: [&str; 3] = ["Mata Atlântica", "Cerrado", "Caatinga"];
 const LANDSCAPES: [&str; 3] = ["Gentle", "Rolling", "Rugged"];
@@ -220,8 +220,9 @@ fn setup_input(
     keyboard: Res<ButtonInput<KeyCode>>,
     buttons: Query<(&Interaction, &Action), Changed<Interaction>>,
     window: Single<&Window, With<PrimaryWindow>>,
+    saves: Res<SaveMenu>,
 ) {
-    if !window.focused {
+    if !window.focused || saves.open {
         return;
     }
     if !setup.open {
