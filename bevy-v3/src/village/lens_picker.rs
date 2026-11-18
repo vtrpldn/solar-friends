@@ -11,6 +11,7 @@ pub(super) enum MapLens {
     Water,
     Sanitation,
     Work,
+    Food,
 }
 
 const LENSES: [(KeyCode, MapLens, &str); 9] = [
@@ -29,6 +30,7 @@ const LENSES: [(KeyCode, MapLens, &str); 9] = [
 pub(super) struct LensPicker {
     pub open: bool,
     pub active: Option<MapLens>,
+    next_page: bool,
 }
 
 impl LensPicker {
@@ -36,6 +38,7 @@ impl LensPicker {
         let shift = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
         if shift && keys.just_pressed(KeyCode::KeyL) {
             self.open = !self.open;
+            self.next_page = false;
             return true;
         }
         if self.open {
@@ -44,6 +47,13 @@ impl LensPicker {
             } else if keys.just_pressed(KeyCode::Digit0) {
                 self.active = None;
                 self.open = false;
+            } else if keys.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
+                self.next_page = !self.next_page;
+            } else if self.next_page {
+                if keys.just_pressed(KeyCode::Digit1) {
+                    self.active = Some(MapLens::Food);
+                    self.open = false;
+                }
             } else if let Some(&(_, lens, _)) =
                 LENSES.iter().find(|(key, _, _)| keys.just_pressed(*key))
             {
@@ -83,7 +93,15 @@ impl LensPicker {
         if !self.open {
             return None;
         }
-        let mut text = String::from("Map lenses · Esc Close\n0 Normal view");
+        let page = if self.next_page { 2 } else { 1 };
+        let mut text = format!("Map lenses · {page}/2 · Page Up/Down · Esc Close\n0 Normal view");
+        if self.next_page {
+            text.push_str("\n1 Food");
+            if self.active == Some(MapLens::Food) {
+                text.push_str(" · Active");
+            }
+            return Some(text);
+        }
         for (index, &(_, lens, label)) in LENSES.iter().enumerate() {
             let active = if self.active == Some(lens) {
                 " · Active"

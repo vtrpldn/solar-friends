@@ -1,5 +1,6 @@
 mod events;
 mod farm_work;
+mod food_lens;
 mod gather_work;
 mod inventory;
 mod kitchen_work;
@@ -863,6 +864,23 @@ impl Construction {
                 "Construction · Gold supplies pending · Green building · Purple changes queued";
             detail.map_or_else(|| legend.to_owned(), |detail| format!("{legend}\n{detail}"))
         })
+    }
+}
+
+fn draw_lens_marker(
+    terrain: &Terrain,
+    position: IVec2,
+    size: IVec2,
+    color: Color,
+    gizmos: &mut Gizmos,
+) {
+    let center = position.as_vec2() + (size.as_vec2() - Vec2::ONE) * 0.5;
+    let Vec2 { x, y: z } = world_position(center.x, center.y);
+    let base = Vec3::new(x, terrain.height_at(x, z), z);
+    let tip = base + Vec3::Y * 7.0;
+    gizmos.line(base, tip, color);
+    for axis in [Vec3::X, Vec3::Z] {
+        gizmos.line(tip - axis * 0.7, tip + axis * 0.7, color);
     }
 }
 

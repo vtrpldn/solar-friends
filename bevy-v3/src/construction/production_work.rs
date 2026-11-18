@@ -231,6 +231,54 @@ impl Construction {
         self.production.notice.clear();
     }
 
+    pub(super) fn batch_status(
+        &self,
+        job: &Batch,
+        recipe: &ProductionRecipe,
+        clock: f64,
+    ) -> String {
+        match job.phase {
+            Phase::Pickup => "Collecting ingredients".into(),
+            Phase::Approach => "Bringing ingredients".into(),
+            Phase::Work if job.using_biogas => {
+                format!("{:.0}% worked · Biogas", job.work / recipe.work * 100.0)
+            }
+            Phase::Work
+                if needs_power(&job.recipe, recipe) && !self.utilities.powered(job.site) =>
+            {
+                "Waiting for power".into()
+            }
+            Phase::Work if recipe.craft.is_some() => {
+                let fraction = job.work / recipe.work;
+                let stage = recipe.craft.as_ref().expect("craft recipe").stage(fraction);
+                format!("{:.0}% · {stage}", fraction * 100.0)
+            }
+            Phase::Work => format!("{:.0}% worked", job.work / recipe.work * 100.0),
+            Phase::Return => "Carrying output to stores".into(),
+            Phase::Growing => format!(
+                "{:.1} game days remaining",
+                job.growth
+                    .as_ref()
+                    .map_or(0.0, |growth| growth.remaining / DAY)
+            ),
+            Phase::Harvest => {
+                let expired = job
+                    .growth
+                    .as_ref()
+                    .zip(recipe.biology.as_ref())
+                    .is_some_and(|(growth, biology)| {
+                        growth.output(biology, clock, &recipe.output).is_empty()
+                    });
+                if expired {
+                    "Crop lost · awaiting clearing"
+                } else {
+                    "Ready for resident collection"
+                }
+                .into()
+            }
+        }
+    }
+
     pub fn selected_production(
         &self,
         catalog: &Catalog,
@@ -244,46 +292,7 @@ impl Construction {
         let mut text = name.clone();
         if let Some(job) = self.production.jobs.iter().find(|job| job.site == index) {
             let recipe = &catalog.production[&job.recipe];
-            let state = match job.phase {
-                Phase::Pickup => "Collecting ingredients".into(),
-                Phase::Approach => "Bringing ingredients".into(),
-                Phase::Work if job.using_biogas => {
-                    format!("{:.0}% worked · Biogas", job.work / recipe.work * 100.0)
-                }
-                Phase::Work
-                    if needs_power(&job.recipe, recipe) && !self.utilities.powered(job.site) =>
-                {
-                    "Waiting for power".into()
-                }
-                Phase::Work if recipe.craft.is_some() => {
-                    let fraction = job.work / recipe.work;
-                    let stage = recipe.craft.as_ref().expect("craft recipe").stage(fraction);
-                    format!("{:.0}% · {stage}", fraction * 100.0)
-                }
-                Phase::Work => format!("{:.0}% worked", job.work / recipe.work * 100.0),
-                Phase::Return => "Carrying output to stores".into(),
-                Phase::Growing => format!(
-                    "{:.1} game days remaining",
-                    job.growth
-                        .as_ref()
-                        .map_or(0.0, |growth| growth.remaining / DAY)
-                ),
-                Phase::Harvest => {
-                    let expired = job
-                        .growth
-                        .as_ref()
-                        .zip(recipe.biology.as_ref())
-                        .is_some_and(|(growth, biology)| {
-                            growth.output(biology, clock, &recipe.output).is_empty()
-                        });
-                    if expired {
-                        "Crop lost · awaiting clearing"
-                    } else {
-                        "Ready for resident collection"
-                    }
-                    .into()
-                }
-            };
+            let state = self.batch_status(job, recipe, clock);
             text.push_str(&format!(" · {} · {state}", recipe.name));
         }
         if let Some(animals) = self.livestock.animals.get(&index) {

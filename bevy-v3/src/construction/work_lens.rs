@@ -78,14 +78,7 @@ impl Construction {
             } else {
                 continue;
             };
-            let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
-            let Vec2 { x, y: z } = world_position(center.x, center.y);
-            let base = Vec3::new(x, terrain.height_at(x, z), z);
-            let tip = base + Vec3::Y * 7.0;
-            gizmos.line(base, tip, color);
-            for axis in [Vec3::X, Vec3::Z] {
-                gizmos.line(tip - axis * 0.7, tip + axis * 0.7, color);
-            }
+            super::draw_lens_marker(terrain, plan.position, plan.size, color, gizmos);
             if hovered.is_some_and(|cell| {
                 cell.cmpge(plan.position).all() && cell.cmplt(plan.position + plan.size).all()
             }) {
