@@ -10,7 +10,7 @@ use crate::{
 
 use super::*;
 
-const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
+pub(super) const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 
 impl Construction {
     pub fn tick_health(

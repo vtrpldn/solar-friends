@@ -142,6 +142,52 @@ impl Construction {
                 );
             }
         }
+        legend.push_str("\nRoutes · Cyan walking · Orange carrying");
+        let mut closest = None;
+        let mut closest_distance = 2.25;
+        for (index, worker) in self.residents.iter().enumerate() {
+            if worker.path.is_empty()
+                || self.driver_away(index)
+                || self.away_for_work(index)
+                || self.resident_sleeping(index)
+            {
+                continue;
+            }
+            let carrying =
+                self.resident_motion(index) == crate::resident_animation::Motion::CarryWalk;
+            let color = if carrying {
+                Color::srgb_u8(255, 151, 85)
+            } else {
+                Color::srgb_u8(93, 238, 228)
+            };
+            gizmos.linestrip(
+                std::iter::once(worker.position)
+                    .chain(worker.path.iter().copied())
+                    .map(|cell| point_at(cell, 0.65)),
+                color,
+            );
+            if let Some(cell) = hovered {
+                let distance = cell.as_vec2().distance_squared(worker.position);
+                if distance < closest_distance {
+                    closest = Some((index, worker, carrying));
+                    closest_distance = distance;
+                }
+            }
+        }
+        if let Some((index, worker, carrying)) = closest {
+            let mut from = worker.position;
+            let mut distance = 0.0;
+            for &waypoint in &worker.path {
+                distance += from.distance(waypoint);
+                from = waypoint;
+            }
+            let name = super::resident_work::NAMES[index];
+            let route = if carrying { "Carrying" } else { "Walking" };
+            let _ = write!(
+                legend,
+                "\n{name} · {route} · {distance:.1} cells left on route"
+            );
+        }
         legend
     }
 
