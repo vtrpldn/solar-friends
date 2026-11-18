@@ -57,6 +57,7 @@ impl Plugin for VillagePlugin {
         app.add_systems(PostUpdate, cultivation_surface::show_beds);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
+            .init_resource::<PlacementNotice>()
             .init_resource::<Catalog>()
             .init_resource::<SaveMenu>()
             .insert_resource(Time::<Fixed>::from_hz(10.0))
@@ -70,15 +71,13 @@ impl Plugin for VillagePlugin {
                     village_input,
                     advance_days,
                     animate_arrival,
+                    draw_blueprints,
                     show_hud,
                     show_construction,
                 )
                     .chain(),
             )
-            .add_systems(
-                Update,
-                (draw_blueprints.after(village_input), autosave_named),
-            )
+            .add_systems(Update, autosave_named)
             .add_systems(FixedUpdate, advance_clock);
     }
 }
@@ -406,6 +405,9 @@ struct CampPointer {
     clicked: Option<GroundHit>,
     hovered: Option<GroundHit>,
 }
+
+#[derive(Resource, Default, PartialEq)]
+struct PlacementNotice(Option<String>);
 
 #[derive(Clone, Copy)]
 struct GroundHit {
@@ -1138,8 +1140,13 @@ fn show_hud(
     village: Res<Village>,
     mut hud: Single<(&mut Text, &mut Node), With<VillageHud>>,
     (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
+    placement: Res<PlacementNotice>,
 ) {
-    if !saves.is_changed() && !setup.is_changed() && !village.is_changed() {
+    if !saves.is_changed()
+        && !setup.is_changed()
+        && !village.is_changed()
+        && !placement.is_changed()
+    {
         return;
     }
     let (text, node) = &mut *hud;
@@ -1203,6 +1210,10 @@ fn show_hud(
         "Day {day}   {hour:02}:{:02}   {speed}×\n{stock}\n{controls}",
         minute % 60
     );
+    if let Some(notice) = &placement.0 {
+        label.push('\n');
+        label.push_str(notice);
+    }
     let weather = weather_at(village.clock, setup.biome(), setup.seed());
     label.push('\n');
     label.push_str(&weather.summary());
@@ -1390,7 +1401,9 @@ fn draw_blueprints(
     pointer: Res<CampPointer>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut gizmos: Gizmos,
+    mut placement: ResMut<PlacementNotice>,
 ) {
+    let mut notice = None;
     if !setup.open
         && let Some(camp) = village.camp
     {
@@ -1417,20 +1430,25 @@ fn draw_blueprints(
                     .construction
                     .draw_road_route(&terrain, hit.cell, extend, &mut gizmos);
             } else if village.construction.placing_project() {
-                village.construction.draw_project_site(
+                notice = village.construction.draw_project_site(
                     ConstructionSite {
                         terrain: &terrain,
                         land: &land,
                         camp,
                     },
                     &catalog,
-                    village.stock.sandbox,
+                    &village.stock,
+                    TownClock {
+                        seconds: village.clock,
+                        round_trip_km: setup.round_trip_km(),
+                    },
                     hit.cell,
                     &mut gizmos,
                 );
             }
         }
     }
+    placement.set_if_neq(PlacementNotice(notice));
 }
 
 fn show_construction(

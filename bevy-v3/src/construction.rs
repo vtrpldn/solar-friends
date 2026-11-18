@@ -635,27 +635,51 @@ impl Construction {
         &self,
         ground: ConstructionSite,
         catalog: &Catalog,
-        sandbox: bool,
+        stock: &Stock,
+        clock: TownClock,
         position: IVec2,
         gizmos: &mut Gizmos,
-    ) {
+    ) -> Option<String> {
         let key = self
             .moving
             .map(|index| self.plans[index].key.as_str())
-            .or(self.selection.as_deref());
-        let Some(key) = key else { return };
+            .or(self.selection.as_deref())?;
         let proposal = self.proposed_site(catalog, key, position);
-        let valid = self
-            .placement_error(
-                ground.terrain,
-                ground.land,
-                ground.camp,
-                &proposal,
-                &catalog.projects[&proposal.key],
-                (catalog, sandbox, self.moving),
-            )
-            .is_none();
-        let tint = if valid {
+        let definition = &catalog.projects[key];
+        let status = if let Some(reason) = self.placement_error(
+            ground.terrain,
+            ground.land,
+            ground.camp,
+            &proposal,
+            definition,
+            (catalog, stock.sandbox, self.moving),
+        ) {
+            Err(reason.to_owned())
+        } else if self.moving.is_some() || stock.sandbox {
+            Ok("Site available".into())
+        } else {
+            self.market
+                .quote(
+                    catalog,
+                    &definition.materials,
+                    stock,
+                    clock.seconds,
+                    clock.round_trip_km,
+                )
+                .map(|quote| {
+                    if quote.trips == 0 {
+                        "Supplies available locally".into()
+                    } else {
+                        let cost = quote.price + quote.fare * u64::from(quote.trips);
+                        format!(
+                            "R${:.2} including {} town pickup(s)",
+                            cost as f64 / 100.0,
+                            quote.trips
+                        )
+                    }
+                })
+        };
+        let tint = if status.is_ok() {
             Color::srgb_u8(217, 237, 165)
         } else {
             Color::srgb_u8(216, 122, 92)
@@ -679,6 +703,10 @@ impl Construction {
                 tint,
             );
         }
+        Some(match status {
+            Ok(detail) => detail,
+            Err(reason) => format!("Blocked · {reason}"),
+        })
     }
 
     fn placement_error(
