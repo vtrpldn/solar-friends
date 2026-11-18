@@ -15,9 +15,10 @@ export function harvestFactor(b,time){
  return b.stage==='harvestable'?Math.max(0,1-Math.max(0,(time-b.ripeAt)/GAME_DAY-crop.window)/crop.window):1;
 }
 export const harvestExpired=(b,time)=>b.stage==='harvestable'&&harvestFactor(b,time)===0;
-export function harvestYield(b,time){
+export const harvestYield=(b,time)=>Math.floor(edibleYield(b,time));
+function edibleYield(b,time){
  const health=b.stage==='failed'?0:Math.min(b.elapsed?Math.max(0,1-b.stress/b.elapsed):1,1-(b.droughtDamage||0));
- return Math.floor(b.w*b.d*CROPS[b.crop].yieldKg*Math.min(b.density,1.2)/(1+Math.max(0,b.density-1)*1.5)*health*harvestFactor(b,time));
+ return b.w*b.d*CROPS[b.crop].yieldKg*Math.min(b.density,1.2)/(1+Math.max(0,b.density-1)*1.5)*health*harvestFactor(b,time);
 }
 export const FARM_ACTIONS=['prepare','plant','harvest','clear','amend','collect'];
 export const CULTIVATION_KEYS=['field','garden','greenhouse'];
@@ -77,10 +78,14 @@ export function finishFarmJob(s,p,op){
  case 'collect':{const n=Math.floor(b.residueKg);output={scraps:n};b.residueKg-=n;b.residueExportedKg+=n;break;}
  case 'clear':case 'harvest':{
   const health=Math.min(b.elapsed?Math.max(0,1-b.stress/b.elapsed):1,1-(b.droughtDamage||0));
-  const kg=op.farm.action==='harvest'?harvestYield(b,s.time):0;
+  const edible=op.farm.action==='harvest'?edibleYield(b,s.time):0;
+  const carry=p.harvestRemainder??={};
+  const combined=edible+(carry[b.crop]||0);
+  const kg=Math.floor(combined);
+  carry[b.crop]=combined-kg;
   if(kg)output[b.crop]=kg;
   const residues=area*crop.residue*b.growth*health;
-  b.fieldLossKg+=Math.max(0,b.standingBiomassKg-kg-residues);b.standingBiomassKg=0;
+  b.fieldLossKg+=Math.max(0,b.standingBiomassKg-edible-residues);b.standingBiomassKg=0;
   b.residueKg+=residues;
   if(b.residues==='collect'){output.scraps=Math.floor(b.residueKg);b.residueKg-=output.scraps;b.residueExportedKg+=output.scraps;}
   b.exportedKg+=kg;b.fertility=Math.max(0,b.fertility-kg/(area*20));b.stage='harvested';b.growth=0;delete b.ripeAt;
@@ -128,6 +133,7 @@ export function cultivationStep(s,dt,useWater,defs){
 export function validCultivation(s){
  for(const p of s.projects){
   if(p.key==='field'&&!fieldSizeValid(p.fieldSize))return false;
+  if(p.harvestRemainder && Object.entries(p.harvestRemainder).some(([crop,n])=>!Object.hasOwn(CROPS,crop)||!Number.isFinite(n)||n<0||n>=1))return false;
   if(!p.cultivation)continue;
   const layout=bedLayout(p),f=p.cultivation;
   if(!CULTIVATION_KEYS.includes(p.key)||f.version!==1||!Array.isArray(f.beds)||f.beds.length!==layout.length)return false;

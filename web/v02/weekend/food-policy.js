@@ -13,7 +13,7 @@ export function kitchenPlan(s,p,recipes,api){
  if(s.infrastructure?.nodes[p.id]?.enabled===false)return {reason:'Kitchen is switched off.'};
  if(p.repeat)return {reason:'Following the manual repeating recipe.'};
  if(s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))return {reason:'Kitchen has a job in progress.'};
- const storage=ensureFoodStorage(s),daily=s.people.length*2;
+ const storage=ensureFoodStorage(s),daily=s.people.length*3;
  let reason='Fresh meals and provisions meet their targets.';
  for(const preserved of [false,true]){
   const target=Math.ceil(daily*(preserved?policy.provisionDays:policy.freshDays));
@@ -31,7 +31,7 @@ export function kitchenPlan(s,p,recipes,api){
    if(Object.entries(r.input).some(([key,n])=>{let left=n;for(const lot of storage.lots[key]||[]){const used=Math.min(left,lot.n);if(used>0&&lot.expires<=s.time+r.work)return true;left-=used;}return false;})){
     reason='Ingredients expire too soon to finish this batch.';continue;
    }
-   const pending=(s.operations||[]).filter(o=>!o.done&&!o.water).reduce((n,o)=>n+Object.values(o.haulRemaining||o.returnItems||o.harvestOutput||recipes[o.recipe]?.output||{}).reduce((a,b)=>a+b,0),0);
+   const pending=(s.operations||[]).filter(o=>!o.done&&!o.water).reduce((n,o)=>n+Object.values(o.haulRemaining||o.returnItems||o.harvestOutput||(o.farm?{}:recipes[o.recipe]?.output)||{}).reduce((a,b)=>a+b,0),0);
    if(api.stored(s)+pending+Object.values(r.output).reduce((a,b)=>a+b,0)>api.capacity(s)){reason='Make storage space for the finished batch.';continue;}
    return {recipe:id,reason:`Next: ${r.name}`};
   }

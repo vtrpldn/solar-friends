@@ -54,11 +54,16 @@ for(const crop of Object.keys(CROPS)){
 }
 console.log('PASS actual resident greenhouse work and delivery for all crops; saves at operation phase boundaries');
 
-for(const site of [p,gp])for(const bed of site.cultivation.beds){
+for(const site of [p,gp]){
+ let balance=0;
+ for(const bed of site.cultivation.beds){
  const inputs=bed.sownSeedKg+bed.grownBiomassKg+bed.amendmentAppliedKg;
  const stored=bed.standingBiomassKg+bed.residueKg+bed.amendmentKg+bed.soilOrganicKg;
  const outputs=bed.exportedKg+bed.residueExportedKg+bed.decomposedGasKg+bed.fieldLossKg;
- assert(Math.abs(inputs-stored-outputs)<1e-6,'seed, biological input and amendment mass reconcile with stores and losses');
+ balance+=inputs-stored-outputs;
+ }
+ const carry=Object.values(site.harvestRemainder||{}).reduce((sum,n)=>sum+n,0);
+ assert(Math.abs(balance-carry)<1e-6,'site mass reconciles including edible fractions carried across beds');
 }
 for(const state of [wet]){const b=state.projects[0].cultivation.beds[0],capacity=b.w*b.d*16;assert(Math.abs(.75*capacity+b.irrigated+b.rainLiters-b.evaporated-b.drained-b.moisture*capacity)<1e-6,'water balance reconciles');}
 console.log('PASS explicit biomass, organic matter and water balances');

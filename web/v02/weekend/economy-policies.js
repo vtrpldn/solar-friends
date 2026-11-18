@@ -10,7 +10,7 @@ export function economyPolicies(s){
 export function workGroup(op,recipes){return op.water?(op.water.service?'maintenance':'food'):(Object.keys(recipes[op.recipe]?.output||{}).some(id=>FOOD_SERVINGS[id])?'food':'production');}
 export function protectedStock(s,id,recipes){
  const policy=economyPolicies(s).sales[id];let reserve=policy?.keep||0;
- if(FOOD_SERVINGS[id]){const others=foodPortions(s)-Math.floor((s.materials[id]||0)/FOOD_SERVINGS[id]);reserve=Math.max(reserve,Math.max(0,Math.ceil(s.people.length*2*(s.foodReserveDays??2))-others)*FOOD_SERVINGS[id]);}
+ if(FOOD_SERVINGS[id]){const others=foodPortions(s)-Math.floor((s.materials[id]||0)/FOOD_SERVINGS[id]);reserve=Math.max(reserve,Math.max(0,Math.ceil(s.people.length*3*(s.foodReserveDays??2))-others)*FOOD_SERVINGS[id]);}
  // Queued inputs have already left available stock.
  return Math.max(reserve,protectedEquipment(s,id));
 }

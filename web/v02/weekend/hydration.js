@@ -16,8 +16,8 @@ export function hydrationStep(s,r,dt){
   const n=Math.min(.5,r.drinkingWater,(100-r.needs.hydration)/40);r.drinkingWater=Math.max(0,r.drinkingWater-n);r.needs.hydration+=n*40;s.infrastructure.account.waterUsed+=n;
  }
 }
-export function packDrinkingWater(s,r,liters){
- const n=Math.max(0,liters-(r.drinkingWater||0)),camp=s.infrastructure.nodes[0];
+export function packDrinkingWater(s,r,liters,source=s.infrastructure.nodes[0]){
+ const n=Math.max(0,liters-(r.drinkingWater||0)),camp=source;
  if(camp.water[0]+1e-8<n)return false;
  camp.water[0]=Math.max(0,camp.water[0]-n);r.drinkingWater=(r.drinkingWater||0)+n;return true;
 }

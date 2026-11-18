@@ -2061,7 +2061,7 @@ function renderUI() {
     .join(" · ");
   const sale=tradeQuote(s,$("purchase").value,MATERIALS,materialCount,protectedEquipment(s,$("purchase").value));
   $("sell").textContent =
-    `Queue sale: ${materialText($("purchase").value, sale.quantity || 0)} · R$${((sale.cents || 0)/100).toFixed(2)}`;
+    `Queue sale: ${materialText($("purchase").value, sale.quantity || 0)} · R$${((sale.cents || 0)/100).toFixed(2)} gross · R$${((sale.cents||0)/100-transportCost({...s,deliveryOnly:false})).toFixed(2)} after dedicated fuel`;
   $("sell").disabled =
     !!tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error;
   $("sell").title=tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Payment after trading in town; combine batches to share transport costs.";

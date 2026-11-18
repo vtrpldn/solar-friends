@@ -450,11 +450,11 @@ export function createManagement({
       purchaseSettings.append(settingsTitle,settingsBody);$('resource-grid').append(purchaseSettings);
       const reserve=document.createElement('button');
       reserve.textContent=`Automatic food purchases: ${s.emergencyFood===false?'off':'on'}`;
-      reserve.title='Maintain the chosen food reserve with at most one affordable ingredient purchase per day, within the daily food budget. Growing crops cannot replace food needed today.';
+      reserve.title='Maintain the chosen food reserve with affordable ingredient purchases, within the daily food budget. Growing crops cannot replace food needed today.';
       reserve.setAttribute('aria-pressed',String(s.emergencyFood!==false));
       reserve.onclick=()=>{s.emergencyFood=s.emergencyFood===false;refresh();render();};
       settingsBody.append(reserve);
-      for(const [key,label,value,max,step] of [['foodReserveDays','Food reserve in days',1.5,7,.5],['foodPurchaseBudget','Daily food purchase budget including transport (R$)',100,100000,1]]){
+      for(const [key,label,value,max,step] of [['foodReserveDays','Food reserve in days',1.5,7,.5],['foodPurchaseBudget','Daily food purchase budget including transport (R$)',150,100000,1]]){
        const field=document.createElement('label');field.textContent=label;const input=document.createElement('input');input.type='number';input.min=0;input.max=max;input.step=step;input.value=s[key]??value;input.setAttribute('aria-label',label);input.oninput=()=>{s[key]=Math.max(0,Math.min(max,Number(input.value)||0));};input.onchange=()=>{refresh();render();};field.append(input);settingsBody.append(field);
       }
       const forecast=pantryForecast(s);

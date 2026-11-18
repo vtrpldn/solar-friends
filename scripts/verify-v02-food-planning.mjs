@@ -7,10 +7,10 @@ const pantry=()=>({time:0,people:[{},{}],materials:{food:0,meals:0,eggs:0,milk:0
 const s=pantry();ensureFoodStorage(s);
 foodChange(s,'meals',20,[{n:20,expires:800}]);
 const before=JSON.stringify(s);
-assert.deepEqual(pantryForecast(s,2),{portions:20,target:8,served:1,shortfall:7,days:.25,atRisk:19});
+assert.deepEqual(pantryForecast(s,2),{portions:20,target:12,served:2,shortfall:10,days:1/3,atRisk:18});
 assert.equal(JSON.stringify(s),before,'forecast must not consume or age real stock');
 foodChange(s,'meals',8,freshLots(s,'meals',8,PROCESSES.preserve_meals));
-assert.equal(pantryForecast(s,2).shortfall,0);
+assert.equal(pantryForecast(s,2).shortfall,2);
 assert.equal(productionStock(s,PROCESSES.meals,PROCESSES),20);
 assert.equal(productionStock(s,PROCESSES.preserve_meals,PROCESSES),8);
 s.operations.push({recipe:'preserve_meals',phase:'return',haulRemaining:{meals:2}});

@@ -16,7 +16,7 @@ export function coolStoredFood(s,dt){
  }
  const priority=s.foodPolicy?.coolingPriority||'expiry';
  const rank=id=>priority==='meals'?(id==='meals'?0:1):priority==='ingredients'?(id==='meals'?1:0):0;
- candidates.sort((a,b)=>rank(a.id)-rank(b.id)||a.lot.expires-b.lot.expires||a.id.localeCompare(b.id));
+ candidates.sort((a,b)=>rank(a.id)-rank(b.id)||Number(!!b.lot.chilled)-Number(!!a.lot.chilled)||a.lot.expires-b.lot.expires||a.id.localeCompare(b.id));
  for(const {id,lot}of candidates){
   const litres=materialMeasure(id).m3*1000;
   const amount=Math.min(Math.floor((left+1e-9)/litres),lot.n);left-=amount*litres;

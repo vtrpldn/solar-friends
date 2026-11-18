@@ -3,7 +3,7 @@ import {ensureFoodStorage,FOOD_SERVINGS,foodPortions} from './food-storage.js';
 const DAY=3200;
 // Estimate evenly spaced portions, without future harvests, shopping or cooling.
 export function pantryForecast(s,days=s.foodReserveDays??1.5){
- const demand=s.people.length*2,horizon=Math.max(0,Math.min(7,days));
+ const demand=s.people.length*3,horizon=Math.max(0,Math.min(7,days));
  const storage=ensureFoodStorage(s);
  const lots=Object.fromEntries(Object.keys(FOOD_SERVINGS).map(id=>[id,storage.lots[id].map(l=>({...l})).sort((a,b)=>a.expires-b.expires)]));
  const target=Math.ceil(demand*horizon);let served=0,atRisk=0;

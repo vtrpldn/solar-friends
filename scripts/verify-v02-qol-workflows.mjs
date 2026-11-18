@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import {createWeekend, createSandbox, chooseCamp, plan, cancelProject, cancelProjectError, PROJECTS, MATERIALS, PROCESSES, save, restore, say, queueProduction} from '../web/v02/weekend/simulation.js';
 import {productionSearchText, productionActivity, residentProject} from '../web/v02/weekend/project-ui.js';
-import {transportCost} from '../web/v02/weekend/physical-trade.js';
 import {eventHistory, eventTime} from '../web/v02/weekend/event-history.js';
 function fresh() {
   const s = createWeekend(42); s.arrivalElapsed=17; chooseCamp(s,'clearing');
@@ -13,9 +12,9 @@ assert.equal(plan(s,'shelter',40,39),'');
 const id=s.projects.at(-1).id;
 assert.equal(s.trip.phase,'boarding');
 assert.equal(cancelProject(s,id),'');
-assert.equal(s.money,money-transportCost(s),'Cancellation refunds materials; fuel charged when the trip was arranged remains spent'); assert.equal(s.wood,wood); assert.equal(s.trip,null);
+assert.equal(s.money,money,'Cancellation before departure releases the material and fuel reservations'); assert.equal(s.wood,wood); assert.equal(s.trip,null);
 assert(!s.projects.some(p=>p.id===id)); assert(restore(save(s)));
-assert(cancelProject(s,id)); assert.equal(s.money,money-transportCost(s),'Cannot refund twice');
+assert(cancelProject(s,id)); assert.equal(s.money,money,'Cannot refund twice');
 const transit=fresh(); assert.equal(plan(transit,'shelter',40,39),'');
 transit.trip.phase='outbound'; const pid=transit.projects.at(-1).id;
 const before=structuredClone(transit);
