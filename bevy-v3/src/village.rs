@@ -102,6 +102,8 @@ pub struct Village {
     #[serde(skip)]
     event_page: usize,
     #[serde(skip)]
+    inventory_page: usize,
+    #[serde(skip)]
     housing_notice: String,
     #[serde(skip)]
     camp_error: Option<&'static str>,
@@ -212,6 +214,7 @@ enum UtilityPanel {
     Pantry,
     Upkeep,
     Events,
+    Inventory,
 }
 
 impl Village {
@@ -697,6 +700,28 @@ fn village_input(
                 Some(UtilityPanel::Residents)
             };
         }
+        if keyboard.just_pressed(KeyCode::F10) {
+            town.utility_panel = if town.utility_panel == Some(UtilityPanel::Inventory) {
+                None
+            } else {
+                Some(UtilityPanel::Inventory)
+            };
+            town.inventory_page = 0;
+        }
+        if town.utility_panel == Some(UtilityPanel::Inventory) {
+            if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
+                let pages = town
+                    .construction
+                    .inventory_panel(&catalog, &town.stock, town.inventory_page)
+                    .0;
+                town.inventory_page = if keyboard.just_pressed(KeyCode::PageDown) {
+                    (town.inventory_page + 1) % pages
+                } else {
+                    (town.inventory_page + pages - 1) % pages
+                };
+            }
+            return;
+        }
         if keyboard.just_pressed(KeyCode::F8) {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Events) {
                 None
@@ -1147,13 +1172,22 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events",
+            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores",
         );
     }
     match village.utility_panel {
         Some(UtilityPanel::Power) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.power_summary());
+        }
+        Some(UtilityPanel::Inventory) => {
+            label.push('\n');
+            label.push_str(
+                &village
+                    .construction
+                    .inventory_panel(&catalog, &village.stock, village.inventory_page)
+                    .1,
+            );
         }
         Some(UtilityPanel::Events) => {
             label.push('\n');

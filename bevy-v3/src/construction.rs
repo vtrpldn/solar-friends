@@ -1,6 +1,7 @@
 mod events;
 mod farm_work;
 mod gather_work;
+mod inventory;
 mod kitchen_work;
 mod leisure;
 mod lifecycle;
