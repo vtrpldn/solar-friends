@@ -71,6 +71,26 @@ impl Terrain {
         self.hill_height * relief * river_cut
     }
 
+    pub fn height_at(&self, x: f32, z: f32) -> f32 {
+        let tile = |value: f32| {
+            let value = (f64::from(value) + HALF_WIDTH) / 2.0;
+            let tile = value.floor().clamp(0.0, f64::from(CELLS - 1));
+            (tile * 2.0 - HALF_WIDTH, (value - tile).clamp(0.0, 1.0))
+        };
+        let (left, u) = tile(x);
+        let (top, v) = tile(z);
+        let a = self.elevation(left, top);
+        let b = self.elevation(left, top + 2.0);
+        let d = self.elevation(left + 2.0, top);
+        let height = if u + v <= 1.0 {
+            a + (d - a) * u + (b - a) * v
+        } else {
+            let c = self.elevation(left + 2.0, top + 2.0);
+            c + (b - c) * (1.0 - u) + (d - c) * (1.0 - v)
+        };
+        height as f32
+    }
+
     pub fn ground_mesh(&self) -> Mesh {
         let stride = CELLS + 1;
         let mut positions = Vec::with_capacity((stride * stride) as usize);

@@ -6,7 +6,7 @@ const BIOMES: [&str; 3] = ["Mata Atlântica", "Cerrado", "Caatinga"];
 const LANDSCAPES: [&str; 3] = ["Gentle", "Rolling", "Rugged"];
 const WATER: [&str; 3] = ["Dry", "Seasonal", "Abundant"];
 
-#[derive(Resource)]
+#[derive(Resource, Clone, PartialEq, Eq)]
 pub struct WorldSetup {
     pub open: bool,
     seed: u32,
@@ -28,6 +28,13 @@ impl Default for WorldSetup {
 }
 
 impl WorldSetup {
+    pub fn session(&self) -> Self {
+        Self {
+            open: false,
+            ..self.clone()
+        }
+    }
+
     pub fn terrain(&self) -> Terrain {
         Terrain::new(
             self.seed,
@@ -47,7 +54,7 @@ impl WorldSetup {
             Action::Landscape => format!("Landscape   ·   {}", LANDSCAPES[self.landscape]),
             Action::Water => format!("Water   ·   {}", WATER[self.water]),
             Action::Seed => format!("Land seed   ·   {}", self.seed),
-            Action::Explore => "Explore land".into(),
+            Action::Explore => "Enter village".into(),
         }
     }
 }

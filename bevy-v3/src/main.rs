@@ -6,6 +6,7 @@ use bevy::{
 
 mod setup;
 mod terrain;
+mod village;
 use setup::{WorldSetup, WorldSetupPlugin};
 
 const CAMERA_HOME: Vec3 = Vec3::new(-26.0, 3.0, -12.0);
@@ -15,13 +16,13 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                title: "Solar Friends V2".into(),
+                title: "Solar Friends V3".into(),
                 resolution: WindowResolution::new(1280, 800),
                 ..default()
             }),
             ..default()
         }))
-        .add_plugins(WorldSetupPlugin)
+        .add_plugins((WorldSetupPlugin, village::VillagePlugin))
         .add_systems(Startup, setup_scene)
         .add_systems(PostUpdate, update_land)
         .add_systems(Update, camera_controls)
