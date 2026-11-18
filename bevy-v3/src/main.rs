@@ -160,7 +160,7 @@ fn camera_controls(
 ) {
     if setup.open
         || saves.open
-        || village.guide_open()
+        || village.map_input_blocked()
         || village.advance_open()
         || village.trade_open()
         || !window.focused

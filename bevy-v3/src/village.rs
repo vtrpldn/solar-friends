@@ -1,6 +1,8 @@
 mod cultivation_surface;
 mod guide;
 mod land_lens;
+mod lens_picker;
+use lens_picker::{LensPicker, MapLens};
 mod library_ui;
 mod resource_lens;
 mod road_surface;
@@ -113,7 +115,7 @@ pub struct Village {
     #[serde(skip)]
     guide: guide::Guide,
     #[serde(skip)]
-    map_lens: Option<MapLens>,
+    lenses: LensPicker,
     #[serde(skip)]
     open_projects_only: bool,
     #[serde(skip)]
@@ -260,8 +262,8 @@ impl Village {
         self.clock
     }
 
-    pub fn guide_open(&self) -> bool {
-        self.guide.open()
+    pub fn map_input_blocked(&self) -> bool {
+        self.guide.open() || self.lenses.open
     }
 
     pub fn trade_open(&self) -> bool {
@@ -410,15 +412,6 @@ struct CampPointer {
     hovered: Option<GroundHit>,
 }
 
-#[derive(Clone, Copy, PartialEq)]
-enum MapLens {
-    Land,
-    Resources,
-    Ecology,
-    Access,
-    Construction,
-}
-
 #[derive(Resource, Default, PartialEq)]
 struct MapNotice(Option<String>);
 
@@ -444,7 +437,7 @@ fn read_camp_pointer(
     pointer.hovered = None;
     if !window.focused
         || setup.open
-        || village.guide_open()
+        || village.map_input_blocked()
         || village.arrival_time < ARRIVAL_DURATION
     {
         *input = None;
@@ -465,7 +458,7 @@ fn read_camp_pointer(
         && !village.terrain_editor.open
         && !village.planning_roads()
         && !village.construction.placing_project()
-        && village.map_lens.is_none()
+        && village.lenses.active.is_none()
     {
         return;
     }
@@ -573,28 +566,8 @@ fn village_input(
         return;
     }
 
-    if village.camp.is_some() {
-        if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
-            for (key, lens) in [
-                (KeyCode::F2, MapLens::Access),
-                (KeyCode::F11, MapLens::Construction),
-            ] {
-                if keyboard.just_pressed(key) {
-                    village.map_lens = (village.map_lens != Some(lens)).then_some(lens);
-                    return;
-                }
-            }
-        }
-        for (key, lens) in [
-            (KeyCode::F2, MapLens::Land),
-            (KeyCode::F3, MapLens::Resources),
-            (KeyCode::F12, MapLens::Ecology),
-        ] {
-            if keyboard.just_pressed(key) {
-                village.map_lens = (village.map_lens != Some(lens)).then_some(lens);
-                return;
-            }
-        }
+    if village.camp.is_some() && village.lenses.controls(&keyboard) {
+        return;
     }
 
     if village.planning_roads()
@@ -1213,7 +1186,7 @@ fn show_hud(
     node.display = Display::Flex;
     node.top = px(20);
     node.bottom = Val::Auto;
-    if let Some(page) = village.guide.text() {
+    if let Some(page) = village.guide.text().or_else(|| village.lenses.text()) {
         text.0 = page;
         return;
     }
@@ -1283,7 +1256,7 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F2 Slope · F3 Resources · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · F12 Ecology\nShift+F2 Access lens · Shift+F11 Construction lens",
+            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · Shift+L Map lenses",
         );
     }
     match village.utility_panel {
@@ -1449,7 +1422,7 @@ fn draw_blueprints(
         let construction_notice = village.construction.draw(
             &catalog,
             &terrain,
-            village.map_lens == Some(MapLens::Construction),
+            village.lenses.active == Some(MapLens::Construction),
             pointer.hovered.map(|hit| hit.cell),
             &mut gizmos,
         );
@@ -1463,7 +1436,7 @@ fn draw_blueprints(
                 &mut gizmos,
             );
         }
-        notice = match village.map_lens {
+        notice = match village.lenses.active {
             Some(MapLens::Land) => Some(land_lens.draw(
                 village.terrain_key(),
                 &terrain,
