@@ -112,6 +112,10 @@ pub struct Construction {
     #[serde(skip)]
     pub menu: bool,
     #[serde(skip)]
+    build_query: String,
+    #[serde(skip)]
+    pub editing_search: bool,
+    #[serde(skip)]
     road_planning: roads::RoadPlanning,
     #[serde(skip)]
     selection: Option<String>,
@@ -223,6 +227,8 @@ impl Default for Construction {
     fn default() -> Self {
         Self {
             menu: false,
+            build_query: String::new(),
+            editing_search: false,
             road_planning: roads::RoadPlanning::default(),
             selection: None,
             category: 0,
@@ -308,22 +314,78 @@ impl Construction {
 
     fn options<'a>(&self, catalog: &'a Catalog) -> Vec<(&'a String, &'a Project)> {
         let category = CATEGORIES[self.category];
+        let query = self.build_query.trim().to_lowercase();
+        let matches = |text: &str| text.to_lowercase().contains(&query);
         let mut projects: Vec<_> = catalog
             .projects
             .iter()
-            .filter(|(_, project)| match category {
-                "All" => true,
-                "Camp essentials" => project.camp_essential,
-                _ => project.category == category,
+            .filter(|(id, project)| {
+                if query.is_empty() {
+                    return match category {
+                        "All" => true,
+                        "Camp essentials" => project.camp_essential,
+                        _ => project.category == category,
+                    };
+                }
+                let material_matches = |id: &String| matches(&catalog.materials[id].name);
+                matches(id)
+                    || matches(&project.name)
+                    || matches(&project.category)
+                    || project.materials.keys().any(material_matches)
+                    || catalog.production.values().any(|recipe| {
+                        recipe.kind == project.kind
+                            && (matches(&recipe.name) || recipe.output.keys().any(material_matches))
+                    })
             })
             .collect();
-        if category == "Camp essentials" {
+        if query.is_empty() && category == "Camp essentials" {
             let rank = ["gathering", "well", "shelter", "toilet"];
             projects.sort_by_key(|(id, _)| rank.iter().position(|key| *key == id.as_str()));
         } else {
             projects.sort_by(|(_, a), (_, b)| a.name.cmp(&b.name));
         }
         projects
+    }
+
+    pub fn build_search_input(
+        &mut self,
+        keys: &ButtonInput<KeyCode>,
+        text: &mut MessageReader<bevy::input::keyboard::KeyboardInput>,
+    ) -> bool {
+        if !self.menu || self.moving.is_some() {
+            text.clear();
+            return false;
+        }
+        if keys.just_pressed(KeyCode::Slash) {
+            self.editing_search = !self.editing_search;
+            self.selection = None;
+            self.page = 0;
+            self.status.clear();
+            text.clear();
+            return true;
+        }
+        if !self.editing_search {
+            text.clear();
+            return false;
+        }
+        if keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
+            self.editing_search = false;
+            text.clear();
+            return true;
+        }
+        for event in text.read() {
+            if event.state != bevy::input::ButtonState::Pressed {
+                continue;
+            }
+            if event.key_code == KeyCode::Backspace {
+                self.build_query.pop();
+            } else if let Some(chars) = &event.text {
+                let room = 60usize.saturating_sub(self.build_query.chars().count());
+                self.build_query
+                    .extend(chars.chars().filter(|c| !c.is_control()).take(room));
+            }
+        }
+        true
     }
 
     pub fn input(&mut self, keyboard: &ButtonInput<KeyCode>, catalog: &Catalog) {
@@ -347,6 +409,7 @@ impl Construction {
         }
         if keyboard.just_pressed(KeyCode::Tab) {
             let reverse = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+            self.build_query.clear();
             self.category =
                 (self.category + if reverse { CATEGORIES.len() - 1 } else { 1 }) % CATEGORIES.len();
             self.page = 0;
@@ -470,9 +533,29 @@ impl Construction {
             .map(|(i, (_, definition))| format!("{} {}", i + 1, definition.name))
             .collect::<Vec<_>>()
             .join("\n");
+        let (title, controls) = if self.editing_search {
+            (
+                format!("Search {}▏", self.build_query),
+                "Type to filter · Enter Apply",
+            )
+        } else if !self.build_query.trim().is_empty() {
+            (
+                format!("Search results · {}", self.build_query),
+                "/ Search · Tab Category · Page Up/Down · B Close",
+            )
+        } else {
+            (
+                CATEGORIES[self.category].to_owned(),
+                "/ Search · Tab Category · Page Up/Down · B Close",
+            )
+        };
+        let list = if list.is_empty() {
+            "No matching projects"
+        } else {
+            &list
+        };
         format!(
-            "{} · {}/{}\nTab Category · Page Up/Down · B Close\n{list}\n{}",
-            CATEGORIES[self.category],
+            "{title} · {}/{}\n{controls}\n{list}\n{}",
             self.page + 1,
             pages,
             self.status

@@ -278,7 +278,7 @@ impl Village {
     }
 
     pub fn map_input_blocked(&self) -> bool {
-        self.guide.open() || self.lenses.open
+        self.guide.open() || self.lenses.open || self.construction.editing_search
     }
 
     pub fn trade_open(&self) -> bool {
@@ -529,7 +529,10 @@ fn custom_camp_error(terrain: &crate::terrain::Terrain, cell: IVec2) -> Option<&
 
 fn village_input(
     mut commands: Commands,
-    setup: Res<WorldSetup>,
+    (setup, mut build_text): (
+        Res<WorldSetup>,
+        MessageReader<bevy::input::keyboard::KeyboardInput>,
+    ),
     (keyboard, pointer, saves, mut sound): (
         Res<ButtonInput<KeyCode>>,
         Res<CampPointer>,
@@ -591,6 +594,15 @@ fn village_input(
             ));
         }
     }
+
+    if (village.construction.editing_search || keyboard.just_pressed(KeyCode::Slash))
+        && village
+            .construction
+            .build_search_input(&keyboard, &mut build_text)
+    {
+        return;
+    }
+    build_text.clear();
 
     if village.guide.controls(&keyboard) {
         return;
