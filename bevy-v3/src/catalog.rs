@@ -73,6 +73,8 @@ pub struct ProductionRecipe {
     pub output: BTreeMap<String, u32>,
     pub work: f64,
     pub handcraft: bool,
+    #[serde(default)]
+    pub preserved: BTreeMap<String, f64>,
 }
 
 #[derive(Deserialize)]

@@ -145,6 +145,7 @@ impl Construction {
             required,
             inputs,
             output: Default::default(),
+            food_output: None,
             retry: 0.0,
             pickups,
             fare,
@@ -218,6 +219,18 @@ impl Construction {
         dt: f32,
     ) {
         for job_index in (0..self.farming.jobs.len()).rev() {
+            let job = &mut self.farming.jobs[job_index];
+            if let Some(lots) = &mut job.food_output
+                && !stock.sandbox
+            {
+                let lost = crate::food::discard_expired(lots, clock);
+                stock.record_spoilage(catalog, &lost);
+                for (id, lost) in lost {
+                    if let Some(quantity) = job.output.get_mut(&id) {
+                        *quantity = quantity.saturating_sub(lost);
+                    }
+                }
+            }
             let job = &self.farming.jobs[job_index];
             if clock < job.retry || job.pickups > 0 {
                 continue;
@@ -268,6 +281,8 @@ impl Construction {
                         .get_mut(&job.site)
                         .expect("farm job plot");
                     job.output = plot.finish(job, clock, stock.sandbox);
+                    job.food_output =
+                        Some(crate::food::fresh(&job.output, clock, &Default::default()));
                     if job.output.is_empty() {
                         self.farming.jobs.remove(job_index);
                     } else {
@@ -280,7 +295,11 @@ impl Construction {
                     if self.storage_space(catalog, stock) < units {
                         continue;
                     }
-                    stock.receive(&job.output);
+                    if let Some(lots) = &job.food_output {
+                        stock.receive_with_lots(&job.output, lots.clone());
+                    } else {
+                        stock.receive(&job.output);
+                    }
                     self.farming.jobs.remove(job_index);
                 }
             }

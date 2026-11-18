@@ -2,7 +2,11 @@ use std::collections::{BTreeMap, VecDeque};
 
 use serde::{Deserialize, Serialize};
 
-use crate::{catalog::AnimalRation, weather::DAY};
+use crate::{
+    catalog::AnimalRation,
+    food::{FoodLots, Lot},
+    weather::DAY,
+};
 
 #[derive(Default, Deserialize, Serialize)]
 pub struct Livestock {
@@ -56,7 +60,12 @@ impl Pen {
         self.water += water;
     }
 
-    pub fn collect(&mut self, ration: &AnimalRation, sandbox: bool) -> BTreeMap<String, u32> {
+    pub fn collect(
+        &mut self,
+        ration: &AnimalRation,
+        sandbox: bool,
+    ) -> (BTreeMap<String, u32>, FoodLots) {
+        let mut saved = Vec::new();
         let mut remaining = ration.batch;
         if !sandbox {
             while remaining > 0 {
@@ -64,6 +73,14 @@ impl Pen {
                     break;
                 };
                 let removed = remaining.min(lot.units);
+                if removed > 0 {
+                    saved.push(Lot {
+                        units: removed,
+                        expires: lot.expires,
+                        preserved: false,
+                        chilled: false,
+                    });
+                }
                 remaining -= removed;
                 lot.units -= removed;
                 if lot.units == 0 {
@@ -76,9 +93,14 @@ impl Pen {
         let quantity = ration.batch - remaining;
         self.collected = self.collected.saturating_add(quantity);
         if quantity == 0 {
-            BTreeMap::new()
+            (BTreeMap::new(), FoodLots::new())
         } else {
-            BTreeMap::from([(ration.product.clone(), quantity)])
+            let lots = if saved.is_empty() {
+                FoodLots::new()
+            } else {
+                FoodLots::from([(ration.product.clone(), saved)])
+            };
+            (BTreeMap::from([(ration.product.clone(), quantity)]), lots)
         }
     }
 
@@ -156,7 +178,7 @@ mod tests {
             pen.tick(ration, f64::from(day) * DAY, DAY);
         }
         assert_eq!(pen.available(), 6);
-        assert_eq!(pen.collect(ration, false)["eggs"], 6);
+        assert_eq!(pen.collect(ration, false).0["eggs"], 6);
         assert_eq!(pen.available(), 0);
     }
 }

@@ -49,6 +49,8 @@ struct Node {
     charge: f64,
     solar_kw: f64,
     demanding: bool,
+    #[serde(default)]
+    cold_storage: bool,
 }
 
 #[derive(Clone, Copy, Deserialize, Serialize)]
@@ -92,6 +94,7 @@ impl Utilities {
             charge: 0.0,
             solar_kw: 0.0,
             demanding: false,
+            cold_storage: false,
         });
         let mut changed = first;
         for facility in facilities {
@@ -111,6 +114,7 @@ impl Utilities {
                 charge: 0.0,
                 solar_kw: f64::from(facility.panels) * 0.6,
                 demanding: false,
+                cold_storage: false,
             });
             node.demanding = facility.working;
         }
@@ -281,6 +285,26 @@ impl Utilities {
         }
     }
 
+    pub fn install_cold_storage(&mut self, building: usize) {
+        if let Some(node) = self.nodes.get_mut(&(building + 1)) {
+            node.cold_storage = true;
+        }
+    }
+
+    pub fn has_cold_storage(&self, building: usize) -> bool {
+        self.nodes
+            .get(&(building + 1))
+            .is_some_and(|node| node.cold_storage)
+    }
+
+    pub fn powered_cold_storage(&self) -> f64 {
+        self.nodes
+            .values()
+            .filter(|node| node.cold_storage && node.enabled && node.powered)
+            .count() as f64
+            * 80.0
+    }
+
     pub fn facility_status(&self, building: usize) -> Option<String> {
         let node = self.nodes.get(&(building + 1))?;
         let switchable = light_load(&node.kind) > 0.0
@@ -426,6 +450,9 @@ impl Utilities {
             };
             if node.demanding && matches!(node.kind.as_str(), "kitchen" | "workshop") {
                 kw += 0.45;
+            }
+            if node.cold_storage {
+                kw += 0.08;
             }
             demand.push((priority(&node.kind), id, kw));
         }

@@ -48,9 +48,9 @@ const gathering = Object.fromEntries(Object.entries(PROCESSES)
 
 const production = Object.fromEntries(Object.entries(PROCESSES)
   .filter(([id, recipe]) => (!BIOLOGY[id] || ["eggs", "milk"].includes(id)) && !recipe.deposit && !recipe.gathering &&
-    recipe.kind !== "wild-tree" && recipe.kind !== "cultivation" && Object.keys(recipe.output).length)
+    recipe.kind !== "wild-tree" && recipe.kind !== "cultivation" && (Object.keys(recipe.output).length || id === "cold_storage"))
   .map(([id, recipe]) => [id, {name: recipe.name, kind: recipe.kind, input: recipe.input,
-    output: recipe.output, work: recipe.work, handcraft: Boolean(recipe.craft)}]));
+    output: recipe.output, work: recipe.work, handcraft: Boolean(recipe.craft), preserved: recipe.preservedDays || {}}]));
 
 for (const [kind, ration] of Object.entries(ANIMAL_RATIONS)) {
   production[ration.product].name = `Collect ${ration.product}`;

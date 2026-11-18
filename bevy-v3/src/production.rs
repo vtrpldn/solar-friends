@@ -22,6 +22,10 @@ pub struct Batch {
     #[serde(default)]
     pub water_to_deliver: f64,
     #[serde(default)]
+    pub food_input: Option<crate::food::FoodLots>,
+    #[serde(default)]
+    pub food_output: Option<crate::food::FoodLots>,
+    #[serde(default)]
     pub delivered_output: Option<std::collections::BTreeMap<String, u32>>,
 }
 

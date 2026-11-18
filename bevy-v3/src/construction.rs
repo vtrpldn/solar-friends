@@ -609,6 +609,7 @@ impl Construction {
                         job.site == index
                             && job.phase == crate::production::Phase::Work
                             && !catalog.production[&job.recipe].handcraft
+                            && job.recipe != "cold_storage"
                     });
                     Some(Facility {
                         id: index + 1,
@@ -797,6 +798,14 @@ impl Construction {
             camp,
         } = site;
         let space = self.storage_space(catalog, stock);
+        let order_in_progress = self.trip.as_ref().is_some_and(|trip| trip.market_order);
+        self.trade.age_shipments(
+            catalog,
+            stock,
+            &mut self.market,
+            clock.seconds,
+            order_in_progress,
+        );
         self.trade.receive_goods(stock, space, clock.seconds);
         let space = self.storage_space(catalog, stock);
         self.trade.maintain_pantry(

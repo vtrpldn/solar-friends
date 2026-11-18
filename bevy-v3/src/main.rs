@@ -9,6 +9,7 @@ mod audio;
 mod catalog;
 mod construction;
 mod farming;
+mod food;
 mod gathering;
 mod land;
 mod livestock;

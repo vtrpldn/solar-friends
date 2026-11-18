@@ -28,7 +28,7 @@ Story reserves cash for town pickup when a blueprint needs materials beyond curr
 
 In Sandbox, materials are unlimited. Press I to toggle instant building.
 
-In Story, press H for finances and paid town shifts. Book one day shift or turn on repeating weekday work for a selected resident. Wages reach village savings when the resident returns. Press Tab in Finances to open town trade, buy for pickup or freight, quote and reserve a sale, or set an automatic sale policy. Households can restock food automatically.
+In Story, press H for finances and paid town shifts. Book one day shift or turn on repeating weekday work for a selected resident. Wages reach village savings when the resident returns. Press Tab in Finances to open town trade, buy for pickup or freight, quote and reserve a sale, or set an automatic sale policy. Households can restock food automatically. Tab again to inspect food expiry and cold-storage use. Dried provisions keep longer, and powered cold storage slows aging for the food that fits.
 
 Press L to advance between 1 and 365 days. Exact replay uses normal simulation steps. Fast approximate uses larger steps. Press L while advancing to stop at the time shown.
 

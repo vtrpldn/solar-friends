@@ -64,6 +64,10 @@ impl Construction {
 
     fn queue_batch(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize, id: &str) {
         let recipe = &catalog.production[id];
+        if id == "cold_storage" && self.utilities.has_cold_storage(index) {
+            self.production.notice = "Cold storage is already installed.".into();
+            return;
+        }
         if let Some(ration) = catalog.animal_rations.get(&recipe.kind)
             && !stock.sandbox
         {
@@ -90,7 +94,7 @@ impl Construction {
             self.production.notice = "Finish the current batch first.".into();
             return;
         }
-        if !stock.sandbox {
+        let food_input = if !stock.sandbox {
             if let Some(material) = stock.missing(&recipe.input) {
                 self.production.notice = format!(
                     "Not enough {} in supplies.",
@@ -98,8 +102,10 @@ impl Construction {
                 );
                 return;
             }
-            stock.reserve_available(&recipe.input);
-        }
+            Some(stock.reserve_available(&recipe.input))
+        } else {
+            None
+        };
         self.production.jobs.push(Batch {
             site: index,
             recipe: id.into(),
@@ -108,6 +114,8 @@ impl Construction {
             work: 0.0,
             retry_at: 0.0,
             water_to_deliver: 0.0,
+            food_input,
+            food_output: None,
             delivered_output: None,
         });
         self.production.notice.clear();
@@ -124,7 +132,9 @@ impl Construction {
             let state = match job.phase {
                 Phase::Pickup => "Collecting ingredients".into(),
                 Phase::Approach => "Bringing ingredients".into(),
-                Phase::Work if needs_power(recipe) && !self.utilities.powered(job.site) => {
+                Phase::Work
+                    if needs_power(&job.recipe, recipe) && !self.utilities.powered(job.site) =>
+                {
                     "Waiting for power".into()
                 }
                 Phase::Work if recipe.handcraft => {
@@ -214,6 +224,7 @@ impl Construction {
         clock: f64,
         dt: f32,
     ) {
+        self.expire_batch_food(catalog, stock, site, clock);
         for index in (0..self.production.jobs.len()).rev() {
             let job = &self.production.jobs[index];
             if clock < job.retry_at {
@@ -260,7 +271,7 @@ impl Construction {
                 }
                 Phase::Approach => self.production.jobs[index].phase = Phase::Work,
                 Phase::Work => {
-                    if needs_power(recipe) && !self.utilities.powered(job.site) {
+                    if needs_power(&job.recipe, recipe) && !self.utilities.powered(job.site) {
                         continue;
                     }
                     let animal = catalog.animal_rations.get(&recipe.kind);
@@ -276,6 +287,11 @@ impl Construction {
                     let job = &mut self.production.jobs[index];
                     job.work = (job.work + f64::from(dt)).min(recipe.work);
                     if job.work < recipe.work {
+                        continue;
+                    }
+                    if job.recipe == "cold_storage" {
+                        self.utilities.install_cold_storage(job.site);
+                        self.production.jobs.remove(index);
                         continue;
                     }
                     let Some(path) = route(
@@ -302,9 +318,20 @@ impl Construction {
                             continue;
                         }
                         if job.recipe == ration.product {
-                            job.delivered_output = Some(pen.collect(ration, stock.sandbox));
+                            let (quantity, lots) = pen.collect(ration, stock.sandbox);
+                            job.delivered_output = Some(quantity);
+                            job.food_output = Some(lots);
                         }
                     }
+                    let job = &mut self.production.jobs[index];
+                    if job.food_output.is_none() {
+                        job.food_output = Some(crate::food::fresh(
+                            job.delivered_output.as_ref().unwrap_or(&recipe.output),
+                            clock,
+                            &recipe.preserved,
+                        ));
+                    }
+                    job.food_input = None;
                     self.residents[worker_index].path = path;
                     self.production.jobs[index].phase = Phase::Return;
                 }
@@ -314,7 +341,11 @@ impl Construction {
                     if self.storage_space(catalog, stock) < units {
                         continue;
                     }
-                    stock.receive(output);
+                    if let Some(lots) = &job.food_output {
+                        stock.receive_with_lots(output, lots.clone());
+                    } else {
+                        stock.receive(output);
+                    }
                     self.production.jobs.remove(index);
                     self.production.notice = format!("{}: batch in stores.", recipe.name);
                 }
@@ -322,7 +353,74 @@ impl Construction {
         }
     }
 
+    fn expire_batch_food(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: f64,
+    ) {
+        if stock.sandbox {
+            return;
+        }
+        for index in (0..self.production.jobs.len()).rev() {
+            let job = &mut self.production.jobs[index];
+            let outbound = job.phase != Phase::Return;
+            let lots = if outbound {
+                &mut job.food_input
+            } else {
+                &mut job.food_output
+            };
+            let Some(lots) = lots else { continue };
+            let lost = crate::food::discard_expired(lots, clock);
+            if lost.is_empty() {
+                continue;
+            }
+            stock.record_spoilage(catalog, &lost);
+            let recipe = &catalog.production[&job.recipe];
+            let mut good = if outbound {
+                recipe.input.clone()
+            } else {
+                job.delivered_output
+                    .as_ref()
+                    .unwrap_or(&recipe.output)
+                    .clone()
+            };
+            for (id, units) in lost {
+                if let Some(quantity) = good.get_mut(&id) {
+                    *quantity = quantity.saturating_sub(units);
+                }
+            }
+            if !outbound {
+                job.delivered_output = Some(good);
+                continue;
+            }
+            let surviving = std::mem::take(lots);
+            let Some(worker) = job.worker else {
+                stock.receive_with_lots(&good, surviving);
+                self.production.jobs.remove(index);
+                continue;
+            };
+            let from = self.residents[worker].position;
+            let path = self.resident_route(catalog, site, from, SUPPLY_SPOTS[worker]);
+            let job = &mut self.production.jobs[index];
+            job.delivered_output = Some(good);
+            job.food_output = Some(surviving);
+            job.food_input = None;
+            job.phase = Phase::Return;
+            if let Some(path) = path {
+                self.residents[worker].path = path;
+            } else {
+                self.residents[worker].path.clear();
+                job.worker = None;
+            }
+            self.production.notice =
+                "Reserved food spoiled. Usable ingredients are being returned.".into();
+        }
+    }
+
     fn assign_producer(&mut self, job: usize, catalog: &Catalog, site: ConstructionSite) {
+        let returning = self.production.jobs[job].phase == Phase::Return;
         let project = &self.plans[self.production.jobs[job].site];
         let ConstructionSite {
             terrain,
@@ -349,9 +447,10 @@ impl Construction {
                 continue;
             }
             let supply = SUPPLY_SPOTS[index];
-            if perimeter(project.position, project.size, supply.as_vec2())
-                .into_iter()
-                .all(|cell| path(supply.as_vec2(), cell).is_none())
+            if !returning
+                && perimeter(project.position, project.size, supply.as_vec2())
+                    .into_iter()
+                    .all(|cell| path(supply.as_vec2(), cell).is_none())
             {
                 continue;
             }
@@ -381,6 +480,8 @@ fn perimeter(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec2> {
     cells
 }
 
-fn needs_power(recipe: &ProductionRecipe) -> bool {
-    !recipe.handcraft && matches!(recipe.kind.as_str(), "kitchen" | "workshop")
+fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
+    !recipe.handcraft
+        && id != "cold_storage"
+        && matches!(recipe.kind.as_str(), "kitchen" | "workshop")
 }

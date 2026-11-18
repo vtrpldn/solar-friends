@@ -136,6 +136,8 @@ pub struct FarmJob {
     pub required: f64,
     pub inputs: BTreeMap<String, u32>,
     pub output: BTreeMap<String, u32>,
+    #[serde(default)]
+    pub food_output: Option<crate::food::FoodLots>,
     pub retry: f64,
     #[serde(default)]
     pub pickups: u32,
@@ -464,6 +466,7 @@ mod tests {
             required: 1.0,
             inputs: BTreeMap::new(),
             output: BTreeMap::new(),
+            food_output: None,
             retry: 0.0,
             pickups: 0,
             fare: 0,

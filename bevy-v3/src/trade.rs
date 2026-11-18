@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     catalog::{Catalog, Material},
+    food::{self, FoodLots},
     market::Market,
     stock::{CashKind, Stock},
 };
@@ -41,6 +42,10 @@ pub struct Shipment {
     pub settled: bool,
     #[serde(default)]
     pub buying: bool,
+    #[serde(default)]
+    pub spoiled: bool,
+    #[serde(default)]
+    food: Option<FoodLots>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -48,6 +53,8 @@ pub struct Delivery {
     pub material: String,
     pub quantity: u32,
     pub eta: f64,
+    #[serde(default)]
+    food: Option<FoodLots>,
 }
 
 #[derive(Default, Deserialize, Serialize)]
@@ -135,7 +142,7 @@ impl Trade {
         if !market.hold_fare(stock, fare) {
             return Err("Shared savings cannot cover the trip fuel.");
         }
-        stock.reserve_available(&BTreeMap::from([(id.to_owned(), quantity)]));
+        let food = stock.reserve_available(&BTreeMap::from([(id.to_owned(), quantity)]));
         let entry = self.bought.entry(id.to_owned()).or_default();
         if entry.day != day {
             *entry = Daily { day, units: 0 };
@@ -149,6 +156,8 @@ impl Trade {
             day,
             settled: false,
             buying: false,
+            spoiled: false,
+            food: Some(food),
         });
         Ok(quantity)
     }
@@ -174,12 +183,18 @@ impl Trade {
             crate::market::fare_cents(distance)
         };
         let (quantity, cents) = market.buy_pack(catalog, stock, id, (day, fare, freight))?;
+        let food = food::fresh(
+            &BTreeMap::from([(id.to_owned(), quantity)]),
+            clock,
+            &BTreeMap::new(),
+        );
         if freight {
             let eta = clock + 360.0 / 0.45 + crate::market::trip_seconds(distance);
             self.delivery = Some(Delivery {
                 material: id.into(),
                 quantity,
                 eta,
+                food: Some(food),
             });
         } else {
             self.orders.push_back(Shipment {
@@ -190,6 +205,8 @@ impl Trade {
                 day,
                 settled: false,
                 buying: true,
+                spoiled: false,
+                food: Some(food),
             });
         }
         Ok(())
@@ -259,7 +276,12 @@ impl Trade {
         let Some(order) = &self.delivery else { return };
         if order.eta <= clock && u64::from(order.quantity) <= space {
             let order = self.delivery.take().expect("arrived freight");
-            stock.receive(&BTreeMap::from([(order.material, order.quantity)]));
+            let goods = BTreeMap::from([(order.material, order.quantity)]);
+            if let Some(lots) = order.food {
+                stock.receive_with_lots(&goods, lots);
+            } else {
+                stock.receive(&goods);
+            }
             self.purchases = self.purchases.saturating_add(1);
         }
     }
@@ -268,13 +290,20 @@ impl Trade {
         let Some(order) = self.orders.front() else {
             return true;
         };
-        if order.buying && u64::from(order.quantity) > space {
+        if (order.buying || order.spoiled) && u64::from(order.quantity) > space {
             return false;
         }
         let order = self.orders.pop_front().expect("completed town trip");
-        if order.buying {
-            stock.receive(&BTreeMap::from([(order.material, order.quantity)]));
-            self.purchases = self.purchases.saturating_add(1);
+        if order.buying || order.spoiled {
+            let goods = BTreeMap::from([(order.material, order.quantity)]);
+            if let Some(lots) = order.food {
+                stock.receive_with_lots(&goods, lots);
+            } else {
+                stock.receive(&goods);
+            }
+            if order.buying {
+                self.purchases = self.purchases.saturating_add(1);
+            }
         }
         true
     }
@@ -296,7 +325,12 @@ impl Trade {
             self.notice = "Purchase canceled. Shared savings refunded.".into();
             return;
         }
-        stock.receive(&BTreeMap::from([(order.material.clone(), order.quantity)]));
+        let goods = BTreeMap::from([(order.material.clone(), order.quantity)]);
+        if let Some(lots) = order.food {
+            stock.receive_with_lots(&goods, lots);
+        } else {
+            stock.receive(&goods);
+        }
         market.release_fare(order.fare);
         if let Some(entry) = self.bought.get_mut(&order.material)
             && entry.day == order.day
@@ -309,6 +343,7 @@ impl Trade {
     pub fn settle(&mut self, stock: &mut Stock) {
         if let Some(order) = self.orders.front_mut()
             && !order.buying
+            && !order.spoiled
             && !order.settled
         {
             order.settled = true;
@@ -371,17 +406,77 @@ impl Trade {
         }
     }
 
+    pub fn age_shipments(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        market: &mut Market,
+        clock: f64,
+        head_locked: bool,
+    ) {
+        if stock.sandbox {
+            return;
+        }
+        if let Some(delivery) = &mut self.delivery
+            && let Some(lots) = &mut delivery.food
+        {
+            let loss = food::discard_expired(lots, clock);
+            delivery.quantity = delivery
+                .quantity
+                .saturating_sub(loss.get(&delivery.material).copied().unwrap_or(0));
+            stock.record_spoilage(catalog, &loss);
+        }
+        for index in (0..self.orders.len()).rev() {
+            let order = &mut self.orders[index];
+            if order.settled {
+                continue;
+            }
+            let Some(lots) = &mut order.food else {
+                continue;
+            };
+            let loss = food::discard_expired(lots, clock);
+            if loss.is_empty() {
+                continue;
+            }
+            stock.record_spoilage(catalog, &loss);
+            let reserved = order.quantity;
+            order.quantity = order
+                .quantity
+                .saturating_sub(loss.get(&order.material).copied().unwrap_or(0));
+            if order.buying {
+                continue;
+            }
+            if !order.spoiled
+                && let Some(entry) = self.bought.get_mut(&order.material)
+                && entry.day == order.day
+            {
+                entry.units = entry.units.saturating_sub(reserved);
+            }
+            order.spoiled = true;
+            if index == 0 && head_locked {
+                continue;
+            }
+            let order = self.orders.remove(index).expect("spoiled queued sale");
+            let goods = BTreeMap::from([(order.material, order.quantity)]);
+            stock.receive_with_lots(&goods, order.food.unwrap_or_default());
+            market.release_fare(order.fare);
+            self.notice = "Reserved food spoiled before sale.".into();
+        }
+    }
+
     pub fn valid(&self, catalog: &Catalog) -> bool {
         self.delivery.as_ref().is_none_or(|order| {
             order.eta >= 0.0
                 && catalog
                     .materials
                     .get(&order.material)
-                    .is_some_and(|item| order.quantity == item.pack)
+                    .is_some_and(|item| order.quantity <= item.pack)
         }) && self.orders.len() <= 32
             && self.orders.iter().all(|order| {
                 catalog.materials.get(&order.material).is_some_and(|item| {
-                    order.quantity > 0 && order.quantity <= item.pack && order.fare <= 10_000
+                    (order.quantity > 0 || order.buying || order.spoiled)
+                        && order.quantity <= item.pack
+                        && order.fare <= 10_000
                 })
             })
             && self.policies.keys().all(|id| {

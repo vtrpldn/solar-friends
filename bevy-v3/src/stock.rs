@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     catalog::Catalog,
+    food::{self, FoodLots, Pantry, SERVINGS},
     setup::{Mode, WorldSetup},
 };
 
@@ -16,6 +17,8 @@ pub struct Stock {
     ledger: BTreeMap<CashKind, i64>,
     #[serde(default)]
     pub sandbox: bool,
+    #[serde(default)]
+    pub pantry: Pantry,
     materials: BTreeMap<String, u32>,
 }
 
@@ -67,6 +70,7 @@ impl Stock {
             centavos: 0,
             ledger: BTreeMap::new(),
             sandbox: settings.mode == Mode::Sandbox,
+            pantry: Pantry::default(),
             materials,
         }
     }
@@ -83,17 +87,36 @@ impl Stock {
         if self.sandbox {
             return true;
         }
+        self.pantry.ensure(&self.materials);
         let Some((id, portions)) = self.meal() else {
             return false;
         };
         *self.materials.get_mut(id).expect("meal available") -= portions;
+        self.pantry.remove(id, portions);
+        self.add_waste(if id == "eggs" {
+            0.024
+        } else if id == "milk" {
+            0.0
+        } else {
+            0.2
+        });
         true
     }
 
     fn meal(&self) -> Option<(&'static str, u32)> {
-        [("meals", 1), ("food", 1), ("eggs", 4), ("milk", 2)]
+        SERVINGS
             .into_iter()
-            .find(|(id, quantity)| self.available(id) >= *quantity)
+            .filter(|(id, quantity)| self.available(id) >= *quantity)
+            .min_by(|(a, _), (b, _)| {
+                let expiry = |id| {
+                    self.pantry
+                        .lots
+                        .get(id)
+                        .and_then(|list| list.first())
+                        .map_or(f64::INFINITY, |lot| lot.expires)
+                };
+                expiry(*a).total_cmp(&expiry(*b))
+            })
     }
 
     pub fn units(&self) -> u64 {
@@ -101,17 +124,68 @@ impl Stock {
     }
 
     pub fn food_portions(&self) -> u32 {
-        [("meals", 1), ("food", 1), ("eggs", 4), ("milk", 2)]
+        SERVINGS
             .into_iter()
             .map(|(id, portion)| self.available(id) / portion)
-            .sum()
+            .fold(0, u32::saturating_add)
     }
 
     pub fn receive(&mut self, goods: &BTreeMap<String, u32>) {
+        self.receive_with_lots(
+            goods,
+            food::fresh(goods, self.pantry.clock, &BTreeMap::new()),
+        );
+    }
+
+    pub fn receive_with_lots(&mut self, goods: &BTreeMap<String, u32>, lots: FoodLots) {
+        if !self.sandbox {
+            self.pantry.ensure(&self.materials);
+        }
         for (id, units) in goods {
             let count = self.materials.entry(id.clone()).or_default();
             *count = count.saturating_add(*units);
         }
+        if !self.sandbox {
+            self.pantry.insert(lots);
+        }
+    }
+
+    pub fn age_food(&mut self, catalog: &Catalog, clock: f64, dt: f64, cooling: f64) {
+        self.pantry.clock = clock;
+        if self.sandbox {
+            return;
+        }
+        self.pantry.ensure(&self.materials);
+        self.pantry.cool(catalog, cooling, dt, clock);
+        let lost = food::discard_expired(&mut self.pantry.lots, clock);
+        for (id, quantity) in &lost {
+            let count = self.materials.entry(id.clone()).or_default();
+            *count = count.saturating_sub(*quantity);
+        }
+        self.record_spoilage(catalog, &lost);
+    }
+
+    pub fn record_spoilage(&mut self, catalog: &Catalog, lost: &BTreeMap<String, u32>) {
+        for (id, quantity) in lost {
+            let count = self.pantry.spoiled.entry(id.clone()).or_default();
+            *count = count.saturating_add(u64::from(*quantity));
+            if let Some(item) = catalog.materials.get(id) {
+                self.add_waste(f64::from(*quantity) * item.mass);
+            }
+        }
+    }
+
+    pub fn valid_food(&self) -> bool {
+        self.sandbox || self.pantry.valid(&self.materials)
+    }
+
+    fn add_waste(&mut self, kg: f64) {
+        let total = self.pantry.waste_remainder + kg;
+        let whole = (total + 1e-9).floor() as u32;
+        self.pantry.waste_remainder =
+            ((total - f64::from(whole)) * 1_000_000.0).round().max(0.0) / 1_000_000.0;
+        let scraps = self.materials.entry("scraps".into()).or_default();
+        *scraps = scraps.saturating_add(whole);
     }
 
     pub fn balance(&self) -> u64 {
@@ -166,10 +240,22 @@ impl Stock {
             .find_map(|(id, units)| (self.available(id) < *units).then_some(id.as_str()))
     }
 
-    pub fn reserve_available(&mut self, bill: &BTreeMap<String, u32>) {
+    pub fn reserve_available(&mut self, bill: &BTreeMap<String, u32>) -> FoodLots {
+        if !self.sandbox {
+            self.pantry.ensure(&self.materials);
+        }
+        let mut food = FoodLots::new();
         for (id, units) in bill {
             let count = self.materials.entry(id.clone()).or_default();
-            *count -= (*count).min(*units);
+            let take = (*count).min(*units);
+            *count -= take;
+            if !self.sandbox {
+                let taken = self.pantry.remove(id, take);
+                if !taken.is_empty() {
+                    food.insert(id.clone(), taken);
+                }
+            }
         }
+        food
     }
 }

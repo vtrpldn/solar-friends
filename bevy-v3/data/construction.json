@@ -2495,7 +2495,8 @@
         "wood": 4
       },
       "work": 240,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "saw_planks": {
       "name": "Saw timber into planks",
@@ -2507,7 +2508,8 @@
         "planks": 6
       },
       "work": 160,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "frames": {
       "name": "Prepare frames",
@@ -2520,7 +2522,8 @@
         "frames": 1
       },
       "work": 30,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "walls": {
       "name": "Make earth walls",
@@ -2532,7 +2535,8 @@
         "walls": 2
       },
       "work": 30,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "tiles": {
       "name": "Fire roof tiles",
@@ -2545,7 +2549,8 @@
         "tiles": 2
       },
       "work": 40,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "meals": {
       "name": "Cook a meal batch",
@@ -2558,7 +2563,8 @@
         "scraps": 1
       },
       "work": 25,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "preserve_meals": {
       "name": "Prepare dried provisions",
@@ -2571,7 +2577,23 @@
         "scraps": 2
       },
       "work": 75,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {
+        "meals": 10
+      }
+    },
+    "cold_storage": {
+      "name": "Install kitchen cold storage",
+      "kind": "kitchen",
+      "input": {
+        "cooling": 1,
+        "electrical": 1,
+        "hardware": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": false,
+      "preserved": {}
     },
     "eggs": {
       "name": "Collect eggs",
@@ -2581,7 +2603,8 @@
         "eggs": 6
       },
       "work": 25,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "milk": {
       "name": "Collect milk",
@@ -2591,7 +2614,8 @@
         "milk": 4
       },
       "work": 35,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "craft_garden-tools": {
       "name": "Craft garden tools",
@@ -2604,7 +2628,8 @@
         "garden-tools": 1
       },
       "work": 180,
-      "handcraft": true
+      "handcraft": true,
+      "preserved": {}
     },
     "craft_harvest-basket": {
       "name": "Craft harvest basket",
@@ -2616,7 +2641,8 @@
         "harvest-basket": 1
       },
       "work": 240,
-      "handcraft": true
+      "handcraft": true,
+      "preserved": {}
     },
     "craft_wheelbarrow": {
       "name": "Craft wheelbarrow",
@@ -2630,7 +2656,8 @@
         "wheelbarrow": 1
       },
       "work": 360,
-      "handcraft": true
+      "handcraft": true,
+      "preserved": {}
     },
     "craft_produce-crates": {
       "name": "Craft produce crate",
@@ -2643,7 +2670,8 @@
         "produce-crates": 1
       },
       "work": 120,
-      "handcraft": true
+      "handcraft": true,
+      "preserved": {}
     },
     "cook_greens": {
       "name": "Cook leafy greens",
@@ -2655,7 +2683,8 @@
         "meals": 4
       },
       "work": 40,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "cook_beans": {
       "name": "Cook bush beans",
@@ -2667,7 +2696,8 @@
         "meals": 4
       },
       "work": 40,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "cook_corn": {
       "name": "Cook sweet corn",
@@ -2679,7 +2709,8 @@
         "meals": 4
       },
       "work": 40,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "corn_feed": {
       "name": "Prepare corn feed supplement",
@@ -2692,7 +2723,8 @@
         "scraps": 1
       },
       "work": 30,
-      "handcraft": false
+      "handcraft": false,
+      "preserved": {}
     },
     "care-coop": {
       "name": "Feed and water animals",
