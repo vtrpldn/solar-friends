@@ -54,6 +54,38 @@ pub fn vehicle_pose(elapsed: f32, index: usize) -> Pose {
     }
 }
 
+pub fn town_vehicle_pose(elapsed: f64, duration: f64) -> Pose {
+    const DRIVE: f64 = 18.0;
+    let parked = vehicle_pose(ARRIVAL_DURATION, 0);
+    if elapsed >= DRIVE && elapsed < duration - DRIVE {
+        return Pose {
+            visible: false,
+            ..parked
+        };
+    }
+    let outgoing = elapsed < DRIVE;
+    let t = if outgoing {
+        elapsed / DRIVE
+    } else {
+        (elapsed - duration + DRIVE) / DRIVE
+    } as f32;
+    let smooth = t * t * (3.0 - 2.0 * t);
+    let fraction = if outgoing { smooth } else { 1.0 - smooth };
+    let z = PARK_Z + (MAP_START - 8.0 - PARK_Z) * fraction;
+    let x = road_center(z) + (parked.position.x - road_center(PARK_Z)) * (1.0 - fraction);
+    let ahead = z + if outgoing { -0.1 } else { 0.1 };
+    let tangent = (road_center(ahead) - road_center(z)).atan2(ahead - z);
+    Pose {
+        position: Vec2::new(x, z),
+        yaw: if outgoing {
+            tangent * (t * 10.0).min(1.0)
+        } else {
+            tangent
+        },
+        ..parked
+    }
+}
+
 pub fn resident_pose(elapsed: f32, index: usize) -> Pose {
     let car = usize::from(index >= 3);
     let seat = index - car * 3;

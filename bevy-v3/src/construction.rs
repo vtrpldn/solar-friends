@@ -7,6 +7,7 @@ use crate::{
     arrival::{ARRIVAL_SPOTS, MAP_START, ROAD_END, road_center, road_width, world_position},
     catalog::{Catalog, Project},
     land::Land,
+    market::{Market, trip_seconds},
     navigation::route,
     stock::Stock,
     terrain::Terrain,
@@ -44,6 +45,28 @@ const SUPPLY_SPOTS: [IVec2; 5] = [
     IVec2::new(33, -12),
 ];
 
+#[derive(Clone, Copy)]
+pub struct ConstructionSite<'a> {
+    pub terrain: &'a Terrain,
+    pub land: &'a Land,
+    pub camp: IVec2,
+}
+
+#[derive(Clone, Copy)]
+pub struct TownClock {
+    pub seconds: f64,
+    pub round_trip_km: u32,
+}
+
+#[derive(Deserialize, Serialize)]
+struct TownTrip {
+    project: usize,
+    driver: usize,
+    elapsed: f64,
+    duration: f64,
+    boarded: bool,
+}
+
 #[derive(Deserialize, Serialize)]
 pub struct Construction {
     #[serde(skip)]
@@ -61,6 +84,10 @@ pub struct Construction {
     #[serde(default)]
     slow_sandbox: bool,
     plans: Vec<Blueprint>,
+    #[serde(default)]
+    market: Market,
+    #[serde(default)]
+    trip: Option<TownTrip>,
     residents: [Worker; 5],
 }
 
@@ -73,6 +100,10 @@ struct Blueprint {
     loads: u32,
     delivered: u32,
     work: f64,
+    #[serde(default)]
+    pickups: u32,
+    #[serde(default)]
+    fare: u64,
 }
 
 #[derive(Clone, Copy, PartialEq, Deserialize, Serialize)]
@@ -113,6 +144,8 @@ impl Default for Construction {
             status: String::new(),
             slow_sandbox: false,
             plans: Vec::new(),
+            market: Market::default(),
+            trip: None,
             residents: ARRIVAL_SPOTS.map(|(x, z)| Worker {
                 position: Vec2::new(x, z),
                 yaw: 0.0,
@@ -211,6 +244,31 @@ impl Construction {
         }
     }
 
+    pub fn auto_buy_status(&self) -> &'static str {
+        if self.market.auto_buy_off {
+            "U Auto-buy off"
+        } else {
+            "U Auto-buy on"
+        }
+    }
+
+    pub fn toggle_auto_buy(&mut self) {
+        self.market.auto_buy_off = !self.market.auto_buy_off;
+    }
+
+    pub fn driver_away(&self, index: usize) -> bool {
+        self.trip
+            .as_ref()
+            .is_some_and(|trip| trip.driver == index && trip.boarded)
+    }
+
+    pub fn car_trip(&self, index: usize) -> Option<(f64, f64)> {
+        self.trip
+            .as_ref()
+            .filter(|trip| index == 0 && trip.boarded)
+            .map(|trip| (trip.elapsed, trip.duration))
+    }
+
     pub fn toggle_sandbox_construction(&mut self) {
         self.slow_sandbox = !self.slow_sandbox;
     }
@@ -261,12 +319,16 @@ impl Construction {
         &mut self,
         catalog: &Catalog,
         stock: &mut Stock,
-        terrain: &Terrain,
-        land: &Land,
-        camp: IVec2,
+        site: ConstructionSite,
         position: IVec2,
+        clock: TownClock,
     ) {
         let Some(key) = &self.selection else { return };
+        let ConstructionSite {
+            terrain,
+            land,
+            camp,
+        } = site;
         let definition = &catalog.projects[key];
         let mut blueprint = Blueprint {
             key: key.clone(),
@@ -276,6 +338,8 @@ impl Construction {
             loads: catalog.loads(definition),
             delivered: 0,
             work: 0.0,
+            pickups: 0,
+            fare: 0,
         };
         if let Some(error) = self.placement_error(
             terrain,
@@ -288,9 +352,23 @@ impl Construction {
             self.status = error.into();
             return;
         }
-        if let Err(id) = stock.reserve(&definition.materials) {
-            self.status = format!("Not enough {} in supplies.", catalog.materials[&id].name);
-            return;
+        if !stock.sandbox {
+            let quote = match self.market.quote(
+                catalog,
+                definition,
+                stock,
+                clock.seconds,
+                clock.round_trip_km,
+            ) {
+                Ok(quote) => quote,
+                Err(error) => {
+                    self.status = error;
+                    return;
+                }
+            };
+            blueprint.pickups = quote.trips;
+            blueprint.fare = quote.fare;
+            self.market.reserve(stock, definition, &quote);
         }
         self.status = if stock.sandbox && !self.slow_sandbox && key != "road" {
             blueprint.delivered = blueprint.loads;
@@ -298,6 +376,11 @@ impl Construction {
             format!("{} built.", definition.name)
         } else if stock.sandbox {
             format!("{} planned.", definition.name)
+        } else if blueprint.pickups > 0 {
+            format!(
+                "{} planned. Missing materials ordered for town pickup.",
+                definition.name
+            )
         } else {
             format!("{} planned. Materials reserved.", definition.name)
         };
@@ -429,7 +512,34 @@ impl Construction {
 }
 
 impl Construction {
-    pub fn valid_save(&self, catalog: &Catalog) -> bool {
+    pub fn valid_save(&self, catalog: &Catalog, stock: &Stock) -> bool {
+        let active = self
+            .trip
+            .as_ref()
+            .filter(|trip| trip.boarded)
+            .map(|trip| trip.project);
+        let fares = self
+            .plans
+            .iter()
+            .enumerate()
+            .fold(0u64, |total, (index, project)| {
+                let trips = project
+                    .pickups
+                    .saturating_sub(u32::from(active == Some(index)));
+                total.saturating_add(project.fare.saturating_mul(u64::from(trips)))
+            });
+        let trip_valid = self.trip.as_ref().is_none_or(|trip| {
+            trip.driver < self.residents.len()
+                && self
+                    .plans
+                    .get(trip.project)
+                    .is_some_and(|project| project.pickups > 0)
+                && (0.0..=trip.duration).contains(&trip.elapsed)
+                && (0.0..=500.0).contains(&trip.duration)
+        });
+        if !trip_valid || !self.market.valid_save(catalog, stock, fares) {
+            return false;
+        }
         self.plans.len() <= 128 * 128
             && self.plans.iter().all(|plan| {
                 catalog.projects.get(&plan.key).is_some_and(|definition| {
@@ -440,6 +550,7 @@ impl Construction {
                         && (plan.position + plan.size).cmple(IVec2::splat(94)).all()
                         && plan.loads == catalog.loads(definition)
                         && plan.delivered <= plan.loads
+                        && (plan.pickups == 0 || plan.delivered == 0 && plan.work == 0.0)
                         && (0.0..=definition.work).contains(&plan.work)
                         && (plan.delivered == plan.loads || plan.work == 0.0)
                 })
@@ -464,6 +575,8 @@ impl Construction {
         let definition = &catalog.projects[&project.key];
         let status = if project.work >= definition.work {
             "Ready".into()
+        } else if project.pickups > 0 {
+            format!("{} town pickup(s) remaining", project.pickups)
         } else if project.delivered < project.loads {
             format!("{} of {} loads delivered", project.delivered, project.loads)
         } else {
@@ -501,12 +614,21 @@ impl Construction {
     pub fn tick(
         &mut self,
         catalog: &Catalog,
-        terrain: &Terrain,
-        land: &Land,
-        camp: IVec2,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: TownClock,
         dt: f32,
     ) {
+        let ConstructionSite {
+            terrain,
+            land,
+            camp,
+        } = site;
+        self.tick_trip(catalog, stock, site, clock, dt);
         for index in 0..self.residents.len() {
+            if self.trip.as_ref().is_some_and(|trip| trip.driver == index) {
+                continue;
+            }
             if let Some(job) = &self.residents[index].assignment {
                 let project = &self.plans[job.project];
                 if project.work >= catalog.projects[&project.key].work {
@@ -571,6 +693,71 @@ impl Construction {
         }
     }
 
+    fn tick_trip(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: TownClock,
+        dt: f32,
+    ) {
+        if let Some(mut trip) = self.trip.take() {
+            let driver = &mut self.residents[trip.driver];
+            if !trip.boarded {
+                driver.move_along_path(dt, false);
+                if driver.path.is_empty() {
+                    self.market.depart(stock, self.plans[trip.project].fare);
+                    trip.boarded = true;
+                }
+            } else {
+                trip.elapsed = (trip.elapsed + f64::from(dt)).min(trip.duration);
+                if trip.elapsed >= trip.duration {
+                    self.plans[trip.project].pickups -= 1;
+                    return;
+                }
+            }
+            self.trip = Some(trip);
+            return;
+        }
+
+        let hour = ((540.0 + clock.seconds * 0.45) / 60.0) % 24.0;
+        if !(7.0..18.0).contains(&hour) {
+            return;
+        }
+        let Some(project) = self.plans.iter().position(|plan| plan.pickups > 0) else {
+            return;
+        };
+        let door = IVec2::new(30, -15);
+        let ConstructionSite {
+            terrain,
+            land,
+            camp,
+        } = site;
+        for index in (0..self.residents.len()).rev() {
+            let worker = &self.residents[index];
+            if worker.assignment.is_some() {
+                continue;
+            }
+            let Some(path) = route(
+                worker.position,
+                door,
+                |cell| self.blocked(catalog, terrain, land, camp, cell),
+                access_road,
+            ) else {
+                continue;
+            };
+            self.residents[index].path = path;
+            self.trip = Some(TownTrip {
+                project,
+                driver: index,
+                elapsed: 0.0,
+                duration: trip_seconds(clock.round_trip_km),
+                boarded: false,
+            });
+            return;
+        }
+    }
+
     fn assign(
         &mut self,
         index: usize,
@@ -582,7 +769,7 @@ impl Construction {
         let position = self.residents[index].position;
         for (id, project) in self.plans.iter().enumerate() {
             let definition = &catalog.projects[&project.key];
-            if project.work >= definition.work {
+            if project.pickups > 0 || project.work >= definition.work {
                 continue;
             }
             let crew: Vec<_> = self
@@ -700,6 +887,40 @@ mod tests {
     use crate::setup::WorldSetup;
 
     #[test]
+    fn residents_wait_for_town_pickup_before_cistern_hauling() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut construction = Construction {
+            selection: Some("well".into()),
+            ..default()
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        construction.plan(&catalog, &mut stock, site, IVec2::new(44, 36), clock);
+        assert_eq!(construction.plans[0].pickups, 1);
+        for _ in 0..1_000 {
+            if construction.plans[0].pickups == 0 {
+                break;
+            }
+            assert_eq!(construction.plans[0].delivered, 0);
+            construction.tick(&catalog, &mut stock, site, clock, 0.1);
+        }
+        assert_eq!(construction.plans[0].pickups, 0);
+        assert_eq!(stock.balance(), 872_824);
+        assert!(construction.valid_save(&catalog, &stock));
+    }
+
+    #[test]
     fn sandbox_builds_a_catalog_project_without_spending_stock() {
         let mut setup = WorldSetup::default();
         setup.mode = crate::setup::Mode::Sandbox;
@@ -715,10 +936,16 @@ mod tests {
         construction.plan(
             &catalog,
             &mut stock,
-            &terrain,
-            &empty,
-            camp,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &empty,
+                camp,
+            },
             IVec2::new(44, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
         );
         assert_eq!(construction.finished_models(&catalog).count(), 1);
         assert_eq!(stock.available("wood"), 36);
@@ -739,14 +966,33 @@ mod tests {
         construction.plan(
             &catalog,
             &mut stock,
-            &terrain,
-            &land,
-            camp,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &land,
+                camp,
+            },
             IVec2::new(44, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
         );
         let loads = catalog.loads(&catalog.projects["gathering"]);
         for _ in 0..8_000 {
-            construction.tick(&catalog, &terrain, &land, camp, 0.1);
+            construction.tick(
+                &catalog,
+                &mut stock,
+                ConstructionSite {
+                    terrain: &terrain,
+                    land: &land,
+                    camp,
+                },
+                TownClock {
+                    seconds: 0.0,
+                    round_trip_km: 12,
+                },
+                0.1,
+            );
             let project = &construction.plans[0];
             assert!(project.delivered <= loads);
             if project.delivered < loads {
@@ -774,30 +1020,56 @@ mod tests {
             ..default()
         };
 
-        construction.plan(&catalog, &mut stock, &terrain, &land, camp, camp);
+        construction.plan(
+            &catalog,
+            &mut stock,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &land,
+                camp,
+            },
+            camp,
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
+        );
         assert_eq!(stock.available("wood"), 36);
         assert!(construction.plans.is_empty());
 
         construction.plan(
             &catalog,
             &mut stock,
-            &terrain,
-            &land,
-            camp,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &land,
+                camp,
+            },
             IVec2::new(44, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
         );
         assert_eq!(stock.available("wood"), 28);
         assert_eq!(stock.available("hardware"), 6);
         assert_eq!(construction.plans.len(), 1);
 
         construction.selection = Some("well".into());
+        construction.market.auto_buy_off = true;
         construction.plan(
             &catalog,
             &mut stock,
-            &terrain,
-            &land,
-            camp,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &land,
+                camp,
+            },
             IVec2::new(50, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
         );
         assert_eq!(stock.available("hardware"), 6);
         assert_eq!(construction.plans.len(), 1);

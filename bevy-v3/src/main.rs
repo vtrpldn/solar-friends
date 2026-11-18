@@ -9,6 +9,7 @@ mod audio;
 mod catalog;
 mod construction;
 mod land;
+mod market;
 mod navigation;
 mod save;
 mod setup;

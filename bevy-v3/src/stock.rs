@@ -11,6 +11,8 @@ use crate::{
 pub struct Stock {
     pub cash: u32,
     #[serde(default)]
+    centavos: u8,
+    #[serde(default)]
     pub sandbox: bool,
     materials: BTreeMap<String, u32>,
 }
@@ -33,6 +35,7 @@ impl Stock {
             .collect();
         Self {
             cash: settings.starting_cash(),
+            centavos: 0,
             sandbox: settings.mode == Mode::Sandbox,
             materials,
         }
@@ -42,16 +45,23 @@ impl Stock {
         self.materials.get(id).copied().unwrap_or(0)
     }
 
-    pub fn reserve(&mut self, bill: &BTreeMap<String, u32>) -> Result<(), String> {
-        if self.sandbox {
-            return Ok(());
-        }
-        if let Some((id, _)) = bill.iter().find(|(id, count)| self.available(id) < **count) {
-            return Err(id.clone());
-        }
+    pub fn balance(&self) -> u64 {
+        u64::from(self.cash) * 100 + u64::from(self.centavos)
+    }
+
+    pub fn debit(&mut self, cents: u64) {
+        let balance = self
+            .balance()
+            .checked_sub(cents)
+            .expect("purchase was quoted against available balance");
+        self.cash = (balance / 100) as u32;
+        self.centavos = (balance % 100) as u8;
+    }
+
+    pub fn reserve_available(&mut self, bill: &BTreeMap<String, u32>) {
         for (id, units) in bill {
-            *self.materials.entry(id.clone()).or_default() -= *units;
+            let count = self.materials.entry(id.clone()).or_default();
+            *count -= (*count).min(*units);
         }
-        Ok(())
     }
 }

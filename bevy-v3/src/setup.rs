@@ -6,6 +6,7 @@ use crate::{terrain::Terrain, ui_font::ui_font};
 const BIOMES: [&str; 3] = ["Mata Atlântica", "Cerrado", "Caatinga"];
 const LANDSCAPES: [&str; 3] = ["Gentle", "Rolling", "Rugged"];
 const RESOURCES: [&str; 3] = ["Sparse", "Balanced", "Rich"];
+const TOWN: [&str; 3] = ["Nearby", "Drive", "Remote"];
 const SAVINGS: [&str; 3] = [
     "Tight · R$3,000",
     "Modest · R$10,000",
@@ -35,6 +36,8 @@ pub struct WorldSetup {
     resources: usize,
     savings: usize,
     supplies: usize,
+    #[serde(default = "balanced_resources")]
+    town: usize,
 }
 
 fn balanced_resources() -> usize {
@@ -53,6 +56,7 @@ impl Default for WorldSetup {
             resources: 1,
             savings: 1,
             supplies: 1,
+            town: 1,
         }
     }
 }
@@ -72,6 +76,7 @@ impl WorldSetup {
             && self.resources < RESOURCES.len()
             && self.savings < SAVINGS.len()
             && self.supplies < SUPPLIES.len()
+            && self.town < TOWN.len()
     }
 
     pub fn biome(&self) -> usize {
@@ -80,6 +85,10 @@ impl WorldSetup {
 
     pub fn richness(&self) -> f64 {
         [0.6, 1.0, 1.6][self.resources]
+    }
+
+    pub fn round_trip_km(&self) -> u32 {
+        [8, 12, 36][self.town]
     }
 
     pub fn starting_cash(&self) -> u32 {
@@ -118,6 +127,7 @@ impl WorldSetup {
             Action::Savings => SAVINGS[self.savings].into(),
             Action::Supplies if self.mode == Mode::Sandbox => "Supplies   ·   Unlimited".into(),
             Action::Supplies => format!("Supplies   ·   {}", SUPPLIES[self.supplies]),
+            Action::Town => format!("Town   ·   {}", TOWN[self.town]),
             Action::Seed => format!("Land seed   ·   {}", self.seed),
             Action::Explore => "Enter village".into(),
         }
@@ -133,6 +143,7 @@ enum Action {
     Resources,
     Savings,
     Supplies,
+    Town,
     Seed,
     Explore,
 }
@@ -177,6 +188,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Resources,
                 Action::Savings,
                 Action::Supplies,
+                Action::Town,
                 Action::Seed,
                 Action::Explore,
             ] {
@@ -232,6 +244,7 @@ fn setup_input(
                 setup.supplies = (setup.supplies + 1) % SUPPLIES.len()
             }
             Action::Savings | Action::Supplies => {}
+            Action::Town => setup.town = (setup.town + 1) % TOWN.len(),
             Action::Seed => setup.seed = setup.seed.wrapping_add(1),
             Action::Explore => setup.open = false,
         }

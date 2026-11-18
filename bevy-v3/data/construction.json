@@ -3,276 +3,551 @@
     "wood": {
       "name": "timber pieces",
       "batch": 4,
+      "pack": 12,
+      "price": 432,
+      "supplier": 1536,
+      "mass": 4,
+      "volume": 0.012,
       "starting": 36
     },
     "hardware": {
       "name": "fastener packs",
       "batch": 1,
+      "pack": 2,
+      "price": 30,
+      "supplier": 256,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 7
     },
     "roofing": {
       "name": "roof sheets",
       "batch": 2,
+      "pack": 6,
+      "price": 120,
+      "supplier": 768,
+      "mass": 8,
+      "volume": 0.035,
       "starting": 8
     },
     "tarp": {
       "name": "tarp & rope kits",
       "batch": 1,
+      "pack": 1,
+      "price": 50,
+      "supplier": 128,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 1
     },
     "tank": {
       "name": "water tanks",
       "batch": 1,
+      "pack": 1,
+      "price": 320,
+      "supplier": 16,
+      "mass": 12,
+      "volume": 0.35,
       "starting": 1
     },
     "plumbing": {
       "name": "pipe & tap kits",
       "batch": 1,
+      "pack": 1,
+      "price": 40,
+      "supplier": 16,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 1
     },
     "sanitation": {
       "name": "toilet kits",
       "batch": 1,
+      "pack": 1,
+      "price": 80,
+      "supplier": 16,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 1
     },
     "greens": {
       "name": "Leafy greens",
       "batch": 1,
+      "pack": 10,
+      "price": 30,
+      "supplier": 160,
+      "mass": 1,
+      "volume": 0.004,
       "starting": 0
     },
     "greens_seed": {
       "name": "Leafy greens seed packets",
       "batch": 1,
+      "pack": 5,
+      "price": 10,
+      "supplier": 40,
+      "mass": 0.02,
+      "volume": 0.0001,
       "starting": 0
     },
     "beans": {
       "name": "Bush beans",
       "batch": 1,
+      "pack": 10,
+      "price": 30,
+      "supplier": 160,
+      "mass": 1,
+      "volume": 0.002,
       "starting": 0
     },
     "beans_seed": {
       "name": "Bush beans seed packets",
       "batch": 1,
+      "pack": 5,
+      "price": 10,
+      "supplier": 40,
+      "mass": 0.1,
+      "volume": 0.0002,
       "starting": 0
     },
     "corn": {
       "name": "Sweet corn",
       "batch": 1,
+      "pack": 10,
+      "price": 30,
+      "supplier": 160,
+      "mass": 1,
+      "volume": 0.003,
       "starting": 0
     },
     "corn_seed": {
       "name": "Sweet corn seed packets",
       "batch": 1,
+      "pack": 5,
+      "price": 10,
+      "supplier": 40,
+      "mass": 0.1,
+      "volume": 0.0002,
       "starting": 0
     },
     "bucket": {
       "name": "Bucket",
       "batch": 1,
+      "pack": 1,
+      "price": 30,
+      "supplier": 128,
+      "mass": 1,
+      "volume": 0.015,
       "starting": 0
     },
     "garden-tools": {
       "name": "Garden tools",
       "batch": 1,
+      "pack": 1,
+      "price": 95,
+      "supplier": 128,
+      "mass": 3,
+      "volume": 0.025,
       "starting": 0
     },
     "carpentry-tools": {
       "name": "Carpentry tools",
       "batch": 1,
+      "pack": 1,
+      "price": 120,
+      "supplier": 128,
+      "mass": 4,
+      "volume": 0.02,
       "starting": 0
     },
     "harvest-basket": {
       "name": "Harvest basket",
       "batch": 1,
+      "pack": 1,
+      "price": 25,
+      "supplier": 128,
+      "mass": 1,
+      "volume": 0.04,
       "starting": 0
     },
     "cleaning-kit": {
       "name": "Cleaning kit",
       "batch": 1,
+      "pack": 1,
+      "price": 55,
+      "supplier": 128,
+      "mass": 2,
+      "volume": 0.02,
       "starting": 0
     },
     "watering-can": {
       "name": "Watering can",
       "batch": 1,
+      "pack": 1,
+      "price": 45,
+      "supplier": 128,
+      "mass": 1,
+      "volume": 0.015,
       "starting": 0
     },
     "wheelbarrow": {
       "name": "Wheelbarrow",
       "batch": 1,
+      "pack": 1,
+      "price": 180,
+      "supplier": 128,
+      "mass": 15,
+      "volume": 0.35,
       "starting": 0
     },
     "bicycle": {
       "name": "Bicycle",
       "batch": 1,
+      "pack": 1,
+      "price": 450,
+      "supplier": 128,
+      "mass": 16,
+      "volume": 0.5,
       "starting": 0
     },
     "produce-crates": {
       "name": "Produce crate",
       "batch": 1,
+      "pack": 1,
+      "price": 25,
+      "supplier": 128,
+      "mass": 2,
+      "volume": 0.04,
       "starting": 0
     },
     "cooling": {
       "name": "Refrigeration kit",
       "batch": 1,
+      "pack": 1,
+      "price": 600,
+      "supplier": 16,
+      "mass": 35,
+      "volume": 0.35,
       "starting": 0
     },
     "tool_heads": {
       "name": "Garden tool heads",
       "batch": 1,
+      "pack": 1,
+      "price": 65,
+      "supplier": 128,
+      "mass": 2,
+      "volume": 0.005,
       "starting": 0
     },
     "repair_supplies": {
       "name": "Repair supplies",
       "batch": 1,
+      "pack": 1,
+      "price": 15,
+      "supplier": 128,
+      "mass": 1,
+      "volume": 0.003,
       "starting": 0
     },
     "soap": {
       "name": "Soap refill",
       "batch": 1,
+      "pack": 1,
+      "price": 8,
+      "supplier": 128,
+      "mass": 1,
+      "volume": 0.002,
       "starting": 0
     },
     "wheel_kit": {
       "name": "Wheel and axle kit",
       "batch": 1,
+      "pack": 1,
+      "price": 65,
+      "supplier": 128,
+      "mass": 5,
+      "volume": 0.04,
       "starting": 0
     },
     "logs": {
       "name": "Raw wood",
       "batch": 4,
+      "pack": 12,
+      "price": 96,
+      "supplier": 1536,
+      "mass": 6,
+      "volume": 0.015,
       "starting": 0
     },
     "planks": {
       "name": "Planks",
       "batch": 4,
+      "pack": 12,
+      "price": 240,
+      "supplier": 1536,
+      "mass": 1.5,
+      "volume": 0.005,
       "starting": 0
     },
     "bamboo": {
       "name": "Bamboo poles",
       "batch": 4,
+      "pack": 12,
+      "price": 48,
+      "supplier": 1536,
+      "mass": 3,
+      "volume": 0.018,
       "starting": 0
     },
     "earth": {
       "name": "Building earth",
       "batch": 4,
+      "pack": 12,
+      "price": 18,
+      "supplier": 1536,
+      "mass": 20,
+      "volume": 0.015,
       "starting": 0
     },
     "stone": {
       "name": "Stone",
       "batch": 4,
+      "pack": 12,
+      "price": 42,
+      "supplier": 1536,
+      "mass": 20,
+      "volume": 0.012,
       "starting": 0
     },
     "frames": {
       "name": "Frames",
       "batch": 2,
+      "pack": 4,
+      "price": 320,
+      "supplier": 512,
+      "mass": 4,
+      "volume": 0.04,
       "starting": 0
     },
     "walls": {
       "name": "Wall material",
       "batch": 4,
+      "pack": 8,
+      "price": 80,
+      "supplier": 1024,
+      "mass": 18,
+      "volume": 0.025,
       "starting": 0
     },
     "tiles": {
       "name": "Roof tiles",
       "batch": 4,
+      "pack": 12,
+      "price": 108,
+      "supplier": 1536,
+      "mass": 12,
+      "volume": 0.012,
       "starting": 0
     },
     "electrical": {
       "name": "Electrical supplies",
       "batch": 1,
+      "pack": 4,
+      "price": 144,
+      "supplier": 64,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 0
     },
     "covering": {
       "name": "Greenhouse covering",
       "batch": 1,
+      "pack": 1,
+      "price": 80,
+      "supplier": 128,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 0
     },
     "panels": {
       "name": "Solar panels",
       "batch": 1,
+      "pack": 2,
+      "price": 1400,
+      "supplier": 8,
+      "mass": 20,
+      "volume": 0.12,
       "starting": 0
     },
     "batteries": {
       "name": "Battery equipment",
       "batch": 1,
+      "pack": 1,
+      "price": 6000,
+      "supplier": 4,
+      "mass": 30,
+      "volume": 0.05,
       "starting": 0
     },
     "pumps": {
       "name": "Pumps",
       "batch": 1,
+      "pack": 1,
+      "price": 160,
+      "supplier": 16,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 0
     },
     "tools": {
       "name": "Tool supplies",
       "batch": 1,
+      "pack": 4,
+      "price": 36,
+      "supplier": 64,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 4
     },
     "food": {
       "name": "Ingredients",
       "batch": 4,
+      "pack": 12,
+      "price": 48,
+      "supplier": 192,
+      "mass": 1,
+      "volume": 0.002,
       "starting": 12
     },
     "meals": {
       "name": "Prepared meals",
       "batch": 4,
+      "pack": 12,
+      "price": 96,
+      "supplier": 192,
+      "mass": 1,
+      "volume": 0.002,
       "starting": 20
     },
     "eggs": {
       "name": "Eggs",
       "batch": 4,
+      "pack": 12,
+      "price": 36,
+      "supplier": 192,
+      "mass": 0.06,
+      "volume": 0.0001,
       "starting": 0
     },
     "compost": {
       "name": "Mature compost",
       "batch": 4,
+      "pack": 8,
+      "price": 64,
+      "supplier": 64,
+      "mass": 1,
+      "volume": 0.002,
       "starting": 0
     },
     "scraps": {
       "name": "Organic residues",
       "batch": 4,
+      "pack": 0,
+      "price": 0,
+      "supplier": 0,
+      "mass": 1,
+      "volume": 0.002,
       "starting": 0
     },
     "seedlings": {
       "name": "Vegetable seedlings",
       "batch": 4,
+      "pack": 8,
+      "price": 24,
+      "supplier": 64,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 0
     },
     "tree_starts": {
       "name": "Timber seedlings",
       "batch": 2,
+      "pack": 4,
+      "price": 40,
+      "supplier": 32,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 0
     },
     "bamboo_starts": {
       "name": "Bamboo starts",
       "batch": 2,
+      "pack": 4,
+      "price": 80,
+      "supplier": 32,
+      "mass": 2,
+      "volume": 0.01,
       "starting": 0
     },
     "fodder": {
       "name": "Dry fodder",
       "batch": 4,
+      "pack": 12,
+      "price": 24,
+      "supplier": 96,
+      "mass": 1,
+      "volume": 0.002,
       "starting": 0
     },
     "milk": {
       "name": "Fresh milk",
       "batch": 4,
+      "pack": 6,
+      "price": 42,
+      "supplier": 96,
+      "mass": 1,
+      "volume": 0.002,
       "starting": 0
     },
     "honey": {
       "name": "Honey",
       "batch": 4,
+      "pack": 4,
+      "price": 48,
+      "supplier": 64,
+      "mass": 1,
+      "volume": 0.002,
       "starting": 0
     },
     "goats": {
       "name": "Goats",
       "batch": 1,
+      "pack": 2,
+      "price": 1800,
+      "supplier": 16,
+      "mass": 40,
+      "volume": 0.4,
       "starting": 0
     },
     "bees": {
       "name": "Bee colonies",
       "batch": 1,
+      "pack": 1,
+      "price": 400,
+      "supplier": 8,
+      "mass": 15,
+      "volume": 0.08,
       "starting": 0
     },
     "hens": {
       "name": "Hens",
       "batch": 1,
+      "pack": 3,
+      "price": 180,
+      "supplier": 24,
+      "mass": 2,
+      "volume": 0.025,
       "starting": 0
     }
   },

@@ -6,13 +6,15 @@ Run the desktop preview from the repository root.
 cargo run --locked --manifest-path bevy-v3/Cargo.toml
 ```
 
-Choose Story or Sandbox, a biome, landscape, water availability, resource richness, land seed, starting savings, and supplies, then select **Enter village**. Pan with WASD, the arrow keys, or left drag. Rotate with Q/E or right drag. Zoom with the wheel or +/−, reset the camera with Home, and return to setup with Escape.
+Choose Story or Sandbox, a biome, landscape, water availability, resource richness, land seed, starting savings, supplies, and distance to town, then select **Enter village**. Pan with WASD, the arrow keys, or left drag. Rotate with Q/E or right drag. Zoom with the wheel or +/−, reset the camera with Home, and return to setup with Escape.
 
 After the cars arrive, click the ground to place camp or select a preset with 1 (shade), 2 (entrance), or 3 (clearing). Press Space to pause or resume the village clock. After placing camp, press B to open the build catalog. Use Tab for categories and Page Up/Down to browse. Select a blueprint with its number key, R to rotate it, and click the plot to reserve materials and mark the site. Residents carry each reserved load to the site before assembly. The project model appears when they finish.
 
-V3 runs as a standalone Bevy desktop application. The preview covers land generation, navigation, the opening camp, and construction with materials already in stock. The V2 browser game remains available at `/v2/`.
+V3 runs as a standalone Bevy desktop application. The preview covers land generation, navigation, the opening camp, and construction, including orders and town pickup for missing materials. The V2 browser game remains available at `/v2/`.
 
 Use 1–4 to change simulation speed with the build menu closed. Press M to mute music and interface sounds.
+
+Story reserves cash for town pickup when a blueprint needs materials beyond current stock. Press U to toggle automatic ordering.
 
 In Sandbox, materials are unlimited. Press I to toggle instant building.
 

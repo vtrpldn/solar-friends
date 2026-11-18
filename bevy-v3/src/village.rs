@@ -11,10 +11,10 @@ use crate::{
     GroundMesh, VillageCamera,
     arrival::{
         ARRIVAL_DURATION, MAP_START, ROAD_END, resident_pose, road_center, road_width,
-        vehicle_pose, world_position,
+        town_vehicle_pose, vehicle_pose, world_position,
     },
     catalog::Catalog,
-    construction::Construction,
+    construction::{Construction, ConstructionSite, TownClock},
     land::Land,
     save,
     setup::{Mode, WorldSetup},
@@ -102,7 +102,7 @@ impl Village {
         {
             return false;
         }
-        self.construction.valid_save(catalog)
+        self.construction.valid_save(catalog, &self.stock)
     }
 }
 
@@ -306,6 +306,9 @@ fn village_input(
         if town.stock.sandbox && keyboard.just_pressed(KeyCode::KeyI) {
             town.construction.toggle_sandbox_construction();
         }
+        if !town.stock.sandbox && keyboard.just_pressed(KeyCode::KeyU) {
+            town.construction.toggle_auto_buy();
+        }
         if keyboard.get_just_pressed().len() > 0 {
             town.construction.input(&keyboard, &catalog);
             if !town.construction.menu
@@ -317,8 +320,20 @@ fn village_input(
             }
         }
         if let Some(position) = pointer.0 {
-            town.construction
-                .plan(&catalog, &mut town.stock, &terrain, &land, cell, position);
+            town.construction.plan(
+                &catalog,
+                &mut town.stock,
+                ConstructionSite {
+                    terrain: &terrain,
+                    land: &land,
+                    camp: cell,
+                },
+                position,
+                TownClock {
+                    seconds: town.clock,
+                    round_trip_km: setup.round_trip_km(),
+                },
+            );
         }
         return;
     }
@@ -397,11 +412,14 @@ fn animate_arrival(
                     position: world_position(worker.position.x, worker.position.y),
                     yaw: worker.yaw,
                     step_height: 0.0,
-                    visible: true,
+                    visible: !village.construction.driver_away(index),
                 }
             }
             ArrivalActor::Resident(index) => resident_pose(village.arrival_time, index),
-            ArrivalActor::Car(index) => vehicle_pose(village.arrival_time, index),
+            ArrivalActor::Car(index) => village.construction.car_trip(index).map_or_else(
+                || vehicle_pose(village.arrival_time, index),
+                |(elapsed, duration)| town_vehicle_pose(elapsed, duration),
+            ),
         };
         let Vec2 { x, y: z } = pose.position;
         transform.translation = Vec3::new(x, terrain.height_at(x, z) + pose.step_height, z);
@@ -428,11 +446,20 @@ fn advance_clock(
     }
     if let Some(camp) = village.camp {
         let terrain = setup.terrain();
-        for _ in 0..SPEEDS[village.speed].1 {
-            village.clock += time.delta_secs_f64();
-            village
-                .construction
-                .tick(&catalog, &terrain, &land, camp, time.delta_secs());
+        let town = &mut *village;
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        for _ in 0..SPEEDS[town.speed].1 {
+            town.clock += time.delta_secs_f64();
+            let clock = TownClock {
+                seconds: town.clock,
+                round_trip_km: setup.round_trip_km(),
+            };
+            town.construction
+                .tick(&catalog, &mut town.stock, site, clock, time.delta_secs());
         }
     }
 }
@@ -481,10 +508,11 @@ fn show_hud(
         format!("Sandbox · {}", village.construction.sandbox_status())
     } else {
         format!(
-            "R${} · {} timber · {} meals",
-            village.stock.cash,
+            "R${:.2} · {} timber · {} meals · {}",
+            village.stock.balance() as f64 / 100.0,
             village.stock.available("wood"),
             village.stock.available("meals"),
+            village.construction.auto_buy_status(),
         )
     };
     let mut label = format!(
@@ -581,15 +609,30 @@ mod tests {
         village.construction.plan(
             &catalog,
             &mut village.stock,
-            &terrain,
-            &land,
-            camp,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &land,
+                camp,
+            },
             IVec2::new(44, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
         );
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
         for _ in 0..200 {
             village
                 .construction
-                .tick(&catalog, &terrain, &land, camp, 0.1);
+                .tick(&catalog, &mut village.stock, site, clock, 0.1);
         }
 
         let path =
@@ -601,10 +644,10 @@ mod tests {
         for _ in 0..2_000 {
             village
                 .construction
-                .tick(&catalog, &terrain, &land, camp, 0.1);
+                .tick(&catalog, &mut village.stock, site, clock, 0.1);
             resumed
                 .construction
-                .tick(&catalog, &terrain, &land, camp, 0.1);
+                .tick(&catalog, &mut resumed.stock, site, clock, 0.1);
         }
         assert_eq!(
             serde_json::to_value(village).unwrap(),

@@ -13,6 +13,11 @@ pub struct Catalog {
 pub struct Material {
     pub name: String,
     pub batch: u32,
+    pub pack: u32,
+    pub price: f64,
+    pub supplier: u32,
+    pub mass: f64,
+    pub volume: f64,
     pub starting: u32,
 }
 

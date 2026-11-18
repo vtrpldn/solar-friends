@@ -2,6 +2,8 @@
 import { writeFile } from "node:fs/promises";
 import { MATERIALS, PROJECTS, createWeekend } from "../web/v02/weekend/simulation.js";
 import { buildingCategory, inBuildCategory, isBuildOption } from "../web/v02/weekend/build-categories.js";
+import { materialMeasure } from "../web/v02/weekend/material-measures.js";
+import { supplierLimit } from "../web/v02/weekend/supplier-stock.js";
 
 const startingVillage = createWeekend();
 const materials = Object.fromEntries(Object.entries(MATERIALS).map(([id, material]) => [
@@ -9,6 +11,11 @@ const materials = Object.fromEntries(Object.entries(MATERIALS).map(([id, materia
   {
     name: material.name,
     batch: material.batch,
+    pack: material.quantity || 0,
+    price: Number.isFinite(material.price) ? material.price : 0,
+    supplier: material.quantity ? supplierLimit(id, material) : 0,
+    mass: materialMeasure(id).kg,
+    volume: materialMeasure(id).m3,
     starting: id === "wood" ? startingVillage.wood : startingVillage.materials[id],
   },
 ]));
