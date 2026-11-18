@@ -13,8 +13,31 @@ pub struct Stock {
     #[serde(default)]
     centavos: u8,
     #[serde(default)]
+    ledger: BTreeMap<CashKind, i64>,
+    #[serde(default)]
     pub sandbox: bool,
     materials: BTreeMap<String, u32>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
+pub enum CashKind {
+    Materials,
+    Fuel,
+    Electricity,
+    Commuting,
+    TownWages,
+}
+
+impl CashKind {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Materials => "Materials",
+            Self::Fuel => "Fuel",
+            Self::Electricity => "Grid electricity",
+            Self::Commuting => "Bus fares",
+            Self::TownWages => "Town wages",
+        }
+    }
 }
 
 impl Stock {
@@ -36,6 +59,7 @@ impl Stock {
         Self {
             cash: settings.starting_cash(),
             centavos: 0,
+            ledger: BTreeMap::new(),
             sandbox: settings.mode == Mode::Sandbox,
             materials,
         }
@@ -77,13 +101,47 @@ impl Stock {
         u64::from(self.cash) * 100 + u64::from(self.centavos)
     }
 
-    pub fn debit(&mut self, cents: u64) {
+    pub fn debit(&mut self, cents: u64, category: CashKind) {
+        if cents == 0 {
+            return;
+        }
         let balance = self
             .balance()
             .checked_sub(cents)
             .expect("purchase was quoted against available balance");
-        self.cash = (balance / 100) as u32;
-        self.centavos = (balance % 100) as u8;
+        self.set_balance(balance);
+        let counter = self.ledger.entry(category).or_default();
+        *counter = counter.saturating_sub(cents as i64);
+    }
+
+    pub fn credit(&mut self, cents: u64, category: CashKind) {
+        let maximum = u64::from(u32::MAX) * 100 + 99;
+        let before = self.balance();
+        let after = before.saturating_add(cents).min(maximum);
+        self.set_balance(after);
+        let counter = self.ledger.entry(category).or_default();
+        *counter = counter.saturating_add((after - before) as i64);
+    }
+
+    fn set_balance(&mut self, value: u64) {
+        self.cash = (value / 100) as u32;
+        self.centavos = (value % 100) as u8;
+    }
+
+    pub fn finance_summary(&self, committed: u64) -> String {
+        let mut display = format!(
+            "Shared savings R${:.2} · Available after pickup R${:.2}",
+            self.balance() as f64 / 100.0,
+            self.balance().saturating_sub(committed) as f64 / 100.0
+        );
+        for (kind, cents) in &self.ledger {
+            display.push_str(&format!(
+                "\n{} · R${:+.2}",
+                kind.label(),
+                *cents as f64 / 100.0
+            ));
+        }
+        display
     }
 
     pub fn missing<'a>(&self, bill: &'a BTreeMap<String, u32>) -> Option<&'a str> {

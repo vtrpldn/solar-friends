@@ -3,6 +3,7 @@ mod gather_work;
 mod production_work;
 mod resident_work;
 mod town_pickup;
+mod work_shift;
 
 use std::collections::VecDeque;
 
@@ -22,6 +23,7 @@ use crate::{
     residents::{Health, Need},
     stock::Stock,
     terrain::Terrain,
+    town_work::TownWork,
     utilities::{Facility, Utilities},
 };
 
@@ -157,6 +159,8 @@ pub struct Worker {
     retry: f32,
     #[serde(default)]
     health: Health,
+    #[serde(default)]
+    town_work: TownWork,
 }
 
 impl Default for Construction {
@@ -188,6 +192,7 @@ impl Default for Construction {
                     experience: 0.0,
                     retry: 0.0,
                     health: Health::new(index),
+                    town_work: TownWork::default(),
                 }
             }),
         }
@@ -739,6 +744,7 @@ impl Construction {
             land,
             camp,
         } = site;
+        self.tick_shifts(catalog, stock, site, clock, dt);
         self.tick_trip(catalog, stock, site, clock, dt);
         self.tick_gathering(catalog, stock, site, clock.seconds, dt);
         self.tick_production(catalog, stock, site, clock.seconds, dt);
@@ -749,6 +755,7 @@ impl Construction {
                 || self.production.has_worker(index)
                 || self.farming.has_worker(index)
                 || self.residents[index].health.task.is_some()
+                || self.residents[index].town_work.active()
             {
                 continue;
             }

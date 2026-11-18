@@ -89,6 +89,7 @@ impl Construction {
                     || self.production.has_worker(worker_index)
                     || self.farming.has_worker(worker_index)
                     || worker.health.task.is_some()
+                    || worker.town_work.active()
                 {
                     continue;
                 }

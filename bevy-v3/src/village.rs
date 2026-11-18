@@ -82,6 +82,8 @@ pub struct Village {
     #[serde(skip)]
     utility_panel: Option<UtilityPanel>,
     #[serde(skip)]
+    finance_resident: usize,
+    #[serde(skip)]
     camp_error: Option<&'static str>,
     #[serde(skip)]
     save_notice: String,
@@ -96,6 +98,7 @@ enum UtilityPanel {
     Power,
     Water,
     Residents,
+    Finances,
 }
 
 impl Village {
@@ -362,6 +365,41 @@ fn village_input(
     }
     if let Some(cell) = village.camp {
         let town = &mut *village;
+        if keyboard.just_pressed(KeyCode::KeyH) && !town.stock.sandbox {
+            town.utility_panel = if town.utility_panel == Some(UtilityPanel::Finances) {
+                None
+            } else {
+                Some(UtilityPanel::Finances)
+            };
+        }
+        if town.utility_panel == Some(UtilityPanel::Finances)
+            && [KeyCode::KeyB, KeyCode::KeyC, KeyCode::KeyK]
+                .iter()
+                .any(|key| keyboard.just_pressed(*key))
+        {
+            town.utility_panel = None;
+        }
+        if town.utility_panel == Some(UtilityPanel::Finances) {
+            if let Some(index) = [
+                KeyCode::Digit1,
+                KeyCode::Digit2,
+                KeyCode::Digit3,
+                KeyCode::Digit4,
+                KeyCode::Digit5,
+            ]
+            .iter()
+            .position(|key| keyboard.just_pressed(*key))
+            {
+                town.finance_resident = index;
+            }
+            if keyboard.just_pressed(KeyCode::KeyT) {
+                town.construction.toggle_shift(town.finance_resident);
+            }
+            if keyboard.just_pressed(KeyCode::KeyY) {
+                town.construction
+                    .toggle_weekday_shift(town.finance_resident);
+            }
+        }
         if keyboard.just_pressed(KeyCode::KeyP) {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Power) {
                 None
@@ -399,20 +437,23 @@ fn village_input(
         }
         if keyboard.get_just_pressed().len() > 0 {
             town.construction.input(&keyboard, &catalog);
-            town.construction
-                .production_input(&catalog, &mut town.stock, &keyboard);
-            town.construction.farm_input(
-                &catalog,
-                &mut town.stock,
-                &keyboard,
-                TownClock {
-                    seconds: town.clock,
-                    round_trip_km: setup.round_trip_km(),
-                },
-            );
+            if town.utility_panel != Some(UtilityPanel::Finances) {
+                town.construction
+                    .production_input(&catalog, &mut town.stock, &keyboard);
+                town.construction.farm_input(
+                    &catalog,
+                    &mut town.stock,
+                    &keyboard,
+                    TownClock {
+                        seconds: town.clock,
+                        round_trip_km: setup.round_trip_km(),
+                    },
+                );
+            }
             if !town.construction.menu
                 && !town.construction.production.open
                 && !town.construction.farming.open
+                && town.utility_panel != Some(UtilityPanel::Finances)
                 && let Some(speed) = SPEEDS
                     .iter()
                     .position(|(key, _)| keyboard.just_pressed(*key))
@@ -533,7 +574,8 @@ fn animate_arrival(
                     yaw: worker.yaw,
                     step_height: 0.0,
                     visible: !village.construction.driver_away(index)
-                        && !village.construction.resident_sleeping(index),
+                        && !village.construction.resident_sleeping(index)
+                        && !village.construction.away_for_work(index),
                 }
             }
             ArrivalActor::Resident(index) => resident_pose(village.arrival_time, index),
@@ -712,7 +754,7 @@ fn show_hud(
         label.push_str(&natural);
     }
     if village.camp.is_some() {
-        label.push_str("\nP Power · V Water · N Residents");
+        label.push_str("\nP Power · V Water · N Residents · H Finances");
     }
     match village.utility_panel {
         Some(UtilityPanel::Power) => {
@@ -726,6 +768,14 @@ fn show_hud(
         Some(UtilityPanel::Residents) => {
             label.push('\n');
             label.push_str(&village.construction.resident_status(&catalog));
+        }
+        Some(UtilityPanel::Finances) => {
+            label.push('\n');
+            label.push_str(
+                &village
+                    .construction
+                    .finance_summary(&village.stock, village.finance_resident),
+            );
         }
         None => {}
     }

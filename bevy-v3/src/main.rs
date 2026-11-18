@@ -22,6 +22,7 @@ mod setup;
 mod stock;
 mod terrain;
 mod time_advance;
+mod town_work;
 mod ui_font;
 mod utilities;
 mod village;

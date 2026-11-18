@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     arrival::world_position,
     setup::WorldSetup,
-    stock::Stock,
+    stock::{CashKind, Stock},
     terrain::Terrain,
     weather::{DAY, recharge_season, sun_height, weather_at},
 };
@@ -461,7 +461,7 @@ impl Utilities {
         }
         let debit = self.grid_debt_cents.floor() as u64;
         if debit > 0 {
-            stock.debit(debit);
+            stock.debit(debit, CashKind::Electricity);
             self.grid_debt_cents -= debit as f64;
         }
         self.generated_kwh += generation * hours;

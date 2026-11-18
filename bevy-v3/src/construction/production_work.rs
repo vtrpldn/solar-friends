@@ -338,6 +338,7 @@ impl Construction {
                 || self.production.has_worker(index)
                 || self.farming.has_worker(index)
                 || self.residents[index].health.task.is_some()
+                || self.residents[index].town_work.active()
                 || self.trip.as_ref().is_some_and(|trip| trip.driver == index)
             {
                 continue;

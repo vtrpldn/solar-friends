@@ -2,7 +2,10 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{catalog::Catalog, stock::Stock};
+use crate::{
+    catalog::Catalog,
+    stock::{CashKind, Stock},
+};
 
 const RESERVE: u64 = 10_000;
 const CARGO_MASS: f64 = 350.0;
@@ -96,7 +99,7 @@ impl Market {
 
     pub fn reserve(&mut self, stock: &mut Stock, bill: &BTreeMap<String, u32>, quote: &Quote) {
         stock.reserve_available(bill);
-        stock.debit(quote.price);
+        stock.debit(quote.price, CashKind::Materials);
         self.committed_fares += quote.fare * u64::from(quote.trips);
         for (id, units) in &quote.units {
             let allocation = self.suppliers.entry(id.clone()).or_insert(Allocation {
@@ -114,7 +117,7 @@ impl Market {
     }
 
     pub fn depart(&mut self, stock: &mut Stock, fare: u64) {
-        stock.debit(fare);
+        stock.debit(fare, CashKind::Fuel);
         self.committed_fares -= fare;
     }
 

@@ -43,6 +43,7 @@ impl Construction {
                 && !self.trip.as_ref().is_some_and(|trip| trip.driver == index)
                 && !self.gathering.workers_at_site(index)
                 && !self.production.has_worker(index)
+                && !self.residents[index].town_work.active()
                 && !self.farming.has_worker(index)
                 && !self.residents[index]
                     .assignment
@@ -236,6 +237,7 @@ impl Construction {
                         < catalog.residents[*id].temperament.accepts_at
                     && !self.gathering.workers_at_site(*id)
                     && !self.production.has_worker(*id)
+                    && !resident.town_work.active()
                     && !self.farming.has_worker(*id)
                     && !self.trip.as_ref().is_some_and(|trip| trip.driver == *id)
             })
@@ -434,7 +436,9 @@ impl Construction {
             .iter()
             .enumerate()
             .map(|(index, worker)| {
-                let action = if self.driver_away(index) {
+                let action = if worker.town_work.active() {
+                    worker.town_work.status()
+                } else if self.driver_away(index) {
                     "In town"
                 } else if let Some(task) = &worker.health.task {
                     task.kind.label()

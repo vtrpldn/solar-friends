@@ -286,6 +286,7 @@ impl Construction {
     fn try_farm_worker(&mut self, job: usize, catalog: &Catalog, site: ConstructionSite) {
         for (index, worker) in self.residents.iter().enumerate() {
             if worker.health.task.is_some()
+                || worker.town_work.active()
                 || worker.assignment.is_some()
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
