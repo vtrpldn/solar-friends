@@ -144,6 +144,106 @@ impl Utilities {
         }) && (0.0..1.0).contains(&self.grid_debt_cents)
     }
 
+    pub fn water_sources(&self) -> impl Iterator<Item = (usize, IVec2, IVec2)> + '_ {
+        self.nodes
+            .iter()
+            .filter(|(_, node)| {
+                node.enabled
+                    && node.water[0] >= 0.5
+                    && !matches!(node.kind.as_str(), "coop" | "goat_pasture")
+            })
+            .map(|(&id, node)| (id, node.location, node.size))
+    }
+
+    pub fn wash_sources(&self) -> impl Iterator<Item = (usize, IVec2, IVec2)> + '_ {
+        self.nodes
+            .iter()
+            .filter(|(_, node)| {
+                node.enabled
+                    && node.water[0] >= 1.0
+                    && node.capacity[2] - node.water[2] >= 0.8
+                    && matches!(
+                        node.kind.as_str(),
+                        "camp" | "wash-station" | "eco_toilet" | "home"
+                    )
+            })
+            .map(|(&id, node)| (id, node.location, node.size))
+    }
+
+    pub fn toilets(&self, waste: f64) -> impl Iterator<Item = (usize, IVec2, IVec2)> + '_ {
+        self.nodes
+            .iter()
+            .filter(move |(_, node)| {
+                node.enabled
+                    && matches!(node.kind.as_str(), "eco_toilet" | "home")
+                    && node.capacity[3] - node.water[3] >= waste
+            })
+            .map(|(&id, node)| (id, node.location, node.size))
+    }
+
+    pub fn drink(&mut self, id: usize, liters: f64) -> bool {
+        let Some(node) = self.nodes.get_mut(&id) else {
+            return false;
+        };
+        if !node.enabled || node.water[0] + 1e-8 < liters {
+            return false;
+        }
+        node.water[0] = (node.water[0] - liters).max(0.0);
+        true
+    }
+
+    pub fn wash(&mut self, id: usize) -> bool {
+        let Some(node) = self.nodes.get_mut(&id) else {
+            return false;
+        };
+        if !node.enabled || node.water[0] < 1.0 || node.capacity[2] - node.water[2] < 0.8 {
+            return false;
+        }
+        node.water[0] -= 1.0;
+        node.water[2] += 0.8;
+        true
+    }
+
+    pub fn receive_sewage(&mut self, id: usize, liters: f64) -> bool {
+        let Some(node) = self.nodes.get_mut(&id) else {
+            return false;
+        };
+        if !node.enabled || node.capacity[3] - node.water[3] < liters {
+            return false;
+        }
+        node.water[3] += liters;
+        true
+    }
+
+    pub fn camp_water(&self) -> Option<[f64; 4]> {
+        self.nodes.get(&0).map(|camp| camp.water)
+    }
+
+    pub fn carry_river_water(&mut self, amount: f64) -> f64 {
+        let Some(ground) = &mut self.ground else {
+            return 0.0;
+        };
+        let amount = amount.min(ground.river);
+        ground.river -= amount;
+        amount
+    }
+
+    pub fn put_camp_water(&mut self, amount: f64) {
+        if let Some(camp) = self.nodes.get_mut(&0) {
+            let accepted = (camp.capacity[1] - camp.water[1]).min(amount);
+            camp.water[1] += accepted;
+            if let Some(ground) = &mut self.ground {
+                ground.runoff += amount - accepted;
+            }
+        }
+    }
+
+    pub fn purify_camp_water(&mut self) {
+        if let Some(camp) = self.nodes.get_mut(&0) {
+            transform_water(camp, 1, 0, 12.0, 1.0);
+        }
+    }
+
     pub fn powered(&self, building: usize) -> bool {
         self.nodes
             .get(&(building + 1))

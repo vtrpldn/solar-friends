@@ -45,6 +45,27 @@ impl Stock {
         self.materials.get(id).copied().unwrap_or(0)
     }
 
+    pub fn has_meal(&self) -> bool {
+        self.meal().is_some()
+    }
+
+    pub fn eat(&mut self) -> bool {
+        if self.sandbox {
+            return true;
+        }
+        let Some((id, portions)) = self.meal() else {
+            return false;
+        };
+        *self.materials.get_mut(id).expect("meal available") -= portions;
+        true
+    }
+
+    fn meal(&self) -> Option<(&'static str, u32)> {
+        [("meals", 1), ("food", 1), ("eggs", 4), ("milk", 2)]
+            .into_iter()
+            .find(|(id, quantity)| self.available(id) >= *quantity)
+    }
+
     pub fn receive(&mut self, goods: &BTreeMap<String, u32>) {
         for (id, units) in goods {
             let count = self.materials.entry(id.clone()).or_default();

@@ -1,5 +1,6 @@
 mod gather_work;
 mod production_work;
+mod resident_work;
 mod town_pickup;
 
 use std::collections::VecDeque;
@@ -15,6 +16,7 @@ use crate::{
     market::{Market, trip_seconds},
     navigation::route,
     production::Production,
+    residents::{Health, Need},
     stock::Stock,
     terrain::Terrain,
     utilities::{Facility, Utilities},
@@ -144,6 +146,8 @@ pub struct Worker {
     assignment: Option<Assignment>,
     experience: f64,
     retry: f32,
+    #[serde(default)]
+    health: Health,
 }
 
 impl Default for Construction {
@@ -162,14 +166,18 @@ impl Default for Construction {
             production: Production::default(),
             utilities: Utilities::default(),
             trip: None,
-            residents: ARRIVAL_SPOTS.map(|(x, z)| Worker {
-                position: Vec2::new(x, z),
-                yaw: 0.0,
-                speed: 0.0,
-                path: VecDeque::new(),
-                assignment: None,
-                experience: 0.0,
-                retry: 0.0,
+            residents: std::array::from_fn(|index| {
+                let (x, z) = ARRIVAL_SPOTS[index];
+                Worker {
+                    position: Vec2::new(x, z),
+                    yaw: 0.0,
+                    speed: 0.0,
+                    path: VecDeque::new(),
+                    assignment: None,
+                    experience: 0.0,
+                    retry: 0.0,
+                    health: Health::new(index),
+                }
             }),
         }
     }
@@ -625,7 +633,8 @@ impl Construction {
                 let in_bounds = |point: Vec2| {
                     point.cmpge(Vec2::splat(-31.0)).all() && point.cmple(Vec2::splat(94.0)).all()
                 };
-                in_bounds(worker.position)
+                worker.health.valid()
+                    && in_bounds(worker.position)
                     && worker.path.len() <= 128 * 128
                     && worker.path.iter().copied().all(in_bounds)
                     && worker.assignment.as_ref().is_none_or(|job| {
@@ -697,6 +706,7 @@ impl Construction {
             if self.trip.as_ref().is_some_and(|trip| trip.driver == index)
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
+                || self.residents[index].health.task.is_some()
             {
                 continue;
             }
@@ -748,16 +758,19 @@ impl Construction {
                         })
                         .count();
                     let worker = &mut self.residents[index];
-                    let skilled = matches!(
-                        (index, project.key.as_str()),
-                        (1, "shelter") | (2, "gathering") | (3, "well") | (4, "toilet")
-                    );
+                    let skilled = catalog.residents[index].strengths.contains(&project.key);
                     let skill = if skilled { 1.25 } else { 1.0 };
                     let experience = 1.0 + (worker.experience / 10_000.0).min(0.15);
                     let efficiency = 1.0 / (1.0 + 0.12 * crew as f64);
-                    project.work = (project.work + f64::from(dt) * skill * experience * efficiency)
-                        .min(catalog.projects[&project.key].work);
+                    project.work = (project.work
+                        + f64::from(dt)
+                            * skill
+                            * experience
+                            * efficiency
+                            * worker.health.hydration_factor())
+                    .min(catalog.projects[&project.key].work);
                     worker.experience += f64::from(dt);
+                    worker.health.energy = (worker.health.energy - f64::from(dt) * 0.16).max(0.0);
                 }
             }
             self.residents[index].assignment = Some(job);

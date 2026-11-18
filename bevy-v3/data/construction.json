@@ -2234,5 +2234,271 @@
       "work": 30,
       "handcraft": false
     }
-  }
+  },
+  "residents": [
+    {
+      "role": "Grower & naturalist",
+      "bio": "Keeps seeds in her pockets and notices which plants thrive in the shade. Wants the village to feed itself.",
+      "backstory": "Iara grew up tending a small garden with her grandmother, then spent years maintaining ornamental gardens for people who rarely went outside. She met Luz through a community kitchen, bringing surplus herbs after work. She joined the village to grow food people would actually share, and to stop treating her own plans as something for later.",
+      "traits": [
+        "Observant",
+        "Generous",
+        "Stubborn"
+      ],
+      "desire": "Grow enough food to share without emptying the pantry.",
+      "motivation": "Caring for living things gives her a sense of continuity and belonging.",
+      "fear": "Watching a garden fail while everyone depends on it.",
+      "flaw": "Takes setbacks personally and keeps checking on things instead of asking for help.",
+      "boundary": "Enjoys company, but needs quiet outdoor time after a demanding stretch.",
+      "growth": "Learning that sharing responsibility is also a way of caring.",
+      "hobby": "Time in the garden",
+      "favorites": [
+        "garden-bench",
+        "square",
+        "picnic-table"
+      ],
+      "rates": {
+        "fun": 0.8,
+        "hygiene": 0.8
+      },
+      "strengths": [
+        "garden",
+        "grove",
+        "orchard",
+        "greenhouse",
+        "compost",
+        "supply-0",
+        "supply-1"
+      ],
+      "effect": "Gets dirty more slowly and needs recreation less often.",
+      "interests": [
+        "growing",
+        "food",
+        "nature"
+      ],
+      "aspiration": {
+        "label": "A village orchard",
+        "key": "orchard",
+        "reason": "Plant something that will feed us for years."
+      },
+      "temperament": {
+        "socialAt": 48,
+        "acceptsAt": 78,
+        "breakAt": 48,
+        "bedtime": 21,
+        "downtime": "breathe"
+      },
+      "reflection": "I can leave the garden in someone else’s hands for a little while."
+    },
+    {
+      "role": "Carpenter & practical problem-solver",
+      "bio": "Would rather repair a wobbly chair than replace it. Dreams of building comfortable homes with his own hands.",
+      "backstory": "Bento learned repairs in his father’s tiny furniture shop. On building crews he became the person who quietly stayed late to fix rushed work. Nina met him while organizing a repair workshop and kept inviting him back. He came to the village hoping to build things carefully, with people who would still be there when the work was finished.",
+      "traits": [
+        "Patient",
+        "Dependable",
+        "Reserved"
+      ],
+      "desire": "Build a comfortable home and have time left to enjoy it.",
+      "motivation": "Making something useful is his easiest way of showing affection.",
+      "fear": "Letting people down when they are counting on him.",
+      "flaw": "Says yes too often and assumes others will notice when he is worn out.",
+      "boundary": "Likes one-to-one company; quiet breaks help him recover.",
+      "growth": "Learning to say what he needs before exhaustion says it for him.",
+      "hobby": "Quiet reading",
+      "favorites": [
+        "reading-room",
+        "hammock",
+        "garden-bench"
+      ],
+      "rates": {
+        "social": 0.75,
+        "fun": 0.9
+      },
+      "strengths": [
+        "shelter",
+        "shed",
+        "house",
+        "workshop",
+        "warehouse",
+        "bridge"
+      ],
+      "effect": "Comfortable with longer stretches of quiet work.",
+      "interests": [
+        "making",
+        "books",
+        "home"
+      ],
+      "aspiration": {
+        "label": "A comfortable home",
+        "key": "house",
+        "reason": "Make somewhere we can properly rest."
+      },
+      "temperament": {
+        "socialAt": 38,
+        "acceptsAt": 62,
+        "breakAt": 40,
+        "bedtime": 21.5,
+        "downtime": "look"
+      },
+      "reflection": "A little quiet helps. I do not have to finish everything today."
+    },
+    {
+      "role": "Cook & community host",
+      "bio": "Turns whatever is in the pantry into a meal worth sharing. Sees a good gathering place as the heart of the village.",
+      "backstory": "Luz worked long café shifts and spent her free evenings cooking at a neighborhood kitchen. She could remember everyone’s usual order, but often ate her own dinner standing up. Iara became a friend over those late meals. Luz wanted a village where being together was part of everyday life, and where she could be a guest sometimes too.",
+      "traits": [
+        "Warm",
+        "Playful",
+        "Restless"
+      ],
+      "desire": "Make room for a shared meal that nobody has to rush.",
+      "motivation": "Feels at home when people choose to spend time together.",
+      "fear": "Being useful to everyone but truly known by no one.",
+      "flaw": "Fills silences and offers help before checking whether it is wanted.",
+      "boundary": "Seeks company often, but is learning that a quiet friend is not an unhappy friend.",
+      "growth": "Learning to receive care and let others set the pace.",
+      "hobby": "Gathering with friends",
+      "favorites": [
+        "community-hall",
+        "fire-circle",
+        "picnic-table",
+        "square"
+      ],
+      "rates": {
+        "social": 1.3,
+        "fun": 1.15
+      },
+      "strengths": [
+        "gathering",
+        "kitchen",
+        "community-hall",
+        "picnic-table"
+      ],
+      "effect": "Seeks conversation and recreation more often.",
+      "interests": [
+        "food",
+        "stories",
+        "community"
+      ],
+      "aspiration": {
+        "label": "A shared kitchen",
+        "key": "kitchen",
+        "reason": "Cook together, then sit down together."
+      },
+      "temperament": {
+        "socialAt": 62,
+        "acceptsAt": 95,
+        "breakAt": 55,
+        "bedtime": 22.3,
+        "downtime": "stretch"
+      },
+      "reflection": "It is good to pause. I can let somebody else look after things."
+    },
+    {
+      "role": "Water & energy tinkerer",
+      "bio": "Likes tracing a problem back to its source. Wants to hear the river and know the village is running on clean energy.",
+      "backstory": "Cauã fixed pumps and electrical equipment with a traveling maintenance crew. He liked solving problems, but disliked leaving before people could learn the repair themselves. Bento once lent him a workbench; they spent the afternoon rebuilding a discarded fan. He joined the village for the chance to make reliable systems and stay long enough to see them used.",
+      "traits": [
+        "Curious",
+        "Resourceful",
+        "Independent"
+      ],
+      "desire": "Help the village generate its own electricity.",
+      "motivation": "Wants people to understand and control the things they depend on.",
+      "fear": "A preventable failure leaving everyone without essentials.",
+      "flaw": "Disappears into a problem and forgets to explain what he is doing.",
+      "boundary": "Prefers a conversation with a purpose, and space to think afterward.",
+      "growth": "Learning that explaining and listening are part of fixing things.",
+      "hobby": "Outdoor exercise",
+      "favorites": [
+        "exercise-garden",
+        "volleyball-court",
+        "outdoor-classroom"
+      ],
+      "rates": {
+        "social": 0.85,
+        "hunger": 1.1
+      },
+      "strengths": [
+        "water",
+        "well",
+        "hydro",
+        "solar_farm",
+        "streetlight",
+        "rain-barrel"
+      ],
+      "effect": "Needs less social time, but gets hungry a little faster.",
+      "interests": [
+        "making",
+        "nature",
+        "learning"
+      ],
+      "aspiration": {
+        "label": "Our own solar power",
+        "key": "solar_farm",
+        "reason": "Turn the sunlight here into something we can depend on."
+      },
+      "temperament": {
+        "socialAt": 42,
+        "acceptsAt": 68,
+        "breakAt": 44,
+        "bedtime": 22.5,
+        "downtime": "stretch"
+      },
+      "reflection": "The problem will still be there after a walk. I might see it differently."
+    },
+    {
+      "role": "Ecological builder & organizer",
+      "bio": "Thinks about where everything goes after we use it. Wants a healthy village where useful things never become waste.",
+      "backstory": "Nina helped run a neighborhood repair group while studying ecological building. She was good at turning a vague idea into a checklist, and less good at letting someone else change it. Organizing a workshop brought her together with Bento and, later, the others. She came to the village to put her ideas into practice and learn how to make plans with people, not just for them.",
+      "traits": [
+        "Thoughtful",
+        "Organized",
+        "Exacting"
+      ],
+      "desire": "Give the village a safe, useful way to handle wastewater.",
+      "motivation": "Believes care includes the consequences people do not immediately see.",
+      "fear": "An overlooked detail harming the place they are trying to care for.",
+      "flaw": "Can turn a helpful suggestion into a correction and struggle to leave things unfinished.",
+      "boundary": "Values calm conversation and uninterrupted reading time.",
+      "growth": "Learning to make room for experiments and other people’s methods.",
+      "hobby": "Reading and learning",
+      "favorites": [
+        "reading-room",
+        "outdoor-classroom",
+        "garden-bench"
+      ],
+      "rates": {
+        "hygiene": 1.2,
+        "fun": 0.9
+      },
+      "strengths": [
+        "toilet",
+        "eco_toilet",
+        "banana_treatment",
+        "wetland",
+        "biodigester"
+      ],
+      "effect": "Notices the need to wash sooner and enjoys quiet leisure.",
+      "interests": [
+        "books",
+        "learning",
+        "nature"
+      ],
+      "aspiration": {
+        "label": "A planted treatment bed",
+        "key": "banana_treatment",
+        "reason": "Care for what leaves the village as well as what comes in."
+      },
+      "temperament": {
+        "socialAt": 44,
+        "acceptsAt": 70,
+        "breakAt": 46,
+        "bedtime": 21.8,
+        "downtime": "breathe"
+      },
+      "reflection": "A pause is part of the plan, even when the list is not finished."
+    }
+  ]
 }

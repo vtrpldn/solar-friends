@@ -87,6 +87,7 @@ impl Construction {
                         .is_some_and(|trip| trip.driver == worker_index)
                     || self.gathering.workers_at_site(worker_index)
                     || self.production.has_worker(worker_index)
+                    || worker.health.task.is_some()
                 {
                     continue;
                 }

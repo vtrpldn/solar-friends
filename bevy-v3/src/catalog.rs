@@ -9,6 +9,7 @@ pub struct Catalog {
     pub projects: BTreeMap<String, Project>,
     pub gathering: BTreeMap<String, GatherRecipe>,
     pub production: BTreeMap<String, ProductionRecipe>,
+    pub residents: [Profile; 5],
 }
 
 #[derive(Deserialize)]
@@ -59,6 +60,24 @@ pub struct ProductionRecipe {
     pub output: BTreeMap<String, u32>,
     pub work: f64,
     pub handcraft: bool,
+}
+
+#[derive(Deserialize)]
+pub struct Profile {
+    pub role: String,
+    pub bio: String,
+    pub rates: BTreeMap<String, f64>,
+    pub strengths: Vec<String>,
+    pub temperament: Temperament,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Temperament {
+    pub social_at: f64,
+    pub accepts_at: f64,
+    pub break_at: f64,
+    pub bedtime: f64,
 }
 
 impl Default for Catalog {

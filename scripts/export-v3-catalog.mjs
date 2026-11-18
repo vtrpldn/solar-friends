@@ -3,6 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { MATERIALS, PROJECTS, PROCESSES, createWeekend } from "../web/v02/weekend/simulation.js";
 import { buildingCategory, inBuildCategory, isBuildOption } from "../web/v02/weekend/build-categories.js";
 import { materialMeasure } from "../web/v02/weekend/material-measures.js";
+import { PROFILES } from "../web/v02/weekend/resident-personality.js";
 import { BIOLOGY } from "../web/v02/weekend/biological-production.js";
 import { supplierLimit } from "../web/v02/weekend/supplier-stock.js";
 
@@ -49,4 +50,4 @@ const production = Object.fromEntries(Object.entries(PROCESSES)
     output: recipe.output, work: recipe.work, handcraft: Boolean(recipe.craft)}]));
 
 await writeFile(new URL("../bevy-v3/data/construction.json", import.meta.url),
-  JSON.stringify({ materials, projects, gathering, production }, null, 2) + "\n");
+  JSON.stringify({ materials, projects, gathering, production, residents: Object.values(PROFILES) }, null, 2) + "\n");

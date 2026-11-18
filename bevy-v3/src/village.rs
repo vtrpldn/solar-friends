@@ -90,6 +90,7 @@ pub struct Village {
 enum UtilityPanel {
     Power,
     Water,
+    Residents,
 }
 
 impl Village {
@@ -336,6 +337,13 @@ fn village_input(
                 Some(UtilityPanel::Power)
             };
         }
+        if keyboard.just_pressed(KeyCode::KeyN) {
+            town.utility_panel = if town.utility_panel == Some(UtilityPanel::Residents) {
+                None
+            } else {
+                Some(UtilityPanel::Residents)
+            };
+        }
         if keyboard.just_pressed(KeyCode::KeyV) {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Water) {
                 None
@@ -482,7 +490,8 @@ fn animate_arrival(
                     position: world_position(worker.position.x, worker.position.y),
                     yaw: worker.yaw,
                     step_height: 0.0,
-                    visible: !village.construction.driver_away(index),
+                    visible: !village.construction.driver_away(index)
+                        && !village.construction.resident_sleeping(index),
                 }
             }
             ArrivalActor::Resident(index) => resident_pose(village.arrival_time, index),
@@ -530,6 +539,14 @@ fn advance_clock(
                 &mut town.stock,
                 town.clock,
                 time.delta_secs_f64(),
+            );
+            town.construction.tick_health(
+                &catalog,
+                &setup,
+                &mut town.stock,
+                site,
+                town.clock,
+                time.delta_secs(),
             );
             let clock = TownClock {
                 seconds: town.clock,
@@ -618,7 +635,7 @@ fn show_hud(
         label.push_str(&natural);
     }
     if village.camp.is_some() {
-        label.push_str("\nP Power · V Water");
+        label.push_str("\nP Power · V Water · N Residents");
     }
     match village.utility_panel {
         Some(UtilityPanel::Power) => {
@@ -628,6 +645,10 @@ fn show_hud(
         Some(UtilityPanel::Water) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.water_summary());
+        }
+        Some(UtilityPanel::Residents) => {
+            label.push('\n');
+            label.push_str(&village.construction.resident_status(&catalog));
         }
         None => {}
     }

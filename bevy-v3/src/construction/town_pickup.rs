@@ -46,6 +46,7 @@ impl Construction {
             if worker.assignment.is_some()
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
+                || self.residents[index].health.task.is_some()
             {
                 continue;
             }

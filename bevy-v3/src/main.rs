@@ -13,6 +13,7 @@ mod land;
 mod market;
 mod navigation;
 mod production;
+mod residents;
 mod save;
 mod setup;
 mod stock;
