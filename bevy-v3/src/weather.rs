@@ -96,6 +96,16 @@ pub fn recharge_season(seconds: f64, biome: usize) -> f64 {
     rain[month_at(day)] / rain.into_iter().fold(0.0, f64::max)
 }
 
+pub fn growing_season(seconds: f64, biome: usize) -> f64 {
+    let day = (304.0 + (540.0 + seconds * 0.45) / 1440.0).rem_euclid(365.0);
+    let season = ((day + 31.0).rem_euclid(365.0) / 91.25).floor() as usize;
+    [
+        [1.0, 0.9, 0.7, 1.0],
+        [1.0, 0.8, 0.45, 0.8],
+        [1.0, 0.8, 0.3, 0.45],
+    ][biome][season]
+}
+
 pub fn sun_height(seconds: f64) -> f64 {
     (((game_hour(seconds) - 6.0) * std::f64::consts::PI / 12.0).sin()).max(0.0)
 }

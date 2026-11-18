@@ -1,3 +1,4 @@
+mod farm_work;
 mod gather_work;
 mod production_work;
 mod resident_work;
@@ -11,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     arrival::{ARRIVAL_SPOTS, MAP_START, ROAD_END, road_center, road_width, world_position},
     catalog::{Catalog, Project},
+    farming::Farming,
     gathering::{GatherPhase, Gathering},
     land::Land,
     market::{Market, trip_seconds},
@@ -70,6 +72,8 @@ pub struct TownClock {
 #[derive(Deserialize, Serialize)]
 struct TownTrip {
     project: usize,
+    #[serde(default)]
+    farm_bed: Option<usize>,
     driver: usize,
     elapsed: f64,
     duration: f64,
@@ -97,6 +101,8 @@ pub struct Construction {
     market: Market,
     #[serde(default)]
     pub gathering: Gathering,
+    #[serde(default)]
+    pub farming: Farming,
     #[serde(default)]
     pub production: Production,
     #[serde(default)]
@@ -163,6 +169,7 @@ impl Default for Construction {
             plans: Vec::new(),
             market: Market::default(),
             gathering: Gathering::default(),
+            farming: Farming::default(),
             production: Production::default(),
             utilities: Utilities::default(),
             trip: None,
@@ -379,7 +386,7 @@ impl Construction {
         if !stock.sandbox {
             let quote = match self.market.quote(
                 catalog,
-                definition,
+                &definition.materials,
                 stock,
                 clock.seconds,
                 clock.round_trip_km,
@@ -392,7 +399,7 @@ impl Construction {
             };
             blueprint.pickups = quote.trips;
             blueprint.fare = quote.fare;
-            self.market.reserve(stock, definition, &quote);
+            self.market.reserve(stock, &definition.materials, &quote);
         }
         self.status = if stock.sandbox && !self.slow_sandbox && key != "road" {
             blueprint.delivered = blueprint.loads;
@@ -580,7 +587,7 @@ impl Construction {
         let active = self
             .trip
             .as_ref()
-            .filter(|trip| trip.boarded)
+            .filter(|trip| trip.boarded && trip.farm_bed.is_none())
             .map(|trip| trip.project);
         let fares = self
             .plans
@@ -592,12 +599,27 @@ impl Construction {
                     .saturating_sub(u32::from(active == Some(index)));
                 total.saturating_add(project.fare.saturating_mul(u64::from(trips)))
             });
+        let fares = self.farming.jobs.iter().fold(fares, |total, job| {
+            let paid = self.trip.as_ref().is_some_and(|trip| {
+                trip.boarded && trip.project == job.site && trip.farm_bed == Some(job.bed)
+            });
+            total.saturating_add(
+                job.fare
+                    .saturating_mul(u64::from(job.pickups.saturating_sub(u32::from(paid)))),
+            )
+        });
         let trip_valid = self.trip.as_ref().is_none_or(|trip| {
             trip.driver < self.residents.len()
-                && self
-                    .plans
-                    .get(trip.project)
-                    .is_some_and(|project| project.pickups > 0)
+                && if let Some(bed) = trip.farm_bed {
+                    self.farming
+                        .jobs
+                        .iter()
+                        .any(|job| job.site == trip.project && job.bed == bed && job.pickups > 0)
+                } else {
+                    self.plans
+                        .get(trip.project)
+                        .is_some_and(|project| project.pickups > 0)
+                }
                 && (0.0..=trip.duration).contains(&trip.elapsed)
                 && (0.0..=500.0).contains(&trip.duration)
         });
@@ -607,7 +629,13 @@ impl Construction {
                 .and_then(|project| catalog.projects.get(&project.key))
                 .is_some_and(|definition| definition.kind == kind)
         });
-        if !services_valid
+        let farms_valid = self.farming.valid_save(|index| {
+            self.plans.get(index).is_some_and(|project| {
+                matches!(project.key.as_str(), "garden" | "greenhouse" | "field")
+            })
+        });
+        if !farms_valid
+            || !services_valid
             || !trip_valid
             || !self.market.valid_save(catalog, stock, fares)
             || !self.valid_production(catalog)
@@ -702,10 +730,12 @@ impl Construction {
         self.tick_trip(catalog, stock, site, clock, dt);
         self.tick_gathering(catalog, stock, site, clock.seconds, dt);
         self.tick_production(catalog, stock, site, clock.seconds, dt);
+        self.tick_farm_jobs(catalog, stock, site, clock.seconds, dt);
         for index in 0..self.residents.len() {
             if self.trip.as_ref().is_some_and(|trip| trip.driver == index)
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
+                || self.farming.has_worker(index)
                 || self.residents[index].health.task.is_some()
             {
                 continue;

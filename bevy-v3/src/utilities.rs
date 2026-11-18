@@ -181,6 +181,19 @@ impl Utilities {
             .map(|(&id, node)| (id, node.location, node.size))
     }
 
+    pub fn irrigate(&mut self, plot: usize, amount: f64) -> bool {
+        let Some(node) = self.nodes.get_mut(&(plot + 1)) else {
+            return false;
+        };
+        if !node.enabled || node.water[0] + node.water[1] < amount {
+            return false;
+        }
+        let untreated = node.water[1].min(amount);
+        node.water[1] -= untreated;
+        node.water[0] -= amount - untreated;
+        true
+    }
+
     pub fn drink(&mut self, id: usize, liters: f64) -> bool {
         let Some(node) = self.nodes.get_mut(&id) else {
             return false;

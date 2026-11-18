@@ -26,7 +26,8 @@ impl Construction {
                 .as_ref()
                 .is_some_and(|job| job.activity != Activity::Walk)
                 || self.gathering.workers_at_site(index)
-                || self.production.has_worker(index);
+                || self.production.has_worker(index)
+                || self.farming.has_worker(index);
             resident.health.decay(
                 &catalog.residents[index],
                 temperature,
@@ -42,6 +43,7 @@ impl Construction {
                 && !self.trip.as_ref().is_some_and(|trip| trip.driver == index)
                 && !self.gathering.workers_at_site(index)
                 && !self.production.has_worker(index)
+                && !self.farming.has_worker(index)
                 && !self.residents[index]
                     .assignment
                     .as_ref()
@@ -234,6 +236,7 @@ impl Construction {
                         < catalog.residents[*id].temperament.accepts_at
                     && !self.gathering.workers_at_site(*id)
                     && !self.production.has_worker(*id)
+                    && !self.farming.has_worker(*id)
                     && !self.trip.as_ref().is_some_and(|trip| trip.driver == *id)
             })
             .find_map(|(id, resident)| {
@@ -243,7 +246,7 @@ impl Construction {
             })
     }
 
-    fn resident_route(
+    pub(super) fn resident_route(
         &self,
         catalog: &Catalog,
         site: ConstructionSite,
@@ -467,7 +470,7 @@ impl Construction {
     }
 }
 
-fn approach_points(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec2> {
+pub(super) fn approach_points(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec2> {
     let mut candidates = Vec::new();
     for row in 0..size.y {
         candidates.extend([start + IVec2::new(-1, row), start + IVec2::new(size.x, row)]);

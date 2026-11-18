@@ -387,8 +387,18 @@ fn village_input(
             town.construction.input(&keyboard, &catalog);
             town.construction
                 .production_input(&catalog, &mut town.stock, &keyboard);
+            town.construction.farm_input(
+                &catalog,
+                &mut town.stock,
+                &keyboard,
+                TownClock {
+                    seconds: town.clock,
+                    round_trip_km: setup.round_trip_km(),
+                },
+            );
             if !town.construction.menu
                 && !town.construction.production.open
+                && !town.construction.farming.open
                 && let Some(speed) = SPEEDS
                     .iter()
                     .position(|(key, _)| keyboard.just_pressed(*key))
@@ -558,6 +568,8 @@ fn advance_clock(
                 town.clock,
                 time.delta_secs_f64(),
             );
+            town.construction
+                .tick_crops(&catalog, &setup, town.clock, time.delta_secs_f64());
             town.construction.tick_health(
                 &catalog,
                 &setup,
@@ -673,6 +685,10 @@ fn show_hud(
     if let Some(production) = village.construction.selected_production(&catalog) {
         label.push('\n');
         label.push_str(&production);
+    }
+    if let Some(farm) = village.construction.farm_status(village.clock) {
+        label.push('\n');
+        label.push_str(&farm);
     }
     if let Some(index) = village.construction.production.selected
         && let Some(service) = village.construction.utilities.facility_status(index)

@@ -20,6 +20,8 @@ With the build menu closed, click a natural resource and press G to assign it fo
 
 Click a completed workbench, workshop, or kitchen and press C to open its recipes. Residents bring inputs to the building and carry the finished batch back to stores.
 
+Select a completed field, garden, or greenhouse and press K to manage its beds. Prepare the soil, sow a crop, and return to harvest when it is ripe. Bed settings cover crop, density, irrigation, and residues.
+
 Story reserves cash for town pickup when a blueprint needs materials beyond current stock. Press U to toggle automatic ordering.
 
 In Sandbox, materials are unlimited. Press I to toggle instant building.

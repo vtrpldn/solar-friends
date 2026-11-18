@@ -2,10 +2,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    catalog::{Catalog, Project},
-    stock::Stock,
-};
+use crate::{catalog::Catalog, stock::Stock};
 
 const RESERVE: u64 = 10_000;
 const CARGO_MASS: f64 = 350.0;
@@ -40,7 +37,7 @@ impl Market {
     pub fn quote(
         &self,
         catalog: &Catalog,
-        project: &Project,
+        bill: &BTreeMap<String, u32>,
         stock: &Stock,
         clock: f64,
         round_trip_km: u32,
@@ -48,7 +45,7 @@ impl Market {
         let day = ((540.0 + clock * 0.45) / 1440.0).floor() as u64;
         let mut units = BTreeMap::new();
         let mut total: f64 = 0.0;
-        for (id, amount) in &project.materials {
+        for (id, amount) in bill {
             let missing = amount.saturating_sub(stock.available(id));
             if missing == 0 || stock.sandbox {
                 continue;
@@ -97,8 +94,8 @@ impl Market {
         })
     }
 
-    pub fn reserve(&mut self, stock: &mut Stock, project: &Project, quote: &Quote) {
-        stock.reserve_available(&project.materials);
+    pub fn reserve(&mut self, stock: &mut Stock, bill: &BTreeMap<String, u32>, quote: &Quote) {
+        stock.reserve_available(bill);
         stock.debit(quote.price);
         self.committed_fares += quote.fare * u64::from(quote.trips);
         for (id, units) in &quote.units {
@@ -172,9 +169,11 @@ mod tests {
         let project = &catalog.projects["well"];
         let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
         let mut market = Market::default();
-        let quote = market.quote(&catalog, project, &stock, 0.0, 12).unwrap();
+        let quote = market
+            .quote(&catalog, &project.materials, &stock, 0.0, 12)
+            .unwrap();
         assert_eq!((quote.price, quote.trips, quote.fare), (126_400, 1, 776));
-        market.reserve(&mut stock, project, &quote);
+        market.reserve(&mut stock, &project.materials, &quote);
         assert_eq!(stock.balance(), 873_600);
         assert_eq!(stock.available("plumbing"), 0);
         market.depart(&mut stock, quote.fare);

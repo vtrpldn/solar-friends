@@ -240,6 +240,7 @@ impl Construction {
             if resident.assignment.is_some()
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
+                || self.farming.has_worker(index)
                 || self.residents[index].health.task.is_some()
                 || self.trip.as_ref().is_some_and(|trip| trip.driver == index)
             {

@@ -14,13 +14,32 @@ impl Construction {
             if !trip.boarded {
                 driver.move_along_path(dt, false);
                 if driver.path.is_empty() {
-                    self.market.depart(stock, self.plans[trip.project].fare);
+                    let fare = if let Some(bed) = trip.farm_bed {
+                        self.farming
+                            .jobs
+                            .iter()
+                            .find(|job| job.site == trip.project && job.bed == bed)
+                            .expect("booked seed pickup")
+                            .fare
+                    } else {
+                        self.plans[trip.project].fare
+                    };
+                    self.market.depart(stock, fare);
                     trip.boarded = true;
                 }
             } else {
                 trip.elapsed = (trip.elapsed + f64::from(dt)).min(trip.duration);
                 if trip.elapsed >= trip.duration {
-                    self.plans[trip.project].pickups -= 1;
+                    if let Some(bed) = trip.farm_bed {
+                        self.farming
+                            .jobs
+                            .iter_mut()
+                            .find(|job| job.site == trip.project && job.bed == bed)
+                            .expect("booked seed pickup")
+                            .pickups -= 1;
+                    } else {
+                        self.plans[trip.project].pickups -= 1;
+                    }
                     return;
                 }
             }
@@ -32,7 +51,18 @@ impl Construction {
         if !(7.0..18.0).contains(&hour) {
             return;
         }
-        let Some(project) = self.plans.iter().position(|plan| plan.pickups > 0) else {
+        let construction = self
+            .plans
+            .iter()
+            .position(|plan| plan.pickups > 0)
+            .map(|index| (index, None));
+        let farming = self
+            .farming
+            .jobs
+            .iter()
+            .find(|job| job.pickups > 0)
+            .map(|job| (job.site, Some(job.bed)));
+        let Some((project, farm_bed)) = construction.or(farming) else {
             return;
         };
         let door = IVec2::new(30, -15);
@@ -46,6 +76,7 @@ impl Construction {
             if worker.assignment.is_some()
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
+                || self.farming.has_worker(index)
                 || self.residents[index].health.task.is_some()
             {
                 continue;
@@ -61,6 +92,7 @@ impl Construction {
             self.residents[index].path = path;
             self.trip = Some(TownTrip {
                 project,
+                farm_bed,
                 driver: index,
                 elapsed: 0.0,
                 duration: trip_seconds(clock.round_trip_km),
