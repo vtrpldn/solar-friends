@@ -79,6 +79,10 @@ impl WorldSetup {
             && self.town < TOWN.len()
     }
 
+    pub fn seed(&self) -> u32 {
+        self.seed
+    }
+
     pub fn biome(&self) -> usize {
         self.biome
     }

@@ -1,0 +1,33 @@
+name: Check Bevy desktop game
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'bevy-v3/**'
+      - 'rust-toolchain.toml'
+      - '.github/workflows/bevy-v3.yml'
+  pull_request:
+    paths:
+      - 'bevy-v3/**'
+      - 'rust-toolchain.toml'
+      - '.github/workflows/bevy-v3.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  desktop:
+    runs-on: macos-latest
+    env:
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup show
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: bevy-v3
+      - run: cargo fmt --manifest-path bevy-v3/Cargo.toml --check
+      - run: cargo clippy --locked --manifest-path bevy-v3/Cargo.toml --all-targets -- -D warnings
+      - run: cargo test --locked --manifest-path bevy-v3/Cargo.toml

@@ -20,6 +20,7 @@ use crate::{
     setup::{Mode, WorldSetup},
     stock::Stock,
     ui_font::ui_font,
+    weather::{forecast, weather_at},
 };
 
 const SPEEDS: [(KeyCode, u8); 4] = [
@@ -72,6 +73,8 @@ pub struct Village {
     paused: bool,
     speed: usize,
     #[serde(skip)]
+    show_forecast: bool,
+    #[serde(skip)]
     camp_error: Option<&'static str>,
     #[serde(skip)]
     save_notice: String,
@@ -82,6 +85,14 @@ pub struct Village {
 }
 
 impl Village {
+    pub fn seconds(&self) -> f64 {
+        self.clock
+    }
+
+    pub fn is_paused(&self) -> bool {
+        self.paused
+    }
+
     pub fn tree_felled(&self, index: usize) -> bool {
         self.construction.gathering.felled(index)
     }
@@ -302,6 +313,9 @@ fn village_input(
         }
     }
 
+    if keyboard.just_pressed(KeyCode::KeyF) {
+        village.show_forecast = !village.show_forecast;
+    }
     if keyboard.just_pressed(KeyCode::Space) && village.camp.is_some() {
         village.paused = !village.paused;
     }
@@ -545,6 +559,14 @@ fn show_hud(
         "Day {day}   {hour:02}:{:02}   {speed}×\n{stock}\n{controls}",
         minute % 60
     );
+    let weather = weather_at(village.clock, setup.biome(), setup.seed());
+    label.push('\n');
+    label.push_str(&weather.summary());
+    label.push_str(" · F Forecast");
+    if village.show_forecast {
+        label.push('\n');
+        label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
+    }
     if let Some(progress) = village.construction.latest_progress(&catalog) {
         label.push('\n');
         label.push_str(&progress);

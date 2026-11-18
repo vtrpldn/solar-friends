@@ -12,7 +12,7 @@ After the cars arrive, click the ground to place camp or select a preset with 1 
 
 V3 runs as a standalone Bevy desktop application. The preview covers land generation, navigation, the opening camp, and construction, including orders and town pickup for missing materials. The V2 browser game remains available at `/v2/`.
 
-Use 1–4 to change simulation speed with the build menu closed. Press M to mute music and interface sounds.
+Press F for the three-day forecast. Use 1–4 to change simulation speed with the build menu closed. Press M to mute music and interface sounds.
 
 With the build menu closed, click a natural resource and press G to assign it for gathering, extraction, or felling. Output enters inventory when the resident brings it back.
 

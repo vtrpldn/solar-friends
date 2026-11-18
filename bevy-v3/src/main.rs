@@ -19,6 +19,7 @@ mod stock;
 mod terrain;
 mod ui_font;
 mod village;
+mod weather;
 use setup::{WorldSetup, WorldSetupPlugin};
 
 const CAMERA_HOME: Vec3 = Vec3::new(-26.0, 3.0, -12.0);
@@ -40,6 +41,7 @@ fn main() {
             ui_font::UiFontPlugin,
             audio::VillageAudio,
             land::LandPlugin,
+            weather::WeatherPlugin,
         ))
         .add_systems(Startup, setup_scene)
         .add_systems(PostUpdate, update_land)
@@ -197,4 +199,63 @@ fn camera_controls(
     };
     let change = zoom * delta * 1.3 - scroll.delta.y * wheel_factor;
     ortho.scale = (ortho.scale * change.exp()).clamp(1.0 / 6.0, 1.0 / 0.18);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::{asset::AssetPlugin, gizmos::GizmoPlugin, transform::TransformPlugin};
+
+    #[test]
+    fn bevy_update_enters_a_village_and_places_a_camp() {
+        let mut app = App::new();
+        app.add_plugins((
+            MinimalPlugins,
+            TransformPlugin,
+            AssetPlugin::default(),
+            WindowPlugin::default(),
+            GizmoPlugin,
+        ))
+        .init_asset::<Mesh>()
+        .init_asset::<StandardMaterial>()
+        .init_asset::<Scene>()
+        .init_asset::<Font>()
+        .init_resource::<ClearColor>()
+        .init_resource::<GlobalAmbientLight>()
+        .init_resource::<ButtonInput<KeyCode>>()
+        .init_resource::<ButtonInput<MouseButton>>()
+        .init_resource::<AccumulatedMouseMotion>()
+        .init_resource::<AccumulatedMouseScroll>()
+        .add_plugins((
+            WorldSetupPlugin,
+            village::VillagePlugin,
+            ui_font::UiFontPlugin,
+            land::LandPlugin,
+            weather::WeatherPlugin,
+        ))
+        .add_systems(Startup, setup_scene)
+        .add_systems(PostUpdate, update_land)
+        .add_systems(Update, camera_controls);
+        app.finish();
+        app.cleanup();
+        app.update();
+
+        app.world_mut().resource_mut::<WorldSetup>().open = false;
+        app.update();
+        assert!(app.world().resource::<village::Village>().camp.is_none());
+        for _ in 0..180 {
+            app.world_mut()
+                .resource_mut::<Time>()
+                .advance_by(std::time::Duration::from_millis(100));
+            app.world_mut().run_schedule(Update);
+        }
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Digit3);
+        app.world_mut().run_schedule(Update);
+        assert_eq!(
+            app.world().resource::<village::Village>().camp,
+            Some(IVec2::new(36, 36))
+        );
+    }
 }
