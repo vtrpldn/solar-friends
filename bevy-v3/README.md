@@ -90,3 +90,7 @@ Verify a lab report with `cargo run --locked --manifest-path bevy-v3/Cargo.toml 
 Use `--lab-ui scenario.json [village.json]` to open the native lab window. Press **Space** to run or pause, **J** for one simulation step, or **1–4** to change speed.
 
 In the native lab, press **O** to enter a JSON order at the current step and **F5** to export a completed report. The command window pauses the scenario while you type.
+
+## Model workshop
+
+Pass `--workshop` to inspect the bundled building scenes. Use **←/→** to browse, **Q/E** to orbit, **+/−** to zoom, **N** to change lighting, and **Home** to reset the view.

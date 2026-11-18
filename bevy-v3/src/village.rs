@@ -60,7 +60,7 @@ pub struct VillagePlugin;
 impl Plugin for VillagePlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "opening.glb");
-        embedded_asset!(app, "buildings.glb");
+        register_building_models(app);
         road_surface::install(app);
         building_preview::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds);
@@ -1754,7 +1754,11 @@ fn draw_blueprints(
     map_notice.set_if_neq(MapNotice(notice));
 }
 
-fn building_model(assets: &AssetServer, model: usize) -> SceneRoot {
+pub(crate) fn register_building_models(app: &mut App) {
+    embedded_asset!(app, "buildings.glb");
+}
+
+pub(crate) fn building_model(assets: &AssetServer, model: usize) -> SceneRoot {
     let path = AssetPath::from_path_buf(embedded_path!("buildings.glb")).with_source("embedded");
     SceneRoot(assets.load(path.with_label(GltfAssetLabel::Scene(model).to_string())))
 }

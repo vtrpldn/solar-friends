@@ -32,6 +32,7 @@ mod utilities;
 mod village;
 mod weather;
 mod wildlife;
+mod workshop;
 use setup::{WorldSetup, WorldSetupPlugin};
 
 const CAMERA_HOME: Vec3 = Vec3::new(-26.0, 3.0, -12.0);
@@ -40,6 +41,10 @@ const CAMERA_HEIGHT: f32 = 40.0;
 fn main() {
     let mut args = std::env::args_os().skip(1);
     let option = args.next();
+    if option.as_deref().is_some_and(|flag| flag == "--workshop") {
+        workshop::run();
+        return;
+    }
     if let Some(flag) = option.as_deref()
         && (flag == "--lab" || flag == "--lab-replay" || flag == "--lab-ui")
     {
