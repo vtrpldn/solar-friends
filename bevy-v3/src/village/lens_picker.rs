@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::utilities::NetworkView;
+
 #[derive(Clone, Copy, PartialEq)]
 pub(super) enum MapLens {
     Land,
@@ -42,10 +44,20 @@ pub(super) struct LensPicker {
     pub active: Option<MapLens>,
     next_page: bool,
     pub material: usize,
-    pub liquid: usize,
+    liquid: usize,
+    pub network_site: Option<usize>,
 }
 
 impl LensPicker {
+    pub(super) fn network_view(&self) -> Option<NetworkView> {
+        match self.active {
+            Some(MapLens::Power) => Some(NetworkView::Power),
+            Some(MapLens::Water) => Some(NetworkView::Liquid(self.liquid)),
+            Some(MapLens::Sanitation) => Some(NetworkView::Sanitation),
+            _ => None,
+        }
+    }
+
     pub(super) fn controls(&mut self, keys: &ButtonInput<KeyCode>, material_count: usize) -> bool {
         let shift = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
         if shift && keys.just_pressed(KeyCode::KeyL) {
@@ -58,6 +70,7 @@ impl LensPicker {
                 self.open = false;
             } else if keys.just_pressed(KeyCode::Digit0) {
                 self.active = None;
+                self.network_site = None;
                 self.open = false;
             } else if keys.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
                 self.next_page = !self.next_page;
@@ -65,6 +78,7 @@ impl LensPicker {
                 for (key, lens, _) in SECOND_PAGE {
                     if keys.just_pressed(key) {
                         self.active = Some(lens);
+                        self.network_site = None;
                         self.open = false;
                     }
                 }
@@ -72,6 +86,7 @@ impl LensPicker {
                 LENSES.iter().find(|(key, _, _)| keys.just_pressed(*key))
             {
                 self.active = Some(lens);
+                self.network_site = None;
                 self.open = false;
             }
             return true;
@@ -87,10 +102,12 @@ impl LensPicker {
             if let Some((index, count)) = filter {
                 if keys.just_pressed(KeyCode::PageUp) {
                     *index = (*index + count - 1) % count;
+                    self.network_site = None;
                     return true;
                 }
                 if keys.just_pressed(KeyCode::PageDown) {
                     *index = (*index + 1) % count;
+                    self.network_site = None;
                     return true;
                 }
             }
@@ -116,6 +133,7 @@ impl LensPicker {
         };
         if let Some(lens) = picked {
             self.active = (self.active != Some(lens)).then_some(lens);
+            self.network_site = None;
             return true;
         }
         false

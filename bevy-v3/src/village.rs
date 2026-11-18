@@ -571,6 +571,22 @@ fn village_input(
         return;
     }
 
+    if let Some(view) = village.lenses.network_view()
+        && keyboard.any_pressed([KeyCode::ControlLeft, KeyCode::ControlRight])
+        && keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown])
+    {
+        if let Some((id, point)) = village.construction.utilities.focus_lens_site(
+            view,
+            village.lenses.network_site,
+            keyboard.just_pressed(KeyCode::PageDown),
+        ) {
+            let terrain = village.terrain(&setup);
+            village.lenses.network_site = Some(id);
+            camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+        }
+        return;
+    }
+
     if village.planning_roads()
         && let Some(camp) = village.camp
     {
@@ -1427,12 +1443,7 @@ fn draw_blueprints(
             pointer.hovered.map(|hit| hit.cell),
             &mut gizmos,
         );
-        let network_lens = match village.lenses.active {
-            Some(MapLens::Power) => Some(NetworkView::Power),
-            Some(MapLens::Water) => Some(NetworkView::Liquid(village.lenses.liquid)),
-            Some(MapLens::Sanitation) => Some(NetworkView::Sanitation),
-            _ => None,
-        };
+        let network_lens = village.lenses.network_view();
         if network_lens.is_none()
             && matches!(
                 village.utility_panel,
@@ -1518,7 +1529,10 @@ fn draw_blueprints(
                     village.construction.utilities.draw_lens(
                         &terrain,
                         view,
-                        pointer.hovered.map(|hit| hit.cell),
+                        (
+                            pointer.hovered.map(|hit| hit.cell),
+                            village.lenses.network_site,
+                        ),
                         &mut gizmos,
                     )
                 })

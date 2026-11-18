@@ -90,6 +90,20 @@ struct Node {
     maintain_sanitation: bool,
 }
 
+impl Node {
+    fn matches_view(&self, view: NetworkView) -> bool {
+        if view == NetworkView::Power {
+            light_load(&self.kind) > 0.0
+                || self.solar_kw > 0.0
+                || self.battery > 0.0
+                || self.kind == "hydro"
+                || self.demanding
+        } else {
+            view.channels().any(|channel| self.capacity[channel] > 0.0)
+        }
+    }
+}
+
 #[derive(Clone, Copy, Deserialize, Serialize)]
 struct Pipe {
     from: usize,
@@ -1086,11 +1100,36 @@ impl Utilities {
         }
     }
 
+    pub fn focus_lens_site(
+        &self,
+        view: NetworkView,
+        selected: Option<usize>,
+        forward: bool,
+    ) -> Option<(usize, Vec2)> {
+        let sites = || {
+            self.nodes
+                .iter()
+                .filter(|(_, node)| node.matches_view(view))
+        };
+        let (id, node) = if forward {
+            sites()
+                .find(|&(&id, _)| selected.is_none_or(|previous| id > previous))
+                .or_else(|| sites().next())?
+        } else {
+            sites()
+                .rev()
+                .find(|&(&id, _)| selected.is_none_or(|previous| id < previous))
+                .or_else(|| sites().next_back())?
+        };
+        let center = node.location.as_vec2() + (node.size.as_vec2() - Vec2::ONE) * 0.5;
+        Some((*id, world_position(center.x, center.y)))
+    }
+
     pub fn draw_lens(
         &self,
         terrain: &Terrain,
         view: NetworkView,
-        hovered: Option<IVec2>,
+        (hovered, focused): (Option<IVec2>, Option<usize>),
         gizmos: &mut Gizmos,
     ) -> String {
         use std::fmt::Write;
@@ -1111,18 +1150,24 @@ impl Utilities {
                 "Sanitation · Purple greywater · Orange sewage pipes · Red storage full".into()
             }
         };
-        for node in self.nodes.values() {
+        label.push_str("\nCtrl+Page Up/Down Find facility");
+        let displayed_hover = hovered.and_then(|cell| {
+            self.nodes.iter().find_map(|(&id, node)| {
+                (node.matches_view(view)
+                    && cell.cmpge(node.location).all()
+                    && cell.cmplt(node.location + node.size).all())
+                .then_some(id)
+            })
+        });
+        let inspected = displayed_hover.or(focused);
+        for (&id, node) in self
+            .nodes
+            .iter()
+            .filter(|(_, node)| node.matches_view(view))
+        {
             let channels = view.channels();
             let (color, detail) = match view {
                 NetworkView::Power => {
-                    if !(light_load(&node.kind) > 0.0
-                        || node.solar_kw > 0.0
-                        || node.battery > 0.0
-                        || node.kind == "hydro"
-                        || node.demanding)
-                    {
-                        continue;
-                    }
                     let (state, color) = if !node.enabled {
                         ("Switched off", Color::srgb_u8(147, 146, 140))
                     } else if node.powered {
@@ -1135,9 +1180,6 @@ impl Utilities {
                     (color, state)
                 }
                 NetworkView::Water | NetworkView::Liquid(_) | NetworkView::Sanitation => {
-                    if !channels.clone().any(|channel| node.capacity[channel] > 0.0) {
-                        continue;
-                    }
                     if !node.enabled {
                         (Color::srgb_u8(147, 146, 140), "Switched off")
                     } else if channels.clone().any(|channel| {
@@ -1163,9 +1205,7 @@ impl Utilities {
             for axis in [Vec3::X, Vec3::Z] {
                 gizmos.line(tip - axis * 0.6, tip + axis * 0.6, color);
             }
-            if hovered.is_some_and(|cell| {
-                cell.cmpge(node.location).all() && cell.cmplt(node.location + node.size).all()
-            }) {
+            if inspected == Some(id) {
                 let _ = write!(label, "\n{} · {detail}", node.kind.replace('-', " "));
                 if view == NetworkView::Power && node.battery > 0.0 {
                     let _ = write!(label, " · {:.2}/{:.2} kWh", node.charge, node.battery);
