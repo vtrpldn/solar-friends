@@ -41,6 +41,8 @@ pub struct Buyer {
 #[serde(rename_all = "camelCase")]
 pub struct Project {
     pub name: String,
+    #[serde(default)]
+    pub description: String,
     pub size: [i32; 2],
     pub model: usize,
     pub kind: String,

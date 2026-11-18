@@ -32,6 +32,7 @@ const projects = Object.fromEntries(options
     id,
     {
       name: definition.name,
+      description: definition.description,
       model: models.indexOf(definition.asset),
       kind: definition.kind,
       size: definition.size,

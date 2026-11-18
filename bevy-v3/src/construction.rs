@@ -330,6 +330,7 @@ impl Construction {
                 let material_matches = |id: &String| matches(&catalog.materials[id].name);
                 matches(id)
                     || matches(&project.name)
+                    || matches(&project.description)
                     || matches(&project.category)
                     || project.materials.keys().any(material_matches)
                     || catalog.production.values().any(|recipe| {
@@ -515,11 +516,46 @@ impl Construction {
         if let Some(key) = &self.selection {
             let definition = &catalog.projects[key];
             let degrees = u32::from(self.rotation) * 90;
-            return format!(
-                "{} · {} loads · {:.0} work seconds\nClick to plan · R Rotate ({degrees}°) · B Close\n{}",
+            let dimensions = size(definition, self.rotation);
+            let materials: Vec<_> = definition
+                .materials
+                .iter()
+                .map(|(id, amount)| format!("{amount} {}", catalog.materials[id].name))
+                .collect();
+            let bill = materials
+                .chunks(3)
+                .map(|row| row.join(" · "))
+                .collect::<Vec<_>>()
+                .join("\n");
+            let labor_hours = definition.work * 0.45 / 60.0;
+            let mut details = format!(
+                "{} · {} × {} m · {:.1} person-hours · {} loads",
                 definition.name,
-                catalog.loads(definition),
-                definition.work,
+                dimensions.x * 2,
+                dimensions.y * 2,
+                labor_hours,
+                catalog.loads(definition)
+            );
+            if !definition.description.is_empty() {
+                let mut width = 0;
+                for word in definition.description.split_whitespace() {
+                    let length = word.chars().count();
+                    if width == 0 || width + 1 + length > 80 {
+                        details.push('\n');
+                        width = length;
+                    } else {
+                        details.push(' ');
+                        width += 1 + length;
+                    }
+                    details.push_str(word);
+                }
+            }
+            if !bill.is_empty() {
+                details.push_str("\nMaterials\n");
+                details.push_str(&bill);
+            }
+            return format!(
+                "{details}\nClick to plan · R Rotate ({degrees}°) · B Close\n{}",
                 self.status
             );
         }
