@@ -1193,7 +1193,9 @@ fn step(
         },
     );
     town.construction
-        .tick_growth(catalog, setup, &mut town.stock, town.clock, dt);
+        .tick_growth(catalog, setup, &town.stock, town.clock, dt);
+    town.construction
+        .schedule_perennial_work(catalog, &mut town.stock);
     town.construction
         .tick_health(catalog, setup, &mut town.stock, site, town.clock, dt as f32);
     town.construction

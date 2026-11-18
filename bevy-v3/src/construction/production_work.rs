@@ -373,14 +373,17 @@ impl Construction {
                 continue;
             };
             let pen = self.livestock.animals.entry(index).or_default();
-            if stock.sandbox {
-                continue;
+            if !stock.sandbox {
+                pen.tick(ration, clock, dt);
             }
-            pen.tick(ration, clock, dt);
             if self.changes.contains_key(&index)
                 || !self.utilities.enabled(index)
                 || self.production.jobs.iter().any(|job| job.site == index)
             {
+                continue;
+            }
+            if stock.sandbox {
+                batches.push((index, ration.product.clone()));
                 continue;
             }
             if pen.fed_days(ration) <= 0.25 {
@@ -409,7 +412,7 @@ impl Construction {
         &mut self,
         catalog: &Catalog,
         setup: &WorldSetup,
-        stock: &mut Stock,
+        stock: &Stock,
         clock: f64,
         elapsed: f64,
     ) {
@@ -455,6 +458,9 @@ impl Construction {
                 job.phase = Phase::Harvest;
             }
         }
+    }
+
+    pub fn schedule_perennial_work(&mut self, catalog: &Catalog, stock: &mut Stock) {
         let queued = self
             .plans
             .iter()
@@ -947,6 +953,41 @@ mod upgrade_tests {
     use super::*;
 
     #[test]
+    fn sandbox_schedules_perennial_harvests_and_livestock_without_duplicates() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let mut village = Construction::default();
+        for key in ["orchard", "grove", "apiary", "coop"] {
+            let mut plan = village.proposed_site(&catalog, key, IVec2::new(44, 36));
+            plan.work = catalog.projects[key].work;
+            village.plans.push(plan);
+        }
+        for _ in 0..2 {
+            village.tick_growth(&catalog, &setup, &stock, 0.1, 0.1);
+            village.schedule_perennial_work(&catalog, &mut stock);
+            village.tick_animals(&catalog, &mut stock, &Land::default(), 0.1, 0.1);
+        }
+        assert_eq!(
+            village
+                .production
+                .jobs
+                .iter()
+                .map(|job| &*job.recipe)
+                .collect::<Vec<_>>(),
+            ["fruit", "bananas", "honey", "eggs"]
+        );
+        assert!(
+            village
+                .production
+                .jobs
+                .iter()
+                .all(|job| job.growth.is_none())
+        );
+    }
+
+    #[test]
     fn livestock_schedules_forage_and_collection_without_player_orders() {
         let catalog = Catalog::default();
         let setup = WorldSetup::default();
@@ -1126,7 +1167,7 @@ mod upgrade_tests {
         let save = serde_json::to_string(&village).unwrap();
         let mut village: Construction = serde_json::from_str(&save).unwrap();
         assert!(village.valid_save(&catalog, &stock));
-        village.tick_growth(&catalog, &setup, &mut stock, 61.0 * DAY, 60.0 * DAY);
+        village.tick_growth(&catalog, &setup, &stock, 61.0 * DAY, 60.0 * DAY);
         assert!(village.production.jobs[0].phase == Phase::Harvest);
         assert_eq!(stock.available("compost"), before);
         for step in 0..3_000 {
