@@ -1,4 +1,5 @@
 mod cultivation_surface;
+mod guide;
 mod library_ui;
 mod road_surface;
 
@@ -105,6 +106,8 @@ pub struct Village {
     inventory_page: usize,
     #[serde(skip)]
     projects_page: usize,
+    #[serde(skip)]
+    guide: guide::Guide,
     #[serde(skip)]
     open_projects_only: bool,
     #[serde(skip)]
@@ -249,6 +252,10 @@ impl Village {
 
     pub fn seconds(&self) -> f64 {
         self.clock
+    }
+
+    pub fn guide_open(&self) -> bool {
+        self.guide.open()
     }
 
     pub fn trade_open(&self) -> bool {
@@ -417,7 +424,11 @@ fn read_camp_pointer(
 ) {
     pointer.clicked = None;
     pointer.hovered = None;
-    if !window.focused || setup.open || village.arrival_time < ARRIVAL_DURATION {
+    if !window.focused
+        || setup.open
+        || village.guide_open()
+        || village.arrival_time < ARRIVAL_DURATION
+    {
         *input = None;
         return;
     }
@@ -537,6 +548,10 @@ fn village_input(
                 opening_model(&assets, NAMES.len() + index * 2 + 1),
             ));
         }
+    }
+
+    if village.guide.controls(&keyboard) {
+        return;
     }
 
     if village.planning_roads()
@@ -1150,6 +1165,10 @@ fn show_hud(
     node.display = Display::Flex;
     node.top = px(20);
     node.bottom = Val::Auto;
+    if let Some(page) = village.guide.text() {
+        text.0 = page;
+        return;
+    }
     let minute = (540.0 + village.clock * 0.45) as u64;
     let hour = minute / 60 % 24;
     let day = minute / 1440 + 1;
@@ -1184,7 +1203,7 @@ fn show_hud(
     let weather = weather_at(village.clock, setup.biome(), setup.seed());
     label.push('\n');
     label.push_str(&weather.summary());
-    label.push_str(" · F Forecast");
+    label.push_str(" · F Forecast · F1 Guide");
     if village.show_forecast {
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));

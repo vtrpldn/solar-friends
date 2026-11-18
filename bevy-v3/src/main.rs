@@ -158,7 +158,12 @@ fn camera_controls(
     ),
     mut camera: Single<(&mut Transform, &mut Projection, &mut VillageCamera)>,
 ) {
-    if setup.open || saves.open || village.advance_open() || village.trade_open() || !window.focused
+    if setup.open
+        || saves.open
+        || village.guide_open()
+        || village.advance_open()
+        || village.trade_open()
+        || !window.focused
     {
         return;
     }
