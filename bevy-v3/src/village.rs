@@ -965,6 +965,7 @@ fn show_hud(
         Some(UtilityPanel::Water) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.water_summary());
+            label.push_str("\nBlue Drinking · Green Irrigation\nPurple Greywater · Amber Sewage");
         }
         Some(UtilityPanel::Residents) => {
             label.push('\n');
@@ -1053,6 +1054,16 @@ fn draw_blueprints(
     if !setup.open && village.camp.is_some() {
         let terrain = village.terrain(&setup);
         village.construction.draw(&catalog, &terrain, &mut gizmos);
+        if matches!(
+            village.utility_panel,
+            Some(UtilityPanel::Power | UtilityPanel::Water)
+        ) {
+            village.construction.utilities.draw_network(
+                &terrain,
+                village.utility_panel == Some(UtilityPanel::Power),
+                &mut gizmos,
+            );
+        }
         if let Some(hit) = pointer.hovered {
             if village.terrain_editor.open {
                 village

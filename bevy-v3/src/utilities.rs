@@ -21,6 +21,10 @@ pub struct Utilities {
     #[serde(skip)]
     links: Vec<Pipe>,
     #[serde(skip)]
+    power_links: Vec<(usize, usize)>,
+    #[serde(skip)]
+    power_members: HashSet<usize>,
+    #[serde(skip)]
     topology_valid: bool,
     pub grid_off: bool,
     grid_debt_cents: f64,
@@ -125,6 +129,8 @@ impl Utilities {
         }
         if changed {
             self.links = self.connections();
+            self.power_links = self.power_tree();
+            self.power_members = self.power_links.iter().flat_map(|&(a, b)| [a, b]).collect();
             self.topology_valid = true;
         }
     }
@@ -424,9 +430,22 @@ impl Utilities {
             hours,
             terrain,
         } = step;
-        let mut generation = 0.0;
-        let mut stored = 0.0;
-        let mut cap = 0.0;
+        #[derive(Default)]
+        struct Circuit {
+            generation: f64,
+            stored: f64,
+            capacity: f64,
+            available: f64,
+        }
+
+        let circuit_of = |id| {
+            if self.power_members.contains(&id) {
+                0
+            } else {
+                id
+            }
+        };
+        let mut circuits = BTreeMap::<usize, Circuit>::new();
         let wells: Vec<_> = self
             .nodes
             .values()
@@ -443,9 +462,10 @@ impl Utilities {
                 "hydro" => (flow * 9.81 * 5.0 * 0.65 / 86_400_000.0).min(2.34),
                 _ => 0.0,
             };
-            generation += output;
-            cap += node.battery;
-            stored += node.charge;
+            let circuit = circuits.entry(circuit_of(id)).or_default();
+            circuit.generation += output;
+            circuit.capacity += node.battery;
+            circuit.stored += node.charge;
             let mut kw = match node.kind.as_str() {
                 "well"
                     if (node.water[1] > 0.0 || rainfall > 0.05)
@@ -472,35 +492,42 @@ impl Utilities {
             if node.cold_storage {
                 kw += 0.08;
             }
-            demand.push((priority(&node.kind), id, kw));
+            demand.push((circuit_of(id), priority(&node.kind), id, kw));
         }
-        demand.sort_by_key(|(priority, id, _)| (*priority, *id));
-        self.generation_kw = generation;
-        self.demand_kw = demand.iter().map(|(_, _, kw)| kw).sum();
+        demand.sort_by_key(|&(circuit, priority, id, _)| (circuit, priority, id));
+        self.generation_kw = circuits.values().map(|circuit| circuit.generation).sum();
+        self.demand_kw = demand.iter().map(|&(_, _, _, kw)| kw).sum();
         self.grid_import_kw = 0.0;
-        let mut available = stored + generation * hours;
-        let mut grid = if self.grid_off {
+        for circuit in circuits.values_mut() {
+            circuit.available = circuit.stored + circuit.generation * hours;
+        }
+        let mut grid = if self.grid_off || !self.nodes.get(&0).is_some_and(|camp| camp.enabled) {
             0.0
         } else {
             GRID_CAPACITY * hours
         };
         let budget = stock.balance().saturating_sub(committed) as f64;
-        for (_, id, kw) in demand {
+        for (network, _, id, kw) in demand {
+            let available = &mut circuits.get_mut(&network).expect("power circuit").available;
             let required = kw * hours;
-            let deficit = (required - available).max(0.0);
+            let deficit = (required - *available).max(0.0);
             let cost = deficit * GRID_TARIFF_CENTS;
-            if deficit > 0.0 && deficit <= grid + 1e-9 && self.grid_debt_cents + cost <= budget {
+            if network == 0
+                && deficit > 0.0
+                && deficit <= grid + 1e-9
+                && self.grid_debt_cents + cost <= budget
+            {
                 self.grid_debt_cents += cost;
                 self.grid_spent += cost;
                 grid -= deficit;
                 self.grid_import_kw += deficit / hours;
                 self.grid_import_total += deficit;
-                available += deficit;
+                *available += deficit;
             }
             let node = self.nodes.get_mut(&id).expect("demand site");
-            node.powered = available + 1e-9 >= required;
+            node.powered = *available + 1e-9 >= required;
             if node.powered {
-                available = (available - required).max(0.0);
+                *available = (*available - required).max(0.0);
                 self.used_kwh += required;
             }
         }
@@ -509,19 +536,21 @@ impl Utilities {
             stock.debit(debit, CashKind::Electricity);
             self.grid_debt_cents -= debit as f64;
         }
-        self.generated_kwh += generation * hours;
-        let loss = ((available - stored).max(0.0)).min((cap - stored).max(0.0) / 0.9) * 0.1;
-        self.storage_loss_kwh += loss;
-        available -= loss;
-        self.curtailed_kwh += (available - cap).max(0.0);
-        if cap > 0.0 {
-            let remaining = available.min(cap).max(0.0);
-            for node in self
-                .nodes
-                .values_mut()
-                .filter(|node| node.enabled && node.battery > 0.0)
-            {
-                node.charge = remaining * node.battery / cap;
+        self.generated_kwh += self.generation_kw * hours;
+        for circuit in circuits.values_mut() {
+            let loss = (circuit.available - circuit.stored)
+                .max(0.0)
+                .min((circuit.capacity - circuit.stored).max(0.0) / 0.9)
+                * 0.1;
+            self.storage_loss_kwh += loss;
+            circuit.available -= loss;
+            self.curtailed_kwh += (circuit.available - circuit.capacity).max(0.0);
+            circuit.available = circuit.available.min(circuit.capacity);
+        }
+        for (&id, node) in &mut self.nodes {
+            if node.enabled && node.battery > 0.0 {
+                let circuit = &circuits[&circuit_of(id)];
+                node.charge = circuit.available * node.battery / circuit.capacity;
             }
         }
     }
@@ -682,6 +711,7 @@ impl Utilities {
                     .min_by(|a, b| {
                         distance(self.nodes[a].location, node.location)
                             .total_cmp(&distance(self.nodes[b].location, node.location))
+                            .then_with(|| a.cmp(b))
                     })
             };
             let mut pipe_in = |channel, nodes| {
@@ -731,6 +761,98 @@ impl Utilities {
             }
         }
         links
+    }
+
+    fn power_tree(&self) -> Vec<(usize, usize)> {
+        let mut unjoined: Vec<_> = self
+            .nodes
+            .iter()
+            .filter_map(|(&id, node)| {
+                (id != 0
+                    && (node.battery > 0.0
+                        || light_load(&node.kind) > 0.0
+                        || (node.kind != "water-storage"
+                            && self.links.iter().any(|pipe| pipe.from == id))))
+                .then_some((
+                    id,
+                    0,
+                    self.nodes[&0].location.distance_squared(node.location),
+                    0,
+                ))
+            })
+            .collect();
+        let mut links = Vec::with_capacity(unjoined.len());
+        while !unjoined.is_empty() {
+            let index = (0..unjoined.len())
+                .min_by_key(|&i| {
+                    let (id, _, distance, order) = unjoined[i];
+                    (distance, order, id)
+                })
+                .expect("unconnected utility nodes");
+            let (to, from, _, _) = unjoined.swap_remove(index);
+            links.push((from, to));
+            let position = self.nodes[&to].location;
+            for (candidate, nearest, best, order) in &mut unjoined {
+                let distance = position.distance_squared(self.nodes[candidate].location);
+                if distance < *best {
+                    *best = distance;
+                    *nearest = to;
+                    *order = links.len();
+                }
+            }
+        }
+        links
+    }
+
+    pub fn draw_network(&self, terrain: &Terrain, power: bool, gizmos: &mut Gizmos) {
+        let center = |node: &Node| {
+            let cell = node.location.as_vec2() + (node.size.as_vec2() - Vec2::ONE) * 0.5;
+            world_position(cell.x, cell.y)
+        };
+        let draw = |gizmos: &mut Gizmos, pair: (usize, usize), color: Color, channel: usize| {
+            let (Some(from), Some(to)) = (self.nodes.get(&pair.0), self.nodes.get(&pair.1)) else {
+                return;
+            };
+            let steps = (center(from).distance(center(to)) / 2.0).ceil().max(1.0) as usize;
+            let lift = if channel == 4 {
+                0.55
+            } else {
+                0.18 + channel as f32 * 0.06
+            };
+            let tint = if from.enabled && to.enabled && (!power || from.powered && to.powered) {
+                color
+            } else {
+                Color::srgb_u8(120, 125, 128)
+            };
+            gizmos.linestrip(
+                (0..=steps).map(|step| {
+                    let Vec2 { x, y: z } =
+                        center(from).lerp(center(to), step as f32 / steps as f32);
+                    Vec3::new(x, terrain.height_at(x, z) + lift, z)
+                }),
+                tint,
+            );
+        };
+        if power {
+            for &pair in &self.power_links {
+                draw(gizmos, pair, Color::srgb_u8(255, 221, 114), 4);
+            }
+        } else {
+            let colors = [
+                Color::srgb_u8(101, 214, 255),
+                Color::srgb_u8(117, 223, 149),
+                Color::srgb_u8(196, 161, 252),
+                Color::srgb_u8(234, 163, 90),
+            ];
+            for pipe in &self.links {
+                draw(
+                    gizmos,
+                    (pipe.from, pipe.to),
+                    colors[pipe.channel],
+                    pipe.channel,
+                );
+            }
+        }
     }
 
     fn transfer(&mut self, hours: f64) {
@@ -876,6 +998,52 @@ fn capacity(kind: &str) -> [f64; 4] {
 mod tests {
     use super::*;
     use crate::catalog::Catalog;
+
+    #[test]
+    fn automatic_links_use_nearby_nodes_and_keep_isolated_power_local() {
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &Catalog::default());
+        let mut utilities = Utilities {
+            grid_off: true,
+            ..default()
+        };
+        let node = |id, kind, dx, dz, batteries, panels| Facility {
+            id,
+            kind,
+            location: IVec2::new(32 + dx, -13 + dz),
+            size: IVec2::ONE,
+            batteries,
+            panels,
+            working: kind == "workshop",
+        };
+        utilities.sync(
+            [
+                node(1, "workshop", 9, 0, 0, 0),
+                node(2, "home", 2, 0, 0, 0),
+                node(3, "rain-barrel", 4, 0, 0, 0),
+                node(4, "garden", 4, 1, 0, 0),
+                node(5, "solar_farm", 12, 0, 0, 6),
+            ]
+            .into_iter(),
+        );
+        assert_eq!(utilities.power_links, [(0, 2), (2, 3), (3, 1)]);
+        assert!(
+            utilities
+                .links
+                .iter()
+                .any(|p| (p.from, p.to, p.channel) == (3, 4, 1))
+        );
+        utilities.tick(&setup, &mut stock, 0, 1.0, 0.1);
+        assert!(utilities.generation_kw > 0.45);
+        assert!(!utilities.powered(0));
+
+        utilities.sync([node(6, "solar_farm", 10, 0, 1, 6)].into_iter());
+        assert_eq!(utilities.power_links.last(), Some(&(1, 6)));
+        utilities.tick(&setup, &mut stock, 0, 2.0, 0.1);
+        assert!(utilities.powered(0));
+        assert_eq!(utilities.grid_import_kw, 0.0);
+        assert!(utilities.nodes[&6].charge > 0.0);
+    }
 
     #[test]
     fn grid_buys_only_consumed_energy_and_off_grid_can_block_machines() {
