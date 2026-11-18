@@ -5,6 +5,15 @@ use crate::{
     weather::{growing_season, weather_at},
 };
 
+fn work_priority(action: FarmAction) -> u8 {
+    match action {
+        FarmAction::Harvest => 0,
+        FarmAction::Plant => 1,
+        FarmAction::Clear | FarmAction::Amend | FarmAction::Collect => 2,
+        FarmAction::Prepare => 3,
+    }
+}
+
 impl Construction {
     pub fn tick_crops(&mut self, catalog: &Catalog, setup: &WorldSetup, clock: f64, dt: f64) {
         let weather = weather_at(clock, setup.biome(), setup.seed());
@@ -193,18 +202,18 @@ impl Construction {
                 if busy.contains(&(site, index)) {
                     continue;
                 }
-                let (priority, action) = match bed.stage {
+                let action = match bed.stage {
                     Stage::Harvestable
                         if bed.requirements(FarmAction::Harvest, clock.seconds).is_ok() =>
                     {
-                        (0, FarmAction::Harvest)
+                        FarmAction::Harvest
                     }
-                    Stage::Prepared => (1, FarmAction::Plant),
-                    Stage::Failed | Stage::Harvestable => (2, FarmAction::Clear),
-                    Stage::Unprepared | Stage::Harvested => (3, FarmAction::Prepare),
+                    Stage::Prepared => FarmAction::Plant,
+                    Stage::Failed | Stage::Harvestable => FarmAction::Clear,
+                    Stage::Unprepared | Stage::Harvested => FarmAction::Prepare,
                     Stage::Growing => continue,
                 };
-                candidates.push((priority, site, index, action));
+                candidates.push((work_priority(action), site, index, action));
             }
         }
         candidates.sort_unstable_by_key(|&(priority, site, bed, _)| (priority, site, bed));
@@ -370,8 +379,6 @@ impl Construction {
                 continue;
             }
             let Some(index) = job.worker else {
-                self.try_farm_worker(job_index, catalog, site);
-                self.farming.jobs[job_index].retry = clock + 1.0;
                 continue;
             };
             let worker = &mut self.residents[index];
@@ -453,6 +460,20 @@ impl Construction {
                     self.farming.jobs.remove(job_index);
                 }
             }
+        }
+
+        let mut waiting: Vec<_> = self
+            .farming
+            .jobs
+            .iter()
+            .enumerate()
+            .filter(|(_, job)| job.worker.is_none() && job.pickups == 0 && job.retry <= clock)
+            .map(|(index, job)| (work_priority(job.action), index))
+            .collect();
+        waiting.sort_unstable();
+        for (_, index) in waiting {
+            self.try_farm_worker(index, catalog, site);
+            self.farming.jobs[index].retry = clock + 1.0;
         }
     }
 
@@ -650,8 +671,12 @@ mod resize_tests {
         let setup = WorldSetup::default();
         let mut stock = Stock::for_start(&setup, &catalog);
         stock.sandbox = true;
-        let mut village = Construction::default();
-        let field = village.proposed_site(&catalog, "field", IVec2::new(44, 36));
+        let mut village = Construction {
+            field_size: IVec2::splat(8),
+            ..default()
+        };
+        let mut field = village.proposed_site(&catalog, "field", IVec2::new(44, 36));
+        field.work = catalog.projects["field"].work;
         village.plans.push(field);
         let mut plot = Plot::new("field", IVec2::splat(8)).unwrap();
         plot.beds[0].stage = Stage::Unprepared;
@@ -672,6 +697,24 @@ mod resize_tests {
         assert_eq!(village.farming.jobs[0].bed, 1);
         assert_eq!(village.farming.jobs[1].bed, 2);
         assert_eq!(village.farming.jobs[2].bed, 0);
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        for (index, worker) in village.residents.iter_mut().enumerate() {
+            worker.position = SUPPLY_SPOTS[index].as_vec2();
+        }
+        village.tick_farm_jobs(
+            &catalog,
+            &mut stock,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &land,
+                camp,
+            },
+            0.0,
+            0.1,
+        );
+        assert_eq!(village.farming.jobs[0].worker, Some(0));
     }
 
     #[test]
