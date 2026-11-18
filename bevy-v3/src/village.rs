@@ -2,6 +2,7 @@ mod cultivation_surface;
 mod guide;
 mod land_lens;
 mod library_ui;
+mod resource_lens;
 mod road_surface;
 
 use library_ui::{autosave_named, library_controls};
@@ -112,7 +113,7 @@ pub struct Village {
     #[serde(skip)]
     guide: guide::Guide,
     #[serde(skip)]
-    show_land_lens: bool,
+    map_lens: Option<MapLens>,
     #[serde(skip)]
     open_projects_only: bool,
     #[serde(skip)]
@@ -409,6 +410,12 @@ struct CampPointer {
     hovered: Option<GroundHit>,
 }
 
+#[derive(Clone, Copy, PartialEq)]
+enum MapLens {
+    Land,
+    Resources,
+}
+
 #[derive(Resource, Default, PartialEq)]
 struct MapNotice(Option<String>);
 
@@ -455,7 +462,7 @@ fn read_camp_pointer(
         && !village.terrain_editor.open
         && !village.planning_roads()
         && !village.construction.placing_project()
-        && !village.show_land_lens
+        && village.map_lens.is_none()
     {
         return;
     }
@@ -563,8 +570,16 @@ fn village_input(
         return;
     }
 
-    if village.camp.is_some() && keyboard.just_pressed(KeyCode::F2) {
-        village.show_land_lens = !village.show_land_lens;
+    if village.camp.is_some() {
+        for (key, lens) in [
+            (KeyCode::F2, MapLens::Land),
+            (KeyCode::F3, MapLens::Resources),
+        ] {
+            if keyboard.just_pressed(key) {
+                village.map_lens = (village.map_lens != Some(lens)).then_some(lens);
+                return;
+            }
+        }
     }
 
     if village.planning_roads()
@@ -1253,7 +1268,7 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F2 Land & slope · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects",
+            "\nP Power · V Water · N Residents · H Finances · F2 Slope · F3 Resources · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects",
         );
     }
     match village.utility_panel {
@@ -1427,14 +1442,24 @@ fn draw_blueprints(
                 &mut gizmos,
             );
         }
-        if village.show_land_lens {
-            notice = Some(land_lens.draw(
+        notice = match village.map_lens {
+            Some(MapLens::Land) => Some(land_lens.draw(
                 village.terrain_key(),
                 &terrain,
                 pointer.hovered.map(|hit| hit.world),
                 &mut gizmos,
-            ));
-        }
+            )),
+            Some(MapLens::Resources) => Some(resource_lens::draw(
+                &village,
+                &setup,
+                &terrain,
+                &catalog,
+                &land,
+                pointer.hovered,
+                &mut gizmos,
+            )),
+            None => None,
+        };
         if let Some(hit) = pointer.hovered {
             if village.terrain_editor.open {
                 village

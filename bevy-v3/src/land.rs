@@ -75,6 +75,10 @@ impl Land {
         self.sites.get(index)
     }
 
+    pub fn sites(&self) -> impl Iterator<Item = (usize, &Site)> {
+        self.sites.iter().enumerate()
+    }
+
     pub fn generate(setup: &WorldSetup) -> Self {
         let terrain = setup.terrain();
         let mut land = Self::default();

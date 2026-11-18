@@ -37,6 +37,28 @@ struct HarvestState {
     ready: f64,
 }
 
+pub enum ResourceStatus {
+    Cleared,
+    Exhausted,
+    Queued,
+    Recovering(f64),
+    Remaining(u32),
+    Available,
+}
+
+impl std::fmt::Display for ResourceStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Cleared => f.write_str("Cleared"),
+            Self::Exhausted => f.write_str("Exhausted"),
+            Self::Queued => f.write_str("Gathering queued"),
+            Self::Recovering(days) => write!(f, "Recovering for {days:.1} days"),
+            Self::Remaining(units) => write!(f, "{units} units remaining"),
+            Self::Available => f.write_str("Available"),
+        }
+    }
+}
+
 impl Gathering {
     pub fn felled(&self, index: usize) -> bool {
         self.markers.get(&index).is_some_and(|site| site.removed)
@@ -75,6 +97,62 @@ impl Gathering {
         Some(format!("{name} · {status}"))
     }
 
+    pub fn resource_status(
+        &self,
+        index: usize,
+        site: &crate::land::Site,
+        catalog: &Catalog,
+        (seed, richness, clock): (u32, f64, f64),
+    ) -> ResourceStatus {
+        let recipe = &catalog.gathering[site.recipe()];
+        let state = self.markers.get(&index);
+        let extracted = state.map_or(0, |state| state.extracted);
+        let remaining = if recipe.deposit > 0 {
+            Some(Self::deposit_limit(site, recipe, seed, richness).saturating_sub(extracted))
+        } else if recipe.gather_limit > 0 {
+            Some(recipe.gather_limit.saturating_sub(extracted))
+        } else {
+            None
+        };
+        if self.felled(index) {
+            ResourceStatus::Cleared
+        } else if self.orders.contains_key(&index) {
+            ResourceStatus::Queued
+        } else if remaining == Some(0) {
+            ResourceStatus::Exhausted
+        } else if let Some(state) = state.filter(|state| clock < state.ready) {
+            ResourceStatus::Recovering((state.ready - clock) / 3200.0)
+        } else if let Some(units) = remaining {
+            ResourceStatus::Remaining(units)
+        } else {
+            ResourceStatus::Available
+        }
+    }
+
+    fn deposit_limit(
+        site: &crate::land::Site,
+        recipe: &crate::catalog::GatherRecipe,
+        seed: u32,
+        richness: f64,
+    ) -> u32 {
+        let salt = if site.recipe() == "stone" {
+            0x91af
+        } else {
+            0x7c32
+        };
+        let column = site.position.x.div_euclid(12) as u32;
+        let row = site.position.y.div_euclid(12) as u32;
+        let mut random =
+            land_random(seed ^ salt ^ column.wrapping_mul(73856093) ^ row.wrapping_mul(19349663));
+        let factor = if seed == 0 {
+            1.0
+        } else {
+            (0.6 + random() * 1.4) * richness
+        };
+        let batch: u32 = recipe.output.values().sum();
+        (f64::from(recipe.deposit * 8) * factor / f64::from(batch)).round() as u32 * batch
+    }
+
     pub fn queue(&mut self, catalog: &Catalog, land: &Land, seed: u32, richness: f64, clock: f64) {
         let Some(index) = self.selected else { return };
         let Some(site) = land.site(index) else { return };
@@ -91,25 +169,7 @@ impl Gathering {
                 return;
             }
             if recipe.deposit > 0 {
-                let salt = if site.recipe() == "stone" {
-                    0x91af
-                } else {
-                    0x7c32
-                };
-                let column = site.position.x.div_euclid(12) as u32;
-                let row = site.position.y.div_euclid(12) as u32;
-                let mut random = land_random(
-                    seed ^ salt ^ column.wrapping_mul(73856093) ^ row.wrapping_mul(19349663),
-                );
-                let factor = if seed == 0 {
-                    1.0
-                } else {
-                    (0.6 + random() * 1.4) * richness
-                };
-                let batch: u32 = recipe.output.values().sum();
-                let limit = (f64::from(recipe.deposit * 8) * factor / f64::from(batch)).round()
-                    as u32
-                    * batch;
+                let limit = Self::deposit_limit(site, recipe, seed, richness);
                 if state.extracted >= limit {
                     self.notice = "This deposit is exhausted.".into();
                     return;
