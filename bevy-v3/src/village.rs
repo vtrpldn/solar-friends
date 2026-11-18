@@ -1,12 +1,17 @@
 use bevy::{
     asset::{AssetPath, embedded_asset, embedded_path},
     gltf::GltfAssetLabel,
+    picking::prelude::{MeshRayCast, MeshRayCastSettings},
     prelude::*,
+    window::PrimaryWindow,
 };
 
 use crate::{
-    VillageCamera,
-    arrival::{ARRIVAL_DURATION, resident_pose, vehicle_pose, world_position},
+    GroundMesh, VillageCamera,
+    arrival::{
+        ARRIVAL_DURATION, MAP_START, ROAD_END, resident_pose, road_center, road_width,
+        vehicle_pose, world_position,
+    },
     setup::WorldSetup,
 };
 
@@ -23,20 +28,25 @@ impl Plugin for VillagePlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "opening.glb");
         app.init_resource::<Village>()
+            .init_resource::<CampPointer>()
             .insert_resource(Time::<Fixed>::from_hz(10.0))
             .add_systems(Startup, spawn_hud)
-            .add_systems(Update, (village_input, animate_arrival, show_hud).chain())
+            .add_systems(
+                Update,
+                (read_camp_pointer, village_input, animate_arrival, show_hud).chain(),
+            )
             .add_systems(FixedUpdate, advance_clock);
     }
 }
 
 #[derive(Resource, Default)]
-struct Village {
+pub struct Village {
     setup: Option<WorldSetup>,
-    camp: Option<IVec2>,
+    pub camp: Option<IVec2>,
     clock: f64,
     arrival_time: f32,
     paused: bool,
+    camp_error: Option<&'static str>,
 }
 
 #[derive(Component)]
@@ -73,10 +83,83 @@ fn spawn_hud(mut commands: Commands) {
     ));
 }
 
+#[derive(Resource, Default)]
+struct CampPointer(Option<IVec2>);
+
+fn read_camp_pointer(
+    (setup, village): (Res<WorldSetup>, Res<Village>),
+    (mouse, window): (
+        Res<ButtonInput<MouseButton>>,
+        Single<&Window, With<PrimaryWindow>>,
+    ),
+    camera: Single<(&Camera, &GlobalTransform), With<VillageCamera>>,
+    ground: Query<(), With<GroundMesh>>,
+    mut raycast: MeshRayCast,
+    mut input: Local<Option<Vec2>>,
+    mut pointer: ResMut<CampPointer>,
+) {
+    pointer.0 = None;
+    if !window.focused
+        || setup.open
+        || village.camp.is_some()
+        || village.arrival_time < ARRIVAL_DURATION
+    {
+        *input = None;
+        return;
+    }
+    if mouse.just_pressed(MouseButton::Left) {
+        *input = window.cursor_position();
+    }
+    let Some(cursor) = window.cursor_position() else {
+        *input = None;
+        return;
+    };
+    if input.is_some_and(|start| start.distance(cursor) > 5.0) {
+        *input = None;
+    }
+    if !mouse.just_released(MouseButton::Left) || input.take().is_none() {
+        return;
+    }
+    let (camera, transform) = *camera;
+    let Ok(ray) = camera.viewport_to_world(transform, cursor) else {
+        return;
+    };
+    let filter = |entity| ground.contains(entity);
+    let settings = MeshRayCastSettings::default().with_filter(&filter);
+    if let Some((_, hit)) = raycast.cast_ray(ray, &settings).first() {
+        let cell = hit.point.xz() * 0.5 + Vec2::splat(32.5);
+        pointer.0 = Some(cell.floor().as_ivec2());
+    }
+}
+
+fn custom_camp_error(terrain: &crate::terrain::Terrain, cell: IVec2) -> Option<&'static str> {
+    if !(-28..=90).contains(&cell.x) || !(-26..=91).contains(&cell.y) {
+        return Some("Keep the tents inside the plot.");
+    }
+    for column in cell.x - 1..=cell.x + 3 {
+        for row in cell.y - 3..=cell.y {
+            let Vec2 { x, y: z } = world_position(column as f32, row as f32);
+            let (center, width) = terrain.river(f64::from(z));
+            if (f64::from(x) - center).abs() <= width + 3.9 {
+                return Some("Keep the tents back from the river.");
+            }
+            if (MAP_START..=ROAD_END).contains(&z)
+                && (x - road_center(z)).abs() < road_width(z) + 1.0
+            {
+                return Some("Leave the access road clear.");
+            }
+            if column == 32 && row == -13 {
+                return Some("Leave the unloaded supplies clear.");
+            }
+        }
+    }
+    None
+}
+
 fn village_input(
     mut commands: Commands,
     setup: Res<WorldSetup>,
-    keyboard: Res<ButtonInput<KeyCode>>,
+    (keyboard, pointer): (Res<ButtonInput<KeyCode>>, Res<CampPointer>),
     mut village: ResMut<Village>,
     mut camera: Single<&mut VillageCamera>,
     entities: Query<Entity, With<VillageEntity>>,
@@ -124,13 +207,21 @@ fn village_input(
     if village.camp.is_some() || village.arrival_time < ARRIVAL_DURATION {
         return;
     }
-    let Some((_, cell)) = CAMP_SITES
+    let preset = CAMP_SITES
         .into_iter()
-        .find(|(key, _)| keyboard.just_pressed(*key))
-    else {
+        .find_map(|(key, cell)| keyboard.just_pressed(key).then_some(cell));
+    let Some(cell) = preset.or(pointer.0) else {
         return;
     };
+    if preset.is_none()
+        && let Some(error) = custom_camp_error(&terrain, cell)
+    {
+        village.camp_error = Some(error);
+        return;
+    }
+    village.camp_error = None;
     village.camp = Some(cell);
+    let terrain = terrain.with_camp(cell);
     let Vec2 { x, y: z } = world_position(cell.x as f32, cell.y as f32);
     camera.target = Vec3::new(x, terrain.height_at(x, z), z);
     for index in 0..2 {
@@ -157,8 +248,13 @@ fn animate_arrival(
     if village.arrival_time >= ARRIVAL_DURATION && !setup.is_changed() && !village.is_changed() {
         return;
     }
-    village.arrival_time = (village.arrival_time + time.delta_secs()).min(ARRIVAL_DURATION);
-    let terrain = setup.terrain();
+    if village.arrival_time < ARRIVAL_DURATION {
+        village.arrival_time = (village.arrival_time + time.delta_secs()).min(ARRIVAL_DURATION);
+    }
+    let mut terrain = setup.terrain();
+    if let Some(cell) = village.camp {
+        terrain = terrain.with_camp(cell);
+    }
     for (actor, mut transform, mut visibility) in &mut actors {
         let pose = match *actor {
             ArrivalActor::Resident(index) => resident_pose(village.arrival_time, index),
@@ -204,7 +300,9 @@ fn show_hud(
     let controls = if village.arrival_time < ARRIVAL_DURATION {
         "Arriving at the village"
     } else if village.camp.is_none() {
-        "Choose camp · 1 Shade · 2 Entrance · 3 Clearing"
+        village
+            .camp_error
+            .unwrap_or("Click to choose camp · 1 Shade · 2 Entrance · 3 Clearing")
     } else if village.paused {
         "Space to resume"
     } else {

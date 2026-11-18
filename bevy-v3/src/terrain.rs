@@ -2,7 +2,7 @@ use bevy::{
     asset::RenderAssetUsages, mesh::Indices, prelude::*, render::render_resource::PrimitiveTopology,
 };
 
-use crate::arrival::{MAP_START, ROAD_END, road_center, road_width};
+use crate::arrival::{MAP_START, ROAD_END, road_center, road_width, world_position};
 
 const CELLS: u32 = 128;
 const HALF_WIDTH: f64 = 128.0;
@@ -14,6 +14,15 @@ pub struct Terrain {
     bend: f64,
     width: f64,
     hill_height: f64,
+    foundation: Option<Foundation>,
+}
+
+struct Foundation {
+    left: f64,
+    right: f64,
+    top: f64,
+    bottom: f64,
+    height: f64,
 }
 
 impl Terrain {
@@ -36,6 +45,7 @@ impl Terrain {
             bend,
             width: (2.1 + random() * 1.3) * water.sqrt(),
             hill_height: (4.0 + random() * 5.0) * relief,
+            foundation: None,
         }
     }
 
@@ -54,7 +64,47 @@ impl Terrain {
         (center, width)
     }
 
+    pub fn with_camp(mut self, cell: IVec2) -> Self {
+        let start = world_position((cell.x - 1) as f32, (cell.y - 3) as f32) - Vec2::splat(2.0);
+        let end = world_position((cell.x + 4) as f32, (cell.y + 1) as f32);
+        let center = (start + end) * 0.5;
+        self.foundation = Some(Foundation {
+            left: start.x.into(),
+            right: end.x.into(),
+            top: start.y.into(),
+            bottom: end.y.into(),
+            height: self.height_at(center.x, center.y).into(),
+        });
+        self
+    }
+
     pub fn elevation(&self, x: f64, z: f64) -> f64 {
+        let natural = self.natural_elevation(x, z);
+        let Some(pad) = &self.foundation else {
+            return natural;
+        };
+        let distance = (pad.left - x)
+            .max(0.0)
+            .max(x - pad.right)
+            .hypot((pad.top - z).max(0.0).max(z - pad.bottom));
+        if distance < 0.0001 {
+            return pad.height;
+        }
+        if distance >= 8.0 {
+            return natural;
+        }
+        let (center, width) = self.river(z);
+        let access_road = (f64::from(MAP_START)..=f64::from(ROAD_END)).contains(&z)
+            && (x - f64::from(road_center(z as f32))).abs() < f64::from(road_width(z as f32)) + 1.0;
+        if (x - center).abs() <= width + 2.9 || access_road {
+            return natural;
+        }
+        let t = distance / 8.0;
+        let weight = 1.0 - t * t * (3.0 - 2.0 * t);
+        natural * (1.0 - weight) + pad.height * weight
+    }
+
+    fn natural_elevation(&self, x: f64, z: f64) -> f64 {
         if self.seed == 0 {
             return 0.0;
         }
@@ -182,6 +232,19 @@ fn noise(x: f64, z: f64, seed: u32) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn camp_grading_matches_the_reference_foundation() {
+        let terrain = Terrain::new(42, 1.0, 1.0).with_camp(IVec2::new(36, 36));
+        for (x, z, expected) in [
+            (8.0, 8.0, 2.201269096913987),
+            (14.0, 10.0, 2.201269096913987),
+            (20.0, 10.0, 2.1936407927990986),
+            (22.0, 8.0, 2.399863653582314),
+        ] {
+            assert!((terrain.elevation(x, z) - expected).abs() < 1e-6);
+        }
+    }
 
     #[test]
     fn terrain_matches_v2_reference_samples() {

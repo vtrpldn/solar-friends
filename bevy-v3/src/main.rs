@@ -69,22 +69,34 @@ fn setup_scene(mut commands: Commands) {
 #[derive(Component)]
 struct LandMesh;
 
+#[derive(Component)]
+struct GroundMesh;
+
 fn update_land(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     setup: Res<WorldSetup>,
     old_land: Query<Entity, With<LandMesh>>,
+    village: Res<village::Village>,
+    mut drawn: Local<Option<(WorldSetup, Option<IVec2>)>>,
 ) {
-    if !setup.is_changed() || !setup.open {
+    let camp = if setup.open { None } else { village.camp };
+    let key = (setup.session(), camp);
+    if drawn.as_ref() == Some(&key) {
         return;
     }
+    *drawn = Some(key);
     for entity in &old_land {
         commands.entity(entity).despawn();
     }
-    let terrain = setup.terrain();
+    let mut terrain = setup.terrain();
+    if let Some(cell) = camp {
+        terrain = terrain.with_camp(cell);
+    }
     commands.spawn((
         LandMesh,
+        GroundMesh,
         Mesh3d(meshes.add(terrain.ground_mesh())),
         MeshMaterial3d(materials.add(setup.ground_color())),
     ));
