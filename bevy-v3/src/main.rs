@@ -23,6 +23,7 @@ mod stock;
 mod terrain;
 mod time_advance;
 mod town_work;
+mod trade;
 mod ui_font;
 mod utilities;
 mod village;

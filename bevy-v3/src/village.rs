@@ -99,6 +99,7 @@ enum UtilityPanel {
     Water,
     Residents,
     Finances,
+    Trade,
 }
 
 impl Village {
@@ -366,16 +367,28 @@ fn village_input(
     if let Some(cell) = village.camp {
         let town = &mut *village;
         if keyboard.just_pressed(KeyCode::KeyH) && !town.stock.sandbox {
-            town.utility_panel = if town.utility_panel == Some(UtilityPanel::Finances) {
+            town.utility_panel = if matches!(
+                town.utility_panel,
+                Some(UtilityPanel::Finances | UtilityPanel::Trade)
+            ) {
                 None
             } else {
                 Some(UtilityPanel::Finances)
             };
         }
-        if town.utility_panel == Some(UtilityPanel::Finances)
-            && [KeyCode::KeyB, KeyCode::KeyC, KeyCode::KeyK]
-                .iter()
-                .any(|key| keyboard.just_pressed(*key))
+        if keyboard.just_pressed(KeyCode::Tab) {
+            town.utility_panel = match town.utility_panel {
+                Some(UtilityPanel::Finances) => Some(UtilityPanel::Trade),
+                Some(UtilityPanel::Trade) => Some(UtilityPanel::Finances),
+                other => other,
+            };
+        }
+        if matches!(
+            town.utility_panel,
+            Some(UtilityPanel::Finances | UtilityPanel::Trade)
+        ) && [KeyCode::KeyB, KeyCode::KeyC, KeyCode::KeyK]
+            .iter()
+            .any(|key| keyboard.just_pressed(*key))
         {
             town.utility_panel = None;
         }
@@ -399,6 +412,17 @@ fn village_input(
                 town.construction
                     .toggle_weekday_shift(town.finance_resident);
             }
+        }
+        if town.utility_panel == Some(UtilityPanel::Trade) {
+            town.construction.trade_input(
+                &catalog,
+                &mut town.stock,
+                &keyboard,
+                TownClock {
+                    seconds: town.clock,
+                    round_trip_km: setup.round_trip_km(),
+                },
+            );
         }
         if keyboard.just_pressed(KeyCode::KeyP) {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Power) {
@@ -437,7 +461,10 @@ fn village_input(
         }
         if keyboard.get_just_pressed().len() > 0 {
             town.construction.input(&keyboard, &catalog);
-            if town.utility_panel != Some(UtilityPanel::Finances) {
+            if !matches!(
+                town.utility_panel,
+                Some(UtilityPanel::Finances | UtilityPanel::Trade)
+            ) {
                 town.construction
                     .production_input(&catalog, &mut town.stock, &keyboard);
                 town.construction.farm_input(
@@ -453,7 +480,10 @@ fn village_input(
             if !town.construction.menu
                 && !town.construction.production.open
                 && !town.construction.farming.open
-                && town.utility_panel != Some(UtilityPanel::Finances)
+                && !matches!(
+                    town.utility_panel,
+                    Some(UtilityPanel::Finances | UtilityPanel::Trade)
+                )
                 && let Some(speed) = SPEEDS
                     .iter()
                     .position(|(key, _)| keyboard.just_pressed(*key))
@@ -776,6 +806,19 @@ fn show_hud(
                     .construction
                     .finance_summary(&village.stock, village.finance_resident),
             );
+            label.push_str("\nTab Town trade");
+        }
+        Some(UtilityPanel::Trade) => {
+            label.push('\n');
+            label.push_str(&village.construction.trade_status(
+                &catalog,
+                &village.stock,
+                TownClock {
+                    seconds: village.clock,
+                    round_trip_km: setup.round_trip_km(),
+                },
+            ));
+            label.push_str("\nTab Finances");
         }
         None => {}
     }

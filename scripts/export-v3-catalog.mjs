@@ -2,6 +2,7 @@
 import { writeFile } from "node:fs/promises";
 import { MATERIALS, PROJECTS, PROCESSES, createWeekend } from "../web/v02/weekend/simulation.js";
 import { buildingCategory, inBuildCategory, isBuildOption } from "../web/v02/weekend/build-categories.js";
+import { buyerFor } from "../web/v02/weekend/local-market.js";
 import { materialMeasure } from "../web/v02/weekend/material-measures.js";
 import { PROFILES } from "../web/v02/weekend/resident-personality.js";
 import { ANIMAL_RATIONS } from "../web/v02/weekend/animal-care.js";
@@ -19,6 +20,7 @@ const materials = Object.fromEntries(Object.entries(MATERIALS).map(([id, materia
     supplier: material.quantity ? supplierLimit(id, material) : 0,
     mass: materialMeasure(id).kg,
     volume: materialMeasure(id).m3,
+    buyer: buyerFor(id),
     starting: id === "wood" ? startingVillage.wood : startingVillage.materials[id],
   },
 ]));

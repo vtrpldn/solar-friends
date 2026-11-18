@@ -28,7 +28,7 @@ Story reserves cash for town pickup when a blueprint needs materials beyond curr
 
 In Sandbox, materials are unlimited. Press I to toggle instant building.
 
-In Story, press H for finances and paid town shifts. Book one day shift or turn on repeating weekday work for a selected resident. Wages reach village savings when the resident returns.
+In Story, press H for finances and paid town shifts. Book one day shift or turn on repeating weekday work for a selected resident. Wages reach village savings when the resident returns. Press Tab in Finances to open town trade, quote and reserve a sale, or set an automatic sale policy.
 
 Press L to advance between 1 and 365 days. Exact replay uses normal simulation steps. Fast approximate uses larger steps. Press L while advancing to stop at the time shown.
 

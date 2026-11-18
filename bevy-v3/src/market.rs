@@ -78,7 +78,7 @@ impl Market {
             total += f64::from(missing) * item.price / f64::from(item.pack);
         }
         let trips = cargo_trips(catalog, units.clone())?;
-        let fare = ((f64::from(round_trip_km) / 10.0) * 6.47 * 100.0).round() as u64;
+        let fare = fare_cents(round_trip_km);
         let price = (total * 100.0).ceil() as u64;
         if !units.is_empty()
             && price + fare * u64::from(trips) + RESERVE + self.committed_fares > stock.balance()
@@ -114,6 +114,18 @@ impl Market {
             }
             allocation.units += units;
         }
+    }
+
+    pub fn hold_fare(&mut self, stock: &Stock, fare: u64) -> bool {
+        if stock.balance().saturating_sub(self.committed_fares) < fare {
+            return false;
+        }
+        self.committed_fares += fare;
+        true
+    }
+
+    pub fn release_fare(&mut self, fare: u64) {
+        self.committed_fares -= fare;
     }
 
     pub fn depart(&mut self, stock: &mut Stock, fare: u64) {
@@ -155,6 +167,10 @@ fn cargo_trips(catalog: &Catalog, mut pending: BTreeMap<String, u32>) -> Result<
         trips += 1;
     }
     Ok(trips)
+}
+
+pub fn fare_cents(round_trip_km: u32) -> u64 {
+    ((f64::from(round_trip_km) / 10.0) * 6.47 * 100.0).round() as u64
 }
 
 pub fn trip_seconds(round_trip_km: u32) -> f64 {

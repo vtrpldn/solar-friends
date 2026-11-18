@@ -3,6 +3,7 @@ mod gather_work;
 mod production_work;
 mod resident_work;
 mod town_pickup;
+mod trade_work;
 mod work_shift;
 
 use std::collections::VecDeque;
@@ -24,6 +25,7 @@ use crate::{
     stock::Stock,
     terrain::Terrain,
     town_work::TownWork,
+    trade::Trade,
     utilities::{Facility, Utilities},
 };
 
@@ -77,6 +79,8 @@ struct TownTrip {
     project: usize,
     #[serde(default)]
     farm_bed: Option<usize>,
+    #[serde(default)]
+    export: bool,
     driver: usize,
     elapsed: f64,
     duration: f64,
@@ -102,6 +106,8 @@ pub struct Construction {
     plans: Vec<Blueprint>,
     #[serde(default)]
     market: Market,
+    #[serde(default)]
+    pub trade: Trade,
     #[serde(default)]
     pub gathering: Gathering,
     #[serde(default)]
@@ -175,6 +181,7 @@ impl Default for Construction {
             slow_sandbox: false,
             plans: Vec::new(),
             market: Market::default(),
+            trade: Trade::default(),
             gathering: Gathering::default(),
             farming: Farming::default(),
             livestock: Livestock::default(),
@@ -596,7 +603,7 @@ impl Construction {
         let active = self
             .trip
             .as_ref()
-            .filter(|trip| trip.boarded && trip.farm_bed.is_none())
+            .filter(|trip| trip.boarded && trip.farm_bed.is_none() && !trip.export)
             .map(|trip| trip.project);
         let fares = self
             .plans
@@ -617,9 +624,27 @@ impl Construction {
                     .saturating_mul(u64::from(job.pickups.saturating_sub(u32::from(paid)))),
             )
         });
+        let export_paid = self
+            .trip
+            .as_ref()
+            .is_some_and(|trip| trip.export && trip.boarded);
+        let fares = self
+            .trade
+            .orders
+            .iter()
+            .enumerate()
+            .fold(fares, |total, (index, order)| {
+                if index == 0 && export_paid {
+                    total
+                } else {
+                    total.saturating_add(order.fare)
+                }
+            });
         let trip_valid = self.trip.as_ref().is_none_or(|trip| {
             trip.driver < self.residents.len()
-                && if let Some(bed) = trip.farm_bed {
+                && if trip.export {
+                    self.trade.orders.front().is_some()
+                } else if let Some(bed) = trip.farm_bed {
                     self.farming
                         .jobs
                         .iter()
@@ -650,7 +675,8 @@ impl Construction {
                 .and_then(|definition| catalog.animal_rations.get(&definition.kind))
                 .is_some_and(|ration| pen.valid(ration))
         });
-        if !animals_valid
+        if !self.trade.valid(catalog)
+            || !animals_valid
             || !farms_valid
             || !services_valid
             || !trip_valid
@@ -744,6 +770,13 @@ impl Construction {
             land,
             camp,
         } = site;
+        self.trade.auto_sell(
+            catalog,
+            stock,
+            &mut self.market,
+            clock.seconds,
+            crate::market::fare_cents(clock.round_trip_km),
+        );
         self.tick_shifts(catalog, stock, site, clock, dt);
         self.tick_trip(catalog, stock, site, clock, dt);
         self.tick_gathering(catalog, stock, site, clock.seconds, dt);

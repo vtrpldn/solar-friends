@@ -14,7 +14,9 @@ impl Construction {
             if !trip.boarded {
                 driver.move_along_path(dt, false);
                 if driver.path.is_empty() {
-                    let fare = if let Some(bed) = trip.farm_bed {
+                    let fare = if trip.export {
+                        self.trade.orders.front().expect("active export").fare
+                    } else if let Some(bed) = trip.farm_bed {
                         self.farming
                             .jobs
                             .iter()
@@ -29,8 +31,13 @@ impl Construction {
                 }
             } else {
                 trip.elapsed = (trip.elapsed + f64::from(dt)).min(trip.duration);
+                if trip.export && trip.elapsed >= trip.duration * 0.5 {
+                    self.trade.settle(stock);
+                }
                 if trip.elapsed >= trip.duration {
-                    if let Some(bed) = trip.farm_bed {
+                    if trip.export {
+                        self.trade.orders.pop_front();
+                    } else if let Some(bed) = trip.farm_bed {
                         self.farming
                             .jobs
                             .iter_mut()
@@ -62,7 +69,9 @@ impl Construction {
             .iter()
             .find(|job| job.pickups > 0)
             .map(|job| (job.site, Some(job.bed)));
-        let Some((project, farm_bed)) = construction.or(farming) else {
+        let next = construction.or(farming);
+        let export = next.is_none() && !self.trade.orders.is_empty();
+        let Some((project, farm_bed)) = next.or_else(|| export.then_some((0, None))) else {
             return;
         };
         let door = IVec2::new(30, -15);
@@ -94,6 +103,7 @@ impl Construction {
             self.trip = Some(TownTrip {
                 project,
                 farm_bed,
+                export,
                 driver: index,
                 elapsed: 0.0,
                 duration: trip_seconds(clock.round_trip_km),

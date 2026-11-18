@@ -26,6 +26,7 @@ pub enum CashKind {
     Electricity,
     Commuting,
     TownWages,
+    Sales,
 }
 
 impl CashKind {
@@ -36,6 +37,7 @@ impl CashKind {
             Self::Electricity => "Grid electricity",
             Self::Commuting => "Bus fares",
             Self::TownWages => "Town wages",
+            Self::Sales => "Town sales",
         }
     }
 }
@@ -88,6 +90,13 @@ impl Stock {
         [("meals", 1), ("food", 1), ("eggs", 4), ("milk", 2)]
             .into_iter()
             .find(|(id, quantity)| self.available(id) >= *quantity)
+    }
+
+    pub fn food_portions(&self) -> u32 {
+        [("meals", 1), ("food", 1), ("eggs", 4), ("milk", 2)]
+            .into_iter()
+            .map(|(id, portion)| self.available(id) / portion)
+            .sum()
     }
 
     pub fn receive(&mut self, goods: &BTreeMap<String, u32>) {

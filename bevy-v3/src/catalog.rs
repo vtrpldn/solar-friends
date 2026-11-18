@@ -23,7 +23,18 @@ pub struct Material {
     pub supplier: u32,
     pub mass: f64,
     pub volume: f64,
+    pub buyer: Buyer,
     pub starting: u32,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Buyer {
+    pub name: String,
+    pub batches: u32,
+    pub full_price_batches: u32,
+    pub ratio: f64,
+    pub bulk_ratio: f64,
 }
 
 #[derive(Deserialize)]
