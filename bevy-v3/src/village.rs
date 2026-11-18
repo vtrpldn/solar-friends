@@ -415,6 +415,7 @@ enum MapLens {
     Land,
     Resources,
     Ecology,
+    Construction,
 }
 
 #[derive(Resource, Default, PartialEq)]
@@ -572,6 +573,13 @@ fn village_input(
     }
 
     if village.camp.is_some() {
+        if keyboard.just_pressed(KeyCode::F11)
+            && keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+        {
+            let lens = MapLens::Construction;
+            village.map_lens = (village.map_lens != Some(lens)).then_some(lens);
+            return;
+        }
         for (key, lens) in [
             (KeyCode::F2, MapLens::Land),
             (KeyCode::F3, MapLens::Resources),
@@ -1270,7 +1278,7 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F2 Slope · F3 Resources · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · F12 Ecology",
+            "\nP Power · V Water · N Residents · H Finances · F2 Slope · F3 Resources · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · F12 Ecology\nShift+F11 Construction lens",
         );
     }
     match village.utility_panel {
@@ -1433,7 +1441,13 @@ fn draw_blueprints(
         && let Some(camp) = village.camp
     {
         let terrain = village.terrain(&setup);
-        village.construction.draw(&catalog, &terrain, &mut gizmos);
+        let construction_notice = village.construction.draw(
+            &catalog,
+            &terrain,
+            village.map_lens == Some(MapLens::Construction),
+            pointer.hovered.map(|hit| hit.cell),
+            &mut gizmos,
+        );
         if matches!(
             village.utility_panel,
             Some(UtilityPanel::Power | UtilityPanel::Water)
@@ -1460,6 +1474,7 @@ fn draw_blueprints(
                 (pointer.hovered, lens == MapLens::Ecology),
                 &mut gizmos,
             )),
+            Some(MapLens::Construction) => construction_notice,
             None => None,
         };
         if let Some(hit) = pointer.hovered {

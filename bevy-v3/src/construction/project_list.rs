@@ -53,17 +53,7 @@ impl Construction {
             .enumerate()
         {
             let def = &catalog.projects[&plan.key];
-            let state = if self.changes.contains_key(index) {
-                "Changes queued".to_owned()
-            } else if plan.work >= def.work {
-                "Complete".to_owned()
-            } else if plan.pickups > 0 {
-                format!("{} town pickup(s) pending", plan.pickups)
-            } else if plan.delivered < plan.loads {
-                format!("{}/{} loads delivered", plan.delivered, plan.loads)
-            } else {
-                format!("{:.0}% built", 100.0 * plan.work / def.work)
-            };
+            let state = self.project_status(catalog, *index);
             let priority = if self.priority == Some(*index) {
                 " · Priority"
             } else {
@@ -78,6 +68,22 @@ impl Construction {
             );
         }
         (pages, text)
+    }
+
+    pub(super) fn project_status(&self, catalog: &Catalog, index: usize) -> String {
+        let plan = &self.plans[index];
+        let def = &catalog.projects[&plan.key];
+        if self.changes.contains_key(&index) {
+            "Changes queued".to_owned()
+        } else if plan.work >= def.work {
+            "Complete".to_owned()
+        } else if plan.pickups > 0 {
+            format!("{} town pickup(s) pending", plan.pickups)
+        } else if plan.delivered < plan.loads {
+            format!("{}/{} loads delivered", plan.delivered, plan.loads)
+        } else {
+            format!("{:.0}% built", 100.0 * plan.work / def.work)
+        }
     }
 
     pub fn focus_project(

@@ -802,17 +802,48 @@ impl Construction {
         None
     }
 
-    pub fn draw(&self, catalog: &Catalog, terrain: &Terrain, gizmos: &mut Gizmos) {
+    pub fn draw(
+        &self,
+        catalog: &Catalog,
+        terrain: &Terrain,
+        construction_lens: bool,
+        hovered: Option<IVec2>,
+        gizmos: &mut Gizmos,
+    ) -> Option<String> {
+        let mut detail = None;
         for (index, plan) in self.plans.iter().enumerate() {
+            let definition = &catalog.projects[&plan.key];
             let selected = self.production.selected == Some(index);
-            if plan.removed || (!selected && plan.work >= catalog.projects[&plan.key].work) {
+            let unfinished = plan.work < definition.work;
+            let changing = self.changes.contains_key(&index);
+            if plan.removed || !(selected || unfinished || construction_lens && changing) {
                 continue;
             }
-            let color = if selected {
+            let color = if construction_lens && (unfinished || changing) {
+                if changing {
+                    Color::srgb_u8(190, 167, 248)
+                } else if plan.pickups > 0 || plan.delivered < plan.loads {
+                    Color::srgb_u8(243, 200, 108)
+                } else {
+                    Color::srgb_u8(136, 220, 148)
+                }
+            } else if selected {
                 Color::srgb_u8(109, 220, 255)
             } else {
                 Color::srgb_u8(230, 244, 158)
             };
+            if construction_lens
+                && hovered.is_some_and(|cell| {
+                    cell.cmpge(plan.position).all() && cell.cmplt(plan.position + plan.size).all()
+                })
+            {
+                detail = Some(format!(
+                    "{} #{} · {}",
+                    definition.name,
+                    index + 1,
+                    self.project_status(catalog, index)
+                ));
+            }
             draw_footprint(terrain, plan.position, plan.size, color, gizmos);
         }
         for job in self.changes.values() {
@@ -826,6 +857,11 @@ impl Construction {
                 );
             }
         }
+        construction_lens.then(|| {
+            let legend =
+                "Construction · Gold supplies pending · Green building · Purple changes queued";
+            detail.map_or_else(|| legend.to_owned(), |detail| format!("{legend}\n{detail}"))
+        })
     }
 }
 
