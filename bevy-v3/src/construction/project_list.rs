@@ -86,6 +86,65 @@ impl Construction {
         }
     }
 
+    pub fn draw_access_lens(
+        &self,
+        catalog: &Catalog,
+        terrain: &Terrain,
+        hovered: Option<IVec2>,
+        gizmos: &mut Gizmos,
+    ) -> String {
+        use std::fmt::Write;
+
+        const FAR_THRESHOLD: f32 = 25.0;
+        let point_at = |cell: Vec2, offset: f32| {
+            let Vec2 { x, y: z } = world_position(cell.x, cell.y);
+            Vec3::new(x, terrain.height_at(x, z) + offset, z)
+        };
+        let supplies = STOCKPILE.as_vec2();
+        let stock_marker = point_at(supplies, 6.0);
+        let stock_color = Color::srgb_u8(238, 245, 255);
+        gizmos.line(point_at(supplies, 0.1), stock_marker, stock_color);
+        for axis in [Vec3::X, Vec3::Z] {
+            gizmos.line(stock_marker - axis, stock_marker + axis, stock_color);
+        }
+
+        let mut legend =
+            "Access · White shared supplies · Blue within 25 cells · Gold farther away".to_owned();
+        for (index, plan) in self.plans.iter().enumerate() {
+            if plan.removed || matches!(plan.key.as_str(), "road" | "bridge") {
+                continue;
+            }
+            let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
+            let distance = center.distance(supplies);
+            let color = if distance > FAR_THRESHOLD {
+                Color::srgb_u8(243, 200, 108)
+            } else {
+                Color::srgb_u8(109, 220, 255)
+            };
+            let tip = point_at(center, 7.0);
+            gizmos.line(point_at(center, 0.1), tip, color);
+            gizmos.line(tip - Vec3::X * 0.7, tip + Vec3::X * 0.7, color);
+            if hovered.is_some_and(|cell| {
+                cell.cmpge(plan.position).all() && cell.cmplt(plan.position + plan.size).all()
+            }) {
+                let _ = write!(
+                    legend,
+                    "\n{} #{} · {distance:.1} cells from supplies (straight line)",
+                    catalog.projects[&plan.key].name,
+                    index + 1
+                );
+                let steps = distance.ceil().max(1.0) as usize;
+                gizmos.linestrip(
+                    (0..=steps).map(|step| {
+                        point_at(supplies.lerp(center, step as f32 / steps as f32), 0.4)
+                    }),
+                    color,
+                );
+            }
+        }
+        legend
+    }
+
     pub fn focus_project(
         &mut self,
         catalog: &Catalog,

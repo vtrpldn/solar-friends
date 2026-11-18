@@ -415,6 +415,7 @@ enum MapLens {
     Land,
     Resources,
     Ecology,
+    Access,
     Construction,
 }
 
@@ -573,12 +574,16 @@ fn village_input(
     }
 
     if village.camp.is_some() {
-        if keyboard.just_pressed(KeyCode::F11)
-            && keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
-        {
-            let lens = MapLens::Construction;
-            village.map_lens = (village.map_lens != Some(lens)).then_some(lens);
-            return;
+        if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+            for (key, lens) in [
+                (KeyCode::F2, MapLens::Access),
+                (KeyCode::F11, MapLens::Construction),
+            ] {
+                if keyboard.just_pressed(key) {
+                    village.map_lens = (village.map_lens != Some(lens)).then_some(lens);
+                    return;
+                }
+            }
         }
         for (key, lens) in [
             (KeyCode::F2, MapLens::Land),
@@ -1278,7 +1283,7 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F2 Slope · F3 Resources · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · F12 Ecology\nShift+F11 Construction lens",
+            "\nP Power · V Water · N Residents · H Finances · F2 Slope · F3 Resources · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · F12 Ecology\nShift+F2 Access lens · Shift+F11 Construction lens",
         );
     }
     match village.utility_panel {
@@ -1472,6 +1477,12 @@ fn draw_blueprints(
                 &catalog,
                 &land,
                 (pointer.hovered, lens == MapLens::Ecology),
+                &mut gizmos,
+            )),
+            Some(MapLens::Access) => Some(village.construction.draw_access_lens(
+                &catalog,
+                &terrain,
+                pointer.hovered.map(|hit| hit.cell),
                 &mut gizmos,
             )),
             Some(MapLens::Construction) => construction_notice,
