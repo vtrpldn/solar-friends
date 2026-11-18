@@ -95,6 +95,9 @@ impl Construction {
             let state = match job.phase {
                 Phase::Pickup => "Collecting ingredients".into(),
                 Phase::Approach => "Bringing ingredients".into(),
+                Phase::Work if needs_power(recipe) && !self.utilities.powered(job.site) => {
+                    "Waiting for power".into()
+                }
                 Phase::Work if recipe.handcraft => {
                     format!("{:.0}% crafted", job.work / recipe.work * 100.0)
                 }
@@ -189,6 +192,9 @@ impl Construction {
                 }
                 Phase::Approach => self.production.jobs[index].phase = Phase::Work,
                 Phase::Work => {
+                    if needs_power(recipe) && !self.utilities.powered(job.site) {
+                        continue;
+                    }
                     let job = &mut self.production.jobs[index];
                     job.work = (job.work + f64::from(dt)).min(recipe.work);
                     if job.work < recipe.work {
@@ -269,4 +275,8 @@ fn perimeter(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec2> {
             .total_cmp(&b.as_vec2().distance_squared(from))
     });
     cells
+}
+
+fn needs_power(recipe: &ProductionRecipe) -> bool {
+    !recipe.handcraft && matches!(recipe.kind.as_str(), "kitchen" | "workshop")
 }

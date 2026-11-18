@@ -49,12 +49,7 @@ pub fn game_hour(seconds: f64) -> f64 {
 
 pub fn weather_at(seconds: f64, biome: usize, seed: u32) -> Weather {
     let day = (seconds / DAY + 9.0 / 24.0).floor() as i64;
-    let mut day_of_year = (day + 304).rem_euclid(365) as usize;
-    let mut month = 0;
-    while day_of_year >= MONTH_DAYS[month] {
-        day_of_year -= MONTH_DAYS[month];
-        month += 1;
-    }
+    let month = month_at(day);
     let hour = game_hour(seconds);
     let days = RAIN_DAYS[biome][month];
     let normals = RAIN_MM[biome][month];
@@ -83,6 +78,26 @@ pub fn weather_at(seconds: f64, biome: usize, seed: u32) -> Weather {
         cloud,
         temperature,
     }
+}
+
+fn month_at(day: i64) -> usize {
+    let mut day_of_year = (day + 304).rem_euclid(365) as usize;
+    let mut month = 0;
+    while day_of_year >= MONTH_DAYS[month] {
+        day_of_year -= MONTH_DAYS[month];
+        month += 1;
+    }
+    month
+}
+
+pub fn recharge_season(seconds: f64, biome: usize) -> f64 {
+    let day = (seconds / DAY + 9.0 / 24.0).floor() as i64;
+    let rain = RAIN_MM[biome];
+    rain[month_at(day)] / rain.into_iter().fold(0.0, f64::max)
+}
+
+pub fn sun_height(seconds: f64) -> f64 {
+    (((game_hour(seconds) - 6.0) * std::f64::consts::PI / 12.0).sin()).max(0.0)
 }
 
 fn sample(seed: u32, day: i64, salt: u32) -> f64 {
@@ -156,11 +171,7 @@ fn sunlight(
     let weather = weather_at(seconds, setup.biome(), setup.seed());
     let hour = game_hour(seconds);
     let angle = ((hour - 6.0) * std::f64::consts::PI / 12.0) as f32;
-    let height = if (6.0..18.0).contains(&hour) {
-        angle.sin().max(0.0)
-    } else {
-        0.0
-    };
+    let height = sun_height(seconds) as f32;
     let daylight = (height * 5.0).min(1.0);
     let cloud = weather.cloud as f32;
     let (light, transform) = &mut *sun;

@@ -18,6 +18,7 @@ mod setup;
 mod stock;
 mod terrain;
 mod ui_font;
+mod utilities;
 mod village;
 mod weather;
 use setup::{WorldSetup, WorldSetupPlugin};

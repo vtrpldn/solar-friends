@@ -17,6 +17,7 @@ use crate::{
     production::Production,
     stock::Stock,
     terrain::Terrain,
+    utilities::{Facility, Utilities},
 };
 
 const CATEGORIES: [&str; 10] = [
@@ -97,6 +98,8 @@ pub struct Construction {
     #[serde(default)]
     pub production: Production,
     #[serde(default)]
+    pub utilities: Utilities,
+    #[serde(default)]
     trip: Option<TownTrip>,
     residents: [Worker; 5],
 }
@@ -157,6 +160,7 @@ impl Default for Construction {
             market: Market::default(),
             gathering: Gathering::default(),
             production: Production::default(),
+            utilities: Utilities::default(),
             trip: None,
             residents: ARRIVAL_SPOTS.map(|(x, z)| Worker {
                 position: Vec2::new(x, z),
@@ -527,6 +531,43 @@ impl Construction {
 }
 
 impl Construction {
+    pub fn tick_services(
+        &mut self,
+        catalog: &Catalog,
+        setup: &crate::setup::WorldSetup,
+        stock: &mut Stock,
+        clock: f64,
+        dt: f64,
+    ) {
+        self.utilities.sync(
+            self.plans
+                .iter()
+                .enumerate()
+                .filter_map(|(index, project)| {
+                    let definition = &catalog.projects[&project.key];
+                    if project.work < definition.work {
+                        return None;
+                    }
+                    let working = self.production.jobs.iter().any(|job| {
+                        job.site == index
+                            && job.phase == crate::production::Phase::Work
+                            && !catalog.production[&job.recipe].handcraft
+                    });
+                    Some(Facility {
+                        id: index + 1,
+                        kind: &definition.kind,
+                        location: project.position,
+                        size: project.size,
+                        batteries: definition.materials.get("batteries").copied().unwrap_or(0),
+                        panels: definition.materials.get("panels").copied().unwrap_or(0),
+                        working,
+                    })
+                }),
+        );
+        self.utilities
+            .tick(setup, stock, self.market.committed_fares(), clock, dt);
+    }
+
     pub fn valid_save(&self, catalog: &Catalog, stock: &Stock) -> bool {
         let active = self
             .trip
@@ -552,7 +593,14 @@ impl Construction {
                 && (0.0..=trip.duration).contains(&trip.elapsed)
                 && (0.0..=500.0).contains(&trip.duration)
         });
-        if !trip_valid
+        let services_valid = self.utilities.valid_save(|index, kind| {
+            self.plans
+                .get(index)
+                .and_then(|project| catalog.projects.get(&project.key))
+                .is_some_and(|definition| definition.kind == kind)
+        });
+        if !services_valid
+            || !trip_valid
             || !self.market.valid_save(catalog, stock, fares)
             || !self.valid_production(catalog)
         {

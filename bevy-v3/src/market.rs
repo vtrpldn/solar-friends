@@ -33,6 +33,10 @@ pub struct Quote {
 }
 
 impl Market {
+    pub fn committed_fares(&self) -> u64 {
+        self.committed_fares
+    }
+
     pub fn quote(
         &self,
         catalog: &Catalog,

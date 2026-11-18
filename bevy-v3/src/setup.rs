@@ -103,10 +103,14 @@ impl WorldSetup {
         [(6, 10), (1, 1), (17, 10)][self.supplies]
     }
 
+    pub fn water_factor(&self) -> f64 {
+        [0.55, 1.0, 1.5][self.water]
+    }
+
     pub fn terrain(&self) -> Terrain {
         Terrain::new(
             self.seed,
-            [0.55, 1.0, 1.5][self.water],
+            self.water_factor(),
             [0.35, 1.0, 1.7][self.landscape],
         )
     }

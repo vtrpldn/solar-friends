@@ -75,6 +75,8 @@ pub struct Village {
     #[serde(skip)]
     show_forecast: bool,
     #[serde(skip)]
+    utility_panel: Option<UtilityPanel>,
+    #[serde(skip)]
     camp_error: Option<&'static str>,
     #[serde(skip)]
     save_notice: String,
@@ -82,6 +84,12 @@ pub struct Village {
     rebuild_scene: bool,
     stock: Stock,
     construction: Construction,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+enum UtilityPanel {
+    Power,
+    Water,
 }
 
 impl Village {
@@ -321,6 +329,28 @@ fn village_input(
     }
     if let Some(cell) = village.camp {
         let town = &mut *village;
+        if keyboard.just_pressed(KeyCode::KeyP) {
+            town.utility_panel = if town.utility_panel == Some(UtilityPanel::Power) {
+                None
+            } else {
+                Some(UtilityPanel::Power)
+            };
+        }
+        if keyboard.just_pressed(KeyCode::KeyV) {
+            town.utility_panel = if town.utility_panel == Some(UtilityPanel::Water) {
+                None
+            } else {
+                Some(UtilityPanel::Water)
+            };
+        }
+        if keyboard.just_pressed(KeyCode::KeyO) && town.utility_panel == Some(UtilityPanel::Power) {
+            town.construction.utilities.grid_off = !town.construction.utilities.grid_off;
+        }
+        if keyboard.just_pressed(KeyCode::KeyJ)
+            && let Some(index) = town.construction.production.selected
+        {
+            town.construction.utilities.toggle(index);
+        }
         if town.stock.sandbox && keyboard.just_pressed(KeyCode::KeyI) {
             town.construction.toggle_sandbox_construction();
         }
@@ -494,6 +524,13 @@ fn advance_clock(
         };
         for _ in 0..SPEEDS[town.speed].1 {
             town.clock += time.delta_secs_f64();
+            town.construction.tick_services(
+                &catalog,
+                &setup,
+                &mut town.stock,
+                town.clock,
+                time.delta_secs_f64(),
+            );
             let clock = TownClock {
                 seconds: town.clock,
                 round_trip_km: setup.round_trip_km(),
@@ -580,9 +617,29 @@ fn show_hud(
         label.push('\n');
         label.push_str(&natural);
     }
+    if village.camp.is_some() {
+        label.push_str("\nP Power · V Water");
+    }
+    match village.utility_panel {
+        Some(UtilityPanel::Power) => {
+            label.push('\n');
+            label.push_str(&village.construction.utilities.power_summary());
+        }
+        Some(UtilityPanel::Water) => {
+            label.push('\n');
+            label.push_str(&village.construction.utilities.water_summary());
+        }
+        None => {}
+    }
     if let Some(production) = village.construction.selected_production(&catalog) {
         label.push('\n');
         label.push_str(&production);
+    }
+    if let Some(index) = village.construction.production.selected
+        && let Some(service) = village.construction.utilities.facility_status(index)
+    {
+        label.push('\n');
+        label.push_str(&service);
     }
     if !village.save_notice.is_empty() {
         label.push('\n');
