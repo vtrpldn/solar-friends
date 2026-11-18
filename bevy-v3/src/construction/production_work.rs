@@ -125,7 +125,13 @@ impl Construction {
         None
     }
 
-    fn queue_batch(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize, id: &str) {
+    pub(super) fn queue_batch(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        index: usize,
+        id: &str,
+    ) {
         let recipe = &catalog.production[id];
         if let Some(tool) = &recipe.repair
             && (self.repairing(catalog, tool)

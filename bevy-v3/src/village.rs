@@ -630,6 +630,7 @@ fn village_input(
             }
         }
         if town.utility_panel == Some(UtilityPanel::Pantry) {
+            town.construction.kitchen_controls(&keyboard);
             if keyboard.just_pressed(KeyCode::KeyT) {
                 town.stock.pantry.priority = town.stock.pantry.priority.next();
             }
@@ -992,6 +993,8 @@ fn step(
         .tick_growth(catalog, setup, &mut town.stock, town.clock, dt);
     town.construction
         .tick_health(catalog, setup, &mut town.stock, site, town.clock, dt as f32);
+    town.construction
+        .manage_kitchens(catalog, &mut town.stock, town.clock);
     let clock = TownClock {
         seconds: town.clock,
         round_trip_km: setup.round_trip_km(),
@@ -1174,6 +1177,8 @@ fn show_hud(
                     .trade
                     .pantry_purchase_status(&village.stock, village.clock),
             );
+            label.push('\n');
+            label.push_str(&village.construction.production.kitchen_policy.status());
             label.push_str("\nTab Finances");
         }
         None => {}

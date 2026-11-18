@@ -1,5 +1,6 @@
 mod farm_work;
 mod gather_work;
+mod kitchen_work;
 mod leisure;
 mod lifecycle;
 mod production_work;
@@ -923,7 +924,8 @@ impl Construction {
                             && target.rotation <= 3
                     })
             });
-        if !self.upkeep.valid(self.plans.len())
+        if !self.production.kitchen_policy.valid()
+            || !self.upkeep.valid(self.plans.len())
             || !self.valid_water_jobs()
             || !self.valid_homes(catalog)
             || !changes_valid

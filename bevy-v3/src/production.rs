@@ -1,5 +1,6 @@
 pub mod crafting;
 pub mod growth;
+pub mod kitchen;
 
 use serde::{Deserialize, Serialize};
 
@@ -14,6 +15,8 @@ pub struct Production {
     pub page: usize,
     #[serde(skip)]
     pub notice: String,
+    #[serde(default)]
+    pub kitchen_policy: kitchen::KitchenPolicy,
     #[serde(default)]
     pub growing_sites: std::collections::BTreeMap<usize, growth::Ground>,
 }
