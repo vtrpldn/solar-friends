@@ -317,7 +317,7 @@ fn generate_land(
 #[derive(Default)]
 struct LandDetailDraw {
     camp: Option<IVec2>,
-    terrain: (u64, u64),
+    terrain: (u64, u64, usize),
 }
 
 fn draw_land(

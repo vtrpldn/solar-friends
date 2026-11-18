@@ -105,7 +105,7 @@ struct LandMesh;
 #[derive(Component)]
 struct GroundMesh;
 
-type LandDrawKey = (WorldSetup, Option<IVec2>, (u64, u64));
+type LandDrawKey = (WorldSetup, Option<IVec2>, (u64, u64, usize));
 
 fn update_land(
     mut commands: Commands,

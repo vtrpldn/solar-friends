@@ -337,6 +337,17 @@ impl Construction {
                     continue;
                 }
                 if let Some(target) = job.target.take() {
+                    if Self::uses_foundation(&self.plans[index].key) {
+                        let terrain = site.terrain.clone().with_foundations(&self.foundations);
+                        match self.project_foundation(&terrain, target.position, target.size) {
+                            Ok(pad) => self.add_foundation(pad),
+                            Err(reason) => {
+                                self.changes.remove(&index);
+                                self.status = format!("Move canceled. {reason}");
+                                continue;
+                            }
+                        }
+                    }
                     self.plans[index].position = target.position;
                     self.plans[index].size = target.size;
                     self.plans[index].rotation = target.rotation;
@@ -461,6 +472,51 @@ mod tests {
         assert_eq!(construction.market.committed_fares(), 0);
         assert!(construction.plans[0].removed);
         assert!(construction.valid_save(&catalog, &stock));
+    }
+
+    #[test]
+    fn relocation_grades_the_new_site_and_keeps_the_old_pad_in_the_save() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let rock = Terrain::new(42, 1.0, 1.0);
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = rock.with_camp(camp);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut construction = Construction {
+            selection: Some("gathering".into()),
+            ..default()
+        };
+        construction.plan(
+            &catalog,
+            &mut stock,
+            site,
+            IVec2::new(44, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
+        );
+        construction.plans[0].work = catalog.projects["gathering"].work;
+        construction.plans[0].delivered = construction.plans[0].loads;
+        let destination = IVec2::new(54, 36);
+        construction.queue_move(&catalog, &stock, site, destination, 0);
+        for _ in 0..2_000 {
+            construction.tick_changes(&catalog, &mut stock, site, 0.1);
+            if construction.changes.is_empty() {
+                break;
+            }
+        }
+        assert_eq!(construction.plans[0].position, destination);
+        assert_eq!(construction.foundations.len(), 2);
+        let encoded = serde_json::to_string(&construction).unwrap();
+        let saved: Construction = serde_json::from_str(&encoded).unwrap();
+        assert_eq!(saved.foundations, construction.foundations);
     }
 
     #[test]

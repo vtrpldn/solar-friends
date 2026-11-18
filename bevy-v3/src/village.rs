@@ -116,14 +116,22 @@ enum UtilityPanel {
 }
 
 impl Village {
-    pub fn terrain_key(&self) -> (u64, u64) {
-        (self.session_serial, self.terrain_editor.revision)
+    pub fn terrain_key(&self) -> (u64, u64, usize) {
+        (
+            self.session_serial,
+            self.terrain_editor.revision,
+            self.construction.foundations.len(),
+        )
     }
 
     pub fn terrain(&self, setup: &WorldSetup) -> Terrain {
         let terrain = setup.terrain();
         match self.camp.filter(|_| !setup.open) {
-            Some(cell) => self.terrain_editor.terrain(terrain.with_camp(cell)),
+            Some(cell) => self.terrain_editor.terrain(
+                terrain
+                    .with_camp(cell)
+                    .with_foundations(&self.construction.foundations),
+            ),
             None => terrain,
         }
     }

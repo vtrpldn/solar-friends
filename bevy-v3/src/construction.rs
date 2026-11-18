@@ -7,7 +7,10 @@ mod town_pickup;
 mod trade_work;
 mod work_shift;
 
-use std::collections::{BTreeMap, VecDeque};
+use std::{
+    collections::{BTreeMap, VecDeque},
+    sync::Arc,
+};
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -24,7 +27,7 @@ use crate::{
     production::Production,
     residents::{Health, Need},
     stock::Stock,
-    terrain::Terrain,
+    terrain::{Foundation, Terrain},
     town_work::TownWork,
     trade::Trade,
     utilities::{Facility, Utilities},
@@ -105,6 +108,8 @@ pub struct Construction {
     #[serde(default)]
     slow_sandbox: bool,
     plans: Vec<Blueprint>,
+    #[serde(default)]
+    pub foundations: Arc<Vec<Foundation>>,
     #[serde(default)]
     market: Market,
     #[serde(default)]
@@ -191,6 +196,7 @@ impl Default for Construction {
             status: String::new(),
             slow_sandbox: false,
             plans: Vec::new(),
+            foundations: Arc::default(),
             market: Market::default(),
             trade: Trade::default(),
             gathering: Gathering::default(),
@@ -486,8 +492,38 @@ impl Construction {
         } else {
             format!("{} planned. Materials reserved.", definition.name)
         };
+        if Self::uses_foundation(&blueprint.key)
+            && let Some(pad) = terrain.foundation(blueprint.position, blueprint.size)
+        {
+            self.add_foundation(pad);
+        }
         self.plans.push(blueprint);
         self.selection = None;
+    }
+
+    fn uses_foundation(key: &str) -> bool {
+        !matches!(key, "road" | "bridge" | "field")
+    }
+
+    fn add_foundation(&mut self, pad: Foundation) {
+        if !self.foundations.contains(&pad) {
+            Arc::make_mut(&mut self.foundations).push(pad);
+        }
+    }
+
+    fn project_foundation(
+        &self,
+        terrain: &Terrain,
+        position: IVec2,
+        size: IVec2,
+    ) -> Result<Foundation, &'static str> {
+        let pad = terrain
+            .foundation(position, size)
+            .ok_or("Leave space between foundations at different heights.")?;
+        if self.foundations.len() >= 4094 && !self.foundations.contains(&pad) {
+            return Err("This village has reached the foundation limit.");
+        }
+        Ok(pad)
     }
 
     fn placement_error(
@@ -519,6 +555,11 @@ impl Construction {
         let end = start + blueprint.size;
         if start.cmplt(IVec2::splat(-30)).any() || end.cmpgt(IVec2::splat(94)).any() {
             return Some("Keep buildings inside the plot boundary.");
+        }
+        if Self::uses_foundation(&blueprint.key)
+            && let Err(reason) = self.project_foundation(terrain, start, blueprint.size)
+        {
+            return Some(reason);
         }
         if bridge {
             let along = if blueprint.rotation.is_multiple_of(2) {
@@ -689,6 +730,9 @@ impl Construction {
     }
 
     pub fn valid_save(&self, catalog: &Catalog, stock: &Stock) -> bool {
+        if self.foundations.len() > 4094 || !self.foundations.iter().all(|pad| pad.valid()) {
+            return false;
+        }
         let active = self
             .trip
             .as_ref()

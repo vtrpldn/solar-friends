@@ -13,23 +13,50 @@ use crate::arrival::{MAP_START, ROAD_END, road_center, road_width, world_positio
 const CELLS: u32 = 128;
 const HALF_WIDTH: f64 = 128.0;
 
-#[derive(Resource)]
+#[derive(Clone, Resource)]
 pub struct Terrain {
     pub seed: u32,
     offset: f64,
     bend: f64,
     width: f64,
     pub hill_height: f64,
-    foundation: Option<Foundation>,
+    camp: Option<Foundation>,
+    foundations: Arc<Vec<Foundation>>,
     edits: Arc<BTreeMap<u16, f64>>,
 }
 
-struct Foundation {
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+pub struct Foundation {
     left: f64,
     right: f64,
     top: f64,
     bottom: f64,
     height: f64,
+}
+
+impl Foundation {
+    fn distance(self, x: f64, z: f64) -> f64 {
+        (self.left - x)
+            .max(0.0)
+            .max(x - self.right)
+            .hypot((self.top - z).max(0.0).max(z - self.bottom))
+    }
+
+    fn touches(self, other: Self) -> bool {
+        self.left <= other.right
+            && self.right >= other.left
+            && self.top <= other.bottom
+            && self.bottom >= other.top
+    }
+
+    pub fn valid(self) -> bool {
+        [self.left, self.right, self.top, self.bottom]
+            .into_iter()
+            .all(|side| (-HALF_WIDTH..=HALF_WIDTH).contains(&side) && side % 2.0 == 0.0)
+            && self.left < self.right
+            && self.top < self.bottom
+            && (0.0..=12.0).contains(&self.height)
+    }
 }
 
 #[derive(Clone, Copy, Default)]
@@ -243,7 +270,8 @@ impl Terrain {
             bend,
             width: (2.1 + random() * 1.3) * water.sqrt(),
             hill_height: (4.0 + random() * 5.0) * relief,
-            foundation: None,
+            camp: None,
+            foundations: Arc::default(),
             edits: Arc::default(),
         }
     }
@@ -268,42 +296,80 @@ impl Terrain {
         let road = (f64::from(MAP_START)..=f64::from(ROAD_END)).contains(&z)
             && (x - f64::from(road_center(z as f32))).abs() < f64::from(road_width(z as f32)) + 3.0;
         let stock = x.hypot(z + 90.0) < 10.0;
-        let camp = self.foundation.as_ref().is_some_and(|pad| {
+        let pad = self.pads().any(|pad| {
             (pad.left - 2.0..=pad.right + 2.0).contains(&x)
                 && (pad.top - 2.0..=pad.bottom + 2.0).contains(&z)
         });
-        (x - center).abs() <= width + 4.9 || road || stock || camp
+        (x - center).abs() <= width + 4.9 || road || stock || pad
     }
 
-    pub fn with_camp(mut self, cell: IVec2) -> Self {
-        let start = world_position((cell.x - 1) as f32, (cell.y - 3) as f32) - Vec2::splat(2.0);
-        let end = world_position((cell.x + 4) as f32, (cell.y + 1) as f32);
+    fn pads(&self) -> impl Iterator<Item = &Foundation> {
+        self.camp.iter().chain(self.foundations.iter())
+    }
+
+    pub fn foundation(&self, position: IVec2, size: IVec2) -> Option<Foundation> {
+        let start = world_position(position.x as f32, position.y as f32) - Vec2::splat(2.0);
+        let end = position + size;
+        let end = world_position(end.x as f32, end.y as f32);
         let center = (start + end) * 0.5;
-        self.foundation = Some(Foundation {
+        let mut pad = Foundation {
             left: start.x.into(),
             right: end.x.into(),
             top: start.y.into(),
             bottom: end.y.into(),
-            height: self.height_at(center.x, center.y).into(),
-        });
+            height: 0.0,
+        };
+        let mut adjacent = self.pads().filter(|other| pad.touches(**other));
+        pad.height = if let Some(first) = adjacent.next() {
+            if adjacent.any(|other| (other.height - first.height).abs() > 0.001) {
+                return None;
+            }
+            first.height
+        } else {
+            self.height_at(center.x, center.y).into()
+        };
+        pad.valid().then_some(pad)
+    }
+
+    pub fn with_camp(mut self, cell: IVec2) -> Self {
+        self.camp = self.foundation(cell + IVec2::new(-1, -3), IVec2::new(5, 4));
+        self
+    }
+
+    pub fn with_foundations(mut self, foundations: &Arc<Vec<Foundation>>) -> Self {
+        self.foundations = Arc::clone(foundations);
         self
     }
 
     pub fn elevation(&self, x: f64, z: f64) -> f64 {
+        let mut total = 0.0;
+        let mut graded = 0.0;
+        let mut strongest: f64 = 0.0;
+        for pad in self.pads() {
+            // Most vertices are outside a given pad's grading apron.
+            if x <= pad.left - 8.0
+                || x >= pad.right + 8.0
+                || z <= pad.top - 8.0
+                || z >= pad.bottom + 8.0
+            {
+                continue;
+            }
+            let distance = pad.distance(x, z);
+            if distance < 0.0001 {
+                return pad.height;
+            }
+            if distance < 8.0 {
+                let t = distance / 8.0;
+                let weight = 1.0 - t * t * (3.0 - 2.0 * t);
+                total += weight;
+                graded += pad.height * weight;
+                strongest = strongest.max(weight);
+            }
+        }
         let natural = vertex_index(x, z)
             .and_then(|index| self.edits.get(&index).copied())
             .unwrap_or_else(|| self.natural_elevation(x, z));
-        let Some(pad) = &self.foundation else {
-            return natural;
-        };
-        let distance = (pad.left - x)
-            .max(0.0)
-            .max(x - pad.right)
-            .hypot((pad.top - z).max(0.0).max(z - pad.bottom));
-        if distance < 0.0001 {
-            return pad.height;
-        }
-        if distance >= 8.0 {
+        if total == 0.0 {
             return natural;
         }
         let (center, width) = self.river(z);
@@ -312,9 +378,7 @@ impl Terrain {
         if (x - center).abs() <= width + 2.9 || access_road {
             return natural;
         }
-        let t = distance / 8.0;
-        let weight = 1.0 - t * t * (3.0 - 2.0 * t);
-        natural * (1.0 - weight) + pad.height * weight
+        natural * (1.0 - strongest) + (graded / total) * strongest
     }
 
     fn natural_elevation(&self, x: f64, z: f64) -> f64 {
@@ -503,6 +567,47 @@ mod tests {
         assert_eq!(terrain.elevation(-32.0, 0.0), 0.0);
         assert_eq!(terrain.elevation(0.0, -110.0), 0.0);
         assert_eq!(terrain.elevation(8.0, 8.0), 0.0);
+    }
+
+    #[test]
+    fn project_pads_match_v2_and_reject_conflicting_grades() {
+        let mut terrain = Terrain::new(42, 1.0, 1.0).with_camp(IVec2::new(36, 36));
+        let first = terrain
+            .foundation(IVec2::new(43, 35), IVec2::new(2, 3))
+            .unwrap();
+        terrain = terrain.with_foundations(&Arc::new(vec![first]));
+        let adjacent = terrain
+            .foundation(IVec2::new(46, 38), IVec2::new(2, 3))
+            .unwrap();
+        assert_eq!(adjacent.height, first.height);
+        let second = terrain
+            .foundation(IVec2::new(47, 38), IVec2::new(2, 3))
+            .unwrap();
+        let pads = Arc::new(vec![first, second]);
+        terrain = terrain.with_foundations(&pads);
+        assert!(
+            terrain
+                .foundation(IVec2::new(45, 37), IVec2::splat(2))
+                .is_none()
+        );
+        for (x, z, expected) in [
+            (20.0, 6.0, 2.5218430707450206),
+            (28.0, 8.0, 2.7922280607864827),
+            (26.0, 14.0, 2.7394255172261306),
+            (24.0, 14.0, 2.6658015882521133),
+            (30.0, 14.0, 2.9631012216889085),
+        ] {
+            assert!((terrain.elevation(x, z) - expected).abs() < 1e-6);
+        }
+
+        let mut editor = TerrainEditor::default();
+        editor.stroke(&terrain, Vec3::new(22.0, 2.5, 8.0), |_| false);
+        assert_eq!(editor.terrain(terrain).elevation(22.0, 8.0), first.height);
+        assert!(
+            !editor
+                .vertices
+                .contains_key(&vertex_index(22.0, 8.0).unwrap())
+        );
     }
 
     #[test]
