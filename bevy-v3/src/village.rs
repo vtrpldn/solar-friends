@@ -78,6 +78,7 @@ impl Plugin for VillagePlugin {
                     library_controls,
                     read_camp_pointer,
                     village_input,
+                    crate::camera_controls,
                     advance_days,
                     animate_arrival,
                     draw_blueprints,
@@ -94,6 +95,24 @@ impl Plugin for VillagePlugin {
     }
 }
 
+#[derive(Clone, Copy, PartialEq, Deserialize, Serialize)]
+pub(super) struct CameraView {
+    pub target: Vec3,
+    pub heading: f32,
+    pub zoom: f32,
+}
+
+impl CameraView {
+    fn valid(self) -> bool {
+        self.target.is_finite()
+            && self.target.x.abs() <= 124.0
+            && self.target.z.abs() <= 124.0
+            && self.target.y.abs() <= 128.0
+            && self.heading.is_finite()
+            && (1.0 / 6.0..=1.0 / 0.18).contains(&self.zoom)
+    }
+}
+
 #[derive(Resource, Default, Deserialize, Serialize)]
 pub struct Village {
     setup: Option<WorldSetup>,
@@ -102,6 +121,8 @@ pub struct Village {
     arrival_time: f32,
     paused: bool,
     speed: usize,
+    #[serde(default)]
+    pub(super) camera_view: Option<CameraView>,
     #[serde(skip)]
     show_forecast: bool,
     #[serde(skip)]
@@ -326,6 +347,9 @@ impl Village {
         let Some(setup) = &self.setup else {
             return false;
         };
+        if self.camera_view.is_some_and(|view| !view.valid()) {
+            return false;
+        }
         if !setup.valid_save()
             || !(0.0..=ARRIVAL_DURATION).contains(&self.arrival_time)
             || self.stock.sandbox != (setup.mode == Mode::Sandbox)
@@ -575,7 +599,7 @@ fn village_input(
         ResMut<SoundSettings>,
     ),
     mut village: ResMut<Village>,
-    mut camera: Single<&mut VillageCamera>,
+    mut camera: Single<(&mut VillageCamera, &mut Projection)>,
     entities: Query<Entity, With<VillageEntity>>,
     (assets, catalog, land): (Res<AssetServer>, Res<Catalog>, Res<Land>),
 ) {
@@ -593,6 +617,7 @@ fn village_input(
         }
         return;
     }
+    let (camera, projection) = &mut *camera;
     let new_world = village.setup.as_ref() != Some(&setup.session());
     if new_world || village.rebuild_scene {
         for entity in &entities {
@@ -610,6 +635,14 @@ fn village_input(
         camera.target = Vec3::new(0.0, 2.0, -86.0);
         if let Some(cell) = village.camp {
             camera.target = spawn_tents(&mut commands, &assets, &setup, cell);
+        }
+        camera.heading = 0.0;
+        if let Projection::Orthographic(ortho) = &mut **projection {
+            ortho.scale = village.camera_view.map_or(1.0, |view| view.zoom);
+        }
+        if let Some(view) = village.camera_view {
+            camera.target = view.target;
+            camera.heading = view.heading;
         }
         for (index, name) in NAMES.into_iter().enumerate() {
             commands.spawn((

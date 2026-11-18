@@ -62,7 +62,6 @@ fn main() {
     ))
     .add_systems(Startup, setup_scene)
     .add_systems(PostUpdate, update_land)
-    .add_systems(Update, camera_controls)
     .run();
 }
 
@@ -153,9 +152,9 @@ fn camera_controls(
     (motion, scroll): (Res<AccumulatedMouseMotion>, Res<AccumulatedMouseScroll>),
     window: Single<&Window, With<PrimaryWindow>>,
     time: Res<Time>,
-    (setup, village, saves, sound): (
+    (setup, mut village, saves, sound): (
         Res<WorldSetup>,
-        Res<village::Village>,
+        ResMut<village::Village>,
         Res<save_library::SaveMenu>,
         Res<audio::SoundSettings>,
     ),
@@ -229,6 +228,7 @@ fn camera_controls(
     if mouse.pressed(MouseButton::Right) {
         view.heading -= motion.delta.x / window.height().max(1.0) * std::f32::consts::TAU;
     }
+    view.heading = view.heading.rem_euclid(std::f32::consts::TAU);
     view.target.x = view.target.x.clamp(-124.0, 124.0);
     view.target.z = view.target.z.clamp(-124.0, 124.0);
     **transform = camera_transform(view.target, view.heading);
@@ -243,6 +243,14 @@ fn camera_controls(
     };
     let change = zoom * delta * 1.3 - scroll.delta.y * wheel_factor;
     ortho.scale = (ortho.scale * change.exp()).clamp(1.0 / 6.0, 1.0 / 0.18);
+    let saved = village::CameraView {
+        target: view.target,
+        heading: view.heading,
+        zoom: ortho.scale,
+    };
+    if village.camera_view != Some(saved) {
+        village.camera_view = Some(saved);
+    }
 }
 
 #[cfg(test)]
@@ -302,8 +310,7 @@ mod tests {
             wildlife::WildlifePlugin,
         ))
         .add_systems(Startup, setup_scene)
-        .add_systems(PostUpdate, update_land)
-        .add_systems(Update, camera_controls);
+        .add_systems(PostUpdate, update_land);
         app.finish();
         app.cleanup();
         app.update();
