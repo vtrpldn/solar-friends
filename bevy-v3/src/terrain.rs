@@ -72,6 +72,10 @@ pub struct Foundation {
 }
 
 impl Foundation {
+    pub fn height(self) -> f32 {
+        self.height as f32
+    }
+
     fn distance(self, x: f64, z: f64) -> f64 {
         (self.left - x)
             .max(0.0)

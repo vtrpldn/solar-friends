@@ -732,6 +732,39 @@ impl Construction {
         self.selection.is_some() || self.moving.is_some()
     }
 
+    pub fn preview_model(
+        &self,
+        catalog: &Catalog,
+        terrain: &Terrain,
+        position: IVec2,
+    ) -> Option<(usize, Transform)> {
+        let key = self
+            .moving
+            .map(|index| self.plans[index].key.as_str())
+            .or(self.selection.as_deref())?;
+        if matches!(key, "field" | "garden" | "road") {
+            return None;
+        }
+        let definition = &catalog.projects[key];
+        let footprint = size(definition, self.rotation);
+        let center = position.as_vec2() + (footprint.as_vec2() - Vec2::ONE) * 0.5;
+        let Vec2 { x, y: z } = world_position(center.x, center.y);
+        let height = if Self::uses_foundation(key) {
+            terrain.foundation(position, footprint).map_or_else(
+                || terrain.height_at(x, z),
+                crate::terrain::Foundation::height,
+            )
+        } else {
+            terrain.height_at(x, z)
+        };
+        Some((
+            definition.model,
+            Transform::from_xyz(x, height, z).with_rotation(Quat::from_rotation_y(
+                f32::from(self.rotation) * std::f32::consts::FRAC_PI_2,
+            )),
+        ))
+    }
+
     fn proposed_site(&self, catalog: &Catalog, key: &str, position: IVec2) -> Blueprint {
         let definition = &catalog.projects[key];
         Blueprint {

@@ -1,4 +1,5 @@
 use crate::{audio::SoundSettings, utilities::NetworkView};
+mod building_preview;
 mod cultivation_surface;
 mod diagnostics;
 mod guide;
@@ -60,6 +61,7 @@ impl Plugin for VillagePlugin {
         embedded_asset!(app, "opening.glb");
         embedded_asset!(app, "buildings.glb");
         road_surface::install(app);
+        building_preview::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
@@ -1646,6 +1648,11 @@ fn draw_blueprints(
     map_notice.set_if_neq(MapNotice(notice));
 }
 
+fn building_model(assets: &AssetServer, model: usize) -> SceneRoot {
+    let path = AssetPath::from_path_buf(embedded_path!("buildings.glb")).with_source("embedded");
+    SceneRoot(assets.load(path.with_label(GltfAssetLabel::Scene(model).to_string())))
+}
+
 fn show_construction(
     mut commands: Commands,
     setup: Res<WorldSetup>,
@@ -1666,7 +1673,6 @@ fn show_construction(
         return;
     }
     let terrain = village.terrain(&setup);
-    let models = AssetPath::from_path_buf(embedded_path!("buildings.glb")).with_source("embedded");
     let models_to_show: Vec<_> = village.construction.finished_models(&catalog).collect();
     for (entity, shown, _) in &displayed {
         if !models_to_show
@@ -1704,13 +1710,7 @@ fn show_construction(
                 place,
             ));
             if !village.construction.has_cultivation_surface(project) {
-                building.insert(SceneRoot(
-                    assets.load(
-                        models
-                            .clone()
-                            .with_label(GltfAssetLabel::Scene(asset).to_string()),
-                    ),
-                ));
+                building.insert(building_model(&assets, asset));
             }
             if village.construction.is_road(project) {
                 building.insert(road_surface::RoadSurface);
