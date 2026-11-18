@@ -20,7 +20,7 @@ import {activeTrips,uncollectedProjects} from "./trip-state.js";
 import {upkeepStep,performUpkeep,recordVehicleDistance,validUpkeep,serviceParts,ANIMAL_CARE} from "./asset-upkeep.js";
 import {tripEstimate,STARTING_CAPITAL} from "./economy-reference.js";
 import {CROP_CARE,BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology} from "./biological-production.js";
-import {outsideWorkStep,validOutsideWork} from "./outside-work.js";
+import {atTownJob, dayShiftDue, startOutsideWork, outsideWorkStep, validOutsideWork} from "./outside-work.js";
 import {coolStoredFood} from './cold-storage.js';
 import {refreshSandboxFood,foodChange,takeFoodLots,freshLots,foodStorageStep,validFoodStorage,returnUnsoldFood,FOOD_DAYS} from './food-storage.js';
 import {recordProduction,validProductionAccounting} from './production-accounting.js';
@@ -676,7 +676,7 @@ export function utilitySpot(s, node, r) {
     return spots.find(spot=>!occupied(s,spot.x,spot.z)&&route(s,r,spot));
   }
   const spots=accessGeometry(p,PROJECTS[p.key],footprint(p)).work;
-  return spots.find(spot=>!occupied(s,spot.x,spot.z)&&!s.people.some(other=>other!==r&&!other.needTask&&!other.tentPhase&&(
+  return spots.find(spot=>!occupied(s,spot.x,spot.z)&&!s.people.some(other=>other!==r&&!atTownJob(other)&&!other.needTask&&!other.tentPhase&&(
     Math.hypot(other.x-spot.x,other.z-spot.z)<.55 ||
     (other.target&&Math.hypot(other.target.x-spot.x,other.target.z-spot.z)<.55)
   ))&&route(s,r,spot));
@@ -1384,7 +1384,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
     });
   }
   for (const resident of s.people) {
-    if (resident.outsideWork?.phase === 'away' || resident.action === 'town') continue;
+    if (atTownJob(resident) || resident.action === 'town') continue;
     for (const [available, destination] of [[canEat,'food stores'],[canDrink,'drinking water']]) {
       if ((!available(proposed,resident) || !available(completedSite,resident)) && available(s,resident))
         return `Leave a walking route for ${resident.name} to reach ${destination}.`;
@@ -1623,7 +1623,7 @@ function startSupplyRun(s, material = "wood", project = null, saleOnly = false) 
     return false;
   const vehicles=[s.nextTripVehicle||0,1-(s.nextTripVehicle||0)].filter(i=>s.secondTrip?.vehicle!==i&&(s.upkeep?.vehicles[i]?.condition??100)>10);
   const drivers = s.people
-    .filter((r) => r.energy > 35 && r.action!=='town' && !r.outsideWork && !r.cargo && !r.tentPhase && !r.needTask && Object.entries(ensureNeeds(r)).every(([key,value])=>["food","meals"].includes(material)?(!['bladder','bowels','hygiene'].includes(key)||value>10):value>25))
+    .filter((r) => r.energy > 35 && r.action!=='town' && !r.outsideWork && !dayShiftDue(s,r) && !r.cargo && !r.tentPhase && !r.needTask && Object.entries(ensureNeeds(r)).every(([key,value])=>["food","meals"].includes(material)?(!['bladder','bowels','hygiene'].includes(key)||value>10):value>25))
     .sort((a, b) => b.energy - a.energy);
   let vehicle,r;
   for(const candidate of vehicles){const driver=drivers.find(person=>route(s,person,carDoor(candidate)));if(driver){vehicle=candidate;r=driver;break;}}
@@ -2083,7 +2083,7 @@ function restoreHomeAssignments(s) {
 function recoveryEnergy(s, r, constructionPending) {
   // A short construction nap must leave an outside worker rested enough to
   // accept the next shift (which requires 65 energy).
-  if (r.outsideJobEnabled || !constructionPending) return 80;
+  if (r.outsideJobEnabled || r.dayShiftBooked || !constructionPending) return 80;
   return s.projects.some(p => p.work < PROJECTS[p.key].work) ? 60 : 80;
 }
 function chooseRestingPlace(s, r, i) {
@@ -2177,7 +2177,7 @@ function supplySpot(s, r, i) {
       occupied(s, goal.x, goal.z) ||
       s.people.some(
         (other) =>
-          other !== r &&
+          other !== r && !atTownJob(other) &&
           ((other.target &&
             other.target.x === goal.x &&
             other.target.z === goal.z) ||
@@ -2210,7 +2210,7 @@ function workSpot(s, r, p) {
         !s.people.some(
           (other) =>
             other !== r &&
-            !other.tentPhase &&
+            !other.tentPhase && !atTownJob(other) &&
             (Math.hypot(other.x - spot.x, other.z - spot.z) < 0.55 ||
               (other.target?.x === spot.x && other.target?.z === spot.z)),
         ) &&
@@ -2228,7 +2228,7 @@ function leisureSpot(s,r,p) {
     .map(spot=>({x:Math.max(p.x+Math.min(.2,(w-1)/2),Math.min(p.x+w-1-Math.min(.2,(w-1)/2),spot.x)),
       z:Math.max(p.z+Math.min(.2,(d-1)/2),Math.min(p.z+d-1-Math.min(.2,(d-1)/2),spot.z))}))
     .sort((a,b)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z))
-    .find(spot=>!s.people.some(other=>other!==r && (
+    .find(spot=>!s.people.some(other=>other!==r && !atTownJob(other) && (
       (!other.tentPhase && Math.hypot(other.x-spot.x,other.z-spot.z)<.7) ||
       (other.downtime && Math.hypot(other.downtime.target.x-spot.x,other.downtime.target.z-spot.z)<.8)
     )) && route(s,r,spot));
@@ -2317,7 +2317,7 @@ function tickUncached(s, dt) {
   maintainWater(s);
   manageKitchens(s,PROJECTS,PROCESSES,{blocker:productionBlocker,queue:queueProduction,stored:storedMaterials,capacity:storageCapacity});
   for (const [i,r] of s.people.entries()) {
-    if(r.outsideWork?.phase==='away')continue;
+    if(atTownJob(r))continue;
     decayNeeds(s,r,i,dt);
     noticeAspiration(s,r,PROJECTS);
     // Being awake is tiring even when no construction is underway.
@@ -2345,7 +2345,7 @@ function tickUncached(s, dt) {
         const point={x:Math.round(center.x+Math.cos(angle)*ring),z:Math.round(center.z+Math.sin(angle)*ring)};
         if(point.x<CELL_MIN+2 || point.x>CELL_MAX-2 || point.z<CELL_MIN+2 || point.z>CELL_MAX-2 || occupied(s,point.x,point.z))continue;
         if(privateBreak && (riverBankAt(point.x,point.z,5,s.landSeed) || Math.hypot(point.x-s.stock.x,point.z-s.stock.z)<5))continue;
-        if(s.people.some(p=>p!==r && ((p.needTask && Math.hypot(p.needTask.target.x-point.x,p.needTask.target.z-point.z)<.8) || Math.hypot(p.x-point.x,p.z-point.z)<.7)))continue;
+        if(s.people.some(p=>p!==r && !atTownJob(p) && ((p.needTask && Math.hypot(p.needTask.target.x-point.x,p.needTask.target.z-point.z)<.8) || Math.hypot(p.x-point.x,p.z-point.z)<.7)))continue;
         if(route(s,r,point))return point;
       }
       return null;
@@ -2431,7 +2431,7 @@ function tickUncached(s, dt) {
     if(downtimeInvalid(s,r,PROJECTS)){clearDowntime(r);r.walk=[];r.target=null;}
     if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.outsideWork || r.action==='town'))clearDowntime(r);
     if (r.action === "town") continue;
-    if(r.outsideWork?.phase==='away'){outsideWorkStep(s,r,dt,go,route);continue;}
+    if(atTownJob(r)){outsideWorkStep(s,r,dt,go,say);continue;}
     const canDrink=r.needs.hydration<10&&Object.values(s.infrastructure.nodes).some(n=>{
       if(!n.enabled||n.water[0]<.5||['coop','goat_pasture'].includes(n.kind))return false;
       const spot=utilitySpot(s,n,r);return spot&&route(s,r,spot);
@@ -2492,6 +2492,7 @@ function tickUncached(s, dt) {
     if (r.energy < 25 && r.job && !r.cargo && !r.needTask) {
       r.walk=[]; r.target=null; r.job=null; r.supplyGoal=null;
     }
+    if (r.dayShiftBooked) startOutsideWork(s,r,route);
     if (r.walk.length) {
       const next = r.walk[0],
         dx = next.x - r.x,
@@ -2510,7 +2511,7 @@ function tickUncached(s, dt) {
       const nearby = s.people.filter(
         (other) =>
           other !== r &&
-          other.action !== "town" &&
+          other.action !== "town" && !atTownJob(other) &&
           Math.hypot(other.x - r.x, other.z - r.z) < 0.75,
       );
       const step = dt * r.moveSpeed * (nearby.length ? 0.65 : 1);
@@ -2543,6 +2544,10 @@ function tickUncached(s, dt) {
       continue;
     }
     r.moveSpeed = 0;
+    if (r.outsideWork) {
+      if (!advanceNeed(s,r,dt,needApi)) outsideWorkStep(s,r,dt,go,say);
+      continue;
+    }
     if (s.stage === "evening") {
       r.action = "meal";
       go(s, r, restSpot(s, i));
@@ -2586,7 +2591,10 @@ function tickUncached(s, dt) {
     // Finish an assigned batch before reconsidering work categories. Otherwise
     // changing availability can shuffle the reserved slots on every tick.
     if (removalsPending && r.energy >= 25 && removalStep(s,r,dt,{defs:PROJECTS,recipes:PROCESSES,workSpot,go,stored:storedMaterials,capacity:storageCapacity,change:changeMaterial,invalidate:invalidateNavigation,say,placement:placementError,grade:gradeFoundation})) continue;
-    if(outsideWorkStep(s,r,dt,go,route))continue;
+    if (r.outsideJobEnabled && !r.dayShiftBooked && startOutsideWork(s,r,route)) {
+      outsideWorkStep(s,r,dt,go,say);
+      continue;
+    }
     if(r.energy>=25&&performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot))continue;
     const activeOperation = operationsPending && s.operations.find(o => o.id === r.operation && !o.done);
     if(activeOperation && !r.job && operationalWork(s,r,i,dt,false,workGroup(activeOperation,PROCESSES))) continue;
