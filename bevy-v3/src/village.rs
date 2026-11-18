@@ -75,7 +75,10 @@ impl Plugin for VillagePlugin {
                 )
                     .chain(),
             )
-            .add_systems(Update, (draw_blueprints, autosave_named))
+            .add_systems(
+                Update,
+                (draw_blueprints.after(village_input), autosave_named),
+            )
             .add_systems(FixedUpdate, advance_clock);
     }
 }
@@ -446,7 +449,7 @@ fn read_camp_pointer(
     if !clicked
         && !village.terrain_editor.open
         && !village.planning_roads()
-        && !village.construction.placing_field()
+        && !village.construction.placing_project()
     {
         return;
     }
@@ -1413,8 +1416,8 @@ fn draw_blueprints(
                 village
                     .construction
                     .draw_road_route(&terrain, hit.cell, extend, &mut gizmos);
-            } else if village.construction.placing_field() {
-                village.construction.draw_field_site(
+            } else if village.construction.placing_project() {
+                village.construction.draw_project_site(
                     ConstructionSite {
                         terrain: &terrain,
                         land: &land,

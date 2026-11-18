@@ -500,23 +500,7 @@ impl Construction {
             camp,
         } = site;
         let definition = &catalog.projects[key];
-        let mut blueprint = Blueprint {
-            key: key.clone(),
-            position,
-            size: if is_field {
-                rotated_size(self.field_size, self.rotation)
-            } else {
-                size(definition, self.rotation)
-            },
-            rotation: self.rotation,
-            loads: catalog.loads(definition),
-            delivered: 0,
-            work: 0.0,
-            pickups: 0,
-            fare: 0,
-            removed: false,
-            purchase: None,
-        };
+        let mut blueprint = self.proposed_site(catalog, key, position);
         if let Some(error) = self.placement_error(
             terrain,
             land,
@@ -620,6 +604,81 @@ impl Construction {
             return Err("This village has reached the foundation limit.");
         }
         Ok(pad)
+    }
+
+    pub fn placing_project(&self) -> bool {
+        self.selection.is_some() || self.moving.is_some()
+    }
+
+    fn proposed_site(&self, catalog: &Catalog, key: &str, position: IVec2) -> Blueprint {
+        let definition = &catalog.projects[key];
+        Blueprint {
+            key: key.to_owned(),
+            position,
+            size: if key == "field" {
+                rotated_size(self.field_size, self.rotation)
+            } else {
+                size(definition, self.rotation)
+            },
+            rotation: self.rotation,
+            loads: catalog.loads(definition),
+            delivered: 0,
+            work: 0.0,
+            pickups: 0,
+            fare: 0,
+            removed: false,
+            purchase: None,
+        }
+    }
+
+    pub fn draw_project_site(
+        &self,
+        ground: ConstructionSite,
+        catalog: &Catalog,
+        sandbox: bool,
+        position: IVec2,
+        gizmos: &mut Gizmos,
+    ) {
+        let key = self
+            .moving
+            .map(|index| self.plans[index].key.as_str())
+            .or(self.selection.as_deref());
+        let Some(key) = key else { return };
+        let proposal = self.proposed_site(catalog, key, position);
+        let valid = self
+            .placement_error(
+                ground.terrain,
+                ground.land,
+                ground.camp,
+                &proposal,
+                &catalog.projects[&proposal.key],
+                (catalog, sandbox, self.moving),
+            )
+            .is_none();
+        let tint = if valid {
+            Color::srgb_u8(217, 237, 165)
+        } else {
+            Color::srgb_u8(216, 122, 92)
+        };
+        let low = world_position(position.x as f32, position.y as f32) - Vec2::ONE;
+        let high = low + proposal.size.as_vec2() * 2.0;
+        let points = [
+            low,
+            Vec2::new(low.x, high.y),
+            high,
+            Vec2::new(high.x, low.y),
+            low,
+        ];
+        for line in points.windows(2) {
+            let length = line[0].distance(line[1]).ceil() as usize;
+            gizmos.linestrip(
+                (0..=length).map(|step| {
+                    let Vec2 { x, y: z } = line[0].lerp(line[1], step as f32 / length as f32);
+                    Vec3::new(x, ground.terrain.height_at(x, z) + 0.1, z)
+                }),
+                tint,
+            );
+        }
     }
 
     fn placement_error(
