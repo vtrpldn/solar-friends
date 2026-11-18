@@ -220,9 +220,9 @@ fn setup_input(
     keyboard: Res<ButtonInput<KeyCode>>,
     buttons: Query<(&Interaction, &Action), Changed<Interaction>>,
     window: Single<&Window, With<PrimaryWindow>>,
-    saves: Res<SaveMenu>,
+    (saves, sound): (Res<SaveMenu>, Res<crate::audio::SoundSettings>),
 ) {
-    if !window.focused || saves.open {
+    if !window.focused || saves.open || sound.open {
         return;
     }
     if !setup.open {

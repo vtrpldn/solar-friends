@@ -151,15 +151,17 @@ fn camera_controls(
     (motion, scroll): (Res<AccumulatedMouseMotion>, Res<AccumulatedMouseScroll>),
     window: Single<&Window, With<PrimaryWindow>>,
     time: Res<Time>,
-    (setup, village, saves): (
+    (setup, village, saves, sound): (
         Res<WorldSetup>,
         Res<village::Village>,
         Res<save_library::SaveMenu>,
+        Res<audio::SoundSettings>,
     ),
     mut camera: Single<(&mut Transform, &mut Projection, &mut VillageCamera)>,
 ) {
     if setup.open
         || saves.open
+        || sound.open
         || village.map_input_blocked()
         || village.advance_open()
         || village.trade_open()

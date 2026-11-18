@@ -24,9 +24,9 @@ pub(super) fn library_controls(
     mut setup: ResMut<WorldSetup>,
     mut village: ResMut<Village>,
     catalog: Res<Catalog>,
-    time: Res<Time<Real>>,
+    (time, sound): (Res<Time<Real>>, Res<SoundSettings>),
 ) {
-    if !window.focused {
+    if !window.focused || sound.open {
         text.clear();
         return;
     }

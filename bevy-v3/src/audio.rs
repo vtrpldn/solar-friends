@@ -6,6 +6,10 @@ use bevy::{
     window::PrimaryWindow,
 };
 
+use serde::{Deserialize, Serialize};
+
+use crate::{save, setup::Mode};
+
 const RATE: u32 = 24_000;
 const STEP: f64 = 60.0 / 92.0 / 4.0;
 const CHORDS: [[i32; 5]; 16] = [
@@ -79,7 +83,96 @@ struct Soundscape {
     music: Handle<Sound>,
     effect: Handle<Sound>,
     started: bool,
-    muted: bool,
+}
+
+#[derive(Resource, Deserialize, Serialize)]
+pub struct SoundSettings {
+    music: u8,
+    effects: u8,
+    #[serde(skip)]
+    pub open: bool,
+    #[serde(skip)]
+    effects_selected: bool,
+    #[serde(skip)]
+    save_failed: bool,
+}
+
+impl Default for SoundSettings {
+    fn default() -> Self {
+        Self {
+            music: 30,
+            effects: 45,
+            open: false,
+            effects_selected: false,
+            save_failed: false,
+        }
+    }
+}
+
+impl SoundSettings {
+    fn path() -> std::io::Result<std::path::PathBuf> {
+        Ok(save::location(Mode::Story)?.with_file_name("sound.json"))
+    }
+
+    fn load() -> Option<Self> {
+        let bytes = save::read_bytes(&Self::path().ok()?, 1024).ok()?;
+        let mut settings: Self = serde_json::from_slice(&bytes).ok()?;
+        settings.music = settings.music.min(100);
+        settings.effects = settings.effects.min(100);
+        Some(settings)
+    }
+
+    pub fn controls(&mut self, keys: &ButtonInput<KeyCode>) -> bool {
+        if keys.just_pressed(KeyCode::F1)
+            && keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+        {
+            self.open = !self.open;
+            return true;
+        }
+        if !self.open {
+            return false;
+        }
+        if keys.any_just_pressed([KeyCode::ArrowUp, KeyCode::ArrowDown]) {
+            self.effects_selected = !self.effects_selected;
+        }
+        let step = 5
+            * (i16::from(keys.just_pressed(KeyCode::ArrowRight))
+                - i16::from(keys.just_pressed(KeyCode::ArrowLeft)));
+        let volume = if self.effects_selected {
+            &mut self.effects
+        } else {
+            &mut self.music
+        };
+        let next = if keys.just_pressed(KeyCode::KeyM) {
+            0
+        } else {
+            (i16::from(*volume) + step).clamp(0, 100) as u8
+        };
+        if next != *volume {
+            *volume = next;
+            self.save_failed = Self::path()
+                .and_then(|path| save::atomic_write(&path, &serde_json::to_vec(self)?, 1024))
+                .is_err();
+        }
+        true
+    }
+
+    pub fn label(&self) -> String {
+        let (music, effects) = if self.effects_selected {
+            ("", "› ")
+        } else {
+            ("› ", "")
+        };
+        let status = if self.save_failed {
+            "\nCould not save sound settings"
+        } else {
+            ""
+        };
+        format!(
+            "Sound · Up/Down Select · Left/Right Adjust · M Mute selected\n{music}Music {}%\n{effects}Interaction sounds {}%\nShift+F1 Close{status}",
+            self.music, self.effects
+        )
+    }
 }
 
 #[derive(Component)]
@@ -95,32 +188,32 @@ impl Plugin for VillageAudio {
     }
 }
 
-fn prepare_audio(mut commands: Commands, mut sounds: ResMut<Assets<Sound>>) {
+fn prepare_audio(
+    mut commands: Commands,
+    mut sounds: ResMut<Assets<Sound>>,
+    mut settings: ResMut<SoundSettings>,
+) {
+    if let Some(saved) = SoundSettings::load() {
+        *settings = saved;
+    }
     let mut effect = vec![0.0; sample_count(0.085)];
     tone(&mut effect, 81, 0.0, 0.085, 0.065, false);
     commands.insert_resource(Soundscape {
         music: sounds.add(Sound(sunday_in_the_village().into())),
         effect: sounds.add(Sound(effect.into())),
         started: false,
-        muted: false,
     });
 }
 
 fn audio_controls(
     mut commands: Commands,
     mut soundscape: ResMut<Soundscape>,
-    keyboard: Res<ButtonInput<KeyCode>>,
-    mouse: Res<ButtonInput<MouseButton>>,
+    (keyboard, mouse): (Res<ButtonInput<KeyCode>>, Res<ButtonInput<MouseButton>>),
     window: Single<&Window, With<PrimaryWindow>>,
-    sinks: Query<&AudioSink, With<Music>>,
+    mut sinks: Query<&mut AudioSink, With<Music>>,
     buttons: Query<&Interaction, (Changed<Interaction>, With<Button>)>,
+    settings: Res<SoundSettings>,
 ) {
-    if keyboard.just_pressed(KeyCode::KeyM)
-        && window.focused
-        && !keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
-    {
-        soundscape.muted = !soundscape.muted;
-    }
     if !soundscape.started
         && window.focused
         && (keyboard.get_just_pressed().len() > 0 || mouse.just_pressed(MouseButton::Left))
@@ -130,26 +223,28 @@ fn audio_controls(
             Music,
             AudioPlayer(soundscape.music.clone()),
             PlaybackSettings {
-                paused: soundscape.muted,
-                volume: Volume::Linear(0.3),
+                paused: settings.music == 0,
+                volume: Volume::Linear(f32::from(settings.music) / 100.0),
                 ..PlaybackSettings::LOOP
             },
         ));
     }
-    for sink in &sinks {
-        if soundscape.muted || !window.focused {
+    for mut sink in &mut sinks {
+        sink.set_volume(Volume::Linear(f32::from(settings.music) / 100.0));
+        if settings.music == 0 || !window.focused {
             sink.pause();
         } else if sink.is_paused() {
             sink.play();
         }
     }
     if window.focused
-        && !soundscape.muted
+        && settings.effects > 0
         && buttons.iter().any(|state| *state == Interaction::Pressed)
     {
         commands.spawn((
             AudioPlayer(soundscape.effect.clone()),
-            PlaybackSettings::DESPAWN.with_volume(Volume::Linear(0.45)),
+            PlaybackSettings::DESPAWN
+                .with_volume(Volume::Linear(f32::from(settings.effects) / 100.0)),
         ));
     }
 }

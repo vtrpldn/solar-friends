@@ -1,4 +1,4 @@
-use crate::utilities::NetworkView;
+use crate::{audio::SoundSettings, utilities::NetworkView};
 mod cultivation_surface;
 mod guide;
 mod land_lens;
@@ -63,6 +63,7 @@ impl Plugin for VillagePlugin {
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
             .init_resource::<MapNotice>()
+            .init_resource::<SoundSettings>()
             .init_resource::<Catalog>()
             .init_resource::<SaveMenu>()
             .insert_resource(Time::<Fixed>::from_hz(10.0))
@@ -509,12 +510,20 @@ fn custom_camp_error(terrain: &crate::terrain::Terrain, cell: IVec2) -> Option<&
 fn village_input(
     mut commands: Commands,
     setup: Res<WorldSetup>,
-    (keyboard, pointer, saves): (Res<ButtonInput<KeyCode>>, Res<CampPointer>, Res<SaveMenu>),
+    (keyboard, pointer, saves, mut sound): (
+        Res<ButtonInput<KeyCode>>,
+        Res<CampPointer>,
+        Res<SaveMenu>,
+        ResMut<SoundSettings>,
+    ),
     mut village: ResMut<Village>,
     mut camera: Single<&mut VillageCamera>,
     entities: Query<Entity, With<VillageEntity>>,
     (assets, catalog, land): (Res<AssetServer>, Res<Catalog>, Res<Land>),
 ) {
+    if (sound.open || keyboard.just_pressed(KeyCode::F1)) && sound.controls(&keyboard) {
+        return;
+    }
     if saves.open {
         return;
     }
@@ -1168,16 +1177,26 @@ fn show_hud(
     village: Res<Village>,
     mut hud: Single<(&mut Text, &mut Node), With<VillageHud>>,
     (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
-    placement: Res<MapNotice>,
+    (placement, sound): (Res<MapNotice>, Res<SoundSettings>),
 ) {
     if !saves.is_changed()
         && !setup.is_changed()
         && !village.is_changed()
         && !placement.is_changed()
+        && !sound.is_changed()
     {
         return;
     }
     let (text, node) = &mut *hud;
+    if sound.open {
+        node.display = Display::Flex;
+        node.left = Val::Auto;
+        node.right = px(20);
+        node.top = px(20);
+        node.bottom = Val::Auto;
+        text.0 = sound.label();
+        return;
+    }
     if saves.open {
         node.display = Display::Flex;
         node.left = Val::Auto;
@@ -1245,7 +1264,7 @@ fn show_hud(
     let weather = weather_at(village.clock, setup.biome(), setup.seed());
     label.push('\n');
     label.push_str(&weather.summary());
-    label.push_str(" · F Forecast · F1 Guide");
+    label.push_str(" · F Forecast · F1 Guide · Shift+F1 Sound");
     if village.show_forecast {
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
