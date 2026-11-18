@@ -1,5 +1,6 @@
 mod farm_work;
 mod gather_work;
+mod leisure;
 mod lifecycle;
 mod production_work;
 mod resident_work;
@@ -184,6 +185,8 @@ pub struct Worker {
     #[serde(default)]
     home: Option<usize>,
     #[serde(default)]
+    leisure: leisure::Leisure,
+    #[serde(default)]
     town_work: TownWork,
 }
 
@@ -222,6 +225,7 @@ impl Default for Construction {
                     retry: 0.0,
                     health: Health::new(index),
                     home: None,
+                    leisure: leisure::Leisure::default(),
                     town_work: TownWork::default(),
                 }
             }),
@@ -854,6 +858,7 @@ impl Construction {
                     point.cmpge(Vec2::splat(-31.0)).all() && point.cmple(Vec2::splat(94.0)).all()
                 };
                 worker.health.valid()
+                    && worker.leisure.valid()
                     && in_bounds(worker.position)
                     && worker.path.len() <= 128 * 128
                     && worker.path.iter().copied().all(in_bounds)

@@ -23,6 +23,14 @@ const cycle = [
   ["stretch", Math.PI * 2 / 0.9],
   ["chop", 1.4],
   ["rest", Math.PI],
+  ["read", Math.PI * 2],
+  ["ground-read", Math.PI * 2],
+  ["fire-sit", Math.PI * 2 / .65],
+  ["ground-relax", Math.PI * 2],
+  ["breathe", Math.PI * 2],
+  ["yawn", 3],
+  ["neck-stretch", 3],
+  ["shoulder-roll", 3],
 ];
 
 function bakeResident(name, root) {

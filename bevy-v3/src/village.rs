@@ -820,6 +820,8 @@ fn step(
     };
     town.construction
         .tick(catalog, &mut town.stock, site, clock, dt as f32);
+    town.construction
+        .tick_leisure(catalog, setup, &town.stock, site, town.clock, dt as f32);
 }
 
 fn show_hud(

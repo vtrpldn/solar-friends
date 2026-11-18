@@ -10,7 +10,7 @@ use bevy::{
 
 use crate::{setup::WorldSetup, village::Village};
 
-const CLIPS: usize = 10;
+const CLIPS: usize = 18;
 const RESIDENTS: usize = 5;
 
 // Matches the baked clip order in scripts/export-v3-opening-models.mjs.
@@ -26,6 +26,14 @@ pub enum Motion {
     Stretch,
     Chop,
     Rest,
+    Read,
+    GroundRead,
+    FireSit,
+    GroundRelax,
+    Breathe,
+    Yawn,
+    NeckStretch,
+    ShoulderRoll,
 }
 
 #[derive(Component)]

@@ -86,6 +86,8 @@ pub struct Profile {
     pub strengths: Vec<String>,
     pub temperament: Temperament,
     pub interests: Vec<String>,
+    pub favorites: Vec<String>,
+    pub hobby: String,
     pub aspiration: Aspiration,
     pub reflection: String,
 }

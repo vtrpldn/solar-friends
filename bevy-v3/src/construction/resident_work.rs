@@ -155,7 +155,11 @@ impl Construction {
         let Some((kind, facility, path, partner_route)) = selected else {
             return;
         };
-        let mut task = NeedTask {
+        if let Some((partner, their_path)) = partner_route {
+            self.start_conversation(catalog, stock, [(index, path), (partner, their_path)]);
+            return;
+        }
+        let task = NeedTask {
             kind,
             facility,
             elapsed: 0.0,
@@ -189,24 +193,6 @@ impl Construction {
             partner: None,
             conversation: None,
         };
-        if let Some((partner, route)) = partner_route {
-            let conversation = self.conversation(index, partner, catalog, stock);
-            task.partner = Some(partner);
-            task.conversation = Some(conversation.clone());
-            let resident = &mut self.residents[partner];
-            resident.assignment = None;
-            resident.health.task = Some(NeedTask {
-                kind,
-                partner: Some(index),
-                facility: None,
-                elapsed: 0.0,
-                duration: 18.0,
-                returning: false,
-                water: 0.0,
-                conversation: Some(conversation),
-            });
-            resident.path = route;
-        }
         let worker = &mut self.residents[index];
         if kind == Need::Sleep {
             worker.health.last_night = Some(night);
@@ -420,6 +406,16 @@ impl Construction {
         site: ConstructionSite,
         clock: f64,
     ) -> Option<(usize, VecDeque<Vec2>)> {
+        self.willing_partners(index, catalog, clock)
+            .into_iter()
+            .find_map(|id| {
+                let target = site.camp + IVec2::new(index as i32 - 2, 2);
+                self.resident_route(catalog, site, self.residents[id].position, target)
+                    .map(|path| (id, path))
+            })
+    }
+
+    fn willing_partners(&self, index: usize, catalog: &Catalog, clock: f64) -> Vec<usize> {
         let initiator = &self.residents[index];
         let score = |id: usize| {
             let other = &self.residents[id];
@@ -470,11 +466,70 @@ impl Construction {
             })
             .collect::<Vec<_>>();
         partners.sort_by(|(a, _), (b, _)| score(*b).total_cmp(&score(*a)));
-        partners.into_iter().find_map(|(id, resident)| {
-            let target = site.camp + IVec2::new(index as i32 - 2, 2);
-            self.resident_route(catalog, site, resident.position, target)
-                .map(|path| (id, path))
-        })
+        partners.into_iter().map(|(id, _)| id).collect()
+    }
+
+    fn start_conversation(
+        &mut self,
+        catalog: &Catalog,
+        stock: &Stock,
+        [(a, a_path), (b, b_path)]: [(usize, VecDeque<Vec2>); 2],
+    ) {
+        let conversation = self.conversation(a, b, catalog, stock);
+        for (id, partner, path) in [(a, b, a_path), (b, a, b_path)] {
+            let worker = &mut self.residents[id];
+            worker.assignment = None;
+            worker.leisure.visit = None;
+            worker.path = path;
+            worker.health.task = Some(NeedTask {
+                kind: Need::Social,
+                partner: Some(partner),
+                facility: None,
+                elapsed: 0.0,
+                duration: 18.0,
+                returning: false,
+                water: 0.0,
+                conversation: Some(conversation.clone()),
+            });
+        }
+    }
+
+    pub(super) fn invite_at_fire(
+        &mut self,
+        index: usize,
+        catalog: &Catalog,
+        stock: &Stock,
+        center: Vec2,
+        clock: f64,
+    ) {
+        let health = &self.residents[index].health;
+        if health.energy < 35.0
+            || health.mind.quiet_until > clock
+            || health.levels[Need::Social as usize]
+                >= catalog.residents[index].temperament.accepts_at
+        {
+            return;
+        }
+        if let Some(other) = self
+            .willing_partners(index, catalog, clock)
+            .into_iter()
+            .find(|&id| {
+                let worker = &self.residents[id];
+                self.free_for_leisure(id)
+                    && worker.position.distance(center) <= 4.0
+                    && worker.position.distance(self.residents[index].position) <= 2.5
+            })
+        {
+            for (id, partner) in [(index, other), (other, index)] {
+                let offset = self.residents[partner].position - self.residents[id].position;
+                self.residents[id].yaw = offset.x.atan2(offset.y);
+            }
+            self.start_conversation(
+                catalog,
+                stock,
+                [(index, VecDeque::new()), (other, VecDeque::new())],
+            );
+        }
     }
 
     fn concern(&self, index: usize, catalog: &Catalog, stock: &Stock) -> Option<&'static str> {
@@ -747,6 +802,9 @@ impl Construction {
                 _ => Motion::Walk,
             };
         }
+        if let Some(visit) = &worker.leisure.visit {
+            return visit.motion();
+        }
         if !worker.path.is_empty() {
             Motion::Walk
         } else {
@@ -785,6 +843,8 @@ impl Construction {
                     "In production"
                 } else if self.gathering.workers_at_site(index) {
                     "Gathering"
+                } else if let Some(visit) = &worker.leisure.visit {
+                    visit.label()
                 } else {
                     "Available"
                 };
