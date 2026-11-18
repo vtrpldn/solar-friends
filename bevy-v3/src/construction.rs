@@ -12,11 +12,27 @@ use crate::{
     terrain::Terrain,
 };
 
-const ESSENTIALS: [(KeyCode, &str); 4] = [
-    (KeyCode::Digit1, "gathering"),
-    (KeyCode::Digit2, "well"),
-    (KeyCode::Digit3, "shelter"),
-    (KeyCode::Digit4, "toilet"),
+const CATEGORIES: [&str; 10] = [
+    "Camp essentials",
+    "Homes & shelter",
+    "Food & farming",
+    "Animals",
+    "Water & sanitation",
+    "Power",
+    "Storage & production",
+    "Paths & boundaries",
+    "Community & leisure",
+    "All",
+];
+const PAGE_KEYS: [KeyCode; 8] = [
+    KeyCode::Digit1,
+    KeyCode::Digit2,
+    KeyCode::Digit3,
+    KeyCode::Digit4,
+    KeyCode::Digit5,
+    KeyCode::Digit6,
+    KeyCode::Digit7,
+    KeyCode::Digit8,
 ];
 
 const STOCKPILE: IVec2 = IVec2::new(32, -13);
@@ -33,11 +49,17 @@ pub struct Construction {
     #[serde(skip)]
     pub menu: bool,
     #[serde(skip)]
-    selection: Option<&'static str>,
+    selection: Option<String>,
+    #[serde(skip)]
+    category: usize,
+    #[serde(skip)]
+    page: usize,
     #[serde(skip)]
     rotation: u8,
     #[serde(skip)]
     status: String,
+    #[serde(default)]
+    slow_sandbox: bool,
     plans: Vec<Blueprint>,
     residents: [Worker; 5],
 }
@@ -85,8 +107,11 @@ impl Default for Construction {
         Self {
             menu: false,
             selection: None,
+            category: 0,
+            page: 0,
             rotation: 0,
             status: String::new(),
+            slow_sandbox: false,
             plans: Vec::new(),
             residents: ARRIVAL_SPOTS.map(|(x, z)| Worker {
                 position: Vec2::new(x, z),
@@ -128,6 +153,26 @@ impl Construction {
         self.selection.is_some()
     }
 
+    fn options<'a>(&self, catalog: &'a Catalog) -> Vec<(&'a String, &'a Project)> {
+        let category = CATEGORIES[self.category];
+        let mut projects: Vec<_> = catalog
+            .projects
+            .iter()
+            .filter(|(_, project)| match category {
+                "All" => true,
+                "Camp essentials" => project.camp_essential,
+                _ => project.category == category,
+            })
+            .collect();
+        if category == "Camp essentials" {
+            let rank = ["gathering", "well", "shelter", "toilet"];
+            projects.sort_by_key(|(id, _)| rank.iter().position(|key| *key == id.as_str()));
+        } else {
+            projects.sort_by(|(_, a), (_, b)| a.name.cmp(&b.name));
+        }
+        projects
+    }
+
     pub fn input(&mut self, keyboard: &ButtonInput<KeyCode>, catalog: &Catalog) {
         if keyboard.just_pressed(KeyCode::KeyB) {
             self.menu = !self.menu;
@@ -137,12 +182,27 @@ impl Construction {
         if !self.menu {
             return;
         }
-        if let Some(id) = ESSENTIALS
-            .iter()
-            .find_map(|(key, id)| keyboard.just_pressed(*key).then_some(*id))
-            && catalog.projects[id].camp_essential
+        if keyboard.just_pressed(KeyCode::Tab) {
+            let reverse = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+            self.category =
+                (self.category + if reverse { CATEGORIES.len() - 1 } else { 1 }) % CATEGORIES.len();
+            self.page = 0;
+            self.selection = None;
+            self.status.clear();
+        }
+        let options = self.options(catalog);
+        let pages = options.len().div_ceil(PAGE_KEYS.len()).max(1);
+        if keyboard.just_pressed(KeyCode::PageDown) {
+            self.page = (self.page + 1) % pages;
+            self.selection = None;
+        } else if keyboard.just_pressed(KeyCode::PageUp) {
+            self.page = (self.page + pages - 1) % pages;
+            self.selection = None;
+        }
+        if let Some(index) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key))
+            && let Some((id, _)) = options.get(self.page * PAGE_KEYS.len() + index)
         {
-            self.selection = Some(id);
+            self.selection = Some((*id).clone());
             self.rotation = 0;
             self.status.clear();
         }
@@ -151,11 +211,23 @@ impl Construction {
         }
     }
 
+    pub fn toggle_sandbox_construction(&mut self) {
+        self.slow_sandbox = !self.slow_sandbox;
+    }
+
+    pub fn sandbox_status(&self) -> &'static str {
+        if self.slow_sandbox {
+            "I Instant build off"
+        } else {
+            "I Instant build on"
+        }
+    }
+
     pub fn instructions(&self, catalog: &Catalog) -> String {
         if !self.menu {
             return "B Build · Space Pause · 1–4 Speed".into();
         }
-        if let Some(key) = self.selection {
+        if let Some(key) = &self.selection {
             let definition = &catalog.projects[key];
             let degrees = u32::from(self.rotation) * 90;
             return format!(
@@ -166,12 +238,21 @@ impl Construction {
                 self.status
             );
         }
+        let options = self.options(catalog);
+        let pages = options.len().div_ceil(PAGE_KEYS.len()).max(1);
+        let list = options
+            .iter()
+            .skip(self.page * PAGE_KEYS.len())
+            .take(PAGE_KEYS.len())
+            .enumerate()
+            .map(|(i, (_, definition))| format!("{} {}", i + 1, definition.name))
+            .collect::<Vec<_>>()
+            .join("\n");
         format!(
-            "Camp essentials\n1 {} · 2 {}\n3 {} · 4 {}\nB Close\n{}",
-            catalog.projects["gathering"].name,
-            catalog.projects["well"].name,
-            catalog.projects["shelter"].name,
-            catalog.projects["toilet"].name,
+            "{} · {}/{}\nTab Category · Page Up/Down · B Close\n{list}\n{}",
+            CATEGORIES[self.category],
+            self.page + 1,
+            pages,
             self.status
         )
     }
@@ -185,10 +266,10 @@ impl Construction {
         camp: IVec2,
         position: IVec2,
     ) {
-        let Some(key) = self.selection else { return };
+        let Some(key) = &self.selection else { return };
         let definition = &catalog.projects[key];
-        let blueprint = Blueprint {
-            key: key.into(),
+        let mut blueprint = Blueprint {
+            key: key.clone(),
             position,
             size: size(definition, self.rotation),
             rotation: self.rotation,
@@ -196,9 +277,14 @@ impl Construction {
             delivered: 0,
             work: 0.0,
         };
-        if let Some(error) =
-            self.placement_error(terrain, land, camp, &blueprint, definition.repeatable)
-        {
+        if let Some(error) = self.placement_error(
+            terrain,
+            land,
+            camp,
+            &blueprint,
+            definition,
+            (catalog, stock.sandbox),
+        ) {
             self.status = error.into();
             return;
         }
@@ -206,9 +292,17 @@ impl Construction {
             self.status = format!("Not enough {} in supplies.", catalog.materials[&id].name);
             return;
         }
+        self.status = if stock.sandbox && !self.slow_sandbox && key != "road" {
+            blueprint.delivered = blueprint.loads;
+            blueprint.work = definition.work;
+            format!("{} built.", definition.name)
+        } else if stock.sandbox {
+            format!("{} planned.", definition.name)
+        } else {
+            format!("{} planned. Materials reserved.", definition.name)
+        };
         self.plans.push(blueprint);
         self.selection = None;
-        self.status = format!("{} planned. Materials reserved.", definition.name);
     }
 
     fn placement_error(
@@ -217,9 +311,11 @@ impl Construction {
         land: &Land,
         camp: IVec2,
         blueprint: &Blueprint,
-        repeatable: bool,
+        definition: &Project,
+        (catalog, sandbox): (&Catalog, bool),
     ) -> Option<&'static str> {
-        if !repeatable
+        if !sandbox
+            && !definition.repeatable
             && self
                 .plans
                 .iter()
@@ -228,9 +324,47 @@ impl Construction {
             return Some("Already planned.");
         }
         let start = blueprint.position;
+        let bridge = blueprint.key == "bridge";
+        let road = blueprint.key == "road";
+        let riverside = matches!(definition.kind.as_str(), "hydro" | "water-pump");
+        let near_river = |cell: Vec2, margin: f64| {
+            let Vec2 { x, y: z } = world_position(cell.x, cell.y);
+            let (center, width) = terrain.river(f64::from(z));
+            (f64::from(x) - center).abs() <= width + 1.9 + margin
+        };
         let end = start + blueprint.size;
         if start.cmplt(IVec2::splat(-30)).any() || end.cmpgt(IVec2::splat(94)).any() {
             return Some("Keep buildings inside the plot boundary.");
+        }
+        if bridge {
+            let along = if blueprint.rotation.is_multiple_of(2) {
+                IVec2::X
+            } else {
+                IVec2::Y
+            };
+            let length = blueprint.size.max_element();
+            let middle = start.as_vec2() + along.as_vec2() * (length - 1) as f32 * 0.5;
+            if !near_river(middle, 0.0)
+                || near_river((start - along).as_vec2(), 0.7)
+                || near_river((start + along * length).as_vec2(), 0.7)
+            {
+                return Some("Span the river with both bridge ends on dry land.");
+            }
+        }
+        if definition.kind == "hydro"
+            && !near_river(start.as_vec2() + blueprint.size.as_vec2() * 0.5, 3.0)
+        {
+            return Some("Place the generator beside the river.");
+        }
+        if definition.kind == "water-pump"
+            && !near_river(start.as_vec2() + Vec2::splat(0.5), 3.0)
+            && !self.plans.iter().any(|project| {
+                project.key == "groundwater-well"
+                    && project.work >= catalog.projects[&project.key].work
+                    && (project.position - start).as_vec2().length() <= 6.0
+            })
+        {
+            return Some("Place the pump beside the river or a completed well.");
         }
         let overlaps = |plot_start: IVec2, plot_end: IVec2| {
             start.cmplt(plot_end).all() && end.cmpgt(plot_start).all()
@@ -254,13 +388,13 @@ impl Construction {
                     return Some("A tree or natural resource occupies that space.");
                 }
                 let Vec2 { x, y: z } = world_position(column as f32, row as f32);
-                if (MAP_START..=ROAD_END).contains(&z)
+                if !road
+                    && (MAP_START..=ROAD_END).contains(&z)
                     && (x - road_center(z)).abs() < road_width(z) + 1.0
                 {
                     return Some("Keep the access road and parking clear.");
                 }
-                let (center, width) = terrain.river(f64::from(z));
-                if (f64::from(x) - center).abs() <= width + 2.9 {
+                if !bridge && !riverside && near_river(Vec2::new(column as f32, row as f32), 1.0) {
                     return Some("Keep projects back from the riverbank.");
                 }
             }
@@ -353,7 +487,7 @@ impl Construction {
                 if project.work < catalog.projects[&project.key].work {
                     return None;
                 }
-                let model = 9 + ESSENTIALS.iter().position(|(_, key)| *key == project.key)?;
+                let model = catalog.projects[&project.key].model;
                 let base = project.position.as_vec2() + (project.size.as_vec2() - Vec2::ONE) * 0.5;
                 Some((
                     index,
@@ -485,7 +619,7 @@ impl Construction {
                 route(
                     from,
                     to,
-                    |cell| self.blocked(terrain, land, camp, cell),
+                    |cell| self.blocked(catalog, terrain, land, camp, cell),
                     access_road,
                 )
             };
@@ -516,10 +650,25 @@ impl Construction {
         }
     }
 
-    fn blocked(&self, terrain: &Terrain, land: &Land, camp: IVec2, cell: IVec2) -> bool {
+    fn blocked(
+        &self,
+        catalog: &Catalog,
+        terrain: &Terrain,
+        land: &Land,
+        camp: IVec2,
+        cell: IVec2,
+    ) -> bool {
         let Vec2 { x, y: z } = world_position(cell.x as f32, cell.y as f32);
         let (center, width) = terrain.river(f64::from(z));
         let inside = |start: IVec2, end: IVec2| cell.cmpge(start).all() && cell.cmplt(end).all();
+        let crossing = self.plans.iter().any(|plan| {
+            plan.key == "bridge"
+                && plan.work >= catalog.projects[&plan.key].work
+                && inside(plan.position, plan.position + plan.size)
+        });
+        if crossing {
+            return false;
+        }
         (f64::from(x) - center).abs() <= width + 1.9
             || cell == STOCKPILE
             || land.occupied(cell)
@@ -527,7 +676,7 @@ impl Construction {
             || self
                 .plans
                 .iter()
-                .any(|plan| inside(plan.position, plan.position + plan.size))
+                .any(|plan| plan.key != "road" && inside(plan.position, plan.position + plan.size))
     }
 }
 
@@ -551,6 +700,31 @@ mod tests {
     use crate::setup::WorldSetup;
 
     #[test]
+    fn sandbox_builds_a_catalog_project_without_spending_stock() {
+        let mut setup = WorldSetup::default();
+        setup.mode = crate::setup::Mode::Sandbox;
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let terrain = setup.terrain();
+        let camp = IVec2::new(36, 36);
+        let mut construction = Construction {
+            selection: Some("home-family".into()),
+            ..default()
+        };
+        let empty = Land::default();
+        construction.plan(
+            &catalog,
+            &mut stock,
+            &terrain,
+            &empty,
+            camp,
+            IVec2::new(44, 36),
+        );
+        assert_eq!(construction.finished_models(&catalog).count(), 1);
+        assert_eq!(stock.available("wood"), 36);
+    }
+
+    #[test]
     fn residents_haul_all_reserved_loads_before_assembling() {
         let setup = WorldSetup::default();
         let catalog = Catalog::default();
@@ -559,7 +733,7 @@ mod tests {
         let land = Land::default();
         let camp = IVec2::new(36, 36);
         let mut construction = Construction {
-            selection: Some("gathering"),
+            selection: Some("gathering".into()),
             ..default()
         };
         construction.plan(
@@ -596,7 +770,7 @@ mod tests {
         let land = Land::default();
         let camp = IVec2::new(36, 36);
         let mut construction = Construction {
-            selection: Some("gathering"),
+            selection: Some("gathering".into()),
             ..default()
         };
 
@@ -616,7 +790,7 @@ mod tests {
         assert_eq!(stock.available("hardware"), 6);
         assert_eq!(construction.plans.len(), 1);
 
-        construction.selection = Some("well");
+        construction.selection = Some("well".into());
         construction.plan(
             &catalog,
             &mut stock,

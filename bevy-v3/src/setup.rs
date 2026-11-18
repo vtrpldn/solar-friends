@@ -14,10 +14,19 @@ const SAVINGS: [&str; 3] = [
 const SUPPLIES: [&str; 3] = ["Essentials", "Camp", "Prepared"];
 const WATER: [&str; 3] = ["Dry", "Seasonal", "Abundant"];
 
+#[derive(Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
+pub enum Mode {
+    #[default]
+    Story,
+    Sandbox,
+}
+
 #[derive(Resource, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct WorldSetup {
     #[serde(skip)]
     pub open: bool,
+    #[serde(default)]
+    pub mode: Mode,
     seed: u32,
     biome: usize,
     landscape: usize,
@@ -36,6 +45,7 @@ impl Default for WorldSetup {
     fn default() -> Self {
         Self {
             open: true,
+            mode: Mode::Story,
             seed: 42,
             biome: 0,
             landscape: 1,
@@ -95,11 +105,18 @@ impl WorldSetup {
 
     fn label(&self, action: Action) -> String {
         match action {
+            Action::Mode => match self.mode {
+                Mode::Story => "Mode   ·   Story",
+                Mode::Sandbox => "Mode   ·   Sandbox",
+            }
+            .into(),
             Action::Biome => format!("Biome   ·   {}", BIOMES[self.biome]),
             Action::Landscape => format!("Landscape   ·   {}", LANDSCAPES[self.landscape]),
             Action::Water => format!("Water   ·   {}", WATER[self.water]),
             Action::Resources => format!("Resources   ·   {}", RESOURCES[self.resources]),
+            Action::Savings if self.mode == Mode::Sandbox => "Savings   ·   Unlimited".into(),
             Action::Savings => SAVINGS[self.savings].into(),
+            Action::Supplies if self.mode == Mode::Sandbox => "Supplies   ·   Unlimited".into(),
             Action::Supplies => format!("Supplies   ·   {}", SUPPLIES[self.supplies]),
             Action::Seed => format!("Land seed   ·   {}", self.seed),
             Action::Explore => "Enter village".into(),
@@ -109,6 +126,7 @@ impl WorldSetup {
 
 #[derive(Component, Clone, Copy)]
 enum Action {
+    Mode,
     Biome,
     Landscape,
     Water,
@@ -152,6 +170,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
             panel.spawn((Text::new("Solar Friends"), ui_font(&assets, 30.0)));
             panel.spawn((Text::new("Choose the land"), ui_font(&assets, 18.0)));
             for action in [
+                Action::Mode,
                 Action::Biome,
                 Action::Landscape,
                 Action::Water,
@@ -196,12 +215,23 @@ fn setup_input(
             continue;
         }
         match action {
+            Action::Mode => {
+                setup.mode = match setup.mode {
+                    Mode::Story => Mode::Sandbox,
+                    Mode::Sandbox => Mode::Story,
+                }
+            }
             Action::Biome => setup.biome = (setup.biome + 1) % BIOMES.len(),
             Action::Landscape => setup.landscape = (setup.landscape + 1) % LANDSCAPES.len(),
             Action::Water => setup.water = (setup.water + 1) % WATER.len(),
             Action::Resources => setup.resources = (setup.resources + 1) % RESOURCES.len(),
-            Action::Savings => setup.savings = (setup.savings + 1) % SAVINGS.len(),
-            Action::Supplies => setup.supplies = (setup.supplies + 1) % SUPPLIES.len(),
+            Action::Savings if setup.mode == Mode::Story => {
+                setup.savings = (setup.savings + 1) % SAVINGS.len()
+            }
+            Action::Supplies if setup.mode == Mode::Story => {
+                setup.supplies = (setup.supplies + 1) % SUPPLIES.len()
+            }
+            Action::Savings | Action::Supplies => {}
             Action::Seed => setup.seed = setup.seed.wrapping_add(1),
             Action::Explore => setup.open = false,
         }

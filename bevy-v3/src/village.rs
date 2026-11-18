@@ -17,7 +17,7 @@ use crate::{
     construction::Construction,
     land::Land,
     save,
-    setup::WorldSetup,
+    setup::{Mode, WorldSetup},
     stock::Stock,
     ui_font::ui_font,
 };
@@ -40,6 +40,7 @@ pub struct VillagePlugin;
 impl Plugin for VillagePlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "opening.glb");
+        embedded_asset!(app, "buildings.glb");
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
             .init_resource::<Catalog>()
@@ -87,6 +88,7 @@ impl Village {
         };
         if !setup.valid_save()
             || !(0.0..=ARRIVAL_DURATION).contains(&self.arrival_time)
+            || self.stock.sandbox != (setup.mode == Mode::Sandbox)
             || self.speed >= SPEEDS.len()
             || self.clock < 0.0
             || !self.clock.is_finite()
@@ -115,7 +117,7 @@ fn save_controls(
         return;
     }
     if keyboard.just_pressed(KeyCode::F9) {
-        match save::location().and_then(|path| save::read(&path, &catalog)) {
+        match save::location(setup.mode).and_then(|path| save::read(&path, &catalog)) {
             Ok(mut loaded) => {
                 *setup = loaded.setup.as_ref().expect("validated setup").session();
                 loaded.save_notice = "Village loaded.".into();
@@ -125,10 +127,11 @@ fn save_controls(
             Err(error) => village.save_notice = format!("Could not load village: {error}"),
         }
     } else if keyboard.just_pressed(KeyCode::F5) && !setup.open && village.setup.is_some() {
-        village.save_notice = match save::location().and_then(|path| save::write(&path, &village)) {
-            Ok(()) => "Village saved.".into(),
-            Err(error) => format!("Could not save village: {error}"),
-        };
+        village.save_notice =
+            match save::location(setup.mode).and_then(|path| save::write(&path, &village)) {
+                Ok(()) => "Village saved.".into(),
+                Err(error) => format!("Could not save village: {error}"),
+            };
     }
 }
 
@@ -300,6 +303,9 @@ fn village_input(
     }
     if let Some(cell) = village.camp {
         let town = &mut *village;
+        if town.stock.sandbox && keyboard.just_pressed(KeyCode::KeyI) {
+            town.construction.toggle_sandbox_construction();
+        }
         if keyboard.get_just_pressed().len() > 0 {
             town.construction.input(&keyboard, &catalog);
             if !town.construction.menu
@@ -471,12 +477,19 @@ fn show_hud(
         village.construction.instructions(&catalog)
     };
     let speed = SPEEDS[village.speed].1;
+    let stock = if village.stock.sandbox {
+        format!("Sandbox · {}", village.construction.sandbox_status())
+    } else {
+        format!(
+            "R${} · {} timber · {} meals",
+            village.stock.cash,
+            village.stock.available("wood"),
+            village.stock.available("meals"),
+        )
+    };
     let mut label = format!(
-        "Day {day}   {hour:02}:{:02}   R${}   {speed}×\n{} timber · {} meals\n{controls}",
-        minute % 60,
-        village.stock.cash,
-        village.stock.available("wood"),
-        village.stock.available("meals"),
+        "Day {day}   {hour:02}:{:02}   {speed}×\n{stock}\n{controls}",
+        minute % 60
     );
     if let Some(progress) = village.construction.latest_progress(&catalog) {
         label.push('\n');
@@ -519,6 +532,7 @@ fn show_construction(
     }
     let Some(camp) = village.camp else { return };
     let terrain = setup.terrain().with_camp(camp);
+    let models = AssetPath::from_path_buf(embedded_path!("buildings.glb")).with_source("embedded");
     for (project, asset, position, yaw) in village.construction.finished_models(&catalog) {
         if displayed.iter().any(|model| model.0 == project) {
             continue;
@@ -527,7 +541,13 @@ fn show_construction(
         commands.spawn((
             VillageEntity,
             BuiltProject(project),
-            opening_model(&assets, asset),
+            SceneRoot(
+                assets.load(
+                    models
+                        .clone()
+                        .with_label(GltfAssetLabel::Scene(asset).to_string()),
+                ),
+            ),
             Transform::from_xyz(x, terrain.height_at(x, z), z)
                 .with_rotation(Quat::from_rotation_y(yaw)),
         ));

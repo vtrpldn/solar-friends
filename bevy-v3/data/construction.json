@@ -279,6 +279,8 @@
   "projects": {
     "gathering": {
       "name": "Gathering place",
+      "model": 45,
+      "kind": "square",
       "size": [
         2,
         2
@@ -294,6 +296,8 @@
     },
     "shelter": {
       "name": "Basic shelter",
+      "model": 50,
+      "kind": "shed",
       "size": [
         3,
         3
@@ -310,6 +314,8 @@
     },
     "toilet": {
       "name": "Private toilet",
+      "model": 12,
+      "kind": "eco_toilet",
       "size": [
         2,
         2
@@ -327,6 +333,8 @@
     },
     "home-studio": {
       "name": "Little limewash studio",
+      "model": 38,
+      "kind": "home",
       "size": [
         3,
         4
@@ -347,6 +355,8 @@
     },
     "home-lane": {
       "name": "Narrow lane house",
+      "model": 31,
+      "kind": "home",
       "size": [
         3,
         5
@@ -367,6 +377,8 @@
     },
     "home-garden": {
       "name": "Garden cottage",
+      "model": 30,
+      "kind": "home",
       "size": [
         4,
         3
@@ -387,6 +399,8 @@
     },
     "home-ochre": {
       "name": "Ochre gable house",
+      "model": 33,
+      "kind": "home",
       "size": [
         4,
         5
@@ -407,6 +421,8 @@
     },
     "home-deep-porch": {
       "name": "Deep porch house",
+      "model": 27,
+      "kind": "home",
       "size": [
         4,
         6
@@ -427,6 +443,8 @@
     },
     "home-blue-gallery": {
       "name": "Sage terrace house",
+      "model": 23,
+      "kind": "home",
       "size": [
         5,
         4
@@ -447,6 +465,8 @@
     },
     "home-paired": {
       "name": "Paired roof house",
+      "model": 34,
+      "kind": "home",
       "size": [
         6,
         4
@@ -467,6 +487,8 @@
     },
     "home-broad-veranda": {
       "name": "Broad veranda house",
+      "model": 24,
+      "kind": "home",
       "size": [
         7,
         5
@@ -487,6 +509,8 @@
     },
     "home-shaded-retreat": {
       "name": "Shaded terrace home",
+      "model": 36,
+      "kind": "home",
       "size": [
         6,
         7
@@ -507,6 +531,8 @@
     },
     "home-ranch": {
       "name": "Long clay-roof house",
+      "model": 35,
+      "kind": "home",
       "size": [
         8,
         4
@@ -527,6 +553,8 @@
     },
     "home-cottage": {
       "name": "Small cottage",
+      "model": 25,
+      "kind": "home",
       "size": [
         4,
         4
@@ -547,6 +575,8 @@
     },
     "home-longhouse": {
       "name": "Long veranda house",
+      "model": 32,
+      "kind": "home",
       "size": [
         7,
         4
@@ -567,6 +597,8 @@
     },
     "groundwater-well": {
       "name": "Water well",
+      "model": 20,
+      "kind": "groundwater-well",
       "size": [
         2,
         2
@@ -585,6 +617,8 @@
     },
     "water-pump": {
       "name": "Water pump",
+      "model": 62,
+      "kind": "water-pump",
       "size": [
         1,
         1
@@ -603,6 +637,8 @@
     },
     "home-family": {
       "name": "Family house",
+      "model": 28,
+      "kind": "home",
       "size": [
         6,
         5
@@ -623,6 +659,8 @@
     },
     "home-shared": {
       "name": "Shared adobe house",
+      "model": 37,
+      "kind": "home",
       "size": [
         6,
         6
@@ -642,6 +680,8 @@
     },
     "road": {
       "name": "Village road",
+      "model": 48,
+      "kind": "road",
       "size": [
         1,
         1
@@ -657,6 +697,8 @@
     },
     "bridge": {
       "name": "Timber footbridge",
+      "model": 5,
+      "kind": "bridge",
       "size": [
         8,
         1
@@ -673,6 +715,8 @@
     },
     "house": {
       "name": "Limewashed house",
+      "model": 40,
+      "kind": "home",
       "size": [
         5,
         5
@@ -693,6 +737,8 @@
     },
     "shed": {
       "name": "Open timber shed",
+      "model": 50,
+      "kind": "shed",
       "size": [
         3,
         3
@@ -711,6 +757,8 @@
     },
     "orchard": {
       "name": "Fruit orchard",
+      "model": 43,
+      "kind": "orchard",
       "size": [
         5,
         5
@@ -727,6 +775,8 @@
     },
     "goat_pasture": {
       "name": "Goat pen",
+      "model": 18,
+      "kind": "goat_pasture",
       "size": [
         6,
         5
@@ -745,6 +795,8 @@
     },
     "apiary": {
       "name": "Stingless bee apiary",
+      "model": 2,
+      "kind": "apiary",
       "size": [
         2,
         2
@@ -762,6 +814,8 @@
     },
     "hydro": {
       "name": "River generator",
+      "model": 41,
+      "kind": "hydro",
       "size": [
         3,
         3
@@ -781,6 +835,8 @@
     },
     "eco_toilet": {
       "name": "Ecological toilet",
+      "model": 12,
+      "kind": "eco_toilet",
       "size": [
         2,
         2
@@ -800,6 +856,8 @@
     },
     "banana_treatment": {
       "name": "Banana treatment bed",
+      "model": 3,
+      "kind": "banana_treatment",
       "size": [
         3,
         4
@@ -819,6 +877,8 @@
     },
     "wetland": {
       "name": "Reed bed",
+      "model": 65,
+      "kind": "wetland",
       "size": [
         3,
         5
@@ -837,6 +897,8 @@
     },
     "biodigester": {
       "name": "Biodigester",
+      "model": 4,
+      "kind": "biodigester",
       "size": [
         4,
         4
@@ -855,6 +917,8 @@
     },
     "warehouse": {
       "name": "Storage house",
+      "model": 60,
+      "kind": "warehouse",
       "size": [
         5,
         4
@@ -876,6 +940,8 @@
     },
     "solar_farm": {
       "name": "Solar farm",
+      "model": 51,
+      "kind": "solar_farm",
       "size": [
         4,
         4
@@ -894,6 +960,8 @@
     },
     "streetlight": {
       "name": "Street light",
+      "model": 53,
+      "kind": "streetlight",
       "size": [
         1,
         1
@@ -911,6 +979,8 @@
     },
     "kitchen": {
       "name": "Community kitchen",
+      "model": 42,
+      "kind": "kitchen",
       "size": [
         6,
         5
@@ -932,6 +1002,8 @@
     },
     "grove": {
       "name": "Banana grove",
+      "model": 21,
+      "kind": "grove",
       "size": [
         4,
         4
@@ -948,6 +1020,8 @@
     },
     "garden": {
       "name": "Vegetable garden",
+      "model": 16,
+      "kind": "garden",
       "size": [
         4,
         6
@@ -964,6 +1038,8 @@
     },
     "greenhouse": {
       "name": "Greenhouse",
+      "model": 19,
+      "kind": "greenhouse",
       "size": [
         4,
         6
@@ -984,6 +1060,8 @@
     },
     "well": {
       "name": "Cistern",
+      "model": 64,
+      "kind": "well",
       "size": [
         3,
         3
@@ -1003,6 +1081,8 @@
     },
     "compost": {
       "name": "Compost station",
+      "model": 10,
+      "kind": "compost",
       "size": [
         3,
         2
@@ -1019,6 +1099,8 @@
     },
     "square": {
       "name": "Community square",
+      "model": 52,
+      "kind": "square",
       "size": [
         5,
         5
@@ -1037,6 +1119,8 @@
     },
     "workshop": {
       "name": "Workshop",
+      "model": 67,
+      "kind": "workshop",
       "size": [
         5,
         4
@@ -1057,6 +1141,8 @@
     },
     "coop": {
       "name": "Chicken coop",
+      "model": 11,
+      "kind": "coop",
       "size": [
         4,
         4
@@ -1075,6 +1161,8 @@
     },
     "home-veranda": {
       "name": "Veranda house",
+      "model": 39,
+      "kind": "home",
       "size": [
         5,
         6
@@ -1095,6 +1183,8 @@
     },
     "home-gable": {
       "name": "Gabled house",
+      "model": 29,
+      "kind": "home",
       "size": [
         5,
         5
@@ -1115,6 +1205,8 @@
     },
     "home-courtyard": {
       "name": "Terrace house",
+      "model": 26,
+      "kind": "home",
       "size": [
         6,
         5
@@ -1135,6 +1227,8 @@
     },
     "adobe-gable": {
       "name": "Adobe gabled house",
+      "model": 0,
+      "kind": "home",
       "size": [
         5,
         5
@@ -1154,6 +1248,8 @@
     },
     "adobe-veranda": {
       "name": "Adobe veranda house",
+      "model": 1,
+      "kind": "home",
       "size": [
         5,
         6
@@ -1173,6 +1269,8 @@
     },
     "supply-0": {
       "name": "Managed timber",
+      "model": 54,
+      "kind": "supply-0",
       "size": [
         6,
         6
@@ -1187,6 +1285,8 @@
     },
     "supply-1": {
       "name": "Bamboo stand",
+      "model": 55,
+      "kind": "supply-1",
       "size": [
         3,
         3
@@ -1201,6 +1301,8 @@
     },
     "supply-5": {
       "name": "Timber workbench",
+      "model": 56,
+      "kind": "supply-5",
       "size": [
         1,
         1
@@ -1215,6 +1317,8 @@
     },
     "supply-6": {
       "name": "Battery station",
+      "model": 57,
+      "kind": "supply-6",
       "size": [
         1,
         1
@@ -1230,6 +1334,8 @@
     },
     "rain-barrel": {
       "name": "Rainwater barrel",
+      "model": 46,
+      "kind": "rain-barrel",
       "size": [
         1,
         1
@@ -1245,6 +1351,8 @@
     },
     "tool-rack": {
       "name": "Garden tool rack",
+      "model": 58,
+      "kind": "tool-rack",
       "size": [
         1,
         1
@@ -1260,6 +1368,8 @@
     },
     "seedling-bench": {
       "name": "Seedling bench",
+      "model": 49,
+      "kind": "seedling-bench",
       "size": [
         1,
         1
@@ -1275,6 +1385,8 @@
     },
     "woodpile": {
       "name": "Seasoned firewood",
+      "model": 66,
+      "kind": "woodpile",
       "size": [
         1,
         1
@@ -1290,6 +1402,8 @@
     },
     "picnic-table": {
       "name": "Picnic table",
+      "model": 45,
+      "kind": "picnic-table",
       "size": [
         2,
         2
@@ -1305,6 +1419,8 @@
     },
     "garden-bench": {
       "name": "Garden bench",
+      "model": 17,
+      "kind": "garden-bench",
       "size": [
         1,
         1
@@ -1320,6 +1436,8 @@
     },
     "clothesline": {
       "name": "Clothesline",
+      "model": 8,
+      "kind": "clothesline",
       "size": [
         2,
         1
@@ -1335,6 +1453,8 @@
     },
     "hammock": {
       "name": "Hammock",
+      "model": 22,
+      "kind": "hammock",
       "size": [
         2,
         1
@@ -1350,6 +1470,8 @@
     },
     "wayfinding-sign": {
       "name": "Wayfinding sign",
+      "model": 63,
+      "kind": "wayfinding-sign",
       "size": [
         1,
         1
@@ -1365,6 +1487,8 @@
     },
     "wash-station": {
       "name": "Outdoor wash station",
+      "model": 61,
+      "kind": "wash-station",
       "size": [
         1,
         1
@@ -1380,6 +1504,8 @@
     },
     "farm-gate": {
       "name": "Farm gate",
+      "model": 14,
+      "kind": "farm-gate",
       "size": [
         1,
         1
@@ -1395,6 +1521,8 @@
     },
     "fire-circle": {
       "name": "Fire circle",
+      "model": 15,
+      "kind": "fire-circle",
       "size": [
         1,
         1
@@ -1410,6 +1538,8 @@
     },
     "canvas-tent-teal": {
       "name": "Sage canvas tent",
+      "model": 7,
+      "kind": "canvas-tent-teal",
       "size": [
         2,
         2
@@ -1425,6 +1555,8 @@
     },
     "canvas-tent-ochre": {
       "name": "Ochre canvas tent",
+      "model": 6,
+      "kind": "canvas-tent-ochre",
       "size": [
         2,
         2
@@ -1440,6 +1572,8 @@
     },
     "reading-room": {
       "name": "Village reading room",
+      "model": 47,
+      "kind": "reading-room",
       "size": [
         5,
         4
@@ -1458,6 +1592,8 @@
     },
     "outdoor-classroom": {
       "name": "Outdoor classroom",
+      "model": 44,
+      "kind": "outdoor-classroom",
       "size": [
         5,
         5
@@ -1475,6 +1611,8 @@
     },
     "community-hall": {
       "name": "Community hall",
+      "model": 9,
+      "kind": "community-hall",
       "size": [
         7,
         6
@@ -1493,6 +1631,8 @@
     },
     "exercise-garden": {
       "name": "Exercise garden",
+      "model": 13,
+      "kind": "exercise-garden",
       "size": [
         5,
         5
@@ -1509,6 +1649,8 @@
     },
     "volleyball-court": {
       "name": "Volleyball court",
+      "model": 59,
+      "kind": "volleyball-court",
       "size": [
         11,
         7
@@ -1526,6 +1668,8 @@
     },
     "field": {
       "name": "Cultivated field",
+      "model": 16,
+      "kind": "garden",
       "size": [
         2,
         2

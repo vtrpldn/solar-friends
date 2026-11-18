@@ -2,11 +2,16 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{catalog::Catalog, setup::WorldSetup};
+use crate::{
+    catalog::Catalog,
+    setup::{Mode, WorldSetup},
+};
 
 #[derive(Default, Deserialize, Serialize)]
 pub struct Stock {
     pub cash: u32,
+    #[serde(default)]
+    pub sandbox: bool,
     materials: BTreeMap<String, u32>,
 }
 
@@ -28,6 +33,7 @@ impl Stock {
             .collect();
         Self {
             cash: settings.starting_cash(),
+            sandbox: settings.mode == Mode::Sandbox,
             materials,
         }
     }
@@ -37,6 +43,9 @@ impl Stock {
     }
 
     pub fn reserve(&mut self, bill: &BTreeMap<String, u32>) -> Result<(), String> {
+        if self.sandbox {
+            return Ok(());
+        }
         if let Some((id, _)) = bill.iter().find(|(id, count)| self.available(id) < **count) {
             return Err(id.clone());
         }

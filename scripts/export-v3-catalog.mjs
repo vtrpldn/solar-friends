@@ -13,12 +13,15 @@ const materials = Object.fromEntries(Object.entries(MATERIALS).map(([id, materia
   },
 ]));
 
-const projects = Object.fromEntries(Object.entries(PROJECTS)
-  .filter(([id, definition]) => isBuildOption(id, definition))
+const options = Object.entries(PROJECTS).filter(([id, definition]) => isBuildOption(id, definition));
+const models = [...new Set(options.map(([, definition]) => definition.asset))].sort();
+const projects = Object.fromEntries(options
   .map(([id, definition]) => [
     id,
     {
       name: definition.name,
+      model: models.indexOf(definition.asset),
+      kind: definition.kind,
       size: definition.size,
       materials: definition.materials,
       work: definition.work,

@@ -21,6 +21,9 @@ pub struct Material {
 pub struct Project {
     pub name: String,
     pub size: [i32; 2],
+    pub model: usize,
+    pub kind: String,
+    pub category: String,
     pub materials: BTreeMap<String, u32>,
     pub work: f64,
     pub camp_essential: bool,

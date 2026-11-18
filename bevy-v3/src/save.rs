@@ -7,7 +7,7 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::{catalog::Catalog, village::Village};
+use crate::{catalog::Catalog, setup::Mode, village::Village};
 
 const VERSION: u32 = 1;
 const MAX_BYTES: u64 = 16 * 1024 * 1024;
@@ -18,7 +18,7 @@ struct SaveFile<T> {
     village: T,
 }
 
-pub fn location() -> io::Result<PathBuf> {
+pub fn location(mode: Mode) -> io::Result<PathBuf> {
     let directory = if cfg!(target_os = "windows") {
         std::env::var_os("APPDATA").map(PathBuf::from)
     } else if cfg!(target_os = "macos") {
@@ -30,7 +30,13 @@ pub fn location() -> io::Result<PathBuf> {
             .or_else(|| std::env::home_dir().map(|path| path.join(".local/share")))
     };
     directory
-        .map(|path| path.join("Solar Friends V3").join("village.json"))
+        .map(|path| {
+            let file = match mode {
+                Mode::Story => "village.json",
+                Mode::Sandbox => "sandbox.json",
+            };
+            path.join("Solar Friends V3").join(file)
+        })
         .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "no local game data folder"))
 }
 
