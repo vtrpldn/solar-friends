@@ -96,6 +96,10 @@ pub struct Village {
     #[serde(skip)]
     selected_resident: usize,
     #[serde(skip)]
+    finance_history_open: bool,
+    #[serde(skip)]
+    finance_history_page: usize,
+    #[serde(skip)]
     housing_notice: String,
     #[serde(skip)]
     camp_error: Option<&'static str>,
@@ -610,6 +614,20 @@ fn village_input(
             town.utility_panel = None;
         }
         if town.utility_panel == Some(UtilityPanel::Finances) {
+            if keyboard.just_pressed(KeyCode::KeyR) {
+                town.finance_history_open = !town.finance_history_open;
+                town.finance_history_page = 0;
+            }
+            if town.finance_history_open
+                && keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown])
+            {
+                let (pages, _) = town.stock.finance_history(town.finance_history_page);
+                town.finance_history_page = if keyboard.just_pressed(KeyCode::PageDown) {
+                    (town.finance_history_page + 1) % pages
+                } else {
+                    (town.finance_history_page + pages - 1) % pages
+                };
+            }
             if let Some(index) = [
                 KeyCode::Digit1,
                 KeyCode::Digit2,
@@ -1149,11 +1167,21 @@ fn show_hud(
         }
         Some(UtilityPanel::Finances) => {
             label.push('\n');
-            label.push_str(
-                &village
-                    .construction
-                    .finance_summary(&village.stock, village.selected_resident),
-            );
+            if village.finance_history_open {
+                label.push_str(
+                    &village
+                        .stock
+                        .finance_history(village.finance_history_page)
+                        .1,
+                );
+            } else {
+                label.push_str(
+                    &village
+                        .construction
+                        .finance_summary(&village.stock, village.selected_resident),
+                );
+                label.push_str("\nR Recent transactions");
+            }
             label.push_str("\nTab Town trade");
         }
         Some(UtilityPanel::Trade) => {

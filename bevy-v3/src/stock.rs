@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 
 use serde::{Deserialize, Serialize};
 
@@ -32,6 +32,17 @@ struct CashFlow {
     started_day: Option<u64>,
     day: u64,
     operating: BTreeMap<u64, i64>,
+    #[serde(default)]
+    minute: u64,
+    #[serde(default)]
+    recent: VecDeque<Transaction>,
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+struct Transaction {
+    minute: u64,
+    category: CashKind,
+    cents: i64,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
@@ -257,7 +268,9 @@ impl Stock {
     }
 
     pub fn update_finance_clock(&mut self, clock: f64) {
-        let day = ((540.0 + clock * 0.45) / 1440.0).floor() as u64;
+        let minute = (540.0 + clock * 0.45).floor() as u64;
+        self.cash_flow.minute = minute;
+        let day = minute / 1440;
         self.cash_flow.started_day.get_or_insert(day);
         if self.cash_flow.day != day {
             self.cash_flow.day = day;
@@ -270,19 +283,39 @@ impl Stock {
     fn record_cash(&mut self, category: CashKind, cents: i64) {
         let counter = self.ledger.entry(category).or_default();
         *counter = counter.saturating_add(cents);
-        if category != CashKind::Construction && !self.sandbox && cents != 0 {
-            let total = self
-                .cash_flow
-                .operating
-                .entry(self.cash_flow.day)
-                .or_default();
+        if self.sandbox || cents == 0 {
+            return;
+        }
+        let flow = &mut self.cash_flow;
+        if category != CashKind::Construction {
+            let total = flow.operating.entry(flow.day).or_default();
             *total = total.saturating_add(cents);
+        }
+        if category == CashKind::Electricity
+            && let Some(entry) = flow
+                .recent
+                .iter_mut()
+                .find(|entry| entry.category == category && entry.minute / 1440 == flow.day)
+        {
+            entry.cents = entry.cents.saturating_add(cents);
+        } else {
+            flow.recent.push_front(Transaction {
+                minute: flow.minute,
+                category,
+                cents,
+            });
+            flow.recent.truncate(100);
         }
     }
 
     pub fn valid_cash_flow(&self) -> bool {
         let flow = &self.cash_flow;
-        flow.operating.len() <= 91
+        flow.recent.len() <= 100
+            && flow
+                .recent
+                .iter()
+                .all(|entry| entry.minute / 1440 <= flow.day)
+            && flow.operating.len() <= 91
             && flow.started_day.is_none_or(|day| day <= flow.day)
             && flow
                 .operating
@@ -315,6 +348,39 @@ impl Stock {
     fn set_balance(&mut self, value: u64) {
         self.cash = (value / 100) as u32;
         self.centavos = (value % 100) as u8;
+    }
+
+    pub fn finance_history(&self, page: usize) -> (usize, String) {
+        const ROWS: usize = 8;
+        let pages = self.cash_flow.recent.len().div_ceil(ROWS).max(1);
+        let page = page.min(pages - 1);
+        let mut display = format!(
+            "Transactions · {}/{} · Page Up/Down · R Close",
+            page + 1,
+            pages
+        );
+        for entry in self.cash_flow.recent.iter().skip(page * ROWS).take(ROWS) {
+            use std::fmt::Write;
+            let day = entry.minute / 1440 + 1;
+            let time = entry.minute % 1440;
+            let category = if entry.category == CashKind::Electricity {
+                "Grid electricity, daily total"
+            } else {
+                entry.category.label()
+            };
+            let _ = write!(
+                display,
+                "\nDay {day} · {:02}:{:02} · {} · R${:+.2}",
+                time / 60,
+                time % 60,
+                category,
+                entry.cents as f64 / 100.0
+            );
+        }
+        if self.cash_flow.recent.is_empty() {
+            display.push_str("\nNo recent transactions recorded.");
+        }
+        (pages, display)
     }
 
     pub fn finance_summary(&self, committed: u64) -> String {
@@ -375,7 +441,8 @@ mod finance_tests {
         stock.credit(700, CashKind::Sales);
         stock.update_finance_clock(DAY);
         stock.debit(1_000, CashKind::Construction);
-        stock.debit(400, CashKind::Electricity);
+        stock.debit(100, CashKind::Electricity);
+        stock.debit(300, CashKind::Electricity);
         stock.update_finance_clock(2.0 * DAY);
         stock.update_finance_clock(3.0 * DAY);
         stock.credit(800, CashKind::Sales);
@@ -388,6 +455,9 @@ mod finance_tests {
         assert_eq!(low, available - 28.0);
         assert_eq!(high, available + 56.0);
         assert!((mean - 4.0 / 3.0).abs() < 1e-9);
+        let (_, history) = stock.finance_history(0);
+        assert_eq!(history.matches("Grid electricity, daily total").count(), 1);
+        assert!(history.contains("Day 2 · 09:00 · Grid electricity, daily total · R$-4.00"));
         let save = serde_json::to_string(&stock).unwrap();
         let restored: Stock = serde_json::from_str(&save).unwrap();
         assert_eq!(
