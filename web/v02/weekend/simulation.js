@@ -236,7 +236,7 @@ export function storedMaterials(s) {
   return s.wood + Object.values(s.materials).reduce((a, b) => a + b, 0) + pendingExports(s).reduce((n,o)=>n+o.quantity,0);
 }
 function changeMaterial(s,id,n,lots,reason='transfer'){return foodChange(s,id,n,lots,reason);}
-export function sellMaterial(s, id) {
+export function sellMaterial(s, id, holdForPickup=false) {
   const item = MATERIALS[id];
   if (
     !item ||
@@ -245,7 +245,9 @@ export function sellMaterial(s, id) {
     materialCount(s, id) - protectedEquipment(s,id) < 1
   )
     return false;
-  return reserveExport(s,id,MATERIALS,materialCount,changeMaterial,protectedEquipment(s,id));
+  const reserved=reserveExport(s,id,MATERIALS,materialCount,changeMaterial,protectedEquipment(s,id));
+  if(reserved && holdForPickup) s.trade.orders.at(-1).holdForPickup=true;
+  return reserved;
 }
 export function automaticSales(s) {
   if(s.stage!=='playing'||s.mode==='sandbox')return;

@@ -1,4 +1,8 @@
-import {PROJECTS,PROCESSES,MATERIALS,footprint,campLocation} from './simulation.js';
+import {PROJECTS,PROCESSES,MATERIALS,materialCount,footprint,campLocation} from './simulation.js';
+import {tradeQuote,transportCost} from './physical-trade.js';
+import {protectedStock} from './economy-policies.js';
+import {protectedEquipment} from './equipment.js';
+import {FOOD_SERVINGS,foodPortions} from './food-storage.js';
 import {riverCenter} from './river-layout.js';
 import {CULTIVATION_KEYS,CROPS,harvestExpired,harvestYield} from './cultivation.js';
 import {animalCareText} from './animal-care.js';
@@ -21,7 +25,7 @@ const rotate=()=>{rotation=(rotation+1)%4;$('rotate').textContent=`Rotate · ${r
 $('camp').onclick=()=>{if(s){center={...s.stock};selected=0;placing=null;inspectorKey='';render();}};
 $('sites').onchange=()=>{selected=Number($('sites').value);bed='all';const p=s.projects.find(p=>p.id===selected);if(p)center={x:p.x,z:p.z};inspectorKey='';render();};
 $('material').onchange=render;
-$('buy').onclick=()=>send('buy',{material:$('material').value});$('sell').onclick=()=>send('sell',{material:$('material').value});
+$('buy').onclick=()=>send('buy',{material:$('material').value});$('sell').onclick=()=>send('sell',{material:$('material').value,holdForPickup:$('hold-sale').checked});
 function button(parent,text,type,args={}){const b=document.createElement('button');b.textContent=text;b.disabled=replaying&&type!=='unused';b.onclick=()=>send(type,args);parent.append(b);}
 function line(parent,text){const p=document.createElement('p');p.textContent=text;parent.append(p);}
 function render(){if(!s)return;
@@ -29,7 +33,13 @@ function render(){if(!s)return;
  const minutes=540+Math.floor(s.time*.45),nodes=Object.values(s.infrastructure?.nodes||{});
  $('clock').textContent=`Day ${1+Math.floor(minutes/1440)} · ${String(Math.floor(minutes/60)%24).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
  $('totals').textContent=`R$${s.money.toFixed(2)} · ${s.wood} timber · ${s.materials.meals} meals + ${s.materials.food} ingredients · ${nodes.reduce((n,a)=>n+a.water[0],0).toFixed(0)} clean water · Grid R$${s.infrastructure.grid.spent.toFixed(2)} total`;
- $('trade').textContent=`Available: ${$('material').value==='wood'?s.wood:s.materials[$('material').value]} · ${s.trip?'Town pickup in progress':'Car available'}`;
+ const material=$('material').value,stock=materialCount(s,material);
+ const quote=tradeQuote(s,material,MATERIALS,materialCount,protectedEquipment(s,material));
+ const serving=FOOD_SERVINGS[material],reserve=protectedStock(s,material,PROCESSES);
+ const remaining=serving?foodPortions(s)-Math.floor(stock/serving)+Math.floor((stock-(quote.quantity||0))/serving):0;
+ const fare=transportCost({...s,deliveryOnly:false});
+ $('trade').textContent=quote.error?`Available: ${stock} · ${quote.error}`:
+  `Available: ${stock} · Reserve: ${reserve} · After sale: ${stock-quote.quantity}${serving?` · Household food left: ${remaining} portions`:''} · R$${(quote.cents/100).toFixed(2)} gross · R$${fare.toFixed(2)} dedicated fuel · R$${(quote.cents/100-fare).toFixed(2)} after fuel · Shared pickup adds R$0 fuel.`;
  const siteList=[['0','Camp stores'],...s.projects.filter(p=>!p.felled).map(p=>[String(p.id),`${PROJECTS[p.key].name} #${p.id} (${p.x}, ${p.z})`])];if($('sites').options.length!==siteList.length){opts($('sites'),siteList);}$('sites').value=selected;
  const p=s.projects.find(p=>p.id===selected),n=s.infrastructure.nodes[selected],ops=s.operations?.filter(o=>o.site===selected&&!o.done)||[];
  const key=JSON.stringify([replaying,selected,p?.work,p?.readyAt,n?.water.map(v=>Math.floor(v)),n?.maintainFresh,n?.maintainSanitation,ops.map(o=>[o.id,o.status]),Math.floor(s.time/20),s.infrastructure.grid.enabled,s.emergencyFood]);
