@@ -13,6 +13,7 @@ struct Workshop {
     heading: f32,
     zoom: f32,
     night: bool,
+    guides: bool,
     export_notice: String,
 }
 
@@ -36,10 +37,14 @@ pub fn run() {
         heading: 0.0,
         zoom: 1.0,
         night: false,
+        guides: false,
         export_notice: String::new(),
     })
     .add_systems(Startup, setup)
-    .add_systems(Update, (controls, show_model, capture_preview).chain());
+    .add_systems(
+        Update,
+        (controls, show_model, capture_preview, draw_guides).chain(),
+    );
     crate::village::register_building_models(&mut app);
     app.run();
 }
@@ -94,6 +99,9 @@ fn controls(
         workshop.selected = (workshop.selected + 1) % len;
     } else if keys.just_pressed(KeyCode::ArrowLeft) {
         workshop.selected = (workshop.selected + len - 1) % len;
+    }
+    if keys.just_pressed(KeyCode::KeyG) {
+        workshop.guides = !workshop.guides;
     }
     if keys.just_pressed(KeyCode::KeyN) {
         workshop.night = !workshop.night;
@@ -155,7 +163,7 @@ fn show_model(
         "Day"
     };
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · Q/E Orbit · +/− Zoom · N Lighting · Home Reset · F5 Export PNG\n{}",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · Q/E Orbit · +/− Zoom · N Lighting · G Guides · Home Reset · F5 Export PNG\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
@@ -216,4 +224,42 @@ fn capture_preview(
             };
         },
     );
+}
+
+fn draw_guides(
+    workshop: Res<Workshop>,
+    catalog: Res<Catalog>,
+    pending: Query<(), With<Screenshot>>,
+    mut gizmos: Gizmos,
+) {
+    if !workshop.guides || !pending.is_empty() {
+        return;
+    }
+    let project = &catalog.projects[&workshop.projects[workshop.selected]];
+    let [x, z] = project.size.map(|cells| cells as f32);
+    let edge = (x.max(z) + 4.0).ceil() as i32;
+    for marker in -edge..=edge {
+        let distance = marker as f32;
+        let extent = edge as f32;
+        let tint = if marker.rem_euclid(2) == 0 {
+            Color::srgba(0.75, 0.83, 0.75, 0.55)
+        } else {
+            Color::srgba(0.75, 0.83, 0.75, 0.3)
+        };
+        gizmos.line(
+            Vec3::new(distance, 0.025, -extent),
+            Vec3::new(distance, 0.025, extent),
+            tint,
+        );
+        gizmos.line(
+            Vec3::new(-extent, 0.025, distance),
+            Vec3::new(extent, 0.025, distance),
+            tint,
+        );
+    }
+    gizmos.linestrip(
+        [(-x, -z), (x, -z), (x, z), (-x, z), (-x, -z)].map(|(x, z)| Vec3::new(x, 0.05, z)),
+        Color::srgb_u8(255, 211, 107),
+    );
+    gizmos.line(Vec3::ZERO, Vec3::Y * 2.0, Color::srgb_u8(109, 220, 255));
 }
