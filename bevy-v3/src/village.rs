@@ -1,5 +1,6 @@
 use crate::{audio::SoundSettings, utilities::NetworkView};
 mod cultivation_surface;
+mod diagnostics;
 mod guide;
 mod land_lens;
 mod lens_picker;
@@ -368,11 +369,18 @@ fn save_controls(
             Err(error) => village.save_notice = format!("Could not load village: {error}"),
         }
     } else if keyboard.just_pressed(KeyCode::F5) && !setup.open && village.setup.is_some() {
-        village.save_notice =
+        let shift = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+        village.save_notice = if shift {
+            match diagnostics::export(&village, &catalog, &window) {
+                Ok(path) => format!("Bug report saved locally\n{}", path.display()),
+                Err(error) => format!("Could not export bug report: {error}"),
+            }
+        } else {
             match save::location(setup.mode).and_then(|path| save::write(&path, &village)) {
                 Ok(()) => "Village saved.".into(),
                 Err(error) => format!("Could not save village: {error}"),
-            };
+            }
+        };
     }
 }
 

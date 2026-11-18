@@ -8,7 +8,8 @@ const TOPICS: [(&str, &str); 7] = [
          Use B to open Build. Select a project and click the map to plan it.\n\
          Check F11 for progress and F10 for available supplies.\n\
          Space pauses or resumes time. Outside menus, 1–4 set the speed.\n\
-         F5 saves the village. F6 opens the saved village library.",
+         F5 saves the village. F6 opens the saved village library.\n\
+         Shift+F5 exports a local bug report with the current village state.",
     ),
     (
         "Camera and building",
