@@ -367,9 +367,14 @@ impl Construction {
                 let plan = &self.plans[index];
                 let definition = &catalog.projects[&plan.key];
                 let mut installed = definition.materials.clone();
-                if self.utilities.has_cold_storage(index) {
-                    for (id, units) in &catalog.production["cold_storage"].input {
-                        *installed.entry(id.clone()).or_default() += units;
+                for (recipe, upgraded) in [
+                    ("cold_storage", self.utilities.has_cold_storage(index)),
+                    ("solar_upgrade", self.utilities.has_rooftop_solar(index)),
+                ] {
+                    if upgraded {
+                        for (id, units) in &catalog.production[recipe].input {
+                            *installed.entry(id.clone()).or_default() += units;
+                        }
                     }
                 }
                 let returned: BTreeMap<_, _> = installed

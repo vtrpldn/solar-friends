@@ -54,6 +54,8 @@ struct Node {
     battery: f64,
     charge: f64,
     solar_kw: f64,
+    #[serde(default)]
+    solar_upgrade: bool,
     demanding: bool,
     #[serde(default)]
     cold_storage: bool,
@@ -121,6 +123,7 @@ impl Utilities {
             battery: 0.0,
             charge: 0.0,
             solar_kw: 0.0,
+            solar_upgrade: false,
             demanding: false,
             cold_storage: false,
             maintain_fresh: false,
@@ -143,6 +146,7 @@ impl Utilities {
                 battery: f64::from(facility.batteries) * 4.0,
                 charge: 0.0,
                 solar_kw: f64::from(facility.panels) * 0.6,
+                solar_upgrade: false,
                 demanding: false,
                 cold_storage: false,
                 maintain_fresh: false,
@@ -184,6 +188,8 @@ impl Utilities {
                     .iter()
                     .zip(node.capacity)
                     .all(|(amount, cap)| (0.0..=cap + 1e-8).contains(amount))
+                && (!node.solar_upgrade
+                    || node.kind == "home" && node.solar_kw == 0.6 && node.battery == 4.0)
                 && (0.0..=node.battery + 1e-8).contains(&node.charge)
         }) && self.ground.as_ref().is_none_or(|ground| {
             ground.capacity > 0.0
@@ -420,6 +426,27 @@ impl Utilities {
         }
     }
 
+    pub fn install_rooftop_solar(&mut self, building: usize) -> bool {
+        let Some(node) = self
+            .nodes
+            .get_mut(&(building + 1))
+            .filter(|node| node.kind == "home")
+        else {
+            return false;
+        };
+        node.solar_upgrade = true;
+        node.solar_kw = 0.6;
+        node.battery = 4.0;
+        self.topology_valid = false;
+        true
+    }
+
+    pub fn has_rooftop_solar(&self, building: usize) -> bool {
+        self.nodes
+            .get(&(building + 1))
+            .is_some_and(|node| node.solar_upgrade)
+    }
+
     pub fn install_cold_storage(&mut self, building: usize) {
         if let Some(node) = self.nodes.get_mut(&(building + 1)) {
             node.cold_storage = true;
@@ -462,6 +489,15 @@ impl Utilities {
                 status.push_str(" · ");
             }
             status.push_str(&format!("Water {:.1} L", node.water[0] + node.water[1]));
+        }
+        if node.solar_upgrade {
+            if !status.is_empty() {
+                status.push_str(" · ");
+            }
+            status.push_str(&format!(
+                "Rooftop solar · {:.2}/{:.0} kWh stored",
+                node.charge, node.battery
+            ));
         }
         (!status.is_empty()).then_some(status)
     }

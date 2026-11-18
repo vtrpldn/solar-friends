@@ -338,7 +338,10 @@ struct VillageEntity;
 struct VillageHud;
 
 #[derive(Component)]
-struct BuiltProject(usize);
+struct BuiltProject {
+    index: usize,
+    rooftop_solar: bool,
+}
 
 #[derive(Component)]
 enum ArrivalActor {
@@ -1185,8 +1188,13 @@ fn show_construction(
     setup: Res<WorldSetup>,
     village: Res<Village>,
     catalog: Res<Catalog>,
-    assets: Res<AssetServer>,
-    mut displayed: Query<(Entity, &BuiltProject, &mut Transform)>,
+    (assets, mut meshes, mut materials): (
+        Res<AssetServer>,
+        ResMut<Assets<Mesh>>,
+        ResMut<Assets<StandardMaterial>>,
+    ),
+    mut solar_model: Local<Option<(Handle<Mesh>, Handle<StandardMaterial>)>>,
+    mut displayed: Query<(Entity, &mut BuiltProject, &mut Transform)>,
 ) {
     if setup.open || !village.is_changed() {
         return;
@@ -1200,7 +1208,7 @@ fn show_construction(
     for (entity, shown, _) in &displayed {
         if !models_to_show
             .iter()
-            .any(|(index, _, _, _)| *index == shown.0)
+            .any(|(index, _, _, _)| *index == shown.index)
         {
             commands.entity(entity).despawn();
         }
@@ -1209,28 +1217,54 @@ fn show_construction(
         let Vec2 { x, y: z } = position;
         let place = Transform::from_xyz(x, terrain.height_at(x, z), z)
             .with_rotation(Quat::from_rotation_y(yaw));
-        if let Some((_, _, mut placed)) =
-            displayed.iter_mut().find(|(_, view, _)| view.0 == project)
+        let rooftop_solar = village.construction.utilities.has_rooftop_solar(project);
+        let (entity, add_panel) = if let Some((entity, mut shown, mut placed)) = displayed
+            .iter_mut()
+            .find(|(_, view, _)| view.index == project)
         {
             if *placed != place {
                 *placed = place;
             }
-            continue;
-        }
-        let mut building = commands.spawn((
-            VillageEntity,
-            BuiltProject(project),
-            SceneRoot(
-                assets.load(
-                    models
-                        .clone()
-                        .with_label(GltfAssetLabel::Scene(asset).to_string()),
+            let add_panel = rooftop_solar && !shown.rooftop_solar;
+            if add_panel {
+                shown.rooftop_solar = true;
+            }
+            (entity, add_panel)
+        } else {
+            let mut building = commands.spawn((
+                VillageEntity,
+                BuiltProject {
+                    index: project,
+                    rooftop_solar,
+                },
+                SceneRoot(
+                    assets.load(
+                        models
+                            .clone()
+                            .with_label(GltfAssetLabel::Scene(asset).to_string()),
+                    ),
                 ),
-            ),
-            place,
-        ));
-        if village.construction.is_road(project) {
-            building.insert(road_surface::RoadSurface);
+                place,
+            ));
+            if village.construction.is_road(project) {
+                building.insert(road_surface::RoadSurface);
+            }
+            (building.id(), rooftop_solar)
+        };
+        if add_panel {
+            let (mesh, material) = solar_model.get_or_insert_with(|| {
+                (
+                    meshes.add(Cuboid::new(1.2, 0.07, 0.8)),
+                    materials.add(Color::srgb_u8(67, 107, 121)),
+                )
+            });
+            commands.spawn((
+                Mesh3d(mesh.clone()),
+                MeshMaterial3d(material.clone()),
+                Transform::from_xyz(-0.8, 3.2, 0.6)
+                    .with_rotation(Quat::from_rotation_x(1.05_f32.atan2(1.78))),
+                ChildOf(entity),
+            ));
         }
     }
 }

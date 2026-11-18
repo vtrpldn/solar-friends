@@ -2499,6 +2499,19 @@
     }
   },
   "production": {
+    "solar_upgrade": {
+      "name": "Install rooftop solar and battery",
+      "kind": "home",
+      "input": {
+        "panels": 1,
+        "batteries": 1,
+        "electrical": 1
+      },
+      "output": {},
+      "work": 90,
+      "handcraft": false,
+      "preserved": {}
+    },
     "saw_timber": {
       "name": "Saw raw wood into timber",
       "kind": "supply-5",

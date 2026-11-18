@@ -32,6 +32,8 @@ In Story, press H for finances and paid town shifts. Book one day shift or turn 
 
 Press L to advance between 1 and 365 days. Exact replay uses normal simulation steps. Fast approximate uses larger steps. Press L while advancing to stop at the time shown.
 
+Select a completed home and open Recipes with C to install a rooftop panel and battery. Residents bring the parts from storage and install them on site.
+
 Press P or V to see the automatic power and water networks. Dark lines indicate inactive connections. The power network draws grid power at camp when enabled. In Water, click a facility as the destination or press C for camp. Shift-click a source to carry between reservoirs. The panel also queues river collection, hand purification, and waste service, and toggles automatic drinking reserves and sanitation.
 
 Choose Village road in the build menu to pause for road planning. Click the first tile, then Shift-click to preview and place a connected route. Press Z to undo the last stroke or Esc to finish planning and let residents build the road.

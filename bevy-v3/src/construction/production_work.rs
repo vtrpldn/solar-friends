@@ -69,6 +69,10 @@ impl Construction {
 
     fn queue_batch(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize, id: &str) {
         let recipe = &catalog.production[id];
+        if id == "solar_upgrade" && self.utilities.has_rooftop_solar(index) {
+            self.production.notice = "Rooftop solar is already installed.".into();
+            return;
+        }
         if id == "cold_storage" && self.utilities.has_cold_storage(index) {
             self.production.notice = "Cold storage is already installed.".into();
             return;
@@ -299,6 +303,13 @@ impl Construction {
                         self.production.jobs.remove(index);
                         continue;
                     }
+                    if job.recipe == "solar_upgrade" {
+                        if self.utilities.install_rooftop_solar(job.site) {
+                            self.production.notice = "Rooftop solar and battery installed.".into();
+                            self.production.jobs.remove(index);
+                        }
+                        continue;
+                    }
                     let Some(path) = route(
                         position,
                         SUPPLY_SPOTS[worker_index],
@@ -491,4 +502,68 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
     !recipe.handcraft
         && id != "cold_storage"
         && matches!(recipe.kind.as_str(), "kitchen" | "workshop")
+}
+
+#[cfg(test)]
+mod upgrade_tests {
+    use super::*;
+    use crate::setup::WorldSetup;
+
+    #[test]
+    fn residents_install_solar_from_stock_and_the_finished_home_charges() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction {
+            selection: Some("home-cottage".into()),
+            ..default()
+        };
+        village.plan(
+            &catalog,
+            &mut stock,
+            site,
+            IVec2::new(44, 36),
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
+        );
+        stock.sandbox = false;
+        let parts = &catalog.production["solar_upgrade"].input;
+        stock.receive(parts);
+        let before = stock.available("panels");
+        village.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        village.queue_batch(&catalog, &mut stock, 0, "solar_upgrade");
+        assert_eq!(stock.available("panels"), before - 1);
+        assert!(!village.utilities.has_rooftop_solar(0));
+        village.utilities.grid_off = true;
+        for step in 0..4_000 {
+            let clock = f64::from(step) * 0.1;
+            village.tick_production(&catalog, &mut stock, site, clock, 0.1);
+            if village.production.jobs.is_empty() {
+                break;
+            }
+        }
+        assert!(village.utilities.has_rooftop_solar(0));
+        village.tick_services(&catalog, &setup, &mut stock, 300.0, 50.0);
+        let after = village.utilities.facility_status(0).unwrap();
+        assert!(after.contains("kWh stored"));
+        assert!(!after.contains("0.00/4 kWh stored"));
+        village.queue_batch(&catalog, &mut stock, 0, "solar_upgrade");
+        assert!(village.production.jobs.is_empty());
+        assert_eq!(stock.available("panels"), before - 1);
+        let serialized = serde_json::to_string(&village).unwrap();
+        let restored: Construction = serde_json::from_str(&serialized).unwrap();
+        assert_eq!(restored.utilities.facility_status(0), Some(after));
+        assert!(restored.valid_save(&catalog, &stock));
+    }
 }
