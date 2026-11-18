@@ -14,6 +14,8 @@ V3 runs as a standalone Bevy desktop application. The preview covers land genera
 
 Use 1–4 to change simulation speed with the build menu closed. Press M to mute music and interface sounds.
 
+With the build menu closed, click a natural resource and press G to assign it for gathering, extraction, or felling. Output enters inventory when the resident brings it back.
+
 Story reserves cash for town pickup when a blueprint needs materials beyond current stock. Press U to toggle automatic ordering.
 
 In Sandbox, materials are unlimited. Press I to toggle instant building.

@@ -1955,5 +1955,93 @@
       "campEssential": false,
       "repeatable": true
     }
+  },
+  "gathering": {
+    "fell_tree": {
+      "name": "Fell selected tree",
+      "input": {},
+      "output": {
+        "logs": 12
+      },
+      "kind": "wild-tree",
+      "work": 90
+    },
+    "earth": {
+      "name": "Extract building earth",
+      "input": {},
+      "output": {
+        "earth": 12
+      },
+      "kind": "supply-2",
+      "work": 40,
+      "deposit": 240
+    },
+    "stone": {
+      "name": "Extract stone",
+      "input": {},
+      "output": {
+        "stone": 8
+      },
+      "kind": "supply-3",
+      "work": 50,
+      "deposit": 160
+    },
+    "gather-wild-fruit": {
+      "name": "Gather wild fruit thicket",
+      "kind": "wild-fruit",
+      "input": {},
+      "output": {
+        "food": 4
+      },
+      "work": 55,
+      "renew": 96000,
+      "gathering": true
+    },
+    "gather-fallen-wood": {
+      "name": "Gather fallen branches",
+      "kind": "fallen-wood",
+      "input": {},
+      "output": {
+        "logs": 3
+      },
+      "work": 45,
+      "renew": 0,
+      "gatherLimit": 6,
+      "gathering": true
+    },
+    "gather-wild-bamboo": {
+      "name": "Gather wild bamboo stand",
+      "kind": "wild-bamboo",
+      "input": {},
+      "output": {
+        "bamboo": 3
+      },
+      "work": 90,
+      "renew": 1168000,
+      "gathering": true
+    },
+    "gather-wild-forage": {
+      "name": "Gather wild forage grasses",
+      "kind": "wild-forage",
+      "input": {},
+      "output": {
+        "fodder": 6
+      },
+      "work": 55,
+      "renew": 44800,
+      "gathering": true
+    },
+    "gather-loose-stone": {
+      "name": "Gather loose surface stones",
+      "kind": "loose-stone",
+      "input": {},
+      "output": {
+        "stone": 2
+      },
+      "work": 65,
+      "renew": 0,
+      "gatherLimit": 6,
+      "gathering": true
+    }
   }
 }

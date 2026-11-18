@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 use bevy::{
     asset::{AssetPath, embedded_asset, embedded_path},
@@ -26,7 +26,7 @@ impl Plugin for LandPlugin {
         embedded_asset!(app, "land.glb");
         app.init_resource::<Land>()
             .add_systems(PreUpdate, generate_land)
-            .add_systems(PostUpdate, draw_land);
+            .add_systems(PostUpdate, (draw_land, hide_felled_trees).chain());
     }
 }
 
@@ -34,14 +34,14 @@ impl Plugin for LandPlugin {
 pub struct Land {
     sites: Vec<Site>,
     scenery: Vec<Plant>,
-    occupied: HashSet<IVec2>,
+    occupied: HashMap<IVec2, usize>,
 }
 
 #[derive(Clone, Copy)]
-struct Site {
+pub struct Site {
     model: usize,
-    position: IVec2,
-    size: IVec2,
+    pub position: IVec2,
+    pub size: IVec2,
 }
 
 struct Plant {
@@ -60,11 +60,19 @@ struct Candidate {
 }
 
 #[derive(Component)]
-struct LandDetail;
+struct LandDetail(Option<usize>);
 
 impl Land {
     pub fn occupied(&self, cell: IVec2) -> bool {
-        self.occupied.contains(&cell)
+        self.occupied.contains_key(&cell)
+    }
+
+    pub fn site_at(&self, cell: IVec2) -> Option<usize> {
+        self.occupied.get(&cell).copied()
+    }
+
+    pub fn site(&self, index: usize) -> Option<&Site> {
+        self.sites.get(index)
     }
 
     pub fn generate(setup: &WorldSetup) -> Self {
@@ -213,7 +221,7 @@ impl Land {
         }
         for x in position.x..end.x {
             for z in position.y..end.y {
-                self.occupied.insert(IVec2::new(x, z));
+                self.occupied.insert(IVec2::new(x, z), self.sites.len());
             }
         }
         self.sites.push(Site {
@@ -222,6 +230,22 @@ impl Land {
             size,
         });
         true
+    }
+}
+
+impl Site {
+    pub fn recipe(&self) -> &'static str {
+        match self.model {
+            0..=7 => "fell_tree",
+            EARTH => "earth",
+            STONE => "stone",
+            10 => "gather-wild-fruit",
+            11 => "gather-fallen-wood",
+            WILD_BAMBOO => "gather-wild-bamboo",
+            13 => "gather-wild-forage",
+            14 => "gather-loose-stone",
+            _ => unreachable!("a natural site must have a recipe"),
+        }
     }
 }
 
@@ -312,7 +336,7 @@ fn draw_land(
         terrain = terrain.with_camp(cell);
     }
     let path = AssetPath::from_path_buf(embedded_path!("land.glb")).with_source("embedded");
-    let sites = land.sites.iter().map(|site| {
+    let sites = land.sites.iter().enumerate().map(|(index, site)| {
         let position = site.position.as_vec2() + (site.size.as_vec2() - Vec2::ONE) * 0.5;
         let mut random = land_random(
             terrain.seed
@@ -324,26 +348,41 @@ fn draw_land(
         } else {
             1.0
         };
-        Plant {
-            model: site.model,
-            position,
-            yaw: (random() * std::f64::consts::TAU) as f32,
-            scale,
-        }
+        (
+            Some(index),
+            Plant {
+                model: site.model,
+                position,
+                yaw: (random() * std::f64::consts::TAU) as f32,
+                scale,
+            },
+        )
     });
-    for plant in sites.chain(land.scenery.iter().map(|p| Plant { ..*p })) {
+    for (index, plant) in sites.chain(land.scenery.iter().map(|p| (None, Plant { ..*p }))) {
         let Vec2 { x, y: z } = world_position(plant.position.x, plant.position.y);
         let scene = assets.load(
             path.clone()
                 .with_label(GltfAssetLabel::Scene(plant.model).to_string()),
         );
         commands.spawn((
-            LandDetail,
+            LandDetail(index),
             SceneRoot(scene),
             Transform::from_xyz(x, terrain.height_at(x, z), z)
                 .with_rotation(Quat::from_rotation_y(plant.yaw))
                 .with_scale(Vec3::splat(plant.scale)),
         ));
+    }
+}
+fn hide_felled_trees(village: Res<Village>, mut models: Query<(&LandDetail, &mut Visibility)>) {
+    for (detail, mut visibility) in &mut models {
+        let visible = if detail.0.is_some_and(|site| village.tree_felled(site)) {
+            Visibility::Hidden
+        } else {
+            Visibility::Inherited
+        };
+        if *visibility != visible {
+            *visibility = visible;
+        }
     }
 }
 

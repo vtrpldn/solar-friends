@@ -8,6 +8,7 @@ mod arrival;
 mod audio;
 mod catalog;
 mod construction;
+mod gathering;
 mod land;
 mod market;
 mod navigation;

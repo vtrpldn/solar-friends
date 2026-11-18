@@ -7,6 +7,7 @@ use serde::Deserialize;
 pub struct Catalog {
     pub materials: BTreeMap<String, Material>,
     pub projects: BTreeMap<String, Project>,
+    pub gathering: BTreeMap<String, GatherRecipe>,
 }
 
 #[derive(Deserialize)]
@@ -33,6 +34,20 @@ pub struct Project {
     pub work: f64,
     pub camp_essential: bool,
     pub repeatable: bool,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GatherRecipe {
+    pub name: String,
+    pub output: BTreeMap<String, u32>,
+    pub work: f64,
+    #[serde(default)]
+    pub renew: f64,
+    #[serde(default)]
+    pub gather_limit: u32,
+    #[serde(default)]
+    pub deposit: u32,
 }
 
 impl Default for Catalog {

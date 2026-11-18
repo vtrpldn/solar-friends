@@ -1,6 +1,6 @@
 // Export the authored V2 construction data for the standalone Bevy game.
 import { writeFile } from "node:fs/promises";
-import { MATERIALS, PROJECTS, createWeekend } from "../web/v02/weekend/simulation.js";
+import { MATERIALS, PROJECTS, PROCESSES, createWeekend } from "../web/v02/weekend/simulation.js";
 import { buildingCategory, inBuildCategory, isBuildOption } from "../web/v02/weekend/build-categories.js";
 import { materialMeasure } from "../web/v02/weekend/material-measures.js";
 import { supplierLimit } from "../web/v02/weekend/supplier-stock.js";
@@ -38,5 +38,8 @@ const projects = Object.fromEntries(options
     },
   ]));
 
+const gathering = Object.fromEntries(Object.entries(PROCESSES)
+  .filter(([, recipe]) => recipe.deposit || recipe.gathering || recipe.kind === "wild-tree"));
+
 await writeFile(new URL("../bevy-v3/data/construction.json", import.meta.url),
-  JSON.stringify({ materials, projects }, null, 2) + "\n");
+  JSON.stringify({ materials, projects, gathering }, null, 2) + "\n");

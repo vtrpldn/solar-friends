@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     arrival::{ARRIVAL_SPOTS, MAP_START, ROAD_END, road_center, road_width, world_position},
     catalog::{Catalog, Project},
+    gathering::{GatherPhase, Gathering},
     land::Land,
     market::{Market, trip_seconds},
     navigation::route,
@@ -87,6 +88,8 @@ pub struct Construction {
     #[serde(default)]
     market: Market,
     #[serde(default)]
+    pub gathering: Gathering,
+    #[serde(default)]
     trip: Option<TownTrip>,
     residents: [Worker; 5],
 }
@@ -145,6 +148,7 @@ impl Default for Construction {
             slow_sandbox: false,
             plans: Vec::new(),
             market: Market::default(),
+            gathering: Gathering::default(),
             trip: None,
             residents: ARRIVAL_SPOTS.map(|(x, z)| Worker {
                 position: Vec2::new(x, z),
@@ -467,7 +471,10 @@ impl Construction {
         }
         for column in start.x..end.x {
             for row in start.y..end.y {
-                if land.occupied(IVec2::new(column, row)) {
+                if land
+                    .site_at(IVec2::new(column, row))
+                    .is_some_and(|index| !self.gathering.felled(index))
+                {
                     return Some("A tree or natural resource occupies that space.");
                 }
                 let Vec2 { x, y: z } = world_position(column as f32, row as f32);
@@ -625,8 +632,11 @@ impl Construction {
             camp,
         } = site;
         self.tick_trip(catalog, stock, site, clock, dt);
+        self.tick_gathering(catalog, stock, site, clock.seconds, dt);
         for index in 0..self.residents.len() {
-            if self.trip.as_ref().is_some_and(|trip| trip.driver == index) {
+            if self.trip.as_ref().is_some_and(|trip| trip.driver == index)
+                || self.gathering.workers_at_site(index)
+            {
                 continue;
             }
             if let Some(job) = &self.residents[index].assignment {
@@ -693,6 +703,134 @@ impl Construction {
         }
     }
 
+    fn tick_gathering(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: f64,
+        dt: f32,
+    ) {
+        let ConstructionSite {
+            terrain,
+            land,
+            camp,
+        } = site;
+        let queued: Vec<_> = self.gathering.orders.keys().copied().collect();
+        for index in queued {
+            let Some(resource) = land.site(index) else {
+                continue;
+            };
+            let recipe = &catalog.gathering[resource.recipe()];
+            if clock < self.gathering.orders[&index].retry_at {
+                continue;
+            }
+            let assigned = self.gathering.orders[&index].worker;
+            if let Some(worker_index) = assigned {
+                let worker = &mut self.residents[worker_index];
+                let phase = &self.gathering.orders[&index].phase;
+                worker.move_along_path(dt, *phase == GatherPhase::Return);
+                if !worker.path.is_empty() {
+                    continue;
+                }
+                let job = self.gathering.orders.get_mut(&index).expect("queued job");
+                match job.phase {
+                    GatherPhase::Approach => job.phase = GatherPhase::Work,
+                    GatherPhase::Work => {
+                        job.work = (job.work + f64::from(dt)).min(recipe.work);
+                        if job.work < recipe.work {
+                            continue;
+                        }
+                        let Some(path) = route(
+                            worker.position,
+                            SUPPLY_SPOTS[worker_index],
+                            |cell| self.blocked(catalog, terrain, land, camp, cell),
+                            access_road,
+                        ) else {
+                            self.gathering
+                                .orders
+                                .get_mut(&index)
+                                .expect("queued job")
+                                .retry_at = clock + 5.0;
+                            continue;
+                        };
+                        self.residents[worker_index].path = path;
+                        self.gathering
+                            .orders
+                            .get_mut(&index)
+                            .expect("queued job")
+                            .phase = GatherPhase::Return;
+                        self.gathering.gathered(
+                            index,
+                            resource.recipe() == "fell_tree",
+                            recipe.output.values().sum(),
+                            clock + recipe.renew,
+                        );
+                    }
+                    GatherPhase::Return => {
+                        stock.receive(&recipe.output);
+                        self.gathering.orders.remove(&index);
+                    }
+                }
+                continue;
+            }
+
+            self.gathering
+                .orders
+                .get_mut(&index)
+                .expect("queued job")
+                .retry_at = clock + 5.0;
+            for worker_index in 0..self.residents.len() {
+                let worker = &self.residents[worker_index];
+                if worker.assignment.is_some()
+                    || self
+                        .trip
+                        .as_ref()
+                        .is_some_and(|trip| trip.driver == worker_index)
+                    || self.gathering.workers_at_site(worker_index)
+                {
+                    continue;
+                }
+                let start = resource.position;
+                let size = resource.size;
+                let mut approaches = Vec::new();
+                for z in 0..size.y {
+                    approaches.extend([start + IVec2::new(-1, z), start + IVec2::new(size.x, z)]);
+                }
+                for x in 0..size.x {
+                    approaches.extend([start + IVec2::new(x, -1), start + IVec2::new(x, size.y)]);
+                }
+                approaches.sort_by(|a, b| {
+                    a.as_vec2()
+                        .distance_squared(worker.position)
+                        .total_cmp(&b.as_vec2().distance_squared(worker.position))
+                });
+                let Some(path) = approaches.into_iter().find_map(|cell| {
+                    route(
+                        worker.position,
+                        cell,
+                        |cell| self.blocked(catalog, terrain, land, camp, cell),
+                        access_road,
+                    )
+                }) else {
+                    continue;
+                };
+                self.residents[worker_index].path = path;
+                self.gathering
+                    .orders
+                    .get_mut(&index)
+                    .expect("queued job")
+                    .worker = Some(worker_index);
+                self.gathering
+                    .orders
+                    .get_mut(&index)
+                    .expect("queued job")
+                    .retry_at = 0.0;
+                break;
+            }
+        }
+    }
+
     fn tick_trip(
         &mut self,
         catalog: &Catalog,
@@ -735,7 +873,7 @@ impl Construction {
         } = site;
         for index in (0..self.residents.len()).rev() {
             let worker = &self.residents[index];
-            if worker.assignment.is_some() {
+            if worker.assignment.is_some() || self.gathering.workers_at_site(index) {
                 continue;
             }
             let Some(path) = route(
@@ -858,7 +996,9 @@ impl Construction {
         }
         (f64::from(x) - center).abs() <= width + 1.9
             || cell == STOCKPILE
-            || land.occupied(cell)
+            || land
+                .site_at(cell)
+                .is_some_and(|index| !self.gathering.felled(index))
             || inside(camp + IVec2::new(-1, -3), camp + IVec2::new(4, 0))
             || self
                 .plans
@@ -885,6 +1025,42 @@ fn size(definition: &Project, rotation: u8) -> IVec2 {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn gathered_goods_enter_stock_only_after_the_return_walk() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let terrain = setup.terrain();
+        let land = Land::generate(&setup);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut construction = Construction::default();
+        let deposit = land.site_at(IVec2::new(45, -26)).unwrap();
+        construction.gathering.select(&land, Some(deposit));
+        construction
+            .gathering
+            .queue(&catalog, &land, terrain.seed, setup.richness(), 0.0);
+        let output = catalog.gathering["stone"].output["stone"];
+        let mut returning = false;
+        for step in 0..2_000 {
+            let clock = TownClock {
+                seconds: f64::from(step) / 10.0,
+                round_trip_km: 12,
+            };
+            construction.tick(&catalog, &mut stock, site, clock, 0.1);
+            if construction.gathering.orders.is_empty() {
+                break;
+            }
+            returning |= construction.gathering.orders[&deposit].phase == GatherPhase::Return;
+            assert_eq!(stock.available("stone"), 0);
+        }
+        assert!(returning);
+        assert_eq!(stock.available("stone"), output);
+    }
 
     #[test]
     fn residents_wait_for_town_pickup_before_cistern_hauling() {

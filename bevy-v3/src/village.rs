@@ -82,6 +82,10 @@ pub struct Village {
 }
 
 impl Village {
+    pub fn tree_felled(&self, index: usize) -> bool {
+        self.construction.gathering.felled(index)
+    }
+
     pub fn valid_save(&self, catalog: &Catalog) -> bool {
         let Some(setup) = &self.setup else {
             return false;
@@ -103,6 +107,10 @@ impl Village {
             return false;
         }
         self.construction.valid_save(catalog, &self.stock)
+            && self
+                .construction
+                .gathering
+                .valid_save(&Land::generate(setup))
     }
 }
 
@@ -188,11 +196,7 @@ fn read_camp_pointer(
     mut pointer: ResMut<CampPointer>,
 ) {
     pointer.0 = None;
-    if !window.focused
-        || setup.open
-        || (village.camp.is_some() && !village.construction.is_placing())
-        || village.arrival_time < ARRIVAL_DURATION
-    {
+    if !window.focused || setup.open || village.arrival_time < ARRIVAL_DURATION {
         *input = None;
         return;
     }
@@ -319,7 +323,9 @@ fn village_input(
                 town.speed = speed;
             }
         }
-        if let Some(position) = pointer.0 {
+        if let Some(position) = pointer.0
+            && town.construction.is_placing()
+        {
             town.construction.plan(
                 &catalog,
                 &mut town.stock,
@@ -333,6 +339,22 @@ fn village_input(
                     seconds: town.clock,
                     round_trip_km: setup.round_trip_km(),
                 },
+            );
+        }
+        if let Some(position) = pointer.0
+            && !town.construction.menu
+        {
+            town.construction
+                .gathering
+                .select(&land, land.site_at(position));
+        }
+        if keyboard.just_pressed(KeyCode::KeyG) && !town.construction.menu {
+            town.construction.gathering.queue(
+                &catalog,
+                &land,
+                terrain.seed,
+                setup.richness(),
+                town.clock,
             );
         }
         return;
@@ -468,7 +490,7 @@ fn show_hud(
     setup: Res<WorldSetup>,
     village: Res<Village>,
     mut hud: Single<(&mut Text, &mut Node), With<VillageHud>>,
-    catalog: Res<Catalog>,
+    (catalog, land): (Res<Catalog>, Res<Land>),
 ) {
     if !setup.is_changed() && !village.is_changed() {
         return;
@@ -522,6 +544,15 @@ fn show_hud(
     if let Some(progress) = village.construction.latest_progress(&catalog) {
         label.push('\n');
         label.push_str(&progress);
+    }
+    if let Some(natural) =
+        village
+            .construction
+            .gathering
+            .selected_status(&catalog, &land, village.clock)
+    {
+        label.push('\n');
+        label.push_str(&natural);
     }
     if !village.save_notice.is_empty() {
         label.push('\n');

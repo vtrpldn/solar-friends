@@ -45,6 +45,13 @@ impl Stock {
         self.materials.get(id).copied().unwrap_or(0)
     }
 
+    pub fn receive(&mut self, goods: &BTreeMap<String, u32>) {
+        for (id, units) in goods {
+            let count = self.materials.entry(id.clone()).or_default();
+            *count = count.saturating_add(*units);
+        }
+    }
+
     pub fn balance(&self) -> u64 {
         u64::from(self.cash) * 100 + u64::from(self.centavos)
     }
