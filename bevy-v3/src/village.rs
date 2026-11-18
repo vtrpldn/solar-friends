@@ -1495,6 +1495,11 @@ fn draw_blueprints(
                 pointer.hovered.map(|hit| hit.cell),
                 &mut gizmos,
             )),
+            Some(MapLens::Residents) => Some(village.construction.draw_residents_lens(
+                &terrain,
+                pointer.hovered.map(|hit| hit.world),
+                &mut gizmos,
+            )),
             Some(MapLens::Work) => Some(village.construction.draw_work_lens(
                 &catalog,
                 &terrain,

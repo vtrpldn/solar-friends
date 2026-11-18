@@ -844,39 +844,108 @@ impl Construction {
             .is_some_and(|task| matches!(task.kind, Need::Rest | Need::Sleep) && task.elapsed > 0.0)
     }
 
+    fn resident_action(&self, index: usize) -> &'static str {
+        let worker = &self.residents[index];
+        if worker.town_work.active() {
+            worker.town_work.status()
+        } else if self.driver_away(index) {
+            "In town"
+        } else if let Some(task) = &worker.health.task {
+            task.kind.label()
+        } else if let Some(job) = &worker.assignment {
+            match job.activity {
+                Activity::Collect => "Collecting materials",
+                Activity::Carry => "Hauling",
+                Activity::Walk => "Walking to site",
+                Activity::Build => "Building",
+            }
+        } else if self.production.has_worker(index) {
+            "In production"
+        } else if self.gathering.workers_at_site(index) {
+            "Gathering"
+        } else if let Some(activity) = self
+            .service_activity(index)
+            .or_else(|| self.water_activity(index))
+        {
+            activity
+        } else if let Some(visit) = &worker.leisure.visit {
+            visit.label()
+        } else {
+            "Available"
+        }
+    }
+
+    pub fn draw_residents_lens(
+        &self,
+        terrain: &Terrain,
+        hovered: Option<Vec3>,
+        gizmos: &mut Gizmos,
+    ) -> String {
+        use std::fmt::Write;
+
+        let mut label = "Residents · Green needs above 30% · Red needs at or below 30%".to_owned();
+        let mut nearest = None;
+        let mut nearest_distance = 9.0;
+        let mut away = 0;
+        for (index, worker) in self.residents.iter().enumerate() {
+            if self.away_for_work(index) || self.driver_away(index) {
+                away += 1;
+                continue;
+            }
+            let health = &worker.health;
+            let urgent = health.energy <= 30.0 || health.levels.iter().any(|level| *level <= 30.0);
+            let color = if urgent {
+                Color::srgb_u8(222, 112, 96)
+            } else {
+                Color::srgb_u8(136, 220, 148)
+            };
+            let Vec2 { x, y: z } = world_position(worker.position.x, worker.position.y);
+            let ground = Vec3::new(x, terrain.height_at(x, z), z);
+            let tip = ground + Vec3::Y * 4.0;
+            gizmos.line(ground, tip, color);
+            for axis in [Vec3::X, Vec3::Z] {
+                gizmos.line(tip - axis * 0.6, tip + axis * 0.6, color);
+            }
+            if let Some(pointer) = hovered {
+                let distance = pointer.xz().distance_squared(ground.xz());
+                if distance < nearest_distance {
+                    nearest = Some(index);
+                    nearest_distance = distance;
+                }
+            }
+        }
+        if away > 0 {
+            let _ = write!(label, " · {away} away");
+        }
+        if let Some(index) = nearest {
+            let health = &self.residents[index].health;
+            let _ = write!(
+                label,
+                "\n{} · {}",
+                NAMES[index],
+                self.resident_action(index)
+            );
+            for (name, level) in [
+                "Energy", "Food", "Bladder", "Bowels", "Hygiene", "Social", "Fun", "Water",
+            ]
+            .into_iter()
+            .zip(std::iter::once(health.energy).chain(health.levels))
+            {
+                if level <= 30.0 {
+                    let _ = write!(label, " · {name} {level:.0}%");
+                }
+            }
+        }
+        label
+    }
+
     pub fn resident_status(&self, catalog: &Catalog, stock: &Stock, selected: usize) -> String {
         let mut rows = self
             .residents
             .iter()
             .enumerate()
             .map(|(index, worker)| {
-                let action = if worker.town_work.active() {
-                    worker.town_work.status()
-                } else if self.driver_away(index) {
-                    "In town"
-                } else if let Some(task) = &worker.health.task {
-                    task.kind.label()
-                } else if let Some(job) = &worker.assignment {
-                    match job.activity {
-                        Activity::Collect => "Collecting materials",
-                        Activity::Carry => "Hauling",
-                        Activity::Walk => "Walking to site",
-                        Activity::Build => "Building",
-                    }
-                } else if self.production.has_worker(index) {
-                    "In production"
-                } else if self.gathering.workers_at_site(index) {
-                    "Gathering"
-                } else if let Some(activity) = self
-                    .service_activity(index)
-                    .or_else(|| self.water_activity(index))
-                {
-                    activity
-                } else if let Some(visit) = &worker.leisure.visit {
-                    visit.label()
-                } else {
-                    "Available"
-                };
+                let action = self.resident_action(index);
                 let health = &worker.health;
                 let profile = &catalog.residents[index];
                 let home = worker.home.map_or_else(
