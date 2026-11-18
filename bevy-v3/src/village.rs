@@ -19,7 +19,7 @@ use crate::{
         town_vehicle_pose, vehicle_pose, world_position,
     },
     catalog::Catalog,
-    construction::{Construction, ConstructionSite, TownClock},
+    construction::{Construction, ConstructionSite, TownClock, WaterAction},
     land::Land,
     resident_animation::{Motion, ResidentAnimation},
     save,
@@ -105,8 +105,93 @@ pub struct Village {
     session_serial: u64,
     #[serde(default)]
     terrain_editor: TerrainEditor,
+    #[serde(skip)]
+    water_panel: WaterControls,
     stock: Stock,
     construction: Construction,
+}
+
+#[derive(Default)]
+struct WaterControls {
+    target: usize,
+    source: Option<usize>,
+    channel: usize,
+    message: String,
+}
+
+impl WaterControls {
+    fn input(
+        &mut self,
+        keyboard: &ButtonInput<KeyCode>,
+        hit: Option<GroundHit>,
+        construction: &mut Construction,
+    ) {
+        let shift = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+        if let Some(id) = hit.and_then(|hit| construction.utilities.water_at(hit.cell)) {
+            if shift {
+                self.source = Some(id);
+            } else {
+                self.target = id;
+            }
+            self.message.clear();
+        }
+        if keyboard.just_pressed(KeyCode::KeyC) {
+            if shift {
+                self.source = Some(0);
+            } else {
+                self.target = 0;
+            }
+            self.message.clear();
+        }
+        if let Some(channel) = [
+            KeyCode::Digit1,
+            KeyCode::Digit2,
+            KeyCode::Digit3,
+            KeyCode::Digit4,
+        ]
+        .into_iter()
+        .position(|key| keyboard.just_pressed(key))
+        {
+            self.channel = channel;
+        }
+        if keyboard.any_just_pressed([KeyCode::KeyM, KeyCode::KeyL]) {
+            self.message = if construction
+                .utilities
+                .toggle_water_policy(self.target, keyboard.just_pressed(KeyCode::KeyM))
+            {
+                "Water policy updated."
+            } else {
+                "This facility does not support that water policy."
+            }
+            .into();
+            return;
+        }
+        let action = if keyboard.just_pressed(KeyCode::KeyR) {
+            WaterAction::Carry {
+                source: None,
+                channel: 1,
+            }
+        } else if keyboard.just_pressed(KeyCode::KeyT) {
+            let Some(source) = self.source else {
+                self.message = "Shift-click a water source first.".into();
+                return;
+            };
+            WaterAction::Carry {
+                source: Some(source),
+                channel: self.channel,
+            }
+        } else if keyboard.just_pressed(KeyCode::KeyY) {
+            WaterAction::Purify
+        } else if keyboard.just_pressed(KeyCode::KeyK) {
+            WaterAction::Sanitation
+        } else {
+            return;
+        };
+        self.message = match construction.queue_water(self.target, action) {
+            Ok(()) => "Water job queued.".into(),
+            Err(reason) => reason.into(),
+        };
+    }
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -569,6 +654,11 @@ fn village_input(
                 Some(UtilityPanel::Water)
             };
         }
+        if town.utility_panel == Some(UtilityPanel::Water) {
+            town.water_panel
+                .input(&keyboard, pointer.clicked, &mut town.construction);
+            return;
+        }
         if keyboard.just_pressed(KeyCode::KeyO) && town.utility_panel == Some(UtilityPanel::Power) {
             town.construction.utilities.grid_off = !town.construction.utilities.grid_off;
         }
@@ -966,6 +1056,17 @@ fn show_hud(
             label.push('\n');
             label.push_str(&village.construction.utilities.water_summary());
             label.push_str("\nBlue Drinking · Green Irrigation\nPurple Greywater · Amber Sewage");
+            let panel = &village.water_panel;
+            label.push('\n');
+            label.push_str(&village.construction.water_panel(
+                panel.target,
+                panel.source,
+                panel.channel,
+            ));
+            if !panel.message.is_empty() {
+                label.push('\n');
+                label.push_str(&panel.message);
+            }
         }
         Some(UtilityPanel::Residents) => {
             label.push('\n');

@@ -66,6 +66,7 @@ impl Construction {
                 && !self.residents[index].town_work.active()
                 && !self.farming.has_worker(index)
                 && !self.working_change(index)
+                && !self.working_water(index)
                 && !self.residents[index]
                     .assignment
                     .as_ref()
@@ -129,6 +130,7 @@ impl Construction {
         let idle = self.residents[index].assignment.is_none();
         if selected.is_none()
             && idle
+            && !self.water_jobs.contains_key(&0)
             && let Some(water) = self.utilities.camp_water()
         {
             let kind = if water[0] < 30.0 && water[1] >= 1.0 {
@@ -462,6 +464,7 @@ impl Construction {
                     && !resident.town_work.active()
                     && !self.farming.has_worker(id)
                     && !self.working_change(id)
+                    && !self.working_water(id)
                     && !self.trip.as_ref().is_some_and(|trip| trip.driver == id)
             })
             .collect::<Vec<_>>();
@@ -802,6 +805,9 @@ impl Construction {
                 _ => Motion::Walk,
             };
         }
+        if let Some(motion) = self.water_motion(index) {
+            return motion;
+        }
         if let Some(visit) = &worker.leisure.visit {
             return visit.motion();
         }
@@ -843,6 +849,8 @@ impl Construction {
                     "In production"
                 } else if self.gathering.workers_at_site(index) {
                     "Gathering"
+                } else if let Some(activity) = self.water_activity(index) {
+                    activity
                 } else if let Some(visit) = &worker.leisure.visit {
                     visit.label()
                 } else {

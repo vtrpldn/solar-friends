@@ -7,7 +7,10 @@ mod resident_work;
 mod roads;
 mod town_pickup;
 mod trade_work;
+mod water_work;
 mod work_shift;
+
+pub use water_work::WaterAction;
 
 use std::{
     collections::{BTreeMap, VecDeque},
@@ -130,6 +133,8 @@ pub struct Construction {
     pub utilities: Utilities,
     #[serde(default)]
     changes: BTreeMap<usize, lifecycle::ChangeJob>,
+    #[serde(default)]
+    water_jobs: BTreeMap<usize, water_work::WaterJob>,
     #[serde(skip)]
     moving: Option<usize>,
     #[serde(default)]
@@ -214,6 +219,7 @@ impl Default for Construction {
             production: Production::default(),
             utilities: Utilities::default(),
             changes: BTreeMap::new(),
+            water_jobs: BTreeMap::new(),
             moving: None,
             priority: None,
             trip: None,
@@ -852,7 +858,8 @@ impl Construction {
                             && target.rotation <= 3
                     })
             });
-        if !self.valid_homes(catalog)
+        if !self.valid_water_jobs()
+            || !self.valid_homes(catalog)
             || !changes_valid
             || !self.trade.valid(catalog)
             || !animals_valid
@@ -975,6 +982,7 @@ impl Construction {
             crate::market::fare_cents(clock.round_trip_km),
         );
         self.tick_changes(catalog, stock, site, dt);
+        self.tick_water_work(catalog, site, clock.seconds, dt);
         self.tick_shifts(catalog, stock, site, clock, dt);
         self.tick_trip(catalog, stock, site, clock, dt);
         self.tick_gathering(catalog, stock, site, clock.seconds, dt);
@@ -988,6 +996,7 @@ impl Construction {
                 || self.residents[index].health.task.is_some()
                 || self.residents[index].town_work.active()
                 || self.working_change(index)
+                || self.working_water(index)
             {
                 continue;
             }

@@ -320,6 +320,7 @@ impl Construction {
                 || self.production.has_worker(index)
                 || self.farming.has_worker(index)
                 || self.working_change(index)
+                || self.working_water(index)
                 || self.trip.as_ref().is_some_and(|trip| trip.driver == index)
             {
                 continue;

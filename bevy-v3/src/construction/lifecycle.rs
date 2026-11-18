@@ -133,6 +133,9 @@ impl Construction {
     }
 
     fn can_change(&self, index: usize) -> Option<&'static str> {
+        if self.water_job_at(index) {
+            return Some("Wait for the queued water job to finish.");
+        }
         if self.production.jobs.iter().any(|job| job.site == index)
             || self.farming.jobs.iter().any(|job| job.site == index)
         {
@@ -416,6 +419,7 @@ impl Construction {
                     || self.gathering.workers_at_site(worker_index)
                     || self.farming.has_worker(worker_index)
                     || self.working_change(worker_index)
+                    || self.working_water(worker_index)
                     || self
                         .trip
                         .as_ref()

@@ -38,6 +38,8 @@ pub struct Utilities {
     storage_loss_kwh: f64,
     curtailed_kwh: f64,
     pub biogas: f64,
+    #[serde(default)]
+    waste_removed: f64,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -55,6 +57,10 @@ struct Node {
     demanding: bool,
     #[serde(default)]
     cold_storage: bool,
+    #[serde(default)]
+    maintain_fresh: bool,
+    #[serde(default)]
+    maintain_sanitation: bool,
 }
 
 #[derive(Clone, Copy, Deserialize, Serialize)]
@@ -71,6 +77,24 @@ struct Hydrology {
     river: f64,
     runoff: f64,
     flow: f64,
+}
+
+#[derive(Clone, Copy)]
+pub struct WaterSite<'a> {
+    pub kind: &'a str,
+    pub location: IVec2,
+    pub size: IVec2,
+    pub levels: [f64; 4],
+    pub capacity: [f64; 4],
+    pub enabled: bool,
+    pub maintain_fresh: bool,
+    pub maintain_sanitation: bool,
+}
+
+impl WaterSite<'_> {
+    pub fn space(&self, channel: usize) -> f64 {
+        (self.capacity[channel] - self.levels[channel]).max(0.0)
+    }
 }
 
 pub struct Facility<'a> {
@@ -99,6 +123,8 @@ impl Utilities {
             solar_kw: 0.0,
             demanding: false,
             cold_storage: false,
+            maintain_fresh: false,
+            maintain_sanitation: false,
         });
         let mut changed = first;
         for facility in facilities {
@@ -119,6 +145,8 @@ impl Utilities {
                 solar_kw: f64::from(facility.panels) * 0.6,
                 demanding: false,
                 cold_storage: false,
+                maintain_fresh: false,
+                maintain_sanitation: false,
             });
             if node.location != facility.location || node.size != facility.size {
                 node.location = facility.location;
@@ -257,6 +285,91 @@ impl Utilities {
         true
     }
 
+    pub fn water_site(&self, id: usize) -> Option<WaterSite<'_>> {
+        let node = self.nodes.get(&id)?;
+        Some(WaterSite {
+            kind: &node.kind,
+            location: node.location,
+            size: node.size,
+            levels: node.water,
+            capacity: node.capacity,
+            enabled: node.enabled,
+            maintain_fresh: node.maintain_fresh,
+            maintain_sanitation: node.maintain_sanitation,
+        })
+    }
+
+    pub fn water_ids(&self) -> impl Iterator<Item = usize> + '_ {
+        self.nodes
+            .iter()
+            .filter_map(|(&id, node)| node.capacity.iter().any(|&n| n > 0.0).then_some(id))
+    }
+
+    pub fn water_at(&self, cell: IVec2) -> Option<usize> {
+        self.water_ids().find(|id| {
+            let node = &self.nodes[id];
+            cell.cmpge(node.location).all() && cell.cmplt(node.location + node.size).all()
+        })
+    }
+
+    pub fn toggle_water_policy(&mut self, id: usize, fresh: bool) -> bool {
+        let Some(node) = self.nodes.get_mut(&id) else {
+            return false;
+        };
+        if fresh && node.capacity[0] > 0.0 && node.capacity[1] > 0.0 {
+            node.maintain_fresh = !node.maintain_fresh;
+            true
+        } else if !fresh
+            && (node.capacity[2] > 0.0 || node.capacity[3] > 0.0)
+            && !matches!(
+                node.kind.as_str(),
+                "wetland" | "biodigester" | "banana_treatment"
+            )
+        {
+            node.maintain_sanitation = !node.maintain_sanitation;
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn take_water(&mut self, source: Option<usize>, channel: usize, liters: f64) -> f64 {
+        if let Some(id) = source {
+            let Some(node) = self.nodes.get_mut(&id).filter(|node| node.enabled) else {
+                return 0.0;
+            };
+            let liters = liters.min(node.water[channel]);
+            node.water[channel] -= liters;
+            liters
+        } else if channel == 1 {
+            self.carry_river_water(liters)
+        } else {
+            0.0
+        }
+    }
+
+    pub fn deliver_water(&mut self, id: usize, channel: usize, liters: f64) -> f64 {
+        let Some(node) = self.nodes.get_mut(&id).filter(|node| node.enabled) else {
+            return 0.0;
+        };
+        let accepted = liters.min((node.capacity[channel] - node.water[channel]).max(0.0));
+        node.water[channel] += accepted;
+        accepted
+    }
+
+    pub fn purify_water(&mut self, id: usize) {
+        if let Some(node) = self.nodes.get_mut(&id).filter(|node| node.enabled) {
+            transform_water(node, 1, 0, 12.0, 1.0);
+        }
+    }
+
+    pub fn service_waste(&mut self, id: usize) {
+        if let Some(node) = self.nodes.get_mut(&id).filter(|node| node.enabled) {
+            self.waste_removed += node.water[2] + node.water[3];
+            node.water[2..].fill(0.0);
+        }
+    }
+
     pub fn camp_water(&self) -> Option<[f64; 4]> {
         self.nodes.get(&0).map(|camp| camp.water)
     }
@@ -281,9 +394,7 @@ impl Utilities {
     }
 
     pub fn purify_camp_water(&mut self) {
-        if let Some(camp) = self.nodes.get_mut(&0) {
-            transform_water(camp, 1, 0, 12.0, 1.0);
-        }
+        self.purify_water(0);
     }
 
     pub fn powered(&self, building: usize) -> bool {

@@ -208,6 +208,7 @@ impl Construction {
             && !self.production.has_worker(index)
             && !self.farming.has_worker(index)
             && !self.working_change(index)
+            && !self.working_water(index)
     }
 
     fn visit_valid(&self, visit: &Visit, catalog: &Catalog, clock: f64, wet: bool) -> bool {
