@@ -60,7 +60,7 @@ impl Construction {
             if self.residents[index].health.task.is_some() {
                 self.step_need(index, catalog, stock, site, clock, dt);
             } else if self.residents[index].health.retry_at <= clock
-                && !self.trip.as_ref().is_some_and(|trip| trip.driver == index)
+                && !self.driver_booked(index)
                 && !self.gathering.workers_at_site(index)
                 && !self.production.has_worker(index)
                 && !self.residents[index].town_work.active()
@@ -467,7 +467,7 @@ impl Construction {
                     && !self.working_change(id)
                     && !self.working_water(id)
                     && !self.working_upkeep(id)
-                    && !self.trip.as_ref().is_some_and(|trip| trip.driver == id)
+                    && !self.driver_booked(id)
             })
             .collect::<Vec<_>>();
         partners.sort_by(|(a, _), (b, _)| score(*b).total_cmp(&score(*a)));

@@ -64,7 +64,7 @@ impl Construction {
                 };
         }
         if keys.just_pressed(KeyCode::Backspace) {
-            let active = self.trip.as_ref().is_some_and(|trip| trip.market_order);
+            let active = self.active_trips().any(|trip| trip.market_order);
             self.trade.cancel_last(stock, &mut self.market, active);
         }
         let policy = self.trade.policies.entry(id.into()).or_default();

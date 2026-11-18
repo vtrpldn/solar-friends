@@ -225,9 +225,10 @@ impl Construction {
         let plan = &self.plans[index];
         let mut returned = catalog.projects[&plan.key].materials.clone();
         if plan.pickups > 0 {
-            let active = self.trip.as_ref().filter(|trip| {
-                !trip.market_order && trip.farm_bed.is_none() && trip.project == index
-            });
+            let active = self
+                .active_trips()
+                .find(|trip| !trip.market_order && trip.farm_bed.is_none() && trip.project == index)
+                .copied();
             let Some(order) = plan
                 .purchase
                 .as_ref()
@@ -250,9 +251,8 @@ impl Construction {
                 &order.units,
                 (order.day, order.price, plan.fare * u64::from(plan.pickups)),
             );
-            if active.is_some() {
-                let trip = self.trip.take().expect("boarding pickup");
-                self.residents[trip.driver].path.clear();
+            if let Some(active) = active {
+                self.cancel_boarding(active);
             }
         }
         if !stock.sandbox {
@@ -437,10 +437,7 @@ impl Construction {
                     || self.working_change(worker_index)
                     || self.working_water(worker_index)
                     || self.working_upkeep(worker_index)
-                    || self
-                        .trip
-                        .as_ref()
-                        .is_some_and(|trip| trip.driver == worker_index)
+                    || self.driver_booked(worker_index)
                 {
                     continue;
                 }

@@ -93,10 +93,7 @@ impl Construction {
             for worker_index in 0..self.residents.len() {
                 let worker = &self.residents[worker_index];
                 if worker.assignment.is_some()
-                    || self
-                        .trip
-                        .as_ref()
-                        .is_some_and(|trip| trip.driver == worker_index)
+                    || self.driver_booked(worker_index)
                     || self.gathering.workers_at_site(worker_index)
                     || self.production.has_worker(worker_index)
                     || self.farming.has_worker(worker_index)

@@ -85,7 +85,7 @@ pub struct TownClock {
     pub round_trip_km: u32,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Copy, Deserialize, Serialize)]
 struct TownTrip {
     project: usize,
     #[serde(default)]
@@ -149,6 +149,8 @@ pub struct Construction {
     priority: Option<usize>,
     #[serde(default)]
     trip: Option<TownTrip>,
+    #[serde(default)]
+    second_trip: Option<TownTrip>,
     residents: [Worker; 5],
 }
 
@@ -235,6 +237,7 @@ impl Default for Construction {
             moving: None,
             priority: None,
             trip: None,
+            second_trip: None,
             residents: std::array::from_fn(|index| {
                 let (x, z) = ARRIVAL_SPOTS[index];
                 Worker {
@@ -379,16 +382,22 @@ impl Construction {
         self.market.auto_buy_off = !self.market.auto_buy_off;
     }
 
+    fn active_trips(&self) -> impl Iterator<Item = &TownTrip> {
+        self.trip.iter().chain(self.second_trip.iter())
+    }
+
+    fn driver_booked(&self, index: usize) -> bool {
+        self.active_trips().any(|trip| trip.driver == index)
+    }
+
     pub fn driver_away(&self, index: usize) -> bool {
-        self.trip
-            .as_ref()
-            .is_some_and(|trip| trip.driver == index && trip.boarded)
+        self.active_trips()
+            .any(|trip| trip.driver == index && trip.boarded)
     }
 
     pub fn car_trip(&self, index: usize) -> Option<(f64, f64)> {
-        self.trip
-            .as_ref()
-            .filter(|trip| index == trip.vehicle && trip.boarded)
+        self.active_trips()
+            .find(|trip| index == trip.vehicle && trip.boarded)
             .map(|trip| (trip.elapsed, trip.duration))
     }
 
@@ -748,9 +757,8 @@ impl Construction {
             return (stock.units(), 1_000_000);
         }
         let loaded = self
-            .trip
-            .as_ref()
-            .is_some_and(|trip| trip.market_order && trip.boarded);
+            .active_trips()
+            .any(|trip| trip.market_order && trip.boarded);
         let used = stock.units() + self.trade.reserved_at_home(loaded);
         let expansions = self
             .plans
@@ -816,11 +824,11 @@ impl Construction {
         if self.foundations.len() > 4094 || !self.foundations.iter().all(|pad| pad.valid()) {
             return false;
         }
-        let active = self
-            .trip
-            .as_ref()
+        let active: Vec<_> = self
+            .active_trips()
             .filter(|trip| trip.boarded && trip.farm_bed.is_none() && !trip.market_order)
-            .map(|trip| trip.project);
+            .map(|trip| trip.project)
+            .collect();
         let fares = self
             .plans
             .iter()
@@ -828,11 +836,11 @@ impl Construction {
             .fold(0u64, |total, (index, project)| {
                 let trips = project
                     .pickups
-                    .saturating_sub(u32::from(active == Some(index)));
+                    .saturating_sub(u32::from(active.contains(&index)));
                 total.saturating_add(project.fare.saturating_mul(u64::from(trips)))
             });
         let fares = self.farming.jobs.iter().fold(fares, |total, job| {
-            let paid = self.trip.as_ref().is_some_and(|trip| {
+            let paid = self.active_trips().any(|trip| {
                 trip.boarded && trip.project == job.site && trip.farm_bed == Some(job.bed)
             });
             total.saturating_add(
@@ -841,9 +849,8 @@ impl Construction {
             )
         });
         let export_paid = self
-            .trip
-            .as_ref()
-            .is_some_and(|trip| trip.market_order && trip.boarded);
+            .active_trips()
+            .any(|trip| trip.market_order && trip.boarded);
         let fares = self
             .trade
             .orders
@@ -856,11 +863,14 @@ impl Construction {
                     total.saturating_add(order.fare)
                 }
             });
-        let trip_valid = self.trip.as_ref().is_none_or(|trip| {
+        let trip_valid = self.active_trips().all(|trip| {
             trip.driver < self.residents.len()
                 && trip.vehicle < 2
+                && (0.0..=trip.duration).contains(&trip.elapsed)
+                && (1.0..=500.0).contains(&trip.duration)
+                && (trip.boarded || trip.elapsed == 0.0)
                 && if trip.market_order {
-                    self.trade.orders.front().is_some()
+                    trip.farm_bed.is_none() && self.trade.orders.front().is_some()
                 } else if let Some(bed) = trip.farm_bed {
                     self.farming
                         .jobs
@@ -869,10 +879,16 @@ impl Construction {
                 } else {
                     self.plans
                         .get(trip.project)
-                        .is_some_and(|project| project.pickups > 0)
+                        .is_some_and(|project| !project.removed && project.pickups > 0)
                 }
-                && (0.0..=trip.duration).contains(&trip.elapsed)
-                && (0.0..=500.0).contains(&trip.duration)
+        }) && self.trip.zip(self.second_trip).is_none_or(|(a, b)| {
+            a.driver != b.driver
+                && a.vehicle != b.vehicle
+                && if a.market_order || b.market_order {
+                    a.market_order != b.market_order
+                } else {
+                    (a.project, a.farm_bed) != (b.project, b.farm_bed)
+                }
         });
         let services_valid = self.utilities.valid_save(|index, kind| {
             self.plans
@@ -1058,7 +1074,7 @@ impl Construction {
             .equipment
             .release(|worker, task| self.active_tool_task(worker, task));
         let space = self.storage_space(catalog, stock);
-        let order_in_progress = self.trip.as_ref().is_some_and(|trip| trip.market_order);
+        let order_in_progress = self.active_trips().any(|trip| trip.market_order);
         self.trade.age_shipments(
             catalog,
             stock,
@@ -1090,7 +1106,7 @@ impl Construction {
         self.tick_production(catalog, stock, site, clock.seconds, dt);
         self.tick_farm_jobs(catalog, stock, site, clock.seconds, dt);
         for index in 0..self.residents.len() {
-            if self.trip.as_ref().is_some_and(|trip| trip.driver == index)
+            if self.driver_booked(index)
                 || self.gathering.workers_at_site(index)
                 || self.production.has_worker(index)
                 || self.farming.has_worker(index)

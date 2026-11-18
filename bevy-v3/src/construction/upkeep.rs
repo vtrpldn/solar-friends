@@ -370,7 +370,7 @@ impl Construction {
             }
         }
         for index in 0..self.upkeep.vehicles.len() {
-            if self.trip.as_ref().is_some_and(|trip| trip.vehicle == index) {
+            if self.active_trips().any(|trip| trip.vehicle == index) {
                 continue;
             }
             let Some(mut job) = self.upkeep.vehicles[index].service.take() else {
