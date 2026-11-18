@@ -12,6 +12,7 @@ mod gathering;
 mod land;
 mod market;
 mod navigation;
+mod production;
 mod save;
 mod setup;
 mod stock;

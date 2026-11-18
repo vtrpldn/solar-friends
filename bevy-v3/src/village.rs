@@ -315,7 +315,10 @@ fn village_input(
         }
         if keyboard.get_just_pressed().len() > 0 {
             town.construction.input(&keyboard, &catalog);
+            town.construction
+                .production_input(&catalog, &mut town.stock, &keyboard);
             if !town.construction.menu
+                && !town.construction.production.open
                 && let Some(speed) = SPEEDS
                     .iter()
                     .position(|(key, _)| keyboard.just_pressed(*key))
@@ -344,6 +347,7 @@ fn village_input(
         if let Some(position) = pointer.0
             && !town.construction.menu
         {
+            town.construction.select_facility(&catalog, position);
             town.construction
                 .gathering
                 .select(&land, land.site_at(position));
@@ -553,6 +557,10 @@ fn show_hud(
     {
         label.push('\n');
         label.push_str(&natural);
+    }
+    if let Some(production) = village.construction.selected_production(&catalog) {
+        label.push('\n');
+        label.push_str(&production);
     }
     if !village.save_notice.is_empty() {
         label.push('\n');

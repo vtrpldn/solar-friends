@@ -3,6 +3,7 @@ import { writeFile } from "node:fs/promises";
 import { MATERIALS, PROJECTS, PROCESSES, createWeekend } from "../web/v02/weekend/simulation.js";
 import { buildingCategory, inBuildCategory, isBuildOption } from "../web/v02/weekend/build-categories.js";
 import { materialMeasure } from "../web/v02/weekend/material-measures.js";
+import { BIOLOGY } from "../web/v02/weekend/biological-production.js";
 import { supplierLimit } from "../web/v02/weekend/supplier-stock.js";
 
 const startingVillage = createWeekend();
@@ -41,5 +42,11 @@ const projects = Object.fromEntries(options
 const gathering = Object.fromEntries(Object.entries(PROCESSES)
   .filter(([, recipe]) => recipe.deposit || recipe.gathering || recipe.kind === "wild-tree"));
 
+const production = Object.fromEntries(Object.entries(PROCESSES)
+  .filter(([id, recipe]) => !BIOLOGY[id] && !recipe.deposit && !recipe.gathering &&
+    recipe.kind !== "wild-tree" && recipe.kind !== "cultivation" && Object.keys(recipe.output).length)
+  .map(([id, recipe]) => [id, {name: recipe.name, kind: recipe.kind, input: recipe.input,
+    output: recipe.output, work: recipe.work, handcraft: Boolean(recipe.craft)}]));
+
 await writeFile(new URL("../bevy-v3/data/construction.json", import.meta.url),
-  JSON.stringify({ materials, projects, gathering }, null, 2) + "\n");
+  JSON.stringify({ materials, projects, gathering, production }, null, 2) + "\n");

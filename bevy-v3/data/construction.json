@@ -2043,5 +2043,196 @@
       "gatherLimit": 6,
       "gathering": true
     }
+  },
+  "production": {
+    "saw_timber": {
+      "name": "Saw raw wood into timber",
+      "kind": "supply-5",
+      "input": {
+        "logs": 6
+      },
+      "output": {
+        "wood": 4
+      },
+      "work": 240,
+      "handcraft": false
+    },
+    "saw_planks": {
+      "name": "Saw timber into planks",
+      "kind": "supply-5",
+      "input": {
+        "wood": 3
+      },
+      "output": {
+        "planks": 6
+      },
+      "work": 160,
+      "handcraft": false
+    },
+    "frames": {
+      "name": "Prepare frames",
+      "kind": "workshop",
+      "input": {
+        "planks": 2,
+        "hardware": 1
+      },
+      "output": {
+        "frames": 1
+      },
+      "work": 30,
+      "handcraft": false
+    },
+    "walls": {
+      "name": "Make earth walls",
+      "kind": "workshop",
+      "input": {
+        "earth": 2
+      },
+      "output": {
+        "walls": 2
+      },
+      "work": 30,
+      "handcraft": false
+    },
+    "tiles": {
+      "name": "Fire roof tiles",
+      "kind": "workshop",
+      "input": {
+        "earth": 2,
+        "wood": 1
+      },
+      "output": {
+        "tiles": 2
+      },
+      "work": 40,
+      "handcraft": false
+    },
+    "meals": {
+      "name": "Cook a meal batch",
+      "kind": "kitchen",
+      "input": {
+        "food": 4
+      },
+      "output": {
+        "meals": 4,
+        "scraps": 1
+      },
+      "work": 25,
+      "handcraft": false
+    },
+    "preserve_meals": {
+      "name": "Prepare dried provisions",
+      "kind": "kitchen",
+      "input": {
+        "food": 6
+      },
+      "output": {
+        "meals": 4,
+        "scraps": 2
+      },
+      "work": 75,
+      "handcraft": false
+    },
+    "craft_garden-tools": {
+      "name": "Craft garden tools",
+      "kind": "supply-5",
+      "input": {
+        "wood": 2,
+        "tool_heads": 1
+      },
+      "output": {
+        "garden-tools": 1
+      },
+      "work": 180,
+      "handcraft": true
+    },
+    "craft_harvest-basket": {
+      "name": "Craft harvest basket",
+      "kind": "supply-5",
+      "input": {
+        "bamboo": 2
+      },
+      "output": {
+        "harvest-basket": 1
+      },
+      "work": 240,
+      "handcraft": true
+    },
+    "craft_wheelbarrow": {
+      "name": "Craft wheelbarrow",
+      "kind": "workshop",
+      "input": {
+        "planks": 4,
+        "hardware": 1,
+        "wheel_kit": 1
+      },
+      "output": {
+        "wheelbarrow": 1
+      },
+      "work": 360,
+      "handcraft": true
+    },
+    "craft_produce-crates": {
+      "name": "Craft produce crate",
+      "kind": "supply-5",
+      "input": {
+        "planks": 2,
+        "hardware": 1
+      },
+      "output": {
+        "produce-crates": 1
+      },
+      "work": 120,
+      "handcraft": true
+    },
+    "cook_greens": {
+      "name": "Cook leafy greens",
+      "kind": "kitchen",
+      "input": {
+        "greens": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "work": 40,
+      "handcraft": false
+    },
+    "cook_beans": {
+      "name": "Cook bush beans",
+      "kind": "kitchen",
+      "input": {
+        "beans": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "work": 40,
+      "handcraft": false
+    },
+    "cook_corn": {
+      "name": "Cook sweet corn",
+      "kind": "kitchen",
+      "input": {
+        "corn": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "work": 40,
+      "handcraft": false
+    },
+    "corn_feed": {
+      "name": "Prepare corn feed supplement",
+      "kind": "supply-5",
+      "input": {
+        "corn": 4
+      },
+      "output": {
+        "fodder": 1,
+        "scraps": 1
+      },
+      "work": 30,
+      "handcraft": false
+    }
   }
 }

@@ -65,6 +65,11 @@ impl Stock {
         self.centavos = (balance % 100) as u8;
     }
 
+    pub fn missing<'a>(&self, bill: &'a BTreeMap<String, u32>) -> Option<&'a str> {
+        bill.iter()
+            .find_map(|(id, units)| (self.available(id) < *units).then_some(id.as_str()))
+    }
+
     pub fn reserve_available(&mut self, bill: &BTreeMap<String, u32>) {
         for (id, units) in bill {
             let count = self.materials.entry(id.clone()).or_default();

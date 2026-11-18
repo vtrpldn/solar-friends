@@ -8,6 +8,7 @@ pub struct Catalog {
     pub materials: BTreeMap<String, Material>,
     pub projects: BTreeMap<String, Project>,
     pub gathering: BTreeMap<String, GatherRecipe>,
+    pub production: BTreeMap<String, ProductionRecipe>,
 }
 
 #[derive(Deserialize)]
@@ -48,6 +49,16 @@ pub struct GatherRecipe {
     pub gather_limit: u32,
     #[serde(default)]
     pub deposit: u32,
+}
+
+#[derive(Deserialize)]
+pub struct ProductionRecipe {
+    pub name: String,
+    pub kind: String,
+    pub input: BTreeMap<String, u32>,
+    pub output: BTreeMap<String, u32>,
+    pub work: f64,
+    pub handcraft: bool,
 }
 
 impl Default for Catalog {
