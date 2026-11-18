@@ -39,23 +39,23 @@ struct Outcome {
 }
 
 #[derive(Serialize)]
-struct Report {
+struct Report<'a> {
     version: u32,
-    scenario: Scenario,
-    initial: serde_json::Value,
+    scenario: &'a Scenario,
+    initial: &'a serde_json::Value,
     step_seconds: f64,
     end_step: u64,
     stop_reason: Option<&'static str>,
-    samples: Vec<Sample>,
-    orders: Vec<Outcome>,
-    village: Village,
+    samples: &'a [Sample],
+    orders: &'a [Outcome],
+    village: &'a Village,
 }
 
 pub(crate) fn run_file(scenario: &Path, save: Option<&Path>) -> io::Result<()> {
     let catalog = Catalog::default();
     let (scenario, village) = load_inputs(scenario, save, &catalog)?;
     let report = run(scenario, village, &catalog)?;
-    serde_json::to_writer(io::stdout().lock(), &report)?;
+    serde_json::to_writer(io::stdout().lock(), &report.report())?;
     Ok(())
 }
 
@@ -103,8 +103,9 @@ fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Resu
         ));
     }
     let report = run(serde_json::from_value(scenario)?, Some(village), catalog)?;
-    let end_step = report.end_step;
-    let mut actual: serde_json::Value = serde_json::from_slice(&serde_json::to_vec(&report)?)?;
+    let end_step = report.index;
+    let mut actual: serde_json::Value =
+        serde_json::from_slice(&serde_json::to_vec(&report.report())?)?;
     actual["initial"] = serde_json::Value::Null;
     actual["scenario"] = serde_json::Value::Null;
     if actual != expected {
@@ -279,27 +280,60 @@ impl Runner {
         }
     }
 
-    fn into_report(self) -> Report {
+    fn submit(&mut self, catalog: &Catalog, order: LabOrder) -> Result<(), &'static str> {
+        if self.done() {
+            return Err("The scenario is complete.");
+        }
+        self.scenario.orders.insert(
+            self.next_order,
+            ScheduledOrder {
+                step: self.index,
+                order,
+            },
+        );
+        if self
+            .samples
+            .last()
+            .is_some_and(|sample| sample.step == self.index)
+        {
+            self.samples.pop();
+        }
+        self.observe(catalog);
+        Ok(())
+    }
+
+    fn report(&self) -> Report<'_> {
         Report {
             version: 1,
-            scenario: self.scenario,
-            initial: self.initial,
+            scenario: &self.scenario,
+            initial: &self.initial,
             step_seconds: STEP,
             end_step: self.index,
             stop_reason: self.reason,
-            samples: self.samples,
-            orders: self.outcomes,
-            village: self.village,
+            samples: &self.samples,
+            orders: &self.outcomes,
+            village: &self.village,
         }
+    }
+
+    fn export(&self) -> io::Result<std::path::PathBuf> {
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(io::Error::other)?;
+        let path = crate::save::location(self.setup.mode)?
+            .with_file_name(format!("lab-report-{}.json", nonce.as_nanos()));
+        let bytes = serde_json::to_vec(&self.report())?;
+        crate::save::atomic_write(&path, &bytes, 3 * crate::save::MAX_BYTES)?;
+        Ok(path)
     }
 }
 
-fn run(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::Result<Report> {
+fn run(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::Result<Runner> {
     let mut runner = Runner::new(scenario, village, catalog)?;
     while !runner.done() {
         runner.advance(catalog);
     }
-    Ok(runner.into_report())
+    Ok(runner)
 }
 
 pub(crate) fn run_ui(scenario: &Path, save: Option<&Path>) -> io::Result<()> {
@@ -339,6 +373,8 @@ struct Playback {
     running: bool,
     speed: usize,
     debt: f64,
+    order: Option<String>,
+    notice: String,
 }
 
 impl Default for Playback {
@@ -347,6 +383,8 @@ impl Default for Playback {
             running: false,
             speed: 2,
             debt: 0.0,
+            order: None,
+            notice: String::new(),
         }
     }
 }
@@ -355,10 +393,64 @@ fn update_lab_window(
     mut runner: ResMut<Runner>,
     catalog: Res<Catalog>,
     time: Res<Time>,
-    keys: Res<ButtonInput<KeyCode>>,
+    (keys, mut events): (
+        Res<ButtonInput<KeyCode>>,
+        MessageReader<bevy::input::keyboard::KeyboardInput>,
+    ),
     mut playback: Local<Playback>,
     mut panel: Single<&mut Text>,
 ) {
+    if let Some(mut order) = playback.order.take() {
+        if keys.just_pressed(KeyCode::Escape) {
+            events.clear();
+        } else if keys.just_pressed(KeyCode::Enter) {
+            events.clear();
+            let result = serde_json::from_str(&order)
+                .map_err(|error| error.to_string())
+                .and_then(|order| runner.submit(&catalog, order).map_err(str::to_owned));
+            match result {
+                Ok(()) => playback.notice.clear(),
+                Err(error) => {
+                    playback.notice = error;
+                    playback.order = Some(order);
+                }
+            }
+        } else {
+            for event in events.read() {
+                if event.state != bevy::input::ButtonState::Pressed {
+                    continue;
+                }
+                if event.key_code == KeyCode::Backspace {
+                    order.pop();
+                } else if let Some(chars) = &event.text {
+                    let room = 1024usize.saturating_sub(order.chars().count());
+                    order.extend(chars.chars().filter(|c| !c.is_control()).take(room));
+                }
+            }
+            playback.order = Some(order);
+        }
+    } else {
+        events.clear();
+        if keys.just_pressed(KeyCode::KeyO) && !runner.done() {
+            playback.running = false;
+            playback.debt = 0.0;
+            playback.notice.clear();
+            playback.order = Some(String::new());
+        }
+        if keys.just_pressed(KeyCode::F5) && runner.done() {
+            playback.notice = match runner.export() {
+                Ok(path) => format!("Report saved to {}", path.display()),
+                Err(error) => format!("Could not export report · {error}"),
+            };
+        }
+    }
+    if let Some(order) = &playback.order {
+        panel.set_if_neq(Text::new(format!(
+            "Order at step {}\nEnter Submit · Esc Cancel\n\nExample {{\"type\":\"grid\",\"enabled\":false}}\n\n{order}▏\n{}",
+            runner.index, playback.notice
+        )));
+        return;
+    }
     let rates = [1, 8, 32, 128];
     for (index, key) in [
         KeyCode::Digit1,
@@ -412,11 +504,12 @@ fn update_lab_window(
         },
     );
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water\n{last}\n\n{}",
         runner.index,
         runner.scenario.steps,
         village.clock,
         rates[playback.speed],
+        playback.notice,
         village.stock.balance() as f64 / 100.0,
         village.stock.available("wood"),
         village.stock.available("meals"),
@@ -433,6 +526,38 @@ mod tests {
     use super::*;
 
     #[test]
+    fn live_orders_are_replayed_in_sequence_without_duplicate_samples() {
+        let catalog = Catalog::default();
+        let mut runner = Runner::new(
+            Scenario {
+                steps: 3,
+                orders: Vec::new(),
+                stop: LabStop::None,
+            },
+            None,
+            &catalog,
+        )
+        .unwrap();
+        runner.advance(&catalog);
+        runner
+            .submit(&catalog, LabOrder::Grid { enabled: false })
+            .unwrap();
+        runner
+            .submit(&catalog, LabOrder::Grid { enabled: true })
+            .unwrap();
+        assert_eq!(runner.samples.len(), 2);
+        while !runner.done() {
+            runner.advance(&catalog);
+        }
+        assert!(!runner.village.construction.utilities.grid_off);
+        let data = serde_json::to_vec(&runner.report()).unwrap();
+        assert_eq!(
+            verify_report(serde_json::from_slice(&data).unwrap(), &catalog).unwrap(),
+            3
+        );
+    }
+
+    #[test]
     fn scripted_field_orders_reuse_the_bed_queue_validation() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{
@@ -447,22 +572,24 @@ mod tests {
         }"#).unwrap();
         let report = run(scenario, None, &catalog).unwrap();
         assert!(
-            report.orders[..3].iter().all(|order| order.error.is_none()),
+            report.outcomes[..3]
+                .iter()
+                .all(|order| order.error.is_none()),
             "{:?}",
             report
-                .orders
+                .outcomes
                 .iter()
                 .map(|order| &order.error)
                 .collect::<Vec<_>>()
         );
         assert!(
-            report.orders[3]
+            report.outcomes[3]
                 .error
                 .as_deref()
                 .unwrap()
                 .contains("current bed job")
         );
-        assert!(report.orders[4].error.is_none());
+        assert!(report.outcomes[4].error.is_none());
         assert_eq!(report.village.construction.farming.jobs.len(), 1);
     }
 
@@ -479,7 +606,7 @@ mod tests {
         };
         let report = run(scenario, None, &catalog).unwrap();
         let mut report: serde_json::Value =
-            serde_json::from_slice(&serde_json::to_vec(&report).unwrap()).unwrap();
+            serde_json::from_slice(&serde_json::to_vec(&report.report()).unwrap()).unwrap();
         assert_eq!(verify_report(report.clone(), &catalog).unwrap(), 10);
         report["samples"][0]["cash_centavos"] = 0.into();
         assert!(
@@ -518,9 +645,9 @@ mod tests {
             &catalog,
         )
         .unwrap();
-        assert_eq!(report.end_step, 0);
-        assert!(report.stop_reason.is_some());
+        assert_eq!(report.index, 0);
+        assert!(report.reason.is_some());
         assert_eq!(report.samples[0].potable_liters, 0.0);
-        assert!(report.orders.is_empty());
+        assert!(report.outcomes.is_empty());
     }
 }
