@@ -14,6 +14,7 @@ pub(super) enum MapLens {
     Food,
     Chains,
     Residents,
+    Comfort,
 }
 
 const LENSES: [(KeyCode, MapLens, &str); 9] = [
@@ -28,10 +29,11 @@ const LENSES: [(KeyCode, MapLens, &str); 9] = [
     (KeyCode::Digit9, MapLens::Work, "Work"),
 ];
 
-const SECOND_PAGE: [(KeyCode, MapLens, &str); 3] = [
+const SECOND_PAGE: [(KeyCode, MapLens, &str); 4] = [
     (KeyCode::Digit1, MapLens::Food, "Food"),
     (KeyCode::Digit2, MapLens::Chains, "Material chains"),
     (KeyCode::Digit3, MapLens::Residents, "Residents"),
+    (KeyCode::Digit4, MapLens::Comfort, "Comfort"),
 ];
 
 #[derive(Default)]

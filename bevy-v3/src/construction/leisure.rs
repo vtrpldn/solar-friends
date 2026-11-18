@@ -420,6 +420,104 @@ fn camp_points(center: IVec2, order: u32) -> Vec<IVec2> {
         .collect()
 }
 
+impl Construction {
+    pub fn draw_comfort_lens(
+        &self,
+        catalog: &Catalog,
+        terrain: &Terrain,
+        hovered: Option<IVec2>,
+        gizmos: &mut Gizmos,
+    ) -> String {
+        use std::fmt::Write;
+
+        let center =
+            |position: IVec2, size: IVec2| position.as_vec2() + (size.as_vec2() - Vec2::ONE) * 0.5;
+        let wash: Vec<_> = self
+            .utilities
+            .wash_sources()
+            .map(|(_, pos, size)| center(pos, size))
+            .collect();
+        let toilets: Vec<_> = self
+            .utilities
+            .toilets(1.5)
+            .map(|(_, pos, size)| center(pos, size))
+            .collect();
+        let leisure: Vec<_> = self
+            .plans
+            .iter()
+            .enumerate()
+            .filter_map(|(index, plan)| {
+                let project = &catalog.projects[&plan.key];
+                (!plan.removed
+                    && plan.work >= project.work
+                    && !self.changes.contains_key(&index)
+                    && self.utilities.enabled(index)
+                    && Activity::at(&project.kind).is_some())
+                .then(|| center(plan.position, plan.size))
+            })
+            .collect();
+        let mut label =
+            "Comfort · Green open facility · Gold under construction · Gray closed".to_owned();
+        for (index, plan) in self.plans.iter().enumerate() {
+            let project = &catalog.projects[&plan.key];
+            let kind = project.kind.as_str();
+            if plan.removed
+                || !(matches!(kind, "home" | "kitchen" | "wash-station" | "eco_toilet")
+                    || Activity::at(kind).is_some())
+            {
+                continue;
+            }
+            let finished = plan.work >= project.work;
+            let open = !self.changes.contains_key(&index) && self.utilities.enabled(index);
+            let color = if !finished {
+                Color::srgb_u8(243, 200, 108)
+            } else if open {
+                Color::srgb_u8(136, 220, 148)
+            } else {
+                Color::srgb_u8(147, 146, 140)
+            };
+            super::draw_lens_marker(terrain, plan.position, plan.size, color, gizmos);
+            if hovered.is_some_and(|cell| {
+                cell.cmpge(plan.position).all() && cell.cmplt(plan.position + plan.size).all()
+            }) {
+                let _ = write!(label, "\n{} #{}", project.name, index + 1);
+                if !finished {
+                    let _ = write!(label, " · {}", self.project_status(catalog, index));
+                } else if !open {
+                    label.push_str(" · Closed");
+                } else if kind == "home" {
+                    let from = center(plan.position, plan.size);
+                    let meals = from.distance(STOCKPILE.as_vec2());
+                    let _ = write!(
+                        label,
+                        " · Straight-line distances\nShared meals {meals:.0} cells"
+                    );
+                    for (service, locations) in [
+                        ("Washing", &wash),
+                        ("Toilet", &toilets),
+                        ("Leisure", &leisure),
+                    ] {
+                        if let Some(distance) = locations
+                            .iter()
+                            .map(|point| from.distance(*point))
+                            .min_by(f32::total_cmp)
+                        {
+                            let _ = write!(label, " · {service} {distance:.0} cells");
+                        } else {
+                            let _ = write!(label, " · {service} unavailable");
+                        }
+                    }
+                } else if let Some(status) = self.utilities.facility_status(index) {
+                    let _ = write!(label, " · {status}");
+                } else {
+                    label.push_str(" · Open");
+                }
+            }
+        }
+        label
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
