@@ -22,6 +22,7 @@ import {wasteWarnings, operationalStatus} from './session-ui.js';
 import {upgradeAction, productionSearchText, productionActivity} from './project-ui.js';
 import {economyControls} from './economy-controls.js';
 import {financeSummary,financeTime,financeForecast} from './finances.js';
+import {dayShiftControls} from './day-shift-ui.js';
 import { productionBlocker, buildingOperatingStatus } from './simulation.js';
 import { disabledReason } from './disabled-info.js';
 import { renderCrafting } from './crafting-ui.js';
@@ -82,6 +83,7 @@ export function createManagement({
     render();
   };
   let purchaseSettingsOpen = false;
+  let dayShiftResidentId;
   const recipeChoices = new Map();
   const dialog = $("management");
   let view = "resources",
@@ -303,6 +305,13 @@ export function createManagement({
       const add=(tag,text,parent=screen)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
       add('p',s.mode==='sandbox'?'Sandbox supplies and funds are unlimited; purchases are not tracked.':`Records begin ${financeTime(f.since)} with ${money(f.opening)}. Earlier purchases in an existing save are not reconstructed.`);
       add('p',`Available to spend: ${money(f.available)}. Reserved for undelivered construction supplies: ${money(f.committed)} in collection costs. This reserve stays in savings until each trip departs.`);
+      if (s.mode !== 'sandbox') {
+        const resident = s.people.find(person => person.id === dayShiftResidentId) || s.people[0];
+        screen.append(dayShiftControls(s, resident, refresh, id => {
+          dayShiftResidentId = id;
+          render();
+        }));
+      }
       add('h3','Seven-day outlook');
       const forecast=financeForecast(s);
       add('p',forecast.days?`Available cash could reach ${money(forecast.low)}–${money(forecast.high)} if the best or worst daily operating cash flow from the last ${forecast.days} complete days repeats. Mean operating change: ${money(forecast.mean)}/day. This is a scenario range, not guaranteed income; excludes new construction and assumes the same shopping, work and sales.`:'A forecast needs at least one complete recorded day. Future crops and unpaid exports are not included in available cash.');
@@ -346,7 +355,7 @@ export function createManagement({
       const groups={outsideWork:'Outside work',commuting:'Commuting',transport:'Transport',sales:'Surplus sales',construction:'Building materials',purchases:'Operating supplies',household:'Household food',electricity:'Grid electricity'};
       for(const [key,label] of Object.entries(groups))add('p',`${label}: ${money(Math.abs(f.categories[key]||0))}`);
       add('h3','Recent transactions');
-      if(!f.entries.length)add('p','No transactions recorded yet. Selling surplus brings income; purchases and imported power spend shared savings.');
+      if(!f.entries.length)add('p','No transactions recorded yet.');
       else {
         const table=add('table','');table.className='finance-ledger';
         const head=document.createElement('thead');table.append(head);const heading=add('tr','',head);

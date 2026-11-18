@@ -15,9 +15,9 @@
     }
   },
   "startingCapital": {
-    "tight": 500,
-    "modest": 2000,
-    "comfortable": 6000
+    "tight": 3000,
+    "modest": 10000,
+    "comfortable": 20000
   },
   "startingEndowment": {
     "vehicles": 2,

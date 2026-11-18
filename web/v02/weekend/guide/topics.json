@@ -487,16 +487,17 @@
     "sources": [
       "outside-work.js",
       "resident-personality.js",
-      "simulation.js"
+      "simulation.js",
+      "day-shift-ui.js"
     ],
     "tests": [
       "outside-work",
       "outside-rest"
     ],
-    "description": "Optional jobs require travel and completed shifts before pay arrives.",
-    "diagram": "stateDiagram-v2\n Disabled --> Eligible: Player enables outside job\n Eligible --> Waiting: Not scheduled or resident unavailable\n Waiting --> Eligible: Schedule and needs permit\n Eligible --> Outbound: Leave for shift\n Outbound --> Away: Reach work\n Away --> Inbound: Finish shift\n Inbound --> Eligible: Return and receive pay less any deferred fare\n Eligible --> Disabled: Player disables job\n note right of Away\n Meals and toilet breaks are provided.\n Disabling finishes the current shift.\n end note",
-    "boundary": "Job schedules and pay vary by resident.",
-    "tip": "Use outside jobs to fund early infrastructure while leaving enough workers for essential village work.",
+    "description": "In Story, book a resident for one eight-hour shift from Finances or Residents. Their profile also offers recurring four-hour weekday shifts.",
+    "diagram": "flowchart LR\n Once[Book one eight-hour shift] --> Bus[Catch the morning bus when rested and free]\n Repeat[Enable four-hour weekday shifts] --> Bus\n Bus --> Work[Work in town]\n Work --> Home[Return to camp and collect wages]",
+    "boundary": "Residents take at most one shift per day. A day booking takes priority over a recurring shift. The employer covers the bus fare upfront when village cash is short and deducts it on payday.",
+    "tip": "Check the take-home pay before booking. Leave someone in camp if you need building materials collected or a house finished that day.",
     "facts": null
   },
   {
