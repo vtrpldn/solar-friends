@@ -30,6 +30,27 @@ pub struct Trade {
     next_pantry_check: f64,
     #[serde(default)]
     pub household_restock_off: bool,
+    #[serde(default)]
+    pantry_purchase: PantryPurchase,
+}
+
+#[derive(Deserialize, Serialize)]
+struct PantryPurchase {
+    reserve_half_days: u8,
+    allowance_cents: u64,
+    day: u64,
+    reserved_cents: u64,
+}
+
+impl Default for PantryPurchase {
+    fn default() -> Self {
+        Self {
+            reserve_half_days: 3,
+            allowance_cents: 15_000,
+            day: 0,
+            reserved_cents: 0,
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize)]
@@ -225,32 +246,79 @@ impl Trade {
             return;
         }
         self.next_pantry_check = clock + 10.0;
-        let household = |id: &str| matches!(id, "food" | "meals");
-        let incoming = self
+        let servings = |id: &str, quantity| {
+            food::SERVINGS
+                .iter()
+                .find(|&&(material, _)| material == id)
+                .map_or(0, |&(_, units)| quantity / units)
+        };
+        let incoming: u32 = self
             .orders
             .iter()
-            .filter(|order| order.buying && household(&order.material))
-            .map(|order| order.quantity)
+            .filter(|order| order.buying)
+            .map(|order| servings(&order.material, order.quantity))
             .sum::<u32>()
             + self
                 .delivery
                 .as_ref()
-                .filter(|order| household(&order.material))
-                .map_or(0, |order| order.quantity);
-        if stock.food_portions().saturating_add(incoming) >= 23 {
+                .map_or(0, |order| servings(&order.material, order.quantity));
+        let target = (15 * u32::from(self.pantry_purchase.reserve_half_days)).div_ceil(2);
+        if stock.food_portions().saturating_add(incoming) >= target {
             return;
         }
         let free = space.saturating_sub(self.inbound());
-        let cheapest = ["food", "meals"];
-        for id in cheapest {
-            if u64::from(catalog.materials[id].pack) <= free
-                && self
-                    .buy(catalog, stock, market, id, (clock, distance, false))
-                    .is_ok()
-            {
-                return;
-            }
+        let ingredients = &catalog.materials["food"];
+        let cost = (ingredients.price * 100.0).round() as u64 + crate::market::fare_cents(distance);
+        let day = pantry_day(clock);
+        let already_reserved = if day == self.pantry_purchase.day {
+            self.pantry_purchase.reserved_cents
+        } else {
+            0
+        };
+        if cost + already_reserved <= self.pantry_purchase.allowance_cents
+            && u64::from(ingredients.pack) <= free
+            && self
+                .buy(catalog, stock, market, "food", (clock, distance, false))
+                .is_ok()
+        {
+            self.pantry_purchase.day = day;
+            self.pantry_purchase.reserved_cents = already_reserved + cost;
         }
+    }
+
+    pub fn pantry_controls(&mut self, reserve_change: i8, budget_change: i64, toggle: bool) {
+        if toggle {
+            self.household_restock_off = !self.household_restock_off;
+        }
+        let policy = &mut self.pantry_purchase;
+        policy.reserve_half_days = policy
+            .reserve_half_days
+            .saturating_add_signed(reserve_change)
+            .min(14);
+        policy.allowance_cents = policy
+            .allowance_cents
+            .saturating_add_signed(budget_change)
+            .min(10_000_000);
+    }
+
+    pub fn pantry_purchase_status(&self, clock: f64) -> String {
+        let policy = &self.pantry_purchase;
+        let state = if self.household_restock_off {
+            "off"
+        } else {
+            "on"
+        };
+        let used = if policy.day == pantry_day(clock) {
+            policy.reserved_cents
+        } else {
+            0
+        };
+        format!(
+            "U Automatic food purchases {state}\n[ ] Reserve {:.1} days · Shift [ ] Daily limit R${:.0}\nR${:.2} reserved today including fuel",
+            f64::from(policy.reserve_half_days) / 2.0,
+            policy.allowance_cents as f64 / 100.0,
+            used as f64 / 100.0
+        )
     }
 
     pub fn reserved_at_home(&self, boarded: &[usize]) -> u64 {
@@ -476,13 +544,17 @@ impl Trade {
     }
 
     pub fn valid(&self, catalog: &Catalog) -> bool {
-        self.delivery.as_ref().is_none_or(|order| {
-            order.eta >= 0.0
-                && catalog
-                    .materials
-                    .get(&order.material)
-                    .is_some_and(|item| order.quantity <= item.pack)
-        }) && self.orders.len() <= 32
+        self.pantry_purchase.reserve_half_days <= 14
+            && self.pantry_purchase.allowance_cents <= 10_000_000
+            && self.pantry_purchase.reserved_cents <= 10_000_000
+            && self.delivery.as_ref().is_none_or(|order| {
+                order.eta >= 0.0
+                    && catalog
+                        .materials
+                        .get(&order.material)
+                        .is_some_and(|item| order.quantity <= item.pack)
+            })
+            && self.orders.len() <= 32
             && self.orders.iter().all(|order| {
                 catalog.materials.get(&order.material).is_some_and(|item| {
                     (order.quantity > 0 || order.buying || order.spoiled)
@@ -499,10 +571,37 @@ impl Trade {
     }
 }
 
+fn pantry_day(clock: f64) -> u64 {
+    ((540.0 + clock * 0.45) / 1440.0).floor() as u64
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn emergency_food_budget_counts_each_reserved_pack_and_its_fare() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut market = Market::default();
+        let mut trade = Trade::default();
+        let cost = 4_800 + crate::market::fare_cents(12);
+        trade.pantry_controls(11, (cost * 2) as i64 - 15_000, false);
+        for clock in [0.0, 11.0, 22.0] {
+            trade.maintain_pantry(&catalog, &mut stock, &mut market, (clock, 12, 500));
+        }
+        assert_eq!(trade.orders.len(), 2);
+        assert_eq!(trade.pantry_purchase.reserved_cents, cost * 2);
+        assert_eq!(market.committed_fares(), crate::market::fare_cents(12) * 2);
+        trade.maintain_pantry(&catalog, &mut stock, &mut market, (3_200.0, 12, 500));
+        assert_eq!(trade.orders.len(), 3);
+        assert_eq!(trade.pantry_purchase.reserved_cents, cost);
+        let save = serde_json::to_string(&trade).unwrap();
+        let loaded: Trade = serde_json::from_str(&save).unwrap();
+        assert_eq!(loaded.pantry_purchase.allowance_cents, cost * 2);
+        assert_eq!(loaded.pantry_purchase.reserve_half_days, 14);
+    }
 
     #[test]
     fn freight_waits_for_storage_after_its_scheduled_arrival() {

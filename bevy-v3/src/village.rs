@@ -629,9 +629,25 @@ fn village_input(
                     .toggle_weekday_shift(town.selected_resident);
             }
         }
-        if town.utility_panel == Some(UtilityPanel::Pantry) && keyboard.just_pressed(KeyCode::KeyT)
-        {
-            town.stock.pantry.priority = town.stock.pantry.priority.next();
+        if town.utility_panel == Some(UtilityPanel::Pantry) {
+            if keyboard.just_pressed(KeyCode::KeyT) {
+                town.stock.pantry.priority = town.stock.pantry.priority.next();
+            }
+            let bracket = i8::from(keyboard.just_pressed(KeyCode::BracketRight))
+                - i8::from(keyboard.just_pressed(KeyCode::BracketLeft));
+            let toggle = keyboard.just_pressed(KeyCode::KeyU);
+            let (reserve, budget) =
+                if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+                    (0, i64::from(bracket) * 2_500)
+                } else {
+                    (bracket, 0)
+                };
+            town.construction
+                .trade
+                .pantry_controls(reserve, budget, toggle);
+            if toggle {
+                return;
+            }
         }
         if town.utility_panel == Some(UtilityPanel::Trade) {
             town.construction.trade_input(
@@ -1151,6 +1167,13 @@ fn show_hud(
                 &catalog,
                 village.construction.utilities.powered_cold_storage(),
             ));
+            label.push('\n');
+            label.push_str(
+                &village
+                    .construction
+                    .trade
+                    .pantry_purchase_status(village.clock),
+            );
             label.push_str("\nTab Finances");
         }
         None => {}
