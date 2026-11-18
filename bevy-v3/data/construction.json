@@ -2788,7 +2788,18 @@
       "work": 180,
       "handcraft": true,
       "preserved": {},
-      "tool": "carpentry-tools"
+      "craft": {
+        "skill": "woodworking",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 180,
+        "stages": [
+          "Shape wooden handles",
+          "Fit purchased tool heads",
+          "Secure and inspect"
+        ]
+      }
     },
     "craft_harvest-basket": {
       "name": "Craft harvest basket",
@@ -2802,7 +2813,18 @@
       "work": 240,
       "handcraft": true,
       "preserved": {},
-      "tool": "carpentry-tools"
+      "craft": {
+        "skill": "basketry",
+        "level": 0,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 240,
+        "stages": [
+          "Split and prepare bamboo",
+          "Weave body and base",
+          "Bind rim and handles"
+        ]
+      }
     },
     "craft_wheelbarrow": {
       "name": "Craft wheelbarrow",
@@ -2818,7 +2840,18 @@
       "work": 360,
       "handcraft": true,
       "preserved": {},
-      "tool": "carpentry-tools"
+      "craft": {
+        "skill": "woodworking",
+        "level": 2,
+        "kind": "workshop",
+        "tool": "carpentry-tools",
+        "work": 360,
+        "stages": [
+          "Build frame and tray",
+          "Fit purchased axle and wheel",
+          "Balance and load-test"
+        ]
+      }
     },
     "craft_produce-crates": {
       "name": "Craft produce crate",
@@ -2833,7 +2866,18 @@
       "work": 120,
       "handcraft": true,
       "preserved": {},
-      "tool": "carpentry-tools"
+      "craft": {
+        "skill": "woodworking",
+        "level": 0,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 120,
+        "stages": [
+          "Cut planks to length",
+          "Assemble and fasten",
+          "Smooth and inspect"
+        ]
+      }
     },
     "repair_bucket": {
       "name": "Repair bucket",
@@ -2846,7 +2890,18 @@
       "handcraft": true,
       "preserved": {},
       "repair": "bucket",
-      "tool": "carpentry-tools"
+      "craft": {
+        "skill": "repair",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 120,
+        "stages": [
+          "Inspect wear",
+          "Replace worn parts from repair kit",
+          "Test and service"
+        ]
+      }
     },
     "repair_garden-tools": {
       "name": "Repair garden tools",
@@ -2859,7 +2914,18 @@
       "handcraft": true,
       "preserved": {},
       "repair": "garden-tools",
-      "tool": "carpentry-tools"
+      "craft": {
+        "skill": "repair",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 120,
+        "stages": [
+          "Inspect wear",
+          "Replace worn parts from repair kit",
+          "Test and service"
+        ]
+      }
     },
     "repair_carpentry-tools": {
       "name": "Repair carpentry tools",
@@ -2871,7 +2937,19 @@
       "work": 120,
       "handcraft": true,
       "preserved": {},
-      "repair": "carpentry-tools"
+      "repair": "carpentry-tools",
+      "craft": {
+        "skill": "repair",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": null,
+        "work": 120,
+        "stages": [
+          "Inspect wear",
+          "Replace worn parts from repair kit",
+          "Test and service"
+        ]
+      }
     },
     "repair_harvest-basket": {
       "name": "Repair harvest basket",
@@ -2884,7 +2962,18 @@
       "handcraft": true,
       "preserved": {},
       "repair": "harvest-basket",
-      "tool": "carpentry-tools"
+      "craft": {
+        "skill": "basketry",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 120,
+        "stages": [
+          "Inspect damaged weave",
+          "Replace and bind fibers",
+          "Check handles"
+        ]
+      }
     },
     "repair_cleaning-kit": {
       "name": "Repair cleaning kit",
@@ -2897,7 +2986,18 @@
       "handcraft": true,
       "preserved": {},
       "repair": "cleaning-kit",
-      "tool": "carpentry-tools"
+      "craft": {
+        "skill": "repair",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 120,
+        "stages": [
+          "Inspect wear",
+          "Replace worn parts from repair kit",
+          "Test and service"
+        ]
+      }
     },
     "cook_greens": {
       "name": "Cook leafy greens",

@@ -53,7 +53,7 @@ const production = Object.fromEntries(Object.entries(PROCESSES)
   .map(([id, recipe]) => [id, {name: recipe.name, kind: recipe.kind, input: recipe.input,
     output: recipe.output, work: recipe.work, handcraft: Boolean(recipe.craft), preserved: recipe.preservedDays || {},
     ...(recipe.equipmentRepair ? {repair: recipe.equipmentRepair} : {}),
-    ...(recipe.craft?.tool ? {tool: recipe.craft.tool} : {}),
+    ...(recipe.craft ? {craft: recipe.craft} : {}),
     ...(recipe.biogas ? {biogas: recipe.biogas} : {}),
     ...(!BIOLOGY[id] || ["eggs", "milk"].includes(id) ? {} : {biology: {
       days: BIOLOGY[id].days, window: Number.isFinite(BIOLOGY[id].window) ? BIOLOGY[id].window : null,

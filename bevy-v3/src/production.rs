@@ -1,3 +1,4 @@
+pub mod crafting;
 pub mod growth;
 
 use serde::{Deserialize, Serialize};

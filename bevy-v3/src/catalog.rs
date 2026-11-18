@@ -79,7 +79,23 @@ pub struct ProductionRecipe {
     pub biology: Option<Biology>,
     pub biogas: Option<f64>,
     pub repair: Option<String>,
+    pub craft: Option<Craft>,
+}
+
+#[derive(Deserialize)]
+pub struct Craft {
+    pub skill: crate::production::crafting::Skill,
+    pub level: usize,
     pub tool: Option<String>,
+    pub stages: Vec<String>,
+}
+
+impl Craft {
+    pub fn stage(&self, fraction: f64) -> &str {
+        let index =
+            ((fraction * self.stages.len() as f64).floor() as usize).min(self.stages.len() - 1);
+        &self.stages[index]
+    }
 }
 
 #[derive(Deserialize)]

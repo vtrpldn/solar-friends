@@ -39,6 +39,19 @@ impl Equipment {
         self.wear.get(item).copied().unwrap_or_default()
     }
 
+    pub fn ready(&self, item: &str, owned: u32, worker: Option<usize>, repairing: bool) -> bool {
+        let broken = (self.wear(item) / LIFE).floor() as u32;
+        let held = worker.is_some_and(|index| {
+            self.loans[index]
+                .as_ref()
+                .is_some_and(|loan| loan.item == item)
+        });
+        held || owned
+            > broken
+                .max(u32::from(repairing))
+                .saturating_add(self.borrowed(item))
+    }
+
     pub fn borrowed(&self, item: &str) -> u32 {
         self.loans
             .iter()

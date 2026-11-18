@@ -95,6 +95,36 @@ impl Construction {
         self.queue_batch(catalog, stock, index, id);
     }
 
+    fn craft_blocker(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        recipe: &ProductionRecipe,
+        worker: Option<usize>,
+    ) -> Option<String> {
+        let craft = recipe.craft.as_ref()?;
+        let qualified =
+            |index: usize| self.residents[index].craft.level(index, craft.skill) >= craft.level;
+        if !worker.map_or_else(|| (0..self.residents.len()).any(qualified), qualified) {
+            return Some(format!(
+                "Needs {} level {}.",
+                craft.skill.label(),
+                craft.level
+            ));
+        }
+        if let Some(tool) = &craft.tool
+            && !stock.equipment.ready(
+                tool,
+                stock.available(tool),
+                worker,
+                self.repairing(catalog, tool),
+            )
+        {
+            return Some("Waiting for usable shared carpentry tools.".into());
+        }
+        None
+    }
+
     fn queue_batch(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize, id: &str) {
         let recipe = &catalog.production[id];
         if let Some(tool) = &recipe.repair
@@ -141,6 +171,10 @@ impl Construction {
                     return;
                 }
             }
+        }
+        if let Some(reason) = self.craft_blocker(catalog, stock, recipe, None) {
+            self.production.notice = reason;
+            return;
         }
         if self.production.jobs.iter().any(|job| job.site == index) {
             self.production.notice = "Finish the current batch first.".into();
@@ -210,8 +244,10 @@ impl Construction {
                 {
                     "Waiting for power".into()
                 }
-                Phase::Work if recipe.handcraft => {
-                    format!("{:.0}% crafted", job.work / recipe.work * 100.0)
+                Phase::Work if recipe.craft.is_some() => {
+                    let fraction = job.work / recipe.work;
+                    let stage = recipe.craft.as_ref().expect("craft recipe").stage(fraction);
+                    format!("{:.0}% · {stage}", fraction * 100.0)
                 }
                 Phase::Work => format!("{:.0}% worked", job.work / recipe.work * 100.0),
                 Phase::Return => "Carrying output to stores".into(),
@@ -466,7 +502,7 @@ impl Construction {
                 continue;
             }
             let Some(worker_index) = job.worker else {
-                self.assign_producer(index, catalog, site, stock.sandbox);
+                self.assign_producer(index, catalog, site, stock);
                 self.production.jobs[index].retry_at = clock + 1.0;
                 continue;
             };
@@ -508,6 +544,16 @@ impl Construction {
                 }
                 Phase::Approach => self.production.jobs[index].phase = Phase::Work,
                 Phase::Work => {
+                    if self
+                        .craft_blocker(catalog, stock, recipe, Some(worker_index))
+                        .is_some()
+                    {
+                        let job = &mut self.production.jobs[index];
+                        job.worker = None;
+                        job.phase = Phase::Pickup;
+                        job.retry_at = clock + 3.0;
+                        continue;
+                    }
                     let tool = production_tool(recipe);
                     let repairing = tool.is_some_and(|tool| self.repairing(catalog, tool));
                     let job = &mut self.production.jobs[index];
@@ -557,7 +603,13 @@ impl Construction {
                             repairing,
                         )
                     });
-                    job.work = (job.work + f64::from(dt) * boost).min(recipe.work);
+                    let seconds = f64::from(dt);
+                    let rate = recipe.craft.as_ref().map_or(boost, |craft| {
+                        let worker = &mut self.residents[worker_index];
+                        worker.craft.practice(worker_index, craft.skill, seconds)
+                            * worker.health.hydration_factor()
+                    });
+                    job.work = (job.work + seconds * rate).min(recipe.work);
                     if !stock.sandbox
                         && job.growth.is_none()
                         && let Some(biology) = &recipe.biology
@@ -728,10 +780,10 @@ impl Construction {
         job: usize,
         catalog: &Catalog,
         site: ConstructionSite,
-        sandbox: bool,
+        stock: &Stock,
     ) {
         let batch = &self.production.jobs[job];
-        if !sandbox
+        if !stock.sandbox
             && batch.phase != Phase::Return
             && !batch.watered
             && let Some(biology) = &catalog.production[&batch.recipe].biology
@@ -769,6 +821,18 @@ impl Construction {
                 || self.residents[index].health.task.is_some()
                 || self.residents[index].town_work.active()
                 || self.trip.as_ref().is_some_and(|trip| trip.driver == index)
+            {
+                continue;
+            }
+            if !returning
+                && self
+                    .craft_blocker(
+                        catalog,
+                        stock,
+                        &catalog.production[&batch.recipe],
+                        Some(index),
+                    )
+                    .is_some()
             {
                 continue;
             }
@@ -818,15 +882,15 @@ fn perimeter(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec2> {
 }
 
 fn production_tool(recipe: &ProductionRecipe) -> Option<&str> {
-    if recipe.repair.is_some() {
-        return None;
+    if let Some(craft) = &recipe.craft {
+        return craft.tool.as_deref();
     }
-    recipe.tool.as_deref().or(match recipe.kind.as_str() {
+    match recipe.kind.as_str() {
         "garden" | "greenhouse" | "compost" => Some("garden-tools"),
         "orchard" | "grove" => Some("harvest-basket"),
         "supply-5" if !recipe.output.contains_key("harvest-basket") => Some("carpentry-tools"),
         _ => None,
-    })
+    }
 }
 
 fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
@@ -871,6 +935,7 @@ mod upgrade_tests {
         stock.receive(&BTreeMap::from([
             ("garden-tools".into(), 1),
             ("repair_supplies".into(), 1),
+            ("carpentry-tools".into(), 1),
         ]));
         let task = ToolTask::Cultivation(2, 0);
         assert_eq!(stock.use_tool(0, "garden-tools", task, 1.0, false), 1.25);
@@ -880,7 +945,9 @@ mod upgrade_tests {
         let parts = stock.available("repair_supplies");
         village.queue_batch(&catalog, &mut stock, 0, "repair_garden-tools");
         assert_eq!(stock.available("repair_supplies"), parts - 1);
-        for step in 0..4_000 {
+        village.tick_production(&catalog, &mut stock, site, 0.0, 0.1);
+        assert_eq!(village.production.jobs[0].worker, Some(1));
+        for step in 1..4_000 {
             village.tick_production(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
             if village.production.jobs.is_empty() {
                 break;

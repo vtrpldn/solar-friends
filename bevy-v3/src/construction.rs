@@ -190,6 +190,8 @@ pub struct Worker {
     path: VecDeque<Vec2>,
     assignment: Option<Assignment>,
     experience: f64,
+    #[serde(default)]
+    craft: crate::production::crafting::Experience,
     retry: f32,
     #[serde(default)]
     health: Health,
@@ -236,6 +238,7 @@ impl Default for Construction {
                     path: VecDeque::new(),
                     assignment: None,
                     experience: 0.0,
+                    craft: crate::production::crafting::Experience::default(),
                     retry: 0.0,
                     health: Health::new(index),
                     home: None,
@@ -927,6 +930,7 @@ impl Construction {
                     point.cmpge(Vec2::splat(-31.0)).all() && point.cmple(Vec2::splat(94.0)).all()
                 };
                 worker.health.valid()
+                    && worker.craft.valid()
                     && worker.leisure.valid()
                     && in_bounds(worker.position)
                     && worker.path.len() <= 128 * 128

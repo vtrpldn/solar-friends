@@ -935,6 +935,15 @@ impl Construction {
             "\n\n{}\n{stage} · {}\n{thought}",
             profile.bio, wish.label
         );
+        use crate::production::crafting::Skill;
+        for skill in [Skill::Woodworking, Skill::Basketry, Skill::Repair] {
+            let _ = write!(
+                rows,
+                "\n{} · Level {}",
+                skill.label(),
+                worker.craft.level(selected, skill)
+            );
+        }
         let ties = worker
             .health
             .friendships
