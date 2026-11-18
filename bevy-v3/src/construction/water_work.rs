@@ -259,7 +259,7 @@ impl Construction {
             .find_map(|cell| self.resident_route(catalog, site, from, cell))
     }
 
-    fn maintain_water(&mut self, catalog: &Catalog) {
+    fn maintain_water(&mut self, catalog: &Catalog, sandbox: bool) {
         let ids = self.utilities.water_ids().collect::<Vec<_>>();
         for id in ids {
             if self.water_jobs.contains_key(&id) {
@@ -308,14 +308,24 @@ impl Construction {
                             && matches!(job.recipe.as_str(), "fruit" | "bananas")
                     })
             });
-            let needs_drinking_water = id.checked_sub(1).is_some_and(|target| {
-                self.production.jobs.iter().any(|job| {
-                    job.site == target
-                        && !job.watered
-                        && job.phase != crate::production::Phase::Return
-                        && catalog.production[&job.recipe].water > site.levels[0] + 1e-8
-                })
-            });
+            let needs_drinking_water = !sandbox
+                && id.checked_sub(1).is_some_and(|target| {
+                    let animal_care = catalog.animal_rations.get(site.kind).is_some_and(|ration| {
+                        site.levels[0] + 1e-8 < ration.water
+                            && self
+                                .livestock
+                                .animals
+                                .get(&target)
+                                .is_some_and(|pen| pen.fed_days(ration) <= 0.25)
+                    });
+                    animal_care
+                        || self.production.jobs.iter().any(|job| {
+                            job.site == target
+                                && !job.watered
+                                && job.phase != crate::production::Phase::Return
+                                && catalog.production[&job.recipe].water > site.levels[0] + 1e-8
+                        })
+                });
             let action = if needs_drinking_water {
                 self.utilities
                     .water_sources()
@@ -377,7 +387,7 @@ impl Construction {
         clock: f64,
         dt: f32,
     ) {
-        self.maintain_water(catalog);
+        self.maintain_water(catalog, stock.sandbox);
         let ids = self.water_jobs.keys().copied().collect::<Vec<_>>();
         for id in ids {
             // Keep the slot occupied while choosing a worker for another job.
@@ -538,6 +548,41 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn a_dry_coop_receives_drinking_water_for_automatic_care() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut town = Construction::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let ration = &catalog.animal_rations["coop"];
+        stock.receive(&BTreeMap::from([("fodder".into(), ration.fodder)]));
+        let mut coop = town.proposed_site(&catalog, "coop", IVec2::new(40, -13));
+        coop.work = catalog.projects["coop"].work;
+        town.plans.push(coop);
+        town.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        town.utilities.take_water(Some(1), 0, 6.0);
+        town.tick_animals(&catalog, &mut stock, &land, 0.0, 0.1);
+        assert!(town.production.jobs.is_empty());
+
+        for step in 0..2_000 {
+            let clock = f64::from(step) * 0.1;
+            town.tick_water_work(&catalog, &mut stock, site, clock, 0.1);
+            if town.utilities.potable_at(1) >= ration.water {
+                break;
+            }
+        }
+        assert!(town.utilities.potable_at(1) >= ration.water);
+        town.tick_animals(&catalog, &mut stock, &land, 200.0, 0.1);
+        assert_eq!(town.production.jobs[0].recipe, "care-coop");
+    }
 
     #[test]
     fn a_hauler_stages_excess_water_and_another_trip_delivers_it() {
