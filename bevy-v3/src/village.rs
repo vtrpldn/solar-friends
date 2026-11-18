@@ -20,6 +20,7 @@ use crate::{
     save,
     setup::{Mode, WorldSetup},
     stock::Stock,
+    time_advance::Advance,
     ui_font::ui_font,
     weather::{forecast, weather_at},
 };
@@ -54,6 +55,7 @@ impl Plugin for VillagePlugin {
                     save_controls,
                     read_camp_pointer,
                     village_input,
+                    advance_days,
                     animate_arrival,
                     show_hud,
                     show_construction,
@@ -75,6 +77,8 @@ pub struct Village {
     speed: usize,
     #[serde(skip)]
     show_forecast: bool,
+    #[serde(skip)]
+    advance: Advance,
     #[serde(skip)]
     utility_panel: Option<UtilityPanel>,
     #[serde(skip)]
@@ -99,8 +103,12 @@ impl Village {
         self.clock
     }
 
+    pub fn advance_open(&self) -> bool {
+        self.advance.open
+    }
+
     pub fn is_paused(&self) -> bool {
-        self.paused
+        self.paused || self.advance.open
     }
 
     pub fn motion(&self, index: usize) -> Motion {
@@ -346,6 +354,12 @@ fn village_input(
     if keyboard.just_pressed(KeyCode::Space) && village.camp.is_some() {
         village.paused = !village.paused;
     }
+    if village.camp.is_some() && keyboard.get_just_pressed().len() > 0 {
+        village.advance.controls(&keyboard);
+    }
+    if village.advance.open {
+        return;
+    }
     if let Some(cell) = village.camp {
         let town = &mut *village;
         if keyboard.just_pressed(KeyCode::KeyP) {
@@ -548,44 +562,71 @@ fn advance_clock(
     mut village: ResMut<Village>,
     (catalog, land): (Res<Catalog>, Res<Land>),
 ) {
-    if setup.open || village.paused {
+    if setup.open || village.is_paused() {
         return;
     }
-    if let Some(camp) = village.camp {
-        let terrain = setup.terrain();
-        let town = &mut *village;
-        let site = ConstructionSite {
-            terrain: &terrain,
-            land: &land,
-            camp,
-        };
-        for _ in 0..SPEEDS[town.speed].1 {
-            town.clock += time.delta_secs_f64();
-            town.construction.tick_services(
-                &catalog,
-                &setup,
-                &mut town.stock,
-                town.clock,
-                time.delta_secs_f64(),
-            );
-            town.construction
-                .tick_crops(&catalog, &setup, town.clock, time.delta_secs_f64());
-            town.construction.tick_health(
-                &catalog,
-                &setup,
-                &mut town.stock,
-                site,
-                town.clock,
-                time.delta_secs(),
-            );
-            let clock = TownClock {
-                seconds: town.clock,
-                round_trip_km: setup.round_trip_km(),
-            };
-            town.construction
-                .tick(&catalog, &mut town.stock, site, clock, time.delta_secs());
+    let Some(camp) = village.camp else { return };
+    let terrain = setup.terrain();
+    let site = ConstructionSite {
+        terrain: &terrain,
+        land: &land,
+        camp,
+    };
+    for _ in 0..SPEEDS[village.speed].1 {
+        step(&mut village, &catalog, &setup, site, time.delta_secs_f64());
+    }
+}
+
+fn advance_days(
+    setup: Res<WorldSetup>,
+    mut village: ResMut<Village>,
+    (catalog, land): (Res<Catalog>, Res<Land>),
+) {
+    if setup.open || village.advance.running.is_none() {
+        return;
+    }
+    let (Some(camp), Some(mut run)) = (village.camp, village.advance.running.take()) else {
+        return;
+    };
+    let terrain = setup.terrain();
+    let site = ConstructionSite {
+        terrain: &terrain,
+        land: &land,
+        camp,
+    };
+    let started = std::time::Instant::now();
+    loop {
+        step(&mut village, &catalog, &setup, site, run.dt);
+        if run.record_step() {
+            village.advance.done();
+            return;
+        }
+        if started.elapsed() >= std::time::Duration::from_millis(12) {
+            break;
         }
     }
+    village.advance.running = Some(run);
+}
+
+fn step(
+    town: &mut Village,
+    catalog: &Catalog,
+    setup: &WorldSetup,
+    site: ConstructionSite,
+    dt: f64,
+) {
+    town.clock += dt;
+    town.construction
+        .tick_services(catalog, setup, &mut town.stock, town.clock, dt);
+    town.construction.tick_crops(catalog, setup, town.clock, dt);
+    town.construction
+        .tick_health(catalog, setup, &mut town.stock, site, town.clock, dt as f32);
+    let clock = TownClock {
+        seconds: town.clock,
+        round_trip_km: setup.round_trip_km(),
+    };
+    town.construction
+        .tick(catalog, &mut town.stock, site, clock, dt as f32);
 }
 
 fn show_hud(
@@ -650,6 +691,10 @@ fn show_hud(
     if village.show_forecast {
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
+    }
+    if village.camp.is_some() {
+        label.push('\n');
+        label.push_str(&village.advance.status());
     }
     if let Some(progress) = village.construction.latest_progress(&catalog) {
         label.push('\n');

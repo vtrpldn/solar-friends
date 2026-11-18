@@ -26,6 +26,8 @@ Story reserves cash for town pickup when a blueprint needs materials beyond curr
 
 In Sandbox, materials are unlimited. Press I to toggle instant building.
 
+Press L to advance between 1 and 365 days. Exact replay uses normal simulation steps. Fast approximate uses larger steps. Press L while advancing to stop at the time shown.
+
 Press F5 to save the current village and F9 to reload it. Story and Sandbox have separate save files under `Solar Friends V3` in the local application data directory.
 
 The opening models are embedded in the executable. To regenerate them after changing the source artwork, run `npm ci` and `node scripts/export-v3-opening-models.mjs` from the repository root.

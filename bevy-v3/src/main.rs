@@ -20,6 +20,7 @@ mod save;
 mod setup;
 mod stock;
 mod terrain;
+mod time_advance;
 mod ui_font;
 mod utilities;
 mod village;
@@ -145,10 +146,10 @@ fn camera_controls(
     (motion, scroll): (Res<AccumulatedMouseMotion>, Res<AccumulatedMouseScroll>),
     window: Single<&Window, With<PrimaryWindow>>,
     time: Res<Time>,
-    setup: Res<WorldSetup>,
+    (setup, village): (Res<WorldSetup>, Res<village::Village>),
     mut camera: Single<(&mut Transform, &mut Projection, &mut VillageCamera)>,
 ) {
-    if setup.open || !window.focused {
+    if setup.open || village.advance_open() || !window.focused {
         return;
     }
     let (transform, projection, view) = &mut *camera;
