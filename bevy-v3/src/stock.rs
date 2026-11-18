@@ -9,6 +9,24 @@ use crate::{
     setup::{Mode, WorldSetup},
 };
 
+fn tracked_recipe(id: &str) -> bool {
+    matches!(
+        id,
+        "corn_feed"
+            | "cook_greens"
+            | "cook_beans"
+            | "cook_corn"
+            | "preserve_meals"
+            | "saw_timber"
+            | "saw_planks"
+            | "frames"
+            | "walls"
+            | "tiles"
+            | "meals"
+            | "compost"
+    )
+}
+
 #[derive(Clone, Default, Deserialize, Serialize)]
 pub struct Stock {
     pub cash: u32,
@@ -22,6 +40,8 @@ pub struct Stock {
     pub sandbox: bool,
     #[serde(default)]
     pub pantry: Pantry,
+    #[serde(default)]
+    processing: BTreeMap<String, u64>,
     materials: BTreeMap<String, u32>,
     #[serde(default)]
     pub equipment: Equipment,
@@ -97,6 +117,7 @@ impl Stock {
             cash_flow: CashFlow::default(),
             sandbox: settings.mode == Mode::Sandbox,
             pantry: Pantry::default(),
+            processing: BTreeMap::new(),
             materials,
             equipment: Equipment::default(),
         }
@@ -306,6 +327,41 @@ impl Stock {
             });
             flow.recent.truncate(100);
         }
+    }
+
+    pub fn record_processing(&mut self, id: &str) {
+        if !self.sandbox && tracked_recipe(id) {
+            let count = self.processing.entry(id.to_owned()).or_default();
+            *count = count.saturating_add(1);
+        }
+    }
+
+    pub fn processing_summary(&self, catalog: &Catalog) -> String {
+        if self.sandbox {
+            return "Processing records are available in Story.".into();
+        }
+        let mass = |bill: &BTreeMap<String, u32>| -> f64 {
+            bill.iter()
+                .map(|(id, amount)| catalog.materials[id].mass * f64::from(*amount))
+                .sum()
+        };
+        let (mut batches, mut input, mut output) = (0u64, 0.0, 0.0);
+        for (id, count) in &self.processing {
+            let recipe = &catalog.production[id];
+            batches = batches.saturating_add(*count);
+            input += (mass(&recipe.input) + recipe.water) * (*count as f64);
+            output += mass(&recipe.output) * (*count as f64);
+        }
+        let loss = (input - output).max(0.0);
+        format!(
+            "Processing · {batches} batches\nApprox. {input:.1} kg inputs · {output:.1} kg usable output · {loss:.1} kg process losses"
+        )
+    }
+
+    pub fn valid_processing(&self, catalog: &Catalog) -> bool {
+        self.processing
+            .keys()
+            .all(|id| tracked_recipe(id) && catalog.production.contains_key(id))
     }
 
     pub fn valid_cash_flow(&self) -> bool {

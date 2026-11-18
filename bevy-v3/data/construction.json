@@ -2663,7 +2663,8 @@
       },
       "work": 25,
       "handcraft": false,
-      "preserved": {}
+      "preserved": {},
+      "water": 2
     },
     "preserve_meals": {
       "name": "Prepare dried provisions",
@@ -2680,7 +2681,8 @@
       "preserved": {
         "meals": 10
       },
-      "biogas": 0.6
+      "biogas": 0.6,
+      "water": 2
     },
     "cold_storage": {
       "name": "Install kitchen cold storage",
@@ -3082,7 +3084,8 @@
       },
       "work": 40,
       "handcraft": false,
-      "preserved": {}
+      "preserved": {},
+      "water": 2
     },
     "cook_beans": {
       "name": "Cook bush beans",
@@ -3095,7 +3098,8 @@
       },
       "work": 40,
       "handcraft": false,
-      "preserved": {}
+      "preserved": {},
+      "water": 2
     },
     "cook_corn": {
       "name": "Cook sweet corn",
@@ -3108,7 +3112,8 @@
       },
       "work": 40,
       "handcraft": false,
-      "preserved": {}
+      "preserved": {},
+      "water": 2
     },
     "corn_feed": {
       "name": "Prepare corn feed supplement",

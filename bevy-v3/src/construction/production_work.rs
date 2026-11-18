@@ -238,6 +238,13 @@ impl Construction {
         clock: f64,
     ) -> String {
         match job.phase {
+            Phase::Pickup | Phase::Approach | Phase::Work
+                if recipe.water > 0.0
+                    && !job.watered
+                    && self.utilities.potable_at(job.site + 1) < recipe.water =>
+            {
+                "Waiting for drinking water".into()
+            }
             Phase::Pickup => "Collecting ingredients".into(),
             Phase::Approach => "Bringing ingredients".into(),
             Phase::Work if job.using_biogas => {
@@ -607,6 +614,15 @@ impl Construction {
                     if !self.utilities.enabled(job.site) {
                         continue;
                     }
+                    if !stock.sandbox && !job.watered && recipe.water > 0.0 {
+                        if !self.utilities.drink(job.site + 1, recipe.water) {
+                            job.worker = None;
+                            job.phase = Phase::Pickup;
+                            job.retry_at = clock + 1.0;
+                            continue;
+                        }
+                        job.watered = true;
+                    }
                     if needs_power(&job.recipe, recipe)
                         && !self.utilities.powered(job.site)
                         && !job.using_biogas
@@ -731,6 +747,7 @@ impl Construction {
                             &recipe.preserved,
                         ));
                     }
+                    stock.record_processing(&job.recipe);
                     job.food_input = None;
                     self.residents[worker_index].path = path;
                     self.production.jobs[index].phase = Phase::Return;
@@ -831,6 +848,14 @@ impl Construction {
         stock: &Stock,
     ) {
         let batch = &self.production.jobs[job];
+        let recipe = &catalog.production[&batch.recipe];
+        if !stock.sandbox
+            && batch.phase != Phase::Return
+            && !batch.watered
+            && self.utilities.potable_at(batch.site + 1) + 1e-8 < recipe.water
+        {
+            return;
+        }
         if !stock.sandbox
             && batch.phase != Phase::Return
             && !batch.watered
@@ -1108,16 +1133,29 @@ mod upgrade_tests {
         village.utilities.grid_off = true;
         village.utilities.biogas = 1.0;
         village.queue_batch(&catalog, &mut stock, 0, "cook_greens");
-        for step in 0..4_000 {
+        village.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        village.utilities.take_water(Some(1), 0, 6.0);
+        village.tick_production(&catalog, &mut stock, site, 0.0, 0.1);
+        assert!(village.production.jobs[0].worker.is_none());
+        assert_eq!(
+            village.utilities.deliver_water(1, 0, recipe.water),
+            recipe.water
+        );
+        let mut consumed = 0.0;
+        for step in 1..4_000 {
             let clock = f64::from(step) * 0.1;
             village.tick_services(&catalog, &setup, &mut stock, clock, 0.1);
+            let available = village.utilities.potable_at(1);
             village.tick_production(&catalog, &mut stock, site, clock, 0.1);
+            consumed += available - village.utilities.potable_at(1);
             if village.production.jobs.is_empty() {
                 break;
             }
         }
         assert!(village.production.jobs.is_empty());
         assert_eq!(stock.available("meals"), before + recipe.output["meals"]);
+        assert!((consumed - recipe.water).abs() < 1e-9);
+        assert!(stock.processing_summary(&catalog).contains("1 batch"));
         assert!((village.utilities.biogas - 0.8).abs() < 1e-9);
     }
 

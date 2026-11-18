@@ -360,6 +360,7 @@ impl Village {
             || !self.clock.is_finite()
             || !self.stock.valid_food()
             || !self.stock.valid_cash_flow()
+            || !self.stock.valid_processing(catalog)
             || !self.stock.equipment.valid(|id| self.stock.available(id))
             || !self.terrain_editor.valid()
         {
@@ -1454,6 +1455,8 @@ fn show_hud(
                     .inventory_panel(&catalog, &village.stock, village.inventory_page)
                     .1,
             );
+            label.push('\n');
+            label.push_str(&village.stock.processing_summary(&catalog));
         }
         Some(UtilityPanel::Events) => {
             label.push('\n');

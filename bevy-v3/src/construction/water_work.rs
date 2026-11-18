@@ -259,7 +259,7 @@ impl Construction {
             .find_map(|cell| self.resident_route(catalog, site, from, cell))
     }
 
-    fn maintain_water(&mut self) {
+    fn maintain_water(&mut self, catalog: &Catalog) {
         let ids = self.utilities.water_ids().collect::<Vec<_>>();
         for id in ids {
             if self.water_jobs.contains_key(&id) {
@@ -308,7 +308,24 @@ impl Construction {
                             && matches!(job.recipe.as_str(), "fruit" | "bananas")
                     })
             });
-            let action = if site.maintain_fresh && below_reserve {
+            let needs_drinking_water = id.checked_sub(1).is_some_and(|target| {
+                self.production.jobs.iter().any(|job| {
+                    job.site == target
+                        && !job.watered
+                        && job.phase != crate::production::Phase::Return
+                        && catalog.production[&job.recipe].water > site.levels[0] + 1e-8
+                })
+            });
+            let action = if needs_drinking_water {
+                self.utilities
+                    .water_sources()
+                    .filter(|(source, _, _)| *source != id)
+                    .min_by_key(|(_, location, _)| location.distance_squared(site.location))
+                    .map(|(source, _, _)| WaterAction::Carry {
+                        source: Some(source),
+                        channel: 0,
+                    })
+            } else if site.maintain_fresh && below_reserve {
                 if site.levels[1] >= site.space(0).min(12.0)
                     || (site.levels[0] < 10.0 && site.levels[1] >= 1.0)
                 {
@@ -360,7 +377,7 @@ impl Construction {
         clock: f64,
         dt: f32,
     ) {
-        self.maintain_water();
+        self.maintain_water(catalog);
         let ids = self.water_jobs.keys().copied().collect::<Vec<_>>();
         for id in ids {
             // Keep the slot occupied while choosing a worker for another job.

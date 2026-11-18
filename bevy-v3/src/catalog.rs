@@ -80,6 +80,8 @@ pub struct ProductionRecipe {
     pub preserved: BTreeMap<String, f64>,
     pub biology: Option<Biology>,
     pub biogas: Option<f64>,
+    #[serde(default)]
+    pub water: f64,
     pub repair: Option<String>,
     pub craft: Option<Craft>,
 }

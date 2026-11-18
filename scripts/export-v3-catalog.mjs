@@ -56,6 +56,7 @@ const production = Object.fromEntries(Object.entries(PROCESSES)
     ...(recipe.equipmentRepair ? {repair: recipe.equipmentRepair} : {}),
     ...(recipe.craft ? {craft: recipe.craft} : {}),
     ...(recipe.biogas ? {biogas: recipe.biogas} : {}),
+    ...(recipe.kind === "kitchen" && recipe.water ? {water: recipe.water} : {}),
     ...(!BIOLOGY[id] || ["eggs", "milk"].includes(id) ? {} : {biology: {
       days: BIOLOGY[id].days, window: Number.isFinite(BIOLOGY[id].window) ? BIOLOGY[id].window : null,
       seasonal: BIOLOGY[id].seasonal, on_site_water: recipe.water || 0, planting_fraction: BIOLOGY[id].plantingFraction ?? 0.5,
