@@ -684,25 +684,7 @@ impl Construction {
         } else {
             Color::srgb_u8(216, 122, 92)
         };
-        let low = world_position(position.x as f32, position.y as f32) - Vec2::ONE;
-        let high = low + proposal.size.as_vec2() * 2.0;
-        let points = [
-            low,
-            Vec2::new(low.x, high.y),
-            high,
-            Vec2::new(high.x, low.y),
-            low,
-        ];
-        for line in points.windows(2) {
-            let length = line[0].distance(line[1]).ceil() as usize;
-            gizmos.linestrip(
-                (0..=length).map(|step| {
-                    let Vec2 { x, y: z } = line[0].lerp(line[1], step as f32 / length as f32);
-                    Vec3::new(x, ground.terrain.height_at(x, z) + 0.1, z)
-                }),
-                tint,
-            );
-        }
+        draw_footprint(ground.terrain, position, proposal.size, tint, gizmos);
         Some(match status {
             Ok(detail) => detail,
             Err(reason) => format!("Blocked · {reason}"),
@@ -821,28 +803,57 @@ impl Construction {
     }
 
     pub fn draw(&self, catalog: &Catalog, terrain: &Terrain, gizmos: &mut Gizmos) {
-        for plan in self
-            .plans
-            .iter()
-            .filter(|plan| !plan.removed && plan.work < catalog.projects[&plan.key].work)
-        {
-            let left_top =
-                world_position(plan.position.x as f32, plan.position.y as f32) - Vec2::ONE;
-            let right_bottom = left_top + plan.size.as_vec2() * 2.0;
-            let corners = [
-                left_top,
-                Vec2::new(left_top.x, right_bottom.y),
-                right_bottom,
-                Vec2::new(right_bottom.x, left_top.y),
-                left_top,
-            ];
-            gizmos.linestrip(
-                corners.map(|point| {
-                    Vec3::new(point.x, terrain.height_at(point.x, point.y) + 0.1, point.y)
-                }),
-                Color::srgb_u8(230, 244, 158),
-            );
+        for (index, plan) in self.plans.iter().enumerate() {
+            let selected = self.production.selected == Some(index);
+            if plan.removed || (!selected && plan.work >= catalog.projects[&plan.key].work) {
+                continue;
+            }
+            let color = if selected {
+                Color::srgb_u8(109, 220, 255)
+            } else {
+                Color::srgb_u8(230, 244, 158)
+            };
+            draw_footprint(terrain, plan.position, plan.size, color, gizmos);
         }
+        for job in self.changes.values() {
+            if let Some(target) = &job.target {
+                draw_footprint(
+                    terrain,
+                    target.position,
+                    target.size,
+                    Color::srgb_u8(190, 167, 248),
+                    gizmos,
+                );
+            }
+        }
+    }
+}
+
+fn draw_footprint(
+    terrain: &Terrain,
+    position: IVec2,
+    size: IVec2,
+    tint: Color,
+    gizmos: &mut Gizmos,
+) {
+    let low = world_position(position.x as f32, position.y as f32) - Vec2::ONE;
+    let high = low + size.as_vec2() * 2.0;
+    let points = [
+        low,
+        Vec2::new(low.x, high.y),
+        high,
+        Vec2::new(high.x, low.y),
+        low,
+    ];
+    for line in points.windows(2) {
+        let length = line[0].distance(line[1]).ceil() as usize;
+        gizmos.linestrip(
+            (0..=length).map(|step| {
+                let Vec2 { x, y: z } = line[0].lerp(line[1], step as f32 / length as f32);
+                Vec3::new(x, terrain.height_at(x, z) + 0.1, z)
+            }),
+            tint,
+        );
     }
 }
 
