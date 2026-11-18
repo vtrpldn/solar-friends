@@ -25,7 +25,7 @@ try{for(const [width,height]of [[1440,1000],[1280,800]]){
  await page.screenshot({path:`artifacts/food-almanac/pantry-${width}.png`});
  await page.getByText('Food reserves & delivery',{exact:true}).click();
  await page.getByRole('spinbutton',{name:'Food reserve in days',exact:true}).fill('7');await page.getByRole('spinbutton',{name:'Food reserve in days',exact:true}).press('Tab');
- assert.match(await page.locator('.food-forecast').textContent(),/70/);
+ assert.match(await page.locator('.food-forecast').textContent(),/of 105 planned portions/);
  await page.locator('.management-tabs [data-manage="resources"]').click();assert.equal(await page.getByText('Food reserves & delivery',{exact:true}).count(),0);
  await page.getByRole('button',{name:'Manage food in the Food Almanac',exact:true}).click();assert.equal(await page.locator('#management-title').textContent(),'Food');
  await page.keyboard.press('Escape');await page.locator('#supplies [data-panel="food"]').click();assert.equal(await page.locator('#management-title').textContent(),'Food');
