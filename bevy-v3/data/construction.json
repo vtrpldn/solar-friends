@@ -2133,6 +2133,26 @@
       "work": 75,
       "handcraft": false
     },
+    "eggs": {
+      "name": "Collect eggs",
+      "kind": "coop",
+      "input": {},
+      "output": {
+        "eggs": 6
+      },
+      "work": 25,
+      "handcraft": false
+    },
+    "milk": {
+      "name": "Collect milk",
+      "kind": "goat_pasture",
+      "input": {},
+      "output": {
+        "milk": 4
+      },
+      "work": 35,
+      "handcraft": false
+    },
     "craft_garden-tools": {
       "name": "Craft garden tools",
       "kind": "supply-5",
@@ -2232,6 +2252,26 @@
         "scraps": 1
       },
       "work": 30,
+      "handcraft": false
+    },
+    "care-coop": {
+      "name": "Feed and water animals",
+      "kind": "coop",
+      "input": {
+        "fodder": 1
+      },
+      "output": {},
+      "work": 25,
+      "handcraft": false
+    },
+    "care-goat_pasture": {
+      "name": "Feed and water animals",
+      "kind": "goat_pasture",
+      "input": {
+        "fodder": 3
+      },
+      "output": {},
+      "work": 35,
       "handcraft": false
     }
   },
@@ -2500,5 +2540,27 @@
       },
       "reflection": "A pause is part of the plan, even when the list is not finished."
     }
-  ]
+  ],
+  "animalRations": {
+    "coop": {
+      "days": 3,
+      "fodder": 1,
+      "water": 2,
+      "work": 25,
+      "product": "eggs",
+      "dailyOutput": 2,
+      "batch": 6,
+      "shelfDays": 7
+    },
+    "goat_pasture": {
+      "days": 1,
+      "fodder": 3,
+      "water": 16,
+      "work": 35,
+      "product": "milk",
+      "dailyOutput": 4,
+      "batch": 4,
+      "shelfDays": 1
+    }
+  }
 }

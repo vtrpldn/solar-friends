@@ -15,6 +15,7 @@ use crate::{
     farming::Farming,
     gathering::{GatherPhase, Gathering},
     land::Land,
+    livestock::Livestock,
     market::{Market, trip_seconds},
     navigation::route,
     production::Production,
@@ -104,6 +105,8 @@ pub struct Construction {
     #[serde(default)]
     pub farming: Farming,
     #[serde(default)]
+    livestock: Livestock,
+    #[serde(default)]
     pub production: Production,
     #[serde(default)]
     pub utilities: Utilities,
@@ -170,6 +173,7 @@ impl Default for Construction {
             market: Market::default(),
             gathering: Gathering::default(),
             farming: Farming::default(),
+            livestock: Livestock::default(),
             production: Production::default(),
             utilities: Utilities::default(),
             trip: None,
@@ -634,7 +638,15 @@ impl Construction {
                 matches!(project.key.as_str(), "garden" | "greenhouse" | "field")
             })
         });
-        if !farms_valid
+        let animals_valid = self.livestock.animals.iter().all(|(index, pen)| {
+            self.plans
+                .get(*index)
+                .and_then(|plan| catalog.projects.get(&plan.key))
+                .and_then(|definition| catalog.animal_rations.get(&definition.kind))
+                .is_some_and(|ration| pen.valid(ration))
+        });
+        if !animals_valid
+            || !farms_valid
             || !services_valid
             || !trip_valid
             || !self.market.valid_save(catalog, stock, fares)

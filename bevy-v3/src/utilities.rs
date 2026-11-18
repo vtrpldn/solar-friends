@@ -194,6 +194,13 @@ impl Utilities {
         true
     }
 
+    pub fn potable_at(&self, facility: usize) -> f64 {
+        self.nodes
+            .get(&facility)
+            .filter(|node| node.enabled)
+            .map_or(0.0, |node| node.water[0])
+    }
+
     pub fn drink(&mut self, id: usize, liters: f64) -> bool {
         let Some(node) = self.nodes.get_mut(&id) else {
             return false;

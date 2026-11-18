@@ -618,6 +618,8 @@ fn step(
     town.clock += dt;
     town.construction
         .tick_services(catalog, setup, &mut town.stock, town.clock, dt);
+    town.construction
+        .tick_animals(catalog, &mut town.stock, town.clock, dt);
     town.construction.tick_crops(catalog, setup, town.clock, dt);
     town.construction
         .tick_health(catalog, setup, &mut town.stock, site, town.clock, dt as f32);

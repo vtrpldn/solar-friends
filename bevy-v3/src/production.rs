@@ -19,6 +19,10 @@ pub struct Batch {
     pub phase: Phase,
     pub work: f64,
     pub retry_at: f64,
+    #[serde(default)]
+    pub water_to_deliver: f64,
+    #[serde(default)]
+    pub delivered_output: Option<std::collections::BTreeMap<String, u32>>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]

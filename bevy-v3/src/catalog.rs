@@ -4,12 +4,14 @@ use bevy::prelude::*;
 use serde::Deserialize;
 
 #[derive(Resource, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Catalog {
     pub materials: BTreeMap<String, Material>,
     pub projects: BTreeMap<String, Project>,
     pub gathering: BTreeMap<String, GatherRecipe>,
     pub production: BTreeMap<String, ProductionRecipe>,
     pub residents: [Profile; 5],
+    pub animal_rations: BTreeMap<String, AnimalRation>,
 }
 
 #[derive(Deserialize)]
@@ -78,6 +80,18 @@ pub struct Temperament {
     pub accepts_at: f64,
     pub break_at: f64,
     pub bedtime: f64,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AnimalRation {
+    pub days: f64,
+    pub fodder: u32,
+    pub water: f64,
+    pub product: String,
+    pub daily_output: f64,
+    pub batch: u32,
+    pub shelf_days: f64,
 }
 
 impl Default for Catalog {

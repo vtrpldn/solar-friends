@@ -4,6 +4,7 @@ import { MATERIALS, PROJECTS, PROCESSES, createWeekend } from "../web/v02/weeken
 import { buildingCategory, inBuildCategory, isBuildOption } from "../web/v02/weekend/build-categories.js";
 import { materialMeasure } from "../web/v02/weekend/material-measures.js";
 import { PROFILES } from "../web/v02/weekend/resident-personality.js";
+import { ANIMAL_RATIONS } from "../web/v02/weekend/animal-care.js";
 import { BIOLOGY } from "../web/v02/weekend/biological-production.js";
 import { supplierLimit } from "../web/v02/weekend/supplier-stock.js";
 
@@ -44,10 +45,22 @@ const gathering = Object.fromEntries(Object.entries(PROCESSES)
   .filter(([, recipe]) => recipe.deposit || recipe.gathering || recipe.kind === "wild-tree"));
 
 const production = Object.fromEntries(Object.entries(PROCESSES)
-  .filter(([id, recipe]) => !BIOLOGY[id] && !recipe.deposit && !recipe.gathering &&
+  .filter(([id, recipe]) => (!BIOLOGY[id] || ["eggs", "milk"].includes(id)) && !recipe.deposit && !recipe.gathering &&
     recipe.kind !== "wild-tree" && recipe.kind !== "cultivation" && Object.keys(recipe.output).length)
   .map(([id, recipe]) => [id, {name: recipe.name, kind: recipe.kind, input: recipe.input,
     output: recipe.output, work: recipe.work, handcraft: Boolean(recipe.craft)}]));
 
+for (const [kind, ration] of Object.entries(ANIMAL_RATIONS)) {
+  production[ration.product].name = `Collect ${ration.product}`;
+  production[`care-${kind}`] = {
+    name: "Feed and water animals",
+    kind,
+    input: {fodder: ration.fodder},
+    output: {},
+    work: ration.work,
+    handcraft: false,
+  };
+}
+
 await writeFile(new URL("../bevy-v3/data/construction.json", import.meta.url),
-  JSON.stringify({ materials, projects, gathering, production, residents: Object.values(PROFILES) }, null, 2) + "\n");
+  JSON.stringify({ materials, projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS }, null, 2) + "\n");

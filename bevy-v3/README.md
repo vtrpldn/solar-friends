@@ -22,6 +22,8 @@ Click a completed workbench, workshop, or kitchen and press C to open its recipe
 
 Select a completed field, garden, or greenhouse and press K to manage its beds. Prepare the soil, sow a crop, and return to harvest when it is ripe. Bed settings cover crop, density, irrigation, and residues.
 
+A completed coop or goat pen can store feed and drinking water, then produce eggs or milk. Residents take fodder to the animals when supplies are available. Select a pen and press C to see its care and collection options.
+
 Story reserves cash for town pickup when a blueprint needs materials beyond current stock. Press U to toggle automatic ordering.
 
 In Sandbox, materials are unlimited. Press I to toggle instant building.

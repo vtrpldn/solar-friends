@@ -56,9 +56,36 @@ impl Construction {
         let Some(number) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key)) else {
             return;
         };
-        let Some((id, recipe)) = recipes.get(number).copied() else {
+        let Some((id, _)) = recipes.get(number).copied() else {
             return;
         };
+        self.queue_batch(catalog, stock, index, id);
+    }
+
+    fn queue_batch(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize, id: &str) {
+        let recipe = &catalog.production[id];
+        if let Some(ration) = catalog.animal_rations.get(&recipe.kind)
+            && !stock.sandbox
+        {
+            let Some(pen) = self.livestock.animals.get(&index) else {
+                return;
+            };
+            if id == ration.product && pen.available() == 0 {
+                self.production.notice = "There is nothing ready to collect.".into();
+                return;
+            }
+            if id.starts_with("care-") {
+                if pen.fed_days(ration) > ration.days - 0.25 {
+                    self.production.notice =
+                        "The animals already have enough feed and water.".into();
+                    return;
+                }
+                if self.utilities.potable_at(index + 1) < ration.water {
+                    self.production.notice = "Waiting for animal drinking water.".into();
+                    return;
+                }
+            }
+        }
         if self.production.jobs.iter().any(|job| job.site == index) {
             self.production.notice = "Finish the current batch first.".into();
             return;
@@ -75,11 +102,13 @@ impl Construction {
         }
         self.production.jobs.push(Batch {
             site: index,
-            recipe: id.clone(),
+            recipe: id.into(),
             worker: None,
             phase: Phase::Pickup,
             work: 0.0,
             retry_at: 0.0,
+            water_to_deliver: 0.0,
+            delivered_output: None,
         });
         self.production.notice.clear();
     }
@@ -106,6 +135,15 @@ impl Construction {
             };
             text.push_str(&format!(" · {} · {state}", recipe.name));
         }
+        if let Some(animals) = self.livestock.animals.get(&index) {
+            text.push_str(&format!(
+                "\nHealth {:.0}% · feed {:.2} kg · water {:.1} L · {} ready",
+                animals.health,
+                animals.feed,
+                animals.water,
+                animals.available()
+            ));
+        }
         if self.production.open {
             for (index, (_, recipe)) in recipes.iter().enumerate().take(PAGE_KEYS.len()) {
                 text.push_str(&format!("\n{} {}", index + 1, recipe.name));
@@ -119,6 +157,36 @@ impl Construction {
             text.push_str(&self.production.notice);
         }
         Some(text)
+    }
+
+    pub fn tick_animals(&mut self, catalog: &Catalog, stock: &mut Stock, clock: f64, dt: f64) {
+        let mut care = Vec::new();
+        for (index, project) in self.plans.iter().enumerate() {
+            let definition = &catalog.projects[&project.key];
+            if project.work < definition.work {
+                continue;
+            }
+            let Some(ration) = catalog.animal_rations.get(&definition.kind) else {
+                continue;
+            };
+            let pen = self.livestock.animals.entry(index).or_default();
+            if stock.sandbox {
+                continue;
+            }
+            pen.tick(ration, clock, dt);
+            if pen.fed_days(ration) <= 0.25
+                && self.utilities.potable_at(index + 1) >= ration.water
+                && stock.available("fodder") >= ration.fodder
+                && !self.production.jobs.iter().any(|job| job.site == index)
+            {
+                care.push((index, format!("care-{}", definition.kind)));
+            }
+        }
+        for (index, id) in care {
+            if stock.missing(&catalog.production[&id].input).is_none() {
+                self.queue_batch(catalog, stock, index, &id);
+            }
+        }
     }
 
     pub(super) fn valid_production(&self, catalog: &Catalog) -> bool {
@@ -195,6 +263,16 @@ impl Construction {
                     if needs_power(recipe) && !self.utilities.powered(job.site) {
                         continue;
                     }
+                    let animal = catalog.animal_rations.get(&recipe.kind);
+                    if job.recipe.starts_with("care-")
+                        && let Some(ration) = animal
+                        && job.water_to_deliver == 0.0
+                    {
+                        if !stock.sandbox && !self.utilities.drink(job.site + 1, ration.water) {
+                            continue;
+                        }
+                        self.production.jobs[index].water_to_deliver = ration.water;
+                    }
                     let job = &mut self.production.jobs[index];
                     job.work = (job.work + f64::from(dt)).min(recipe.work);
                     if job.work < recipe.work {
@@ -209,11 +287,29 @@ impl Construction {
                         self.production.jobs[index].retry_at = clock + 5.0;
                         continue;
                     };
+                    if let Some(ration) = animal
+                        && let Some(pen) = self
+                            .livestock
+                            .animals
+                            .get_mut(&self.production.jobs[index].site)
+                    {
+                        let job = &mut self.production.jobs[index];
+                        if job.recipe.starts_with("care-") {
+                            if !stock.sandbox {
+                                pen.feed(ration, job.water_to_deliver);
+                            }
+                            self.production.jobs.remove(index);
+                            continue;
+                        }
+                        if job.recipe == ration.product {
+                            job.delivered_output = Some(pen.collect(ration, stock.sandbox));
+                        }
+                    }
                     self.residents[worker_index].path = path;
                     self.production.jobs[index].phase = Phase::Return;
                 }
                 Phase::Return => {
-                    stock.receive(&recipe.output);
+                    stock.receive(job.delivered_output.as_ref().unwrap_or(&recipe.output));
                     self.production.jobs.remove(index);
                     self.production.notice = format!("{}: batch in stores.", recipe.name);
                 }
