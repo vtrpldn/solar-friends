@@ -26,6 +26,10 @@ pub enum Mode {
 pub struct WorldSetup {
     #[serde(skip)]
     pub open: bool,
+    #[serde(skip)]
+    restart: u64,
+    #[serde(skip)]
+    confirming_new: bool,
     #[serde(default)]
     pub mode: Mode,
     seed: u32,
@@ -48,6 +52,8 @@ impl Default for WorldSetup {
     fn default() -> Self {
         Self {
             open: true,
+            restart: 0,
+            confirming_new: false,
             mode: Mode::Story,
             seed: 42,
             biome: 0,
@@ -65,6 +71,7 @@ impl WorldSetup {
     pub fn session(&self) -> Self {
         Self {
             open: false,
+            confirming_new: false,
             ..self.clone()
         }
     }
@@ -120,7 +127,7 @@ impl WorldSetup {
         Color::srgb_u8(red, green, blue)
     }
 
-    fn label(&self, action: Action) -> String {
+    fn label(&self, action: Action, has_village: bool) -> String {
         match action {
             Action::Mode => match self.mode {
                 Mode::Story => "Mode   ·   Story",
@@ -137,7 +144,10 @@ impl WorldSetup {
             Action::Supplies => format!("Supplies   ·   {}", SUPPLIES[self.supplies]),
             Action::Town => format!("Town   ·   {}", TOWN[self.town]),
             Action::Seed => format!("Land seed   ·   {}", self.seed),
+            Action::Explore if self.confirming_new => "Confirm new village".into(),
+            Action::Explore if has_village => "Start new village".into(),
             Action::Explore => "Enter village".into(),
+            Action::Resume => "Resume current village".into(),
         }
     }
 }
@@ -154,6 +164,7 @@ enum Action {
     Town,
     Seed,
     Explore,
+    Resume,
 }
 
 #[derive(Component)]
@@ -198,6 +209,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Supplies,
                 Action::Town,
                 Action::Seed,
+                Action::Resume,
                 Action::Explore,
             ] {
                 panel
@@ -205,12 +217,20 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                         action,
                         Button,
                         Node {
+                            display: if matches!(action, Action::Resume) {
+                                Display::None
+                            } else {
+                                Display::Flex
+                            },
                             padding: UiRect::axes(px(14), px(10)),
                             ..default()
                         },
                         BackgroundColor(Color::srgb_u8(62, 83, 65)),
                     ))
-                    .with_child((Text::new(setup.label(action)), ui_font(&assets, 17.0)));
+                    .with_child((
+                        Text::new(setup.label(action, false)),
+                        ui_font(&assets, 17.0),
+                    ));
             }
         });
 }
@@ -220,7 +240,11 @@ fn setup_input(
     keyboard: Res<ButtonInput<KeyCode>>,
     buttons: Query<(&Interaction, &Action), Changed<Interaction>>,
     window: Single<&Window, With<PrimaryWindow>>,
-    (saves, sound): (Res<SaveMenu>, Res<crate::audio::SoundSettings>),
+    (saves, sound, village): (
+        Res<SaveMenu>,
+        Res<crate::audio::SoundSettings>,
+        Res<crate::village::Village>,
+    ),
 ) {
     if !window.focused || saves.open || sound.open {
         return;
@@ -234,6 +258,9 @@ fn setup_input(
     for (interaction, action) in &buttons {
         if *interaction != Interaction::Pressed {
             continue;
+        }
+        if !matches!(action, Action::Explore) {
+            setup.confirming_new = false;
         }
         match action {
             Action::Mode => {
@@ -255,7 +282,20 @@ fn setup_input(
             Action::Savings | Action::Supplies => {}
             Action::Town => setup.town = (setup.town + 1) % TOWN.len(),
             Action::Seed => setup.seed = setup.seed.wrapping_add(1),
-            Action::Explore => setup.open = false,
+            Action::Explore => {
+                if village.session_setup().is_some() && !setup.confirming_new {
+                    setup.confirming_new = true;
+                } else {
+                    setup.restart = setup.restart.wrapping_add(1);
+                    setup.confirming_new = false;
+                    setup.open = false;
+                }
+            }
+            Action::Resume => {
+                if let Some(active) = village.session_setup() {
+                    *setup = active.session();
+                }
+            }
         }
     }
 }
@@ -263,7 +303,8 @@ fn setup_input(
 fn refresh_panel(
     setup: Res<WorldSetup>,
     mut panel: Single<&mut Node, With<SetupPanel>>,
-    buttons: Query<(&Action, &Children)>,
+    mut buttons: Query<(&Action, &Children, &mut Node), Without<SetupPanel>>,
+    village: Res<crate::village::Village>,
     mut labels: Query<&mut Text>,
 ) {
     if !setup.is_changed() {
@@ -274,11 +315,19 @@ fn refresh_panel(
     } else {
         Display::None
     };
-    for (action, children) in &buttons {
+    let has_village = village.session_setup().is_some();
+    for (action, children, mut button) in &mut buttons {
+        if matches!(action, Action::Resume) {
+            button.display = if has_village {
+                Display::Flex
+            } else {
+                Display::None
+            };
+        }
         if let Some(child) = children.first()
             && let Ok(mut label) = labels.get_mut(*child)
         {
-            label.0 = setup.label(*action);
+            label.0 = setup.label(*action, has_village);
         }
     }
 }

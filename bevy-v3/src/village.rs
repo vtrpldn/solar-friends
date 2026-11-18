@@ -265,6 +265,10 @@ impl Village {
         }
     }
 
+    pub fn session_setup(&self) -> Option<&WorldSetup> {
+        self.setup.as_ref()
+    }
+
     pub fn mode(&self) -> Option<Mode> {
         self.setup.as_ref().map(|setup| setup.mode)
     }

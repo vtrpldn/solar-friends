@@ -248,6 +248,27 @@ mod tests {
     use super::*;
     use bevy::{asset::AssetPlugin, gizmos::GizmoPlugin, transform::TransformPlugin};
 
+    fn press_setup_button(app: &mut App, label: &str) {
+        let world = app.world_mut();
+        let button = world
+            .query_filtered::<(Entity, &Children), With<Button>>()
+            .iter(world)
+            .find_map(|(entity, children)| {
+                children
+                    .iter()
+                    .any(|child| world.get::<Text>(child).is_some_and(|text| text.0 == label))
+                    .then_some(entity)
+            })
+            .expect("setup button");
+        *world
+            .get_mut::<Interaction>(button)
+            .expect("button interaction") = Interaction::Pressed;
+        world.run_schedule(Update);
+        *app.world_mut()
+            .get_mut::<Interaction>(button)
+            .expect("button interaction") = Interaction::None;
+    }
+
     #[test]
     fn bevy_update_enters_a_village_and_places_a_camp() {
         let mut app = App::new();
@@ -300,5 +321,26 @@ mod tests {
             app.world().resource::<village::Village>().camp,
             Some(IVec2::new(36, 36))
         );
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+        app.world_mut().resource_mut::<WorldSetup>().open = true;
+        app.world_mut().run_schedule(Update);
+        press_setup_button(&mut app, "Start new village");
+        assert!(app.world().resource::<WorldSetup>().open);
+        press_setup_button(&mut app, "Resume current village");
+        assert!(!app.world().resource::<WorldSetup>().open);
+        assert_eq!(
+            app.world().resource::<village::Village>().camp,
+            Some(IVec2::new(36, 36))
+        );
+
+        app.world_mut().resource_mut::<WorldSetup>().open = true;
+        app.world_mut().run_schedule(Update);
+        press_setup_button(&mut app, "Start new village");
+        press_setup_button(&mut app, "Confirm new village");
+        app.world_mut().run_schedule(Update);
+        assert!(!app.world().resource::<WorldSetup>().open);
+        assert!(app.world().resource::<village::Village>().camp.is_none());
     }
 }
