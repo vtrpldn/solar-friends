@@ -1,4 +1,4 @@
-import {hydrologyStep,extractWater,hydroFactor,rainCatchments,captureRain} from './hydrology.js';
+import {hydrologyStep,extractWater,rainCatchments,captureRain} from './hydrology.js';
 import {solarFactor} from './weather.js';
 import {projectMaterials} from './project-materials.js';
 import {serviceFactor} from "./asset-upkeep.js";
@@ -299,8 +299,9 @@ export function infrastructureStep(s, defs, dt, sys = syncInfrastructure(s, defs
       capacity = 0,
       demand = 0;
     for (const n of component) {
+      // Discharge in L/day at 5 m effective head and 65% turbine efficiency, capped at nameplate power.
       n.generation = n.enabled
-        ? { solar_farm: (n.solarKw??1.2) * sun, hydro: 2.34*hydroFactor(s), home: n.solarUpgrade ? 0.6 * sun : 0 }[n.kind] || 0
+        ? { solar_farm: (n.solarKw??1.2) * sun, hydro: Math.min(2.34,s.hydrology.flowLitersPerDay*9.81*5*.65/86400000), home: n.solarUpgrade ? 0.6 * sun : 0 }[n.kind] || 0
         : 0;
       const machinery=['kitchen','workshop'].includes(n.kind);
       const pumping=n.kind==='water-pump' && n.water[1]<n.capacity[1]-.01 && (riverBankAt(n.x+.5,n.z+.5,3,s.landSeed) || nodes.some(a=>a.kind==='groundwater-well' && a.enabled && a.water[1]>0 && Math.hypot(a.x-n.x,a.z-n.z)<=6));
@@ -369,9 +370,10 @@ export function infrastructureStep(s, defs, dt, sys = syncInfrastructure(s, defs
     if(n.enabled && n.kind==='water-pump' && n.power>.99 && n.demand>0) {
       let amount=Math.min(n.capacity[1]-n.water[1],600*hours*(n.serviceFactor??1));
       const source=nodes.filter(a=>a.kind==='groundwater-well'&&a.enabled&&Math.hypot(a.x-n.x,a.z-n.z)<=6).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
-      if(source){amount=Math.min(amount,source.water[1]);source.water[1]-=amount;}
-      else if(riverBankAt(n.x+.5,n.z+.5,3,s.landSeed)){amount=extractWater(s,"river",amount);sys.account.waterReceived+=amount;}
-      else amount=0;
+      const wellDraw=source?Math.min(amount,source.water[1]):0;
+      if(source)source.water[1]-=wellDraw;
+      const riverDraw=riverBankAt(n.x+.5,n.z+.5,3,s.landSeed)?extractWater(s,"river",amount-wellDraw):0;
+      sys.account.waterReceived+=riverDraw;amount=wellDraw+riverDraw;
       n.water[1]+=amount;
     }
     // Rain is non-potable until filtered; no sewage or greywater becomes drinking water.

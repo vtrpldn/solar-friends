@@ -13,7 +13,7 @@ export function kitchenPlan(s,p,recipes,api){
  if(s.infrastructure?.nodes[p.id]?.enabled===false)return {reason:'Kitchen is switched off.'};
  if(p.repeat)return {reason:'Following the manual repeating recipe.'};
  if(s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))return {reason:'Kitchen has a job in progress.'};
- const storage=ensureFoodStorage(s),daily=s.people.length*2;
+ const storage=ensureFoodStorage(s),daily=s.people.length*3;
  let reason='Fresh meals and provisions meet their targets.';
  for(const preserved of [false,true]){
   const target=Math.ceil(daily*(preserved?policy.provisionDays:policy.freshDays));

@@ -371,10 +371,12 @@ export function resizeField(s,id,size){
   const a=(p.rotation||0)*Math.PI/2,wx=newSize[0]-oldSize[0],wz=newSize[1]-oldSize[1];
   const dx=Math.round(Math.cos(a)*wx-Math.sin(a)*wz),dz=Math.round(Math.sin(a)*wx+Math.cos(a)*wz);
   const find=g=>old.find(b=>b.x-dx===g.x&&b.z-dz===g.z&&b.w===g.w&&b.d===g.d);
-  if(old.some(b=>!layout.some(g=>find(g)===b)&&(!['unprepared','prepared','harvested'].includes(b.stage)||b.residueKg>0||b.amendmentKg>0)))return 'Clear crops and collect residues before shrinking occupied beds.';
+  if(old.some(b=>!layout.some(g=>find(g)===b)&&(!['unprepared','prepared','harvested'].includes(b.stage)||b.residueKg>=1||b.amendmentKg>=1)))return 'Clear crops and collect residues before shrinking occupied beds.';
+  const removedBeds=old.filter(b=>!layout.some(g=>find(g)===b));
   s.operations=(s.operations||[]).filter(o=>o.site!==id||!o.done);
   p.fieldSize=[...size];delete p.cultivation;const farm=ensureCultivation(s,p);
   farm.beds=farm.beds.map((b,i)=>({...find(b),...b,...(find(b)||{}),x:b.x,z:b.z,id:i}));
+  for(const b of removedBeds){farm.beds[0].residueKg+=b.residueKg;farm.beds[0].amendmentKg+=b.amendmentKg;}
   invalidateNavigation(s);return '';
 }
 export function productionBlocker(s, site, recipe) {
@@ -616,7 +618,7 @@ function maintainFood(s) {
   s.nextFoodCheck=s.time+10;
   const incoming=[...activeTrips(s),s.delivery].filter(t=>t&&!t.foodSpoiled&&!t.saleOnly&&!t.project&&FOOD_SERVINGS[t.material]).reduce((n,t)=>n+Math.floor((t.foodLots?.reduce((q,l)=>q+(l.expires>s.time?l.n:0),0)??MATERIALS[t.material].quantity)/FOOD_SERVINGS[t.material]),0);
   const food=pantryForecast(s).served+incoming;
-  const target=Math.ceil(s.people.length*2*(s.foodReserveDays??1.5));
+  const target=Math.ceil(s.people.length*3*(s.foodReserveDays??1.5));
   if(food>=target)return;
   // Harvest existing food plots before construction or nonessential production.
   for(const p of s.projects) {
@@ -628,7 +630,7 @@ function maintainFood(s) {
   const day = Math.floor((540 + s.time * .45) / 1440);
   const spent = s.foodPurchases?.day === day ? s.foodPurchases.spent : 0;
   const cost = MATERIALS.food.price + pickupFare(s);
-  if (Math.round((spent + cost) * 100) <= Math.round((s.foodPurchaseBudget ?? 100) * 100) && supplyRun(s,'food')) {
+  if (Math.round((spent + cost) * 100) <= Math.round((s.foodPurchaseBudget ?? 150) * 100) && supplyRun(s,'food')) {
     s.foodPurchases = {day, spent: Math.round((spent + cost) * 100) / 100};
     say(s,'Food reserve is low: the community bought emergency ingredients. Change this policy in Resources.');
   }
@@ -798,7 +800,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
       const dest=utilitySpot(s,node,r);
       if(!dest || !go(s,r,dest))return true;
       r.action='produce';op.status='Purifying untreated water';
-      op.work+=dt;r.energy=Math.max(0,r.energy-dt*.06);
+      op.work+=dt;r.work+=dt;r.energy=Math.max(0,r.energy-dt*.06);
       if(op.work>=30) {
         const amount=Math.min(12,node.water[1],node.capacity[0]-node.water[0]);
         node.water[1]-=amount;node.water[0]+=amount;op.done=true;r.operation=null;
@@ -1242,6 +1244,7 @@ export function finished(s, key) {
   return s.projects.some((p) => p.key === key && p.work >= PROJECTS[key].work);
 }
 export function placementError(s, key, x, z, ignore = null, rotation = 0, details = null) {
+  if(ignore===null && s.projects.length>=128*128)return 'This village has reached the project limit.';
   const def = PROJECTS[key];
   if (!def || !Number.isInteger(x) || !Number.isInteger(z))
     return "Choose a grid square.";
@@ -1455,7 +1458,7 @@ export function plan(s, key, x, z, rotation = 0) {
     billOfMaterials:{...def.materials},
     work: instant ? def.work : 0,
     delivered: s.mode === "sandbox" ? requiredLoads(key) : 0,
-    ...(Object.keys(purchase.items).length ? {pendingMaterials: purchase.items} : {}),
+    ...(Object.keys(purchase.items).length ? {pendingMaterials: purchase.items,supplierDay:Math.floor((540+s.time*.45)/1440)} : {}),
   });
   for (const r of s.people) {
     r.walk = [];
@@ -1470,7 +1473,7 @@ export function plan(s, key, x, z, rotation = 0) {
   );
   dispatchBlueprintPickup(s);
   for(const trip of activeTrips(s))if(trip.phase==='boarding')loadExports(s,trip);
-  if(activeTrips(s).length<2 && pendingExports(s).length && dispatchReady(s) && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
+  if(activeTrips(s).length<2 && pendingExports(s).some(o=>!o.holdForPickup) && dispatchReady(s,true) && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
   return "";
 }
 export function planRoadLine(s, from, to) {
@@ -1541,6 +1544,7 @@ export function cancelProject(s, id) {
     for (const [material, count] of Object.entries(projectMaterials(p,PROJECTS))) {
       const pending = p.pendingMaterials?.[material] || 0;
       changeMaterial(s, material, count - pending);
+      if(pending && p.supplierDay===s.suppliers?.[material]?.day && p.supplierDay!==undefined)s.suppliers[material].units=Math.max(0,s.suppliers[material].units-pending);
       if (pending) refund += pending * MATERIALS[material].price / MATERIALS[material].quantity;
     }
     refund = Math.ceil(refund * 100) / 100;
@@ -1557,6 +1561,7 @@ export function cancelProject(s, id) {
       trip.saleOnly = true;
     } else {
       const driver = s.people.find(r => r.id === trip.person);
+      if(trip.boardingFare>0)transact(s,trip.boardingFare,'transport','Unused pickup fuel refunded');
       if (driver) { driver.action = 'idle'; driver.target = null; driver.walk = []; }
       s[key] = null;
     }
@@ -1589,6 +1594,7 @@ export function prioritize(s, id) {
     "The group will pick up this project next. Current carrying trips finish first.",
   );
 }
+function inboundStock(s){return [...activeTrips(s),s.delivery].filter(t=>t&&!t.saleOnly&&!t.project&&!t.shipments).reduce((n,t)=>n+(t.quantity??MATERIALS[t.material]?.quantity??0),0);}
 export function supplyRun(s,material="wood",project=null,saleOnly=false){
  const hour=((540+s.time*.45)/60)%24;
  if(hour<7||hour>=18)return false;
@@ -1597,7 +1603,7 @@ export function supplyRun(s,material="wood",project=null,saleOnly=false){
  if(!project&&!saleOnly){
   const trip=returnPickup(s);
   const item=MATERIALS[material];
-  if(trip&&item?.quantity&&fitsCargo({[material]:item.quantity})&&storedMaterials(s)+item.quantity<=storageCapacity(s)&&spendableMoney(s)>=item.price&&reserveSupplier(s,{[material]:item.quantity},MATERIALS)){
+  if(trip&&item?.quantity&&fitsCargo({[material]:item.quantity})&&storedMaterials(s)+inboundStock(s)+item.quantity<=storageCapacity(s)&&spendableMoney(s)>=item.price&&reserveSupplier(s,{[material]:item.quantity},MATERIALS)){
    transact(s,-item.price,purchaseCategory(material),`Bought ${item.quantity} ${item.name} on the existing town trip`);
    trip.material=material;trip.saleOnly=false;
    if(FOOD_DAYS[material])trip.foodLots=freshLots(s,material,item.quantity);
@@ -1617,7 +1623,7 @@ function startSupplyRun(s, material = "wood", project = null, saleOnly = false) 
     !item ||
     !item.quantity ||
     (!project && !saleOnly && !fitsCargo({[material]:item.quantity})) ||
-    (!project && !saleOnly && storedMaterials(s) + item.quantity > storageCapacity(s)) ||
+    (!project && !saleOnly && storedMaterials(s) + inboundStock(s) + item.quantity > storageCapacity(s)) ||
     s.stage !== "playing" ||
     s.trip ||
     (project ? s.money : spendableMoney(s)) < (project || saleOnly ? 0 : item.price) + fare
@@ -1631,12 +1637,15 @@ function startSupplyRun(s, material = "wood", project = null, saleOnly = false) 
   for(const candidate of vehicles){const driver=drivers.find(person=>route(s,person,carDoor(candidate)));if(driver){vehicle=candidate;r=driver;break;}}
   if (!r) return false;
   const drinkingAllowance=Math.max(.5,5*townDuration(s.worldSettings?.town)/3200);
-  if(ensureInfrastructure(s).nodes[0].water[0]+(r.drinkingWater||0)<drinkingAllowance)return false;
+  const tanks=ensureInfrastructure(s).nodes;
+  const canFill=n=>n.enabled && n.water[0]+(r.drinkingWater||0)>=drinkingAllowance;
+  const source=canFill(tanks[0])?tanks[0]:Object.values(tanks).find(n=>canFill(n)&&!['coop','goat_pasture'].includes(n.kind)&&utilitySpot(s,n,r));
+  if(!source)return false;
   if(!project&&!saleOnly&&!reserveSupplier(s,{[material]:item.quantity},MATERIALS))return false;
   if (!project && !saleOnly) transact(s,-item.price,purchaseCategory(material),`Bought ${item.quantity} ${item.name}`);
   transact(s,-fare,"transport","Town trip fuel");
-  recordVehicleDistance(s,vehicle,tripEstimate(s.worldSettings?.town).km);
-  packDrinkingWater(s,r,drinkingAllowance);
+
+  packDrinkingWater(s,r,drinkingAllowance,source);
   s.nextTripVehicle = 1 - vehicle;
   s.trip = {
     person: r.id,
@@ -1647,6 +1656,7 @@ function startSupplyRun(s, material = "wood", project = null, saleOnly = false) 
     ...(project ? {project: project.id} : {}),
     vehicle,
     phase: "boarding",
+    boardingFare:fare,
   };
   if(!project&&!saleOnly&&FOOD_DAYS[material])s.trip.foodLots=freshLots(s,material,item.quantity);
   loadExports(s,s.trip);
@@ -1657,7 +1667,7 @@ function startSupplyRun(s, material = "wood", project = null, saleOnly = false) 
   r.toiletSite = null;
   r.toiletTime = 0;
   r.washSite = null;
-  if (s.opening) s.opening.townTrips++;
+
   say(
     s,
     saleOnly ? `${r.name} is taking reserved surplus to town. Payment arrives after trading.` : project ? `${r.name} is heading to town to collect the prepaid materials for ${PROJECTS[project.key].name}.` : `${r.name} is heading to the car for town: ${item.quantity} ${item.name} for R$${item.price}. Travel time depends on the distance to town.`,
@@ -2355,7 +2365,7 @@ function tickUncached(s, dt) {
   };
   dispatchBlueprintPickup(s);
   for(const trip of activeTrips(s))if(trip.phase==='boarding')loadExports(s,trip);
-  if(activeTrips(s).length<2 && pendingExports(s).length && dispatchReady(s) && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
+  if(activeTrips(s).length<2 && pendingExports(s).some(o=>!o.holdForPickup) && dispatchReady(s,true) && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
   for (const trip of activeTrips(s)) {
     const r = s.people.find((r) => r.id === trip.person);
     if (trip.phase === "boarding" || trip.phase === "unloading") {
@@ -2384,7 +2394,14 @@ function tickUncached(s, dt) {
         r.walk = [];
         r.target = null;
         r.moveSpeed = 0;
-        if (trip.phase === "boarding") trip.phase = "outbound";
+        if (trip.phase === "boarding") {
+          if(trip.boardingFare!==undefined){
+            recordVehicleDistance(s,trip.vehicle,tripEstimate(s.worldSettings?.town).km);
+            if(s.opening)s.opening.townTrips++;
+            delete trip.boardingFare;
+          }
+          trip.phase="outbound";
+        }
         else {
           const id = trip.material,
             item = MATERIALS[id];
@@ -2392,6 +2409,7 @@ function tickUncached(s, dt) {
           const orders = trip.projects || [trip.project];
           if(trip.shipments) receiveBlueprintShipment(s,trip);
           else if (project) for (const p of s.projects.filter(p=>orders.includes(p.id))) delete p.pendingMaterials;
+          else if(!trip.saleOnly && storedMaterials(s)+(trip.foodLots?.reduce((n,l)=>n+l.n,0)??item.quantity)>storageCapacity(s))continue;
           else if (!trip.saleOnly) changeMaterial(s,id,trip.foodSpoiled?trip.foodLots.reduce((n,l)=>n+l.n,0):item.quantity,trip.foodLots);
           returnUnsoldFood(s,trip);
           r.action = "idle";
@@ -2756,6 +2774,15 @@ export function restore(text) {
     )
       return null;
     for(const r of s.people)if(r?.removalJob!==undefined&&!s.projects.some(p=>p?.id===r.removalJob))delete r.removalJob;
+    if(Array.isArray(s.operations)&&s.infrastructure?.nodes){
+      s.operations=s.operations.filter(op=>{
+        if(!op?.water||op.water.from===-1||s.infrastructure.nodes[op.water.from])return true;
+        if(op.phase==='deliver'){op.water.from=-1;return true;}
+        for(const r of s.people)if(r.operation===op.id){r.operation=null;r.cargo=false;r.action='idle';}
+        return false;
+      });
+    }
+    if(activeTrips(s).some(t=>t.boardingFare!==undefined && (t.phase!=='boarding'||t.boardingFare!==transportCost({...s,deliveryOnly:false}))))return null;
     if(!validWeather(s)||!validHydrology(s)||!validAnimalCare(s,PROJECTS))return null;
     ensureHydrology(s);
     if(s.weather===undefined)weatherStep(s);

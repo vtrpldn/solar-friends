@@ -56,8 +56,9 @@ export function removalStep(s,r,dt,api){
  if(node){sys.account.waterLost+=node.water.reduce((a,b)=>a+b,0);sys.account.curtailed+=node.charge;delete sys.nodes[p.id];sys.links=sys.links.filter(l=>l.from!==p.id&&l.to!==p.id);}
  s.projects=remaining.projects;
  for(const project of s.projects)if(project.depot===p.id){delete project.depot;project.staged=0;}
- const removedOperations=new Set((s.operations||[]).filter(o=>o.site===p.id).map(o=>o.id));
- s.operations=(s.operations||[]).filter(o=>o.site!==p.id);
+ for(const o of s.operations||[])if(o.water?.from===p.id && o.phase==='deliver')o.water.from=-1;
+ const removedOperations=new Set((s.operations||[]).filter(o=>o.site===p.id||o.water?.from===p.id).map(o=>o.id));
+ s.operations=(s.operations||[]).filter(o=>!removedOperations.has(o.id));
  for(const person of s.people)if(removedOperations.has(person.operation)){person.operation=null;person.cargo=false;person.action='idle';person.walk=[];person.target=null;}
  if(s.upkeep)s.upkeep.jobs=s.upkeep.jobs.filter(j=>j.target!==p.id);
  for(const person of s.people){if(person.home===p.id)person.home=null;if(person.restSite===p.id){person.restSite=null;person.tentPhase=null;}if(person.removalJob===p.id){delete person.removalJob;person.action='idle';person.walk=[];person.target=null;}}

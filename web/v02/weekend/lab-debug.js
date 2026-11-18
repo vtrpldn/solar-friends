@@ -17,7 +17,7 @@ export function labCommand(s,m){
  case 'produce':return queueProduction(s,m.site,m.recipe);
  case 'repeat':return 'Automatic repeating has been removed. Queue one job at a time.';
  case 'buy':return supplyRun(s,m.material)?'':'No resident, car, storage or savings available.';
- case 'sell':return sellMaterial(s,m.material)?'':'Not enough surplus for one sale batch.';
+ case 'sell':return sellMaterial(s,m.material)?'':'Unable to reserve a sale batch.';
  case 'haul':return queueWater(s,-1,m.site,'irrigation');
  case 'purify':return queuePurification(s,m.site);
  case 'service':return queueSanitation(s,m.site);

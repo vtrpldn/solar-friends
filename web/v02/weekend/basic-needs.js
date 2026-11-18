@@ -16,7 +16,7 @@ export function basicNeeds(s) {
  const thirsty=residents.filter(r=>(r.needs?.hydration??100)<30);
  const water=item('water','Water',!count?'neutral':thirsty.length||fresh<.5?'alert':hours<6?'watch':'good',!count?'No residents':thirsty.length?'Residents thirsty':fresh<.5?'No drinking water':hours<6?'Low reserve':'In reserve',`${fresh.toFixed(1)} L potable · ${thirsty.length?`${thirsty.length} thirsty`:'access still required'}`,'water');
  if(s.mode==='sandbox'){water.status='neutral';water.summary='Sandbox';water.detail='Resident hydration is maintained in sandbox';}
- const portions=foodPortions(s),days=count?portions/(count*2):0;
+ const portions=foodPortions(s),days=count?portions/(count*3):0;
  const food=item('food','Food',!count?'neutral':!portions?'alert':days<1?'watch':'good',!count?'No residents':!portions?'No ready food':days<1?'Low reserve':'In reserve',`${portions} portions · ${days.toFixed(1)} days estimated`,'food');
  if(s.mode==='sandbox'){food.status='neutral';food.summary='Sandbox';food.detail='Unlimited food supplies';}
  const toilets=enabled.filter(n=>['home','eco_toilet'].includes(n.kind));
@@ -40,7 +40,7 @@ export function renderBasicNeeds(root,s) {
   const status=b.querySelector('.resource-trend');
   if(status){status.textContent=row.id==='water'?`${marks[waterStatus.status]} ${waterStatus===sanitation?'Sanitation: ':''}${waterStatus.summary}`:`${marks[row.status]} ${row.summary}`;status.classList.add('need-status');}
   b.setAttribute('aria-label',`${row.label}: ${row.summary}. ${row.detail}. Open management.`);
-  const explanation=row.id==='food'?'Estimate: two portions per resident per day, before spoilage; excludes uncooked crops and cargo.':row.id==='water'?'Low reserve: under six drinking hours at current activity and temperature. Animal tanks are excluded; access and washing still matter.':row.id==='sanitation'?'Current stock and observed waiting; access and occupancy may still limit service.':'Current requested loads; future work and nighttime lighting may need more power.';
+  const explanation=row.id==='food'?'Estimate: three portions per resident per day, before spoilage; excludes uncooked crops and cargo.':row.id==='water'?'Low reserve: under six drinking hours at current activity and temperature. Animal tanks are excluded; access and washing still matter.':row.id==='sanitation'?'Current stock and observed waiting; access and occupancy may still limit service.':'Current requested loads; future work and nighttime lighting may need more power.';
   if(row.id==='water'){
    b.querySelector('small').textContent='Water & sanitation';
    b.setAttribute('aria-label',`Water: ${water.summary}. ${water.detail}. Sanitation: ${sanitation.summary}. ${sanitation.detail}. Open water and sanitation management.`);

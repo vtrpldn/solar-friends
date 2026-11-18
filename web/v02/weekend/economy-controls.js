@@ -39,10 +39,11 @@ export function economyControls(root,s,materials,recipes,count,refresh){
  }
  const send=make(logistics,'button',dispatch.urgent?'Waiting loads marked urgent':'Send waiting loads now');send.onclick=()=>{dispatch.urgent=true;refresh();};
  const orders=make(panel,'fieldset');make(orders,'legend','Town exports');
- make(orders,'p',`Goods leave available stock when queued. Trips combine sale batches within cargo capacity. Transport: R$${transportCost(s)} per trip; the driver needs enough energy and the village must afford departure.`);
+ make(orders,'p',`Goods leave available stock when queued. Trips combine sale batches within cargo capacity. Transport: R$${transportCost({...s,deliveryOnly:false})} per trip; the driver needs enough energy and the village must afford departure.`);
  for(const o of pendingExports(s)){
- const row=make(orders,'div');make(row,'span',`${quantityText(o.material,o.quantity)} ${materials[o.material].name} · R$${(o.cents/100).toFixed(2)} gross `);
- const cancel=make(row,'button','Cancel sale');cancel.onclick=()=>{cancelExport(s,o.id,foodChange);refresh();};
+ const row=make(orders,'div');make(row,'span',`${quantityText(o.material,o.quantity)} ${materials[o.material].name} · R$${(o.cents/100).toFixed(2)} gross · R$${((o.cents/100)-transportCost({...s,deliveryOnly:false})).toFixed(2)} after dedicated fuel `);
+ const hold=make(row,'button',o.holdForPickup?'Allow dedicated trip':'Hold for a shared pickup');hold.onclick=()=>{o.holdForPickup=!o.holdForPickup;refresh();};
+    const cancel=make(row,'button','Cancel sale');cancel.onclick=()=>{cancelExport(s,o.id,foodChange);refresh();};
  }
  if(!pendingExports(s).length)make(orders,'p','No sale batches waiting.');
  root.append(drawer);

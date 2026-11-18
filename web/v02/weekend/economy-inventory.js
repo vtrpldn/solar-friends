@@ -18,6 +18,7 @@ export function inventoryOwnership(s,projects,recipes,materials){
  }
  for(const job of s.upkeep?.jobs||[])if(job.partsPaid&&!job.done)add(job.replacementParts||(job.soil?{compost:job.compost}:job.battery?{batteries:1,electrical:1}:job.care?{fodder:job.care==='coop'?1:3}:{tools:1,hardware:1}),'processing');
  for(const o of s.trade?.orders||[])if(['queued','loaded'].includes(o.status))add({[o.material]:o.quantity},o.status==='queued'?'reserved':'transit');
+ for(const o of s.trade?.orders||[])if(o.returnFood&&o.status==="spoiled")add({[o.material]:o.foodLots.reduce((n,l)=>n+l.n,0)},"transit");
  for(const t of [s.trip,s.secondTrip,s.delivery].filter(Boolean))if(!t.shipments&&!t.project&&!t.saleOnly)add({[t.material]:t.foodLots?t.foodLots.reduce((n,l)=>n+l.n,0):(t.quantity??materials[t.material]?.quantity??0)},'transit');
  const values={available:0,reserved:0,processing:0,transit:0,installed:0};
  for(const [id,row]of Object.entries(rows)){const price=(materials[id].price||0)/(materials[id].quantity||1);for(const k of Object.keys(values))values[k]+=row[k]*price;}
