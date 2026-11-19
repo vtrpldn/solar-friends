@@ -1,6 +1,9 @@
 mod map;
 
-use std::{io, path::Path};
+use std::{
+    io,
+    path::{Path, PathBuf},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -564,10 +567,13 @@ fn run(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::R
 }
 
 pub(crate) fn run_ui(scenario: &Path, save: Option<&Path>) -> io::Result<()> {
+    let source = LabSource {
+        scenario: scenario.to_owned(),
+        checkpoint: save.map(Path::to_owned),
+    };
     let catalog = Catalog::default();
-    let (scenario, village) = load_inputs(scenario, save, &catalog)?;
-    let runner = Runner::new(scenario, village, &catalog)?;
-    open_lab(catalog, runner, None);
+    let runner = source.load(&catalog)?;
+    open_lab(catalog, runner, None, Some(source));
     Ok(())
 }
 
@@ -575,14 +581,30 @@ pub(crate) fn replay_ui(path: &Path) -> io::Result<()> {
     let bytes = crate::save::read_bytes(path, 3 * crate::save::MAX_BYTES)?;
     let catalog = Catalog::default();
     let (runner, replay) = prepare_replay(serde_json::from_slice(&bytes)?, &catalog)?;
-    open_lab(catalog, runner, Some(replay));
+    open_lab(catalog, runner, Some(replay), None);
     Ok(())
 }
 
-fn open_lab(catalog: Catalog, runner: Runner, replay: Option<Replay>) {
+#[derive(Resource)]
+struct LabSource {
+    scenario: PathBuf,
+    checkpoint: Option<PathBuf>,
+}
+
+impl LabSource {
+    fn load(&self, catalog: &Catalog) -> io::Result<Runner> {
+        let (scenario, village) = load_inputs(&self.scenario, self.checkpoint.as_deref(), catalog)?;
+        Runner::new(scenario, village, catalog)
+    }
+}
+
+fn open_lab(catalog: Catalog, runner: Runner, replay: Option<Replay>, source: Option<LabSource>) {
     let mut app = App::new();
     if let Some(replay) = replay {
         app.insert_resource(replay);
+    }
+    if let Some(source) = source {
+        app.insert_resource(source);
     }
     app.insert_resource(catalog)
         .insert_resource(runner)
@@ -847,6 +869,7 @@ struct Playback {
     waiting_only: bool,
     farm_site: Option<usize>,
     clear_confirmation: Option<(usize, Option<usize>)>,
+    reload_confirmation: bool,
 }
 
 impl Playback {
@@ -969,6 +992,7 @@ impl Default for Playback {
             waiting_only: false,
             farm_site: None,
             clear_confirmation: None,
+            reload_confirmation: false,
         }
     }
 }
@@ -1155,9 +1179,45 @@ fn update_lab_window(
     ),
     mut playback: Local<Playback>,
     mut panel: Single<&mut Text>,
-    (mut replay, mut map): (Option<ResMut<Replay>>, ResMut<map::MapState>),
+    (mut replay, mut map, source): (
+        Option<ResMut<Replay>>,
+        ResMut<map::MapState>,
+        Option<Res<LabSource>>,
+    ),
 ) {
     playback.replaying = replay.is_some();
+    if let Some(source) = &source
+        && playback.order.is_none()
+    {
+        if playback.reload_confirmation && keys.just_pressed(KeyCode::Escape) {
+            playback.reload_confirmation = false;
+        } else if keys.just_pressed(KeyCode::F8) {
+            if playback.reload_confirmation {
+                playback.reload_confirmation = false;
+                match source.load(&catalog) {
+                    Ok(reloaded) => {
+                        *runner = reloaded;
+                        *playback = Playback::default();
+                        *map = map::MapState::default();
+                        playback.notice = "Scenario reloaded at step 0.".into();
+                    }
+                    Err(error) => playback.notice = format!("Could not reload scenario · {error}"),
+                }
+            } else {
+                playback.running = false;
+                playback.reset_timing();
+                playback.reload_confirmation = true;
+            }
+        }
+        if playback.reload_confirmation {
+            map.visible = false;
+            events.clear();
+            panel.set_if_neq(Text::new(
+                "Reload scenario?\nF8 Confirm · Esc Cancel\nThis replaces the current lab run and its unsaved orders.",
+            ));
+            return;
+        }
+    }
     let limit = replay
         .as_ref()
         .map_or(runner.scenario.steps, |replay| replay.limit);
@@ -1471,6 +1531,11 @@ fn update_lab_window(
         return;
     }
     let weather = lab_weather(village, &runner.setup);
+    let reload_control = if source.is_some() {
+        " · F8 Reload"
+    } else {
+        ""
+    };
     let spoiled = village
         .stock
         .pantry
@@ -1479,7 +1544,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint · Tab Browse lab views\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint{reload_control} · Tab Browse lab views\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         limit,
         village.clock,
@@ -1679,6 +1744,51 @@ mod tests {
         assert_eq!(runner.index, 1);
         assert!(runner.outcomes.is_empty());
         assert!(!runner.village.construction.utilities.grid_off);
+    }
+
+    #[test]
+    fn desktop_lab_reloads_an_edited_scenario_only_after_confirmation() {
+        let path =
+            std::env::temp_dir().join(format!("solar-lab-reload-{}.json", std::process::id()));
+        std::fs::write(&path, r#"{"steps":3}"#).unwrap();
+        let source = LabSource {
+            scenario: path.clone(),
+            checkpoint: None,
+        };
+        let catalog = Catalog::default();
+        let mut runner = source.load(&catalog).unwrap();
+        runner.advance(&catalog);
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .insert_resource(catalog)
+            .insert_resource(runner)
+            .insert_resource(source)
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<map::MapState>()
+            .add_message::<bevy::input::keyboard::KeyboardInput>()
+            .add_systems(Update, update_lab_window);
+        let panel = app.world_mut().spawn(Text::default()).id();
+        let press_reload = |app: &mut App| {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.reset_all();
+            keys.press(KeyCode::F8);
+            app.update();
+        };
+        std::fs::write(&path, r#"{"steps":8}"#).unwrap();
+        press_reload(&mut app);
+        assert!(
+            app.world()
+                .get::<Text>(panel)
+                .unwrap()
+                .0
+                .contains("Confirm")
+        );
+        assert_eq!(app.world().resource::<Runner>().index, 1);
+        press_reload(&mut app);
+        let reloaded = app.world().resource::<Runner>();
+        assert_eq!(reloaded.index, 0);
+        assert_eq!(reloaded.scenario.steps, 8);
+        std::fs::remove_file(path).unwrap();
     }
 
     #[test]

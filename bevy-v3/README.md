@@ -118,6 +118,8 @@ Use `--lab-ui scenario.json [village.json]` to open the native lab window. Press
 
 In the native lab, press **O** to enter a JSON order at the current step and **F5** to export a report through the current step. Press **F6** to save the current village as a checkpoint you can pass to a new lab run. The command window pauses the scenario while you type.
 
+Press **F8** twice to reload the scenario file and any starting checkpoint. This starts a new run at step 0, so export the current report or save a checkpoint first if you want to keep it.
+
 ## Model workshop
 
 Pass `--workshop` to inspect the bundled building scenes. Use **←/→** to browse, **Q/E** to orbit, **↑/↓** to tilt, **R** to rotate the model, **+/−** to zoom, **N** to change lighting, **G** to toggle the grid and footprint guides, and **Home** to reset the view.
