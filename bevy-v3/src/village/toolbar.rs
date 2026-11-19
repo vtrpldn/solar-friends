@@ -6,6 +6,8 @@ use crate::{
     time_advance::AdvanceAction,
 };
 
+pub(super) const PANEL_WIDTH: f32 = 240.0;
+
 #[derive(Component, Clone, Copy)]
 enum Action {
     Build,
@@ -584,7 +586,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     position_type: PositionType::Absolute,
                     right: px(0),
                     bottom: percent(100),
-                    width: px(240),
+                    width: px(PANEL_WIDTH),
                     flex_wrap: FlexWrap::Wrap,
                     padding: UiRect::all(px(6)),
                     row_gap: px(5),
@@ -769,17 +771,22 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
 }
 
 fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action: Action) {
+    let trade_button = matches!(
+        action,
+        Action::TradeItem(_) | Action::Trade(_) | Action::TradePolicy(_)
+    );
+    let (vertical_padding, font_size) = if trade_button { (4, 15.0) } else { (7, 17.0) };
     parent
         .spawn((
             action,
             Button,
             Node {
-                padding: UiRect::axes(px(10), px(7)),
+                padding: UiRect::axes(px(10), px(vertical_padding)),
                 ..default()
             },
             BackgroundColor(Color::srgb_u8(58, 78, 61)),
         ))
-        .with_child((Text::default(), ui_font(assets, 17.0)));
+        .with_child((Text::default(), ui_font(assets, font_size)));
 }
 
 fn handle_buttons(
