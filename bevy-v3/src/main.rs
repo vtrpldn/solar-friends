@@ -2,6 +2,7 @@ use bevy::{
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit},
     prelude::*,
     window::{PrimaryWindow, WindowResolution},
+    winit::{UpdateMode, WinitSettings},
 };
 
 mod arrival;
@@ -72,7 +73,13 @@ fn main() {
     if std::env::args().any(|argument| argument == "--play") {
         app.insert_resource(WorldSetup::default().session());
     }
-    app.add_plugins(DefaultPlugins.set(WindowPlugin {
+    app.insert_resource(WinitSettings {
+        unfocused_mode: UpdateMode::reactive_low_power(std::time::Duration::from_secs_f64(
+            1.0 / village::SIMULATION_HZ,
+        )),
+        ..WinitSettings::game()
+    })
+    .add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             title: "Solar Friends V3".into(),
             resolution: WindowResolution::new(1280, 800),

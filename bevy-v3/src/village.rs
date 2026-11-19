@@ -44,6 +44,8 @@ use crate::{
     weather::{forecast, weather_at},
 };
 
+pub(crate) const SIMULATION_HZ: f64 = 10.0;
+
 const SPEEDS: [(KeyCode, u8); 4] = [
     (KeyCode::Digit1, 1),
     (KeyCode::Digit2, 4),
@@ -75,7 +77,7 @@ impl Plugin for VillagePlugin {
             .init_resource::<SoundSettings>()
             .init_resource::<Catalog>()
             .init_resource::<SaveMenu>()
-            .insert_resource(Time::<Fixed>::from_hz(10.0))
+            .insert_resource(Time::<Fixed>::from_hz(SIMULATION_HZ))
             .add_systems(Startup, spawn_hud)
             .add_systems(
                 Update,
