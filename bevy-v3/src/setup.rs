@@ -325,7 +325,8 @@ impl WorldSetup {
             Action::Explore => "Enter village".into(),
             Action::CancelNew => "Keep current village".into(),
             Action::Resume => "Resume current village".into(),
-            Action::Continue => "Continue last autosave".into(),
+            Action::Continue(Mode::Story) => "Continue Story".into(),
+            Action::Continue(Mode::Sandbox) => "Continue Sandbox".into(),
             Action::Library => "Saved villages".into(),
             Action::Sound => "Sound settings".into(),
         }
@@ -348,7 +349,7 @@ pub(crate) enum Action {
     Explore,
     CancelNew,
     Resume,
-    Continue,
+    Continue(Mode),
     Library,
     Sound,
 }
@@ -412,7 +413,8 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Seed,
                 Action::Reroll,
                 Action::Resume,
-                Action::Continue,
+                Action::Continue(Mode::Story),
+                Action::Continue(Mode::Sandbox),
                 Action::Library,
                 Action::Sound,
                 Action::Explore,
@@ -425,7 +427,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                         Node {
                             display: if matches!(
                                 action,
-                                Action::Resume | Action::Continue | Action::CancelNew
+                                Action::Resume | Action::Continue(_) | Action::CancelNew
                             ) {
                                 Display::None
                             } else {
@@ -575,7 +577,7 @@ fn setup_input(
                 }
             }
             Action::CancelNew => setup.confirming_new = false,
-            Action::Continue | Action::Library => {}
+            Action::Continue(_) | Action::Library => {}
             Action::Sound => sound.open = true,
             Action::Resume => {
                 if let Some(active) = village.session_setup() {
@@ -618,8 +620,9 @@ fn refresh_panel(
                     Display::None
                 };
             }
-            Action::Continue => {
-                let available = !has_village && autosave_exists;
+            Action::Continue(mode) => {
+                let available =
+                    !has_village && saves.continue_path(*mode).is_ok_and(|path| path.is_file());
                 button.display = if available {
                     Display::Flex
                 } else {

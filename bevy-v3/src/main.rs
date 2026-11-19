@@ -730,7 +730,7 @@ mod tests {
             .test_directory = Some(save_dir.clone());
         app.update();
 
-        press_button(&mut app, "Continue last autosave");
+        press_button(&mut app, "Continue Story");
         assert!(app.world().resource::<WorldSetup>().open);
         assert!(
             app.world_mut()

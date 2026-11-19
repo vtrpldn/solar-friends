@@ -912,14 +912,19 @@ fn save_controls(
     if !window.focused || saves.open {
         return;
     }
-    let resume = setup.open
-        && village.setup.is_none()
-        && buttons.iter().any(|(interaction, action)| {
-            *interaction == Interaction::Pressed && matches!(action, crate::setup::Action::Continue)
-        });
-    if resume || keyboard.just_pressed(KeyCode::F9) {
-        let restored = if resume {
-            restore_continuation(&saves, setup.mode, &catalog)
+    let resume = if setup.open && village.setup.is_none() {
+        buttons
+            .iter()
+            .find_map(|(interaction, action)| match (interaction, action) {
+                (Interaction::Pressed, crate::setup::Action::Continue(mode)) => Some(*mode),
+                _ => None,
+            })
+    } else {
+        None
+    };
+    if resume.is_some() || keyboard.just_pressed(KeyCode::F9) {
+        let restored = if let Some(mode) = resume {
+            restore_continuation(&saves, mode, &catalog)
         } else {
             save::location(setup.mode)
                 .and_then(|path| save::read(&path, &catalog))
@@ -934,7 +939,7 @@ fn save_controls(
                 saves.attached = named_slot.map(|id| (setup.mode, id, loaded.session_serial));
                 *village = loaded;
             }
-            Err(error) if resume => {
+            Err(error) if resume.is_some() => {
                 village.save_notice = format!(
                     "Could not continue the autosave: {error}\nThe autosave was preserved. Open Saved villages to load a named village."
                 );
