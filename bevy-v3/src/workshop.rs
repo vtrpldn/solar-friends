@@ -23,6 +23,8 @@ struct Workshop {
     zoom: f32,
     target: Vec3,
     scale_figure: bool,
+    roof_available: bool,
+    roof_visible: bool,
     surface: Surface,
     night: bool,
     guides: bool,
@@ -153,6 +155,8 @@ pub fn run() {
         zoom: 1.0,
         target: Vec3::Y,
         scale_figure: false,
+        roof_available: false,
+        roof_visible: true,
         surface: Surface::Materials,
         night: false,
         guides: false,
@@ -168,6 +172,7 @@ pub fn run() {
             controls,
             show_model,
             show_scale_figure,
+            apply_roof_visibility,
             apply_surface,
             capture_preview,
             sprites::start,
@@ -311,6 +316,9 @@ fn controls(
     if keys.just_pressed(KeyCode::KeyM) {
         workshop.surface = workshop.surface.next();
     }
+    if workshop.roof_available && keys.just_pressed(KeyCode::KeyT) {
+        workshop.roof_visible = !workshop.roof_visible;
+    }
     if keys.just_pressed(KeyCode::KeyH) {
         workshop.scale_figure = !workshop.scale_figure;
     }
@@ -440,9 +448,18 @@ fn show_model(
         )));
         return;
     }
+    let roof = if workshop.roof_available {
+        if workshop.roof_visible {
+            " · T Hide roof"
+        } else {
+            " · T Show roof"
+        }
+    } else {
+        ""
+    };
     let surface = workshop.surface.label();
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure · Home Reset · F5 Export PNG · F6 Sprite sheet · F7 Sprite Proof\n{}",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure{roof} · Home Reset · F5 Export PNG · F6 Sprite sheet · F7 Sprite Proof\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
@@ -464,6 +481,33 @@ fn show_scale_figure(
     } else {
         Visibility::Hidden
     };
+}
+
+fn apply_roof_visibility(
+    mut workshop: ResMut<Workshop>,
+    model: Query<&SceneInstance, With<WorkshopModel>>,
+    spawner: Res<SceneSpawner>,
+    mut parts: Query<(&Name, &mut Visibility)>,
+) {
+    let mut available = false;
+    if let Ok(instance) = model.single() {
+        for entity in spawner.iter_instance_entities(**instance) {
+            let Ok((name, mut visibility)) = parts.get_mut(entity) else {
+                continue;
+            };
+            if name.as_str() == "functional-roof" {
+                available = true;
+                visibility.set_if_neq(if workshop.roof_visible {
+                    Visibility::Inherited
+                } else {
+                    Visibility::Hidden
+                });
+            }
+        }
+    }
+    if workshop.roof_available != available {
+        workshop.roof_available = available;
+    }
 }
 
 type SurfaceScene = Or<(With<WorkshopModel>, With<ScaleFigure>)>;
@@ -614,6 +658,7 @@ fn capture_preview(
         "model_rotation_degrees": u16::from(workshop.rotation) * 90,
         "metres_per_cell": 2,
         "scale_figure": workshop.scale_figure,
+        "roof_visible": !workshop.roof_available || workshop.roof_visible,
         "surface": workshop.surface.label().to_ascii_lowercase(),
         "light": if workshop.night { "night" } else { "day" },
         "camera": {

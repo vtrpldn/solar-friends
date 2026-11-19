@@ -160,6 +160,6 @@ Press **F8** twice to reload the scenario file and any starting checkpoint. This
 
 Pass `--workshop` to inspect the bundled building scenes. Use **←/→** to browse, **/** to find an asset by name, **Q/E** to orbit, **↑/↓** to tilt, **R** to rotate the model, **+/−** to zoom, **N** to change lighting, **G** to toggle the grid and footprint guides, and **Home** to reset the view.
 
-Drag to orbit, right-drag to pan, and scroll to zoom. Press **H** to show a resident beside the model for scale, and **M** to switch between original materials, clay, and wireframe.
+Drag to orbit, right-drag to pan, and scroll to zoom. Press **H** to show a resident beside the model for scale, and **M** to switch between original materials, clay, and wireframe. Press **T** to remove the roof from models with an authored interior. Sprite sheets always include the roof.
 
 Press **F5** to export the current workshop view as a PNG without the controls overlay. A JSON sidecar records the model, footprint, lighting, and camera settings. The workshop shows the saved path. Press **F6** for a transparent four-view sheet and placement JSON with fixed camera and anchors. Press **F7** to preview the same sprite sheet inside the Workshop.

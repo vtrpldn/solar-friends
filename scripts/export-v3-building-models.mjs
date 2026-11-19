@@ -23,7 +23,18 @@ const models = buildingScenes.map((id) => {
   if (id === "greenhouse") return [id, bareGreenhouse()];
   const model = createAsset(id);
   model.getObjectByName("optional-rooftop-solar")?.removeFromParent();
+  const roof = model.userData.exteriorOnly
+    ? null
+    : model.getObjectByName("functional-roof");
+  let compactRoof;
+  if (roof) {
+    const holder = new Group();
+    holder.name = "functional-roof";
+    holder.attach(roof);
+    compactRoof = compactModel(holder);
+  }
   const compact = compactModel(model);
+  if (compactRoof) compact.add(compactRoof);
   let index = 0;
   compact.traverse(node => {
     if (!node.animalRig) return;
