@@ -136,7 +136,7 @@ fn select(
                 let sandbox = village.stock.sandbox;
                 let build = &mut village.construction;
                 match *button {
-                    BuildButton::Blueprint(row) => build.pick_build_row(&catalog, row),
+                    BuildButton::Blueprint(row) => build.pick_build_row(&catalog, row, sandbox),
                     BuildButton::Category => build.change_build_category(false),
                     BuildButton::PreviousPage => build.turn_build_page(&catalog, false),
                     BuildButton::NextPage => build.turn_build_page(&catalog, true),
@@ -202,20 +202,28 @@ fn refresh(
         let label = match *button {
             BuildButton::Blueprint(index) => {
                 let project = projects.get(index);
-                if let Some(project) = project
-                    && *interaction == Interaction::Hovered
-                {
-                    detail_node.display = Display::Flex;
-                    detail_text.set_if_neq(Text::new(blueprint_details(
-                        &village, &setup, &catalog, project,
-                    )));
-                }
                 node.display = if project.is_some() {
                     Display::Flex
                 } else {
                     Display::None
                 };
-                project.map(|project| format!("{}  {}", index + 1, project.name))
+                project.map(|(key, project)| {
+                    let already_planned = village.construction.blueprint_already_planned(
+                        key, project, village.stock.sandbox, None,
+                    );
+                    if already_planned {
+                        color.0 = Color::srgb_u8(40, 53, 43);
+                    }
+                    if *interaction == Interaction::Hovered {
+                        let mut text = blueprint_details(&village, &setup, &catalog, project);
+                        if already_planned {
+                            text.push_str("\nAlready planned or built. Select the existing project to manage it.");
+                        }
+                        detail_node.display = Display::Flex;
+                        detail_text.set_if_neq(Text::new(text));
+                    }
+                    format!("{}  {}", index + 1, project.name)
+                })
             }
             BuildButton::ConstructionPolicy => Some(
                 if village.stock.sandbox {

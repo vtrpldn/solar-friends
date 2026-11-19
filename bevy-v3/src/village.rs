@@ -1416,7 +1416,8 @@ fn village_input(
             town.construction.toggle_auto_buy();
         }
         if keyboard.get_just_pressed().len() > 0 {
-            town.construction.input(&keyboard, &catalog);
+            town.construction
+                .input(&keyboard, &catalog, town.stock.sandbox);
             if !matches!(
                 town.utility_panel,
                 Some(UtilityPanel::Finances | UtilityPanel::Trade | UtilityPanel::Pantry)
@@ -2670,7 +2671,9 @@ mod tests {
         let mut keys = ButtonInput::default();
         keys.press(KeyCode::KeyB);
         keys.press(KeyCode::Digit1);
-        village.construction.input(&keys, &catalog);
+        village
+            .construction
+            .input(&keys, &catalog, village.stock.sandbox);
         assert!(village.construction.placing_project());
 
         village.apply_advance_action(AdvanceAction::Toggle);
@@ -2711,7 +2714,9 @@ mod tests {
         let mut keys = ButtonInput::default();
         keys.press(KeyCode::KeyB);
         keys.press(KeyCode::Digit1);
-        village.construction.input(&keys, &catalog);
+        village
+            .construction
+            .input(&keys, &catalog, village.stock.sandbox);
         village.construction.plan(
             &catalog,
             &mut village.stock,

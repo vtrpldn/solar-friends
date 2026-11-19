@@ -689,18 +689,36 @@ impl Construction {
         self.menu && !self.placing_project() && !self.editing_search
     }
 
-    pub fn build_rows<'a>(&self, catalog: &'a Catalog) -> Vec<&'a Project> {
+    pub fn build_rows<'a>(&self, catalog: &'a Catalog) -> Vec<(&'a String, &'a Project)> {
         self.options(catalog)
             .into_iter()
             .skip(self.page * BUILD_ROWS)
             .take(BUILD_ROWS)
-            .map(|(_, project)| project)
             .collect()
     }
 
-    pub fn pick_build_row(&mut self, catalog: &Catalog, row: usize) {
-        if let Some((id, _)) = self.options(catalog).get(self.page * BUILD_ROWS + row) {
-            self.choose_blueprint(id);
+    pub fn blueprint_already_planned(
+        &self,
+        key: &str,
+        definition: &Project,
+        sandbox: bool,
+        ignore: Option<usize>,
+    ) -> bool {
+        !sandbox
+            && !definition.repeatable
+            && self.plans.iter().enumerate().any(|(index, project)| {
+                !project.removed && ignore != Some(index) && project.key == key
+            })
+    }
+
+    pub fn pick_build_row(&mut self, catalog: &Catalog, row: usize, sandbox: bool) {
+        if let Some((key, definition)) = self.build_rows(catalog).get(row) {
+            if self.blueprint_already_planned(key, definition, sandbox, None) {
+                self.status =
+                    "Already planned or built. Select the existing project to manage it.".into();
+            } else {
+                self.choose_blueprint(key);
+            }
         }
     }
 
@@ -729,7 +747,7 @@ impl Construction {
         self.field_size = (self.field_size + delta).clamp(IVec2::splat(2), IVec2::splat(32));
     }
 
-    pub fn input(&mut self, keyboard: &ButtonInput<KeyCode>, catalog: &Catalog) {
+    pub fn input(&mut self, keyboard: &ButtonInput<KeyCode>, catalog: &Catalog, sandbox: bool) {
         if self.moving.is_some() {
             if keyboard.just_pressed(KeyCode::KeyR) {
                 self.rotate_placement();
@@ -754,7 +772,7 @@ impl Construction {
             self.turn_build_page(catalog, keyboard.just_pressed(KeyCode::PageDown));
         }
         if let Some(index) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key)) {
-            self.pick_build_row(catalog, index);
+            self.pick_build_row(catalog, index, sandbox);
         }
         if self.placing_field()
             && let Some(delta) = field_size_input(keyboard)
@@ -1296,12 +1314,7 @@ impl Construction {
         definition: &Project,
         (catalog, sandbox, ignore): (&Catalog, bool, Option<usize>),
     ) -> Option<&'static str> {
-        if !sandbox
-            && !definition.repeatable
-            && self.plans.iter().enumerate().any(|(index, project)| {
-                !project.removed && ignore != Some(index) && project.key == blueprint.key
-            })
-        {
+        if self.blueprint_already_planned(&blueprint.key, definition, sandbox, ignore) {
             return Some("Already planned.");
         }
         let start = blueprint.position;
