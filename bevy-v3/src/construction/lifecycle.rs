@@ -37,6 +37,8 @@ pub(super) struct ChangeJob {
     pub work: f64,
     pub required: f64,
     retry: f64,
+    #[serde(skip)]
+    blocked_destination: Option<&'static str>,
 }
 
 #[derive(Clone, Copy, Deserialize, Serialize)]
@@ -89,6 +91,9 @@ impl Construction {
                 Change::Salvage => "Salvaging",
                 Change::Demolish => "Demolishing",
             };
+            if let Some(reason) = job.blocked_destination {
+                return Some(format!("{action} · {reason}"));
+            }
             if job.target.is_none() && job.work >= job.required {
                 let (recovered, _) = self.dismantling_yield(catalog, index, job.kind);
                 if !self.can_store_dismantling(catalog, stock, index, &recovered) {
@@ -359,6 +364,7 @@ impl Construction {
                 work: 0.0,
                 required,
                 retry: 0.0,
+                blocked_destination: None,
             },
         );
         self.release_construction(index);
@@ -490,8 +496,9 @@ impl Construction {
                     if let Some(error) =
                         self.move_placement_error(catalog, stock, site, index, target)
                     {
-                        self.status = error.into();
-                        self.changes.get_mut(&index).expect("blocked move").retry = 3.0;
+                        let job = self.changes.get_mut(&index).expect("blocked move");
+                        job.blocked_destination = Some(error);
+                        job.retry = 3.0;
                         continue;
                     }
                     if Self::uses_foundation(&self.plans[index].key) {
@@ -510,6 +517,13 @@ impl Construction {
                     self.plans[index].rotation = target.rotation;
                     self.changes.remove(&index);
                     self.status = "Project relocated.".into();
+                    self.record_event(
+                        clock,
+                        format!(
+                            "{} relocated by residents.",
+                            catalog.projects[&self.plans[index].key].name
+                        ),
+                    );
                     continue;
                 }
                 let kind = job.kind;
@@ -702,11 +716,15 @@ mod tests {
         construction.plans.push(obstacle);
         for _ in 0..2_000 {
             construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
-            if construction.status == "Another project occupies that space." {
+            if construction.changes[&0].blocked_destination.is_some() {
                 break;
             }
         }
-        assert_eq!(construction.status, "Another project occupies that space.");
+        construction.production.selected = Some(0);
+        assert_eq!(
+            construction.lifecycle_status(&catalog, &stock).as_deref(),
+            Some("Moving · Another project occupies that space.")
+        );
         assert_eq!(construction.plans[0].position, original);
         assert_eq!(construction.foundations.len(), 1);
         assert!(construction.changes[&0].target.is_some());
