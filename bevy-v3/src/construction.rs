@@ -2643,6 +2643,89 @@ mod tests {
     use crate::setup::WorldSetup;
 
     #[test]
+    fn every_catalog_blueprint_has_a_valid_site_on_the_default_sandbox_plot() {
+        let catalog = Catalog::default();
+        let mut setup = WorldSetup::default();
+        setup.mode = crate::setup::Mode::Sandbox;
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::generate(&setup);
+        let ground = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: setup.round_trip_km(),
+        };
+        let mut candidates: Vec<_> = (-30..94)
+            .flat_map(|z| (-30..94).map(move |x| IVec2::new(x, z)))
+            .collect();
+        candidates.sort_by_key(|&position| (position - IVec2::new(44, 36)).length_squared());
+        for (key, project) in &catalog.projects {
+            let mut construction = Construction::default();
+            let (position, rotation) = (0..4)
+                .find_map(|rotation| {
+                    candidates
+                        .iter()
+                        .copied()
+                        .find(|&position| {
+                            let proposal = Construction::proposal(
+                                &catalog,
+                                key,
+                                position,
+                                default_field_size(),
+                                rotation,
+                            );
+                            construction
+                                .placement_error(
+                                    &terrain,
+                                    &land,
+                                    camp,
+                                    &proposal,
+                                    project,
+                                    (&catalog, true, None),
+                                )
+                                .is_none()
+                        })
+                        .map(|position| (position, rotation))
+                })
+                .unwrap_or_else(|| panic!("{key} has no valid placement"));
+            let mut stock = Stock::for_start(&setup, &catalog);
+            construction
+                .lab_order(
+                    &catalog,
+                    &mut stock,
+                    ground,
+                    clock,
+                    &LabOrder::Build {
+                        key: key.clone(),
+                        x: position.x,
+                        z: position.y,
+                        rotation,
+                        size: None,
+                    },
+                    setup.richness(),
+                )
+                .unwrap_or_else(|error| panic!("{key} at {position}: {error}"));
+            let plan = &construction.plans[0];
+            assert_eq!(&plan.key, key);
+            assert_eq!(plan.delivered, plan.loads, "{key}");
+            if key == "road" {
+                assert_eq!(plan.work, 0.0);
+            } else {
+                assert_eq!(plan.work, project.work, "{key}");
+                assert_eq!(
+                    construction.finished_models(&catalog).next().unwrap().1,
+                    project.model
+                );
+            }
+            assert!(construction.valid_save(&catalog, &stock), "{key}");
+        }
+    }
+
+    #[test]
     fn timber_batch_reserves_input_and_returns_finished_output() {
         let mut setup = WorldSetup::default();
         setup.mode = crate::setup::Mode::Sandbox;
