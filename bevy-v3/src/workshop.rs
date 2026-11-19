@@ -1,3 +1,5 @@
+mod sprites;
+
 use std::collections::{HashMap, HashSet};
 
 use bevy::{
@@ -70,6 +72,12 @@ impl AssetSearch {
 
 #[derive(Component)]
 struct WorkshopModel;
+
+#[derive(Component)]
+struct InspectionCamera;
+
+#[derive(Component)]
+struct InspectionLight;
 
 #[derive(Component)]
 struct ScaleFigure;
@@ -158,6 +166,8 @@ pub fn run() {
             show_scale_figure,
             apply_surface,
             capture_preview,
+            sprites::start,
+            sprites::progress,
             draw_guides,
         )
             .chain(),
@@ -187,10 +197,13 @@ fn setup(
     });
     commands.spawn((
         Camera3d::default(),
+        InspectionCamera,
+        bevy::ui::IsDefaultUiCamera,
         Projection::Orthographic(OrthographicProjection::default_3d()),
         orbit_camera(0.0, DEFAULT_ELEVATION, Vec3::Y),
     ));
     commands.spawn((
+        InspectionLight,
         DirectionalLight {
             shadows_enabled: true,
             ..default()
@@ -227,7 +240,10 @@ fn controls(
         MessageReader<bevy::input::keyboard::KeyboardInput>,
     ),
     time: Res<Time>,
-    pending: Query<(), With<Screenshot>>,
+    (pending, sprite_capture): (
+        Query<(), With<Screenshot>>,
+        Option<Res<sprites::SpriteCapture>>,
+    ),
     (mouse, motion, scroll): (
         Res<ButtonInput<MouseButton>>,
         Res<AccumulatedMouseMotion>,
@@ -236,7 +252,7 @@ fn controls(
     (catalog, window): (Res<Catalog>, Single<&Window>),
     mut workshop: ResMut<Workshop>,
 ) {
-    if !pending.is_empty() {
+    if !pending.is_empty() || sprite_capture.is_some() {
         return;
     }
     if keys.just_pressed(KeyCode::Slash) && workshop.search.is_none() {
@@ -348,12 +364,23 @@ fn viewport_height(project: &crate::catalog::Project, zoom: f32) -> f32 {
     footprint.mul_add(1.4, 4.0) * zoom
 }
 
+fn lighting(night: bool) -> (f32, Color, f32, &'static str) {
+    if night {
+        (800.0, Color::srgb_u8(157, 176, 227), 60.0, "Night")
+    } else {
+        (14500.0, Color::srgb_u8(255, 236, 201), 350.0, "Day")
+    }
+}
+
 fn show_model(
     mut commands: Commands,
     (assets, catalog, workshop): (Res<AssetServer>, Res<Catalog>, Res<Workshop>),
     mut preview: Local<Option<(usize, Entity)>>,
-    (mut light, mut ambient): (Single<&mut DirectionalLight>, ResMut<GlobalAmbientLight>),
-    mut camera: Single<(&mut Transform, &mut Projection), With<Camera3d>>,
+    (mut light, mut ambient): (
+        Single<&mut DirectionalLight, With<InspectionLight>>,
+        ResMut<GlobalAmbientLight>,
+    ),
+    mut camera: Single<(&mut Transform, &mut Projection), With<InspectionCamera>>,
     mut text: Single<&mut Text>,
 ) {
     if !workshop.is_changed() {
@@ -388,24 +415,17 @@ fn show_model(
         };
     }
     light.shadows_enabled = !matches!(workshop.surface, Surface::Wireframe);
-    let mode = if workshop.night {
-        light.illuminance = 800.0;
-        light.color = Color::srgb_u8(157, 176, 227);
-        ambient.brightness = 60.0;
-        "Night"
-    } else {
-        light.illuminance = 14500.0;
-        light.color = Color::srgb_u8(255, 236, 201);
-        ambient.brightness = 350.0;
-        "Day"
-    };
+    let (illuminance, color, brightness, mode) = lighting(workshop.night);
+    light.illuminance = illuminance;
+    light.color = color;
+    ambient.brightness = brightness;
     if let Some(search) = &workshop.search {
         text.set_if_neq(Text::new(search.label(&workshop.projects, &catalog)));
         return;
     }
     let surface = workshop.surface.label();
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure · Home Reset · F5 Export PNG\n{}",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure · Home Reset · F5 Export PNG · F6 Sprite sheet\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
@@ -522,15 +542,15 @@ fn apply_surface(
 }
 
 fn capture_preview(
-    mut commands: Commands,
-    keys: Res<ButtonInput<KeyCode>>,
+    (mut commands, keys): (Commands, Res<ButtonInput<KeyCode>>),
     (mut workshop, catalog): (ResMut<Workshop>, Res<Catalog>),
     mut panel: Single<&mut Node, With<Text>>,
     pending: Query<(), With<Screenshot>>,
     scene: Query<(&SceneInstance, Option<&WorkshopModel>, Option<&ScaleFigure>)>,
+    sprite_capture: Option<Res<sprites::SpriteCapture>>,
     spawner: Res<SceneSpawner>,
 ) {
-    if !pending.is_empty() {
+    if !pending.is_empty() || sprite_capture.is_some() {
         return;
     }
     panel.display = Display::Flex;
