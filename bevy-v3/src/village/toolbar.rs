@@ -63,6 +63,7 @@ enum Action {
     InventorySearch,
     Resident(usize),
     WorkPriority(WorkGroup),
+    WorkerReservation(bool),
     Home(bool),
     ListedHome(usize),
     Shift(bool),
@@ -226,7 +227,9 @@ impl Action {
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
-            Self::WorkPriority(_) => village.utility_panel == Some(UtilityPanel::Residents),
+            Self::WorkPriority(_) | Self::WorkerReservation(_) => {
+                village.utility_panel == Some(UtilityPanel::Residents)
+            }
             Self::Resident(_) => matches!(
                 village.utility_panel,
                 Some(UtilityPanel::Residents | UtilityPanel::Finances)
@@ -425,6 +428,9 @@ impl Action {
             }
             Self::Resident(index) => NAMES[index].into(),
             Self::WorkPriority(group) => village.construction.work_priority_label(group),
+            Self::WorkerReservation(essential) => {
+                village.construction.worker_reservation_label(essential)
+            }
             Self::Home(true) => "Assign selected home".into(),
             Self::Home(false) => "Clear home assignment".into(),
             Self::ListedHome(_) => String::new(),
@@ -694,6 +700,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for group in WorkGroup::ALL {
                     spawn_button(menu, &assets, Action::WorkPriority(group));
                 }
+                spawn_button(menu, &assets, Action::WorkerReservation(true));
+                spawn_button(menu, &assets, Action::WorkerReservation(false));
                 spawn_button(menu, &assets, Action::Shift(false));
                 spawn_button(menu, &assets, Action::Shift(true));
                 spawn_button(menu, &assets, Action::Ledger);
@@ -1010,6 +1018,9 @@ fn handle_buttons(
                     village.projects_page = 0;
                 }
                 Action::Resident(index) if !picker.open => village.select_resident(index),
+                Action::WorkerReservation(essential) if !picker.open => {
+                    village.construction.cycle_worker_reservation(essential);
+                }
                 Action::WorkPriority(group) if !picker.open => {
                     village.construction.cycle_work_priority(group);
                 }
@@ -1174,6 +1185,7 @@ fn handle_buttons(
                 | Action::ProjectFilter
                 | Action::Resident(_)
                 | Action::WorkPriority(_)
+                | Action::WorkerReservation(_)
                 | Action::Home(_)
                 | Action::ListedHome(_)
                 | Action::Shift(_)
@@ -1363,7 +1375,7 @@ fn refresh(
             Action::ProjectFilter => show_projects,
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => show_residents || show_finances,
-            Action::WorkPriority(_) => show_residents,
+            Action::WorkPriority(_) | Action::WorkerReservation(_) => show_residents,
             Action::Shift(_) | Action::Ledger => show_finances,
             Action::ExpansionReserve(_) => show_finances && !village.finance_history_open,
             Action::PantryBatches

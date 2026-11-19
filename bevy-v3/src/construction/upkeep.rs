@@ -547,6 +547,9 @@ impl Construction {
         site: ConstructionSite,
         dt: f32,
     ) -> bool {
+        if self.reservation_pass.is_some() && job.worker.is_some() {
+            return false;
+        }
         let project = match target {
             Target::Building(id) => {
                 let project = &self.plans[id];
@@ -624,7 +627,7 @@ impl Construction {
             }
             let picked = (0..self.residents.len())
                 .filter(|&index| {
-                    self.free_for_leisure(index) && self.residents[index].health.energy >= 25.0
+                    self.work_candidate(index) && self.residents[index].health.energy >= 25.0
                 })
                 .find_map(|index| {
                     target_path(index, self.residents[index].position).map(|path| (index, path))
@@ -637,6 +640,9 @@ impl Construction {
             self.residents[index].leisure.visit = None;
             index
         };
+        if self.reservation_pass.is_some() {
+            return false;
+        }
         let resident = &mut self.residents[worker];
         resident.move_along_path(dt, job.parts_paid);
         if !resident.path.is_empty() {

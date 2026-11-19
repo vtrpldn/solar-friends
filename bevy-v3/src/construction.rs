@@ -186,6 +186,8 @@ pub struct Construction {
     priority: Option<usize>,
     #[serde(default)]
     work_policy: work_policy::WorkPolicy,
+    #[serde(skip)]
+    reservation_pass: Option<[bool; 5]>,
     #[serde(default)]
     trip: Option<TownTrip>,
     #[serde(default)]
@@ -343,6 +345,7 @@ impl Default for Construction {
             moving: None,
             priority: None,
             work_policy: work_policy::WorkPolicy::default(),
+            reservation_pass: None,
             trip: None,
             second_trip: None,
             supplier_construction: false,
@@ -2062,45 +2065,62 @@ impl Construction {
             resident.health.levels[Need::Hunger as usize] < 15.0
                 || resident.health.levels[Need::Hydration as usize] < 15.0
         });
-        for group in self.work_policy.dispatch_order(urgent) {
-            match group {
-                WorkGroup::Essentials => {
-                    self.tick_water_group(catalog, stock, site, clock.seconds, dt, Some(group));
-                    self.tick_production_group(
-                        catalog,
-                        stock,
-                        site,
-                        clock.seconds,
-                        dt,
-                        Some(group),
-                    );
-                    self.tick_farm_jobs(catalog, stock, site, clock.seconds, dt);
-                }
-                WorkGroup::Maintenance => {
-                    self.tick_water_group(catalog, stock, site, clock.seconds, dt, Some(group));
-                    self.tick_upkeep(catalog, stock, site, dt);
-                    self.restock_upkeep(catalog, stock, site.land, clock);
-                }
-                WorkGroup::Production => {
-                    self.tick_gathering(catalog, stock, site, clock.seconds, dt);
-                    self.tick_production_group(
-                        catalog,
-                        stock,
-                        site,
-                        clock.seconds,
-                        dt,
-                        Some(group),
-                    );
-                }
-                WorkGroup::Construction => {
-                    self.tick_changes(catalog, stock, site, clock.seconds, dt);
-                    self.tick_builders(catalog, stock, site, clock.seconds, dt, raining);
-                }
+        let order = self.work_policy.dispatch_order(urgent);
+        let (essential, production) = self.reserved_workers();
+        // Reserve assignments first. The normal pass advances jobs and assigns any
+        // residents whose reserved work was unavailable.
+        for group in order {
+            let workers = match group {
+                WorkGroup::Essentials if urgent => [true; 5],
+                WorkGroup::Essentials | WorkGroup::Maintenance => essential,
+                WorkGroup::Production => production,
+                WorkGroup::Construction => continue,
+            };
+            if workers.iter().any(|&reserved| reserved) {
+                self.reservation_pass = Some(workers);
+                self.tick_work_group(group, catalog, stock, site, clock, (dt, raining));
             }
+        }
+        self.reservation_pass = None;
+        for group in order {
+            self.tick_work_group(group, catalog, stock, site, clock, (dt, raining));
         }
         stock
             .equipment
             .release(|worker, task| self.active_tool_task(worker, task));
+    }
+
+    fn tick_work_group(
+        &mut self,
+        group: WorkGroup,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: TownClock,
+        (dt, raining): (f32, bool),
+    ) {
+        match group {
+            WorkGroup::Essentials => {
+                self.tick_water_group(catalog, stock, site, clock.seconds, dt, Some(group));
+                self.tick_production_group(catalog, stock, site, clock.seconds, dt, Some(group));
+                self.tick_farm_jobs(catalog, stock, site, clock.seconds, dt);
+            }
+            WorkGroup::Maintenance => {
+                self.tick_water_group(catalog, stock, site, clock.seconds, dt, Some(group));
+                self.tick_upkeep(catalog, stock, site, dt);
+                if self.reservation_pass.is_none() {
+                    self.restock_upkeep(catalog, stock, site.land, clock);
+                }
+            }
+            WorkGroup::Production => {
+                self.tick_gathering(catalog, stock, site, clock.seconds, dt);
+                self.tick_production_group(catalog, stock, site, clock.seconds, dt, Some(group));
+            }
+            WorkGroup::Construction => {
+                self.tick_changes(catalog, stock, site, clock.seconds, dt);
+                self.tick_builders(catalog, stock, site, clock.seconds, dt, raining);
+            }
+        }
     }
 
     fn tick_builders(

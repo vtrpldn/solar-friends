@@ -631,6 +631,10 @@ impl Construction {
         clock: f64,
         dt: f32,
     ) {
+        if self.reservation_pass.is_some() {
+            self.assign_farm_workers(catalog, site, clock);
+            return;
+        }
         for job_index in (0..self.farming.jobs.len()).rev() {
             let job = &mut self.farming.jobs[job_index];
             if let Some(lots) = &mut job.food_output
@@ -770,6 +774,10 @@ impl Construction {
             }
         }
 
+        self.assign_farm_workers(catalog, site, clock);
+    }
+
+    fn assign_farm_workers(&mut self, catalog: &Catalog, site: ConstructionSite, clock: f64) {
         let mut waiting: Vec<_> = self
             .farming
             .jobs
@@ -781,7 +789,9 @@ impl Construction {
         waiting.sort_unstable();
         for (_, index) in waiting {
             self.try_farm_worker(index, catalog, site);
-            self.farming.jobs[index].retry = clock + 1.0;
+            if self.reservation_pass.is_none() {
+                self.farming.jobs[index].retry = clock + 1.0;
+            }
         }
     }
 
@@ -878,7 +888,7 @@ impl Construction {
     fn try_farm_worker(&mut self, job: usize, catalog: &Catalog, site: ConstructionSite) {
         if self.farming.jobs[job].inputs.is_empty() {
             for (index, worker) in self.residents.iter().enumerate() {
-                if self.free_for_leisure(index) {
+                if self.work_candidate(index) {
                     let Some(path) =
                         self.path_to_bed(catalog, site, &self.farming.jobs[job], worker.position)
                     else {
@@ -893,7 +903,7 @@ impl Construction {
             return;
         }
         for (index, worker) in self.residents.iter().enumerate() {
-            if !self.free_for_leisure(index) {
+            if !self.work_candidate(index) {
                 continue;
             }
             let Some(path) =

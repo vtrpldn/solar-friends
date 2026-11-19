@@ -431,6 +431,9 @@ impl Construction {
         clock: f64,
         dt: f32,
     ) -> bool {
+        if self.reservation_pass.is_some() && job.worker.is_some() {
+            return false;
+        }
         if !self
             .utilities
             .water_site(id)
@@ -451,7 +454,9 @@ impl Construction {
             if clock < job.retry {
                 return false;
             }
-            job.retry = clock + 3.0;
+            if self.reservation_pass.is_none() {
+                job.retry = clock + 3.0;
+            }
             if let (WaterAction::Carry { channel, .. }, WaterPhase::Staged(_)) =
                 (job.action, job.phase)
                 && !self
@@ -463,7 +468,7 @@ impl Construction {
             }
             let picked = (0..self.residents.len())
                 .filter(|&index| {
-                    self.free_for_leisure(index) && self.residents[index].health.energy >= 25.0
+                    self.work_candidate(index) && self.residents[index].health.energy >= 25.0
                 })
                 .find_map(|index| {
                     let path = match (job.action, job.phase) {
@@ -496,6 +501,9 @@ impl Construction {
             index
         };
 
+        if self.reservation_pass.is_some() {
+            return false;
+        }
         let carrying = matches!(job.phase, WaterPhase::Deliver);
         let boost = if carrying && !self.residents[worker].path.is_empty() {
             stock.use_tool(

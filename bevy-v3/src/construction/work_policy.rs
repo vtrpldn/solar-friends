@@ -42,19 +42,30 @@ impl WorkGroup {
 #[derive(Deserialize, Serialize)]
 pub(super) struct WorkPolicy {
     priorities: [u8; 4],
+    #[serde(default = "one_worker")]
+    essential_workers: u8,
+    #[serde(default = "one_worker")]
+    production_workers: u8,
 }
 
 impl Default for WorkPolicy {
     fn default() -> Self {
         Self {
             priorities: [3, 3, 2, 2],
+            essential_workers: 1,
+            production_workers: 1,
         }
     }
+}
+
+fn one_worker() -> u8 {
+    1
 }
 
 impl WorkPolicy {
     pub(super) fn valid(&self) -> bool {
         self.priorities.iter().all(|&priority| priority <= 3)
+            && u16::from(self.essential_workers) + u16::from(self.production_workers) <= 5
     }
 
     pub(super) fn dispatch_order(&self, urgent: bool) -> [WorkGroup; 4] {
@@ -70,6 +81,54 @@ impl WorkPolicy {
 }
 
 impl Construction {
+    pub(super) fn reserved_workers(&self) -> ([bool; 5], [bool; 5]) {
+        let mut essential = [false; 5];
+        let mut production = [false; 5];
+        let mut available = (0..self.residents.len()).filter(|&index| {
+            self.residents[index].health.energy >= 25.0 && self.free_for_leisure(index)
+        });
+        for index in available
+            .by_ref()
+            .take(usize::from(self.work_policy.essential_workers))
+        {
+            essential[index] = true;
+        }
+        for index in available.take(usize::from(self.work_policy.production_workers)) {
+            production[index] = true;
+        }
+        (essential, production)
+    }
+
+    pub(super) fn work_candidate(&self, index: usize) -> bool {
+        self.reservation_pass.is_none_or(|workers| workers[index]) && self.free_for_leisure(index)
+    }
+
+    pub(crate) fn cycle_worker_reservation(&mut self, essential: bool) {
+        let policy = &mut self.work_policy;
+        let (selected, other) = if essential {
+            (
+                &mut policy.essential_workers,
+                &mut policy.production_workers,
+            )
+        } else {
+            (
+                &mut policy.production_workers,
+                &mut policy.essential_workers,
+            )
+        };
+        *selected = (*selected + 1) % 6;
+        *other = (*other).min(5 - *selected);
+    }
+
+    pub(crate) fn worker_reservation_label(&self, essential: bool) -> String {
+        let policy = &self.work_policy;
+        if essential {
+            format!("Reserve {} for essentials", policy.essential_workers)
+        } else {
+            format!("Reserve {} for production", policy.production_workers)
+        }
+    }
+
     pub(crate) fn cycle_work_priority(&mut self, group: WorkGroup) {
         let priority = &mut self.work_policy.priorities[group as usize];
         *priority = (*priority + 1) % 4;
@@ -117,11 +176,29 @@ mod tests {
             seconds: 0.0,
             round_trip_km: 12,
         };
+        village.work_policy.essential_workers = 0;
+        village.work_policy.production_workers = 0;
         let before = serde_json::to_vec(&village).unwrap();
         village.cycle_work_priority(WorkGroup::Construction);
         village.tick(&catalog, &mut stock.clone(), ground, clock, 0.1, false);
         assert!(village.residents[0].assignment.is_some());
         assert!(village.production.jobs[0].worker.is_none());
+
+        let mut reserved: Construction = serde_json::from_slice(&before).unwrap();
+        reserved.cycle_work_priority(WorkGroup::Construction);
+        reserved.cycle_worker_reservation(false);
+        assert_eq!(reserved.work_policy.production_workers, 1);
+        let saved = serde_json::to_vec(&reserved).unwrap();
+        reserved = serde_json::from_slice(&saved).unwrap();
+        reserved.tick(&catalog, &mut stock.clone(), ground, clock, 0.1, false);
+        assert_eq!(reserved.production.jobs[0].worker, Some(0));
+        assert!(reserved.residents[0].assignment.is_none());
+        assert!(reserved.reservation_pass.is_none());
+
+        let mut no_batch: Construction = serde_json::from_slice(&saved).unwrap();
+        no_batch.production.jobs.clear();
+        no_batch.tick(&catalog, &mut stock.clone(), ground, clock, 0.1, false);
+        assert!(no_batch.residents[0].assignment.is_some());
 
         let mut restored: Construction = serde_json::from_slice(&before).unwrap();
         restored.cycle_work_priority(WorkGroup::Production);

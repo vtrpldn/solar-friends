@@ -945,6 +945,10 @@ impl Construction {
                 group == WorkGroup::for_recipe(&catalog.production[&job.recipe])
             })
         };
+        if self.reservation_pass.is_some() {
+            self.assign_producers(catalog, stock, site, clock, in_group);
+            return;
+        }
         for job in &mut self.production.jobs {
             if in_group(job)
                 && matches!(job.phase, Phase::Pickup | Phase::Harvest | Phase::Work)
@@ -1353,18 +1357,7 @@ impl Construction {
             .iter()
             .any(|resident| resident.health.levels[Need::Hunger as usize] < 15.0);
         for index in 0..self.residents.len() {
-            let resident = &self.residents[index];
-            if resident.assignment.is_some()
-                || self.gathering.workers_at_site(index)
-                || self.production.has_worker(index)
-                || self.farming.has_worker(index)
-                || self.working_change(index)
-                || self.working_water(index)
-                || self.working_upkeep(index)
-                || resident.health.task.is_some()
-                || resident.town_work.active()
-                || self.driver_booked(index)
-            {
+            if !self.work_candidate(index) {
                 continue;
             }
             jobs.sort_by_key(|&job| {
@@ -1388,8 +1381,10 @@ impl Construction {
                 }
             }
         }
-        for job in jobs {
-            self.production.jobs[job].retry_at = clock + 1.0;
+        if self.reservation_pass.is_none() {
+            for job in jobs {
+                self.production.jobs[job].retry_at = clock + 1.0;
+            }
         }
     }
 
