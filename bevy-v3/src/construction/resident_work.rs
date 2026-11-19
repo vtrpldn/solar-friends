@@ -1242,6 +1242,46 @@ impl Construction {
         label
     }
 
+    pub(crate) fn lab_town_work(&self, resident: usize) -> &TownWork {
+        &self.residents[resident].town_work
+    }
+
+    pub(crate) fn lab_resident_row(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        index: usize,
+    ) -> String {
+        let worker = &self.residents[index];
+        let health = &worker.health;
+        let (need, level) = [
+            "Hunger",
+            "Bladder",
+            "Bowels",
+            "Hygiene",
+            "Social",
+            "Fun",
+            "Hydration",
+        ]
+        .into_iter()
+        .zip(health.levels)
+        .min_by(|a, b| a.1.total_cmp(&b.1))
+        .expect("residents have needs");
+        let action = self.resident_action(catalog, index);
+        let mut line = format!(
+            "{} · {action}\nEnergy {:.0}% · Food {:.0}% · Water {:.0}% · Lowest need {need} {level:.0}%",
+            NAMES[index],
+            health.energy,
+            health.levels[Need::Hunger as usize],
+            health.levels[Need::Hydration as usize]
+        );
+        if let Some(concern) = self.concern(index, catalog, stock) {
+            line.push('\n');
+            line.push_str(concern);
+        }
+        line
+    }
+
     pub fn resident_status(&self, catalog: &Catalog, stock: &Stock, selected: usize) -> String {
         let mut rows = self
             .residents

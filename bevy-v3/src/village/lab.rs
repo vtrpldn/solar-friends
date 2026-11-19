@@ -678,6 +678,7 @@ enum LabView {
     Map,
     Trends,
     Trade,
+    Residents,
 }
 
 impl LabView {
@@ -692,7 +693,8 @@ impl LabView {
             Self::Events => Self::Map,
             Self::Map => Self::Trends,
             Self::Trends => Self::Trade,
-            Self::Trade => Self::Overview,
+            Self::Trade => Self::Residents,
+            Self::Residents => Self::Overview,
         }
     }
 }
@@ -774,6 +776,68 @@ impl LabTrade {
             notice,
         )
     }
+}
+
+fn lab_resident_view(
+    runner: &mut Runner,
+    catalog: &Catalog,
+    keys: &ButtonInput<KeyCode>,
+    playback: &mut Playback,
+) -> String {
+    use std::fmt::Write as _;
+    let count = super::NAMES.len();
+    if keys.just_pressed(KeyCode::BracketRight) {
+        playback.resident = (playback.resident + 1) % count;
+    } else if keys.just_pressed(KeyCode::BracketLeft) {
+        playback.resident = (playback.resident + count - 1) % count;
+    }
+    let resident = playback.resident;
+    let story = !runner.village.stock.sandbox;
+    let editable = story && !playback.replaying && !runner.done();
+    if editable && keys.any_just_pressed([KeyCode::KeyT, KeyCode::KeyY]) {
+        let recurring = keys.just_pressed(KeyCode::KeyY);
+        let work = runner.village.construction.lab_town_work(resident);
+        let enabled = if recurring {
+            !work.repeating
+        } else {
+            !work.booked
+        };
+        let order = LabOrder::Outside {
+            resident: resident + 1,
+            enabled,
+            recurring,
+        };
+        playback.notice = match runner.submit(catalog, order) {
+            Ok(()) => runner
+                .outcomes
+                .last()
+                .and_then(|outcome| outcome.error.clone())
+                .unwrap_or_else(|| "Town work order accepted.".into()),
+            Err(error) => error.into(),
+        };
+    }
+    let mut text = "Residents\nTab Switch view · [ / ] Choose resident".to_owned();
+    if editable {
+        text.push_str(" · T Book/cancel day shift · Y Toggle weekdays");
+    }
+    let village = &runner.village;
+    for index in 0..count {
+        let marker = if resident == index { "> " } else { "" };
+        let row = village
+            .construction
+            .lab_resident_row(catalog, &village.stock, index);
+        let _ = write!(text, "\n\n{marker}{row}");
+        if story {
+            let work = village.construction.lab_town_work(index);
+            let _ = write!(
+                text,
+                "\n{} · Weekdays {}",
+                work.status(),
+                if work.repeating { "on" } else { "off" }
+            );
+        }
+    }
+    text
 }
 
 fn lab_trends(samples: &[Sample], catalog: &Catalog) -> String {
@@ -1237,6 +1301,7 @@ struct Playback {
     replacement: Option<LabReplacement>,
     story_settings: Option<StorySettings>,
     trade: LabTrade,
+    resident: usize,
 }
 
 impl Playback {
@@ -1362,6 +1427,7 @@ impl Default for Playback {
             replacement: None,
             story_settings: None,
             trade: LabTrade::default(),
+            resident: 0,
         }
     }
 }
@@ -1933,6 +1999,8 @@ fn update_lab_window(
                 playback.notice = notice;
             }
             text
+        } else if playback.view == LabView::Residents {
+            lab_resident_view(&mut runner, &catalog, &keys, playback)
         } else if playback.view == LabView::Trends {
             lab_trends(&runner.samples, &catalog)
         } else if playback.view == LabView::Events {
@@ -2043,6 +2111,25 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn lab_residents_book_work_for_the_selected_resident_only() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{"steps":2}"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        let mut playback = Playback::default();
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::BracketRight);
+        keys.press(KeyCode::KeyY);
+        let view = lab_resident_view(&mut runner, &catalog, &keys, &mut playback);
+        assert!(view.contains("> Bento"));
+        assert!(view.contains("Lowest need"));
+        assert!(runner.village.construction.lab_town_work(1).repeating);
+        assert!(!runner.village.construction.lab_town_work(0).repeating);
+        playback.replaying = true;
+        lab_resident_view(&mut runner, &catalog, &keys, &mut playback);
+        assert_eq!(runner.scenario.orders.len(), 1);
+    }
 
     #[test]
     fn lab_trade_records_a_held_sale_and_replay_cannot_submit() {

@@ -146,7 +146,7 @@ Use `--lab-ui` to start a paused, isolated Story lab run with a 365-day limit. P
 
 In the native lab, press **O** to enter a JSON order at the current step and **F5** to export a report through the current step. Press **F6** to save to the isolated lab slot, **F9** to load it, or **Shift+F6** to export a separate checkpoint. Drop a checkpoint onto the lab window and press **F8** to open it as a fresh run with the saved village and clock. Drop an exported lab report and confirm to open its replay in the same window. The command window pauses the scenario while you type.
 
-In the lab map, drag to pan, scroll to zoom, and press **Home** to focus camp. Use **Tab** to reach **Resources & trade** for town purchases, sales, and shared pickup, or **Simulation trends** and review savings, clean water, lowest resident hydration, and food ingredients over the retained samples.
+In the lab map, drag to pan, scroll to zoom, and press **Home** to focus camp. Use **Tab** to reach **Resources & trade** for town purchases, sales, and shared pickup, **Residents** for needs and town work, or **Simulation trends** and review savings, clean water, lowest resident hydration, and food ingredients over the retained samples.
 
 Press **F8** twice to reload the scenario file and any starting checkpoint. This starts a new run at step 0, so export the current report or save a checkpoint first if you want to keep it.
 
