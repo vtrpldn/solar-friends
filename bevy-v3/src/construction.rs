@@ -1103,18 +1103,29 @@ impl Construction {
                 }
             }
         }
+        let source = SUPPLY_SPOTS[2].as_vec2();
+        let existing_blocked = |cell| self.blocked(catalog, terrain, land, camp, cell);
+        let footprint = |cell: IVec2| cell.cmpge(start).all() && cell.cmplt(end).all();
+        let proposed_blocked = |cell| {
+            footprint(cell) || self.blocked_ignoring(catalog, terrain, land, camp, cell, ignore)
+        };
         if !road && !bridge {
             for (index, existing) in self.plans.iter().enumerate() {
                 if existing.removed || ignore == Some(index) {
                     continue;
                 }
-                if let Some(entrance) =
-                    building_entrance(existing, &catalog.projects[&existing.key])
-                    && entrance.cmpge(start).all()
-                    && entrance.cmplt(end).all()
-                    && !self.blocked(catalog, terrain, land, camp, entrance)
-                {
+                let Some(entrance) = building_entrance(existing, &catalog.projects[&existing.key])
+                else {
+                    continue;
+                };
+                if footprint(entrance) && !existing_blocked(entrance) {
                     return Some("Keep the existing building's entrance clear.");
+                }
+                if let Some(path) = route(source, entrance, existing_blocked, access_road)
+                    && path.iter().any(|point| footprint(point.as_ivec2()))
+                    && route(source, entrance, proposed_blocked, access_road).is_none()
+                {
+                    return Some("Keep a walking route to the existing building's entrance.");
                 }
             }
         }
@@ -1129,11 +1140,7 @@ impl Construction {
             } else {
                 build_perimeter(start, blueprint.size)
             };
-            let accessible =
-                crate::navigation::reaches_any(SUPPLY_SPOTS[2].as_vec2(), &targets, |cell| {
-                    (cell.cmpge(start).all() && cell.cmplt(end).all())
-                        || self.blocked(catalog, terrain, land, camp, cell)
-                });
+            let accessible = crate::navigation::reaches_any(source, &targets, proposed_blocked);
             if !accessible {
                 return Some(if bridge {
                     "Keep one bridge end reachable from the village."
@@ -1877,11 +1884,24 @@ impl Construction {
         camp: IVec2,
         cell: IVec2,
     ) -> bool {
+        self.blocked_ignoring(catalog, terrain, land, camp, cell, None)
+    }
+
+    fn blocked_ignoring(
+        &self,
+        catalog: &Catalog,
+        terrain: &Terrain,
+        land: &Land,
+        camp: IVec2,
+        cell: IVec2,
+        ignore: Option<usize>,
+    ) -> bool {
         let Vec2 { x, y: z } = world_position(cell.x as f32, cell.y as f32);
         let (center, width) = terrain.river(f64::from(z));
         let inside = |start: IVec2, end: IVec2| cell.cmpge(start).all() && cell.cmplt(end).all();
-        let crossing = self.plans.iter().any(|plan| {
-            !plan.removed
+        let crossing = self.plans.iter().enumerate().any(|(index, plan)| {
+            ignore != Some(index)
+                && !plan.removed
                 && plan.key == "bridge"
                 && plan.work >= catalog.projects[&plan.key].work
                 && inside(plan.position, plan.position + plan.size)
@@ -1895,8 +1915,9 @@ impl Construction {
                 .site_at(cell)
                 .is_some_and(|index| !self.gathering.felled(index))
             || inside(camp + IVec2::new(-1, -3), camp + IVec2::new(4, 0))
-            || self.plans.iter().any(|plan| {
-                !plan.removed
+            || self.plans.iter().enumerate().any(|(index, plan)| {
+                ignore != Some(index)
+                    && !plan.removed
                     && plan.key != "road"
                     && inside(plan.position, plan.position + plan.size)
             })
@@ -2160,6 +2181,43 @@ mod tests {
         village.selection = Some("road".into());
         village.plan(&catalog, &mut stock, site, entrance, clock);
         assert_eq!(village.plans.len(), 2);
+    }
+
+    #[test]
+    fn a_blueprint_cannot_cut_off_an_existing_entrance() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut village = Construction {
+            selection: Some("home-cottage".into()),
+            ..default()
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village.plan(&catalog, &mut stock, site, IVec2::new(44, 36), clock);
+        let entrance =
+            building_entrance(&village.plans[0], &catalog.projects["home-cottage"]).unwrap();
+        for side in [IVec2::X, IVec2::NEG_X] {
+            let obstacle = village.proposed_site(&catalog, "fire-circle", entrance + side);
+            village.plans.push(obstacle);
+        }
+        village.selection = Some("fire-circle".into());
+        village.plan(&catalog, &mut stock, site, entrance + IVec2::Y, clock);
+        assert_eq!(village.plans.len(), 3);
+        assert_eq!(
+            village.status,
+            "Keep a walking route to the existing building's entrance."
+        );
     }
 
     #[test]
