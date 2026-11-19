@@ -269,6 +269,26 @@ impl MapState {
         details
     }
 
+    pub fn browse_sites(&mut self, runner: &Runner, catalog: &Catalog, forward: bool) {
+        let mut projects = runner.village.construction.lab_map_projects(catalog);
+        let project = if forward {
+            projects.find(|(index, ..)| self.selected.is_none_or(|current| *index > current))
+        } else {
+            projects
+                .filter(|(index, ..)| self.selected.is_none_or(|current| *index < current))
+                .last()
+        };
+        self.cancel_build();
+        self.resource = None;
+        self.recipe = 0;
+        self.selected = project.map(|(index, ..)| index);
+        let position = project.map_or_else(
+            || world_position(runner.camp.x as f32, runner.camp.y as f32),
+            |(_, position, ..)| position,
+        );
+        self.camera = Vec2::new(position.x, -position.y);
+    }
+
     pub fn cancel_build(&mut self) {
         self.blueprint = None;
         self.placement = None;
@@ -545,6 +565,44 @@ pub(super) fn resource_status(runner: &Runner, catalog: &Catalog, index: usize) 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn site_browsing_cycles_between_camp_and_projects() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps":2,
+            "setup":{"mode":"Sandbox","seed":42,"biome":0,"landscape":1,"water":1,"savings":1,"supplies":1}
+        }"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        runner
+            .submit(
+                &catalog,
+                LabOrder::Build {
+                    key: "home-cottage".into(),
+                    x: 44,
+                    z: 36,
+                    rotation: 0,
+                    size: None,
+                },
+            )
+            .unwrap();
+        assert!(runner.outcomes[0].error.is_none());
+        let mut map = MapState::default();
+        map.browse_sites(&runner, &catalog, true);
+        assert_eq!(map.selected, Some(0));
+        assert!(
+            runner
+                .village
+                .construction
+                .lab_map_project_status(&catalog, 0, runner.camp)
+                .unwrap()
+                .contains("(44, 36)")
+        );
+        map.browse_sites(&runner, &catalog, true);
+        assert_eq!(map.selected, None);
+        map.browse_sites(&runner, &catalog, false);
+        assert_eq!(map.selected, Some(0));
+    }
 
     #[test]
     fn camp_controls_issue_replayable_grid_and_food_orders() {

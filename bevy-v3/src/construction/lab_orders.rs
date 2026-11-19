@@ -361,11 +361,26 @@ impl Construction {
         })
     }
 
-    pub(crate) fn lab_map_project_status(&self, catalog: &Catalog, index: usize) -> Option<String> {
+    pub(crate) fn lab_map_project_status(
+        &self,
+        catalog: &Catalog,
+        index: usize,
+        camp: IVec2,
+    ) -> Option<String> {
         let name = self.lab_job_site_name(catalog, index)?;
+        let plan = &self.plans[index];
+        let required = catalog.projects[&plan.key].work;
+        let progress = if required > 0.0 {
+            100.0 * (plan.work / required).clamp(0.0, 1.0)
+        } else {
+            100.0
+        };
+        let distance = plan.position.as_vec2().distance(camp.as_vec2());
         Some(format!(
-            "{name} #{} · {}",
+            "{name} #{} · ({}, {}) · {distance:.0} cells from camp · {progress:.0}% built\n{}",
             index + 1,
+            plan.position.x,
+            plan.position.y,
             self.project_status(catalog, index)
         ))
     }

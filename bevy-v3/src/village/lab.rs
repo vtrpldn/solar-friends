@@ -2062,7 +2062,10 @@ fn update_lab_window(
             Err(error) => error.into(),
         };
     }
-    if keys.just_pressed(KeyCode::PageDown) {
+    if playback.view == LabView::Map && keys.any_just_pressed([KeyCode::PageDown, KeyCode::PageUp])
+    {
+        map.browse_sites(&runner, &catalog, keys.just_pressed(KeyCode::PageDown));
+    } else if keys.just_pressed(KeyCode::PageDown) {
         playback.inventory_page = playback.inventory_page.saturating_add(1);
     } else if keys.just_pressed(KeyCode::PageUp) {
         playback.inventory_page = playback.inventory_page.saturating_sub(1);
@@ -2242,13 +2245,15 @@ fn update_lab_window(
                 .and_then(|project| {
                     village
                         .construction
-                        .lab_map_project_status(&catalog, project)
+                        .lab_map_project_status(&catalog, project, runner.camp)
                 })
                 .or_else(|| {
                     map.resource
                         .and_then(|site| map::resource_status(&runner, &catalog, site))
                 })
-                .unwrap_or_else(|| "Click a project or resource to inspect it".into());
+                .unwrap_or_else(|| {
+                    "Camp stores · Click a project or resource to inspect it".into()
+                });
             let gather = if map.resource.is_some()
                 && !playback.replaying
                 && !runner.done()
@@ -2284,7 +2289,7 @@ fn update_lab_window(
             let water = map.water_details(&runner, editable);
             let project = map.project_details(&runner, &catalog, editable);
             format!(
-                "Village map · {selection}\nTab Switch view · Drag Pan · Scroll Zoom · Home Camp · Enter Inspect jobs{gather}{build}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources{project}{water}"
+                "Village map · {selection}\nTab Switch view · Drag Pan · Scroll Zoom · Home Camp · Page Up/Down Browse sites · Enter Inspect jobs{gather}{build}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources{project}{water}"
             )
         } else {
             lab_inventory(
