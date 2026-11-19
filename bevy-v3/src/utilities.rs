@@ -1058,16 +1058,27 @@ impl Utilities {
         Some(status)
     }
 
-    pub fn power_summary(&self) -> String {
+    pub fn grid_cost_per_hour(&self) -> f64 {
+        self.grid_import_kw * GRID_TARIFF_CENTS / 100.0
+    }
+
+    pub fn power_summary(&self, sandbox: bool) -> String {
         let stored = self.stored_energy();
         let capacity: f64 = self.nodes.values().map(|node| node.battery).sum();
+        let grid = if self.grid_off { "off" } else { "on" };
+        let billing = if sandbox {
+            String::from("Free in Sandbox")
+        } else {
+            format!(
+                "R${:.2}/kWh · R${:.2}/h now · R${:.2} metered",
+                GRID_TARIFF_CENTS / 100.0,
+                self.grid_cost_per_hour(),
+                self.grid_spent / 100.0
+            )
+        };
         format!(
-            "Power · {:.2} kW solar/hydro · {:.2} kW demand\nBattery {stored:.2}/{capacity:.2} kWh · {:.2} kW grid · R${:.2} used\nGrid {} · O Switch grid",
-            self.generation_kw,
-            self.demand_kw,
-            self.grid_import_kw,
-            self.grid_spent / 100.0,
-            if self.grid_off { "off" } else { "on" },
+            "Power · {:.2} kW solar/hydro · {:.2} kW demand\nBattery {stored:.2}/{capacity:.2} kWh · {:.2} kW grid\nGrid {grid} · {GRID_CAPACITY:.0} kW backup · O Switch grid\n{billing}",
+            self.generation_kw, self.demand_kw, self.grid_import_kw
         )
     }
 
@@ -2459,6 +2470,7 @@ mod tests {
         assert!(utilities.nodes[&1].powered);
         assert!((utilities.grid_import_total - 0.45).abs() < 1e-9);
         assert_eq!(utilities.grid_debt_cents, 0.0);
+        assert!(utilities.power_summary(true).contains("Free in Sandbox"));
         assert_eq!(stock.balance(), balance);
     }
 
@@ -2486,6 +2498,11 @@ mod tests {
         assert!(utilities.powered(0));
         assert!((utilities.grid_import_total - 0.45 * (10.0 * 0.45 / 60.0)).abs() < 1e-9);
         assert!(stock.balance() < before);
+        assert!(
+            utilities
+                .power_summary(false)
+                .contains("R$0.95/kWh · R$0.43/h now")
+        );
         utilities.grid_off = true;
         utilities.tick(&setup, &mut stock, 0, 11.0, 0.1);
         assert!(!utilities.powered(0));

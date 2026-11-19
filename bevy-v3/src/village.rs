@@ -2207,7 +2207,12 @@ fn show_hud(
     match village.utility_panel {
         Some(UtilityPanel::Power) => {
             label.push('\n');
-            label.push_str(&village.construction.utilities.power_summary());
+            label.push_str(
+                &village
+                    .construction
+                    .utilities
+                    .power_summary(village.stock.sandbox),
+            );
             label.push_str(&village.construction.connection_summary(
                 &catalog,
                 village.power_link,
@@ -2340,6 +2345,14 @@ fn show_hud(
                 ));
                 label.push('\n');
                 label.push_str(&village.construction.expansion_reserve_label());
+                if !village.stock.sandbox {
+                    use std::fmt::Write;
+                    let _ = write!(
+                        label,
+                        "\nGrid electricity · R${:.2}/h at current use",
+                        village.construction.utilities.grid_cost_per_hour()
+                    );
+                }
                 label.push_str("\nR Recent transactions");
             }
             label.push_str("\nTab Town trade");
