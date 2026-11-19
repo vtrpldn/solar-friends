@@ -509,25 +509,32 @@ impl Construction {
                 }
             }
         }
-        let quote = match self.trade.quote(catalog, stock, id, day, 0) {
+        let fare = fare_cents(clock.round_trip_km);
+        let quote = match self.trade.quote_sale_order(catalog, stock, id, day, 0) {
             Ok((qty, cents)) => {
-                let fare = fare_cents(clock.round_trip_km);
                 let net = (cents as f64 - fare as f64) / 100.0;
                 let after_fuel = if net < 0.0 {
                     format!("-R${:.2}", -net)
                 } else {
                     format!("R${net:.2}")
                 };
-                format!(
+                let mut quote = format!(
                     "{} · R${:.2} gross · {after_fuel} after dedicated fuel",
                     item.quantity_text(u64::from(qty)),
                     cents as f64 / 100.0,
-                )
+                );
+                if self.market.can_hold_fare(stock, fare) {
+                    quote.push_str("\nEnter Queue sale");
+                } else {
+                    quote.push_str("\nShared savings cannot cover a dedicated trip.");
+                }
+                quote.push_str(" · Shift+Enter Hold for shared trip");
+                quote
             }
             Err(error) => error.into(),
         };
         display.push_str(&format!(
-            "{buyer} · {quote}\nEnter Sell batch · Backspace Cancel last queued\n"
+            "{buyer} · {quote}\nBackspace Cancel last queued\n"
         ));
         let policy = self.trade.policies.get(id);
         let on = if policy.is_some_and(|policy| policy.enabled) {
@@ -555,7 +562,7 @@ impl Construction {
         ));
         let (used, maximum) = self.storage(catalog, stock);
         display.push_str(&format!(
-            "\nI Buy for pickup · D Order freight · Shift Enter Sell on shared trip\nStorage {used}/{maximum} units · {} fulfilled purchases",
+            "\nI Buy for pickup · D Order freight\nStorage {used}/{maximum} units · {} fulfilled purchases",
             self.trade.purchases,
         ));
         if let Some(order) = &self.trade.delivery {
@@ -660,7 +667,8 @@ mod tests {
     #[test]
     fn sale_quote_shows_a_loss_after_dedicated_fuel() {
         let catalog = Catalog::default();
-        let stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        stock.debit(stock.balance(), crate::stock::CashKind::Materials);
         let mut village = Construction::default();
         village.trade.selected = Trade::tradable(&catalog)
             .iter()
@@ -680,6 +688,19 @@ mod tests {
                     gross as f64 / 100.0,
                     loss as f64 / 100.0,
                 ))
+        );
+        assert!(village.trade_status(&catalog, &stock, clock).contains(
+            "Shared savings cannot cover a dedicated trip. · Shift+Enter Hold for shared trip"
+        ));
+        assert!(
+            village
+                .reserve_town_sale(&catalog, &mut stock, clock, "wood", false)
+                .is_err()
+        );
+        assert!(
+            village
+                .reserve_town_sale(&catalog, &mut stock, clock, "wood", true)
+                .is_ok()
         );
     }
 

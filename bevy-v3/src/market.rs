@@ -244,8 +244,12 @@ impl Market {
         self.release_fare(fare);
     }
 
+    pub fn can_hold_fare(&self, stock: &Stock, fare: u64) -> bool {
+        stock.balance().saturating_sub(self.committed_fares) >= fare
+    }
+
     pub fn hold_fare(&mut self, stock: &Stock, fare: u64) -> bool {
-        if stock.balance().saturating_sub(self.committed_fares) < fare {
+        if !self.can_hold_fare(stock, fare) {
             return false;
         }
         self.committed_fares += fare;

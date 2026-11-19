@@ -158,6 +158,20 @@ impl Trade {
         Ok((quantity, cents))
     }
 
+    pub fn quote_sale_order(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        id: &str,
+        day: u64,
+        protect: u32,
+    ) -> Result<(u32, u64), &'static str> {
+        if self.orders.len() >= 32 {
+            return Err("The town sale queue is full.");
+        }
+        self.quote(catalog, stock, id, day, protect)
+    }
+
     pub fn reserve(
         &mut self,
         catalog: &Catalog,
@@ -166,10 +180,7 @@ impl Trade {
         id: &str,
         (day, fare, protect): (u64, u64, u32),
     ) -> Result<u32, &'static str> {
-        if self.orders.len() >= 32 {
-            return Err("The town sale queue is full.");
-        }
-        let (quantity, cents) = self.quote(catalog, stock, id, day, protect)?;
+        let (quantity, cents) = self.quote_sale_order(catalog, stock, id, day, protect)?;
         if !market.hold_fare(stock, fare) {
             return Err("Shared savings cannot cover the trip fuel.");
         }
