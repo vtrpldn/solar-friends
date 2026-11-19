@@ -1683,7 +1683,7 @@ impl Construction {
         }
         self.valid_haul_reservations()
             && self.plans.len() <= 128 * 128
-            && self.plans.iter().all(|plan| {
+            && self.plans.iter().enumerate().all(|(index, plan)| {
                 catalog.projects.get(&plan.key).is_some_and(|definition| {
                     plan.rotation <= 3
                         && plan.position.cmpge(IVec2::splat(-30)).all()
@@ -1700,7 +1700,11 @@ impl Construction {
                         && plan.loads == catalog.loads_for(plan.materials(catalog))
                         && plan.staged <= plan.loads.saturating_sub(plan.delivered)
                         && plan.depot.map_or(plan.staged == 0, |depot| {
-                            self.valid_haul_depot(catalog, depot)
+                            depot != index
+                                && !plan.removed
+                                && plan.pickups == 0
+                                && plan.delivered < plan.loads
+                                && self.valid_haul_depot(catalog, depot)
                         })
                         && plan.delivered <= plan.loads
                         && (plan.pickups == 0 || plan.delivered == 0 && plan.work == 0.0)
@@ -2228,6 +2232,8 @@ impl Construction {
         counts.into_iter().all(|(index, (camp, depot))| {
             self.plans.get(index).is_some_and(|plan| {
                 depot <= u64::from(plan.staged)
+                    && !plan.removed
+                    && plan.pickups == 0
                     && camp + u64::from(plan.staged) + u64::from(plan.delivered)
                         <= u64::from(plan.loads)
             })
@@ -3082,6 +3088,9 @@ mod tests {
                 let json = serde_json::to_string(&construction).unwrap();
                 construction = serde_json::from_str(&json).unwrap();
                 assert!(construction.valid_save(&catalog, &stock));
+                construction.plans[0].depot = Some(0);
+                assert!(!construction.valid_save(&catalog, &stock));
+                construction.plans[0].depot = None;
                 saw_staging = true;
             }
             if depot_delivery.is_none()
