@@ -1162,6 +1162,11 @@ impl Construction {
                 });
             }
         }
+        if let Some(entrance) = building_entrance(blueprint, definition)
+            && route(source, entrance, proposed_blocked, access_road).is_none()
+        {
+            return Some("Leave a walking route to the proposed entrance or rotate the building.");
+        }
         None
     }
 
@@ -2267,6 +2272,44 @@ mod tests {
             village.status,
             "Keep a walking route to the existing work site."
         );
+    }
+
+    #[test]
+    fn a_house_with_a_blocked_front_can_be_placed_after_rotating() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut village = Construction {
+            selection: Some("home-cottage".into()),
+            ..default()
+        };
+        let cell = IVec2::new(44, 36);
+        let house = village.proposed_site(&catalog, "home-cottage", cell);
+        let entrance = building_entrance(&house, &catalog.projects["home-cottage"]).unwrap();
+        village
+            .plans
+            .push(village.proposed_site(&catalog, "fire-circle", entrance));
+        village.plan(&catalog, &mut stock, site, cell, clock);
+        assert_eq!(village.plans.len(), 1);
+        assert_eq!(
+            village.status,
+            "Leave a walking route to the proposed entrance or rotate the building."
+        );
+        village.rotation = 1;
+        village.plan(&catalog, &mut stock, site, cell, clock);
+        assert_eq!(village.plans.len(), 2);
     }
 
     #[test]
