@@ -279,6 +279,8 @@ pub struct Worker {
     pub position: Vec2,
     pub yaw: f32,
     speed: f32,
+    #[serde(skip, default = "default_walking_pace")]
+    walking_pace: f32,
     #[serde(skip)]
     crowded: bool,
     #[serde(skip)]
@@ -340,6 +342,7 @@ impl Default for Construction {
                     position: Vec2::new(x, z),
                     yaw: 0.0,
                     speed: 0.0,
+                    walking_pace: default_walking_pace(),
                     crowded: false,
                     sidestep_cells: [None; 9],
                     path: VecDeque::new(),
@@ -382,7 +385,7 @@ impl Worker {
         } else {
             1.0
         };
-        self.speed = (self.speed + dt * 1.8).min(pace * fatigue * braking);
+        self.speed = (self.speed + dt * 1.8).min(pace * self.walking_pace * fatigue * braking);
         let step = self.speed * dt * if self.crowded { 0.65 } else { 1.0 };
         if distance > 0.001 {
             self.yaw = offset.x.atan2(offset.y);
@@ -416,6 +419,10 @@ impl Worker {
     }
 }
 
+fn default_walking_pace() -> f32 {
+    1.0
+}
+
 impl Construction {
     pub fn refresh_resident_crowding(&mut self, catalog: &Catalog, site: ConstructionSite) {
         let present: [Option<Vec2>; 5] = std::array::from_fn(|index| {
@@ -447,6 +454,7 @@ impl Construction {
             };
             self.residents[index].crowded = crowded;
             self.residents[index].sidestep_cells = cells;
+            self.residents[index].walking_pace = 0.92 + index as f32 * 0.035;
         }
     }
 
@@ -2842,12 +2850,13 @@ mod tests {
         let worker = &mut village.residents[0];
         worker.path.push_back(Vec2::X * 5.0);
         worker.move_along_path(1.0, false);
-        assert!((worker.position.x - 0.95 * 0.65).abs() < 1e-6);
+        assert!((worker.position.x - 0.95 * 0.92 * 0.65).abs() < 1e-6);
         village.residents[1].position = Vec2::Y * 3.0;
         village.refresh_resident_crowding(&catalog, site);
         let worker = &mut village.residents[0];
         worker.move_along_path(1.0, false);
-        assert!((worker.position.x - 0.95 * 1.65).abs() < 1e-6);
+        assert!((worker.position.x - 0.95 * 0.92 * 1.65).abs() < 1e-6);
+        assert!((village.residents[4].walking_pace - 1.06).abs() < 1e-6);
     }
 
     #[test]
