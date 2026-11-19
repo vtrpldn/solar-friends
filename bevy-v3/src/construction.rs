@@ -2692,6 +2692,13 @@ mod tests {
                         .map(|position| (position, rotation))
                 })
                 .unwrap_or_else(|| panic!("{key} has no valid placement"));
+            let order = LabOrder::Build {
+                key: key.clone(),
+                x: position.x,
+                z: position.y,
+                rotation,
+                size: None,
+            };
             let mut stock = Stock::for_start(&setup, &catalog);
             construction
                 .lab_order(
@@ -2699,13 +2706,7 @@ mod tests {
                     &mut stock,
                     ground,
                     clock,
-                    &LabOrder::Build {
-                        key: key.clone(),
-                        x: position.x,
-                        z: position.y,
-                        rotation,
-                        size: None,
-                    },
+                    &order,
                     setup.richness(),
                 )
                 .unwrap_or_else(|error| panic!("{key} at {position}: {error}"));
@@ -2722,6 +2723,47 @@ mod tests {
                 );
             }
             assert!(construction.valid_save(&catalog, &stock), "{key}");
+
+            if matches!(
+                key.as_str(),
+                "gathering" | "shelter" | "road" | "bridge" | "water-pump"
+            ) {
+                let story = WorldSetup::default();
+                let mut stock = Stock::for_start(&story, &catalog);
+                let mut construction = Construction::default();
+                construction
+                    .lab_order(
+                        &catalog,
+                        &mut stock,
+                        ground,
+                        clock,
+                        &order,
+                        story.richness(),
+                    )
+                    .unwrap_or_else(|error| panic!("Story {key}: {error}"));
+                assert_eq!(construction.plans[0].delivered, 0, "{key}");
+                assert_eq!(construction.plans[0].work, 0.0, "{key}");
+                for step in 0..32_000 {
+                    construction.tick(
+                        &catalog,
+                        &mut stock,
+                        ground,
+                        TownClock {
+                            seconds: f64::from(step) / 10.0,
+                            ..clock
+                        },
+                        0.1,
+                        false,
+                    );
+                    if construction.plans[0].work >= project.work {
+                        break;
+                    }
+                }
+                let plan = &construction.plans[0];
+                assert_eq!(plan.delivered, plan.loads, "Story {key}");
+                assert_eq!(plan.work, project.work, "Story {key}");
+                assert!(construction.valid_save(&catalog, &stock), "Story {key}");
+            }
         }
     }
 
