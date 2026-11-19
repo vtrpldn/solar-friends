@@ -263,13 +263,23 @@ impl Construction {
         let resident = &self.residents[index];
         let path = |cell| self.resident_route(catalog, site, resident.position, cell);
         let fallback = |cell| path(cell).map(|route| (None, route));
-        let facility_path = |id, loc, size| {
+        let facility_path = |id: usize, loc, size| {
             if id == 0 {
                 path(SUPPLY_SPOTS[index]).map(|path| (Some(id), path))
             } else {
-                approach_points(loc, size, resident.position)
-                    .into_iter()
-                    .find_map(|cell| path(cell).map(|path| (Some(id), path)))
+                let entrance = self
+                    .plans
+                    .get(id - 1)
+                    .and_then(|plan| building_entrance(plan, &catalog.projects[&plan.key]));
+                entrance
+                    .and_then(path)
+                    .or_else(|| {
+                        approach_points(loc, size, resident.position)
+                            .into_iter()
+                            .filter(|cell| Some(*cell) != entrance)
+                            .find_map(path)
+                    })
+                    .map(|path| (Some(id), path))
             }
         };
         let bank = || {

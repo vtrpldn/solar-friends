@@ -715,7 +715,7 @@ impl Construction {
                 Phase::Harvest => self.production.jobs[index].phase = Phase::Work,
                 Phase::Pickup => {
                     let facility = &self.plans[job.site];
-                    let Some(path) = perimeter(facility.position, facility.size, position)
+                    let Some(path) = production_access_points(facility, catalog, position)
                         .into_iter()
                         .find_map(|cell| path(position, cell))
                     else {
@@ -1043,7 +1043,7 @@ impl Construction {
                 continue;
             }
             if phase == Phase::Harvest {
-                if let Some(path) = perimeter(project.position, project.size, resident.position)
+                if let Some(path) = production_access_points(project, catalog, resident.position)
                     .into_iter()
                     .find_map(|cell| path(resident.position, cell))
                 {
@@ -1056,7 +1056,7 @@ impl Construction {
             }
             let supply = SUPPLY_SPOTS[index];
             if !returning
-                && perimeter(project.position, project.size, supply.as_vec2())
+                && production_access_points(project, catalog, supply.as_vec2())
                     .into_iter()
                     .all(|cell| path(supply.as_vec2(), cell).is_none())
             {
@@ -1073,6 +1073,15 @@ impl Construction {
         }
         self.production.jobs[job].waiting_for_access = route_blocked;
     }
+}
+
+fn production_access_points(plan: &Blueprint, catalog: &Catalog, from: Vec2) -> Vec<IVec2> {
+    let mut points = perimeter(plan.position, plan.size, from);
+    if let Some(entrance) = building_entrance(plan, &catalog.projects[&plan.key]) {
+        points.retain(|&cell| cell != entrance);
+        points.insert(0, entrance);
+    }
+    points
 }
 
 fn perimeter(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec2> {
@@ -1112,6 +1121,20 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn production_prefers_the_marked_entrance_over_a_nearer_side() {
+        let catalog = Catalog::default();
+        let village = Construction::default();
+        let origin = IVec2::new(44, 36);
+        let kitchen = village.proposed_site(&catalog, "kitchen", origin);
+        let from = (origin - IVec2::Y).as_vec2();
+        let front = building_entrance(&kitchen, &catalog.projects["kitchen"]).unwrap();
+        let points = production_access_points(&kitchen, &catalog, from);
+        assert_eq!(points[0], front);
+        assert_eq!(points[1], from.as_ivec2());
+        assert_eq!(points.iter().filter(|&&cell| cell == front).count(), 1);
+    }
 
     #[test]
     fn access_stop_marks_failed_routes_but_ignores_normal_retry() {
