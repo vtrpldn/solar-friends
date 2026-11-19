@@ -293,7 +293,11 @@ fn pointer_over_ui(ui: &Query<&Interaction>) -> bool {
 fn camera_controls(
     keyboard: Res<ButtonInput<KeyCode>>,
     (mouse, ui): (Res<ButtonInput<MouseButton>>, Query<&Interaction>),
-    (motion, scroll): (Res<AccumulatedMouseMotion>, Res<AccumulatedMouseScroll>),
+    (motion, scroll, mut drag_button): (
+        Res<AccumulatedMouseMotion>,
+        Res<AccumulatedMouseScroll>,
+        Local<Option<MouseButton>>,
+    ),
     window: Single<&Window, With<PrimaryWindow>>,
     time: Res<Time>,
     (setup, village, saves, sound): (
@@ -312,6 +316,7 @@ fn camera_controls(
         || village.trade_open()
         || !window.focused
     {
+        *drag_button = None;
         return;
     }
     let (projection, view) = &mut *camera;
@@ -354,13 +359,24 @@ fn camera_controls(
     let orientation = Quat::from_rotation_y(heading);
     view.target += orientation * pan * (24.0 * dash * ortho.scale.sqrt() * delta);
     let over_ui = pointer_over_ui(&ui);
-    if !over_ui && mouse.pressed(MouseButton::Left) && !village.planning_roads() {
+    if drag_button.is_some_and(|button| !mouse.pressed(button)) {
+        *drag_button = None;
+    }
+    if drag_button.is_none() && !over_ui {
+        *drag_button = [MouseButton::Left, MouseButton::Right, MouseButton::Middle]
+            .into_iter()
+            .find(|&button| {
+                mouse.just_pressed(button)
+                    && (button != MouseButton::Left || !village.planning_roads())
+            });
+    }
+    if *drag_button == Some(MouseButton::Left) && !village.planning_roads() {
         let distance_per_pixel = CAMERA_HEIGHT * ortho.scale / window.height().max(1.0);
         let drag = Vec3::new(-motion.delta.x, 0.0, -motion.delta.y);
         view.target += orientation * drag * distance_per_pixel;
     }
     view.heading += turn as f32 * delta * 1.2;
-    if !over_ui && mouse.pressed(MouseButton::Right) {
+    if *drag_button == Some(MouseButton::Right) {
         let orbit = motion.delta / window.height().max(1.0) * std::f32::consts::TAU;
         view.heading -= orbit.x;
         view.polar =
@@ -383,7 +399,7 @@ fn camera_controls(
     } else {
         scroll.delta.y * wheel_factor
     };
-    let dolly = if !over_ui && mouse.pressed(MouseButton::Middle) {
+    let dolly = if *drag_button == Some(MouseButton::Middle) {
         motion.delta.y / window.height().max(1.0) * 4.0
     } else {
         0.0
@@ -702,6 +718,27 @@ mod tests {
             .unwrap();
         assert_eq!(camera.heading, std::f32::consts::FRAC_PI_2);
         let world = app.world_mut();
+        let overlay = world.spawn(Interaction::Hovered).id();
+        world
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+        world.resource_mut::<AccumulatedMouseMotion>().delta = Vec2::new(0.0, 30.0);
+        world.run_schedule(Update);
+        world.despawn(overlay);
+        world
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .clear_just_pressed(MouseButton::Right);
+        world.run_schedule(Update);
+        world.run_schedule(PostUpdate);
+        assert_eq!(
+            world
+                .resource::<village::Village>()
+                .camera_view
+                .unwrap()
+                .polar,
+            default_camera_polar()
+        );
+        world.resource_mut::<ButtonInput<MouseButton>>().reset_all();
         world
             .resource_mut::<ButtonInput<MouseButton>>()
             .press(MouseButton::Right);
