@@ -1,3 +1,5 @@
+mod tree_wind;
+
 use std::collections::HashMap;
 
 use bevy::{
@@ -29,6 +31,7 @@ pub struct LandPlugin;
 impl Plugin for LandPlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "land.glb");
+        tree_wind::install(app);
         app.init_resource::<Land>()
             .init_resource::<LandscapeMotion>()
             .add_message::<WindowOccluded>()
@@ -39,7 +42,7 @@ impl Plugin for LandPlugin {
                     advance_landscape_motion,
                     draw_land,
                     update_harvested_land,
-                    sway_trees,
+                    tree_wind::update,
                 )
                     .chain()
                     .before(TransformSystems::Propagate),
@@ -82,12 +85,6 @@ struct LandDetail {
     depleted: bool,
 }
 
-#[derive(Component)]
-struct TreeSway {
-    planted_rotation: Quat,
-    phase: f32,
-}
-
 #[derive(Resource, Default)]
 pub(crate) struct LandscapeMotion {
     pub seconds: f64,
@@ -110,38 +107,6 @@ pub(crate) fn advance_landscape_motion(
     let delta = time.delta_secs_f64().clamp(0.0, 0.1);
     if !setup.open && !village.is_paused() && !motion.occluded && delta > 0.0 {
         motion.seconds += delta;
-    }
-}
-
-impl TreeSway {
-    fn rotation(&self, seconds: f32) -> Quat {
-        let gust = 0.65 + 0.35 * (seconds * 0.37 + self.phase * 0.6).sin();
-        let east = (0.10 * (seconds * 1.25 + self.phase).sin()
-            + 0.025 * (seconds * 2.1 + self.phase * 1.7).sin())
-            * gust;
-        let south = 0.055 * (seconds * 1.05 + self.phase + 0.8).sin() * gust;
-        // V2's displacement is strongest at 4.5 m. Use the same amplitude
-        // there while pivoting the native scene around its ground anchor.
-        Quat::from_rotation_z(-east / 4.5)
-            * Quat::from_rotation_x(south / 4.5)
-            * self.planted_rotation
-    }
-}
-
-fn sway_trees(
-    motion: Res<LandscapeMotion>,
-    mut trees: Query<(&TreeSway, &mut Transform, &Visibility)>,
-) {
-    if motion.seconds == 0.0 {
-        return;
-    }
-    for (tree, mut transform, visibility) in &mut trees {
-        if *visibility != Visibility::Hidden {
-            let rotation = tree.rotation(motion.seconds as f32);
-            if transform.rotation != rotation {
-                transform.rotation = rotation;
-            }
-        }
     }
 }
 
@@ -476,10 +441,7 @@ fn draw_land(
                 .with_scale(Vec3::splat(plant.scale)),
         ));
         if plant.model < EARTH {
-            entity.insert(TreeSway {
-                planted_rotation,
-                phase: x * 0.14 + z * 0.09,
-            });
+            entity.observe(tree_wind::apply);
         }
     }
 }
@@ -556,47 +518,21 @@ mod tests {
     }
 
     #[test]
-    fn wind_moves_visible_trees_without_moving_their_ground_anchor() {
+    fn landscape_motion_stops_while_the_window_is_occluded_or_setup_is_open() {
         let mut app = App::new();
         app.init_resource::<Time<Real>>()
             .init_resource::<WorldSetup>()
             .init_resource::<Village>()
             .init_resource::<LandscapeMotion>()
             .add_message::<WindowOccluded>()
-            .add_systems(Update, (advance_landscape_motion, sway_trees).chain());
+            .add_systems(Update, advance_landscape_motion);
         let world = app.world_mut();
         world.resource_mut::<WorldSetup>().open = false;
-        world.resource_mut::<Village>().camp = Some(IVec2::splat(36));
-        let anchor = Vec3::new(4.0, 1.0, -2.0);
-        let planted = Quat::from_rotation_y(1.0);
-        let tree = world
-            .spawn((
-                TreeSway {
-                    planted_rotation: planted,
-                    phase: 0.3,
-                },
-                Transform::from_translation(anchor).with_rotation(planted),
-                Visibility::Inherited,
-            ))
-            .id();
-        let hidden = world
-            .spawn((
-                TreeSway {
-                    planted_rotation: planted,
-                    phase: 1.0,
-                },
-                Transform::from_translation(anchor).with_rotation(planted),
-                Visibility::Hidden,
-            ))
-            .id();
         world
             .resource_mut::<Time<Real>>()
             .advance_by(std::time::Duration::from_millis(100));
         world.run_schedule(Update);
-        let swayed = *world.get::<Transform>(tree).unwrap();
-        assert_eq!(swayed.translation, anchor);
-        assert_ne!(swayed.rotation, planted);
-        assert_eq!(world.get::<Transform>(hidden).unwrap().rotation, planted);
+        assert_eq!(world.resource::<LandscapeMotion>().seconds, 0.1);
 
         let window = world.spawn(PrimaryWindow).id();
         world.write_message(WindowOccluded {
@@ -604,20 +540,17 @@ mod tests {
             occluded: true,
         });
         world.run_schedule(Update);
-        assert_eq!(*world.get::<Transform>(tree).unwrap(), swayed);
+        assert_eq!(world.resource::<LandscapeMotion>().seconds, 0.1);
+
         world.write_message(WindowOccluded {
             window,
             occluded: false,
         });
         world.run_schedule(Update);
-        let resumed = *world.get::<Transform>(tree).unwrap();
-        assert_ne!(resumed.rotation, swayed.rotation);
+        assert_eq!(world.resource::<LandscapeMotion>().seconds, 0.2);
 
         world.resource_mut::<WorldSetup>().open = true;
-        world
-            .resource_mut::<Time<Real>>()
-            .advance_by(std::time::Duration::from_millis(100));
         world.run_schedule(Update);
-        assert_eq!(*world.get::<Transform>(tree).unwrap(), resumed);
+        assert_eq!(world.resource::<LandscapeMotion>().seconds, 0.2);
     }
 }
