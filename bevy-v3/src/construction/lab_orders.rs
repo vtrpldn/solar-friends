@@ -708,10 +708,10 @@ impl Construction {
                     .water_jobs
                     .values()
                     .any(|job| self.water_route_blocked(job, clock))
-                || self
-                    .residents
-                    .iter()
-                    .any(|worker| worker.health.task.is_none() && worker.waiting_for_route()))
+                || self.residents.iter().any(|worker| {
+                    worker.town_work.route_blocked
+                        || (worker.health.task.is_none() && worker.waiting_for_route())
+                }))
             .then_some("A job is waiting for access."),
             LabStop::Hydration => {
                 (self.minimum_hydration() < 20.0).then_some("A resident has urgent thirst.")

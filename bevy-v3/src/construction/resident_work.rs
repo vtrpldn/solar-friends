@@ -941,7 +941,7 @@ impl Construction {
         index: usize,
     ) -> std::borrow::Cow<'static, str> {
         let worker = &self.residents[index];
-        let label = if worker.waiting_for_route() {
+        let label = if worker.waiting_for_route() || worker.town_work.route_blocked {
             "Waiting for access"
         } else if worker.town_work.active() {
             worker.town_work.status()

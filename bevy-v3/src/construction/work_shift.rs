@@ -86,10 +86,17 @@ impl Construction {
             });
         let receipts = self.trade.receipts;
         let names = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
-        let work = &self.residents[selected].town_work;
+        let worker = &self.residents[selected];
+        let work = &worker.town_work;
         let (job, wage) = JOBS[selected];
         let shift_status = if work.active() {
-            work.status().into()
+            if work.route_blocked {
+                "No walking route back to camp".into()
+            } else if worker.waiting_for_route() {
+                format!("{} · Waiting for access", work.status())
+            } else {
+                work.status().into()
+            }
         } else {
             let when = if game_hour(seconds) >= 11.0 || work.last_day == Some(shift_day(seconds)) {
                 "tomorrow"
@@ -173,6 +180,8 @@ impl Construction {
                             {
                                 self.residents[index].path = path;
                                 shift.phase = Commute::Inbound;
+                            } else {
+                                self.residents[index].town_work.route_blocked = true;
                             }
                         }
                     }
@@ -295,6 +304,10 @@ mod tests {
             construction
                 .finance_summary(&stock, 0, 0.0)
                 .contains("No walking route")
+        );
+        assert_eq!(
+            construction.lab_stop_reason(crate::construction::LabStop::Blocked, 0.0),
+            Some("A job is waiting for access.")
         );
         assert_eq!(stock.balance(), 0);
         construction.residents[0].position = starting_position;
