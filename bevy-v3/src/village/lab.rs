@@ -576,9 +576,11 @@ fn run(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::R
 }
 
 pub(crate) fn run_ui(scenario: Option<&Path>, save: Option<&Path>) -> io::Result<()> {
-    let source = scenario.map_or(LabSource::Story, |scenario| LabSource::File {
-        scenario: scenario.to_owned(),
-        checkpoint: save.map(Path::to_owned),
+    let source = scenario.map_or(LabSource::Story(WorldSetup::default()), |scenario| {
+        LabSource::File {
+            scenario: scenario.to_owned(),
+            checkpoint: save.map(Path::to_owned),
+        }
     });
     let catalog = Catalog::default();
     let runner = source.load(&catalog)?;
@@ -596,7 +598,7 @@ pub(crate) fn replay_ui(path: &Path) -> io::Result<()> {
 
 #[derive(Resource)]
 enum LabSource {
-    Story,
+    Story(WorldSetup),
     File {
         scenario: PathBuf,
         checkpoint: Option<PathBuf>,
@@ -606,10 +608,10 @@ enum LabSource {
 impl LabSource {
     fn load(&self, catalog: &Catalog) -> io::Result<Runner> {
         match self {
-            Self::Story => Runner::new(
+            Self::Story(setup) => Runner::new(
                 Scenario {
                     steps: (365.0 * crate::weather::DAY / STEP).round() as u64,
-                    setup: None,
+                    setup: Some(setup.clone()),
                     orders: Vec::new(),
                     stop: LabStop::None,
                 },
@@ -1079,7 +1081,7 @@ impl LabReplacement {
 
     fn prompt(&self, source: Option<&LabSource>) -> &'static str {
         match self {
-            Self::Reload if matches!(source, Some(LabSource::Story)) => {
+            Self::Reload if matches!(source, Some(LabSource::Story(_))) => {
                 "Start a new Story lab run?"
             }
             Self::Reload => "Reload scenario?",
@@ -1106,6 +1108,7 @@ struct Playback {
     farm_site: Option<usize>,
     clear_confirmation: Option<(usize, Option<usize>)>,
     replacement: Option<LabReplacement>,
+    story_seed: Option<String>,
 }
 
 impl Playback {
@@ -1229,6 +1232,7 @@ impl Default for Playback {
             farm_site: None,
             clear_confirmation: None,
             replacement: None,
+            story_seed: None,
         }
     }
 }
@@ -1430,6 +1434,52 @@ fn update_lab_window(
             _ => None,
         })
         .last();
+    if let Some(LabSource::Story(setup)) = source.as_deref()
+        && playback.order.is_none()
+        && playback.replacement.is_none()
+    {
+        if keys.just_pressed(KeyCode::F7) {
+            playback.running = false;
+            playback.reset_timing();
+            playback.story_seed = Some(String::new());
+        }
+        if let Some(mut seed) = playback.story_seed.take() {
+            map.visible = false;
+            events.clear();
+            if keys.just_pressed(KeyCode::Escape) {
+                return;
+            }
+            let mut error = "";
+            if keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
+                if let Ok(number) = seed.parse::<std::num::NonZeroU32>() {
+                    let next = LabSource::Story(setup.clone().with_seed(number));
+                    match next.load(&catalog) {
+                        Ok(opened) => {
+                            *runner = opened;
+                            *playback = Playback::default();
+                            *map = map::MapState::default();
+                            commands.insert_resource(next);
+                            commands.remove_resource::<Replay>();
+                            playback.notice = format!("Story lab started with seed {number}.");
+                            panel.set_if_neq(Text::new(playback.notice.clone()));
+                            return;
+                        }
+                        Err(load_error) => playback.notice = load_error.to_string(),
+                    }
+                } else {
+                    error = "Enter a seed between 1 and 4294967295.";
+                }
+            } else {
+                WorldSetup::edit_seed_digits(&mut seed, &keys);
+            }
+            panel.set_if_neq(Text::new(format!(
+                "New Story lab run\nCurrent seed {} · New seed {seed}▏\nEnter Start new run · Esc Cancel\nThis replaces the current lab run.\n{error} {}",
+                setup.seed(), playback.notice
+            )));
+            playback.story_seed = Some(seed);
+            return;
+        }
+    }
     if playback.order.is_none() {
         let replacement = if let Some(path) = dropped {
             Some(LabReplacement::File(path.clone()))
@@ -1796,7 +1846,9 @@ fn update_lab_window(
         return;
     }
     let weather = lab_weather(village, &runner.setup);
-    let reload_control = if source.is_some() {
+    let reload_control = if matches!(source.as_deref(), Some(LabSource::Story(_))) {
+        " · F7 New seed · F8 Restart"
+    } else if source.is_some() {
         " · F8 Reload"
     } else {
         ""
@@ -1837,7 +1889,9 @@ mod tests {
     #[test]
     fn the_fileless_lab_starts_an_isolated_story_run() {
         let catalog = Catalog::default();
-        let runner = LabSource::Story.load(&catalog).unwrap();
+        let setup = WorldSetup::default().with_seed(std::num::NonZeroU32::new(215).unwrap());
+        let runner = LabSource::Story(setup).load(&catalog).unwrap();
+        assert_eq!(runner.setup.seed(), 215);
         assert!(runner.setup.mode == Mode::Story);
         assert_eq!(runner.village.camp, Some(CAMP_SITES[2].1));
         assert_eq!(runner.index, 0);

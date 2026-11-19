@@ -139,6 +139,11 @@ impl WorldSetup {
         self.seed
     }
 
+    pub(crate) fn with_seed(mut self, seed: std::num::NonZeroU32) -> Self {
+        self.seed = seed.get();
+        self
+    }
+
     pub fn biome(&self) -> usize {
         self.biome
     }
@@ -191,6 +196,10 @@ impl WorldSetup {
             }
             return;
         }
+        Self::edit_seed_digits(entry, keyboard);
+    }
+
+    pub(crate) fn edit_seed_digits(entry: &mut String, keyboard: &ButtonInput<KeyCode>) {
         if keyboard.just_pressed(KeyCode::Backspace) {
             entry.pop();
         }
