@@ -1,4 +1,7 @@
-use bevy::input::{ButtonState, keyboard::KeyboardInput};
+use bevy::{
+    input::{ButtonState, keyboard::KeyboardInput},
+    window::FileDragAndDrop,
+};
 
 use crate::save_library::NameEntry;
 
@@ -51,8 +54,45 @@ pub(super) enum LibraryAction {
 struct LibraryPanel;
 
 pub(super) fn install(app: &mut App) {
-    app.add_systems(Startup, spawn_library)
+    app.add_message::<FileDragAndDrop>()
+        .add_systems(Startup, spawn_library)
+        .add_systems(
+            Update,
+            import_dropped_snapshot
+                .after(library_controls)
+                .before(village_input),
+        )
         .add_systems(Update, show_library.after(village_input));
+}
+
+fn import_dropped_snapshot(
+    mut dropped: MessageReader<FileDragAndDrop>,
+    primary: Single<Entity, With<PrimaryWindow>>,
+    mut menu: ResMut<SaveMenu>,
+    catalog: Res<Catalog>,
+) {
+    for event in dropped.read() {
+        let FileDragAndDrop::DroppedFile { window, path_buf } = event else {
+            continue;
+        };
+        if *window != *primary || !menu.open || menu.entry.is_some() {
+            continue;
+        }
+        match menu.import_snapshot(path_buf, &catalog) {
+            Ok((mode, id)) => {
+                menu.browse_mode = mode;
+                menu.delete_request = None;
+                menu.status = "Imported a copy. Select Load village to open it.".into();
+                if let Ok(directory) = menu.directory(mode) {
+                    refresh_library(&mut menu, &directory, mode);
+                }
+                if let Some(index) = menu.rows.iter().position(|row| row.id == id) {
+                    menu.selected = index;
+                }
+            }
+            Err(error) => menu.status = format!("Could not import village: {error}"),
+        }
+    }
 }
 
 fn spawn_library(mut commands: Commands, assets: Res<AssetServer>) {

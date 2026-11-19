@@ -52,7 +52,7 @@ Press N to view residents and assign beds. Pick a resident with 1–5, click a c
 
 Press F4 after pitching camp to edit terrain. Use 1–4 for Raise, Lower, Flatten, or Smooth. Use brackets to change the brush radius, then click the terrain. Flatten keeps the height of the first click until you reselect it. Press Z to undo an edit. Your edits are saved with the village. New building plans and completed moves grade their footprint. Foundations stay in the terrain after a project moves or is removed.
 
-Press F5 to save the current village and F9 to reload it. Press F6 to name, load, rename, recover, or export villages. An active named village autosaves and retains its previous snapshot. Story and Sandbox have separate save files under `Solar Friends V3` in the local application data directory.
+Press F5 to save the current village and F9 to reload it. Press F6 to name, load, rename, recover, or export villages. Drop an exported V3 save or lab checkpoint onto the game window while the library is open to import it as a new named village. An active named village autosaves and retains its previous snapshot. Story and Sandbox have separate save files under `Solar Friends V3` in the local application data directory.
 
 Use **Tab** or the mode button in Saved villages to browse the other mode. Loading a village switches the game to that village's mode.
 

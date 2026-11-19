@@ -70,6 +70,19 @@ impl SaveMenu {
         directory(mode)
     }
 
+    pub fn import_snapshot(&self, path: &Path, catalog: &Catalog) -> io::Result<(Mode, u64)> {
+        let village = save::read(path, catalog)?;
+        let mode = village
+            .mode()
+            .ok_or_else(|| io::Error::other("save has no game mode"))?;
+        let name = path
+            .file_stem()
+            .and_then(|stem| stem.to_str())
+            .unwrap_or("Imported village");
+        let id = create(&self.directory(mode)?, mode, name, &village)?;
+        Ok((mode, id))
+    }
+
     pub fn label(&self) -> String {
         let mode = match self.browse_mode {
             Mode::Story => "Story",
@@ -100,6 +113,9 @@ impl SaveMenu {
             lines.push("↑ / ↓ Select · Enter Load · N New · R Rename".into());
             lines.push("E Export · P Recover · Delete Remove".into());
             lines.push("Tab Switch mode · F6 Close".into());
+        }
+        if self.entry.is_none() {
+            lines.push("Drop a V3 save file here to import a copy.".into());
         }
         if let Some(slot) = self.delete_request
             && let Some(row) = self.rows.iter().find(|row| row.id == slot)

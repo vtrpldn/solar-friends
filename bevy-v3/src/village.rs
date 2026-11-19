@@ -2944,6 +2944,33 @@ mod tests {
     }
 
     #[test]
+    fn an_exported_snapshot_imports_as_an_independent_named_village() {
+        let directory =
+            std::env::temp_dir().join(format!("solar-v3-slot-import-test-{}", std::process::id()));
+        let menu = SaveMenu {
+            test_directory: Some(directory.clone()),
+            ..default()
+        };
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let village = Village {
+            setup: Some(setup.session()),
+            stock: Stock::for_start(&setup, &catalog),
+            speed: 1,
+            ..default()
+        };
+        let original =
+            save_library::create(&directory, Mode::Story, "River camp", &village).unwrap();
+        let export = save_library::export(&directory, original, Mode::Story).unwrap();
+        let (mode, imported) = menu.import_snapshot(&export, &catalog).unwrap();
+        assert!(mode == Mode::Story);
+        assert_ne!(original, imported);
+        assert!(save_library::load(&directory, imported, mode, &catalog).is_ok());
+        assert_eq!(save_library::list(&directory, mode).unwrap().len(), 2);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
     fn save_library_exports_unreadable_data_without_changing_the_slot() {
         let directory =
             std::env::temp_dir().join(format!("solar-v3-slot-export-test-{}", std::process::id()));
