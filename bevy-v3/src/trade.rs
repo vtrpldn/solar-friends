@@ -295,24 +295,12 @@ impl Trade {
             return;
         }
         self.next_pantry_check = clock + 10.0;
-        let servings = |id: &str, quantity| {
-            food::SERVINGS
-                .iter()
-                .find(|&&(material, _)| material == id)
-                .map_or(0, |&(_, units)| quantity / units)
-        };
-        let incoming: u32 = self
-            .orders
-            .iter()
-            .filter(|order| order.buying)
-            .map(|order| servings(&order.material, order.quantity))
-            .sum::<u32>()
-            + self
-                .delivery
-                .as_ref()
-                .map_or(0, |order| servings(&order.material, order.quantity));
         let forecast = self.pantry_forecast(stock, clock);
-        if forecast.served.saturating_add(incoming) >= forecast.target {
+        if forecast
+            .served
+            .saturating_add(self.incoming_servings(clock))
+            >= forecast.target
+        {
             return;
         }
         let free = space.saturating_sub(self.inbound());
@@ -372,6 +360,33 @@ impl Trade {
             .min(10_000_000);
     }
 
+    fn incoming_servings(&self, clock: f64) -> u32 {
+        let servings = |id: &str, quantity| {
+            food::SERVINGS
+                .iter()
+                .find(|&&(material, _)| material == id)
+                .map_or(0, |&(_, units)| quantity / units)
+        };
+        self.orders
+            .iter()
+            .filter(|order| order.buying)
+            .map(|order| servings(&order.material, order.quantity))
+            .sum::<u32>()
+            + self.delivery.as_ref().map_or(0, |order| {
+                let usable = order
+                    .food
+                    .as_ref()
+                    .and_then(|lots| lots.get(&order.material))
+                    .map_or(order.quantity, |lots| {
+                        lots.iter()
+                            .filter(|lot| lot.expires > order.eta.max(clock))
+                            .map(|lot| lot.units)
+                            .sum()
+                    });
+                servings(&order.material, usable)
+            })
+    }
+
     fn pantry_forecast(&self, stock: &Stock, clock: f64) -> food::Forecast {
         stock
             .pantry
@@ -394,13 +409,14 @@ impl Trade {
             0
         };
         format!(
-            "U Automatic food purchases {state}\n[ ] Reserve {:.1} days · Shift [ ] Daily limit R${:.0}\nR${:.2} reserved today including fuel\nStored food covers {}/{} meals · {:.1} servings may spoil",
+            "U Automatic food purchases {state}\n[ ] Reserve {:.1} days · Shift [ ] Daily limit R${:.0}\nR${:.2} reserved today including fuel\nStored food covers {}/{} meals · {:.1} servings may spoil\n{} servings expected from incoming orders",
             f64::from(policy.reserve_half_days) / 2.0,
             policy.allowance_cents as f64 / 100.0,
             used as f64 / 100.0,
             forecast.served,
             forecast.target,
-            forecast.at_risk
+            forecast.at_risk,
+            self.incoming_servings(clock),
         )
     }
 
@@ -813,6 +829,22 @@ mod tests {
         assert_eq!(market.supplier_available(&catalog, "milk", 0), available);
         assert_eq!(market.committed_fares(), 0);
         assert_eq!(stock.balance(), balance);
+    }
+
+    #[test]
+    fn pantry_counts_only_freight_food_that_can_survive_to_arrival() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut market = Market::default();
+        let mut trade = Trade::default();
+        trade
+            .buy(&catalog, &mut stock, &mut market, "milk", (0.0, 12, true))
+            .unwrap();
+        assert_eq!(trade.incoming_servings(0.0), 3);
+
+        let delivery = trade.delivery.as_mut().unwrap();
+        delivery.eta = delivery.food.as_ref().unwrap()["milk"][0].expires;
+        assert_eq!(trade.incoming_servings(0.0), 0);
     }
 
     #[test]
