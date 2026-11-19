@@ -362,10 +362,7 @@ impl Construction {
             return false;
         }
         if keys.just_pressed(KeyCode::Slash) {
-            self.editing_search = !self.editing_search;
-            self.selection = None;
-            self.page = 0;
-            self.status.clear();
+            self.toggle_build_search();
             text.clear();
             return true;
         }
@@ -391,6 +388,34 @@ impl Construction {
             }
         }
         true
+    }
+
+    pub fn toggle_build_search(&mut self) {
+        self.editing_search = !self.editing_search;
+        self.selection = None;
+        self.page = 0;
+        self.status.clear();
+    }
+
+    pub fn toggle_build_menu(&mut self) {
+        self.menu = !self.menu;
+        self.selection = None;
+        self.status.clear();
+    }
+
+    pub fn change_build_category(&mut self, reverse: bool) {
+        self.build_query.clear();
+        self.category =
+            (self.category + if reverse { CATEGORIES.len() - 1 } else { 1 }) % CATEGORIES.len();
+        self.page = 0;
+        self.selection = None;
+        self.status.clear();
+    }
+
+    pub fn turn_build_page(&mut self, catalog: &Catalog, forward: bool) {
+        let pages = self.options(catalog).len().div_ceil(BUILD_ROWS).max(1);
+        self.page = (self.page + if forward { 1 } else { pages - 1 }) % pages;
+        self.selection = None;
     }
 
     pub fn browsing_blueprints(&self) -> bool {
@@ -431,35 +456,21 @@ impl Construction {
             return;
         }
         if keyboard.just_pressed(KeyCode::KeyB) {
-            self.menu = !self.menu;
-            self.selection = None;
-            self.status.clear();
+            self.toggle_build_menu();
         }
         if !self.menu {
             return;
         }
         if keyboard.just_pressed(KeyCode::Tab) {
-            let reverse = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
-            self.build_query.clear();
-            self.category =
-                (self.category + if reverse { CATEGORIES.len() - 1 } else { 1 }) % CATEGORIES.len();
-            self.page = 0;
-            self.selection = None;
-            self.status.clear();
+            self.change_build_category(
+                keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]),
+            );
         }
-        let options = self.options(catalog);
-        let pages = options.len().div_ceil(PAGE_KEYS.len()).max(1);
-        if keyboard.just_pressed(KeyCode::PageDown) {
-            self.page = (self.page + 1) % pages;
-            self.selection = None;
-        } else if keyboard.just_pressed(KeyCode::PageUp) {
-            self.page = (self.page + pages - 1) % pages;
-            self.selection = None;
+        if keyboard.any_just_pressed([KeyCode::PageDown, KeyCode::PageUp]) {
+            self.turn_build_page(catalog, keyboard.just_pressed(KeyCode::PageDown));
         }
-        if let Some(index) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key))
-            && let Some((id, _)) = options.get(self.page * PAGE_KEYS.len() + index)
-        {
-            self.choose_blueprint(id);
+        if let Some(index) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key)) {
+            self.pick_build_row(catalog, index);
         }
         if self.selection.as_deref() == Some("field")
             && let Some(delta) = field_size_input(keyboard)
