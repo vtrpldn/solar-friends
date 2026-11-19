@@ -285,6 +285,8 @@ pub struct Worker {
     crowded: bool,
     #[serde(skip)]
     sidestep_cells: [Option<IVec2>; 9],
+    #[serde(skip)]
+    paused_waypoint: Option<Vec2>,
     path: VecDeque<Vec2>,
     assignment: Option<Assignment>,
     experience: f64,
@@ -345,6 +347,7 @@ impl Default for Construction {
                     walking_pace: default_walking_pace(),
                     crowded: false,
                     sidestep_cells: [None; 9],
+                    paused_waypoint: None,
                     path: VecDeque::new(),
                     assignment: None,
                     experience: 0.0,
@@ -380,6 +383,10 @@ impl Worker {
             self.speed = 0.0;
             return;
         };
+        if self.paused_waypoint == Some(next) {
+            self.speed = 0.0;
+            return;
+        }
         let offset = next - self.position;
         let distance = offset.length();
         let pace = if carrying { 0.72 } else { 0.95 };
@@ -436,6 +443,11 @@ impl Construction {
                 .then_some(self.residents[index].position)
         });
         for index in 0..self.residents.len() {
+            if present[index].is_some() && self.residents[index].assignment.is_some() {
+                self.refresh_construction_route(index, catalog, site);
+            } else {
+                self.residents[index].paused_waypoint = None;
+            }
             let crowded = present[index].is_some_and(|position| {
                 present.iter().enumerate().any(|(other, point)| {
                     index != other
@@ -461,6 +473,32 @@ impl Construction {
             self.residents[index].crowded = crowded;
             self.residents[index].sidestep_cells = cells;
             self.residents[index].walking_pace = 0.92 + index as f32 * 0.035;
+        }
+    }
+
+    fn refresh_construction_route(
+        &mut self,
+        index: usize,
+        catalog: &Catalog,
+        site: ConstructionSite,
+    ) {
+        let worker = &self.residents[index];
+        let blocked_waypoint = worker.path.front().copied().filter(|waypoint| {
+            let cell = waypoint.round().as_ivec2();
+            cell != worker.position.round().as_ivec2()
+                && self.blocked(catalog, site.terrain, site.land, site.camp, cell)
+        });
+        let replacement = blocked_waypoint
+            .and_then(|_| worker.path.back())
+            .and_then(|goal| {
+                self.resident_route(catalog, site, worker.position, goal.round().as_ivec2())
+            });
+        let worker = &mut self.residents[index];
+        if let Some(path) = replacement {
+            worker.path = path;
+            worker.paused_waypoint = None;
+        } else {
+            worker.paused_waypoint = blocked_waypoint;
         }
     }
 
@@ -2837,6 +2875,38 @@ mod tests {
         village.priority = Some(0);
         village.assign(0, &catalog, &terrain, &land, camp);
         assert_eq!(village.residents[0].assignment.take().unwrap().project, 0);
+    }
+
+    #[test]
+    fn construction_routes_detour_around_a_new_blueprint() {
+        let catalog = Catalog::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = WorldSetup::default().terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction::default();
+        let obstacle = IVec2::new(45, 36);
+        let goal = IVec2::new(47, 36);
+        village
+            .plans
+            .push(village.proposed_site(&catalog, "supply-5", obstacle));
+        village.residents[0].position = IVec2::new(44, 36).as_vec2();
+        village.residents[0].path = VecDeque::from([obstacle.as_vec2(), goal.as_vec2()]);
+        village.refresh_construction_route(0, &catalog, site);
+        let path = &village.residents[0].path;
+        assert_eq!(path.back(), Some(&goal.as_vec2()));
+        assert!(!path.contains(&obstacle.as_vec2()));
+        village.residents[0].path = VecDeque::from([obstacle.as_vec2()]);
+        village.refresh_construction_route(0, &catalog, site);
+        let worker = &mut village.residents[0];
+        let position = worker.position;
+        worker.move_along_path(1.0, false);
+        assert_eq!(worker.position, position);
+        assert!(!worker.path.is_empty());
     }
 
     #[test]
