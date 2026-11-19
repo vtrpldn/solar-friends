@@ -103,26 +103,6 @@ impl AssetSearch {
             })
             .collect()
     }
-
-    fn label(&self, assets: &[String], catalog: &WorkshopCatalog) -> String {
-        use std::fmt::Write as _;
-        const ROWS: usize = 9;
-        let matches = self.matching(assets, catalog);
-        let mut label = format!(
-            "Find an asset · {}▏\nUp/Down Select · Enter Open · Esc Cancel\n",
-            self.query
-        );
-        if matches.is_empty() {
-            label.push_str("\nNo matching assets.");
-        }
-        let start = self.row / ROWS * ROWS;
-        for (row, &index) in matches.iter().enumerate().skip(start).take(ROWS) {
-            let marker = if row == self.row { "> " } else { "  " };
-            let model = &catalog.0[&assets[index]];
-            let _ = write!(label, "\n{marker}{} · {}", model.name, model.category);
-        }
-        label
-    }
 }
 
 #[derive(Component)]

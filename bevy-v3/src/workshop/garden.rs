@@ -3,7 +3,7 @@ mod rehearsal;
 
 use super::garden_connections::{Connection, connections};
 use super::garden_terrain::{BIOMES, Terrain};
-use super::{WorkshopCatalog, building_model, ui_font};
+use super::{WorkshopCatalog, asset_picker, building_model, ui_font};
 use bevy::{
     asset::{AssetPath, embedded_asset, embedded_path},
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit},
@@ -208,6 +208,7 @@ enum GardenAction {
     RestoreGallery,
     Export,
     Import,
+    Catalog,
     Resident,
     Interaction,
     Send,
@@ -377,7 +378,7 @@ fn run_garden(path: Option<PathBuf>, night: bool, study: Option<&str>) {
     .add_observer(light_new_props)
     .add_observer(mark_selectable_meshes)
     .add_observer(style_placement_preview)
-    .add_systems(Startup, setup)
+    .add_systems(Startup, (setup, asset_picker::setup))
     .add_systems(
         Update,
         (
@@ -390,6 +391,7 @@ fn run_garden(path: Option<PathBuf>, night: bool, study: Option<&str>) {
             preview,
             update_lighting,
             update_garden_buttons,
+            display_asset_picker,
         )
             .chain(),
     );
@@ -485,6 +487,7 @@ fn setup(
                 ("Restore gallery", GardenAction::RestoreGallery),
                 ("Export scene", GardenAction::Export),
                 ("Import scene", GardenAction::Import),
+                ("Asset catalog", GardenAction::Catalog),
                 ("Next resident", GardenAction::Resident),
                 ("Next interaction", GardenAction::Interaction),
                 ("Send resident", GardenAction::Send),
@@ -558,6 +561,7 @@ fn update_garden_buttons(
                 | GardenAction::Send
                 | GardenAction::Nearby => can_rehearse,
                 GardenAction::Stop => rehearsal.has_task(),
+                GardenAction::Catalog => garden.pending.is_none(),
                 GardenAction::LoadLandscape => garden.layout.biome != "flat",
                 GardenAction::Rotate => selected_prop || garden.pending.is_some(),
                 GardenAction::Cancel => garden.pending.is_some(),
@@ -569,6 +573,22 @@ fn update_garden_buttons(
             Display::Flex
         } else {
             Display::None
+        };
+    }
+}
+
+fn display_asset_picker(
+    garden: Res<Garden>,
+    models: Res<WorkshopCatalog>,
+    mut picker: asset_picker::PickerView,
+    mut overlay: Single<&mut Visibility, With<GardenText>>,
+) {
+    if garden.is_changed() {
+        picker.update(garden.search.as_ref(), &garden.library, &models);
+        **overlay = if garden.search.is_some() {
+            Visibility::Hidden
+        } else {
+            Visibility::Inherited
         };
     }
 }
@@ -594,6 +614,7 @@ fn edit(
     mut pointer: Local<Option<(Vec2, bool)>>,
     buttons: Query<&Interaction, GardenButton>,
     action_buttons: Query<(&Interaction, &GardenAction), Changed<Interaction>>,
+    picker: asset_picker::PickerInput,
     mut raycast: MeshRayCast,
     selectable: Query<&SelectableProp>,
     roots: Query<&GardenProp>,
@@ -665,13 +686,16 @@ fn edit(
         typing.clear();
         return;
     }
-    if pressed(Slash) && garden.search.is_none() && garden.pending.is_none() {
+    if (pressed(Slash) || clicked_action(GardenAction::Catalog))
+        && garden.search.is_none()
+        && garden.pending.is_none()
+    {
         garden.search = Some(super::AssetSearch::default());
         typing.clear();
         return;
     }
     if let Some(mut search) = garden.search.take() {
-        if pressed(Escape) {
+        if pressed(Escape) || picker.clicked(asset_picker::Action::Close) {
             typing.clear();
             return;
         }
@@ -686,11 +710,9 @@ fn edit(
             }
         }
         let matches = search.matching(&garden.library, &models);
-        if pressed(ArrowDown) {
-            search.row = (search.row + 1).min(matches.len().saturating_sub(1));
-        } else if pressed(ArrowUp) {
-            search.row = search.row.saturating_sub(1);
-        } else if enter && let Some(&index) = matches.get(search.row) {
+        let clicked_row = picker.selected().map(|offset| search.page_start() + offset);
+        let selected_row = clicked_row.or(enter.then_some(search.row));
+        if let Some(&index) = selected_row.and_then(|row| matches.get(row)) {
             let asset = garden.library[index].clone();
             if let Some(index) = garden
                 .layout
@@ -720,6 +742,18 @@ fn edit(
                 });
             }
             return;
+        }
+        if picker.clicked(asset_picker::Action::Next) || pressed(PageDown) {
+            let next = search.page_start() + asset_picker::PAGE_SIZE;
+            if next < matches.len() {
+                search.row = next;
+            }
+        } else if picker.clicked(asset_picker::Action::Previous) || pressed(PageUp) {
+            search.row = search.page_start().saturating_sub(asset_picker::PAGE_SIZE);
+        } else if pressed(ArrowDown) {
+            search.row = (search.row + 1).min(matches.len().saturating_sub(1));
+        } else if pressed(ArrowUp) {
+            search.row = search.row.saturating_sub(1);
         }
         garden.search = Some(search);
         return;
@@ -1328,10 +1362,6 @@ Enter place   Esc cancel
 {}",
             garden.status
         );
-        return;
-    }
-    if let Some(search) = &garden.search {
-        text.0 = search.label(&garden.library, &models);
         return;
     }
     let selection = garden.selected.map(|index| &garden.layout.props[index]);

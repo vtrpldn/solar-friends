@@ -99,64 +99,90 @@ fn button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action: Actio
         .with_child((Text::new(label), ui_font(assets, 15.)));
 }
 
+type PickerButton = (
+    &'static Action,
+    &'static Children,
+    &'static mut Node,
+    &'static mut BackgroundColor,
+);
+
+#[derive(bevy::ecs::system::SystemParam)]
+pub(super) struct PickerView<'w, 's> {
+    panel: Single<'w, 's, &'static mut Node, (With<Picker>, Without<Action>)>,
+    heading: Single<'w, 's, &'static mut Text, With<Heading>>,
+    buttons: Query<'w, 's, PickerButton>,
+    labels: Query<'w, 's, &'static mut Text, Without<Heading>>,
+}
+
 pub(super) fn display(
     workshop: Res<Workshop>,
     catalog: Res<WorkshopCatalog>,
-    mut panel: Single<&mut Node, (With<Picker>, Without<Action>)>,
-    mut heading: Single<&mut Text, With<Heading>>,
-    mut buttons: Query<(&Action, &Children, &mut Node, &mut BackgroundColor)>,
-    mut labels: Query<&mut Text, Without<Heading>>,
+    mut view: PickerView,
 ) {
-    let Some(search) = &workshop.search else {
-        panel.display = Display::None;
-        return;
-    };
-    panel.display = Display::Flex;
-    if !workshop.is_changed() {
-        return;
+    if workshop.is_changed() {
+        view.update(workshop.search.as_ref(), &workshop.assets, &catalog);
     }
-    let matches = search.matching(&workshop.assets, &catalog);
-    let start = search.page_start();
-    let page = start / PAGE_SIZE + 1;
-    let pages = matches.len().div_ceil(PAGE_SIZE);
-    let results = if matches.is_empty() {
-        "No matching assets".into()
-    } else {
-        format!("{} assets · Page {page}/{pages}", matches.len())
-    };
-    let query = if search.query.is_empty() {
-        "Type to filter"
-    } else {
-        &search.query
-    };
-    heading.set_if_neq(Text::new(format!("Find asset · {query}\n{results}")));
-    for (action, children, mut node, mut background) in &mut buttons {
-        let visible = match *action {
-            Action::Asset(offset) => {
-                let row = start + offset;
-                if let Some(&index) = matches.get(row) {
-                    let model = &catalog.0[&workshop.assets[index]];
-                    if let Ok(mut label) = labels.get_mut(children[0]) {
-                        label.set_if_neq(Text::new(format!("{} · {}", model.name, model.category)));
-                    }
-                    background.0 = if row == search.row {
-                        Color::srgb_u8(103, 123, 85)
-                    } else {
-                        Color::srgb_u8(62, 83, 65)
-                    };
-                    true
-                } else {
-                    false
-                }
-            }
-            Action::Previous => page > 1,
-            Action::Next => page < pages,
-            Action::Close => true,
+}
+
+impl PickerView<'_, '_> {
+    pub(super) fn update(
+        &mut self,
+        search: Option<&AssetSearch>,
+        assets: &[String],
+        catalog: &WorkshopCatalog,
+    ) {
+        let Some(search) = search else {
+            self.panel.display = Display::None;
+            return;
         };
-        node.display = if visible {
-            Display::Flex
+        self.panel.display = Display::Flex;
+        let matches = search.matching(assets, catalog);
+        let start = search.page_start();
+        let page = start / PAGE_SIZE + 1;
+        let pages = matches.len().div_ceil(PAGE_SIZE);
+        let results = if matches.is_empty() {
+            "No matching assets".into()
         } else {
-            Display::None
+            format!("{} assets · Page {page}/{pages}", matches.len())
         };
+        let query = if search.query.is_empty() {
+            "Type to filter"
+        } else {
+            &search.query
+        };
+        self.heading
+            .set_if_neq(Text::new(format!("Find asset · {query}\n{results}")));
+        for (action, children, mut node, mut background) in &mut self.buttons {
+            let visible = match *action {
+                Action::Asset(offset) => {
+                    let row = start + offset;
+                    if let Some(&index) = matches.get(row) {
+                        let model = &catalog.0[&assets[index]];
+                        if let Ok(mut label) = self.labels.get_mut(children[0]) {
+                            label.set_if_neq(Text::new(format!(
+                                "{} · {}",
+                                model.name, model.category
+                            )));
+                        }
+                        background.0 = if row == search.row {
+                            Color::srgb_u8(103, 123, 85)
+                        } else {
+                            Color::srgb_u8(62, 83, 65)
+                        };
+                        true
+                    } else {
+                        false
+                    }
+                }
+                Action::Previous => page > 1,
+                Action::Next => page < pages,
+                Action::Close => true,
+            };
+            node.display = if visible {
+                Display::Flex
+            } else {
+                Display::None
+            };
+        }
     }
 }
