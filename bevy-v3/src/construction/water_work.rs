@@ -838,6 +838,18 @@ impl Construction {
                             && matches!(job.recipe.as_str(), "fruit" | "bananas")
                     })
             });
+            let kitchen_needs_drainage = !sandbox
+                && site.kind == "kitchen"
+                && id.checked_sub(1).is_some_and(|target| {
+                    self.production.jobs.iter().any(|job| {
+                        let water = catalog.production[&job.recipe].water;
+                        job.site == target
+                            && job.phase != crate::production::Phase::Return
+                            && !job.watered
+                            && water > 0.0
+                            && !self.utilities.greywater_space(id, water)
+                    })
+                });
             let needs_drinking_water = !sandbox
                 && id.checked_sub(1).is_some_and(|target| {
                     let animal_care = catalog.animal_rations.get(site.kind).is_some_and(|ration| {
@@ -856,7 +868,9 @@ impl Construction {
                                 && catalog.production[&job.recipe].water > site.levels[0] + 1e-8
                         })
                 });
-            let action = if needs_drinking_water {
+            let action = if kitchen_needs_drainage && site.maintain_sanitation {
+                Some(WaterAction::Sanitation)
+            } else if needs_drinking_water && !kitchen_needs_drainage {
                 self.utilities
                     .water_sources()
                     .filter(|(source, _, _)| *source != id)
@@ -1217,6 +1231,39 @@ mod tests {
             .unwrap();
         town.utilities.remove_manual_link(row, false);
         assert!(!town.utilities.water_link_exists(1, 2, 1));
+    }
+
+    #[test]
+    fn automatic_sanitation_clears_a_kitchen_blocked_on_water_and_greywater() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut town = Construction::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut kitchen = town.proposed_site(&catalog, "kitchen", IVec2::new(44, 36));
+        kitchen.work = catalog.projects["kitchen"].work;
+        town.plans.push(kitchen);
+        town.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        town.utilities.take_water(Some(1), 0, 6.0);
+        town.utilities.deliver_water(1, 2, 24.0);
+        stock.receive(&catalog.production["cook_greens"].input);
+        town.queue_batch(&catalog, &mut stock, 0, "cook_greens");
+
+        town.maintain_water(&catalog, false);
+        assert!(!town.water_jobs.contains_key(&1));
+        assert!(town.utilities.set_water_policy(1, false, true));
+        town.maintain_water(&catalog, false);
+        assert!(matches!(
+            town.water_jobs[&1].action,
+            WaterAction::Sanitation
+        ));
+
+        town.water_jobs.remove(&1);
+        assert_eq!(town.utilities.service_waste(1), 24.0);
+        town.maintain_water(&catalog, false);
+        assert!(matches!(
+            town.water_jobs[&1].action,
+            WaterAction::Carry { channel: 0, .. }
+        ));
     }
 
     #[test]
