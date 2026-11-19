@@ -56,6 +56,19 @@ pub fn write(path: &Path, village: &Village) -> io::Result<()> {
     atomic_write(path, &json, MAX_BYTES)
 }
 
+pub fn write_continuation(path: &Path, village: &Village, catalog: &Catalog) -> io::Result<()> {
+    match read(path, catalog) {
+        Ok(saved) if saved.mode() == village.mode() => {}
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+        _ => {
+            return Err(io::Error::other(
+                "the existing autosave could not be restored and was preserved",
+            ));
+        }
+    }
+    write(path, village)
+}
+
 pub(crate) fn atomic_write(path: &Path, json: &[u8], max_bytes: u64) -> io::Result<()> {
     if json.len() as u64 > max_bytes {
         return Err(io::Error::other("the village save exceeds its size limit"));

@@ -675,6 +675,7 @@ fn autosave_continue(
     time: Res<Time<Real>>,
     setup: Res<WorldSetup>,
     saves: Res<SaveMenu>,
+    catalog: Res<Catalog>,
     mut village: ResMut<Village>,
     mut next: Local<f64>,
 ) {
@@ -690,7 +691,7 @@ fn autosave_continue(
     let Some(mode) = village.mode() else { return };
     if let Err(error) = saves
         .continue_path(mode)
-        .and_then(|path| save::write(&path, &village))
+        .and_then(|path| save::write_continuation(&path, &village, &catalog))
     {
         village.save_notice = format!("Could not autosave village: {error}");
     }
@@ -2316,6 +2317,31 @@ mod tests {
         app.world_mut().resource_mut::<Village>().guide.toggle();
         app.update();
         assert_eq!(app.world().resource::<Village>().arrival_time, 2.0);
+    }
+
+    #[test]
+    fn continue_autosave_preserves_an_unreadable_existing_village() {
+        let setup = WorldSetup::default().session();
+        let catalog = Catalog::default();
+        let mut village = Village {
+            setup: Some(setup.clone()),
+            stock: Stock::for_start(&setup, &catalog),
+            ..default()
+        };
+        let path = std::env::temp_dir().join(format!(
+            "solar-v3-continue-test-{}.json",
+            std::process::id()
+        ));
+        save::write_continuation(&path, &village, &catalog).unwrap();
+        village.clock = 12.0;
+        save::write_continuation(&path, &village, &catalog).unwrap();
+        assert_eq!(save::read(&path, &catalog).unwrap().clock, 12.0);
+
+        let damaged = b"{\"version\":1,\"village\":";
+        std::fs::write(&path, damaged).unwrap();
+        assert!(save::write_continuation(&path, &village, &catalog).is_err());
+        assert_eq!(std::fs::read(&path).unwrap(), damaged);
+        std::fs::remove_file(path).unwrap();
     }
 
     #[test]
