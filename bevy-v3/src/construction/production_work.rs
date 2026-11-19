@@ -360,6 +360,10 @@ impl Construction {
         recipe: &ProductionRecipe,
         clock: f64,
     ) -> String {
+        if !matches!(job.phase, Phase::Return | Phase::Growing) && !self.utilities.enabled(job.site)
+        {
+            return "Building switched off".into();
+        }
         if job.waiting_for_access && job.retry_at > clock {
             return "Waiting for access".into();
         }
@@ -701,7 +705,8 @@ impl Construction {
         for job in &mut self.production.jobs {
             if matches!(job.phase, Phase::Pickup | Phase::Harvest | Phase::Work)
                 && let Some(worker) = job.worker
-                && self.residents[worker].health.energy < 25.0
+                && (self.residents[worker].health.energy < 25.0
+                    || !self.utilities.enabled(job.site))
             {
                 self.residents[worker].path.clear();
                 job.worker = None;
@@ -1082,6 +1087,9 @@ impl Construction {
     ) -> bool {
         let batch = &self.production.jobs[job];
         let recipe = &catalog.production[&batch.recipe];
+        if batch.phase != Phase::Return && !self.utilities.enabled(batch.site) {
+            return false;
+        }
         if !stock.sandbox
             && batch.phase != Phase::Return
             && !batch.watered
@@ -1225,6 +1233,30 @@ mod upgrade_tests {
                 .unwrap();
             assert!(job.worker.is_some_and(|worker| worker != 0));
             assert_eq!(job.work, 5.0);
+            if expected_site == 0 {
+                let plan = &village.plans[0];
+                village.utilities.sync(std::iter::once(Facility {
+                    id: 1,
+                    kind: "coop",
+                    location: plan.position,
+                    size: plan.size,
+                    batteries: 0,
+                    panels: 0,
+                    working: true,
+                }));
+                village.utilities.toggle(0);
+                village.tick_production(&catalog, &mut stock, site, 3.0, 0.1);
+                let job = &village.production.jobs[0];
+                assert!(job.worker.is_none());
+                assert_eq!(job.work, 5.0);
+                assert_eq!(
+                    village.batch_status(job, &catalog.production["eggs"], 3.0),
+                    "Building switched off"
+                );
+                village.utilities.toggle(0);
+                village.tick_production(&catalog, &mut stock, site, 4.0, 0.1);
+                assert!(village.production.jobs[0].worker.is_some());
+            }
         }
     }
 
