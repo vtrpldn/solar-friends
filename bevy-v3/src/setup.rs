@@ -246,7 +246,31 @@ impl WorldSetup {
         self.town = preset.town;
     }
 
-    fn label(&self, action: Action, has_village: bool) -> String {
+    pub(crate) const WORLD_OPTIONS: [Action; 7] = [
+        Action::Biome,
+        Action::Landscape,
+        Action::Water,
+        Action::Resources,
+        Action::Savings,
+        Action::Supplies,
+        Action::Town,
+    ];
+
+    pub(crate) fn cycle_world_option(&mut self, action: Action, forward: bool) {
+        let (index, count) = match action {
+            Action::Biome => (&mut self.biome, BIOMES.len()),
+            Action::Landscape => (&mut self.landscape, LANDSCAPES.len()),
+            Action::Water => (&mut self.water, WATER.len()),
+            Action::Resources => (&mut self.resources, RESOURCES.len()),
+            Action::Savings if self.mode == Mode::Story => (&mut self.savings, SAVINGS.len()),
+            Action::Supplies if self.mode == Mode::Story => (&mut self.supplies, SUPPLIES.len()),
+            Action::Town => (&mut self.town, TOWN.len()),
+            _ => return,
+        };
+        *index = (*index + if forward { 1 } else { count - 1 }) % count;
+    }
+
+    pub(crate) fn label(&self, action: Action, has_village: bool) -> String {
         match action {
             Action::Mode => match self.mode {
                 Mode::Story => "Mode   ·   Story",
@@ -462,18 +486,15 @@ fn setup_input(
                 }
             }
             Action::Preset => setup.cycle_preset(),
-            Action::Biome => setup.biome = (setup.biome + 1) % BIOMES.len(),
-            Action::Landscape => setup.landscape = (setup.landscape + 1) % LANDSCAPES.len(),
-            Action::Water => setup.water = (setup.water + 1) % WATER.len(),
-            Action::Resources => setup.resources = (setup.resources + 1) % RESOURCES.len(),
-            Action::Savings if setup.mode == Mode::Story => {
-                setup.savings = (setup.savings + 1) % SAVINGS.len()
+            Action::Biome
+            | Action::Landscape
+            | Action::Water
+            | Action::Resources
+            | Action::Savings
+            | Action::Supplies
+            | Action::Town => {
+                setup.cycle_world_option(*action, true);
             }
-            Action::Supplies if setup.mode == Mode::Story => {
-                setup.supplies = (setup.supplies + 1) % SUPPLIES.len()
-            }
-            Action::Savings | Action::Supplies => {}
-            Action::Town => setup.town = (setup.town + 1) % TOWN.len(),
             Action::Seed => {
                 setup.seed_entry = Some(String::new());
             }

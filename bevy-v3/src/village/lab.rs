@@ -1090,6 +1090,44 @@ impl LabReplacement {
     }
 }
 
+struct StorySettings {
+    world: WorldSetup,
+    seed: String,
+    selected: usize,
+}
+
+impl StorySettings {
+    fn edit(&mut self, keys: &ButtonInput<KeyCode>) {
+        let options = WorldSetup::WORLD_OPTIONS;
+        if keys.just_pressed(KeyCode::ArrowDown) {
+            self.selected = (self.selected + 1) % options.len();
+        } else if keys.just_pressed(KeyCode::ArrowUp) {
+            self.selected = (self.selected + options.len() - 1) % options.len();
+        }
+        if keys.any_just_pressed([KeyCode::ArrowLeft, KeyCode::ArrowRight]) {
+            self.world.cycle_world_option(
+                options[self.selected],
+                keys.just_pressed(KeyCode::ArrowRight),
+            );
+        }
+        WorldSetup::edit_seed_digits(&mut self.seed, keys);
+    }
+
+    fn prompt(&self, notice: &str) -> String {
+        use std::fmt::Write as _;
+        let mut text = format!(
+            "New Story lab run\nSeed {}▏ · digits change seed\nUp/Down Select · Left/Right Change · Enter Start · Esc Cancel\nThis replaces the current lab run.\n",
+            self.seed
+        );
+        for (index, action) in WorldSetup::WORLD_OPTIONS.into_iter().enumerate() {
+            let marker = if self.selected == index { "> " } else { "  " };
+            let _ = writeln!(text, "{marker}{}", self.world.label(action, false));
+        }
+        text.push_str(notice);
+        text
+    }
+}
+
 struct Playback {
     running: bool,
     replaying: bool,
@@ -1108,7 +1146,7 @@ struct Playback {
     farm_site: Option<usize>,
     clear_confirmation: Option<(usize, Option<usize>)>,
     replacement: Option<LabReplacement>,
-    story_seed: Option<String>,
+    story_settings: Option<StorySettings>,
 }
 
 impl Playback {
@@ -1232,7 +1270,7 @@ impl Default for Playback {
             farm_site: None,
             clear_confirmation: None,
             replacement: None,
-            story_seed: None,
+            story_settings: None,
         }
     }
 }
@@ -1441,18 +1479,22 @@ fn update_lab_window(
         if keys.just_pressed(KeyCode::F7) {
             playback.running = false;
             playback.reset_timing();
-            playback.story_seed = Some(String::new());
+            playback.notice.clear();
+            playback.story_settings = Some(StorySettings {
+                world: setup.clone(),
+                seed: setup.seed().to_string(),
+                selected: 0,
+            });
         }
-        if let Some(mut seed) = playback.story_seed.take() {
+        if let Some(mut settings) = playback.story_settings.take() {
             map.visible = false;
             events.clear();
             if keys.just_pressed(KeyCode::Escape) {
                 return;
             }
-            let mut error = "";
             if keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
-                if let Ok(number) = seed.parse::<std::num::NonZeroU32>() {
-                    let next = LabSource::Story(setup.clone().with_seed(number));
+                if let Ok(number) = settings.seed.parse::<std::num::NonZeroU32>() {
+                    let next = LabSource::Story(settings.world.clone().with_seed(number));
                     match next.load(&catalog) {
                         Ok(opened) => {
                             *runner = opened;
@@ -1467,16 +1509,13 @@ fn update_lab_window(
                         Err(load_error) => playback.notice = load_error.to_string(),
                     }
                 } else {
-                    error = "Enter a seed between 1 and 4294967295.";
+                    playback.notice = "Enter a seed between 1 and 4294967295.".into();
                 }
             } else {
-                WorldSetup::edit_seed_digits(&mut seed, &keys);
+                settings.edit(&keys);
             }
-            panel.set_if_neq(Text::new(format!(
-                "New Story lab run\nCurrent seed {} · New seed {seed}▏\nEnter Start new run · Esc Cancel\nThis replaces the current lab run.\n{error} {}",
-                setup.seed(), playback.notice
-            )));
-            playback.story_seed = Some(seed);
+            panel.set_if_neq(Text::new(settings.prompt(&playback.notice)));
+            playback.story_settings = Some(settings);
             return;
         }
     }
@@ -1847,7 +1886,7 @@ fn update_lab_window(
     }
     let weather = lab_weather(village, &runner.setup);
     let reload_control = if matches!(source.as_deref(), Some(LabSource::Story(_))) {
-        " · F7 New seed · F8 Restart"
+        " · F7 Story settings · F8 Restart"
     } else if source.is_some() {
         " · F8 Reload"
     } else {
@@ -1885,6 +1924,28 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn story_settings_change_land_and_capital_for_the_next_run() {
+        let mut settings = StorySettings {
+            world: WorldSetup::default(),
+            seed: "42".into(),
+            selected: 0,
+        };
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::ArrowRight);
+        settings.edit(&keys);
+        assert_eq!(settings.world.biome(), 1);
+        settings.selected = 4;
+        keys.reset_all();
+        keys.press(KeyCode::ArrowLeft);
+        settings.edit(&keys);
+        let runner = LabSource::Story(settings.world)
+            .load(&Catalog::default())
+            .unwrap();
+        assert_eq!(runner.setup.biome(), 1);
+        assert_eq!(runner.village.stock.balance(), 300_000);
+    }
 
     #[test]
     fn the_fileless_lab_starts_an_isolated_story_run() {
