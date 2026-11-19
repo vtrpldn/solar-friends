@@ -4,6 +4,9 @@ use super::*;
 struct BuildPanel;
 
 #[derive(Component)]
+struct BlueprintDetails;
+
+#[derive(Component)]
 enum BuildButton {
     Blueprint(usize),
     Category,
@@ -81,6 +84,21 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     button(row, &assets, BuildButton::NextPage, "Next →");
                 });
         });
+    commands.spawn((
+        BlueprintDetails,
+        Text::default(),
+        ui_font(&assets, 16.0),
+        Node {
+            display: Display::None,
+            position_type: PositionType::Absolute,
+            right: px(320),
+            top: px(20),
+            width: px(350),
+            padding: UiRect::all(px(14)),
+            ..default()
+        },
+        BackgroundColor(Color::srgb_u8(31, 45, 35)),
+    ));
 }
 
 fn button(
@@ -139,6 +157,12 @@ fn select(
     }
 }
 
+type BlueprintDetailsFilter = (
+    With<BlueprintDetails>,
+    Without<BuildPanel>,
+    Without<BuildButton>,
+);
+
 fn refresh(
     (setup, catalog, saves, sound): (
         Res<WorldSetup>,
@@ -158,14 +182,17 @@ fn refresh(
         ),
         Without<BuildPanel>,
     >,
-    mut labels: Query<&mut Text>,
+    mut labels: Query<&mut Text, Without<BlueprintDetails>>,
+    mut details: Single<(&mut Node, &mut Text), BlueprintDetailsFilter>,
 ) {
+    let (detail_node, detail_text) = &mut *details;
+    detail_node.display = Display::None;
     if !visible(&setup, &village, &saves, &sound) {
         panel.display = Display::None;
         return;
     }
     panel.display = Display::Flex;
-    let names = village.construction.build_row_labels(&catalog);
+    let projects = village.construction.build_rows(&catalog);
     for (button, children, interaction, mut node, mut color) in &mut buttons {
         color.0 = match interaction {
             Interaction::None => Color::srgb_u8(58, 78, 61),
@@ -174,13 +201,21 @@ fn refresh(
         };
         let label = match *button {
             BuildButton::Blueprint(index) => {
-                let name = names.get(index);
-                node.display = if name.is_some() {
+                let project = projects.get(index);
+                if let Some(project) = project
+                    && *interaction == Interaction::Hovered
+                {
+                    detail_node.display = Display::Flex;
+                    detail_text.set_if_neq(Text::new(blueprint_details(
+                        &village, &setup, &catalog, project,
+                    )));
+                }
+                node.display = if project.is_some() {
                     Display::Flex
                 } else {
                     Display::None
                 };
-                name.map(|name| format!("{}  {name}", index + 1))
+                project.map(|project| format!("{}  {}", index + 1, project.name))
             }
             BuildButton::ConstructionPolicy => Some(
                 if village.stock.sandbox {
@@ -214,4 +249,42 @@ fn refresh(
             text.set_if_neq(Text::new(label));
         }
     }
+}
+
+fn blueprint_details(
+    village: &Village,
+    setup: &WorldSetup,
+    catalog: &Catalog,
+    project: &crate::catalog::Project,
+) -> String {
+    use std::fmt::Write;
+    let [width, depth] = project.size;
+    let mut details = format!(
+        "{}\n{}\n{} × {} m · {:.1} person-hours · {} loads",
+        project.name,
+        project.description,
+        width * 2,
+        depth * 2,
+        project.work * 0.45 / 60.0,
+        catalog.loads(project),
+    );
+    for (id, amount) in &project.materials {
+        let missing = amount.saturating_sub(village.stock.available(id));
+        let _ = write!(details, "\n{amount} {}", catalog.materials[id].name);
+        if missing > 0 && !village.stock.sandbox {
+            let _ = write!(details, " · {missing} missing");
+        }
+    }
+    let quote = village.construction.blueprint_supply_quote(
+        catalog,
+        &village.stock,
+        TownClock {
+            seconds: village.clock,
+            round_trip_km: setup.round_trip_km(),
+        },
+        project,
+    );
+    let quote = quote.unwrap_or_else(|reason| reason);
+    let _ = write!(details, "\n{quote}");
+    details
 }

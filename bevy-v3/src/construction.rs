@@ -689,12 +689,12 @@ impl Construction {
         self.menu && !self.placing_project() && !self.editing_search
     }
 
-    pub fn build_row_labels<'a>(&self, catalog: &'a Catalog) -> Vec<&'a str> {
+    pub fn build_rows<'a>(&self, catalog: &'a Catalog) -> Vec<&'a Project> {
         self.options(catalog)
             .into_iter()
             .skip(self.page * BUILD_ROWS)
             .take(BUILD_ROWS)
-            .map(|(_, project)| project.name.as_str())
+            .map(|(_, project)| project)
             .collect()
     }
 
@@ -1172,6 +1172,53 @@ impl Construction {
         }
     }
 
+    pub fn blueprint_supply_quote(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+        definition: &Project,
+    ) -> Result<String, String> {
+        if stock.sandbox {
+            return Ok("Free in Sandbox".into());
+        }
+        let quote = self.market.quote(
+            catalog,
+            &definition.materials,
+            stock,
+            clock.seconds,
+            clock.round_trip_km,
+        )?;
+        if quote.trips == 0 {
+            return Ok("Supplies available locally".into());
+        }
+        let pickup_cost = quote.price + quote.fare * u64::from(quote.trips);
+        let trips = quote.trips;
+        let pickup = format!(
+            "R${:.2} including {trips} town pickup(s)",
+            pickup_cost as f64 / 100.0
+        );
+        if self.supplier_construction
+            && let Some(trips) = Self::construction_freight_trips(catalog, quote.units)
+        {
+            let freight_cost =
+                quote.price + crate::market::freight_cents(clock.round_trip_km) * u64::from(trips);
+            if self
+                .market
+                .can_replace_fares_with_freight(stock, 0, freight_cost)
+            {
+                return Ok(format!(
+                    "R${:.2} including {trips} supplier load(s)",
+                    freight_cost as f64 / 100.0
+                ));
+            }
+            return Ok(format!(
+                "{pickup} · Freight exceeds available expansion funds"
+            ));
+        }
+        Ok(pickup)
+    }
+
     pub fn draw_project_site(
         &self,
         ground: ConstructionSite,
@@ -1199,42 +1246,7 @@ impl Construction {
         } else if self.moving.is_some() || stock.sandbox {
             Ok("Site available".into())
         } else {
-            self.market
-                .quote(
-                    catalog,
-                    &definition.materials,
-                    stock,
-                    clock.seconds,
-                    clock.round_trip_km,
-                )
-                .map(|quote| {
-                    if quote.trips == 0 {
-                        return "Supplies available locally".into();
-                    }
-                    let pickup_cost = quote.price + quote.fare * u64::from(quote.trips);
-                    if self.supplier_construction
-                        && let Some(trips) = Self::construction_freight_trips(catalog, quote.units)
-                    {
-                        let freight_cost = quote.price
-                            + crate::market::freight_cents(clock.round_trip_km) * u64::from(trips);
-                        if self.market.can_replace_fares_with_freight(stock, 0, freight_cost) {
-                            return format!(
-                                "R${:.2} including {trips} supplier load(s)",
-                                freight_cost as f64 / 100.0
-                            );
-                        }
-                        return format!(
-                            "R${:.2} including {} town pickup(s) · Freight exceeds available expansion funds",
-                            pickup_cost as f64 / 100.0,
-                            quote.trips
-                        );
-                    }
-                    format!(
-                        "R${:.2} including {} town pickup(s)",
-                        pickup_cost as f64 / 100.0,
-                        quote.trips
-                    )
-                })
+            self.blueprint_supply_quote(catalog, stock, clock, definition)
         };
         let tint = if status.is_ok() {
             Color::srgb_u8(217, 237, 165)
