@@ -21,6 +21,27 @@ pub struct Farming {
 pub struct Plot {
     pub beds: Vec<Bed>,
     remainders: [f64; 3],
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    warning: Option<CropWarning>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
+pub(crate) enum CropWarning {
+    Wilting,
+    Damaged,
+    Expired,
+    Failed,
+}
+
+impl CropWarning {
+    pub(crate) fn message(self) -> &'static str {
+        match self {
+            Self::Wilting => "Crops wilting. Restore irrigation.",
+            Self::Damaged => "Crops damaged. Restore irrigation to prevent further damage.",
+            Self::Expired => "Harvest window closed. Clear expired crops before replanting.",
+            Self::Failed => "Crops failed. Clear failed beds before replanting.",
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
@@ -178,7 +199,30 @@ impl Plot {
         Some(Self {
             beds,
             remainders: [0.0; 3],
+            warning: None,
         })
+    }
+
+    pub(crate) fn update_warning(&mut self, clock: f64) -> Option<CropWarning> {
+        let warning = self
+            .beds
+            .iter()
+            .filter_map(|bed| {
+                if bed.stage == Stage::Failed {
+                    Some(CropWarning::Failed)
+                } else if bed.harvest_expired(clock) {
+                    Some(CropWarning::Expired)
+                } else if bed.standing() && bed.drought_damage() > 0.0 {
+                    Some(CropWarning::Damaged)
+                } else if bed.standing() && bed.moisture < 0.2 {
+                    Some(CropWarning::Wilting)
+                } else {
+                    None
+                }
+            })
+            .max();
+        let previous = std::mem::replace(&mut self.warning, warning);
+        warning.filter(|warning| Some(*warning) != previous)
     }
 
     pub fn field_size_valid(size: IVec2) -> bool {

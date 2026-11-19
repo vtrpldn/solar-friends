@@ -170,6 +170,15 @@ impl Construction {
             for bed in &mut plot.beds {
                 bed.tick(climate, |amount| self.utilities.irrigate(index, amount));
             }
+            if !climate.sandbox
+                && let Some(warning) = plot.update_warning(clock)
+            {
+                let name = &catalog.projects[&self.plans[index].key].name;
+                self.events.record(
+                    clock,
+                    format!("{name} #{} · {}", index + 1, warning.message()),
+                );
+            }
         }
     }
 
@@ -1129,6 +1138,35 @@ mod resize_tests {
         }
         assert!(village.farming.jobs.is_empty());
         assert_eq!(stock.available("greens"), initial + total);
+    }
+
+    #[test]
+    fn crop_alerts_follow_the_most_severe_bed_and_survive_reload() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut village = Construction::default();
+        let mut field = village.proposed_site(&catalog, "field", IVec2::new(44, 36));
+        field.work = catalog.projects["field"].work;
+        village.plans.push(field);
+        let mut plot = Plot::new("field", IVec2::splat(8)).unwrap();
+        plot.beds[0].stage = Stage::Growing;
+        plot.beds[0].moisture = 0.1;
+        plot.beds[1].stage = Stage::Failed;
+        village.farming.plots.insert(0, plot);
+
+        village.tick_crops(&catalog, &setup, 0.0, 0.0);
+        let log = village.event_log(0, "").1;
+        assert!(log.contains("Crops failed."));
+        assert!(!log.contains("Crops wilting."));
+
+        let mut restored: Construction =
+            serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        restored.tick_crops(&catalog, &setup, 1.0, 0.0);
+        assert_eq!(restored.event_log(0, "").1, log);
+
+        restored.farming.plots.get_mut(&0).unwrap().beds[1].stage = Stage::Unprepared;
+        restored.tick_crops(&catalog, &setup, 2.0, 0.0);
+        assert!(restored.event_log(0, "").1.contains("Crops wilting."));
     }
 
     #[test]
