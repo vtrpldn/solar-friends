@@ -3,7 +3,7 @@ use std::{collections::BTreeMap, sync::LazyLock};
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
-use crate::weather::DAY;
+use crate::{catalog::Catalog, weather::DAY};
 
 #[derive(Default, Deserialize, Serialize)]
 pub struct Farming {
@@ -148,6 +148,16 @@ impl Stage {
     }
 }
 
+#[derive(Clone, Default, Deserialize, Serialize)]
+struct CropMass {
+    seeds_kg: f64,
+    grown_kg: f64,
+    standing_kg: Option<f64>,
+    field_loss_kg: f64,
+    harvested_kg: f64,
+    residue_exported_kg: f64,
+}
+
 #[derive(Clone, Deserialize, Serialize)]
 pub struct Bed {
     pub offset: Vec2,
@@ -179,6 +189,8 @@ pub struct Bed {
     pub(crate) soil_organic_kg: f64,
     #[serde(default)]
     pub(crate) decomposed_gas_kg: f64,
+    #[serde(default)]
+    mass: CropMass,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
@@ -324,7 +336,13 @@ impl Plot {
         Ok(())
     }
 
-    pub fn finish(&mut self, job: &FarmJob, clock: f64, sandbox: bool) -> BTreeMap<String, u32> {
+    pub fn finish(
+        &mut self,
+        catalog: &Catalog,
+        job: &FarmJob,
+        clock: f64,
+        sandbox: bool,
+    ) -> BTreeMap<String, u32> {
         let bed = &mut self.beds[job.bed];
         let area = bed.area();
         let mut output = BTreeMap::new();
@@ -342,6 +360,15 @@ impl Plot {
                 bed.drought_seconds = 0.0;
                 bed.damage = 0.0;
                 bed.ripe_at = clock;
+                let seeds: f64 = job
+                    .inputs
+                    .iter()
+                    .map(|(id, amount)| catalog.materials[id].mass * f64::from(*amount))
+                    .sum();
+                let grown = bed.growth * bed.potential_biomass();
+                bed.mass.seeds_kg += seeds;
+                bed.mass.grown_kg += grown;
+                bed.mass.standing_kg = Some(seeds + grown);
             }
             FarmAction::Amend => bed.amendment_kg += f64::from(job.inputs["compost"]),
             FarmAction::Collect => collect_residues(bed, &mut output),
@@ -358,7 +385,11 @@ impl Plot {
                 if units > 0 {
                     output.insert(bed.crop.material().into(), units);
                 }
-                bed.residue_kg += area * bed.crop.residue() * bed.growth * bed.health();
+                let residues = area * bed.crop.residue() * bed.growth * bed.health();
+                bed.mass.field_loss_kg += (bed.standing_biomass() - edible - residues).max(0.0);
+                bed.mass.standing_kg = Some(0.0);
+                bed.mass.harvested_kg += f64::from(units);
+                bed.residue_kg += residues;
                 if bed.collect_residues {
                     collect_residues(bed, &mut output);
                 }
@@ -374,6 +405,7 @@ impl Plot {
 fn collect_residues(bed: &mut Bed, output: &mut BTreeMap<String, u32>) {
     let units = bed.residue_kg.floor() as u32;
     bed.residue_kg -= f64::from(units);
+    bed.mass.residue_exported_kg += f64::from(units);
     if units > 0 {
         output.insert("scraps".into(), units);
     }
@@ -413,6 +445,7 @@ impl Bed {
             amendment_kg: 0.0,
             soil_organic_kg: 0.0,
             decomposed_gas_kg: 0.0,
+            mass: CropMass::default(),
         }
     }
 
@@ -453,11 +486,27 @@ impl Bed {
         self.health() * self.harvest_factor(clock).max(0.15)
     }
 
-    pub fn yield_kg(&self, clock: f64) -> f64 {
+    fn potential_yield(&self) -> f64 {
         self.area() * self.crop.yield_kg() * self.density.min(1.2)
             / (1.0 + (self.density - 1.0).max(0.0) * 1.5)
-            * self.health()
-            * self.harvest_factor(clock)
+    }
+
+    fn potential_biomass(&self) -> f64 {
+        self.potential_yield() + self.area() * self.crop.residue()
+    }
+
+    pub(crate) fn standing_biomass(&self) -> f64 {
+        self.mass
+            .standing_kg
+            .unwrap_or_else(|| self.growth * self.potential_biomass())
+    }
+
+    pub(crate) fn field_loss_kg(&self) -> f64 {
+        self.mass.field_loss_kg
+    }
+
+    pub fn yield_kg(&self, clock: f64) -> f64 {
+        self.potential_yield() * self.health() * self.harvest_factor(clock)
     }
 
     pub fn editable(&self) -> bool {
@@ -600,9 +649,14 @@ impl Bed {
         self.progress_seconds += dt;
         self.stress += dt * (1.0 - condition);
         if self.stage == Stage::Growing {
+            let previous_growth = self.growth;
+            let previous_mass = self.standing_biomass();
             self.growth = (self.growth
                 + days / self.crop.days() * condition * if sheltered { 1.0 } else { season })
             .min(1.0);
+            let grown = (self.growth - previous_growth) * self.potential_biomass();
+            self.mass.grown_kg += grown;
+            self.mass.standing_kg = Some(previous_mass + grown);
             if self.growth >= 1.0 {
                 self.stage = Stage::Harvestable;
                 self.ripe_at = clock;
@@ -644,6 +698,12 @@ impl Farming {
                             bed.drained_liters,
                             bed.soil_organic_kg,
                             bed.decomposed_gas_kg,
+                            bed.mass.seeds_kg,
+                            bed.mass.grown_kg,
+                            bed.mass.standing_kg.unwrap_or(0.0),
+                            bed.mass.field_loss_kg,
+                            bed.mass.harvested_kg,
+                            bed.mass.residue_exported_kg,
                         ]
                         .into_iter()
                         .all(|amount| amount.is_finite() && amount >= 0.0)
@@ -725,6 +785,7 @@ mod tests {
 
     #[test]
     fn irrigated_greens_mature_in_45_days_and_preserve_fractional_harvest() {
+        let catalog = Catalog::default();
         let mut plot = Plot::new("garden", IVec2::new(3, 5)).unwrap();
         let mut job = FarmJob {
             site: 0,
@@ -743,12 +804,13 @@ mod tests {
             fare: 0,
             seed_freight_eta: None,
         };
-        plot.finish(&job, 0.0, false);
+        plot.finish(&catalog, &job, 0.0, false);
         job.action = FarmAction::Plant;
         let (seeds, work) = plot.beds[0].requirements(FarmAction::Plant, 0.0).unwrap();
         assert_eq!(seeds["greens_seed"], 2);
         assert_eq!(work, 58.0);
-        plot.finish(&job, 0.0, false);
+        job.inputs = seeds;
+        plot.finish(&catalog, &job, 0.0, false);
         let mut withdrawn = 0.0;
         for hour in 1..=45 * 24 + 1 {
             let dt = DAY / 24.0;
@@ -771,8 +833,12 @@ mod tests {
         assert!(withdrawn > 0.0);
         assert_eq!(plot.beds[0].irrigated_liters, withdrawn);
         job.action = FarmAction::Harvest;
-        let output = plot.finish(&job, 45.5 * DAY, false);
+        let output = plot.finish(&catalog, &job, 45.5 * DAY, false);
         assert_eq!(output["greens"], 9);
+        let bed = &plot.beds[0];
+        assert_eq!(bed.standing_biomass(), 0.0);
+        let accounted = 9.0 + plot.remainders[0] + bed.residue_kg + bed.field_loss_kg();
+        assert!((accounted - bed.mass.seeds_kg - bed.mass.grown_kg).abs() < 1e-9);
         assert!((plot.remainders[0] - 0.6).abs() < 1e-9);
     }
 
