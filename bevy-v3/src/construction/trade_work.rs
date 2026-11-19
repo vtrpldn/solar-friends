@@ -74,6 +74,8 @@ impl Construction {
                 let direction = if order.buying { "Buy" } else { "Sell" };
                 let trip = self.active_trips().find(|trip| trip.covers_order(index));
                 let status = match trip {
+                    Some(_) if order.settled => "Paid",
+                    Some(_) if order.spoiled => "Spoiled",
                     Some(trip) if trip.boarded => "In transit",
                     Some(_) => "Booked",
                     None if order.hold_for_pickup => "Held for pickup",

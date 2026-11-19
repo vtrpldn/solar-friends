@@ -27,11 +27,21 @@ impl Construction {
 
     pub fn finance_summary(&self, stock: &Stock, selected: usize) -> String {
         let status = stock.finance_summary(self.market.committed_fares());
+        let (pending_sales, expected_cents) = self
+            .trade
+            .orders
+            .iter()
+            .filter(|order| !order.buying && !order.settled && !order.spoiled)
+            .fold((0, 0u64), |(count, cents), order| {
+                (count + 1, cents.saturating_add(order.cents))
+            });
+        let receipts = self.trade.receipts;
         let names = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
         let worker = &self.residents[selected];
         let (job, wage) = JOBS[selected];
         format!(
-            "{status}\n\n{} · {job}\n{} · Day shift R${} after bus fare\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays",
+            "{status}\nTown sales · {receipts} paid · {pending_sales} pending (R${:.2} before fuel)\n\n{} · {job}\n{} · Day shift R${} after bus fare\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays",
+            expected_cents as f64 / 100.0,
             names[selected],
             worker.town_work.status(),
             wage * 2 - 8
