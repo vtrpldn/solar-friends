@@ -862,6 +862,7 @@ impl Construction {
             .find(|job| job.worker == Some(index))
         {
             return match job.phase {
+                crate::production::Phase::Return if job.returning_to_site => Motion::Walk,
                 crate::production::Phase::Approach | crate::production::Phase::Return
                     if !worker.path.is_empty() =>
                 {

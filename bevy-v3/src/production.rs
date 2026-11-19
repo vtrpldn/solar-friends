@@ -33,6 +33,8 @@ pub struct Batch {
     pub retry_at: f64,
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub waiting_for_access: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub returning_to_site: bool,
     #[serde(default)]
     pub water_to_deliver: f64,
     #[serde(default)]

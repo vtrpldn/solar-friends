@@ -391,6 +391,7 @@ impl Construction {
             work: 0.0,
             retry_at: 0.0,
             waiting_for_access: false,
+            returning_to_site: false,
             water_to_deliver: 0.0,
             food_input,
             food_output: None,
@@ -496,7 +497,12 @@ impl Construction {
         let units = |goods: &BTreeMap<String, u32>| {
             goods.values().map(|&count| u64::from(count)).sum::<u64>()
         };
-        let expected = if let Some(output) = &job.delivered_output {
+        let expected = if job.phase == Phase::Return {
+            units(&production_load(
+                catalog,
+                job.delivered_output.as_ref().unwrap_or(&recipe.output),
+            ))
+        } else if let Some(output) = &job.delivered_output {
             units(output)
         } else if let Some((growth, biology)) = job.growth.as_ref().zip(recipe.biology.as_ref()) {
             units(&growth.output(biology, clock, &recipe.output))
@@ -570,6 +576,10 @@ impl Construction {
                 format!("{:.0}% · {stage}", fraction * 100.0)
             }
             Phase::Work => format!("{:.0}% worked", job.work / recipe.work * 100.0),
+            Phase::Return if job.returning_to_site => "Returning for the next load".into(),
+            Phase::Return if recipe.output.contains_key("wheelbarrow") => {
+                "Wheeling the assembled wheelbarrow to stores".into()
+            }
             Phase::Return => "Carrying output to stores".into(),
             Phase::Growing => format!(
                 "{:.1} game days remaining",
@@ -900,6 +910,11 @@ impl Construction {
                         })
                 }) && job.worker.is_none_or(|index| index < self.residents.len())
                     && job.retry_at >= 0.0
+                    && job.delivered_output.as_ref().is_none_or(|output| {
+                        output.keys().all(|id| catalog.materials.contains_key(id))
+                    })
+                    && (!job.returning_to_site
+                        || job.phase == Phase::Return && job.delivered_output.is_some())
             })
     }
 
@@ -937,7 +952,10 @@ impl Construction {
             };
             let worker = &mut self.residents[worker_index];
             let phase = job.phase;
-            worker.move_along_path(dt, matches!(phase, Phase::Approach | Phase::Return));
+            worker.move_along_path(
+                dt,
+                phase == Phase::Approach || (phase == Phase::Return && !job.returning_to_site),
+            );
             if !worker.path.is_empty() {
                 continue;
             }
@@ -1148,14 +1166,57 @@ impl Construction {
                     self.production.jobs[index].phase = Phase::Return;
                 }
                 Phase::Return => {
-                    let output = job.delivered_output.as_ref().unwrap_or(&recipe.output);
+                    if job.returning_to_site {
+                        if let Some(path) = path(position, SUPPLY_SPOTS[worker_index]) {
+                            self.residents[worker_index].path = path;
+                            self.production.jobs[index].returning_to_site = false;
+                        } else {
+                            let job = &mut self.production.jobs[index];
+                            job.waiting_for_access = true;
+                            job.retry_at = clock + 5.0;
+                        }
+                        continue;
+                    }
                     if self.batch_storage_full(catalog, stock, job, clock) {
                         continue;
                     }
-                    if let Some(lots) = &job.food_output {
-                        stock.receive_with_lots(output, lots.clone());
+                    let output = job.delivered_output.as_ref().unwrap_or(&recipe.output);
+                    let load = production_load(catalog, output);
+                    if load.is_empty() && output.values().any(|&units| units > 0) {
+                        self.production.notice = "Output exceeds hand-carry capacity.".into();
+                        continue;
+                    }
+                    let mut remaining = output.clone();
+                    for (id, units) in &load {
+                        *remaining.get_mut(id).expect("load is part of output") -= units;
+                    }
+                    remaining.retain(|_, units| *units > 0);
+                    let next_path = if remaining.is_empty() {
+                        None
                     } else {
-                        stock.receive(output);
+                        let workspace = &self.plans[job.site];
+                        let Some(path) = project_access_points(workspace, catalog, position)
+                            .into_iter()
+                            .find_map(|cell| path(position, cell))
+                        else {
+                            let job = &mut self.production.jobs[index];
+                            job.waiting_for_access = true;
+                            job.retry_at = clock + 5.0;
+                            continue;
+                        };
+                        Some(path)
+                    };
+                    let job = &mut self.production.jobs[index];
+                    if let Some(lots) = &mut job.food_output {
+                        stock.receive_with_lots(&load, take_load_lots(lots, &load));
+                    } else {
+                        stock.receive(&load);
+                    }
+                    if let Some(path) = next_path {
+                        self.residents[worker_index].path = path;
+                        job.delivered_output = Some(remaining);
+                        job.returning_to_site = true;
+                        continue;
                     }
                     if let Some(tool) = &recipe.repair {
                         stock.equipment.repair(tool);
@@ -1359,19 +1420,20 @@ impl Construction {
             return false;
         }
         let supply = SUPPLY_SPOTS[index];
-        let assigned_path = if matches!(phase, Phase::Harvest | Phase::Work) {
-            project_access_points(project, catalog, resident.position)
-                .into_iter()
-                .find_map(|cell| path(resident.position, cell))
-        } else if returning
-            || project_access_points(project, catalog, supply.as_vec2())
-                .into_iter()
-                .any(|cell| path(supply.as_vec2(), cell).is_some())
-        {
-            path(resident.position, supply)
-        } else {
-            None
-        };
+        let assigned_path =
+            if matches!(phase, Phase::Harvest | Phase::Work) || batch.returning_to_site {
+                project_access_points(project, catalog, resident.position)
+                    .into_iter()
+                    .find_map(|cell| path(resident.position, cell))
+            } else if returning
+                || project_access_points(project, catalog, supply.as_vec2())
+                    .into_iter()
+                    .any(|cell| path(supply.as_vec2(), cell).is_some())
+            {
+                path(resident.position, supply)
+            } else {
+                None
+            };
         let Some(path) = assigned_path else {
             self.production.jobs[job].waiting_for_access = true;
             return false;
@@ -1380,6 +1442,57 @@ impl Construction {
         self.production.jobs[job].worker = Some(index);
         true
     }
+}
+
+fn production_load(catalog: &Catalog, output: &BTreeMap<String, u32>) -> BTreeMap<String, u32> {
+    if output.get("wheelbarrow").is_some_and(|&units| units > 0) {
+        return BTreeMap::from([("wheelbarrow".into(), 1)]);
+    }
+    let (mut mass, mut volume) = (30.0, 0.12);
+    let mut load = BTreeMap::new();
+    for (id, &units) in output {
+        let material = &catalog.materials[id];
+        let count = units
+            .min(((mass + 1e-8) / material.mass).floor() as u32)
+            .min(((volume + 1e-8) / material.volume).floor() as u32);
+        if count > 0 {
+            load.insert(id.clone(), count);
+            mass -= f64::from(count) * material.mass;
+            volume -= f64::from(count) * material.volume;
+        }
+    }
+    load
+}
+
+fn take_load_lots(
+    lots: &mut crate::food::FoodLots,
+    load: &BTreeMap<String, u32>,
+) -> crate::food::FoodLots {
+    let mut taken = BTreeMap::new();
+    for (id, &units) in load {
+        let Some(source) = lots.get_mut(id) else {
+            continue;
+        };
+        let mut remaining = units;
+        let mut delivery = Vec::new();
+        for lot in source.iter_mut().filter(|lot| lot.units > 0) {
+            let count = remaining.min(lot.units);
+            if count == 0 {
+                break;
+            }
+            delivery.push(crate::food::Lot {
+                units: count,
+                ..lot.clone()
+            });
+            lot.units -= count;
+            remaining -= count;
+        }
+        source.retain(|lot| lot.units > 0);
+        if !delivery.is_empty() {
+            taken.insert(id.clone(), delivery);
+        }
+    }
+    taken
 }
 
 fn production_tool(recipe: &ProductionRecipe) -> Option<&str> {
@@ -1403,6 +1516,53 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn bulky_production_returns_in_multiple_conserved_loads() {
+        let catalog = Catalog::default();
+        let mut setup = WorldSetup::default();
+        setup.mode = crate::setup::Mode::Sandbox;
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let mut trees = village.proposed_site(&catalog, "supply-0", IVec2::new(44, 36));
+        trees.work = catalog.projects["supply-0"].work;
+        trees.delivered = trees.loads;
+        village.plans.push(trees);
+        village.queue_batch(&catalog, &mut stock, 0, "wood");
+        village.production.jobs[0].worker = Some(0);
+        village.production.jobs[0].phase = Phase::Return;
+        village.production.jobs[0].work = catalog.production["wood"].work;
+        village.residents[0].position = SUPPLY_SPOTS[0].as_vec2();
+        village.tick_production(&catalog, &mut stock, site, 0.0, 0.1);
+        assert_eq!(stock.available("logs"), 5);
+        assert!(village.production.jobs[0].returning_to_site);
+        let saved = serde_json::to_string(&village).unwrap();
+        village = serde_json::from_str(&saved).unwrap();
+        assert!(village.valid_save(&catalog, &stock));
+        for step in 1..20_000 {
+            village.tick_production(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
+            if village.production.jobs.is_empty() {
+                break;
+            }
+        }
+        assert!(village.production.jobs.is_empty());
+        assert_eq!(stock.available("logs"), 48);
+        assert_eq!(
+            production_load(
+                &catalog,
+                &BTreeMap::from([("wheelbarrow".into(), 2), ("logs".into(), 1)])
+            ),
+            BTreeMap::from([("wheelbarrow".into(), 1)])
+        );
+    }
 
     #[test]
     fn crafting_distinguishes_borrowed_tools_from_broken_tools() {
