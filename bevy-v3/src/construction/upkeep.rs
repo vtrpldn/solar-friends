@@ -197,8 +197,20 @@ impl Upkeep {
 }
 
 impl Construction {
+    pub fn automatic_upkeep(&self) -> bool {
+        self.upkeep.automatic
+    }
+
     pub fn toggle_automatic_upkeep(&mut self) {
         self.upkeep.automatic = !self.upkeep.automatic;
+    }
+
+    pub fn set_upkeep_budget(&mut self, restock: bool, cents: u64) {
+        if restock {
+            self.upkeep.restock_budget = cents.min(10_000_000);
+        } else {
+            self.upkeep.budget = cents.min(10_000_000);
+        }
     }
 
     pub fn adjust_upkeep_budget(&mut self, restock: bool, increase: bool) {

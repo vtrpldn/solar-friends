@@ -100,7 +100,7 @@ enum Action {
     CancelUtilityInstallation,
     NextUtilityInstallation,
     AutomaticUpkeep,
-    UpkeepBudget { restock: bool, increase: bool },
+    UpkeepBudget { restock: bool },
 }
 
 impl Action {
@@ -553,10 +553,9 @@ impl Action {
                 "Purchases: supplier freight".into()
             }
             Self::PantryTransport => "Purchases: resident pickup".into(),
-            Self::PantryBudget => match &village.pantry_budget_entry {
-                Some(entry) => format!("R${entry} · Enter to set · Esc to cancel"),
-                None => "Set daily food budget".into(),
-            },
+            Self::PantryBudget => {
+                budget_label(village, BudgetTarget::Food, "Set daily food budget")
+            }
             Self::AutoCook if village.construction.production.kitchen_policy.automatic => {
                 "Automatic cooking on".into()
             }
@@ -619,13 +618,34 @@ impl Action {
                 WaterCommand::Purify => "Purify water".into(),
                 WaterCommand::Sanitation => "Service waste".into(),
             },
-            Self::AutomaticUpkeep => "Toggle auto maintenance".into(),
-            Self::UpkeepBudget { restock, increase } => format!(
-                "{} {} R$25",
-                if restock { "Restock" } else { "Parts" },
-                if increase { "+" } else { "−" }
+            Self::AutomaticUpkeep => format!(
+                "Automatic maintenance {}",
+                if village.construction.automatic_upkeep() {
+                    "on"
+                } else {
+                    "off"
+                }
+            ),
+            Self::UpkeepBudget { restock: false } => budget_label(
+                village,
+                BudgetTarget::MaintenanceParts,
+                "Set parts allowance",
+            ),
+            Self::UpkeepBudget { restock: true } => budget_label(
+                village,
+                BudgetTarget::MaintenanceShopping,
+                "Set feed and repair budget",
             ),
         }
+    }
+}
+
+fn budget_label(village: &Village, target: BudgetTarget, label: &str) -> String {
+    match &village.budget_entry {
+        Some((active, entry)) if *active == target => {
+            format!("R${entry} · Enter to set · Esc to cancel")
+        }
+        _ => label.into(),
     }
 }
 
@@ -898,9 +918,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::InstallWaterLink);
                 spawn_button(menu, &assets, Action::AutomaticUpkeep);
                 for restock in [false, true] {
-                    for increase in [false, true] {
-                        spawn_button(menu, &assets, Action::UpkeepBudget { restock, increase });
-                    }
+                    spawn_button(menu, &assets, Action::UpkeepBudget { restock });
                 }
                 spawn_button(menu, &assets, Action::Home(true));
                 spawn_button(menu, &assets, Action::Home(false));
@@ -1265,8 +1283,13 @@ fn handle_buttons(
                 Action::AutomaticUpkeep if !picker.open => {
                     village.construction.toggle_automatic_upkeep()
                 }
-                Action::UpkeepBudget { restock, increase } if !picker.open => {
-                    village.construction.adjust_upkeep_budget(restock, increase);
+                Action::UpkeepBudget { restock } if !picker.open => {
+                    let target = if restock {
+                        BudgetTarget::MaintenanceShopping
+                    } else {
+                        BudgetTarget::MaintenanceParts
+                    };
+                    village.budget_entry = Some((target, String::new()));
                 }
                 Action::UtilityLinkPage(forward) if !picker.open => {
                     village.move_utility_link(forward)
@@ -1318,7 +1341,7 @@ fn handle_buttons(
                     village.construction.toggle_supplier_construction()
                 }
                 Action::PantryBudget if !picker.open => {
-                    village.pantry_budget_entry = Some(String::new());
+                    village.budget_entry = Some((BudgetTarget::Food, String::new()));
                 }
                 Action::PantryPolicy(reserve, budget, toggle) if !picker.open => {
                     village

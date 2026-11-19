@@ -181,7 +181,8 @@ pub struct Village {
     inventory_equipment: bool,
     #[serde(skip)]
     inventory_search: String,
-    pantry_budget_entry: Option<String>,
+    #[serde(skip)]
+    budget_entry: Option<(BudgetTarget, String)>,
     #[serde(skip)]
     editing_inventory: bool,
     #[serde(skip)]
@@ -1257,6 +1258,13 @@ fn custom_camp_error(terrain: &crate::terrain::Terrain, cell: IVec2) -> Option<&
     None
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum BudgetTarget {
+    Food,
+    MaintenanceParts,
+    MaintenanceShopping,
+}
+
 fn village_input(
     mut commands: Commands,
     (setup, mut build_text): (
@@ -1347,21 +1355,43 @@ fn village_input(
         }
     }
 
-    if village.utility_panel != Some(UtilityPanel::Pantry) {
-        village.pantry_budget_entry = None;
+    if village.budget_entry.as_ref().is_some_and(|(target, _)| {
+        village.utility_panel
+            != Some(match target {
+                BudgetTarget::Food => UtilityPanel::Pantry,
+                BudgetTarget::MaintenanceParts | BudgetTarget::MaintenanceShopping => {
+                    UtilityPanel::Upkeep
+                }
+            })
+    }) {
+        village.budget_entry = None;
     }
-    if let Some(entry) = &mut village.pantry_budget_entry {
+    if let Some((target, entry)) = &mut village.budget_entry {
         if keyboard.just_pressed(KeyCode::Escape) {
-            village.pantry_budget_entry = None;
+            village.budget_entry = None;
         } else if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
-            let budget = village.pantry_budget_entry.take().unwrap_or_default();
-            if let Ok(reais) = budget.parse::<u64>() {
-                let trade = &mut village.construction.trade;
-                let _ = trade.set_pantry_policy(
-                    !trade.household_restock_off,
-                    None,
-                    Some(reais.min(100_000) * 100),
-                );
+            let target = *target;
+            let amount = entry
+                .parse::<u64>()
+                .ok()
+                .map(|reais| reais.min(100_000) * 100);
+            village.budget_entry = None;
+            if let Some(cents) = amount {
+                let construction = &mut village.construction;
+                match target {
+                    BudgetTarget::Food => {
+                        let trade = &mut construction.trade;
+                        let _ = trade.set_pantry_policy(
+                            !trade.household_restock_off,
+                            None,
+                            Some(cents),
+                        );
+                    }
+                    BudgetTarget::MaintenanceParts | BudgetTarget::MaintenanceShopping => {
+                        construction
+                            .set_upkeep_budget(target == BudgetTarget::MaintenanceShopping, cents);
+                    }
+                }
             }
         } else {
             crate::construction::read_search_text(entry, &mut build_text);
