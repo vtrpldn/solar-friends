@@ -1052,6 +1052,7 @@ impl Construction {
         let materials = &catalog.projects[&blueprint.key].materials;
         blueprint.materials_paid = Some(materials.clone());
         if stock.sandbox {
+            blueprint.delivered = blueprint.loads;
             return Ok(());
         }
         let quote = market.quote(

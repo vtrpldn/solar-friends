@@ -238,5 +238,14 @@ mod tests {
         assert_eq!(construction.road_planning.anchor, Some(anchor));
         assert_eq!(serde_json::to_value(&stock).unwrap(), reserved);
         assert_eq!(serde_json::to_value(&construction.market).unwrap(), market);
+
+        stock.sandbox = true;
+        let stone = stock.available("stone");
+        construction.plan_roads(&catalog, &mut stock, site, IVec2::new(45, 36), clock, true);
+        let tile = &construction.plans[1];
+        assert!(tile.loads > 0);
+        assert_eq!(tile.delivered, tile.loads);
+        assert_eq!(tile.work, 0.0);
+        assert_eq!(stock.available("stone"), stone);
     }
 }
