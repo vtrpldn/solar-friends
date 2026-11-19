@@ -1,3 +1,5 @@
+mod shadow;
+
 use bevy::{
     camera::{ClearColorConfig, RenderTarget, ScalingMode, visibility::RenderLayers},
     mesh::VertexAttributeValues,
@@ -75,6 +77,7 @@ struct Frame {
     model: Entity,
     image: Handle<Image>,
     pixels: Option<Vec<u8>>,
+    shadow: Vec<u8>,
     pending: Option<Entity>,
 }
 
@@ -88,11 +91,13 @@ fn framing(points: impl Iterator<Item = Vec3>) -> f32 {
         for turn in 0..TURNS {
             let rotation = Quat::from_rotation_y(turn as f32 * std::f32::consts::FRAC_PI_2);
             let point = rotation * point;
-            let x = view.right().dot(point);
-            let y = view.up().dot(point);
-            fit = fit.max(x.abs() * 96.0 / SIZE as f32 / 0.94);
-            fit = fit.max(y * 96.0 / SIZE as f32 / 1.44);
-            fit = fit.max(-y * 96.0 / SIZE as f32 / 0.44);
+            for projected in [point, shadow::ground_point(point)] {
+                let x = view.right().dot(projected);
+                let y = view.up().dot(projected);
+                fit = fit.max(x.abs() * 96.0 / SIZE as f32 / 0.94);
+                fit = fit.max(y * 96.0 / SIZE as f32 / 1.44);
+                fit = fit.max(-y * 96.0 / SIZE as f32 / 0.44);
+            }
         }
     }
     48.0 / fit
@@ -189,32 +194,48 @@ pub(super) fn start(
         return;
     }
     let inverse = root.affine().inverse();
-    let ppm = framing(
-        spawner
-            .iter_instance_entities(**instance)
-            .flat_map(|entity| {
-                let Ok((mesh, transform, original)) = scene_mesh.get(entity) else {
-                    return None;
-                };
-                let source = original.map_or(&mesh.0, |original| &original.mesh);
-                let VertexAttributeValues::Float32x3(points) =
-                    meshes.get(source)?.attribute(Mesh::ATTRIBUTE_POSITION)?
-                else {
-                    return None;
-                };
-                let transform = inverse * transform.affine();
-                Some(
-                    points
+    let mut points = Vec::new();
+    let mut triangles = Vec::new();
+    for entity in spawner.iter_instance_entities(**instance) {
+        let Ok((mesh, transform, original)) = scene_mesh.get(entity) else {
+            continue;
+        };
+        let source = original.map_or(&mesh.0, |original| &original.mesh);
+        let Some(mesh) = meshes.get(source) else {
+            continue;
+        };
+        let Some(VertexAttributeValues::Float32x3(positions)) =
+            mesh.attribute(Mesh::ATTRIBUTE_POSITION)
+        else {
+            continue;
+        };
+        let world = inverse * transform.affine();
+        let local: Vec<_> = positions
+            .iter()
+            .map(|&point| world.transform_point3(Vec3::from_array(point)))
+            .collect();
+        if mesh.primitive_topology() == bevy::mesh::PrimitiveTopology::TriangleList {
+            if let Some(indices) = mesh.indices() {
+                let indices: Vec<_> = indices.iter().collect();
+                triangles.extend(
+                    indices
+                        .as_chunks::<3>()
+                        .0
                         .iter()
-                        .map(move |&point| transform.transform_point3(Vec3::from_array(point))),
-                )
-            })
-            .flatten(),
-    );
+                        .map(|triangle| triangle.map(|index| local[index])),
+                );
+            } else {
+                triangles.extend(local.as_chunks::<3>().0.iter().copied());
+            }
+        }
+        points.extend(local);
+    }
+    let ppm = framing(points.into_iter());
     let project = &catalog.projects[id];
     let mut frames = Vec::new();
     for turn in 0..TURNS {
         let layer = RenderLayers::layer(FIRST_LAYER + turn);
+        let rotation = Quat::from_rotation_y(turn as f32 * std::f32::consts::FRAC_PI_2);
         let image = images.add(Image::new_target_texture(
             SIZE,
             SIZE,
@@ -245,9 +266,7 @@ pub(super) fn start(
             .spawn((
                 SpriteModel(turn),
                 building_model(&assets, project.model),
-                Transform::from_rotation(Quat::from_rotation_y(
-                    turn as f32 * std::f32::consts::FRAC_PI_2,
-                )),
+                Transform::from_rotation(rotation),
                 Visibility::Hidden,
             ))
             .id();
@@ -256,6 +275,7 @@ pub(super) fn start(
             model,
             image,
             pixels: None,
+            shadow: shadow::mask(&triangles, rotation, ppm),
             pending: None,
         });
     }
@@ -267,7 +287,7 @@ pub(super) fn start(
                 color,
                 ..default()
             },
-            Transform::from_xyz(-8.0, 12.0, 6.0).looking_at(Vec3::ZERO, Vec3::Y),
+            Transform::from_translation(shadow::LIGHT_POSITION).looking_at(Vec3::ZERO, Vec3::Y),
             RenderLayers::from_layers(&[1, 2, 3, 4]),
         ))
         .id();
@@ -340,8 +360,9 @@ pub(super) fn progress(
                             let frame = &mut capture.frames[index];
                             frame.pending = None;
                             if let Ok(image) = event.image.clone().try_into_dynamic() {
-                                let pixels = image.into_rgba8().into_raw();
+                                let mut pixels = image.into_rgba8().into_raw();
                                 if pixels.as_chunks::<4>().0.iter().any(|pixel| pixel[3] != 0) {
+                                    shadow::composite(&mut pixels, &frame.shadow);
                                     frame.pixels = Some(pixels);
                                 }
                             }
