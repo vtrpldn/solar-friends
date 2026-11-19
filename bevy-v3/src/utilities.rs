@@ -1943,6 +1943,38 @@ fn capacity(kind: &str) -> [f64; 4] {
 #[cfg(test)]
 mod tests {
     #[test]
+    fn seasonal_hydrology_matches_v2_with_daily_water_draws() {
+        // Reference values come from V2 weatherStep, hydrologyStep and extractWater
+        // at seed 42, using 96 days of hourly steps and one draw per day.
+        let samples = [
+            (0, 1.0, [116_089.776_8, 7_527.406_1, 55.7651, 7_808.963_1]),
+            (1, 1.5, [169_208.782_5, 9_598.361_5, 6.3298, 9_923.668_9]),
+            (2, 0.55, [62_498.936_0, 4_225.888_8, 6.5793, 4_437.698_9]),
+        ];
+        let hour = crate::weather::HOUR;
+        for (biome, factor, expected) in samples {
+            let mut ground = Hydrology::new(factor, recharge_season(0.0, biome));
+            for step in 1..=96 * 24 {
+                let clock = f64::from(step) * hour;
+                let rain = weather_at(clock - hour * 0.5, biome, 42).rain;
+                ground.step(factor, recharge_season(clock, biome), rain, hour);
+                if step % 24 == 0 {
+                    ground.groundwater -= 42.0;
+                    ground.account().groundwater_extracted += 42.0;
+                    ground.extract_river(120.0);
+                }
+            }
+            let measured = [ground.groundwater, ground.river, ground.runoff, ground.flow];
+            for (actual, expected) in measured.into_iter().zip(expected) {
+                assert!(
+                    (actual - expected).abs() < 0.001,
+                    "Biome {biome}: {actual} vs {expected}"
+                );
+            }
+        }
+    }
+
+    #[test]
     fn older_hydrology_saves_begin_a_balanced_water_account() {
         let mut ground: Hydrology = serde_json::from_str(
             r#"{"capacity":120000,"groundwater":50000,"river":5000,"runoff":300,"flow":6500}"#,
