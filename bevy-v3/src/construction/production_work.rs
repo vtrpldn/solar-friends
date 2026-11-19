@@ -774,6 +774,12 @@ impl Construction {
                 let progress = (100.0 * job.work / recipe.work).floor();
                 let _ = write!(text, "\nCraft progress {progress:.0}% · {resident}");
             }
+        } else if definition.kind == "kitchen"
+            && site.work >= definition.work
+            && !self.changes.contains_key(&index)
+        {
+            text.push('\n');
+            text.push_str(&self.idle_kitchen_status(catalog, stock, clock, index));
         }
         if let Some(animals) = self.livestock.animals.get(&index) {
             text.push('\n');

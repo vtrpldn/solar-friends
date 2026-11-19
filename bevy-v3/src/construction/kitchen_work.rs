@@ -55,7 +55,7 @@ impl Construction {
             return;
         }
         for index in kitchens {
-            if let Some(recipe) = self.choose_kitchen_recipe(catalog, stock, clock) {
+            if let Ok(recipe) = self.choose_kitchen_recipe(catalog, stock, clock) {
                 self.queue_batch(catalog, stock, index, recipe);
             }
         }
@@ -66,7 +66,7 @@ impl Construction {
         catalog: &'a Catalog,
         stock: &Stock,
         clock: f64,
-    ) -> Option<&'a str> {
+    ) -> Result<&'a str, String> {
         let units = |goods: &BTreeMap<String, u32>| {
             goods.values().map(|&units| u64::from(units)).sum::<u64>()
         };
@@ -91,6 +91,7 @@ impl Construction {
         let available = self
             .storage_space(catalog, stock)
             .saturating_sub(production_units.saturating_add(harvest_units));
+        let mut reason = String::from("Fresh meals and provisions meet their targets.");
         for preserved in [false, true] {
             let target = self.production.kitchen_policy.target(preserved);
             let stored = stock
@@ -124,37 +125,64 @@ impl Construction {
             if room == 0 {
                 continue;
             }
-            let best = catalog
+            let mut candidates: Vec<_> = catalog
                 .production
                 .iter()
                 .filter(|(_, recipe)| {
                     recipe.kind == "kitchen"
                         && recipe.preserved.contains_key("meals") == preserved
-                        && recipe
-                            .output
-                            .get("meals")
-                            .is_some_and(|&units| u64::from(units) <= room)
-                        && recipe
-                            .output
-                            .values()
-                            .map(|&units| u64::from(units))
-                            .sum::<u64>()
-                            <= available
-                        && stock.missing(&recipe.input).is_none()
-                        && self.craft_blocker(catalog, stock, recipe, None).is_none()
-                        && enough_to_eat(stock, &recipe.input)
-                        && ingredients_keep(stock, &recipe.input, clock + recipe.work)
+                        && recipe.output.contains_key("meals")
                 })
-                .min_by(|(a, left), (b, right)| {
-                    earliest_ingredient(stock, &left.input)
-                        .total_cmp(&earliest_ingredient(stock, &right.input))
-                        .then_with(|| a.cmp(b))
-                });
-            if let Some((id, _)) = best {
-                return Some(id);
+                .collect();
+            candidates.sort_by(|(a, left), (b, right)| {
+                earliest_ingredient(stock, &left.input)
+                    .total_cmp(&earliest_ingredient(stock, &right.input))
+                    .then_with(|| a.cmp(b))
+            });
+            for (id, recipe) in candidates {
+                reason = if u64::from(recipe.output["meals"]) > room {
+                    "Waiting for room in the meal target for a whole batch.".into()
+                } else if let Some(material) = stock.missing(&recipe.input) {
+                    format!(
+                        "Waiting for {} in stores.",
+                        catalog.materials[material].name
+                    )
+                } else if let Some(reason) = self.craft_blocker(catalog, stock, recipe, None) {
+                    reason
+                } else if !enough_to_eat(stock, &recipe.input) {
+                    "Keeping one day of edible food available.".into()
+                } else if !ingredients_keep(stock, &recipe.input, clock + recipe.work) {
+                    "Ingredients expire too soon to finish this batch.".into()
+                } else if units(&recipe.output) > available {
+                    "Waiting for storage space for the finished batch.".into()
+                } else {
+                    return Ok(id);
+                };
             }
         }
-        None
+        Err(reason)
+    }
+
+    pub(super) fn idle_kitchen_status(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: f64,
+        index: usize,
+    ) -> String {
+        if stock.sandbox {
+            return "Automatic kitchen policy is inactive in Sandbox.".into();
+        }
+        if !self.utilities.enabled(index) {
+            return "Kitchen is switched off.".into();
+        }
+        if !self.production.kitchen_policy.automatic {
+            return "Automatic kitchen policy is off.".into();
+        }
+        match self.choose_kitchen_recipe(catalog, stock, clock) {
+            Ok(id) => format!("Next automatic batch · {}", catalog.production[id].name),
+            Err(reason) => reason,
+        }
     }
 }
 
@@ -260,7 +288,7 @@ mod tests {
         stock.age_food(&catalog, 0.0, 0.1, 0.0);
         assert_eq!(
             village.choose_kitchen_recipe(&catalog, &stock, 0.0),
-            Some("preserve_meals")
+            Ok("preserve_meals")
         );
 
         let doomed = stock.pantry.lots.get_mut("food").unwrap();
@@ -268,14 +296,14 @@ mod tests {
         assert!(
             village
                 .choose_kitchen_recipe(&catalog, &stock, 0.0)
-                .is_none()
+                .is_err()
         );
         stock.pantry.lots.get_mut("food").unwrap()[0].expires = 900.0;
         stock.reserve_available(&BTreeMap::from([("meals".to_owned(), 12)]));
         assert!(
             village
                 .choose_kitchen_recipe(&catalog, &stock, 0.0)
-                .is_none()
+                .is_err()
         );
     }
 
@@ -290,7 +318,7 @@ mod tests {
         village.production.kitchen_policy.change(true, -3);
         assert_eq!(
             village.choose_kitchen_recipe(&catalog, &stock, 0.0),
-            Some("preserve_meals")
+            Ok("preserve_meals")
         );
         village.farming.jobs.push(FarmJob {
             site: 0,
@@ -315,7 +343,7 @@ mod tests {
         assert!(
             village
                 .choose_kitchen_recipe(&catalog, &stock, 0.0)
-                .is_none()
+                .is_err()
         );
     }
 }
