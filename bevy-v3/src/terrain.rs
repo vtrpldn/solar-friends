@@ -266,12 +266,13 @@ impl TerrainEditor {
         occupied: impl Fn(IVec2) -> bool,
     ) {
         let previous = Arc::clone(&self.vertices);
+        let mut working = self.terrain(terrain.clone());
         let mut changed = false;
         for &point in points {
-            let terrain = self.terrain(terrain.clone());
-            changed |= self.apply_brush(&terrain, point, &occupied);
+            changed |= self.apply_brush(&mut working, point, &occupied);
         }
         if changed {
+            self.vertices = working.edits;
             if self.history.len() == 20 {
                 self.history.pop_front();
             }
@@ -284,7 +285,7 @@ impl TerrainEditor {
 
     fn apply_brush(
         &mut self,
-        terrain: &Terrain,
+        terrain: &mut Terrain,
         point: Vec3,
         occupied: impl Fn(IVec2) -> bool,
     ) -> bool {
@@ -307,7 +308,9 @@ impl TerrainEditor {
             let max = ((center + radius) / 2.0).floor().min(HALF_WIDTH / 2.0) as i32;
             min..=max
         };
-        let mut changed = false;
+        // Sample neighbours before applying the dab so smoothing uses a single
+        // surface, and keep all dabs in one working map for this drag.
+        let mut updates = Vec::new();
         for column in bounds(x) {
             for row in bounds(z) {
                 let (a, b) = (f64::from(column * 2), f64::from(row * 2));
@@ -335,11 +338,13 @@ impl TerrainEditor {
                 }
                 .clamp(0.0, 12.0);
                 if (next - old).abs() >= 0.00001 {
-                    Arc::make_mut(&mut self.vertices)
-                        .insert(vertex_index(a, b).expect("bounded vertex"), next);
-                    changed = true;
+                    updates.push((vertex_index(a, b).expect("bounded vertex"), next));
                 }
             }
+        }
+        let changed = !updates.is_empty();
+        if changed {
+            Arc::make_mut(&mut terrain.edits).extend(updates);
         }
         self.status = if changed {
             ""
