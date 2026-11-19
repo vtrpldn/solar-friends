@@ -417,8 +417,9 @@ impl Construction {
                     continue;
                 }
                 let job = self.changes.get_mut(&index).expect("working project");
-                job.work = (job.work + f64::from(dt)).min(job.required);
-                resident.health.energy = (resident.health.energy - f64::from(dt) * 0.12).max(0.0);
+                let labor = f64::from(dt).min(job.required - job.work);
+                job.work += labor;
+                resident.health.energy = (resident.health.energy - labor * 0.12).max(0.0);
                 if job.work < job.required {
                     continue;
                 }
@@ -670,6 +671,10 @@ mod tests {
         assert_eq!(construction.plans[0].position, original);
         assert_eq!(construction.foundations.len(), 1);
         assert!(construction.changes[&0].target.is_some());
+        let worker = construction.changes[&0].worker.unwrap();
+        let energy = construction.residents[worker].health.energy;
+        construction.tick_changes(&catalog, &mut stock, site, 42.0, 3.0);
+        assert_eq!(construction.residents[worker].health.energy, energy);
         construction.plans.pop();
         for _ in 0..2_000 {
             construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
@@ -682,6 +687,44 @@ mod tests {
         let encoded = serde_json::to_string(&construction).unwrap();
         let saved: Construction = serde_json::from_str(&encoded).unwrap();
         assert_eq!(saved.foundations, construction.foundations);
+    }
+
+    #[test]
+    fn demolishing_a_goat_pen_returns_both_animals_to_stock() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut construction = Construction::default();
+        let mut pen = construction.proposed_site(&catalog, "goat_pasture", IVec2::new(44, 36));
+        pen.work = catalog.projects["goat_pasture"].work;
+        pen.delivered = pen.loads;
+        construction.plans.push(pen);
+        construction.livestock.animals.insert(0, Default::default());
+        construction.production.selected = Some(0);
+        construction.apply_project_action(&catalog, &mut stock, ProjectAction::Demolish);
+
+        for _ in 0..2_000 {
+            construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
+            if construction.plans[0].removed {
+                break;
+            }
+        }
+
+        assert!(construction.plans[0].removed);
+        assert!(construction.livestock.animals.is_empty());
+        assert_eq!(stock.available("goats"), 2);
+        let history = &construction.building_history[0];
+        assert_eq!(history.recovered["goats"], 2);
+        assert_eq!(history.lost["bamboo"], 10);
+        assert!(!history.lost.contains_key("goats"));
     }
 
     #[test]
