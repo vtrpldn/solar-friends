@@ -215,6 +215,25 @@ impl Construction {
             && !self.working_upkeep(index)
     }
 
+    pub(super) fn recreation_spot_taken(&self, index: usize, point: IVec2) -> bool {
+        self.residents.iter().enumerate().any(|(other, worker)| {
+            if other == index {
+                return false;
+            }
+            let target = if worker
+                .health
+                .task
+                .as_ref()
+                .is_some_and(|task| task.kind == Need::Fun)
+            {
+                Some(worker.path.back().copied().unwrap_or(worker.position))
+            } else {
+                worker.leisure.visit.as_ref().map(|visit| visit.target)
+            };
+            target.is_some_and(|target| target.distance_squared(point.as_vec2()) < 0.8_f32.powi(2))
+        })
+    }
+
     fn visit_valid(&self, visit: &Visit, catalog: &Catalog, clock: f64, wet: bool) -> bool {
         clock - visit.created <= 180.0
             && (!wet || visit.key.activity.sheltered())
@@ -313,61 +332,54 @@ impl Construction {
             add(Activity::Walk, None, 4.0);
         }
         candidates.sort_by(|(_, a), (_, b)| b.total_cmp(a));
-        let chosen =
-            candidates.into_iter().find_map(|(key, _)| {
-                let plan = key.site.map(|id| &self.plans[id]);
-                let points = if let Some(plan) = plan {
-                    approach_points(plan.position, plan.size, worker.position)
-                } else {
-                    camp_points(site.camp, index as u32 + cycle.wrapping_mul(2))
-                };
-                let (target, path) = points
-                    .into_iter()
-                    .filter(|&point| {
-                        !self.residents.iter().enumerate().any(|(other, worker)| {
-                            other != index
-                                && worker.leisure.visit.as_ref().is_some_and(|visit| {
-                                    visit.target.distance(point.as_vec2()) < 0.8
-                                })
-                        })
-                    })
-                    .find_map(|point| {
-                        self.resident_route(catalog, site, worker.position, point)
-                            .map(|path| (point, path))
-                    })?;
-                let next =
-                    if key.activity == Activity::Walk {
-                        let center =
-                            site.camp + IVec2::new(if cycle.is_multiple_of(2) { -4 } else { 4 }, 3);
-                        Some(camp_points(center, index as u32 + cycle).into_iter().find(
-                            |&point| {
-                                point.as_vec2().distance(target.as_vec2()) >= 2.0
-                                    && self
-                                        .resident_route(catalog, site, target.as_vec2(), point)
-                                        .is_some()
-                            },
-                        )?)
-                    } else {
-                        None
-                    };
-                let facing = plan
-                    .filter(|_| key.activity == Activity::Fire)
-                    .map(|plan| plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5);
-                Some((
-                    Visit {
-                        key,
-                        site_pose: plan.map(|plan| (plan.position, plan.rotation)),
-                        target: target.as_vec2(),
-                        next,
-                        facing,
-                        created: clock,
-                        elapsed: 0.0,
-                        next_invitation: 0.0,
-                        arrived: false,
-                    },
-                    path,
-                ))
-            });
+        let chosen = candidates.into_iter().find_map(|(key, _)| {
+            let plan = key.site.map(|id| &self.plans[id]);
+            let points = if let Some(plan) = plan {
+                approach_points(plan.position, plan.size, worker.position)
+            } else {
+                camp_points(site.camp, index as u32 + cycle.wrapping_mul(2))
+            };
+            let (target, path) = points
+                .into_iter()
+                .filter(|&point| !self.recreation_spot_taken(index, point))
+                .find_map(|point| {
+                    self.resident_route(catalog, site, worker.position, point)
+                        .map(|path| (point, path))
+                })?;
+            let next = if key.activity == Activity::Walk {
+                let center =
+                    site.camp + IVec2::new(if cycle.is_multiple_of(2) { -4 } else { 4 }, 3);
+                Some(
+                    camp_points(center, index as u32 + cycle)
+                        .into_iter()
+                        .find(|&point| {
+                            point.as_vec2().distance(target.as_vec2()) >= 2.0
+                                && self
+                                    .resident_route(catalog, site, target.as_vec2(), point)
+                                    .is_some()
+                        })?,
+                )
+            } else {
+                None
+            };
+            let facing = plan
+                .filter(|_| key.activity == Activity::Fire)
+                .map(|plan| plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5);
+            Some((
+                Visit {
+                    key,
+                    site_pose: plan.map(|plan| (plan.position, plan.rotation)),
+                    target: target.as_vec2(),
+                    next,
+                    facing,
+                    created: clock,
+                    elapsed: 0.0,
+                    next_invitation: 0.0,
+                    arrived: false,
+                },
+                path,
+            ))
+        });
         let worker = &mut self.residents[index];
         worker.leisure.cycle = cycle.wrapping_add(1);
         let (visit, path) = chosen.unwrap_or_else(|| {
@@ -568,6 +580,14 @@ mod tests {
                 .site,
             Some(0)
         );
+        let target = village.residents[index]
+            .leisure
+            .visit
+            .as_ref()
+            .unwrap()
+            .target
+            .as_ivec2();
+        assert!(village.recreation_spot_taken(0, target));
         assert_eq!(village.residents[index].health.levels[fun], 60.0);
         let path = &village.residents[index].path;
         let blocked = *path.front().unwrap();

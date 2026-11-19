@@ -320,6 +320,7 @@ impl Construction {
             worker.health.last_night = Some(night);
         }
         worker.assignment = None;
+        worker.leisure.visit = None;
         worker.path = path;
         worker.health.task = Some(task);
     }
@@ -337,7 +338,12 @@ impl Construction {
             camp,
         } = site;
         let resident = &self.residents[index];
-        let path = |cell| self.resident_route(catalog, site, resident.position, cell);
+        let path = |cell| {
+            if kind == Need::Fun && self.recreation_spot_taken(index, cell) {
+                return None;
+            }
+            self.resident_route(catalog, site, resident.position, cell)
+        };
         let fallback = |cell| path(cell).map(|route| (None, route));
         let facility_path = |id: usize, loc, size| {
             if id == 0 {
@@ -1615,6 +1621,8 @@ mod tests {
         assert!(task.kind == Need::Fun);
         assert_eq!(task.facility, Some(1));
         village.residents[0].path.clear();
+        village.residents[0].position = Vec2::new(42.0, 36.0);
+        assert!(village.recreation_spot_taken(1, IVec2::new(42, 36)));
         assert!(matches!(village.resident_motion(0), Motion::Read));
     }
 
