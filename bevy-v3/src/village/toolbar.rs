@@ -1,5 +1,8 @@
 use super::*;
-use crate::construction::{TradeOrder, TradePolicy};
+use crate::{
+    construction::{TradeOrder, TradePolicy},
+    terrain::Brush,
+};
 
 #[derive(Component, Clone, Copy)]
 enum Action {
@@ -9,6 +12,10 @@ enum Action {
     ConnectRoad,
     UndoRoad,
     FinishRoad,
+    Terrain,
+    TerrainBrush(Brush),
+    TerrainRadius(bool),
+    UndoTerrain,
     ResizeField(IVec2),
     Pause,
     Speed,
@@ -57,6 +64,15 @@ impl Action {
         if matches!(self, Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad) {
             return village.planning_roads() && !village.map_input_blocked();
         }
+        if !village.map_input_blocked() && !village.advance_open() && !village.planning_roads() {
+            match self {
+                Self::Terrain => return true,
+                Self::TerrainBrush(_) | Self::TerrainRadius(_) | Self::UndoTerrain => {
+                    return village.terrain_editor.open;
+                }
+                _ => {}
+            }
+        }
         if village.map_input_blocked()
             || village.advance_open()
             || village.planning_roads()
@@ -65,6 +81,9 @@ impl Action {
             return false;
         }
         match self {
+            Self::Terrain | Self::TerrainBrush(_) | Self::TerrainRadius(_) | Self::UndoTerrain => {
+                false
+            }
             Self::Build => village.utility_panel.is_none(),
             Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
             Self::ResizeField(_) => village.construction.placing_field(),
@@ -136,6 +155,18 @@ impl Action {
             Self::ConnectRoad => "Single road tile".into(),
             Self::UndoRoad => "Undo road stroke".into(),
             Self::FinishRoad => "Finish roads".into(),
+            Self::Terrain if village.terrain_editor.open => "Finish terrain".into(),
+            Self::Terrain => "Terrain tools".into(),
+            Self::TerrainBrush(brush) => match brush {
+                Brush::Raise => "Raise",
+                Brush::Lower => "Lower",
+                Brush::Flatten => "Flatten",
+                Brush::Smooth => "Smooth",
+            }
+            .into(),
+            Self::TerrainRadius(true) => "Next radius".into(),
+            Self::TerrainRadius(false) => "Previous radius".into(),
+            Self::UndoTerrain => "Undo terrain edit".into(),
             Self::ResizeField(delta) => format!(
                 "{} {}",
                 if delta.x != 0 { "Width" } else { "Depth" },
@@ -274,6 +305,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::ConnectRoad,
                 Action::UndoRoad,
                 Action::FinishRoad,
+                Action::Terrain,
                 Action::Manage,
                 Action::ClosePanel,
                 Action::Pause,
@@ -299,6 +331,12 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 BackgroundColor(Color::srgb_u8(31, 45, 35)),
             ))
             .with_children(|menu| {
+                for brush in [Brush::Raise, Brush::Lower, Brush::Flatten, Brush::Smooth] {
+                    spawn_button(menu, &assets, Action::TerrainBrush(brush));
+                }
+                spawn_button(menu, &assets, Action::TerrainRadius(false));
+                spawn_button(menu, &assets, Action::TerrainRadius(true));
+                spawn_button(menu, &assets, Action::UndoTerrain);
                 for delta in [IVec2::NEG_X, IVec2::X, IVec2::NEG_Y, IVec2::Y] {
                     spawn_button(menu, &assets, Action::ResizeField(delta));
                 }
@@ -419,6 +457,13 @@ fn handle_buttons(
                     town.construction.undo_roads(&mut town.stock);
                 }
                 Action::FinishRoad => village.finish_road_planning(),
+                Action::Terrain => {
+                    village.terrain_editor.toggle();
+                    picker.open = false;
+                }
+                Action::TerrainBrush(brush) => village.terrain_editor.select_brush(brush),
+                Action::TerrainRadius(forward) => village.terrain_editor.cycle_radius(forward),
+                Action::UndoTerrain => village.terrain_editor.undo(),
                 Action::ResizeField(delta) => village.construction.resize_field_placement(delta),
                 Action::Pause => village.paused = !village.paused,
                 Action::Speed => village.speed = (village.speed + 1) % SPEEDS.len(),
@@ -583,6 +628,7 @@ fn refresh(
     if toolbar.display == Display::None {
         return;
     }
+    let show_terrain = Action::UndoTerrain.available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
     let show_trade = !picker.open && Action::TradeItem(0).available(&village);
@@ -615,7 +661,8 @@ fn refresh(
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
     picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.0));
-    menu.display = if show_field_size
+    menu.display = if show_terrain
+        || show_field_size
         || show_projects
         || show_residents
         || show_finances
@@ -643,6 +690,9 @@ fn refresh(
             | Action::UndoRoad
             | Action::FinishRoad
             | Action::ResizeField(_) => action.available(&village),
+            Action::TerrainBrush(_) | Action::TerrainRadius(_) | Action::UndoTerrain => {
+                show_terrain
+            }
             Action::Project(row) => projects.get(row).is_some(),
             Action::TradeItem(row) => trade_items.get(row).is_some(),
             Action::Trade(_) | Action::TradePolicy(_) => show_trade,

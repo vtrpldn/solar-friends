@@ -101,7 +101,7 @@ impl Foundation {
 }
 
 #[derive(Clone, Copy, Default)]
-enum Brush {
+pub(crate) enum Brush {
     #[default]
     Raise,
     Lower,
@@ -139,11 +139,25 @@ impl TerrainEditor {
         })
     }
 
+    pub fn toggle(&mut self) {
+        self.open = !self.open;
+        self.level = None;
+        self.status = "";
+    }
+
+    pub fn select_brush(&mut self, brush: Brush) {
+        self.brush = brush;
+        self.level = None;
+    }
+
+    pub fn cycle_radius(&mut self, forward: bool) {
+        let count = Self::RADII.len();
+        self.radius_index = (self.radius_index + if forward { 1 } else { count - 1 }) % count;
+    }
+
     pub fn controls(&mut self, keyboard: &ButtonInput<KeyCode>) {
         if keyboard.just_pressed(KeyCode::F4) {
-            self.open = !self.open;
-            self.level = None;
-            self.status = "";
+            self.toggle();
         }
         if !self.open {
             return;
@@ -155,22 +169,21 @@ impl TerrainEditor {
             (KeyCode::Digit4, Brush::Smooth),
         ] {
             if keyboard.just_pressed(key) {
-                self.brush = brush;
-                self.level = None;
+                self.select_brush(brush);
             }
         }
         if keyboard.just_pressed(KeyCode::KeyZ) {
             self.undo();
         }
         if keyboard.just_pressed(KeyCode::BracketLeft) {
-            self.radius_index = (self.radius_index + 2) % Self::RADII.len();
+            self.cycle_radius(false);
         }
         if keyboard.just_pressed(KeyCode::BracketRight) {
-            self.radius_index = (self.radius_index + 1) % Self::RADII.len();
+            self.cycle_radius(true);
         }
     }
 
-    fn undo(&mut self) {
+    pub fn undo(&mut self) {
         let Some(previous) = self.history.pop_back() else {
             self.status = "No terrain edits to undo.";
             return;
