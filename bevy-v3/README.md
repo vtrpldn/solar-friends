@@ -32,6 +32,8 @@ Sandbox skips the arrival and pitches camp in the clearing when it is free. If t
 
 In Story, press H for finances and paid town shifts. Book one day shift or turn on repeating weekday work for a selected resident. Wages reach village savings when the resident returns. Press Tab in Finances to open town trade, buy for pickup or freight, quote and reserve a sale, or set an automatic sale policy. Households can restock food automatically. Tab again to inspect food expiry and cold-storage use. Dried provisions keep longer, and powered cold storage slows aging for the food that fits.
 
+Press **F** or choose **Find in village** to center the camera on the selected project. **Alt+F** opens the forecast while a project is selected.
+
 Press L to advance between 1 and 365 days. Use Alt+L when L controls sanitation or cold storage. Exact replay uses normal simulation steps. Fast approximate uses larger steps. Press L while advancing to stop at the time shown.
 
 Choose Cultivated field in the build menu. Use brackets to change its width, Shift with brackets for depth, and R to rotate. To resize a field already on the map, select it, open Beds with K, and use the same bracket controls. Existing beds stay anchored to their ground.

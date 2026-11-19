@@ -639,6 +639,28 @@ impl Village {
         self.water_panel.channel = channel;
     }
 
+    fn selected_project_focus(&self) -> Option<Vec2> {
+        if self.utility_panel.is_some()
+            || self.advance_open()
+            || self.construction.menu
+            || self.construction.is_placing()
+            || self.construction.production.open
+            || self.construction.farming.open
+        {
+            return None;
+        }
+        self.construction.selected_project_center()
+    }
+
+    fn focus_selected_project(&self, setup: &WorldSetup, camera: &mut VillageCamera) -> bool {
+        let Some(point) = self.selected_project_focus() else {
+            return false;
+        };
+        let terrain = self.terrain(setup);
+        camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+        true
+    }
+
     fn focus_project_row(
         &mut self,
         catalog: &Catalog,
@@ -1399,7 +1421,10 @@ fn village_input(
         return;
     }
     if keyboard.just_pressed(KeyCode::KeyF) {
-        village.show_forecast = !village.show_forecast;
+        let forecast = keyboard.any_pressed([KeyCode::AltLeft, KeyCode::AltRight]);
+        if forecast || !village.focus_selected_project(&setup, camera) {
+            village.show_forecast = !village.show_forecast;
+        }
     }
     if village.camp.is_some()
         && !village.terrain_editor.open
@@ -2181,7 +2206,11 @@ fn show_hud(
     let weather = weather_at(village.clock, setup.biome(), setup.seed());
     label.push('\n');
     label.push_str(&weather.summary());
-    label.push_str(" · F Forecast · F1 Guide · Shift+F1 Sound");
+    label.push_str(if village.selected_project_focus().is_some() {
+        " · F Find in village · Alt+F Forecast · F1 Guide · Shift+F1 Sound"
+    } else {
+        " · F Forecast · F1 Guide · Shift+F1 Sound"
+    });
     if village.show_forecast {
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
@@ -3214,6 +3243,63 @@ mod tests {
         village.apply_advance_action(AdvanceAction::Toggle);
         assert!(village.is_paused());
         assert!(village.advance_checkpoint);
+    }
+
+    #[test]
+    fn selected_project_focus_centers_the_camera_and_respects_panels() {
+        let mut setup = WorldSetup::default().session();
+        setup.mode = Mode::Sandbox;
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::generate(&setup);
+        let camp = CAMP_SITES[2].1;
+        let mut village = Village {
+            setup: Some(setup.clone()),
+            camp: Some(camp),
+            stock: Stock::for_start(&setup, &catalog),
+            ..default()
+        };
+        village
+            .construction
+            .lab_order(
+                &catalog,
+                &mut village.stock,
+                ConstructionSite {
+                    terrain: &terrain,
+                    land: &land,
+                    camp,
+                },
+                TownClock {
+                    seconds: 0.0,
+                    round_trip_km: 12,
+                },
+                &crate::construction::LabOrder::Build {
+                    key: "home-cottage".into(),
+                    x: 44,
+                    z: 36,
+                    rotation: 0,
+                    size: None,
+                },
+                setup.richness(),
+            )
+            .unwrap();
+        let point = village
+            .construction
+            .focus_project(&catalog, 0, 0, false)
+            .unwrap();
+        let mut camera = VillageCamera {
+            target: Vec3::ZERO,
+            heading: 0.4,
+            polar: 0.7,
+        };
+        assert!(village.focus_selected_project(&setup, &mut camera));
+        assert_eq!(
+            camera.target,
+            Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y)
+        );
+        assert_eq!(camera.heading, 0.4);
+        village.utility_panel = Some(UtilityPanel::Inventory);
+        assert!(!village.focus_selected_project(&setup, &mut camera));
     }
 
     #[test]

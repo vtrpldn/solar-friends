@@ -274,12 +274,7 @@ impl Action {
             }
             Self::SelectedProject(_) => village.utility_panel.is_none(),
             Self::FocusSelectedProject | Self::DeselectProject => {
-                village.utility_panel.is_none()
-                    && !village.construction.menu
-                    && !village.construction.is_placing()
-                    && !village.construction.production.open
-                    && !village.construction.farming.open
-                    && village.construction.selected_project_center().is_some()
+                village.selected_project_focus().is_some()
             }
             Self::TradeItem(_)
             | Self::TradeQueue
@@ -471,7 +466,7 @@ impl Action {
             Self::MoveCraft => "Move unfinished job".into(),
             Self::RecipePage(false) => "Previous recipes".into(),
             Self::RecipePage(true) => "Next recipes".into(),
-            Self::FocusSelectedProject => "Focus project".into(),
+            Self::FocusSelectedProject => "Find in village".into(),
             Self::DeselectProject => "Close project".into(),
             Self::SelectedProject(action) => match action {
                 ProjectAction::Prioritize => "Prioritize project",
@@ -1287,11 +1282,7 @@ fn handle_buttons(
                     village.construction.adjust_trade_policy(&catalog, policy);
                 }
                 Action::FocusSelectedProject if !picker.open => {
-                    if let Some(point) = village.construction.selected_project_center() {
-                        let terrain = village.terrain(&setup);
-                        camera.target =
-                            Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
-                    }
+                    village.focus_selected_project(&setup, camera);
                 }
                 Action::DeselectProject if !picker.open => {
                     village.construction.clear_selected_project()
