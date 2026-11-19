@@ -5,9 +5,10 @@ use super::garden_connections::{Connection, connections};
 use super::garden_terrain::{BIOMES, Terrain};
 use super::{WorkshopCatalog, building_model, ui_font};
 use bevy::{
-    asset::{AssetEvent, AssetPath, embedded_asset, embedded_path},
+    asset::{AssetPath, embedded_asset, embedded_path},
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit},
     prelude::*,
+    scene::SceneInstanceReady,
     window::FileDragAndDrop,
 };
 use serde::{Deserialize, Serialize};
@@ -19,6 +20,7 @@ use std::{
 
 pub(super) const CELLS: i32 = 96;
 pub(super) const WIDTH: f32 = CELLS as f32 * 2.0;
+const LAMP_LUMENS: f32 = 520.;
 const CAMERA_HEIGHT: f32 = 170.;
 const HOME_BEARING: f32 = std::f32::consts::FRAC_PI_4;
 const MAX_SCENE_BYTES: u64 = 1_000_000;
@@ -286,6 +288,7 @@ pub fn run(path: Option<PathBuf>, night: bool, study: bool) {
         grid: false,
         night,
     })
+    .add_observer(light_new_props)
     .add_systems(Startup, setup)
     .add_systems(
         Update,
@@ -784,7 +787,7 @@ fn render(
                     Streetlamp,
                     PointLight {
                         color: Color::srgb_u8(255, 210, 138),
-                        intensity: if garden.night { 90. } else { 0. },
+                        intensity: if garden.night { LAMP_LUMENS } else { 0. },
                         range: 7.,
                         ..default()
                     },
@@ -886,6 +889,37 @@ fn glow_strength(color: Color) -> Option<f32> {
     })
 }
 
+fn set_glow(material: &mut StandardMaterial, strength: f32, night: bool) {
+    material.emissive = if night {
+        Color::srgb_u8(244, 184, 95).to_linear() * strength
+    } else {
+        LinearRgba::BLACK
+    };
+    material.emissive_exposure_weight = 0.;
+}
+
+fn light_new_props(
+    event: On<SceneInstanceReady>,
+    garden: Res<Garden>,
+    children: Query<&Children>,
+    surfaces: Query<&MeshMaterial3d<StandardMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    if !garden.night {
+        return;
+    }
+    for entity in children.iter_descendants(event.entity) {
+        if let Ok(surface) = surfaces.get(entity)
+            && let Some(strength) = materials
+                .get(surface.id())
+                .and_then(|material| glow_strength(material.base_color))
+            && let Some(material) = materials.get_mut(surface.id())
+        {
+            set_glow(material, strength, true);
+        }
+    }
+}
+
 fn update_lighting(
     garden: Res<Garden>,
     mut mode: Local<Option<bool>>,
@@ -893,51 +927,38 @@ fn update_lighting(
     (mut ambient, mut background): (ResMut<GlobalAmbientLight>, ResMut<ClearColor>),
     mut lamps: Query<&mut PointLight, With<Streetlamp>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut events: MessageReader<AssetEvent<StandardMaterial>>,
 ) {
     let night = garden.night;
-    let changed = *mode != Some(night);
-    let ids: Vec<_> = if changed {
-        *mode = Some(night);
-        let (illuminance, tint, brightness, _) = super::lighting(night);
-        sun.illuminance = illuminance;
-        sun.color = tint;
-        ambient.brightness = brightness;
-        ambient.color = if night {
-            Color::srgb_u8(163, 185, 222)
-        } else {
-            Color::srgb_u8(255, 241, 207)
-        };
-        background.0 = if night {
-            Color::srgb_u8(38, 59, 69)
-        } else {
-            Color::srgb_u8(220, 226, 200)
-        };
-        for mut light in &mut lamps {
-            light.intensity = if night { 90. } else { 0. };
-        }
-        events.clear();
-        materials.iter().map(|(id, _)| id).collect()
+    if *mode == Some(night) {
+        return;
+    }
+    *mode = Some(night);
+    let (illuminance, tint, brightness, _) = super::lighting(night);
+    sun.illuminance = illuminance;
+    sun.color = tint;
+    ambient.brightness = brightness;
+    ambient.color = if night {
+        Color::srgb_u8(163, 185, 222)
     } else {
-        events
-            .read()
-            .filter_map(|event| match event {
-                AssetEvent::Added { id } => Some(*id),
-                _ => None,
-            })
-            .collect()
+        Color::srgb_u8(255, 241, 207)
     };
-    for id in ids {
-        if let Some(strength) = materials
-            .get(id)
-            .and_then(|material| glow_strength(material.base_color))
-            && let Some(material) = materials.get_mut(id)
-        {
-            material.emissive = if night {
-                Color::srgb_u8(244, 184, 95).to_linear() * strength
-            } else {
-                LinearRgba::BLACK
-            };
+    background.0 = if night {
+        Color::srgb_u8(38, 59, 69)
+    } else {
+        Color::srgb_u8(220, 226, 200)
+    };
+    for mut light in &mut lamps {
+        light.intensity = if night { LAMP_LUMENS } else { 0. };
+    }
+    let glowing: Vec<_> = materials
+        .iter()
+        .filter_map(|(id, material)| {
+            glow_strength(material.base_color).map(|strength| (id, strength))
+        })
+        .collect();
+    for (id, strength) in glowing {
+        if let Some(material) = materials.get_mut(id) {
+            set_glow(material, strength, night);
         }
     }
 }
