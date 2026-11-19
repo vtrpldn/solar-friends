@@ -6,6 +6,7 @@ import { buyerFor } from "../web/v02/weekend/local-market.js";
 import { materialMeasure, physicalUnit } from "../web/v02/weekend/material-measures.js";
 import { PROFILES } from "../web/v02/weekend/resident-personality.js";
 import { ANIMAL_RATIONS } from "../web/v02/weekend/animal-care.js";
+import { CROPS } from "../web/v02/weekend/cultivation.js";
 import { BIOLOGY, CROP_CARE } from "../web/v02/weekend/biological-production.js";
 import { EQUIPMENT_IDS } from "../web/v02/weekend/resource-groups.js";
 import { supplierLimit } from "../web/v02/weekend/supplier-stock.js";
@@ -82,19 +83,19 @@ for (const [kind, ration] of Object.entries(ANIMAL_RATIONS)) {
   };
 }
 
-const output = new URL("../bevy-v3/data/construction.json", import.meta.url);
-const serialized = JSON.stringify(
-  { materials, projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS },
-  null,
-  2,
-) + "\n";
-
-if (process.argv.includes("--check")) {
-  const current = await readFile(output, "utf8");
-  if (current !== serialized) {
-    console.error("Bevy catalog drift. Run node scripts/export-v3-catalog.mjs and commit the updated catalog.");
-    process.exitCode = 1;
+const catalogs = {
+  "construction.json": { materials, projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS },
+  "crops.json": CROPS,
+};
+for (const [name, catalog] of Object.entries(catalogs)) {
+  const output = new URL(`../bevy-v3/data/${name}`, import.meta.url);
+  const serialized = JSON.stringify(catalog, null, 2) + "\n";
+  if (process.argv.includes("--check")) {
+    if (await readFile(output, "utf8") !== serialized) {
+      console.error(`Bevy catalog drift in ${name}. Run node scripts/export-v3-catalog.mjs and commit the updated catalog.`);
+      process.exitCode = 1;
+    }
+  } else {
+    await writeFile(output, serialized);
   }
-} else {
-  await writeFile(output, serialized);
 }

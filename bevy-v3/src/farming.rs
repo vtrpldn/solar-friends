@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::LazyLock};
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -51,9 +51,42 @@ pub enum Crop {
     Corn,
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CropDefinition {
+    name: String,
+    days: f64,
+    window: f64,
+    yield_kg: f64,
+    water: f64,
+    residue: f64,
+    plants: f32,
+    height: f32,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CropCatalog {
+    greens: CropDefinition,
+    beans: CropDefinition,
+    corn: CropDefinition,
+}
+
+static CROPS: LazyLock<CropCatalog> = LazyLock::new(|| {
+    serde_json::from_str(include_str!("../data/crops.json")).expect("embedded crop catalog")
+});
+
 impl Crop {
+    fn definition(self) -> &'static CropDefinition {
+        match self {
+            Self::Greens => &CROPS.greens,
+            Self::Beans => &CROPS.beans,
+            Self::Corn => &CROPS.corn,
+        }
+    }
+
     pub fn label(self) -> &'static str {
-        ["Leafy greens", "Bush beans", "Sweet corn"][self as usize]
+        &self.definition().name
     }
 
     pub fn seed(self) -> &'static str {
@@ -65,19 +98,25 @@ impl Crop {
     }
 
     fn days(self) -> f64 {
-        [45.0, 60.0, 85.0][self as usize]
+        self.definition().days
     }
     fn window(self) -> f64 {
-        [4.0, 7.0, 5.0][self as usize]
+        self.definition().window
     }
     fn yield_kg(self) -> f64 {
-        [2.0, 1.2, 1.5][self as usize]
+        self.definition().yield_kg
     }
     fn water(self) -> f64 {
-        [3.0, 3.0, 4.0][self as usize]
+        self.definition().water
     }
     fn residue(self) -> f64 {
-        [0.3, 0.6, 1.0][self as usize]
+        self.definition().residue
+    }
+    pub(crate) fn plants_per_square_meter(self) -> f32 {
+        self.definition().plants
+    }
+    pub(crate) fn height(self) -> f32 {
+        self.definition().height
     }
     pub fn next(self) -> Self {
         [Self::Greens, Self::Beans, Self::Corn][(self as usize + 1) % 3]

@@ -231,11 +231,13 @@ fn bed_mesh(bed: &Bed, state: &BedState, ground: impl Fn(Vec2) -> f32, seed: f32
     ) || planting > 0.0
     {
         let harvest = action_fraction(FarmAction::Harvest).max(action_fraction(FarmAction::Clear));
-        let (density, height, color, radius) = match state.crop {
-            Crop::Greens => (12.0, 0.28, [103, 155, 66], 0.16),
-            Crop::Beans => (8.0, 0.65, [78, 132, 61], 0.16),
-            Crop::Corn => (4.0, 2.0, [113, 140, 59], 0.37),
+        let (color, radius) = match state.crop {
+            Crop::Greens => ([103, 155, 66], 0.16),
+            Crop::Beans => ([78, 132, 61], 0.16),
+            Crop::Corn => ([113, 140, 59], 0.37),
         };
+        let density = state.crop.plants_per_square_meter();
+        let height = state.crop.height();
         let spacing = 1.0 / (density * state.density as f32).sqrt();
         let growth = (f32::from(state.growth) / 20.0).max(0.1);
         let mut number = 0;
@@ -319,7 +321,7 @@ fn plant(
             },
         );
     }
-    let full_height = if crop == Crop::Corn { 2.0 } else { 0.65 };
+    let full_height = crop.height();
     let emergence = ((height / full_height - 0.65) / 0.25).clamp(0.0, 1.0);
     if crop != Crop::Greens && emergence > 0.0 {
         let color = if crop == Crop::Corn {
