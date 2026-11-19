@@ -282,10 +282,22 @@ pub(crate) fn subtract_cargo(pending: &mut BTreeMap<String, u32>, cargo: &BTreeM
     });
 }
 
-fn cargo_trips(catalog: &Catalog, mut pending: BTreeMap<String, u32>) -> Result<u32, String> {
+pub(crate) fn cargo_trips(
+    catalog: &Catalog,
+    pending: BTreeMap<String, u32>,
+) -> Result<u32, String> {
+    cargo_trips_with_capacity(catalog, pending, (CARGO_MASS, CARGO_VOLUME))
+}
+
+pub(crate) fn cargo_trips_with_capacity(
+    catalog: &Catalog,
+    mut pending: BTreeMap<String, u32>,
+    capacity: (f64, f64),
+) -> Result<u32, String> {
     let mut trips = 0;
     while !pending.is_empty() {
-        let load = pickup_cargo(catalog, &pending);
+        let mut available = capacity;
+        let load = pack_cargo(catalog, &pending, &mut available);
         if load.is_empty() {
             return Err("These materials need a larger delivery vehicle.".into());
         }

@@ -1161,12 +1161,12 @@ impl Construction {
                     if quote.trips == 0 {
                         "Supplies available locally".into()
                     } else if self.supplier_construction
-                        && Self::construction_order_cargo(catalog, &quote.units)
-                            .is_some_and(Self::fits_freight_truck)
+                        && let Some(trips) = Self::construction_freight_trips(catalog, quote.units)
                     {
-                        let cost = quote.price + crate::market::freight_cents(clock.round_trip_km);
+                        let cost = quote.price
+                            + crate::market::freight_cents(clock.round_trip_km) * u64::from(trips);
                         format!(
-                            "R${:.2} with a dedicated supplier truck",
+                            "R${:.2} including {trips} supplier load(s)",
                             cost as f64 / 100.0
                         )
                     } else {
@@ -1669,8 +1669,9 @@ impl Construction {
             .iter()
             .enumerate()
             .fold(0u64, |total, (index, project)| {
-                let trips = project
-                    .pickups
+                let trips = self
+                    .remaining_freight_pickups(catalog, index)
+                    .unwrap_or(project.pickups)
                     .saturating_sub(u32::from(active.contains(&index)));
                 total.saturating_add(project.fare.saturating_mul(u64::from(trips)))
             });
@@ -1760,7 +1761,7 @@ impl Construction {
                             && target.rotation <= 3
                     })
             });
-        if !self.valid_construction_delivery()
+        if !self.valid_construction_delivery(catalog)
             || !self.events.valid()
             || !self.production.kitchen_policy.valid()
             || !self.upkeep.valid(self.plans.len())

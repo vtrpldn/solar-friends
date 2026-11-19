@@ -2,11 +2,15 @@ use std::collections::BTreeSet;
 
 use super::*;
 
+const FREIGHT_CAPACITY: (f64, f64) = (5000.0, 12.0);
+
 #[derive(Deserialize, Serialize)]
 pub(super) struct ConstructionDelivery {
     site: usize,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     additional_sites: Vec<usize>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    cargo: BTreeMap<usize, BTreeMap<String, u32>>,
     eta: f64,
 }
 
@@ -80,31 +84,84 @@ impl Construction {
         ))
     }
 
-    pub(super) fn valid_construction_delivery(&self) -> bool {
+    pub(super) fn construction_freight_cargo(&self, site: usize) -> Option<&BTreeMap<String, u32>> {
+        let delivery = self.construction_delivery.as_ref()?;
+        if delivery.cargo.is_empty() && delivery.sites().any(|id| id == site) {
+            return Some(&self.plans.get(site)?.purchase.as_ref()?.units);
+        }
+        delivery.cargo.get(&site)
+    }
+
+    pub(super) fn valid_construction_delivery(&self, catalog: &Catalog) -> bool {
         self.construction_delivery.as_ref().is_none_or(|order| {
+            let mut truck = BTreeMap::<String, u32>::new();
             order.eta.is_finite()
                 && order.eta >= 0.0
                 && self.trade.delivery.is_none()
                 && order.sites().collect::<BTreeSet<_>>().len() == 1 + order.additional_sites.len()
+                && (order.cargo.is_empty() || order.cargo.len() == 1 + order.additional_sites.len())
                 && order.sites().all(|site| {
                     !self.active_trips().any(|trip| {
                         !trip.market_order && trip.farm_bed.is_none() && trip.project == site
                     }) && self.plans.get(site).is_some_and(|plan| {
                         !plan.removed
                             && plan.pickups > 0
-                            && plan.fare == 0
-                            && plan.purchase.is_some()
+                            && plan.purchase.as_ref().is_some_and(|purchase| {
+                                if order.cargo.is_empty() {
+                                    return plan.fare == 0;
+                                }
+                                order.cargo.get(&site).is_some_and(|load| {
+                                    !load.is_empty()
+                                        && Self::pickups_after_load(catalog, plan, load).is_some()
+                                        && load.iter().all(|(id, &units)| {
+                                            if units == 0
+                                                || units
+                                                    > purchase.units.get(id).copied().unwrap_or(0)
+                                            {
+                                                return false;
+                                            }
+                                            let total = truck.entry(id.clone()).or_default();
+                                            *total = total.saturating_add(units);
+                                            true
+                                        })
+                                })
+                            })
                     })
                 })
+                && Self::construction_order_cargo(catalog, &truck)
+                    .is_some_and(Self::fits_freight_truck)
         })
     }
 
-    fn construction_cargo(catalog: &Catalog, plan: &Blueprint) -> Option<(f64, f64)> {
+    fn pending_construction_cargo(plan: &Blueprint) -> Option<&BTreeMap<String, u32>> {
         let purchase = plan.purchase.as_ref()?;
-        if purchase.trips != plan.pickups {
+        (plan.pickups > 0 && purchase.trips == plan.pickups).then_some(&purchase.units)
+    }
+
+    pub(super) fn remaining_freight_pickups(&self, catalog: &Catalog, site: usize) -> Option<u32> {
+        let load = self.construction_freight_cargo(site)?;
+        Self::pickups_after_load(catalog, &self.plans[site], load)
+    }
+
+    fn pickups_after_load(
+        catalog: &Catalog,
+        plan: &Blueprint,
+        load: &BTreeMap<String, u32>,
+    ) -> Option<u32> {
+        let mut pending = Self::pending_construction_cargo(plan)?.clone();
+        if pending
+            .iter()
+            .any(|(id, &quantity)| quantity > 100_000 || !catalog.materials.contains_key(id))
+            || load
+                .iter()
+                .any(|(id, &units)| units > pending.get(id).copied().unwrap_or(0))
+        {
             return None;
         }
-        Self::construction_order_cargo(catalog, &purchase.units)
+        crate::market::subtract_cargo(&mut pending, load);
+        crate::market::cargo_trips(catalog, pending)
+            .ok()
+            .filter(|&trips| trips <= plan.pickups)
     }
 
     pub(super) fn construction_order_cargo(
@@ -123,11 +180,24 @@ impl Construction {
     }
 
     pub(super) fn fits_construction_freight(catalog: &Catalog, plan: &Blueprint) -> bool {
-        Self::construction_cargo(catalog, plan).is_some_and(Self::fits_freight_truck)
+        Self::pending_construction_cargo(plan).is_some_and(|units| {
+            units.keys().all(|id| catalog.materials.contains_key(id))
+                && units.iter().any(|(id, &quantity)| {
+                    let item = &catalog.materials[id];
+                    quantity > 0 && Self::fits_freight_truck((item.mass, item.volume))
+                })
+        })
+    }
+
+    pub(super) fn construction_freight_trips(
+        catalog: &Catalog,
+        units: BTreeMap<String, u32>,
+    ) -> Option<u32> {
+        crate::market::cargo_trips_with_capacity(catalog, units, FREIGHT_CAPACITY).ok()
     }
 
     pub(super) fn fits_freight_truck((mass, volume): (f64, f64)) -> bool {
-        mass <= 5000.0 && volume <= 12.0
+        mass <= FREIGHT_CAPACITY.0 + 1e-8 && volume <= FREIGHT_CAPACITY.1 + 1e-8
     }
 
     fn tick_construction_delivery(
@@ -138,12 +208,23 @@ impl Construction {
     ) -> bool {
         if let Some(delivery) = &self.construction_delivery {
             if clock.seconds >= delivery.eta {
+                let delivery = self.construction_delivery.take().expect("arrived freight");
                 for site in delivery.sites() {
                     let plan = &mut self.plans[site];
+                    if let Some(load) = delivery.cargo.get(&site) {
+                        plan.pickups = Self::pickups_after_load(catalog, plan, load)
+                            .expect("valid freight manifest");
+                        if plan.pickups > 0 {
+                            let purchase =
+                                plan.purchase.as_mut().expect("pending construction order");
+                            purchase.receive_cargo(catalog, load);
+                            purchase.trips = plan.pickups;
+                            continue;
+                        }
+                    }
                     plan.pickups = 0;
                     plan.purchase = None;
                 }
-                self.construction_delivery = None;
                 self.record_event(clock.seconds, "Construction supplies delivered.".into());
             }
             return false;
@@ -156,7 +237,8 @@ impl Construction {
         }
         let mut sites = Vec::new();
         let mut reserved = 0;
-        let (mut mass, mut volume) = (0.0, 0.0);
+        let mut capacity = FREIGHT_CAPACITY;
+        let mut cargo = BTreeMap::new();
         for (index, plan) in self.plans.iter().enumerate() {
             if plan.removed
                 || plan.pickups == 0
@@ -166,13 +248,18 @@ impl Construction {
             {
                 continue;
             }
-            if let Some((kg, cubic_metres)) = Self::construction_cargo(catalog, plan)
-                && Self::fits_freight_truck((mass + kg, volume + cubic_metres))
+            let Some(pending) = Self::pending_construction_cargo(plan) else {
+                continue;
+            };
+            let mut proposed_capacity = capacity;
+            let load = crate::market::pack_cargo(catalog, pending, &mut proposed_capacity);
+            if !load.is_empty()
+                && let Some(remaining) = Self::pickups_after_load(catalog, plan, &load)
             {
+                capacity = proposed_capacity;
                 sites.push(index);
-                mass += kg;
-                volume += cubic_metres;
-                reserved += plan.fare * u64::from(plan.pickups);
+                cargo.insert(index, load);
+                reserved += plan.fare * u64::from(plan.pickups - remaining);
             }
         }
         let Some((&site, additional_sites)) = sites.split_first() else {
@@ -188,12 +275,10 @@ impl Construction {
         }
         self.market.release_fare(reserved);
         stock.debit(freight, crate::stock::CashKind::Freight);
-        for site in sites.iter().copied() {
-            self.plans[site].fare = 0;
-        }
         self.construction_delivery = Some(ConstructionDelivery {
             site,
             additional_sites: additional_sites.to_vec(),
+            cargo,
             eta: clock.seconds + 6.0 * crate::weather::HOUR + trip_seconds(clock.round_trip_km),
         });
         self.record_event(
@@ -429,6 +514,86 @@ mod tests {
             restored.plans[0].purchase.as_ref().unwrap().units["stone"],
             200 - first_load
         );
+    }
+
+    #[test]
+    fn oversized_construction_orders_arrive_in_multiple_saved_freight_loads() {
+        let mut catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        stock.credit(1_000_000, crate::stock::CashKind::Construction);
+        let mut capacity = FREIGHT_CAPACITY;
+        let limit = crate::market::pack_cargo(
+            &catalog,
+            &BTreeMap::from([("stone".into(), 100_000)]),
+            &mut capacity,
+        )["stone"];
+        let quantity = limit + 1;
+        let bill = BTreeMap::from([("stone".into(), quantity)]);
+        catalog.projects.get_mut("well").unwrap().materials = bill.clone();
+        let mut village = Construction::default();
+        let mut plan = village.proposed_site(&catalog, "well", IVec2::new(36, 36));
+        let pickups = crate::market::cargo_trips(&catalog, bill.clone()).unwrap();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        plan.pickups = pickups;
+        plan.fare = crate::market::fare_cents(clock.round_trip_km);
+        assert!(
+            village
+                .market
+                .hold_fare(&stock, plan.fare * u64::from(pickups))
+        );
+        plan.purchase = Some(super::super::lifecycle::Purchase {
+            units: bill,
+            price: 10_000,
+            day: 0,
+            trips: pickups,
+        });
+        village.plans.push(plan);
+        village.toggle_supplier_construction();
+
+        let balance = stock.balance();
+        assert!(!village.tick_construction_delivery(&catalog, &mut stock, clock));
+        assert_eq!(
+            village.construction_freight_cargo(0).unwrap()["stone"],
+            limit
+        );
+        assert_eq!(village.market.committed_fares(), village.plans[0].fare);
+        assert!(village.valid_save(&catalog, &stock));
+        village = serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        let first_eta = village.construction_delivery.as_ref().unwrap().eta;
+        let next = TownClock {
+            seconds: first_eta,
+            ..clock
+        };
+        village.tick_construction_delivery(&catalog, &mut stock, next);
+        assert_eq!(
+            village.plans[0].purchase.as_ref().unwrap().units["stone"],
+            1
+        );
+        assert_eq!(village.plans[0].pickups, 1);
+        assert!(village.valid_save(&catalog, &stock));
+
+        village.tick_construction_delivery(&catalog, &mut stock, next);
+        assert_eq!(village.construction_freight_cargo(0).unwrap()["stone"], 1);
+        let final_eta = village.construction_delivery.as_ref().unwrap().eta;
+        village.tick_construction_delivery(
+            &catalog,
+            &mut stock,
+            TownClock {
+                seconds: final_eta,
+                ..clock
+            },
+        );
+        assert_eq!(village.plans[0].pickups, 0);
+        assert!(village.plans[0].purchase.is_none());
+        assert_eq!(village.market.committed_fares(), 0);
+        assert_eq!(
+            balance - stock.balance(),
+            2 * crate::market::freight_cents(12)
+        );
+        assert!(village.valid_save(&catalog, &stock));
     }
 
     #[test]
