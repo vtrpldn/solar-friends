@@ -1215,6 +1215,11 @@ mod tests {
         )
         .unwrap();
         assert!(checkpoint.is_paused());
+        assert!(
+            checkpoint
+                .story_resume_summary()
+                .ends_with("shared savings")
+        );
         assert_eq!(
             checkpoint.seconds(),
             app.world().resource::<village::Village>().seconds()

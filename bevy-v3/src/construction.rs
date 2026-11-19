@@ -508,6 +508,10 @@ fn zero_retry_ticks(ticks: &u8) -> bool {
 }
 
 impl Construction {
+    pub(crate) fn project_count(&self) -> usize {
+        self.plans.iter().filter(|plan| !plan.removed).count()
+    }
+
     pub fn refresh_resident_crowding(&mut self, catalog: &Catalog, site: ConstructionSite) {
         let present: [Option<Vec2>; 5] = std::array::from_fn(|index| {
             (!self.driver_away(index) && !self.away_for_work(index))

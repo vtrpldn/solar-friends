@@ -391,6 +391,18 @@ impl Village {
         self.setup.as_ref()
     }
 
+    pub(crate) fn story_resume_summary(&self) -> String {
+        if self.camp.is_none() {
+            return "Choose a place for your tents.".into();
+        }
+        let projects = self.construction.project_count();
+        let noun = if projects == 1 { "project" } else { "projects" };
+        format!(
+            "{projects} {noun} · R${:.2} shared savings",
+            self.stock.balance() as f64 / 100.0
+        )
+    }
+
     pub fn mode(&self) -> Option<Mode> {
         self.setup.as_ref().map(|setup| setup.mode)
     }
@@ -959,7 +971,7 @@ fn save_controls(
     }
 }
 
-fn restore_continuation(
+pub(crate) fn restore_continuation(
     menu: &SaveMenu,
     mode: Mode,
     catalog: &Catalog,

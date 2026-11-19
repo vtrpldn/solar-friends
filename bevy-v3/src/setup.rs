@@ -366,6 +366,11 @@ struct PlotPreviewImage;
 #[derive(Component)]
 struct PlotSummary;
 
+#[derive(Component)]
+struct StoryResumeSummary;
+
+type StoryResumeSnapshot = (std::path::PathBuf, std::time::SystemTime, u64);
+
 const PREVIEW_SIZE: u32 = 128;
 
 pub struct WorldSetupPlugin;
@@ -376,7 +381,13 @@ impl Plugin for WorldSetupPlugin {
             .add_systems(Startup, spawn_panel)
             .add_systems(
                 Update,
-                (setup_input, refresh_panel, refresh_preview).chain(),
+                (
+                    setup_input,
+                    refresh_panel,
+                    refresh_preview,
+                    refresh_story_resume,
+                )
+                    .chain(),
             );
     }
 }
@@ -420,28 +431,35 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Explore,
                 Action::CancelNew,
             ] {
-                panel
-                    .spawn((
-                        action,
-                        Button,
-                        Node {
-                            display: if matches!(
-                                action,
-                                Action::Resume | Action::Continue(_) | Action::CancelNew
-                            ) {
-                                Display::None
-                            } else {
-                                Display::Flex
-                            },
-                            padding: UiRect::axes(px(14), px(6)),
-                            ..default()
+                let mut button = panel.spawn((
+                    action,
+                    Button,
+                    Node {
+                        display: if matches!(
+                            action,
+                            Action::Resume | Action::Continue(_) | Action::CancelNew
+                        ) {
+                            Display::None
+                        } else {
+                            Display::Flex
                         },
-                        BackgroundColor(Color::srgb_u8(62, 83, 65)),
-                    ))
-                    .with_child((
-                        Text::new(setup.label(action, false)),
-                        ui_font(&assets, 17.0),
+                        padding: UiRect::axes(px(14), px(6)),
+                        flex_direction: FlexDirection::Column,
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                ));
+                button.with_child((
+                    Text::new(setup.label(action, false)),
+                    ui_font(&assets, 17.0),
+                ));
+                if matches!(action, Action::Continue(Mode::Story)) {
+                    button.with_child((
+                        StoryResumeSummary,
+                        Text::default(),
+                        ui_font(&assets, 13.0),
                     ));
+                }
             }
         });
     commands
@@ -643,6 +661,37 @@ fn refresh_panel(
         {
             label.0 = setup.label(*action, has_village || autosave_exists);
         }
+    }
+}
+
+fn refresh_story_resume(
+    setup: Res<WorldSetup>,
+    saves: Res<SaveMenu>,
+    village: Res<crate::village::Village>,
+    catalog: Res<crate::catalog::Catalog>,
+    mut label: Single<&mut Text, With<StoryResumeSummary>>,
+    mut preview: Local<Option<StoryResumeSnapshot>>,
+) {
+    if !setup.open
+        || village.session_setup().is_some()
+        || (!setup.is_changed() && !saves.is_changed())
+    {
+        return;
+    }
+    let snapshot = saves.continue_path(Mode::Story).ok().and_then(|path| {
+        let metadata = path.metadata().ok()?;
+        metadata.is_file().then_some(())?;
+        Some((path, metadata.modified().ok()?, metadata.len()))
+    });
+    if *preview != snapshot {
+        label.0 = if snapshot.is_some() {
+            crate::village::restore_continuation(&saves, Mode::Story, &catalog)
+                .map(|(saved, _)| saved.story_resume_summary())
+                .unwrap_or_default()
+        } else {
+            String::new()
+        };
+        *preview = snapshot;
     }
 }
 
