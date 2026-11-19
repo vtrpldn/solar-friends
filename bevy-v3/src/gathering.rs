@@ -21,6 +21,8 @@ pub struct GatherJob {
     pub work: f64,
     #[serde(default)]
     pub retry_at: f64,
+    #[serde(default)]
+    pub waiting_for_access: bool,
     pub phase: GatherPhase,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remaining: Option<BTreeMap<String, u32>>,
@@ -94,13 +96,22 @@ impl Gathering {
         self.selected.is_some_and(|site| !self.felled(site))
     }
 
-    pub fn selected_status(&self, catalog: &Catalog, land: &Land, clock: f64) -> Option<String> {
+    pub fn selected_status(
+        &self,
+        catalog: &Catalog,
+        land: &Land,
+        clock: f64,
+        blocked: impl Fn(&GatherJob) -> bool,
+    ) -> Option<String> {
         let index = self.selected?;
         let name = &catalog.gathering[land.site(index)?.recipe()].name;
         if !self.notice.is_empty() {
             return Some(format!("{name} · {}", self.notice));
         }
         let status = if let Some(job) = self.orders.get(&index) {
+            if blocked(job) {
+                return Some(format!("{name} · Waiting for access"));
+            }
             match job.phase {
                 GatherPhase::Approach => "Waiting for a resident".into(),
                 GatherPhase::Work => format!(
@@ -252,6 +263,7 @@ impl Gathering {
                 worker: None,
                 work: 0.0,
                 retry_at: 0.0,
+                waiting_for_access: false,
                 phase: GatherPhase::Approach,
                 remaining: None,
                 food_output: None,

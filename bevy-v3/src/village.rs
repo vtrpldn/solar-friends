@@ -1709,7 +1709,11 @@ fn show_hud(
         village
             .construction
             .gathering
-            .selected_status(&catalog, &land, village.clock)
+            .selected_status(&catalog, &land, village.clock, |job| {
+                village
+                    .construction
+                    .gathering_route_blocked(job, village.clock)
+            })
     {
         label.push('\n');
         label.push_str(&natural);

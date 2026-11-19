@@ -1,6 +1,17 @@
 use super::*;
 
 impl Construction {
+    pub(crate) fn gathering_route_blocked(
+        &self,
+        job: &crate::gathering::GatherJob,
+        clock: f64,
+    ) -> bool {
+        (job.waiting_for_access && job.retry_at > clock)
+            || job
+                .worker
+                .is_some_and(|worker| self.residents[worker].waiting_for_route())
+    }
+
     pub(super) fn tick_gathering(
         &mut self,
         catalog: &Catalog,
@@ -39,6 +50,11 @@ impl Construction {
                 if self.reservation_pass.is_some() {
                     continue;
                 }
+                self.gathering
+                    .orders
+                    .get_mut(&index)
+                    .expect("queued job")
+                    .waiting_for_access = false;
                 let job = &self.gathering.orders[&index];
                 if matches!(job.phase, GatherPhase::Approach | GatherPhase::Work)
                     && self.residents[worker_index].health.energy < 25.0
@@ -96,6 +112,7 @@ impl Construction {
                             job.phase = GatherPhase::CollectOutput;
                             job.remaining = Some(recipe.output.clone());
                             job.retry_at = clock + 5.0;
+                            job.waiting_for_access = true;
                         }
                         self.gathering.gathered(
                             index,
@@ -149,25 +166,21 @@ impl Construction {
                             self.residents[worker_index].path = path;
                         } else {
                             job.retry_at = clock + 5.0;
+                            job.waiting_for_access = true;
                         }
                     }
                 }
                 continue;
             }
 
-            if self.reservation_pass.is_none() {
-                self.gathering
-                    .orders
-                    .get_mut(&index)
-                    .expect("queued job")
-                    .retry_at = clock + 5.0;
-            }
+            let mut attempted_route = false;
             for worker_index in 0..self.residents.len() {
                 if !self.work_candidate(worker_index)
                     || self.residents[worker_index].health.energy < 25.0
                 {
                     continue;
                 }
+                attempted_route = true;
                 let worker = &self.residents[worker_index];
                 let Some(path) = route_to_gather_site(resource, worker.position, |cell| {
                     self.blocked(catalog, terrain, land, camp, cell)
@@ -175,17 +188,16 @@ impl Construction {
                     continue;
                 };
                 self.residents[worker_index].path = path;
-                self.gathering
-                    .orders
-                    .get_mut(&index)
-                    .expect("queued job")
-                    .worker = Some(worker_index);
-                self.gathering
-                    .orders
-                    .get_mut(&index)
-                    .expect("queued job")
-                    .retry_at = 0.0;
+                let job = self.gathering.orders.get_mut(&index).expect("queued job");
+                job.worker = Some(worker_index);
+                job.retry_at = 0.0;
+                job.waiting_for_access = false;
                 break;
+            }
+            let job = self.gathering.orders.get_mut(&index).expect("queued job");
+            if self.reservation_pass.is_none() && job.worker.is_none() {
+                job.retry_at = clock + 5.0;
+                job.waiting_for_access = attempted_route;
             }
         }
     }
@@ -290,6 +302,27 @@ mod tests {
             resident.position = SUPPLY_SPOTS[worker].as_vec2();
             resident.health.energy = if worker == 0 { 100.0 } else { 0.0 };
         }
+        let mut blocked: Construction =
+            serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        for point in gather_approaches(resource) {
+            let obstacle = blocked.proposed_site(&catalog, "supply-5", point);
+            blocked.plans.push(obstacle);
+        }
+        blocked.tick_gathering(&catalog, &mut stock, site, 0.0, 0.1, WorkGroup::Essentials);
+        assert!(blocked.gathering.orders[&index].worker.is_none());
+        assert_eq!(
+            blocked.lab_stop_reason(super::super::LabStop::Blocked, 0.0),
+            Some("A job is waiting for access.")
+        );
+        blocked.plans.clear();
+        blocked.tick_gathering(&catalog, &mut stock, site, 5.0, 0.1, WorkGroup::Essentials);
+        assert_eq!(blocked.gathering.orders[&index].worker, Some(0));
+        assert!(
+            blocked
+                .lab_stop_reason(super::super::LabStop::Blocked, 5.0)
+                .is_none()
+        );
+
         village.tick_gathering(&catalog, &mut stock, site, 0.0, 0.1, WorkGroup::Production);
         assert!(village.gathering.orders[&index].worker.is_none());
         village.tick_gathering(&catalog, &mut stock, site, 0.0, 0.1, WorkGroup::Essentials);

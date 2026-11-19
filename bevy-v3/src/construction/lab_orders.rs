@@ -187,12 +187,17 @@ impl Construction {
             ));
         }
         for (&index, job) in &self.gathering.orders {
+            let blocked = self.gathering_route_blocked(job, clock);
             if focus.is_none()
-                && (!waiting_only || job.worker.is_none())
+                && (!waiting_only || job.worker.is_none() || blocked)
                 && let Some(site) = land.site(index)
             {
                 let recipe = &catalog.gathering[site.recipe()];
                 let status = match job.phase {
+                    _ if blocked => "Waiting for access".to_owned(),
+                    GatherPhase::Approach if job.worker.is_none() => {
+                        "Waiting for a resident".to_owned()
+                    }
                     GatherPhase::Approach => "Heading to the site".to_owned(),
                     GatherPhase::Work => format!("{:.0}% worked", 100.0 * job.work / recipe.work),
                     GatherPhase::Return => "Carrying supplies back".to_owned(),
@@ -570,6 +575,11 @@ impl Construction {
                     .jobs
                     .iter()
                     .any(|job| self.farm_route_blocked(job, clock))
+                || self
+                    .gathering
+                    .orders
+                    .values()
+                    .any(|job| self.gathering_route_blocked(job, clock))
                 || self
                     .residents
                     .iter()
