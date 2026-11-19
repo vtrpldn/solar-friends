@@ -5,7 +5,7 @@
 #import bevy_pbr::forward_io::{Vertex, VertexOutput}
 #endif
 
-@group(#{MATERIAL_BIND_GROUP}) @binding(100) var<uniform> wind_time: f32;
+@group(#{MATERIAL_BIND_GROUP}) @binding(100) var<storage, read> wind_time: f32;
 
 fn wind_position(position: vec3<f32>, model: mat4x4<f32>, seconds: f32) -> vec4<f32> {
     let phase = dot(model[3].xz, vec2<f32>(0.14, 0.09));
