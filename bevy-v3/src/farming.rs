@@ -156,6 +156,8 @@ struct CropMass {
     field_loss_kg: f64,
     harvested_kg: f64,
     residue_exported_kg: f64,
+    #[serde(default)]
+    compost_applied_kg: f64,
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -370,7 +372,11 @@ impl Plot {
                 bed.mass.grown_kg += grown;
                 bed.mass.standing_kg = Some(seeds + grown);
             }
-            FarmAction::Amend => bed.amendment_kg += f64::from(job.inputs["compost"]),
+            FarmAction::Amend => {
+                let compost = f64::from(job.inputs["compost"]);
+                bed.amendment_kg += compost;
+                bed.mass.compost_applied_kg += compost;
+            }
             FarmAction::Collect => collect_residues(bed, &mut output),
             FarmAction::Clear | FarmAction::Harvest => {
                 let edible = if job.action == FarmAction::Harvest {
@@ -501,8 +507,16 @@ impl Bed {
             .unwrap_or_else(|| self.growth * self.potential_biomass())
     }
 
-    pub(crate) fn field_loss_kg(&self) -> f64 {
-        self.mass.field_loss_kg
+    pub(crate) fn material_balance_summary(&self) -> String {
+        format!(
+            "Crop mass · {:.1} kg standing · {:.1} kg lost in field\nHarvest totals · {:.1} kg produce · {:.1} kg residues collected\nSoil totals · {:.1} kg compost applied · {:.1} kg decomposition losses",
+            self.standing_biomass(),
+            self.mass.field_loss_kg,
+            self.mass.harvested_kg,
+            self.mass.residue_exported_kg,
+            self.mass.compost_applied_kg,
+            self.decomposed_gas_kg
+        )
     }
 
     pub fn yield_kg(&self, clock: f64) -> f64 {
@@ -704,6 +718,7 @@ impl Farming {
                             bed.mass.field_loss_kg,
                             bed.mass.harvested_kg,
                             bed.mass.residue_exported_kg,
+                            bed.mass.compost_applied_kg,
                         ]
                         .into_iter()
                         .all(|amount| amount.is_finite() && amount >= 0.0)
@@ -837,7 +852,8 @@ mod tests {
         assert_eq!(output["greens"], 9);
         let bed = &plot.beds[0];
         assert_eq!(bed.standing_biomass(), 0.0);
-        let accounted = 9.0 + plot.remainders[0] + bed.residue_kg + bed.field_loss_kg();
+        assert!(bed.material_balance_summary().contains("9.0 kg produce"));
+        let accounted = 9.0 + plot.remainders[0] + bed.residue_kg + bed.mass.field_loss_kg;
         assert!((accounted - bed.mass.seeds_kg - bed.mass.grown_kg).abs() < 1e-9);
         assert!((plot.remainders[0] - 0.6).abs() < 1e-9);
     }
