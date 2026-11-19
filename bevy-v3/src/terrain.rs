@@ -333,6 +333,49 @@ impl TerrainEditor {
         }
     }
 
+    fn brush_vertices(
+        &self,
+        terrain: &Terrain,
+        x: f64,
+        z: f64,
+        occupied: impl Fn(IVec2) -> bool,
+    ) -> impl Iterator<Item = (f64, f64, f64)> {
+        let radius = Self::RADII[self.radius_index];
+        let bounds = move |center: f64| {
+            let min = ((center - radius) / 2.0).ceil().max(-HALF_WIDTH / 2.0) as i32;
+            let max = ((center + radius) / 2.0).floor().min(HALF_WIDTH / 2.0) as i32;
+            min..=max
+        };
+        bounds(x)
+            .flat_map(move |column| bounds(z).map(move |row| (column, row)))
+            .filter_map(move |(column, row)| {
+                let (a, b) = (f64::from(column * 2), f64::from(row * 2));
+                let distance = (a - x).hypot(b - z);
+                let cell = IVec2::new(column + 32, row + 32);
+                (distance < radius && !terrain.protected_vertex(a, b) && !occupied(cell))
+                    .then_some((a, b, distance))
+            })
+    }
+
+    pub fn inspect_brush(
+        &self,
+        terrain: &Terrain,
+        point: Vec3,
+        occupied: impl Fn(IVec2) -> bool,
+    ) -> String {
+        let height = terrain.height_at(point.x, point.z);
+        let protection = if self
+            .brush_vertices(terrain, point.x.into(), point.z.into(), occupied)
+            .next()
+            .is_none()
+        {
+            " · No editable ground within brush"
+        } else {
+            ""
+        };
+        format!("Ground {height:.2} m{protection}")
+    }
+
     fn apply_brush(
         &mut self,
         terrain: &mut Terrain,
@@ -353,43 +396,28 @@ impl TerrainEditor {
         }
 
         let radius = Self::RADII[self.radius_index];
-        let bounds = |center: f64| {
-            let min = ((center - radius) / 2.0).ceil().max(-HALF_WIDTH / 2.0) as i32;
-            let max = ((center + radius) / 2.0).floor().min(HALF_WIDTH / 2.0) as i32;
-            min..=max
-        };
         // Sample neighbours before applying the dab so smoothing uses a single
         // surface, and keep all dabs in one working map for this drag.
         let mut updates = Vec::new();
-        for column in bounds(x) {
-            for row in bounds(z) {
-                let (a, b) = (f64::from(column * 2), f64::from(row * 2));
-                let distance = (a - x).hypot(b - z);
-                let cell = IVec2::new(column + 32, row + 32);
-                if distance >= radius || terrain.protected_vertex(a, b) || occupied(cell) {
-                    continue;
+        for (a, b, distance) in self.brush_vertices(terrain, x, z, occupied) {
+            let old = terrain.elevation(a, b);
+            let weight = (1.0 - distance / radius).powi(2);
+            let next = match self.brush {
+                Brush::Raise => old + 0.6 * weight,
+                Brush::Lower => old - 0.6 * weight,
+                Brush::Flatten => old + (self.level.unwrap_or(old) - old) * (2.0 * weight).min(1.0),
+                Brush::Smooth => {
+                    let average = (terrain.elevation(a - 2.0, b)
+                        + terrain.elevation(a + 2.0, b)
+                        + terrain.elevation(a, b - 2.0)
+                        + terrain.elevation(a, b + 2.0))
+                        / 4.0;
+                    old + (average - old) * (2.0 * weight).min(1.0)
                 }
-                let old = terrain.elevation(a, b);
-                let weight = (1.0 - distance / radius).powi(2);
-                let next = match self.brush {
-                    Brush::Raise => old + 0.6 * weight,
-                    Brush::Lower => old - 0.6 * weight,
-                    Brush::Flatten => {
-                        old + (self.level.unwrap_or(old) - old) * (2.0 * weight).min(1.0)
-                    }
-                    Brush::Smooth => {
-                        let average = (terrain.elevation(a - 2.0, b)
-                            + terrain.elevation(a + 2.0, b)
-                            + terrain.elevation(a, b - 2.0)
-                            + terrain.elevation(a, b + 2.0))
-                            / 4.0;
-                        old + (average - old) * (2.0 * weight).min(1.0)
-                    }
-                }
-                .clamp(0.0, 12.0);
-                if (next - old).abs() >= 0.00001 {
-                    updates.push((vertex_index(a, b).expect("bounded vertex"), next));
-                }
+            }
+            .clamp(0.0, 12.0);
+            if (next - old).abs() >= 0.00001 {
+                updates.push((vertex_index(a, b).expect("bounded vertex"), next));
             }
         }
         let changed = !updates.is_empty();
@@ -800,6 +828,15 @@ mod tests {
         let base = || Terrain::new(0, 1.0, 1.0);
         let at = Vec3::new(40.0, 0.0, 24.0);
         let terrain = editor.terrain(base());
+        assert_eq!(
+            editor.inspect_brush(&terrain, at, |_| false),
+            "Ground 0.00 m"
+        );
+        assert!(
+            editor
+                .inspect_brush(&terrain, at, |_| true)
+                .contains("No editable ground")
+        );
         editor.stroke(&terrain, at, |cell| cell == IVec2::new(53, 44));
         let raised = editor.terrain(base());
         assert_eq!(raised.elevation(40.0, 24.0), 0.6);

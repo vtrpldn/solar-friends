@@ -2635,6 +2635,13 @@ fn draw_blueprints(
                 village
                     .terrain_editor
                     .draw_preview(&terrain, hit.world, &mut gizmos);
+                notice = Some(
+                    village
+                        .terrain_editor
+                        .inspect_brush(&terrain, hit.world, |cell| {
+                            village.construction.protects_terrain(cell)
+                        }),
+                );
             } else if village.planning_roads() {
                 let extend = village.extend_road(&keyboard);
                 village
