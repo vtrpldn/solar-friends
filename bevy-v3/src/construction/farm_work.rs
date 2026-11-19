@@ -83,16 +83,10 @@ impl Construction {
         if !self.farming.open {
             return;
         }
-        if self.plans[site].key == "field"
+        if self.can_resize_selected_field()
             && let Some(delta) = field_size_input(keyboard)
         {
-            let plan = &self.plans[site];
-            let proposed = rotated_size(plan.size, plan.rotation) + delta;
-            self.farming.notice =
-                match self.resize_field(catalog, ground, site, proposed, stock.sandbox) {
-                    Ok(()) => "Field resized.".into(),
-                    Err(reason) => reason.into(),
-                };
+            self.resize_selected_field(catalog, ground, delta, stock.sandbox);
             return;
         }
         let actions = [
@@ -121,6 +115,38 @@ impl Construction {
             .find_map(|(key, action)| keyboard.just_pressed(*key).then_some(action))
         {
             self.apply_farm_control(catalog, stock, FarmControl::Work(action), clock);
+        }
+    }
+
+    pub fn can_resize_selected_field(&self) -> bool {
+        self.farming.open
+            && !self.menu
+            && !self.production.open
+            && self.has_selected_plot()
+            && self
+                .production
+                .selected
+                .is_some_and(|site| self.plans[site].key == "field")
+    }
+
+    pub fn resize_selected_field(
+        &mut self,
+        catalog: &Catalog,
+        ground: ConstructionSite,
+        delta: IVec2,
+        sandbox: bool,
+    ) {
+        if !self.can_resize_selected_field() {
+            return;
+        }
+        if let Some(site) = self.production.selected {
+            let plan = &self.plans[site];
+            let proposed = rotated_size(plan.size, plan.rotation) + delta;
+            self.farming.notice = match self.resize_field(catalog, ground, site, proposed, sandbox)
+            {
+                Ok(()) => "Field resized.".into(),
+                Err(reason) => reason.into(),
+            };
         }
     }
 

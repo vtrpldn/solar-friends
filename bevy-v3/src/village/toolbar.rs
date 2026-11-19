@@ -121,7 +121,11 @@ impl Action {
             }
             Self::Build => village.utility_panel.is_none(),
             Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
-            Self::ResizeField(_) => village.construction.placing_field(),
+            Self::ResizeField(_) => {
+                village.construction.placing_field()
+                    || (village.utility_panel.is_none()
+                        && village.construction.can_resize_selected_field())
+            }
             Self::Pause => true,
             Self::Speed => {
                 !village.construction.menu
@@ -546,7 +550,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
 
 fn handle_buttons(
     (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
-    catalog: Res<Catalog>,
+    (catalog, land): (Res<Catalog>, Res<Land>),
     mut village: ResMut<Village>,
     mut picker: ResMut<PanelPicker>,
     keyboard: Res<ButtonInput<KeyCode>>,
@@ -586,7 +590,26 @@ fn handle_buttons(
                     village.advance.apply(action);
                     picker.open = false;
                 }
-                Action::ResizeField(delta) => village.construction.resize_field_placement(delta),
+                Action::ResizeField(delta) if village.construction.placing_field() => {
+                    village.construction.resize_field_placement(delta);
+                }
+                Action::ResizeField(delta) if !picker.open => {
+                    if let Some(camp) = village.camp {
+                        let terrain = village.terrain(&setup);
+                        let sandbox = village.stock.sandbox;
+                        village.construction.resize_selected_field(
+                            &catalog,
+                            ConstructionSite {
+                                terrain: &terrain,
+                                land: &land,
+                                camp,
+                            },
+                            delta,
+                            sandbox,
+                        );
+                    }
+                }
+                Action::ResizeField(_) => {}
                 Action::Pause => village.paused = !village.paused,
                 Action::Speed => village.speed = (village.speed + 1) % SPEEDS.len(),
                 Action::Guide => {
@@ -866,8 +889,8 @@ fn refresh(
             | Action::CancelPlacement
             | Action::ConnectRoad
             | Action::UndoRoad
-            | Action::FinishRoad
-            | Action::ResizeField(_) => action.available(&village),
+            | Action::FinishRoad => action.available(&village),
+            Action::ResizeField(_) => !picker.open && show_field_size,
             Action::TerrainBrush(_) | Action::TerrainRadius(_) | Action::UndoTerrain => {
                 show_terrain
             }
