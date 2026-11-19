@@ -203,6 +203,8 @@ pub struct Construction {
     changes: BTreeMap<usize, lifecycle::ChangeJob>,
     #[serde(default)]
     water_jobs: BTreeMap<usize, water_work::WaterJob>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pending_connections: Vec<(usize, WaterAction)>,
     #[serde(default)]
     upkeep: upkeep::Upkeep,
     #[serde(skip)]
@@ -368,6 +370,7 @@ impl Default for Construction {
             utilities: Utilities::default(),
             changes: BTreeMap::new(),
             water_jobs: BTreeMap::new(),
+            pending_connections: Vec::new(),
             upkeep: upkeep::Upkeep::default(),
             moving: None,
             priority: None,

@@ -26,6 +26,14 @@ pub enum WaterAction {
 }
 
 impl WaterAction {
+    fn connection(self, from: usize) -> Option<(usize, usize, Option<usize>)> {
+        match self {
+            Self::InstallCable { to, .. } => Some((from, to, None)),
+            Self::InstallPipe { to, channel, .. } => Some((from, to, Some(channel))),
+            _ => None,
+        }
+    }
+
     fn installation(self) -> Option<(usize, f64)> {
         match self {
             Self::InstallPipe { to, required, .. } | Self::InstallCable { to, required } => {
@@ -82,10 +90,7 @@ impl Construction {
     ) -> Result<(), &'static str> {
         let distance = self.connection_distance(from, to)?;
         if self.utilities.power_link_exists(from, to)
-            || self.water_jobs.iter().any(|(&source, job)| {
-                matches!(job.action, WaterAction::InstallCable { to: target, .. }
-                if (source, target) == (from, to) || (source, target) == (to, from))
-            })
+            || self.queued_connection(from, to, None).is_some()
         {
             return Err("Already connected or planned.");
         }
@@ -93,7 +98,7 @@ impl Construction {
         if !stock.sandbox && stock.available("electrical") < electrical {
             return Err("The connection needs electrical supplies.");
         }
-        self.queue_water(
+        self.queue_installation(
             from,
             WaterAction::InstallCable {
                 to,
@@ -153,8 +158,10 @@ impl Construction {
         {
             return Err("Both ends need storage for this water class.");
         }
-        if self.utilities.water_link_exists(from, to, channel) {
-            return Err("Already connected.");
+        if self.utilities.water_link_exists(from, to, channel)
+            || self.queued_connection(from, to, Some(channel)).is_some()
+        {
+            return Err("Already connected or planned.");
         }
         if !destination.enabled || to > 0 && self.changes.contains_key(&(to - 1)) {
             return Err("Choose an open destination.");
@@ -171,7 +178,7 @@ impl Construction {
         {
             return Err("The connection needs plumbing supplies and one pump.");
         }
-        self.queue_water(
+        self.queue_installation(
             from,
             WaterAction::InstallPipe {
                 to,
@@ -186,6 +193,38 @@ impl Construction {
             ]));
         }
         Ok(())
+    }
+
+    fn queue_installation(&mut self, from: usize, action: WaterAction) -> Result<(), &'static str> {
+        if !self
+            .utilities
+            .water_site(from)
+            .is_some_and(|site| site.enabled)
+            || from > 0 && self.changes.contains_key(&(from - 1))
+        {
+            return Err("Choose an open source.");
+        }
+        if self.water_jobs.contains_key(&from)
+            || self
+                .pending_connections
+                .iter()
+                .any(|&(source, _)| source == from)
+        {
+            self.pending_connections.push((from, action));
+            Ok(())
+        } else {
+            self.queue_water(from, action)
+        }
+    }
+
+    fn promote_pending_connections(&mut self) {
+        let mut retained = Vec::new();
+        for (source, action) in std::mem::take(&mut self.pending_connections) {
+            if self.queue_water(source, action).is_err() {
+                retained.push((source, action));
+            }
+        }
+        self.pending_connections = retained;
     }
 
     pub fn queue_water(&mut self, target: usize, action: WaterAction) -> Result<(), &'static str> {
@@ -263,36 +302,73 @@ impl Construction {
 
     pub(super) fn valid_water_jobs(&self) -> bool {
         let mut workers = [false; 5];
-        self.water_jobs.iter().all(|(&target, job)| {
-            let Some(site) = self.utilities.water_site(target) else {
+        let valid_pending = self.pending_connections.iter().all(|&(source, action)| {
+            let Some((_, to, channel)) = action.connection(source) else {
                 return false;
             };
-            let numeric = (0.0..=LOAD).contains(&job.carried)
-                && (0.0..=job
-                    .action
-                    .installation()
-                    .map_or(45.0, |(_, required)| required))
-                    .contains(&job.work)
-                && job.retry.is_finite()
-                && job.retry >= 0.0;
-            let action = match job.action {
-                WaterAction::Carry { source, channel } => {
-                    channel < CHANNELS.len()
-                        && site.capacity[channel] > 0.0
-                        && source != Some(target)
-                        && source.map_or(channel == 1, |id| self.utilities.water_site(id).is_some())
-                }
-                WaterAction::InstallPipe {
-                    to,
-                    channel,
-                    required,
-                } => {
-                    to != target
-                        && channel < CHANNELS.len()
-                        && site.capacity[channel] > 0.0
-                        && self.utilities.water_site(to).is_some_and(|destination| {
-                            destination.capacity[channel] > 0.0
-                                && required
+            let Some((_, required)) = action.installation() else {
+                return false;
+            };
+            let (Some(a), Some(b)) = (
+                self.utilities.water_site(source),
+                self.utilities.water_site(to),
+            ) else {
+                return false;
+            };
+            source != to
+                && required
+                    == 20.0 + 3.0 * f64::from(a.location.as_vec2().distance(b.location.as_vec2()))
+                && channel.is_none_or(|c| {
+                    c < CHANNELS.len() && a.capacity[c] > 0.0 && b.capacity[c] > 0.0
+                })
+        });
+        valid_pending
+            && self.water_jobs.iter().all(|(&target, job)| {
+                let Some(site) = self.utilities.water_site(target) else {
+                    return false;
+                };
+                let numeric = (0.0..=LOAD).contains(&job.carried)
+                    && (0.0..=job
+                        .action
+                        .installation()
+                        .map_or(45.0, |(_, required)| required))
+                        .contains(&job.work)
+                    && job.retry.is_finite()
+                    && job.retry >= 0.0;
+                let action = match job.action {
+                    WaterAction::Carry { source, channel } => {
+                        channel < CHANNELS.len()
+                            && site.capacity[channel] > 0.0
+                            && source != Some(target)
+                            && source
+                                .map_or(channel == 1, |id| self.utilities.water_site(id).is_some())
+                    }
+                    WaterAction::InstallPipe {
+                        to,
+                        channel,
+                        required,
+                    } => {
+                        to != target
+                            && channel < CHANNELS.len()
+                            && site.capacity[channel] > 0.0
+                            && self.utilities.water_site(to).is_some_and(|destination| {
+                                destination.capacity[channel] > 0.0
+                                    && required
+                                        == 20.0
+                                            + 3.0
+                                                * f64::from(
+                                                    site.location
+                                                        .as_vec2()
+                                                        .distance(destination.location.as_vec2()),
+                                                )
+                            })
+                            && job.carried == 0.0
+                            && matches!(job.phase, WaterPhase::Approach)
+                    }
+                    WaterAction::InstallCable { to, required } => {
+                        to != target
+                            && self.utilities.water_site(to).is_some_and(|destination| {
+                                required
                                     == 20.0
                                         + 3.0
                                             * f64::from(
@@ -300,37 +376,24 @@ impl Construction {
                                                     .as_vec2()
                                                     .distance(destination.location.as_vec2()),
                                             )
-                        })
-                        && job.carried == 0.0
-                        && matches!(job.phase, WaterPhase::Approach)
-                }
-                WaterAction::InstallCable { to, required } => {
-                    to != target
-                        && self.utilities.water_site(to).is_some_and(|destination| {
-                            required
-                                == 20.0
-                                    + 3.0
-                                        * f64::from(
-                                            site.location
-                                                .as_vec2()
-                                                .distance(destination.location.as_vec2()),
-                                        )
-                        })
-                        && job.carried == 0.0
-                        && matches!(job.phase, WaterPhase::Approach)
-                }
-                _ => job.carried == 0.0 && matches!(job.phase, WaterPhase::Approach),
-            };
-            let worker = job
-                .worker
-                .is_none_or(|id| id < workers.len() && !std::mem::replace(&mut workers[id], true));
-            numeric && action && worker
-        })
+                            })
+                            && job.carried == 0.0
+                            && matches!(job.phase, WaterPhase::Approach)
+                    }
+                    _ => job.carried == 0.0 && matches!(job.phase, WaterPhase::Approach),
+                };
+                let worker = job.worker.is_none_or(|id| {
+                    id < workers.len() && !std::mem::replace(&mut workers[id], true)
+                });
+                numeric && action && worker
+            })
     }
 
     pub(super) fn water_job_at(&self, index: usize) -> bool {
         let id = index + 1;
-        self.water_jobs.contains_key(&id) || self.water_jobs.values().any(|job| {
+        self.pending_connections.iter().any(|&(from, action)| {
+            from == id || action.installation().is_some_and(|(to, _)| to == id)
+        }) || self.water_jobs.contains_key(&id) || self.water_jobs.values().any(|job| {
             matches!(job.action, WaterAction::Carry { source: Some(source), .. } if source == id)
                 || job.action.installation().is_some_and(|(to, _)| to == id)
         })
@@ -412,12 +475,12 @@ impl Construction {
     ) -> impl Iterator<Item = (usize, usize, Option<usize>)> + '_ {
         self.water_jobs
             .iter()
-            .filter_map(move |(&from, job)| match job.action {
-                WaterAction::InstallCable { to, .. } if power => Some((from, to, None)),
-                WaterAction::InstallPipe { to, channel, .. } if !power => {
-                    Some((from, to, Some(channel)))
-                }
-                _ => None,
+            .map(|(&from, job)| (from, job.action))
+            .chain(self.pending_connections.iter().copied())
+            .filter_map(move |(from, action)| {
+                action
+                    .connection(from)
+                    .filter(|edge| edge.2.is_none() == power)
             })
     }
 
@@ -437,17 +500,14 @@ impl Construction {
             }) {
                 continue;
             }
-            let job = &self.water_jobs[&from];
-            let Some((_, required)) = job.action.installation() else {
-                continue;
-            };
-            self.utilities.draw_queued_connection(
-                terrain,
-                (from, to),
-                channel,
-                (job.work / required).clamp(0.0, 1.0) as f32,
-                gizmos,
-            );
+            let progress = self
+                .active_connection(from, to, channel)
+                .map_or(0.0, |job| {
+                    let (_, required) = job.action.installation().expect("installation");
+                    (job.work / required).clamp(0.0, 1.0) as f32
+                });
+            self.utilities
+                .draw_queued_connection(terrain, (from, to), channel, progress, gizmos);
         }
     }
 
@@ -466,29 +526,35 @@ impl Construction {
         )
     }
 
+    fn active_connection(
+        &self,
+        from: usize,
+        to: usize,
+        channel: Option<usize>,
+    ) -> Option<&WaterJob> {
+        let matches = |source, destination| {
+            self.water_jobs
+                .get(&source)
+                .filter(|job| job.action.connection(source) == Some((source, destination, channel)))
+        };
+        matches(from, to).or_else(|| {
+            if channel.is_none() {
+                matches(to, from)
+            } else {
+                None
+            }
+        })
+    }
+
     pub fn queued_connection(
         &self,
         from: usize,
         to: usize,
         channel: Option<usize>,
-    ) -> Option<usize> {
-        self.water_jobs
-            .iter()
-            .find_map(|(&source, job)| match (job.action, channel) {
-                (WaterAction::InstallCable { to: target, .. }, None)
-                    if (source, target) == (from, to) || (source, target) == (to, from) =>
-                {
-                    Some(source)
-                }
-                (
-                    WaterAction::InstallPipe {
-                        to: target,
-                        channel,
-                        ..
-                    },
-                    Some(selected),
-                ) if (source, target, channel) == (from, to, selected) => Some(source),
-                _ => None,
+    ) -> Option<(usize, usize, Option<usize>)> {
+        self.queued_utility_connections(channel.is_none())
+            .find(|&edge| {
+                edge == (from, to, channel) || (channel.is_none() && edge == (to, from, None))
             })
     }
 
@@ -498,13 +564,18 @@ impl Construction {
         to: usize,
         channel: Option<usize>,
     ) -> bool {
-        let Some(source) = self.queued_connection(from, to, channel) else {
+        let Some(edge) = self.queued_connection(from, to, channel) else {
             return false;
         };
-        if let Some(job) = self.water_jobs.remove(&source)
-            && let Some(worker) = job.worker
-        {
-            self.residents[worker].path.clear();
+        if self.active_connection(from, to, channel).is_some() {
+            if let Some(job) = self.water_jobs.remove(&edge.0)
+                && let Some(worker) = job.worker
+            {
+                self.residents[worker].path.clear();
+            }
+        } else {
+            self.pending_connections
+                .retain(|&(source, action)| action.connection(source) != Some(edge));
         }
         true
     }
@@ -516,8 +587,7 @@ impl Construction {
             self.connection_site_name(catalog, from),
             self.connection_site_name(catalog, to),
         );
-        if let Some(source) = self.queued_connection(from, to, None)
-            && let Some(job) = self.water_jobs.get(&source)
+        if let Some(job) = self.active_connection(from, to, None)
             && let WaterAction::InstallCable { required, .. } = job.action
         {
             let _ = write!(
@@ -631,8 +701,7 @@ impl Construction {
             }
         }
         let displayed_job = source
-            .and_then(|from| self.queued_connection(from, target, Some(channel)))
-            .and_then(|from| self.water_jobs.get(&from))
+            .and_then(|from| self.active_connection(from, target, Some(channel)))
             .or_else(|| self.water_jobs.get(&target))
             .or_else(|| {
                 self.water_jobs.values().find(
@@ -843,6 +912,9 @@ impl Construction {
         dt: f32,
         group: Option<WorkGroup>,
     ) {
+        if self.reservation_pass.is_none() && !self.pending_connections.is_empty() {
+            self.promote_pending_connections();
+        }
         let ids = self
             .water_jobs
             .iter()
@@ -1103,18 +1175,23 @@ mod tests {
         assert_eq!(stock.available("pumps"), pumps - 1);
         town.queue_water_connection(&mut stock, 1, 2, 1).unwrap();
 
+        stock.receive(&BTreeMap::from([("electrical".into(), 1)]));
+        town.queue_power_connection(&mut stock, 1, 2).unwrap();
+        assert_eq!(town.pending_connections.len(), 1);
+
         let mut town: Construction =
             serde_json::from_str(&serde_json::to_string(&town).unwrap()).unwrap();
         assert!(town.valid_water_jobs());
         for step in 1..4_000 {
             let clock = f64::from(step) * 0.1;
             town.tick_water_work(&catalog, &mut stock, site, clock, 0.1);
-            if !town.water_jobs.contains_key(&1) {
+            if !town.water_jobs.contains_key(&1) && town.pending_connections.is_empty() {
                 town.tick_services(&catalog, &setup, &mut stock, clock, 0.1);
                 break;
             }
         }
         assert!(town.utilities.water_link_exists(1, 2, 1));
+        assert!(town.utilities.power_link_exists(1, 2));
         assert!(town.utilities.water_site(2).unwrap().levels[1] > 0.0);
         let row = (0..town.utilities.water_link_count())
             .find(|&row| town.utilities.is_manual_link(row, false))

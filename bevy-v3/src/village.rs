@@ -512,16 +512,13 @@ impl Village {
         let current = self
             .selected_installation()
             .and_then(|(from, to, channel)| self.construction.queued_connection(from, to, channel));
-        let next = {
-            let mut queue = self.construction.queued_utility_connections(power);
-            let Some(first) = queue.next() else { return };
-            current.map_or(first, |current| {
-                if first.0 > current {
-                    first
-                } else {
-                    queue.find(|&(from, _, _)| from > current).unwrap_or(first)
-                }
-            })
+        let queue = || self.construction.queued_utility_connections(power);
+        let Some(next) = queue()
+            .filter(|edge| current.is_none_or(|current| *edge > current))
+            .min()
+            .or_else(|| queue().min())
+        else {
+            return;
         };
         let (from, to, channel) = next;
         if let Some(channel) = channel {
