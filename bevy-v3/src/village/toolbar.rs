@@ -938,17 +938,19 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
             | Action::TradePolicy(_)
     );
     let (vertical_padding, font_size) = if trade_button { (4, 15.0) } else { (7, 17.0) };
-    parent
-        .spawn((
-            action,
-            Button,
-            Node {
-                padding: UiRect::axes(px(10), px(vertical_padding)),
-                ..default()
-            },
-            BackgroundColor(Color::srgb_u8(58, 78, 61)),
-        ))
-        .with_child((Text::default(), ui_font(assets, font_size)));
+    let mut button = parent.spawn((
+        action,
+        Button,
+        Node {
+            padding: UiRect::axes(px(10), px(vertical_padding)),
+            ..default()
+        },
+        BackgroundColor(Color::srgb_u8(58, 78, 61)),
+    ));
+    if matches!(action, Action::View | Action::Forecast) {
+        button.insert(crate::audio::DisclosureSound);
+    }
+    button.with_child((Text::default(), ui_font(assets, font_size)));
 }
 
 fn handle_buttons(

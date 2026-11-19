@@ -82,7 +82,8 @@ impl Decodable for Sound {
 #[derive(Resource)]
 struct Soundscape {
     music: Handle<Sound>,
-    effect: Handle<Sound>,
+    button: Handle<Sound>,
+    disclosure: Handle<Sound>,
     started: bool,
 }
 
@@ -206,6 +207,9 @@ impl SoundSettings {
 
 #[derive(Component)]
 struct Music;
+
+#[derive(Component)]
+pub(crate) struct DisclosureSound;
 
 pub struct VillageAudio;
 
@@ -342,14 +346,20 @@ fn prepare_audio(
     if let Some(saved) = SoundSettings::load() {
         *settings = saved;
     }
-    let mut effect = vec![0.0; sample_count(0.085)];
-    tone(&mut effect, 81, 0.0, 0.085, 0.065, false);
+    let click = |note| {
+        let mut samples = vec![0.0; sample_count(0.085)];
+        tone(&mut samples, note, 0.0, 0.085, 0.065, false);
+        Sound(samples.into())
+    };
     commands.insert_resource(Soundscape {
         music: sounds.add(Sound(sunday_in_the_village().into())),
-        effect: sounds.add(Sound(effect.into())),
+        button: sounds.add(click(81)),
+        disclosure: sounds.add(click(76)),
         started: false,
     });
 }
+
+type ChangedButton = (Changed<Interaction>, With<Button>, Without<VolumeTrack>);
 
 fn audio_controls(
     mut commands: Commands,
@@ -357,7 +367,7 @@ fn audio_controls(
     (keyboard, mouse): (Res<ButtonInput<KeyCode>>, Res<ButtonInput<MouseButton>>),
     window: Single<&Window, With<PrimaryWindow>>,
     mut sinks: Query<&mut AudioSink, With<Music>>,
-    buttons: Query<&Interaction, (Changed<Interaction>, With<Button>)>,
+    buttons: Query<(&Interaction, Has<DisclosureSound>), ChangedButton>,
     settings: Res<SoundSettings>,
 ) {
     if !soundscape.started
@@ -383,15 +393,22 @@ fn audio_controls(
             sink.play();
         }
     }
-    if window.focused
-        && settings.effects > 0
-        && buttons.iter().any(|state| *state == Interaction::Pressed)
-    {
-        commands.spawn((
-            AudioPlayer(soundscape.effect.clone()),
-            PlaybackSettings::DESPAWN
-                .with_volume(Volume::Linear(f32::from(settings.effects) / 100.0)),
-        ));
+    if window.focused && settings.effects > 0 {
+        for (state, disclosure) in &buttons {
+            if *state != Interaction::Pressed {
+                continue;
+            }
+            let sound = if disclosure {
+                &soundscape.disclosure
+            } else {
+                &soundscape.button
+            };
+            commands.spawn((
+                AudioPlayer(sound.clone()),
+                PlaybackSettings::DESPAWN
+                    .with_volume(Volume::Linear(f32::from(settings.effects) / 100.0)),
+            ));
+        }
     }
 }
 
