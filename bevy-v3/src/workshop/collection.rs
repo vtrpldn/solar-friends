@@ -1,3 +1,4 @@
+use super::navigation::ArtTool;
 use super::{WorkshopCatalog, building_model, orbit_camera, ui_font, viewport_height};
 use bevy::{
     camera::{
@@ -49,6 +50,7 @@ struct CategoryChoice(usize);
 
 #[derive(Component, Clone, Copy)]
 enum Control {
+    Open(ArtTool),
     Category,
     Previous,
     Next,
@@ -175,6 +177,33 @@ fn setup(
             ..default()
         },))
         .with_children(|root| {
+            root.spawn(Node {
+                flex_wrap: FlexWrap::Wrap,
+                column_gap: px(8),
+                row_gap: px(4),
+                ..default()
+            })
+            .with_children(|navigation| {
+                for tool in [
+                    ArtTool::Game,
+                    ArtTool::Workshop,
+                    ArtTool::Garden,
+                    ArtTool::Biomes,
+                    ArtTool::Residents,
+                ] {
+                    navigation
+                        .spawn((
+                            Button,
+                            Control::Open(tool),
+                            Node {
+                                padding: UiRect::axes(px(10), px(5)),
+                                ..default()
+                            },
+                            BackgroundColor(Color::srgb_u8(51, 77, 58)),
+                        ))
+                        .with_child((Text::new(tool.label()), ui_font(&assets, 15.)));
+                }
+            });
             root.spawn((
                 Text::new("The 3D collection"),
                 ui_font(&assets, 30.),
@@ -423,6 +452,13 @@ fn input(
         );
     for action in actions {
         match action {
+            Control::Open(tool) => {
+                if let Err(error) = tool.launch().map(|child| children.push(child)) {
+                    collection.status = format!("Could not open {}: {error}", tool.label());
+                    collection.dirty = true;
+                }
+                continue;
+            }
             Control::Category => {
                 collection.categories_open = !collection.categories_open;
                 collection.category_cursor = collection.category;

@@ -17,7 +17,8 @@ struct ArtTools;
 struct LaunchStatus;
 
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
-enum ArtTool {
+pub(super) enum ArtTool {
+    Game,
     Collection,
     Workshop,
     Garden,
@@ -34,8 +35,9 @@ impl ArtTool {
         Self::Residents,
     ];
 
-    fn label(self) -> &'static str {
+    pub(super) fn label(self) -> &'static str {
         match self {
+            Self::Game => "Game menu",
             Self::Collection => "Collection",
             Self::Workshop => "3D inspector",
             Self::Garden => "Asset Garden",
@@ -46,12 +48,21 @@ impl ArtTool {
 
     fn arguments(self) -> &'static [&'static str] {
         match self {
+            Self::Game => &[],
             Self::Collection => &["--collection"],
             Self::Workshop => &["--workshop"],
             Self::Garden => &["--asset-garden"],
             Self::Biomes => &["--biome-landscapes"],
             Self::Residents => &["--residents"],
         }
+    }
+
+    pub(super) fn launch(self) -> std::io::Result<std::process::Child> {
+        std::env::current_exe().and_then(|exe| {
+            std::process::Command::new(exe)
+                .args(self.arguments())
+                .spawn()
+        })
     }
 }
 
@@ -127,11 +138,7 @@ fn open_tool(
             status.0 = format!("{} is already open.", tool.label());
             continue;
         }
-        match std::env::current_exe().and_then(|exe| {
-            std::process::Command::new(exe)
-                .args(tool.arguments())
-                .spawn()
-        }) {
+        match tool.launch() {
             Ok(child) => {
                 processes.push((*tool, child));
                 status.0.clear();
