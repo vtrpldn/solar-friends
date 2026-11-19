@@ -985,19 +985,7 @@ impl Construction {
             }
             let position = worker.position;
             let recipe = &catalog.production[&job.recipe];
-            let ConstructionSite {
-                terrain,
-                land,
-                camp,
-            } = site;
-            let path = |from, to| {
-                route(
-                    from,
-                    to,
-                    |cell| self.blocked(catalog, terrain, land, camp, cell),
-                    access_road,
-                )
-            };
+            let path = |from, to| self.resident_route(catalog, site, from, to);
             match phase {
                 Phase::Growing => unreachable!("growth is handled before resident work"),
                 Phase::Harvest => self.production.jobs[index].phase = Phase::Work,
@@ -1136,12 +1124,9 @@ impl Construction {
                         }
                         continue;
                     }
-                    let Some(path) = route(
-                        position,
-                        SUPPLY_SPOTS[worker_index],
-                        |cell| self.blocked(catalog, terrain, land, camp, cell),
-                        access_road,
-                    ) else {
+                    let Some(path) =
+                        self.resident_route(catalog, site, position, SUPPLY_SPOTS[worker_index])
+                    else {
                         self.production.jobs[index].retry_at = clock + 5.0;
                         self.production.jobs[index].waiting_for_access = true;
                         continue;
@@ -1423,19 +1408,7 @@ impl Construction {
         let phase = self.production.jobs[job].phase;
         let returning = phase == Phase::Return;
         let project = &self.plans[self.production.jobs[job].site];
-        let ConstructionSite {
-            terrain,
-            land,
-            camp,
-        } = site;
-        let path = |from, to| {
-            route(
-                from,
-                to,
-                |cell| self.blocked(catalog, terrain, land, camp, cell),
-                access_road,
-            )
-        };
+        let path = |from, to| self.resident_route(catalog, site, from, to);
         let resident = &self.residents[index];
         if !returning
             && self

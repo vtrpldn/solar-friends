@@ -687,11 +687,12 @@ impl Construction {
         from: Vec2,
         to: IVec2,
     ) -> Option<VecDeque<Vec2>> {
+        let roads = self.finished_road_cells(catalog);
         route(
             from,
             to,
             |cell| self.blocked(catalog, site.terrain, site.land, site.camp, cell),
-            access_road,
+            |cell| roads.contains(&cell) || access_road(cell),
         )
     }
 

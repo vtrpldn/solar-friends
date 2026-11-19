@@ -14,6 +14,27 @@ struct RoadStroke {
 }
 
 impl Construction {
+    pub(super) fn finished_road_cells(
+        &self,
+        catalog: &Catalog,
+    ) -> std::collections::HashSet<IVec2> {
+        let mut cells = std::collections::HashSet::new();
+        for plan in &self.plans {
+            if plan.removed
+                || !matches!(plan.key.as_str(), "road" | "bridge")
+                || plan.work < catalog.projects[&plan.key].work
+            {
+                continue;
+            }
+            for x in 0..plan.size.x {
+                for z in 0..plan.size.y {
+                    cells.insert(plan.position + IVec2::new(x, z));
+                }
+            }
+        }
+        cells
+    }
+
     pub fn planning_roads(&self) -> bool {
         self.selection.as_deref() == Some("road") && self.moving.is_none()
     }
@@ -202,6 +223,32 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn resident_routes_prefer_finished_road_tiles() {
+        let catalog = Catalog::default();
+        let terrain = WorldSetup::default().terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut village = Construction::default();
+        let from = Vec2::new(44.0, 36.0);
+        let to = IVec2::new(56, 36);
+        for x in 44..=56 {
+            let tile = village.proposed_site(&catalog, "road", IVec2::new(x, 37));
+            village.plans.push(tile);
+        }
+        let path = village.resident_route(&catalog, site, from, to).unwrap();
+        assert!(path.iter().all(|cell| cell.y == 36.0));
+        for tile in &mut village.plans {
+            tile.work = catalog.projects["road"].work;
+        }
+        let path = village.resident_route(&catalog, site, from, to).unwrap();
+        assert!(path.iter().filter(|cell| cell.y == 37.0).count() >= 12);
+    }
 
     #[test]
     fn a_road_stroke_is_atomic_and_undo_restores_receipts_and_the_anchor() {

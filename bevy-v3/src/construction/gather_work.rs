@@ -21,11 +21,7 @@ impl Construction {
         dt: f32,
         group: WorkGroup,
     ) {
-        let ConstructionSite {
-            terrain,
-            land,
-            camp,
-        } = site;
+        let land = site.land;
         let queued: Vec<_> = self.gathering.orders.keys().copied().collect();
         for index in queued {
             let Some(resource) = land.site(index) else {
@@ -94,11 +90,12 @@ impl Construction {
                         if job.work < recipe.work {
                             continue;
                         }
-                        let path = route(
-                            worker.position,
+                        let position = worker.position;
+                        let path = self.resident_route(
+                            catalog,
+                            site,
+                            position,
                             SUPPLY_SPOTS[worker_index],
-                            |cell| self.blocked(catalog, terrain, land, camp, cell),
-                            access_road,
                         );
                         let job = self.gathering.orders.get_mut(&index).expect("queued job");
                         let food = crate::food::fresh(&recipe.output, clock, &BTreeMap::new());
@@ -152,11 +149,11 @@ impl Construction {
                         let at_source = gather_approaches(resource)
                             .contains(&worker.position.round().as_ivec2());
                         let from = worker.position;
-                        let blocked = |cell| self.blocked(catalog, terrain, land, camp, cell);
+                        let path = |cell| self.resident_route(catalog, site, from, cell);
                         let next = if at_source {
-                            route(from, SUPPLY_SPOTS[worker_index], blocked, access_road)
+                            path(SUPPLY_SPOTS[worker_index])
                         } else {
-                            route_to_gather_site(resource, from, blocked)
+                            route_to_gather_site(resource, from, path)
                         };
                         let job = self.gathering.orders.get_mut(&index).expect("queued job");
                         if let Some(path) = next {
@@ -183,7 +180,7 @@ impl Construction {
                 attempted_route = true;
                 let worker = &self.residents[worker_index];
                 let Some(path) = route_to_gather_site(resource, worker.position, |cell| {
-                    self.blocked(catalog, terrain, land, camp, cell)
+                    self.resident_route(catalog, site, worker.position, cell)
                 }) else {
                     continue;
                 };
@@ -247,7 +244,7 @@ fn gather_approaches(resource: &crate::land::Site) -> Vec<IVec2> {
 fn route_to_gather_site(
     resource: &crate::land::Site,
     from: Vec2,
-    mut blocked: impl FnMut(IVec2) -> bool,
+    path: impl FnMut(IVec2) -> Option<VecDeque<Vec2>>,
 ) -> Option<VecDeque<Vec2>> {
     let mut approaches = gather_approaches(resource);
     approaches.sort_by(|a, b| {
@@ -255,9 +252,7 @@ fn route_to_gather_site(
             .distance_squared(from)
             .total_cmp(&b.as_vec2().distance_squared(from))
     });
-    approaches
-        .into_iter()
-        .find_map(|cell| route(from, cell, &mut blocked, access_road))
+    approaches.into_iter().find_map(path)
 }
 
 #[cfg(test)]
@@ -284,7 +279,7 @@ mod tests {
             .filter(|(_, resource)| resource.recipe() == "gather-wild-fruit")
             .find_map(|(index, resource)| {
                 let route = route_to_gather_site(resource, SUPPLY_SPOTS[0].as_vec2(), |cell| {
-                    village.blocked(&catalog, &terrain, &land, camp, cell)
+                    village.resident_route(&catalog, site, SUPPLY_SPOTS[0].as_vec2(), cell)
                 })?;
                 Some((index, resource, *route.back()?))
             })

@@ -2343,14 +2343,12 @@ impl Construction {
             if hauling && available_staged == 0 && available_at_camp == 0 {
                 continue;
             }
-            let path = |from, to| {
-                route(
-                    from,
-                    to,
-                    |cell| self.blocked(catalog, terrain, land, camp, cell),
-                    access_road,
-                )
+            let site = ConstructionSite {
+                terrain,
+                land,
+                camp,
             };
+            let path = |from, to| self.resident_route(catalog, site, from, to);
             let depot = if hauling {
                 self.haul_depots(catalog, id, available_staged > 0)
                     .into_iter()
