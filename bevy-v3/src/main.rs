@@ -788,6 +788,13 @@ mod tests {
                 .advance_by(std::time::Duration::from_millis(100));
             app.world_mut().run_schedule(Update);
         }
+        interact_with_button(&mut app, "Camp in clearing", Interaction::Hovered);
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Dry, roomy ground"))
+        );
         press_button(&mut app, "Camp in clearing");
         assert_eq!(
             app.world().resource::<village::Village>().camp,

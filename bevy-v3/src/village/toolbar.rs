@@ -1779,6 +1779,14 @@ fn refresh(
         }
         if interaction != Interaction::None {
             let description = match action {
+                Action::CampPreset(index) => Some(
+                    [
+                        "Cool afternoons, but a longer walk from the unloading point.",
+                        "Quick unloading beside the entrance clearing.",
+                        "Dry, roomy ground. You’ll need to make your own shade.",
+                    ][index]
+                        .into(),
+                ),
                 Action::UndoRoad if !village.construction.can_undo_roads() => {
                     Some("Place a road stroke before trying to undo it.".into())
                 }

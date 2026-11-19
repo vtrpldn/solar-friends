@@ -1985,6 +1985,12 @@ fn village_input(
     );
     let clock = village.clock;
     village.stock.update_finance_clock(clock);
+    if !village.stock.sandbox {
+        village.construction.record_event(
+            clock,
+            "Iara · We have tents, meals and drinking water. There’s a spare tarp in the supplies if the weather turns.".into(),
+        );
+    }
     village.construction.record_event(
         clock,
         "Camp is ready. Choose what your community needs first.".into(),
