@@ -1,5 +1,5 @@
 // Export the authored V2 construction data for the standalone Bevy game.
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { MATERIALS, PROCESSES, createWeekend } from "../web/v02/weekend/simulation.js";
 import { buildingCategory, inBuildCategory } from "../web/v02/weekend/build-categories.js";
 import { buyerFor } from "../web/v02/weekend/local-market.js";
@@ -82,5 +82,19 @@ for (const [kind, ration] of Object.entries(ANIMAL_RATIONS)) {
   };
 }
 
-await writeFile(new URL("../bevy-v3/data/construction.json", import.meta.url),
-  JSON.stringify({ materials, projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS }, null, 2) + "\n");
+const output = new URL("../bevy-v3/data/construction.json", import.meta.url);
+const serialized = JSON.stringify(
+  { materials, projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS },
+  null,
+  2,
+) + "\n";
+
+if (process.argv.includes("--check")) {
+  const current = await readFile(output, "utf8");
+  if (current !== serialized) {
+    console.error("Bevy catalog drift. Run node scripts/export-v3-catalog.mjs and commit the updated catalog.");
+    process.exitCode = 1;
+  }
+} else {
+  await writeFile(output, serialized);
+}
