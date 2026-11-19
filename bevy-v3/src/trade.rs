@@ -675,6 +675,57 @@ mod tests {
     }
 
     #[test]
+    fn spoiled_sales_return_usable_food_without_refreshing_its_expiry() {
+        let catalog = Catalog::default();
+        let id = "greens";
+        for booked in [false, true] {
+            let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+            let mut market = Market::default();
+            let mut trade = Trade::default();
+            stock.receive_with_lots(
+                &BTreeMap::from([(id.into(), 2)]),
+                BTreeMap::from([(
+                    id.into(),
+                    [1.0, 200.0]
+                        .into_iter()
+                        .map(|expires| food::Lot {
+                            units: 1,
+                            expires,
+                            preserved: false,
+                            chilled: false,
+                        })
+                        .collect(),
+                )]),
+            );
+            let fare = crate::market::fare_cents(12);
+            assert_eq!(
+                trade.reserve(&catalog, &mut stock, &mut market, id, (0, fare, 0)),
+                Ok(2)
+            );
+            let locked: &[usize] = if booked { &[0] } else { &[] };
+            let removed = trade.age_shipments(&catalog, &mut stock, &mut market, 2.0, locked);
+            if booked {
+                assert!(removed.is_empty());
+                assert!(trade.orders[0].spoiled);
+                assert_eq!(stock.available(id), 0);
+                market.depart(&mut stock, fare);
+                let balance = stock.balance();
+                trade.settle(0, &mut stock);
+                assert_eq!(stock.balance(), balance);
+                assert!(trade.finish_trip(0, &mut stock, 1));
+            } else {
+                assert_eq!(removed, [0]);
+            }
+            assert_eq!(trade.receipts, 0);
+            assert!(trade.orders.is_empty());
+            assert_eq!(market.committed_fares(), 0);
+            assert_eq!(stock.available(id), 1);
+            assert_eq!(stock.pantry.lots[id][0].expires, 200.0);
+            assert_eq!(stock.pantry.spoiled[id], 1);
+        }
+    }
+
+    #[test]
     fn automatic_restock_uses_the_forecast_when_food_will_expire_first() {
         let catalog = Catalog::default();
         let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
