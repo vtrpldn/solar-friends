@@ -237,7 +237,7 @@ impl Construction {
         text
     }
 
-    fn water_route(
+    pub(super) fn water_route(
         &self,
         worker: usize,
         catalog: &Catalog,

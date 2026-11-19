@@ -889,13 +889,33 @@ impl Construction {
         let market_order = pickup.is_none();
         let (project, farm_bed) = pickup.or_else(|| order.map(|index| (index, None)))?;
         let door = crate::arrival::car_door(vehicle);
-        let (driver, path) = (0..self.residents.len())
+        let duration = trip_seconds(clock.round_trip_km);
+        let allowance = (5.0 * duration / crate::weather::DAY).max(0.5);
+        self.utilities.ensure_camp();
+        let (driver, path, water) = (0..self.residents.len())
             .rev()
             .filter(|&index| self.free_for_leisure(index))
             .find_map(|index| {
-                self.resident_route(catalog, site, self.residents[index].position, door)
-                    .map(|path| (index, path))
+                let path =
+                    self.resident_route(catalog, site, self.residents[index].position, door)?;
+                let needed = (allowance - self.residents[index].health.drinking_water).max(0.0);
+                let water = if needed > 0.0 {
+                    let (source, _, _) =
+                        self.utilities
+                            .water_sources_with(needed)
+                            .find(|&(id, _, _)| {
+                                id == 0 || self.water_route(index, catalog, site, id).is_some()
+                            })?;
+                    Some((source, needed))
+                } else {
+                    None
+                };
+                Some((index, path, water))
             })?;
+        if let Some((source, needed)) = water {
+            assert!(self.utilities.drink(source, needed));
+            self.residents[driver].health.drinking_water += needed;
+        }
         self.residents[driver].path = path;
         self.residents[driver].leisure.visit = None;
         let mut trip = TownTrip {
@@ -907,7 +927,7 @@ impl Construction {
             driver,
             vehicle,
             elapsed: 0.0,
-            duration: trip_seconds(clock.round_trip_km),
+            duration,
             boarded: false,
         };
         self.add_trip_exports(catalog, &mut trip);
@@ -919,6 +939,46 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn town_pickups_wait_for_water_and_save_the_drivers_bottle() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 36,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        village
+            .buy_from_town(&catalog, &mut stock, clock, "wood", false)
+            .unwrap();
+        village.utilities.ensure_camp();
+        assert!(village.utilities.drink(0, 40.0));
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.active_trips().next().is_none());
+        assert_eq!(village.trade.orders.len(), 1);
+
+        assert_eq!(village.utilities.deliver_water(0, 0, 1.0), 1.0);
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        let trip = village.trip.unwrap();
+        assert_eq!(village.utilities.stored_drinking_water(), 0.5);
+        let saved = serde_json::to_vec(&village).unwrap();
+        let mut restored: Construction = serde_json::from_slice(&saved).unwrap();
+        let health = &mut restored.residents[trip.driver].health;
+        assert_eq!(health.drinking_water, 0.5);
+        health.levels[Need::Hydration as usize] = 65.0;
+        health.decay(&catalog.residents[trip.driver], 25.0, false, false, 0.1);
+        assert!(health.levels[Need::Hydration as usize] > 84.0);
+        assert_eq!(health.drinking_water, 0.0);
+    }
 
     #[test]
     fn a_held_sale_waits_for_a_shared_trip_without_reserving_fuel() {

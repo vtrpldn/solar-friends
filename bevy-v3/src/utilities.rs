@@ -183,8 +183,7 @@ pub struct Facility<'a> {
 }
 
 impl Utilities {
-    pub fn sync<'a>(&mut self, facilities: impl Iterator<Item = Facility<'a>>) {
-        let first = !self.topology_valid;
+    pub(crate) fn ensure_camp(&mut self) {
         self.nodes.entry(0).or_insert_with(|| Node {
             kind: "camp".into(),
             location: IVec2::new(32, -13),
@@ -204,6 +203,11 @@ impl Utilities {
             maintain_fresh: false,
             maintain_sanitation: false,
         });
+    }
+
+    pub fn sync<'a>(&mut self, facilities: impl Iterator<Item = Facility<'a>>) {
+        let first = !self.topology_valid;
+        self.ensure_camp();
         let mut changed = first;
         for facility in facilities {
             let entry = self.nodes.entry(facility.id);
@@ -284,11 +288,18 @@ impl Utilities {
     }
 
     pub fn water_sources(&self) -> impl Iterator<Item = (usize, IVec2, IVec2)> + '_ {
+        self.water_sources_with(0.5)
+    }
+
+    pub(crate) fn water_sources_with(
+        &self,
+        amount: f64,
+    ) -> impl Iterator<Item = (usize, IVec2, IVec2)> + '_ {
         self.nodes
             .iter()
-            .filter(|(_, node)| {
+            .filter(move |(_, node)| {
                 node.enabled
-                    && node.water[0] >= 0.5
+                    && node.water[0] >= amount
                     && !matches!(node.kind.as_str(), "coop" | "goat_pasture")
             })
             .map(|(&id, node)| (id, node.location, node.size))

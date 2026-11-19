@@ -15,6 +15,8 @@ pub struct Health {
     pub last_meal: Option<f64>,
     pub last_night: Option<u64>,
     pub retry_at: f64,
+    #[serde(default, skip_serializing_if = "water_bottle_empty")]
+    pub drinking_water: f64,
     #[serde(default)]
     pub friendships: [i16; 5],
     #[serde(default)]
@@ -61,6 +63,10 @@ pub fn daily_drinking_liters(temperature: f64, working: bool) -> f64 {
     2.5 * (1.0 + if working { 0.5 } else { 0.0 } + heat)
 }
 
+fn water_bottle_empty(liters: &f64) -> bool {
+    *liters == 0.0
+}
+
 impl Health {
     pub fn new(index: usize) -> Self {
         let index = index as f64;
@@ -79,6 +85,7 @@ impl Health {
             last_meal: None,
             last_night: None,
             retry_at: 0.0,
+            drinking_water: 0.0,
             friendships: [0; 5],
             mind: mind::Mind::default(),
         }
@@ -119,11 +126,20 @@ impl Health {
             self.levels[index] = (self.levels[index] - rates[index] * dt * rate * scale).max(0.0);
         }
         let water = daily_drinking_liters(temperature, working);
-        self.levels[Need::Hydration as usize] = if sandbox {
-            100.0
+        let hydration = &mut self.levels[Need::Hydration as usize];
+        if sandbox {
+            *hydration = 100.0;
         } else {
-            (self.levels[Need::Hydration as usize] - water * 40.0 * dt / DAY).max(0.0)
-        };
+            *hydration = (*hydration - water * 40.0 * dt / DAY).max(0.0);
+            if *hydration <= 70.0 {
+                let sip = self
+                    .drinking_water
+                    .min(0.5)
+                    .min((100.0 - *hydration) / 40.0);
+                self.drinking_water -= sip;
+                *hydration += sip * 40.0;
+            }
+        }
     }
 
     pub fn pending(&self, profile: &Profile, clock: f64, food: bool) -> Vec<Need> {
@@ -173,6 +189,7 @@ impl Health {
 
     pub fn valid(&self) -> bool {
         (0.0..=100.0).contains(&self.energy)
+            && (0.0..=12.0).contains(&self.drinking_water)
             && self
                 .levels
                 .iter()
