@@ -722,6 +722,15 @@ mod tests {
         app.cleanup();
         app.update();
 
+        press_button(&mut app, "Town   ·   Drive");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("36 km") && text.0.contains("66 game minutes"))
+        );
+        press_button(&mut app, "Town   ·   Remote");
+        press_button(&mut app, "Town   ·   Nearby");
         press_button(&mut app, "Sound settings");
         assert!(app.world().resource::<audio::SoundSettings>().open);
         app.world_mut().run_schedule(Update);

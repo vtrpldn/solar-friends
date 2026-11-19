@@ -164,6 +164,19 @@ impl WorldSetup {
         [(6, 10), (1, 1), (17, 10)][self.supplies]
     }
 
+    fn plot_summary(&self) -> String {
+        if self.mode == Mode::Sandbox {
+            return "Unlimited money and supplies\nLand settings still shape this plot.".into();
+        }
+        let distance = self.round_trip_km();
+        let minutes = crate::market::trip_seconds(distance) * 0.45;
+        let cost = crate::market::fare_cents(distance) as f64 / 100.0;
+        format!(
+            "{} · {} supplies\nTown round trip · {distance} km\nAbout {minutes:.0} game minutes · R${cost:.2} fuel",
+            SAVINGS[self.savings], SUPPLIES[self.supplies]
+        )
+    }
+
     pub fn water_factor(&self) -> f64 {
         [0.55, 1.0, 1.5][self.water]
     }
@@ -335,6 +348,9 @@ struct PlotPreview;
 #[derive(Component)]
 struct PlotPreviewImage;
 
+#[derive(Component)]
+struct PlotSummary;
+
 const PREVIEW_SIZE: u32 = 128;
 
 pub struct WorldSetupPlugin;
@@ -434,7 +450,12 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 },
             ));
             panel.spawn((
-                Text::new("Blue river · Tan access road"),
+                Text::new("Blue river · Tan access road\nDarker ground is higher"),
+                ui_font(&assets, 15.0),
+            ));
+            panel.spawn((
+                PlotSummary,
+                Text::new(setup.plot_summary()),
                 ui_font(&assets, 15.0),
             ));
         });
@@ -591,22 +612,26 @@ fn refresh_panel(
 
 fn refresh_preview(
     setup: Res<WorldSetup>,
+    (saves, sound): (Res<SaveMenu>, Res<crate::audio::SoundSettings>),
     mut panel: Single<&mut Node, With<PlotPreview>>,
     mut image: Single<&mut ImageNode, With<PlotPreviewImage>>,
+    mut summary: Single<&mut Text, With<PlotSummary>>,
     mut images: ResMut<Assets<Image>>,
     mut drawn: Local<Option<(u32, usize, usize, usize)>>,
 ) {
-    if !setup.is_changed() {
+    if !setup.is_changed() && !saves.is_changed() && !sound.is_changed() {
         return;
     }
-    panel.display = if setup.open {
+    let visible = setup.open && !saves.open && !sound.open;
+    panel.display = if visible {
         Display::Flex
     } else {
         Display::None
     };
-    if !setup.open {
+    if !visible {
         return;
     }
+    summary.0 = setup.plot_summary();
     let mut preview = setup.clone();
     if let Some(seed) = setup
         .seed_entry
