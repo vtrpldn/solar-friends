@@ -251,6 +251,14 @@ const SPEEDS: [(KeyCode, u16); 9] = [
     (KeyCode::Digit9, 1024),
 ];
 const SAMPLE_LIMIT: usize = 2160;
+const RUN_INTERVALS: [(f64, &str); 6] = [
+    (0.1, "0.1 day"),
+    (1.0, "1 day"),
+    (7.0, "7 days"),
+    (30.0, "30 days"),
+    (90.0, "90 days"),
+    (365.0, "365 days"),
+];
 
 #[derive(Resource)]
 struct Runner {
@@ -792,6 +800,8 @@ struct Playback {
     speed: usize,
     debt: f64,
     speed_meter: SpeedMeter,
+    interval: usize,
+    pause_at: Option<u64>,
     order: Option<String>,
     notice: String,
     view: LabView,
@@ -811,6 +821,50 @@ impl Playback {
     fn reset_timing(&mut self) {
         self.debt = 0.0;
         self.speed_meter = SpeedMeter::default();
+    }
+
+    fn start_interval(&mut self, start: u64, limit: u64, seconds: f64, label: &str) {
+        let steps = (seconds / STEP).ceil() as u64;
+        self.pause_at = Some(start.saturating_add(steps).min(limit));
+        self.running = self.pause_at.is_some_and(|target| target > start);
+        self.reset_timing();
+        self.notice = format!(
+            "Scheduled {label} through step {}",
+            self.pause_at.unwrap_or(start)
+        );
+    }
+
+    fn advance_frame(&mut self, runner: &mut Runner, catalog: &Catalog, limit: u64, elapsed: f64) {
+        let speed = f64::from(SPEEDS[self.speed].1);
+        self.debt = (self.debt + elapsed.min(0.25) * speed).min(speed * 2.0);
+        let before = runner.index;
+        let endpoint = self.pause_at.unwrap_or(limit).min(limit);
+        let start = std::time::Instant::now();
+        while self.debt >= STEP
+            && runner.index < endpoint
+            && !runner.done()
+            && start.elapsed().as_millis() < 8
+        {
+            runner.advance(catalog);
+            self.debt -= STEP;
+        }
+        self.speed_meter.observe(elapsed, runner.index - before);
+        if self.pause_at.is_some_and(|target| runner.index >= target) && !runner.done() {
+            self.pause_at = None;
+            self.running = false;
+            self.reset_timing();
+            self.notice = format!("Interval complete at step {}.", runner.index);
+        }
+    }
+
+    fn interval_controls(&self) -> String {
+        if self.replaying {
+            return String::new();
+        }
+        format!(
+            "F2 Interval {} · F3 Run interval · Shift+J Advance 1h\n",
+            RUN_INTERVALS[self.interval].1
+        )
     }
 
     fn speed_label(&self) -> String {
@@ -838,6 +892,8 @@ impl Default for Playback {
             speed: 5,
             debt: 0.0,
             speed_meter: SpeedMeter::default(),
+            interval: 3,
+            pause_at: None,
             order: None,
             notice: String::new(),
             view: LabView::default(),
@@ -1144,23 +1200,28 @@ fn update_lab_window(
         playback.running = !playback.running;
         playback.reset_timing();
     }
+    if !playback.replaying && keys.just_pressed(KeyCode::F2) {
+        playback.interval = (playback.interval + 1) % RUN_INTERVALS.len();
+    }
+    if !playback.replaying && !reached_end(&runner) {
+        if keys.just_pressed(KeyCode::F3) {
+            let (days, label) = RUN_INTERVALS[playback.interval];
+            playback.start_interval(runner.index, limit, days * crate::weather::DAY, label);
+        } else if keys.just_pressed(KeyCode::KeyJ)
+            && keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+        {
+            playback.start_interval(runner.index, limit, crate::weather::HOUR, "one hour");
+        }
+    }
     if keys.just_pressed(KeyCode::KeyJ) && !playback.running && !reached_end(&runner) {
         runner.advance(&catalog);
     }
     if playback.running {
-        let speed = f64::from(SPEEDS[playback.speed].1);
-        let elapsed = time.delta_secs_f64();
-        playback.debt = (playback.debt + elapsed.min(0.25) * speed).min(speed * 2.0);
-        let before = runner.index;
-        let start = std::time::Instant::now();
-        while playback.debt >= STEP && !reached_end(&runner) && start.elapsed().as_millis() < 8 {
-            runner.advance(&catalog);
-            playback.debt -= STEP;
-        }
-        playback.speed_meter.observe(elapsed, runner.index - before);
+        playback.advance_frame(&mut runner, &catalog, limit, time.delta_secs_f64());
     }
     if reached_end(&runner) {
         playback.running = false;
+        playback.pause_at = None;
         if let Some(replay) = replay.as_deref_mut()
             && let Some(expected) = replay.expected.take()
         {
@@ -1217,6 +1278,7 @@ fn update_lab_window(
             )
         },
     );
+    let interval_controls = playback.interval_controls();
     if playback.view != LabView::Overview {
         let playback = &mut *playback;
         let details = if playback.view == LabView::Jobs {
@@ -1333,7 +1395,7 @@ fn update_lab_window(
             )
         };
         panel.set_if_neq(Text::new(format!(
-            "Simulation lab · {status} · Step {} / {} · {}\nSpace Run/Pause · J Single step · 1–9 Speed · {order_control}F5 Report · F6 Checkpoint\n{}\n\n{details}",
+            "Simulation lab · {status} · Step {} / {} · {}\nSpace Run/Pause · J Single step · 1–9 Speed · {order_control}F5 Report · F6 Checkpoint\n{interval_controls}{}\n\n{details}",
             runner.index, limit, playback.speed_label(), playback.notice,
         )));
         return;
@@ -1347,7 +1409,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint · Tab Browse lab views\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint · Tab Browse lab views\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         limit,
         village.clock,
@@ -1371,6 +1433,55 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn interval_stops_at_its_target_and_leaves_a_replayable_partial_report() {
+        let catalog = Catalog::default();
+        let mut runner = Runner::new(
+            Scenario {
+                steps: 12,
+                orders: vec![ScheduledOrder {
+                    step: 4,
+                    order: LabOrder::Grid { enabled: false },
+                }],
+                stop: LabStop::None,
+            },
+            None,
+            &catalog,
+        )
+        .unwrap();
+        let mut playback = Playback::default();
+        playback.start_interval(runner.index, runner.scenario.steps, 0.3, "test interval");
+        while playback.running {
+            playback.advance_frame(&mut runner, &catalog, 12, 0.1);
+        }
+        assert_eq!(runner.index, 3);
+        assert!(runner.outcomes.is_empty());
+        assert_eq!(playback.notice, "Interval complete at step 3.");
+        let partial =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(partial, &catalog).unwrap(), 3);
+
+        playback.start_interval(
+            runner.index,
+            runner.scenario.steps,
+            crate::weather::HOUR,
+            "one hour",
+        );
+        while !runner.done() {
+            playback.advance_frame(&mut runner, &catalog, 12, 0.1);
+        }
+        assert_eq!(runner.index, 12);
+        assert!(runner.village.construction.utilities.grid_off);
+        assert_eq!(
+            verify_report(
+                serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap(),
+                &catalog
+            )
+            .unwrap(),
+            12
+        );
+    }
 
     #[test]
     fn lab_speed_labels_distinguish_requested_and_achieved_rates() {
