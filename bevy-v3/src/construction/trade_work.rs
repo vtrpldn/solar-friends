@@ -94,6 +94,8 @@ impl Construction {
                 };
                 let outcome = if order.settled {
                     " · Paid"
+                } else if order.buying && order.quantity < item.pack {
+                    " · Spoilage loss"
                 } else if order.spoiled {
                     " · Spoiled"
                 } else {
@@ -584,7 +586,7 @@ impl Construction {
             self.trade.purchases,
         ));
         if let Some(order) = &self.trade.delivery {
-            let name = &catalog.materials[&order.material].name;
+            let item = &catalog.materials[&order.material];
             let arrival = order.eta - clock.seconds;
             let status = if arrival > 0.0 {
                 format!("{:.1}h remaining", arrival / crate::weather::HOUR)
@@ -593,7 +595,16 @@ impl Construction {
             } else {
                 "Arrived · Ready to unload".into()
             };
-            display.push_str(&format!("\nFreight · {name} · {status}"));
+            let outcome = if order.quantity < item.pack {
+                " · Spoilage loss"
+            } else {
+                ""
+            };
+            display.push_str(&format!(
+                "\nFreight · {} · {} · {status}{outcome}",
+                item.name,
+                item.quantity_text(u64::from(order.quantity))
+            ));
         }
         if let Some(freight) = self.construction_freight_status(clock.seconds) {
             display.push('\n');

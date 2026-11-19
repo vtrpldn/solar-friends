@@ -772,11 +772,12 @@ impl Construction {
             orders.sort_unstable_by(|a, b| b.cmp(a));
             for index in orders {
                 let order = &self.trade.orders[index];
-                if order.buying && order.quantity == 0 {
-                    let name = &catalog.materials[&order.material].name;
+                let item = &catalog.materials[&order.material];
+                if order.buying && order.quantity < item.pack {
+                    let lost = item.quantity_text(u64::from(item.pack - order.quantity));
                     self.record_event(
                         clock.seconds,
-                        format!("Town pickup returned with no usable {name}."),
+                        format!("Town pickup lost {lost} of {} to spoilage.", item.name),
                     );
                 }
                 self.trade.finish_trip(index, stock, space);
