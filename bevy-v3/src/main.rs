@@ -56,6 +56,25 @@ fn main() {
         workshop::run();
         return;
     }
+    if option
+        .as_deref()
+        .is_some_and(|flag| flag == "--create-scenario")
+    {
+        let result = args
+            .next()
+            .filter(|_| args.next().is_none())
+            .and_then(|argument| argument.into_string().ok())
+            .ok_or_else(|| std::io::Error::other("Expected one scenario setup argument."))
+            .and_then(|setup| {
+                serde_json::from_str::<WorldSetup>(&setup).map_err(std::io::Error::other)
+            })
+            .and_then(village::lab::create_ui);
+        if let Err(error) = result {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+        return;
+    }
     if let Some(flag) = option.as_deref()
         && (flag == "--lab"
             || flag == "--lab-replay"

@@ -670,7 +670,7 @@ fn run(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::R
 }
 
 pub(crate) fn run_ui(scenario: &Path, save: Option<&Path>) -> io::Result<()> {
-    let source = LabSource {
+    let source = LabSource::File {
         scenario: scenario.to_owned(),
         checkpoint: save.map(Path::to_owned),
     };
@@ -688,16 +688,51 @@ pub(crate) fn replay_ui(path: &Path) -> io::Result<()> {
     Ok(())
 }
 
+pub(crate) fn create_ui(setup: WorldSetup) -> io::Result<()> {
+    let source = LabSource::New(setup);
+    let catalog = Catalog::default();
+    let runner = source.load(&catalog)?;
+    open_lab(catalog, runner, None, Some(source));
+    Ok(())
+}
+
 #[derive(Clone, Resource)]
-struct LabSource {
-    scenario: PathBuf,
-    checkpoint: Option<PathBuf>,
+enum LabSource {
+    New(WorldSetup),
+    File {
+        scenario: PathBuf,
+        checkpoint: Option<PathBuf>,
+    },
 }
 
 impl LabSource {
     fn load(&self, catalog: &Catalog) -> io::Result<Runner> {
-        let (scenario, village) = load_inputs(&self.scenario, self.checkpoint.as_deref(), catalog)?;
-        Runner::new(scenario, village, catalog)
+        match self {
+            Self::New(setup) => Runner::new(
+                Scenario {
+                    steps: (24.0 * 3600.0 / STEP) as u64,
+                    setup: Some(setup.clone()),
+                    orders: Vec::new(),
+                    stop: LabStop::None,
+                },
+                None,
+                catalog,
+            ),
+            Self::File {
+                scenario,
+                checkpoint,
+            } => {
+                let (scenario, village) = load_inputs(scenario, checkpoint.as_deref(), catalog)?;
+                Runner::new(scenario, village, catalog)
+            }
+        }
+    }
+
+    fn path(&self) -> Option<&Path> {
+        match self {
+            Self::New(_) => None,
+            Self::File { scenario, .. } => Some(scenario),
+        }
     }
 }
 
@@ -1424,7 +1459,7 @@ fn update_lab_window(
         } else if let Some(path) = dropped_path {
             playback.running = false;
             playback.reset_timing();
-            playback.pending_source = Some(LabSource {
+            playback.pending_source = Some(LabSource::File {
                 scenario: path.clone(),
                 checkpoint: None,
             });
@@ -1451,7 +1486,7 @@ fn update_lab_window(
             events.clear();
             panel.set_if_neq(Text::new(format!(
                 "Open scenario?\n{}\nF8 Confirm · Esc Cancel\nThis replaces the current lab run and its unsaved orders.",
-                candidate.scenario.display()
+                candidate.path().map_or_else(|| "New scenario".into(), |path| path.display().to_string())
             )));
             return;
         }
@@ -2472,6 +2507,20 @@ mod tests {
     }
 
     #[test]
+    fn new_scenario_uses_the_menu_world_settings() {
+        let mut setup = WorldSetup::default();
+        setup.mode = Mode::Sandbox;
+        let catalog = Catalog::default();
+        let source = LabSource::New(setup.clone());
+        let runner = source.load(&catalog).unwrap();
+        assert!(runner.setup == setup.session());
+        assert!(runner.village.stock.sandbox);
+        assert_eq!(runner.index, 0);
+        assert!(runner.scenario.orders.is_empty());
+        assert_eq!(runner.scenario.steps as f64 * STEP, 24.0 * 3600.0);
+    }
+
+    #[test]
     fn replacing_pending_action_preserves_step_and_replays() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(
@@ -2696,7 +2745,7 @@ mod tests {
         let path =
             std::env::temp_dir().join(format!("solar-lab-reload-{}.json", std::process::id()));
         std::fs::write(&path, r#"{"steps":3}"#).unwrap();
-        let source = LabSource {
+        let source = LabSource::File {
             scenario: path.clone(),
             checkpoint: None,
         };
@@ -2750,14 +2799,20 @@ mod tests {
         };
         drop_replacement(&mut app);
         press_reload(&mut app);
-        assert_eq!(app.world().resource::<LabSource>().scenario, path);
+        assert_eq!(
+            app.world().resource::<LabSource>().path(),
+            Some(path.as_path())
+        );
         assert_eq!(app.world().resource::<Runner>().scenario.steps, 8);
 
         std::fs::write(&replacement, r#"{"steps":12}"#).unwrap();
         drop_replacement(&mut app);
         assert_eq!(app.world().resource::<Runner>().scenario.steps, 8);
         press_reload(&mut app);
-        assert_eq!(app.world().resource::<LabSource>().scenario, replacement);
+        assert_eq!(
+            app.world().resource::<LabSource>().path(),
+            Some(replacement.as_path())
+        );
         assert_eq!(app.world().resource::<Runner>().scenario.steps, 12);
         std::fs::remove_file(replacement).unwrap();
         std::fs::remove_file(path).unwrap();
