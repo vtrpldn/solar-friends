@@ -185,6 +185,39 @@ mod tests {
     use crate::catalog::Catalog;
 
     #[test]
+    fn livestock_matches_v2_through_ration_gaps_collection_and_spoilage() {
+        let catalog = Catalog::default();
+        // From V2 animalStep and collectAnimal with three ration deliveries
+        // and a collection on step 28 of a 12-day run.
+        let cases = [
+            ("coop", 83.125, 17.205_468_75, 4, 3, 10),
+            ("goat_pasture", 0.0, 8.325, 2, 6, 0),
+        ];
+        for (kind, health, produced, collected, spoiled, available) in cases {
+            let ration = &catalog.animal_rations[kind];
+            let mut pen = Pen::default();
+            let interval = DAY / 8.0;
+            for step in 1..=96 {
+                if matches!(step, 8 | 16 | 64) {
+                    pen.feed(ration, ration.water);
+                }
+                pen.tick(ration, f64::from(step) * interval, interval);
+                if step == 28 {
+                    let (output, _) = pen.collect(ration, false);
+                    assert_eq!(output[&ration.product], collected);
+                }
+            }
+            assert_eq!(pen.health, health);
+            assert!((pen.produced - produced).abs() < 1e-9);
+            assert_eq!(pen.collected, collected);
+            assert_eq!(pen.spoiled, spoiled);
+            assert_eq!(pen.available(), available);
+            assert_eq!(pen.feed, 0.0);
+            assert_eq!(pen.water, 0.0);
+        }
+    }
+
+    #[test]
     fn hens_produce_a_batch_only_with_feed_and_water() {
         let catalog = Catalog::default();
         let ration = &catalog.animal_rations["coop"];
