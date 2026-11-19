@@ -334,10 +334,54 @@ impl Construction {
                 })
         };
         match kind {
-            Need::Hydration => self
-                .utilities
-                .water_sources()
-                .find_map(|(id, loc, size)| facility_path(id, loc, size)),
+            Need::Hydration => {
+                let favorites = &catalog.residents[index].favorites;
+                let mut sources: Vec<_> = self
+                    .utilities
+                    .water_sources()
+                    .filter(|&(id, _, _)| {
+                        id == 0
+                            || !self.residents.iter().enumerate().any(|(other, worker)| {
+                                other != index
+                                    && worker
+                                        .health
+                                        .task
+                                        .as_ref()
+                                        .is_some_and(|task| task.facility == Some(id))
+                            })
+                    })
+                    .collect();
+                let score = |(id, location, _): (usize, IVec2, IVec2)| {
+                    let kind = if id == 0 {
+                        "camp"
+                    } else {
+                        self.plans
+                            .get(id - 1)
+                            .map_or("", |plan| catalog.projects[&plan.key].kind.as_str())
+                    };
+                    let preference = favorites
+                        .iter()
+                        .position(|key| key == kind)
+                        .unwrap_or(favorites.len());
+                    let target = if id == 0 {
+                        SUPPLY_SPOTS[index]
+                    } else {
+                        location
+                    };
+                    (
+                        preference,
+                        resident.position.distance_squared(target.as_vec2()),
+                    )
+                };
+                sources.sort_by(|&a, &b| {
+                    let (a_rank, a_distance) = score(a);
+                    let (b_rank, b_distance) = score(b);
+                    a_rank.cmp(&b_rank).then(a_distance.total_cmp(&b_distance))
+                });
+                sources
+                    .into_iter()
+                    .find_map(|(id, loc, size)| facility_path(id, loc, size))
+            }
             Need::Hunger | Need::FilterWater => fallback(SUPPLY_SPOTS[index]),
             Need::FetchWater => bank(),
             Need::Hygiene => self
@@ -1397,6 +1441,49 @@ mod tests {
                 .is_some_and(|task| task.kind == Need::Hydration)
         );
         assert!(village.residents[1].health.task.is_none());
+    }
+
+    #[test]
+    fn residents_drink_from_a_nearby_free_source_before_walking_to_camp_storage() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        village.utilities.sync(
+            [crate::utilities::Facility {
+                id: 1,
+                kind: "well",
+                location: IVec2::new(44, 36),
+                size: IVec2::ONE,
+                batteries: 0,
+                panels: 0,
+                working: false,
+            }]
+            .into_iter(),
+        );
+        assert_eq!(village.utilities.deliver_water(1, 0, 10.0), 10.0);
+        for worker in &mut village.residents[..2] {
+            worker.position = Vec2::new(42.0, 36.0);
+            worker.health.levels[Need::Hydration as usize] = 40.0;
+        }
+
+        village.tick_health(&catalog, &setup, &mut stock, site, 0.0, 0.1);
+
+        assert_eq!(
+            village.residents[0].health.task.as_ref().unwrap().facility,
+            Some(1)
+        );
+        assert_eq!(
+            village.residents[1].health.task.as_ref().unwrap().facility,
+            Some(0)
+        );
     }
 
     #[test]
