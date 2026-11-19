@@ -27,7 +27,7 @@ pub(super) struct ChangeJob {
     retry: f64,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Copy, Deserialize, Serialize)]
 pub(super) struct Destination {
     pub position: IVec2,
     pub size: IVec2,
@@ -228,38 +228,34 @@ impl Construction {
             rotation: self.rotation,
             size: size(definition, self.rotation),
         };
-        let proposal = Blueprint {
-            key: plan.key.clone(),
-            position,
-            size: target.size,
-            rotation: target.rotation,
-            loads: plan.loads,
-            delivered: plan.delivered,
-            work: plan.work,
-            pickups: plan.pickups,
-            fare: plan.fare,
-            removed: false,
-            purchase: None,
-            materials_paid: plan.materials_paid.clone(),
-        };
-        let ConstructionSite {
-            terrain,
-            land,
-            camp,
-        } = site;
-        if let Some(error) = self.placement_error(
-            terrain,
-            land,
-            camp,
-            &proposal,
-            definition,
-            (catalog, stock.sandbox, Some(index)),
-        ) {
+        if let Some(error) = self.move_placement_error(catalog, stock, site, index, target) {
             self.status = error.into();
             return;
         }
         self.begin_change(catalog, index, Change::Move, Some(target));
         self.moving = None;
+    }
+
+    fn move_placement_error(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        site: ConstructionSite,
+        index: usize,
+        target: Destination,
+    ) -> Option<&'static str> {
+        let mut proposal = self.plans[index].clone();
+        proposal.position = target.position;
+        proposal.size = target.size;
+        proposal.rotation = target.rotation;
+        self.placement_error(
+            site.terrain,
+            site.land,
+            site.camp,
+            &proposal,
+            &catalog.projects[&proposal.key],
+            (catalog, stock.sandbox, Some(index)),
+        )
     }
 
     fn cancel_plan(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize) {
@@ -400,7 +396,14 @@ impl Construction {
                 if job.work < job.required {
                     continue;
                 }
-                if let Some(target) = job.target.take() {
+                if let Some(target) = job.target {
+                    if let Some(error) =
+                        self.move_placement_error(catalog, stock, site, index, target)
+                    {
+                        self.status = error.into();
+                        self.changes.get_mut(&index).expect("blocked move").retry = 3.0;
+                        continue;
+                    }
                     if Self::uses_foundation(&self.plans[index].key) {
                         let terrain = site.terrain.clone().with_foundations(&self.foundations);
                         match self.project_foundation(&terrain, target.position, target.size) {
@@ -574,6 +577,21 @@ mod tests {
         construction.plans[0].delivered = construction.plans[0].loads;
         let destination = IVec2::new(54, 36);
         construction.queue_move(&catalog, &stock, site, destination, 0);
+        let original = construction.plans[0].position;
+        let mut obstacle = construction.plans[0].clone();
+        obstacle.position = destination;
+        construction.plans.push(obstacle);
+        for _ in 0..2_000 {
+            construction.tick_changes(&catalog, &mut stock, site, 0.1);
+            if construction.status == "Another project occupies that space." {
+                break;
+            }
+        }
+        assert_eq!(construction.status, "Another project occupies that space.");
+        assert_eq!(construction.plans[0].position, original);
+        assert_eq!(construction.foundations.len(), 1);
+        assert!(construction.changes[&0].target.is_some());
+        construction.plans.pop();
         for _ in 0..2_000 {
             construction.tick_changes(&catalog, &mut stock, site, 0.1);
             if construction.changes.is_empty() {
