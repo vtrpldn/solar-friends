@@ -11,6 +11,7 @@ enum BuildButton {
     NextPage,
     Search,
     ConstructionPolicy,
+    SupplierConstruction,
     Close,
 }
 
@@ -56,6 +57,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         .with_children(|panel| {
             panel.spawn((Text::new("Blueprints"), ui_font(&assets, 20.0)));
             button(panel, &assets, BuildButton::ConstructionPolicy, "");
+            button(panel, &assets, BuildButton::SupplierConstruction, "");
             panel
                 .spawn(Node {
                     column_gap: px(5),
@@ -124,6 +126,10 @@ fn select(
                         build.toggle_sandbox_construction()
                     }
                     BuildButton::ConstructionPolicy => build.toggle_auto_buy(),
+                    BuildButton::SupplierConstruction if !sandbox => {
+                        build.toggle_supplier_construction()
+                    }
+                    BuildButton::SupplierConstruction => {}
                     BuildButton::Search => build.toggle_build_search(),
                     BuildButton::Close => build.toggle_build_menu(),
                 }
@@ -184,6 +190,21 @@ fn refresh(
                 }
                 .into(),
             ),
+            BuildButton::SupplierConstruction => {
+                node.display = if village.stock.sandbox {
+                    Display::None
+                } else {
+                    Display::Flex
+                };
+                Some(
+                    if village.construction.supplier_construction() {
+                        "Construction · Supplier freight"
+                    } else {
+                        "Construction · Resident pickup"
+                    }
+                    .into(),
+                )
+            }
             _ => None,
         };
         if let Some(label) = label

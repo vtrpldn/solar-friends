@@ -263,6 +263,10 @@ impl Construction {
     }
 
     fn cancel_plan(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize) {
+        if self.construction_delivery_at(index) {
+            self.status = "Materials are on their way. Cancel after delivery.".into();
+            return;
+        }
         let plan = &self.plans[index];
         let mut returned = plan.materials(catalog).clone();
         if plan.pickups > 0 {

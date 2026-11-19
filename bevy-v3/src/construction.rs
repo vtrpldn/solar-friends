@@ -171,6 +171,10 @@ pub struct Construction {
     trip: Option<TownTrip>,
     #[serde(default)]
     second_trip: Option<TownTrip>,
+    #[serde(default)]
+    supplier_construction: bool,
+    #[serde(default)]
+    construction_delivery: Option<town_pickup::ConstructionDelivery>,
     residents: [Worker; 5],
 }
 
@@ -271,6 +275,8 @@ impl Default for Construction {
             priority: None,
             trip: None,
             second_trip: None,
+            supplier_construction: false,
+            construction_delivery: None,
             residents: std::array::from_fn(|index| {
                 let (x, z) = ARRIVAL_SPOTS[index];
                 Worker {
@@ -1323,7 +1329,8 @@ impl Construction {
                             && target.rotation <= 3
                     })
             });
-        if !self.events.valid()
+        if !self.valid_construction_delivery()
+            || !self.events.valid()
             || !self.production.kitchen_policy.valid()
             || !self.upkeep.valid(self.plans.len())
             || !self.valid_water_jobs()

@@ -1,5 +1,11 @@
 use super::*;
 
+#[derive(Deserialize, Serialize)]
+pub(super) struct ConstructionDelivery {
+    site: usize,
+    eta: f64,
+}
+
 impl Construction {
     pub(super) fn tick_trip(
         &mut self,
@@ -20,8 +26,8 @@ impl Construction {
             }
         }
 
-        let hour = ((540.0 + clock.seconds * 0.45) / 60.0) % 24.0;
-        if !(7.0..18.0).contains(&hour) {
+        self.tick_construction_delivery(catalog, stock, clock);
+        if !crate::market::town_is_open(clock.seconds) {
             return;
         }
         let available: Vec<_> = self
@@ -37,6 +43,108 @@ impl Construction {
             self.set_trip(slot, Some(trip));
             self.upkeep.dispatch_vehicle(vehicle);
         }
+    }
+
+    pub fn supplier_construction(&self) -> bool {
+        self.supplier_construction
+    }
+
+    pub fn toggle_supplier_construction(&mut self) {
+        self.supplier_construction = !self.supplier_construction;
+    }
+
+    pub(super) fn construction_delivery_at(&self, site: usize) -> bool {
+        self.construction_delivery
+            .as_ref()
+            .is_some_and(|order| order.site == site)
+    }
+
+    pub(super) fn valid_construction_delivery(&self) -> bool {
+        self.construction_delivery.as_ref().is_none_or(|order| {
+            order.eta.is_finite()
+                && order.eta >= 0.0
+                && self.trade.delivery.is_none()
+                && !self.active_trips().any(|trip| {
+                    !trip.market_order && trip.farm_bed.is_none() && trip.project == order.site
+                })
+                && self.plans.get(order.site).is_some_and(|plan| {
+                    !plan.removed && plan.pickups > 0 && plan.fare == 0 && plan.purchase.is_some()
+                })
+        })
+    }
+
+    fn fits_construction_freight(catalog: &Catalog, plan: &Blueprint) -> bool {
+        let Some(purchase) = &plan.purchase else {
+            return false;
+        };
+        if purchase.trips != plan.pickups {
+            return false;
+        }
+        let cargo = purchase
+            .units
+            .iter()
+            .try_fold((0.0, 0.0), |(mass, volume), (id, &units)| {
+                let item = catalog.materials.get(id)?;
+                Some((
+                    mass + item.mass * f64::from(units),
+                    volume + item.volume * f64::from(units),
+                ))
+            });
+        cargo.is_some_and(|(mass, volume)| mass <= 5000.0 && volume <= 12.0)
+    }
+
+    fn tick_construction_delivery(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        clock: TownClock,
+    ) {
+        if let Some(delivery) = &self.construction_delivery {
+            if clock.seconds >= delivery.eta {
+                let plan = &mut self.plans[delivery.site];
+                plan.pickups = 0;
+                plan.purchase = None;
+                self.construction_delivery = None;
+                self.record_event(clock.seconds, "Construction supplies delivered.".into());
+            }
+            return;
+        }
+        if !self.supplier_construction
+            || self.trade.delivery.is_some()
+            || !crate::market::town_is_open(clock.seconds)
+        {
+            return;
+        }
+        let Some((site, plan)) = self.plans.iter().enumerate().find(|(index, plan)| {
+            !plan.removed
+                && plan.pickups > 0
+                && Self::fits_construction_freight(catalog, plan)
+                && !self.active_trips().any(|trip| {
+                    !trip.market_order && trip.farm_bed.is_none() && trip.project == *index
+                })
+        }) else {
+            return;
+        };
+        let reserved = plan.fare * u64::from(plan.pickups);
+        let freight = crate::market::freight_cents(clock.round_trip_km);
+        if stock
+            .balance()
+            .saturating_sub(self.market.committed_fares().saturating_sub(reserved))
+            < freight
+        {
+            return;
+        }
+        self.market.release_fare(reserved);
+        stock.debit(freight, crate::stock::CashKind::Freight);
+        self.plans[site].fare = 0;
+        self.construction_delivery = Some(ConstructionDelivery {
+            site,
+            eta: clock.seconds + 6.0 * crate::weather::HOUR + trip_seconds(clock.round_trip_km),
+        });
+        self.record_event(
+            clock.seconds,
+            "Supplier dispatched construction supplies.".into(),
+        );
     }
 
     pub(super) fn booked_trade_orders(&self) -> Vec<usize> {
@@ -160,9 +268,6 @@ impl Construction {
         clock: TownClock,
         vehicle: usize,
     ) -> Option<TownTrip> {
-        if !crate::market::town_is_open(clock.seconds) {
-            return None;
-        }
         let booked = |project, bed| {
             self.active_trips()
                 .any(|trip| !trip.market_order && trip.project == project && trip.farm_bed == bed)
@@ -171,7 +276,14 @@ impl Construction {
             .plans
             .iter()
             .enumerate()
-            .find(|&(index, plan)| !plan.removed && plan.pickups > 0 && !booked(index, None))
+            .find(|&(index, plan)| {
+                !plan.removed
+                    && plan.pickups > 0
+                    && !booked(index, None)
+                    && !self.construction_delivery_at(index)
+                    && !(self.supplier_construction
+                        && Self::fits_construction_freight(catalog, plan))
+            })
             .map(|(index, _)| (index, None));
         let farming = self
             .farming
@@ -214,6 +326,44 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn construction_freight_replaces_reserved_pickup_fare_and_survives_a_save() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut plan = village.proposed_site(&catalog, "well", IVec2::new(36, 36));
+        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
+            .unwrap();
+        village.plans.push(plan);
+        village.toggle_supplier_construction();
+        let before = stock.balance();
+        village.tick_construction_delivery(&catalog, &mut stock, clock);
+        assert!(village.construction_delivery_at(0));
+        assert_eq!(village.market.committed_fares(), 0);
+        assert_eq!(stock.balance(), before - crate::market::freight_cents(12));
+        assert!(village.valid_save(&catalog, &stock));
+        let mut village: Construction =
+            serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        let eta = village.construction_delivery.as_ref().unwrap().eta;
+        village.tick_construction_delivery(
+            &catalog,
+            &mut stock,
+            TownClock {
+                seconds: eta,
+                ..clock
+            },
+        );
+        assert_eq!(village.plans[0].pickups, 0);
+        assert!(village.construction_delivery.is_none());
+        assert_eq!(stock.balance(), before - crate::market::freight_cents(12));
+        assert!(village.valid_save(&catalog, &stock));
+    }
 
     #[test]
     fn a_purchase_can_return_before_an_earlier_sale() {

@@ -77,6 +77,8 @@ impl Construction {
             "Changes queued".to_owned()
         } else if plan.work >= def.work {
             "Complete".to_owned()
+        } else if self.construction_delivery_at(index) {
+            "Supplier delivery on its way".into()
         } else if plan.pickups > 0 {
             format!("{} town pickup(s) pending", plan.pickups)
         } else if plan.delivered < plan.loads {

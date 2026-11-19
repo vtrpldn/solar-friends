@@ -134,6 +134,9 @@ impl Construction {
         if !town_is_open(clock.seconds) {
             return Err("Town is closed. Order between 07:00 and 18:00.");
         }
+        if freight && self.construction_delivery.is_some() {
+            return Err("A construction delivery is already on the way.");
+        }
         if u64::from(item.pack) + self.trade.inbound() > self.storage_space(catalog, stock) {
             return Err("There is not enough storage for another pack.");
         }
