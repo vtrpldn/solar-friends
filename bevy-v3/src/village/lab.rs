@@ -1721,6 +1721,34 @@ mod tests {
     }
 
     #[test]
+    fn a_build_order_uses_a_terrain_stroke_from_the_same_step() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps": 1,
+            "orders": [
+                {"step": 0, "order": {"type": "terrain-stroke", "brush": "raise", "points": [[24,8]]}},
+                {"step": 0, "order": {"type": "build", "key": "gathering", "x": 44, "z": 36}}
+            ]
+        }"#).unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        for outcome in &runner.outcomes {
+            assert!(outcome.error.is_none(), "{:?}", outcome.error);
+        }
+        let base = runner.setup.terrain().with_camp(runner.camp);
+        let original_foundation = base
+            .foundation(IVec2::new(44, 36), IVec2::splat(2))
+            .unwrap();
+        let [foundation] = runner.village.construction.foundations.as_slice() else {
+            panic!("Expected one foundation");
+        };
+        assert!(foundation.height() > original_foundation.height());
+
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 1);
+    }
+
+    #[test]
     fn scripted_pantry_budget_controls_restocks_and_replays() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{
