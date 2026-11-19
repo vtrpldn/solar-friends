@@ -418,9 +418,16 @@ mod tests {
         press_button(&mut app, "Manage");
         press_button(&mut app, "Trade");
         assert!(app.world().resource::<village::Village>().trade_open());
-        press_button(&mut app, "Manage");
         press_button(&mut app, "Close panel");
         assert!(!app.world().resource::<village::Village>().trade_open());
+
+        press_button(&mut app, "Manage");
+        press_button(&mut app, "Projects");
+        press_button(&mut app, "Show underway");
+        press_button(&mut app, "Next page");
+        press_button(&mut app, "Previous page");
+        press_button(&mut app, "Show all projects");
+        press_button(&mut app, "Close panel");
 
         app.world_mut().resource_mut::<WorldSetup>().open = true;
         app.world_mut().run_schedule(Update);

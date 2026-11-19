@@ -142,6 +142,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Page(true),
                 Action::Build,
                 Action::Manage,
+                Action::ClosePanel,
                 Action::Pause,
                 Action::Speed,
                 Action::Guide,
@@ -168,7 +169,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for (panel, _) in Action::PANELS {
                     spawn_button(menu, &assets, Action::Panel(panel));
                 }
-                spawn_button(menu, &assets, Action::ClosePanel);
                 spawn_button(menu, &assets, Action::ProjectFilter);
                 for row in 0..crate::construction::PAGE_KEYS.len() {
                     spawn_button(menu, &assets, Action::Project(row));
@@ -231,7 +231,7 @@ fn handle_buttons(
                     }
                     picker.open = false;
                 }
-                Action::ClosePanel if picker.open => {
+                Action::ClosePanel => {
                     village.utility_panel = None;
                     picker.open = false;
                 }
@@ -243,10 +243,7 @@ fn handle_buttons(
                     village.open_projects_only = !village.open_projects_only;
                     village.projects_page = 0;
                 }
-                Action::Panel(_)
-                | Action::ClosePanel
-                | Action::Project(_)
-                | Action::ProjectFilter => {}
+                Action::Panel(_) | Action::Project(_) | Action::ProjectFilter => {}
             }
         }
     }
@@ -299,10 +296,10 @@ fn refresh(
     };
     for (&action, &interaction, children, mut background, mut node) in &mut buttons {
         let show = match action {
-            Action::Page(_) => action.available(&village),
+            Action::Page(_) | Action::ClosePanel => action.available(&village),
             Action::Project(row) => projects.get(row).is_some(),
             Action::ProjectFilter => show_projects,
-            Action::Panel(_) | Action::ClosePanel => picker.open,
+            Action::Panel(_) => picker.open,
             _ => true,
         };
         node.display = if show { Display::Flex } else { Display::None };
