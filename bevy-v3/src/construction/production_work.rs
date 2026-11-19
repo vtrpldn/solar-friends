@@ -616,10 +616,30 @@ impl Construction {
         let definition = &catalog.projects[&site.key];
         let name = &definition.name;
         let recipes = self.recipes(catalog, index);
-        let mut text = name.clone();
-        if !site.removed && site.work < definition.work {
+        if site.removed {
+            return None;
+        }
+        let mut text = format!("{name} #{}", index + 1);
+        if site.work < definition.work {
             use std::fmt::Write;
             let _ = write!(text, " · {}", self.project_status(catalog, index));
+            let _ = write!(
+                text,
+                "\n{} × {} m · Labor {:.0}/{:.0} person-minutes · Delivered {}/{} loads",
+                site.size.x * 2,
+                site.size.y * 2,
+                site.work * 0.45,
+                definition.work * 0.45,
+                site.delivered,
+                site.loads,
+            );
+            if !site.materials(catalog).is_empty() {
+                text.push_str("\nMaterials for this plan");
+                for (row, (id, amount)) in site.materials(catalog).iter().enumerate() {
+                    text.push_str(if row % 3 == 0 { "\n" } else { " · " });
+                    let _ = write!(text, "{amount} {}", catalog.materials[id].name);
+                }
+            }
             let crew: Vec<_> = self
                 .residents
                 .iter()
