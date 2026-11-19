@@ -297,7 +297,7 @@ impl Pantry {
                     * catalog.materials[id].volume
                     * 1000.0
             })
-            .sum();
+            .fold(0.0, |total, volume| total + volume);
         let spoiled: u64 = self.spoiled.values().copied().fold(0, u64::saturating_add);
         let cooling = if capacity < installed {
             "\nSome cooling is off or unpowered. Unchilled food ages normally."

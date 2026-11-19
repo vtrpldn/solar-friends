@@ -724,11 +724,15 @@ impl Utilities {
     }
 
     pub fn stored_energy(&self) -> f64 {
-        self.nodes.values().map(|node| node.charge).sum()
+        self.nodes
+            .values()
+            .fold(0.0, |total, node| total + node.charge)
     }
 
     pub fn stored_drinking_water(&self) -> f64 {
-        self.nodes.values().map(|node| node.water[0]).sum()
+        self.nodes
+            .values()
+            .fold(0.0, |total, node| total + node.water[0])
     }
 
     pub fn power_summary(&self) -> String {
