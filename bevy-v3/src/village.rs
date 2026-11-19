@@ -3,6 +3,7 @@ mod build_menu;
 mod building_preview;
 mod cultivation_surface;
 mod diagnostics;
+mod fire;
 mod guide;
 pub(crate) mod lab;
 mod land_lens;
@@ -93,6 +94,8 @@ impl Plugin for VillagePlugin {
                     draw_blueprints,
                     show_hud,
                     show_construction,
+                    fire::light_new_fires,
+                    fire::animate_fires,
                 )
                     .chain(),
             )

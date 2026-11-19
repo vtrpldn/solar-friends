@@ -1440,6 +1440,10 @@ impl Construction {
         matches!(self.plans[project].key.as_str(), "field" | "garden")
     }
 
+    pub fn is_fire_circle(&self, project: usize) -> bool {
+        self.plans[project].key == "fire-circle"
+    }
+
     pub fn finished_models<'a>(
         &'a self,
         catalog: &'a Catalog,
