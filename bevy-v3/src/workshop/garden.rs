@@ -39,7 +39,7 @@ fn flat_biome() -> String {
     "flat".into()
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub(super) struct Prop {
     pub(super) id: String,
     pub(super) asset: String,
@@ -808,6 +808,27 @@ fn style_placement_preview(
     }
 }
 
+struct PreviewHeight {
+    biome: String,
+    props: Vec<Prop>,
+    prop: Prop,
+    height: f32,
+}
+
+fn preview_height(layout: &Layout, prop: &Prop, models: &WorkshopCatalog, center: Vec2) -> f32 {
+    let mut candidate = layout.clone();
+    if let Some(existing) = candidate
+        .props
+        .iter_mut()
+        .find(|existing| existing.id == prop.id)
+    {
+        *existing = prop.clone();
+    } else {
+        candidate.props.push(prop.clone());
+    }
+    Terrain::proposed_height(&candidate, models, center)
+}
+
 fn preview(
     mut commands: Commands,
     garden: Res<Garden>,
@@ -815,6 +836,7 @@ fn preview(
     assets: Res<AssetServer>,
     mut existing: Query<(Entity, &PlacementPreview, &mut Transform)>,
     mut props: Query<(&GardenProp, &mut Visibility)>,
+    mut surface: Local<Option<PreviewHeight>>,
 ) {
     let moving = garden
         .pending
@@ -831,7 +853,24 @@ fn preview(
     let pending = garden.pending.as_ref().map(|(prop, _)| {
         let model = models.0[&prop.asset].model;
         let mut center = prop.center(&models);
-        center.y = garden.terrain.height(center.x, center.z);
+        center.y = if !prop.fits(&models) {
+            garden.terrain.height(center.x, center.z)
+        } else if let Some(cached) = surface.as_ref().filter(|cached| {
+            cached.prop == *prop
+                && cached.biome == garden.layout.biome
+                && cached.props == garden.layout.props
+        }) {
+            cached.height
+        } else {
+            let height = preview_height(&garden.layout, prop, &models, center.xz());
+            *surface = Some(PreviewHeight {
+                biome: garden.layout.biome.clone(),
+                props: garden.layout.props.clone(),
+                prop: prop.clone(),
+                height,
+            });
+            height
+        };
         let transform = Transform::from_translation(center)
             .with_rotation(Quat::from_rotation_y((prop.rotation as f32).to_radians()));
         (model, transform)
@@ -1131,6 +1170,27 @@ mod tests {
             Layout::decode(&exported, &models).unwrap().props.len(),
             assets.len()
         );
+    }
+
+    #[test]
+    fn placement_preview_matches_the_committed_shared_terrace() {
+        let models = WorkshopCatalog::default();
+        let mut layout = Layout::decode(
+            r#"{"format":"solar-friends-scene","version":1,"biome":"mata-atlantica","props":[{"id":"one","asset":"house","column":60,"row":63,"rotation":0}]}"#,
+            &models,
+        ).unwrap();
+        let next = Prop {
+            id: "two".into(),
+            column: 65,
+            ..layout.props[0].clone()
+        };
+        let center = next.center(&models).xz();
+        let before = Terrain::new(&layout, &models).height(center.x, center.y);
+        let preview = preview_height(&layout, &next, &models, center);
+        layout.props.push(next);
+        let committed = Terrain::new(&layout, &models).height(center.x, center.y);
+        assert!((preview - before).abs() > 0.01);
+        assert_eq!(preview, committed);
     }
 
     #[test]

@@ -35,74 +35,104 @@ fn base_height(biome: &str, x: f32, z: f32) -> f32 {
         }
 }
 
+fn terraces(layout: &Layout, models: &WorkshopCatalog) -> Vec<Pad> {
+    let biome = layout.biome.as_str();
+    let mut pads: Vec<_> = layout
+        .props
+        .iter()
+        .filter(|prop| {
+            matches!(
+                models.0[&prop.asset].category.as_str(),
+                "Homes" | "Buildings" | "Props" | "Supplies" | "Construction"
+            ) || prop.asset == "road"
+        })
+        .map(|prop| {
+            let center = prop.center(models);
+            let [w, d] = prop.size(models);
+            Pad {
+                center: Vec2::new(center.x, center.z),
+                size: Vec2::new(w as f32, d as f32),
+                height: base_height(biome, center.x, center.z),
+            }
+        })
+        .collect();
+    let mut visited = vec![false; pads.len()];
+    for first in 0..pads.len() {
+        if visited[first] {
+            continue;
+        }
+        visited[first] = true;
+        let mut group = vec![first];
+        let mut cursor = 0;
+        while cursor < group.len() {
+            let pad = &pads[group[cursor]];
+            for (other, candidate) in pads.iter().enumerate() {
+                if !visited[other]
+                    && (pad.center - candidate.center)
+                        .abs()
+                        .cmple(pad.size + candidate.size + Vec2::splat(0.01))
+                        .all()
+                {
+                    visited[other] = true;
+                    group.push(other);
+                }
+            }
+            cursor += 1;
+        }
+        let height = group.iter().map(|&i| pads[i].height).sum::<f32>() / group.len() as f32;
+        for i in group {
+            pads[i].height = height;
+        }
+    }
+    pads
+}
+
+fn graded_height(biome: &str, pads: &[Pad], x: f32, z: f32) -> f32 {
+    let base = base_height(biome, x, z);
+    let mut nearest = 3.;
+    let mut value = base;
+    for pad in pads {
+        let distance = ((Vec2::new(x, z) - pad.center).abs() - pad.size).max_element();
+        if distance < nearest {
+            nearest = distance;
+            value = pad.height.lerp(base, ease(distance / 3.));
+        }
+    }
+    value
+}
+
+fn sample_surface(x: f32, z: f32, vertex: impl Fn(usize, usize) -> f32) -> f32 {
+    let cell =
+        ((Vec2::new(x, z) + Vec2::splat(HALF)) / 2.).clamp(Vec2::ZERO, Vec2::splat(CELLS as f32));
+    let origin = cell.floor().min(Vec2::splat((CELLS - 1) as f32));
+    let (i, j) = (origin.x as usize, origin.y as usize);
+    let fraction = cell - origin;
+    let (a, b) = (fraction.x, fraction.y);
+    let top_right = vertex(i + 1, j);
+    let bottom_left = vertex(i, j + 1);
+    if a + b <= 1. {
+        let top_left = vertex(i, j);
+        top_left + a * (top_right - top_left) + b * (bottom_left - top_left)
+    } else {
+        let bottom_right = vertex(i + 1, j + 1);
+        bottom_right
+            + (1. - a) * (bottom_left - bottom_right)
+            + (1. - b) * (top_right - bottom_right)
+    }
+}
+
 impl Terrain {
     pub fn new(layout: &Layout, models: &WorkshopCatalog) -> Self {
         let biome = layout.biome.as_str();
         if biome == "flat" {
             return Self::default();
         }
-        let mut pads: Vec<_> = layout
-            .props
-            .iter()
-            .filter(|prop| {
-                matches!(
-                    models.0[&prop.asset].category.as_str(),
-                    "Homes" | "Buildings" | "Props" | "Supplies" | "Construction"
-                ) || prop.asset == "road"
-            })
-            .map(|prop| {
-                let center = prop.center(models);
-                let [w, d] = prop.size(models);
-                Pad {
-                    center: Vec2::new(center.x, center.z),
-                    size: Vec2::new(w as f32, d as f32),
-                    height: base_height(biome, center.x, center.z),
-                }
-            })
-            .collect();
-        let mut visited = vec![false; pads.len()];
-        for first in 0..pads.len() {
-            if visited[first] {
-                continue;
-            }
-            visited[first] = true;
-            let mut group = vec![first];
-            let mut cursor = 0;
-            while cursor < group.len() {
-                let pad = &pads[group[cursor]];
-                for (other, candidate) in pads.iter().enumerate() {
-                    if !visited[other]
-                        && (pad.center - candidate.center)
-                            .abs()
-                            .cmple(pad.size + candidate.size + Vec2::splat(0.01))
-                            .all()
-                    {
-                        visited[other] = true;
-                        group.push(other);
-                    }
-                }
-                cursor += 1;
-            }
-            let height = group.iter().map(|&i| pads[i].height).sum::<f32>() / group.len() as f32;
-            for i in group {
-                pads[i].height = height;
-            }
-        }
+        let pads = terraces(layout, models);
         let heights = (0..SIDE * SIDE)
             .map(|index| {
                 let x = (index % SIDE) as f32 * 2. - HALF;
                 let z = (index / SIDE) as f32 * 2. - HALF;
-                let base = base_height(biome, x, z);
-                let mut nearest = 3.;
-                let mut value = base;
-                for pad in &pads {
-                    let distance = ((Vec2::new(x, z) - pad.center).abs() - pad.size).max_element();
-                    if distance < nearest {
-                        nearest = distance;
-                        value = pad.height.lerp(base, ease(distance / 3.));
-                    }
-                }
-                value
+                graded_height(biome, &pads, x, z)
             })
             .collect();
         Self { heights }
@@ -113,23 +143,22 @@ impl Terrain {
     }
 
     pub fn height(&self, x: f32, z: f32) -> f32 {
-        let cell = ((Vec2::new(x, z) + Vec2::splat(HALF)) / 2.)
-            .clamp(Vec2::ZERO, Vec2::splat(CELLS as f32));
-        let origin = cell.floor().min(Vec2::splat((CELLS - 1) as f32));
-        let (i, j) = (origin.x as usize, origin.y as usize);
-        let fraction = cell - origin;
-        let (a, b) = (fraction.x, fraction.y);
-        let top_right = self.vertex(i + 1, j);
-        let bottom_left = self.vertex(i, j + 1);
-        if a + b <= 1. {
-            let top_left = self.vertex(i, j);
-            top_left + a * (top_right - top_left) + b * (bottom_left - top_left)
-        } else {
-            let bottom_right = self.vertex(i + 1, j + 1);
-            bottom_right
-                + (1. - a) * (bottom_left - bottom_right)
-                + (1. - b) * (top_right - bottom_right)
+        sample_surface(x, z, |i, j| self.vertex(i, j))
+    }
+
+    pub fn proposed_height(layout: &Layout, models: &WorkshopCatalog, center: Vec2) -> f32 {
+        if layout.biome == "flat" {
+            return 0.;
         }
+        let pads = terraces(layout, models);
+        sample_surface(center.x, center.y, |i, j| {
+            graded_height(
+                &layout.biome,
+                &pads,
+                i as f32 * 2. - HALF,
+                j as f32 * 2. - HALF,
+            )
+        })
     }
 
     pub fn surface(&self, ray: Ray3d) -> Option<Vec3> {
