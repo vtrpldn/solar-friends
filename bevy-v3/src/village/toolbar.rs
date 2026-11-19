@@ -1321,7 +1321,7 @@ fn refresh(
         {
             recipe_details = village
                 .construction
-                .recipe_row_details(&catalog, row)
+                .recipe_row_details(&catalog, &village.stock, row)
                 .unwrap_or_default();
         }
         background.0 = if !action.available(&village)

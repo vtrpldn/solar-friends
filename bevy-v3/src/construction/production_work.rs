@@ -142,11 +142,16 @@ impl Construction {
             .collect()
     }
 
-    pub fn recipe_row_details(&self, catalog: &Catalog, row: usize) -> Option<String> {
+    pub fn recipe_row_details(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        row: usize,
+    ) -> Option<String> {
         use std::fmt::Write;
         let site = self.production.selected?;
         let recipes = self.recipes(catalog, site);
-        let (_, recipe) = recipes.get(self.production.page * PAGE_KEYS.len() + row)?;
+        let (id, recipe) = recipes.get(self.production.page * PAGE_KEYS.len() + row)?;
         let materials = |items: &BTreeMap<String, u32>| {
             items
                 .iter()
@@ -179,6 +184,9 @@ impl Construction {
         }
         if let Some(biology) = &recipe.biology {
             let _ = write!(detail, "\n{} days of growth at full rate", biology.days);
+        }
+        if let Err(reason) = self.batch_inputs(catalog, stock, site, id) {
+            let _ = write!(detail, "\n{reason}");
         }
         Some(detail)
     }
@@ -234,81 +242,12 @@ impl Construction {
         index: usize,
         id: &str,
     ) {
-        let recipe = &catalog.production[id];
-        if let Some(tool) = &recipe.repair
-            && (self.repairing(catalog, tool)
-                || stock.equipment.borrowed(tool) > 0
-                || stock.equipment.wear(tool) == 0.0)
-        {
-            self.production.notice = if self.repairing(catalog, tool) {
-                "A repair is already queued for this equipment."
-            } else if stock.equipment.borrowed(tool) > 0 {
-                "Wait for the borrowed equipment to be returned."
-            } else {
-                "This equipment does not need repair."
-            }
-            .into();
-            return;
-        }
-        if id == "solar_upgrade" && self.utilities.has_rooftop_solar(index) {
-            self.production.notice = "Rooftop solar is already installed.".into();
-            return;
-        }
-        if id == "cold_storage" && self.utilities.has_cold_storage(index) {
-            self.production.notice = "Cold storage is already installed.".into();
-            return;
-        }
-        if let Some(ration) = catalog.animal_rations.get(&recipe.kind)
-            && !stock.sandbox
-        {
-            let Some(pen) = self.livestock.animals.get(&index) else {
-                return;
-            };
-            if id == ration.product && pen.available() == 0 {
-                self.production.notice = "There is nothing ready to collect.".into();
+        let food_input = match self.batch_inputs(catalog, stock, index, id) {
+            Ok(inputs) => inputs.map(|inputs| stock.reserve_available(&inputs)),
+            Err(reason) => {
+                self.production.notice = reason;
                 return;
             }
-            if id.starts_with("care-") {
-                if pen.fed_days(ration) > ration.days - 0.25 {
-                    self.production.notice =
-                        "The animals already have enough feed and water.".into();
-                    return;
-                }
-                if self.utilities.potable_at(index + 1) < ration.water {
-                    self.production.notice = "Waiting for animal drinking water.".into();
-                    return;
-                }
-            }
-        }
-        if let Some(reason) = self.craft_blocker(catalog, stock, recipe, None) {
-            self.production.notice = reason;
-            return;
-        }
-        if self.production.jobs.iter().any(|job| job.site == index) {
-            self.production.notice = "Finish the current batch first.".into();
-            return;
-        }
-        let food_input = if !stock.sandbox {
-            let mut inputs = recipe.input.clone();
-            if id == "wood"
-                && self
-                    .production
-                    .growing_sites
-                    .get(&index)
-                    .is_some_and(|ground| ground.harvests > 0)
-            {
-                inputs.insert("tree_starts".into(), 4);
-            }
-            if let Some(material) = stock.missing(&inputs) {
-                self.production.notice = format!(
-                    "Not enough {} in supplies.",
-                    catalog.materials[material].name
-                );
-                return;
-            }
-            Some(stock.reserve_available(&inputs))
-        } else {
-            None
         };
         self.production.jobs.push(Batch {
             site: index,
@@ -326,6 +265,79 @@ impl Construction {
             using_biogas: false,
         });
         self.production.notice.clear();
+    }
+
+    fn batch_inputs(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        index: usize,
+        id: &str,
+    ) -> Result<Option<BTreeMap<String, u32>>, String> {
+        let recipe = &catalog.production[id];
+        if let Some(tool) = &recipe.repair {
+            if self.repairing(catalog, tool) {
+                return Err("A repair is already queued for this equipment.".into());
+            }
+            if stock.equipment.borrowed(tool) > 0 {
+                return Err("Wait for the borrowed equipment to be returned.".into());
+            }
+            if stock.equipment.wear(tool) == 0.0 {
+                return Err("This equipment does not need repair.".into());
+            }
+        }
+        if id == "solar_upgrade" && self.utilities.has_rooftop_solar(index) {
+            return Err("Rooftop solar is already installed.".into());
+        }
+        if id == "cold_storage" && self.utilities.has_cold_storage(index) {
+            return Err("Cold storage is already installed.".into());
+        }
+        if let Some(ration) = catalog.animal_rations.get(&recipe.kind)
+            && !stock.sandbox
+        {
+            let pen = self
+                .livestock
+                .animals
+                .get(&index)
+                .ok_or("The animal pen is being prepared.")?;
+            if id == ration.product && pen.available() == 0 {
+                return Err("There is nothing ready to collect.".into());
+            }
+            if id.starts_with("care-") {
+                if pen.fed_days(ration) > ration.days - 0.25 {
+                    return Err("The animals already have enough feed and water.".into());
+                }
+                if self.utilities.potable_at(index + 1) < ration.water {
+                    return Err("Waiting for animal drinking water.".into());
+                }
+            }
+        }
+        if let Some(reason) = self.craft_blocker(catalog, stock, recipe, None) {
+            return Err(reason);
+        }
+        if self.production.jobs.iter().any(|job| job.site == index) {
+            return Err("Finish the current batch first.".into());
+        }
+        if stock.sandbox {
+            return Ok(None);
+        }
+        let mut inputs = recipe.input.clone();
+        if id == "wood"
+            && self
+                .production
+                .growing_sites
+                .get(&index)
+                .is_some_and(|ground| ground.harvests > 0)
+        {
+            inputs.insert("tree_starts".into(), 4);
+        }
+        if let Some(material) = stock.missing(&inputs) {
+            return Err(format!(
+                "Not enough {} in supplies.",
+                catalog.materials[material].name
+            ));
+        }
+        Ok(Some(inputs))
     }
 
     pub(super) fn batch_status(
