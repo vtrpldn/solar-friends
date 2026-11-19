@@ -567,7 +567,7 @@ impl Construction {
                 .production
                 .jobs
                 .iter()
-                .any(|job| job.waiting_for_access && job.retry_at > clock)
+                .any(|job| self.production_route_blocked(job, clock))
                 || self
                     .residents
                     .iter()

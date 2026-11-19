@@ -514,6 +514,13 @@ impl Construction {
         expected > 0 && self.storage_space(catalog, stock) < expected
     }
 
+    pub(super) fn production_route_blocked(&self, job: &Batch, clock: f64) -> bool {
+        (job.waiting_for_access && job.retry_at > clock)
+            || job
+                .worker
+                .is_some_and(|worker| self.residents[worker].waiting_for_route())
+    }
+
     pub(super) fn batch_status(
         &self,
         job: &Batch,
@@ -526,7 +533,7 @@ impl Construction {
         {
             return "Building switched off".into();
         }
-        if job.waiting_for_access && job.retry_at > clock {
+        if self.production_route_blocked(job, clock) {
             return "Waiting for access".into();
         }
         if matches!(job.phase, Phase::Pickup | Phase::Work)

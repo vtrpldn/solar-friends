@@ -366,8 +366,11 @@ impl Default for Construction {
 impl Worker {
     fn blocked_construction_project(&self) -> Option<usize> {
         let job = self.assignment.as_ref()?;
-        (self.paused_waypoint.is_some() && self.paused_waypoint.as_ref() == self.path.front())
-            .then_some(job.project)
+        self.waiting_for_route().then_some(job.project)
+    }
+
+    fn waiting_for_route(&self) -> bool {
+        self.paused_waypoint.is_some() && self.paused_waypoint.as_ref() == self.path.front()
     }
 
     fn work_multiplier(&self, profile: &crate::catalog::Profile, project: &str) -> f64 {
@@ -449,8 +452,10 @@ impl Construction {
                 .then_some(self.residents[index].position)
         });
         for index in 0..self.residents.len() {
-            if present[index].is_some() && self.residents[index].assignment.is_some() {
-                self.refresh_construction_route(index, catalog, site);
+            if present[index].is_some()
+                && (self.residents[index].assignment.is_some() || self.production.has_worker(index))
+            {
+                self.refresh_resident_route(index, catalog, site);
             } else {
                 self.residents[index].paused_waypoint = None;
             }
@@ -482,12 +487,7 @@ impl Construction {
         }
     }
 
-    fn refresh_construction_route(
-        &mut self,
-        index: usize,
-        catalog: &Catalog,
-        site: ConstructionSite,
-    ) {
+    fn refresh_resident_route(&mut self, index: usize, catalog: &Catalog, site: ConstructionSite) {
         let worker = &self.residents[index];
         let blocked_waypoint = worker.path.front().copied().filter(|waypoint| {
             let cell = waypoint.round().as_ivec2();
@@ -2905,12 +2905,12 @@ mod tests {
             .push(village.proposed_site(&catalog, "gathering", IVec2::new(45, 37)));
         village.residents[0].position = IVec2::new(44, 36).as_vec2();
         village.residents[0].path = VecDeque::from([obstacle.as_vec2(), goal.as_vec2()]);
-        village.refresh_construction_route(0, &catalog, site);
+        village.refresh_resident_route(0, &catalog, site);
         let path = &village.residents[0].path;
         assert_eq!(path.back(), Some(&goal.as_vec2()));
         assert!(!path.contains(&obstacle.as_vec2()));
         village.residents[0].path = VecDeque::from([obstacle.as_vec2()]);
-        village.refresh_construction_route(0, &catalog, site);
+        village.refresh_resident_route(0, &catalog, site);
         let worker = &mut village.residents[0];
         let position = worker.position;
         worker.move_along_path(1.0, false);
@@ -2930,11 +2930,35 @@ mod tests {
             Some("A job is waiting for access.")
         );
         village.plans[0].removed = true;
-        village.refresh_construction_route(0, &catalog, site);
+        village.refresh_resident_route(0, &catalog, site);
         assert_eq!(village.lab_stop_reason(LabStop::Blocked, 0.0), None);
         let worker = &mut village.residents[0];
         worker.move_along_path(1.0, false);
         assert_ne!(worker.position, position);
+        let mut setup = WorldSetup::default();
+        setup.mode = crate::setup::Mode::Sandbox;
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let coop = village.proposed_site(&catalog, "coop", IVec2::new(50, 36));
+        village.plans.push(coop);
+        village.queue_batch(&catalog, &mut stock, 2, "eggs");
+        village.production.jobs[0].worker = Some(0);
+        village.residents[0].assignment = None;
+        village.residents[0].position = IVec2::new(44, 36).as_vec2();
+        village.residents[0].path = VecDeque::from([obstacle.as_vec2()]);
+        village.plans[0].removed = false;
+        village.refresh_resident_crowding(&catalog, site);
+        let job = &village.production.jobs[0];
+        assert_eq!(
+            village.batch_status(job, &catalog, &stock, 0.0),
+            "Waiting for access"
+        );
+        assert_eq!(
+            village.lab_stop_reason(LabStop::Blocked, 0.0),
+            Some("A job is waiting for access.")
+        );
+        village.plans[0].removed = true;
+        village.refresh_resident_crowding(&catalog, site);
+        assert_eq!(village.lab_stop_reason(LabStop::Blocked, 0.0), None);
     }
 
     #[test]
