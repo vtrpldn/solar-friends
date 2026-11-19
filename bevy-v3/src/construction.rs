@@ -1150,7 +1150,7 @@ impl Construction {
             .moving
             .map(|index| self.plans[index].key.as_str())
             .or(self.selection.as_deref())?;
-        if matches!(key, "field" | "garden" | "road") {
+        if matches!(key, "field" | "road") {
             return None;
         }
         let definition = &catalog.projects[key];
@@ -1291,6 +1291,41 @@ impl Construction {
             Color::srgb_u8(216, 122, 92)
         };
         draw_footprint(ground.terrain, position, proposal.size, tint, gizmos);
+        if key == "field"
+            && let Some(plot) = crate::farming::Plot::new("field", self.field_size)
+        {
+            let center = position.as_vec2() + (proposal.size.as_vec2() - Vec2::ONE) * 0.5;
+            let origin = world_position(center.x, center.y);
+            let rotation =
+                Vec2::from_angle(-f32::from(self.rotation) * std::f32::consts::FRAC_PI_2);
+            for bed in plot.beds {
+                let half = bed.dimensions * 0.5;
+                let corners = [
+                    Vec2::new(-half.x, -half.y),
+                    Vec2::new(half.x, -half.y),
+                    Vec2::new(half.x, half.y),
+                    Vec2::new(-half.x, half.y),
+                ];
+                for edge in 0..4 {
+                    let a = corners[edge];
+                    let b = corners[(edge + 1) % 4];
+                    let steps = a.distance(b).ceil() as u32;
+                    gizmos.linestrip(
+                        (0..=steps).map(|step| {
+                            let point = origin
+                                + rotation
+                                    .rotate(bed.offset + a.lerp(b, step as f32 / steps as f32));
+                            Vec3::new(
+                                point.x,
+                                ground.terrain.height_at(point.x, point.y) + 0.13,
+                                point.y,
+                            )
+                        }),
+                        tint,
+                    );
+                }
+            }
+        }
         let show_access = status.is_ok() && !matches!(key, "road" | "bridge");
         if show_access {
             let entrance = building_entrance(&proposal, definition);
