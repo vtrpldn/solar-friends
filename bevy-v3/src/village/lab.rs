@@ -494,6 +494,7 @@ enum LabView {
     Jobs,
     Beds,
     Orders,
+    Events,
 }
 
 impl LabView {
@@ -504,7 +505,8 @@ impl LabView {
             Self::AllItems => Self::Jobs,
             Self::Jobs => Self::Beds,
             Self::Beds => Self::Orders,
-            Self::Orders => Self::Overview,
+            Self::Orders => Self::Events,
+            Self::Events => Self::Overview,
         }
     }
 }
@@ -1035,6 +1037,12 @@ fn update_lab_window(
             lab_bed_page(&mut runner, &catalog, &keys, playback)
         } else if playback.view == LabView::Orders {
             lab_order_page(&runner, &mut playback.inventory_page)
+        } else if playback.view == LabView::Events {
+            let (pages, text) = village
+                .construction
+                .event_log(playback.inventory_page, "Tab Switch view");
+            playback.inventory_page = playback.inventory_page.min(pages - 1);
+            text
         } else {
             lab_inventory(
                 &catalog,

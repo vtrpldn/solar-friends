@@ -471,7 +471,7 @@ impl Village {
                 &mut self.inventory_page,
             ),
             Some(UtilityPanel::Events) => (
-                self.construction.event_log(self.event_page).0,
+                self.construction.event_log(self.event_page, "F8 Close").0,
                 &mut self.event_page,
             ),
             _ => return,
@@ -1715,7 +1715,12 @@ fn show_hud(
         }
         Some(UtilityPanel::Events) => {
             label.push('\n');
-            label.push_str(&village.construction.event_log(village.event_page).1);
+            label.push_str(
+                &village
+                    .construction
+                    .event_log(village.event_page, "F8 Close")
+                    .1,
+            );
         }
         Some(UtilityPanel::Upkeep) => {
             label.push('\n');

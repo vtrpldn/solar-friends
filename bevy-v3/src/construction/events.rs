@@ -43,16 +43,19 @@ impl Construction {
         self.events.record(clock, text);
     }
 
-    pub fn event_log(&self, page: usize) -> (usize, String) {
+    pub fn event_log(&self, page: usize, controls: &str) -> (usize, String) {
         use std::fmt::Write;
         const PAGE: usize = 8;
         let pages = self.events.0.len().div_ceil(PAGE).max(1);
         let page = page.min(pages - 1);
         let mut text = format!(
-            "Village events · {}/{} · Page Up/Down · F8 Close",
+            "Village events · {}/{} · Page Up/Down · {controls}",
             page + 1,
             pages
         );
+        if self.events.0.is_empty() {
+            text.push_str("\nNo village events recorded.");
+        }
         for event in self.events.0.iter().skip(page * PAGE).take(PAGE) {
             let minute = (540.0 + event.clock * 0.45).floor() as u64;
             let _ = write!(
@@ -84,10 +87,10 @@ mod tests {
         construction.record_event(60.0, "Arrival 49".into());
         let save = serde_json::to_string(&construction).unwrap();
         let restored: Construction = serde_json::from_str(&save).unwrap();
-        let (pages, newest) = restored.event_log(0);
+        let (pages, newest) = restored.event_log(0, "F8 Close");
         assert_eq!(pages, 6);
         assert!(newest.contains("Arrival 49 ×2"));
-        assert!(!restored.event_log(5).1.contains("Arrival 0"));
+        assert!(!restored.event_log(5, "F8 Close").1.contains("Arrival 0"));
         assert!(restored.events.valid());
     }
 }
