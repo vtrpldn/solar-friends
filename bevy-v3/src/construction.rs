@@ -1209,24 +1209,31 @@ impl Construction {
                 )
                 .map(|quote| {
                     if quote.trips == 0 {
-                        "Supplies available locally".into()
-                    } else if self.supplier_construction
+                        return "Supplies available locally".into();
+                    }
+                    let pickup_cost = quote.price + quote.fare * u64::from(quote.trips);
+                    if self.supplier_construction
                         && let Some(trips) = Self::construction_freight_trips(catalog, quote.units)
                     {
-                        let cost = quote.price
+                        let freight_cost = quote.price
                             + crate::market::freight_cents(clock.round_trip_km) * u64::from(trips);
-                        format!(
-                            "R${:.2} including {trips} supplier load(s)",
-                            cost as f64 / 100.0
-                        )
-                    } else {
-                        let cost = quote.price + quote.fare * u64::from(quote.trips);
-                        format!(
-                            "R${:.2} including {} town pickup(s)",
-                            cost as f64 / 100.0,
+                        if self.market.can_replace_fares_with_freight(stock, 0, freight_cost) {
+                            return format!(
+                                "R${:.2} including {trips} supplier load(s)",
+                                freight_cost as f64 / 100.0
+                            );
+                        }
+                        return format!(
+                            "R${:.2} including {} town pickup(s) · Freight exceeds available expansion funds",
+                            pickup_cost as f64 / 100.0,
                             quote.trips
-                        )
+                        );
                     }
+                    format!(
+                        "R${:.2} including {} town pickup(s)",
+                        pickup_cost as f64 / 100.0,
+                        quote.trips
+                    )
                 })
         };
         let tint = if status.is_ok() {

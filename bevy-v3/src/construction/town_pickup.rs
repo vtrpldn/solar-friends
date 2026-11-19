@@ -200,10 +200,9 @@ impl Construction {
         };
         let job = &mut self.farming.jobs[index];
         let freight = crate::market::freight_cents(clock.round_trip_km);
-        if stock
-            .balance()
-            .saturating_sub(self.market.committed_fares().saturating_sub(job.fare))
-            < freight
+        if !self
+            .market
+            .can_replace_fares_with_freight(stock, job.fare, freight)
         {
             return true;
         }
@@ -441,10 +440,9 @@ impl Construction {
             return false;
         };
         let freight = crate::market::freight_cents(clock.round_trip_km);
-        if stock
-            .balance()
-            .saturating_sub(self.market.committed_fares().saturating_sub(reserved))
-            < freight
+        if !self
+            .market
+            .can_replace_fares_with_freight(stock, reserved, freight)
         {
             return true;
         }
@@ -1660,7 +1658,9 @@ mod tests {
 
         let reserved = village.market.committed_fares();
         assert!(reserved < crate::market::freight_cents(12));
-        stock.debit(stock.balance() - reserved, crate::stock::CashKind::Food);
+        let freight = crate::market::freight_cents(12);
+        stock.debit(stock.balance() - freight, crate::stock::CashKind::Food);
+        assert_eq!(stock.balance(), freight);
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
 
         assert!(village.construction_delivery.is_none());
