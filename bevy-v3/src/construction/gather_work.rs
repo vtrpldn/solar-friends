@@ -8,6 +8,7 @@ impl Construction {
         site: ConstructionSite,
         clock: f64,
         dt: f32,
+        group: WorkGroup,
     ) {
         let ConstructionSite {
             terrain,
@@ -20,6 +21,9 @@ impl Construction {
                 continue;
             };
             let recipe = &catalog.gathering[resource.recipe()];
+            if WorkGroup::for_output(&recipe.output) != group {
+                continue;
+            }
             if self.reservation_pass.is_none()
                 && !stock.sandbox
                 && self.expire_gathered_food(catalog, stock, index, &recipe.output, clock)
@@ -33,6 +37,18 @@ impl Construction {
             let basket_in_repair = self.repairing(catalog, "harvest-basket");
             if let Some(worker_index) = assigned {
                 if self.reservation_pass.is_some() {
+                    continue;
+                }
+                let job = &self.gathering.orders[&index];
+                if matches!(job.phase, GatherPhase::Approach | GatherPhase::Work)
+                    && self.residents[worker_index].health.energy < 25.0
+                {
+                    let worker = &mut self.residents[worker_index];
+                    worker.path.clear();
+                    worker.paused_waypoint = None;
+                    let job = self.gathering.orders.get_mut(&index).expect("queued job");
+                    job.worker = None;
+                    job.phase = GatherPhase::Approach;
                     continue;
                 }
                 let worker = &mut self.residents[worker_index];
@@ -147,7 +163,9 @@ impl Construction {
                     .retry_at = clock + 5.0;
             }
             for worker_index in 0..self.residents.len() {
-                if !self.work_candidate(worker_index) {
+                if !self.work_candidate(worker_index)
+                    || self.residents[worker_index].health.energy < 25.0
+                {
                     continue;
                 }
                 let worker = &self.residents[worker_index];
@@ -268,6 +286,21 @@ mod tests {
                 (terrain.seed, setup.richness(), 0.0),
             )
             .unwrap();
+        for (worker, resident) in village.residents.iter_mut().enumerate() {
+            resident.position = SUPPLY_SPOTS[worker].as_vec2();
+            resident.health.energy = if worker == 0 { 100.0 } else { 0.0 };
+        }
+        village.tick_gathering(&catalog, &mut stock, site, 0.0, 0.1, WorkGroup::Production);
+        assert!(village.gathering.orders[&index].worker.is_none());
+        village.tick_gathering(&catalog, &mut stock, site, 0.0, 0.1, WorkGroup::Essentials);
+        assert_eq!(village.gathering.orders[&index].worker, Some(0));
+        village.residents[0].health.energy = 24.0;
+        village.tick_gathering(&catalog, &mut stock, site, 0.1, 0.1, WorkGroup::Essentials);
+        assert!(village.gathering.orders[&index].worker.is_none());
+        village.tick_gathering(&catalog, &mut stock, site, 0.2, 0.1, WorkGroup::Essentials);
+        assert!(village.gathering.orders[&index].worker.is_none());
+        village.residents[0].health.energy = 100.0;
+        village.residents[0].path.clear();
         village.residents[0].position = approach;
         let recipe = &catalog.gathering[resource.recipe()];
         let job = village.gathering.orders.get_mut(&index).unwrap();
@@ -275,7 +308,14 @@ mod tests {
         job.phase = GatherPhase::Work;
         job.work = recipe.work;
         let harvested_at = 2.0 * crate::weather::HOUR;
-        village.tick_gathering(&catalog, &mut stock, site, harvested_at, 0.1);
+        village.tick_gathering(
+            &catalog,
+            &mut stock,
+            site,
+            harvested_at,
+            0.1,
+            WorkGroup::Essentials,
+        );
         let job = &village.gathering.orders[&index];
         assert!(job.phase == GatherPhase::Return);
         let expiry = job.food_output.as_ref().unwrap()["food"][0].expires;
@@ -288,7 +328,14 @@ mod tests {
         fresh.residents[0].path.clear();
         fresh.residents[0].position = SUPPLY_SPOTS[0].as_vec2();
         let mut fresh_stock = stock.clone();
-        fresh.tick_gathering(&catalog, &mut fresh_stock, site, expiry - 1.0, 0.1);
+        fresh.tick_gathering(
+            &catalog,
+            &mut fresh_stock,
+            site,
+            expiry - 1.0,
+            0.1,
+            WorkGroup::Essentials,
+        );
         assert_eq!(
             fresh_stock.available("food"),
             initial + recipe.output["food"]
@@ -300,7 +347,14 @@ mod tests {
         );
 
         village = serde_json::from_slice(&saved).unwrap();
-        village.tick_gathering(&catalog, &mut stock, site, expiry, 0.1);
+        village.tick_gathering(
+            &catalog,
+            &mut stock,
+            site,
+            expiry,
+            0.1,
+            WorkGroup::Essentials,
+        );
         assert!(village.gathering.orders.is_empty());
         assert!(village.residents[0].path.is_empty());
         assert_eq!(stock.available("food"), initial);

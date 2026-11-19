@@ -1,5 +1,3 @@
-use crate::catalog::ProductionRecipe;
-
 use super::*;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -27,10 +25,10 @@ impl WorkGroup {
         }
     }
 
-    pub(super) fn for_recipe(recipe: &ProductionRecipe) -> Self {
+    pub(super) fn for_output(output: &BTreeMap<String, u32>) -> Self {
         if crate::food::SERVINGS
             .iter()
-            .any(|(id, _)| recipe.output.contains_key(*id))
+            .any(|(id, _)| output.contains_key(*id))
         {
             Self::Essentials
         } else {

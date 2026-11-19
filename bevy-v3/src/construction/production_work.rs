@@ -942,7 +942,7 @@ impl Construction {
     ) {
         let in_group = |job: &Batch| {
             group.is_none_or(|group| {
-                group == WorkGroup::for_recipe(&catalog.production[&job.recipe])
+                group == WorkGroup::for_output(&catalog.production[&job.recipe].output)
             })
         };
         if self.reservation_pass.is_some() {

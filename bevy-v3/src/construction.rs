@@ -2104,6 +2104,7 @@ impl Construction {
                 self.tick_water_group(catalog, stock, site, clock.seconds, dt, Some(group));
                 self.tick_production_group(catalog, stock, site, clock.seconds, dt, Some(group));
                 self.tick_farm_jobs(catalog, stock, site, clock.seconds, dt);
+                self.tick_gathering(catalog, stock, site, clock.seconds, dt, group);
             }
             WorkGroup::Maintenance => {
                 self.tick_water_group(catalog, stock, site, clock.seconds, dt, Some(group));
@@ -2113,7 +2114,7 @@ impl Construction {
                 }
             }
             WorkGroup::Production => {
-                self.tick_gathering(catalog, stock, site, clock.seconds, dt);
+                self.tick_gathering(catalog, stock, site, clock.seconds, dt, group);
                 self.tick_production_group(catalog, stock, site, clock.seconds, dt, Some(group));
             }
             WorkGroup::Construction => {
