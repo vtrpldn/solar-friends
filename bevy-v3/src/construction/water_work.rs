@@ -506,8 +506,13 @@ impl Construction {
         if self.water_route_blocked(target, job, clock) {
             "Waiting for access"
         } else {
-            self.water_job_wait(target, job)
-                .unwrap_or_else(|| job.label())
+            self.water_job_wait(target, job).unwrap_or_else(|| {
+                if job.worker.is_some() || matches!(job.phase, WaterPhase::Staged(_)) {
+                    job.label()
+                } else {
+                    "Waiting for a resident"
+                }
+            })
         }
     }
 
@@ -780,24 +785,44 @@ impl Construction {
                 }
             }
         }
-        let displayed_job = source
-            .and_then(|from| self.active_connection(from, target, Some(channel)))
+        let selected_job =
+            source.and_then(|from| self.active_connection(from, target, Some(channel)));
+        let selected_waiting = selected_job.is_none()
+            && source.is_some_and(|from| {
+                self.queued_connection(from, target, Some(channel))
+                    .is_some()
+            });
+        if selected_waiting {
+            text.push_str("\nInstallation queued · Waiting for other work at the source");
+        } else if let Some(job) = selected_job
             .or_else(|| self.water_jobs.get(&target))
             .or_else(|| {
                 self.water_jobs.values().find(
                     |job| matches!(job.action, WaterAction::InstallPipe { to, .. } if to == target),
                 )
-            });
-        if let Some(job) = displayed_job {
+            })
+        {
             let status = self.water_job_status(target, job, clock);
-            if let WaterAction::InstallPipe { required, .. } = job.action {
-                let _ = write!(
-                    text,
-                    "\n{status} · {:.0}% installed",
-                    100.0 * job.work / required
-                );
-            } else {
-                let _ = write!(text, "\n{status} · {:.1} L carried", job.carried);
+            let _ = write!(text, "\n{status}");
+            match job.action {
+                WaterAction::InstallPipe { required, .. } => {
+                    let _ = write!(text, " · {:.0}% installed", 100.0 * job.work / required);
+                }
+                WaterAction::Purify | WaterAction::Sanitation => {
+                    let required = if matches!(job.action, WaterAction::Purify) {
+                        30.0
+                    } else {
+                        45.0
+                    };
+                    let _ = write!(text, " · {:.0}% complete", 100.0 * job.work / required);
+                }
+                WaterAction::Carry { .. } if job.carried > EPSILON => {
+                    let _ = write!(text, " · {:.1} L carried", job.carried);
+                }
+                _ => {}
+            }
+            if let Some(worker) = job.worker {
+                let _ = write!(text, " · {}", super::resident_work::NAMES[worker]);
             }
         }
         text
