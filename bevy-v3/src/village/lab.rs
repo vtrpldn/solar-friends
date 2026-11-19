@@ -559,6 +559,7 @@ struct Playback {
     job_focus: Option<usize>,
     waiting_only: bool,
     farm_site: Option<usize>,
+    clear_confirmation: Option<(usize, Option<usize>)>,
 }
 
 impl Default for Playback {
@@ -574,6 +575,7 @@ impl Default for Playback {
             job_focus: None,
             waiting_only: false,
             farm_site: None,
+            clear_confirmation: None,
         }
     }
 }
@@ -668,6 +670,26 @@ fn lab_bed_page(
             }
         }
     }
+    let clear_target = (site, (!all_beds).then_some(index));
+    let clearing = matches!(
+        orders.first(),
+        Some(LabOrder::Bed {
+            action: FarmAction::Clear,
+            ..
+        })
+    );
+    if clearing && playback.clear_confirmation != Some(clear_target) {
+        playback.clear_confirmation = Some(clear_target);
+        orders.clear();
+    } else if clearing
+        || !orders.is_empty()
+        || playback
+            .clear_confirmation
+            .is_some_and(|(plot, bed)| plot != site || bed.is_some_and(|bed| bed != index))
+        || keys.just_pressed(KeyCode::Escape)
+    {
+        playback.clear_confirmation = None;
+    }
     if !orders.is_empty() {
         let count = orders.len();
         let start = runner.outcomes.len();
@@ -708,6 +730,15 @@ fn lab_bed_page(
             "\nLast bed order · Step {} · {result}",
             outcome.step
         );
+    }
+    if let Some((_, bed)) = playback.clear_confirmation.filter(|_| !runner.done()) {
+        let instruction = if bed.is_some() {
+            "Press Shift+4 again to clear the selected bed. Only residues remain. Esc cancels."
+        } else {
+            "Press Ctrl+Shift+4 again to clear every bed in this plot. Only residues remain. Esc cancels."
+        };
+        details.push('\n');
+        details.push_str(instruction);
     }
     let controls = if runner.done() {
         ""
@@ -766,6 +797,7 @@ fn update_lab_window(
             playback.running = false;
             playback.debt = 0.0;
             playback.notice.clear();
+            playback.clear_confirmation = None;
             playback.order = Some(String::new());
         }
         if keys.just_pressed(KeyCode::F5) && runner.done() {
@@ -785,6 +817,7 @@ fn update_lab_window(
     if keys.just_pressed(KeyCode::Tab) {
         playback.view = playback.view.next();
         playback.inventory_page = 0;
+        playback.clear_confirmation = None;
     }
     if keys.just_pressed(KeyCode::PageDown) {
         playback.inventory_page = playback.inventory_page.saturating_add(1);
@@ -1115,6 +1148,35 @@ mod tests {
             verify_report(serde_json::from_slice(&data).unwrap(), &catalog).unwrap(),
             2
         );
+    }
+
+    #[test]
+    fn bulk_clear_waits_for_confirmation_and_records_only_confirmed_orders() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(
+            r#"{
+            "steps":2,
+            "orders":[{"step":0,"order":{"type":"build","key":"field","x":40,"z":36,"size":[2,2]}}]
+        }"#,
+        )
+        .unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        let mut playback = Playback::default();
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::ControlLeft);
+        keys.press(KeyCode::ShiftLeft);
+        keys.press(KeyCode::Digit4);
+        assert!(
+            lab_bed_page(&mut runner, &catalog, &keys, &mut playback)
+                .contains("Ctrl+Shift+4 again")
+        );
+        assert_eq!(runner.outcomes.len(), 1);
+        keys.reset(KeyCode::Digit4);
+        keys.press(KeyCode::Digit4);
+        lab_bed_page(&mut runner, &catalog, &keys, &mut playback);
+        let beds = runner.village.construction.farming.plots[&0].beds.len();
+        assert_eq!(runner.outcomes.len(), 1 + beds);
+        assert!(playback.clear_confirmation.is_none());
     }
 
     #[test]
