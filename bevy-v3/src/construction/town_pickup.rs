@@ -104,8 +104,11 @@ impl Construction {
             } else {
                 self.second_trip
             } {
-                if !trip.boarded && !self.pickup_manifests[trip.vehicle].is_empty() {
-                    self.fill_construction_pickup(catalog, trip, false);
+                if !trip.boarded {
+                    if !self.pickup_manifests[trip.vehicle].is_empty() {
+                        self.fill_construction_pickup(catalog, trip, false);
+                    }
+                    self.add_trip_exports(catalog, &mut trip);
                 }
                 let finished = self.advance_trip(catalog, stock, clock, &mut trip, dt);
                 if finished {
@@ -538,8 +541,12 @@ impl Construction {
                 item.volume * f64::from(order.quantity),
             )
         };
-        if trip.market_order && !self.trade.orders[trip.project].buying {
-            let (mass, volume) = load(&self.trade.orders[trip.project]);
+        for order in trip
+            .trade_orders()
+            .map(|index| &self.trade.orders[index])
+            .filter(|order| !order.buying)
+        {
+            let (mass, volume) = load(order);
             available.0 -= mass;
             available.1 -= volume;
         }
@@ -1504,9 +1511,10 @@ mod tests {
             canceled_village
                 .reserve_town_sale(&catalog, &mut canceled_stock, clock, "wood", true)
                 .unwrap();
-            let mut retained_trip = canceled_village.trip.unwrap();
-            canceled_village.add_trip_exports(&catalog, &mut retained_trip);
-            canceled_village.trip = Some(retained_trip);
+            canceled_village.tick_trip(&catalog, &mut canceled_stock, site, clock, 0.0);
+            let retained_trip = canceled_village.trip.unwrap();
+            assert!(!retained_trip.boarded);
+            assert_eq!(retained_trip.extra_orders().collect::<Vec<_>>(), vec![0]);
             canceled_village.request_project_action(
                 &catalog,
                 &mut canceled_stock,
