@@ -423,6 +423,7 @@ impl Village {
 
     fn toggle_inventory_view(&mut self) {
         self.inventory_equipment = !self.inventory_equipment;
+        self.inventory_search.clear();
         self.inventory_page = 0;
     }
 

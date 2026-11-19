@@ -577,6 +577,49 @@ mod tests {
         press_button(&mut app, "Show all projects");
         press_button(&mut app, "Close panel");
 
+        press_button(&mut app, "Manage");
+        press_button(&mut app, "Stores");
+        press_button(&mut app, "Find material");
+        let window = app
+            .world_mut()
+            .query_filtered::<Entity, With<PrimaryWindow>>()
+            .single(app.world())
+            .unwrap();
+        use bevy::input::{
+            ButtonState,
+            keyboard::{Key, KeyboardInput},
+        };
+        for (key_code, letter) in [
+            (KeyCode::KeyT, "T"),
+            (KeyCode::KeyI, "I"),
+            (KeyCode::KeyM, "M"),
+            (KeyCode::KeyB, "B"),
+            (KeyCode::KeyE, "E"),
+            (KeyCode::KeyR, "R"),
+        ] {
+            app.world_mut().write_message(KeyboardInput {
+                key_code,
+                logical_key: Key::Character(letter.into()),
+                state: ButtonState::Pressed,
+                text: Some(letter.into()),
+                repeat: false,
+                window,
+            });
+        }
+        app.world_mut().run_schedule(Update);
+        let hud = app
+            .world_mut()
+            .query::<&Text>()
+            .iter(app.world())
+            .find(|text| text.0.contains("Find material · TIMBER"))
+            .unwrap();
+        assert!(hud.0.contains("timber pieces"));
+        assert!(!hud.0.contains("fastener packs"));
+        press_button(&mut app, "Done searching");
+        press_button(&mut app, "Show items and equipment");
+        press_button(&mut app, "Show resources");
+        press_button(&mut app, "Close panel");
+
         let save_dir =
             std::env::temp_dir().join(format!("solar-v3-ui-save-{}", std::process::id()));
         app.world_mut()
