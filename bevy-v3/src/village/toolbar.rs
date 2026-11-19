@@ -145,7 +145,9 @@ impl Action {
                             || village.advance.can_start())));
         }
         if matches!(self, Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad) {
-            return village.planning_roads() && !village.map_input_blocked();
+            return village.planning_roads()
+                && !village.map_input_blocked()
+                && (!matches!(self, Self::UndoRoad) || village.construction.can_undo_roads());
         }
         if !village.map_input_blocked() && !village.advance_open() && !village.planning_roads() {
             match self {
@@ -915,22 +917,22 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::TradeQueued(row));
                     spawn_button(menu, &assets, Action::HoldTradeQueued(row));
                 }
-                menu.spawn((
-                    ActionDetails,
-                    Text::default(),
-                    ui_font(&assets, 15.0),
-                    Visibility::Hidden,
-                    BackgroundColor(Color::srgb_u8(31, 45, 35)),
-                    Node {
-                        position_type: PositionType::Absolute,
-                        right: percent(100),
-                        bottom: px(0),
-                        width: px(254),
-                        padding: UiRect::all(px(10)),
-                        ..default()
-                    },
-                ));
             });
+            row.spawn((
+                ActionDetails,
+                Text::default(),
+                ui_font(&assets, 15.0),
+                Visibility::Hidden,
+                BackgroundColor(Color::srgb_u8(31, 45, 35)),
+                Node {
+                    position_type: PositionType::Absolute,
+                    right: px(PANEL_WIDTH + 8.),
+                    bottom: percent(100),
+                    width: px(254),
+                    padding: UiRect::all(px(10)),
+                    ..default()
+                },
+            ));
         });
 }
 
@@ -1554,8 +1556,8 @@ fn refresh(
             | Action::RotatePlacement
             | Action::CancelPlacement
             | Action::ConnectRoad
-            | Action::UndoRoad
             | Action::FinishRoad => action.available(&village),
+            Action::UndoRoad => Action::FinishRoad.available(&village),
             Action::ResizeField(_) => !picker.open && show_field_size,
             Action::PickFlattenHeight => action.available(&village),
             Action::TerrainBrush(_)
@@ -1652,6 +1654,9 @@ fn refresh(
         }
         if interaction != Interaction::None {
             let description = match action {
+                Action::UndoRoad if !village.construction.can_undo_roads() => {
+                    Some("Place a road stroke before trying to undo it.".into())
+                }
                 Action::UndoTerrain if !village.terrain_editor.can_undo() => {
                     Some("There are no terrain edits to undo in this session.".into())
                 }

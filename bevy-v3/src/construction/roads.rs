@@ -72,6 +72,10 @@ impl Construction {
         self.status.clear();
     }
 
+    pub fn can_undo_roads(&self) -> bool {
+        !self.road_planning.history.is_empty()
+    }
+
     pub fn undo_roads(&mut self, stock: &mut Stock) {
         let Some(stroke) = self.road_planning.history.pop() else {
             self.status = "No road strokes to undo.".into();
@@ -377,9 +381,11 @@ mod tests {
             selection: Some("road".into()),
             ..default()
         };
+        assert!(!construction.can_undo_roads());
         let anchor = IVec2::new(44, 36);
         construction.plan_roads(&catalog, &mut stock, site, anchor, clock, false);
         assert_eq!(construction.plans.len(), 1);
+        assert!(construction.can_undo_roads());
         let reserved = serde_json::to_value(&stock).unwrap();
         let market = serde_json::to_value(&construction.market).unwrap();
 
