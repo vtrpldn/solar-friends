@@ -397,6 +397,64 @@ impl Construction {
         }
     }
 
+    fn dismantling_yield(
+        &self,
+        catalog: &Catalog,
+        index: usize,
+        kind: Change,
+    ) -> (BTreeMap<String, u32>, BTreeMap<String, u32>) {
+        let mut installed = self.plans[index].materials(catalog).clone();
+        for (recipe, upgraded) in [
+            ("cold_storage", self.utilities.has_cold_storage(index)),
+            ("solar_upgrade", self.utilities.has_rooftop_solar(index)),
+        ] {
+            if upgraded {
+                for (id, units) in &catalog.production[recipe].input {
+                    *installed.entry(id.clone()).or_default() += units;
+                }
+            }
+        }
+        let mut returned = BTreeMap::new();
+        let mut lost = BTreeMap::new();
+        for (id, amount) in installed {
+            let keep = if matches!(id.as_str(), "goats" | "hens" | "bees") {
+                amount
+            } else if kind == Change::Salvage {
+                amount / 2
+            } else {
+                0
+            };
+            if keep > 0 {
+                returned.insert(id.clone(), keep);
+            }
+            if amount > keep {
+                lost.insert(id, amount - keep);
+            }
+        }
+        (returned, lost)
+    }
+
+    fn can_store_dismantling(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        index: usize,
+        returned: &BTreeMap<String, u32>,
+    ) -> bool {
+        let plan = &self.plans[index];
+        let definition = &catalog.projects[&plan.key];
+        let returned_units: u64 = returned.values().map(|units| u64::from(*units)).sum();
+        let (used, capacity) = self.storage(catalog, stock);
+        let lost_storage = if plan.work >= definition.work
+            && matches!(definition.kind.as_str(), "warehouse" | "covered-storage")
+        {
+            600
+        } else {
+            0
+        };
+        stock.sandbox || used + returned_units <= capacity.saturating_sub(lost_storage)
+    }
+
     pub(super) fn tick_changes(
         &mut self,
         catalog: &Catalog,
@@ -460,43 +518,9 @@ impl Construction {
                 let kind = job.kind;
                 let plan = &self.plans[index];
                 let definition = &catalog.projects[&plan.key];
-                let mut installed = plan.materials(catalog).clone();
-                for (recipe, upgraded) in [
-                    ("cold_storage", self.utilities.has_cold_storage(index)),
-                    ("solar_upgrade", self.utilities.has_rooftop_solar(index)),
-                ] {
-                    if upgraded {
-                        for (id, units) in &catalog.production[recipe].input {
-                            *installed.entry(id.clone()).or_default() += units;
-                        }
-                    }
-                }
-                let mut returned = BTreeMap::new();
-                let mut lost = BTreeMap::new();
-                for (id, amount) in installed {
-                    let keep = if matches!(id.as_str(), "goats" | "hens" | "bees") {
-                        amount
-                    } else if kind == Change::Salvage {
-                        amount / 2
-                    } else {
-                        0
-                    };
-                    if keep > 0 {
-                        returned.insert(id.clone(), keep);
-                    }
-                    if amount > keep {
-                        lost.insert(id, amount - keep);
-                    }
-                }
-                let returned_units: u64 = returned.values().map(|units| u64::from(*units)).sum();
-                let (used, capacity) = self.storage(catalog, stock);
-                let lost_storage =
-                    if matches!(definition.kind.as_str(), "warehouse" | "covered-storage") {
-                        600
-                    } else {
-                        0
-                    };
-                if !stock.sandbox && used + returned_units > capacity.saturating_sub(lost_storage) {
+                let (returned, lost) = self.dismantling_yield(catalog, index, kind);
+                if !self.can_store_dismantling(catalog, stock, index, &returned) {
+                    self.changes.get_mut(&index).expect("blocked change").worker = None;
                     self.status = "Make room in storage for recovered materials.".into();
                     self.changes.get_mut(&index).expect("blocked change").retry = 3.0;
                     continue;
@@ -521,6 +545,15 @@ impl Construction {
                 );
                 self.record_event(clock, self.status.clone());
                 continue;
+            }
+            if job.target.is_none() && job.work >= job.required {
+                let kind = job.kind;
+                let (returned, _) = self.dismantling_yield(catalog, index, kind);
+                if !self.can_store_dismantling(catalog, stock, index, &returned) {
+                    self.status = "Make room in storage for recovered materials.".into();
+                    self.changes.get_mut(&index).expect("blocked change").retry = 3.0;
+                    continue;
+                }
             }
             let parcel = &self.plans[index];
             self.changes.get_mut(&index).expect("pending change").retry = 2.0;
@@ -774,6 +807,23 @@ mod tests {
         construction.plans[0].work = catalog.projects["gathering"].work;
         construction.plans[0].delivered = construction.plans[0].loads;
         construction.begin_change(&catalog, 0, Change::Salvage, None);
+        let fill = BTreeMap::from([("bamboo".into(), (600 - stock.units()) as u32)]);
+        stock.receive(&fill);
+        for _ in 0..2_000 {
+            construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
+            if construction.status == "Make room in storage for recovered materials." {
+                break;
+            }
+        }
+        assert_eq!(
+            construction.status,
+            "Make room in storage for recovered materials."
+        );
+        assert!(!construction.plans[0].removed);
+        assert!(construction.building_history.is_empty());
+        construction.tick_changes(&catalog, &mut stock, site, 42.0, 3.0);
+        assert_eq!(construction.changes[&0].worker, None);
+        stock.reserve_available(&fill);
         for _ in 0..2_000 {
             construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
             if construction.plans[0].removed {
