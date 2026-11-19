@@ -1040,6 +1040,56 @@ impl Construction {
         (position.lerp(center, transition), visible)
     }
 
+    pub fn resident_visual_yaw(&self, index: usize) -> f32 {
+        let worker = &self.residents[index];
+        let Some(task) = worker
+            .health
+            .task
+            .as_ref()
+            .filter(|task| task.kind == Need::Social)
+        else {
+            return worker.yaw;
+        };
+        if worker.path.is_empty()
+            && let Some(partner) = task.partner.and_then(|partner| self.residents.get(partner))
+            && partner.path.is_empty()
+        {
+            let offset = partner.position - worker.position;
+            if offset.length_squared() > 0.001 {
+                return offset.x.atan2(offset.y);
+            }
+        }
+        worker.yaw
+    }
+
+    fn conversation_motion(&self, index: usize, task: &NeedTask) -> Motion {
+        let Some(partner) = task.partner else {
+            return Motion::Chat;
+        };
+        let elapsed = self
+            .residents
+            .get(partner)
+            .and_then(|resident| resident.health.task.as_ref())
+            .filter(|other| other.kind == Need::Social && other.partner == Some(index))
+            .map_or(task.elapsed, |other| task.elapsed.min(other.elapsed));
+        if elapsed <= 0.0 {
+            return Motion::Look;
+        }
+        if elapsed < 1.6 {
+            return Motion::Wave;
+        }
+        let turn = ((elapsed - 1.6) / 3.5).floor() as usize % 2;
+        if usize::from(index > partner) != turn {
+            return Motion::Listen;
+        }
+        if matches!(task.conversation, Some(Conversation::Interest { .. }))
+            && (12.0..14.0).contains(&elapsed)
+        {
+            return Motion::Laugh;
+        }
+        Motion::Chat
+    }
+
     pub fn resident_motion(&self, index: usize, catalog: &Catalog) -> Motion {
         let worker = &self.residents[index];
         if let Some(task) = &worker.health.task {
@@ -1059,7 +1109,7 @@ impl Construction {
                 Need::Hygiene => Motion::Wash,
                 Need::Bladder => Motion::Pee,
                 Need::Bowels => Motion::Toilet,
-                Need::Social => Motion::Chat,
+                Need::Social => self.conversation_motion(index, task),
                 Need::Fun => recreation_activity(&self.plans, task).0,
                 Need::Sleep | Need::Rest => Motion::Rest,
                 Need::FilterWater | Need::FetchWater => Motion::Work,
@@ -1706,6 +1756,63 @@ mod tests {
             village.residents[1].health.task.as_ref().unwrap().facility,
             Some(0)
         );
+    }
+
+    #[test]
+    fn conversation_partners_take_turns_and_only_shared_interests_trigger_laughter() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        village.residents[0].position = Vec2::ZERO;
+        village.residents[1].position = Vec2::X;
+        for (resident, partner) in [(0, 1), (1, 0)] {
+            village.residents[resident].health.task = Some(NeedTask {
+                kind: Need::Social,
+                facility: None,
+                elapsed: 0.0,
+                started_at: None,
+                duration: 18.,
+                water: 0.,
+                returning: false,
+                partner: Some(partner),
+                conversation: Some(Conversation::interest("growing")),
+            });
+        }
+        assert!(matches!(village.resident_motion(0, &catalog), Motion::Look));
+        assert_eq!(village.resident_visual_yaw(0), std::f32::consts::FRAC_PI_2);
+        assert_eq!(village.resident_visual_yaw(1), -std::f32::consts::FRAC_PI_2);
+        for worker in &mut village.residents[..2] {
+            worker.health.task.as_mut().unwrap().elapsed = 1.;
+        }
+        assert!(matches!(village.resident_motion(1, &catalog), Motion::Wave));
+        for worker in &mut village.residents[..2] {
+            worker.health.task.as_mut().unwrap().elapsed = 3.;
+        }
+        assert!(matches!(village.resident_motion(0, &catalog), Motion::Chat));
+        assert!(matches!(
+            village.resident_motion(1, &catalog),
+            Motion::Listen
+        ));
+        for worker in &mut village.residents[..2] {
+            worker.health.task.as_mut().unwrap().elapsed = 13.;
+        }
+        assert!(matches!(
+            village.resident_motion(0, &catalog),
+            Motion::Listen
+        ));
+        assert!(matches!(
+            village.resident_motion(1, &catalog),
+            Motion::Laugh
+        ));
+        village.residents[1]
+            .health
+            .task
+            .as_mut()
+            .unwrap()
+            .conversation = Some(Conversation::Support {
+            resident: 0,
+            reason: "I need rest".into(),
+        });
+        assert!(matches!(village.resident_motion(1, &catalog), Motion::Chat));
     }
 
     #[test]

@@ -1916,13 +1916,12 @@ fn animate_arrival(
     for (actor, mut transform, mut visibility) in &mut actors {
         let pose = match *actor {
             ArrivalActor::Resident(index) if village.camp.is_some() => {
-                let worker = village.construction.worker(index);
                 let (position, visible) = village
                     .construction
                     .resident_visual_position(index, &catalog);
                 crate::arrival::Pose {
                     position: world_position(position.x, position.y),
-                    yaw: worker.yaw,
+                    yaw: village.construction.resident_visual_yaw(index),
                     step_height: 0.0,
                     visible: visible
                         && !village.construction.driver_away(index)
