@@ -118,6 +118,24 @@ struct Hydrology {
     river: f64,
     runoff: f64,
     flow: f64,
+    #[serde(default)]
+    account: Option<WaterAccount>,
+}
+
+#[derive(Default, Deserialize, Serialize)]
+struct WaterAccount {
+    initial: f64,
+    rain: f64,
+    upstream: f64,
+    recharged: f64,
+    baseflow: f64,
+    groundwater_extracted: f64,
+    river_extracted: f64,
+    outflow: f64,
+    catchment_rain: f64,
+    captured: f64,
+    catchment_overflow: f64,
+    returned: f64,
 }
 
 #[derive(Clone, Copy)]
@@ -243,6 +261,7 @@ impl Utilities {
                 && ground.river >= 0.0
                 && ground.runoff >= 0.0
                 && ground.flow >= 0.0
+                && ground.account.as_ref().is_none_or(WaterAccount::valid)
         }) && (0.0..1.0).contains(&self.grid_debt_cents)
             && self.biogas.is_finite()
             && self.biogas >= 0.0
@@ -433,7 +452,7 @@ impl Utilities {
             return 0.0;
         };
         let amount = amount.min(ground.river);
-        ground.river -= amount;
+        ground.extract_river(amount);
         amount
     }
 
@@ -442,6 +461,7 @@ impl Utilities {
             let accepted = (camp.capacity[1] - camp.water[1]).min(amount);
             camp.water[1] += accepted;
             if let Some(ground) = &mut self.ground {
+                ground.account().returned += amount - accepted;
                 ground.runoff += amount - accepted;
             }
         }
@@ -686,8 +706,8 @@ impl Utilities {
         );
         if let Some(ground) = &self.ground {
             text.push_str(&format!(
-                "\nAquifer {:.0} L · River {:.0} L/day",
-                ground.groundwater, ground.flow
+                "\nAquifer {:.0} / {:.0} L · River reserve {:.0} L · Flow {:.0} L/day",
+                ground.groundwater, ground.capacity, ground.river, ground.flow
             ));
         }
         text
@@ -904,6 +924,10 @@ impl Utilities {
             let total = area * rain * hours;
             let collected = (total * 0.8).min(node.capacity[1] - node.water[1]).max(0.0);
             node.water[1] += collected;
+            let account = ground.account();
+            account.catchment_rain += total;
+            account.captured += collected;
+            account.catchment_overflow += total - collected;
             ground.runoff += total - collected;
         }
         for (&id, node) in &mut self.nodes {
@@ -916,6 +940,7 @@ impl Utilities {
                         .min(node.capacity[1] - node.water[1])
                         .min(ground.groundwater)
                         .max(0.0);
+                    ground.account().groundwater_extracted += extraction;
                     ground.groundwater -= extraction;
                     node.water[1] += extraction;
                 }
@@ -964,7 +989,7 @@ impl Utilities {
             } else {
                 0.0
             };
-            ground.river -= from_river;
+            ground.extract_river(from_river);
             self.nodes.get_mut(&id).expect("pump").water[1] += from_well + from_river;
         }
     }
@@ -1347,22 +1372,68 @@ impl Hydrology {
             river,
             runoff: 0.0,
             flow: river,
+            account: Some(WaterAccount {
+                initial: groundwater + river,
+                ..Default::default()
+            }),
         }
+    }
+
+    fn account(&mut self) -> &mut WaterAccount {
+        self.account.get_or_insert_with(|| WaterAccount {
+            initial: self.groundwater + self.river + self.runoff,
+            ..Default::default()
+        })
+    }
+
+    fn extract_river(&mut self, volume: f64) {
+        self.account().river_extracted += volume;
+        self.river -= volume;
     }
 
     fn step(&mut self, factor: f64, season: f64, rainfall: f64, dt: f64) {
         let days = dt / DAY;
-        self.runoff += rainfall * 24.0 * days * 4000.0;
+        let rain = rainfall * 24.0 * days * 4000.0;
+        let upstream = 8000.0 * factor * (0.15 + 0.85 * season) * days;
+        self.account();
+        self.runoff += rain;
         let released = self.runoff * -(-days / 2.0).exp_m1();
         self.runoff -= released;
         let recharge = (self.capacity - self.groundwater).min(released * 0.6);
         self.groundwater += recharge;
         let base = self.groundwater * -(-days / 180.0).exp_m1();
         self.groundwater -= base;
-        self.river += released - recharge + base + 8000.0 * factor * (0.15 + 0.85 * season) * days;
+        self.river += released - recharge + base + upstream;
         let out = self.river * -(-days).exp_m1();
         self.river -= out;
         self.flow = out / days;
+        let account = self.account();
+        account.rain += rain;
+        account.upstream += upstream;
+        account.recharged += recharge;
+        account.baseflow += base;
+        account.outflow += out;
+    }
+}
+
+impl WaterAccount {
+    fn valid(&self) -> bool {
+        [
+            self.initial,
+            self.rain,
+            self.upstream,
+            self.recharged,
+            self.baseflow,
+            self.groundwater_extracted,
+            self.river_extracted,
+            self.outflow,
+            self.catchment_rain,
+            self.captured,
+            self.catchment_overflow,
+            self.returned,
+        ]
+        .into_iter()
+        .all(|volume| volume.is_finite() && volume >= 0.0)
     }
 }
 
@@ -1436,6 +1507,24 @@ fn capacity(kind: &str) -> [f64; 4] {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn older_hydrology_saves_begin_a_balanced_water_account() {
+        let mut ground: Hydrology = serde_json::from_str(
+            r#"{"capacity":120000,"groundwater":50000,"river":5000,"runoff":300,"flow":6500}"#,
+        )
+        .unwrap();
+        ground.step(1.0, 0.7, 0.4, DAY / 24.0);
+        ground.extract_river(12.0);
+        let account = ground.account.as_ref().unwrap();
+        assert_eq!(account.initial, 55_300.0);
+        assert_eq!(account.river_extracted, 12.0);
+        let remaining = ground.groundwater + ground.river + ground.runoff;
+        let ledger = account.initial + account.rain + account.upstream
+            - account.river_extracted
+            - account.outflow;
+        assert!((remaining - ledger).abs() < 1e-8);
+    }
+
     use super::*;
     use crate::catalog::Catalog;
 
