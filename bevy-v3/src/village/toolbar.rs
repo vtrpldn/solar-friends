@@ -63,6 +63,8 @@ enum Action {
     PantryPriority,
     PantryPolicy(i8, i64, bool),
     Grid,
+    BuildingPower,
+    Cooling,
     Water(WaterCommand),
     AutomaticUpkeep,
     UpkeepBudget { restock: bool, increase: bool },
@@ -185,6 +187,12 @@ impl Action {
             Self::Panel(_) => true,
             Self::ClosePanel => village.utility_panel.is_some(),
             Self::Grid => village.utility_panel == Some(UtilityPanel::Power),
+            Self::BuildingPower | Self::Cooling => {
+                matches!(village.utility_panel, None | Some(UtilityPanel::Power))
+                    && !village.construction.menu
+                    && !village.construction.is_placing()
+                    && self.facility_switch(village).is_some()
+            }
             Self::Water(_) => village.utility_panel == Some(UtilityPanel::Water),
             Self::AutomaticUpkeep | Self::UpkeepBudget { .. } => {
                 village.utility_panel == Some(UtilityPanel::Upkeep)
@@ -223,6 +231,16 @@ impl Action {
                         | UtilityPanel::Trade
                 )
             ),
+        }
+    }
+
+    fn facility_switch(self, village: &Village) -> Option<bool> {
+        let building = village.construction.production.selected?;
+        let utilities = &village.construction.utilities;
+        match self {
+            Self::BuildingPower => utilities.building_switch(building),
+            Self::Cooling => utilities.cooling_switch(building),
+            _ => None,
         }
     }
 
@@ -382,6 +400,12 @@ impl Action {
             Self::PantryPolicy(_, _, false) => "Budget +R$25".into(),
             Self::Grid if village.construction.utilities.grid_off => "Connect grid".into(),
             Self::Grid => "Disconnect grid".into(),
+            Self::BuildingPower if self.facility_switch(village) == Some(true) => {
+                "Switch building off".into()
+            }
+            Self::BuildingPower => "Switch building on".into(),
+            Self::Cooling if self.facility_switch(village) == Some(true) => "Pause cooling".into(),
+            Self::Cooling => "Resume cooling".into(),
             Self::Water(command) => match command {
                 WaterCommand::Camp { source: true } => "Camp source".into(),
                 WaterCommand::Camp { source: false } => "Camp destination".into(),
@@ -608,6 +632,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::PantryPolicy(reserve, budget, toggle));
                 }
                 spawn_button(menu, &assets, Action::Grid);
+                spawn_button(menu, &assets, Action::BuildingPower);
+                spawn_button(menu, &assets, Action::Cooling);
                 for command in [
                     WaterCommand::Camp { source: true },
                     WaterCommand::Camp { source: false },
@@ -886,6 +912,16 @@ fn handle_buttons(
                     village.finance_history_open = !village.finance_history_open;
                     village.finance_history_page = 0;
                 }
+                Action::BuildingPower | Action::Cooling if !picker.open => {
+                    let construction = &mut village.construction;
+                    if let Some(building) = construction.production.selected {
+                        if matches!(action, Action::Cooling) {
+                            construction.utilities.toggle_cooling(building);
+                        } else {
+                            construction.utilities.toggle(building);
+                        }
+                    }
+                }
                 Action::Grid if !picker.open => {
                     let utilities = &mut village.construction.utilities;
                     utilities.grid_off = !utilities.grid_off;
@@ -990,6 +1026,8 @@ fn handle_buttons(
                 | Action::PantryPriority
                 | Action::PantryPolicy(..)
                 | Action::Grid
+                | Action::BuildingPower
+                | Action::Cooling
                 | Action::Water(_)
                 | Action::AutomaticUpkeep
                 | Action::UpkeepBudget { .. } => {}
@@ -1059,6 +1097,8 @@ fn refresh(
     };
     let show_pantry = !picker.open && Action::PantryBatches.available(&village);
     let show_finances = !picker.open && Action::Ledger.available(&village);
+    let show_facility_switches = !picker.open
+        && (Action::BuildingPower.available(&village) || Action::Cooling.available(&village));
     let show_power = !picker.open && Action::Grid.available(&village);
     let show_water = !picker.open && Action::Water(WaterCommand::River).available(&village);
     let show_upkeep = !picker.open && Action::AutomaticUpkeep.available(&village);
@@ -1095,6 +1135,7 @@ fn refresh(
         || show_pantry
         || show_trade
         || show_power
+        || show_facility_switches
         || show_upkeep
         || show_water
         || (picker.open && Action::Manage.available(&village))
@@ -1153,6 +1194,9 @@ fn refresh(
             }
             Action::Home(_) => show_residents,
             Action::Grid => show_power,
+            Action::BuildingPower | Action::Cooling => {
+                show_facility_switches && action.available(&village)
+            }
             Action::Water(_) => show_water,
             Action::AutomaticUpkeep | Action::UpkeepBudget { .. } => show_upkeep,
             Action::Panel(_) => picker.open,

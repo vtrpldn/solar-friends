@@ -463,14 +463,20 @@ impl Utilities {
             .is_none_or(|node| node.enabled)
     }
 
+    pub fn building_switch(&self, building: usize) -> Option<bool> {
+        let node = self.nodes.get(&(building + 1))?;
+        (light_load(&node.kind) > 0.0
+            || node.battery > 0.0
+            || node.solar_kw > 0.0
+            || node.kind == "hydro")
+            .then_some(node.enabled)
+    }
+
     pub fn toggle(&mut self, building: usize) {
-        if let Some(node) = self.nodes.get_mut(&(building + 1))
-            && (light_load(&node.kind) > 0.0
-                || node.battery > 0.0
-                || node.solar_kw > 0.0
-                || node.kind == "hydro")
+        if let Some(enabled) = self.building_switch(building)
+            && let Some(node) = self.nodes.get_mut(&(building + 1))
         {
-            node.enabled = !node.enabled;
+            node.enabled = !enabled;
         }
     }
 
@@ -511,6 +517,13 @@ impl Utilities {
             node.cold_storage = true;
             node.cooling_paused = false;
         }
+    }
+
+    pub fn cooling_switch(&self, building: usize) -> Option<bool> {
+        self.nodes
+            .get(&(building + 1))
+            .filter(|node| node.cold_storage)
+            .map(|node| !node.cooling_paused)
     }
 
     pub fn toggle_cooling(&mut self, building: usize) {
