@@ -699,6 +699,54 @@ impl LabView {
     }
 }
 
+fn lab_sale_quote(runner: &Runner, catalog: &Catalog, id: &str, hold: bool) -> String {
+    use std::fmt::Write as _;
+    let village = &runner.village;
+    let clock = TownClock {
+        seconds: village.clock,
+        round_trip_km: runner.setup.round_trip_km(),
+    };
+    let stock = &village.stock;
+    let trade = &village.construction.trade;
+    let (quantity, gross) = match trade.quote_sale_order(catalog, stock, id, clock.day(), 0) {
+        Ok(quote) => quote,
+        Err(reason) => return format!("Sale unavailable · {reason}"),
+    };
+    let item = &catalog.materials[id];
+    let before = stock.available(id);
+    let after = before.saturating_sub(quantity);
+    let fuel = crate::market::fare_cents(clock.round_trip_km);
+    let net = (gross as f64 - fuel as f64) / 100.0;
+    let net = if net < 0.0 {
+        format!("-R${:.2}", -net)
+    } else {
+        format!("R${net:.2}")
+    };
+    let transport = if hold {
+        "Waiting for a shared pickup"
+    } else {
+        "Dedicated trip allowed"
+    };
+    let mut text = format!(
+        "Sell {} · {} left in stock\nGross R${:.2} · Dedicated fuel R${:.2} · Net {net}\nShared pickup adds no fuel charge · {transport}",
+        item.quantity_text(quantity.into()),
+        item.quantity_text(after.into()),
+        gross as f64 / 100.0,
+        fuel as f64 / 100.0,
+    );
+    if let Some((_, serving)) = crate::food::SERVINGS
+        .into_iter()
+        .find(|(food, _)| *food == id)
+    {
+        let remaining = stock
+            .food_portions()
+            .saturating_sub(before / serving)
+            .saturating_add(after / serving);
+        let _ = write!(text, "\nHousehold food after sale · {remaining} portions");
+    }
+    text
+}
+
 #[derive(Default)]
 struct LabTrade {
     selection: usize,
@@ -764,14 +812,14 @@ impl LabTrade {
             ""
         };
         let buyer = &material.buyer.name;
+        let quote = lab_sale_quote(runner, catalog, id, self.hold_for_pickup);
         (
             format!(
-                "Resources & trade · {}\nTab Switch view · [ / ] Choose material{actions}\n\nIn stock · {}\nPurchase pack · {}\nSupplier · {}\nBuyer · {buyer}\nHold sale for shared pickup · {}",
+                "Resources & trade · {}\nTab Switch view · [ / ] Choose material{actions}\n\nIn stock · {}\nPurchase pack · {}\nSupplier · {}\nBuyer · {buyer}\n\n{quote}",
                 material.name,
                 material.quantity_text(runner.village.stock.available(id).into()),
                 material.quantity_text(material.pack.into()),
                 material.supplier_name,
-                if self.hold_for_pickup { "On" } else { "Off" },
             ),
             notice,
         )
@@ -2241,6 +2289,34 @@ mod tests {
         playback.replaying = true;
         lab_resident_view(&mut runner, &catalog, &keys, &mut playback);
         assert_eq!(runner.scenario.orders.len(), 1);
+    }
+
+    #[test]
+    fn lab_trade_quotes_use_the_same_batch_and_fuel_as_the_order() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{"steps":2}"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        let fuel = crate::market::fare_cents(runner.setup.round_trip_km()) as f64 / 100.0;
+        let quote = lab_sale_quote(&runner, &catalog, "wood", true);
+        assert!(quote.contains(&format!("Dedicated fuel R${fuel:.2}")));
+        assert!(quote.contains("Waiting for a shared pickup"));
+        runner
+            .submit(
+                &catalog,
+                LabOrder::Sell {
+                    material: "wood".into(),
+                    hold_for_pickup: true,
+                },
+            )
+            .unwrap();
+        assert!(runner.outcomes.last().unwrap().error.is_none());
+        let order = runner.village.construction.trade.orders.back().unwrap();
+        let item = &catalog.materials["wood"];
+        assert!(quote.contains(&format!(
+            "Sell {}",
+            item.quantity_text(order.quantity.into())
+        )));
+        assert_eq!(order.fare, 0);
     }
 
     #[test]

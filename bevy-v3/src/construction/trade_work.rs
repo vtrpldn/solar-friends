@@ -164,7 +164,7 @@ impl Construction {
         material: &str,
         hold_for_pickup: bool,
     ) -> Result<u32, &'static str> {
-        let day = ((540.0 + clock.seconds * 0.45) / 1440.0).floor() as u64;
+        let day = clock.day();
         let fare = if hold_for_pickup {
             0
         } else {
@@ -490,7 +490,7 @@ impl Construction {
         }
         let (id, item) = options[self.trade.selected];
         let buyer = &item.buyer.name;
-        let day = ((540.0 + clock.seconds * 0.45) / 1440.0).floor() as u64;
+        let day = clock.day();
         let supplier = self.market.supplier_available(catalog, id, day);
         let pack = item.quantity_text(u64::from(item.pack));
         let available = item.quantity_text(u64::from(supplier));
