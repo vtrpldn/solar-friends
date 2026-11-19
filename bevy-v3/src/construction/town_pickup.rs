@@ -1360,6 +1360,14 @@ mod tests {
         );
         let before_departure = stock.balance();
         assert_eq!(village.market.committed_fares(), fare * 3);
+        assert!(
+            village
+                .finance_summary(&stock, 0, clock.seconds)
+                .contains(&format!(
+                    "Reserved for town trips R${:.2}",
+                    (fare * 3) as f64 / 100.0
+                ))
+        );
 
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
         assert_eq!(village.active_trips().count(), 1);

@@ -467,9 +467,10 @@ impl Stock {
 
     pub fn finance_summary(&self, committed: u64) -> String {
         let mut display = format!(
-            "Shared savings R${:.2} · Available after pickup R${:.2}",
+            "Shared savings R${:.2} · Available after pickup R${:.2}\nReserved for town trips R${:.2} · Charged when a trip departs",
             self.balance() as f64 / 100.0,
-            self.balance().saturating_sub(committed) as f64 / 100.0
+            self.balance().saturating_sub(committed) as f64 / 100.0,
+            committed as f64 / 100.0,
         );
         for (kind, cents) in &self.ledger {
             display.push_str(&format!(

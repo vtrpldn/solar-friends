@@ -2496,10 +2496,13 @@ fn show_hud(
                 label.push_str(&village.construction.expansion_reserve_label());
                 if !village.stock.sandbox {
                     use std::fmt::Write;
+                    let distance = setup.round_trip_km();
                     let _ = write!(
                         label,
-                        "\nGrid electricity · R${:.2}/h at current use",
-                        village.construction.utilities.grid_cost_per_hour()
+                        "\nGrid electricity · R${:.2}/h at current use\nTown pickup or export · {distance} km round trip · R${:.2} fuel · About {:.0} game minutes",
+                        village.construction.utilities.grid_cost_per_hour(),
+                        crate::market::fare_cents(distance) as f64 / 100.0,
+                        crate::market::trip_seconds(distance) * 0.45,
                     );
                 }
                 label.push_str("\nR Recent transactions");
