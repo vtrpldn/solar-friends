@@ -1167,9 +1167,17 @@ impl Construction {
                 }
                 Phase::Return => {
                     if job.returning_to_site {
-                        if let Some(path) = path(position, SUPPLY_SPOTS[worker_index]) {
+                        let workspace = &self.plans[job.site];
+                        let approaches = project_access_points(workspace, catalog, position);
+                        let at_workspace = approaches.iter().any(|cell| cell.as_vec2() == position);
+                        let next_path = if at_workspace {
+                            path(position, SUPPLY_SPOTS[worker_index])
+                        } else {
+                            approaches.into_iter().find_map(|cell| path(position, cell))
+                        };
+                        if let Some(path) = next_path {
                             self.residents[worker_index].path = path;
-                            self.production.jobs[index].returning_to_site = false;
+                            self.production.jobs[index].returning_to_site = !at_workspace;
                         } else {
                             let job = &mut self.production.jobs[index];
                             job.waiting_for_access = true;
@@ -1195,16 +1203,9 @@ impl Construction {
                         None
                     } else {
                         let workspace = &self.plans[job.site];
-                        let Some(path) = project_access_points(workspace, catalog, position)
+                        project_access_points(workspace, catalog, position)
                             .into_iter()
                             .find_map(|cell| path(position, cell))
-                        else {
-                            let job = &mut self.production.jobs[index];
-                            job.waiting_for_access = true;
-                            job.retry_at = clock + 5.0;
-                            continue;
-                        };
-                        Some(path)
                     };
                     let job = &mut self.production.jobs[index];
                     if let Some(lots) = &mut job.food_output {
@@ -1212,10 +1213,15 @@ impl Construction {
                     } else {
                         stock.receive(&load);
                     }
-                    if let Some(path) = next_path {
-                        self.residents[worker_index].path = path;
+                    if !remaining.is_empty() {
                         job.delivered_output = Some(remaining);
                         job.returning_to_site = true;
+                        if let Some(path) = next_path {
+                            self.residents[worker_index].path = path;
+                        } else {
+                            job.waiting_for_access = true;
+                            job.retry_at = clock + 5.0;
+                        }
                         continue;
                     }
                     if let Some(tool) = &recipe.repair {
@@ -1541,12 +1547,19 @@ mod upgrade_tests {
         village.production.jobs[0].phase = Phase::Return;
         village.production.jobs[0].work = catalog.production["wood"].work;
         village.residents[0].position = SUPPLY_SPOTS[0].as_vec2();
+        for cell in project_access_points(&village.plans[0], &catalog, SUPPLY_SPOTS[0].as_vec2()) {
+            let obstacle = village.proposed_site(&catalog, "supply-5", cell);
+            village.plans.push(obstacle);
+        }
         village.tick_production(&catalog, &mut stock, site, 0.0, 0.1);
         assert_eq!(stock.available("logs"), 5);
         assert!(village.production.jobs[0].returning_to_site);
+        assert!(village.production.jobs[0].waiting_for_access);
+        assert!(village.residents[0].path.is_empty());
         let saved = serde_json::to_string(&village).unwrap();
         village = serde_json::from_str(&saved).unwrap();
         assert!(village.valid_save(&catalog, &stock));
+        village.plans.truncate(1);
         for step in 1..20_000 {
             village.tick_production(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
             if village.production.jobs.is_empty() {
