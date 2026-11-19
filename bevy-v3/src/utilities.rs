@@ -1911,10 +1911,11 @@ fn near_river(terrain: &Terrain, cell: IVec2) -> bool {
 fn priority(kind: &str) -> u8 {
     match kind {
         "water-pump" | "well" | "camp" => 0,
-        "eco_toilet" | "biodigester" | "banana_treatment" => 1,
-        "home" | "streetlight" => 2,
-        "kitchen" => 3,
-        "greenhouse" | "coop" | "goat_pasture" => 4,
+        "eco_toilet" => 1,
+        "home" => 2,
+        "streetlight" => 3,
+        "kitchen" => 4,
+        "workshop" => 5,
         _ => 6,
     }
 }
@@ -2294,6 +2295,50 @@ mod tests {
         assert!(!loaded.powered(0));
         loaded.remove_manual_link(link, true);
         assert!(loaded.power_link_exists(1, 6));
+    }
+
+    #[test]
+    fn grid_serves_v2_priority_order_when_procurement_commits_most_cash() {
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &Catalog::default());
+        let mut utilities = Utilities::default();
+        utilities.sync(
+            [
+                (1, "greenhouse"),
+                (2, "workshop"),
+                (3, "kitchen"),
+                (4, "streetlight"),
+            ]
+            .into_iter()
+            .map(|(id, kind)| Facility {
+                id,
+                kind,
+                location: IVec2::new(43 + id as i32, 36),
+                size: IVec2::ONE,
+                batteries: 0,
+                panels: 0,
+                working: false,
+            }),
+        );
+        let terrain = setup.terrain();
+        let balance = stock.balance();
+        utilities.electricity(
+            &mut stock,
+            balance - 7,
+            PowerStep {
+                sun: 0.0,
+                cloud: 0.0,
+                flow: 0.0,
+                rainfall: 0.0,
+                hours: 1.0,
+                terrain: &terrain,
+            },
+        );
+        assert!(utilities.nodes[&4].powered);
+        assert!(utilities.nodes[&3].powered);
+        assert!(utilities.nodes[&2].powered);
+        assert!(!utilities.nodes[&1].powered);
+        assert_eq!(stock.balance(), balance - 6);
     }
 
     #[test]
