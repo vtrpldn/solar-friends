@@ -15,6 +15,8 @@ enum Action {
     Resident(usize),
     Home(bool),
     ListedHome(usize),
+    Shift(bool),
+    Ledger,
 }
 
 impl Action {
@@ -64,8 +66,16 @@ impl Action {
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
-            Self::Resident(_) | Self::Home(_) | Self::ListedHome(_) => {
+            Self::Resident(_) => matches!(
+                village.utility_panel,
+                Some(UtilityPanel::Residents | UtilityPanel::Finances)
+            ),
+            Self::Shift(_) | Self::Ledger => village.utility_panel == Some(UtilityPanel::Finances),
+            Self::Home(_) | Self::ListedHome(_) => {
                 village.utility_panel == Some(UtilityPanel::Residents)
+            }
+            Self::Page(_) if village.utility_panel == Some(UtilityPanel::Finances) => {
+                village.finance_history_open
             }
             Self::Page(_) => matches!(
                 village.utility_panel,
@@ -108,6 +118,10 @@ impl Action {
             Self::Home(true) => "Assign selected home".into(),
             Self::Home(false) => "Clear home assignment".into(),
             Self::ListedHome(_) => String::new(),
+            Self::Shift(false) => "Toggle day shift".into(),
+            Self::Shift(true) => "Toggle weekday shifts".into(),
+            Self::Ledger if village.finance_history_open => "Close ledger".into(),
+            Self::Ledger => "Open ledger".into(),
         }
     }
 }
@@ -194,6 +208,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for index in 0..NAMES.len() {
                     spawn_button(menu, &assets, Action::Resident(index));
                 }
+                spawn_button(menu, &assets, Action::Shift(false));
+                spawn_button(menu, &assets, Action::Shift(true));
+                spawn_button(menu, &assets, Action::Ledger);
                 spawn_button(menu, &assets, Action::Home(true));
                 spawn_button(menu, &assets, Action::Home(false));
                 for row in 0..HOME_ROWS {
@@ -295,12 +312,26 @@ fn handle_buttons(
                             .unwrap_or_else(str::to_owned);
                     }
                 }
+                Action::Shift(repeat) if !picker.open => {
+                    let resident = village.selected_resident;
+                    if repeat {
+                        village.construction.toggle_weekday_shift(resident);
+                    } else {
+                        village.construction.toggle_shift(resident);
+                    }
+                }
+                Action::Ledger if !picker.open => {
+                    village.finance_history_open = !village.finance_history_open;
+                    village.finance_history_page = 0;
+                }
                 Action::Panel(_)
                 | Action::Project(_)
                 | Action::ProjectFilter
                 | Action::Resident(_)
                 | Action::Home(_)
-                | Action::ListedHome(_) => {}
+                | Action::ListedHome(_)
+                | Action::Shift(_)
+                | Action::Ledger => {}
             }
         }
     }
@@ -337,6 +368,7 @@ fn refresh(
         return;
     }
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
+    let show_finances = !picker.open && Action::Ledger.available(&village);
     let show_residents = !picker.open && Action::Home(true).available(&village);
     let projects = if show_projects {
         village.construction.project_page_labels(
@@ -356,12 +388,15 @@ fn refresh(
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
     picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.0));
-    menu.display =
-        if show_projects || show_residents || (picker.open && Action::Manage.available(&village)) {
-            Display::Flex
-        } else {
-            Display::None
-        };
+    menu.display = if show_projects
+        || show_residents
+        || show_finances
+        || (picker.open && Action::Manage.available(&village))
+    {
+        Display::Flex
+    } else {
+        Display::None
+    };
     for (&action, &interaction, children, mut background, mut node) in &mut buttons {
         let show = match action {
             Action::Page(_) if village.utility_panel == Some(UtilityPanel::Residents) => {
@@ -371,7 +406,9 @@ fn refresh(
             Action::Project(row) => projects.get(row).is_some(),
             Action::ProjectFilter => show_projects,
             Action::ListedHome(row) => homes.get(row).is_some(),
-            Action::Resident(_) | Action::Home(_) => show_residents,
+            Action::Resident(_) => show_residents || show_finances,
+            Action::Shift(_) | Action::Ledger => show_finances,
+            Action::Home(_) => show_residents,
             Action::Panel(_) => picker.open,
             _ => true,
         };

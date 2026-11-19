@@ -423,6 +423,14 @@ mod tests {
         );
 
         press_button(&mut app, "Manage");
+        press_button(&mut app, "Finances");
+        press_button(&mut app, "Bento");
+        press_button(&mut app, "Toggle day shift");
+        press_button(&mut app, "Toggle weekday shifts");
+        press_button(&mut app, "Open ledger");
+        press_button(&mut app, "Next page");
+        press_button(&mut app, "Close ledger");
+        press_button(&mut app, "Manage");
         press_button(&mut app, "Trade");
         assert!(app.world().resource::<village::Village>().trade_open());
         press_button(&mut app, "Close panel");

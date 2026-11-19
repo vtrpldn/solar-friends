@@ -353,6 +353,10 @@ impl Village {
 
     fn change_panel_page(&mut self, catalog: &Catalog, forward: bool) {
         let (pages, page) = match self.utility_panel {
+            Some(UtilityPanel::Finances) if self.finance_history_open => (
+                self.stock.finance_history(self.finance_history_page).0,
+                &mut self.finance_history_page,
+            ),
             Some(UtilityPanel::Projects) => (
                 self.construction
                     .projects_panel(catalog, self.projects_page, self.open_projects_only)
@@ -868,12 +872,7 @@ fn village_input(
             if town.finance_history_open
                 && keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown])
             {
-                let (pages, _) = town.stock.finance_history(town.finance_history_page);
-                town.finance_history_page = if keyboard.just_pressed(KeyCode::PageDown) {
-                    (town.finance_history_page + 1) % pages
-                } else {
-                    (town.finance_history_page + pages - 1) % pages
-                };
+                town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
             }
             if let Some(index) = [
                 KeyCode::Digit1,
