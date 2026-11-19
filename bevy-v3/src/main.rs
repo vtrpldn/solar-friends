@@ -919,7 +919,13 @@ mod tests {
         );
         press_button(&mut app, "Close guide");
 
-        press_button(&mut app, "Terrain tools");
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::KeyT);
+        app.world_mut().run_schedule(Update);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset(KeyCode::KeyT);
         interact_with_button(&mut app, "Undo terrain edit", Interaction::Hovered);
         let world = app.world_mut();
         assert!(world.query::<&Text>().iter(world).any(|text| {

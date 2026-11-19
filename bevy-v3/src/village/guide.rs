@@ -20,7 +20,8 @@ const TOPICS: [(&str, &str); 7] = [
          Home · Camp     End · River bend     Shift+End · Whole plot     Shift+Home · Reset view\n\
          Space · Pause     1–4 · Speed     Esc · Cancel placement or close a panel\n\
          B · Build     / · Search     R · Rotate the current placement\n\
-         F4 · Terrain tools     J / F11 · Projects     Shift+G · Grid\n\
+         F4 · Terrain tools     F11 · Projects     Shift+G · Grid\n\
+         With no project selected, T opens terrain tools and J opens Projects.\n\
          In road planning, Shift-click extends and Z undoes the last stroke.",
     ),
     (

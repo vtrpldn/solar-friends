@@ -1535,6 +1535,18 @@ fn village_input(
     let terrain = village.terrain(&setup);
     if let Some(cell) = village.camp {
         let town = &mut *village;
+        let main_view = town.utility_panel.is_none()
+            && !town.construction.menu
+            && !town.construction.production.open
+            && !town.construction.farming.open;
+        let terrain_shortcut = keyboard.just_pressed(KeyCode::KeyT)
+            && !keyboard.just_pressed(KeyCode::F4)
+            && (town.terrain_editor.open
+                || (main_view && town.construction.production.selected.is_none()));
+        if terrain_shortcut {
+            town.terrain_editor.toggle();
+            return;
+        }
         town.terrain_editor.controls(&keyboard);
         if town.terrain_editor.open {
             if pointer.terrain_stroke_finished && !pointer.terrain_stroke.is_empty() {
@@ -1545,10 +1557,6 @@ fn village_input(
             }
             return;
         }
-        let main_view = town.utility_panel.is_none()
-            && !town.construction.menu
-            && !town.construction.production.open
-            && !town.construction.farming.open;
         let finances_shortcut = keyboard.just_pressed(KeyCode::KeyM)
             && (main_view || town.utility_panel == Some(UtilityPanel::Finances));
         if (keyboard.just_pressed(KeyCode::KeyH) || finances_shortcut) && !town.stock.sandbox {
@@ -2412,8 +2420,11 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push_str(
-            "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · Shift+L Map lenses · Shift+G Grid",
+            "\nP Power · V Water · N Residents · F4 Terrain · F8 Events · F10 Stores · F11 Projects\nShift+L Map lenses · Shift+G Grid",
         );
+        if !village.stock.sandbox {
+            label.push_str(" · H Finances · F7 Maintenance");
+        }
     }
     if village.camp.is_some()
         && village.utility_panel.is_none()
