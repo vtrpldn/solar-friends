@@ -219,6 +219,46 @@ mod tests {
     use super::*;
 
     #[test]
+    fn desktop_model_bundles_are_self_contained_and_cover_catalog_scenes() {
+        let catalog = Catalog::default();
+        for (bundle, bytes) in [
+            ("buildings", include_bytes!("buildings.glb").as_slice()),
+            ("land", include_bytes!("land.glb").as_slice()),
+            ("opening", include_bytes!("opening.glb").as_slice()),
+        ] {
+            assert_eq!(&bytes[..4], b"glTF", "{bundle}");
+            assert_eq!(&bytes[16..20], b"JSON", "{bundle}");
+            let length = u32::from_le_bytes(bytes[12..16].try_into().unwrap()) as usize;
+            let document: serde_json::Value = serde_json::from_slice(&bytes[20..20 + length])
+                .unwrap_or_else(|error| panic!("invalid {bundle} model bundle: {error}"));
+            for section in ["buffers", "images"] {
+                for entry in document[section].as_array().into_iter().flatten() {
+                    assert!(
+                        entry.get("uri").is_none_or(|uri| {
+                            uri.as_str().is_some_and(|uri| uri.starts_with("data:"))
+                        }),
+                        "{bundle} references an external {section} asset"
+                    );
+                }
+            }
+            if bundle == "buildings" {
+                let scenes = document["scenes"].as_array().unwrap();
+                for (key, project) in &catalog.projects {
+                    let models = std::iter::once(project.model)
+                        .chain(project.construction_models.into_iter().flatten())
+                        .chain(project.unpacking_model);
+                    for index in models {
+                        assert!(
+                            index < scenes.len(),
+                            "{key} references missing scene {index}"
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
     fn construction_uses_authored_stages_or_the_standard_model_until_completion() {
         let catalog = Catalog::default();
         let road = &catalog.projects["road"];
