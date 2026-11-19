@@ -1279,7 +1279,6 @@ impl Utilities {
         let Some(ground) = &mut self.ground else {
             return;
         };
-        let mut pumping = Vec::new();
         for (&id, &(area, _)) in &self.rain_catchments {
             let node = self.nodes.get_mut(&id).expect("rain catchment");
             let total = area * rain * hours;
@@ -1291,11 +1290,15 @@ impl Utilities {
             account.catchment_overflow += total - collected;
             ground.runoff += total - collected;
         }
-        for (&id, node) in &mut self.nodes {
+        // V2 processes facilities by ID. A pump can draw this step's well output
+        // only if the well has already run.
+        let processors: Vec<_> = self.nodes.keys().copied().collect();
+        for id in processors {
+            let node = self.nodes.get_mut(&id).expect("water processor");
             if !node.enabled {
                 continue;
             }
-            match node.kind.as_str() {
+            let (location, volume) = match node.kind.as_str() {
                 "groundwater-well" => {
                     let extraction = (8.0 * hours * water_factor)
                         .min(node.capacity[1] - node.water[1])
@@ -1304,19 +1307,24 @@ impl Utilities {
                     ground.account().groundwater_extracted += extraction;
                     ground.groundwater -= extraction;
                     node.water[1] += extraction;
+                    continue;
                 }
                 "water-pump"
                     if node.drawing_power
                         && node.powered
                         && node.water[1] < node.capacity[1] - 0.01 =>
                 {
-                    pumping.push(id)
+                    let volume =
+                        (600.0 * hours * node.service_factor).min(node.capacity[1] - node.water[1]);
+                    (node.location, volume)
                 }
                 "well" if node.drawing_power && node.powered => {
                     transform_water(node, 1, 0, 25.0 * hours * node.service_factor, 1.0);
+                    continue;
                 }
                 "wetland" => {
                     transform_water(node, 2, 1, 10.0 * hours, 0.85);
+                    continue;
                 }
                 "banana_treatment" | "biodigester" => {
                     let used = (8.0 * hours).min(node.water[3]);
@@ -1324,15 +1332,10 @@ impl Utilities {
                     if node.kind == "biodigester" {
                         self.biogas += used * 0.15;
                     }
+                    continue;
                 }
-                _ => {}
-            }
-        }
-        for id in pumping {
-            let pump = &self.nodes[&id];
-            let location = pump.location;
-            let volume =
-                (600.0 * hours * pump.service_factor).min(pump.capacity[1] - pump.water[1]);
+                _ => continue,
+            };
             let well = self
                 .nodes
                 .iter_mut()
@@ -1341,8 +1344,10 @@ impl Utilities {
                         && node.enabled
                         && distance(node.location, location) <= 6.0
                 })
-                .min_by(|(_, a), (_, b)| {
-                    distance(a.location, location).total_cmp(&distance(b.location, location))
+                .min_by(|(a_id, a), (b_id, b)| {
+                    distance(a.location, location)
+                        .total_cmp(&distance(b.location, location))
+                        .then_with(|| a_id.cmp(b_id))
                 });
             let from_well = if let Some((_, well)) = well {
                 let amount = volume.min(well.water[1]);
@@ -2117,6 +2122,39 @@ mod tests {
         utilities.tick(&setup, &mut stock, 0, 0.2, 0.1);
         assert!(utilities.nodes[&2].water[1] > 0.0);
         assert!((utilities.grid_import_kw - 0.18).abs() < 1e-9);
+    }
+
+    #[test]
+    fn older_pump_draws_before_a_newer_well_replenishes() {
+        let terrain = WorldSetup::default().terrain();
+        let pump_location = IVec2::new(49, 36);
+        assert!(!near_river(&terrain, pump_location));
+        let mut utilities = Utilities {
+            ground: Some(Hydrology::new(1.0, 1.0)),
+            ..default()
+        };
+        utilities.sync(
+            [(1, "water-pump"), (2, "groundwater-well")]
+                .into_iter()
+                .map(|(id, kind)| Facility {
+                    id,
+                    kind,
+                    location: pump_location + IVec2::new(id as i32 - 1, 0),
+                    size: IVec2::ONE,
+                    batteries: 0,
+                    panels: 0,
+                    working: false,
+                }),
+        );
+        let pump = utilities.nodes.get_mut(&1).unwrap();
+        pump.drawing_power = true;
+        pump.powered = true;
+        utilities.deliver_water(2, 1, 2.0);
+
+        utilities.process_water(&terrain, 1.0, 0.0, 1.0);
+
+        assert_eq!(utilities.nodes[&1].water[1], 2.0);
+        assert_eq!(utilities.nodes[&2].water[1], 8.0);
     }
 
     #[test]
