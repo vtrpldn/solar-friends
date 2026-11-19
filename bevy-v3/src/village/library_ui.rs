@@ -389,7 +389,7 @@ pub(super) fn library_controls(
             Err(error) => menu.status = format!("Could not open saved village: {error}"),
         }
     } else if matches!(action, Some(Export)) {
-        menu.status = match save_library::export(&path, slot, mode, &catalog) {
+        menu.status = match save_library::export(&path, slot, mode) {
             Ok(file) => format!("Exported to {}", file.display()),
             Err(error) => format!("Could not export village: {error}"),
         };

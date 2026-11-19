@@ -49,6 +49,10 @@ pub fn autosave_location(mode: Mode) -> io::Result<PathBuf> {
 }
 
 pub fn write(path: &Path, village: &Village) -> io::Result<()> {
+    write_payload(path, village)
+}
+
+pub(crate) fn write_payload(path: &Path, village: &impl Serialize) -> io::Result<()> {
     let json = serde_json::to_vec(&SaveFile {
         version: VERSION,
         village,

@@ -230,13 +230,19 @@ pub fn remove(directory: &Path, id: u64) -> io::Result<()> {
     fs::remove_file(path(directory, id))
 }
 
-pub fn export(directory: &Path, id: u64, mode: Mode, catalog: &Catalog) -> io::Result<PathBuf> {
-    let village = load(directory, id, mode, catalog)?;
-    let export = directory
-        .join("exports")
-        .join(format!("village-{id}-{}.json", timestamp()));
-    save::write(&export, &village)?;
-    Ok(export)
+pub fn export(directory: &Path, id: u64, mode: Mode) -> io::Result<PathBuf> {
+    let bytes = save::read_bytes(&path(directory, id), SLOT_BYTES)?;
+    let exports = directory.join("exports");
+    let timestamp = timestamp();
+    if let Ok(slot) = decode_slot(&bytes, id, mode) {
+        let export = exports.join(format!("village-{id}-{timestamp}.json"));
+        save::write_payload(&export, &slot.current)?;
+        Ok(export)
+    } else {
+        let export = exports.join(format!("slot-{id}-{timestamp}.backup.json"));
+        save::atomic_write(&export, &bytes, SLOT_BYTES)?;
+        Ok(export)
+    }
 }
 
 fn path(directory: &Path, id: u64) -> PathBuf {
@@ -244,7 +250,12 @@ fn path(directory: &Path, id: u64) -> PathBuf {
 }
 
 fn read_slot(directory: &Path, id: u64, mode: Mode) -> io::Result<Slot> {
-    let slot: Slot = serde_json::from_slice(&save::read_bytes(&path(directory, id), SLOT_BYTES)?)?;
+    let bytes = save::read_bytes(&path(directory, id), SLOT_BYTES)?;
+    decode_slot(&bytes, id, mode)
+}
+
+fn decode_slot(bytes: &[u8], id: u64, mode: Mode) -> io::Result<Slot> {
+    let slot: Slot = serde_json::from_slice(bytes)?;
     if slot.id != id || slot.version != save::VERSION || slot.mode != mode {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,

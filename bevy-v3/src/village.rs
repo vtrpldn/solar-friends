@@ -2393,8 +2393,44 @@ mod tests {
                 .clock,
             0.0
         );
-        let exported = save_library::export(&directory, id, Mode::Story, &catalog).unwrap();
+        let exported = save_library::export(&directory, id, Mode::Story).unwrap();
         assert_eq!(save::read(&exported, &catalog).unwrap().clock, 0.0);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn save_library_exports_unreadable_data_without_changing_the_slot() {
+        let directory =
+            std::env::temp_dir().join(format!("solar-v3-slot-export-test-{}", std::process::id()));
+        std::fs::create_dir_all(&directory).unwrap();
+        let slot = directory.join("slot-42.json");
+        let payload = serde_json::json!({"futureVillageField": [1, 2]});
+        let container = serde_json::json!({
+            "version": save::VERSION,
+            "id": 42,
+            "name": "River camp",
+            "mode": Mode::Story,
+            "updated": 42,
+            "current": payload,
+            "previous": null
+        });
+        let bytes = serde_json::to_vec(&container).unwrap();
+        std::fs::write(&slot, &bytes).unwrap();
+
+        let catalog = Catalog::default();
+        assert!(save_library::load(&directory, 42, Mode::Story, &catalog).is_err());
+        let exported = save_library::export(&directory, 42, Mode::Story).unwrap();
+        let data: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(exported).unwrap()).unwrap();
+        assert_eq!(data["village"], payload);
+        assert_eq!(std::fs::read(&slot).unwrap(), bytes);
+
+        let truncated = br#"{"version":"#;
+        std::fs::write(&slot, truncated).unwrap();
+        let exported = save_library::export(&directory, 42, Mode::Story).unwrap();
+        assert!(exported.to_string_lossy().ends_with(".backup.json"));
+        assert_eq!(std::fs::read(exported).unwrap(), truncated);
+        assert_eq!(std::fs::read(slot).unwrap(), truncated);
         std::fs::remove_dir_all(directory).unwrap();
     }
 
