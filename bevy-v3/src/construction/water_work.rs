@@ -38,7 +38,7 @@ impl WaterJob {
         self.worker == Some(index)
     }
 
-    fn label(&self) -> &'static str {
+    pub(super) fn label(&self) -> &'static str {
         match (self.action, self.phase) {
             (WaterAction::Purify, _) => "Purifying water by hand",
             (WaterAction::Sanitation, _) => "Servicing sealed waste tanks",

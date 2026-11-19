@@ -75,6 +75,93 @@ pub(crate) enum LabStop {
 }
 
 impl Construction {
+    pub(crate) fn lab_jobs(&self, catalog: &Catalog, land: &Land, clock: f64) -> Vec<String> {
+        let mut jobs = Vec::new();
+        let site_name = |index: usize| {
+            format!(
+                "{} #{}",
+                catalog.projects[&self.plans[index].key].name,
+                index + 1
+            )
+        };
+        let worker_name = |index: Option<usize>| {
+            index.map_or("Unassigned", |index| resident_work::NAMES[index])
+        };
+        for (index, plan) in self.plans.iter().enumerate() {
+            if !plan.removed
+                && (plan.work < catalog.projects[&plan.key].work
+                    || self.changes.contains_key(&index))
+            {
+                let assigned = self
+                    .residents
+                    .iter()
+                    .filter(|resident| {
+                        resident
+                            .assignment
+                            .as_ref()
+                            .is_some_and(|job| job.project == index)
+                    })
+                    .count();
+                jobs.push(format!(
+                    "{} · {} · {assigned} assigned",
+                    site_name(index),
+                    self.project_status(catalog, index)
+                ));
+            }
+        }
+        for batch in &self.production.jobs {
+            let recipe = &catalog.production[&batch.recipe];
+            jobs.push(format!(
+                "{} · {} · {} · {}",
+                site_name(batch.site),
+                recipe.name,
+                self.batch_status(batch, recipe, clock),
+                worker_name(batch.worker)
+            ));
+        }
+        for job in &self.farming.jobs {
+            use crate::farming::FarmPhase;
+            let status = match job.phase {
+                FarmPhase::Pickup if job.pickups > 0 => "Waiting for seed delivery".to_owned(),
+                FarmPhase::Pickup => "Collecting supplies".to_owned(),
+                FarmPhase::Walk => "Walking to the bed".to_owned(),
+                FarmPhase::Work => format!("{:.0}% worked", 100.0 * job.work / job.required),
+                FarmPhase::Return => "Returning to stores".to_owned(),
+            };
+            jobs.push(format!(
+                "{} · Bed {} · {status} · {}",
+                site_name(job.site),
+                job.bed + 1,
+                worker_name(job.worker)
+            ));
+        }
+        for (&index, job) in &self.gathering.orders {
+            if let Some(site) = land.site(index) {
+                let recipe = &catalog.gathering[site.recipe()];
+                let status = match job.phase {
+                    GatherPhase::Approach => "Heading to the site".to_owned(),
+                    GatherPhase::Work => format!("{:.0}% worked", 100.0 * job.work / recipe.work),
+                    GatherPhase::Return => "Carrying supplies back".to_owned(),
+                };
+                jobs.push(format!(
+                    "{} · {status} · {}",
+                    recipe.name,
+                    worker_name(job.worker)
+                ));
+            }
+        }
+        for (&site, job) in &self.water_jobs {
+            let destination = site.checked_sub(1).map_or_else(|| "Camp".into(), site_name);
+            let worker = (0..self.residents.len()).find(|&index| job.assigned_to(index));
+            jobs.push(format!(
+                "{destination} · {} · {}",
+                job.label(),
+                worker_name(worker)
+            ));
+        }
+        jobs
+    }
+
     pub(crate) fn lab_order(
         &mut self,
         catalog: &Catalog,

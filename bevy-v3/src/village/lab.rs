@@ -435,6 +435,7 @@ enum LabView {
     Overview,
     Stocked,
     AllItems,
+    Jobs,
 }
 
 impl LabView {
@@ -442,7 +443,8 @@ impl LabView {
         match self {
             Self::Overview => Self::Stocked,
             Self::Stocked => Self::AllItems,
-            Self::AllItems => Self::Overview,
+            Self::AllItems => Self::Jobs,
+            Self::Jobs => Self::Overview,
         }
     }
 }
@@ -488,6 +490,24 @@ fn lab_inventory(catalog: &Catalog, stock: &Stock, view: &LabView, page: &mut us
         if spoiled > 0 {
             let _ = write!(text, " · {spoiled} spoiled");
         }
+    }
+    text
+}
+
+fn lab_job_page(jobs: &[String], page: &mut usize) -> String {
+    const ROWS: usize = 9;
+    let pages = jobs.len().div_ceil(ROWS).max(1);
+    *page = (*page).min(pages - 1);
+    let mut text = format!(
+        "Active jobs · Page {} of {pages}\nTab Switch view · Page Up/Down Browse\n",
+        *page + 1
+    );
+    if jobs.is_empty() {
+        text.push_str("\nNo active jobs.");
+    }
+    for job in jobs.iter().skip(*page * ROWS).take(ROWS) {
+        text.push('\n');
+        text.push_str(job);
     }
     text
 }
@@ -641,14 +661,21 @@ fn update_lab_window(
     );
     if playback.view != LabView::Overview {
         let playback = &mut *playback;
-        let inventory = lab_inventory(
-            &catalog,
-            &village.stock,
-            &playback.view,
-            &mut playback.inventory_page,
-        );
+        let details = if playback.view == LabView::Jobs {
+            let jobs = village
+                .construction
+                .lab_jobs(&catalog, &runner.land, village.clock);
+            lab_job_page(&jobs, &mut playback.inventory_page)
+        } else {
+            lab_inventory(
+                &catalog,
+                &village.stock,
+                &playback.view,
+                &mut playback.inventory_page,
+            )
+        };
         panel.set_if_neq(Text::new(format!(
-            "Simulation lab · {status} · Step {} / {}\nSpace Run/Pause · J Single step · O Enter order · F5 Export\n{}\n\n{inventory}",
+            "Simulation lab · {status} · Step {} / {}\nSpace Run/Pause · J Single step · O Enter order · F5 Export\n{}\n\n{details}",
             runner.index, runner.scenario.steps, playback.notice,
         )));
         return;
@@ -662,7 +689,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report · Tab Inventory\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report · Tab Inventory and jobs\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         runner.scenario.steps,
         village.clock,
