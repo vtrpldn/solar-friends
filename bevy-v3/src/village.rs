@@ -732,6 +732,26 @@ impl Village {
         self.connect_road_strokes || keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
     }
 
+    fn utility_owns_advance_key(&self) -> bool {
+        self.utility_panel == Some(UtilityPanel::Water)
+            || self.construction.production.selected.is_some_and(|index| {
+                self.construction.utilities.cooling_switch(index).is_some()
+                    && matches!(self.utility_panel, None | Some(UtilityPanel::Power))
+                    && !self.construction.is_placing()
+                    && !self.construction.menu
+            })
+    }
+
+    fn advance_keyboard_action(&self, keys: &ButtonInput<KeyCode>) -> Option<AdvanceAction> {
+        if !self.advance.open
+            && self.utility_owns_advance_key()
+            && !keys.any_pressed([KeyCode::AltLeft, KeyCode::AltRight])
+        {
+            return None;
+        }
+        self.advance.keyboard_action(keys)
+    }
+
     fn apply_advance_action(&mut self, action: AdvanceAction) {
         let was_open = self.advance.open;
         if self.advance.apply(action) {
@@ -1344,7 +1364,7 @@ fn village_input(
     }
     if village.camp.is_some()
         && !village.terrain_editor.open
-        && let Some(action) = village.advance.keyboard_action(&keyboard)
+        && let Some(action) = village.advance_keyboard_action(&keyboard)
     {
         village.apply_advance_action(action);
         return;
@@ -1646,6 +1666,7 @@ fn village_input(
             town.construction.utilities.toggle(index);
         }
         if keyboard.just_pressed(KeyCode::KeyL)
+            && town.utility_owns_advance_key()
             && let Some(index) = town.construction.production.selected
         {
             town.construction.utilities.toggle_cooling(index);
@@ -2127,7 +2148,7 @@ fn show_hud(
     }
     if village.camp.is_some() {
         label.push('\n');
-        label.push_str(&village.advance.status());
+        label.push_str(&village.advance.status(village.utility_owns_advance_key()));
         if village.advance.open {
             label.push_str(&village.construction.advance_milestones(
                 &catalog,
@@ -2995,6 +3016,29 @@ mod tests {
         assert!(advanced.advance_checkpoint);
         assert_eq!(advanced.clock, fixed.clock);
         assert!(serde_json::to_value(advanced).unwrap() == serde_json::to_value(fixed).unwrap());
+    }
+
+    #[test]
+    fn water_policy_shortcut_yields_to_an_open_advance_dialog() {
+        let mut village = Village {
+            utility_panel: Some(UtilityPanel::Water),
+            ..default()
+        };
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::KeyL);
+        assert!(village.advance_keyboard_action(&keys).is_none());
+
+        keys.press(KeyCode::AltLeft);
+        let action = village.advance_keyboard_action(&keys).unwrap();
+        village.apply_advance_action(action);
+        assert!(village.advance.open);
+
+        keys.reset_all();
+        keys.press(KeyCode::KeyL);
+        assert!(matches!(
+            village.advance_keyboard_action(&keys),
+            Some(AdvanceAction::Toggle)
+        ));
     }
 
     #[test]

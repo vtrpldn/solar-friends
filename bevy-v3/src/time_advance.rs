@@ -148,7 +148,7 @@ impl Advance {
             })
     }
 
-    pub fn status(&self) -> String {
+    pub fn status(&self, contextual_shortcut: bool) -> String {
         if let Some(run) = &self.running {
             return format!(
                 "Advancing {} days · {:.0}%\nL Stop here",
@@ -157,10 +157,11 @@ impl Advance {
             );
         }
         if !self.open {
+            let shortcut = if contextual_shortcut { "Alt+L" } else { "L" };
             return if self.result.is_empty() {
-                "L Advance days".into()
+                format!("{shortcut} Advance days")
             } else {
-                format!("{} · L Advance days", self.result)
+                format!("{} · {shortcut} Advance days", self.result)
             };
         }
         let method = if self.fast {
