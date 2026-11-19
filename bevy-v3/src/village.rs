@@ -181,6 +181,7 @@ pub struct Village {
     inventory_equipment: bool,
     #[serde(skip)]
     inventory_search: String,
+    pantry_budget_entry: Option<String>,
     #[serde(skip)]
     editing_inventory: bool,
     #[serde(skip)]
@@ -1344,6 +1345,31 @@ fn village_input(
                 opening_model(&assets, NAMES.len() + index * 2 + 1),
             ));
         }
+    }
+
+    if village.utility_panel != Some(UtilityPanel::Pantry) {
+        village.pantry_budget_entry = None;
+    }
+    if let Some(entry) = &mut village.pantry_budget_entry {
+        if keyboard.just_pressed(KeyCode::Escape) {
+            village.pantry_budget_entry = None;
+        } else if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
+            let budget = village.pantry_budget_entry.take().unwrap_or_default();
+            if let Ok(reais) = budget.parse::<u64>() {
+                let trade = &mut village.construction.trade;
+                let _ = trade.set_pantry_policy(
+                    !trade.household_restock_off,
+                    None,
+                    Some(reais.min(100_000) * 100),
+                );
+            }
+        } else {
+            crate::construction::read_search_text(entry, &mut build_text);
+            entry.retain(|character| character.is_ascii_digit());
+            entry.truncate(6);
+        }
+        build_text.clear();
+        return;
     }
 
     if village.utility_panel == Some(UtilityPanel::Inventory)

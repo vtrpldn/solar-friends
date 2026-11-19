@@ -1012,6 +1012,40 @@ mod tests {
         press_button(&mut app, "Purchases: supplier freight");
         press_button(&mut app, "Automatic food purchases on");
         press_button(&mut app, "Automatic food purchases off");
+        press_button(&mut app, "Set daily food budget");
+        let window = app
+            .world_mut()
+            .query_filtered::<Entity, With<PrimaryWindow>>()
+            .single(app.world())
+            .unwrap();
+        use bevy::input::{
+            ButtonState,
+            keyboard::{Key, KeyboardInput},
+        };
+        for (key_code, digit) in [(KeyCode::Digit3, "3"), (KeyCode::Digit7, "7")] {
+            app.world_mut().write_message(KeyboardInput {
+                key_code,
+                logical_key: Key::Character(digit.into()),
+                state: ButtonState::Pressed,
+                text: Some(digit.into()),
+                repeat: false,
+                window,
+            });
+        }
+        app.world_mut().run_schedule(Update);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Enter);
+        app.world_mut().run_schedule(Update);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset(KeyCode::Enter);
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Daily limit R$37\n"))
+        );
         press_button(&mut app, "Automatic cooking off");
         press_button(&mut app, "Fresh target 1.0d +");
         press_button(&mut app, "Fresh target 1.5d −");
@@ -1042,15 +1076,6 @@ mod tests {
         press_button(&mut app, "Manage");
         press_button(&mut app, "Stores");
         press_button(&mut app, "Find material");
-        let window = app
-            .world_mut()
-            .query_filtered::<Entity, With<PrimaryWindow>>()
-            .single(app.world())
-            .unwrap();
-        use bevy::input::{
-            ButtonState,
-            keyboard::{Key, KeyboardInput},
-        };
         for (key_code, letter) in [
             (KeyCode::KeyT, "T"),
             (KeyCode::KeyI, "I"),
