@@ -711,6 +711,12 @@ impl Construction {
             format!("{} built.", definition.name)
         } else if stock.sandbox {
             format!("{} planned.", definition.name)
+        } else if self.supplier_construction && Self::fits_construction_freight(catalog, &blueprint)
+        {
+            format!(
+                "{} planned. Missing materials queued for supplier freight.",
+                definition.name
+            )
         } else if blueprint.pickups > 0 {
             format!(
                 "{} planned. Missing materials ordered for town pickup.",
@@ -891,6 +897,15 @@ impl Construction {
                 .map(|quote| {
                     if quote.trips == 0 {
                         "Supplies available locally".into()
+                    } else if self.supplier_construction
+                        && Self::construction_order_cargo(catalog, &quote.units)
+                            .is_some_and(Self::fits_freight_truck)
+                    {
+                        let cost = quote.price + crate::market::freight_cents(clock.round_trip_km);
+                        format!(
+                            "R${:.2} with a dedicated supplier truck",
+                            cost as f64 / 100.0
+                        )
                     } else {
                         let cost = quote.price + quote.fare * u64::from(quote.trips);
                         format!(

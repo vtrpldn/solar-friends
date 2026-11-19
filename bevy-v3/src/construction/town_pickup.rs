@@ -102,8 +102,14 @@ impl Construction {
         if purchase.trips != plan.pickups {
             return None;
         }
-        purchase
-            .units
+        Self::construction_order_cargo(catalog, &purchase.units)
+    }
+
+    pub(super) fn construction_order_cargo(
+        catalog: &Catalog,
+        units: &std::collections::BTreeMap<String, u32>,
+    ) -> Option<(f64, f64)> {
+        units
             .iter()
             .try_fold((0.0, 0.0), |(mass, volume), (id, &units)| {
                 let item = catalog.materials.get(id)?;
@@ -114,9 +120,12 @@ impl Construction {
             })
     }
 
-    fn fits_construction_freight(catalog: &Catalog, plan: &Blueprint) -> bool {
-        Self::construction_cargo(catalog, plan)
-            .is_some_and(|(mass, volume)| mass <= 5000.0 && volume <= 12.0)
+    pub(super) fn fits_construction_freight(catalog: &Catalog, plan: &Blueprint) -> bool {
+        Self::construction_cargo(catalog, plan).is_some_and(Self::fits_freight_truck)
+    }
+
+    pub(super) fn fits_freight_truck((mass, volume): (f64, f64)) -> bool {
+        mass <= 5000.0 && volume <= 12.0
     }
 
     fn tick_construction_delivery(
@@ -156,8 +165,7 @@ impl Construction {
                 continue;
             }
             if let Some((kg, cubic_metres)) = Self::construction_cargo(catalog, plan)
-                && mass + kg <= 5000.0
-                && volume + cubic_metres <= 12.0
+                && Self::fits_freight_truck((mass + kg, volume + cubic_metres))
             {
                 sites.push(index);
                 mass += kg;
