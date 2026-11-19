@@ -15,6 +15,9 @@ import { ECONOMY_REFERENCE, GRID_TARIFF, STARTING_CAPITAL, tripEstimate } from "
 import { TRADE_RULES } from "../web/v02/weekend/physical-trade.js";
 import { DELIVERY_LIMITS } from "../web/v02/weekend/deliveries.js";
 
+import { encode, gallery } from "../web/v02/land/editor.js";
+import { BIOMES, biomeLandscape } from "../web/v02/land/terrain.js";
+
 import { buildingScenes, buildOptions, constructionScene, workshopModels } from "./v3-building-scene-ids.mjs";
 
 const startingVillage = createWeekend();
@@ -124,17 +127,22 @@ pub(crate) const GRID_TARIFF_CENTS: f64 = ${rustFloat(Math.round(GRID_TARIFF * 1
 `;
 
 const json = data => JSON.stringify(data, null, 2) + "\n";
+const landscapes = Object.fromEntries(
+  Object.keys(BIOMES).filter(id => id !== "flat").map(id => [id, biomeLandscape(id)]),
+);
 const exports = {
   "data/construction.json": json({ materials, projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS, workshopComparison: buildingScenes.indexOf("workshop-comparison") }),
   "data/crops.json": json(CROPS),
   "data/workshop.json": json(workshopModels),
+  "data/asset-garden.json": encode(gallery()) + "\n",
+  "data/asset-garden-biomes.json": JSON.stringify(landscapes) + "\n",
   "src/economy_reference.rs": economy,
 };
 for (const [name, serialized] of Object.entries(exports)) {
   const output = new URL(`../bevy-v3/${name}`, import.meta.url);
   if (process.argv.includes("--check")) {
     if (await readFile(output, "utf8") !== serialized) {
-      console.error(`Bevy catalog drift in ${name}. Run node scripts/export-v3-catalog.mjs and commit the updated catalog.`);
+      console.error(`Bevy data drift in ${name}. Run node scripts/export-v3-catalog.mjs and commit the updated data.`);
       process.exitCode = 1;
     }
   } else {
