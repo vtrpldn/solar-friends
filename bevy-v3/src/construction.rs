@@ -10,6 +10,7 @@ mod lab_orders;
 pub(crate) use lab_orders::{LabOrder, LabStop};
 mod leisure;
 mod lifecycle;
+mod opening;
 pub(crate) use lifecycle::ProjectAction;
 mod production_work;
 mod project_list;
@@ -151,6 +152,8 @@ pub struct Construction {
     plans: Vec<Blueprint>,
     #[serde(default)]
     events: events::VillageEvents,
+    #[serde(default)]
+    opening: opening::OpeningMilestones,
     #[serde(default)]
     building_history: VecDeque<lifecycle::DismantledBuilding>,
     #[serde(default)]
@@ -308,6 +311,7 @@ impl Default for Construction {
             slow_sandbox: false,
             plans: Vec::new(),
             events: events::VillageEvents::default(),
+            opening: opening::OpeningMilestones::default(),
             building_history: VecDeque::new(),
             foundations: Arc::default(),
             market: Market::default(),

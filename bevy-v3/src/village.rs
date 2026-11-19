@@ -1524,6 +1524,10 @@ fn step(
     };
     town.construction
         .tick(catalog, &mut town.stock, site, clock, dt as f32);
+    if !town.stock.sandbox {
+        town.construction
+            .update_opening_milestones(catalog, town.clock);
+    }
     town.construction
         .tick_leisure(catalog, setup, &town.stock, site, town.clock, dt as f32);
 }
@@ -1645,6 +1649,13 @@ fn show_hud(
     if village.terrain_editor.open {
         label.push('\n');
         label.push_str(&village.terrain_editor.label());
+    }
+    if village.camp.is_some()
+        && !village.stock.sandbox
+        && let Some(status) = village.construction.opening_milestones_status()
+    {
+        label.push('\n');
+        label.push_str(&status);
     }
     if let Some(progress) = village.construction.latest_progress(&catalog) {
         label.push('\n');
