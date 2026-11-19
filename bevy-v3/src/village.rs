@@ -1,4 +1,5 @@
 use crate::{audio::SoundSettings, utilities::NetworkView};
+mod build_menu;
 mod building_preview;
 mod cultivation_surface;
 mod diagnostics;
@@ -63,6 +64,7 @@ impl Plugin for VillagePlugin {
         register_building_models(app);
         road_surface::install(app);
         building_preview::install(app);
+        build_menu::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
@@ -514,9 +516,9 @@ fn read_camp_pointer(
     ),
     camera: Single<(&Camera, &GlobalTransform), With<VillageCamera>>,
     ground: Query<(), With<GroundMesh>>,
+    buttons: Query<&Interaction, With<Button>>,
     mut raycast: MeshRayCast,
-    mut input: Local<Option<Vec2>>,
-    mut pointer: ResMut<CampPointer>,
+    (mut input, mut pointer): (Local<Option<Vec2>>, ResMut<CampPointer>),
 ) {
     pointer.clicked = None;
     pointer.hovered = None;
@@ -524,6 +526,9 @@ fn read_camp_pointer(
         || setup.open
         || village.map_input_blocked()
         || village.arrival_time < ARRIVAL_DURATION
+        || buttons
+            .iter()
+            .any(|interaction| *interaction != Interaction::None)
     {
         *input = None;
         return;

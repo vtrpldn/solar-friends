@@ -61,7 +61,9 @@ const CATEGORIES: [&str; 10] = [
     "Community & leisure",
     "All",
 ];
-const PAGE_KEYS: [KeyCode; 8] = [
+pub(crate) const BUILD_ROWS: usize = 8;
+
+const PAGE_KEYS: [KeyCode; BUILD_ROWS] = [
     KeyCode::Digit1,
     KeyCode::Digit2,
     KeyCode::Digit3,
@@ -391,6 +393,32 @@ impl Construction {
         true
     }
 
+    pub fn browsing_blueprints(&self) -> bool {
+        self.menu && !self.placing_project() && !self.editing_search
+    }
+
+    pub fn build_row_labels<'a>(&self, catalog: &'a Catalog) -> Vec<&'a str> {
+        self.options(catalog)
+            .into_iter()
+            .skip(self.page * BUILD_ROWS)
+            .take(BUILD_ROWS)
+            .map(|(_, project)| project.name.as_str())
+            .collect()
+    }
+
+    pub fn pick_build_row(&mut self, catalog: &Catalog, row: usize) {
+        if let Some((id, _)) = self.options(catalog).get(self.page * BUILD_ROWS + row) {
+            self.choose_blueprint(id);
+        }
+    }
+
+    fn choose_blueprint(&mut self, id: &str) {
+        self.selection = Some(id.to_owned());
+        self.rotation = 0;
+        self.field_size = default_field_size();
+        self.status.clear();
+    }
+
     pub fn input(&mut self, keyboard: &ButtonInput<KeyCode>, catalog: &Catalog) {
         if self.moving.is_some() {
             if keyboard.just_pressed(KeyCode::KeyR) {
@@ -431,10 +459,7 @@ impl Construction {
         if let Some(index) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key))
             && let Some((id, _)) = options.get(self.page * PAGE_KEYS.len() + index)
         {
-            self.selection = Some((*id).clone());
-            self.rotation = 0;
-            self.field_size = default_field_size();
-            self.status.clear();
+            self.choose_blueprint(id);
         }
         if self.selection.as_deref() == Some("field")
             && let Some(delta) = field_size_input(keyboard)
@@ -589,8 +614,10 @@ impl Construction {
         };
         let list = if list.is_empty() {
             "No matching projects"
-        } else {
+        } else if self.editing_search {
             &list
+        } else {
+            ""
         };
         format!(
             "{title} · {}/{}\n{controls}\n{list}\n{}",
