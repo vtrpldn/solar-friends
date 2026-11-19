@@ -117,6 +117,7 @@ struct Garden {
     connections: HashMap<String, Connection>,
     library: Vec<String>,
     search: Option<super::AssetSearch>,
+    coordinates: Option<String>,
     target: Vec3,
     bearing: f32,
     zoom: f32,
@@ -282,6 +283,7 @@ pub fn run(path: Option<PathBuf>, night: bool, study: bool) {
         connections: HashMap::new(),
         library,
         search: None,
+        coordinates: None,
         target: Vec3::ZERO,
         bearing: HOME_BEARING,
         zoom: 1.0,
@@ -388,6 +390,45 @@ fn edit(
     use KeyCode::*;
     let (camera, global, transform, projection) = &mut *camera;
     let pressed = |key| keys.just_pressed(key);
+    if let Some(mut input) = garden.coordinates.take() {
+        if pressed(Escape) {
+            typing.clear();
+            garden.status.clear();
+            return;
+        }
+        if pressed(Enter) || pressed(NumpadEnter) {
+            typing.clear();
+            if let Some(index) = garden.selected {
+                match exact_position(&input, &garden.layout.props[index], &models) {
+                    Ok((column, row)) => {
+                        let current = &garden.layout.props[index];
+                        if (column, row) != (current.column, current.row) {
+                            garden.edit();
+                            garden.layout.props[index].column = column;
+                            garden.layout.props[index].row = row;
+                        }
+                        garden.status.clear();
+                        return;
+                    }
+                    Err(error) => garden.status = error.into(),
+                }
+            }
+        } else {
+            crate::construction::read_search_text(&mut input, &mut typing);
+        }
+        garden.coordinates = Some(input);
+        return;
+    }
+    if pressed(F2)
+        && garden.selected.is_some()
+        && garden.search.is_none()
+        && garden.pending.is_none()
+    {
+        garden.coordinates = Some(String::new());
+        garden.status.clear();
+        typing.clear();
+        return;
+    }
     if pressed(Slash) && garden.search.is_none() && garden.pending.is_none() {
         garden.search = Some(super::AssetSearch::default());
         typing.clear();
@@ -612,6 +653,33 @@ fn edit(
     }
 }
 
+fn exact_position(
+    input: &str,
+    prop: &Prop,
+    models: &WorkshopCatalog,
+) -> Result<(i32, i32), &'static str> {
+    let mut values = input.split_whitespace();
+    let parse = |value: Option<&str>| {
+        value
+            .and_then(|value| value.parse::<i32>().ok())
+            .and_then(|value| value.checked_sub(1))
+    };
+    let (Some(column), Some(row), None) =
+        (parse(values.next()), parse(values.next()), values.next())
+    else {
+        return Err("Enter two whole numbers, such as 42 18.");
+    };
+    let candidate = Prop {
+        column,
+        row,
+        ..prop.clone()
+    };
+    if !candidate.fits(models) {
+        return Err("Keep the full rotated footprint inside the plot.");
+    }
+    Ok((column, row))
+}
+
 fn import_scene(
     mut dropped: MessageReader<FileDragAndDrop>,
     window: Single<Entity, With<bevy::window::PrimaryWindow>>,
@@ -638,6 +706,7 @@ fn import_scene(
             garden.selected = None;
             garden.pending = None;
             garden.search = None;
+            garden.coordinates = None;
             garden.status = format!("Imported {}", path.display());
         }
         Err(error) => garden.status = format!("Could not import scene: {error}"),
@@ -810,6 +879,17 @@ fn render(
         }
         garden.redraw = loading;
     }
+    if let Some(input) = &garden.coordinates {
+        text.0 = format!(
+            "Exact placement
+Enter one-based column and row, separated by a space.
+Column Row: {input}▏
+Enter place   Esc cancel
+{}",
+            garden.status
+        );
+        return;
+    }
     if let Some(search) = &garden.search {
         text.0 = search.label(&garden.library, &models);
         return;
@@ -867,7 +947,7 @@ fn render(
         });
     let rehearsal_hint = rehearsal::hint(&rehearsal, &garden.layout.props, selection, &models);
     text.0 = format!(
-        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home first prop   End whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
+        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home first prop   End whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   F2 exact position   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
         garden.layout.props.len(),
         garden.layout.biome,
         garden.status,
@@ -1003,6 +1083,31 @@ mod tests {
             .expect("oversized import rejected");
         std::fs::remove_file(path).unwrap();
         assert_eq!(error.kind(), io::ErrorKind::InvalidData);
+    }
+
+    #[test]
+    fn exact_positions_use_one_based_cells_and_rotated_bounds() {
+        let models = WorkshopCatalog::default();
+        let layout = Layout::decode(GALLERY, &models).unwrap();
+        let mut prop = layout
+            .props
+            .into_iter()
+            .find(|prop| prop.asset == "garden")
+            .unwrap();
+        prop.rotation = 90;
+        let [width, depth] = prop.size(&models);
+        assert_eq!(exact_position("1 1", &prop, &models), Ok((0, 0)));
+        assert_eq!(
+            exact_position(
+                &format!("{} {}", CELLS + 1 - width, CELLS + 1 - depth),
+                &prop,
+                &models
+            ),
+            Ok((CELLS - width, CELLS - depth))
+        );
+        assert!(exact_position(&format!("{} 1", CELLS + 2 - width), &prop, &models).is_err());
+        assert!(exact_position("0 1", &prop, &models).is_err());
+        assert!(exact_position("1 1 1", &prop, &models).is_err());
     }
 
     #[test]

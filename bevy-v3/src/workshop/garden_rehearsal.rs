@@ -172,7 +172,7 @@ pub(super) fn tick(
     mut actors: Query<(Entity, &GardenProp, &mut Transform, &mut RehearsalPose)>,
 ) {
     use KeyCode::*;
-    if garden.search.is_some() {
+    if garden.search.is_some() || garden.coordinates.is_some() {
         return;
     }
     let start = keys.just_pressed(KeyU) || keys.just_pressed(KeyY);
@@ -422,6 +422,7 @@ mod tests {
                 connections: HashMap::new(),
                 library: vec![],
                 search: None,
+                coordinates: None,
                 target: Vec3::ZERO,
                 bearing: 0.,
                 zoom: 1.,
