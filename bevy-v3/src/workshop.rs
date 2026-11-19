@@ -11,10 +11,22 @@ struct Workshop {
     projects: Vec<String>,
     selected: usize,
     heading: f32,
+    elevation: f32,
+    rotation: u8,
     zoom: f32,
     night: bool,
     guides: bool,
     export_notice: String,
+}
+
+const DEFAULT_ELEVATION: f32 = 37.72;
+
+fn orbit_camera(heading: f32, elevation: f32) -> Transform {
+    let target = Vec3::Y;
+    let yaw = heading + std::f32::consts::FRAC_PI_4;
+    let (up, level) = elevation.to_radians().sin_cos();
+    let offset = Vec3::new(yaw.sin() * level, up, yaw.cos() * level) * 57.2;
+    Transform::from_translation(target + offset).looking_at(target, Vec3::Y)
 }
 
 pub fn run() {
@@ -35,6 +47,8 @@ pub fn run() {
         projects,
         selected: 0,
         heading: 0.0,
+        elevation: DEFAULT_ELEVATION,
+        rotation: 0,
         zoom: 1.0,
         night: false,
         guides: false,
@@ -58,7 +72,7 @@ fn setup(
     commands.spawn((
         Camera3d::default(),
         Projection::Orthographic(OrthographicProjection::default_3d()),
-        crate::camera_transform(Vec3::Y, 0.0),
+        orbit_camera(0.0, DEFAULT_ELEVATION),
     ));
     commands.spawn((
         DirectionalLight {
@@ -108,7 +122,18 @@ fn controls(
     }
     if keys.just_pressed(KeyCode::Home) {
         workshop.heading = 0.0;
+        workshop.elevation = DEFAULT_ELEVATION;
+        workshop.rotation = 0;
         workshop.zoom = 1.0;
+    }
+    if keys.just_pressed(KeyCode::KeyR) {
+        workshop.rotation = (workshop.rotation + 1) % 4;
+    }
+    let tilt =
+        i8::from(keys.pressed(KeyCode::ArrowUp)) - i8::from(keys.pressed(KeyCode::ArrowDown));
+    if tilt != 0 {
+        workshop.elevation =
+            (workshop.elevation + f32::from(tilt) * time.delta_secs() * 45.0).clamp(10.0, 80.0);
     }
     let turn = i8::from(keys.pressed(KeyCode::KeyE)) - i8::from(keys.pressed(KeyCode::KeyQ));
     if turn != 0 {
@@ -148,8 +173,15 @@ fn show_model(
             .id();
         *preview = Some((project.model, entity));
     }
+    if let Some((_, entity)) = *preview {
+        commands
+            .entity(entity)
+            .insert(Transform::from_rotation(Quat::from_rotation_y(
+                f32::from(workshop.rotation) * std::f32::consts::FRAC_PI_2,
+            )));
+    }
     let (transform, projection) = &mut *camera;
-    **transform = crate::camera_transform(Vec3::Y, workshop.heading);
+    **transform = orbit_camera(workshop.heading, workshop.elevation);
     if let Projection::Orthographic(ortho) = &mut **projection {
         ortho.scaling_mode = bevy::camera::ScalingMode::FixedVertical {
             viewport_height: viewport_height(project, workshop.zoom),
@@ -167,7 +199,7 @@ fn show_model(
         "Day"
     };
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · Q/E Orbit · +/− Zoom · N Lighting · G Guides · Home Reset · F5 Export PNG\n{}",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nN Lighting · G Guides · Home Reset · F5 Export PNG\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
@@ -220,12 +252,13 @@ fn capture_preview(
         "project": id,
         "model": project.model,
         "footprint_cells": project.size,
+        "model_rotation_degrees": u16::from(workshop.rotation) * 90,
         "metres_per_cell": 2,
         "light": if workshop.night { "night" } else { "day" },
         "camera": {
             "projection": "orthographic",
             "heading_degrees": (workshop.heading.to_degrees() + 45.0).rem_euclid(360.0),
-            "elevation_degrees": (35.0_f32 / 32.0_f32.hypot(32.0)).atan().to_degrees(),
+            "elevation_degrees": workshop.elevation,
             "viewport_height_metres": viewport_height(project, workshop.zoom),
         }
     });
@@ -268,7 +301,10 @@ fn draw_guides(
         return;
     }
     let project = &catalog.projects[&workshop.projects[workshop.selected]];
-    let [x, z] = project.size.map(|cells| cells as f32);
+    let [mut x, mut z] = project.size.map(|cells| cells as f32);
+    if !workshop.rotation.is_multiple_of(2) {
+        std::mem::swap(&mut x, &mut z);
+    }
     let edge = (x.max(z) + 4.0).ceil() as i32;
     for marker in -edge..=edge {
         let distance = marker as f32;
