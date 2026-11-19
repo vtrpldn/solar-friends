@@ -182,6 +182,9 @@ fn show_library(
     }
 }
 
+type SetupButtons<'w, 's> =
+    Query<'w, 's, (&'static crate::setup::Action, &'static Interaction), Changed<Interaction>>;
+
 pub(super) fn library_controls(
     (keys, window): (
         Res<ButtonInput<KeyCode>>,
@@ -192,13 +195,21 @@ pub(super) fn library_controls(
     mut setup: ResMut<WorldSetup>,
     mut village: ResMut<Village>,
     (catalog, time, sound): (Res<Catalog>, Res<Time<Real>>, Res<SoundSettings>),
-    buttons: Query<(&LibraryAction, &Interaction), Changed<Interaction>>,
+    (buttons, setup_buttons): (
+        Query<(&LibraryAction, &Interaction), Changed<Interaction>>,
+        SetupButtons,
+    ),
 ) {
     if !window.focused || sound.open {
         text.clear();
         return;
     }
-    if keys.just_pressed(KeyCode::F6) {
+    let from_setup = setup.open
+        && !menu.open
+        && setup_buttons.iter().any(|(action, interaction)| {
+            matches!(action, crate::setup::Action::Library) && *interaction == Interaction::Pressed
+        });
+    if keys.just_pressed(KeyCode::F6) || from_setup {
         toggle_library(&mut menu, setup.mode);
     }
     if !menu.open {

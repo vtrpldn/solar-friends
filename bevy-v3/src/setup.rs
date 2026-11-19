@@ -267,6 +267,7 @@ impl WorldSetup {
             Action::Explore => "Enter village".into(),
             Action::Resume => "Resume current village".into(),
             Action::Continue => "Continue last autosave".into(),
+            Action::Library => "Saved villages".into(),
         }
     }
 }
@@ -287,6 +288,7 @@ pub(crate) enum Action {
     Explore,
     Resume,
     Continue,
+    Library,
 }
 
 #[derive(Component)]
@@ -346,6 +348,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Reroll,
                 Action::Resume,
                 Action::Continue,
+                Action::Library,
                 Action::Explore,
             ] {
                 panel
@@ -479,7 +482,7 @@ fn setup_input(
                     setup.open = false;
                 }
             }
-            Action::Continue => {}
+            Action::Continue | Action::Library => {}
             Action::Resume => {
                 if let Some(active) = village.session_setup() {
                     *setup = active.session();
@@ -493,13 +496,13 @@ fn refresh_panel(
     setup: Res<WorldSetup>,
     mut panel: Single<&mut Node, With<SetupPanel>>,
     mut buttons: Query<(&Action, &Children, &mut Node), Without<SetupPanel>>,
-    village: Res<crate::village::Village>,
+    (village, saves): (Res<crate::village::Village>, Res<SaveMenu>),
     mut labels: Query<&mut Text>,
 ) {
-    if !setup.is_changed() {
+    if !setup.is_changed() && !saves.is_changed() {
         return;
     }
-    panel.display = if setup.open {
+    panel.display = if setup.open && !saves.open {
         Display::Flex
     } else {
         Display::None

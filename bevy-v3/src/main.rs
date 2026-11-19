@@ -301,22 +301,25 @@ mod tests {
             .query_filtered::<(Entity, &Children), With<Button>>()
             .iter(world)
             .find_map(|(entity, children)| {
-                children
+                if !children
                     .iter()
                     .any(|child| world.get::<Text>(child).is_some_and(|text| text.0 == label))
-                    .then_some(entity)
+                {
+                    return None;
+                }
+                let mut ancestor = Some(entity);
+                while let Some(current) = ancestor {
+                    if world
+                        .get::<Node>(current)
+                        .is_some_and(|node| node.display == Display::None)
+                    {
+                        return None;
+                    }
+                    ancestor = world.get::<ChildOf>(current).map(ChildOf::parent);
+                }
+                Some(entity)
             })
-            .unwrap_or_else(|| panic!("missing button: {label}"));
-        let mut ancestor = Some(button);
-        while let Some(entity) = ancestor {
-            assert!(
-                world
-                    .get::<Node>(entity)
-                    .is_none_or(|node| node.display != Display::None),
-                "hidden button: {label}"
-            );
-            ancestor = world.get::<ChildOf>(entity).map(ChildOf::parent);
-        }
+            .unwrap_or_else(|| panic!("missing visible button: {label}"));
         *world
             .get_mut::<Interaction>(button)
             .expect("button interaction") = Interaction::Pressed;
@@ -499,6 +502,9 @@ mod tests {
             .text = "Renamed test village".into();
         press_button(&mut app, "Confirm name");
         press_button(&mut app, "Close saved villages");
+        press_button(&mut app, "Setup");
+        app.world_mut().run_schedule(Update);
+        assert!(app.world().resource::<WorldSetup>().open);
         press_button(&mut app, "Saved villages");
         press_button(&mut app, "› Renamed test village");
         press_button(&mut app, "Load village");
