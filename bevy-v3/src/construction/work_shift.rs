@@ -23,6 +23,40 @@ impl Construction {
         work.booked && shift_morning(seconds, work.last_day).is_some()
     }
 
+    fn shift_departure_blocker(&self, index: usize) -> Option<&'static str> {
+        let worker = &self.residents[index];
+        if self.driver_booked(index) {
+            return Some("Finishing a town trip");
+        }
+        if worker.health.energy < 65.0
+            || worker
+                .health
+                .task
+                .as_ref()
+                .is_some_and(|task| matches!(task.kind, Need::Rest | Need::Sleep))
+        {
+            return Some("Needs to rest");
+        }
+        if worker.health.task.is_some()
+            || [Need::Bladder, Need::Bowels, Need::Hydration]
+                .iter()
+                .any(|kind| worker.health.levels[*kind as usize] < 20.0)
+        {
+            return Some("Taking care of personal needs");
+        }
+        let finishing_work = self.working_water(index)
+            || self.working_upkeep(index)
+            || worker
+                .assignment
+                .as_ref()
+                .is_some_and(|job| job.activity == Activity::Carry)
+            || self.gathering.workers_at_site(index)
+            || self.production.has_worker(index)
+            || self.farming.has_worker(index)
+            || self.working_change(index);
+        finishing_work.then_some("Finishing village work")
+    }
+
     pub fn toggle_shift(&mut self, index: usize) {
         let resident = &mut self.residents[index];
         if !resident.town_work.active() {
@@ -62,7 +96,15 @@ impl Construction {
                 "today"
             };
             if work.booked {
-                format!("Booked for {when}, 08:00–11:00")
+                let blocker = self
+                    .booked_shift_due(selected, seconds)
+                    .then(|| self.shift_departure_blocker(selected))
+                    .flatten();
+                if let Some(blocker) = blocker {
+                    format!("Booked for {when}, 08:00–11:00 · {blocker}")
+                } else {
+                    format!("Booked for {when}, 08:00–11:00")
+                }
             } else {
                 format!(
                     "Book for {when}, 08:00–11:00 · {}",
@@ -99,9 +141,6 @@ impl Construction {
             return;
         }
         for (index, &(job_name, wages)) in JOBS.iter().enumerate() {
-            let unavailable = self.driver_booked(index)
-                || self.working_water(index)
-                || self.working_upkeep(index);
             let worker = &mut self.residents[index];
             if let Some(mut shift) = worker.town_work.shift.take() {
                 match shift.phase {
@@ -152,26 +191,13 @@ impl Construction {
             let Some(day) = shift_morning(clock.seconds, worker.town_work.last_day) else {
                 continue;
             };
-            if !(worker.town_work.booked || worker.town_work.repeating && day % 7 < 5)
-                || worker.health.energy < 65.0
-                || worker.health.task.is_some()
-                || unavailable
-                || [Need::Bladder, Need::Bowels, Need::Hydration]
-                    .iter()
-                    .any(|kind| worker.health.levels[*kind as usize] < 20.0)
-                || worker
-                    .assignment
-                    .as_ref()
-                    .is_some_and(|job| job.activity == Activity::Carry)
-                || self.gathering.workers_at_site(index)
-                || self.production.has_worker(index)
-                || self.farming.has_worker(index)
-                || self.changes.values().any(|job| job.worker == Some(index))
+            let full_day = worker.town_work.booked;
+            let from = worker.position;
+            if !(full_day || worker.town_work.repeating && day % 7 < 5)
+                || self.shift_departure_blocker(index).is_some()
             {
                 continue;
             }
-            let from = worker.position;
-            let full_day = worker.town_work.booked;
             let Some(path) = self.resident_route(catalog, site, from, BUS_STOP) else {
                 continue;
             };
@@ -228,6 +254,24 @@ mod tests {
                 .finance_summary(&stock, 0, HOUR * 3.0)
                 .contains("Booked for tomorrow")
         );
+        construction.residents[0].health.energy = 60.0;
+        assert!(
+            construction
+                .finance_summary(&stock, 0, 0.0)
+                .contains("Needs to rest")
+        );
+        construction.tick_shifts(
+            &catalog,
+            &mut stock,
+            site,
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
+            1.0,
+        );
+        assert!(construction.residents[0].town_work.booked);
+        construction.residents[0].health.energy = 85.0;
         let mut left_camp = false;
         for seconds in 0..1_500 {
             let clock = TownClock {
