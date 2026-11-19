@@ -114,7 +114,7 @@ An example scenario with one construction order:
 
 Order types include `build`, `move`, `salvage`, `demolish`, `produce`, `move-craft`, `buy`, `sell`, `bed`, `configure-bed`, `outside`, `food-policy`, `grid`, `collect-water`, `purify`, and `service-water`. Project, bed, and resident numbers start at 1. Use site 0 for the camp water facility. For `move-craft`, supply the source project as `site` and the target project as `destination`. Build and move coordinates use map cells, rotation takes 0–3 quarter turns, and fields accept a `size` pair in cells.
 
-Use `{"type":"install-connection","from":1,"to":2,"channel":1}` to queue a manual irrigation line between completed sites. Water channels run from 0 for drinking water through 3 for sewage. Omit `channel` to install a power line. The lab uses the same resident work and material requirements as the desktop game.
+Use `{"type":"install-connection","from":1,"to":2,"channel":1}` to queue a manual irrigation line between completed sites. Water channels run from 0 for drinking water through 3 for sewage. Omit `channel` to install a power line. The lab uses the same resident work and material requirements as the desktop game. Use `switch-connection` with the same endpoints and `"enabled":false` to close a line, or `remove-connection` to cancel a queued installation or remove an installed manual line.
 
 Use `{"type":"supply-transport","freight":true}` to select supplier freight for automatic construction purchases, seed orders, and pantry restocks. Set `freight` to `false` to prefer resident pickup.
 

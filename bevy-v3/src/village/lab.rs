@@ -846,6 +846,22 @@ fn order_label(order: &LabOrder) -> String {
             }
             None => format!("Install power connection #{from} ↔ #{to}"),
         },
+        LabOrder::SwitchConnection {
+            from,
+            to,
+            channel,
+            enabled,
+        } => {
+            let kind = if channel.is_some() { "water" } else { "power" };
+            format!(
+                "{} {kind} connection #{from} to #{to}",
+                toggle_label(*enabled)
+            )
+        }
+        LabOrder::RemoveConnection { from, to, channel } => {
+            let kind = if channel.is_some() { "water" } else { "power" };
+            format!("Remove {kind} connection #{from} to #{to}")
+        }
         LabOrder::CollectWater { site } => format!("Collect river water for site #{site}"),
         LabOrder::CarryWater {
             source,

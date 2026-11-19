@@ -106,6 +106,19 @@ pub(crate) enum LabOrder {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         channel: Option<usize>,
     },
+    SwitchConnection {
+        from: usize,
+        to: usize,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        channel: Option<usize>,
+        enabled: bool,
+    },
+    RemoveConnection {
+        from: usize,
+        to: usize,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        channel: Option<usize>,
+    },
     CollectWater {
         site: usize,
     },
@@ -631,6 +644,37 @@ impl Construction {
                 Some(channel) => self.queue_water_connection(stock, *from, *to, *channel)?,
                 None => self.queue_power_connection(stock, *from, *to)?,
             },
+            LabOrder::SwitchConnection {
+                from,
+                to,
+                channel,
+                enabled,
+            } => {
+                let (row, current) = self
+                    .utilities
+                    .connection_row(*from, *to, *channel)
+                    .ok_or("No installed connection matches these endpoints.")?;
+                if current != *enabled {
+                    if channel.is_some() {
+                        self.utilities.toggle_water_link(row);
+                    } else {
+                        self.utilities.toggle_power_link(row);
+                    }
+                }
+            }
+            LabOrder::RemoveConnection { from, to, channel } => {
+                if !self.cancel_connection_installation(*from, *to, *channel) {
+                    let (row, _) = self
+                        .utilities
+                        .connection_row(*from, *to, *channel)
+                        .ok_or("No connection matches these endpoints.")?;
+                    let power = channel.is_none();
+                    if !self.utilities.is_manual_link(row, power) {
+                        return Err("Only manual connections can be removed.".into());
+                    }
+                    self.utilities.remove_manual_link(row, power);
+                }
+            }
             LabOrder::CollectWater { site } => self.queue_water(
                 *site,
                 WaterAction::Carry {

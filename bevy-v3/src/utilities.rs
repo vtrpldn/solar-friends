@@ -868,6 +868,28 @@ impl Utilities {
         })
     }
 
+    pub fn connection_row(
+        &self,
+        from: usize,
+        to: usize,
+        channel: Option<usize>,
+    ) -> Option<(usize, bool)> {
+        if let Some(channel) = channel {
+            let row = self
+                .links
+                .iter()
+                .position(|pipe| (pipe.from, pipe.to, pipe.channel) == (from, to, channel))?;
+            Some((row, self.water_link_enabled(self.links[row])))
+        } else {
+            let key = (from.min(to), from.max(to));
+            let row = self
+                .power_links
+                .iter()
+                .position(|&(a, b)| (a.min(b), a.max(b)) == key)?;
+            Some((row, self.power_link_open(from, to)))
+        }
+    }
+
     pub fn is_manual_link(&self, row: usize, power: bool) -> bool {
         if power {
             self.power_link(row)
