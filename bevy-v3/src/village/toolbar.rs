@@ -29,6 +29,7 @@ enum Action {
     Terrain,
     TerrainBrush(Brush),
     TerrainRadius(bool),
+    PickFlattenHeight,
     UndoTerrain,
     RedoTerrain,
     Advance(AdvanceAction),
@@ -148,6 +149,7 @@ impl Action {
         if !village.map_input_blocked() && !village.advance_open() && !village.planning_roads() {
             match self {
                 Self::Terrain => return true,
+                Self::PickFlattenHeight => return village.terrain_editor.can_pick_flatten_height(),
                 Self::TerrainBrush(_)
                 | Self::TerrainRadius(_)
                 | Self::UndoTerrain
@@ -168,6 +170,7 @@ impl Action {
             Self::Terrain
             | Self::TerrainBrush(_)
             | Self::TerrainRadius(_)
+            | Self::PickFlattenHeight
             | Self::UndoTerrain
             | Self::RedoTerrain => false,
             Self::Advance(_) => false,
@@ -385,6 +388,7 @@ impl Action {
             .into(),
             Self::TerrainRadius(true) => "Next radius".into(),
             Self::TerrainRadius(false) => "Previous radius".into(),
+            Self::PickFlattenHeight => "Pick a new flatten height".into(),
             Self::UndoTerrain => "Undo terrain edit".into(),
             Self::RedoTerrain => "Redo terrain edit".into(),
             Self::Advance(action) => match action {
@@ -781,6 +785,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 }
                 spawn_button(menu, &assets, Action::TerrainRadius(false));
                 spawn_button(menu, &assets, Action::TerrainRadius(true));
+                spawn_button(menu, &assets, Action::PickFlattenHeight);
                 spawn_button(menu, &assets, Action::UndoTerrain);
                 spawn_button(menu, &assets, Action::RedoTerrain);
                 for delta in [IVec2::NEG_X, IVec2::X, IVec2::NEG_Y, IVec2::Y] {
@@ -1052,6 +1057,7 @@ fn handle_buttons(
                 }
                 Action::TerrainBrush(brush) => village.terrain_editor.select_brush(brush),
                 Action::TerrainRadius(forward) => village.terrain_editor.cycle_radius(forward),
+                Action::PickFlattenHeight => village.terrain_editor.pick_flatten_height(),
                 Action::UndoTerrain => village.terrain_editor.undo(),
                 Action::RedoTerrain => village.terrain_editor.redo(),
                 Action::Advance(action) => {
@@ -1537,6 +1543,7 @@ fn refresh(
             | Action::UndoRoad
             | Action::FinishRoad => action.available(&village),
             Action::ResizeField(_) => !picker.open && show_field_size,
+            Action::PickFlattenHeight => action.available(&village),
             Action::TerrainBrush(_)
             | Action::TerrainRadius(_)
             | Action::UndoTerrain

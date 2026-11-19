@@ -156,6 +156,17 @@ impl TerrainEditor {
         self.level = None;
     }
 
+    pub fn can_pick_flatten_height(&self) -> bool {
+        self.open && matches!(self.brush, Brush::Flatten)
+    }
+
+    pub fn pick_flatten_height(&mut self) {
+        if self.can_pick_flatten_height() {
+            self.level = None;
+            self.status = "";
+        }
+    }
+
     pub fn cycle_radius(&mut self, forward: bool) {
         let count = Self::RADII.len();
         self.radius_index = (self.radius_index + if forward { 1 } else { count - 1 }) % count;
@@ -177,6 +188,9 @@ impl TerrainEditor {
             if keyboard.just_pressed(key) {
                 self.select_brush(brush);
             }
+        }
+        if keyboard.just_pressed(KeyCode::KeyP) {
+            self.pick_flatten_height();
         }
         if keyboard.just_pressed(KeyCode::KeyZ) {
             if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
@@ -263,6 +277,7 @@ impl TerrainEditor {
             .map_or_else(String::new, |h| format!(" · Grade {h:.2} m"));
         let instruction = match (self.brush, self.level) {
             (Brush::Flatten, None) => "Click to sample a grade",
+            (Brush::Flatten, Some(_)) => "Click or drag to flatten · P Pick new height",
             _ => "Click or drag to shape the ground",
         };
         format!(
@@ -922,6 +937,14 @@ mod tests {
         assert_eq!(terrain.elevation(-32.0, 0.0), 0.0);
         assert_eq!(terrain.elevation(0.0, -110.0), 0.0);
         assert_eq!(terrain.elevation(8.0, 8.0), 0.0);
+        editor.open = true;
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::KeyP);
+        editor.controls(&keys);
+        assert!(editor.level.is_none());
+        assert_eq!(editor.terrain(base()).elevation(40.0, 24.0), 1.25);
+        editor.stroke(&terrain, Vec3::new(56.0, 2.5, 42.0), |_| false);
+        assert_eq!(editor.level, Some(2.5));
     }
 
     #[test]

@@ -36,6 +36,8 @@ Press **F** or choose **Find in village** to center the camera on the selected p
 
 Press L to advance between 1 and 365 days. Use Alt+L when L controls sanitation or cold storage. Exact replay uses normal simulation steps. Fast approximate uses larger steps. Press L while advancing to stop at the time shown.
 
+With the Flatten terrain tool open, press **P** or choose **Pick a new flatten height**. The next click samples a grade for subsequent strokes.
+
 Choose Cultivated field in the build menu. Use brackets to change its width, Shift with brackets for depth, and R to rotate. To resize a field already on the map, select it, open Beds with K, and use the same bracket controls. Existing beds stay anchored to their ground.
 
 Press F7 in Story to see maintenance jobs and inspect a completed building. Press T to toggle automatic maintenance or use brackets to adjust the daily parts allowance.
