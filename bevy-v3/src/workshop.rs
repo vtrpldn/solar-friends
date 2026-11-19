@@ -122,6 +122,11 @@ fn controls(
     }
 }
 
+fn viewport_height(project: &crate::catalog::Project, zoom: f32) -> f32 {
+    let footprint = project.size[0].max(project.size[1]) as f32 * 2.0;
+    footprint.mul_add(1.4, 4.0) * zoom
+}
+
 fn show_model(
     mut commands: Commands,
     (assets, catalog, workshop): (Res<AssetServer>, Res<Catalog>, Res<Workshop>),
@@ -146,9 +151,8 @@ fn show_model(
     let (transform, projection) = &mut *camera;
     **transform = crate::camera_transform(Vec3::Y, workshop.heading);
     if let Projection::Orthographic(ortho) = &mut **projection {
-        let footprint = project.size[0].max(project.size[1]) as f32 * 2.0;
         ortho.scaling_mode = bevy::camera::ScalingMode::FixedVertical {
-            viewport_height: footprint.mul_add(1.4, 4.0) * workshop.zoom,
+            viewport_height: viewport_height(project, workshop.zoom),
         };
     }
     let mode = if workshop.night {
@@ -172,7 +176,7 @@ fn show_model(
 fn capture_preview(
     mut commands: Commands,
     keys: Res<ButtonInput<KeyCode>>,
-    mut workshop: ResMut<Workshop>,
+    (mut workshop, catalog): (ResMut<Workshop>, Res<Catalog>),
     mut panel: Single<&mut Node, With<Text>>,
     pending: Query<(), With<Screenshot>>,
     scene: Query<&SceneInstance>,
@@ -209,6 +213,22 @@ fn capture_preview(
             return;
         }
     };
+    let id = &workshop.projects[workshop.selected];
+    let project = &catalog.projects[id];
+    let mut metadata = serde_json::json!({
+        "schema": "solar-friends.v3.workshop-preview.v1",
+        "project": id,
+        "model": project.model,
+        "footprint_cells": project.size,
+        "metres_per_cell": 2,
+        "light": if workshop.night { "night" } else { "day" },
+        "camera": {
+            "projection": "orthographic",
+            "heading_degrees": (workshop.heading.to_degrees() + 45.0).rem_euclid(360.0),
+            "elevation_degrees": (35.0_f32 / 32.0_f32.hypot(32.0)).atan().to_degrees(),
+            "viewport_height_metres": viewport_height(project, workshop.zoom),
+        }
+    });
     panel.display = Display::None;
     commands.spawn(Screenshot::primary_window()).observe(
         move |event: On<ScreenshotCaptured>, mut workshop: ResMut<Workshop>| {
@@ -218,9 +238,21 @@ fn capture_preview(
                 .try_into_dynamic()
                 .map_err(|error| error.to_string())
                 .and_then(|img| img.to_rgb8().save(&path).map_err(|error| error.to_string()));
+            let result = result.and_then(|()| {
+                metadata["image_pixels"] =
+                    serde_json::json!([event.image.width(), event.image.height()]);
+                serde_json::to_vec_pretty(&metadata)
+                    .map_err(std::io::Error::from)
+                    .and_then(|bytes| {
+                        crate::save::atomic_write(&path.with_extension("json"), &bytes, 4096)
+                    })
+                    .map_err(|error| {
+                        format!("PNG saved, but metadata could not be written · {error}")
+                    })
+            });
             workshop.export_notice = match result {
-                Ok(()) => format!("Saved {}", path.display()),
-                Err(error) => format!("Could not export PNG · {error}"),
+                Ok(()) => format!("Saved PNG and metadata · {}", path.display()),
+                Err(error) => format!("Export · {error}"),
             };
         },
     );

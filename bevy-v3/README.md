@@ -95,4 +95,4 @@ In the native lab, press **O** to enter a JSON order at the current step and **F
 
 Pass `--workshop` to inspect the bundled building scenes. Use **←/→** to browse, **Q/E** to orbit, **+/−** to zoom, **N** to change lighting, **G** to toggle the grid and footprint guides, and **Home** to reset the view.
 
-Press **F5** to export the current workshop view as a PNG without the controls overlay. The workshop shows the saved path.
+Press **F5** to export the current workshop view as a PNG without the controls overlay. A JSON sidecar records the model, footprint, lighting, and camera settings. The workshop shows the saved path.
