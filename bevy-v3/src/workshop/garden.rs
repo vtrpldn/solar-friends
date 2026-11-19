@@ -4,7 +4,10 @@ use bevy::{
     prelude::*,
 };
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, path::PathBuf};
+use std::{
+    collections::{HashMap, HashSet},
+    path::PathBuf,
+};
 
 const CELLS: i32 = 96;
 const WIDTH: f32 = CELLS as f32 * 2.0;
@@ -111,7 +114,10 @@ impl Garden {
 }
 
 #[derive(Component)]
-struct GardenProp;
+struct GardenProp {
+    id: String,
+    model: usize,
+}
 #[derive(Component)]
 struct GardenText;
 
@@ -226,7 +232,10 @@ fn edit(
     let modifier = [ControlLeft, ControlRight, SuperLeft, SuperRight]
         .iter()
         .any(|key| keys.pressed(*key));
-    garden.zoom = (garden.zoom * (1. - scroll.delta.y * 0.09)).clamp(0.035, 3.);
+    let zoom_in = pressed(Equal) || pressed(NumpadAdd);
+    let zoom_out = pressed(Minus) || pressed(NumpadSubtract);
+    let zoom_steps = scroll.delta.y + f32::from(zoom_in) - f32::from(zoom_out);
+    garden.zoom = (garden.zoom * (-0.09 * zoom_steps).exp()).clamp(0.035, 3.);
     garden.bearing +=
         (i32::from(pressed(KeyE)) - i32::from(pressed(KeyQ))) as f32 * std::f32::consts::FRAC_PI_2;
     if mouse.pressed(MouseButton::Right) {
@@ -367,23 +376,51 @@ fn render(
     mut garden: ResMut<Garden>,
     models: Res<WorkshopCatalog>,
     assets: Res<AssetServer>,
-    rendered: Query<Entity, With<GardenProp>>,
+    mut rendered: Query<(Entity, &GardenProp, &mut Transform)>,
     mut text: Single<&mut Text, With<GardenText>>,
     mut gizmos: Gizmos,
 ) {
     if garden.redraw {
-        garden.redraw = false;
-        for entity in &rendered {
+        const MODELS_PER_FRAME: usize = 12;
+        let mut displayed: HashMap<_, _> = rendered
+            .iter_mut()
+            .map(|(entity, marker, transform)| {
+                (marker.id.as_str(), (entity, marker.model, transform))
+            })
+            .collect();
+        let mut spawned = 0;
+        let mut loading = false;
+        for prop in &garden.layout.props {
+            let model = models.0[&prop.asset].model;
+            let transform = Transform::from_translation(prop.center(&models))
+                .with_rotation(Quat::from_rotation_y((prop.rotation as f32).to_radians()));
+            if let Some((entity, existing_model, mut existing_transform)) =
+                displayed.remove(prop.id.as_str())
+            {
+                if existing_model == model {
+                    existing_transform.set_if_neq(transform);
+                    continue;
+                }
+                commands.entity(entity).despawn();
+            }
+            if spawned == MODELS_PER_FRAME {
+                loading = true;
+                continue;
+            }
+            commands.spawn((
+                GardenProp {
+                    id: prop.id.clone(),
+                    model,
+                },
+                building_model(&assets, model),
+                transform,
+            ));
+            spawned += 1;
+        }
+        for (entity, _, _) in displayed.into_values() {
             commands.entity(entity).despawn();
         }
-        for prop in &garden.layout.props {
-            commands.spawn((
-                GardenProp,
-                building_model(&assets, models.0[&prop.asset].model),
-                Transform::from_translation(prop.center(&models))
-                    .with_rotation(Quat::from_rotation_y((prop.rotation as f32).to_radians())),
-            ));
-        }
+        garden.redraw = loading;
     }
     let selection = garden.selected.map(|index| &garden.layout.props[index]);
     let highlighted = garden.pending.as_ref().map(|(prop, _)| prop).or(selection);
@@ -432,7 +469,7 @@ fn render(
         },
     );
     text.0 = format!(
-        "Asset Garden  ·  {} props\n{label}\nRight drag pan   Scroll zoom   Q/E turn   Home whole plot   G grid\nM move   R rotate   Ctrl/⌘ D copy   Delete remove   F5 restore gallery\nClick/Enter confirm   Esc cancel   Ctrl/⌘ Z undo   Shift redo   Ctrl/⌘ S save\n{}",
+        "Asset Garden  ·  {} props\n{label}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nClick/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save\n{}",
         garden.layout.props.len(),
         garden.status
     );
