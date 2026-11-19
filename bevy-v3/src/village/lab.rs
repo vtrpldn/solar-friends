@@ -432,12 +432,20 @@ impl Runner {
         }
     }
 
-    fn export(&self) -> io::Result<std::path::PathBuf> {
+    fn checkpoint(&self, path: &Path) -> io::Result<()> {
+        crate::save::write(path, &self.village)
+    }
+
+    fn output_path(&self, kind: &str) -> io::Result<std::path::PathBuf> {
         let nonce = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map_err(io::Error::other)?;
-        let path = crate::save::location(self.setup.mode)?
-            .with_file_name(format!("lab-report-{}.json", nonce.as_nanos()));
+        Ok(crate::save::location(self.setup.mode)?
+            .with_file_name(format!("lab-{kind}-{}.json", nonce.as_nanos())))
+    }
+
+    fn export(&self) -> io::Result<std::path::PathBuf> {
+        let path = self.output_path("report")?;
         let bytes = serde_json::to_vec(&self.report())?;
         crate::save::atomic_write(&path, &bytes, 3 * crate::save::MAX_BYTES)?;
         Ok(path)
@@ -906,6 +914,15 @@ fn update_lab_window(
             playback.clear_confirmation = None;
             playback.order = Some(String::new());
         }
+        if keys.just_pressed(KeyCode::F6) {
+            playback.notice = match runner.output_path("checkpoint").and_then(|path| {
+                runner.checkpoint(&path)?;
+                Ok(path)
+            }) {
+                Ok(path) => format!("Checkpoint saved to {}", path.display()),
+                Err(error) => format!("Could not save checkpoint · {error}"),
+            };
+        }
         if keys.just_pressed(KeyCode::F5) && runner.done() {
             playback.notice = match runner.export() {
                 Ok(path) => format!("Report saved to {}", path.display()),
@@ -1052,7 +1069,7 @@ fn update_lab_window(
             )
         };
         panel.set_if_neq(Text::new(format!(
-            "Simulation lab · {status} · Step {} / {}\nSpace Run/Pause · J Single step · O Enter order · F5 Export\n{}\n\n{details}",
+            "Simulation lab · {status} · Step {} / {}\nSpace Run/Pause · J Single step · O Enter order · F5 Report · F6 Checkpoint\n{}\n\n{details}",
             runner.index, runner.scenario.steps, playback.notice,
         )));
         return;
@@ -1066,7 +1083,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report · Tab Browse lab views\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export report · F6 Checkpoint · Tab Browse lab views\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         runner.scenario.steps,
         village.clock,
@@ -1090,6 +1107,33 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_lab_checkpoint_restores_the_current_village_for_a_new_run() {
+        let catalog = Catalog::default();
+        let scenario = || Scenario {
+            steps: 3,
+            orders: vec![],
+            stop: LabStop::None,
+        };
+        let mut runner = Runner::new(scenario(), None, &catalog).unwrap();
+        runner.advance(&catalog);
+        runner
+            .submit(&catalog, LabOrder::Grid { enabled: false })
+            .unwrap();
+        let path = std::env::temp_dir().join(format!(
+            "solar-lab-checkpoint-test-{}.json",
+            std::process::id()
+        ));
+        runner.checkpoint(&path).unwrap();
+        let from_save = crate::save::read(&path, &catalog);
+        std::fs::remove_file(path).unwrap();
+        let resumed = Runner::new(scenario(), Some(from_save.unwrap()), &catalog).unwrap();
+        assert_eq!(resumed.index, 0);
+        assert_eq!(resumed.village.clock, runner.village.clock);
+        assert!(resumed.village.construction.utilities.grid_off);
+        assert!(resumed.outcomes.is_empty());
+    }
 
     #[test]
     fn a_lab_purchase_at_night_cannot_spend_cash_or_create_an_order() {
