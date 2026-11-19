@@ -117,6 +117,13 @@ struct Node {
 }
 
 impl Node {
+    fn irrigation_source(&self, amount: f64) -> Option<usize> {
+        let channel = usize::from(
+            !matches!(self.kind.as_str(), "coop" | "goat_pasture") && self.water[1] >= amount,
+        );
+        (self.enabled && self.water[channel] + 1e-8 >= amount).then_some(channel)
+    }
+
     fn matches_view(&self, view: NetworkView) -> bool {
         if view == NetworkView::Power {
             light_load(&self.kind) > 0.0
@@ -399,16 +406,21 @@ impl Utilities {
             .map(|(&id, node)| (id, node.location, node.size))
     }
 
+    pub fn can_irrigate(&self, plot: usize, amount: f64) -> bool {
+        self.nodes
+            .get(&(plot + 1))
+            .is_some_and(|node| node.irrigation_source(amount).is_some())
+    }
+
     pub fn irrigate(&mut self, plot: usize, amount: f64) -> bool {
         let Some(node) = self.nodes.get_mut(&(plot + 1)) else {
             return false;
         };
-        if !node.enabled || node.water[0] + node.water[1] < amount {
+        // Irrigation uses a full dose from one tank, preferring untreated water.
+        let Some(channel) = node.irrigation_source(amount) else {
             return false;
-        }
-        let untreated = node.water[1].min(amount);
-        node.water[1] -= untreated;
-        node.water[0] -= amount - untreated;
+        };
+        node.water[channel] = (node.water[channel] - amount).max(0.0);
         true
     }
 
@@ -1947,6 +1959,30 @@ fn capacity(kind: &str) -> [f64; 4] {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn irrigation_uses_one_tank_per_dose() {
+        let mut utilities = Utilities::default();
+        utilities.sync(std::iter::once(Facility {
+            id: 1,
+            kind: "garden",
+            location: IVec2::new(49, 36),
+            size: IVec2::ONE,
+            batteries: 0,
+            panels: 0,
+            working: false,
+        }));
+        utilities.deliver_water(1, 0, 2.0);
+        utilities.deliver_water(1, 1, 2.0);
+
+        assert!(!utilities.can_irrigate(0, 3.0));
+        assert!(!utilities.irrigate(0, 3.0));
+        assert_eq!(utilities.nodes[&1].water[..2], [2.0, 2.0]);
+        assert!(utilities.irrigate(0, 1.5));
+        assert_eq!(utilities.nodes[&1].water[..2], [2.0, 0.5]);
+        assert!(utilities.irrigate(0, 1.0));
+        assert_eq!(utilities.nodes[&1].water[..2], [1.0, 0.5]);
+    }
+
     #[test]
     fn seasonal_hydrology_matches_v2_with_daily_water_draws() {
         // Reference values come from V2 weatherStep, hydrologyStep and extractWater

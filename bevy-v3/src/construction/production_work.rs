@@ -1472,8 +1472,7 @@ impl Construction {
             && biology.on_site_water > 0.0
             && !self
                 .utilities
-                .water_site(batch.site + 1)
-                .is_some_and(|node| node.levels[0] + node.levels[1] >= biology.on_site_water)
+                .can_irrigate(batch.site, biology.on_site_water)
         {
             return false;
         }
