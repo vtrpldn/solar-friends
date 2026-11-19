@@ -1,6 +1,6 @@
 use bevy::{math::EulerRot, prelude::*, scene::SceneInstanceReady};
 
-use super::{BuiltProject, Village};
+use super::{BuiltProject, Village, outdoor_animation_time};
 use crate::setup::WorldSetup;
 
 enum Joint {
@@ -74,8 +74,9 @@ fn animate(
     if setup.open {
         return;
     }
+    let elapsed = outdoor_animation_time(village.seconds());
     for (joint, mut transform) in &mut joints {
-        let time = village.seconds() as f32 + joint.phase;
+        let time = elapsed + joint.phase;
         let envelope = (time * 0.35).sin();
         let walk = envelope.max(0.0).powi(4);
         let goat = joint.goat;

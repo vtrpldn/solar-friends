@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use super::{BuiltProject, Village};
+use super::{BuiltProject, Village, outdoor_animation_time};
 
 #[derive(Component)]
 pub(super) struct Flame {
@@ -76,12 +76,13 @@ pub(super) fn light_new_fires(
 }
 
 pub(super) fn animate_fires(
-    time: Res<Time>,
+    village: Res<Village>,
     mut flames: Query<(&Flame, &mut Transform)>,
     mut lights: Query<(&FireLight, &mut PointLight)>,
 ) {
+    let elapsed = outdoor_animation_time(village.seconds());
     for (flame, mut transform) in &mut flames {
-        let time = time.elapsed_secs() + flame.phase;
+        let time = elapsed + flame.phase;
         let index = flame.index as f32;
         let pulse =
             1.0 + (time * 5.3 + index * 1.7).sin() * 0.18 + (time * 8.1 + index).sin() * 0.08;
@@ -93,7 +94,7 @@ pub(super) fn animate_fires(
         transform.rotation = Quat::from_rotation_z((time * 3.7 + index).sin() * 0.12);
     }
     for (fire, mut light) in &mut lights {
-        let time = time.elapsed_secs() + fire.0;
+        let time = elapsed + fire.0;
         light.intensity = 950.0 + (time * 5.3).sin() * 86.0 + (time * 8.1).sin() * 65.0;
     }
 }

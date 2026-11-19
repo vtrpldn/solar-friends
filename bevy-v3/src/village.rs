@@ -2111,6 +2111,12 @@ fn show_construction(
     }
 }
 
+fn outdoor_animation_time(seconds: f64) -> f32 {
+    // The fire and livestock frequencies are multiples of 0.05 radians per second.
+    // Reduce by a shared period before converting to f32 to keep motion smooth in old villages.
+    seconds.rem_euclid(20.0 * std::f64::consts::TAU) as f32
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
