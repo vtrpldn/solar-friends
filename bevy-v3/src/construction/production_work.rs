@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::{
     catalog::ProductionRecipe,
     production::{
@@ -167,8 +169,9 @@ impl Construction {
             recipe.name,
             (recipe.work * 0.45).ceil()
         );
-        if !recipe.input.is_empty() {
-            let _ = write!(detail, "\nUses {}", materials(&recipe.input));
+        let inputs = self.recipe_materials(catalog, site, id);
+        if !inputs.is_empty() {
+            let _ = write!(detail, "\nUses {}", materials(&inputs));
         }
         if !recipe.output.is_empty() {
             let _ = write!(detail, "\nProduces {}", materials(&recipe.output));
@@ -321,23 +324,33 @@ impl Construction {
         if stock.sandbox {
             return Ok(None);
         }
-        let mut inputs = recipe.input.clone();
-        if id == "wood"
-            && self
-                .production
-                .growing_sites
-                .get(&index)
-                .is_some_and(|ground| ground.harvests > 0)
-        {
-            inputs.insert("tree_starts".into(), 4);
-        }
+        let inputs = self.recipe_materials(catalog, index, id);
         if let Some(material) = stock.missing(&inputs) {
             return Err(format!(
                 "Not enough {} in supplies.",
                 catalog.materials[material].name
             ));
         }
-        Ok(Some(inputs))
+        Ok(Some(inputs.into_owned()))
+    }
+
+    pub(super) fn recipe_materials<'a>(
+        &self,
+        catalog: &'a Catalog,
+        site: usize,
+        id: &str,
+    ) -> Cow<'a, BTreeMap<String, u32>> {
+        let mut inputs = Cow::Borrowed(&catalog.production[id].input);
+        if id == "wood"
+            && self
+                .production
+                .growing_sites
+                .get(&site)
+                .is_some_and(|ground| ground.harvests > 0)
+        {
+            inputs.to_mut().insert("tree_starts".into(), 4);
+        }
+        inputs
     }
 
     pub(super) fn batch_status(

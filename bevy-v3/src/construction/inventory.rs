@@ -72,7 +72,11 @@ impl Construction {
                     Location::Transit,
                 );
             } else {
-                record(&mut ledger, &recipe.input, Location::Processing);
+                record(
+                    &mut ledger,
+                    &self.recipe_materials(catalog, job.site, &job.recipe),
+                    Location::Processing,
+                );
             }
         }
         for job in &self.farming.jobs {
