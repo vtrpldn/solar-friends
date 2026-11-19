@@ -1970,6 +1970,12 @@ fn show_hud(
                     .pantry_purchase_status(&village.stock, village.clock),
             );
             label.push('\n');
+            if !village.stock.sandbox
+                && let Some(warning) = village.stock.pantry.use_soon(&catalog, village.clock)
+            {
+                label.push_str(&warning);
+                label.push('\n');
+            }
             label.push_str(&village.construction.production.kitchen_policy.status());
             label.push_str("\nR Food batches · Tab Finances");
         }

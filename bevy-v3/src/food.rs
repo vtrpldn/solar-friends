@@ -305,6 +305,24 @@ impl Pantry {
         )
     }
 
+    pub fn use_soon(&self, catalog: &Catalog, clock: f64) -> Option<String> {
+        let foods: Vec<_> = FOODS
+            .iter()
+            .filter_map(|&(id, _)| {
+                let units: u64 = self
+                    .lots
+                    .get(id)?
+                    .iter()
+                    .filter(|lot| lot.expires > clock && lot.expires <= clock + DAY)
+                    .map(|lot| u64::from(lot.units))
+                    .sum();
+                let item = &catalog.materials[id];
+                (units > 0).then(|| format!("{} {}", item.quantity_text(units), item.name))
+            })
+            .collect();
+        (!foods.is_empty()).then(|| format!("Use within one day · {}", foods.join(", ")))
+    }
+
     pub fn batches(&self, catalog: &Catalog, page: usize) -> (usize, String) {
         use std::fmt::Write;
 
