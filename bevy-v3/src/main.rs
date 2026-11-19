@@ -688,6 +688,13 @@ mod tests {
         press_button(&mut app, "1×");
 
         press_button(&mut app, "Guide");
+        let reading_time = app.world().resource::<village::Village>().seconds();
+        assert!(app.world().resource::<village::Village>().is_paused());
+        simulate_river_frame(&mut app);
+        assert_eq!(
+            app.world().resource::<village::Village>().seconds(),
+            reading_time
+        );
         assert!(
             app.world()
                 .resource::<village::Village>()
@@ -697,6 +704,9 @@ mod tests {
         press_button(&mut app, "Growing autonomy");
         press_button(&mut app, "Chapter index");
         press_button(&mut app, "Close guide");
+        assert!(!app.world().resource::<village::Village>().is_paused());
+        simulate_river_frame(&mut app);
+        assert!(app.world().resource::<village::Village>().seconds() > reading_time);
         assert!(
             !app.world()
                 .resource::<village::Village>()

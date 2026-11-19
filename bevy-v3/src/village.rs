@@ -527,7 +527,8 @@ impl Village {
     }
 
     fn planning_pause(&self) -> bool {
-        self.utility_panel.is_some()
+        self.guide.open()
+            || self.utility_panel.is_some()
             || (self.construction.menu && !self.construction.placing_project())
     }
 
@@ -1530,7 +1531,7 @@ fn advance_days(
     mut village: ResMut<Village>,
     (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
 ) {
-    if setup.open || saves.open || village.advance.running.is_none() {
+    if setup.open || saves.open || village.guide.open() || village.advance.running.is_none() {
         return;
     }
     let (Some(camp), Some(mut run)) = (village.camp, village.advance.running.take()) else {
