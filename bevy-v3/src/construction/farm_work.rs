@@ -498,7 +498,34 @@ impl Construction {
             return Some("K Cultivation".into());
         }
         let index = self.farming.bed.min(plot.beds.len() - 1);
-        let bed = &plot.beds[index];
+        let mut label = self.bed_status(site, index, clock)?;
+        if !self
+            .farming
+            .jobs
+            .iter()
+            .any(|job| job.site == site && job.bed == index)
+        {
+            label.push_str("\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect");
+        }
+        label.push_str("\nTab Bed · X Crop · Y Density · T Water · Z Residues · K Close");
+        let plan = &self.plans[site];
+        if plan.key == "field" {
+            let size = rotated_size(plan.size, plan.rotation);
+            label.push_str(&format!(
+                "\n{} × {} cells · [ ] Width · Shift [ ] Depth",
+                size.x, size.y
+            ));
+        }
+        if !self.farming.notice.is_empty() {
+            label.push('\n');
+            label.push_str(&self.farming.notice);
+        }
+        Some(label)
+    }
+
+    pub(crate) fn bed_status(&self, site: usize, index: usize, clock: f64) -> Option<String> {
+        let plot = self.farming.plots.get(&site)?;
+        let bed = plot.beds.get(index)?;
         let irrigation = if bed.irrigation {
             "Irrigated"
         } else {
@@ -537,21 +564,6 @@ impl Construction {
                     job.work / job.required * 100.0
                 ));
             }
-        } else {
-            label.push_str("\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect");
-        }
-        label.push_str("\nTab Bed · X Crop · Y Density · T Water · Z Residues · K Close");
-        let plan = &self.plans[site];
-        if plan.key == "field" {
-            let size = rotated_size(plan.size, plan.rotation);
-            label.push_str(&format!(
-                "\n{} × {} cells · [ ] Width · Shift [ ] Depth",
-                size.x, size.y
-            ));
-        }
-        if !self.farming.notice.is_empty() {
-            label.push('\n');
-            label.push_str(&self.farming.notice);
         }
         Some(label)
     }

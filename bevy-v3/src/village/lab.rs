@@ -436,6 +436,7 @@ enum LabView {
     Stocked,
     AllItems,
     Jobs,
+    Beds,
 }
 
 impl LabView {
@@ -444,7 +445,8 @@ impl LabView {
             Self::Overview => Self::Stocked,
             Self::Stocked => Self::AllItems,
             Self::AllItems => Self::Jobs,
-            Self::Jobs => Self::Overview,
+            Self::Jobs => Self::Beds,
+            Self::Beds => Self::Overview,
         }
     }
 }
@@ -527,6 +529,7 @@ struct Playback {
     inventory_page: usize,
     job_focus: Option<usize>,
     waiting_only: bool,
+    farm_site: Option<usize>,
 }
 
 impl Default for Playback {
@@ -541,8 +544,61 @@ impl Default for Playback {
             inventory_page: 0,
             job_focus: None,
             waiting_only: false,
+            farm_site: None,
         }
     }
+}
+
+fn lab_bed_page(
+    village: &Village,
+    catalog: &Catalog,
+    keys: &ButtonInput<KeyCode>,
+    playback: &mut Playback,
+) -> String {
+    let construction = &village.construction;
+    let plots = &construction.farming.plots;
+    let Some((&first, _)) = plots.first_key_value() else {
+        playback.farm_site = None;
+        return "Cultivation\nTab Switch view\n\nNo cultivated plots.".into();
+    };
+    let current = playback
+        .farm_site
+        .filter(|site| plots.contains_key(site))
+        .unwrap_or(first);
+    let site = if keys.just_pressed(KeyCode::BracketRight) {
+        plots
+            .keys()
+            .copied()
+            .find(|&site| site > current)
+            .unwrap_or(first)
+    } else if keys.just_pressed(KeyCode::BracketLeft) {
+        plots
+            .keys()
+            .rev()
+            .copied()
+            .find(|&site| site < current)
+            .unwrap_or_else(|| *plots.last_key_value().expect("at least one plot").0)
+    } else {
+        current
+    };
+    if playback.farm_site != Some(site) {
+        playback.farm_site = Some(site);
+        playback.inventory_page = 0;
+    }
+    let index = playback
+        .inventory_page
+        .min(plots[&site].beds.len().saturating_sub(1));
+    playback.inventory_page = index;
+    let name = construction
+        .lab_job_site_name(catalog, site)
+        .unwrap_or("Cultivation");
+    let details = construction
+        .bed_status(site, index, village.clock)
+        .unwrap_or_else(|| "No beds.".into());
+    format!(
+        "Cultivation · {name} #{}\nTab Switch view · [ / ] Plot · Page Up/Down Bed\n\n{details}",
+        site + 1
+    )
 }
 
 fn update_lab_window(
@@ -716,6 +772,8 @@ fn update_lab_window(
                 &focus,
                 playback.waiting_only,
             )
+        } else if playback.view == LabView::Beds {
+            lab_bed_page(village, &catalog, &keys, playback)
         } else {
             lab_inventory(
                 &catalog,
@@ -739,7 +797,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report · Tab Inventory and jobs\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report · Tab Inventory, jobs and beds\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         runner.scenario.steps,
         village.clock,
