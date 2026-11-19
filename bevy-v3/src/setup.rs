@@ -268,6 +268,7 @@ impl WorldSetup {
             Action::Resume => "Resume current village".into(),
             Action::Continue => "Continue last autosave".into(),
             Action::Library => "Saved villages".into(),
+            Action::Sound => "Sound settings".into(),
         }
     }
 }
@@ -289,6 +290,7 @@ pub(crate) enum Action {
     Resume,
     Continue,
     Library,
+    Sound,
 }
 
 #[derive(Component)]
@@ -326,7 +328,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 padding: UiRect::all(px(24)),
                 width: px(340),
                 flex_direction: FlexDirection::Column,
-                row_gap: px(8),
+                row_gap: px(6),
                 ..default()
             },
             BackgroundColor(Color::srgb_u8(31, 45, 35)),
@@ -349,6 +351,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Resume,
                 Action::Continue,
                 Action::Library,
+                Action::Sound,
                 Action::Explore,
             ] {
                 panel
@@ -361,7 +364,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                             } else {
                                 Display::Flex
                             },
-                            padding: UiRect::axes(px(14), px(8)),
+                            padding: UiRect::axes(px(14), px(6)),
                             ..default()
                         },
                         BackgroundColor(Color::srgb_u8(62, 83, 65)),
@@ -409,9 +412,9 @@ fn setup_input(
     keyboard: Res<ButtonInput<KeyCode>>,
     buttons: Query<(&Interaction, &Action), Changed<Interaction>>,
     window: Single<&Window, With<PrimaryWindow>>,
-    (mut saves, sound, mut village, catalog): (
+    (mut saves, mut sound, mut village, catalog): (
         ResMut<SaveMenu>,
-        Res<crate::audio::SoundSettings>,
+        ResMut<crate::audio::SoundSettings>,
         ResMut<crate::village::Village>,
         Res<crate::catalog::Catalog>,
     ),
@@ -498,6 +501,7 @@ fn setup_input(
                 }
             }
             Action::Continue | Action::Library => {}
+            Action::Sound => sound.open = true,
             Action::Resume => {
                 if let Some(active) = village.session_setup() {
                     *setup = active.session();
@@ -511,13 +515,17 @@ fn refresh_panel(
     setup: Res<WorldSetup>,
     mut panel: Single<&mut Node, With<SetupPanel>>,
     mut buttons: Query<(&Action, &Children, &mut Node), Without<SetupPanel>>,
-    (village, saves): (Res<crate::village::Village>, Res<SaveMenu>),
+    (village, saves, sound): (
+        Res<crate::village::Village>,
+        Res<SaveMenu>,
+        Res<crate::audio::SoundSettings>,
+    ),
     mut labels: Query<&mut Text>,
 ) {
-    if !setup.is_changed() && !saves.is_changed() {
+    if !setup.is_changed() && !saves.is_changed() && !sound.is_changed() {
         return;
     }
-    panel.display = if setup.open && !saves.open {
+    panel.display = if setup.open && !saves.open && !sound.open {
         Display::Flex
     } else {
         Display::None

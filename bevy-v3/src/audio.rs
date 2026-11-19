@@ -135,7 +135,12 @@ impl SoundSettings {
         if keys.any_just_pressed([KeyCode::ArrowUp, KeyCode::ArrowDown]) {
             self.effects_selected = !self.effects_selected;
         }
-        let step = 5
+        let increment = if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+            5
+        } else {
+            1
+        };
+        let step = increment
             * (i16::from(keys.just_pressed(KeyCode::ArrowRight))
                 - i16::from(keys.just_pressed(KeyCode::ArrowLeft)));
         if keys.just_pressed(KeyCode::KeyM) {
@@ -181,7 +186,7 @@ impl SoundSettings {
             ""
         };
         format!(
-            "Sound · Up/Down Select · Left/Right Adjust · M Mute selected\n{music}Music {}%\n{effects}Interaction sounds {}%\nShift+F1 Close{status}",
+            "Sound · Up/Down Select · Left/Right ±1% · Shift ±5% · M Mute selected\n{music}Music {}%\n{effects}Interaction sounds {}%\nShift+F1 Close{status}",
             self.music, self.effects
         )
     }

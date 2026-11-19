@@ -605,6 +605,12 @@ mod tests {
         app.cleanup();
         app.update();
 
+        press_button(&mut app, "Sound settings");
+        assert!(app.world().resource::<audio::SoundSettings>().open);
+        app.world_mut().run_schedule(Update);
+        press_button(&mut app, "Close sound settings");
+        assert!(!app.world().resource::<audio::SoundSettings>().open);
+
         app.world_mut().resource_mut::<WorldSetup>().open = false;
         app.update();
         assert!(app.world().resource::<village::Village>().camp.is_none());
