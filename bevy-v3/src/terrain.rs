@@ -291,7 +291,8 @@ impl TerrainEditor {
         format!(
             "Terrain · {tool} · {} m radius{level}
 1 Raise · 2 Lower · 3 Flatten · 4 Smooth
-{instruction} · [ ] Radius · Z Undo · Shift+Z Redo · Shift+Backspace Reset · F4 Close
+{instruction} · [ ] Radius · Z Undo · Shift+Z Redo · Shift+Backspace Reset · Esc Close
+Terrain edits use no money, materials or resident work.
 {}",
             Self::RADII[self.radius_index],
             self.status

@@ -519,6 +519,10 @@ fn setup_input(
             && !village.advance_open()
             && !village.planning_roads()
         {
+            if village.editing_terrain() {
+                village.close_terrain_tools();
+                return;
+            }
             if let Err(error) = crate::village::save_session(&saves, &village, &catalog) {
                 village.save_notice = format!("Could not save village: {error}");
             }

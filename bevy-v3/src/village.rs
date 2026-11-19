@@ -415,6 +415,12 @@ impl Village {
         self.terrain_editor.open
     }
 
+    pub(crate) fn close_terrain_tools(&mut self) {
+        if self.terrain_editor.open {
+            self.terrain_editor.toggle();
+        }
+    }
+
     pub fn map_input_blocked(&self) -> bool {
         self.guide.open()
             || self.lenses.open

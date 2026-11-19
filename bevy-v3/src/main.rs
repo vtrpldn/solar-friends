@@ -932,7 +932,15 @@ mod tests {
             text.0
                 .contains("There are no terrain edits to undo in this session.")
         }));
-        press_button(&mut app, "Finish terrain");
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Escape);
+        app.world_mut().run_schedule(Update);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset(KeyCode::Escape);
+        assert!(!app.world().resource::<WorldSetup>().open);
+        assert!(!app.world().resource::<village::Village>().editing_terrain());
 
         press_button(&mut app, "Guide");
         let reading_time = app.world().resource::<village::Village>().seconds();
