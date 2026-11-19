@@ -63,7 +63,7 @@ const CATEGORIES: [&str; 10] = [
 ];
 pub(crate) const BUILD_ROWS: usize = 8;
 
-const PAGE_KEYS: [KeyCode; BUILD_ROWS] = [
+pub(crate) const PAGE_KEYS: [KeyCode; BUILD_ROWS] = [
     KeyCode::Digit1,
     KeyCode::Digit2,
     KeyCode::Digit3,

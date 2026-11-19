@@ -10,6 +10,8 @@ enum Action {
     Panel(UtilityPanel),
     ClosePanel,
     Page(bool),
+    Project(usize),
+    ProjectFilter,
 }
 
 impl Action {
@@ -56,6 +58,9 @@ impl Action {
             ) => !village.stock.sandbox,
             Self::Panel(_) => true,
             Self::ClosePanel => village.utility_panel.is_some(),
+            Self::Project(_) | Self::ProjectFilter => {
+                village.utility_panel == Some(UtilityPanel::Projects)
+            }
             Self::Page(_) => matches!(
                 village.utility_panel,
                 Some(UtilityPanel::Projects | UtilityPanel::Inventory | UtilityPanel::Events)
@@ -82,6 +87,9 @@ impl Action {
             Self::ClosePanel => "Close panel".into(),
             Self::Page(false) => "Previous page".into(),
             Self::Page(true) => "Next page".into(),
+            Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
+            Self::ProjectFilter => "Show underway".into(),
+            Self::Project(_) => String::new(),
         }
     }
 }
@@ -161,6 +169,10 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::Panel(panel));
                 }
                 spawn_button(menu, &assets, Action::ClosePanel);
+                spawn_button(menu, &assets, Action::ProjectFilter);
+                for row in 0..crate::construction::PAGE_KEYS.len() {
+                    spawn_button(menu, &assets, Action::Project(row));
+                }
             });
         });
 }
@@ -185,6 +197,7 @@ fn handle_buttons(
     mut village: ResMut<Village>,
     mut picker: ResMut<PanelPicker>,
     keyboard: Res<ButtonInput<KeyCode>>,
+    mut camera: Single<&mut VillageCamera>,
     buttons: Query<(&Action, &Interaction), Changed<Interaction>>,
 ) {
     if !visible(&village, &setup, &saves, &sound) {
@@ -223,7 +236,17 @@ fn handle_buttons(
                     picker.open = false;
                 }
                 Action::Page(forward) => village.change_panel_page(&catalog, forward),
-                Action::Panel(_) | Action::ClosePanel => {}
+                Action::Project(row) if !picker.open => {
+                    village.focus_project_row(&catalog, &setup, &mut camera, row);
+                }
+                Action::ProjectFilter if !picker.open => {
+                    village.open_projects_only = !village.open_projects_only;
+                    village.projects_page = 0;
+                }
+                Action::Panel(_)
+                | Action::ClosePanel
+                | Action::Project(_)
+                | Action::ProjectFilter => {}
             }
         }
     }
@@ -244,7 +267,7 @@ type ToolbarButtons<'w, 's> = Query<
 
 fn refresh(
     (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
-    village: Res<Village>,
+    (village, catalog): (Res<Village>, Res<Catalog>),
     picker: Res<PanelPicker>,
     mut toolbar: Single<&mut Node, (With<Toolbar>, Without<PanelMenu>)>,
     mut menu: Single<&mut Node, (With<PanelMenu>, Without<Toolbar>)>,
@@ -259,18 +282,32 @@ fn refresh(
     if toolbar.display == Display::None {
         return;
     }
-    menu.display = if picker.open && Action::Manage.available(&village) {
+    let show_projects = !picker.open && Action::ProjectFilter.available(&village);
+    let projects = if show_projects {
+        village.construction.project_page_labels(
+            &catalog,
+            village.projects_page,
+            village.open_projects_only,
+        )
+    } else {
+        Vec::new()
+    };
+    menu.display = if show_projects || (picker.open && Action::Manage.available(&village)) {
         Display::Flex
     } else {
         Display::None
     };
     for (&action, &interaction, children, mut background, mut node) in &mut buttons {
-        if matches!(action, Action::Page(_)) {
-            node.display = if action.available(&village) {
-                Display::Flex
-            } else {
-                Display::None
-            };
+        let show = match action {
+            Action::Page(_) => action.available(&village),
+            Action::Project(row) => projects.get(row).is_some(),
+            Action::ProjectFilter => show_projects,
+            Action::Panel(_) | Action::ClosePanel => picker.open,
+            _ => true,
+        };
+        node.display = if show { Display::Flex } else { Display::None };
+        if !show {
+            continue;
         }
         background.0 = if !action.available(&village) {
             Color::srgb_u8(40, 53, 43)
@@ -280,7 +317,10 @@ fn refresh(
             Color::srgb_u8(78, 105, 82)
         };
         if let Ok(mut text) = labels.get_mut(children[0]) {
-            let label = action.label(&village, &picker);
+            let label = match action {
+                Action::Project(row) => projects[row].clone(),
+                _ => action.label(&village, &picker),
+            };
             if text.0 != label {
                 text.0 = label;
             }

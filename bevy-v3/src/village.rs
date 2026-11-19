@@ -315,6 +315,25 @@ impl Village {
         self.guide.open() || self.lenses.open || self.construction.editing_search
     }
 
+    fn focus_project_row(
+        &mut self,
+        catalog: &Catalog,
+        setup: &WorldSetup,
+        camera: &mut VillageCamera,
+        row: usize,
+    ) {
+        if let Some(point) = self.construction.focus_project(
+            catalog,
+            row,
+            self.projects_page,
+            self.open_projects_only,
+        ) {
+            let terrain = self.terrain(setup);
+            camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+            self.utility_panel = None;
+        }
+    }
+
     fn change_panel_page(&mut self, catalog: &Catalog, forward: bool) {
         let (pages, page) = match self.utility_panel {
             Some(UtilityPanel::Projects) => (
@@ -938,14 +957,11 @@ fn village_input(
             if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
                 town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
             }
-            if let Some(point) = town.construction.focus_project(
-                &catalog,
-                &keyboard,
-                town.projects_page,
-                town.open_projects_only,
-            ) {
-                camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
-                town.utility_panel = None;
+            if let Some(row) = crate::construction::PAGE_KEYS
+                .iter()
+                .position(|key| keyboard.just_pressed(*key))
+            {
+                town.focus_project_row(&catalog, &setup, camera, row);
             }
             return;
         }

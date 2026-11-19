@@ -191,19 +191,32 @@ impl Construction {
         legend
     }
 
+    pub fn project_page_labels(
+        &self,
+        catalog: &Catalog,
+        page: usize,
+        underway: bool,
+    ) -> Vec<String> {
+        let projects = self.visible_projects(catalog, underway);
+        let page = page.min(projects.len().div_ceil(PAGE_KEYS.len()).saturating_sub(1));
+        projects
+            .iter()
+            .skip(page * PAGE_KEYS.len())
+            .take(PAGE_KEYS.len())
+            .map(|(index, plan)| format!("{} #{}", catalog.projects[&plan.key].name, index + 1))
+            .collect()
+    }
+
     pub fn focus_project(
         &mut self,
         catalog: &Catalog,
-        keyboard: &ButtonInput<KeyCode>,
+        row: usize,
         page: usize,
         underway: bool,
     ) -> Option<Vec2> {
-        let index = PAGE_KEYS
-            .iter()
-            .position(|key| keyboard.just_pressed(*key))?;
         let rows = self.visible_projects(catalog, underway);
         let page = page.min(rows.len().div_ceil(PAGE_KEYS.len()).saturating_sub(1));
-        let &(project, plan) = rows.get(page * PAGE_KEYS.len() + index)?;
+        let &(project, plan) = rows.get(page * PAGE_KEYS.len() + row)?;
         let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
         self.select_project(Some(project));
         Some(world_position(center.x, center.y))
