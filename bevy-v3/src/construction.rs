@@ -460,6 +460,8 @@ impl Construction {
                     || self.working_water(index)
                     || self.gathering.workers_at_site(index)
                     || self.farming.has_worker(index)
+                    || self.driver_booked(index)
+                    || self.residents[index].town_work.active()
                     || self.residents[index].leisure.visit.is_some()
                     || self.residents[index].health.task.is_some())
             {
@@ -2991,6 +2993,23 @@ mod tests {
         assert_eq!(village.resident_action(&catalog, 0), "Waiting for access");
         assert_eq!(village.lab_stop_reason(LabStop::Blocked, 0.0), None);
         village.plans[0].removed = true;
+        village.refresh_resident_crowding(&catalog, site);
+        assert!(!village.residents[0].waiting_for_route());
+        village.residents[0].health.task = None;
+        village.plans[0].removed = false;
+        village.trip = Some(TownTrip {
+            project: 0,
+            farm_bed: None,
+            market_order: false,
+            driver: 0,
+            vehicle: 0,
+            elapsed: 0.0,
+            duration: 20.0,
+            boarded: false,
+        });
+        village.refresh_resident_crowding(&catalog, site);
+        assert!(village.residents[0].waiting_for_route());
+        village.trip.as_mut().unwrap().boarded = true;
         village.refresh_resident_crowding(&catalog, site);
         assert!(!village.residents[0].waiting_for_route());
     }

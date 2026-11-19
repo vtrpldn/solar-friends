@@ -927,12 +927,12 @@ impl Construction {
         index: usize,
     ) -> std::borrow::Cow<'static, str> {
         let worker = &self.residents[index];
-        let label = if worker.town_work.active() {
+        let label = if worker.waiting_for_route() {
+            "Waiting for access"
+        } else if worker.town_work.active() {
             worker.town_work.status()
         } else if self.driver_away(index) {
             "In town"
-        } else if worker.waiting_for_route() {
-            "Waiting for access"
         } else if let Some(task) = &worker.health.task {
             task.kind.label()
         } else if let Some(job) = &worker.assignment {
