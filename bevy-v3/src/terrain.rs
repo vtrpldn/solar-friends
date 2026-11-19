@@ -514,14 +514,48 @@ impl Terrain {
     }
 
     pub fn river_mesh(&self) -> Mesh {
+        const ACROSS: u32 = 5;
+        let mut positions = Vec::new();
+        let mut colors = Vec::new();
+        let mut indices = Vec::new();
+        let deep = Color::srgb_u8(58, 110, 127).to_linear();
+        let shallow = Color::srgb_u8(108, 160, 150).to_linear();
+        for row in 0..=CELLS * 2 {
+            let z = f64::from(row) - HALF_WIDTH;
+            let (center, width) = self.river(z);
+            for column in 0..ACROSS {
+                let lateral = (2.0 * f64::from(column) / f64::from(ACROSS - 1)) - 1.0;
+                let x = center + width * lateral;
+                positions.push([x as f32, 0.05, z as f32]);
+                let tint = deep.mix(&shallow, lateral.abs().powi(2) as f32);
+                colors.push([tint.red, tint.green, tint.blue, 1.0]);
+                if row < CELLS * 2 && column < ACROSS - 1 {
+                    let a = row * ACROSS + column;
+                    indices.extend_from_slice(&[
+                        a,
+                        a + ACROSS,
+                        a + 1,
+                        a + ACROSS,
+                        a + ACROSS + 1,
+                        a + 1,
+                    ]);
+                }
+            }
+        }
+        surface_mesh(positions, indices).with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
+    }
+
+    pub fn river_bank_mesh(&self, extra: f64, height: f32) -> Mesh {
         let mut positions = Vec::new();
         let mut indices = Vec::new();
-        for row in 0..=CELLS {
-            let z = f64::from(row) * 2.0 - HALF_WIDTH;
+        for row in 0..=CELLS * 2 {
+            let z = f64::from(row) - HALF_WIDTH;
             let (center, width) = self.river(z);
-            positions.push([(center - width) as f32, 0.05, z as f32]);
-            positions.push([(center + width) as f32, 0.05, z as f32]);
-            if row < CELLS {
+            let edge = width + extra * (0.82 + noise(z / 7.0, 2.0, self.seed) * 0.18);
+            for x in [center - edge, center + edge] {
+                positions.push([x as f32, height, z as f32]);
+            }
+            if row < CELLS * 2 {
                 let a = row * 2;
                 indices.extend_from_slice(&[a, a + 2, a + 1, a + 2, a + 3, a + 1]);
             }

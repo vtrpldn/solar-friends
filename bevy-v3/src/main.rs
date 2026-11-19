@@ -176,10 +176,24 @@ fn update_land(
         Mesh3d(meshes.add(terrain.road_mesh())),
         MeshMaterial3d(materials.add(Color::srgb_u8(159, 120, 82))),
     ));
+    for (width, height, color) in [
+        (1.9, 0.025, Color::srgb_u8(130, 144, 106)),
+        (1.1, 0.035, Color::srgb_u8(182, 167, 128)),
+        (0.3, 0.045, Color::srgb_u8(159, 174, 145)),
+    ] {
+        commands.spawn((
+            LandMesh,
+            Mesh3d(meshes.add(terrain.river_bank_mesh(width, height))),
+            MeshMaterial3d(materials.add(color)),
+        ));
+    }
     commands.spawn((
         LandMesh,
         Mesh3d(meshes.add(terrain.river_mesh())),
-        MeshMaterial3d(materials.add(Color::srgb_u8(75, 135, 147))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            perceptual_roughness: 0.35,
+            ..default()
+        })),
     ));
 }
 
