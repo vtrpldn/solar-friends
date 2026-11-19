@@ -134,14 +134,18 @@ impl Action {
             Self::Grid if village.construction.utilities.grid_off => "Connect grid".into(),
             Self::Grid => "Disconnect grid".into(),
             Self::Water(command) => match command {
-                WaterCommand::Policy(true) => "Auto drinking reserve",
-                WaterCommand::Policy(false) => "Auto sanitation",
-                WaterCommand::River => "Collect river water",
-                WaterCommand::Carry => "Carry from source",
-                WaterCommand::Purify => "Purify water",
-                WaterCommand::Sanitation => "Service waste",
-            }
-            .into(),
+                WaterCommand::Camp { source: true } => "Camp source".into(),
+                WaterCommand::Camp { source: false } => "Camp destination".into(),
+                WaterCommand::NextChannel => {
+                    format!("Channel · {}", WATER_CHANNELS[village.water_panel.channel])
+                }
+                WaterCommand::Policy(true) => "Auto drinking reserve".into(),
+                WaterCommand::Policy(false) => "Auto sanitation".into(),
+                WaterCommand::River => "Collect river water".into(),
+                WaterCommand::Carry => "Carry from source".into(),
+                WaterCommand::Purify => "Purify water".into(),
+                WaterCommand::Sanitation => "Service waste".into(),
+            },
             Self::AutomaticUpkeep => "Toggle auto maintenance".into(),
             Self::UpkeepBudget { restock, increase } => format!(
                 "{} {} R$25",
@@ -239,6 +243,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::Ledger);
                 spawn_button(menu, &assets, Action::Grid);
                 for command in [
+                    WaterCommand::Camp { source: true },
+                    WaterCommand::Camp { source: false },
+                    WaterCommand::NextChannel,
                     WaterCommand::River,
                     WaterCommand::Carry,
                     WaterCommand::Purify,

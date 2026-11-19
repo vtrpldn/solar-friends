@@ -185,8 +185,12 @@ struct WaterControls {
     message: String,
 }
 
+const WATER_CHANNELS: [&str; 4] = ["Drinking", "Irrigation", "Greywater", "Sewage"];
+
 #[derive(Clone, Copy)]
 enum WaterCommand {
+    Camp { source: bool },
+    NextChannel,
     River,
     Carry,
     Purify,
@@ -203,20 +207,10 @@ impl WaterControls {
     ) {
         let shift = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
         if let Some(id) = hit.and_then(|hit| construction.utilities.water_at(hit.cell)) {
-            if shift {
-                self.source = Some(id);
-            } else {
-                self.target = id;
-            }
-            self.message.clear();
+            self.select_facility(id, shift);
         }
         if keyboard.just_pressed(KeyCode::KeyC) {
-            if shift {
-                self.source = Some(0);
-            } else {
-                self.target = 0;
-            }
-            self.message.clear();
+            self.apply(WaterCommand::Camp { source: shift }, construction);
         }
         if let Some(channel) = [
             KeyCode::Digit1,
@@ -245,8 +239,25 @@ impl WaterControls {
         }
     }
 
+    fn select_facility(&mut self, facility: usize, source: bool) {
+        if source {
+            self.source = Some(facility);
+        } else {
+            self.target = facility;
+        }
+        self.message.clear();
+    }
+
     fn apply(&mut self, command: WaterCommand, construction: &mut Construction) {
         let action = match command {
+            WaterCommand::Camp { source } => {
+                self.select_facility(0, source);
+                return;
+            }
+            WaterCommand::NextChannel => {
+                self.channel = (self.channel + 1) % WATER_CHANNELS.len();
+                return;
+            }
             WaterCommand::Policy(drinking) => {
                 self.message = if construction
                     .utilities

@@ -437,6 +437,17 @@ mod tests {
         assert!(!app.world().resource::<village::Village>().trade_open());
 
         press_button(&mut app, "Manage");
+        press_button(&mut app, "Water");
+        press_button(&mut app, "Camp source");
+        press_button(&mut app, "Camp destination");
+        press_button(&mut app, "Channel · Drinking");
+        press_button(&mut app, "Channel · Irrigation");
+        press_button(&mut app, "Channel · Greywater");
+        press_button(&mut app, "Channel · Sewage");
+        press_button(&mut app, "Channel · Drinking");
+        press_button(&mut app, "Close panel");
+
+        press_button(&mut app, "Manage");
         press_button(&mut app, "Projects");
         press_button(&mut app, "Show underway");
         press_button(&mut app, "Next page");
