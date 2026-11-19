@@ -921,9 +921,9 @@ impl Construction {
             .is_some_and(|task| matches!(task.kind, Need::Rest | Need::Sleep) && task.elapsed > 0.0)
     }
 
-    fn resident_action(&self, index: usize) -> &'static str {
+    fn resident_action(&self, catalog: &Catalog, index: usize) -> std::borrow::Cow<'static, str> {
         let worker = &self.residents[index];
-        if worker.town_work.active() {
+        let label = if worker.town_work.active() {
             worker.town_work.status()
         } else if self.driver_away(index) {
             "In town"
@@ -932,7 +932,16 @@ impl Construction {
         } else if let Some(job) = &worker.assignment {
             match job.activity {
                 Activity::Collect => "Collecting materials",
-                Activity::Carry => "Hauling",
+                Activity::Carry => {
+                    let loads = job.haul.loads();
+                    let unit = if loads == 1 { "load" } else { "loads" };
+                    let destination = if let Haul::Stage { .. } = job.haul {
+                        "nearby storage"
+                    } else {
+                        &catalog.projects[&self.plans[job.project].key].name
+                    };
+                    return format!("Carrying {loads} {unit} to {destination}").into();
+                }
                 Activity::Walk => "Walking to site",
                 Activity::Build => "Building",
             }
@@ -949,11 +958,13 @@ impl Construction {
             visit.label()
         } else {
             "Available"
-        }
+        };
+        label.into()
     }
 
     pub fn draw_residents_lens(
         &self,
+        catalog: &Catalog,
         terrain: &Terrain,
         hovered: Option<Vec3>,
         gizmos: &mut Gizmos,
@@ -1000,7 +1011,7 @@ impl Construction {
                 label,
                 "\n{} · {}",
                 NAMES[index],
-                self.resident_action(index)
+                self.resident_action(catalog, index)
             );
             for (name, level) in [
                 "Energy", "Food", "Bladder", "Bowels", "Hygiene", "Social", "Fun", "Water",
@@ -1022,7 +1033,7 @@ impl Construction {
             .iter()
             .enumerate()
             .map(|(index, worker)| {
-                let action = self.resident_action(index);
+                let action = self.resident_action(catalog, index);
                 let health = &worker.health;
                 let profile = &catalog.residents[index];
                 let home = worker.home.map_or_else(

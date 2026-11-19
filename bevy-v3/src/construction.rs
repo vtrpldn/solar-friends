@@ -2787,8 +2787,13 @@ mod tests {
 
         let mut saw_staging = false;
         let mut depot_delivery = None;
+        let mut saw_resident_staging_label = false;
         for _ in 0..8_000 {
             construction.tick(&catalog, &mut stock, site, clock, 0.1);
+            let resident_status = construction.resident_status(&catalog, &stock, 0);
+            saw_resident_staging_label |= resident_status
+                .lines()
+                .any(|line| line.contains("Carrying ") && line.contains("to nearby storage"));
             let target = &construction.plans[1];
             if target.staged > 0 && !saw_staging {
                 assert_eq!(target.delivered, 0);
@@ -2810,13 +2815,16 @@ mod tests {
                     })
                 })
             {
+                assert!(resident_status.lines().any(|line| {
+                    line.contains("Carrying ") && line.contains("to Gathering place")
+                }));
                 depot_delivery = Some(serde_json::to_string(&construction).unwrap());
             }
             if construction.finished_models(&catalog).count() == 2 {
                 break;
             }
         }
-        assert!(saw_staging);
+        assert!(saw_staging && saw_resident_staging_label);
         assert_eq!(construction.finished_models(&catalog).count(), 2);
         assert_eq!(construction.plans[1].staged, 0);
         assert_eq!(stock.available("wood"), 28);

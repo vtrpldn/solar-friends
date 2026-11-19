@@ -1968,6 +1968,7 @@ fn draw_blueprints(
                 &mut gizmos,
             )),
             Some(MapLens::Residents) => Some(village.construction.draw_residents_lens(
+                &catalog,
                 &terrain,
                 pointer.hovered.map(|hit| hit.world),
                 &mut gizmos,
