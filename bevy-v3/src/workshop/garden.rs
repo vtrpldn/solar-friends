@@ -105,6 +105,8 @@ struct Garden {
     terrain_dirty: bool,
     terrain: Terrain,
     connections: HashMap<String, Connection>,
+    library: Vec<String>,
+    search: Option<super::AssetSearch>,
     target: Vec3,
     bearing: f32,
     zoom: f32,
@@ -112,6 +114,18 @@ struct Garden {
 }
 
 impl Garden {
+    fn begin_copy(&mut self, mut prop: Prop) {
+        if self.layout.props.len() >= 1000 {
+            self.status = "The plot already has 1,000 props.".into();
+            return;
+        }
+        prop.id = (1..)
+            .map(|i| format!("copy-{i}"))
+            .find(|id| self.layout.props.iter().all(|existing| &existing.id != id))
+            .expect("at most 1,000 occupied IDs");
+        self.pending = Some((prop, true));
+    }
+
     fn edit(&mut self) {
         if self.past.len() == 100 {
             self.past.remove(0);
@@ -134,6 +148,9 @@ struct GardenText;
 #[derive(Component)]
 struct GardenGround;
 
+#[derive(Component)]
+struct PlacementPreview(usize);
+
 pub fn run(path: Option<PathBuf>) {
     let models = WorkshopCatalog::default();
     let gallery = Layout::decode(GALLERY, &models).expect("bundled V2 gallery");
@@ -148,6 +165,8 @@ pub fn run(path: Option<PathBuf>) {
         }
         Err(error) => (gallery.clone(), error.to_string()),
     };
+    let mut library: Vec<_> = models.0.keys().cloned().collect();
+    library.sort_by_key(|id| (&models.0[id].name, id.clone()));
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -173,6 +192,8 @@ pub fn run(path: Option<PathBuf>) {
         terrain_dirty: true,
         terrain: Terrain::default(),
         connections: HashMap::new(),
+        library,
+        search: None,
         target: Vec3::ZERO,
         bearing: std::f32::consts::FRAC_PI_4,
         zoom: 1.0,
@@ -181,7 +202,7 @@ pub fn run(path: Option<PathBuf>) {
     .add_systems(Startup, setup)
     .add_systems(
         Update,
-        (edit, rehearsal::tick, update_terrain, render).chain(),
+        (edit, rehearsal::tick, update_terrain, render, preview).chain(),
     );
     crate::village::register_building_models(&mut app);
     embedded_asset!(app, "connected-solar-farm.glb");
@@ -251,12 +272,73 @@ fn edit(
     mouse: Res<ButtonInput<MouseButton>>,
     motion: Res<AccumulatedMouseMotion>,
     scroll: Res<AccumulatedMouseScroll>,
+    mut typing: MessageReader<bevy::input::keyboard::KeyboardInput>,
     window: Single<&Window>,
     mut camera: Single<(&Camera, &GlobalTransform, &mut Transform, &mut Projection)>,
 ) {
     use KeyCode::*;
     let (camera, global, transform, projection) = &mut *camera;
     let pressed = |key| keys.just_pressed(key);
+    if pressed(Slash) && garden.search.is_none() && garden.pending.is_none() {
+        garden.search = Some(super::AssetSearch::default());
+        typing.clear();
+        return;
+    }
+    if let Some(mut search) = garden.search.take() {
+        if pressed(Escape) {
+            typing.clear();
+            return;
+        }
+        let enter = pressed(Enter) || pressed(NumpadEnter);
+        if pressed(ArrowUp) || pressed(ArrowDown) || enter {
+            typing.clear();
+        } else {
+            let before = search.query.clone();
+            crate::construction::read_search_text(&mut search.query, &mut typing);
+            if search.query != before {
+                search.row = 0;
+            }
+        }
+        let matches = search.matching(&garden.library, &models);
+        if pressed(ArrowDown) {
+            search.row = (search.row + 1).min(matches.len().saturating_sub(1));
+        } else if pressed(ArrowUp) {
+            search.row = search.row.saturating_sub(1);
+        } else if enter && let Some(&index) = matches.get(search.row) {
+            let asset = garden.library[index].clone();
+            if let Some(index) = garden
+                .layout
+                .props
+                .iter()
+                .position(|prop| prop.asset == asset)
+            {
+                let center = garden.layout.props[index].center(&models);
+                garden.selected = Some(index);
+                garden.target = Vec3::new(
+                    center.x,
+                    garden.terrain.height(center.x, center.z),
+                    center.z,
+                );
+                garden.zoom = 0.12;
+            } else {
+                let center = ((garden.target.xz() + Vec2::splat(WIDTH / 2.)) / 2.)
+                    .floor()
+                    .as_ivec2();
+                let [w, d] = models.0[&asset].size;
+                garden.begin_copy(Prop {
+                    id: String::new(),
+                    asset,
+                    rotation: 0,
+                    column: center.x.clamp(0, CELLS - w),
+                    row: center.y.clamp(0, CELLS - d),
+                });
+            }
+            return;
+        }
+        garden.search = Some(search);
+        return;
+    }
+    typing.clear();
     let modifier = [ControlLeft, ControlRight, SuperLeft, SuperRight]
         .iter()
         .any(|key| keys.pressed(*key));
@@ -351,14 +433,22 @@ fn edit(
         return;
     }
     if let Some((mut prop, copy)) = garden.pending.take() {
-        if let Some((column, row)) = cell {
+        if (motion.delta != Vec2::ZERO || mouse.just_pressed(MouseButton::Left))
+            && let Some((column, row)) = cell
+        {
             prop.column = column;
             prop.row = row;
         }
+        prop.column += i32::from(pressed(ArrowRight)) - i32::from(pressed(ArrowLeft));
+        prop.row += i32::from(pressed(ArrowDown)) - i32::from(pressed(ArrowUp));
         if pressed(KeyR) {
             prop.rotation = (prop.rotation + 90) % 360;
         }
-        if (mouse.just_pressed(MouseButton::Left) || pressed(Enter)) && prop.fits(&models) {
+        if ((mouse.just_pressed(MouseButton::Left) && cell.is_some())
+            || pressed(Enter)
+            || pressed(NumpadEnter))
+            && prop.fits(&models)
+        {
             garden.edit();
             if copy {
                 garden.selected = Some(garden.layout.props.len());
@@ -395,18 +485,8 @@ fn edit(
         garden.selected = None;
     } else if pressed(KeyM) {
         garden.pending = Some((prop, false));
-    } else if modifier && pressed(KeyD) && garden.layout.props.len() < 1000 {
-        let Some(id) = (1..).map(|i| format!("copy-{i}")).find(|id| {
-            garden
-                .layout
-                .props
-                .iter()
-                .all(|existing| &existing.id != id)
-        }) else {
-            return;
-        };
-        prop.id = id;
-        garden.pending = Some((prop, true));
+    } else if modifier && pressed(KeyD) {
+        garden.begin_copy(prop);
     } else if pressed(KeyR) {
         prop.rotation = (prop.rotation + 90) % 360;
         if prop.fits(&models) {
@@ -429,6 +509,39 @@ fn update_terrain(
         if let Some(mesh) = meshes.get_mut(&ground.0) {
             *mesh = garden.terrain.mesh(&garden.layout.biome);
         }
+    }
+}
+
+fn preview(
+    mut commands: Commands,
+    garden: Res<Garden>,
+    models: Res<WorkshopCatalog>,
+    assets: Res<AssetServer>,
+    mut existing: Query<(Entity, &PlacementPreview, &mut Transform)>,
+) {
+    let pending = garden.pending.as_ref().map(|(prop, _)| {
+        let model = models.0[&prop.asset].model;
+        let mut center = prop.center(&models);
+        center.y = garden.terrain.height(center.x, center.z);
+        let transform = Transform::from_translation(center)
+            .with_rotation(Quat::from_rotation_y((prop.rotation as f32).to_radians()));
+        (model, transform)
+    });
+    for (entity, marker, mut transform) in &mut existing {
+        if let Some((model, target)) = pending
+            && marker.0 == model
+        {
+            transform.set_if_neq(target);
+            return;
+        }
+        commands.entity(entity).despawn();
+    }
+    if let Some((model, transform)) = pending {
+        commands.spawn((
+            PlacementPreview(model),
+            building_model(&assets, model),
+            transform,
+        ));
     }
 }
 
@@ -518,6 +631,10 @@ fn render(
         }
         garden.redraw = loading;
     }
+    if let Some(search) = &garden.search {
+        text.0 = search.label(&garden.library, &models);
+        return;
+    }
     let selection = garden.selected.map(|index| &garden.layout.props[index]);
     let highlighted = garden.pending.as_ref().map(|(prop, _)| prop).or(selection);
     if let Some(prop) = highlighted {
@@ -571,7 +688,7 @@ fn render(
         });
     let rehearsal_hint = rehearsal::hint(&rehearsal, &garden.layout.props, selection, &models);
     text.0 = format!(
-        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nClick/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save{rehearsal_hint}\n{}",
+        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid   / catalog\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save{rehearsal_hint}\n{}",
         garden.layout.props.len(),
         garden.layout.biome,
         garden.status

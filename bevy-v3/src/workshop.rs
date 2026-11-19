@@ -93,7 +93,10 @@ impl AssetSearch {
             .enumerate()
             .filter_map(|(index, id)| {
                 let model = &catalog.0[id];
-                (model.name.to_lowercase().contains(&query) || id.contains(&query)).then_some(index)
+                (model.name.to_lowercase().contains(&query)
+                    || id.contains(&query)
+                    || model.category.to_lowercase().contains(&query))
+                .then_some(index)
             })
             .collect()
     }

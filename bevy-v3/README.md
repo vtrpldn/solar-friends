@@ -173,3 +173,5 @@ Press **B** to switch between the flat gallery, Mata Atlântica, Cerrado, and Ca
 Adjacent garden, orchard, and solar farm sections show their connected area when selected. Sections stay individually editable, and connected solar farms share one inverter.
 
 Select a prop with a resident interaction. Press **I** to choose a resident, **O** to change the action, **U** to send the resident from their placed location, or **Y** to rehearse nearby. **P** pauses or resumes the animation, and **Esc** returns the resident to their original pose and position.
+
+Press **/** to search the catalog by model name, key, or category. **Enter** focuses an existing prop or starts placement for a model missing from the scene. Use the mouse or arrow keys to position a placement preview, then click or press **Enter** to confirm.

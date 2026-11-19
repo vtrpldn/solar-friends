@@ -172,6 +172,9 @@ pub(super) fn tick(
     mut actors: Query<(Entity, &GardenProp, &mut Transform, &mut RehearsalPose)>,
 ) {
     use KeyCode::*;
+    if garden.search.is_some() {
+        return;
+    }
     let start = keys.just_pressed(KeyU) || keys.just_pressed(KeyY);
     let stopped = garden.terrain_dirty || keys.just_pressed(Escape) || start;
     if stopped && let Some(task) = rehearsal.task.take() {
@@ -414,6 +417,8 @@ mod tests {
                 terrain_dirty: false,
                 terrain: Terrain::default(),
                 connections: HashMap::new(),
+                library: vec![],
+                search: None,
                 target: Vec3::ZERO,
                 bearing: 0.,
                 zoom: 1.,
