@@ -29,6 +29,7 @@ struct Sample {
     meals: u32,
     potable_liters: f64,
     minimum_hydration: f64,
+    watershed: Option<crate::utilities::WatershedSample>,
     residents: String,
 }
 
@@ -81,7 +82,8 @@ pub(crate) fn replay_file(path: &Path) -> io::Result<()> {
 }
 
 fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Result<u64> {
-    if expected.get("version").and_then(serde_json::Value::as_u64) != Some(1) {
+    let version = expected.get("version").and_then(serde_json::Value::as_u64);
+    if !matches!(version, Some(1 | 2)) {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
             "Unsupported lab report version.",
@@ -108,6 +110,28 @@ fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Resu
         serde_json::from_slice(&serde_json::to_vec(&report.report())?)?;
     actual["initial"] = serde_json::Value::Null;
     actual["scenario"] = serde_json::Value::Null;
+    if version == Some(1) {
+        actual["version"] = 1.into();
+        if let Some(samples) = actual["samples"].as_array_mut() {
+            for sample in samples {
+                sample
+                    .as_object_mut()
+                    .expect("sample object")
+                    .remove("watershed");
+            }
+        }
+        let ground = "/village/construction/utilities/ground";
+        if expected
+            .pointer(ground)
+            .and_then(|value| value.get("account"))
+            .is_none()
+            && let Some(account) = actual
+                .pointer_mut(ground)
+                .and_then(serde_json::Value::as_object_mut)
+        {
+            account.remove("account");
+        }
+    }
     if actual != expected {
         return Err(io::Error::other(
             "Replay diverged from the recorded results.",
@@ -271,6 +295,7 @@ impl Runner {
                 meals: self.village.stock.available("meals"),
                 potable_liters: self.village.construction.potable_liters(),
                 minimum_hydration: self.village.construction.minimum_hydration(),
+                watershed: self.village.construction.utilities.watershed_sample(),
                 residents: self.village.construction.resident_status(
                     catalog,
                     &self.village.stock,
@@ -304,7 +329,7 @@ impl Runner {
 
     fn report(&self) -> Report<'_> {
         Report {
-            version: 1,
+            version: 2,
             scenario: &self.scenario,
             initial: &self.initial,
             step_seconds: STEP,
@@ -504,7 +529,7 @@ fn update_lab_window(
         },
     );
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water\n{}\n{last}\n\n{}",
         runner.index,
         runner.scenario.steps,
         village.clock,
@@ -514,6 +539,7 @@ fn update_lab_window(
         village.stock.available("wood"),
         village.stock.available("meals"),
         village.construction.potable_liters(),
+        village.construction.utilities.water_summary(),
         village
             .construction
             .resident_status(&catalog, &village.stock, 0)
@@ -651,6 +677,20 @@ mod tests {
         let mut report: serde_json::Value =
             serde_json::from_slice(&serde_json::to_vec(&report.report()).unwrap()).unwrap();
         assert_eq!(verify_report(report.clone(), &catalog).unwrap(), 10);
+        assert!(report["samples"].as_array().unwrap().last().unwrap()["watershed"]
+            ["river_flow_liters_per_day"].as_f64().unwrap() > 0.0);
+        let mut legacy = report.clone();
+        legacy["version"] = 1.into();
+        for sample in legacy["samples"].as_array_mut().unwrap() {
+            sample.as_object_mut().unwrap().remove("watershed");
+        }
+        legacy
+            .pointer_mut("/village/construction/utilities/ground")
+            .unwrap()
+            .as_object_mut()
+            .unwrap()
+            .remove("account");
+        assert_eq!(verify_report(legacy, &catalog).unwrap(), 10);
         report["samples"][0]["cash_centavos"] = 0.into();
         assert!(
             verify_report(report, &catalog)

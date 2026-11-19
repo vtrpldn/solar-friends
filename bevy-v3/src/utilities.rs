@@ -122,6 +122,15 @@ struct Hydrology {
     account: Option<WaterAccount>,
 }
 
+#[derive(Serialize)]
+pub struct WatershedSample {
+    aquifer_capacity_liters: f64,
+    groundwater_liters: f64,
+    river_reserve_liters: f64,
+    river_flow_liters_per_day: f64,
+    runoff_liters: f64,
+}
+
 #[derive(Default, Deserialize, Serialize)]
 struct WaterAccount {
     initial: f64,
@@ -691,6 +700,16 @@ impl Utilities {
             self.grid_spent / 100.0,
             if self.grid_off { "off" } else { "on" },
         )
+    }
+
+    pub fn watershed_sample(&self) -> Option<WatershedSample> {
+        self.ground.as_ref().map(|ground| WatershedSample {
+            aquifer_capacity_liters: ground.capacity,
+            groundwater_liters: ground.groundwater,
+            river_reserve_liters: ground.river,
+            river_flow_liters_per_day: ground.flow,
+            runoff_liters: ground.runoff,
+        })
     }
 
     pub fn water_summary(&self) -> String {
