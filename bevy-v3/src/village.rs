@@ -46,7 +46,7 @@ use crate::{
     setup::{Mode, WorldSetup},
     stock::Stock,
     terrain::{Terrain, TerrainEditor},
-    time_advance::Advance,
+    time_advance::{Advance, AdvanceAction},
     ui_font::ui_font,
     weather::{forecast, weather_at},
 };
@@ -520,6 +520,20 @@ impl Village {
 
     fn extend_road(&self, keys: &ButtonInput<KeyCode>) -> bool {
         self.connect_road_strokes || keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+    }
+
+    fn apply_advance_action(&mut self, action: AdvanceAction) {
+        let was_open = self.advance.open;
+        if self.advance.apply(action) {
+            self.checkpoint_advance();
+        }
+        if !was_open && self.advance.open {
+            self.construction.cancel_placement();
+            self.construction.menu = false;
+            self.construction.production.open = false;
+            self.construction.farming.open = false;
+            self.utility_panel = None;
+        }
     }
 
     fn checkpoint_advance(&mut self) {
@@ -1036,22 +1050,21 @@ fn village_input(
     if keyboard.just_pressed(KeyCode::KeyF) {
         village.show_forecast = !village.show_forecast;
     }
+    if village.camp.is_some()
+        && !village.terrain_editor.open
+        && let Some(action) = village.advance.keyboard_action(&keyboard)
+    {
+        village.apply_advance_action(action);
+        return;
+    }
+    if village.advance.open {
+        return;
+    }
     if keyboard.just_pressed(KeyCode::Space)
         && village.camp.is_some()
         && !village.terrain_editor.open
     {
         village.paused = !village.paused;
-    }
-    if village.camp.is_some()
-        && !village.terrain_editor.open
-        && keyboard.get_just_pressed().len() > 0
-        && village.advance.controls(&keyboard)
-    {
-        village.checkpoint_advance();
-        return;
-    }
-    if village.advance.open {
-        return;
     }
     let terrain = village.terrain(&setup);
     if let Some(cell) = village.camp {
@@ -2382,6 +2395,38 @@ mod tests {
         let exported = save_library::export(&directory, id, Mode::Story, &catalog).unwrap();
         assert_eq!(save::read(&exported, &catalog).unwrap().clock, 0.0);
         std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn advance_dialog_closes_planning_tools_and_preserves_pause_on_cancel() {
+        let mut village = Village {
+            utility_panel: Some(UtilityPanel::Projects),
+            ..default()
+        };
+        let catalog = Catalog::default();
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::KeyB);
+        keys.press(KeyCode::Digit1);
+        village.construction.input(&keys, &catalog);
+        assert!(village.construction.placing_project());
+
+        village.apply_advance_action(AdvanceAction::Toggle);
+        assert!(village.is_paused());
+        assert!(!village.construction.placing_project());
+        assert!(!village.construction.menu);
+        assert!(village.utility_panel.is_none());
+
+        keys.reset_all();
+        keys.press(KeyCode::Escape);
+        let cancel = village.advance.keyboard_action(&keys).unwrap();
+        village.apply_advance_action(cancel);
+        assert!(!village.is_paused());
+
+        village.apply_advance_action(AdvanceAction::Toggle);
+        village.apply_advance_action(AdvanceAction::Start);
+        village.apply_advance_action(AdvanceAction::Toggle);
+        assert!(village.is_paused());
+        assert!(village.advance_checkpoint);
     }
 
     #[test]

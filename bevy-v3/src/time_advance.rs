@@ -37,26 +37,29 @@ pub(crate) enum AdvanceAction {
 }
 
 impl Advance {
-    pub fn controls(&mut self, keys: &ButtonInput<KeyCode>) -> bool {
-        if keys.just_pressed(KeyCode::KeyL) && self.apply(AdvanceAction::Toggle) {
-            return true;
+    pub fn keyboard_action(&self, keys: &ButtonInput<KeyCode>) -> Option<AdvanceAction> {
+        if keys.just_pressed(KeyCode::KeyL)
+            || (self.open && self.running.is_none() && keys.just_pressed(KeyCode::Escape))
+        {
+            return Some(AdvanceAction::Toggle);
+        }
+        if !self.open || self.running.is_some() {
+            return None;
         }
         let increment = if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
             7
         } else {
             1
         };
-        for (key, action) in [
+        [
             (KeyCode::BracketLeft, AdvanceAction::Adjust(-increment)),
             (KeyCode::BracketRight, AdvanceAction::Adjust(increment)),
             (KeyCode::KeyA, AdvanceAction::Method),
             (KeyCode::Enter, AdvanceAction::Start),
-        ] {
-            if keys.just_pressed(key) {
-                self.apply(action);
-            }
-        }
-        false
+            (KeyCode::NumpadEnter, AdvanceAction::Start),
+        ]
+        .into_iter()
+        .find_map(|(key, action)| keys.just_pressed(key).then_some(action))
     }
 
     pub fn apply(&mut self, action: AdvanceAction) -> bool {

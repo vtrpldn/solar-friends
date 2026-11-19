@@ -120,7 +120,8 @@ impl Action {
             return !village.construction.editing_search;
         }
         if let Self::Advance(action) = self {
-            return !village.map_input_blocked()
+            return village.camp.is_some()
+                && !village.map_input_blocked()
                 && !village.planning_roads()
                 && !village.terrain_editor.open
                 && (matches!(action, AdvanceAction::Toggle)
@@ -971,9 +972,7 @@ fn handle_buttons(
                 Action::TerrainRadius(forward) => village.terrain_editor.cycle_radius(forward),
                 Action::UndoTerrain => village.terrain_editor.undo(),
                 Action::Advance(action) => {
-                    if village.advance.apply(action) {
-                        village.checkpoint_advance();
-                    }
+                    village.apply_advance_action(action);
                     picker.open = false;
                 }
                 Action::ResizeField(delta) if village.construction.placing_field() => {
@@ -1402,7 +1401,7 @@ fn refresh(
             Action::Lens(row) => show_lenses && row < village.lenses.choices().len(),
             Action::LensPage | Action::ClearLens => show_lenses,
             Action::LensFilter(_) | Action::LensSite(_) => action.available(&village),
-            Action::Advance(AdvanceAction::Toggle) => true,
+            Action::Advance(AdvanceAction::Toggle) => action.available(&village),
             Action::Volume { .. } => false,
             Action::Advance(_) => show_advance,
             Action::Page(_) if village.utility_panel == Some(UtilityPanel::Residents) => {
