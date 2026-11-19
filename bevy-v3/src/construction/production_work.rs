@@ -658,7 +658,42 @@ impl Construction {
                 let _ = write!(text, "\nAssigned · {}", crew.join(", "));
             }
         }
-        if let Some(job) = self.production.jobs.iter().find(|job| job.site == index) {
+        let active_job = self.production.jobs.iter().find(|job| job.site == index);
+        if site.work >= definition.work {
+            use std::fmt::Write;
+            if active_job.is_none()
+                && !self.changes.contains_key(&index)
+                && self.utilities.facility_status(index).is_none()
+            {
+                text.push_str(" · Ready to use");
+            }
+            match definition.kind.as_str() {
+                "home" => {
+                    let capacity = definition.beds.unwrap_or(2);
+                    let assigned = self
+                        .residents
+                        .iter()
+                        .filter(|resident| resident.home == Some(index))
+                        .count();
+                    let _ = write!(text, "\nHousing · {assigned}/{capacity} beds assigned");
+                }
+                "warehouse" | "covered-storage" if !stock.sandbox => {
+                    let _ = write!(text, "\nStorage · Adds {STORAGE_EXPANSION} supply spaces");
+                }
+                "warehouse" | "covered-storage" => {
+                    text.push_str("\nStorage · Unlimited in Sandbox");
+                }
+                kind => {
+                    if let Some(activity) = super::leisure::recreation_benefit(kind) {
+                        let _ = write!(
+                            text,
+                            "\nRecreation · {activity} · Helps residents recover fun"
+                        );
+                    }
+                }
+            }
+        }
+        if let Some(job) = active_job {
             let recipe = &catalog.production[&job.recipe];
             let state = self.batch_status(job, catalog, stock, clock);
             text.push_str(&format!(" · {} · {state}", recipe.name));

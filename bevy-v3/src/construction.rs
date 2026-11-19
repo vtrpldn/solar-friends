@@ -77,6 +77,7 @@ const CATEGORIES: [&str; 10] = [
     "Community & leisure",
     "All",
 ];
+const STORAGE_EXPANSION: u64 = 600;
 pub(crate) const BUILD_ROWS: usize = 8;
 
 pub(crate) const PAGE_KEYS: [KeyCode; BUILD_ROWS] = [
@@ -1679,7 +1680,7 @@ impl Construction {
                     && matches!(definition.kind.as_str(), "warehouse" | "covered-storage")
             })
             .count() as u64;
-        (used, 600 * (1 + expansions))
+        (used, STORAGE_EXPANSION * (1 + expansions))
     }
 
     fn storage_space(&self, catalog: &Catalog, stock: &Stock) -> u64 {

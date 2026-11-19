@@ -22,6 +22,10 @@ enum Activity {
     Waiting,
 }
 
+pub(super) fn recreation_benefit(kind: &str) -> Option<&'static str> {
+    Activity::at(kind).map(|activity| activity.details().0)
+}
+
 impl Activity {
     fn at(kind: &str) -> Option<Self> {
         Some(match kind {
