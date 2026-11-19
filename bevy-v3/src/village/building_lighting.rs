@@ -1,4 +1,11 @@
-use bevy::{gltf::GltfMaterialExtras, prelude::*, scene::SceneInstanceReady};
+use bevy::{
+    camera::primitives::{Aabb, MeshAabb},
+    gltf::GltfMaterialExtras,
+    math::Affine3A,
+    prelude::*,
+    scene::SceneInstanceReady,
+    transform::helper::TransformHelper,
+};
 
 use super::{BuiltProject, Village};
 use crate::{VillageCamera, catalog::Catalog, setup::WorldSetup, weather::sun_height};
@@ -13,7 +20,7 @@ struct WindowPane {
 }
 
 #[derive(Component)]
-struct Windowed;
+struct WindowSpill(Vec3);
 
 #[derive(Component)]
 struct BuildingLight(usize);
@@ -44,15 +51,25 @@ fn collect_windows(
     mut commands: Commands,
     projects: Query<&BuiltProject>,
     descendants: Query<&Children>,
-    panes: Query<(&MeshMaterial3d<StandardMaterial>, &GltfMaterialExtras)>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    panes: Query<(
+        &MeshMaterial3d<StandardMaterial>,
+        &GltfMaterialExtras,
+        &Mesh3d,
+    )>,
+    transforms: TransformHelper,
+    (meshes, mut materials): (Res<Assets<Mesh>>, ResMut<Assets<StandardMaterial>>),
 ) {
     let Ok(project) = projects.get(event.entity) else {
         return;
     };
+    let Ok(root) = transforms.compute_global_transform(event.entity) else {
+        return;
+    };
+    let to_root = root.affine().inverse();
+    let mut front = None;
     let mut windowed = false;
     for entity in descendants.iter_descendants(event.entity) {
-        let Ok((material, extras)) = panes.get(entity) else {
+        let Ok((material, extras, mesh)) = panes.get(entity) else {
             continue;
         };
         if !serde_json::from_str::<serde_json::Value>(&extras.value)
@@ -73,16 +90,39 @@ fn collect_windows(
             },
         ));
         windowed = true;
+        if let Some(bounds) = meshes.get(&mesh.0).and_then(MeshAabb::compute_aabb)
+            && let Ok(transform) = transforms.compute_global_transform(entity)
+        {
+            let (center, spill) = window_spill(bounds, to_root * transform.affine());
+            if front.is_none_or(|(z, _)| center.z > z) {
+                front = Some((center.z, spill));
+            }
+        }
     }
     if windowed {
-        commands.entity(event.entity).insert(Windowed);
+        let spill = front.map_or(Vec3::new(0.8, 1.4, 2.1), |(_, spill)| spill);
+        commands.entity(event.entity).insert(WindowSpill(spill));
     }
+}
+
+fn window_spill(bounds: Aabb, to_root: Affine3A) -> (Vec3, Vec3) {
+    let center: Vec3 = to_root.transform_point3a(bounds.center).into();
+    let matrix = to_root.matrix3;
+    let extents = matrix.x_axis.abs() * bounds.half_extents.x
+        + matrix.y_axis.abs() * bounds.half_extents.y
+        + matrix.z_axis.abs() * bounds.half_extents.z;
+    let outward = if extents.x < extents.z {
+        Vec3::X * if center.x < 0.0 { -1.0 } else { 1.0 }
+    } else {
+        Vec3::Z * if center.z < 0.0 { -1.0 } else { 1.0 }
+    };
+    (center, center + outward * 0.45)
 }
 
 fn update_lighting(
     (village, setup, catalog): (Res<Village>, Res<WorldSetup>, Res<Catalog>),
     camera: Single<&VillageCamera>,
-    projects: Query<(&BuiltProject, &Transform, Has<Windowed>), Without<BuildingLight>>,
+    projects: Query<(&BuiltProject, &Transform, Option<&WindowSpill>), Without<BuildingLight>>,
     mut panes: Query<(&mut WindowPane, &MeshMaterial3d<StandardMaterial>)>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut lights: Query<(
@@ -112,15 +152,15 @@ fn update_lighting(
 
     let mut candidates = Vec::new();
     if night > 0.0 {
-        for (project, transform, windowed) in &projects {
+        for (project, transform, spill) in &projects {
             if !powered(project.index) {
                 continue;
             }
             let Some(kind) = village.construction.project_kind(&catalog, project.index) else {
                 continue;
             };
-            let offset = if windowed {
-                Vec3::new(0.8, 1.4, 2.1)
+            let offset = if let Some(spill) = spill {
+                spill.0
             } else {
                 let height = match kind {
                     "streetlight" => 2.7,
@@ -134,7 +174,7 @@ fn update_lighting(
                 distance,
                 project.index,
                 transform.transform_point(offset),
-                windowed,
+                spill.is_some(),
             ));
         }
         candidates.sort_unstable_by(|a, b| a.0.total_cmp(&b.0).then(a.1.cmp(&b.1)));
@@ -148,5 +188,20 @@ fn update_lighting(
         } else if *visibility != Visibility::Hidden {
             *visibility = Visibility::Hidden;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn rotated_window_spills_outside_the_wall_it_faces() {
+        let bounds = Aabb::from_min_max(Vec3::new(-0.5, -0.4, -0.02), Vec3::new(0.5, 0.4, 0.02));
+        let transform = Transform::from_xyz(-2.0, 1.5, 0.5)
+            .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2));
+        let (center, light) = window_spill(bounds, transform.compute_affine());
+        assert_eq!(center, transform.translation);
+        assert!(light.abs_diff_eq(Vec3::new(-2.45, 1.5, 0.5), 1e-5));
     }
 }
