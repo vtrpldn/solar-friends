@@ -446,11 +446,56 @@ impl Construction {
             .map(WaterJob::label)
     }
 
-    pub(super) fn water_route_blocked(&self, job: &WaterJob, clock: f64) -> bool {
-        (job.waiting_for_access && job.retry > clock)
-            || job
-                .worker
-                .is_some_and(|index| self.residents[index].waiting_for_route())
+    fn waiting_for_water_supply(&self, target: usize, job: &WaterJob) -> Option<&'static str> {
+        if !matches!(job.phase, WaterPhase::Approach) {
+            return None;
+        }
+        match job.action {
+            WaterAction::Carry {
+                source: Some(source),
+                channel,
+            } => {
+                let stocked = self
+                    .utilities
+                    .water_site(source)
+                    .is_some_and(|node| node.enabled && node.levels[channel] >= 0.1);
+                let alternate = job.automatic
+                    && channel == 0
+                    && self
+                        .utilities
+                        .water_sources()
+                        .any(|(id, _, _)| id != target && id != source);
+                (!stocked && !alternate).then_some("Waiting for water at the source")
+            }
+            WaterAction::Carry { source: None, .. } => self
+                .utilities
+                .watershed_sample()
+                .filter(|water| water.river_reserve_liters < 0.1)
+                .map(|_| "Waiting for river flow"),
+            _ => None,
+        }
+    }
+
+    pub(super) fn water_route_blocked(&self, target: usize, job: &WaterJob, clock: f64) -> bool {
+        self.waiting_for_water_supply(target, job).is_none()
+            && ((job.waiting_for_access && job.retry > clock)
+                || job
+                    .worker
+                    .is_some_and(|index| self.residents[index].waiting_for_route()))
+    }
+
+    pub(super) fn water_job_status(
+        &self,
+        target: usize,
+        job: &WaterJob,
+        clock: f64,
+    ) -> &'static str {
+        if self.water_route_blocked(target, job, clock) {
+            "Waiting for access"
+        } else {
+            self.waiting_for_water_supply(target, job)
+                .unwrap_or_else(|| job.label())
+        }
     }
 
     pub fn connection_summary(&self, catalog: &Catalog, selected: usize, power: bool) -> String {
@@ -731,11 +776,7 @@ impl Construction {
                 )
             });
         if let Some(job) = displayed_job {
-            let status = if self.water_route_blocked(job, clock) {
-                "Waiting for access"
-            } else {
-                job.label()
-            };
+            let status = self.water_job_status(target, job, clock);
             if let WaterAction::InstallPipe { required, .. } = job.action {
                 let _ = write!(
                     text,
@@ -1049,6 +1090,9 @@ impl Construction {
             {
                 return false;
             }
+            if self.waiting_for_water_supply(id, job).is_some() {
+                return false;
+            }
             let mut attempted_route = false;
             let picked = (0..self.residents.len())
                 .filter(|&index| {
@@ -1346,10 +1390,18 @@ mod tests {
             },
         )
         .unwrap();
-        town.water_jobs.get_mut(&2).unwrap().automatic = true;
         town.utilities.take_water(Some(1), 0, 4.0);
-
         town.tick_water_group(&catalog, &mut stock, site, 1.0, 0.1, None);
+        let waiting = &town.water_jobs[&2];
+        assert!(waiting.worker.is_none());
+        assert_eq!(
+            town.water_job_status(2, waiting, 1.0),
+            "Waiting for water at the source"
+        );
+        assert!(!town.water_route_blocked(2, waiting, 1.0));
+
+        town.water_jobs.get_mut(&2).unwrap().automatic = true;
+        town.tick_water_group(&catalog, &mut stock, site, 5.0, 0.1, None);
         assert!(matches!(
             town.water_jobs[&2].action,
             WaterAction::Carry {

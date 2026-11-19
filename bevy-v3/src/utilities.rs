@@ -148,7 +148,7 @@ struct Hydrology {
 pub struct WatershedSample {
     aquifer_capacity_liters: f64,
     groundwater_liters: f64,
-    river_reserve_liters: f64,
+    pub(crate) river_reserve_liters: f64,
     river_flow_liters_per_day: f64,
     runoff_liters: f64,
 }

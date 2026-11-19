@@ -285,17 +285,13 @@ impl Construction {
             }
             let destination = site.checked_sub(1).map_or_else(|| "Camp".into(), site_name);
             let worker = (0..self.residents.len()).find(|&index| job.assigned_to(index));
-            let blocked = self.water_route_blocked(job, clock);
+            let blocked = self.water_route_blocked(site, job, clock);
             if waiting_only && worker.is_some() && !blocked {
                 continue;
             }
             jobs.push(format!(
                 "{destination} · {} · {}",
-                if blocked {
-                    "Waiting for access"
-                } else {
-                    job.label()
-                },
+                self.water_job_status(site, job, clock),
                 worker_name(worker)
             ));
         }
@@ -760,8 +756,8 @@ impl Construction {
                     .any(|job| self.gathering_route_blocked(job, clock))
                 || self
                     .water_jobs
-                    .values()
-                    .any(|job| self.water_route_blocked(job, clock))
+                    .iter()
+                    .any(|(&site, job)| self.water_route_blocked(site, job, clock))
                 || self.residents.iter().any(|worker| {
                     worker.town_work.route_blocked
                         || (worker.health.task.is_none() && worker.waiting_for_route())
