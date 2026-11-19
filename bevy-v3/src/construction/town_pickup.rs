@@ -386,6 +386,13 @@ impl Construction {
                 let lower = (1u32 << index) - 1;
                 trip.exports = (trip.exports & lower) | ((trip.exports & !lower) >> 1 & !lower);
             }
+            trip.return_purchase = trip.return_purchase.map(|purchase| {
+                if purchase > index {
+                    purchase - 1
+                } else {
+                    purchase
+                }
+            });
             if trip.market_order && trip.project > index {
                 trip.project -= 1;
             }
@@ -430,31 +437,69 @@ impl Construction {
         }
     }
 
-    pub(super) fn valid_trip_exports(&self, catalog: &Catalog, trip: TownTrip) -> bool {
+    pub(super) fn valid_trip_trade_cargo(&self, catalog: &Catalog, trip: TownTrip) -> bool {
+        if let Some(index) = trip.return_purchase
+            && (!trip.market_order
+                || index == trip.project
+                || trip.extra_orders().any(|extra| extra == index)
+                || !self
+                    .trade
+                    .orders
+                    .get(trip.project)
+                    .is_some_and(|order| !order.buying)
+                || !self.trade.orders.get(index).is_some_and(|order| {
+                    order.buying
+                        && order.fare == 0
+                        && catalog.materials.get(&order.material).is_some_and(|item| {
+                            let (mass, volume) = crate::market::PICKUP_CAPACITY;
+                            item.mass * f64::from(order.quantity) <= mass + 1e-8
+                                && item.volume * f64::from(order.quantity) <= volume + 1e-8
+                        })
+                }))
+        {
+            return false;
+        }
         if trip.exports == 0 {
             return true;
         }
         let mut available = crate::market::PICKUP_CAPACITY;
-        trip.trade_orders().all(|index| {
-            self.trade.orders.get(index).is_some_and(|order| {
-                if trip.market_order && index == trip.project {
-                    if trip.extra_orders().any(|extra| extra == index) {
+        trip.trade_orders()
+            .filter(|index| Some(*index) != trip.return_purchase)
+            .all(|index| {
+                self.trade.orders.get(index).is_some_and(|order| {
+                    if trip.market_order && index == trip.project {
+                        if trip.extra_orders().any(|extra| extra == index) {
+                            return false;
+                        }
+                        if order.buying {
+                            return true;
+                        }
+                    } else if order.buying {
                         return false;
                     }
-                    if order.buying {
-                        return true;
-                    }
-                } else if order.buying {
-                    return false;
-                }
-                let Some(item) = catalog.materials.get(&order.material) else {
-                    return false;
-                };
-                available.0 -= item.mass * f64::from(order.quantity);
-                available.1 -= item.volume * f64::from(order.quantity);
-                available.0 >= -1e-8 && available.1 >= -1e-8
+                    let Some(item) = catalog.materials.get(&order.material) else {
+                        return false;
+                    };
+                    available.0 -= item.mass * f64::from(order.quantity);
+                    available.1 -= item.volume * f64::from(order.quantity);
+                    available.0 >= -1e-8 && available.1 >= -1e-8
+                })
             })
-        })
+    }
+
+    pub(super) fn sale_trip_for_return_purchase(&mut self) -> Option<&mut TownTrip> {
+        let orders = &self.trade.orders;
+        [&mut self.trip, &mut self.second_trip]
+            .into_iter()
+            .filter_map(Option::as_mut)
+            .find(|trip| {
+                trip.market_order
+                    && trip.return_purchase.is_none()
+                    && trip.elapsed < trip.duration * 0.5
+                    && orders
+                        .get(trip.project)
+                        .is_some_and(|order| !order.buying && !order.settled)
+            })
     }
 
     fn set_trip(&mut self, slot: usize, trip: Option<TownTrip>) {
@@ -651,6 +696,7 @@ impl Construction {
             farm_bed,
             market_order,
             exports: 0,
+            return_purchase: None,
             driver,
             vehicle,
             elapsed: 0.0,
@@ -707,6 +753,66 @@ mod tests {
         assert_eq!(trip.project, 1);
         assert_eq!(trip.extra_orders().collect::<Vec<_>>(), vec![0]);
         assert_eq!(village.market.committed_fares(), fare);
+        assert!(village.valid_save(&catalog, &stock));
+    }
+
+    #[test]
+    fn purchase_added_to_an_outbound_sale_returns_with_no_additional_fuel() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let initial_wood = stock.available("wood");
+        village
+            .reserve_town_sale(&catalog, &mut stock, clock, "wood", false)
+            .unwrap();
+        let sale_cents = village.trade.orders[0].cents;
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        let outgoing = village.trip.unwrap();
+        village.residents[outgoing.driver].path.clear();
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.trip.unwrap().boarded);
+
+        let after_departure = stock.balance();
+        assert!(
+            village
+                .buy_from_town(&catalog, &mut stock, clock, "wood", false)
+                .unwrap()
+        );
+        assert_eq!(village.trade.orders[1].fare, 0);
+        assert_eq!(village.market.committed_fares(), 0);
+        let purchase_price = village.trade.orders[1].cents;
+        assert_eq!(stock.balance(), after_departure - purchase_price);
+        assert!(village.valid_save(&catalog, &stock));
+
+        village = serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        assert!(village.sale_trip_for_return_purchase().is_none());
+        village.tick_trip(
+            &catalog,
+            &mut stock,
+            site,
+            clock,
+            outgoing.duration as f32 + 1.0,
+        );
+        assert_eq!(village.active_trips().count(), 0);
+        assert_eq!(village.trade.receipts, 1);
+        assert_eq!(village.trade.purchases, 1);
+        assert_eq!(stock.available("wood"), initial_wood);
+        assert_eq!(
+            stock.balance(),
+            after_departure - purchase_price + sale_cents
+        );
         assert!(village.valid_save(&catalog, &stock));
     }
 

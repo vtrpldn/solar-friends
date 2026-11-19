@@ -315,7 +315,7 @@ impl Construction {
         clock: TownClock,
         material: &str,
         freight: bool,
-    ) -> Result<(), &'static str> {
+    ) -> Result<bool, &'static str> {
         let item = catalog.materials.get(material).ok_or("Unknown material.")?;
         if !town_is_open(clock.seconds) {
             return Err("Town is closed. Order between 07:00 and 18:00.");
@@ -326,13 +326,28 @@ impl Construction {
         if u64::from(item.pack) + self.trade.inbound() > self.storage_space(catalog, stock) {
             return Err("There is not enough storage for another pack.");
         }
-        self.trade.buy(
-            catalog,
-            stock,
-            &mut self.market,
-            material,
-            (clock.seconds, clock.round_trip_km, freight),
-        )
+        if !freight && self.sale_trip_for_return_purchase().is_some() {
+            let index = self.trade.orders.len();
+            if self
+                .trade
+                .buy_on_return_trip(catalog, stock, &mut self.market, material, clock.seconds)
+                .is_ok()
+            {
+                self.sale_trip_for_return_purchase()
+                    .expect("outbound sale trip")
+                    .return_purchase = Some(index);
+                return Ok(true);
+            }
+        }
+        self.trade
+            .buy(
+                catalog,
+                stock,
+                &mut self.market,
+                material,
+                (clock.seconds, clock.round_trip_km, freight),
+            )
+            .map(|()| false)
     }
 
     pub fn place_trade_order(
@@ -349,10 +364,14 @@ impl Construction {
         match order {
             TradeOrder::Buy { freight } => {
                 self.trade.notice = match self.buy_from_town(catalog, stock, clock, id, freight) {
-                    Ok(()) if freight => {
+                    Ok(true) => format!(
+                        "{} added to the return trip. No extra fuel charge.",
+                        definition.name
+                    ),
+                    Ok(false) if freight => {
                         format!("{} ordered for freight delivery.", definition.name)
                     }
-                    Ok(()) => format!("{} ordered for town pickup.", definition.name),
+                    Ok(false) => format!("{} ordered for town pickup.", definition.name),
                     Err(error) => error.into(),
                 };
             }
@@ -559,6 +578,7 @@ mod tests {
             farm_bed: None,
             market_order: true,
             exports: 0,
+            return_purchase: None,
             driver: 0,
             vehicle: 0,
             elapsed: 0.0,

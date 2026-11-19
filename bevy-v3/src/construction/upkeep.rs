@@ -813,6 +813,7 @@ mod tests {
             farm_bed: None,
             market_order: false,
             exports: 0,
+            return_purchase: None,
             driver: 4,
             vehicle: 1,
             elapsed: 54.95,

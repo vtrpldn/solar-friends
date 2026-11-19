@@ -460,6 +460,7 @@ mod tests {
             farm_bed: None,
             market_order: true,
             exports: 0,
+            return_purchase: None,
             driver: 0,
             vehicle: 0,
             elapsed: 0.0,

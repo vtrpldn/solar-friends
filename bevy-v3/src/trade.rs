@@ -202,18 +202,40 @@ impl Trade {
         id: &str,
         (clock, distance, freight): (f64, u32, bool),
     ) -> Result<(), &'static str> {
+        let fare = if freight {
+            crate::market::freight_cents(distance)
+        } else {
+            crate::market::fare_cents(distance)
+        };
+        self.buy_with_fare(catalog, stock, market, id, (clock, distance, freight, fare))
+    }
+
+    pub fn buy_on_return_trip(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        market: &mut Market,
+        id: &str,
+        clock: f64,
+    ) -> Result<(), &'static str> {
+        self.buy_with_fare(catalog, stock, market, id, (clock, 0, false, 0))
+    }
+
+    fn buy_with_fare(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        market: &mut Market,
+        id: &str,
+        (clock, distance, freight, fare): (f64, u32, bool, u64),
+    ) -> Result<(), &'static str> {
         if freight && self.delivery.is_some() {
             return Err("A freight order is already on the way.");
         }
         if !freight && self.orders.len() >= 32 {
             return Err("The town order queue is full.");
         }
-        let day = ((540.0 + clock * 0.45) / 1440.0).floor() as u64;
-        let fare = if freight {
-            crate::market::freight_cents(distance)
-        } else {
-            crate::market::fare_cents(distance)
-        };
+        let day = pantry_day(clock);
         let (quantity, cents) = market.buy_pack(catalog, stock, id, (day, fare, freight))?;
         let food = food::fresh(
             &BTreeMap::from([(id.to_owned(), quantity)]),

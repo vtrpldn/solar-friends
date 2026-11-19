@@ -121,6 +121,8 @@ struct TownTrip {
     market_order: bool,
     #[serde(default)]
     exports: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    return_purchase: Option<usize>,
     driver: usize,
     #[serde(default)]
     vehicle: usize,
@@ -139,10 +141,12 @@ impl TownTrip {
             .then_some(self.project)
             .into_iter()
             .chain(self.extra_orders())
+            .chain(self.return_purchase)
     }
 
     fn covers_order(self, index: usize) -> bool {
-        (self.market_order && self.project == index)
+        self.return_purchase == Some(index)
+            || (self.market_order && self.project == index)
             || (index < u32::BITS as usize && self.exports & (1 << index) != 0)
     }
 }
@@ -1749,7 +1753,7 @@ impl Construction {
                 && (0.0..=trip.duration).contains(&trip.elapsed)
                 && (1.0..=500.0).contains(&trip.duration)
                 && (trip.boarded || trip.elapsed == 0.0)
-                && self.valid_trip_exports(catalog, *trip)
+                && self.valid_trip_trade_cargo(catalog, *trip)
                 && if trip.market_order {
                     trip.farm_bed.is_none() && self.trade.orders.get(trip.project).is_some()
                 } else if let Some(bed) = trip.farm_bed {
@@ -3178,6 +3182,7 @@ mod tests {
             farm_bed: None,
             market_order: false,
             exports: 0,
+            return_purchase: None,
             driver: 0,
             vehicle: 0,
             elapsed: 0.0,
