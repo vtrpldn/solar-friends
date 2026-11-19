@@ -165,6 +165,12 @@ pub struct Bed {
     damage: f64,
     #[serde(default)]
     pub irrigated_liters: f64,
+    #[serde(default)]
+    pub rain_liters: f64,
+    #[serde(default)]
+    pub evaporated_liters: f64,
+    #[serde(default)]
+    pub drained_liters: f64,
     stress: f64,
     ripe_at: f64,
     residue_kg: f64,
@@ -394,6 +400,9 @@ impl Bed {
             drought_seconds: 0.0,
             damage: 0.0,
             irrigated_liters: 0.0,
+            rain_liters: 0.0,
+            evaporated_liters: 0.0,
+            drained_liters: 0.0,
             stress: 0.0,
             ripe_at: 0.0,
             residue_kg: 0.0,
@@ -553,9 +562,13 @@ impl Bed {
         } else {
             0.0
         };
+        let capacity = area * 16.0;
+        let available = self.moisture * capacity + rain + irrigated;
         self.irrigated_liters += irrigated;
-        self.moisture =
-            (self.moisture + (rain + irrigated - demand) / (area * 16.0)).clamp(0.0, 1.0);
+        self.rain_liters += rain;
+        self.evaporated_liters += available.min(demand);
+        self.drained_liters += (available - demand - capacity).max(0.0);
+        self.moisture = ((available - demand) / capacity).clamp(0.0, 1.0);
         if !self.standing() {
             return;
         }
@@ -612,8 +625,14 @@ impl Farming {
                         && bed.dimensions.x == 1.2
                         && bed.dimensions.y >= 1.0
                         && [0.5, 1.0, 1.5].contains(&bed.density)
-                        && bed.irrigated_liters.is_finite()
-                        && bed.irrigated_liters >= 0.0
+                        && [
+                            bed.irrigated_liters,
+                            bed.rain_liters,
+                            bed.evaporated_liters,
+                            bed.drained_liters,
+                        ]
+                        .into_iter()
+                        .all(|liters| liters.is_finite() && liters >= 0.0)
                         && [bed.moisture, bed.fertility, bed.growth]
                             .iter()
                             .all(|value| (0.0..=1.0).contains(value))
@@ -638,6 +657,35 @@ impl Farming {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn crop_water_is_accounted_for_through_rain_irrigation_and_drainage() {
+        let mut bed = Bed::new(Vec2::ZERO, 4.0);
+        bed.stage = Stage::Growing;
+        let capacity = bed.area() * 16.0;
+        let initial = bed.moisture * capacity;
+        for (hour, rain) in [0.0, 0.0, 40.0, 0.0].into_iter().enumerate() {
+            let dt = DAY / 24.0;
+            bed.tick(
+                CropClimate {
+                    clock: (hour as f64 + 1.0) * dt,
+                    dt,
+                    rain,
+                    season: 1.0,
+                    sheltered: false,
+                    sandbox: false,
+                },
+                |_| true,
+            );
+        }
+        assert!(bed.irrigated_liters > 0.0);
+        assert!(bed.drained_liters > 0.0);
+        assert!(bed.evaporated_liters > 0.0);
+        let remaining = initial + bed.rain_liters + bed.irrigated_liters
+            - bed.evaporated_liters
+            - bed.drained_liters;
+        assert!((remaining - bed.moisture * capacity).abs() < 1e-9);
+    }
 
     #[test]
     fn irrigated_greens_mature_in_45_days_and_preserve_fractional_harvest() {

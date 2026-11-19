@@ -641,7 +641,7 @@ impl Construction {
             bed.stage.label()
         };
         let mut label = format!(
-            "Bed {}/{} · {} · {} ({:.0}%)\nMoisture {:.0}% · Fertility {:.0}% · {:.1} kg harvest estimate\nDrought loss {:.0}% · {:.1} L irrigation applied\nDensity {:.1}× · {} · {} residues",
+            "Bed {}/{} · {} · {} ({:.0}%)\nMoisture {:.0}% · Fertility {:.0}% · {:.1} kg harvest estimate\nDrought loss {:.0}%\nWater totals · {:.1} L rain · {:.1} L irrigation · {:.1} L evaporated · {:.1} L drained\nDensity {:.1}× · {} · {} residues",
             index + 1,
             plot.beds.len(),
             bed.crop.label(),
@@ -651,7 +651,10 @@ impl Construction {
             bed.fertility * 100.0,
             bed.yield_kg(clock),
             bed.drought_damage() * 100.0,
+            bed.rain_liters,
             bed.irrigated_liters,
+            bed.evaporated_liters,
+            bed.drained_liters,
             bed.density,
             irrigation,
             residues,
