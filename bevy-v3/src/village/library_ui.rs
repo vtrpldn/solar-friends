@@ -56,6 +56,8 @@ fn spawn_library(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
             LibraryPanel,
+            Interaction::None,
+            bevy::ui::FocusPolicy::Block,
             Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,

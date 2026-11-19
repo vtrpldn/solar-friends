@@ -429,6 +429,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
             Toolbar,
+            Interaction::None,
+            bevy::ui::FocusPolicy::Block,
             Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
@@ -483,6 +485,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             }
             row.spawn((
                 PanelMenu,
+                Interaction::None,
+                bevy::ui::FocusPolicy::Block,
                 Node {
                     display: Display::None,
                     position_type: PositionType::Absolute,

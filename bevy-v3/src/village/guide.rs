@@ -181,6 +181,8 @@ fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
             GuideNavigation,
+            Interaction::None,
+            bevy::ui::FocusPolicy::Block,
             Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,

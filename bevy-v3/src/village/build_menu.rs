@@ -37,6 +37,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
             BuildPanel,
+            Interaction::None,
+            bevy::ui::FocusPolicy::Block,
             Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,

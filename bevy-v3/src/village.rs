@@ -643,6 +643,8 @@ fn opening_model(assets: &AssetServer, index: usize) -> SceneRoot {
 fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn((
         VillageHud,
+        Interaction::None,
+        bevy::ui::FocusPolicy::Block,
         Text::default(),
         ui_font(&assets, 17.0),
         Node {
@@ -680,7 +682,7 @@ fn read_camp_pointer(
     ),
     camera: Single<(&Camera, &GlobalTransform), With<VillageCamera>>,
     ground: Query<(), With<GroundMesh>>,
-    buttons: Query<&Interaction, With<Button>>,
+    ui: Query<&Interaction>,
     mut raycast: MeshRayCast,
     (mut input, mut pointer): (Local<Option<Vec2>>, ResMut<CampPointer>),
 ) {
@@ -690,9 +692,7 @@ fn read_camp_pointer(
         || setup.open
         || village.map_input_blocked()
         || village.arrival_time < ARRIVAL_DURATION
-        || buttons
-            .iter()
-            .any(|interaction| *interaction != Interaction::None)
+        || crate::pointer_over_ui(&ui)
     {
         *input = None;
         return;

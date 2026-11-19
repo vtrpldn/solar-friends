@@ -183,9 +183,14 @@ fn update_land(
     ));
 }
 
+fn pointer_over_ui(ui: &Query<&Interaction>) -> bool {
+    ui.iter()
+        .any(|interaction| *interaction != Interaction::None)
+}
+
 fn camera_controls(
     keyboard: Res<ButtonInput<KeyCode>>,
-    mouse: Res<ButtonInput<MouseButton>>,
+    (mouse, ui): (Res<ButtonInput<MouseButton>>, Query<&Interaction>),
     (motion, scroll): (Res<AccumulatedMouseMotion>, Res<AccumulatedMouseScroll>),
     window: Single<&Window, With<PrimaryWindow>>,
     time: Res<Time>,
@@ -246,13 +251,14 @@ fn camera_controls(
     let heading = view.heading + std::f32::consts::FRAC_PI_4;
     let orientation = Quat::from_rotation_y(heading);
     view.target += orientation * pan * (24.0 * dash * ortho.scale.sqrt() * delta);
-    if mouse.pressed(MouseButton::Left) && !village.planning_roads() {
+    let over_ui = pointer_over_ui(&ui);
+    if !over_ui && mouse.pressed(MouseButton::Left) && !village.planning_roads() {
         let distance_per_pixel = CAMERA_HEIGHT * ortho.scale / window.height().max(1.0);
         let drag = Vec3::new(-motion.delta.x, 0.0, -motion.delta.y);
         view.target += orientation * drag * distance_per_pixel;
     }
     view.heading += turn as f32 * delta * 1.2;
-    if mouse.pressed(MouseButton::Right) {
+    if !over_ui && mouse.pressed(MouseButton::Right) {
         view.heading -= motion.delta.x / window.height().max(1.0) * std::f32::consts::TAU;
     }
     view.heading = view.heading.rem_euclid(std::f32::consts::TAU);
@@ -268,7 +274,12 @@ fn camera_controls(
         MouseScrollUnit::Line => 0.12,
         MouseScrollUnit::Pixel => 0.002,
     };
-    let change = zoom * delta * 1.3 - scroll.delta.y * wheel_factor;
+    let wheel = if over_ui {
+        0.0
+    } else {
+        scroll.delta.y * wheel_factor
+    };
+    let change = zoom * delta * 1.3 - wheel;
     ortho.scale = (ortho.scale * change.exp()).clamp(1.0 / 6.0, 1.0 / 0.18);
     let saved = village::CameraView {
         target: view.target,
