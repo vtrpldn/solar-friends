@@ -632,7 +632,7 @@ pub(crate) fn replay_ui(path: &Path) -> io::Result<()> {
     Ok(())
 }
 
-#[derive(Resource)]
+#[derive(Clone, Resource)]
 struct LabSource {
     scenario: PathBuf,
     checkpoint: Option<PathBuf>,
@@ -996,7 +996,7 @@ struct Playback {
     waiting_only: bool,
     farm_site: Option<usize>,
     clear_confirmation: Option<(usize, Option<usize>)>,
-    reload_confirmation: bool,
+    pending_source: Option<LabSource>,
 }
 
 impl Playback {
@@ -1119,7 +1119,7 @@ impl Default for Playback {
             waiting_only: false,
             farm_site: None,
             clear_confirmation: None,
-            reload_confirmation: false,
+            pending_source: None,
         }
     }
 }
@@ -1300,48 +1300,64 @@ fn update_lab_window(
     mut runner: ResMut<Runner>,
     catalog: Res<Catalog>,
     time: Res<Time<bevy::time::Real>>,
-    (keys, mut events): (
+    (keys, mut events, mut dropped): (
         Res<ButtonInput<KeyCode>>,
         MessageReader<bevy::input::keyboard::KeyboardInput>,
+        MessageReader<bevy::window::FileDragAndDrop>,
     ),
     mut playback: Local<Playback>,
     mut panel: Single<&mut Text>,
-    (mut replay, mut map, source): (
+    (mut replay, mut map, mut source): (
         Option<ResMut<Replay>>,
         ResMut<map::MapState>,
-        Option<Res<LabSource>>,
+        Option<ResMut<LabSource>>,
     ),
 ) {
     playback.replaying = replay.is_some();
-    if let Some(source) = &source
+    let dropped_path = dropped
+        .read()
+        .filter_map(|event| match event {
+            bevy::window::FileDragAndDrop::DroppedFile { path_buf, .. } => Some(path_buf),
+            _ => None,
+        })
+        .last();
+    if let Some(source) = source.as_deref_mut()
         && playback.order.is_none()
     {
-        if playback.reload_confirmation && keys.just_pressed(KeyCode::Escape) {
-            playback.reload_confirmation = false;
+        if playback.pending_source.is_some() && keys.just_pressed(KeyCode::Escape) {
+            playback.pending_source = None;
+        } else if let Some(path) = dropped_path {
+            playback.running = false;
+            playback.reset_timing();
+            playback.pending_source = Some(LabSource {
+                scenario: path.clone(),
+                checkpoint: None,
+            });
         } else if keys.just_pressed(KeyCode::F8) {
-            if playback.reload_confirmation {
-                playback.reload_confirmation = false;
-                match source.load(&catalog) {
-                    Ok(reloaded) => {
-                        *runner = reloaded;
+            if let Some(candidate) = playback.pending_source.take() {
+                match candidate.load(&catalog) {
+                    Ok(opened) => {
+                        *source = candidate;
+                        *runner = opened;
                         *playback = Playback::default();
                         *map = map::MapState::default();
-                        playback.notice = "Scenario reloaded at step 0.".into();
+                        playback.notice = "Scenario opened at step 0.".into();
                     }
-                    Err(error) => playback.notice = format!("Could not reload scenario · {error}"),
+                    Err(error) => playback.notice = format!("Could not open scenario · {error}"),
                 }
             } else {
                 playback.running = false;
                 playback.reset_timing();
-                playback.reload_confirmation = true;
+                playback.pending_source = Some(source.clone());
             }
         }
-        if playback.reload_confirmation {
+        if let Some(candidate) = &playback.pending_source {
             map.visible = false;
             events.clear();
-            panel.set_if_neq(Text::new(
-                "Reload scenario?\nF8 Confirm · Esc Cancel\nThis replaces the current lab run and its unsaved orders.",
-            ));
+            panel.set_if_neq(Text::new(format!(
+                "Open scenario?\n{}\nF8 Confirm · Esc Cancel\nThis replaces the current lab run and its unsaved orders.",
+                candidate.scenario.display()
+            )));
             return;
         }
     }
@@ -1673,7 +1689,7 @@ fn update_lab_window(
     }
     let weather = lab_weather(village, &runner.setup);
     let reload_control = if source.is_some() {
-        " · F8 Reload"
+        " · F8 Reload · Drop scenario file to open"
     } else {
         ""
     };
@@ -2290,6 +2306,7 @@ mod tests {
             .init_resource::<ButtonInput<KeyCode>>()
             .init_resource::<map::MapState>()
             .add_message::<bevy::input::keyboard::KeyboardInput>()
+            .add_message::<bevy::window::FileDragAndDrop>()
             .add_systems(Update, update_lab_window);
         let panel = app.world_mut().spawn(Text::default()).id();
         let key = |app: &mut App, key| {
@@ -2337,6 +2354,7 @@ mod tests {
             .init_resource::<ButtonInput<KeyCode>>()
             .init_resource::<map::MapState>()
             .add_message::<bevy::input::keyboard::KeyboardInput>()
+            .add_message::<bevy::window::FileDragAndDrop>()
             .add_systems(Update, update_lab_window);
         let panel = app.world_mut().spawn(Text::default()).id();
         let press_reload = |app: &mut App| {
@@ -2359,6 +2377,32 @@ mod tests {
         let reloaded = app.world().resource::<Runner>();
         assert_eq!(reloaded.index, 0);
         assert_eq!(reloaded.scenario.steps, 8);
+
+        let replacement = path.with_extension("replacement.json");
+        let window = app.world_mut().spawn_empty().id();
+        let drop_replacement = |app: &mut App| {
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .reset_all();
+            app.world_mut()
+                .write_message(bevy::window::FileDragAndDrop::DroppedFile {
+                    window,
+                    path_buf: replacement.clone(),
+                });
+            app.update();
+        };
+        drop_replacement(&mut app);
+        press_reload(&mut app);
+        assert_eq!(app.world().resource::<LabSource>().scenario, path);
+        assert_eq!(app.world().resource::<Runner>().scenario.steps, 8);
+
+        std::fs::write(&replacement, r#"{"steps":12}"#).unwrap();
+        drop_replacement(&mut app);
+        assert_eq!(app.world().resource::<Runner>().scenario.steps, 8);
+        press_reload(&mut app);
+        assert_eq!(app.world().resource::<LabSource>().scenario, replacement);
+        assert_eq!(app.world().resource::<Runner>().scenario.steps, 12);
+        std::fs::remove_file(replacement).unwrap();
         std::fs::remove_file(path).unwrap();
     }
 

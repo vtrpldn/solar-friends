@@ -146,7 +146,7 @@ Use `--lab-ui scenario.json [village.json]` to open the native lab window. Press
 
 In the native lab, press **O** to enter a JSON order at the current step and **F5** to export a report through the current step. Press **F6** to save the current village as a checkpoint you can pass to a new lab run. The command window pauses the scenario while you type.
 
-Press **F7** to save an editable scenario with its starting village and all current orders, including orders added during the run. Reopen the exported file with `--lab-ui` on its own to revise or test the scenario from step 0.
+Press **F7** to save an editable scenario with its starting village and all current orders, including orders added during the run. Drop the exported file onto the lab window and press **F8** to open it at step 0, or pass it to `--lab-ui` on its own.
 
 Press **F8** twice to reload the scenario file and any starting checkpoint. This starts a new run at step 0, so export the current report or save a checkpoint first if you want to keep it.
 
