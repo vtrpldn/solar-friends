@@ -2952,7 +2952,9 @@ mod tests {
             ..default()
         };
         let catalog = Catalog::default();
-        let setup = WorldSetup::default();
+        let mut setup = WorldSetup::default();
+        setup.mode = Mode::Sandbox;
+        let sandbox_directory = menu.directory(Mode::Sandbox).unwrap();
         let village = Village {
             setup: Some(setup.session()),
             stock: Stock::for_start(&setup, &catalog),
@@ -2960,8 +2962,9 @@ mod tests {
             ..default()
         };
         let original =
-            save_library::create(&directory, Mode::Story, "River camp", &village).unwrap();
-        let export = save_library::export(&directory, original, Mode::Story).unwrap();
+            save_library::create(&sandbox_directory, Mode::Sandbox, "River camp", &village)
+                .unwrap();
+        let export = save_library::export(&sandbox_directory, original, Mode::Sandbox).unwrap();
         use bevy::window::FileDragAndDrop;
         let mut app = App::new();
         app.add_message::<FileDragAndDrop>()
@@ -2977,7 +2980,9 @@ mod tests {
 
         drop(&mut app, export.clone());
         assert_eq!(
-            save_library::list(&directory, Mode::Story).unwrap().len(),
+            save_library::list(&sandbox_directory, Mode::Sandbox)
+                .unwrap()
+                .len(),
             1
         );
 
@@ -2986,14 +2991,23 @@ mod tests {
         let menu = app.world().resource::<SaveMenu>();
         let catalog = app.world().resource::<Catalog>();
         let imported = menu.rows[menu.selected].id;
-        assert!(menu.browse_mode == Mode::Story);
+        assert!(menu.browse_mode == Mode::Sandbox);
         assert!(menu.status.contains("Imported a copy"));
         assert_ne!(original, imported);
-        assert!(save_library::load(&directory, imported, Mode::Story, catalog).is_ok());
+        assert!(save_library::load(&sandbox_directory, imported, Mode::Sandbox, catalog).is_ok());
         assert_eq!(
-            save_library::list(&directory, Mode::Story).unwrap().len(),
+            save_library::list(&sandbox_directory, Mode::Sandbox)
+                .unwrap()
+                .len(),
             2
         );
+        let invalid = directory.join("invalid.json");
+        std::fs::write(&invalid, b"{}").unwrap();
+        drop(&mut app, invalid);
+        let menu = app.world().resource::<SaveMenu>();
+        assert!(menu.status.starts_with("Could not import village"));
+        assert_eq!(menu.rows[menu.selected].id, imported);
+        assert_eq!(menu.rows.len(), 2);
         std::fs::remove_dir_all(directory).unwrap();
     }
 

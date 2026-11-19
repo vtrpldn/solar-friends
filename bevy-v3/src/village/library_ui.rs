@@ -82,7 +82,12 @@ pub(super) fn import_dropped_snapshot(
             Ok((mode, id)) => {
                 menu.browse_mode = mode;
                 menu.delete_request = None;
-                menu.status = "Imported a copy. Select Load village to open it.".into();
+                let collection = match mode {
+                    Mode::Story => "Story",
+                    Mode::Sandbox => "Sandbox",
+                };
+                menu.status =
+                    format!("Imported a copy into {collection}. Select Load village to open it.");
                 if let Ok(directory) = menu.directory(mode) {
                     refresh_library(&mut menu, &directory, mode);
                 }
