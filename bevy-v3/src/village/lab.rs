@@ -550,12 +550,14 @@ impl Default for Playback {
 }
 
 fn lab_bed_page(
-    village: &Village,
+    runner: &mut Runner,
     catalog: &Catalog,
     keys: &ButtonInput<KeyCode>,
     playback: &mut Playback,
 ) -> String {
-    let construction = &village.construction;
+    use crate::farming::FarmAction;
+
+    let construction = &runner.village.construction;
     let plots = &construction.farming.plots;
     let Some((&first, _)) = plots.first_key_value() else {
         playback.farm_site = None;
@@ -589,14 +591,47 @@ fn lab_bed_page(
         .inventory_page
         .min(plots[&site].beds.len().saturating_sub(1));
     playback.inventory_page = index;
+    if !runner.done()
+        && keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+        && let Some((_, action)) = [
+            (KeyCode::Digit1, FarmAction::Prepare),
+            (KeyCode::Digit2, FarmAction::Plant),
+            (KeyCode::Digit3, FarmAction::Harvest),
+            (KeyCode::Digit4, FarmAction::Clear),
+            (KeyCode::Digit5, FarmAction::Amend),
+            (KeyCode::Digit6, FarmAction::Collect),
+        ]
+        .into_iter()
+        .find(|(key, _)| keys.just_pressed(*key))
+    {
+        let order = LabOrder::Bed {
+            site: site + 1,
+            bed: index + 1,
+            action,
+        };
+        playback.notice = match runner.submit(catalog, order) {
+            Ok(()) => runner
+                .outcomes
+                .last()
+                .and_then(|outcome| outcome.error.clone())
+                .unwrap_or_else(|| "Bed order accepted.".into()),
+            Err(error) => error.into(),
+        };
+    }
+    let construction = &runner.village.construction;
     let name = construction
         .lab_job_site_name(catalog, site)
         .unwrap_or("Cultivation");
     let details = construction
-        .bed_status(site, index, village.clock)
+        .bed_status(site, index, runner.village.clock)
         .unwrap_or_else(|| "No beds.".into());
+    let controls = if runner.done() {
+        ""
+    } else {
+        "\nShift+1 Prepare · +2 Plant · +3 Harvest · +4 Clear · +5 Amend · +6 Collect"
+    };
     format!(
-        "Cultivation · {name} #{}\nTab Switch view · [ / ] Plot · Page Up/Down Bed\n\n{details}",
+        "Cultivation · {name} #{}\nTab Switch view · [ / ] Plot · Page Up/Down Bed{controls}\n\n{details}",
         site + 1
     )
 }
@@ -682,7 +717,10 @@ fn update_lab_window(
     .into_iter()
     .enumerate()
     {
-        if keys.just_pressed(key) {
+        if keys.just_pressed(key)
+            && !(playback.view == LabView::Beds
+                && keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]))
+        {
             playback.speed = index;
             playback.debt = 0.0;
         }
@@ -773,7 +811,7 @@ fn update_lab_window(
                 playback.waiting_only,
             )
         } else if playback.view == LabView::Beds {
-            lab_bed_page(village, &catalog, &keys, playback)
+            lab_bed_page(&mut runner, &catalog, &keys, playback)
         } else {
             lab_inventory(
                 &catalog,
@@ -894,6 +932,43 @@ mod tests {
         assert_eq!(
             verify_report(serde_json::from_slice(&data).unwrap(), &catalog).unwrap(),
             3
+        );
+    }
+
+    #[test]
+    fn cultivation_shortcut_records_the_selected_bed_order_for_replay() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps": 2,
+            "orders": [{"step": 0, "order": {"type":"build","key":"field","x":40,"z":36,"size":[2,2]}}]
+        }"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        let mut playback = Playback {
+            farm_site: Some(0),
+            inventory_page: 1,
+            ..default()
+        };
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::ShiftLeft);
+        keys.press(KeyCode::Digit1);
+        let details = lab_bed_page(&mut runner, &catalog, &keys, &mut playback);
+        assert!(details.contains("Bed 2/"));
+        assert_eq!(playback.notice, "Bed order accepted.");
+        assert!(matches!(
+            runner.scenario.orders[1].order,
+            LabOrder::Bed {
+                site: 1,
+                bed: 2,
+                ..
+            }
+        ));
+        while !runner.done() {
+            runner.advance(&catalog);
+        }
+        let data = serde_json::to_vec(&runner.report()).unwrap();
+        assert_eq!(
+            verify_report(serde_json::from_slice(&data).unwrap(), &catalog).unwrap(),
+            2
         );
     }
 
