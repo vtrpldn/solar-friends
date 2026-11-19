@@ -20,6 +20,7 @@ const models = [
     [`tent-${variant}`, createTent(variant)],
     [`car-${variant}`, openingCar(variant)],
   ]),
+  ["resident", createResident("resident")],
 ];
 const cycle = [
   ["idle", Math.PI],
@@ -40,6 +41,10 @@ const cycle = [
   ["yawn", 3],
   ["neck-stretch", 3],
   ["shoulder-roll", 3],
+  ["sit", Math.PI],
+  ["water", Math.PI * 2 / 3],
+  ["tend", Math.PI * 2 / 3],
+  ["carry", Math.PI],
 ];
 
 function bakeResident(name, root) {
@@ -47,22 +52,30 @@ function bakeResident(name, root) {
   const clips = cycle.map(([action, duration]) => {
     const frames = Math.ceil(duration * 24);
     const times = [];
-    const joints = rig.joints.map((joint) => ({joint, positions: [], rotations: []}));
+    const props = [rig.cargo, rig.can, rig.bowl, rig.book, rig.axe, rig.stream].map(node => ({ node, scales: [] }));
+    const joints = [...rig.joints, rig.can].map((joint) => ({joint, positions: [], rotations: []}));
     for (let frame = 0; frame <= frames; frame++) {
       const time = frame * duration / frames;
       poseResident(rig, action, frame === frames ? 0 : time);
       times.push(time);
+      for (const { node, scales } of props) scales.push(...(node.visible ? node.scale.toArray() : [0, 0, 0]));
       for (const { joint, positions, rotations } of joints) {
         positions.push(...joint.position.toArray());
         rotations.push(...joint.quaternion.toArray());
       }
     }
-    return new AnimationClip(`${name}-${action}`, duration, joints.flatMap(({joint, positions, rotations}) => [
+    const tracks = joints.flatMap(({joint, positions, rotations}) => [
       new VectorKeyframeTrack(`${joint.uuid}.position`, times, positions),
       new QuaternionKeyframeTrack(`${joint.uuid}.quaternion`, times, rotations),
-    ])).optimize();
+    ]);
+    for (const { node, scales } of props) tracks.push(new VectorKeyframeTrack(`${node.uuid}.scale`, times, scales));
+    return new AnimationClip(`${name}-${action}`, duration, tracks).optimize();
   });
   poseResident(rig, "idle", 0);
+  for (const node of [rig.cargo, rig.can, rig.bowl, rig.book, rig.axe]) {
+    node.visible = true;
+    node.scale.setScalar(0);
+  }
   return clips;
 }
 

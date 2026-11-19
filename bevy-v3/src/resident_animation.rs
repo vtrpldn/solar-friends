@@ -10,8 +10,8 @@ use bevy::{
 
 use crate::{setup::WorldSetup, village::Village};
 
-const CLIPS: usize = 18;
-const RESIDENTS: usize = 5;
+const CLIPS: usize = 22;
+const RESIDENTS: usize = 6;
 
 // Matches the baked clip order in scripts/export-v3-opening-models.mjs.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -34,14 +34,22 @@ pub enum Motion {
     Yawn,
     NeckStretch,
     ShoulderRoll,
+    Sit,
+    Water,
+    Tend,
+    Carry,
 }
 
 #[derive(Component)]
 pub struct ResidentAnimation(pub usize);
 
 #[derive(Component)]
+pub struct RehearsalPose(pub Motion, pub bool);
+
+#[derive(Component)]
 struct AnimatedResident {
     index: usize,
+    actor: Entity,
     pose: Option<Motion>,
 }
 
@@ -101,6 +109,7 @@ fn bind_animation_player(
             AnimationTransitions::new(),
             AnimatedResident {
                 index: resident.0,
+                actor: event.entity,
                 pose: None,
             },
         ));
@@ -108,8 +117,9 @@ fn bind_animation_player(
 }
 
 fn animate(
-    setup: Res<WorldSetup>,
-    village: Res<Village>,
+    setup: Option<Res<WorldSetup>>,
+    village: Option<Res<Village>>,
+    rehearsals: Query<&RehearsalPose>,
     library: Res<Library>,
     mut players: Query<(
         &mut AnimatedResident,
@@ -118,7 +128,16 @@ fn animate(
     )>,
 ) {
     for (mut resident, mut player, mut transitions) in &mut players {
-        let pose = village.motion(resident.index);
+        let (pose, paused) = if let Ok(rehearsal) = rehearsals.get(resident.actor) {
+            (rehearsal.0, rehearsal.1)
+        } else if let (Some(setup), Some(village)) = (&setup, &village) {
+            (
+                village.motion(resident.index),
+                setup.open || village.is_paused(),
+            )
+        } else {
+            (Motion::Idle, false)
+        };
         let index = library.indices[resident.index * CLIPS + pose as usize];
         if resident.pose != Some(pose) {
             transitions
@@ -127,7 +146,7 @@ fn animate(
             resident.pose = Some(pose);
         }
         if let Some(active) = player.animation_mut(index) {
-            if setup.open || village.is_paused() {
+            if paused {
                 active.pause();
             } else {
                 active.resume();

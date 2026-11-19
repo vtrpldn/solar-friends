@@ -1,3 +1,6 @@
+#[path = "garden_rehearsal.rs"]
+mod rehearsal;
+
 use super::garden_connections::{Connection, connections};
 use super::garden_terrain::{BIOMES, Terrain};
 use super::{WorkshopCatalog, building_model, ui_font};
@@ -155,6 +158,8 @@ pub fn run(path: Option<PathBuf>) {
     }))
     .add_plugins(crate::ui_font::UiFontPlugin)
     .insert_resource(models)
+    .init_resource::<rehearsal::Rehearsal>()
+    .add_plugins(crate::resident_animation::ResidentAnimationPlugin)
     .insert_resource(Garden {
         layout,
         gallery,
@@ -174,9 +179,13 @@ pub fn run(path: Option<PathBuf>) {
         grid: false,
     })
     .add_systems(Startup, setup)
-    .add_systems(Update, (edit, update_terrain, render).chain());
+    .add_systems(
+        Update,
+        (edit, rehearsal::tick, update_terrain, render).chain(),
+    );
     crate::village::register_building_models(&mut app);
     embedded_asset!(app, "connected-solar-farm.glb");
+    crate::village::register_opening_models(&mut app);
     app.run();
 }
 
@@ -423,6 +432,7 @@ fn update_terrain(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn render(
     mut commands: Commands,
     mut garden: ResMut<Garden>,
@@ -431,6 +441,7 @@ fn render(
     mut rendered: Query<(Entity, &GardenProp, &mut Transform)>,
     mut text: Single<&mut Text, With<GardenText>>,
     mut gizmos: Gizmos,
+    rehearsal: Res<rehearsal::Rehearsal>,
 ) {
     if garden.redraw {
         const MODELS_PER_FRAME: usize = 12;
@@ -460,7 +471,9 @@ fn render(
                 displayed.remove(prop.id.as_str())
             {
                 if existing_model == model && existing_shared == shared_inverter {
-                    existing_transform.set_if_neq(transform);
+                    if !rehearsal.is_active(entity) {
+                        existing_transform.set_if_neq(transform);
+                    }
                     continue;
                 }
                 commands.entity(entity).despawn();
@@ -469,7 +482,10 @@ fn render(
                 loading = true;
                 continue;
             }
-            let scene = if shared_inverter {
+            let resident = rehearsal::resident_model(&prop.asset);
+            let scene = if let Some((_, scene)) = resident {
+                crate::village::opening_model(&assets, scene)
+            } else if shared_inverter {
                 let path = AssetPath::from_path_buf(embedded_path!("connected-solar-farm.glb"))
                     .with_source("embedded")
                     .with_label("Scene0");
@@ -477,7 +493,7 @@ fn render(
             } else {
                 building_model(&assets, model)
             };
-            commands.spawn((
+            let mut entity = commands.spawn((
                 GardenProp {
                     id: prop.id.clone(),
                     model,
@@ -486,6 +502,15 @@ fn render(
                 scene,
                 transform,
             ));
+            if let Some((index, _)) = resident {
+                entity.insert((
+                    crate::resident_animation::ResidentAnimation(index),
+                    crate::resident_animation::RehearsalPose(
+                        crate::resident_animation::Motion::Idle,
+                        false,
+                    ),
+                ));
+            }
             spawned += 1;
         }
         for (entity, _, _, _) in displayed.into_values() {
@@ -544,8 +569,9 @@ fn render(
                 group.count, group.area
             )
         });
+    let rehearsal_hint = rehearsal::hint(&rehearsal, &garden.layout.props, selection, &models);
     text.0 = format!(
-        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nClick/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save\n{}",
+        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nClick/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save{rehearsal_hint}\n{}",
         garden.layout.props.len(),
         garden.layout.biome,
         garden.status

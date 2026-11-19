@@ -171,3 +171,5 @@ Pass `--asset-garden` to open the native flat V2 gallery. For a separate layout,
 Press **B** to switch between the flat gallery, Mata Atlântica, Cerrado, and Caatinga. Press **L** to load the selected biome’s V2 landscape. Undo restores the previous props, and the scene file records the selected biome.
 
 Adjacent garden, orchard, and solar farm sections show their connected area when selected. Sections stay individually editable, and connected solar farms share one inverter.
+
+Select a prop with a resident interaction. Press **I** to choose a resident, **O** to change the action, **U** to send the resident from their placed location, or **Y** to rehearse nearby. **P** pauses or resumes the animation, and **Esc** returns the resident to their original pose and position.
