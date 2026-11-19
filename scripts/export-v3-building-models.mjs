@@ -1,5 +1,5 @@
 // Export one scene for each model in the desktop build catalog.
-import { compactModel, createAsset } from "../web/v02/library/catalog.js";
+import { compactModel, createAsset, createConnectedAsset } from "../web/v02/library/catalog.js";
 import { BoxGeometry, Group, Mesh, MeshStandardMaterial } from "three";
 import { greenhouseShell } from "../web/v02/weekend/greenhouse-model.js";
 import { exportModels } from "./v3-model-export.mjs";
@@ -66,4 +66,9 @@ const models = buildingScenes.map((id) => {
   });
   return [id, compact];
 });
+// Keep the section model separate so the Asset Garden can use one inverter per array.
+await exportModels(
+  [["connected-solar-farm", compactModel(createConnectedAsset("solar_farm", { leader: false }))]],
+  new URL("../bevy-v3/src/workshop/connected-solar-farm.glb", import.meta.url),
+);
 await exportModels(models, new URL("../bevy-v3/src/buildings.glb", import.meta.url));

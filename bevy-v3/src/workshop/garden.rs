@@ -1,6 +1,8 @@
+use super::garden_connections::{Connection, connections};
 use super::garden_terrain::{BIOMES, Terrain};
 use super::{WorkshopCatalog, building_model, ui_font};
 use bevy::{
+    asset::{AssetPath, embedded_asset, embedded_path},
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll},
     prelude::*,
 };
@@ -29,11 +31,11 @@ fn flat_biome() -> String {
 
 #[derive(Clone, Deserialize, Serialize)]
 pub(super) struct Prop {
-    id: String,
+    pub(super) id: String,
     pub(super) asset: String,
-    column: i32,
-    row: i32,
-    rotation: i32,
+    pub(super) column: i32,
+    pub(super) row: i32,
+    pub(super) rotation: i32,
 }
 
 impl Prop {
@@ -99,6 +101,7 @@ struct Garden {
     redraw: bool,
     terrain_dirty: bool,
     terrain: Terrain,
+    connections: HashMap<String, Connection>,
     target: Vec3,
     bearing: f32,
     zoom: f32,
@@ -121,6 +124,7 @@ impl Garden {
 struct GardenProp {
     id: String,
     model: usize,
+    shared_inverter: bool,
 }
 #[derive(Component)]
 struct GardenText;
@@ -163,6 +167,7 @@ pub fn run(path: Option<PathBuf>) {
         redraw: true,
         terrain_dirty: true,
         terrain: Terrain::default(),
+        connections: HashMap::new(),
         target: Vec3::ZERO,
         bearing: std::f32::consts::FRAC_PI_4,
         zoom: 1.0,
@@ -171,6 +176,7 @@ pub fn run(path: Option<PathBuf>) {
     .add_systems(Startup, setup)
     .add_systems(Update, (edit, update_terrain, render).chain());
     crate::village::register_building_models(&mut app);
+    embedded_asset!(app, "connected-solar-farm.glb");
     app.run();
 }
 
@@ -409,6 +415,7 @@ fn update_terrain(
 ) {
     if garden.terrain_dirty {
         garden.terrain_dirty = false;
+        garden.connections = connections(&garden.layout.props, &models);
         garden.terrain = Terrain::new(&garden.layout, &models);
         if let Some(mesh) = meshes.get_mut(&ground.0) {
             *mesh = garden.terrain.mesh(&garden.layout.biome);
@@ -430,21 +437,29 @@ fn render(
         let mut displayed: HashMap<_, _> = rendered
             .iter_mut()
             .map(|(entity, marker, transform)| {
-                (marker.id.as_str(), (entity, marker.model, transform))
+                (
+                    marker.id.as_str(),
+                    (entity, marker.model, marker.shared_inverter, transform),
+                )
             })
             .collect();
         let mut spawned = 0;
         let mut loading = false;
         for prop in &garden.layout.props {
             let model = models.0[&prop.asset].model;
+            let shared_inverter = prop.asset == "solar_farm"
+                && garden
+                    .connections
+                    .get(&prop.id)
+                    .is_some_and(|connection| !connection.leader);
             let mut center = prop.center(&models);
             center.y = garden.terrain.height(center.x, center.z);
             let transform = Transform::from_translation(center)
                 .with_rotation(Quat::from_rotation_y((prop.rotation as f32).to_radians()));
-            if let Some((entity, existing_model, mut existing_transform)) =
+            if let Some((entity, existing_model, existing_shared, mut existing_transform)) =
                 displayed.remove(prop.id.as_str())
             {
-                if existing_model == model {
+                if existing_model == model && existing_shared == shared_inverter {
                     existing_transform.set_if_neq(transform);
                     continue;
                 }
@@ -454,17 +469,26 @@ fn render(
                 loading = true;
                 continue;
             }
+            let scene = if shared_inverter {
+                let path = AssetPath::from_path_buf(embedded_path!("connected-solar-farm.glb"))
+                    .with_source("embedded")
+                    .with_label("Scene0");
+                SceneRoot(assets.load(path))
+            } else {
+                building_model(&assets, model)
+            };
             commands.spawn((
                 GardenProp {
                     id: prop.id.clone(),
                     model,
+                    shared_inverter,
                 },
-                building_model(&assets, model),
+                scene,
                 transform,
             ));
             spawned += 1;
         }
-        for (entity, _, _) in displayed.into_values() {
+        for (entity, _, _, _) in displayed.into_values() {
             commands.entity(entity).despawn();
         }
         garden.redraw = loading;
@@ -512,8 +536,16 @@ fn render(
             )
         },
     );
+    let connection = selection
+        .and_then(|prop| garden.connections.get(&prop.id))
+        .map_or(String::new(), |group| {
+            format!(
+                "  ·  {} connected sections, {} cells",
+                group.count, group.area
+            )
+        });
     text.0 = format!(
-        "Asset Garden  ·  {} props  ·  {}\n{label}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nClick/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save\n{}",
+        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nClick/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save\n{}",
         garden.layout.props.len(),
         garden.layout.biome,
         garden.status

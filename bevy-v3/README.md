@@ -169,3 +169,5 @@ Press **F5** to export the current workshop view as a PNG without the controls o
 Pass `--asset-garden` to open the native flat V2 gallery. For a separate layout, pass a V2 scene JSON path as the next argument. The controls overlay lists selection, placement, rotation, undo, and save shortcuts. Saving without a path writes `solar-friends-asset-garden.json` in the current directory.
 
 Press **B** to switch between the flat gallery, Mata Atlântica, Cerrado, and Caatinga. Press **L** to load the selected biome’s V2 landscape. Undo restores the previous props, and the scene file records the selected biome.
+
+Adjacent garden, orchard, and solar farm sections show their connected area when selected. Sections stay individually editable, and connected solar farms share one inverter.
