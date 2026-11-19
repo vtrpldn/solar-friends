@@ -2991,6 +2991,7 @@ mod tests {
         let menu = app.world().resource::<SaveMenu>();
         let catalog = app.world().resource::<Catalog>();
         let imported = menu.rows[menu.selected].id;
+        assert_eq!(menu.rows[menu.selected].name, "River camp");
         assert!(menu.browse_mode == Mode::Sandbox);
         assert!(menu.status.contains("Imported a copy"));
         assert_ne!(original, imported);

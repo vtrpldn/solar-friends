@@ -71,15 +71,17 @@ impl SaveMenu {
     }
 
     pub fn import_snapshot(&self, path: &Path, catalog: &Catalog) -> io::Result<(Mode, u64)> {
-        let village = save::read(path, catalog)?;
+        let (village, exported_name) = save::read_export(path, catalog)?;
         let mode = village
             .mode()
             .ok_or_else(|| io::Error::other("save has no game mode"))?;
-        let name = path
-            .file_stem()
-            .and_then(|stem| stem.to_str())
-            .unwrap_or("Imported village");
-        let id = create(&self.directory(mode)?, mode, name, &village)?;
+        let filename = path.file_stem().and_then(|stem| stem.to_str());
+        let name = exported_name
+            .as_deref()
+            .and_then(|name| clean_name(name).ok())
+            .or_else(|| filename.and_then(|name| clean_name(name).ok()))
+            .unwrap_or_else(|| "Imported village".into());
+        let id = create(&self.directory(mode)?, mode, &name, &village)?;
         Ok((mode, id))
     }
 
@@ -258,7 +260,7 @@ pub fn export(directory: &Path, id: u64, mode: Mode) -> io::Result<PathBuf> {
     let timestamp = timestamp();
     if let Ok(slot) = decode_slot(&bytes, id, mode) {
         let export = exports.join(format!("village-{id}-{timestamp}.json"));
-        save::write_payload(&export, &slot.current)?;
+        save::write_export(&export, &slot.current, &slot.name)?;
         Ok(export)
     } else {
         let export = exports.join(format!("slot-{id}-{timestamp}.backup.json"));

@@ -17,6 +17,8 @@ struct SaveFile<T> {
     version: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     named_slot: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    village_name: Option<String>,
     village: T,
 }
 
@@ -51,21 +53,23 @@ pub fn autosave_location(mode: Mode) -> io::Result<PathBuf> {
 }
 
 pub fn write(path: &Path, village: &Village) -> io::Result<()> {
-    write_payload(path, village)
+    write_snapshot(path, village, None, None)
 }
 
-pub(crate) fn write_payload(path: &Path, village: &impl Serialize) -> io::Result<()> {
-    write_snapshot(path, village, None)
+pub(crate) fn write_export(path: &Path, village: &impl Serialize, name: &str) -> io::Result<()> {
+    write_snapshot(path, village, None, Some(name.to_owned()))
 }
 
 fn write_snapshot(
     path: &Path,
     village: &impl Serialize,
     named_slot: Option<u64>,
+    village_name: Option<String>,
 ) -> io::Result<()> {
     let json = serde_json::to_vec(&SaveFile {
         version: VERSION,
         named_slot,
+        village_name,
         village,
     })?;
     atomic_write(path, &json, MAX_BYTES)
@@ -86,7 +90,7 @@ pub fn write_continuation(
             ));
         }
     }
-    write_snapshot(path, village, named_slot)
+    write_snapshot(path, village, named_slot, None)
 }
 
 pub(crate) fn atomic_write(path: &Path, json: &[u8], max_bytes: u64) -> io::Result<()> {
@@ -122,6 +126,16 @@ pub fn read(path: &Path, catalog: &Catalog) -> io::Result<Village> {
 }
 
 pub fn read_continuation(path: &Path, catalog: &Catalog) -> io::Result<(Village, Option<u64>)> {
+    let save = read_snapshot(path, catalog)?;
+    Ok((save.village, save.named_slot))
+}
+
+pub(crate) fn read_export(path: &Path, catalog: &Catalog) -> io::Result<(Village, Option<String>)> {
+    let save = read_snapshot(path, catalog)?;
+    Ok((save.village, save.village_name))
+}
+
+fn read_snapshot(path: &Path, catalog: &Catalog) -> io::Result<SaveFile<Village>> {
     let bytes = read_bytes(path, MAX_BYTES)?;
     let save: SaveFile<Village> = serde_json::from_slice(&bytes)?;
     if save.version != VERSION || !save.village.valid_save(catalog) {
@@ -130,7 +144,7 @@ pub fn read_continuation(path: &Path, catalog: &Catalog) -> io::Result<(Village,
             "unsupported or invalid village save",
         ));
     }
-    Ok((save.village, save.named_slot))
+    Ok(save)
 }
 
 pub(crate) fn read_bytes(path: &Path, limit: u64) -> io::Result<Vec<u8>> {
