@@ -3,6 +3,7 @@ use std::{f32::consts::TAU, sync::Arc, time::Duration};
 use bevy::{
     audio::{AddAudioSource, AudioSinkPlayback, Decodable, Source, Volume},
     prelude::*,
+    ui::RelativeCursorPosition,
     window::PrimaryWindow,
 };
 
@@ -161,17 +162,28 @@ impl SoundSettings {
     }
 
     fn set_volume(&mut self, effects: bool, next: u8) {
+        if self.apply_volume(effects, next) {
+            self.persist();
+        }
+    }
+
+    fn apply_volume(&mut self, effects: bool, next: u8) -> bool {
         let volume = if effects {
             &mut self.effects
         } else {
             &mut self.music
         };
-        if next != *volume {
-            *volume = next;
-            self.save_failed = Self::path()
-                .and_then(|path| save::atomic_write(&path, &serde_json::to_vec(self)?, 1024))
-                .is_err();
+        if next == *volume {
+            return false;
         }
+        *volume = next;
+        true
+    }
+
+    fn persist(&mut self) {
+        self.save_failed = Self::path()
+            .and_then(|path| save::atomic_write(&path, &serde_json::to_vec(self)?, 1024))
+            .is_err();
     }
 
     pub fn label(&self) -> String {
@@ -200,8 +212,125 @@ pub struct VillageAudio;
 impl Plugin for VillageAudio {
     fn build(&self, app: &mut App) {
         app.add_audio_source::<Sound>()
-            .add_systems(Startup, prepare_audio)
-            .add_systems(Update, audio_controls);
+            .add_systems(Startup, (prepare_audio, spawn_volume_panel))
+            .add_systems(
+                Update,
+                (volume_input, audio_controls, show_volume_panel).chain(),
+            );
+    }
+}
+
+#[derive(Component)]
+struct VolumePanel;
+
+#[derive(Component)]
+struct VolumeTrack(bool);
+
+#[derive(Component)]
+struct VolumeFill(bool);
+
+#[derive(Component)]
+struct VolumeLabel(bool);
+
+fn spawn_volume_panel(mut commands: Commands, assets: Res<AssetServer>) {
+    use crate::ui_font::ui_font;
+    commands
+        .spawn((
+            VolumePanel,
+            GlobalZIndex(1),
+            Node {
+                display: Display::None,
+                position_type: PositionType::Absolute,
+                right: px(20),
+                bottom: px(82),
+                width: px(308),
+                padding: UiRect::all(px(16)),
+                flex_direction: FlexDirection::Column,
+                row_gap: px(8),
+                ..default()
+            },
+            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+        ))
+        .with_children(|panel| {
+            for effects in [false, true] {
+                panel.spawn((VolumeLabel(effects), Text::default(), ui_font(&assets, 16.)));
+                panel
+                    .spawn((
+                        VolumeTrack(effects),
+                        Button,
+                        RelativeCursorPosition::default(),
+                        Node {
+                            width: percent(100),
+                            height: px(18),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb_u8(63, 80, 65)),
+                    ))
+                    .with_child((
+                        VolumeFill(effects),
+                        Node {
+                            height: percent(100),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb_u8(142, 175, 109)),
+                        bevy::ui::FocusPolicy::Pass,
+                    ));
+            }
+        });
+}
+
+fn volume_input(
+    mut settings: ResMut<SoundSettings>,
+    mouse: Res<ButtonInput<MouseButton>>,
+    window: Single<&Window, With<PrimaryWindow>>,
+    tracks: Query<(&VolumeTrack, &RelativeCursorPosition, &Interaction)>,
+    mut drag: Local<Option<(bool, bool)>>,
+) {
+    if !settings.open || !window.focused || !mouse.pressed(MouseButton::Left) {
+        if let Some((_, true)) = drag.take() {
+            settings.persist();
+        }
+        return;
+    }
+    if mouse.just_pressed(MouseButton::Left) {
+        *drag = tracks.iter().find_map(|(track, _, state)| {
+            (*state == Interaction::Pressed).then_some((track.0, false))
+        });
+    }
+    if let Some((effects, changed)) = drag.as_mut()
+        && let Some(cursor) = tracks.iter().find_map(|(track, cursor, _)| {
+            (track.0 == *effects).then_some(cursor.normalized).flatten()
+        })
+    {
+        let volume = ((cursor.x + 0.5).clamp(0., 1.) * 100.).round() as u8;
+        *changed |= settings.apply_volume(*effects, volume);
+    }
+}
+
+fn show_volume_panel(
+    settings: Res<SoundSettings>,
+    mut panel: Single<&mut Node, With<VolumePanel>>,
+    mut fills: Query<(&VolumeFill, &mut Node), Without<VolumePanel>>,
+    mut labels: Query<(&VolumeLabel, &mut Text)>,
+) {
+    if !settings.is_changed() {
+        return;
+    }
+    panel.display = if settings.open {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    for (fill, mut node) in &mut fills {
+        node.width = percent(f32::from(settings.volume(fill.0)));
+    }
+    for (label, mut text) in &mut labels {
+        let channel = if label.0 {
+            "Interaction sounds"
+        } else {
+            "Music"
+        };
+        text.0 = format!("{channel} {}%", settings.volume(label.0));
     }
 }
 

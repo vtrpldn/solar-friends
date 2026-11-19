@@ -14,7 +14,7 @@ After the cars arrive, click the ground to place camp or select a preset with 1 
 
 V3 runs as a standalone Bevy desktop application. The preview covers land generation, navigation, the opening camp, and construction, including orders and town pickup for missing materials. The V2 browser game remains available at `/v2/`.
 
-Press F for the three-day forecast, P for power, V for water, and N to see what the residents are doing. Use O in the power panel to switch the grid connection, or J after selecting a powered building to switch it off or on. Use 1–4 to change simulation speed with the build menu closed. Open Sound settings from setup or press Shift+F1. Choose Music or Interaction sounds with Up/Down, adjust by 1% with Left/Right, or hold Shift to adjust by 5%. Press M in the sound panel to mute the selected channel.
+Press F for the three-day forecast, P for power, V for water, and N to see what the residents are doing. Use O in the power panel to switch the grid connection, or J after selecting a powered building to switch it off or on. Use 1–4 to change simulation speed with the build menu closed. Open Sound settings from setup or press Shift+F1. Drag either volume slider, or choose Music or Interaction sounds with Up/Down and adjust by 1% with Left/Right, or hold Shift to adjust by 5%. Press M in the sound panel to mute the selected channel.
 
 With the build menu closed, click a natural resource and press G to assign it for gathering, extraction, or felling. Output enters inventory when the resident brings it back.
 
