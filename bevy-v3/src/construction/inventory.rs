@@ -214,6 +214,9 @@ impl Construction {
                 if !borrowers.is_empty() {
                     let _ = write!(text, " ({})", borrowers.join(", "));
                 }
+                if let Some(condition) = equipment.condition_percent(id, count) {
+                    let _ = write!(text, " · {condition:.0}% condition");
+                }
                 if repairing {
                     text.push_str(" · Repair queued");
                 }

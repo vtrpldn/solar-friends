@@ -302,6 +302,17 @@ impl Construction {
                 let _ = write!(detail, " · {}", catalog.materials[tool].name);
             }
         }
+        if let Some(tool) = &recipe.repair {
+            let owned = stock.available(tool);
+            let equipment = &stock.equipment;
+            if let Some(condition) = equipment.condition_percent(tool, owned) {
+                let broken = equipment.broken(tool).min(owned);
+                let _ = write!(
+                    detail,
+                    "\n{owned} owned · {broken} broken · {condition:.0}% condition"
+                );
+            }
+        }
         if let Some(biology) = &recipe.biology {
             let _ = write!(detail, "\n{} days of growth at full rate", biology.days);
         }
@@ -1406,6 +1417,10 @@ mod upgrade_tests {
             Some("Waiting for shared carpentry tools.")
         );
         stock.use_tool(1, "carpentry-tools", task, 1_800.0, false);
+        assert_eq!(
+            stock.equipment.condition_percent("carpentry-tools", 1),
+            Some(0.0)
+        );
         assert_eq!(
             village
                 .craft_blocker(&catalog, &stock, recipe, Some(3))

@@ -67,6 +67,11 @@ impl Equipment {
         (self.wear(item) / LIFE).floor() as u32
     }
 
+    pub fn condition_percent(&self, item: &str, owned: u32) -> Option<f64> {
+        (owned > 0)
+            .then(|| 100.0 * (1.0 - self.wear(item) / (f64::from(owned) * LIFE)).clamp(0.0, 1.0))
+    }
+
     pub fn available(&self, item: &str, owned: u32, repairing: bool) -> u32 {
         owned.saturating_sub(
             self.broken(item)
