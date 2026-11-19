@@ -279,17 +279,20 @@ impl Construction {
                 }
             }
         }
-        let fare = crate::market::fare_cents(clock.round_trip_km);
-        let free = self
-            .storage_space(catalog, stock)
-            .saturating_sub(self.trade.inbound());
+        let freight = self.supplier_construction;
+        let transport = if freight {
+            crate::market::freight_cents(clock.round_trip_km)
+        } else if self.sale_trip_for_return_purchase().is_some() {
+            0
+        } else {
+            crate::market::fare_cents(clock.round_trip_km)
+        };
         for (id, units) in supplies {
             let item = &catalog.materials[&id];
-            let cost = (item.price * 100.0).round() as u64 + fare;
+            let cost = (item.price * 100.0).round() as u64 + transport;
             if stock.available(&id) >= units
                 || item.pack == 0
                 || cost > remaining
-                || u64::from(item.pack) > free
                 || self
                     .trade
                     .orders
@@ -309,14 +312,7 @@ impl Construction {
                 continue;
             }
             if self
-                .trade
-                .buy(
-                    catalog,
-                    stock,
-                    &mut self.market,
-                    &id,
-                    (clock.seconds, clock.round_trip_km, false),
-                )
+                .buy_from_town(catalog, stock, clock, &id, freight)
                 .is_ok()
             {
                 self.upkeep.restock_used += cost;
@@ -779,6 +775,37 @@ mod tests {
         assert_eq!(village.trade.orders.len(), 1);
         assert_eq!(village.trade.orders[0].material, "hardware");
         assert_eq!(village.upkeep.restock_used, price + fare);
+    }
+
+    #[test]
+    fn upkeep_restock_can_use_freight_without_a_resident_pickup() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        stock.reserve_available(&BTreeMap::from([(
+            "hardware".into(),
+            stock.available("hardware"),
+        )]));
+        let mut village = Construction::default();
+        village.toggle_supplier_construction();
+        village.upkeep.vehicles[0].condition = 60.0;
+        village.age_assets(&catalog, 0.0, 0.1);
+
+        let cost = (catalog.materials["hardware"].price * 100.0).round() as u64
+            + crate::market::freight_cents(12);
+        village.upkeep.restock_budget = cost;
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village.restock_upkeep(&catalog, &mut stock, &Land::default(), clock);
+
+        assert_eq!(
+            village.trade.delivery.as_ref().unwrap().material,
+            "hardware"
+        );
+        assert!(village.trade.orders.is_empty());
+        assert_eq!(village.upkeep.restock_used, cost);
+        assert_eq!(village.market.committed_fares(), 0);
     }
 
     #[test]
