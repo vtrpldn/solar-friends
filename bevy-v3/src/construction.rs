@@ -2799,8 +2799,16 @@ mod tests {
             },
         );
         let loads = catalog.loads(&catalog.projects["gathering"]);
+        construction.select_project(Some(0));
+        assert!(
+            construction
+                .selected_production(&catalog, &stock, 0.0)
+                .unwrap()
+                .contains("No crew assigned yet")
+        );
         let mut saw_transit = false;
         let mut saw_assembly = false;
+        let mut saw_named_crew = false;
         for _ in 0..8_000 {
             construction.tick(
                 &catalog,
@@ -2818,6 +2826,10 @@ mod tests {
                 false,
             );
             let status = construction.project_status(&catalog, 0);
+            saw_named_crew |= construction
+                .selected_production(&catalog, &stock, 0.0)
+                .unwrap()
+                .contains("Assigned ·");
             saw_transit |= status.contains("loads delivered · 1 in transit")
                 || status.contains("loads delivered · 2 in transit")
                 || status.contains("loads delivered · 3 in transit");
@@ -2831,7 +2843,7 @@ mod tests {
                 break;
             }
         }
-        assert!(saw_transit && saw_assembly);
+        assert!(saw_transit && saw_assembly && saw_named_crew);
         assert_eq!(construction.finished_models(&catalog).count(), 1);
         assert_eq!(construction.plans[0].delivered, loads);
         assert_eq!(stock.available("wood"), 28);

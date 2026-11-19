@@ -420,9 +420,31 @@ impl Construction {
     ) -> Option<String> {
         let index = self.production.selected?;
         let site = self.plans.get(index)?;
-        let name = &catalog.projects[&site.key].name;
+        let definition = &catalog.projects[&site.key];
+        let name = &definition.name;
         let recipes = self.recipes(catalog, index);
         let mut text = name.clone();
+        if !site.removed && site.work < definition.work {
+            use std::fmt::Write;
+            let _ = write!(text, " · {}", self.project_status(catalog, index));
+            let crew: Vec<_> = self
+                .residents
+                .iter()
+                .enumerate()
+                .filter(|(_, worker)| {
+                    worker
+                        .assignment
+                        .as_ref()
+                        .is_some_and(|job| job.project == index)
+                })
+                .map(|(index, _)| super::resident_work::NAMES[index])
+                .collect();
+            if crew.is_empty() {
+                text.push_str("\nNo crew assigned yet");
+            } else {
+                let _ = write!(text, "\nAssigned · {}", crew.join(", "));
+            }
+        }
         if let Some(job) = self.production.jobs.iter().find(|job| job.site == index) {
             let recipe = &catalog.production[&job.recipe];
             let state = self.batch_status(job, recipe, clock);
