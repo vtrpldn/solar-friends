@@ -212,6 +212,14 @@ impl TerrainEditor {
         }
     }
 
+    pub fn can_undo(&self) -> bool {
+        !self.history.is_empty()
+    }
+
+    pub fn can_redo(&self) -> bool {
+        !self.redo.is_empty()
+    }
+
     pub fn undo(&mut self) {
         let Some(previous) = self.history.pop_back() else {
             self.status = "No terrain edits to undo.";

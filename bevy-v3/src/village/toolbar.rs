@@ -151,11 +151,14 @@ impl Action {
             match self {
                 Self::Terrain => return true,
                 Self::PickFlattenHeight => return village.terrain_editor.can_pick_flatten_height(),
-                Self::TerrainBrush(_)
-                | Self::TerrainRadius(_)
-                | Self::UndoTerrain
-                | Self::RedoTerrain => {
+                Self::TerrainBrush(_) | Self::TerrainRadius(_) => {
                     return village.terrain_editor.open;
+                }
+                Self::UndoTerrain => {
+                    return village.terrain_editor.open && village.terrain_editor.can_undo();
+                }
+                Self::RedoTerrain => {
+                    return village.terrain_editor.open && village.terrain_editor.can_redo();
                 }
                 _ => {}
             }
@@ -607,7 +610,7 @@ struct Toolbar;
 struct PanelMenu;
 
 #[derive(Component)]
-struct RecipeDetails;
+struct ActionDetails;
 
 const HOME_ROWS: usize = 4;
 
@@ -913,7 +916,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::HoldTradeQueued(row));
                 }
                 menu.spawn((
-                    RecipeDetails,
+                    ActionDetails,
                     Text::default(),
                     ui_font(&assets, 15.0),
                     Visibility::Hidden,
@@ -1427,7 +1430,7 @@ type ToolbarButtons<'w, 's> = Query<
 type PanelNode<'w, 's> =
     Single<'w, 's, (Entity, &'static mut Node), (With<PanelMenu>, Without<Toolbar>)>;
 
-type RecipeTooltip<'w, 's> = Single<'w, 's, (Entity, &'static mut Visibility), With<RecipeDetails>>;
+type ActionTooltip<'w, 's> = Single<'w, 's, (Entity, &'static mut Visibility), With<ActionDetails>>;
 
 fn refresh(
     (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
@@ -1436,7 +1439,7 @@ fn refresh(
     mut toolbar: Single<&mut Node, (With<Toolbar>, Without<PanelMenu>)>,
     mut menu: PanelNode,
     mut buttons: ToolbarButtons,
-    (mut labels, mut details): (Query<&mut Text>, RecipeTooltip),
+    (mut labels, mut details): (Query<&mut Text>, ActionTooltip),
 ) {
     toolbar.display = if visible(&village, &setup, &saves, &sound) {
         Display::Flex
@@ -1465,7 +1468,7 @@ fn refresh(
     let show_selected_project =
         !picker.open && Action::SelectedProject(ProjectAction::Salvage).available(&village);
     let show_advance = Action::Advance(AdvanceAction::Method).available(&village);
-    let show_terrain = Action::UndoTerrain.available(&village);
+    let show_terrain = Action::TerrainBrush(Brush::Raise).available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
     let show_trade = !picker.open && Action::TradeItem(0).available(&village);
@@ -1532,7 +1535,7 @@ fn refresh(
     if saves.open || sound.open {
         menu.display = Display::None;
     }
-    let mut recipe_details = String::new();
+    let mut action_details = String::new();
     for (&action, &interaction, children, parent, mut background, mut node) in &mut buttons {
         let show = match action {
             Action::Lens(row) => show_lenses && row < village.lenses.choices().len(),
@@ -1647,13 +1650,24 @@ fn refresh(
         if !show {
             continue;
         }
-        if interaction != Interaction::None
-            && let Action::Recipe(row) = action
-        {
-            recipe_details = village
-                .construction
-                .recipe_row_details(&catalog, &village.stock, row)
-                .unwrap_or_default();
+        if interaction != Interaction::None {
+            let description = match action {
+                Action::UndoTerrain if !village.terrain_editor.can_undo() => {
+                    Some("There are no terrain edits to undo in this session.".into())
+                }
+                Action::RedoTerrain if !village.terrain_editor.can_redo() => {
+                    Some("Undo a terrain edit before trying to redo it.".into())
+                }
+                Action::Recipe(row) => {
+                    village
+                        .construction
+                        .recipe_row_details(&catalog, &village.stock, row)
+                }
+                _ => None,
+            };
+            if let Some(description) = description {
+                action_details = description;
+            }
         }
         background.0 = if !action.available(&village)
             && !matches!(
@@ -1704,14 +1718,14 @@ fn refresh(
         }
     }
     let (details_id, visibility) = &mut *details;
-    **visibility = if recipe_details.is_empty() {
+    **visibility = if action_details.is_empty() {
         Visibility::Hidden
     } else {
         Visibility::Inherited
     };
     if let Ok(mut text) = labels.get_mut(*details_id)
-        && text.0 != recipe_details
+        && text.0 != action_details
     {
-        text.0 = recipe_details;
+        text.0 = action_details;
     }
 }

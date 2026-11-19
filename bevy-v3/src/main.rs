@@ -564,6 +564,10 @@ mod tests {
     use bevy::{asset::AssetPlugin, gizmos::GizmoPlugin, transform::TransformPlugin};
 
     fn press_button(app: &mut App, label: &str) {
+        interact_with_button(app, label, Interaction::Pressed);
+    }
+
+    fn interact_with_button(app: &mut App, label: &str, input: Interaction) {
         let world = app.world_mut();
         let button = world
             .query_filtered::<(Entity, &Children), With<Button>>()
@@ -590,7 +594,7 @@ mod tests {
             .unwrap_or_else(|| panic!("missing visible button: {label}"));
         *world
             .get_mut::<Interaction>(button)
-            .expect("button interaction") = Interaction::Pressed;
+            .expect("button interaction") = input;
         world.run_schedule(Update);
         *app.world_mut()
             .get_mut::<Interaction>(button)
@@ -823,6 +827,15 @@ mod tests {
                 .any(|text| text.0.contains("Village guide · Keyboard & camera"))
         );
         press_button(&mut app, "Close guide");
+
+        press_button(&mut app, "Terrain tools");
+        interact_with_button(&mut app, "Undo terrain edit", Interaction::Hovered);
+        let world = app.world_mut();
+        assert!(world.query::<&Text>().iter(world).any(|text| {
+            text.0
+                .contains("There are no terrain edits to undo in this session.")
+        }));
+        press_button(&mut app, "Finish terrain");
 
         press_button(&mut app, "Guide");
         let reading_time = app.world().resource::<village::Village>().seconds();
