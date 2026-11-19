@@ -15,6 +15,7 @@ pub(crate) enum LabOrder {
         #[serde(default)]
         size: Option<[i32; 2]>,
     },
+    TerrainReset,
     TerrainStroke {
         brush: crate::terrain::Brush,
         points: Vec<[f32; 2]>,
@@ -386,7 +387,9 @@ impl Construction {
         richness: f64,
     ) -> Result<(), String> {
         match order {
-            LabOrder::TerrainStroke { .. } => return Err("Terrain edits require a village.".into()),
+            LabOrder::TerrainReset | LabOrder::TerrainStroke { .. } => {
+                return Err("Terrain edits require a village.".into());
+            }
             LabOrder::Build {
                 key,
                 x,

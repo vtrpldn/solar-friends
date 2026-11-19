@@ -229,7 +229,7 @@ impl TerrainEditor {
         self.revision = self.revision.wrapping_add(1);
     }
 
-    fn reset(&mut self) {
+    pub(crate) fn reset(&mut self) {
         if self.vertices.is_empty() {
             self.status = "No terrain edits to reset.";
             return;

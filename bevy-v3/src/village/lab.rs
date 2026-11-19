@@ -421,6 +421,10 @@ impl Runner {
                 round_trip_km: self.setup.round_trip_km(),
             };
             let result = match &order.order {
+                LabOrder::TerrainReset => {
+                    self.village.terrain_editor.reset();
+                    Ok(())
+                }
                 LabOrder::TerrainStroke { brush, points } => self
                     .village
                     .terrain_editor
@@ -773,6 +777,7 @@ fn lab_order_page(runner: &Runner, page: &mut usize) -> String {
 fn order_label(order: &LabOrder) -> String {
     use crate::farming::FarmAction;
     match order {
+        LabOrder::TerrainReset => "Reset terrain heights".into(),
         LabOrder::TerrainStroke { points, .. } => {
             format!("Shape terrain at {} points", points.len())
         }
@@ -1685,6 +1690,33 @@ mod tests {
         );
         let report =
             serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 10);
+
+        let path = std::env::temp_dir().join(format!(
+            "solar-v3-terrain-checkpoint-{}.json",
+            std::process::id()
+        ));
+        runner.checkpoint(&path).unwrap();
+        let loaded = save::read(&path, &catalog).unwrap();
+        std::fs::remove_file(path).unwrap();
+        assert_eq!(
+            loaded.terrain(&runner.setup).elevation(40.0, 24.0),
+            runner.terrain.elevation(40.0, 24.0)
+        );
+        let scenario = serde_json::from_str(
+            r#"{
+            "steps": 10,
+            "orders": [{"step": 0, "order": {"type": "terrain-reset"}}]
+        }"#,
+        )
+        .unwrap();
+        let reset = run(scenario, Some(loaded), &catalog).unwrap();
+        assert!(reset.outcomes[0].error.is_none());
+        assert_eq!(
+            reset.terrain.elevation(40.0, 24.0),
+            reset.setup.terrain().elevation(40.0, 24.0)
+        );
+        let report = serde_json::from_slice(&serde_json::to_vec(&reset.report()).unwrap()).unwrap();
         assert_eq!(verify_report(report, &catalog).unwrap(), 10);
     }
 
