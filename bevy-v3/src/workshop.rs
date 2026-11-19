@@ -25,6 +25,47 @@ struct Workshop {
     night: bool,
     guides: bool,
     export_notice: String,
+    search: Option<AssetSearch>,
+}
+
+#[derive(Default)]
+struct AssetSearch {
+    query: String,
+    row: usize,
+}
+
+impl AssetSearch {
+    fn matching(&self, projects: &[String], catalog: &Catalog) -> Vec<usize> {
+        let query = self.query.trim().to_lowercase();
+        projects
+            .iter()
+            .enumerate()
+            .filter_map(|(index, id)| {
+                let model = &catalog.projects[id];
+                (model.name.to_lowercase().contains(&query) || id.contains(&query)).then_some(index)
+            })
+            .collect()
+    }
+
+    fn label(&self, projects: &[String], catalog: &Catalog) -> String {
+        use std::fmt::Write as _;
+        const ROWS: usize = 9;
+        let matches = self.matching(projects, catalog);
+        let mut label = format!(
+            "Find an asset · {}▏\nUp/Down Select · Enter Open · Esc Cancel\n",
+            self.query
+        );
+        if matches.is_empty() {
+            label.push_str("\nNo matching assets.");
+        }
+        let start = self.row / ROWS * ROWS;
+        for (row, &index) in matches.iter().enumerate().skip(start).take(ROWS) {
+            let marker = if row == self.row { "> " } else { "  " };
+            let model = &catalog.projects[&projects[index]];
+            let _ = write!(label, "\n{marker}{} · {}", model.name, model.category);
+        }
+        label
+    }
 }
 
 #[derive(Component)]
@@ -106,6 +147,7 @@ pub fn run() {
         night: false,
         guides: false,
         export_notice: String::new(),
+        search: None,
     })
     .add_systems(Startup, setup)
     .add_systems(
@@ -180,7 +222,10 @@ fn setup(
 }
 
 fn controls(
-    keys: Res<ButtonInput<KeyCode>>,
+    (keys, mut text): (
+        Res<ButtonInput<KeyCode>>,
+        MessageReader<bevy::input::keyboard::KeyboardInput>,
+    ),
     time: Res<Time>,
     pending: Query<(), With<Screenshot>>,
     (mouse, motion, scroll): (
@@ -194,6 +239,45 @@ fn controls(
     if !pending.is_empty() {
         return;
     }
+    if keys.just_pressed(KeyCode::Slash) && workshop.search.is_none() {
+        workshop.search = Some(AssetSearch::default());
+        text.clear();
+        return;
+    }
+    if let Some(mut search) = workshop.search.take() {
+        if keys.just_pressed(KeyCode::Escape) {
+            text.clear();
+            return;
+        }
+        if !keys.any_just_pressed([
+            KeyCode::ArrowUp,
+            KeyCode::ArrowDown,
+            KeyCode::Enter,
+            KeyCode::NumpadEnter,
+        ]) {
+            let before = search.query.clone();
+            crate::construction::read_search_text(&mut search.query, &mut text);
+            if search.query != before {
+                search.row = 0;
+            }
+        } else {
+            text.clear();
+        }
+        let matches = search.matching(&workshop.projects, &catalog);
+        if keys.just_pressed(KeyCode::ArrowDown) {
+            search.row = (search.row + 1).min(matches.len().saturating_sub(1));
+        } else if keys.just_pressed(KeyCode::ArrowUp) {
+            search.row = search.row.saturating_sub(1);
+        } else if keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter])
+            && let Some(&index) = matches.get(search.row)
+        {
+            workshop.selected = index;
+            return;
+        }
+        workshop.search = Some(search);
+        return;
+    }
+    text.clear();
     let len = workshop.projects.len();
     if keys.just_pressed(KeyCode::ArrowRight) {
         workshop.selected = (workshop.selected + 1) % len;
@@ -315,9 +399,13 @@ fn show_model(
         ambient.brightness = 350.0;
         "Day"
     };
+    if let Some(search) = &workshop.search {
+        text.set_if_neq(Text::new(search.label(&workshop.projects, &catalog)));
+        return;
+    }
     let surface = workshop.surface.label();
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure · Home Reset · F5 Export PNG\n{}",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure · Home Reset · F5 Export PNG\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
@@ -446,7 +534,7 @@ fn capture_preview(
         return;
     }
     panel.display = Display::Flex;
-    if !keys.just_pressed(KeyCode::F5) {
+    if workshop.search.is_some() || !keys.just_pressed(KeyCode::F5) {
         return;
     }
     let ready = |model| {
@@ -577,6 +665,22 @@ fn draw_guides(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn asset_search_matches_the_display_name_or_catalog_key() {
+        let catalog = Catalog::default();
+        let ids = vec!["gathering".into(), "home-cottage".into(), "shed".into()];
+        let search = AssetSearch {
+            query: " GaThEr ".into(),
+            row: 0,
+        };
+        assert_eq!(search.matching(&ids, &catalog), [0]);
+        let search = AssetSearch {
+            query: "home-cott".into(),
+            row: 0,
+        };
+        assert_eq!(search.matching(&ids, &catalog), [1]);
+    }
 
     #[test]
     fn wireframe_keeps_one_copy_of_each_triangle_edge() {

@@ -158,7 +158,7 @@ Press **F8** twice to reload the scenario file and any starting checkpoint. This
 
 ## Model workshop
 
-Pass `--workshop` to inspect the bundled building scenes. Use **←/→** to browse, **Q/E** to orbit, **↑/↓** to tilt, **R** to rotate the model, **+/−** to zoom, **N** to change lighting, **G** to toggle the grid and footprint guides, and **Home** to reset the view.
+Pass `--workshop` to inspect the bundled building scenes. Use **←/→** to browse, **/** to find an asset by name, **Q/E** to orbit, **↑/↓** to tilt, **R** to rotate the model, **+/−** to zoom, **N** to change lighting, **G** to toggle the grid and footprint guides, and **Home** to reset the view.
 
 Drag to orbit, right-drag to pan, and scroll to zoom. Press **H** to show a resident beside the model for scale, and **M** to switch between original materials, clay, and wireframe.
 
