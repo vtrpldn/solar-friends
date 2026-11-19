@@ -150,7 +150,7 @@ impl Construction {
         {
             let aboard = self
                 .active_trips()
-                .any(|trip| trip.market_order && trip.project == index && trip.boarded);
+                .any(|trip| trip.covers_order(index) && trip.boarded);
             let location = if aboard {
                 Location::Transit
             } else {
@@ -459,6 +459,7 @@ mod tests {
             project: 0,
             farm_bed: None,
             market_order: true,
+            exports: 0,
             driver: 0,
             vehicle: 0,
             elapsed: 0.0,

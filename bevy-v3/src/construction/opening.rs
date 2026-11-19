@@ -149,6 +149,7 @@ mod tests {
             project: 1,
             farm_bed: None,
             market_order: false,
+            exports: 0,
             driver: 0,
             vehicle: 0,
             elapsed: 0.0,

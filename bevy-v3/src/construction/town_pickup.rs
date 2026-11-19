@@ -79,9 +79,7 @@ impl Construction {
             if !order.buying
                 && !order.settled
                 && order.quantity > 0
-                && !self
-                    .active_trips()
-                    .any(|trip| trip.market_order && trip.project == index)
+                && !self.active_trips().any(|trip| trip.covers_order(index))
             {
                 let amount = goods.entry(order.material.clone()).or_default();
                 *amount = amount.saturating_add(order.quantity);
@@ -375,8 +373,7 @@ impl Construction {
 
     pub(super) fn booked_trade_orders(&self) -> Vec<usize> {
         self.active_trips()
-            .filter(|trip| trip.market_order)
-            .map(|trip| trip.project)
+            .flat_map(|trip| trip.trade_orders())
             .collect()
     }
 
@@ -385,10 +382,79 @@ impl Construction {
             .into_iter()
             .flatten()
         {
+            if index < u32::BITS as usize {
+                let lower = (1u32 << index) - 1;
+                trip.exports = (trip.exports & lower) | ((trip.exports & !lower) >> 1 & !lower);
+            }
             if trip.market_order && trip.project > index {
                 trip.project -= 1;
             }
         }
+    }
+
+    fn add_trip_exports(&self, catalog: &Catalog, trip: &mut TownTrip) {
+        let mut available = crate::market::PICKUP_CAPACITY;
+        let load = |order: &crate::trade::Shipment| {
+            let item = &catalog.materials[&order.material];
+            (
+                item.mass * f64::from(order.quantity),
+                item.volume * f64::from(order.quantity),
+            )
+        };
+        if trip.market_order && !self.trade.orders[trip.project].buying {
+            let (mass, volume) = load(&self.trade.orders[trip.project]);
+            available.0 -= mass;
+            available.1 -= volume;
+        }
+        for (index, order) in self
+            .trade
+            .orders
+            .iter()
+            .enumerate()
+            .take(u32::BITS as usize)
+        {
+            if order.buying
+                || order.settled
+                || order.spoiled
+                || trip.covers_order(index)
+                || self.active_trips().any(|active| active.covers_order(index))
+            {
+                continue;
+            }
+            let (mass, volume) = load(order);
+            if mass <= available.0 + 1e-8 && volume <= available.1 + 1e-8 {
+                available.0 -= mass;
+                available.1 -= volume;
+                trip.exports |= 1 << index;
+            }
+        }
+    }
+
+    pub(super) fn valid_trip_exports(&self, catalog: &Catalog, trip: TownTrip) -> bool {
+        if trip.exports == 0 {
+            return true;
+        }
+        let mut available = crate::market::PICKUP_CAPACITY;
+        trip.trade_orders().all(|index| {
+            self.trade.orders.get(index).is_some_and(|order| {
+                if trip.market_order && index == trip.project {
+                    if trip.extra_orders().any(|extra| extra == index) {
+                        return false;
+                    }
+                    if order.buying {
+                        return true;
+                    }
+                } else if order.buying {
+                    return false;
+                }
+                let Some(item) = catalog.materials.get(&order.material) else {
+                    return false;
+                };
+                available.0 -= item.mass * f64::from(order.quantity);
+                available.1 -= item.volume * f64::from(order.quantity);
+                available.0 >= -1e-8 && available.1 >= -1e-8
+            })
+        })
     }
 
     fn set_trip(&mut self, slot: usize, trip: Option<TownTrip>) {
@@ -437,6 +503,11 @@ impl Construction {
                 } else {
                     self.plans[trip.project].fare
                 };
+                let shared_fares = trip
+                    .extra_orders()
+                    .map(|index| self.trade.orders[index].fare)
+                    .sum();
+                self.market.release_fare(shared_fares);
                 self.market.depart(stock, fare);
                 trip.boarded = true;
                 if !stock.sandbox {
@@ -451,23 +522,38 @@ impl Construction {
             self.upkeep
                 .record_distance(trip.vehicle, clock.round_trip_km);
         }
-        if trip.market_order && trip.elapsed >= trip.duration * 0.5 {
-            self.trade.settle(trip.project, stock);
+        if trip.elapsed >= trip.duration * 0.5 {
+            for index in trip.trade_orders() {
+                self.trade.settle(index, stock);
+            }
         }
         if trip.elapsed < trip.duration {
             return false;
         }
-        if trip.market_order {
+        let mut orders: Vec<_> = trip.trade_orders().collect();
+        if !orders.is_empty() {
             let space = self.storage_space(catalog, stock);
-            if self.trade.finish_trip(trip.project, stock, space) {
-                self.removed_trade_order(trip.project);
-                self.record_event(
-                    clock.seconds,
-                    format!("Vehicle {} returned from a trade trip.", trip.vehicle + 1),
-                );
-                return true;
+            let inbound: u64 = orders
+                .iter()
+                .map(|&index| &self.trade.orders[index])
+                .filter(|order| order.buying || order.spoiled)
+                .map(|order| u64::from(order.quantity))
+                .sum();
+            if inbound > space {
+                return false;
             }
-            return false;
+            orders.sort_unstable_by(|a, b| b.cmp(a));
+            for index in orders {
+                self.trade.finish_trip(index, stock, space);
+                self.removed_trade_order(index);
+            }
+        }
+        if trip.market_order {
+            self.record_event(
+                clock.seconds,
+                format!("Vehicle {} returned from a trade trip.", trip.vehicle + 1),
+            );
+            return true;
         }
         if let Some(bed) = trip.farm_bed {
             self.farming
@@ -545,9 +631,7 @@ impl Construction {
             .enumerate()
             .find_map(|(index, order)| {
                 ((ready || order.buying)
-                    && !self
-                        .active_trips()
-                        .any(|trip| trip.market_order && trip.project == index))
+                    && !self.active_trips().any(|trip| trip.covers_order(index)))
                 .then_some(index)
             });
         let market_order = pickup.is_none();
@@ -562,16 +646,19 @@ impl Construction {
             })?;
         self.residents[driver].path = path;
         self.residents[driver].leisure.visit = None;
-        Some(TownTrip {
+        let mut trip = TownTrip {
             project,
             farm_bed,
             market_order,
+            exports: 0,
             driver,
             vehicle,
             elapsed: 0.0,
             duration: trip_seconds(clock.round_trip_km),
             boarded: false,
-        })
+        };
+        self.add_trip_exports(catalog, &mut trip);
+        Some(trip)
     }
 }
 
@@ -579,6 +666,78 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn outbound_sales_share_a_pickup_fare_and_survive_a_save() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let fare = crate::market::fare_cents(12);
+        let initial_wood = stock.available("wood");
+        village
+            .buy_from_town(&catalog, &mut stock, clock, "wood", false)
+            .unwrap();
+        for _ in 0..2 {
+            village
+                .trade
+                .reserve(
+                    &catalog,
+                    &mut stock,
+                    &mut village.market,
+                    "wood",
+                    (0, fare, 0),
+                )
+                .unwrap();
+        }
+        let receipts: u64 = village
+            .trade
+            .orders
+            .iter()
+            .filter(|order| !order.buying)
+            .map(|order| order.cents)
+            .sum();
+        let before_departure = stock.balance();
+        assert_eq!(village.market.committed_fares(), fare * 3);
+
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert_eq!(village.active_trips().count(), 1);
+        let trip = village.trip.unwrap();
+        assert_eq!(trip.trade_orders().collect::<Vec<_>>(), vec![0, 1, 2]);
+        assert!(village.valid_save(&catalog, &stock));
+        village.residents[trip.driver].path.clear();
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert_eq!(stock.balance(), before_departure - fare);
+        assert_eq!(village.market.committed_fares(), 0);
+        assert!(village.valid_save(&catalog, &stock));
+
+        village = serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        village.tick_trip(
+            &catalog,
+            &mut stock,
+            site,
+            clock,
+            trip.duration as f32 + 1.0,
+        );
+        assert!(village.trip.is_none());
+        assert!(village.trade.orders.is_empty());
+        assert_eq!(village.trade.receipts, 2);
+        assert_eq!(village.trade.purchases, 1);
+        assert_eq!(stock.available("wood"), initial_wood - 12);
+        assert_eq!(stock.balance(), before_departure - fare + receipts);
+        assert!(village.valid_save(&catalog, &stock));
+    }
 
     #[test]
     fn returned_pickup_keeps_only_the_uncollected_construction_order() {

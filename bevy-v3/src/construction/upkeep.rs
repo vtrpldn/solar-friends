@@ -812,6 +812,7 @@ mod tests {
             project: 0,
             farm_bed: None,
             market_order: false,
+            exports: 0,
             driver: 4,
             vehicle: 1,
             elapsed: 54.95,

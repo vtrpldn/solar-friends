@@ -64,9 +64,7 @@ impl Construction {
             .map(|(index, order)| {
                 let item = &catalog.materials[&order.material];
                 let direction = if order.buying { "Buy" } else { "Sell" };
-                let trip = self
-                    .active_trips()
-                    .find(|trip| trip.market_order && trip.project == index);
+                let trip = self.active_trips().find(|trip| trip.covers_order(index));
                 let status = match trip {
                     Some(trip) if trip.boarded => "In transit",
                     Some(_) => "Booked",
@@ -477,6 +475,7 @@ mod tests {
             project: 1,
             farm_bed: None,
             market_order: true,
+            exports: 0,
             driver: 0,
             vehicle: 0,
             elapsed: 0.0,

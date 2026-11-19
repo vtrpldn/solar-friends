@@ -119,12 +119,32 @@ struct TownTrip {
     farm_bed: Option<usize>,
     #[serde(default, alias = "export")]
     market_order: bool,
+    #[serde(default)]
+    exports: u32,
     driver: usize,
     #[serde(default)]
     vehicle: usize,
     elapsed: f64,
     duration: f64,
     boarded: bool,
+}
+
+impl TownTrip {
+    fn extra_orders(self) -> impl Iterator<Item = usize> {
+        (0..u32::BITS as usize).filter(move |&index| self.exports & (1 << index) != 0)
+    }
+
+    fn trade_orders(self) -> impl Iterator<Item = usize> {
+        self.market_order
+            .then_some(self.project)
+            .into_iter()
+            .chain(self.extra_orders())
+    }
+
+    fn covers_order(self, index: usize) -> bool {
+        (self.market_order && self.project == index)
+            || (index < u32::BITS as usize && self.exports & (1 << index) != 0)
+    }
 }
 
 #[derive(Deserialize, Serialize)]
@@ -1603,8 +1623,8 @@ impl Construction {
         }
         let boarded: Vec<_> = self
             .active_trips()
-            .filter(|trip| trip.market_order && trip.boarded)
-            .map(|trip| trip.project)
+            .filter(|trip| trip.boarded)
+            .flat_map(|trip| trip.trade_orders())
             .collect();
         let used = stock.units() + self.trade.reserved_at_home(&boarded);
         let expansions = self
@@ -1708,8 +1728,8 @@ impl Construction {
         });
         let export_paid: Vec<_> = self
             .active_trips()
-            .filter(|trip| trip.market_order && trip.boarded)
-            .map(|trip| trip.project)
+            .filter(|trip| trip.boarded)
+            .flat_map(|trip| trip.trade_orders())
             .collect();
         let fares = self
             .trade
@@ -1729,6 +1749,7 @@ impl Construction {
                 && (0.0..=trip.duration).contains(&trip.elapsed)
                 && (1.0..=500.0).contains(&trip.duration)
                 && (trip.boarded || trip.elapsed == 0.0)
+                && self.valid_trip_exports(catalog, *trip)
                 && if trip.market_order {
                     trip.farm_bed.is_none() && self.trade.orders.get(trip.project).is_some()
                 } else if let Some(bed) = trip.farm_bed {
@@ -1744,6 +1765,7 @@ impl Construction {
         }) && self.trip.zip(self.second_trip).is_none_or(|(a, b)| {
             a.driver != b.driver
                 && a.vehicle != b.vehicle
+                && !a.trade_orders().any(|index| b.covers_order(index))
                 && if a.market_order || b.market_order {
                     a.market_order != b.market_order || a.project != b.project
                 } else {
@@ -3155,6 +3177,7 @@ mod tests {
             project: 0,
             farm_bed: None,
             market_order: false,
+            exports: 0,
             driver: 0,
             vehicle: 0,
             elapsed: 0.0,
