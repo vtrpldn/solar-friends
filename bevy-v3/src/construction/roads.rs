@@ -46,7 +46,20 @@ impl Construction {
         clock: TownClock,
         extend: bool,
     ) {
-        let Some(cells) = self.road_cells(end, extend) else {
+        let start = self.road_planning.anchor.filter(|_| extend).unwrap_or(end);
+        self.plan_road_stroke(catalog, stock, site, clock, start, end);
+    }
+
+    pub(super) fn plan_road_stroke(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: TownClock,
+        start: IVec2,
+        end: IVec2,
+    ) {
+        let Some(cells) = Self::road_cells(start, end) else {
             self.status = "Choose a shorter road route (up to 128 cells).".into();
             return;
         };
@@ -126,8 +139,7 @@ impl Construction {
             .any(|plan| !plan.removed && plan.key == "road" && plan.position == cell)
     }
 
-    fn road_cells(&self, end: IVec2, extend: bool) -> Option<impl Iterator<Item = IVec2> + use<>> {
-        let start = self.road_planning.anchor.filter(|_| extend).unwrap_or(end);
+    fn road_cells(start: IVec2, end: IVec2) -> Option<impl Iterator<Item = IVec2>> {
         let delta = end - start;
         let length = delta.x.abs() + delta.y.abs();
         (length < 128).then(|| {
@@ -148,7 +160,8 @@ impl Construction {
         extend: bool,
         gizmos: &mut Gizmos,
     ) {
-        let Some(cells) = self.road_cells(end, extend) else {
+        let start = self.road_planning.anchor.filter(|_| extend).unwrap_or(end);
+        let Some(cells) = Self::road_cells(start, end) else {
             return;
         };
         let mut previous: Option<Vec2> = None;

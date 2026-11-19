@@ -769,6 +769,12 @@ fn order_label(order: &LabOrder) -> String {
     use crate::farming::FarmAction;
     match order {
         LabOrder::Build { key, x, z, .. } => format!("Build {key} at ({x}, {z})"),
+        LabOrder::Road {
+            start: [x, z],
+            end: [end_x, end_z],
+        } => {
+            format!("Plan road from ({x}, {z}) to ({end_x}, {end_z})")
+        }
         LabOrder::Move { site, x, z, .. } => format!("Move project #{site} to ({x}, {z})"),
         LabOrder::Salvage { site } => format!("Salvage project #{site}"),
         LabOrder::Demolish { site } => format!("Demolish project #{site}"),
@@ -1594,6 +1600,35 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_scripted_road_stroke_builds_a_connected_route_and_replays() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(
+            r#"{
+                "steps": 8000,
+                "orders": [
+                    {"step": 0, "order": {"type": "road", "start": [44, 36], "end": [46, 37]}}
+                ]
+            }"#,
+        )
+        .unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        assert!(
+            runner.outcomes[0].error.is_none(),
+            "{:?}",
+            runner.outcomes[0].error
+        );
+        let cells: Vec<_> = runner
+            .village
+            .construction
+            .finished_models(&catalog)
+            .collect();
+        assert_eq!(cells.len(), 4);
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 8000);
+    }
 
     #[test]
     fn scripted_pantry_budget_controls_restocks_and_replays() {

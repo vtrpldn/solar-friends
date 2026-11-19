@@ -116,6 +116,8 @@ Set `"stop"` in the scenario to `"harvest"`, `"crop-failed"`, `"hydration"`, `"w
 
 `{"type":"carry-water","source":1,"site":0,"channel":"irrigation"}` queues a resident to carry water from project 1 to the camp reservoir. Channels are `drinking`, `irrigation`, `greywater`, and `sewage`.
 
+`{"type":"road","start":[44,36],"end":[46,37]}` plans a connected route in one order. Residents still haul materials and build each tile.
+
 `{"type":"work-priority","group":"construction","level":3}` sets a priority from 0 (low) to 3 (highest). Groups are `essentials`, `maintenance`, `production`, and `construction`. Use `{"type":"worker-reservations","essentials":1,"production":2}` to reserve workers, up to five in total.
 
 `{"type":"sale-policy","material":"wood","enabled":true,"reserve":24,"trigger":24,"limit":12}` enables automatic sales above 24 units of wood, keeps 24 in reserve, and limits sales to 12 units per day. Set `limit` to 0 for no player-set daily cap.

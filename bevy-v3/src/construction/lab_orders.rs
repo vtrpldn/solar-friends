@@ -15,6 +15,10 @@ pub(crate) enum LabOrder {
         #[serde(default)]
         size: Option<[i32; 2]>,
     },
+    Road {
+        start: [i32; 2],
+        end: [i32; 2],
+    },
     Move {
         site: usize,
         x: i32,
@@ -384,11 +388,41 @@ impl Construction {
                 self.selection = Some(key.clone());
                 self.rotation = *rotation;
                 self.plan(catalog, stock, ground, IVec2::new(*x, *z), clock);
-                self.selection = None;
-                self.field_size = original_size;
-                if self.plans.len() == previous {
-                    return Err(self.status.clone());
+                let error = (self.plans.len() == previous).then(|| self.status.clone());
+                if key == "road" {
+                    self.finish_roads();
+                } else {
+                    self.selection = None;
                 }
+                self.field_size = original_size;
+                if let Some(error) = error {
+                    return Err(error);
+                }
+            }
+            LabOrder::Road { start, end } => {
+                if start
+                    .iter()
+                    .chain(end)
+                    .any(|value| !(-30..94).contains(value))
+                {
+                    return Err("Choose road endpoints inside the plot.".into());
+                }
+                let previous = self.plans.len();
+                self.plan_road_stroke(
+                    catalog,
+                    stock,
+                    ground,
+                    clock,
+                    IVec2::from_array(*start),
+                    IVec2::from_array(*end),
+                );
+                let result = if self.plans.len() == previous {
+                    Err(self.status.clone())
+                } else {
+                    Ok(())
+                };
+                self.finish_roads();
+                result?;
             }
             LabOrder::Move {
                 site,
