@@ -21,7 +21,12 @@ impl Default for KitchenPolicy {
 }
 
 impl KitchenPolicy {
-    fn half_days(&self, preserved: bool) -> u8 {
+    pub fn toggle(&mut self) {
+        self.automatic = !self.automatic;
+        self.next_check = 0.0;
+    }
+
+    pub fn half_days(&self, preserved: bool) -> u8 {
         if preserved {
             self.provision_half_days
         } else {

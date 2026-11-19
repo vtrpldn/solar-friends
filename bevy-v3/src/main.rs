@@ -549,6 +549,16 @@ mod tests {
         assert!(!app.world().resource::<village::Village>().trade_open());
 
         press_button(&mut app, "Manage");
+        press_button(&mut app, "Pantry");
+        press_button(&mut app, "Automatic cooking off");
+        press_button(&mut app, "Fresh target 1.0d +");
+        press_button(&mut app, "Fresh target 1.5d −");
+        press_button(&mut app, "Dried target 2.0d +");
+        press_button(&mut app, "Dried target 2.5d −");
+        press_button(&mut app, "Automatic cooking on");
+        press_button(&mut app, "Close panel");
+
+        press_button(&mut app, "Manage");
         press_button(&mut app, "Water");
         press_button(&mut app, "Camp source");
         press_button(&mut app, "Camp destination");

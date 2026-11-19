@@ -4,8 +4,7 @@ impl Construction {
     pub fn kitchen_controls(&mut self, keys: &ButtonInput<KeyCode>) {
         let policy = &mut self.production.kitchen_policy;
         if keys.just_pressed(KeyCode::KeyY) {
-            policy.automatic = !policy.automatic;
-            policy.next_check = 0.0;
+            policy.toggle();
         }
         let step = if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
             -1

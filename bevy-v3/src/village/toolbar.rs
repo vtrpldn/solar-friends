@@ -61,6 +61,8 @@ enum Action {
     Ledger,
     PantryBatches,
     PantryPriority,
+    AutoCook,
+    CookingTarget { preserved: bool, increase: bool },
     PantryPolicy(i8, i64, bool),
     Grid,
     BuildingPower,
@@ -207,7 +209,10 @@ impl Action {
                 Some(UtilityPanel::Residents | UtilityPanel::Finances)
             ),
             Self::PantryBatches => village.utility_panel == Some(UtilityPanel::Pantry),
-            Self::PantryPriority | Self::PantryPolicy(..) => {
+            Self::PantryPriority
+            | Self::PantryPolicy(..)
+            | Self::AutoCook
+            | Self::CookingTarget { .. } => {
                 village.utility_panel == Some(UtilityPanel::Pantry)
                     && village.pantry_batch_page.is_none()
             }
@@ -393,6 +398,29 @@ impl Action {
             }
             Self::PantryBatches => "Food batches".into(),
             Self::PantryPriority => "Change food priority".into(),
+            Self::AutoCook if village.construction.production.kitchen_policy.automatic => {
+                "Automatic cooking on".into()
+            }
+            Self::AutoCook => "Automatic cooking off".into(),
+            Self::CookingTarget {
+                preserved,
+                increase,
+            } => format!(
+                "{} {:.1}d {}",
+                if preserved {
+                    "Dried target"
+                } else {
+                    "Fresh target"
+                },
+                f64::from(
+                    village
+                        .construction
+                        .production
+                        .kitchen_policy
+                        .half_days(preserved)
+                ) / 2.0,
+                if increase { "+" } else { "−" }
+            ),
             Self::PantryPolicy(_, _, true) => "Toggle food restock".into(),
             Self::PantryPolicy(-1, _, false) => "Reserve −1".into(),
             Self::PantryPolicy(1, _, false) => "Reserve +1".into(),
@@ -622,6 +650,19 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::Ledger);
                 spawn_button(menu, &assets, Action::PantryBatches);
                 spawn_button(menu, &assets, Action::PantryPriority);
+                spawn_button(menu, &assets, Action::AutoCook);
+                for preserved in [false, true] {
+                    for increase in [false, true] {
+                        spawn_button(
+                            menu,
+                            &assets,
+                            Action::CookingTarget {
+                                preserved,
+                                increase,
+                            },
+                        );
+                    }
+                }
                 for (reserve, budget, toggle) in [
                     (-1, 0, false),
                     (1, 0, false),
@@ -942,6 +983,19 @@ fn handle_buttons(
                 Action::PantryPriority if !picker.open => {
                     village.stock.pantry.priority = village.stock.pantry.priority.next();
                 }
+                Action::AutoCook if !picker.open => {
+                    village.construction.production.kitchen_policy.toggle()
+                }
+                Action::CookingTarget {
+                    preserved,
+                    increase,
+                } if !picker.open => {
+                    village
+                        .construction
+                        .production
+                        .kitchen_policy
+                        .change(preserved, if increase { 1 } else { -1 });
+                }
                 Action::PantryPolicy(reserve, budget, toggle) if !picker.open => {
                     village
                         .construction
@@ -1024,6 +1078,8 @@ fn handle_buttons(
                 | Action::Ledger
                 | Action::PantryBatches
                 | Action::PantryPriority
+                | Action::AutoCook
+                | Action::CookingTarget { .. }
                 | Action::PantryPolicy(..)
                 | Action::Grid
                 | Action::BuildingPower
@@ -1189,9 +1245,11 @@ fn refresh(
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => show_residents || show_finances,
             Action::Shift(_) | Action::Ledger => show_finances,
-            Action::PantryBatches | Action::PantryPriority | Action::PantryPolicy(..) => {
-                show_pantry && action.available(&village)
-            }
+            Action::PantryBatches
+            | Action::PantryPriority
+            | Action::PantryPolicy(..)
+            | Action::AutoCook
+            | Action::CookingTarget { .. } => show_pantry && action.available(&village),
             Action::Home(_) => show_residents,
             Action::Grid => show_power,
             Action::BuildingPower | Action::Cooling => {
