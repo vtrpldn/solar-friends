@@ -1,4 +1,5 @@
 use bevy::{
+    input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit},
     prelude::*,
     render::view::screenshot::{Screenshot, ScreenshotCaptured},
     scene::{SceneInstance, SceneSpawner},
@@ -14,15 +15,22 @@ struct Workshop {
     elevation: f32,
     rotation: u8,
     zoom: f32,
+    target: Vec3,
+    scale_figure: bool,
     night: bool,
     guides: bool,
     export_notice: String,
 }
 
+#[derive(Component)]
+struct WorkshopModel;
+
+#[derive(Component)]
+struct ScaleFigure;
+
 const DEFAULT_ELEVATION: f32 = 37.72;
 
-fn orbit_camera(heading: f32, elevation: f32) -> Transform {
-    let target = Vec3::Y;
+fn orbit_camera(heading: f32, elevation: f32, target: Vec3) -> Transform {
     let yaw = heading + std::f32::consts::FRAC_PI_4;
     let (up, level) = elevation.to_radians().sin_cos();
     let offset = Vec3::new(yaw.sin() * level, up, yaw.cos() * level) * 57.2;
@@ -50,6 +58,8 @@ pub fn run() {
         elevation: DEFAULT_ELEVATION,
         rotation: 0,
         zoom: 1.0,
+        target: Vec3::Y,
+        scale_figure: false,
         night: false,
         guides: false,
         export_notice: String::new(),
@@ -57,9 +67,17 @@ pub fn run() {
     .add_systems(Startup, setup)
     .add_systems(
         Update,
-        (controls, show_model, capture_preview, draw_guides).chain(),
+        (
+            controls,
+            show_model,
+            show_scale_figure,
+            capture_preview,
+            draw_guides,
+        )
+            .chain(),
     );
     crate::village::register_building_models(&mut app);
+    crate::village::register_opening_models(&mut app);
     app.run();
 }
 
@@ -72,7 +90,7 @@ fn setup(
     commands.spawn((
         Camera3d::default(),
         Projection::Orthographic(OrthographicProjection::default_3d()),
-        orbit_camera(0.0, DEFAULT_ELEVATION),
+        orbit_camera(0.0, DEFAULT_ELEVATION, Vec3::Y),
     ));
     commands.spawn((
         DirectionalLight {
@@ -84,6 +102,12 @@ fn setup(
     commands.spawn((
         Mesh3d(meshes.add(Plane3d::default().mesh().size(120.0, 120.0))),
         MeshMaterial3d(materials.add(Color::srgb_u8(115, 130, 115))),
+    ));
+    commands.spawn((
+        ScaleFigure,
+        crate::village::opening_model(&assets, 0),
+        Transform::default(),
+        Visibility::Hidden,
     ));
     commands.spawn((
         Text::default(),
@@ -103,6 +127,12 @@ fn controls(
     keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     pending: Query<(), With<Screenshot>>,
+    (mouse, motion, scroll): (
+        Res<ButtonInput<MouseButton>>,
+        Res<AccumulatedMouseMotion>,
+        Res<AccumulatedMouseScroll>,
+    ),
+    (catalog, window): (Res<Catalog>, Single<&Window>),
     mut workshop: ResMut<Workshop>,
 ) {
     if !pending.is_empty() {
@@ -117,6 +147,9 @@ fn controls(
     if keys.just_pressed(KeyCode::KeyG) {
         workshop.guides = !workshop.guides;
     }
+    if keys.just_pressed(KeyCode::KeyH) {
+        workshop.scale_figure = !workshop.scale_figure;
+    }
     if keys.just_pressed(KeyCode::KeyN) {
         workshop.night = !workshop.night;
     }
@@ -125,6 +158,7 @@ fn controls(
         workshop.elevation = DEFAULT_ELEVATION;
         workshop.rotation = 0;
         workshop.zoom = 1.0;
+        workshop.target = Vec3::Y;
     }
     if keys.just_pressed(KeyCode::KeyR) {
         workshop.rotation = (workshop.rotation + 1) % 4;
@@ -144,6 +178,25 @@ fn controls(
     if zoom != 0 {
         workshop.zoom =
             (workshop.zoom * (-f32::from(zoom) * time.delta_secs()).exp()).clamp(0.3, 3.0);
+    }
+    if window.focused {
+        let delta = motion.delta;
+        if delta != Vec2::ZERO && mouse.pressed(MouseButton::Right) {
+            let view = orbit_camera(workshop.heading, workshop.elevation, workshop.target);
+            let project = &catalog.projects[&workshop.projects[workshop.selected]];
+            let scale = viewport_height(project, workshop.zoom) / window.height().max(1.0);
+            workshop.target += (-*view.right() * delta.x + *view.up() * delta.y) * scale;
+        } else if delta != Vec2::ZERO && mouse.pressed(MouseButton::Left) {
+            workshop.heading -= delta.x * 0.008;
+            workshop.elevation = (workshop.elevation + delta.y * 0.25).clamp(10.0, 80.0);
+        }
+        if scroll.delta.y != 0.0 {
+            let sensitivity = match scroll.unit {
+                MouseScrollUnit::Line => 0.12,
+                MouseScrollUnit::Pixel => 0.002,
+            };
+            workshop.zoom = (workshop.zoom * (-scroll.delta.y * sensitivity).exp()).clamp(0.3, 3.0);
+        }
     }
 }
 
@@ -169,7 +222,11 @@ fn show_model(
             commands.entity(entity).despawn();
         }
         let entity = commands
-            .spawn((building_model(&assets, project.model), Transform::default()))
+            .spawn((
+                WorkshopModel,
+                building_model(&assets, project.model),
+                Transform::default(),
+            ))
             .id();
         *preview = Some((project.model, entity));
     }
@@ -181,7 +238,7 @@ fn show_model(
             )));
     }
     let (transform, projection) = &mut *camera;
-    **transform = orbit_camera(workshop.heading, workshop.elevation);
+    **transform = orbit_camera(workshop.heading, workshop.elevation, workshop.target);
     if let Projection::Orthographic(ortho) = &mut **projection {
         ortho.scaling_mode = bevy::camera::ScalingMode::FixedVertical {
             viewport_height: viewport_height(project, workshop.zoom),
@@ -199,10 +256,28 @@ fn show_model(
         "Day"
     };
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nN Lighting · G Guides · Home Reset · F5 Export PNG\n{}",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · G Guides · H Scale figure · Home Reset · F5 Export PNG\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
+}
+
+fn show_scale_figure(
+    workshop: Res<Workshop>,
+    catalog: Res<Catalog>,
+    mut figure: Single<(&mut Transform, &mut Visibility), With<ScaleFigure>>,
+) {
+    if !workshop.is_changed() {
+        return;
+    }
+    let project = &catalog.projects[&workshop.projects[workshop.selected]];
+    let (figure_transform, visibility) = &mut *figure;
+    figure_transform.translation = scale_figure_position(project.size, workshop.rotation);
+    **visibility = if workshop.scale_figure {
+        Visibility::Visible
+    } else {
+        Visibility::Hidden
+    };
 }
 
 fn capture_preview(
@@ -211,7 +286,7 @@ fn capture_preview(
     (mut workshop, catalog): (ResMut<Workshop>, Res<Catalog>),
     mut panel: Single<&mut Node, With<Text>>,
     pending: Query<(), With<Screenshot>>,
-    scene: Query<&SceneInstance>,
+    scene: Query<(&SceneInstance, Option<&WorkshopModel>, Option<&ScaleFigure>)>,
     spawner: Res<SceneSpawner>,
 ) {
     if !pending.is_empty() {
@@ -221,10 +296,16 @@ fn capture_preview(
     if !keys.just_pressed(KeyCode::F5) {
         return;
     }
-    if !scene
-        .single()
-        .is_ok_and(|instance| spawner.instance_is_ready(**instance))
-    {
+    let ready = |model| {
+        scene.iter().any(|(instance, workshop_model, figure)| {
+            (if model {
+                workshop_model.is_some()
+            } else {
+                figure.is_some()
+            }) && spawner.instance_is_ready(**instance)
+        })
+    };
+    if !ready(true) || workshop.scale_figure && !ready(false) {
         workshop.export_notice = "Wait for the model to finish loading.".into();
         return;
     }
@@ -254,9 +335,11 @@ fn capture_preview(
         "footprint_cells": project.size,
         "model_rotation_degrees": u16::from(workshop.rotation) * 90,
         "metres_per_cell": 2,
+        "scale_figure": workshop.scale_figure,
         "light": if workshop.night { "night" } else { "day" },
         "camera": {
             "projection": "orthographic",
+            "target_metres": workshop.target.to_array(),
             "heading_degrees": (workshop.heading.to_degrees() + 45.0).rem_euclid(360.0),
             "elevation_degrees": workshop.elevation,
             "viewport_height_metres": viewport_height(project, workshop.zoom),
@@ -289,6 +372,11 @@ fn capture_preview(
             };
         },
     );
+}
+
+fn scale_figure_position(size: [i32; 2], rotation: u8) -> Vec3 {
+    let width = size[usize::from(rotation % 2)] as f32;
+    Vec3::new(width + 0.65, 0.0, 0.6)
 }
 
 fn draw_guides(
@@ -330,4 +418,15 @@ fn draw_guides(
         Color::srgb_u8(255, 211, 107),
     );
     gizmos.line(Vec3::ZERO, Vec3::Y * 2.0, Color::srgb_u8(109, 220, 255));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn scale_figure_uses_the_rotated_footprint_edge() {
+        assert_eq!(scale_figure_position([3, 8], 0), Vec3::new(3.65, 0.0, 0.6));
+        assert_eq!(scale_figure_position([3, 8], 1), Vec3::new(8.65, 0.0, 0.6));
+    }
 }

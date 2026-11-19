@@ -74,7 +74,7 @@ pub struct VillagePlugin;
 
 impl Plugin for VillagePlugin {
     fn build(&self, app: &mut App) {
-        embedded_asset!(app, "opening.glb");
+        register_opening_models(app);
         register_building_models(app);
         road_surface::install(app);
         building_preview::install(app);
@@ -1068,7 +1068,11 @@ enum ArrivalActor {
     Car(usize),
 }
 
-fn opening_model(assets: &AssetServer, index: usize) -> SceneRoot {
+pub(crate) fn register_opening_models(app: &mut App) {
+    embedded_asset!(app, "opening.glb");
+}
+
+pub(crate) fn opening_model(assets: &AssetServer, index: usize) -> SceneRoot {
     let path = AssetPath::from_path_buf(embedded_path!("opening.glb")).with_source("embedded");
     SceneRoot(assets.load(path.with_label(GltfAssetLabel::Scene(index).to_string())))
 }
