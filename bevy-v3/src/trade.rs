@@ -108,6 +108,13 @@ impl Trade {
             .collect()
     }
 
+    pub fn buyer_reserved(&self, id: &str, day: u64) -> u32 {
+        self.bought
+            .get(id)
+            .filter(|entry| entry.day == day)
+            .map_or(0, |entry| entry.units)
+    }
+
     pub fn quote(
         &self,
         catalog: &Catalog,
@@ -130,11 +137,7 @@ impl Trade {
         if quantity == 0 {
             return Err("No unreserved stock to sell.");
         }
-        let sold = self
-            .bought
-            .get(id)
-            .filter(|entry| entry.day == day)
-            .map_or(0, |entry| entry.units);
+        let sold = self.buyer_reserved(id, day);
         if sold + quantity > item.buyer.batches * item.pack {
             return Err("The buyer has enough for today.");
         }

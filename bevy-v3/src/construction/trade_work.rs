@@ -556,8 +556,11 @@ impl Construction {
             }
             Err(error) => error.into(),
         };
+        let daily_demand = item.buyer.batches * item.pack;
+        let remaining = daily_demand.saturating_sub(self.trade.buyer_reserved(id, day));
+        let remaining = item.quantity_text(u64::from(remaining));
         display.push_str(&format!(
-            "{buyer} · {quote}\nBackspace Cancel last queued\n"
+            "{buyer} · {remaining} of demand left today\n{quote}\nBackspace Cancel last queued\n"
         ));
         let policy = self.trade.policies.get(id);
         let on = if policy.is_some_and(|policy| policy.enabled) {
