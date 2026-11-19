@@ -117,7 +117,11 @@ impl Trade {
             return Err("There is no local buyer for this resource.");
         }
         let owned = stock.available(id);
-        let protect = protect.max(stock.equipment.protected(id, owned));
+        let protected_tools = stock.equipment.protected(id, owned);
+        if owned > 0 && protected_tools == owned && protect < owned {
+            return Err("Return borrowed tools or repair worn tools before selling.");
+        }
+        let protect = protect.max(protected_tools);
         let quantity = owned.saturating_sub(protect).min(item.pack);
         if quantity == 0 {
             return Err("No unreserved stock to sell.");
@@ -591,6 +595,24 @@ fn pantry_day(clock: f64) -> u64 {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn equipment_sales_keep_wear_with_the_village_and_allow_spare_tools() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let trade = Trade::default();
+        let id = "carpentry-tools";
+        stock.receive(&BTreeMap::from([(id.into(), 1)]));
+        stock.use_tool(0, id, crate::equipment::Task::Building(0), 1.0, false);
+        stock.equipment.release(|_, _| false);
+        assert_eq!(
+            trade.quote(&catalog, &stock, id, 0, 0),
+            Err("Return borrowed tools or repair worn tools before selling.")
+        );
+        stock.receive(&BTreeMap::from([(id.into(), 1)]));
+        assert_eq!(trade.quote(&catalog, &stock, id, 0, 0).unwrap().0, 1);
+        assert_eq!(stock.equipment.wear(id), 1.0);
+    }
 
     #[test]
     fn automatic_restock_uses_the_forecast_when_food_will_expire_first() {
