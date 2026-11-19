@@ -103,9 +103,7 @@ impl LensPicker {
             return true;
         }
         if self.open {
-            if keys.just_pressed(KeyCode::Escape) {
-                self.open = false;
-            } else if keys.just_pressed(KeyCode::Digit0) {
+            if keys.just_pressed(KeyCode::Digit0) {
                 self.choose(None);
             } else if keys.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
                 self.turn_page();

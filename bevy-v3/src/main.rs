@@ -924,7 +924,19 @@ mod tests {
                 .iter(world)
                 .any(|text| text.0.contains("Village guide · Keyboard & camera"))
         );
-        press_button(&mut app, "Close guide");
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Escape);
+        app.world_mut().run_schedule(Update);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset(KeyCode::Escape);
+        assert!(!app.world().resource::<WorldSetup>().open);
+        assert!(
+            !app.world()
+                .resource::<village::Village>()
+                .map_input_blocked()
+        );
 
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()

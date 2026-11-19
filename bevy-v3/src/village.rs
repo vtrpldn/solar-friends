@@ -416,6 +416,14 @@ impl Village {
     }
 
     pub(crate) fn dismiss_game_view(&mut self) -> bool {
+        if self.guide.open() {
+            self.guide.toggle();
+            return true;
+        }
+        if self.lenses.open {
+            self.lenses.open = false;
+            return true;
+        }
         if self.budget_entry.take().is_some() {
             return true;
         }
