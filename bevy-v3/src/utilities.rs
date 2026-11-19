@@ -423,16 +423,23 @@ impl Utilities {
         true
     }
 
-    pub fn wash(&mut self, id: usize) -> bool {
-        let Some(node) = self.nodes.get_mut(&id) else {
-            return false;
-        };
-        if !node.enabled || node.water[0] < 1.0 || node.capacity[2] - node.water[2] < 0.8 {
+    pub fn greywater_space(&self, id: usize, liters: f64) -> bool {
+        self.nodes
+            .get(&id)
+            .is_some_and(|node| node.capacity[2] - node.water[2] + 1e-8 >= liters * 0.8)
+    }
+
+    pub fn use_water_with_greywater(&mut self, id: usize, liters: f64) -> bool {
+        if !self.greywater_space(id, liters) || !self.drink(id, liters) {
             return false;
         }
-        node.water[0] -= 1.0;
-        node.water[2] += 0.8;
+        let node = self.nodes.get_mut(&id).expect("water facility");
+        node.water[2] = (node.water[2] + liters * 0.8).min(node.capacity[2]);
         true
+    }
+
+    pub fn wash(&mut self, id: usize) -> bool {
+        self.use_water_with_greywater(id, 1.0)
     }
 
     pub fn record_latrine_use(&mut self, liters: f64) {
