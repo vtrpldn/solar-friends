@@ -115,7 +115,7 @@ pub struct TownClock {
 
 impl TownClock {
     pub(crate) fn day(self) -> u64 {
-        ((540.0 + self.seconds * 0.45) / 1440.0).floor() as u64
+        crate::weather::game_minutes(self.seconds) / 1440
     }
 }
 

@@ -43,6 +43,10 @@ pub struct Weather {
     pub temperature: f64,
 }
 
+pub(crate) fn game_minutes(seconds: f64) -> u64 {
+    (540.0 + seconds * 0.45) as u64
+}
+
 pub fn game_hour(seconds: f64) -> f64 {
     (9.0 + seconds / HOUR).rem_euclid(24.0)
 }

@@ -2131,7 +2131,7 @@ fn show_hud(
         text.0 = page;
         return;
     }
-    let minute = (540.0 + village.clock * 0.45) as u64;
+    let minute = crate::weather::game_minutes(village.clock);
     let hour = minute / 60 % 24;
     let day = minute / 1440 + 1;
     let controls = if village.arrival_time < ARRIVAL_DURATION {

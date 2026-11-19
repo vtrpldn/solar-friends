@@ -888,6 +888,21 @@ fn lab_resident_view(
     text
 }
 
+fn lab_environment(village: &Village, setup: &WorldSetup) -> String {
+    let weather = lab_weather(village, setup);
+    let (income, expenses, grid) = village.stock.finance_totals();
+    format!(
+        "Weather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\nIncome R${:.2} · Net expenses R${:.2} · Grid R${:.2}",
+        weather.temperature_c,
+        weather.rainfall_mm_per_hour,
+        weather.cloud_cover * 100.0,
+        village.construction.utilities.water_summary(),
+        income as f64 / 100.0,
+        expenses as f64 / 100.0,
+        grid as f64 / 100.0,
+    )
+}
+
 fn lab_trends(samples: &[Sample], catalog: &Catalog) -> String {
     use std::fmt::Write as _;
     let Some((first, last)) = samples.first().zip(samples.last()) else {
@@ -2214,7 +2229,11 @@ fn update_lab_window(
         )));
         return;
     }
-    let weather = lab_weather(village, &runner.setup);
+    let minutes = crate::weather::game_minutes(village.clock);
+    let day = minutes / 1440 + 1;
+    let hour = minutes / 60 % 24;
+    let minute = minutes % 60;
+    let environment = lab_environment(village, &runner.setup);
     let reload_control = if matches!(source.as_deref(), Some(LabSource::Story(_))) {
         " · F7 Story settings · F8 Restart"
     } else if source.is_some() {
@@ -2230,20 +2249,15 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Report · F6 Save lab · F9 Load lab{reload_control} · Tab Browse lab views\nShift+F6 Export checkpoint · Drop checkpoint or replay report to open\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nDay {day} · {hour:02}:{minute:02} · Step {} / {} · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Report · F6 Save lab · F9 Load lab{reload_control} · Tab Browse lab views\nShift+F6 Export checkpoint · Drop checkpoint or replay report to open\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\n{environment}\n{last}\n\n{}",
         runner.index,
         limit,
-        village.clock,
         playback.speed_label(),
         playback.notice,
         village.stock.balance() as f64 / 100.0,
         village.stock.available("wood"),
         village.stock.available("meals"),
         village.construction.utilities.stored_drinking_water(),
-        weather.temperature_c,
-        weather.rainfall_mm_per_hour,
-        weather.cloud_cover * 100.0,
-        village.construction.utilities.water_summary(),
         village
             .construction
             .resident_status(&catalog, &village.stock, 0)
@@ -2254,6 +2268,24 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn lab_environment_reads_watershed_and_net_finance_totals() {
+        use crate::stock::CashKind;
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{"steps":2}"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        runner.advance(&catalog);
+        let stock = &mut runner.village.stock;
+        stock.credit(1250, CashKind::Sales);
+        stock.debit(550, CashKind::Construction);
+        stock.credit(50, CashKind::Construction);
+        stock.debit(100, CashKind::Electricity);
+        let text = lab_environment(&runner.village, &runner.setup);
+        assert!(text.contains("Aquifer"));
+        assert!(text.contains("Flow"));
+        assert!(text.contains("Income R$12.50 · Net expenses R$6.00 · Grid R$1.00"));
+    }
 
     #[test]
     fn lab_build_search_matches_display_names_case_insensitively() {

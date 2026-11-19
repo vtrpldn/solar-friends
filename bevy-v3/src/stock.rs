@@ -458,6 +458,13 @@ impl Stock {
         (pages, display)
     }
 
+    pub(crate) fn finance_totals(&self) -> (i128, i128, i128) {
+        let cents = |kind| i128::from(self.ledger.get(&kind).copied().unwrap_or_default());
+        let income = cents(CashKind::Sales) + cents(CashKind::TownWages);
+        let net = self.ledger.values().copied().map(i128::from).sum::<i128>();
+        (income, income - net, -cents(CashKind::Electricity))
+    }
+
     pub fn finance_summary(&self, committed: u64) -> String {
         let mut display = format!(
             "Shared savings R${:.2} · Available after pickup R${:.2}",
