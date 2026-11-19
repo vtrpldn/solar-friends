@@ -90,7 +90,7 @@ impl Project {
         {
             return Some(model);
         }
-        self.construction_models[usize::from(fraction >= 0.5)]
+        Some(self.construction_models[usize::from(fraction >= 0.5)].unwrap_or(self.model))
     }
 }
 
@@ -211,5 +211,37 @@ impl Catalog {
             .iter()
             .map(|(id, units)| units.div_ceil(self.materials[id].batch))
             .sum()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn construction_uses_authored_stages_or_the_standard_model_until_completion() {
+        let catalog = Catalog::default();
+        let road = &catalog.projects["road"];
+        let [Some(groundwork), Some(assembly)] = road.construction_models else {
+            panic!("road stages must be bundled");
+        };
+        assert_ne!(groundwork, assembly);
+        assert_eq!(road.construction_model(0.0), Some(groundwork));
+        assert_eq!(road.construction_model(road.work * 0.5), Some(assembly));
+        assert_eq!(road.construction_model(road.work), None);
+
+        let gathering = &catalog.projects["gathering"];
+        let unpacking = gathering
+            .unpacking_model
+            .expect("produce crates are bundled");
+        assert_eq!(gathering.construction_model(0.0), Some(unpacking));
+        assert_eq!(
+            gathering.construction_model(gathering.work * 0.4),
+            Some(gathering.model)
+        );
+
+        let fire = &catalog.projects["fire-circle"];
+        assert_eq!(fire.construction_model(0.0), Some(fire.model));
+        assert_eq!(fire.construction_model(fire.work), None);
     }
 }
