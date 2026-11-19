@@ -172,6 +172,7 @@ pub(super) fn export_selected(
     sprite_capture: Option<Res<sprites::SpriteCapture>>,
 ) {
     if !keys.just_pressed(KeyCode::F8)
+        || workshop.together
         || workshop.search.is_some()
         || workshop.show_proof
         || !pending.is_empty()

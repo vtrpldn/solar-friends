@@ -125,7 +125,7 @@ pub(crate) const GRID_TARIFF_CENTS: f64 = ${rustFloat(Math.round(GRID_TARIFF * 1
 
 const json = data => JSON.stringify(data, null, 2) + "\n";
 const exports = {
-  "data/construction.json": json({ materials, projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS }),
+  "data/construction.json": json({ materials, projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS, workshopComparison: buildingScenes.indexOf("workshop-comparison") }),
   "data/crops.json": json(CROPS),
   "src/economy_reference.rs": economy,
 };

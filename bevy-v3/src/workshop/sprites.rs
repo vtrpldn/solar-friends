@@ -152,7 +152,12 @@ pub(super) fn start(
 ) {
     let proof = keys.just_pressed(KeyCode::F7);
     let export = keys.just_pressed(KeyCode::F6);
-    if !(proof || export) || workshop.search.is_some() || capture.is_some() || !pending.is_empty() {
+    if !(proof || export)
+        || workshop.together
+        || workshop.search.is_some()
+        || capture.is_some()
+        || !pending.is_empty()
+    {
         return;
     }
     if proof && workshop.show_proof {

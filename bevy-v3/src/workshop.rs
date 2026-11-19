@@ -33,6 +33,25 @@ struct Workshop {
     search: Option<AssetSearch>,
     proof: Option<sprites::SpriteProof>,
     show_proof: bool,
+    together: bool,
+}
+
+impl Workshop {
+    fn reset_camera(&mut self) {
+        self.heading = 0.0;
+        self.elevation = DEFAULT_ELEVATION;
+        self.rotation = 0;
+        self.zoom = 1.0;
+        self.target = Vec3::Y;
+    }
+
+    fn viewport_height(&self, catalog: &Catalog) -> f32 {
+        if self.together {
+            30.0 * self.zoom
+        } else {
+            viewport_height(&catalog.projects[&self.projects[self.selected]], self.zoom)
+        }
+    }
 }
 
 #[derive(Default)]
@@ -165,6 +184,7 @@ pub fn run() {
         search: None,
         proof: None,
         show_proof: false,
+        together: false,
     })
     .add_systems(Startup, (setup, sprites::setup_proof))
     .add_systems(
@@ -300,16 +320,25 @@ fn controls(
             && let Some(&index) = matches.get(search.row)
         {
             workshop.selected = index;
+            workshop.together = false;
             return;
         }
         workshop.search = Some(search);
         return;
     }
     text.clear();
+    if keys.just_pressed(KeyCode::KeyV) {
+        workshop.together = !workshop.together;
+        workshop.reset_camera();
+        workshop.export_notice.clear();
+        return;
+    }
     let len = workshop.projects.len();
     if keys.just_pressed(KeyCode::ArrowRight) {
+        workshop.together = false;
         workshop.selected = (workshop.selected + 1) % len;
     } else if keys.just_pressed(KeyCode::ArrowLeft) {
+        workshop.together = false;
         workshop.selected = (workshop.selected + len - 1) % len;
     }
     if keys.just_pressed(KeyCode::KeyG) {
@@ -318,23 +347,19 @@ fn controls(
     if keys.just_pressed(KeyCode::KeyM) {
         workshop.surface = workshop.surface.next();
     }
-    if workshop.roof_available && keys.just_pressed(KeyCode::KeyT) {
+    if !workshop.together && workshop.roof_available && keys.just_pressed(KeyCode::KeyT) {
         workshop.roof_visible = !workshop.roof_visible;
     }
-    if keys.just_pressed(KeyCode::KeyH) {
+    if !workshop.together && keys.just_pressed(KeyCode::KeyH) {
         workshop.scale_figure = !workshop.scale_figure;
     }
     if keys.just_pressed(KeyCode::KeyN) {
         workshop.night = !workshop.night;
     }
     if keys.just_pressed(KeyCode::Home) {
-        workshop.heading = 0.0;
-        workshop.elevation = DEFAULT_ELEVATION;
-        workshop.rotation = 0;
-        workshop.zoom = 1.0;
-        workshop.target = Vec3::Y;
+        workshop.reset_camera();
     }
-    if keys.just_pressed(KeyCode::KeyR) {
+    if !workshop.together && keys.just_pressed(KeyCode::KeyR) {
         workshop.rotation = (workshop.rotation + 1) % 4;
     }
     let tilt =
@@ -357,8 +382,7 @@ fn controls(
         let delta = motion.delta;
         if delta != Vec2::ZERO && mouse.pressed(MouseButton::Right) {
             let view = orbit_camera(workshop.heading, workshop.elevation, workshop.target);
-            let project = &catalog.projects[&workshop.projects[workshop.selected]];
-            let scale = viewport_height(project, workshop.zoom) / window.height().max(1.0);
+            let scale = workshop.viewport_height(&catalog) / window.height().max(1.0);
             workshop.target += (-*view.right() * delta.x + *view.up() * delta.y) * scale;
         } else if delta != Vec2::ZERO && mouse.pressed(MouseButton::Left) {
             workshop.heading -= delta.x * 0.008;
@@ -402,18 +426,23 @@ fn show_model(
         return;
     }
     let project = &catalog.projects[&workshop.projects[workshop.selected]];
-    if preview.is_none_or(|(model, _)| model != project.model) {
+    let model = if workshop.together {
+        catalog.workshop_comparison
+    } else {
+        project.model
+    };
+    if preview.is_none_or(|(current, _)| current != model) {
         if let Some((_, entity)) = *preview {
             commands.entity(entity).despawn();
         }
         let entity = commands
             .spawn((
                 WorkshopModel,
-                building_model(&assets, project.model),
+                building_model(&assets, model),
                 Transform::default(),
             ))
             .id();
-        *preview = Some((project.model, entity));
+        *preview = Some((model, entity));
     }
     if let Some((_, entity)) = *preview {
         commands.entity(entity).insert((
@@ -431,7 +460,7 @@ fn show_model(
     **transform = orbit_camera(workshop.heading, workshop.elevation, workshop.target);
     if let Projection::Orthographic(ortho) = &mut **projection {
         ortho.scaling_mode = bevy::camera::ScalingMode::FixedVertical {
-            viewport_height: viewport_height(project, workshop.zoom),
+            viewport_height: workshop.viewport_height(&catalog),
         };
     }
     light.shadows_enabled = !matches!(workshop.surface, Surface::Wireframe);
@@ -450,6 +479,13 @@ fn show_model(
         )));
         return;
     }
+    if workshop.together {
+        text.set_if_neq(Text::new(format!(
+            "View together · {mode}\nHouse · Shed · Tree · Resident · Road\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({}) · G Grid · Home Reset · V Return to model",
+            workshop.surface.label()
+        )));
+        return;
+    }
     let roof = if workshop.roof_available {
         if workshop.roof_visible {
             " · T Hide roof"
@@ -461,7 +497,7 @@ fn show_model(
     };
     let surface = workshop.surface.label();
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure{roof} · Home Reset · F5 Export PNG · F6 Sprite sheet · F7 Sprite Proof · F8 Export 3D source\n{}",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · V View together · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure{roof} · Home Reset · F5 Export PNG · F6 Sprite sheet · F7 Sprite Proof · F8 Export 3D source\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
@@ -478,7 +514,7 @@ fn show_scale_figure(
     let project = &catalog.projects[&workshop.projects[workshop.selected]];
     let (figure_transform, visibility) = &mut *figure;
     figure_transform.translation = scale_figure_position(project.size, workshop.rotation);
-    **visibility = if workshop.scale_figure && !workshop.show_proof {
+    **visibility = if workshop.scale_figure && !workshop.show_proof && !workshop.together {
         Visibility::Visible
     } else {
         Visibility::Hidden
@@ -617,7 +653,11 @@ fn capture_preview(
         return;
     }
     panel.display = Display::Flex;
-    if workshop.show_proof || workshop.search.is_some() || !keys.just_pressed(KeyCode::F5) {
+    if workshop.together
+        || workshop.show_proof
+        || workshop.search.is_some()
+        || !keys.just_pressed(KeyCode::F5)
+    {
         return;
     }
     let ready = |model| {
@@ -719,7 +759,11 @@ fn draw_guides(
     if !workshop.rotation.is_multiple_of(2) {
         std::mem::swap(&mut x, &mut z);
     }
-    let edge = (x.max(z) + 4.0).ceil() as i32;
+    let edge = if workshop.together {
+        12
+    } else {
+        (x.max(z) + 4.0).ceil() as i32
+    };
     for marker in -edge..=edge {
         let distance = marker as f32;
         let extent = edge as f32;
@@ -738,6 +782,9 @@ fn draw_guides(
             Vec3::new(extent, 0.025, distance),
             tint,
         );
+    }
+    if workshop.together {
+        return;
     }
     gizmos.linestrip(
         [(-x, -z), (x, -z), (x, z), (-x, z), (-x, -z)].map(|(x, z)| Vec3::new(x, 0.05, z)),

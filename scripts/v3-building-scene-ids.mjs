@@ -18,4 +18,5 @@ export const buildingScenes = [...new Set([
   ...finished.flatMap(asset => [0, 1].map(stage => constructionScene(asset, stage))).filter(Boolean),
   "produce-crates",
   "goat-pasture-empty",
+  "workshop-comparison",
 ])];

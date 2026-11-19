@@ -12,6 +12,7 @@ pub struct Catalog {
     pub production: BTreeMap<String, ProductionRecipe>,
     pub residents: [Profile; 5],
     pub animal_rations: BTreeMap<String, AnimalRation>,
+    pub workshop_comparison: usize,
 }
 
 #[derive(Deserialize)]
