@@ -737,7 +737,20 @@ mod tests {
         press_button(&mut app, "Close sound settings");
         assert!(!app.world().resource::<audio::SoundSettings>().open);
 
-        app.world_mut().resource_mut::<WorldSetup>().open = false;
+        press_button(&mut app, "Land seed   ·   42");
+        press_button(&mut app, "Enter village");
+        assert!(app.world().resource::<WorldSetup>().open);
+        for key in [KeyCode::Digit4, KeyCode::Digit2] {
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(key);
+            app.world_mut().run_schedule(Update);
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .reset(key);
+        }
+        press_button(&mut app, "Enter village");
+        assert_eq!(app.world().resource::<WorldSetup>().seed(), 42);
         app.update();
         assert!(app.world().resource::<village::Village>().camp.is_none());
         for _ in 0..180 {

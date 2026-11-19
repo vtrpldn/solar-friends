@@ -203,13 +203,22 @@ impl WorldSetup {
             return;
         }
         if keyboard.just_pressed(KeyCode::Enter) || keyboard.just_pressed(KeyCode::NumpadEnter) {
-            if let Ok(value) = entry.parse::<std::num::NonZeroU32>() {
-                self.seed = value.get();
-                self.seed_entry = None;
-            }
+            self.apply_seed_entry();
             return;
         }
         Self::edit_seed_digits(entry, keyboard);
+    }
+
+    fn apply_seed_entry(&mut self) -> bool {
+        let Some(entry) = &self.seed_entry else {
+            return true;
+        };
+        let Ok(value) = entry.parse::<std::num::NonZeroU32>() else {
+            return false;
+        };
+        self.seed = value.get();
+        self.seed_entry = None;
+        true
     }
 
     pub(crate) fn edit_seed_digits(entry: &mut String, keyboard: &ButtonInput<KeyCode>) {
@@ -304,6 +313,9 @@ impl WorldSetup {
             Action::Supplies => format!("Supplies   ·   {}", SUPPLIES[self.supplies]),
             Action::Town => format!("Town   ·   {}", TOWN[self.town]),
             Action::Seed => match &self.seed_entry {
+                Some(entry) if entry.parse::<std::num::NonZeroU32>().is_err() => {
+                    format!("Seed {entry}▏\nUse 1–4294967295 · Esc cancel")
+                }
                 Some(entry) => format!("Seed {entry}▏\nEnter apply · Esc cancel"),
                 None => format!("Land seed   ·   {}", self.seed),
             },
@@ -534,7 +546,9 @@ fn setup_input(
                 setup.seed_entry = None;
             }
             Action::Explore => {
-                setup.seed_entry = None;
+                if !setup.apply_seed_entry() {
+                    continue;
+                }
                 if village.session_setup().is_some() && !setup.confirming_new {
                     setup.confirming_new = true;
                 } else {
