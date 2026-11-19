@@ -22,6 +22,8 @@ pub(crate) use trade_work::{TradeOrder, TradePolicy};
 mod upkeep;
 mod water_work;
 mod work_lens;
+mod work_policy;
+pub(crate) use work_policy::WorkGroup;
 mod work_shift;
 
 pub use water_work::WaterAction;
@@ -183,6 +185,8 @@ pub struct Construction {
     #[serde(default)]
     priority: Option<usize>,
     #[serde(default)]
+    work_policy: work_policy::WorkPolicy,
+    #[serde(default)]
     trip: Option<TownTrip>,
     #[serde(default)]
     second_trip: Option<TownTrip>,
@@ -338,6 +342,7 @@ impl Default for Construction {
             upkeep: upkeep::Upkeep::default(),
             moving: None,
             priority: None,
+            work_policy: work_policy::WorkPolicy::default(),
             trip: None,
             second_trip: None,
             supplier_construction: false,
@@ -1777,6 +1782,7 @@ impl Construction {
             });
         if !self.valid_construction_delivery(catalog)
             || !self.logistics_policy.valid()
+            || !self.work_policy.valid()
             || !self.events.valid()
             || !self.production.kitchen_policy.valid()
             || !self.upkeep.valid(self.plans.len())
@@ -2010,11 +2016,6 @@ impl Construction {
         dt: f32,
         raining: bool,
     ) {
-        let ConstructionSite {
-            terrain,
-            land,
-            camp,
-        } = site;
         stock
             .equipment
             .release(|worker, task| self.active_tool_task(worker, task));
@@ -2053,15 +2054,69 @@ impl Construction {
             clock.seconds,
             crate::market::fare_cents(clock.round_trip_km),
         );
-        self.tick_changes(catalog, stock, site, clock.seconds, dt);
-        self.tick_water_work(catalog, stock, site, clock.seconds, dt);
-        self.tick_upkeep(catalog, stock, site, dt);
-        self.restock_upkeep(catalog, stock, site.land, clock);
         self.tick_shifts(catalog, stock, site, clock, dt);
         self.tick_trip(catalog, stock, site, clock, dt);
-        self.tick_gathering(catalog, stock, site, clock.seconds, dt);
-        self.tick_production(catalog, stock, site, clock.seconds, dt);
-        self.tick_farm_jobs(catalog, stock, site, clock.seconds, dt);
+        self.maintain_water(catalog, stock.sandbox);
+        self.expire_batch_food(catalog, stock, site, clock.seconds);
+        let urgent = self.residents.iter().any(|resident| {
+            resident.health.levels[Need::Hunger as usize] < 15.0
+                || resident.health.levels[Need::Hydration as usize] < 15.0
+        });
+        for group in self.work_policy.dispatch_order(urgent) {
+            match group {
+                WorkGroup::Essentials => {
+                    self.tick_water_group(catalog, stock, site, clock.seconds, dt, Some(group));
+                    self.tick_production_group(
+                        catalog,
+                        stock,
+                        site,
+                        clock.seconds,
+                        dt,
+                        Some(group),
+                    );
+                    self.tick_farm_jobs(catalog, stock, site, clock.seconds, dt);
+                }
+                WorkGroup::Maintenance => {
+                    self.tick_water_group(catalog, stock, site, clock.seconds, dt, Some(group));
+                    self.tick_upkeep(catalog, stock, site, dt);
+                    self.restock_upkeep(catalog, stock, site.land, clock);
+                }
+                WorkGroup::Production => {
+                    self.tick_gathering(catalog, stock, site, clock.seconds, dt);
+                    self.tick_production_group(
+                        catalog,
+                        stock,
+                        site,
+                        clock.seconds,
+                        dt,
+                        Some(group),
+                    );
+                }
+                WorkGroup::Construction => {
+                    self.tick_changes(catalog, stock, site, clock.seconds, dt);
+                    self.tick_builders(catalog, stock, site, clock.seconds, dt, raining);
+                }
+            }
+        }
+        stock
+            .equipment
+            .release(|worker, task| self.active_tool_task(worker, task));
+    }
+
+    fn tick_builders(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: f64,
+        dt: f32,
+        raining: bool,
+    ) {
+        let ConstructionSite {
+            terrain,
+            land,
+            camp,
+        } = site;
         for index in 0..self.residents.len() {
             if self.driver_booked(index)
                 || self.gathering.workers_at_site(index)
@@ -2171,7 +2226,7 @@ impl Construction {
                         .min(catalog.projects[&project.key].work);
                     if project.work >= catalog.projects[&project.key].work {
                         self.events.record(
-                            clock.seconds,
+                            clock,
                             format!("{} completed.", catalog.projects[&project.key].name),
                         );
                     }
@@ -2181,9 +2236,6 @@ impl Construction {
             }
             self.residents[index].assignment = Some(job);
         }
-        stock
-            .equipment
-            .release(|worker, task| self.active_tool_task(worker, task));
     }
 
     fn assign(

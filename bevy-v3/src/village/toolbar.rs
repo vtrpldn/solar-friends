@@ -1,6 +1,6 @@
 use super::*;
 use crate::{
-    construction::{FarmControl, ProjectAction, TradeOrder, TradePolicy},
+    construction::{FarmControl, ProjectAction, TradeOrder, TradePolicy, WorkGroup},
     farming::FarmAction,
     terrain::Brush,
     time_advance::AdvanceAction,
@@ -62,6 +62,7 @@ enum Action {
     InventoryView,
     InventorySearch,
     Resident(usize),
+    WorkPriority(WorkGroup),
     Home(bool),
     ListedHome(usize),
     Shift(bool),
@@ -225,6 +226,7 @@ impl Action {
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
+            Self::WorkPriority(_) => village.utility_panel == Some(UtilityPanel::Residents),
             Self::Resident(_) => matches!(
                 village.utility_panel,
                 Some(UtilityPanel::Residents | UtilityPanel::Finances)
@@ -422,6 +424,7 @@ impl Action {
                 format!("› {}", NAMES[index])
             }
             Self::Resident(index) => NAMES[index].into(),
+            Self::WorkPriority(group) => village.construction.work_priority_label(group),
             Self::Home(true) => "Assign selected home".into(),
             Self::Home(false) => "Clear home assignment".into(),
             Self::ListedHome(_) => String::new(),
@@ -687,6 +690,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 }
                 for index in 0..NAMES.len() {
                     spawn_button(menu, &assets, Action::Resident(index));
+                }
+                for group in WorkGroup::ALL {
+                    spawn_button(menu, &assets, Action::WorkPriority(group));
                 }
                 spawn_button(menu, &assets, Action::Shift(false));
                 spawn_button(menu, &assets, Action::Shift(true));
@@ -1004,6 +1010,9 @@ fn handle_buttons(
                     village.projects_page = 0;
                 }
                 Action::Resident(index) if !picker.open => village.select_resident(index),
+                Action::WorkPriority(group) if !picker.open => {
+                    village.construction.cycle_work_priority(group);
+                }
                 Action::Home(assign) if !picker.open => village.set_resident_home(&catalog, assign),
                 Action::ListedHome(row) if !picker.open => {
                     if let Some(home) = picker.visible_homes[row] {
@@ -1164,6 +1173,7 @@ fn handle_buttons(
                 | Action::TradePolicy(_)
                 | Action::ProjectFilter
                 | Action::Resident(_)
+                | Action::WorkPriority(_)
                 | Action::Home(_)
                 | Action::ListedHome(_)
                 | Action::Shift(_)
@@ -1353,6 +1363,7 @@ fn refresh(
             Action::ProjectFilter => show_projects,
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => show_residents || show_finances,
+            Action::WorkPriority(_) => show_residents,
             Action::Shift(_) | Action::Ledger => show_finances,
             Action::ExpansionReserve(_) => show_finances && !village.finance_history_open,
             Action::PantryBatches

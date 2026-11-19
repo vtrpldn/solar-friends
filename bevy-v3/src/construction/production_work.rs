@@ -918,6 +918,7 @@ impl Construction {
             })
     }
 
+    #[cfg(test)]
     pub(super) fn tick_production(
         &mut self,
         catalog: &Catalog,
@@ -927,8 +928,26 @@ impl Construction {
         dt: f32,
     ) {
         self.expire_batch_food(catalog, stock, site, clock);
+        self.tick_production_group(catalog, stock, site, clock, dt, None);
+    }
+
+    pub(super) fn tick_production_group(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: f64,
+        dt: f32,
+        group: Option<WorkGroup>,
+    ) {
+        let in_group = |job: &Batch| {
+            group.is_none_or(|group| {
+                group == WorkGroup::for_recipe(&catalog.production[&job.recipe])
+            })
+        };
         for job in &mut self.production.jobs {
-            if matches!(job.phase, Phase::Pickup | Phase::Harvest | Phase::Work)
+            if in_group(job)
+                && matches!(job.phase, Phase::Pickup | Phase::Harvest | Phase::Work)
                 && let Some(worker) = job.worker
                 && (self.residents[worker].health.energy < 25.0
                     || !self.utilities.enabled(job.site))
@@ -938,9 +957,10 @@ impl Construction {
                 job.retry_at = clock;
             }
         }
-        self.assign_producers(catalog, stock, site, clock);
+        self.assign_producers(catalog, stock, site, clock, in_group);
         for index in (0..self.production.jobs.len()).rev() {
-            if self.production.jobs[index].phase == Phase::Growing
+            if !in_group(&self.production.jobs[index])
+                || self.production.jobs[index].phase == Phase::Growing
                 || clock < self.production.jobs[index].retry_at
             {
                 continue;
@@ -1235,7 +1255,7 @@ impl Construction {
         }
     }
 
-    fn expire_batch_food(
+    pub(super) fn expire_batch_food(
         &mut self,
         catalog: &Catalog,
         stock: &mut Stock,
@@ -1307,6 +1327,7 @@ impl Construction {
         stock: &Stock,
         site: ConstructionSite,
         clock: f64,
+        in_group: impl Fn(&Batch) -> bool,
     ) {
         let mut jobs: Vec<_> = self
             .production
@@ -1314,7 +1335,10 @@ impl Construction {
             .iter()
             .enumerate()
             .filter_map(|(index, job)| {
-                (job.worker.is_none() && job.phase != Phase::Growing && job.retry_at <= clock)
+                (in_group(job)
+                    && job.worker.is_none()
+                    && job.phase != Phase::Growing
+                    && job.retry_at <= clock)
                     .then_some(index)
             })
             .collect();

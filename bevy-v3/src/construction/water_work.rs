@@ -259,7 +259,7 @@ impl Construction {
             .find_map(|cell| self.resident_route(catalog, site, from, cell))
     }
 
-    fn maintain_water(&mut self, catalog: &Catalog, sandbox: bool) {
+    pub(super) fn maintain_water(&mut self, catalog: &Catalog, sandbox: bool) {
         let ids = self.utilities.water_ids().collect::<Vec<_>>();
         for id in ids {
             if self.water_jobs.contains_key(&id) {
@@ -379,6 +379,7 @@ impl Construction {
         }
     }
 
+    #[cfg(test)]
     pub(super) fn tick_water_work(
         &mut self,
         catalog: &Catalog,
@@ -388,7 +389,30 @@ impl Construction {
         dt: f32,
     ) {
         self.maintain_water(catalog, stock.sandbox);
-        let ids = self.water_jobs.keys().copied().collect::<Vec<_>>();
+        self.tick_water_group(catalog, stock, site, clock, dt, None);
+    }
+
+    pub(super) fn tick_water_group(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: f64,
+        dt: f32,
+        group: Option<WorkGroup>,
+    ) {
+        let ids = self
+            .water_jobs
+            .iter()
+            .filter_map(|(&id, job)| {
+                let work = if matches!(job.action, WaterAction::Sanitation) {
+                    WorkGroup::Maintenance
+                } else {
+                    WorkGroup::Essentials
+                };
+                group.is_none_or(|group| group == work).then_some(id)
+            })
+            .collect::<Vec<_>>();
         for id in ids {
             // Keep the slot occupied while choosing a worker for another job.
             let mut job = self.water_jobs.remove(&id).expect("queued water job");
