@@ -7,6 +7,7 @@ use super::{WorkshopCatalog, building_model, ui_font};
 use bevy::{
     asset::{AssetPath, embedded_asset, embedded_path},
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit},
+    picking::prelude::{MeshRayCast, MeshRayCastSettings},
     prelude::*,
     scene::SceneInstanceReady,
     window::FileDragAndDrop,
@@ -181,6 +182,8 @@ struct GardenProp {
 #[derive(Component)]
 struct GardenText;
 #[derive(Component)]
+struct SelectableProp(Entity);
+#[derive(Component)]
 struct GardenGround;
 #[derive(Component)]
 struct GardenSun;
@@ -300,6 +303,7 @@ pub fn run(path: Option<PathBuf>, night: bool, study: bool) {
         night,
     })
     .add_observer(light_new_props)
+    .add_observer(mark_selectable_meshes)
     .add_observer(style_placement_preview)
     .add_systems(Startup, setup)
     .add_systems(
@@ -395,6 +399,9 @@ fn edit(
     scroll: Res<AccumulatedMouseScroll>,
     mut typing: MessageReader<bevy::input::keyboard::KeyboardInput>,
     mut pointer: Local<Option<(Vec2, bool)>>,
+    mut raycast: MeshRayCast,
+    selectable: Query<&SelectableProp>,
+    roots: Query<&GardenProp>,
     window: Single<&Window>,
     mut camera: Single<(&Camera, &GlobalTransform, &mut Transform, &mut Projection)>,
 ) {
@@ -552,8 +559,8 @@ fn edit(
     if pressed(KeyG) {
         garden.grid = !garden.grid;
     }
-    let cell = cursor
-        .and_then(|pixel| camera.viewport_to_world(global, pixel).ok())
+    let ray = cursor.and_then(|pixel| camera.viewport_to_world(global, pixel).ok());
+    let cell = ray
         .and_then(|ray| garden.terrain.surface(ray))
         .map(|point| {
             (
@@ -641,13 +648,19 @@ fn edit(
         return;
     }
     if clicked {
-        garden.selected = cell.and_then(|(column, row)| {
-            garden.layout.props.iter().rposition(|prop| {
-                let [width, depth] = prop.size(&models);
-                (prop.column..prop.column + width).contains(&column)
-                    && (prop.row..prop.row + depth).contains(&row)
-            })
-        });
+        let filter = |entity| selectable.contains(entity);
+        let settings = MeshRayCastSettings::default().with_filter(&filter);
+        garden.selected = ray
+            .and_then(|ray| raycast.cast_ray(ray, &settings).first())
+            .and_then(|(entity, _)| selectable.get(*entity).ok())
+            .and_then(|mesh| roots.get(mesh.0).ok())
+            .and_then(|root| {
+                garden
+                    .layout
+                    .props
+                    .iter()
+                    .position(|prop| prop.id == root.id)
+            });
     }
     if pressed(F5) {
         garden.edit();
@@ -774,6 +787,24 @@ fn update_terrain(
         if let Some(mesh) = meshes.get_mut(&ground.0) {
             *mesh = garden.terrain.mesh(&garden.layout.biome);
         }
+    }
+}
+
+fn mark_selectable_meshes(
+    event: On<SceneInstanceReady>,
+    mut commands: Commands,
+    props: Query<(), With<GardenProp>>,
+    children: Query<&Children>,
+    meshes: Query<(), With<Mesh3d>>,
+) {
+    if !props.contains(event.entity) {
+        return;
+    }
+    for entity in children
+        .iter_descendants(event.entity)
+        .filter(|&entity| meshes.contains(entity))
+    {
+        commands.entity(entity).insert(SelectableProp(event.entity));
     }
 }
 
