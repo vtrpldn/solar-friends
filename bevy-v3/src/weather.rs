@@ -47,6 +47,10 @@ pub fn game_hour(seconds: f64) -> f64 {
     (9.0 + seconds / HOUR).rem_euclid(24.0)
 }
 
+pub fn step_weather(clock: f64, dt: f64, biome: usize, seed: u32) -> Weather {
+    weather_at((clock - dt * 0.5).max(0.0), biome, seed)
+}
+
 pub fn weather_at(seconds: f64, biome: usize, seed: u32) -> Weather {
     let day = (seconds / DAY + 9.0 / 24.0).floor() as i64;
     let month = month_at(day);

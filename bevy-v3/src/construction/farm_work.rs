@@ -2,7 +2,7 @@ use super::*;
 use crate::{
     farming::{CropClimate, FarmAction, FarmJob, FarmPhase, Plot, Stage},
     setup::WorldSetup,
-    weather::{HOUR, growing_season, weather_at},
+    weather::{HOUR, growing_season, step_weather},
 };
 
 #[derive(Clone, Copy)]
@@ -168,7 +168,7 @@ impl Construction {
     }
 
     pub fn tick_crops(&mut self, catalog: &Catalog, setup: &WorldSetup, clock: f64, dt: f64) {
-        let weather = weather_at(clock, setup.biome(), setup.seed());
+        let weather = step_weather(clock, dt, setup.biome(), setup.seed());
         let season = growing_season(clock, setup.biome());
         for (index, plan) in self.plans.iter().enumerate() {
             let definition = &catalog.projects[&plan.key];
@@ -1003,6 +1003,21 @@ pub(super) fn seed_delivery_status(job: &FarmJob, clock: f64) -> String {
 mod resize_tests {
     use super::*;
     use crate::farming::{Crop, Stage};
+
+    #[test]
+    fn outdoor_beds_receive_rain_at_the_step_midpoint() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut village = Construction::default();
+        let mut garden = village.proposed_site(&catalog, "garden", IVec2::new(44, 36));
+        garden.work = catalog.projects["garden"].work;
+        village.plans.push(garden);
+
+        // V2 weatherStep reports 1.391 mm/h at the midpoint and dry at the end.
+        village.tick_crops(&catalog, &setup, 4.1 * HOUR, HOUR);
+        let expected = 0.75 + (1.391_004_679_594_048 - 1.0 / 24.0) / 16.0;
+        assert!((village.farming.plots[&0].beds[0].moisture - expected).abs() < 1e-9);
+    }
 
     #[test]
     fn field_work_uses_the_interior_aisle_and_leaves_before_releasing_the_worker() {

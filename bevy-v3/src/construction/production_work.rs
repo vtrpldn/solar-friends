@@ -7,7 +7,7 @@ use crate::{
         growth::{Conditions, Growth, Irrigation},
     },
     setup::WorldSetup,
-    weather::{DAY, growing_season, weather_at},
+    weather::{DAY, growing_season, step_weather},
 };
 
 use super::{resident_work::project_access_points, *};
@@ -898,7 +898,7 @@ impl Construction {
         if stock.sandbox {
             return;
         }
-        let rain = weather_at(clock, setup.biome(), setup.seed()).rain;
+        let rain = step_weather(clock, elapsed, setup.biome(), setup.seed()).rain;
         let season = growing_season(clock, setup.biome());
         for (&site, ground) in &mut self.production.growing_sites {
             if !self

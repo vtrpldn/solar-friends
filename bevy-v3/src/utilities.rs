@@ -9,7 +9,7 @@ use crate::{
     setup::WorldSetup,
     stock::{CashKind, Stock},
     terrain::Terrain,
-    weather::{DAY, recharge_season, sun_height, weather_at},
+    weather::{DAY, recharge_season, step_weather, sun_height},
 };
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -1149,7 +1149,7 @@ impl Utilities {
         clock: f64,
         dt: f64,
     ) {
-        let weather = weather_at((clock - dt * 0.5).max(0.0), setup.biome(), setup.seed());
+        let weather = step_weather(clock, dt, setup.biome(), setup.seed());
         let season = recharge_season(clock, setup.biome());
         let rainfall = weather.rain;
         let ground = self
@@ -2092,7 +2092,7 @@ mod tests {
             let mut ground = Hydrology::new(factor, recharge_season(0.0, biome));
             for step in 1..=96 * 24 {
                 let clock = f64::from(step) * hour;
-                let rain = weather_at(clock - hour * 0.5, biome, 42).rain;
+                let rain = step_weather(clock, hour, biome, 42).rain;
                 ground.step(factor, recharge_season(clock, biome), rain, hour);
                 if step % 24 == 0 {
                     ground.groundwater -= 42.0;
