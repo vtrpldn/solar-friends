@@ -1839,7 +1839,10 @@ fn show_hud(
         label.push('\n');
         label.push_str(&production);
     }
-    if let Some(status) = village.construction.lifecycle_status(&catalog) {
+    if let Some(status) = village
+        .construction
+        .lifecycle_status(&catalog, &village.stock)
+    {
         label.push('\n');
         label.push_str(&status);
     }

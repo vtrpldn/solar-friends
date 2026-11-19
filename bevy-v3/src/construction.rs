@@ -1347,6 +1347,15 @@ pub(crate) fn draw_footprint(
 
 impl Construction {
     pub fn storage(&self, catalog: &Catalog, stock: &Stock) -> (u64, u64) {
+        self.storage_without(catalog, stock, None)
+    }
+
+    fn storage_without(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        excluded_project: Option<usize>,
+    ) -> (u64, u64) {
         if stock.sandbox {
             return (stock.units(), 1_000_000);
         }
@@ -1359,9 +1368,11 @@ impl Construction {
         let expansions = self
             .plans
             .iter()
-            .filter(|project| {
+            .enumerate()
+            .filter(|(index, project)| {
                 let definition = &catalog.projects[&project.key];
-                !project.removed
+                excluded_project != Some(*index)
+                    && !project.removed
                     && project.work >= definition.work
                     && matches!(definition.kind.as_str(), "warehouse" | "covered-storage")
             })

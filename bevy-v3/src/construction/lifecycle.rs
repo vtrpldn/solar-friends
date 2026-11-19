@@ -77,7 +77,7 @@ impl Construction {
         &self.status
     }
 
-    pub fn lifecycle_status(&self, catalog: &Catalog) -> Option<String> {
+    pub fn lifecycle_status(&self, catalog: &Catalog, stock: &Stock) -> Option<String> {
         let index = self.production.selected?;
         let project = self.plans.get(index)?;
         if project.removed {
@@ -89,6 +89,12 @@ impl Construction {
                 Change::Salvage => "Salvaging",
                 Change::Demolish => "Demolishing",
             };
+            if job.target.is_none() && job.work >= job.required {
+                let (recovered, _) = self.dismantling_yield(catalog, index, job.kind);
+                if !self.can_store_dismantling(catalog, stock, index, &recovered) {
+                    return Some(format!("{action} · Waiting for storage space"));
+                }
+            }
             format!("{action} · {:.0}%", job.work / job.required * 100.0)
         } else if project.work == 0.0 {
             "X Cancel plan · Z Prioritize".into()
@@ -441,18 +447,9 @@ impl Construction {
         index: usize,
         returned: &BTreeMap<String, u32>,
     ) -> bool {
-        let plan = &self.plans[index];
-        let definition = &catalog.projects[&plan.key];
         let returned_units: u64 = returned.values().map(|units| u64::from(*units)).sum();
-        let (used, capacity) = self.storage(catalog, stock);
-        let lost_storage = if plan.work >= definition.work
-            && matches!(definition.kind.as_str(), "warehouse" | "covered-storage")
-        {
-            600
-        } else {
-            0
-        };
-        stock.sandbox || used + returned_units <= capacity.saturating_sub(lost_storage)
+        let (used, capacity) = self.storage_without(catalog, stock, Some(index));
+        stock.sandbox || used + returned_units <= capacity
     }
 
     pub(super) fn tick_changes(
@@ -821,6 +818,11 @@ mod tests {
         );
         assert!(!construction.plans[0].removed);
         assert!(construction.building_history.is_empty());
+        construction.production.selected = Some(0);
+        assert_eq!(
+            construction.lifecycle_status(&catalog, &stock).as_deref(),
+            Some("Salvaging · Waiting for storage space")
+        );
         construction.tick_changes(&catalog, &mut stock, site, 42.0, 3.0);
         assert_eq!(construction.changes[&0].worker, None);
         stock.reserve_available(&fill);
