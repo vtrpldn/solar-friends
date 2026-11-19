@@ -591,24 +591,52 @@ fn lab_bed_page(
         .inventory_page
         .min(plots[&site].beds.len().saturating_sub(1));
     playback.inventory_page = index;
+    let mut order = None;
     if !runner.done()
-        && keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
-        && let Some((_, action)) = [
-            (KeyCode::Digit1, FarmAction::Prepare),
-            (KeyCode::Digit2, FarmAction::Plant),
-            (KeyCode::Digit3, FarmAction::Harvest),
-            (KeyCode::Digit4, FarmAction::Clear),
-            (KeyCode::Digit5, FarmAction::Amend),
-            (KeyCode::Digit6, FarmAction::Collect),
-        ]
-        .into_iter()
-        .find(|(key, _)| keys.just_pressed(*key))
+        && let Some(bed) = plots[&site].beds.get(index)
     {
-        let order = LabOrder::Bed {
-            site: site + 1,
-            bed: index + 1,
-            action,
-        };
+        let site = site + 1;
+        let index = index + 1;
+        if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+            order = [
+                (KeyCode::Digit1, FarmAction::Prepare),
+                (KeyCode::Digit2, FarmAction::Plant),
+                (KeyCode::Digit3, FarmAction::Harvest),
+                (KeyCode::Digit4, FarmAction::Clear),
+                (KeyCode::Digit5, FarmAction::Amend),
+                (KeyCode::Digit6, FarmAction::Collect),
+            ]
+            .into_iter()
+            .find(|(key, _)| keys.just_pressed(*key))
+            .map(|(_, action)| LabOrder::Bed {
+                site,
+                bed: index,
+                action,
+            });
+        } else {
+            let crop = keys.just_pressed(KeyCode::KeyX).then(|| bed.crop.next());
+            let density = keys.just_pressed(KeyCode::KeyY).then(|| bed.next_density());
+            let irrigation = keys.just_pressed(KeyCode::KeyT).then_some(!bed.irrigation);
+            let collect_residues = keys
+                .just_pressed(KeyCode::KeyZ)
+                .then_some(!bed.collect_residues);
+            if crop.is_some()
+                || density.is_some()
+                || irrigation.is_some()
+                || collect_residues.is_some()
+            {
+                order = Some(LabOrder::ConfigureBed {
+                    site,
+                    bed: index,
+                    crop,
+                    density,
+                    irrigation,
+                    collect_residues,
+                });
+            }
+        }
+    }
+    if let Some(order) = order {
         playback.notice = match runner.submit(catalog, order) {
             Ok(()) => runner
                 .outcomes
@@ -628,7 +656,7 @@ fn lab_bed_page(
     let controls = if runner.done() {
         ""
     } else {
-        "\nShift+1 Prepare · +2 Plant · +3 Harvest · +4 Clear · +5 Amend · +6 Collect"
+        "\nShift+1 Prepare · +2 Plant · +3 Harvest · +4 Clear · +5 Amend · +6 Collect\nX Crop · Y Density · T Irrigation · Z Residues"
     };
     format!(
         "Cultivation · {name} #{}\nTab Switch view · [ / ] Plot · Page Up/Down Bed{controls}\n\n{details}",
@@ -949,13 +977,25 @@ mod tests {
             ..default()
         };
         let mut keys = ButtonInput::default();
+        keys.press(KeyCode::KeyX);
+        let detail = lab_bed_page(&mut runner, &catalog, &keys, &mut playback);
+        assert!(detail.contains("Bush beans"));
+        assert!(matches!(
+            runner.scenario.orders[1].order,
+            LabOrder::ConfigureBed {
+                site: 1,
+                bed: 2,
+                ..
+            }
+        ));
+        keys.reset_all();
         keys.press(KeyCode::ShiftLeft);
         keys.press(KeyCode::Digit1);
         let details = lab_bed_page(&mut runner, &catalog, &keys, &mut playback);
         assert!(details.contains("Bed 2/"));
         assert_eq!(playback.notice, "Bed order accepted.");
         assert!(matches!(
-            runner.scenario.orders[1].order,
+            runner.scenario.orders[2].order,
             LabOrder::Bed {
                 site: 1,
                 bed: 2,

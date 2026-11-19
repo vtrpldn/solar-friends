@@ -311,11 +311,7 @@ impl Construction {
             FarmControl::Residues => bed.collect_residues = !bed.collect_residues,
             FarmControl::Crop if !busy && bed.editable() => bed.crop = bed.crop.next(),
             FarmControl::Density if !busy && bed.editable() => {
-                bed.density = if bed.density == 1.5 {
-                    0.5
-                } else {
-                    bed.density + 0.5
-                };
+                bed.density = bed.next_density();
             }
             FarmControl::Work(action) if !busy => {
                 match self.queue_bed_job(catalog, stock, (site, index, action), clock) {

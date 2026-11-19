@@ -278,6 +278,14 @@ fn collect_residues(bed: &mut Bed, output: &mut BTreeMap<String, u32>) {
 }
 
 impl Bed {
+    pub fn next_density(&self) -> f64 {
+        if self.density == 1.5 {
+            0.5
+        } else {
+            self.density + 0.5
+        }
+    }
+
     fn new(offset: Vec2, length: f32) -> Self {
         Self {
             offset,
