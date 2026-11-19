@@ -1175,9 +1175,13 @@ fn update_lab_window(
                         .construction
                         .lab_map_project_status(&catalog, project)
                 })
-                .unwrap_or_else(|| "Click a project to inspect it".into());
+                .or_else(|| {
+                    map.resource
+                        .and_then(|site| map::resource_status(&runner, &catalog, site))
+                })
+                .unwrap_or_else(|| "Click a project or resource to inspect it".into());
             format!(
-                "Village map · {selection}\nTab Switch view · Enter Inspect selected jobs\nBlue Camp · Cream Residents · Green Completed · Gold Construction"
+                "Village map · {selection}\nTab Switch view · Enter Inspect selected jobs\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources"
             )
         } else {
             lab_inventory(

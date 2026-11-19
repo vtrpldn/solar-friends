@@ -1,12 +1,16 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
 use super::Runner;
-use crate::{arrival::world_position, catalog::Catalog};
+use crate::{
+    arrival::{MAP_START, ROAD_END, road_center, road_width, world_position},
+    catalog::Catalog,
+};
 
 #[derive(Resource, Default, PartialEq)]
 pub(super) struct MapState {
     pub visible: bool,
     pub selected: Option<usize>,
+    pub resource: Option<usize>,
 }
 
 pub(super) fn draw(
@@ -43,6 +47,30 @@ pub(super) fn draw(
         );
     }
 
+    for edge in [-1.0, 1.0] {
+        gizmos.linestrip_2d(
+            (MAP_START as i32..=ROAD_END as i32).step_by(2).map(|z| {
+                let z = z as f32;
+                point(Vec2::new(road_center(z) + edge * road_width(z), z))
+            }),
+            Color::srgb_u8(184, 150, 110),
+        );
+    }
+    let resources = || {
+        runner.land.sites().filter_map(|(index, site)| {
+            if runner.village.tree_felled(index) {
+                return None;
+            }
+            let cell = site.position.as_vec2() + (site.size.as_vec2() - Vec2::ONE) * 0.5;
+            Some((index, point(world_position(cell.x, cell.y))))
+        })
+    };
+    if map
+        .resource
+        .is_some_and(|selected| !resources().any(|(index, _)| index == selected))
+    {
+        map.resource = None;
+    }
     let construction = &runner.village.construction;
     let projects = || construction.lab_map_projects(&catalog);
     if map
@@ -70,7 +98,24 @@ pub(super) fn draw(
                 })
                 .min_by(|a, b| a.1.total_cmp(&b.1))
                 .map(|(index, _)| index);
+            map.resource = if map.selected.is_some() {
+                None
+            } else {
+                resources()
+                    .map(|(index, position)| (index, screen.distance_squared(position)))
+                    .filter(|(_, distance)| *distance <= 16.0)
+                    .min_by(|a, b| a.1.total_cmp(&b.1))
+                    .map(|(index, _)| index)
+            };
         }
+    }
+    for (index, position) in resources() {
+        let tint = if map.resource == Some(index) {
+            Color::WHITE
+        } else {
+            Color::srgb_u8(146, 112, 178)
+        };
+        gizmos.circle_2d(Isometry2d::from_translation(position), 2.0, tint);
     }
     for (index, position, size, built) in projects() {
         let tint = if map.selected == Some(index) {
@@ -106,4 +151,20 @@ pub(super) fn draw(
             Color::srgb_u8(255, 242, 209),
         );
     }
+}
+
+pub(super) fn resource_status(runner: &Runner, catalog: &Catalog, index: usize) -> Option<String> {
+    let site = runner.land.site(index)?;
+    let name = &catalog.gathering[site.recipe()].name;
+    let status = runner.village.construction.gathering.resource_status(
+        index,
+        site,
+        catalog,
+        (
+            runner.setup.seed(),
+            runner.setup.richness(),
+            runner.village.clock,
+        ),
+    );
+    Some(format!("{name} · {status}"))
 }
