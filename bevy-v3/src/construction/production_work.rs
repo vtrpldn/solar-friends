@@ -342,15 +342,18 @@ impl Construction {
                 craft.level
             ));
         }
-        if let Some(tool) = &craft.tool
-            && !stock.equipment.ready(
-                tool,
-                stock.available(tool),
-                worker,
-                self.repairing(catalog, tool),
-            )
-        {
-            return Some("Waiting for usable shared carpentry tools.".into());
+        if let Some(tool) = &craft.tool {
+            let owned = stock.available(tool);
+            if !stock
+                .equipment
+                .ready(tool, owned, worker, self.repairing(catalog, tool))
+            {
+                return Some(if owned > 0 && stock.equipment.broken(tool) >= owned {
+                    "Waiting for carpentry tool repair.".into()
+                } else {
+                    "Waiting for shared carpentry tools.".into()
+                });
+            }
         }
         None
     }
@@ -514,6 +517,11 @@ impl Construction {
         }
         if job.waiting_for_access && job.retry_at > clock {
             return "Waiting for access".into();
+        }
+        if matches!(job.phase, Phase::Pickup | Phase::Work)
+            && let Some(reason) = self.craft_blocker(catalog, stock, recipe, job.worker)
+        {
+            return reason;
         }
         if matches!(job.phase, Phase::Work | Phase::Return)
             && self.batch_storage_full(catalog, stock, job, clock)
@@ -1377,6 +1385,34 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn crafting_distinguishes_borrowed_tools_from_broken_tools() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        stock.receive(&BTreeMap::from([("carpentry-tools".into(), 1)]));
+        let village = Construction::default();
+        let recipe = &catalog.production["craft_garden-tools"];
+        assert_eq!(
+            village.craft_blocker(&catalog, &stock, recipe, Some(1)),
+            None
+        );
+        let task = ToolTask::Production(0);
+        stock.use_tool(1, "carpentry-tools", task, 1.0, false);
+        assert_eq!(
+            village
+                .craft_blocker(&catalog, &stock, recipe, Some(3))
+                .as_deref(),
+            Some("Waiting for shared carpentry tools.")
+        );
+        stock.use_tool(1, "carpentry-tools", task, 1_800.0, false);
+        assert_eq!(
+            village
+                .craft_blocker(&catalog, &stock, recipe, Some(3))
+                .as_deref(),
+            Some("Waiting for carpentry tool repair.")
+        );
+    }
 
     #[test]
     fn recipe_controls_move_unfinished_craft_work_without_resetting_progress() {
