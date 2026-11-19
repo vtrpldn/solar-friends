@@ -56,6 +56,7 @@ jobs:
             "orders": [
               {"step": 0, "order": {"type": "build", "key": "gathering", "x": 40, "z": 36}},
               {"step": 0, "order": {"type": "buy", "material": "wood", "freight": true}},
+              {"step": 200, "order": {"type": "buy", "material": "food", "freight": false}},
               {"step": 8000, "order": {"type": "move", "site": 1, "x": 49, "z": 36}},
               {"step": 12000, "order": {"type": "salvage", "site": 1}}
             ]
@@ -67,6 +68,7 @@ jobs:
             and .orders == [
               {"step": 0, "error": null},
               {"step": 0, "error": null},
+              {"step": 200, "error": null},
               {"step": 8000, "error": null},
               {"step": 12000, "error": null}
             ]
@@ -79,7 +81,8 @@ jobs:
               "key": "gathering", "kind": "Salvage", "recovered": {"wood": 4},
               "lost": {"hardware": 1, "wood": 4}
             }]
-            and .village.construction.trade.purchases == 1
+            and .village.construction.opening.town_trips >= 1
+            and .village.construction.trade.purchases == 2
             and .village.construction.trade.delivery == null
             and .village.stock.materials.wood == 44
           ' report.json
