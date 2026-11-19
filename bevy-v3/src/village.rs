@@ -7,6 +7,7 @@ mod cultivation_surface;
 mod diagnostics;
 mod fire;
 mod guide;
+mod guide_diagrams;
 pub(crate) mod lab;
 mod land_lens;
 mod lens_picker;

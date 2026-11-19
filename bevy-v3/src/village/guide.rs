@@ -125,6 +125,7 @@ enum Screen {
     Quick(usize),
     Index(usize),
     Chapter(usize),
+    Diagram(usize),
 }
 
 #[derive(Default)]
@@ -159,6 +160,7 @@ enum GuideAction {
     SwitchView,
     Index,
     Chapter(usize),
+    Diagram,
 }
 
 impl GuideAction {
@@ -166,7 +168,11 @@ impl GuideAction {
         match (self, screen) {
             (Self::SwitchView, Screen::Quick(_)) => Screen::Index(0),
             (Self::SwitchView, _) => Screen::Quick(0),
-            (Self::Index, Screen::Chapter(chapter)) => Screen::Index(chapter / CHAPTER_KEYS.len()),
+            (Self::Index, Screen::Chapter(chapter) | Screen::Diagram(chapter)) => {
+                Screen::Index(chapter / CHAPTER_KEYS.len())
+            }
+            (Self::Diagram, Screen::Chapter(chapter)) => Screen::Diagram(chapter),
+            (Self::Diagram, Screen::Diagram(chapter)) => Screen::Chapter(chapter),
             (Self::Chapter(row), Screen::Index(page)) => {
                 let chapter = page * CHAPTER_KEYS.len() + row;
                 if chapter < chapters().len() {
@@ -183,6 +189,9 @@ impl GuideAction {
                     Screen::Chapter(page) => {
                         Screen::Chapter(turn_page(page, chapters().len(), forward))
                     }
+                    Screen::Diagram(page) => {
+                        Screen::Diagram(turn_page(page, chapters().len(), forward))
+                    }
                 }
             }
             _ => screen,
@@ -195,7 +204,9 @@ impl GuideAction {
             (Self::Next, _) => Some("Next"),
             (Self::SwitchView, Screen::Quick(_)) => Some("Reference"),
             (Self::SwitchView, _) => Some("Quick guide"),
-            (Self::Index, Screen::Chapter(_)) => Some("Chapter index"),
+            (Self::Index, Screen::Chapter(_) | Screen::Diagram(_)) => Some("Chapter index"),
+            (Self::Diagram, Screen::Chapter(_)) => Some("Show diagram"),
+            (Self::Diagram, Screen::Diagram(_)) => Some("Chapter text"),
             (Self::Chapter(row), Screen::Index(page)) => chapters()
                 .get(page * CHAPTER_KEYS.len() + row)
                 .map(|chapter| chapter.title.as_str()),
@@ -207,15 +218,65 @@ impl GuideAction {
 #[derive(Component)]
 struct GuideNavigation;
 
+#[derive(Component)]
+struct GuideDiagram;
+
 pub(super) fn install(app: &mut App) {
-    app.add_systems(Startup, spawn_navigation)
+    guide_diagrams::install(app);
+    app.add_systems(Startup, (spawn_navigation, spawn_diagram))
         .add_systems(
             Update,
             select_navigation
                 .after(read_camp_pointer)
                 .before(village_input),
         )
-        .add_systems(Update, show_navigation.after(village_input));
+        .add_systems(Update, (show_navigation, show_diagram).after(village_input));
+}
+
+fn spawn_diagram(mut commands: Commands) {
+    commands.spawn((
+        GuideDiagram,
+        ImageNode::default(),
+        Node {
+            display: Display::None,
+            position_type: PositionType::Absolute,
+            left: px(20),
+            top: px(108),
+            ..default()
+        },
+        BackgroundColor(Color::srgb_u8(251, 249, 239)),
+    ));
+}
+
+fn show_diagram(
+    (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
+    village: Res<Village>,
+    window: Single<&Window, With<PrimaryWindow>>,
+    (assets, images): (Res<AssetServer>, Res<Assets<Image>>),
+    mut diagram: Single<(&mut ImageNode, &mut Node), With<GuideDiagram>>,
+) {
+    let (image, node) = &mut *diagram;
+    let Some(Screen::Diagram(index)) = active_screen(&village, &setup, &saves, &sound) else {
+        node.display = Display::None;
+        return;
+    };
+    let Some(handle) = guide_diagrams::load(&assets, &chapters()[index].title) else {
+        node.display = Display::None;
+        return;
+    };
+    if image.image != handle {
+        image.image = handle;
+    }
+    let Some(texture) = images.get(&image.image) else {
+        node.display = Display::None;
+        return;
+    };
+    let size = texture.size().as_vec2();
+    let available = Vec2::new(window.width() - 276.0, window.height() - 188.0);
+    let scale = (available / size).min_element().clamp(0.0, 1.0);
+    node.width = px(size.x * scale);
+    node.height = px(size.y * scale);
+    node.display = Display::Flex;
 }
 
 fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>) {
@@ -241,6 +302,7 @@ fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>) {
             for action in [
                 GuideAction::SwitchView,
                 GuideAction::Index,
+                GuideAction::Diagram,
                 GuideAction::Previous,
                 GuideAction::Next,
             ]
@@ -351,6 +413,8 @@ impl Guide {
             Some(GuideAction::SwitchView)
         } else if keys.just_pressed(KeyCode::Backspace) {
             Some(GuideAction::Index)
+        } else if keys.just_pressed(KeyCode::KeyD) {
+            Some(GuideAction::Diagram)
         } else if keys.just_pressed(KeyCode::PageDown) {
             Some(GuideAction::Next)
         } else if keys.just_pressed(KeyCode::PageUp) {
@@ -397,7 +461,7 @@ impl Guide {
             Screen::Chapter(index) => {
                 let chapter = &chapters()[index];
                 let mut label = format!(
-                    "{} · {}/{}\nPage Up/Down · Backspace Index · F1 Close",
+                    "{} · {}/{}\nPage Up/Down · D Diagram · Backspace Index · F1 Close",
                     chapter.title,
                     index + 1,
                     chapters().len()
@@ -424,6 +488,12 @@ impl Guide {
                 }
                 label
             }
+            Screen::Diagram(index) => format!(
+                "{} · {}/{}\nPage Up/Down · D Chapter text · Backspace Index · F1 Close",
+                chapters()[index].title,
+                index + 1,
+                chapters().len()
+            ),
         })
     }
 }

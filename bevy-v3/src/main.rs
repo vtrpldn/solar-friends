@@ -702,6 +702,8 @@ mod tests {
         );
         press_button(&mut app, "Reference");
         press_button(&mut app, "Growing autonomy");
+        press_button(&mut app, "Show diagram");
+        press_button(&mut app, "Chapter text");
         press_button(&mut app, "Chapter index");
         press_button(&mut app, "Close guide");
         assert!(!app.world().resource::<village::Village>().is_paused());

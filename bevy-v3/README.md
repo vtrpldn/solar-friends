@@ -58,6 +58,8 @@ The opening models are embedded in the executable. To regenerate them after chan
 
 Refresh the construction data with `node scripts/export-v3-catalog.mjs`.
 
+In the in-game reference, open a chapter and press **D** or select **Show diagram**. The diagrams are embedded in the executable. To regenerate them from V2's guide artwork, run `npx playwright install chromium` and `node scripts/export-v3-guide-diagrams.mjs` after installing the repository's npm dependencies.
+
 Regenerate native trees, deposits, and scenery with `node scripts/export-v3-land-models.mjs`.
 
 Regenerate the build catalog models with `node scripts/export-v3-building-models.mjs`.
