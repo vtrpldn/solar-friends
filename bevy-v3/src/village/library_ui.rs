@@ -65,7 +65,7 @@ pub(super) fn install(app: &mut App) {
         .add_systems(Update, show_library.after(village_input));
 }
 
-fn import_dropped_snapshot(
+pub(super) fn import_dropped_snapshot(
     mut dropped: MessageReader<FileDragAndDrop>,
     primary: Single<Entity, With<PrimaryWindow>>,
     mut menu: ResMut<SaveMenu>,

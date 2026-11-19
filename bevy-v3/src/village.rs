@@ -2944,7 +2944,7 @@ mod tests {
     }
 
     #[test]
-    fn an_exported_snapshot_imports_as_an_independent_named_village() {
+    fn dropping_an_exported_snapshot_imports_an_independent_named_village() {
         let directory =
             std::env::temp_dir().join(format!("solar-v3-slot-import-test-{}", std::process::id()));
         let menu = SaveMenu {
@@ -2962,11 +2962,38 @@ mod tests {
         let original =
             save_library::create(&directory, Mode::Story, "River camp", &village).unwrap();
         let export = save_library::export(&directory, original, Mode::Story).unwrap();
-        let (mode, imported) = menu.import_snapshot(&export, &catalog).unwrap();
-        assert!(mode == Mode::Story);
+        use bevy::window::FileDragAndDrop;
+        let mut app = App::new();
+        app.add_message::<FileDragAndDrop>()
+            .insert_resource(menu)
+            .insert_resource(catalog)
+            .add_systems(Update, library_ui::import_dropped_snapshot);
+        let window = app.world_mut().spawn(PrimaryWindow).id();
+        let drop = |app: &mut App, path_buf| {
+            app.world_mut()
+                .write_message(FileDragAndDrop::DroppedFile { window, path_buf });
+            app.update();
+        };
+
+        drop(&mut app, export.clone());
+        assert_eq!(
+            save_library::list(&directory, Mode::Story).unwrap().len(),
+            1
+        );
+
+        app.world_mut().resource_mut::<SaveMenu>().open = true;
+        drop(&mut app, export);
+        let menu = app.world().resource::<SaveMenu>();
+        let catalog = app.world().resource::<Catalog>();
+        let imported = menu.rows[menu.selected].id;
+        assert!(menu.browse_mode == Mode::Story);
+        assert!(menu.status.contains("Imported a copy"));
         assert_ne!(original, imported);
-        assert!(save_library::load(&directory, imported, mode, &catalog).is_ok());
-        assert_eq!(save_library::list(&directory, mode).unwrap().len(), 2);
+        assert!(save_library::load(&directory, imported, Mode::Story, catalog).is_ok());
+        assert_eq!(
+            save_library::list(&directory, Mode::Story).unwrap().len(),
+            2
+        );
         std::fs::remove_dir_all(directory).unwrap();
     }
 
