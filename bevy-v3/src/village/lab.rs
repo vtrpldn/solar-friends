@@ -1281,6 +1281,44 @@ impl StorySettings {
     }
 }
 
+#[derive(Default)]
+struct LabBuildSearch {
+    query: String,
+    selected: usize,
+}
+
+impl LabBuildSearch {
+    fn matches<'a>(&self, catalog: &'a Catalog) -> Vec<(&'a String, &'a crate::catalog::Project)> {
+        let query = self.query.trim().to_lowercase();
+        let mut results: Vec<_> = catalog
+            .projects
+            .iter()
+            .filter(|(_, project)| project.name.to_lowercase().contains(&query))
+            .collect();
+        results.sort_by(|a, b| a.1.name.cmp(&b.1.name).then_with(|| a.0.cmp(b.0)));
+        results
+    }
+
+    fn prompt(&self, results: &[(&String, &crate::catalog::Project)]) -> String {
+        use std::fmt::Write as _;
+        const ROWS: usize = 9;
+        let mut text = format!(
+            "Find a building · {}▏\nType to filter · Up/Down Select · Enter Place · Esc Cancel\n",
+            self.query
+        );
+        if results.is_empty() {
+            text.push_str("\nNo matching buildings.");
+        }
+        let start = self.selected / ROWS * ROWS;
+        for (index, (_, project)) in results.iter().enumerate().skip(start).take(ROWS) {
+            let marker = if index == self.selected { "> " } else { "  " };
+            let [width, depth] = project.size;
+            let _ = write!(text, "\n{marker}{} · {width} × {depth}", project.name);
+        }
+        text
+    }
+}
+
 struct Playback {
     running: bool,
     replaying: bool,
@@ -1302,6 +1340,7 @@ struct Playback {
     story_settings: Option<StorySettings>,
     trade: LabTrade,
     resident: usize,
+    build_search: Option<LabBuildSearch>,
 }
 
 impl Playback {
@@ -1428,6 +1467,7 @@ impl Default for Playback {
             story_settings: None,
             trade: LabTrade::default(),
             resident: 0,
+            build_search: None,
         }
     }
 }
@@ -1631,6 +1671,7 @@ fn update_lab_window(
         .last();
     if let Some(LabSource::Story(setup)) = source.as_deref()
         && playback.order.is_none()
+        && playback.build_search.is_none()
         && playback.replacement.is_none()
     {
         if keys.just_pressed(KeyCode::F7) {
@@ -1676,7 +1717,7 @@ fn update_lab_window(
             return;
         }
     }
-    if playback.order.is_none() {
+    if playback.order.is_none() && playback.build_search.is_none() {
         let replacement = if let Some(path) = dropped {
             Some(LabReplacement::File(path.clone()))
         } else if keys.just_pressed(KeyCode::Escape) {
@@ -1744,6 +1785,58 @@ fn update_lab_window(
         .as_ref()
         .map_or(runner.scenario.steps, |replay| replay.limit);
     let reached_end = |runner: &Runner| runner.index >= limit || runner.done();
+    if playback.view == LabView::Map
+        && playback.order.is_none()
+        && !playback.replaying
+        && !reached_end(&runner)
+        && keys.just_pressed(KeyCode::Slash)
+        && playback.build_search.is_none()
+    {
+        playback.running = false;
+        playback.reset_timing();
+        playback.build_search = Some(LabBuildSearch::default());
+        events.clear();
+    }
+    if let Some(mut search) = playback.build_search.take() {
+        map.visible = false;
+        if keys.just_pressed(KeyCode::Escape) {
+            events.clear();
+            return;
+        }
+        let typing = !keys.any_just_pressed([
+            KeyCode::ArrowUp,
+            KeyCode::ArrowDown,
+            KeyCode::Enter,
+            KeyCode::NumpadEnter,
+        ]);
+        if typing {
+            let previous = search.query.clone();
+            crate::construction::read_search_text(&mut search.query, &mut events);
+            if previous != search.query {
+                search.selected = 0;
+            }
+        } else {
+            events.clear();
+        }
+        let results = search.matches(&catalog);
+        if keys.just_pressed(KeyCode::ArrowDown) {
+            search.selected = (search.selected + 1).min(results.len().saturating_sub(1));
+        } else if keys.just_pressed(KeyCode::ArrowUp) {
+            search.selected = search.selected.saturating_sub(1);
+        } else if keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter])
+            && let Some((key, _)) = results.get(search.selected)
+        {
+            map.cancel_build();
+            map.blueprint = Some(((*key).clone(), 0));
+            panel.set_if_neq(Text::new(
+                "Blueprint selected · Click a map cell to place it.",
+            ));
+            return;
+        }
+        panel.set_if_neq(Text::new(search.prompt(&results)));
+        playback.build_search = Some(search);
+        return;
+    }
     if let Some(mut order) = playback.order.take() {
         if keys.just_pressed(KeyCode::Escape) {
             events.clear();
@@ -2049,7 +2142,7 @@ fn update_lab_window(
                         .map_or_else(String::new, |error| format!("\n{error}"))
                 )
             } else if !playback.replaying && !runner.done() {
-                " · B Build".into()
+                " · B Build · / Find building".into()
             } else {
                 String::new()
             };
@@ -2111,6 +2204,23 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn lab_build_search_matches_display_names_case_insensitively() {
+        let catalog = Catalog::default();
+        let search = LabBuildSearch {
+            query: " GaThErInG ".into(),
+            selected: 0,
+        };
+        let results = search.matches(&catalog);
+        assert!(results.iter().any(|(key, _)| key.as_str() == "gathering"));
+        assert!(
+            results
+                .iter()
+                .all(|(_, project)| project.name.to_lowercase().contains("gathering"))
+        );
+        assert!(search.prompt(&results).contains("Enter Place"));
+    }
 
     #[test]
     fn lab_residents_book_work_for_the_selected_resident_only() {
