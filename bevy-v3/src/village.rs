@@ -431,6 +431,21 @@ impl Village {
         }
     }
 
+    fn queue_selected_water_connection(&mut self) {
+        self.water_panel.message = match self.water_panel.source {
+            Some(source) => match self.construction.queue_water_connection(
+                &mut self.stock,
+                source,
+                self.water_panel.target,
+                self.water_panel.channel,
+            ) {
+                Ok(()) => "Water connection queued.".into(),
+                Err(error) => error.into(),
+            },
+            None => "Shift-click a water source first.".into(),
+        };
+    }
+
     fn utility_link_count(&self) -> usize {
         match self.utility_panel {
             Some(UtilityPanel::Water) => self.construction.utilities.water_link_count(),
@@ -1438,6 +1453,10 @@ fn village_input(
             };
         }
         if town.utility_panel == Some(UtilityPanel::Water) {
+            if keyboard.just_pressed(KeyCode::KeyU) {
+                town.queue_selected_water_connection();
+                return;
+            }
             if keyboard.any_just_pressed([KeyCode::BracketLeft, KeyCode::BracketRight]) {
                 town.move_utility_link(keyboard.just_pressed(KeyCode::BracketRight));
             }

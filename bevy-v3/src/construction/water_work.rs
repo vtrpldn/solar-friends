@@ -14,6 +14,11 @@ pub enum WaterAction {
     },
     Purify,
     Sanitation,
+    InstallPipe {
+        to: usize,
+        channel: usize,
+        required: f64,
+    },
 }
 
 #[derive(Clone, Copy, Deserialize, Serialize)]
@@ -44,6 +49,7 @@ impl WaterJob {
         match (self.action, self.phase) {
             (WaterAction::Purify, _) => "Purifying water by hand",
             (WaterAction::Sanitation, _) => "Servicing sealed waste tanks",
+            (WaterAction::InstallPipe { .. }, _) => "Installing a water connection",
             (_, WaterPhase::Deliver) => "Carrying water to the reservoir",
             (_, WaterPhase::Staged(_)) => "Sealed water waiting beside the reservoir",
             _ => "Collecting water",
@@ -52,6 +58,65 @@ impl WaterJob {
 }
 
 impl Construction {
+    pub fn queue_water_connection(
+        &mut self,
+        stock: &mut Stock,
+        from: usize,
+        to: usize,
+        channel: usize,
+    ) -> Result<(), &'static str> {
+        let source = self
+            .utilities
+            .water_site(from)
+            .ok_or("Choose a completed source.")?;
+        let destination = self
+            .utilities
+            .water_site(to)
+            .ok_or("Choose a completed destination.")?;
+        if from == to {
+            return Err("Choose different water endpoints.");
+        }
+        if channel >= CHANNELS.len()
+            || source.capacity[channel] <= 0.0
+            || destination.capacity[channel] <= 0.0
+        {
+            return Err("Both ends need storage for this water class.");
+        }
+        if self.utilities.water_link_exists(from, to, channel) {
+            return Err("Already connected.");
+        }
+        if !destination.enabled || to > 0 && self.changes.contains_key(&(to - 1)) {
+            return Err("Choose an open destination.");
+        }
+        let distance = f64::from(
+            source
+                .location
+                .as_vec2()
+                .distance(destination.location.as_vec2()),
+        );
+        let plumbing = (distance / 4.0).ceil().max(1.0) as u32;
+        if !stock.sandbox
+            && (stock.available("plumbing") < plumbing || stock.available("pumps") < 1)
+        {
+            return Err("The connection needs plumbing supplies and one pump.");
+        }
+        self.queue_water(
+            from,
+            WaterAction::InstallPipe {
+                to,
+                channel,
+                required: 20.0 + distance * 3.0,
+            },
+        )?;
+        if !stock.sandbox {
+            stock.reserve_available(&BTreeMap::from([
+                ("plumbing".into(), plumbing),
+                ("pumps".into(), 1),
+            ]));
+        }
+        Ok(())
+    }
+
     pub fn queue_water(&mut self, target: usize, action: WaterAction) -> Result<(), &'static str> {
         if self.water_jobs.contains_key(&target) {
             return Err("A water job is already queued here.");
@@ -106,7 +171,7 @@ impl Construction {
             WaterAction::Sanitation if site.levels[2] + site.levels[3] < 1.0 => {
                 return Err("There is no accumulated waste to remove.");
             }
-            WaterAction::Sanitation => {}
+            WaterAction::Sanitation | WaterAction::InstallPipe { .. } => {}
         }
         self.water_jobs.insert(
             target,
@@ -130,7 +195,11 @@ impl Construction {
                 return false;
             };
             let numeric = (0.0..=LOAD).contains(&job.carried)
-                && (0.0..=45.0).contains(&job.work)
+                && (0.0..=match job.action {
+                    WaterAction::InstallPipe { required, .. } => required,
+                    _ => 45.0,
+                })
+                    .contains(&job.work)
                 && job.retry.is_finite()
                 && job.retry >= 0.0;
             let action = match job.action {
@@ -139,6 +208,28 @@ impl Construction {
                         && site.capacity[channel] > 0.0
                         && source != Some(target)
                         && source.map_or(channel == 1, |id| self.utilities.water_site(id).is_some())
+                }
+                WaterAction::InstallPipe {
+                    to,
+                    channel,
+                    required,
+                } => {
+                    to != target
+                        && channel < CHANNELS.len()
+                        && site.capacity[channel] > 0.0
+                        && self.utilities.water_site(to).is_some_and(|destination| {
+                            destination.capacity[channel] > 0.0
+                                && required
+                                    == 20.0
+                                        + 3.0
+                                            * f64::from(
+                                                site.location
+                                                    .as_vec2()
+                                                    .distance(destination.location.as_vec2()),
+                                            )
+                        })
+                        && job.carried == 0.0
+                        && matches!(job.phase, WaterPhase::Approach)
                 }
                 _ => job.carried == 0.0 && matches!(job.phase, WaterPhase::Approach),
             };
@@ -153,6 +244,7 @@ impl Construction {
         let id = index + 1;
         self.water_jobs.contains_key(&id) || self.water_jobs.values().any(|job| {
             matches!(job.action, WaterAction::Carry { source: Some(source), .. } if source == id)
+                || matches!(job.action, WaterAction::InstallPipe { to, .. } if to == id)
         })
     }
 
@@ -293,7 +385,7 @@ impl Construction {
             return "Click a water facility to select it.".into();
         };
         let mut text = format!(
-            "Target · {} #{target} · {}\nClick target · Shift-click source · C Camp\n1 Drinking · 2 Irrigation · 3 Greywater · 4 Sewage\nR River · T Carry from {} · Y Purify · K Service waste\nM Drinking reserve {} · L Sanitation {}",
+            "Target · {} #{target} · {}\nClick target · Shift-click source · C Camp\n1 Drinking · 2 Irrigation · 3 Greywater · 4 Sewage\nR River · T Carry from {} · Y Purify · K Service waste · U Install connection\nM Drinking reserve {} · L Sanitation {}",
             site.kind,
             CHANNELS[channel],
             source.map_or("selected source", name),
@@ -322,13 +414,26 @@ impl Construction {
                 }
             }
         }
-        if let Some(job) = self.water_jobs.get(&target) {
+        let displayed_job = self.water_jobs.get(&target).or_else(|| {
+            self.water_jobs.values().find(
+                |job| matches!(job.action, WaterAction::InstallPipe { to, .. } if to == target),
+            )
+        });
+        if let Some(job) = displayed_job {
             let status = if self.water_route_blocked(job, clock) {
                 "Waiting for access"
             } else {
                 job.label()
             };
-            let _ = write!(text, "\n{status} · {:.1} L carried", job.carried);
+            if let WaterAction::InstallPipe { required, .. } = job.action {
+                let _ = write!(
+                    text,
+                    "\n{status} · {:.0}% installed",
+                    100.0 * job.work / required
+                );
+            } else {
+                let _ = write!(text, "\n{status} · {:.1} L carried", job.carried);
+            }
         }
         text
     }
@@ -522,7 +627,10 @@ impl Construction {
             .water_jobs
             .iter()
             .filter_map(|(&id, job)| {
-                let work = if matches!(job.action, WaterAction::Sanitation) {
+                let work = if matches!(
+                    job.action,
+                    WaterAction::Sanitation | WaterAction::InstallPipe { .. }
+                ) {
                     WorkGroup::Maintenance
                 } else {
                     WorkGroup::Essentials
@@ -713,6 +821,14 @@ impl Construction {
                     );
                 }
             }
+            WaterAction::InstallPipe {
+                to,
+                channel,
+                required,
+            } if job.work >= required => {
+                self.utilities.install_water_link(id, to, channel);
+                self.record_event(clock, format!("{name} installed a water connection."));
+            }
             _ => return false,
         }
         true
@@ -723,6 +839,50 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn residents_finish_a_queued_water_connection_after_reload() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut town = Construction::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.receive(&BTreeMap::from([
+            ("plumbing".into(), 2),
+            ("pumps".into(), 1),
+        ]));
+        let pumps = stock.available("pumps");
+        for x in [42, 46] {
+            let mut tank = town.proposed_site(&catalog, "rain-barrel", IVec2::new(x, 36));
+            tank.work = catalog.projects["rain-barrel"].work;
+            town.plans.push(tank);
+        }
+        town.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        town.utilities.deliver_water(1, 1, 10.0);
+        town.queue_water_connection(&mut stock, 1, 2, 1).unwrap();
+        assert_eq!(stock.available("pumps"), pumps - 1);
+        assert!(!town.utilities.water_link_exists(1, 2, 1));
+
+        let mut town: Construction =
+            serde_json::from_str(&serde_json::to_string(&town).unwrap()).unwrap();
+        assert!(town.valid_water_jobs());
+        for step in 1..4_000 {
+            let clock = f64::from(step) * 0.1;
+            town.tick_water_work(&catalog, &mut stock, site, clock, 0.1);
+            if !town.water_jobs.contains_key(&1) {
+                town.tick_services(&catalog, &setup, &mut stock, clock, 0.1);
+                break;
+            }
+        }
+        assert!(town.utilities.water_link_exists(1, 2, 1));
+        assert!(town.utilities.water_site(2).unwrap().levels[1] > 0.0);
+    }
 
     #[test]
     fn a_dry_coop_receives_drinking_water_for_automatic_care() {

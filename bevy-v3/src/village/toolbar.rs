@@ -85,6 +85,7 @@ enum Action {
     Cooling,
     Water(WaterCommand),
     NextWasteTank,
+    InstallWaterLink,
     NextPowerShortage,
     UtilityLinkPage(bool),
     ToggleUtilityLink,
@@ -242,7 +243,9 @@ impl Action {
                         .next()
                         .is_some()
             }
-            Self::Water(_) => village.utility_panel == Some(UtilityPanel::Water),
+            Self::Water(_) | Self::InstallWaterLink => {
+                village.utility_panel == Some(UtilityPanel::Water)
+            }
             Self::NextWasteTank => {
                 village.utility_panel == Some(UtilityPanel::Water)
                     && village
@@ -547,6 +550,7 @@ impl Action {
             Self::Cooling if self.facility_switch(village) == Some(true) => "Pause cooling".into(),
             Self::Cooling => "Resume cooling".into(),
             Self::NextWasteTank => "Next waste tank".into(),
+            Self::InstallWaterLink => "Install water connection".into(),
             Self::NextPowerShortage => "Next building without power".into(),
             Self::UtilityLinkPage(false) => "Previous connection".into(),
             Self::UtilityLinkPage(true) => "Next connection".into(),
@@ -826,6 +830,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::Water(command));
                 }
                 spawn_button(menu, &assets, Action::NextWasteTank);
+                spawn_button(menu, &assets, Action::InstallWaterLink);
                 spawn_button(menu, &assets, Action::AutomaticUpkeep);
                 for restock in [false, true] {
                     for increase in [false, true] {
@@ -1194,6 +1199,9 @@ fn handle_buttons(
                 Action::NextPowerShortage if !picker.open => {
                     village.focus_next_power_shortage(&setup, camera)
                 }
+                Action::InstallWaterLink if !picker.open => {
+                    village.queue_selected_water_connection()
+                }
                 Action::NextWasteTank if !picker.open => {
                     village.focus_next_waste_tank(&setup, camera)
                 }
@@ -1342,6 +1350,7 @@ fn handle_buttons(
                 | Action::Cooling
                 | Action::Water(_)
                 | Action::NextWasteTank
+                | Action::InstallWaterLink
                 | Action::NextPowerShortage
                 | Action::UtilityLinkPage(_)
                 | Action::ToggleUtilityLink
@@ -1550,7 +1559,7 @@ fn refresh(
             Action::BuildingPower | Action::Cooling => {
                 show_facility_switches && action.available(&village)
             }
-            Action::Water(_) => show_water,
+            Action::Water(_) | Action::InstallWaterLink => show_water,
             Action::NextWasteTank => show_water && action.available(&village),
             Action::AutomaticUpkeep | Action::UpkeepBudget { .. } => show_upkeep,
             Action::Panel(_) => picker.open,

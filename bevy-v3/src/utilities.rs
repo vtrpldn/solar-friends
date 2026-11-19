@@ -57,6 +57,8 @@ pub struct Utilities {
     disabled_power_links: BTreeSet<(usize, usize)>,
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     disabled_water_links: BTreeSet<(usize, usize, usize)>,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    installed_water_links: BTreeSet<(usize, usize, usize)>,
     #[serde(skip)]
     topology_valid: bool,
     pub grid_off: bool,
@@ -275,6 +277,8 @@ impl Utilities {
                 .retain(|&(a, b)| a != id && b != id);
             self.disabled_water_links
                 .retain(|&(from, to, _)| from != id && to != id);
+            self.installed_water_links
+                .retain(|&(from, to, _)| from != id && to != id);
             self.curtailed_kwh += node.charge;
             self.topology_valid = false;
         }
@@ -283,6 +287,7 @@ impl Utilities {
     pub fn valid_save(&self, valid_building: impl Fn(usize, &str) -> bool) -> bool {
         self.disabled_water_links
             .iter()
+            .chain(&self.installed_water_links)
             .all(|&(from, to, channel)| {
                 from != to
                     && channel < LIQUID_NAMES.len()
@@ -787,6 +792,17 @@ impl Utilities {
         self.nodes
             .values()
             .fold(0.0, |total, node| total + node.water[0])
+    }
+
+    pub fn water_link_exists(&self, from: usize, to: usize, channel: usize) -> bool {
+        self.links
+            .iter()
+            .any(|pipe| (pipe.from, pipe.to, pipe.channel) == (from, to, channel))
+    }
+
+    pub fn install_water_link(&mut self, from: usize, to: usize, channel: usize) {
+        self.installed_water_links.insert((from, to, channel));
+        self.topology_valid = false;
     }
 
     pub fn water_link_count(&self) -> usize {
@@ -1303,6 +1319,14 @@ impl Utilities {
                     to,
                     channel: 3,
                 });
+            }
+        }
+        for &(from, to, channel) in &self.installed_water_links {
+            if !links
+                .iter()
+                .any(|pipe| (pipe.from, pipe.to, pipe.channel) == (from, to, channel))
+            {
+                links.push(Pipe { from, to, channel });
             }
         }
         links
