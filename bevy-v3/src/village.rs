@@ -711,6 +711,7 @@ fn read_camp_pointer(
     }
     let clicked = mouse.just_released(MouseButton::Left) && input.take().is_some();
     if !clicked
+        && village.camp.is_some()
         && !village.terrain_editor.open
         && !village.planning_roads()
         && !village.construction.placing_project()
@@ -737,12 +738,35 @@ fn read_camp_pointer(
     }
 }
 
+const CAMP_OFFSET: IVec2 = IVec2::new(-1, -3);
+const CAMP_SIZE: IVec2 = IVec2::new(5, 4);
+
+fn camp_placement_error(
+    terrain: &Terrain,
+    land: &Land,
+    cell: IVec2,
+    preset: bool,
+) -> Option<&'static str> {
+    let start = cell + CAMP_OFFSET;
+    let end = start + CAMP_SIZE;
+    if (start.x..end.x).any(|x| (start.y..end.y).any(|z| land.occupied(IVec2::new(x, z)))) {
+        return Some("Leave the trees and natural resources clear.");
+    }
+    if preset {
+        None
+    } else {
+        custom_camp_error(terrain, cell)
+    }
+}
+
 fn custom_camp_error(terrain: &crate::terrain::Terrain, cell: IVec2) -> Option<&'static str> {
     if !(-28..=90).contains(&cell.x) || !(-26..=91).contains(&cell.y) {
         return Some("Keep the tents inside the plot.");
     }
-    for column in cell.x - 1..=cell.x + 3 {
-        for row in cell.y - 3..=cell.y {
+    let start = cell + CAMP_OFFSET;
+    let end = start + CAMP_SIZE;
+    for column in start.x..end.x {
+        for row in start.y..end.y {
             let Vec2 { x, y: z } = world_position(column as f32, row as f32);
             let (center, width) = terrain.river(f64::from(z));
             if (f64::from(x) - center).abs() <= width + 3.9 {
@@ -1254,16 +1278,7 @@ fn village_input(
     let Some(cell) = preset.or(pointer.clicked.map(|hit| hit.cell)) else {
         return;
     };
-    let natural_site = (cell.x - 1..=cell.x + 3)
-        .any(|x| (cell.y - 3..=cell.y).any(|z| land.occupied(IVec2::new(x, z))));
-    let placement_error = if natural_site {
-        Some("Leave the trees and natural resources clear.")
-    } else if preset.is_none() {
-        custom_camp_error(&terrain, cell)
-    } else {
-        None
-    };
-    if let Some(error) = placement_error {
+    if let Some(error) = camp_placement_error(&terrain, &land, cell, preset.is_some()) {
         village.camp_error = Some(error);
         return;
     }
@@ -1889,6 +1904,26 @@ fn draw_blueprints(
                 );
             }
         }
+    }
+    if !setup.open
+        && village.camp.is_none()
+        && let Some(hit) = pointer.hovered
+    {
+        let terrain = village.terrain(&setup);
+        let issue = camp_placement_error(&terrain, &land, hit.cell, false);
+        let tint = if issue.is_some() {
+            Color::srgb_u8(240, 105, 96)
+        } else {
+            Color::srgb_u8(156, 220, 142)
+        };
+        crate::construction::draw_footprint(
+            &terrain,
+            hit.cell + CAMP_OFFSET,
+            CAMP_SIZE,
+            tint,
+            &mut gizmos,
+        );
+        notice = Some(issue.unwrap_or("Click to pitch camp here.").into());
     }
     map_notice.set_if_neq(MapNotice(notice));
 }

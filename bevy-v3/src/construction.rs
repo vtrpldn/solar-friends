@@ -1097,7 +1097,7 @@ fn draw_lens_marker(
     }
 }
 
-fn draw_footprint(
+pub(crate) fn draw_footprint(
     terrain: &Terrain,
     position: IVec2,
     size: IVec2,
