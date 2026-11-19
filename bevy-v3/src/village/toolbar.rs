@@ -17,6 +17,9 @@ enum Action {
     ListedHome(usize),
     Shift(bool),
     Ledger,
+    Grid,
+    AutomaticUpkeep,
+    UpkeepBudget { restock: bool, increase: bool },
 }
 
 impl Action {
@@ -63,6 +66,10 @@ impl Action {
             ) => !village.stock.sandbox,
             Self::Panel(_) => true,
             Self::ClosePanel => village.utility_panel.is_some(),
+            Self::Grid => village.utility_panel == Some(UtilityPanel::Power),
+            Self::AutomaticUpkeep | Self::UpkeepBudget { .. } => {
+                village.utility_panel == Some(UtilityPanel::Upkeep)
+            }
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
@@ -122,6 +129,14 @@ impl Action {
             Self::Shift(true) => "Toggle weekday shifts".into(),
             Self::Ledger if village.finance_history_open => "Close ledger".into(),
             Self::Ledger => "Open ledger".into(),
+            Self::Grid if village.construction.utilities.grid_off => "Connect grid".into(),
+            Self::Grid => "Disconnect grid".into(),
+            Self::AutomaticUpkeep => "Toggle auto maintenance".into(),
+            Self::UpkeepBudget { restock, increase } => format!(
+                "{} {} R$25",
+                if restock { "Restock" } else { "Parts" },
+                if increase { "+" } else { "−" }
+            ),
         }
     }
 }
@@ -211,6 +226,13 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::Shift(false));
                 spawn_button(menu, &assets, Action::Shift(true));
                 spawn_button(menu, &assets, Action::Ledger);
+                spawn_button(menu, &assets, Action::Grid);
+                spawn_button(menu, &assets, Action::AutomaticUpkeep);
+                for restock in [false, true] {
+                    for increase in [false, true] {
+                        spawn_button(menu, &assets, Action::UpkeepBudget { restock, increase });
+                    }
+                }
                 spawn_button(menu, &assets, Action::Home(true));
                 spawn_button(menu, &assets, Action::Home(false));
                 for row in 0..HOME_ROWS {
@@ -324,6 +346,16 @@ fn handle_buttons(
                     village.finance_history_open = !village.finance_history_open;
                     village.finance_history_page = 0;
                 }
+                Action::Grid if !picker.open => {
+                    let utilities = &mut village.construction.utilities;
+                    utilities.grid_off = !utilities.grid_off;
+                }
+                Action::AutomaticUpkeep if !picker.open => {
+                    village.construction.toggle_automatic_upkeep()
+                }
+                Action::UpkeepBudget { restock, increase } if !picker.open => {
+                    village.construction.adjust_upkeep_budget(restock, increase);
+                }
                 Action::Panel(_)
                 | Action::Project(_)
                 | Action::ProjectFilter
@@ -331,7 +363,10 @@ fn handle_buttons(
                 | Action::Home(_)
                 | Action::ListedHome(_)
                 | Action::Shift(_)
-                | Action::Ledger => {}
+                | Action::Ledger
+                | Action::Grid
+                | Action::AutomaticUpkeep
+                | Action::UpkeepBudget { .. } => {}
             }
         }
     }
@@ -369,6 +404,8 @@ fn refresh(
     }
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
     let show_finances = !picker.open && Action::Ledger.available(&village);
+    let show_power = !picker.open && Action::Grid.available(&village);
+    let show_upkeep = !picker.open && Action::AutomaticUpkeep.available(&village);
     let show_residents = !picker.open && Action::Home(true).available(&village);
     let projects = if show_projects {
         village.construction.project_page_labels(
@@ -391,6 +428,8 @@ fn refresh(
     menu.display = if show_projects
         || show_residents
         || show_finances
+        || show_power
+        || show_upkeep
         || (picker.open && Action::Manage.available(&village))
     {
         Display::Flex
@@ -409,6 +448,8 @@ fn refresh(
             Action::Resident(_) => show_residents || show_finances,
             Action::Shift(_) | Action::Ledger => show_finances,
             Action::Home(_) => show_residents,
+            Action::Grid => show_power,
+            Action::AutomaticUpkeep | Action::UpkeepBudget { .. } => show_upkeep,
             Action::Panel(_) => picker.open,
             _ => true,
         };

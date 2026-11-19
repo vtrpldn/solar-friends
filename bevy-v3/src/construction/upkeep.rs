@@ -197,19 +197,32 @@ impl Upkeep {
 }
 
 impl Construction {
-    pub fn upkeep_input(&mut self, keys: &ButtonInput<KeyCode>) {
-        if keys.just_pressed(KeyCode::KeyT) {
-            self.upkeep.automatic = !self.upkeep.automatic;
-        }
-        let budget = if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+    pub fn toggle_automatic_upkeep(&mut self) {
+        self.upkeep.automatic = !self.upkeep.automatic;
+    }
+
+    pub fn adjust_upkeep_budget(&mut self, restock: bool, increase: bool) {
+        let budget = if restock {
             &mut self.upkeep.restock_budget
         } else {
             &mut self.upkeep.budget
         };
-        if keys.just_pressed(KeyCode::BracketLeft) {
-            *budget = budget.saturating_sub(2_500);
-        } else if keys.just_pressed(KeyCode::BracketRight) {
-            *budget = (*budget + 2_500).min(10_000_000);
+        *budget = if increase {
+            (*budget + 2_500).min(10_000_000)
+        } else {
+            budget.saturating_sub(2_500)
+        };
+    }
+
+    pub fn upkeep_input(&mut self, keys: &ButtonInput<KeyCode>) {
+        if keys.just_pressed(KeyCode::KeyT) {
+            self.toggle_automatic_upkeep();
+        }
+        if keys.any_just_pressed([KeyCode::BracketLeft, KeyCode::BracketRight]) {
+            self.adjust_upkeep_budget(
+                keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]),
+                !keys.just_pressed(KeyCode::BracketLeft),
+            );
         }
     }
 
