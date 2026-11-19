@@ -418,6 +418,7 @@ mod tests {
                 status: String::new(),
                 redraw: false,
                 terrain_dirty: false,
+                focus_on_load: false,
                 terrain: Terrain::default(),
                 connections: HashMap::new(),
                 library: vec![],

@@ -61,7 +61,15 @@ fn main() {
         .as_deref()
         .is_some_and(|flag| flag == "--biome-landscapes")
     {
-        workshop::garden::run(None, false, true);
+        let biome = args.next();
+        let name = biome
+            .as_deref()
+            .map(|name| name.to_str().unwrap_or(""))
+            .unwrap_or("mata-atlantica");
+        if let Err(error) = workshop::garden::run_study(name) {
+            eprintln!("{error}");
+            std::process::exit(2);
+        }
         return;
     }
     if option
@@ -71,7 +79,7 @@ fn main() {
         let first = args.next();
         let night = first.as_deref().is_some_and(|arg| arg == "--night");
         let path = if night { args.next() } else { first };
-        workshop::garden::run(path.map(std::path::PathBuf::from), night, false);
+        workshop::garden::run(path.map(std::path::PathBuf::from), night);
         return;
     }
     if option.as_deref().is_some_and(|flag| flag == "--collection") {

@@ -114,6 +114,7 @@ struct Garden {
     status: String,
     redraw: bool,
     terrain_dirty: bool,
+    focus_on_load: bool,
     terrain: Terrain,
     connections: HashMap<String, Connection>,
     library: Vec<String>,
@@ -214,11 +215,23 @@ fn biome_landscape(biome: &str) -> Vec<Prop> {
     landscapes.remove(biome).expect("known biome landscape")
 }
 
-pub fn run(path: Option<PathBuf>, night: bool, study: bool) {
+pub fn run_study(biome: &str) -> Result<(), &'static str> {
+    if biome == "flat" || !BIOMES.contains(&biome) {
+        return Err("Choose mata-atlantica, cerrado, or caatinga for a biome study.");
+    }
+    run_garden(None, false, Some(biome));
+    Ok(())
+}
+
+pub fn run(path: Option<PathBuf>, night: bool) {
+    run_garden(path, night, None);
+}
+
+fn run_garden(path: Option<PathBuf>, night: bool, study: Option<&str>) {
     let models = WorkshopCatalog::default();
     let gallery = Layout::decode(GALLERY, &models).expect("bundled V2 gallery");
     let mut persistence = String::new();
-    let mut autosave = if study {
+    let mut autosave = if study.is_some() {
         persistence = "Biome study. Ctrl/Cmd+S exports the scene.".into();
         None
     } else if path.is_none() {
@@ -238,8 +251,8 @@ pub fn run(path: Option<PathBuf>, night: bool, study: bool) {
         .map(|file| read_layout(file, &models))
         .unwrap_or_else(|| {
             let mut layout = gallery.clone();
-            if study {
-                layout.biome = "mata-atlantica".into();
+            if let Some(biome) = study {
+                layout.biome = biome.into();
                 layout.props = biome_landscape(&layout.biome);
             }
             Ok(layout)
@@ -265,13 +278,20 @@ pub fn run(path: Option<PathBuf>, night: bool, study: bool) {
     let mut library: Vec<_> = models.0.keys().cloned().collect();
     library.sort_by_key(|id| (&models.0[id].name, id.clone()));
     let mut app = App::new();
-    app.add_plugins(DefaultPlugins.set(WindowPlugin {
-        primary_window: Some(Window {
-            title: "Solar Friends V3 · Asset Garden".into(),
+    app.add_plugins(
+        DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: if study.is_some() {
+                    "Solar Friends V3 · Biome landscapes"
+                } else {
+                    "Solar Friends V3 · Asset Garden"
+                }
+                .into(),
+                ..default()
+            }),
             ..default()
         }),
-        ..default()
-    }))
+    )
     .add_plugins(crate::ui_font::UiFontPlugin)
     .insert_resource(models)
     .init_resource::<GlobalAmbientLight>()
@@ -291,6 +311,7 @@ pub fn run(path: Option<PathBuf>, night: bool, study: bool) {
         pending: None,
         redraw: true,
         terrain_dirty: true,
+        focus_on_load: study.is_none(),
         terrain: Terrain::default(),
         connections: HashMap::new(),
         library,
@@ -663,7 +684,7 @@ fn edit(
         garden.edit();
         garden.layout.props = garden.gallery.props.clone();
         garden.selected = None;
-        garden.focus_first(&models);
+        garden.focus_on_load = true;
     }
     let Some(index) = garden.selected else {
         return;
@@ -742,6 +763,7 @@ fn import_scene(
         Ok(layout) => {
             garden.edit();
             garden.layout = layout;
+            garden.focus_on_load = true;
             garden.selected = None;
             garden.pending = None;
             garden.search = None;
@@ -771,15 +793,14 @@ fn update_terrain(
     models: Res<WorkshopCatalog>,
     ground: Single<&Mesh3d, With<GardenGround>>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut initialized: Local<bool>,
 ) {
     if garden.terrain_dirty {
         garden.terrain_dirty = false;
         garden.connections = connections(&garden.layout.props, &models);
         garden.terrain = Terrain::new(&garden.layout, &models);
-        if !*initialized {
+        if garden.focus_on_load {
             garden.focus_first(&models);
-            *initialized = true;
+            garden.focus_on_load = false;
         }
         if let Some(mesh) = meshes.get_mut(&ground.0) {
             *mesh = garden.terrain.mesh(&garden.layout.biome);
