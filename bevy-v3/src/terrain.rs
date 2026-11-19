@@ -11,7 +11,9 @@ use serde::{Deserialize, Serialize};
 use crate::arrival::{MAP_START, ROAD_END, road_center, road_width, world_position};
 
 const CELLS: u32 = 128;
-const RIVER_COLUMNS: u32 = 9;
+const RIVER_COLUMNS: u32 = 13;
+const RIVER_ROWS: u32 = CELLS * 4;
+pub const RIVER_BOULDER_COUNT: usize = 8;
 const HALF_WIDTH: f64 = 128.0;
 
 #[derive(Default)]
@@ -517,14 +519,14 @@ impl Terrain {
     pub fn river_mesh(&self) -> Mesh {
         let mut positions = Vec::new();
         let mut indices = Vec::new();
-        for row in 0..=CELLS * 2 {
-            let z = f64::from(row) - HALF_WIDTH;
+        for row in 0..=RIVER_ROWS {
+            let z = f64::from(row) * 0.5 - HALF_WIDTH;
             let (center, width) = self.river(z);
             for column in 0..RIVER_COLUMNS {
                 let lateral = river_lateral(column);
                 let x = center + width * lateral;
                 positions.push([x as f32, 0.05, z as f32]);
-                if row < CELLS * 2 && column < RIVER_COLUMNS - 1 {
+                if row < RIVER_ROWS && column < RIVER_COLUMNS - 1 {
                     let a = row * RIVER_COLUMNS + column;
                     indices.extend_from_slice(&[
                         a,
@@ -538,7 +540,22 @@ impl Terrain {
             }
         }
         surface_mesh(positions, indices)
-            .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, river_colors(0.0, self.seed))
+    }
+
+    pub fn river_boulders(&self) -> [RiverBoulder; RIVER_BOULDER_COUNT] {
+        let mut random = land_random(self.seed ^ 0x5a1d9);
+        std::array::from_fn(|index| {
+            let z = -HALF_WIDTH + 18.0 + index as f64 * 29.0 + random() * 9.0;
+            let side = if random() < 0.5 { -1.0 } else { 1.0 };
+            let (center, width) = self.river(z);
+            let x = center + side * width * (0.55 + random() * 0.12);
+            RiverBoulder {
+                center: Vec2::new(x as f32, z as f32),
+                radius: (0.3 + random() * 0.24) as f32,
+                palette: (random() * 3.0) as usize,
+                yaw: (random() * std::f64::consts::PI) as f32,
+            }
+        })
     }
 
     pub fn river_bank_mesh(&self, extra: f64, height: f32) -> Mesh {
@@ -565,15 +582,57 @@ fn river_lateral(column: u32) -> f64 {
     ((across - 0.5) * std::f64::consts::PI).sin()
 }
 
-pub fn river_colors(seconds: f64, seed: u32) -> Vec<[f32; 4]> {
+pub struct RiverBoulder {
+    pub center: Vec2,
+    pub radius: f32,
+    pub palette: usize,
+    pub yaw: f32,
+}
+
+impl RiverBoulder {
+    fn foam(&self, point: Vec2, seconds: f64, streak: f64) -> f64 {
+        let delta = point - self.center;
+        let radius = f64::from(self.radius) * 0.9;
+        let distance = f64::from(delta.length());
+        let rim = 1.0 - smoothstep(0.08, 0.38, (distance - radius).abs());
+        let ring = ((distance - radius) * 11.0 - seconds * 2.2)
+            .sin()
+            .max(0.0)
+            .powi(10);
+        let reach = if distance >= radius {
+            1.0 - smoothstep(radius + 0.25, radius + 1.65, distance)
+        } else {
+            0.0
+        };
+        let z = f64::from(delta.y);
+        let wake = (-f64::from(delta.x.abs()) * 3.0).exp()
+            * smoothstep(0.0, 0.4, z)
+            * (1.0 - smoothstep(0.4, 2.4, z));
+        rim * 0.28 + ring * reach * 0.22 + wake * streak * 0.6
+    }
+}
+
+fn smoothstep(low: f64, high: f64, value: f64) -> f64 {
+    let t = ((value - low) / (high - low)).clamp(0.0, 1.0);
+    t * t * (3.0 - 2.0 * t)
+}
+
+pub fn river_colors(
+    seconds: f64,
+    seed: u32,
+    positions: &[[f32; 3]],
+    rocks: &[RiverBoulder],
+) -> Vec<[f32; 4]> {
     let deep = Color::srgb_u8(58, 110, 127).to_linear();
     let shallow = Color::srgb_u8(108, 160, 150).to_linear();
     let ripple = Color::srgb_u8(161, 195, 185).to_linear();
-    let mut colors = Vec::with_capacity(((CELLS * 2 + 1) * RIVER_COLUMNS) as usize);
-    for row in 0..=CELLS * 2 {
-        let downstream = f64::from(row) - seconds * 0.38;
-        for column in 0..RIVER_COLUMNS {
-            let lateral = river_lateral(column);
+    let mut colors = Vec::with_capacity(positions.len());
+    for points in positions.as_chunks::<{ RIVER_COLUMNS as usize }>().0 {
+        let z = points[0][2];
+        let downstream = f64::from(z) + HALF_WIDTH - seconds * 0.38;
+        let nearby = rocks.iter().find(|rock| (rock.center.y - z).abs() <= 2.5);
+        for (column, &[x, _, z]) in points.iter().enumerate() {
+            let lateral = river_lateral(column as u32);
             let across = (lateral + 1.0) * 0.5;
             let edge = lateral.abs();
             let crest = (downstream * 0.83 + (across * 9.0 + downstream * 0.13).sin()).sin();
@@ -581,7 +640,8 @@ pub fn river_colors(seconds: f64, seed: u32) -> Vec<[f32; 4]> {
             let bank = ((edge - 0.94) / 0.06).clamp(0.0, 1.0);
             let edge_flow = noise(lateral * 4.2, downstream * 0.32, seed);
             let bank_foam = bank * bank * (3.0 - 2.0 * bank) * (0.08 + edge_flow * 0.13);
-            let foam = crest.max(0.0).powi(4) * streak * 0.23 + bank_foam;
+            let eddy = nearby.map_or(0.0, |rock| rock.foam(Vec2::new(x, z), seconds, streak));
+            let foam = (crest.max(0.0).powi(4) * streak * 0.23 + bank_foam + eddy).min(0.55);
             let tint = deep
                 .mix(&shallow, edge.powi(2) as f32)
                 .mix(&ripple, foam as f32);

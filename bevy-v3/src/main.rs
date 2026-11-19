@@ -145,7 +145,7 @@ struct LandMesh;
 struct GroundMesh;
 
 #[derive(Component)]
-struct RiverMesh;
+struct RiverMesh([terrain::RiverBoulder; terrain::RIVER_BOULDER_COUNT]);
 
 type LandDrawKey = (WorldSetup, Option<IVec2>, (u64, u64, usize));
 
@@ -190,9 +190,27 @@ fn update_land(
             MeshMaterial3d(materials.add(color)),
         ));
     }
+    let rocks = terrain.river_boulders();
+    let rock_mesh = meshes.add(Sphere::new(1.0).mesh().ico(0).expect("icosahedron"));
+    let rock_materials = [
+        Color::srgb_u8(151, 155, 134),
+        Color::srgb_u8(176, 174, 148),
+        Color::srgb_u8(125, 139, 126),
+    ]
+    .map(|color| materials.add(color));
+    for rock in &rocks {
+        commands.spawn((
+            LandMesh,
+            Mesh3d(rock_mesh.clone()),
+            MeshMaterial3d(rock_materials[rock.palette].clone()),
+            Transform::from_xyz(rock.center.x, rock.radius * 0.3, rock.center.y)
+                .with_scale(Vec3::new(1.15, 0.65, 0.85) * rock.radius)
+                .with_rotation(Quat::from_euler(EulerRot::XYZ, 0.0, rock.yaw, 0.1)),
+        ));
+    }
     commands.spawn((
         LandMesh,
-        RiverMesh,
+        RiverMesh(rocks),
         Mesh3d(meshes.add(terrain.river_mesh())),
         MeshMaterial3d(materials.add(StandardMaterial {
             perceptual_roughness: 0.35,
@@ -204,22 +222,22 @@ fn update_land(
 fn animate_river(
     setup: Res<WorldSetup>,
     village: Res<village::Village>,
-    river: Query<&Mesh3d, With<RiverMesh>>,
+    river: Query<(&Mesh3d, &RiverMesh)>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut previous: Local<Option<(AssetId<Mesh>, u64)>>,
 ) {
-    let Ok(river) = river.single() else {
+    let Ok((river, rocks)) = river.single() else {
         return;
     };
     let frame = (village.seconds() * 12.0).floor() as u64;
     let key = (river.0.id(), frame);
     if *previous != Some(key)
         && let Some(mesh) = meshes.get_mut(&river.0)
+        && let Some(bevy::mesh::VertexAttributeValues::Float32x3(positions)) =
+            mesh.attribute(Mesh::ATTRIBUTE_POSITION)
     {
-        mesh.insert_attribute(
-            Mesh::ATTRIBUTE_COLOR,
-            terrain::river_colors(frame as f64 / 12.0, setup.seed()),
-        );
+        let colors = terrain::river_colors(frame as f64 / 12.0, setup.seed(), positions, &rocks.0);
+        mesh.insert_attribute(Mesh::ATTRIBUTE_COLOR, colors);
         *previous = Some(key);
     }
 }
