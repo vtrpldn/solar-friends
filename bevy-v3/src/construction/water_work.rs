@@ -924,15 +924,21 @@ impl Construction {
                                 )
                         })
                 });
-            let batch_water = id.checked_sub(1).is_some_and(|site_id| {
-                site.capacity[1] > 0.0
-                    && site.levels[0] + site.levels[1] < 4.0
-                    && self.production.jobs.iter().any(|job| {
+            let batch_water = !sandbox
+                && site.capacity[1] > 0.0
+                && id.checked_sub(1).is_some_and(|site_id| {
+                    self.production.jobs.iter().any(|job| {
+                        let water = catalog.production[&job.recipe]
+                            .biology
+                            .as_ref()
+                            .map_or(0.0, |biology| biology.on_site_water);
                         job.site == site_id
+                            && job.phase != crate::production::Phase::Return
                             && !job.watered
-                            && matches!(job.recipe.as_str(), "fruit" | "bananas")
+                            && water > 0.0
+                            && !self.utilities.can_irrigate(site_id, water)
                     })
-            });
+                });
             let kitchen_needs_drainage = !sandbox
                 && site.kind == "kitchen"
                 && id.checked_sub(1).is_some_and(|target| {
@@ -1456,6 +1462,31 @@ mod tests {
             }
         ));
         assert!(town.water_jobs[&2].worker.is_some());
+    }
+
+    #[test]
+    fn an_orchard_with_split_water_reserves_requests_a_full_irrigation_dose() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut town = Construction::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut orchard = town.proposed_site(&catalog, "orchard", IVec2::new(44, 36));
+        orchard.work = catalog.projects["orchard"].work;
+        town.plans.push(orchard);
+        town.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        town.utilities.deliver_water(1, 0, 2.0);
+        town.utilities.deliver_water(1, 1, 2.0);
+        town.queue_batch(&catalog, &mut stock, 0, "fruit");
+
+        town.maintain_water(&catalog, false);
+
+        assert!(matches!(
+            town.water_jobs[&1].action,
+            WaterAction::Carry {
+                source: None,
+                channel: 1
+            }
+        ));
     }
 
     #[test]
