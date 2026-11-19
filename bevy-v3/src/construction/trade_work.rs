@@ -9,6 +9,15 @@ pub(crate) enum TradeOrder {
     Cancel,
 }
 
+#[derive(Clone, Copy)]
+pub(crate) enum TradePolicy {
+    HouseholdRestock,
+    AutomaticSale,
+    Reserve(bool),
+    Limit,
+    Trigger,
+}
+
 impl Construction {
     pub fn page_trade(&mut self, catalog: &Catalog, forward: bool) {
         let pages = Trade::tradable(catalog)
@@ -49,18 +58,14 @@ impl Construction {
         keys: &ButtonInput<KeyCode>,
         clock: TownClock,
     ) {
-        let options = Trade::tradable(catalog);
         if keys.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
             self.page_trade(catalog, keys.just_pressed(KeyCode::PageDown));
         }
         if let Some(row) = PAGE_KEYS.iter().position(|key| keys.just_pressed(*key)) {
             self.select_trade_row(catalog, row);
         }
-        let Some((id, definition)) = options.get(self.trade.selected).copied() else {
-            return;
-        };
         if keys.just_pressed(KeyCode::Digit0) {
-            self.trade.household_restock_off = !self.trade.household_restock_off;
+            self.adjust_trade_policy(catalog, TradePolicy::HouseholdRestock);
         }
         if keys.any_just_pressed([KeyCode::KeyI, KeyCode::KeyD]) {
             self.place_trade_order(
@@ -78,29 +83,42 @@ impl Construction {
         if keys.just_pressed(KeyCode::Backspace) {
             self.place_trade_order(catalog, stock, clock, TradeOrder::Cancel);
         }
+        for (key, action) in [
+            (KeyCode::KeyT, TradePolicy::AutomaticSale),
+            (KeyCode::BracketLeft, TradePolicy::Reserve(false)),
+            (KeyCode::BracketRight, TradePolicy::Reserve(true)),
+            (KeyCode::KeyY, TradePolicy::Limit),
+            (KeyCode::KeyR, TradePolicy::Trigger),
+        ] {
+            if keys.just_pressed(key) {
+                self.adjust_trade_policy(catalog, action);
+            }
+        }
+    }
+
+    pub fn adjust_trade_policy(&mut self, catalog: &Catalog, action: TradePolicy) {
+        let options = Trade::tradable(catalog);
+        let Some((id, definition)) = options.get(self.trade.selected).copied() else {
+            return;
+        };
+        if matches!(action, TradePolicy::HouseholdRestock) {
+            self.trade.household_restock_off = !self.trade.household_restock_off;
+            return;
+        }
+        let pack = definition.pack;
+        let cycle = |value| match value {
+            0 => pack,
+            set if set == pack => pack * 2,
+            _ => 0,
+        };
         let policy = self.trade.policies.entry(id.into()).or_default();
-        if keys.just_pressed(KeyCode::KeyT) {
-            policy.enabled = !policy.enabled;
-        }
-        if keys.just_pressed(KeyCode::BracketLeft) {
-            policy.reserve = policy.reserve.saturating_sub(definition.pack);
-        }
-        if keys.just_pressed(KeyCode::BracketRight) {
-            policy.reserve = policy.reserve.saturating_add(definition.pack);
-        }
-        if keys.just_pressed(KeyCode::KeyY) {
-            policy.limit = match policy.limit {
-                0 => definition.pack,
-                set if set == definition.pack => definition.pack * 2,
-                _ => 0,
-            };
-        }
-        if keys.just_pressed(KeyCode::KeyR) {
-            policy.trigger = match policy.trigger {
-                0 => definition.pack,
-                set if set == definition.pack => definition.pack * 2,
-                _ => 0,
-            };
+        match action {
+            TradePolicy::AutomaticSale => policy.enabled = !policy.enabled,
+            TradePolicy::Reserve(false) => policy.reserve = policy.reserve.saturating_sub(pack),
+            TradePolicy::Reserve(true) => policy.reserve = policy.reserve.saturating_add(pack),
+            TradePolicy::Limit => policy.limit = cycle(policy.limit),
+            TradePolicy::Trigger => policy.trigger = cycle(policy.trigger),
+            TradePolicy::HouseholdRestock => {}
         }
     }
 

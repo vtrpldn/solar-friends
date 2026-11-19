@@ -15,7 +15,7 @@ mod resident_work;
 mod roads;
 mod town_pickup;
 mod trade_work;
-pub(crate) use trade_work::TradeOrder;
+pub(crate) use trade_work::{TradeOrder, TradePolicy};
 mod upkeep;
 mod water_work;
 mod work_lens;

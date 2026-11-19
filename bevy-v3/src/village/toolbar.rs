@@ -1,5 +1,5 @@
 use super::*;
-use crate::construction::TradeOrder;
+use crate::construction::{TradeOrder, TradePolicy};
 
 #[derive(Component, Clone, Copy)]
 enum Action {
@@ -14,6 +14,7 @@ enum Action {
     Project(usize),
     TradeItem(usize),
     Trade(TradeOrder),
+    TradePolicy(TradePolicy),
     ProjectFilter,
     Resident(usize),
     Home(bool),
@@ -78,7 +79,7 @@ impl Action {
             Self::AutomaticUpkeep | Self::UpkeepBudget { .. } => {
                 village.utility_panel == Some(UtilityPanel::Upkeep)
             }
-            Self::TradeItem(_) | Self::Trade(_) => village.trade_open(),
+            Self::TradeItem(_) | Self::Trade(_) | Self::TradePolicy(_) => village.trade_open(),
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
@@ -140,6 +141,15 @@ impl Action {
             Self::Trade(TradeOrder::Buy { freight: true }) => "Buy for delivery".into(),
             Self::Trade(TradeOrder::Sell) => "Reserve sale".into(),
             Self::Trade(TradeOrder::Cancel) => "Cancel last order".into(),
+            Self::TradePolicy(policy) => match policy {
+                TradePolicy::HouseholdRestock => "Toggle household restock",
+                TradePolicy::AutomaticSale => "Toggle auto sale",
+                TradePolicy::Reserve(false) => "Keep one pack less",
+                TradePolicy::Reserve(true) => "Keep one pack more",
+                TradePolicy::Limit => "Cycle sale limit",
+                TradePolicy::Trigger => "Cycle sale trigger",
+            }
+            .into(),
             Self::Resident(index) if index == village.selected_resident => {
                 format!("› {}", NAMES[index])
             }
@@ -316,6 +326,16 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::Trade(order));
                 }
+                for policy in [
+                    TradePolicy::HouseholdRestock,
+                    TradePolicy::AutomaticSale,
+                    TradePolicy::Reserve(false),
+                    TradePolicy::Reserve(true),
+                    TradePolicy::Limit,
+                    TradePolicy::Trigger,
+                ] {
+                    spawn_button(menu, &assets, Action::TradePolicy(policy));
+                }
                 for row in 0..crate::construction::PAGE_KEYS.len() {
                     spawn_button(menu, &assets, Action::Project(row));
                     spawn_button(menu, &assets, Action::TradeItem(row));
@@ -468,10 +488,14 @@ fn handle_buttons(
                         order,
                     );
                 }
+                Action::TradePolicy(policy) if !picker.open => {
+                    village.construction.adjust_trade_policy(&catalog, policy);
+                }
                 Action::Panel(_)
                 | Action::Project(_)
                 | Action::TradeItem(_)
                 | Action::Trade(_)
+                | Action::TradePolicy(_)
                 | Action::ProjectFilter
                 | Action::Resident(_)
                 | Action::Home(_)
@@ -573,7 +597,7 @@ fn refresh(
             Action::Page(_) | Action::ClosePanel => action.available(&village),
             Action::Project(row) => projects.get(row).is_some(),
             Action::TradeItem(row) => trade_items.get(row).is_some(),
-            Action::Trade(_) => show_trade,
+            Action::Trade(_) | Action::TradePolicy(_) => show_trade,
             Action::ProjectFilter => show_projects,
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => show_residents || show_finances,
