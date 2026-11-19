@@ -1,14 +1,10 @@
 // Export one scene for each model in the desktop build catalog.
-import { PROJECTS } from "../web/v02/weekend/simulation.js";
-import { isBuildOption } from "../web/v02/weekend/build-categories.js";
 import { compactModel, createAsset } from "../web/v02/library/catalog.js";
 import { BoxGeometry, Group, Mesh, MeshStandardMaterial } from "three";
 import { greenhouseShell } from "../web/v02/weekend/greenhouse-model.js";
 import { exportModels } from "./v3-model-export.mjs";
 
-const ids = [...new Set(Object.entries(PROJECTS)
-  .filter(([id, project]) => isBuildOption(id, project))
-  .map(([, project]) => project.asset))].sort();
+import { buildingScenes } from "./v3-building-scene-ids.mjs";
 
 function bareGreenhouse() {
   const shell = new Group();
@@ -23,7 +19,7 @@ function bareGreenhouse() {
   return shell;
 }
 
-const models = ids.map((id) => {
+const models = buildingScenes.map((id) => {
   if (id === "greenhouse") return [id, bareGreenhouse()];
   const model = createAsset(id);
   model.getObjectByName("optional-rooftop-solar")?.removeFromParent();

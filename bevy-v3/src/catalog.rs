@@ -67,6 +67,9 @@ pub struct Project {
     pub description: String,
     pub size: [i32; 2],
     pub model: usize,
+    #[serde(default)]
+    pub construction_models: [Option<usize>; 2],
+    pub unpacking_model: Option<usize>,
     pub kind: String,
     pub category: String,
     pub materials: BTreeMap<String, u32>,
@@ -74,6 +77,21 @@ pub struct Project {
     pub camp_essential: bool,
     pub repeatable: bool,
     pub beds: Option<usize>,
+}
+
+impl Project {
+    pub fn construction_model(&self, work: f64) -> Option<usize> {
+        if work >= self.work {
+            return None;
+        }
+        let fraction = work / self.work;
+        if fraction < 0.35
+            && let Some(model) = self.unpacking_model
+        {
+            return Some(model);
+        }
+        self.construction_models[usize::from(fraction >= 0.5)]
+    }
 }
 
 #[derive(Deserialize)]

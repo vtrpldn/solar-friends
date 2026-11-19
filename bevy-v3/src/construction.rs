@@ -1449,6 +1449,29 @@ impl Construction {
         self.plans[project].key == "fire-circle"
     }
 
+    pub fn construction_models<'a>(
+        &'a self,
+        catalog: &'a Catalog,
+    ) -> impl Iterator<Item = (usize, usize, Vec2, f32)> + 'a {
+        self.plans
+            .iter()
+            .enumerate()
+            .filter_map(|(index, project)| {
+                if project.removed {
+                    return None;
+                }
+                let model = catalog.projects[&project.key].construction_model(project.work)?;
+                let center =
+                    project.position.as_vec2() + (project.size.as_vec2() - Vec2::ONE) * 0.5;
+                Some((
+                    index,
+                    model,
+                    world_position(center.x, center.y),
+                    f32::from(project.rotation) * std::f32::consts::FRAC_PI_2,
+                ))
+            })
+    }
+
     pub fn finished_models<'a>(
         &'a self,
         catalog: &'a Catalog,

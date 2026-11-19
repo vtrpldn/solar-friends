@@ -1,7 +1,7 @@
 // Export the authored V2 construction data for the standalone Bevy game.
 import { writeFile } from "node:fs/promises";
-import { MATERIALS, PROJECTS, PROCESSES, createWeekend } from "../web/v02/weekend/simulation.js";
-import { buildingCategory, inBuildCategory, isBuildOption } from "../web/v02/weekend/build-categories.js";
+import { MATERIALS, PROCESSES, createWeekend } from "../web/v02/weekend/simulation.js";
+import { buildingCategory, inBuildCategory } from "../web/v02/weekend/build-categories.js";
 import { buyerFor } from "../web/v02/weekend/local-market.js";
 import { materialMeasure, physicalUnit } from "../web/v02/weekend/material-measures.js";
 import { PROFILES } from "../web/v02/weekend/resident-personality.js";
@@ -9,6 +9,8 @@ import { ANIMAL_RATIONS } from "../web/v02/weekend/animal-care.js";
 import { BIOLOGY, CROP_CARE } from "../web/v02/weekend/biological-production.js";
 import { EQUIPMENT_IDS } from "../web/v02/weekend/resource-groups.js";
 import { supplierLimit } from "../web/v02/weekend/supplier-stock.js";
+
+import { buildingScenes, buildOptions, constructionScene } from "./v3-building-scene-ids.mjs";
 
 const startingVillage = createWeekend();
 const materials = Object.fromEntries(Object.entries(MATERIALS).map(([id, material]) => [
@@ -28,15 +30,17 @@ const materials = Object.fromEntries(Object.entries(MATERIALS).map(([id, materia
   },
 ]));
 
-const options = Object.entries(PROJECTS).filter(([id, definition]) => isBuildOption(id, definition));
-const models = [...new Set(options.map(([, definition]) => definition.asset))].sort();
-const projects = Object.fromEntries(options
+const projects = Object.fromEntries(buildOptions
   .map(([id, definition]) => [
     id,
     {
       name: definition.name,
       description: definition.description,
-      model: models.indexOf(definition.asset),
+      model: buildingScenes.indexOf(definition.asset),
+      ...(constructionScene(definition.asset, 0) ? {
+        constructionModels: [0, 1].map(stage => buildingScenes.indexOf(constructionScene(definition.asset, stage))),
+      } : {}),
+      ...(id === "gathering" ? { unpackingModel: buildingScenes.indexOf("produce-crates") } : {}),
       kind: definition.kind,
       size: definition.size,
       materials: definition.materials,

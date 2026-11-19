@@ -2,6 +2,7 @@ use crate::{audio::SoundSettings, utilities::NetworkView};
 mod build_menu;
 mod building_lighting;
 mod building_preview;
+mod construction_models;
 mod cultivation_surface;
 mod diagnostics;
 mod fire;
@@ -96,6 +97,7 @@ impl Plugin for VillagePlugin {
                     draw_blueprints,
                     show_hud,
                     show_construction,
+                    construction_models::show_in_progress,
                     fire::light_new_fires,
                     fire::animate_fires,
                 )
