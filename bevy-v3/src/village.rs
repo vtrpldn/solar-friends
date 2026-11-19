@@ -59,6 +59,7 @@ const SPEEDS: [(KeyCode, u8); 4] = [
     (KeyCode::Digit4, 16),
 ];
 const UNAVAILABLE_SPEED: u8 = 64;
+const LIVE_STEP_BUDGET: std::time::Duration = std::time::Duration::from_millis(8);
 pub(crate) const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 const CAMP_SITES: [(KeyCode, IVec2); 3] = [
     (KeyCode::Digit1, IVec2::new(28, 31)),
@@ -1501,6 +1502,7 @@ fn advance_clock(
         camp,
     };
     let mut budget = UNAVAILABLE_SPEED;
+    let started = std::time::Instant::now();
     loop {
         let cost = UNAVAILABLE_SPEED / village.effective_speed();
         if budget < cost {
@@ -1508,6 +1510,9 @@ fn advance_clock(
         }
         budget -= cost;
         step(&mut village, &catalog, &setup, site, time.delta_secs_f64());
+        if started.elapsed() >= LIVE_STEP_BUDGET {
+            break;
+        }
     }
 }
 
