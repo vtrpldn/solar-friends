@@ -98,7 +98,7 @@ impl Construction {
                         label,
                         " · {} · {}",
                         recipe.name,
-                        self.batch_status(job, recipe, clock)
+                        self.batch_status(job, catalog, stock, clock)
                     );
                 } else if plot.is_some() {
                     let _ = write!(label, " · {growing} growing · {ready} harvestable");

@@ -1189,6 +1189,7 @@ fn update_lab_window(
                 .unwrap_or_else(|| "All projects".into());
             let jobs = construction.lab_jobs(
                 &catalog,
+                &village.stock,
                 &runner.land,
                 village.clock,
                 playback.job_focus,

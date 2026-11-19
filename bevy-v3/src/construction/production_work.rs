@@ -354,18 +354,54 @@ impl Construction {
         inputs
     }
 
+    fn batch_storage_full(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        job: &Batch,
+        clock: f64,
+    ) -> bool {
+        let recipe = &catalog.production[&job.recipe];
+        let units = |goods: &BTreeMap<String, u32>| {
+            goods.values().map(|&count| u64::from(count)).sum::<u64>()
+        };
+        let expected = if let Some(output) = &job.delivered_output {
+            units(output)
+        } else if let Some((growth, biology)) = job.growth.as_ref().zip(recipe.biology.as_ref()) {
+            units(&growth.output(biology, clock, &recipe.output))
+        } else if !stock.sandbox
+            && let Some(ration) = catalog.animal_rations.get(&recipe.kind)
+            && job.recipe == ration.product
+        {
+            self.livestock
+                .animals
+                .get(&job.site)
+                .map_or(0, |pen| u64::from(pen.available().min(ration.batch)))
+        } else {
+            units(&recipe.output)
+        };
+        expected > 0 && self.storage_space(catalog, stock) < expected
+    }
+
     pub(super) fn batch_status(
         &self,
         job: &Batch,
-        recipe: &ProductionRecipe,
+        catalog: &Catalog,
+        stock: &Stock,
         clock: f64,
     ) -> String {
+        let recipe = &catalog.production[&job.recipe];
         if !matches!(job.phase, Phase::Return | Phase::Growing) && !self.utilities.enabled(job.site)
         {
             return "Building switched off".into();
         }
         if job.waiting_for_access && job.retry_at > clock {
             return "Waiting for access".into();
+        }
+        if matches!(job.phase, Phase::Work | Phase::Return)
+            && self.batch_storage_full(catalog, stock, job, clock)
+        {
+            return "Waiting for storage space".into();
         }
         match job.phase {
             Phase::Pickup | Phase::Approach | Phase::Work
@@ -451,7 +487,7 @@ impl Construction {
         }
         if let Some(job) = self.production.jobs.iter().find(|job| job.site == index) {
             let recipe = &catalog.production[&job.recipe];
-            let state = self.batch_status(job, recipe, clock);
+            let state = self.batch_status(job, catalog, stock, clock);
             text.push_str(&format!(" · {} · {state}", recipe.name));
         }
         if let Some(animals) = self.livestock.animals.get(&index) {
@@ -764,6 +800,9 @@ impl Construction {
                 }
                 Phase::Approach => self.production.jobs[index].phase = Phase::Work,
                 Phase::Work => {
+                    if self.batch_storage_full(catalog, stock, job, clock) {
+                        continue;
+                    }
                     if self
                         .craft_blocker(catalog, stock, recipe, Some(worker_index))
                         .is_some()
@@ -936,8 +975,7 @@ impl Construction {
                 }
                 Phase::Return => {
                     let output = job.delivered_output.as_ref().unwrap_or(&recipe.output);
-                    let units: u64 = output.values().map(|v| u64::from(*v)).sum();
-                    if self.storage_space(catalog, stock) < units {
+                    if self.batch_storage_full(catalog, stock, job, clock) {
                         continue;
                     }
                     if let Some(lots) = &job.food_output {
@@ -1218,6 +1256,17 @@ mod upgrade_tests {
         assert!(village.utilities.powered(0));
         let expected =
             2.0 * village.residents[1].work_multiplier(&catalog.residents[1], "workshop");
+        let fill = BTreeMap::from([("stone".into(), (1_000_000 - stock.units()) as u32)]);
+        stock.receive(&fill);
+        village.tick_production(&catalog, &mut stock, site, 1.0, 1.0);
+        let job = &village.production.jobs[0];
+        assert_eq!(job.work, 0.0);
+        assert_eq!(village.residents[1].experience, 0.0);
+        assert_eq!(
+            village.batch_status(job, &catalog, &stock, 1.0),
+            "Waiting for storage space"
+        );
+        stock.reserve_available(&fill);
         village.tick_production(&catalog, &mut stock, site, 1.0, 1.0);
         assert_eq!(village.production.jobs[0].work, expected);
         assert_eq!(village.residents[1].experience, 1.0);
@@ -1294,7 +1343,7 @@ mod upgrade_tests {
                 assert!(job.worker.is_none());
                 assert_eq!(job.work, 5.0);
                 assert_eq!(
-                    village.batch_status(job, &catalog.production["eggs"], 3.0),
+                    village.batch_status(job, &catalog, &stock, 3.0),
                     "Building switched off"
                 );
                 village.utilities.toggle(0);
@@ -1364,7 +1413,7 @@ mod upgrade_tests {
         );
         let job = &village.production.jobs[0];
         assert_eq!(
-            village.batch_status(job, &catalog.production["solar_upgrade"], 1.0),
+            village.batch_status(job, &catalog, &stock, 1.0),
             "Waiting for access"
         );
 

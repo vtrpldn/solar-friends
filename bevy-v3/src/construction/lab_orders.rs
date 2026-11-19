@@ -100,6 +100,7 @@ impl Construction {
     pub(crate) fn lab_jobs(
         &self,
         catalog: &Catalog,
+        stock: &Stock,
         land: &Land,
         clock: f64,
         focus: Option<usize>,
@@ -151,7 +152,7 @@ impl Construction {
                 continue;
             }
             let recipe = &catalog.production[&batch.recipe];
-            let status = self.batch_status(batch, recipe, clock);
+            let status = self.batch_status(batch, catalog, stock, clock);
             if waiting_only
                 && (batch.phase == crate::production::Phase::Growing
                     || (batch.worker.is_some() && !status.starts_with("Waiting")))
