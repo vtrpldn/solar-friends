@@ -423,6 +423,7 @@ mod tests {
                 bearing: 0.,
                 zoom: 1.,
                 grid: false,
+                night: false,
             })
             .init_resource::<Time>()
             .init_resource::<ButtonInput<KeyCode>>()

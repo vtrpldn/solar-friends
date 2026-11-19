@@ -5,7 +5,7 @@ use super::garden_connections::{Connection, connections};
 use super::garden_terrain::{BIOMES, Terrain};
 use super::{WorkshopCatalog, building_model, ui_font};
 use bevy::{
-    asset::{AssetPath, embedded_asset, embedded_path},
+    asset::{AssetEvent, AssetPath, embedded_asset, embedded_path},
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll},
     prelude::*,
 };
@@ -111,6 +111,7 @@ struct Garden {
     bearing: f32,
     zoom: f32,
     grid: bool,
+    night: bool,
 }
 
 impl Garden {
@@ -147,11 +148,15 @@ struct GardenProp {
 struct GardenText;
 #[derive(Component)]
 struct GardenGround;
+#[derive(Component)]
+struct GardenSun;
+#[derive(Component)]
+struct Streetlamp;
 
 #[derive(Component)]
 struct PlacementPreview(usize);
 
-pub fn run(path: Option<PathBuf>) {
+pub fn run(path: Option<PathBuf>, night: bool) {
     let models = WorkshopCatalog::default();
     let gallery = Layout::decode(GALLERY, &models).expect("bundled V2 gallery");
     let file = path.unwrap_or_else(|| PathBuf::from("solar-friends-asset-garden.json"));
@@ -177,6 +182,7 @@ pub fn run(path: Option<PathBuf>) {
     }))
     .add_plugins(crate::ui_font::UiFontPlugin)
     .insert_resource(models)
+    .init_resource::<GlobalAmbientLight>()
     .init_resource::<rehearsal::Rehearsal>()
     .add_plugins(crate::resident_animation::ResidentAnimationPlugin)
     .insert_resource(Garden {
@@ -198,11 +204,20 @@ pub fn run(path: Option<PathBuf>) {
         bearing: std::f32::consts::FRAC_PI_4,
         zoom: 1.0,
         grid: false,
+        night,
     })
     .add_systems(Startup, setup)
     .add_systems(
         Update,
-        (edit, rehearsal::tick, update_terrain, render, preview).chain(),
+        (
+            edit,
+            rehearsal::tick,
+            update_terrain,
+            render,
+            preview,
+            update_lighting,
+        )
+            .chain(),
     );
     crate::village::register_building_models(&mut app);
     embedded_asset!(app, "connected-solar-farm.glb");
@@ -227,11 +242,20 @@ fn setup(
         camera_transform(Vec3::ZERO, std::f32::consts::FRAC_PI_4),
     ));
     commands.spawn((
+        GardenSun,
         DirectionalLight {
             illuminance: 18_000.,
+            shadows_enabled: true,
             ..default()
         },
-        Transform::from_xyz(-8., 12., 6.).looking_at(Vec3::ZERO, Vec3::Y),
+        bevy::light::CascadeShadowConfigBuilder {
+            num_cascades: 1,
+            minimum_distance: 1.,
+            maximum_distance: 450.,
+            ..default()
+        }
+        .build(),
+        Transform::from_xyz(-120., 240., 150.).looking_at(Vec3::ZERO, Vec3::Y),
     ));
     commands.spawn((
         GardenGround,
@@ -361,6 +385,9 @@ fn edit(
     **transform = camera_transform(garden.target, garden.bearing);
     if let Projection::Orthographic(orthographic) = &mut **projection {
         orthographic.scale = garden.zoom;
+    }
+    if pressed(KeyN) {
+        garden.night = !garden.night;
     }
     if pressed(KeyG) {
         garden.grid = !garden.grid;
@@ -615,6 +642,18 @@ fn render(
                 scene,
                 transform,
             ));
+            if prop.asset == "streetlight" {
+                entity.with_child((
+                    Streetlamp,
+                    PointLight {
+                        color: Color::srgb_u8(255, 210, 138),
+                        intensity: if garden.night { 90. } else { 0. },
+                        range: 7.,
+                        ..default()
+                    },
+                    Transform::from_xyz(0.55, 3.18, 0.),
+                ));
+            }
             if let Some((index, _)) = resident {
                 entity.insert((
                     crate::resident_animation::ResidentAnimation(index),
@@ -688,11 +727,81 @@ fn render(
         });
     let rehearsal_hint = rehearsal::hint(&rehearsal, &garden.layout.props, selection, &models);
     text.0 = format!(
-        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid   / catalog\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save{rehearsal_hint}\n{}",
+        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save{rehearsal_hint}\n{}",
         garden.layout.props.len(),
         garden.layout.biome,
         garden.status
     );
+}
+
+fn glow_strength(color: Color) -> Option<f32> {
+    let color = color.to_linear().to_vec3();
+    [
+        (Color::srgb_u8(51, 79, 78), 0.45),
+        (Color::srgb_u8(245, 214, 139), 1.6),
+    ]
+    .into_iter()
+    .find_map(|(target, strength)| {
+        color
+            .abs_diff_eq(target.to_linear().to_vec3(), 0.0001)
+            .then_some(strength)
+    })
+}
+
+fn update_lighting(
+    garden: Res<Garden>,
+    mut mode: Local<Option<bool>>,
+    mut sun: Single<&mut DirectionalLight, With<GardenSun>>,
+    (mut ambient, mut background): (ResMut<GlobalAmbientLight>, ResMut<ClearColor>),
+    mut lamps: Query<&mut PointLight, With<Streetlamp>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut events: MessageReader<AssetEvent<StandardMaterial>>,
+) {
+    let night = garden.night;
+    let changed = *mode != Some(night);
+    let ids: Vec<_> = if changed {
+        *mode = Some(night);
+        let (illuminance, tint, brightness, _) = super::lighting(night);
+        sun.illuminance = illuminance;
+        sun.color = tint;
+        ambient.brightness = brightness;
+        ambient.color = if night {
+            Color::srgb_u8(163, 185, 222)
+        } else {
+            Color::srgb_u8(255, 241, 207)
+        };
+        background.0 = if night {
+            Color::srgb_u8(38, 59, 69)
+        } else {
+            Color::srgb_u8(220, 226, 200)
+        };
+        for mut light in &mut lamps {
+            light.intensity = if night { 90. } else { 0. };
+        }
+        events.clear();
+        materials.iter().map(|(id, _)| id).collect()
+    } else {
+        events
+            .read()
+            .filter_map(|event| match event {
+                AssetEvent::Added { id } => Some(*id),
+                _ => None,
+            })
+            .collect()
+    };
+    for id in ids {
+        if let Some(strength) = materials
+            .get(id)
+            .and_then(|material| glow_strength(material.base_color))
+            && let Some(material) = materials.get_mut(id)
+        {
+            material.emissive = if night {
+                Color::srgb_u8(244, 184, 95).to_linear() * strength
+            } else {
+                LinearRgba::BLACK
+            };
+        }
+    }
 }
 
 #[cfg(test)]

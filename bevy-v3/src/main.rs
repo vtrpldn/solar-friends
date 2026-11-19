@@ -56,7 +56,10 @@ fn main() {
         .as_deref()
         .is_some_and(|flag| flag == "--asset-garden")
     {
-        workshop::garden::run(args.next().map(std::path::PathBuf::from));
+        let first = args.next();
+        let night = first.as_deref().is_some_and(|arg| arg == "--night");
+        let path = if night { args.next() } else { first };
+        workshop::garden::run(path.map(std::path::PathBuf::from), night);
         return;
     }
     if option.as_deref().is_some_and(|flag| flag == "--workshop") {
