@@ -3317,6 +3317,7 @@ mod tests {
             kind: Need::Hunger,
             facility: None,
             elapsed: 0.0,
+            started_at: None,
             duration: 12.0,
             water: 0.0,
             returning: false,

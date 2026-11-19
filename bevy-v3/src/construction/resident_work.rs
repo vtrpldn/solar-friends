@@ -121,7 +121,18 @@ impl Construction {
             );
         }
         for index in 0..self.residents.len() {
-            let health = &self.residents[index].health;
+            let health = &mut self.residents[index].health;
+            let timed_out = health.task.as_mut().is_some_and(|task| {
+                !matches!(
+                    task.kind,
+                    Need::Sleep | Need::Rest | Need::FetchWater | Need::FilterWater
+                ) && clock - *task.started_at.get_or_insert(clock) > 240.0
+            });
+            if timed_out {
+                self.cancel_need(index, clock);
+                self.residents[index].health.retry_at = clock + 15.0;
+                continue;
+            }
             if health
                 .task
                 .as_ref()
@@ -133,7 +144,7 @@ impl Construction {
                             && (need != Need::Hunger || stock.has_meal())
                     })
             {
-                self.interrupt_optional_need(index, clock);
+                self.cancel_need(index, clock);
             }
         }
         for index in 0..self.residents.len() {
@@ -159,7 +170,7 @@ impl Construction {
         }
     }
 
-    fn interrupt_optional_need(&mut self, index: usize, clock: f64) {
+    fn cancel_need(&mut self, index: usize, clock: f64) {
         let partner = self.residents[index]
             .health
             .task
@@ -270,6 +281,7 @@ impl Construction {
             kind,
             facility,
             elapsed: 0.0,
+            started_at: None,
             duration: match kind {
                 Need::Hydration => 2.0,
                 Need::Bladder => 6.0,
@@ -666,6 +678,7 @@ impl Construction {
                 partner: Some(partner),
                 facility: None,
                 elapsed: 0.0,
+                started_at: None,
                 duration: 18.0,
                 returning: false,
                 water: 0.0,
@@ -1293,6 +1306,7 @@ mod tests {
                 kind: Need::Sleep,
                 facility: None,
                 elapsed: 1.0,
+                started_at: None,
                 duration: 100.0,
                 water: 0.0,
                 returning: false,
@@ -1558,6 +1572,31 @@ mod tests {
                 .0,
             Some(2)
         );
+    }
+
+    #[test]
+    fn a_stalled_drinking_trip_expires_and_retries_after_a_short_delay() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        village.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        village.residents[0].health.levels[Need::Hydration as usize] = 40.0;
+        village.choose_need(0, &catalog, &stock, site, 0.0);
+        village.tick_health(&catalog, &setup, &mut stock, site, 0.0, 0.1);
+        let saved = serde_json::to_vec(&village).unwrap();
+        let mut resumed: Construction = serde_json::from_slice(&saved).unwrap();
+        resumed.tick_health(&catalog, &setup, &mut stock, site, 241.0, 0.1);
+        assert!(resumed.residents[0].health.task.is_none());
+        assert_eq!(resumed.residents[0].health.retry_at, 256.0);
+        assert!(resumed.residents[0].path.is_empty());
     }
 
     #[test]

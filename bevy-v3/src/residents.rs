@@ -43,6 +43,8 @@ pub struct NeedTask {
     pub kind: Need,
     pub facility: Option<usize>,
     pub elapsed: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub started_at: Option<f64>,
     pub duration: f64,
     pub water: f64,
     pub returning: bool,
@@ -200,7 +202,9 @@ impl Health {
                 .all(|score| (0..=100).contains(score))
             && self.mind.valid()
             && self.task.as_ref().is_none_or(|task| {
-                task.elapsed >= 0.0
+                task.started_at
+                    .is_none_or(|time| time.is_finite() && time >= 0.0)
+                    && task.elapsed >= 0.0
                     && task.duration > 0.0
                     && (0.0..=12.0).contains(&task.water)
                     && task.partner.is_none_or(|partner| partner < 5)
