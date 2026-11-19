@@ -466,6 +466,9 @@ struct Toolbar;
 #[derive(Component)]
 struct PanelMenu;
 
+#[derive(Component)]
+struct RecipeDetails;
+
 const HOME_ROWS: usize = 4;
 
 #[derive(Default, Resource)]
@@ -729,6 +732,21 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::Recipe(row));
                     spawn_button(menu, &assets, Action::TradeItem(row));
                 }
+                menu.spawn((
+                    RecipeDetails,
+                    Text::default(),
+                    ui_font(&assets, 15.0),
+                    Visibility::Hidden,
+                    BackgroundColor(Color::srgb_u8(31, 45, 35)),
+                    Node {
+                        position_type: PositionType::Absolute,
+                        right: percent(100),
+                        bottom: px(0),
+                        width: px(254),
+                        padding: UiRect::all(px(10)),
+                        ..default()
+                    },
+                ));
             });
         });
 }
@@ -1117,6 +1135,8 @@ type ToolbarButtons<'w, 's> = Query<
 type PanelNode<'w, 's> =
     Single<'w, 's, (Entity, &'static mut Node), (With<PanelMenu>, Without<Toolbar>)>;
 
+type RecipeTooltip<'w, 's> = Single<'w, 's, (Entity, &'static mut Visibility), With<RecipeDetails>>;
+
 fn refresh(
     (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
     (village, catalog): (Res<Village>, Res<Catalog>),
@@ -1124,7 +1144,7 @@ fn refresh(
     mut toolbar: Single<&mut Node, (With<Toolbar>, Without<PanelMenu>)>,
     mut menu: PanelNode,
     mut buttons: ToolbarButtons,
-    mut labels: Query<&mut Text>,
+    (mut labels, mut details): (Query<&mut Text>, RecipeTooltip),
 ) {
     toolbar.display = if visible(&village, &setup, &saves, &sound) {
         Display::Flex
@@ -1214,6 +1234,7 @@ fn refresh(
     if saves.open || sound.open {
         menu.display = Display::None;
     }
+    let mut recipe_details = String::new();
     for (&action, &interaction, children, parent, mut background, mut node) in &mut buttons {
         let show = match action {
             Action::Lens(row) => show_lenses && row < village.lenses.choices().len(),
@@ -1295,6 +1316,14 @@ fn refresh(
         if !show {
             continue;
         }
+        if interaction != Interaction::None
+            && let Action::Recipe(row) = action
+        {
+            recipe_details = village
+                .construction
+                .recipe_row_details(&catalog, row)
+                .unwrap_or_default();
+        }
         background.0 = if !action.available(&village)
             && !matches!(
                 action,
@@ -1332,5 +1361,16 @@ fn refresh(
                 text.0 = label;
             }
         }
+    }
+    let (details_id, visibility) = &mut *details;
+    **visibility = if recipe_details.is_empty() {
+        Visibility::Hidden
+    } else {
+        Visibility::Inherited
+    };
+    if let Ok(mut text) = labels.get_mut(*details_id)
+        && text.0 != recipe_details
+    {
+        text.0 = recipe_details;
     }
 }

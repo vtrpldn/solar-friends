@@ -142,6 +142,47 @@ impl Construction {
             .collect()
     }
 
+    pub fn recipe_row_details(&self, catalog: &Catalog, row: usize) -> Option<String> {
+        use std::fmt::Write;
+        let site = self.production.selected?;
+        let recipes = self.recipes(catalog, site);
+        let (_, recipe) = recipes.get(self.production.page * PAGE_KEYS.len() + row)?;
+        let materials = |items: &BTreeMap<String, u32>| {
+            items
+                .iter()
+                .map(|(id, &amount)| {
+                    let item = &catalog.materials[id];
+                    format!("{} {}", item.quantity_text(u64::from(amount)), item.name)
+                })
+                .collect::<Vec<_>>()
+                .join(", ")
+        };
+        let mut detail = format!(
+            "{}\n{:.0} game minutes of work",
+            recipe.name,
+            (recipe.work * 0.45).ceil()
+        );
+        if !recipe.input.is_empty() {
+            let _ = write!(detail, "\nUses {}", materials(&recipe.input));
+        }
+        if !recipe.output.is_empty() {
+            let _ = write!(detail, "\nProduces {}", materials(&recipe.output));
+        }
+        if recipe.water > 0.0 {
+            let _ = write!(detail, "\nNeeds {} L of water", recipe.water);
+        }
+        if let Some(craft) = &recipe.craft {
+            let _ = write!(detail, "\n{} level {}", craft.skill.label(), craft.level);
+            if let Some(tool) = &craft.tool {
+                let _ = write!(detail, " · {}", catalog.materials[tool].name);
+            }
+        }
+        if let Some(biology) = &recipe.biology {
+            let _ = write!(detail, "\n{} days of growth at full rate", biology.days);
+        }
+        Some(detail)
+    }
+
     pub fn queue_recipe_row(&mut self, catalog: &Catalog, stock: &mut Stock, row: usize) {
         let Some(index) = self.production.selected else {
             return;
