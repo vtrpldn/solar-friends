@@ -182,6 +182,12 @@ struct GardenProp {
 }
 #[derive(Component)]
 struct GardenText;
+
+#[derive(Component, Clone, Copy)]
+enum TerrainAction {
+    Choose(&'static str),
+    LoadLandscape,
+}
 #[derive(Component)]
 struct SelectableProp(Entity);
 #[derive(Component)]
@@ -345,6 +351,7 @@ fn run_garden(path: Option<PathBuf>, night: bool, study: Option<&str>) {
             render,
             preview,
             update_lighting,
+            update_terrain_buttons,
         )
             .chain(),
     );
@@ -408,6 +415,62 @@ fn setup(
             ..default()
         },
     ));
+    commands
+        .spawn(Node {
+            position_type: PositionType::Absolute,
+            left: px(12),
+            bottom: px(12),
+            right: px(12),
+            column_gap: px(6),
+            row_gap: px(4),
+            align_items: AlignItems::Center,
+            flex_wrap: FlexWrap::Wrap,
+            ..default()
+        })
+        .with_children(|row| {
+            for (label, action) in [
+                ("Flat", TerrainAction::Choose("flat")),
+                ("Mata Atlântica", TerrainAction::Choose("mata-atlantica")),
+                ("Cerrado", TerrainAction::Choose("cerrado")),
+                ("Caatinga", TerrainAction::Choose("caatinga")),
+                ("Load biome landscape", TerrainAction::LoadLandscape),
+            ] {
+                row.spawn((
+                    Button,
+                    action,
+                    Node {
+                        padding: UiRect::axes(px(10), px(5)),
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                ))
+                .with_child((Text::new(label), ui_font(&assets, 15.)));
+            }
+        });
+}
+
+fn update_terrain_buttons(
+    garden: Res<Garden>,
+    mut buttons: Query<(&TerrainAction, &mut BackgroundColor, &mut Node)>,
+) {
+    if !garden.is_changed() {
+        return;
+    }
+    for (action, mut background, mut node) in &mut buttons {
+        let selected =
+            matches!(action, TerrainAction::Choose(biome) if *biome == garden.layout.biome);
+        background.0 = if selected {
+            Color::srgb_u8(103, 123, 85)
+        } else {
+            Color::srgb_u8(62, 83, 65)
+        };
+        node.display =
+            if matches!(action, TerrainAction::LoadLandscape) && garden.layout.biome == "flat" {
+                Display::None
+            } else {
+                Display::Flex
+            };
+    }
 }
 
 fn camera_transform(target: Vec3, bearing: f32) -> Transform {
@@ -416,6 +479,8 @@ fn camera_transform(target: Vec3, bearing: f32) -> Transform {
     )
     .looking_at(target, Vec3::Y)
 }
+
+type GardenButton = Or<(With<super::navigation::ArtTool>, With<TerrainAction>)>;
 
 #[allow(clippy::too_many_arguments)]
 fn edit(
@@ -427,7 +492,8 @@ fn edit(
     scroll: Res<AccumulatedMouseScroll>,
     mut typing: MessageReader<bevy::input::keyboard::KeyboardInput>,
     mut pointer: Local<Option<(Vec2, bool)>>,
-    navigation: Query<&Interaction, With<super::navigation::ArtTool>>,
+    buttons: Query<&Interaction, GardenButton>,
+    terrain_buttons: Query<(&Interaction, &TerrainAction), Changed<Interaction>>,
     mut raycast: MeshRayCast,
     selectable: Query<&SelectableProp>,
     roots: Query<&GardenProp>,
@@ -439,7 +505,7 @@ fn edit(
     let pressed = |key| keys.just_pressed(key);
     let cursor = window.cursor_position();
     if mouse.just_pressed(MouseButton::Left) {
-        *pointer = if navigation
+        *pointer = if buttons
             .iter()
             .any(|interaction| *interaction != Interaction::None)
         {
@@ -631,23 +697,41 @@ fn edit(
             garden.save_dirty = true;
         }
     }
-    if pressed(KeyB) && garden.pending.is_none() {
-        let current = BIOMES
-            .iter()
-            .position(|&biome| biome == garden.layout.biome)
-            .unwrap_or_default();
-        garden.layout.biome = BIOMES[(current + 1) % BIOMES.len()].into();
-        garden.terrain_dirty = true;
-        garden.save_dirty = true;
-        garden.redraw = true;
-        return;
-    }
-    if pressed(KeyL) && garden.pending.is_none() && garden.layout.biome != "flat" {
-        garden.edit();
-        garden.layout.props = biome_landscape(&garden.layout.biome);
-        garden.selected = None;
-        garden.frame_plot(window.width() / window.height().max(1.));
-        return;
+    let terrain_action = terrain_buttons
+        .iter()
+        .find_map(|(&interaction, &action)| (interaction == Interaction::Pressed).then_some(action))
+        .or_else(|| {
+            if pressed(KeyB) {
+                let current = BIOMES
+                    .iter()
+                    .position(|&biome| biome == garden.layout.biome)
+                    .unwrap_or_default();
+                Some(TerrainAction::Choose(BIOMES[(current + 1) % BIOMES.len()]))
+            } else {
+                pressed(KeyL).then_some(TerrainAction::LoadLandscape)
+            }
+        });
+    let aspect = window.width() / window.height().max(1.);
+    match terrain_action {
+        Some(TerrainAction::Choose(biome)) if garden.layout.biome != biome => {
+            garden.layout.biome = biome.into();
+            garden.pending = None;
+            garden.frame_plot(aspect);
+            garden.terrain_dirty = true;
+            garden.save_dirty = true;
+            garden.redraw = true;
+            return;
+        }
+        Some(TerrainAction::LoadLandscape) if garden.layout.biome != "flat" => {
+            garden.edit();
+            garden.layout.props = biome_landscape(&garden.layout.biome);
+            garden.selected = None;
+            garden.pending = None;
+            garden.frame_plot(aspect);
+            garden.status = "Biome landscape loaded. Undo restores the previous props.".into();
+            return;
+        }
+        _ => {}
     }
     if pressed(Escape) {
         if garden.pending.take().is_none() {
