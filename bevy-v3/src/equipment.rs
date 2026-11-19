@@ -40,24 +40,39 @@ impl Equipment {
     }
 
     pub fn ready(&self, item: &str, owned: u32, worker: Option<usize>, repairing: bool) -> bool {
-        let broken = (self.wear(item) / LIFE).floor() as u32;
         let held = worker.is_some_and(|index| {
             self.loans[index]
                 .as_ref()
                 .is_some_and(|loan| loan.item == item)
         });
-        held || owned
-            > broken
-                .max(u32::from(repairing))
-                .saturating_add(self.borrowed(item))
+        held || self.available(item, owned, repairing) > 0
+    }
+
+    pub fn borrowers<'a>(&'a self, item: &'a str) -> impl Iterator<Item = usize> + 'a {
+        self.loans
+            .iter()
+            .enumerate()
+            .filter_map(move |(resident, loan)| {
+                loan.as_ref()
+                    .is_some_and(|loan| loan.item == item)
+                    .then_some(resident)
+            })
     }
 
     pub fn borrowed(&self, item: &str) -> u32 {
-        self.loans
-            .iter()
-            .flatten()
-            .filter(|loan| loan.item == item)
-            .count() as u32
+        self.borrowers(item).count() as u32
+    }
+
+    pub fn broken(&self, item: &str) -> u32 {
+        (self.wear(item) / LIFE).floor() as u32
+    }
+
+    pub fn available(&self, item: &str, owned: u32, repairing: bool) -> u32 {
+        owned.saturating_sub(
+            self.broken(item)
+                .max(u32::from(repairing))
+                .saturating_add(self.borrowed(item)),
+        )
     }
 
     pub fn protected(&self, item: &str, owned: u32) -> u32 {
@@ -130,7 +145,7 @@ impl Equipment {
             .filter_map(|item| {
                 let count = owned(item);
                 (count > 0).then(|| {
-                    let spent = (self.wear(item) / LIFE).floor() as u32;
+                    let spent = self.broken(item);
                     format!(
                         "{} {count} ({} broken, {} loaned)",
                         item.replace('-', " "),

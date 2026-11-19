@@ -160,6 +160,28 @@ impl Construction {
                     let _ = write!(text, " · {amount} {label}");
                 }
             }
+            if crate::equipment::TOOLS.contains(id) {
+                let count = stock.available(id);
+                let repairing = self.repairing(catalog, id);
+                let equipment = &stock.equipment;
+                let ready = equipment.available(id, count, repairing);
+                let broken = equipment.broken(id).min(count);
+                let borrowers = equipment
+                    .borrowers(id)
+                    .map(|index| crate::village::NAMES[index])
+                    .collect::<Vec<_>>();
+                let _ = write!(
+                    text,
+                    "\n  {ready} ready · {broken} broken · {} in use",
+                    borrowers.len()
+                );
+                if !borrowers.is_empty() {
+                    let _ = write!(text, " ({})", borrowers.join(", "));
+                }
+                if repairing {
+                    text.push_str(" · Repair queued");
+                }
+            }
         }
         (pages, text)
     }

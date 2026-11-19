@@ -52,7 +52,7 @@ const SPEEDS: [(KeyCode, u8); 4] = [
     (KeyCode::Digit3, 8),
     (KeyCode::Digit4, 16),
 ];
-const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
+pub(crate) const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 const CAMP_SITES: [(KeyCode, IVec2); 3] = [
     (KeyCode::Digit1, IVec2::new(28, 31)),
     (KeyCode::Digit2, IVec2::new(33, -9)),
