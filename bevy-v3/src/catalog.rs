@@ -166,6 +166,13 @@ pub struct Profile {
     pub reflection: String,
 }
 
+impl Profile {
+    pub fn work_preference(&self, project: &str) -> u8 {
+        3 * u8::from(self.aspiration.key == project)
+            + 2 * u8::from(self.strengths.iter().any(|key| key == project))
+    }
+}
+
 #[derive(Deserialize)]
 pub struct Aspiration {
     pub key: String,

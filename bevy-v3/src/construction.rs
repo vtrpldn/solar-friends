@@ -2003,8 +2003,7 @@ impl Construction {
             .collect();
         candidates.sort_by_key(|&id| {
             let key = &self.plans[id].key;
-            let preference = 3 * u8::from(profile.aspiration.key == *key)
-                + 2 * u8::from(profile.strengths.contains(key));
+            let preference = profile.work_preference(key);
             (self.priority != Some(id), std::cmp::Reverse(preference))
         });
         for id in candidates {

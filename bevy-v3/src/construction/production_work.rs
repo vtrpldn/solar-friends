@@ -698,6 +698,7 @@ impl Construction {
         dt: f32,
     ) {
         self.expire_batch_food(catalog, stock, site, clock);
+        self.assign_producers(catalog, stock, site, clock);
         for index in (0..self.production.jobs.len()).rev() {
             if self.production.jobs[index].phase == Phase::Growing
                 || clock < self.production.jobs[index].retry_at
@@ -707,8 +708,6 @@ impl Construction {
             self.production.jobs[index].waiting_for_access = false;
             let job = &self.production.jobs[index];
             let Some(worker_index) = job.worker else {
-                self.assign_producer(index, catalog, site, stock);
-                self.production.jobs[index].retry_at = clock + 1.0;
                 continue;
             };
             let worker = &mut self.residents[worker_index];
@@ -993,13 +992,80 @@ impl Construction {
         }
     }
 
-    fn assign_producer(
+    fn assign_producers(
+        &mut self,
+        catalog: &Catalog,
+        stock: &Stock,
+        site: ConstructionSite,
+        clock: f64,
+    ) {
+        let mut jobs: Vec<_> = self
+            .production
+            .jobs
+            .iter()
+            .enumerate()
+            .filter_map(|(index, job)| {
+                (job.worker.is_none() && job.phase != Phase::Growing && job.retry_at <= clock)
+                    .then_some(index)
+            })
+            .collect();
+        if jobs.is_empty() {
+            return;
+        }
+        for &job in &jobs {
+            self.production.jobs[job].waiting_for_access = false;
+        }
+        let hungry = self
+            .residents
+            .iter()
+            .any(|resident| resident.health.levels[Need::Hunger as usize] < 15.0);
+        for index in 0..self.residents.len() {
+            let resident = &self.residents[index];
+            if resident.assignment.is_some()
+                || self.gathering.workers_at_site(index)
+                || self.production.has_worker(index)
+                || self.farming.has_worker(index)
+                || self.working_change(index)
+                || self.working_water(index)
+                || self.working_upkeep(index)
+                || resident.health.task.is_some()
+                || resident.town_work.active()
+                || self.driver_booked(index)
+            {
+                continue;
+            }
+            jobs.sort_by_key(|&job| {
+                let batch = &self.production.jobs[job];
+                let food = hungry
+                    && crate::food::SERVINGS
+                        .iter()
+                        .any(|(id, _)| catalog.production[&batch.recipe].output.contains_key(*id));
+                let preference =
+                    catalog.residents[index].work_preference(&self.plans[batch.site].key);
+                (!food, std::cmp::Reverse(preference), job)
+            });
+            for &job in &jobs {
+                if self.production.jobs[job].worker.is_none()
+                    && self.try_assign_producer(job, index, catalog, site, stock)
+                {
+                    self.production.jobs[job].waiting_for_access = false;
+                    break;
+                }
+            }
+        }
+        for job in jobs {
+            self.production.jobs[job].retry_at = clock + 1.0;
+        }
+    }
+
+    fn try_assign_producer(
         &mut self,
         job: usize,
+        index: usize,
         catalog: &Catalog,
         site: ConstructionSite,
         stock: &Stock,
-    ) {
+    ) -> bool {
         let batch = &self.production.jobs[job];
         let recipe = &catalog.production[&batch.recipe];
         if !stock.sandbox
@@ -1007,7 +1073,7 @@ impl Construction {
             && !batch.watered
             && self.utilities.potable_at(batch.site + 1) + 1e-8 < recipe.water
         {
-            return;
+            return false;
         }
         if !stock.sandbox
             && batch.phase != Phase::Return
@@ -1019,7 +1085,7 @@ impl Construction {
                 .water_site(batch.site + 1)
                 .is_some_and(|node| node.levels[0] + node.levels[1] >= biology.on_site_water)
         {
-            return;
+            return false;
         }
         let phase = self.production.jobs[job].phase;
         let returning = phase == Phase::Return;
@@ -1037,63 +1103,35 @@ impl Construction {
                 access_road,
             )
         };
-        let mut route_blocked = false;
-        for (index, resident) in self.residents.iter().enumerate() {
-            if resident.assignment.is_some()
-                || self.gathering.workers_at_site(index)
-                || self.production.has_worker(index)
-                || self.farming.has_worker(index)
-                || self.working_change(index)
-                || self.working_water(index)
-                || self.working_upkeep(index)
-                || self.residents[index].health.task.is_some()
-                || self.residents[index].town_work.active()
-                || self.driver_booked(index)
-            {
-                continue;
-            }
-            if !returning
-                && self
-                    .craft_blocker(
-                        catalog,
-                        stock,
-                        &catalog.production[&batch.recipe],
-                        Some(index),
-                    )
-                    .is_some()
-            {
-                continue;
-            }
-            if phase == Phase::Harvest {
-                if let Some(path) = project_access_points(project, catalog, resident.position)
-                    .into_iter()
-                    .find_map(|cell| path(resident.position, cell))
-                {
-                    self.residents[index].path = path;
-                    self.production.jobs[job].worker = Some(index);
-                    return;
-                }
-                route_blocked = true;
-                continue;
-            }
-            let supply = SUPPLY_SPOTS[index];
-            if !returning
-                && project_access_points(project, catalog, supply.as_vec2())
-                    .into_iter()
-                    .all(|cell| path(supply.as_vec2(), cell).is_none())
-            {
-                route_blocked = true;
-                continue;
-            }
-            let Some(path) = path(resident.position, supply) else {
-                route_blocked = true;
-                continue;
-            };
-            self.residents[index].path = path;
-            self.production.jobs[job].worker = Some(index);
-            return;
+        let resident = &self.residents[index];
+        if !returning
+            && self
+                .craft_blocker(catalog, stock, recipe, Some(index))
+                .is_some()
+        {
+            return false;
         }
-        self.production.jobs[job].waiting_for_access = route_blocked;
+        let supply = SUPPLY_SPOTS[index];
+        let assigned_path = if phase == Phase::Harvest {
+            project_access_points(project, catalog, resident.position)
+                .into_iter()
+                .find_map(|cell| path(resident.position, cell))
+        } else if returning
+            || project_access_points(project, catalog, supply.as_vec2())
+                .into_iter()
+                .any(|cell| path(supply.as_vec2(), cell).is_some())
+        {
+            path(resident.position, supply)
+        } else {
+            None
+        };
+        let Some(path) = assigned_path else {
+            self.production.jobs[job].waiting_for_access = true;
+            return false;
+        };
+        self.residents[index].path = path;
+        self.production.jobs[job].worker = Some(index);
+        true
     }
 }
 
@@ -1118,6 +1156,37 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn residents_choose_preferred_production_from_the_available_queue() {
+        let catalog = Catalog::default();
+        let mut setup = WorldSetup::default();
+        setup.mode = crate::setup::Mode::Sandbox;
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        for (key, recipe, cell) in [
+            ("grove", "bananas", IVec2::new(44, 36)),
+            ("orchard", "fruit", IVec2::new(50, 36)),
+        ] {
+            let mut plan = village.proposed_site(&catalog, key, cell);
+            plan.work = catalog.projects[key].work;
+            plan.delivered = plan.loads;
+            let index = village.plans.len();
+            village.plans.push(plan);
+            village.queue_batch(&catalog, &mut stock, index, recipe);
+        }
+        village.assign_producers(&catalog, &stock, site, 0.0);
+        assert_eq!(village.production.jobs[1].worker, Some(0));
+        assert_ne!(village.production.jobs[0].worker, Some(0));
+    }
 
     #[test]
     fn production_prefers_the_marked_entrance_over_a_nearer_side() {
