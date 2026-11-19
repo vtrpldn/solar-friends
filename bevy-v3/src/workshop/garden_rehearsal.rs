@@ -46,9 +46,29 @@ pub(super) struct Rehearsal {
 }
 
 impl Rehearsal {
+    pub(super) fn is_playing(&self) -> bool {
+        !self.paused
+    }
+
+    pub(super) fn has_task(&self) -> bool {
+        self.task.is_some()
+    }
+
     pub(super) fn is_active(&self, entity: Entity) -> bool {
         self.task.as_ref().is_some_and(|task| task.actor == entity)
     }
+}
+
+pub(super) fn can_rehearse(garden: &Garden) -> bool {
+    garden.pending.is_none()
+        && garden
+            .selected
+            .is_some_and(|index| !actions(&garden.layout.props[index].asset).is_empty())
+        && garden
+            .layout
+            .props
+            .iter()
+            .any(|prop| resident_model(&prop.asset).is_some())
 }
 
 struct Task {
@@ -169,14 +189,22 @@ pub(super) fn tick(
     models: Res<WorkshopCatalog>,
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
+    buttons: Query<(&Interaction, &GardenAction), Changed<Interaction>>,
     mut actors: Query<(Entity, &GardenProp, &mut Transform, &mut RehearsalPose)>,
 ) {
     use KeyCode::*;
     if garden.search.is_some() || garden.coordinates.is_some() {
         return;
     }
-    let start = keys.just_pressed(KeyU) || keys.just_pressed(KeyY);
-    let stopped = garden.terrain_dirty || keys.just_pressed(Escape) || start;
+    let click = |action| {
+        buttons
+            .iter()
+            .any(|(&interaction, &button)| interaction == Interaction::Pressed && button == action)
+    };
+    let nearby = keys.just_pressed(KeyY) || click(GardenAction::Nearby);
+    let start = keys.just_pressed(KeyU) || nearby || click(GardenAction::Send);
+    let stopped =
+        garden.terrain_dirty || keys.just_pressed(Escape) || click(GardenAction::Stop) || start;
     if stopped && let Some(task) = rehearsal.task.take() {
         if let Ok((_, _, mut transform, mut pose)) = actors.get_mut(task.actor) {
             *transform = task.home;
@@ -195,13 +223,13 @@ pub(super) fn tick(
         .filter(|prop| resident_model(&prop.asset).is_some())
         .collect();
     residents.sort_by_key(|prop| (&prop.asset, &prop.id));
-    if keys.just_pressed(KeyI) && !residents.is_empty() {
+    if (keys.just_pressed(KeyI) || click(GardenAction::Resident)) && !residents.is_empty() {
         rehearsal.actor = (rehearsal.actor + 1) % residents.len();
     }
-    if keys.just_pressed(KeyO) {
+    if keys.just_pressed(KeyO) || click(GardenAction::Interaction) {
         rehearsal.action = rehearsal.action.wrapping_add(1);
     }
-    if keys.just_pressed(KeyP) {
+    if keys.just_pressed(KeyP) || click(GardenAction::PlayPause) {
         rehearsal.paused = !rehearsal.paused;
     }
     if start
@@ -238,7 +266,6 @@ pub(super) fn tick(
                 }
             }
         }
-        let nearby = keys.just_pressed(KeyY);
         let best = slots(target, &models, garden.connections.contains_key(&target.id))
             .into_iter()
             .filter_map(|(at, approach, yaw)| {
@@ -264,6 +291,7 @@ pub(super) fn tick(
             transform.translation =
                 Vec3::new(from.x, garden.terrain.height(from.x, from.y), from.y);
             pose.0 = Motion::Walk;
+            rehearsal.paused = false;
             rehearsal.task = Some(Task {
                 actor: entity,
                 home,
@@ -386,6 +414,15 @@ mod tests {
 
     #[test]
     fn nearby_rehearsal_enters_the_pose_and_escape_restores_the_resident() {
+        verify_nearby_rehearsal(false);
+    }
+
+    #[test]
+    fn rehearsal_buttons_enter_and_reset_the_pose() {
+        verify_nearby_rehearsal(true);
+    }
+
+    fn verify_nearby_rehearsal(use_buttons: bool) {
         let models = WorkshopCatalog::default();
         let layout = Layout::decode(r#"{"format":"solar-friends-scene","version":1,"props":[{"id":"seat","asset":"garden-bench","column":47,"row":47,"rotation":0},{"id":"actor","asset":"iara","column":49,"row":50,"rotation":0}]}"#, &models).unwrap();
         let resident = &layout.props[1];
@@ -434,9 +471,15 @@ mod tests {
             .init_resource::<ButtonInput<KeyCode>>()
             .init_resource::<Rehearsal>()
             .add_systems(Update, tick);
-        app.world_mut()
-            .resource_mut::<ButtonInput<KeyCode>>()
-            .press(KeyCode::KeyY);
+        if use_buttons {
+            app.world_mut().resource_mut::<Rehearsal>().paused = true;
+            app.world_mut()
+                .spawn((GardenAction::Nearby, Interaction::Pressed));
+        } else {
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::KeyY);
+        }
         app.update();
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
@@ -455,9 +498,14 @@ mod tests {
         );
         assert!(app.world().get::<RehearsalPose>(actor).unwrap().0 == Motion::Sit);
         assert_ne!(app.world().get::<Transform>(actor), Some(&home));
-        app.world_mut()
-            .resource_mut::<ButtonInput<KeyCode>>()
-            .press(KeyCode::Escape);
+        if use_buttons {
+            app.world_mut()
+                .spawn((GardenAction::Stop, Interaction::Pressed));
+        } else {
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::Escape);
+        }
         app.update();
         assert_eq!(app.world().get::<Transform>(actor), Some(&home));
         assert!(app.world().get::<RehearsalPose>(actor).unwrap().0 == Motion::Idle);

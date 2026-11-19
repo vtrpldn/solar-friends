@@ -208,6 +208,12 @@ enum GardenAction {
     RestoreGallery,
     Export,
     Import,
+    Resident,
+    Interaction,
+    Send,
+    Nearby,
+    PlayPause,
+    Stop,
 }
 #[derive(Component)]
 struct SelectableProp(Entity);
@@ -479,6 +485,12 @@ fn setup(
                 ("Restore gallery", GardenAction::RestoreGallery),
                 ("Export scene", GardenAction::Export),
                 ("Import scene", GardenAction::Import),
+                ("Next resident", GardenAction::Resident),
+                ("Next interaction", GardenAction::Interaction),
+                ("Send resident", GardenAction::Send),
+                ("Preview nearby", GardenAction::Nearby),
+                ("Animate / pause", GardenAction::PlayPause),
+                ("Stop / reset pose", GardenAction::Stop),
                 ("Gallery", GardenAction::Gallery),
                 ("Whole plot", GardenAction::Overview),
                 ("Turn left", GardenAction::TurnLeft),
@@ -504,16 +516,19 @@ fn setup(
 
 fn update_garden_buttons(
     garden: Res<Garden>,
+    rehearsal: Res<rehearsal::Rehearsal>,
     mut buttons: Query<(&GardenAction, &mut BackgroundColor, &mut Node)>,
 ) {
-    if !garden.is_changed() {
+    if !garden.is_changed() && !rehearsal.is_changed() {
         return;
     }
+    let can_rehearse = rehearsal::can_rehearse(&garden);
     for (action, mut background, mut node) in &mut buttons {
         let selected = match action {
             GardenAction::Choose(biome) => *biome == garden.layout.biome,
             GardenAction::Grid => garden.grid,
             GardenAction::Night => garden.night,
+            GardenAction::PlayPause => rehearsal.is_playing(),
             _ => false,
         };
         background.0 = if selected {
@@ -536,7 +551,13 @@ fn update_garden_buttons(
                 | GardenAction::Night
                 | GardenAction::RestoreGallery
                 | GardenAction::Export
-                | GardenAction::Import => true,
+                | GardenAction::Import
+                | GardenAction::PlayPause => true,
+                GardenAction::Resident
+                | GardenAction::Interaction
+                | GardenAction::Send
+                | GardenAction::Nearby => can_rehearse,
+                GardenAction::Stop => rehearsal.has_task(),
                 GardenAction::LoadLandscape => garden.layout.biome != "flat",
                 GardenAction::Rotate => selected_prop || garden.pending.is_some(),
                 GardenAction::Cancel => garden.pending.is_some(),
