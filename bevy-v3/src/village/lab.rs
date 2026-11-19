@@ -1685,6 +1685,71 @@ mod tests {
     }
 
     #[test]
+    fn seed_freight_survives_checkpoint_and_resumes_planting() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps": 12000,
+            "orders": [
+                {"step": 0, "order": {"type": "build", "key": "field", "x": 40, "z": 36, "size": [2, 2]}},
+                {"step": 0, "order": {"type": "supply-transport", "freight": true}},
+                {"step": 0, "order": {"type": "food-policy", "enabled": false}}
+            ]
+        }"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        assert!(runner.outcomes.iter().all(|order| order.error.is_none()));
+        let bed = &mut runner
+            .village
+            .construction
+            .farming
+            .plots
+            .get_mut(&0)
+            .unwrap()
+            .beds[0];
+        bed.stage = crate::farming::Stage::Prepared;
+        let seed = bed
+            .requirements(crate::farming::FarmAction::Plant, 0.0)
+            .unwrap()
+            .0;
+        for id in seed.keys() {
+            let amount = runner.village.stock.available(id);
+            runner
+                .village
+                .stock
+                .reserve_available(&std::collections::BTreeMap::from([(id.clone(), amount)]));
+        }
+        let plant =
+            serde_json::from_str(r#"{"type":"bed","site":1,"bed":1,"action":"Plant"}"#).unwrap();
+        runner.submit(&catalog, plant).unwrap();
+        assert!(runner.outcomes.last().unwrap().error.is_none());
+        runner.advance(&catalog);
+        assert!(
+            runner.village.construction.farming.jobs[0]
+                .seed_freight_eta
+                .is_some()
+        );
+
+        let path = std::env::temp_dir().join(format!(
+            "solar-seed-freight-checkpoint-{}.json",
+            std::process::id()
+        ));
+        runner.checkpoint(&path).unwrap();
+        let loaded = crate::save::read(&path, &catalog);
+        std::fs::remove_file(path).unwrap();
+        let scenario = serde_json::from_str(r#"{"steps":12000}"#).unwrap();
+        let resumed = run(scenario, Some(loaded.unwrap()), &catalog).unwrap();
+        let construction = &resumed.village.construction;
+        assert!(construction.farming.plots[&0].beds[0].stage == crate::farming::Stage::Growing);
+        assert!(
+            construction
+                .farming
+                .jobs
+                .iter()
+                .all(|job| (job.site, job.bed) != (0, 0) || job.seed_freight_eta.is_none())
+        );
+        assert!(resumed.village.valid_save(&catalog));
+    }
+
+    #[test]
     fn scripted_automatic_sales_respect_reserves_and_replay() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{
