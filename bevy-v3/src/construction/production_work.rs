@@ -10,7 +10,7 @@ use crate::{
     weather::{DAY, growing_season, weather_at},
 };
 
-use super::*;
+use super::{resident_work::project_access_points, *};
 
 impl Construction {
     pub fn select_facility(&mut self, cell: IVec2) {
@@ -715,7 +715,7 @@ impl Construction {
                 Phase::Harvest => self.production.jobs[index].phase = Phase::Work,
                 Phase::Pickup => {
                     let facility = &self.plans[job.site];
-                    let Some(path) = production_access_points(facility, catalog, position)
+                    let Some(path) = project_access_points(facility, catalog, position)
                         .into_iter()
                         .find_map(|cell| path(position, cell))
                     else {
@@ -1043,7 +1043,7 @@ impl Construction {
                 continue;
             }
             if phase == Phase::Harvest {
-                if let Some(path) = production_access_points(project, catalog, resident.position)
+                if let Some(path) = project_access_points(project, catalog, resident.position)
                     .into_iter()
                     .find_map(|cell| path(resident.position, cell))
                 {
@@ -1056,7 +1056,7 @@ impl Construction {
             }
             let supply = SUPPLY_SPOTS[index];
             if !returning
-                && production_access_points(project, catalog, supply.as_vec2())
+                && project_access_points(project, catalog, supply.as_vec2())
                     .into_iter()
                     .all(|cell| path(supply.as_vec2(), cell).is_none())
             {
@@ -1073,31 +1073,6 @@ impl Construction {
         }
         self.production.jobs[job].waiting_for_access = route_blocked;
     }
-}
-
-fn production_access_points(plan: &Blueprint, catalog: &Catalog, from: Vec2) -> Vec<IVec2> {
-    let mut points = perimeter(plan.position, plan.size, from);
-    if let Some(entrance) = building_entrance(plan, &catalog.projects[&plan.key]) {
-        points.retain(|&cell| cell != entrance);
-        points.insert(0, entrance);
-    }
-    points
-}
-
-fn perimeter(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec2> {
-    let mut cells = Vec::new();
-    for z in 0..size.y {
-        cells.extend([start + IVec2::new(-1, z), start + IVec2::new(size.x, z)]);
-    }
-    for x in 0..size.x {
-        cells.extend([start + IVec2::new(x, -1), start + IVec2::new(x, size.y)]);
-    }
-    cells.sort_by(|a, b| {
-        a.as_vec2()
-            .distance_squared(from)
-            .total_cmp(&b.as_vec2().distance_squared(from))
-    });
-    cells
 }
 
 fn production_tool(recipe: &ProductionRecipe) -> Option<&str> {
@@ -1130,7 +1105,7 @@ mod upgrade_tests {
         let kitchen = village.proposed_site(&catalog, "kitchen", origin);
         let from = (origin - IVec2::Y).as_vec2();
         let front = building_entrance(&kitchen, &catalog.projects["kitchen"]).unwrap();
-        let points = production_access_points(&kitchen, &catalog, from);
+        let points = project_access_points(&kitchen, &catalog, from);
         assert_eq!(points[0], front);
         assert_eq!(points[1], from.as_ivec2());
         assert_eq!(points.iter().filter(|&&cell| cell == front).count(), 1);
@@ -1155,7 +1130,11 @@ mod upgrade_tests {
         let mut village = Construction::default();
         let mut house = village.proposed_site(&catalog, "home-cottage", IVec2::new(44, 36));
         house.work = catalog.projects["home-cottage"].work;
-        let entrances = perimeter(house.position, house.size, camp.as_vec2());
+        let entrances = super::super::resident_work::approach_points(
+            house.position,
+            house.size,
+            camp.as_vec2(),
+        );
         village.plans.push(house);
         village.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
         village.queue_batch(&catalog, &mut stock, 0, "solar_upgrade");

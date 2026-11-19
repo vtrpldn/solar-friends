@@ -1123,6 +1123,15 @@ impl Construction {
     }
 }
 
+pub(super) fn project_access_points(plan: &Blueprint, catalog: &Catalog, from: Vec2) -> Vec<IVec2> {
+    let mut points = approach_points(plan.position, plan.size, from);
+    if let Some(entrance) = building_entrance(plan, &catalog.projects[&plan.key]) {
+        points.retain(|&cell| cell != entrance);
+        points.insert(0, entrance);
+    }
+    points
+}
+
 pub(super) fn approach_points(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec2> {
     let mut candidates = Vec::new();
     for row in 0..size.y {

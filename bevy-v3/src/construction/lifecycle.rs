@@ -1,6 +1,6 @@
 use crate::farming::Stage;
 
-use super::{resident_work::approach_points, *};
+use super::{resident_work::project_access_points, *};
 
 #[derive(Clone, Deserialize, Serialize)]
 pub(super) struct Purchase {
@@ -529,8 +529,20 @@ impl Construction {
                 {
                     continue;
                 }
-                let path = approach_points(parcel.position, parcel.size, resident.position)
+                let path = project_access_points(parcel, catalog, resident.position)
                     .into_iter()
+                    .filter(|&cell| {
+                        let point = cell.as_vec2();
+                        !self.residents.iter().enumerate().any(|(other, worker)| {
+                            other != worker_index
+                                && !worker.town_work.active()
+                                && (worker.position.distance_squared(point) < 0.55_f32.powi(2)
+                                    || worker.path.back() == Some(&point)
+                                    || worker.assignment.as_ref().is_some_and(|assignment| {
+                                        assignment.project == index && assignment.spot == cell
+                                    }))
+                        })
+                    })
                     .find_map(|cell| self.resident_route(catalog, site, resident.position, cell));
                 if let Some(path) = path {
                     self.residents[worker_index].path = path;
@@ -548,6 +560,33 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn dismantling_uses_another_approach_when_a_resident_blocks_the_entrance() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut construction = Construction::default();
+        let kitchen = construction.proposed_site(&catalog, "kitchen", IVec2::new(44, 36));
+        let entrance = building_entrance(&kitchen, &catalog.projects["kitchen"]).unwrap();
+        construction.plans.push(kitchen);
+        construction.begin_change(&catalog, 0, Change::Salvage, None);
+        construction.residents[1].position = entrance.as_vec2();
+
+        construction.tick_changes(&catalog, &mut stock, site, 0.0, 0.1);
+
+        assert_eq!(construction.changes[&0].worker, Some(0));
+        let destination = construction.residents[0].path.back().unwrap();
+        assert_ne!(*destination, entrance.as_vec2());
+    }
 
     #[test]
     fn canceling_an_uncollected_blueprint_restores_stock_and_refunds_the_order() {
