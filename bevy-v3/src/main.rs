@@ -1069,7 +1069,14 @@ mod tests {
                 .polar,
             default_camera_polar()
         );
-        press_button(&mut app, "Close view");
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Escape);
+        app.world_mut().run_schedule(Update);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset(KeyCode::Escape);
+        assert!(!app.world().resource::<WorldSetup>().open);
 
         press_button(&mut app, "Show forecast");
         assert!(

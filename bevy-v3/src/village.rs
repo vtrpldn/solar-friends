@@ -18,6 +18,7 @@ mod resource_lens;
 mod resource_trends;
 mod road_surface;
 mod toolbar;
+pub(crate) use toolbar::PanelPicker;
 mod vehicle_motion;
 
 use library_ui::{autosave_named, library_controls};

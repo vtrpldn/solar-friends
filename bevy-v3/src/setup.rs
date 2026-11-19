@@ -504,6 +504,7 @@ fn setup_input(
     keyboard: Res<ButtonInput<KeyCode>>,
     buttons: Query<(&Interaction, &Action), Changed<Interaction>>,
     window: Single<&Window, With<PrimaryWindow>>,
+    mut picker: Option<ResMut<crate::village::PanelPicker>>,
     (mut saves, mut sound, mut village, catalog): (
         ResMut<SaveMenu>,
         ResMut<crate::audio::SoundSettings>,
@@ -519,7 +520,7 @@ fn setup_input(
             && !village.advance_open()
             && !village.planning_roads()
         {
-            if village.dismiss_game_view() {
+            if picker.as_mut().is_some_and(|menu| menu.dismiss()) || village.dismiss_game_view() {
                 return;
             }
             if let Err(error) = crate::village::save_session(&saves, &village, &catalog) {

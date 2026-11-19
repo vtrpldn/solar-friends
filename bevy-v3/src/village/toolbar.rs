@@ -684,11 +684,20 @@ struct ActionDetails;
 const HOME_ROWS: usize = 4;
 
 #[derive(Default, Resource)]
-struct PanelPicker {
+pub(crate) struct PanelPicker {
     open: bool,
     home_page: usize,
     view_open: bool,
     visible_homes: [Option<usize>; HOME_ROWS],
+}
+
+impl PanelPicker {
+    pub(crate) fn dismiss(&mut self) -> bool {
+        let was_open = self.open || self.view_open;
+        self.open = false;
+        self.view_open = false;
+        was_open
+    }
 }
 
 pub(super) fn install(app: &mut App) {
@@ -1047,10 +1056,7 @@ fn handle_buttons(
     (catalog, land): (Res<Catalog>, Res<Land>),
     (mut village, mut pointer): (ResMut<Village>, ResMut<CampPointer>),
     mut picker: ResMut<PanelPicker>,
-    (keyboard, window): (
-        Res<ButtonInput<KeyCode>>,
-        Single<&Window, With<PrimaryWindow>>,
-    ),
+    window: Single<&Window, With<PrimaryWindow>>,
     mut camera: Single<(&mut VillageCamera, &mut Projection)>,
     buttons: Query<(&Action, &Interaction), Changed<Interaction>>,
 ) {
@@ -1059,10 +1065,10 @@ fn handle_buttons(
         picker.open = false;
         return;
     }
-    if keyboard.just_pressed(KeyCode::Escape) || !Action::Manage.available(&village) {
+    if !Action::Manage.available(&village) {
         picker.open = false;
     }
-    if keyboard.just_pressed(KeyCode::Escape) || !Action::View.available(&village) {
+    if !Action::View.available(&village) {
         picker.view_open = false;
     }
     let (camera, projection) = &mut *camera;
