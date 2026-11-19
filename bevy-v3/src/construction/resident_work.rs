@@ -921,7 +921,11 @@ impl Construction {
             .is_some_and(|task| matches!(task.kind, Need::Rest | Need::Sleep) && task.elapsed > 0.0)
     }
 
-    fn resident_action(&self, catalog: &Catalog, index: usize) -> std::borrow::Cow<'static, str> {
+    pub(super) fn resident_action(
+        &self,
+        catalog: &Catalog,
+        index: usize,
+    ) -> std::borrow::Cow<'static, str> {
         let worker = &self.residents[index];
         let label = if worker.town_work.active() {
             worker.town_work.status()

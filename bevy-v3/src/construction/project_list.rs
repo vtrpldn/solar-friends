@@ -178,6 +178,22 @@ impl Construction {
                     catalog.projects[&plan.key].name,
                     index + 1
                 );
+                if let Some(depot_index) = plan.depot {
+                    let depot = &self.plans[depot_index];
+                    let depot_center =
+                        depot.position.as_vec2() + (depot.size.as_vec2() - Vec2::ONE) * 0.5;
+                    let marker = point_at(depot_center, 8.0);
+                    let depot_color = Color::srgb_u8(191, 154, 245);
+                    gizmos.line(point_at(depot_center, 0.2), marker, depot_color);
+                    gizmos.line(marker - Vec3::X, marker + Vec3::X, depot_color);
+                    let _ = write!(
+                        legend,
+                        "\nPurple · {} #{} stages supplies · {}",
+                        catalog.projects[&depot.key].name,
+                        depot_index + 1,
+                        self.project_status(catalog, index)
+                    );
+                }
                 let steps = distance.ceil().max(1.0) as usize;
                 gizmos.linestrip(
                     (0..=steps).map(|step| {
@@ -227,7 +243,17 @@ impl Construction {
                 from = waypoint;
             }
             let name = super::resident_work::NAMES[index];
-            let route = if carrying { "Carrying" } else { "Walking" };
+            let route = if worker
+                .assignment
+                .as_ref()
+                .is_some_and(|job| job.activity == Activity::Carry)
+            {
+                self.resident_action(catalog, index)
+            } else if carrying {
+                "Carrying".into()
+            } else {
+                "Walking".into()
+            };
             let _ = write!(
                 legend,
                 "\n{name} · {route} · {distance:.1} cells left on route"
