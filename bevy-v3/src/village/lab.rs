@@ -677,6 +677,7 @@ enum LabView {
     Events,
     Map,
     Trends,
+    Trade,
 }
 
 impl LabView {
@@ -690,8 +691,88 @@ impl LabView {
             Self::Orders => Self::Events,
             Self::Events => Self::Map,
             Self::Map => Self::Trends,
-            Self::Trends => Self::Overview,
+            Self::Trends => Self::Trade,
+            Self::Trade => Self::Overview,
         }
+    }
+}
+
+#[derive(Default)]
+struct LabTrade {
+    selection: usize,
+    hold_for_pickup: bool,
+}
+
+impl LabTrade {
+    fn view(
+        &mut self,
+        runner: &mut Runner,
+        catalog: &Catalog,
+        keys: &ButtonInput<KeyCode>,
+        replaying: bool,
+    ) -> (String, Option<String>) {
+        let mut options: Vec<_> = catalog
+            .materials
+            .iter()
+            .filter(|(_, material)| material.pack > 0 && material.price > 0.0)
+            .collect();
+        options.sort_by(|a, b| a.1.name.cmp(&b.1.name).then_with(|| a.0.cmp(b.0)));
+        if options.is_empty() {
+            return ("Trade · No tradable materials".into(), None);
+        }
+        if keys.just_pressed(KeyCode::BracketRight) {
+            self.selection = (self.selection + 1) % options.len();
+        } else if keys.just_pressed(KeyCode::BracketLeft) {
+            self.selection = (self.selection + options.len() - 1) % options.len();
+        }
+        let (id, material) = options[self.selection];
+        let editable = !replaying && !runner.done();
+        let mut notice = None;
+        if editable {
+            if keys.just_pressed(KeyCode::KeyH) {
+                self.hold_for_pickup = !self.hold_for_pickup;
+            }
+            let order = if keys.just_pressed(KeyCode::KeyB) {
+                Some(LabOrder::Buy {
+                    material: id.clone(),
+                    freight: false,
+                })
+            } else if keys.just_pressed(KeyCode::KeyS) {
+                Some(LabOrder::Sell {
+                    material: id.clone(),
+                    hold_for_pickup: self.hold_for_pickup,
+                })
+            } else {
+                None
+            };
+            if let Some(order) = order {
+                notice = Some(match runner.submit(catalog, order) {
+                    Ok(()) => runner
+                        .outcomes
+                        .last()
+                        .and_then(|outcome| outcome.error.clone())
+                        .unwrap_or_else(|| "Trade order accepted.".into()),
+                    Err(error) => error.into(),
+                });
+            }
+        }
+        let actions = if editable {
+            "\nB Fetch from town · S Sell one batch · H Toggle shared pickup"
+        } else {
+            ""
+        };
+        let buyer = &material.buyer.name;
+        (
+            format!(
+                "Resources & trade · {}\nTab Switch view · [ / ] Choose material{actions}\n\nIn stock · {}\nPurchase pack · {}\nSupplier · {}\nBuyer · {buyer}\nHold sale for shared pickup · {}",
+                material.name,
+                material.quantity_text(runner.village.stock.available(id).into()),
+                material.quantity_text(material.pack.into()),
+                material.supplier_name,
+                if self.hold_for_pickup { "On" } else { "Off" },
+            ),
+            notice,
+        )
     }
 }
 
@@ -1155,6 +1236,7 @@ struct Playback {
     clear_confirmation: Option<(usize, Option<usize>)>,
     replacement: Option<LabReplacement>,
     story_settings: Option<StorySettings>,
+    trade: LabTrade,
 }
 
 impl Playback {
@@ -1279,6 +1361,7 @@ impl Default for Playback {
             clear_confirmation: None,
             replacement: None,
             story_settings: None,
+            trade: LabTrade::default(),
         }
     }
 }
@@ -1841,6 +1924,15 @@ fn update_lab_window(
             lab_bed_page(&mut runner, &catalog, &keys, playback)
         } else if playback.view == LabView::Orders {
             lab_order_page(&runner, &mut playback.inventory_page)
+        } else if playback.view == LabView::Trade {
+            let (text, notice) =
+                playback
+                    .trade
+                    .view(&mut runner, &catalog, &keys, playback.replaying);
+            if let Some(notice) = notice {
+                playback.notice = notice;
+            }
+            text
         } else if playback.view == LabView::Trends {
             lab_trends(&runner.samples, &catalog)
         } else if playback.view == LabView::Events {
@@ -1951,6 +2043,27 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn lab_trade_records_a_held_sale_and_replay_cannot_submit() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{"steps":2}"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        let mut trade = LabTrade::default();
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::KeyH);
+        keys.press(KeyCode::KeyS);
+        trade.view(&mut runner, &catalog, &keys, true);
+        assert!(runner.scenario.orders.is_empty());
+        trade.view(&mut runner, &catalog, &keys, false);
+        assert!(matches!(
+            runner.scenario.orders[0].order,
+            LabOrder::Sell {
+                hold_for_pickup: true,
+                ..
+            }
+        ));
+    }
 
     #[test]
     fn story_settings_change_land_and_capital_for_the_next_run() {
