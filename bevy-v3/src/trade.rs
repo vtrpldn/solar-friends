@@ -6,7 +6,7 @@ use crate::{
     catalog::{Catalog, Material},
     food::{self, FoodLots},
     market::Market,
-    stock::{CashKind, Stock},
+    stock::{CashKind, MaterialReason, Stock},
 };
 
 #[derive(Default, Deserialize, Serialize)]
@@ -474,11 +474,7 @@ impl Trade {
         }
         let mut order = self.delivery.take().expect("arrived freight");
         let goods = BTreeMap::from([(order.material.clone(), order.quantity)]);
-        if let Some(lots) = order.food.take() {
-            stock.receive_with_lots(&goods, lots);
-        } else {
-            stock.receive(&goods);
-        }
+        stock.receive_materials(&goods, order.food.take(), MaterialReason::SupplierFreight);
         if order.quantity > 0 {
             self.purchases = self.purchases.saturating_add(1);
         }
@@ -495,11 +491,12 @@ impl Trade {
         let order = self.orders.remove(index).expect("completed town trip");
         if (order.buying || order.spoiled) && order.quantity > 0 {
             let goods = BTreeMap::from([(order.material, order.quantity)]);
-            if let Some(lots) = order.food {
-                stock.receive_with_lots(&goods, lots);
+            let reason = if order.buying {
+                MaterialReason::TownPickup
             } else {
-                stock.receive(&goods);
-            }
+                MaterialReason::Arrival
+            };
+            stock.receive_materials(&goods, order.food, reason);
             if order.buying {
                 self.purchases = self.purchases.saturating_add(1);
             }
@@ -1012,6 +1009,11 @@ mod tests {
         assert!(trade.receive_goods(&mut stock, 12, eta + 1.0).is_none());
         assert_eq!(trade.purchases, 1);
         assert_eq!(stock.available("wood"), wood + 12);
+        assert!(
+            stock
+                .material_history(&catalog)
+                .contains("Supplier freight")
+        );
         assert!(trade.delivery.is_none());
     }
 

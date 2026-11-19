@@ -803,14 +803,11 @@ impl Construction {
                         continue;
                     }
                     let job = &mut self.farming.jobs[job_index];
-                    if let Some(lots) = &mut job.food_output {
-                        stock.receive_with_lots(
-                            &load,
-                            super::production_work::take_load_lots(lots, &load),
-                        );
-                    } else {
-                        stock.receive(&load);
-                    }
+                    let lots = job
+                        .food_output
+                        .as_mut()
+                        .map(|lots| super::production_work::take_load_lots(lots, &load));
+                    stock.receive_materials(&load, lots, crate::stock::MaterialReason::Harvest);
                     for (id, units) in load {
                         *job.output.get_mut(&id).expect("load is part of harvest") -= units;
                     }

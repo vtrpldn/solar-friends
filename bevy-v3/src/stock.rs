@@ -88,13 +88,20 @@ struct MaterialMovement {
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
-enum MaterialReason {
+pub(crate) enum MaterialReason {
     Arrival,
     Transfer,
     Meal,
     Spoilage,
     Residues,
     Cleaning,
+    Gathering,
+    Harvest,
+    ProductionDelivery,
+    ProductionInput,
+    ConstructionReservation,
+    TownPickup,
+    SupplierFreight,
 }
 
 impl MaterialReason {
@@ -106,6 +113,13 @@ impl MaterialReason {
             Self::Spoilage => "Spoilage",
             Self::Residues => "Organic residues",
             Self::Cleaning => "Cleaning",
+            Self::Gathering => "Gathering delivery",
+            Self::Harvest => "Harvest delivery",
+            Self::ProductionDelivery => "Production delivery",
+            Self::ProductionInput => "Production input",
+            Self::ConstructionReservation => "Construction reservation",
+            Self::TownPickup => "Town pickup",
+            Self::SupplierFreight => "Supplier freight",
         }
     }
 }
@@ -289,14 +303,25 @@ impl Stock {
     }
 
     pub fn receive_with_lots(&mut self, goods: &BTreeMap<String, u32>, lots: FoodLots) {
+        self.receive_materials(goods, Some(lots), MaterialReason::Arrival);
+    }
+
+    pub(crate) fn receive_materials(
+        &mut self,
+        goods: &BTreeMap<String, u32>,
+        lots: Option<FoodLots>,
+        reason: MaterialReason,
+    ) {
         if !self.sandbox {
             self.pantry.ensure(&self.materials);
         }
         for (id, units) in goods {
-            self.change_material(id, i64::from(*units), MaterialReason::Arrival);
+            self.change_material(id, i64::from(*units), reason);
         }
         if !self.sandbox {
-            self.pantry.insert(lots);
+            self.pantry.insert(
+                lots.unwrap_or_else(|| food::fresh(goods, self.pantry.clock, &BTreeMap::new())),
+            );
         }
     }
 
@@ -658,13 +683,21 @@ impl Stock {
     }
 
     pub fn reserve_available(&mut self, bill: &BTreeMap<String, u32>) -> FoodLots {
+        self.reserve_materials(bill, MaterialReason::Transfer)
+    }
+
+    pub(crate) fn reserve_materials(
+        &mut self,
+        bill: &BTreeMap<String, u32>,
+        reason: MaterialReason,
+    ) -> FoodLots {
         if !self.sandbox {
             self.pantry.ensure(&self.materials);
         }
         let mut food = FoodLots::new();
         for (id, units) in bill {
             let take = self.available(id).min(*units);
-            self.change_material(id, -i64::from(take), MaterialReason::Transfer);
+            self.change_material(id, -i64::from(take), reason);
             if !self.sandbox {
                 let taken = self.pantry.remove(id, take);
                 if !taken.is_empty() {

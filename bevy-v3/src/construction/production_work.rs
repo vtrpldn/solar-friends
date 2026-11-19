@@ -393,7 +393,9 @@ impl Construction {
         id: &str,
     ) {
         let food_input = match self.batch_inputs(catalog, stock, index, id) {
-            Ok(inputs) => inputs.map(|inputs| stock.reserve_available(&inputs)),
+            Ok(inputs) => inputs.map(|inputs| {
+                stock.reserve_materials(&inputs, crate::stock::MaterialReason::ProductionInput)
+            }),
             Err(reason) => {
                 self.production.notice = reason;
                 return;
@@ -1352,11 +1354,15 @@ impl Construction {
                             .find_map(|cell| path(position, cell))
                     };
                     let job = &mut self.production.jobs[index];
-                    if let Some(lots) = &mut job.food_output {
-                        stock.receive_with_lots(&load, take_load_lots(lots, &load));
-                    } else {
-                        stock.receive(&load);
-                    }
+                    let lots = job
+                        .food_output
+                        .as_mut()
+                        .map(|lots| take_load_lots(lots, &load));
+                    stock.receive_materials(
+                        &load,
+                        lots,
+                        crate::stock::MaterialReason::ProductionDelivery,
+                    );
                     if !remaining.is_empty() {
                         job.delivered_output = Some(remaining);
                         job.returning_to_site = true;

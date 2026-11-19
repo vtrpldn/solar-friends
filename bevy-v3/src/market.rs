@@ -8,7 +8,7 @@ use crate::{
         FREIGHT_CAPACITY, GASOLINE_REAIS_PER_LITER, HANDLING_MINUTES, KM_PER_LITER,
         ROAD_KM_PER_HOUR,
     },
-    stock::{CashKind, Stock},
+    stock::{CashKind, MaterialReason, Stock},
 };
 
 const MAX_EXPANSION_RESERVE: u64 = 10_000_000;
@@ -136,7 +136,7 @@ impl Market {
     }
 
     pub fn reserve(&mut self, stock: &mut Stock, bill: &BTreeMap<String, u32>, quote: &Quote) {
-        stock.reserve_available(bill);
+        stock.reserve_materials(bill, MaterialReason::ConstructionReservation);
         stock.debit(quote.price, CashKind::Construction);
         self.committed_fares += quote.fare * u64::from(quote.trips);
         for (id, units) in &quote.units {
