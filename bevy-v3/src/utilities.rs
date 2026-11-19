@@ -59,6 +59,12 @@ pub struct Utilities {
     pub biogas: f64,
     #[serde(default)]
     waste_removed: f64,
+    #[serde(default, skip_serializing_if = "zero_liters")]
+    latrine_waste_liters: f64,
+}
+
+fn zero_liters(liters: &f64) -> bool {
+    *liters == 0.0
 }
 
 #[derive(Deserialize, Serialize)]
@@ -285,6 +291,8 @@ impl Utilities {
         }) && (0.0..1.0).contains(&self.grid_debt_cents)
             && self.biogas.is_finite()
             && self.biogas >= 0.0
+            && self.latrine_waste_liters.is_finite()
+            && self.latrine_waste_liters >= 0.0
     }
 
     pub fn water_sources(&self) -> impl Iterator<Item = (usize, IVec2, IVec2)> + '_ {
@@ -372,6 +380,10 @@ impl Utilities {
         node.water[0] -= 1.0;
         node.water[2] += 0.8;
         true
+    }
+
+    pub fn record_latrine_use(&mut self, liters: f64) {
+        self.latrine_waste_liters += liters;
     }
 
     pub fn receive_sewage(&mut self, id: usize, liters: f64) -> bool {
@@ -768,6 +780,12 @@ impl Utilities {
             "Water · {:.1} L drinking · {:.1} L untreated\n{:.1} L greywater · {:.1} L sewage",
             water[0], water[1], water[2], water[3],
         );
+        if self.latrine_waste_liters > 0.0 {
+            text.push_str(&format!(
+                "\nCamp latrine · {:.1} L waste recorded",
+                self.latrine_waste_liters
+            ));
+        }
         if let Some(ground) = &self.ground {
             text.push_str(&format!(
                 "\nAquifer {:.0} / {:.0} L · River reserve {:.0} L · Flow {:.0} L/day",

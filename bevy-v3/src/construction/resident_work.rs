@@ -929,10 +929,13 @@ impl Construction {
             }
             Need::Bladder | Need::Bowels => {
                 let waste = if task.kind == Need::Bowels { 1.5 } else { 0.5 };
-                if task
-                    .facility
-                    .is_none_or(|id| self.utilities.receive_sewage(id, waste))
-                {
+                let used = if let Some(id) = task.facility {
+                    self.utilities.receive_sewage(id, waste)
+                } else {
+                    self.utilities.record_latrine_use(waste);
+                    true
+                };
+                if used {
                     levels[task.kind as usize] = 95.0;
                     levels[Need::Hygiene as usize] =
                         (levels[Need::Hygiene as usize] - 8.0).max(0.0);
@@ -1657,7 +1660,7 @@ mod tests {
             land: &land,
             camp,
         };
-        let village = Construction::default();
+        let mut village = Construction::default();
         let (facility, path) = village
             .need_route(0, &catalog, site, Need::Bladder)
             .unwrap();
@@ -1668,6 +1671,20 @@ mod tests {
         assert!(target.distance_squared(camp) >= 25);
         assert!(target.distance_squared(STOCKPILE) >= 25);
         assert!((f64::from(x) - center).abs() > width + 6.9);
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        village.residents[0].health.levels[Need::Bladder as usize] = 5.0;
+        village.choose_need(0, &catalog, &stock, site, 0.0);
+        village.residents[0].position = target.as_vec2();
+        village.residents[0].path.clear();
+        village.step_need(0, &catalog, &mut stock, site, 6.0, 6.0);
+        let save = serde_json::to_vec(&village).unwrap();
+        let restored: Construction = serde_json::from_slice(&save).unwrap();
+        assert!(
+            restored
+                .utilities
+                .water_summary()
+                .contains("0.5 L waste recorded")
+        );
     }
 
     #[test]
