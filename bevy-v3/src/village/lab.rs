@@ -943,30 +943,48 @@ impl SpeedMeter {
 
 enum LabReplacement {
     Reload,
-    Checkpoint(PathBuf),
+    File(PathBuf),
 }
 
 impl LabReplacement {
-    fn load(&self, source: &LabSource, steps: u64, catalog: &Catalog) -> io::Result<Runner> {
+    fn load(
+        &self,
+        source: Option<&LabSource>,
+        steps: u64,
+        catalog: &Catalog,
+    ) -> io::Result<(Runner, Option<Replay>)> {
         match self {
-            Self::Reload => source.load(catalog),
-            Self::Checkpoint(path) => Runner::new(
-                Scenario {
-                    steps,
-                    setup: None,
-                    orders: Vec::new(),
-                    stop: LabStop::None,
-                },
-                Some(crate::save::read(path, catalog)?),
-                catalog,
-            ),
+            Self::Reload => {
+                let source = source.ok_or_else(|| io::Error::other("No original scenario."))?;
+                Ok((source.load(catalog)?, None))
+            }
+            Self::File(path) => {
+                let bytes = crate::save::read_bytes(path, 3 * crate::save::MAX_BYTES)?;
+                let value: serde_json::Value = serde_json::from_slice(&bytes)?;
+                if value.get("scenario").is_some() {
+                    let (runner, replay) = prepare_replay(value, catalog)?;
+                    return Ok((runner, Some(replay)));
+                }
+                let village = crate::save::read(path, catalog)?;
+                let runner = Runner::new(
+                    Scenario {
+                        steps,
+                        setup: None,
+                        orders: Vec::new(),
+                        stop: LabStop::None,
+                    },
+                    Some(village),
+                    catalog,
+                )?;
+                Ok((runner, None))
+            }
         }
     }
 
     fn prompt(&self) -> &'static str {
         match self {
             Self::Reload => "Reload scenario?",
-            Self::Checkpoint(_) => "Import village checkpoint?",
+            Self::File(_) => "Open lab checkpoint or replay report?",
         }
     }
 }
@@ -1291,7 +1309,7 @@ fn lab_bed_page(
 fn update_lab_window(
     mut runner: ResMut<Runner>,
     catalog: Res<Catalog>,
-    time: Res<Time<bevy::time::Real>>,
+    (mut commands, time): (Commands, Res<Time<bevy::time::Real>>),
     (keys, mut events, mut files): (
         Res<ButtonInput<KeyCode>>,
         MessageReader<bevy::input::keyboard::KeyboardInput>,
@@ -1306,39 +1324,45 @@ fn update_lab_window(
     ),
 ) {
     playback.replaying = replay.is_some();
-    let checkpoint = files
+    let dropped = files
         .read()
         .filter_map(|event| match event {
             bevy::window::FileDragAndDrop::DroppedFile { path_buf, .. } => Some(path_buf),
             _ => None,
         })
         .last();
-    if let Some(source) = &source
-        && playback.order.is_none()
-    {
-        let replacement = if let Some(path) = checkpoint {
-            Some(LabReplacement::Checkpoint(path.clone()))
+    if playback.order.is_none() {
+        let replacement = if let Some(path) = dropped {
+            Some(LabReplacement::File(path.clone()))
         } else if keys.just_pressed(KeyCode::Escape) {
             playback.replacement = None;
             None
         } else if keys.just_pressed(KeyCode::F8) {
             if let Some(candidate) = playback.replacement.take() {
-                match candidate.load(source, runner.scenario.steps, &catalog) {
-                    Ok(opened) => {
+                match candidate.load(source.as_deref(), runner.scenario.steps, &catalog) {
+                    Ok((opened, imported_replay)) => {
                         *runner = opened;
                         *playback = Playback::default();
                         *map = map::MapState::default();
-                        playback.notice = match candidate {
-                            LabReplacement::Reload => "Scenario reloaded at step 0.",
-                            LabReplacement::Checkpoint(_) => "Checkpoint imported at step 0.",
+                        playback.notice = if let Some(imported_replay) = imported_replay {
+                            commands.insert_resource(imported_replay);
+                            "Replay loaded at step 0."
+                        } else {
+                            commands.remove_resource::<Replay>();
+                            match candidate {
+                                LabReplacement::Reload => "Scenario reloaded at step 0.",
+                                LabReplacement::File(_) => "Checkpoint imported at step 0.",
+                            }
                         }
                         .into();
+                        panel.set_if_neq(Text::new(playback.notice.clone()));
+                        return;
                     }
                     Err(error) => playback.notice = format!("Could not open lab run · {error}"),
                 }
                 None
             } else {
-                Some(LabReplacement::Reload)
+                source.is_some().then_some(LabReplacement::Reload)
             }
         } else {
             None
@@ -1672,7 +1696,7 @@ fn update_lab_window(
     }
     let weather = lab_weather(village, &runner.setup);
     let reload_control = if source.is_some() {
-        " · F8 Reload · Drop checkpoint to import"
+        " · F8 Reload"
     } else {
         ""
     };
@@ -1684,7 +1708,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint{reload_control} · Tab Browse lab views\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint{reload_control} · Tab Browse lab views\nDrop checkpoint or replay report to open\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         limit,
         village.clock,
@@ -2345,6 +2369,27 @@ mod tests {
         press_reload(&mut app);
         assert_eq!(app.world().resource::<Runner>().village.clock, 20.0);
         assert_eq!(app.world().resource::<Runner>().index, 0);
+        let evidence = path.with_extension("evidence.json");
+        let mut recorded = LabReplacement::File(checkpoint.clone())
+            .load(None, 8, app.world().resource::<Catalog>())
+            .unwrap()
+            .0;
+        recorded.advance(app.world().resource::<Catalog>());
+        std::fs::write(&evidence, serde_json::to_vec(&recorded.report()).unwrap()).unwrap();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+        app.world_mut()
+            .write_message(bevy::window::FileDragAndDrop::DroppedFile {
+                window,
+                path_buf: evidence.clone(),
+            });
+        app.update();
+        assert!(!app.world().contains_resource::<Replay>());
+        press_reload(&mut app);
+        assert_eq!(app.world().resource::<Replay>().limit, 1);
+        assert_eq!(app.world().resource::<Runner>().index, 0);
+        std::fs::remove_file(evidence).unwrap();
         std::fs::remove_file(checkpoint).unwrap();
         std::fs::remove_file(path).unwrap();
     }
