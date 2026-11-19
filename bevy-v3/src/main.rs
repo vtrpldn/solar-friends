@@ -1008,6 +1008,10 @@ mod tests {
 
         press_button(&mut app, "Manage");
         press_button(&mut app, "Pantry");
+        press_button(&mut app, "Purchases: resident pickup");
+        press_button(&mut app, "Purchases: supplier freight");
+        press_button(&mut app, "Automatic food purchases on");
+        press_button(&mut app, "Automatic food purchases off");
         press_button(&mut app, "Automatic cooking off");
         press_button(&mut app, "Fresh target 1.0d +");
         press_button(&mut app, "Fresh target 1.5d −");

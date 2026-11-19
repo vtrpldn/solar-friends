@@ -565,9 +565,12 @@ impl Action {
                 ) / 2.0,
                 if increase { "+" } else { "−" }
             ),
-            Self::PantryPolicy(_, _, true) => "Toggle food restock".into(),
-            Self::PantryPolicy(-1, _, false) => "Reserve −1".into(),
-            Self::PantryPolicy(1, _, false) => "Reserve +1".into(),
+            Self::PantryPolicy(_, _, true) if village.construction.trade.household_restock_off => {
+                "Automatic food purchases off".into()
+            }
+            Self::PantryPolicy(_, _, true) => "Automatic food purchases on".into(),
+            Self::PantryPolicy(-1, _, false) => "Reserve −0.5d".into(),
+            Self::PantryPolicy(1, _, false) => "Reserve +0.5d".into(),
             Self::PantryPolicy(_, budget, false) if budget < 0 => "Budget −R$25".into(),
             Self::PantryPolicy(_, _, false) => "Budget +R$25".into(),
             Self::Grid if village.construction.utilities.grid_off => "Connect grid".into(),
