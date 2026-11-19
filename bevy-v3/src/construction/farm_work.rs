@@ -713,10 +713,7 @@ impl Construction {
                 }
                 if spoiled && job.output.values().all(|&units| units == 0) {
                     if let Some(worker) = job.worker {
-                        let resident = &mut self.residents[worker];
-                        if resident.health.task.is_none() && !resident.town_work.active() {
-                            resident.path.clear();
-                        }
+                        self.residents[worker].clear_work_route();
                     }
                     self.farming.jobs.remove(job_index);
                     continue;

@@ -418,6 +418,13 @@ impl Worker {
         self.paused_waypoint.is_some() && self.paused_waypoint.as_ref() == self.path.front()
     }
 
+    fn clear_work_route(&mut self) {
+        if self.health.task.is_none() && !self.town_work.active() {
+            self.path.clear();
+            self.paused_waypoint = None;
+        }
+    }
+
     fn work_multiplier(&self, profile: &crate::catalog::Profile, project: &str) -> f64 {
         let skill = if profile.strengths.iter().any(|key| key == project) {
             1.25

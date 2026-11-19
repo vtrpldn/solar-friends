@@ -220,7 +220,7 @@ impl Construction {
         crate::market::subtract_cargo(remaining, &expired);
         if remaining.is_empty() {
             if let Some(worker) = job.worker {
-                self.residents[worker].path.clear();
+                self.residents[worker].clear_work_route();
             }
             self.gathering.orders.remove(&index);
             return true;
@@ -399,6 +399,29 @@ mod tests {
             pending.food_output.as_ref().unwrap()["food"][0].expires,
             expiry
         );
+
+        let mut tending_needs: Construction = serde_json::from_slice(&saved).unwrap();
+        let waypoint = SUPPLY_SPOTS[0].as_vec2();
+        tending_needs.residents[0].path = VecDeque::from([waypoint]);
+        tending_needs.residents[0].health.task = Some(crate::residents::NeedTask {
+            kind: Need::Sleep,
+            facility: None,
+            elapsed: 0.0,
+            started_at: None,
+            duration: crate::weather::HOUR,
+            water: 0.0,
+            returning: false,
+            partner: None,
+            conversation: None,
+        });
+        assert!(tending_needs.expire_gathered_food(
+            &catalog,
+            &mut stock.clone(),
+            index,
+            &recipe.output,
+            expiry,
+        ));
+        assert_eq!(tending_needs.residents[0].path.front(), Some(&waypoint));
 
         village = serde_json::from_slice(&saved).unwrap();
         village.tick_gathering(

@@ -1404,10 +1404,7 @@ impl Construction {
             }
             if good.values().all(|&units| units == 0) {
                 if let Some(worker) = job.worker {
-                    let resident = &mut self.residents[worker];
-                    if resident.health.task.is_none() && !resident.town_work.active() {
-                        resident.path.clear();
-                    }
+                    self.residents[worker].clear_work_route();
                 }
                 self.production.jobs.remove(index);
                 self.production.notice = if outbound {
