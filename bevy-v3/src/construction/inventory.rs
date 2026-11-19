@@ -190,6 +190,34 @@ impl Construction {
         )
     }
 
+    pub fn pantry_commitments(&self, catalog: &Catalog, stock: &Stock, land: &Land) -> String {
+        use std::fmt::Write;
+
+        let ledger = self.inventory(catalog, stock, land);
+        let mut text = String::from("Food committed and on the way");
+        for (id, _) in crate::food::FOODS {
+            let item = &catalog.materials[id];
+            let [_, reserved, processing, transit, _] = ledger[id];
+            if reserved == 0 && processing == 0 && transit == 0 {
+                continue;
+            }
+            let _ = write!(text, "\n{}", item.name);
+            for (amount, status) in [
+                (reserved, "reserved"),
+                (processing, "in work"),
+                (transit, "in transit"),
+            ] {
+                if amount > 0 {
+                    let _ = write!(text, " · {} {status}", item.quantity_text(amount));
+                }
+            }
+        }
+        if !text.contains('\n') {
+            text.push_str("\nNo food committed or in transit.");
+        }
+        text
+    }
+
     pub fn inventory_panel(
         &self,
         catalog: &Catalog,
@@ -273,6 +301,34 @@ impl Construction {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn pantry_commitments_show_food_freight_before_it_reaches_stores() {
+        let catalog = Catalog::default();
+        let land = Land::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        assert!(
+            village
+                .pantry_commitments(&catalog, &stock, &land)
+                .contains("No food committed")
+        );
+        let before = stock.available("greens");
+        village
+            .trade
+            .buy(
+                &catalog,
+                &mut stock,
+                &mut village.market,
+                "greens",
+                (0.0, 12, true),
+            )
+            .unwrap();
+        let text = village.pantry_commitments(&catalog, &stock, &land);
+        assert!(text.contains(&catalog.materials["greens"].name));
+        assert!(text.contains("in transit"));
+        assert_eq!(stock.available("greens"), before);
+    }
     use crate::setup::WorldSetup;
 
     #[test]

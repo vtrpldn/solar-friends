@@ -2545,6 +2545,12 @@ fn show_hud(
                         .batches(&catalog, village.pantry_batch_page.unwrap_or_default())
                         .1,
                 );
+                label.push('\n');
+                label.push_str(&village.construction.pantry_commitments(
+                    &catalog,
+                    &village.stock,
+                    &land,
+                ));
                 label.push_str("\nTab Finances");
             }
         }
