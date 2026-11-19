@@ -2372,6 +2372,13 @@ fn show_hud(
         }
         None => {}
     }
+    if let Some(endpoints) = village.selected_installation() {
+        label.push_str(
+            &village
+                .construction
+                .connection_quote(&catalog, &village.stock, endpoints),
+        );
+    }
     if let Some(production) =
         village
             .construction

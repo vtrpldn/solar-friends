@@ -88,50 +88,7 @@ impl Construction {
         from: usize,
         to: usize,
     ) -> Result<(), &'static str> {
-        let distance = self.connection_distance(from, to)?;
-        if self.utilities.power_link_exists(from, to)
-            || self.queued_connection(from, to, None).is_some()
-        {
-            return Err("Already connected or planned.");
-        }
-        let electrical = (distance / 4.0).ceil().max(1.0) as u32;
-        if !stock.sandbox && stock.available("electrical") < electrical {
-            return Err("The connection needs electrical supplies.");
-        }
-        self.queue_installation(
-            from,
-            WaterAction::InstallCable {
-                to,
-                required: 20.0 + distance * 3.0,
-            },
-        )?;
-        if !stock.sandbox {
-            stock.reserve_available(&BTreeMap::from([("electrical".into(), electrical)]));
-        }
-        Ok(())
-    }
-
-    fn connection_distance(&self, from: usize, to: usize) -> Result<f64, &'static str> {
-        if from == to {
-            return Err("Choose different endpoints.");
-        }
-        let source = self
-            .utilities
-            .water_site(from)
-            .ok_or("Choose a completed source.")?;
-        let destination = self
-            .utilities
-            .water_site(to)
-            .ok_or("Choose a completed destination.")?;
-        if !destination.enabled || to > 0 && self.changes.contains_key(&(to - 1)) {
-            return Err("Choose an open destination.");
-        }
-        Ok(f64::from(
-            source
-                .location
-                .as_vec2()
-                .distance(destination.location.as_vec2()),
-        ))
+        self.queue_utility_connection(stock, from, to, None)
     }
 
     pub fn queue_water_connection(
@@ -141,58 +98,120 @@ impl Construction {
         to: usize,
         channel: usize,
     ) -> Result<(), &'static str> {
+        self.queue_utility_connection(stock, from, to, Some(channel))
+    }
+
+    fn queue_utility_connection(
+        &mut self,
+        stock: &mut Stock,
+        from: usize,
+        to: usize,
+        channel: Option<usize>,
+    ) -> Result<(), &'static str> {
+        let (action, bill, _) = self.connection_plan(from, to, channel)?;
+        if !stock.sandbox && stock.missing(&bill).is_some() {
+            return Err("Not enough materials to install this connection.");
+        }
+        self.queue_installation(from, action)?;
+        if !stock.sandbox {
+            stock.reserve_available(&bill);
+        }
+        Ok(())
+    }
+
+    fn connection_plan(
+        &self,
+        from: usize,
+        to: usize,
+        channel: Option<usize>,
+    ) -> Result<(WaterAction, BTreeMap<String, u32>, f64), &'static str> {
+        if from == to {
+            return Err("Choose different endpoints.");
+        }
         let source = self
             .utilities
             .water_site(from)
             .ok_or("Choose a completed source.")?;
-        let destination = self
+        let target = self
             .utilities
             .water_site(to)
             .ok_or("Choose a completed destination.")?;
-        if from == to {
-            return Err("Choose different water endpoints.");
+        if !source.enabled || from > 0 && self.changes.contains_key(&(from - 1)) {
+            return Err("Choose an open source.");
         }
-        if channel >= CHANNELS.len()
-            || source.capacity[channel] <= 0.0
-            || destination.capacity[channel] <= 0.0
-        {
+        if !target.enabled || to > 0 && self.changes.contains_key(&(to - 1)) {
+            return Err("Choose an open destination.");
+        }
+        if channel.is_some_and(|c| {
+            c >= CHANNELS.len() || source.capacity[c] <= 0.0 || target.capacity[c] <= 0.0
+        }) {
             return Err("Both ends need storage for this water class.");
         }
-        if self.utilities.water_link_exists(from, to, channel)
-            || self.queued_connection(from, to, Some(channel)).is_some()
-        {
+        let connected = channel.map_or_else(
+            || self.utilities.power_link_exists(from, to),
+            |c| self.utilities.water_link_exists(from, to, c),
+        );
+        if connected || self.queued_connection(from, to, channel).is_some() {
             return Err("Already connected or planned.");
-        }
-        if !destination.enabled || to > 0 && self.changes.contains_key(&(to - 1)) {
-            return Err("Choose an open destination.");
         }
         let distance = f64::from(
             source
                 .location
                 .as_vec2()
-                .distance(destination.location.as_vec2()),
+                .distance(target.location.as_vec2()),
         );
-        let plumbing = (distance / 4.0).ceil().max(1.0) as u32;
-        if !stock.sandbox
-            && (stock.available("plumbing") < plumbing || stock.available("pumps") < 1)
-        {
-            return Err("The connection needs plumbing supplies and one pump.");
+        let units = (distance / 4.0).ceil().max(1.0) as u32;
+        let required = 20.0 + distance * 3.0;
+        let (action, bill) = if let Some(channel) = channel {
+            (
+                WaterAction::InstallPipe {
+                    to,
+                    channel,
+                    required,
+                },
+                BTreeMap::from([("plumbing".into(), units), ("pumps".into(), 1)]),
+            )
+        } else {
+            (
+                WaterAction::InstallCable { to, required },
+                BTreeMap::from([("electrical".into(), units)]),
+            )
+        };
+        Ok((action, bill, distance))
+    }
+
+    pub fn connection_quote(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        (from, to, channel): (usize, usize, Option<usize>),
+    ) -> String {
+        use std::fmt::Write;
+        if from == to || self.queued_connection(from, to, channel).is_some() {
+            return String::new();
         }
-        self.queue_installation(
-            from,
-            WaterAction::InstallPipe {
-                to,
-                channel,
-                required: 20.0 + distance * 3.0,
-            },
-        )?;
-        if !stock.sandbox {
-            stock.reserve_available(&BTreeMap::from([
-                ("plumbing".into(), plumbing),
-                ("pumps".into(), 1),
-            ]));
+        let (action, bill, distance) = match self.connection_plan(from, to, channel) {
+            Ok(plan) => plan,
+            Err(reason) => return format!("\n{reason}"),
+        };
+        let (_, required) = action.installation().expect("connection installation");
+        let mut text = format!(
+            "\n{:.0} m · {:.0} person-minutes",
+            distance * 2.0,
+            required * 0.45
+        );
+        if stock.sandbox {
+            text.push_str(" · Free in Sandbox");
+        } else {
+            for (id, amount) in bill {
+                let missing = amount.saturating_sub(stock.available(&id));
+                let _ = write!(text, " · {amount} {}", catalog.materials[&id].name);
+                if missing > 0 {
+                    let _ = write!(text, " ({missing} missing)");
+                }
+            }
         }
-        Ok(())
+        text
     }
 
     fn queue_installation(&mut self, from: usize, action: WaterAction) -> Result<(), &'static str> {
