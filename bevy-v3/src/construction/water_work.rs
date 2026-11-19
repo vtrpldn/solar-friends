@@ -421,6 +421,36 @@ impl Construction {
             })
     }
 
+    pub fn draw_utility_installations(
+        &self,
+        terrain: &Terrain,
+        view: crate::utilities::NetworkView,
+        gizmos: &mut Gizmos,
+    ) {
+        use crate::utilities::NetworkView;
+        let power = view == NetworkView::Power;
+        for (from, to, channel) in self.queued_utility_connections(power) {
+            if channel.is_some_and(|channel| match view {
+                NetworkView::Liquid(selected) => channel != selected,
+                NetworkView::Sanitation => channel < 2,
+                _ => false,
+            }) {
+                continue;
+            }
+            let job = &self.water_jobs[&from];
+            let Some((_, required)) = job.action.installation() else {
+                continue;
+            };
+            self.utilities.draw_queued_connection(
+                terrain,
+                (from, to),
+                channel,
+                (job.work / required).clamp(0.0, 1.0) as f32,
+                gizmos,
+            );
+        }
+    }
+
     pub fn queued_installation_hint(&self, power: bool) -> String {
         let count = self.queued_utility_connections(power).count();
         if count == 0 {
@@ -431,7 +461,9 @@ impl Construction {
         } else {
             "installations"
         };
-        format!("\n{count} queued {noun} · Page Up Next installation")
+        format!(
+            "\n{count} queued {noun} · Page Up Next installation · Dashed lines under construction"
+        )
     }
 
     pub fn queued_connection(

@@ -2439,21 +2439,21 @@ fn draw_blueprints(
             &mut gizmos,
         );
         let network_lens = village.lenses.network_view();
-        if network_lens.is_none()
-            && matches!(
-                village.utility_panel,
-                Some(UtilityPanel::Power | UtilityPanel::Water)
-            )
-        {
-            village.construction.utilities.draw_network(
-                &terrain,
-                if village.utility_panel == Some(UtilityPanel::Power) {
-                    NetworkView::Power
-                } else {
-                    NetworkView::Water
-                },
-                &mut gizmos,
-            );
+        let panel_network = match village.utility_panel {
+            Some(UtilityPanel::Power) => Some(NetworkView::Power),
+            Some(UtilityPanel::Water) => Some(NetworkView::Water),
+            _ => None,
+        };
+        if let Some(network) = network_lens.or(panel_network) {
+            if network_lens.is_none() {
+                village
+                    .construction
+                    .utilities
+                    .draw_network(&terrain, network, &mut gizmos);
+            }
+            village
+                .construction
+                .draw_utility_installations(&terrain, network, &mut gizmos);
         }
         notice = match village.lenses.active {
             Some(MapLens::Land) => Some(land_lens.draw(

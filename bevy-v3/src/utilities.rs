@@ -1458,6 +1458,48 @@ impl Utilities {
         links
     }
 
+    pub fn draw_queued_connection(
+        &self,
+        terrain: &Terrain,
+        (from, to): (usize, usize),
+        channel: Option<usize>,
+        progress: f32,
+        gizmos: &mut Gizmos,
+    ) {
+        let (Some(from), Some(to)) = (self.nodes.get(&from), self.nodes.get(&to)) else {
+            return;
+        };
+        let center = |node: &Node| {
+            let cell = node.location.as_vec2() + (node.size.as_vec2() - Vec2::ONE) * 0.5;
+            world_position(cell.x, cell.y)
+        };
+        let (from, to) = (center(from), center(to));
+        let steps = (from.distance(to) / 2.0).ceil().max(1.0) as usize;
+        let lift = channel.map_or(0.68, |channel| 0.3 + channel as f32 * 0.06);
+        let point_at = |fraction| {
+            let Vec2 { x, y: z } = from.lerp(to, fraction);
+            Vec3::new(x, terrain.height_at(x, z) + lift, z)
+        };
+        for step in 0..steps {
+            let start = step as f32 / steps as f32;
+            let end = (step as f32 + 0.55) / steps as f32;
+            if progress > start {
+                gizmos.line(
+                    point_at(start),
+                    point_at(end.min(progress)),
+                    Color::srgb_u8(255, 213, 127),
+                );
+            }
+            if progress < end {
+                gizmos.line(
+                    point_at(start.max(progress)),
+                    point_at(end),
+                    Color::srgb_u8(173, 177, 182),
+                );
+            }
+        }
+    }
+
     pub fn draw_network(&self, terrain: &Terrain, view: NetworkView, gizmos: &mut Gizmos) {
         let power = view == NetworkView::Power;
         let center = |node: &Node| {
