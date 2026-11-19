@@ -61,6 +61,8 @@ pub(super) struct WaterJob {
     retry: f64,
     #[serde(default)]
     waiting_for_access: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    automatic: bool,
 }
 
 impl WaterJob {
@@ -314,6 +316,7 @@ impl Construction {
                 work: 0.0,
                 retry: 0.0,
                 waiting_for_access: false,
+                automatic: false,
             },
         );
         Ok(())
@@ -917,8 +920,13 @@ impl Construction {
             } else {
                 None
             };
-            if let Some(action) = action {
-                let _ = self.queue_water(id, action);
+            if let Some(action) = action
+                && self.queue_water(id, action).is_ok()
+            {
+                self.water_jobs
+                    .get_mut(&id)
+                    .expect("queued water job")
+                    .automatic = true;
             }
         }
     }
@@ -974,6 +982,28 @@ impl Construction {
         }
     }
 
+    fn alternate_drinking_source(
+        &self,
+        worker: usize,
+        catalog: &Catalog,
+        site: ConstructionSite,
+        target: usize,
+        original: usize,
+    ) -> Option<(usize, VecDeque<Vec2>)> {
+        let destination = self.utilities.water_site(target)?;
+        let mut candidates: Vec<_> = self
+            .utilities
+            .water_sources()
+            .filter(|&(id, _, _)| id != target && id != original)
+            .map(|(id, location, _)| (location.distance_squared(destination.location), id))
+            .collect();
+        candidates.sort_unstable();
+        candidates.into_iter().find_map(|(_, id)| {
+            self.water_route(worker, catalog, site, id)
+                .map(|path| (id, path))
+        })
+    }
+
     fn step_water(
         &mut self,
         id: usize,
@@ -1026,6 +1056,7 @@ impl Construction {
                 })
                 .find_map(|index| {
                     attempted_route = true;
+                    let mut chosen_action = job.action;
                     let path = match (job.action, job.phase) {
                         (_, WaterPhase::Staged(point)) => self.resident_route(
                             catalog,
@@ -1039,21 +1070,42 @@ impl Construction {
                         (
                             WaterAction::Carry {
                                 source: Some(source),
-                                ..
+                                channel,
                             },
                             _,
-                        ) => self.water_route(index, catalog, site, source),
+                        ) => {
+                            let route = self
+                                .utilities
+                                .water_site(source)
+                                .filter(|node| {
+                                    !job.automatic || (node.enabled && node.levels[channel] >= 0.1)
+                                })
+                                .and_then(|_| self.water_route(index, catalog, site, source));
+                            route.or_else(|| {
+                                if !job.automatic || channel != 0 {
+                                    return None;
+                                }
+                                let (alternate, path) = self
+                                    .alternate_drinking_source(index, catalog, site, id, source)?;
+                                chosen_action = WaterAction::Carry {
+                                    source: Some(alternate),
+                                    channel,
+                                };
+                                Some(path)
+                            })
+                        }
                         _ => self.water_route(index, catalog, site, id),
                     }?;
-                    Some((index, path))
+                    Some((index, path, chosen_action))
                 });
-            let Some((index, path)) = picked else {
+            let Some((index, path, chosen_action)) = picked else {
                 if self.reservation_pass.is_none() {
                     job.waiting_for_access = attempted_route;
                 }
                 return false;
             };
             job.waiting_for_access = false;
+            job.action = chosen_action;
             self.residents[index].path = path;
             self.residents[index].leisure.visit = None;
             job.worker = Some(index);
@@ -1264,6 +1316,48 @@ mod tests {
             town.water_jobs[&1].action,
             WaterAction::Carry { channel: 0, .. }
         ));
+    }
+
+    #[test]
+    fn automatic_drinking_delivery_can_reselect_a_source_that_runs_dry() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut town = Construction::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        for (key, cell) in [("well", IVec2::new(42, 36)), ("coop", IVec2::new(48, 36))] {
+            let mut plan = town.proposed_site(&catalog, key, cell);
+            plan.work = catalog.projects[key].work;
+            town.plans.push(plan);
+        }
+        town.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        town.utilities.deliver_water(1, 0, 4.0);
+        town.queue_water(
+            2,
+            WaterAction::Carry {
+                source: Some(1),
+                channel: 0,
+            },
+        )
+        .unwrap();
+        town.water_jobs.get_mut(&2).unwrap().automatic = true;
+        town.utilities.take_water(Some(1), 0, 4.0);
+
+        town.tick_water_group(&catalog, &mut stock, site, 1.0, 0.1, None);
+        assert!(matches!(
+            town.water_jobs[&2].action,
+            WaterAction::Carry {
+                source: Some(0),
+                channel: 0
+            }
+        ));
+        assert!(town.water_jobs[&2].worker.is_some());
     }
 
     #[test]
