@@ -1203,9 +1203,11 @@ impl Utilities {
             if network == 0
                 && deficit > 0.0
                 && deficit <= grid + 1e-9
-                && self.grid_debt_cents + cost <= budget
+                && (stock.sandbox || self.grid_debt_cents + cost <= budget)
             {
-                self.grid_debt_cents += cost;
+                if !stock.sandbox {
+                    self.grid_debt_cents += cost;
+                }
                 self.grid_spent += cost;
                 grid -= deficit;
                 self.grid_import_kw += deficit / hours;
@@ -2339,6 +2341,41 @@ mod tests {
         assert!(utilities.nodes[&2].powered);
         assert!(!utilities.nodes[&1].powered);
         assert_eq!(stock.balance(), balance - 6);
+    }
+
+    #[test]
+    fn sandbox_grid_imports_are_metered_without_debiting_savings() {
+        let mut setup = WorldSetup::default();
+        setup.mode = crate::setup::Mode::Sandbox;
+        let mut stock = Stock::for_start(&setup, &Catalog::default());
+        let mut utilities = Utilities::default();
+        utilities.sync(std::iter::once(Facility {
+            id: 1,
+            kind: "workshop",
+            location: IVec2::new(44, 36),
+            size: IVec2::ONE,
+            batteries: 0,
+            panels: 0,
+            working: true,
+        }));
+        let balance = stock.balance();
+        let terrain = setup.terrain();
+        utilities.electricity(
+            &mut stock,
+            balance,
+            PowerStep {
+                sun: 1.0,
+                cloud: 0.0,
+                flow: 0.0,
+                rainfall: 0.0,
+                hours: 1.0,
+                terrain: &terrain,
+            },
+        );
+        assert!(utilities.nodes[&1].powered);
+        assert!((utilities.grid_import_total - 0.45).abs() < 1e-9);
+        assert_eq!(utilities.grid_debt_cents, 0.0);
+        assert_eq!(stock.balance(), balance);
     }
 
     #[test]
