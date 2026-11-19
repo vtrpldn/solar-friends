@@ -267,13 +267,13 @@ fn camera_controls(
     (motion, scroll): (Res<AccumulatedMouseMotion>, Res<AccumulatedMouseScroll>),
     window: Single<&Window, With<PrimaryWindow>>,
     time: Res<Time>,
-    (setup, mut village, saves, sound): (
+    (setup, village, saves, sound): (
         Res<WorldSetup>,
-        ResMut<village::Village>,
+        Res<village::Village>,
         Res<save_library::SaveMenu>,
         Res<audio::SoundSettings>,
     ),
-    mut camera: Single<(&mut Transform, &mut Projection, &mut VillageCamera)>,
+    mut camera: Single<(&mut Projection, &mut VillageCamera)>,
 ) {
     if setup.open
         || saves.open
@@ -285,7 +285,7 @@ fn camera_controls(
     {
         return;
     }
-    let (transform, projection, view) = &mut *camera;
+    let (projection, view) = &mut *camera;
     let Projection::Orthographic(ortho) = &mut **projection else {
         return;
     };
@@ -337,7 +337,6 @@ fn camera_controls(
     view.heading = view.heading.rem_euclid(std::f32::consts::TAU);
     view.target.x = view.target.x.clamp(-124.0, 124.0);
     view.target.z = view.target.z.clamp(-124.0, 124.0);
-    **transform = camera_transform(view.target, view.heading);
 
     let zoom = axis(
         [KeyCode::Minus, KeyCode::NumpadSubtract],
@@ -354,6 +353,21 @@ fn camera_controls(
     };
     let change = zoom * delta * 1.3 - wheel;
     ortho.scale = (ortho.scale * change.exp()).clamp(1.0 / 6.0, 1.0 / 0.18);
+}
+
+fn sync_camera_view(
+    setup: Res<WorldSetup>,
+    mut village: ResMut<village::Village>,
+    camera: Single<(&VillageCamera, &Projection, &mut Transform)>,
+) {
+    if setup.open {
+        return;
+    }
+    let (view, projection, mut transform) = camera.into_inner();
+    let Projection::Orthographic(ortho) = projection else {
+        return;
+    };
+    transform.set_if_neq(camera_transform(view.target, view.heading));
     let saved = village::CameraView {
         target: view.target,
         heading: view.heading,
@@ -531,6 +545,36 @@ mod tests {
             app.world().resource::<village::Village>().camp,
             Some(IVec2::new(36, 36))
         );
+        let requested_target = Vec3::new(14.0, 2.0, 5.0);
+        let world = app.world_mut();
+        let mut camera = world.query::<(&mut VillageCamera, &mut Projection)>();
+        let (mut view, mut projection) = camera.single_mut(world).unwrap();
+        let previous_target = view.target;
+        let previous_heading = view.heading;
+        view.target = requested_target;
+        view.heading = 0.75;
+        let Projection::Orthographic(ortho) = &mut *projection else {
+            panic!("expected orthographic camera")
+        };
+        let previous_zoom = ortho.scale;
+        ortho.scale = 1.5;
+        world.run_schedule(PostUpdate);
+        let mut camera = world.query_filtered::<&Transform, With<VillageCamera>>();
+        assert_eq!(
+            *camera.single(world).unwrap(),
+            camera_transform(requested_target, 0.75)
+        );
+        let saved = world.resource::<village::Village>().camera_view.unwrap();
+        assert_eq!(saved.target, requested_target);
+        assert_eq!(saved.heading, 0.75);
+        assert_eq!(saved.zoom, 1.5);
+        let mut camera = world.query::<(&mut VillageCamera, &mut Projection)>();
+        let (mut view, mut projection) = camera.single_mut(world).unwrap();
+        view.target = previous_target;
+        view.heading = previous_heading;
+        if let Projection::Orthographic(ortho) = &mut *projection {
+            ortho.scale = previous_zoom;
+        }
         app.world_mut().run_schedule(PostUpdate);
         app.world_mut()
             .resource_mut::<Time>()

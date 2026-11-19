@@ -79,7 +79,11 @@ impl Plugin for VillagePlugin {
         building_lighting::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
-        app.add_systems(PostUpdate, cultivation_surface::show_beds);
+        app.add_systems(PostUpdate, cultivation_surface::show_beds)
+            .add_systems(
+                PostUpdate,
+                crate::sync_camera_view.before(TransformSystems::Propagate),
+            );
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
             .init_resource::<MapNotice>()
