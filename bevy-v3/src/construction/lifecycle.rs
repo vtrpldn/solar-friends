@@ -34,6 +34,14 @@ pub(super) struct Destination {
     pub rotation: u8,
 }
 
+#[derive(Clone, Copy)]
+pub(crate) enum ProjectAction {
+    Prioritize,
+    Move,
+    Salvage,
+    Demolish,
+}
+
 impl Construction {
     pub fn working_change(&self, worker: usize) -> bool {
         self.changes.values().any(|job| job.worker == Some(worker))
@@ -72,18 +80,56 @@ impl Construction {
         stock: &mut Stock,
         keys: &ButtonInput<KeyCode>,
     ) {
+        let shift = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+        for (key, action) in [
+            (KeyCode::KeyZ, ProjectAction::Prioritize),
+            (KeyCode::KeyM, ProjectAction::Move),
+            (
+                KeyCode::KeyX,
+                if shift {
+                    ProjectAction::Demolish
+                } else {
+                    ProjectAction::Salvage
+                },
+            ),
+        ] {
+            if keys.just_pressed(key)
+                && (!matches!(action, ProjectAction::Move) || shift)
+                && self.project_action_available(catalog, action)
+            {
+                self.apply_project_action(catalog, stock, action);
+                break;
+            }
+        }
+    }
+
+    pub fn project_action_available(&self, catalog: &Catalog, action: ProjectAction) -> bool {
         if self.menu || self.moving.is_some() || self.production.open || self.farming.open {
+            return false;
+        }
+        self.production.selected.is_some_and(|index| {
+            let project = &self.plans[index];
+            !project.removed
+                && !self.changes.contains_key(&index)
+                && (!matches!(action, ProjectAction::Prioritize)
+                    || project.work < catalog.projects[&project.key].work)
+        })
+    }
+
+    pub fn apply_project_action(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        action: ProjectAction,
+    ) {
+        if !self.project_action_available(catalog, action) {
             return;
         }
         let Some(index) = self.production.selected else {
             return;
         };
         let project = &self.plans[index];
-        if project.removed || self.changes.contains_key(&index) {
-            return;
-        }
-        let finished = project.work >= catalog.projects[&project.key].work;
-        if keys.just_pressed(KeyCode::KeyZ) && !finished {
+        if matches!(action, ProjectAction::Prioritize) {
             self.priority = Some(index);
             for worker in &mut self.residents {
                 if worker
@@ -98,17 +144,11 @@ impl Construction {
             self.status = format!("{} prioritized.", catalog.projects[&project.key].name);
             return;
         }
-        let move_requested = keys.just_pressed(KeyCode::KeyM)
-            && keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
-        let salvage = keys.just_pressed(KeyCode::KeyX);
-        if !move_requested && !salvage {
-            return;
-        }
         if let Some(issue) = self.can_change(index) {
             self.status = issue.into();
             return;
         }
-        if move_requested {
+        if matches!(action, ProjectAction::Move) {
             if self.farming.plots.contains_key(&index) {
                 self.status = "Cultivated soil stays on its land.".into();
             } else {
@@ -123,7 +163,7 @@ impl Construction {
                 self.status = "Wait for the purchased supplies to arrive.".into();
                 return;
             }
-            let mode = if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+            let mode = if matches!(action, ProjectAction::Demolish) {
                 Change::Demolish
             } else {
                 Change::Salvage

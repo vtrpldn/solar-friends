@@ -9,6 +9,7 @@ mod lab_orders;
 pub(crate) use lab_orders::{LabOrder, LabStop};
 mod leisure;
 mod lifecycle;
+pub(crate) use lifecycle::ProjectAction;
 mod production_work;
 mod project_list;
 mod resident_work;

@@ -1,6 +1,6 @@
 use super::*;
 use crate::{
-    construction::{TradeOrder, TradePolicy},
+    construction::{ProjectAction, TradeOrder, TradePolicy},
     terrain::Brush,
     time_advance::AdvanceAction,
 };
@@ -27,6 +27,7 @@ enum Action {
     ClosePanel,
     Page(bool),
     Project(usize),
+    SelectedProject(ProjectAction),
     TradeItem(usize),
     Trade(TradeOrder),
     TradePolicy(TradePolicy),
@@ -119,6 +120,7 @@ impl Action {
             Self::AutomaticUpkeep | Self::UpkeepBudget { .. } => {
                 village.utility_panel == Some(UtilityPanel::Upkeep)
             }
+            Self::SelectedProject(_) => village.utility_panel.is_none(),
             Self::TradeItem(_) | Self::Trade(_) | Self::TradePolicy(_) => village.trade_open(),
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
@@ -209,6 +211,13 @@ impl Action {
             Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
             Self::ProjectFilter => "Show underway".into(),
             Self::Project(_) | Self::TradeItem(_) => String::new(),
+            Self::SelectedProject(action) => match action {
+                ProjectAction::Prioritize => "Prioritize project",
+                ProjectAction::Move => "Move building",
+                ProjectAction::Salvage => "Cancel or salvage",
+                ProjectAction::Demolish => "Demolish",
+            }
+            .into(),
             Self::Trade(TradeOrder::Buy { freight: false }) => "Buy for pickup".into(),
             Self::Trade(TradeOrder::Buy { freight: true }) => "Buy for delivery".into(),
             Self::Trade(TradeOrder::Sell) => "Reserve sale".into(),
@@ -360,6 +369,14 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     AdvanceAction::Start,
                 ] {
                     spawn_button(menu, &assets, Action::Advance(action));
+                }
+                for action in [
+                    ProjectAction::Prioritize,
+                    ProjectAction::Move,
+                    ProjectAction::Salvage,
+                    ProjectAction::Demolish,
+                ] {
+                    spawn_button(menu, &assets, Action::SelectedProject(action));
                 }
                 for brush in [Brush::Raise, Brush::Lower, Brush::Flatten, Brush::Smooth] {
                     spawn_button(menu, &assets, Action::TerrainBrush(brush));
@@ -609,8 +626,14 @@ fn handle_buttons(
                 Action::TradePolicy(policy) if !picker.open => {
                     village.construction.adjust_trade_policy(&catalog, policy);
                 }
+                Action::SelectedProject(action) if !picker.open => {
+                    let town = &mut *village;
+                    town.construction
+                        .apply_project_action(&catalog, &mut town.stock, action);
+                }
                 Action::Panel(_)
                 | Action::Project(_)
+                | Action::SelectedProject(_)
                 | Action::TradeItem(_)
                 | Action::Trade(_)
                 | Action::TradePolicy(_)
@@ -662,6 +685,11 @@ fn refresh(
     if toolbar.display == Display::None {
         return;
     }
+    let show_selected_project = !picker.open
+        && Action::SelectedProject(ProjectAction::Salvage).available(&village)
+        && village
+            .construction
+            .project_action_available(&catalog, ProjectAction::Salvage);
     let show_advance = Action::Advance(AdvanceAction::Start).available(&village);
     let show_terrain = Action::UndoTerrain.available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
@@ -696,7 +724,8 @@ fn refresh(
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
     picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.0));
-    menu.display = if show_advance
+    menu.display = if show_selected_project
+        || show_advance
         || show_terrain
         || show_field_size
         || show_projects
@@ -732,6 +761,12 @@ fn refresh(
                 show_terrain
             }
             Action::Project(row) => projects.get(row).is_some(),
+            Action::SelectedProject(action) => {
+                show_selected_project
+                    && village
+                        .construction
+                        .project_action_available(&catalog, action)
+            }
             Action::TradeItem(row) => trade_items.get(row).is_some(),
             Action::Trade(_) | Action::TradePolicy(_) => show_trade,
             Action::ProjectFilter => show_projects,
