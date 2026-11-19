@@ -136,9 +136,10 @@ fn animate(
     setup: Option<Res<WorldSetup>>,
     village: Option<Res<Village>>,
     (rehearsals, previews): (Query<&RehearsalPose>, Query<&PreviewPose>),
-    (clips, catalog): (
-        Res<Assets<AnimationClip>>,
+    clips: Res<Assets<AnimationClip>>,
+    (catalog, land): (
         Option<Res<crate::catalog::Catalog>>,
+        Option<Res<crate::land::Land>>,
     ),
     library: Res<Library>,
     mut players: Query<(
@@ -153,9 +154,11 @@ fn animate(
             (preview.0, true)
         } else if let Ok(rehearsal) = rehearsals.get(resident.actor) {
             (rehearsal.0, rehearsal.1)
-        } else if let (Some(setup), Some(village), Some(catalog)) = (&setup, &village, &catalog) {
+        } else if let (Some(setup), Some(village), Some(catalog), Some(land)) =
+            (&setup, &village, &catalog, &land)
+        {
             (
-                village.motion(resident.index, catalog),
+                village.motion(resident.index, catalog, land),
                 setup.open || village.is_paused(),
             )
         } else {

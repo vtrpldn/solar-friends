@@ -147,6 +147,7 @@ impl Construction {
         &self,
         catalog: &Catalog,
         terrain: &Terrain,
+        land: &Land,
         hovered: Option<IVec2>,
         gizmos: &mut Gizmos,
     ) -> String {
@@ -226,7 +227,7 @@ impl Construction {
             {
                 continue;
             }
-            let carrying = self.resident_motion(index, catalog)
+            let carrying = self.resident_motion(index, catalog, land)
                 == crate::resident_animation::Motion::CarryWalk;
             let color = if carrying {
                 Color::srgb_u8(255, 151, 85)

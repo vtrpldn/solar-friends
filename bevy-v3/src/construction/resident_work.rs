@@ -1133,7 +1133,7 @@ impl Construction {
         Motion::Chat
     }
 
-    pub fn resident_motion(&self, index: usize, catalog: &Catalog) -> Motion {
+    pub fn resident_motion(&self, index: usize, catalog: &Catalog, land: &Land) -> Motion {
         let worker = &self.residents[index];
         if let Some(task) = &worker.health.task {
             if !worker.path.is_empty() {
@@ -1178,20 +1178,42 @@ impl Construction {
                 {
                     Motion::CarryWalk
                 }
+                crate::production::Phase::Work
+                    if matches!(
+                        catalog.production[&job.recipe].kind.as_str(),
+                        "garden"
+                            | "greenhouse"
+                            | "orchard"
+                            | "grove"
+                            | "coop"
+                            | "goat_pasture"
+                            | "compost"
+                            | "apiary"
+                    ) =>
+                {
+                    Motion::Tend
+                }
                 crate::production::Phase::Work => Motion::Work,
                 _ if !worker.path.is_empty() => Motion::Walk,
                 _ => Motion::Idle,
             };
         }
-        if let Some(job) = self
+        if let Some((&site, job)) = self
             .gathering
             .orders
-            .values()
-            .find(|job| job.worker == Some(index))
+            .iter()
+            .find(|(_, job)| job.worker == Some(index))
         {
             return match job.phase {
                 GatherPhase::Return => Motion::CarryWalk,
-                GatherPhase::Work => Motion::Chop,
+                GatherPhase::Work
+                    if land
+                        .site(site)
+                        .is_some_and(|site| site.recipe() == "fell_tree") =>
+                {
+                    Motion::Chop
+                }
+                GatherPhase::Work => Motion::Tend,
                 _ => Motion::Walk,
             };
         }
@@ -1820,7 +1842,10 @@ mod tests {
                 conversation: Some(Conversation::interest("growing")),
             });
         }
-        assert!(matches!(village.resident_motion(0, &catalog), Motion::Look));
+        assert!(matches!(
+            village.resident_motion(0, &catalog, &Land::default()),
+            Motion::Look
+        ));
         assert_eq!(
             village.resident_visual_yaw(0, &catalog),
             std::f32::consts::FRAC_PI_2
@@ -1832,24 +1857,30 @@ mod tests {
         for worker in &mut village.residents[..2] {
             worker.health.task.as_mut().unwrap().elapsed = 1.;
         }
-        assert!(matches!(village.resident_motion(1, &catalog), Motion::Wave));
+        assert!(matches!(
+            village.resident_motion(1, &catalog, &Land::default()),
+            Motion::Wave
+        ));
         for worker in &mut village.residents[..2] {
             worker.health.task.as_mut().unwrap().elapsed = 3.;
         }
-        assert!(matches!(village.resident_motion(0, &catalog), Motion::Chat));
         assert!(matches!(
-            village.resident_motion(1, &catalog),
+            village.resident_motion(0, &catalog, &Land::default()),
+            Motion::Chat
+        ));
+        assert!(matches!(
+            village.resident_motion(1, &catalog, &Land::default()),
             Motion::Listen
         ));
         for worker in &mut village.residents[..2] {
             worker.health.task.as_mut().unwrap().elapsed = 13.;
         }
         assert!(matches!(
-            village.resident_motion(0, &catalog),
+            village.resident_motion(0, &catalog, &Land::default()),
             Motion::Listen
         ));
         assert!(matches!(
-            village.resident_motion(1, &catalog),
+            village.resident_motion(1, &catalog, &Land::default()),
             Motion::Laugh
         ));
         village.residents[1]
@@ -1861,7 +1892,37 @@ mod tests {
             resident: 0,
             reason: "I need rest".into(),
         });
-        assert!(matches!(village.resident_motion(1, &catalog), Motion::Chat));
+        assert!(matches!(
+            village.resident_motion(1, &catalog, &Land::default()),
+            Motion::Chat
+        ));
+    }
+
+    #[test]
+    fn gathering_uses_an_axe_only_when_felling_a_tree() {
+        let catalog = Catalog::default();
+        let land = Land::generate(&WorldSetup::default());
+        let mut village = Construction::default();
+        for (recipe, expected) in [("fell_tree", Motion::Chop), ("stone", Motion::Tend)] {
+            let (site, _) = land
+                .sites()
+                .find(|(_, site)| site.recipe() == recipe)
+                .unwrap();
+            village.gathering.orders.insert(
+                site,
+                crate::gathering::GatherJob {
+                    worker: Some(0),
+                    work: 0.,
+                    retry_at: 0.,
+                    waiting_for_access: false,
+                    phase: GatherPhase::Work,
+                    remaining: None,
+                    food_output: None,
+                },
+            );
+            assert!(village.resident_motion(0, &catalog, &land) == expected);
+            village.gathering.orders.clear();
+        }
     }
 
     #[test]
@@ -1922,7 +1983,7 @@ mod tests {
             conversation: None,
         });
         assert!(matches!(
-            village.resident_motion(0, &catalog),
+            village.resident_motion(0, &catalog, &Land::default()),
             Motion::DuckWalk
         ));
         let (position, visible) = village.resident_visual_position(0, &catalog);
@@ -1940,7 +2001,7 @@ mod tests {
             (original, true)
         );
         assert!(matches!(
-            village.resident_motion(0, &catalog),
+            village.resident_motion(0, &catalog, &Land::default()),
             Motion::Toilet
         ));
     }
@@ -1970,7 +2031,10 @@ mod tests {
         village.residents[0].path.clear();
         village.residents[0].position = Vec2::new(42.0, 36.0);
         assert!(village.recreation_spot_taken(1, IVec2::new(42, 36)));
-        assert!(matches!(village.resident_motion(0, &catalog), Motion::Read));
+        assert!(matches!(
+            village.resident_motion(0, &catalog, &Land::default()),
+            Motion::Read
+        ));
         assert_eq!(village.resident_action(&catalog, 0), "Reading for a while");
         village.step_need(0, &catalog, &mut stock, site, 22.0, 22.0);
         assert!(

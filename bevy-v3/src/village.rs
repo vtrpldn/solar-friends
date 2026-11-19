@@ -829,9 +829,9 @@ impl Village {
         }
     }
 
-    pub fn motion(&self, index: usize, catalog: &Catalog) -> Motion {
+    pub fn motion(&self, index: usize, catalog: &Catalog, land: &Land) -> Motion {
         if self.camp.is_some() {
-            return self.construction.resident_motion(index, catalog);
+            return self.construction.resident_motion(index, catalog, land);
         }
         if self.arrival_time < ARRIVAL_DURATION && resident_pose(self.arrival_time, index).visible {
             let now = resident_pose(self.arrival_time, index).position;
@@ -2596,6 +2596,7 @@ fn draw_blueprints(
             Some(MapLens::Access) => Some(village.construction.draw_access_lens(
                 &catalog,
                 &terrain,
+                &land,
                 pointer.hovered.map(|hit| hit.cell),
                 &mut gizmos,
             )),
