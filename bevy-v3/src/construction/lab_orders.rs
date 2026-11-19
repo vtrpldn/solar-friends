@@ -563,12 +563,16 @@ impl Construction {
                         "A crop has failed or expired."
                     })
             }
-            LabStop::Blocked => self
+            LabStop::Blocked => (self
                 .production
                 .jobs
                 .iter()
                 .any(|job| job.waiting_for_access && job.retry_at > clock)
-                .then_some("A job is waiting for access."),
+                || self
+                    .residents
+                    .iter()
+                    .any(|worker| worker.blocked_construction_project().is_some()))
+            .then_some("A job is waiting for access."),
             LabStop::Hydration => {
                 (self.minimum_hydration() < 20.0).then_some("A resident has urgent thirst.")
             }

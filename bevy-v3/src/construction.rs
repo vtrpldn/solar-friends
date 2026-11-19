@@ -364,6 +364,12 @@ impl Default for Construction {
 }
 
 impl Worker {
+    fn blocked_construction_project(&self) -> Option<usize> {
+        let job = self.assignment.as_ref()?;
+        (self.paused_waypoint.is_some() && self.paused_waypoint.as_ref() == self.path.front())
+            .then_some(job.project)
+    }
+
     fn work_multiplier(&self, profile: &crate::catalog::Profile, project: &str) -> f64 {
         let skill = if profile.strengths.iter().any(|key| key == project) {
             1.25
@@ -2894,6 +2900,9 @@ mod tests {
         village
             .plans
             .push(village.proposed_site(&catalog, "supply-5", obstacle));
+        village
+            .plans
+            .push(village.proposed_site(&catalog, "gathering", IVec2::new(45, 37)));
         village.residents[0].position = IVec2::new(44, 36).as_vec2();
         village.residents[0].path = VecDeque::from([obstacle.as_vec2(), goal.as_vec2()]);
         village.refresh_construction_route(0, &catalog, site);
@@ -2907,6 +2916,25 @@ mod tests {
         worker.move_along_path(1.0, false);
         assert_eq!(worker.position, position);
         assert!(!worker.path.is_empty());
+        worker.assignment = Some(Assignment {
+            project: 1,
+            spot: obstacle,
+            activity: Activity::Walk,
+            to_site: VecDeque::new(),
+            haul: Haul::Direct,
+        });
+        assert_eq!(worker.blocked_construction_project(), Some(1));
+        assert_eq!(village.project_status(&catalog, 1), "Waiting for access");
+        assert_eq!(
+            village.lab_stop_reason(LabStop::Blocked, 0.0),
+            Some("A job is waiting for access.")
+        );
+        village.plans[0].removed = true;
+        village.refresh_construction_route(0, &catalog, site);
+        assert_eq!(village.lab_stop_reason(LabStop::Blocked, 0.0), None);
+        let worker = &mut village.residents[0];
+        worker.move_along_path(1.0, false);
+        assert_ne!(worker.position, position);
     }
 
     #[test]

@@ -73,7 +73,13 @@ impl Construction {
     pub(super) fn project_status(&self, catalog: &Catalog, index: usize) -> String {
         let plan = &self.plans[index];
         let def = &catalog.projects[&plan.key];
-        if self.changes.contains_key(&index) {
+        if self
+            .residents
+            .iter()
+            .any(|worker| worker.blocked_construction_project() == Some(index))
+        {
+            "Waiting for access".into()
+        } else if self.changes.contains_key(&index) {
             "Changes queued".to_owned()
         } else if plan.work >= def.work {
             "Complete".to_owned()
