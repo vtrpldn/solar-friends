@@ -17,7 +17,7 @@ const TOPICS: [(&str, &str); 7] = [
         "Camera and building",
         "WASD / Arrow keys · Pan     Shift · Pan faster\n\
          Q / E or right drag · Rotate     Scroll · Zoom\n\
-         Home · Camp     End · River bend     Shift+Home · Reset view\n\
+         Home · Camp     End · River bend     Shift+End · Whole plot     Shift+Home · Reset view\n\
          B · Build     R · Rotate the current placement\n\
          F4 · Terrain tools     F11 · Find a project     Shift+G · Grid\n\
          In road planning, Shift-click extends and Z undoes the last stroke.",

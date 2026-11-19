@@ -40,6 +40,7 @@ use setup::{WorldSetup, WorldSetupPlugin};
 
 const CAMERA_HOME: Vec3 = Vec3::new(-26.0, 3.0, -12.0);
 const CAMERA_HEIGHT: f32 = 40.0;
+const CAMERA_MAX_ZOOM_OUT: f32 = 8.0;
 const CAMERA_DISTANCE: f32 = 512.0;
 const CAMERA_FAR: f32 = CAMERA_DISTANCE + 512.0;
 const CAMERA_POLAR_LIMITS: std::ops::RangeInclusive<f32> = 0.25..=std::f32::consts::PI * 0.46;
@@ -342,7 +343,12 @@ fn camera_controls(
         apply_camera_action(action, &village, &setup, view, ortho);
     }
     if keyboard_navigation && keyboard.just_pressed(KeyCode::End) {
-        apply_camera_action(CameraAction::River, &village, &setup, view, ortho);
+        let action = if shift {
+            CameraAction::Overview
+        } else {
+            CameraAction::River
+        };
+        apply_camera_action(action, &village, &setup, view, ortho);
     }
     let axis = |positive: &[KeyCode], negative: &[KeyCode]| {
         if keyboard_navigation {
@@ -414,7 +420,7 @@ fn camera_controls(
         0.0
     };
     let change = zoom * delta * 1.3 - wheel + dolly;
-    ortho.scale = (ortho.scale * change.exp()).clamp(1.0 / 6.0, 1.0 / 0.18);
+    ortho.scale = (ortho.scale * change.exp()).clamp(1.0 / 6.0, CAMERA_MAX_ZOOM_OUT);
 }
 
 fn sync_camera_view(
@@ -446,6 +452,7 @@ enum CameraAction {
     Camp,
     Reset,
     River,
+    Overview,
     Turn(bool),
     Zoom(bool),
 }
@@ -477,6 +484,12 @@ fn apply_camera_action(
             };
             camera.target = Vec3::new(x, terrain.height_at(x, 0.0), 0.0);
         }
+        CameraAction::Overview => {
+            camera.target = Vec3::ZERO;
+            camera.heading = std::f32::consts::TAU - std::f32::consts::FRAC_PI_4;
+            camera.polar = *CAMERA_POLAR_LIMITS.start();
+            projection.scale = CAMERA_MAX_ZOOM_OUT;
+        }
         CameraAction::Turn(right) => {
             let quarter = std::f32::consts::FRAC_PI_2;
             camera.heading += if right { quarter } else { -quarter };
@@ -487,7 +500,7 @@ fn apply_camera_action(
             } else {
                 projection.scale * 1.2
             };
-            projection.scale = scale.clamp(1.0 / 6.0, 1.0 / 0.18);
+            projection.scale = scale.clamp(1.0 / 6.0, CAMERA_MAX_ZOOM_OUT);
         }
     }
 }
@@ -557,6 +570,32 @@ mod tests {
             .advance_by(std::time::Duration::from_millis(100));
         world.run_schedule(FixedUpdate);
         world.run_schedule(PostUpdate);
+    }
+
+    #[test]
+    fn whole_plot_camera_frames_the_terrain_in_a_square_viewport() {
+        let mut view = VillageCamera {
+            target: CAMERA_HOME,
+            heading: 0.0,
+            polar: default_camera_polar(),
+        };
+        let mut projection = OrthographicProjection::default_3d();
+        apply_camera_action(
+            CameraAction::Overview,
+            &village::Village::default(),
+            &WorldSetup::default(),
+            &mut view,
+            &mut projection,
+        );
+        let camera = camera_transform(view.target, view.heading, view.polar);
+        let half_view = CAMERA_HEIGHT * projection.scale * 0.5;
+        for x in [-128.0, 128.0] {
+            for z in [-128.0, 128.0] {
+                let point =
+                    camera.rotation.inverse() * (Vec3::new(x, 12.0, z) - camera.translation);
+                assert!(point.x.abs() < half_view && point.y.abs() < half_view);
+            }
+        }
     }
 
     #[test]

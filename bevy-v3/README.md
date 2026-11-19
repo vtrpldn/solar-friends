@@ -8,7 +8,7 @@ cargo run --locked --manifest-path bevy-v3/Cargo.toml
 
 Pass `-- --play` to open the default Story plot directly.
 
-Choose Story or Sandbox, a biome, landscape, water availability, resource richness, land seed, starting savings, supplies, and distance to town, then select **Enter village**. Pan with WASD, the arrow keys, or left drag. Hold Shift to pan faster. Rotate with Q/E or right drag horizontally, and right drag vertically to tilt. Zoom with the wheel, middle drag, or +/−. Press Home to center on camp, Shift+Home to reset the camera, and Escape to return to setup.
+Choose Story or Sandbox, a biome, landscape, water availability, resource richness, land seed, starting savings, supplies, and distance to town, then select **Enter village**. Pan with WASD, the arrow keys, or left drag. Hold Shift to pan faster. Rotate with Q/E or right drag horizontally, and right drag vertically to tilt. Zoom with the wheel, middle drag, or +/−. Press Home to center on camp, Shift+Home to reset the camera, Shift+End to frame the whole plot, and Escape to return to setup.
 
 After the cars arrive, click the ground to place camp or select a preset with 1 (shade), 2 (entrance), or 3 (clearing). Press Space to pause or resume the village clock. After placing camp, press B to open the build catalog. Use Tab for categories and Page Up/Down to browse. Select a blueprint with its number key, R to rotate it, and click the plot to reserve materials and mark the site. Residents carry each reserved load to the site before assembly. The project model appears when they finish. Select a project to prioritize or cancel an unstarted plan, or to queue relocation, salvage, or demolition.
 

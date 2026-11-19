@@ -145,7 +145,7 @@ impl CameraView {
             && self.target.y.abs() <= 128.0
             && self.heading.is_finite()
             && crate::CAMERA_POLAR_LIMITS.contains(&self.polar)
-            && (1.0 / 6.0..=1.0 / 0.18).contains(&self.zoom)
+            && (1.0 / 6.0..=crate::CAMERA_MAX_ZOOM_OUT).contains(&self.zoom)
     }
 }
 
