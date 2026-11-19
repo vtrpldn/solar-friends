@@ -30,7 +30,7 @@ impl Construction {
         catalog: &Catalog,
         setup: &WorldSetup,
         clock: f64,
-        days: u16,
+        days: f64,
     ) -> String {
         use std::fmt::Write;
         if setup.mode == crate::setup::Mode::Sandbox {
@@ -56,6 +56,11 @@ impl Construction {
                             site + 1,
                             index + 1
                         ),
+                        if remaining == 0.0 {
+                            "Queue harvesting before advancing time."
+                        } else {
+                            "Estimated from current soil and seasonal conditions. Residents still need to harvest."
+                        },
                     ));
                 }
             }
@@ -88,6 +93,11 @@ impl Construction {
                         project.name,
                         site + 1
                     ),
+                    if remaining == 0.0 {
+                        "Residents can collect now."
+                    } else {
+                        "Estimated from current growing conditions. Residents still need to collect."
+                    },
                 ));
             }
         }
@@ -98,7 +108,11 @@ impl Construction {
             };
             let name = &project.name;
             let available = pen.available();
-            let product = &catalog.materials[&ration.product].name;
+            let (product, next_unit) = if ration.product == "eggs" {
+                ("eggs", "next egg laid")
+            } else {
+                ("L of milk", "next litre of milk ready")
+            };
             if available > 0 {
                 events.push((
                     0.0,
@@ -106,12 +120,18 @@ impl Construction {
                         "{name} #{} · {available} {product} ready to collect",
                         site + 1
                     ),
+                    "Residents can collect now.",
                 ));
             }
             if let Some(remaining) = pen.next_unit_days(ration) {
                 events.push((
                     remaining,
-                    format!("{name} #{} · Next unit of {product}", site + 1),
+                    format!("{name} #{} · {next_unit}", site + 1),
+                    if remaining.is_finite() {
+                        "Estimated from animal health, feed, and drinking water. Residents still need to collect."
+                    } else {
+                        "Replenish feed and drinking water to continue production."
+                    },
                 ));
             }
         }
@@ -124,9 +144,12 @@ impl Construction {
         if events.is_empty() {
             label.push_str("\nNo upcoming milestones.");
         }
-        for (remaining, event) in events.into_iter().take(8) {
+        if events.len() > 8 {
+            let _ = write!(label, " · Showing 8 of {}", events.len());
+        }
+        for (remaining, event, detail) in events.into_iter().take(8) {
             let when = if !remaining.is_finite() {
-                "Needs feed and water".into()
+                "Needs care".into()
             } else if remaining == 0.0 {
                 "Now".into()
             } else if remaining < 1.0 {
@@ -134,12 +157,12 @@ impl Construction {
             } else {
                 format!("About {remaining:.1} days")
             };
-            let outside = if remaining.is_finite() && remaining > f64::from(days) {
+            let outside = if remaining.is_finite() && remaining > days {
                 " · After advance"
             } else {
                 ""
             };
-            let _ = write!(label, "\n{when} · {event}{outside}");
+            let _ = write!(label, "\n{when} · {event}{outside} · {detail}");
         }
         label
     }

@@ -93,6 +93,12 @@ impl Advance {
         self.result = format!("Advanced {} day(s). The village is paused.", self.days);
     }
 
+    pub fn remaining_days(&self) -> f64 {
+        self.running.as_ref().map_or(f64::from(self.days), |run| {
+            (run.total - run.steps) as f64 * run.dt / DAY
+        })
+    }
+
     pub fn status(&self) -> String {
         if let Some(run) = &self.running {
             return format!(
