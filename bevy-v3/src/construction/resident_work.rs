@@ -850,6 +850,26 @@ impl Construction {
         clock: f64,
         dt: f32,
     ) {
+        let unavailable = self.residents[index]
+            .health
+            .task
+            .as_ref()
+            .filter(|task| {
+                matches!(
+                    task.kind,
+                    Need::Hydration | Need::Hygiene | Need::Bladder | Need::Bowels | Need::Fun
+                )
+            })
+            .and_then(|task| task.facility?.checked_sub(1))
+            .is_some_and(|site| {
+                !self.utilities.enabled(site)
+                    || self.changes.contains_key(&site)
+                    || self.plans.get(site).is_some_and(|plan| plan.removed)
+            });
+        if unavailable {
+            self.cancel_need(index, clock + 5.0);
+            return;
+        }
         let resident = &mut self.residents[index];
         let mut task = resident.health.task.take().expect("active resident task");
         resident.move_along_path(dt, task.returning);
@@ -1684,6 +1704,47 @@ mod tests {
                 .0,
             Some(2)
         );
+    }
+
+    #[test]
+    fn a_drinking_trip_releases_a_source_that_switches_off() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        village.utilities.sync(
+            [crate::utilities::Facility {
+                id: 1,
+                kind: "well",
+                location: IVec2::new(44, 36),
+                size: IVec2::ONE,
+                batteries: 0,
+                panels: 0,
+                working: false,
+            }]
+            .into_iter(),
+        );
+        assert_eq!(village.utilities.deliver_water(1, 0, 10.0), 10.0);
+        village.residents[0].position = Vec2::new(42.0, 36.0);
+        village.residents[0].health.levels[Need::Hydration as usize] = 40.0;
+        village.choose_need(0, &catalog, &stock, site, 0.0);
+        assert_eq!(
+            village.residents[0].health.task.as_ref().unwrap().facility,
+            Some(1)
+        );
+
+        village.utilities.toggle(0);
+        village.tick_health(&catalog, &setup, &mut stock, site, 1.0, 0.1);
+        assert!(village.residents[0].health.task.is_none());
+        assert!(village.residents[0].path.is_empty());
+        assert_eq!(village.residents[0].health.retry_at, 6.0);
     }
 
     #[test]
