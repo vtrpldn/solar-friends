@@ -52,6 +52,13 @@ fn default_camera_polar() -> f32 {
 fn main() {
     let mut args = std::env::args_os().skip(1);
     let option = args.next();
+    if option
+        .as_deref()
+        .is_some_and(|flag| flag == "--asset-garden")
+    {
+        workshop::garden::run(args.next().map(std::path::PathBuf::from));
+        return;
+    }
     if option.as_deref().is_some_and(|flag| flag == "--workshop") {
         workshop::run();
         return;

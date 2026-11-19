@@ -1,3 +1,5 @@
+pub mod garden;
+
 mod model_export;
 mod sprites;
 

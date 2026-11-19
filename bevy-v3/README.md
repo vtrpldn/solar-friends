@@ -163,3 +163,7 @@ Pass `--workshop` to inspect the full bundled V2 asset collection. Use **←/→
 Drag to orbit, right-drag to pan, and scroll to zoom. Press **H** to show a resident beside the model for scale, and **M** to switch between original materials, clay, and wireframe. Press **T** to remove the roof from models with an authored interior. Sprite sheets always include the roof.
 
 Press **F5** to export the current workshop view as a PNG without the controls overlay. A JSON sidecar records the model, footprint, lighting, and camera settings. The workshop shows the saved path. Press **F6** for a transparent four-view sheet and placement JSON with fixed camera and anchors. Press **F7** to preview the same sprite sheet inside the Workshop. Press **F8** in the model view to export the selected asset as a standalone GLB.
+
+### Asset Garden
+
+Pass `--asset-garden` to open the native flat V2 gallery. For a separate layout, pass a V2 flat scene JSON path as the next argument. The controls overlay lists selection, placement, rotation, undo, and save shortcuts. Saving without a path writes `solar-friends-asset-garden.json` in the current directory.
