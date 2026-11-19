@@ -239,6 +239,17 @@ fn compare_replay(runner: &Runner, expected: serde_json::Value, version: u64) ->
 }
 
 const STEP: f64 = 0.1;
+const SPEEDS: [(KeyCode, u16); 9] = [
+    (KeyCode::Digit1, 1),
+    (KeyCode::Digit2, 4),
+    (KeyCode::Digit3, 16),
+    (KeyCode::Digit4, 32),
+    (KeyCode::Digit5, 64),
+    (KeyCode::Digit6, 128),
+    (KeyCode::Digit7, 256),
+    (KeyCode::Digit8, 512),
+    (KeyCode::Digit9, 1024),
+];
 const SAMPLE_LIMIT: usize = 2160;
 
 #[derive(Resource)]
@@ -756,11 +767,31 @@ fn toggle_label(enabled: bool) -> &'static str {
     if enabled { "Enable" } else { "Disable" }
 }
 
+#[derive(Default)]
+struct SpeedMeter {
+    wall_seconds: f64,
+    steps: u64,
+    actual: Option<f64>,
+}
+
+impl SpeedMeter {
+    fn observe(&mut self, elapsed: f64, steps: u64) {
+        self.wall_seconds += elapsed;
+        self.steps += steps;
+        if self.wall_seconds >= 0.5 {
+            self.actual = Some(self.steps as f64 * STEP / self.wall_seconds);
+            self.wall_seconds = 0.0;
+            self.steps = 0;
+        }
+    }
+}
+
 struct Playback {
     running: bool,
     replaying: bool,
     speed: usize,
     debt: f64,
+    speed_meter: SpeedMeter,
     order: Option<String>,
     notice: String,
     view: LabView,
@@ -771,13 +802,42 @@ struct Playback {
     clear_confirmation: Option<(usize, Option<usize>)>,
 }
 
+impl Playback {
+    fn set_speed(&mut self, index: usize) {
+        self.speed = index;
+        self.reset_timing();
+    }
+
+    fn reset_timing(&mut self) {
+        self.debt = 0.0;
+        self.speed_meter = SpeedMeter::default();
+    }
+
+    fn speed_label(&self) -> String {
+        let target = SPEEDS[self.speed].1;
+        let measured = self.speed_meter.actual.filter(|_| self.running);
+        match measured {
+            Some(actual) => {
+                let limited = if self.debt > 1.0 && actual < f64::from(target) {
+                    " · CPU limited"
+                } else {
+                    ""
+                };
+                format!("Actual {actual:.1}× / target {target}×{limited}")
+            }
+            None => format!("Target {target}×"),
+        }
+    }
+}
+
 impl Default for Playback {
     fn default() -> Self {
         Self {
             running: false,
             replaying: false,
-            speed: 2,
+            speed: 5,
             debt: 0.0,
+            speed_meter: SpeedMeter::default(),
             order: None,
             notice: String::new(),
             view: LabView::default(),
@@ -965,7 +1025,7 @@ fn lab_bed_page(
 fn update_lab_window(
     mut runner: ResMut<Runner>,
     catalog: Res<Catalog>,
-    time: Res<Time>,
+    time: Res<Time<bevy::time::Real>>,
     (keys, mut events): (
         Res<ButtonInput<KeyCode>>,
         MessageReader<bevy::input::keyboard::KeyboardInput>,
@@ -1012,7 +1072,7 @@ fn update_lab_window(
         events.clear();
         if keys.just_pressed(KeyCode::KeyO) && !reached_end(&runner) && !playback.replaying {
             playback.running = false;
-            playback.debt = 0.0;
+            playback.reset_timing();
             playback.notice.clear();
             playback.clear_confirmation = None;
             playback.order = Some(String::new());
@@ -1072,39 +1132,32 @@ fn update_lab_window(
     } else if keys.just_pressed(KeyCode::PageUp) {
         playback.inventory_page = playback.inventory_page.saturating_sub(1);
     }
-    let rates = [1, 8, 32, 128];
-    for (index, key) in [
-        KeyCode::Digit1,
-        KeyCode::Digit2,
-        KeyCode::Digit3,
-        KeyCode::Digit4,
-    ]
-    .into_iter()
-    .enumerate()
-    {
+    for (index, (key, _)) in SPEEDS.into_iter().enumerate() {
         if keys.just_pressed(key)
             && !(playback.view == LabView::Beds
                 && keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]))
         {
-            playback.speed = index;
-            playback.debt = 0.0;
+            playback.set_speed(index);
         }
     }
     if keys.just_pressed(KeyCode::Space) && !reached_end(&runner) {
         playback.running = !playback.running;
-        playback.debt = 0.0;
+        playback.reset_timing();
     }
     if keys.just_pressed(KeyCode::KeyJ) && !playback.running && !reached_end(&runner) {
         runner.advance(&catalog);
     }
     if playback.running {
-        let speed = f64::from(rates[playback.speed]);
-        playback.debt = (playback.debt + time.delta_secs_f64().min(0.25) * speed).min(speed * 2.0);
+        let speed = f64::from(SPEEDS[playback.speed].1);
+        let elapsed = time.delta_secs_f64();
+        playback.debt = (playback.debt + elapsed.min(0.25) * speed).min(speed * 2.0);
+        let before = runner.index;
         let start = std::time::Instant::now();
         while playback.debt >= STEP && !reached_end(&runner) && start.elapsed().as_millis() < 8 {
             runner.advance(&catalog);
             playback.debt -= STEP;
         }
+        playback.speed_meter.observe(elapsed, runner.index - before);
     }
     if reached_end(&runner) {
         playback.running = false;
@@ -1280,8 +1333,8 @@ fn update_lab_window(
             )
         };
         panel.set_if_neq(Text::new(format!(
-            "Simulation lab · {status} · Step {} / {}\nSpace Run/Pause · J Single step · {order_control}F5 Report · F6 Checkpoint\n{}\n\n{details}",
-            runner.index, limit, playback.notice,
+            "Simulation lab · {status} · Step {} / {} · {}\nSpace Run/Pause · J Single step · 1–9 Speed · {order_control}F5 Report · F6 Checkpoint\n{}\n\n{details}",
+            runner.index, limit, playback.speed_label(), playback.notice,
         )));
         return;
     }
@@ -1294,11 +1347,11 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\n{order_control}F5 Export report · F6 Checkpoint · Tab Browse lab views\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint · Tab Browse lab views\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         limit,
         village.clock,
-        rates[playback.speed],
+        playback.speed_label(),
         playback.notice,
         village.stock.balance() as f64 / 100.0,
         village.stock.available("wood"),
@@ -1318,6 +1371,26 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn lab_speed_labels_distinguish_requested_and_achieved_rates() {
+        let mut playback = Playback {
+            running: true,
+            ..default()
+        };
+        assert_eq!(playback.speed_label(), "Target 128×");
+        playback.set_speed(8);
+        playback.speed_meter.observe(0.25, 40);
+        playback.speed_meter.observe(0.25, 120);
+        playback.debt = 2.0;
+        assert_eq!(
+            playback.speed_label(),
+            "Actual 32.0× / target 1024× · CPU limited"
+        );
+        playback.set_speed(0);
+        assert_eq!(playback.speed_label(), "Target 1×");
+        assert_eq!(playback.debt, 0.0);
+    }
 
     #[test]
     fn partial_reports_replay_through_the_exported_step_only() {
