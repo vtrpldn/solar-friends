@@ -317,6 +317,21 @@ impl Village {
         self.guide.open() || self.lenses.open || self.construction.editing_search
     }
 
+    fn select_resident(&mut self, index: usize) {
+        self.selected_resident = index;
+        self.housing_notice.clear();
+    }
+
+    fn set_resident_home(&mut self, catalog: &Catalog, assign: bool) {
+        self.housing_notice = if assign {
+            self.construction
+                .assign_selected_home(self.selected_resident, catalog)
+                .unwrap_or_else(str::to_owned)
+        } else {
+            self.construction.clear_home(self.selected_resident)
+        };
+    }
+
     fn focus_project_row(
         &mut self,
         catalog: &Catalog,
@@ -1045,20 +1060,16 @@ fn village_input(
             .iter()
             .position(|key| keyboard.just_pressed(*key))
             {
-                town.selected_resident = index;
-                town.housing_notice.clear();
+                town.select_resident(index);
             }
             if let Some(hit) = pointer.clicked {
                 town.construction.select_facility(hit.cell);
                 town.housing_notice.clear();
             }
             if keyboard.just_pressed(KeyCode::KeyT) {
-                town.housing_notice = town
-                    .construction
-                    .assign_selected_home(town.selected_resident, &catalog)
-                    .unwrap_or_else(str::to_owned);
+                town.set_resident_home(&catalog, true);
             } else if keyboard.just_pressed(KeyCode::KeyY) {
-                town.housing_notice = town.construction.clear_home(town.selected_resident);
+                town.set_resident_home(&catalog, false);
             }
             return;
         }

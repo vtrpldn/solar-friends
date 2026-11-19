@@ -12,6 +12,8 @@ enum Action {
     Page(bool),
     Project(usize),
     ProjectFilter,
+    Resident(usize),
+    Home(bool),
 }
 
 impl Action {
@@ -61,6 +63,9 @@ impl Action {
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
+            Self::Resident(_) | Self::Home(_) => {
+                village.utility_panel == Some(UtilityPanel::Residents)
+            }
             Self::Page(_) => matches!(
                 village.utility_panel,
                 Some(UtilityPanel::Projects | UtilityPanel::Inventory | UtilityPanel::Events)
@@ -90,6 +95,12 @@ impl Action {
             Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
             Self::ProjectFilter => "Show underway".into(),
             Self::Project(_) => String::new(),
+            Self::Resident(index) if index == village.selected_resident => {
+                format!("› {}", NAMES[index])
+            }
+            Self::Resident(index) => NAMES[index].into(),
+            Self::Home(true) => "Assign selected home".into(),
+            Self::Home(false) => "Clear home assignment".into(),
         }
     }
 }
@@ -169,6 +180,11 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for (panel, _) in Action::PANELS {
                     spawn_button(menu, &assets, Action::Panel(panel));
                 }
+                for index in 0..NAMES.len() {
+                    spawn_button(menu, &assets, Action::Resident(index));
+                }
+                spawn_button(menu, &assets, Action::Home(true));
+                spawn_button(menu, &assets, Action::Home(false));
                 spawn_button(menu, &assets, Action::ProjectFilter);
                 for row in 0..crate::construction::PAGE_KEYS.len() {
                     spawn_button(menu, &assets, Action::Project(row));
@@ -243,7 +259,13 @@ fn handle_buttons(
                     village.open_projects_only = !village.open_projects_only;
                     village.projects_page = 0;
                 }
-                Action::Panel(_) | Action::Project(_) | Action::ProjectFilter => {}
+                Action::Resident(index) if !picker.open => village.select_resident(index),
+                Action::Home(assign) if !picker.open => village.set_resident_home(&catalog, assign),
+                Action::Panel(_)
+                | Action::Project(_)
+                | Action::ProjectFilter
+                | Action::Resident(_)
+                | Action::Home(_) => {}
             }
         }
     }
@@ -280,6 +302,7 @@ fn refresh(
         return;
     }
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
+    let show_residents = !picker.open && Action::Home(true).available(&village);
     let projects = if show_projects {
         village.construction.project_page_labels(
             &catalog,
@@ -289,16 +312,18 @@ fn refresh(
     } else {
         Vec::new()
     };
-    menu.display = if show_projects || (picker.open && Action::Manage.available(&village)) {
-        Display::Flex
-    } else {
-        Display::None
-    };
+    menu.display =
+        if show_projects || show_residents || (picker.open && Action::Manage.available(&village)) {
+            Display::Flex
+        } else {
+            Display::None
+        };
     for (&action, &interaction, children, mut background, mut node) in &mut buttons {
         let show = match action {
             Action::Page(_) | Action::ClosePanel => action.available(&village),
             Action::Project(row) => projects.get(row).is_some(),
             Action::ProjectFilter => show_projects,
+            Action::Resident(_) | Action::Home(_) => show_residents,
             Action::Panel(_) => picker.open,
             _ => true,
         };
