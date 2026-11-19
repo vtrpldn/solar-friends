@@ -8,8 +8,12 @@ use super::*;
 
 const BUS_STOP: IVec2 = IVec2::new(29, -31);
 
+fn shift_day(seconds: f64) -> u64 {
+    (seconds / DAY + 9.0 / 24.0).floor() as u64
+}
+
 fn shift_morning(seconds: f64, last_day: Option<u64>) -> Option<u64> {
-    let day = (seconds / DAY + 9.0 / 24.0).floor() as u64;
+    let day = shift_day(seconds);
     ((8.0..11.0).contains(&game_hour(seconds)) && last_day != Some(day)).then_some(day)
 }
 
@@ -35,7 +39,7 @@ impl Construction {
         self.residents[index].town_work.away()
     }
 
-    pub fn finance_summary(&self, stock: &Stock, selected: usize) -> String {
+    pub fn finance_summary(&self, stock: &Stock, selected: usize, seconds: f64) -> String {
         let status = stock.finance_summary(self.market.committed_fares());
         let (pending_sales, expected_cents) = self
             .trade
@@ -47,14 +51,39 @@ impl Construction {
             });
         let receipts = self.trade.receipts;
         let names = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
-        let worker = &self.residents[selected];
+        let work = &self.residents[selected].town_work;
         let (job, wage) = JOBS[selected];
+        let shift_status = if work.active() {
+            work.status().into()
+        } else {
+            let when = if game_hour(seconds) >= 11.0 || work.last_day == Some(shift_day(seconds)) {
+                "tomorrow"
+            } else {
+                "today"
+            };
+            if work.booked {
+                format!("Booked for {when}, 08:00–11:00")
+            } else {
+                format!(
+                    "Book for {when}, 08:00–11:00 · {}",
+                    if work.repeating {
+                        "Weekdays on"
+                    } else {
+                        "Weekdays off"
+                    }
+                )
+            }
+        };
+        let (hours, pay) = if work.shift.as_ref().is_some_and(|shift| !shift.full_day) {
+            (4, wage)
+        } else {
+            (8, wage * 2)
+        };
         format!(
-            "{status}\nTown sales · {receipts} paid · {pending_sales} pending (R${:.2} before fuel)\n\n{} · {job}\n{} · Day shift R${} after bus fare\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays",
+            "{status}\nTown sales · {receipts} paid · {pending_sales} pending (R${:.2} before fuel)\n\n{} · {job}\n{shift_status} · {hours}h shift · R${} after bus fare\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays",
             expected_cents as f64 / 100.0,
             names[selected],
-            worker.town_work.status(),
-            wage * 2 - 8
+            pay - RETURN_FARE / 100
         )
     }
 
@@ -189,6 +218,16 @@ mod tests {
         let mut stock = Stock::for_start(&setup, &catalog);
         stock.cash = 0;
         construction.toggle_shift(0);
+        assert!(
+            construction
+                .finance_summary(&stock, 0, 0.0)
+                .contains("Booked for today")
+        );
+        assert!(
+            construction
+                .finance_summary(&stock, 0, HOUR * 3.0)
+                .contains("Booked for tomorrow")
+        );
         let mut left_camp = false;
         for seconds in 0..1_500 {
             let clock = TownClock {

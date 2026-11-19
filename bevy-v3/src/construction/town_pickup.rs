@@ -1352,10 +1352,14 @@ mod tests {
             .filter(|order| !order.buying)
             .map(|order| order.cents)
             .sum();
-        assert!(village.finance_summary(&stock, 0).contains(&format!(
-            "0 paid · 2 pending (R${:.2} before fuel)",
-            receipts as f64 / 100.0
-        )));
+        assert!(
+            village
+                .finance_summary(&stock, 0, clock.seconds)
+                .contains(&format!(
+                    "0 paid · 2 pending (R${:.2} before fuel)",
+                    receipts as f64 / 100.0
+                ))
+        );
         let before_departure = stock.balance();
         assert_eq!(village.market.committed_fares(), fare * 3);
 
@@ -1382,7 +1386,7 @@ mod tests {
         assert!(village.trade.orders.is_empty());
         assert!(
             village
-                .finance_summary(&stock, 0)
+                .finance_summary(&stock, 0, clock.seconds)
                 .contains("2 paid · 0 pending")
         );
         assert_eq!(village.trade.receipts, 2);

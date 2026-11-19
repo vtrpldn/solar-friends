@@ -1913,11 +1913,11 @@ fn show_hud(
                         .1,
                 );
             } else {
-                label.push_str(
-                    &village
-                        .construction
-                        .finance_summary(&village.stock, village.selected_resident),
-                );
+                label.push_str(&village.construction.finance_summary(
+                    &village.stock,
+                    village.selected_resident,
+                    village.clock,
+                ));
                 label.push('\n');
                 label.push_str(&village.construction.replacement_costs(
                     &catalog,
