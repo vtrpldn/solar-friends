@@ -1,9 +1,12 @@
 use super::{WorkshopCatalog, building_model, orbit_camera, ui_font, viewport_height};
 use bevy::{
-    camera::{ClearColorConfig, RenderTarget, ScalingMode, visibility::RenderLayers},
+    camera::{
+        ClearColorConfig, RenderTarget, ScalingMode, primitives::MeshAabb, visibility::RenderLayers,
+    },
     prelude::*,
     render::render_resource::TextureFormat,
     scene::SceneInstanceReady,
+    transform::helper::TransformHelper,
 };
 use std::process::{Child, Command};
 
@@ -33,6 +36,11 @@ struct ThumbnailCamera(usize);
 #[derive(Component)]
 struct ThumbnailModel(usize);
 #[derive(Component)]
+struct ThumbnailFrame {
+    center: Vec3,
+    span: f32,
+}
+#[derive(Component)]
 struct CollectionStatus;
 #[derive(Component)]
 struct CategoryMenu;
@@ -48,7 +56,7 @@ enum Control {
     Scale,
 }
 
-pub fn run(requested_category: Option<&str>) {
+pub fn run(requested_category: Option<&str>, detail: bool) {
     let catalog = WorkshopCatalog::default();
     let mut ids: Vec<_> = catalog.0.keys().cloned().collect();
     ids.sort_by(|a, b| catalog.0[a].name.cmp(&catalog.0[b].name).then(a.cmp(b)));
@@ -86,13 +94,16 @@ pub fn run(requested_category: Option<&str>) {
         category_cursor: category,
         page: 0,
         turn: 0,
-        detail: false,
+        detail,
         dirty: true,
         visible: vec![],
         status: String::new(),
     })
     .add_systems(Startup, setup)
-    .add_systems(Update, (input, show_categories, refresh).chain())
+    .add_systems(
+        Update,
+        (input, show_categories, refresh, frame_details).chain(),
+    )
     .add_observer(prepare_thumbnail);
     crate::village::register_building_models(&mut app);
     app.run();
@@ -288,14 +299,72 @@ fn prepare_thumbnail(
     mut commands: Commands,
     roots: Query<&ThumbnailModel>,
     children: Query<&Children>,
+    (collection, handles, meshes): (Res<Collection>, Query<&Mesh3d>, Res<Assets<Mesh>>),
+    transforms: TransformHelper,
 ) {
     let Ok(model) = roots.get(event.entity) else {
         return;
     };
+    let mut low = Vec3::splat(f32::INFINITY);
+    let mut high = Vec3::splat(f32::NEG_INFINITY);
     for child in children.iter_descendants(event.entity) {
         commands
             .entity(child)
             .insert(RenderLayers::layer(model.0 + 1));
+        if !collection.detail {
+            continue;
+        }
+        let Some(bounds) = handles
+            .get(child)
+            .ok()
+            .and_then(|handle| meshes.get(&handle.0))
+            .and_then(MeshAabb::compute_aabb)
+        else {
+            continue;
+        };
+        let Ok(transform) = transforms.compute_global_transform(child) else {
+            continue;
+        };
+        for x in [-1., 1.] {
+            for y in [-1., 1.] {
+                for z in [-1., 1.] {
+                    let vertex =
+                        Vec3::from(bounds.center + bounds.half_extents * Vec3A::new(x, y, z));
+                    let point = transform.transform_point(vertex);
+                    low = low.min(point);
+                    high = high.max(point);
+                }
+            }
+        }
+    }
+    if low.is_finite() && high.is_finite() {
+        commands.entity(event.entity).insert(ThumbnailFrame {
+            center: (low + high) * 0.5,
+            span: ((high - low).length() * 1.3).max(1.5),
+        });
+    }
+}
+
+fn frame_details(
+    collection: Res<Collection>,
+    frames: Query<(&ThumbnailModel, &ThumbnailFrame), Added<ThumbnailFrame>>,
+    mut cameras: Query<(&ThumbnailCamera, &mut Projection, &mut Transform)>,
+) {
+    if !collection.detail {
+        return;
+    }
+    for (model, frame) in &frames {
+        if let Some((_, mut projection, mut transform)) =
+            cameras.iter_mut().find(|(camera, ..)| camera.0 == model.0)
+        {
+            *projection = Projection::Orthographic(OrthographicProjection {
+                scaling_mode: ScalingMode::FixedVertical {
+                    viewport_height: frame.span,
+                },
+                ..OrthographicProjection::default_3d()
+            });
+            *transform = orbit_camera(0., 29., frame.center);
+        }
     }
 }
 

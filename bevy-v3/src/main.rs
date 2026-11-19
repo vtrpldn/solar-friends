@@ -84,7 +84,13 @@ fn main() {
     }
     if option.as_deref().is_some_and(|flag| flag == "--collection") {
         let category = args.next();
-        workshop::collection::run(category.as_deref().and_then(std::ffi::OsStr::to_str));
+        let category = category.as_deref().and_then(std::ffi::OsStr::to_str);
+        let detail = category == Some("--detail")
+            || args
+                .next()
+                .as_deref()
+                .is_some_and(|option| option == "--detail");
+        workshop::collection::run(category.filter(|name| *name != "--detail"), detail);
         return;
     }
     if option.as_deref().is_some_and(|flag| flag == "--workshop") {

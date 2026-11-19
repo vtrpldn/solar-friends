@@ -186,7 +186,7 @@ The game menu opens the 3D inspector, Asset Garden, biome landscapes, and reside
 
 ### Collection
 
-Open **Collection** from the game menu or pass `--collection`. Browse all 370 V2 models, pick a category from the menu, rotate the previews, or enlarge small props. Use **C**, the arrow keys, and **Enter** to choose a category from the keyboard. Click a model card to open it in the inspector. To start with a category selected, pass its name after `--collection`, for example `--collection "Resource icons"`.
+Open **Collection** from the game menu or pass `--collection`. Browse all 370 V2 models, pick a category from the menu, rotate the previews, or enlarge small props. Use **C**, the arrow keys, and **Enter** to choose a category from the keyboard. Click a model card to open it in the inspector. To start with a category selected, pass its name after `--collection`, for example `--collection "Resource icons"`. Add `--detail` to frame each model by its own dimensions.
 
 In the Asset Garden, **Home** focuses the house or first placed prop. **End** frames the entire plot.
 
