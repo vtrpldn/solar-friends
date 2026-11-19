@@ -2,6 +2,7 @@ use super::*;
 use crate::{
     construction::{TradeOrder, TradePolicy},
     terrain::Brush,
+    time_advance::AdvanceAction,
 };
 
 #[derive(Component, Clone, Copy)]
@@ -16,6 +17,7 @@ enum Action {
     TerrainBrush(Brush),
     TerrainRadius(bool),
     UndoTerrain,
+    Advance(AdvanceAction),
     ResizeField(IVec2),
     Pause,
     Speed,
@@ -61,6 +63,13 @@ impl Action {
         if matches!(self, Self::Guide) {
             return !village.construction.editing_search;
         }
+        if let Self::Advance(action) = self {
+            return !village.map_input_blocked()
+                && !village.planning_roads()
+                && !village.terrain_editor.open
+                && (matches!(action, AdvanceAction::Toggle)
+                    || (village.advance.open && village.advance.running.is_none()));
+        }
         if matches!(self, Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad) {
             return village.planning_roads() && !village.map_input_blocked();
         }
@@ -84,6 +93,7 @@ impl Action {
             Self::Terrain | Self::TerrainBrush(_) | Self::TerrainRadius(_) | Self::UndoTerrain => {
                 false
             }
+            Self::Advance(_) => false,
             Self::Build => village.utility_panel.is_none(),
             Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
             Self::ResizeField(_) => village.construction.placing_field(),
@@ -167,6 +177,15 @@ impl Action {
             Self::TerrainRadius(true) => "Next radius".into(),
             Self::TerrainRadius(false) => "Previous radius".into(),
             Self::UndoTerrain => "Undo terrain edit".into(),
+            Self::Advance(action) => match action {
+                AdvanceAction::Toggle if village.advance.running.is_some() => "Stop advance".into(),
+                AdvanceAction::Toggle if village.advance.open => "Close advance".into(),
+                AdvanceAction::Toggle => "Advance days".into(),
+                AdvanceAction::Adjust(days) => format!("{days:+} day(s)"),
+                AdvanceAction::Method if village.advance.fast => "Fast approximate".into(),
+                AdvanceAction::Method => "Exact replay".into(),
+                AdvanceAction::Start => "Start advance".into(),
+            },
             Self::ResizeField(delta) => format!(
                 "{} {}",
                 if delta.x != 0 { "Width" } else { "Depth" },
@@ -306,6 +325,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::UndoRoad,
                 Action::FinishRoad,
                 Action::Terrain,
+                Action::Advance(AdvanceAction::Toggle),
                 Action::Manage,
                 Action::ClosePanel,
                 Action::Pause,
@@ -331,6 +351,16 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 BackgroundColor(Color::srgb_u8(31, 45, 35)),
             ))
             .with_children(|menu| {
+                for action in [
+                    AdvanceAction::Adjust(-7),
+                    AdvanceAction::Adjust(-1),
+                    AdvanceAction::Adjust(1),
+                    AdvanceAction::Adjust(7),
+                    AdvanceAction::Method,
+                    AdvanceAction::Start,
+                ] {
+                    spawn_button(menu, &assets, Action::Advance(action));
+                }
                 for brush in [Brush::Raise, Brush::Lower, Brush::Flatten, Brush::Smooth] {
                     spawn_button(menu, &assets, Action::TerrainBrush(brush));
                 }
@@ -464,6 +494,10 @@ fn handle_buttons(
                 Action::TerrainBrush(brush) => village.terrain_editor.select_brush(brush),
                 Action::TerrainRadius(forward) => village.terrain_editor.cycle_radius(forward),
                 Action::UndoTerrain => village.terrain_editor.undo(),
+                Action::Advance(action) => {
+                    village.advance.apply(action);
+                    picker.open = false;
+                }
                 Action::ResizeField(delta) => village.construction.resize_field_placement(delta),
                 Action::Pause => village.paused = !village.paused,
                 Action::Speed => village.speed = (village.speed + 1) % SPEEDS.len(),
@@ -628,6 +662,7 @@ fn refresh(
     if toolbar.display == Display::None {
         return;
     }
+    let show_advance = Action::Advance(AdvanceAction::Start).available(&village);
     let show_terrain = Action::UndoTerrain.available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
@@ -661,7 +696,8 @@ fn refresh(
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
     picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.0));
-    menu.display = if show_terrain
+    menu.display = if show_advance
+        || show_terrain
         || show_field_size
         || show_projects
         || show_residents
@@ -679,6 +715,8 @@ fn refresh(
     };
     for (&action, &interaction, children, mut background, mut node) in &mut buttons {
         let show = match action {
+            Action::Advance(AdvanceAction::Toggle) => true,
+            Action::Advance(_) => show_advance,
             Action::Page(_) if village.utility_panel == Some(UtilityPanel::Residents) => {
                 show_residents && home_pages > 1
             }

@@ -28,35 +28,58 @@ impl Default for Advance {
     }
 }
 
+#[derive(Clone, Copy)]
+pub(crate) enum AdvanceAction {
+    Toggle,
+    Adjust(i16),
+    Method,
+    Start,
+}
+
 impl Advance {
     pub fn controls(&mut self, keys: &ButtonInput<KeyCode>) {
         if keys.just_pressed(KeyCode::KeyL) {
-            if self.running.take().is_some() {
-                self.result = "Advance stopped. The village is at the time shown.".into();
-            } else {
-                self.open = !self.open;
-            }
-        }
-        if !self.open || self.running.is_some() {
-            return;
+            self.apply(AdvanceAction::Toggle);
         }
         let increment = if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
             7
         } else {
             1
         };
-        if keys.just_pressed(KeyCode::BracketLeft) {
-            self.days = self.days.saturating_sub(increment).max(1);
+        for (key, action) in [
+            (KeyCode::BracketLeft, AdvanceAction::Adjust(-increment)),
+            (KeyCode::BracketRight, AdvanceAction::Adjust(increment)),
+            (KeyCode::KeyA, AdvanceAction::Method),
+            (KeyCode::Enter, AdvanceAction::Start),
+        ] {
+            if keys.just_pressed(key) {
+                self.apply(action);
+            }
         }
-        if keys.just_pressed(KeyCode::BracketRight) {
-            self.days = (self.days + increment).min(365);
+    }
+
+    pub fn apply(&mut self, action: AdvanceAction) {
+        if matches!(action, AdvanceAction::Toggle) {
+            if self.running.take().is_some() {
+                self.result = "Advance stopped. The village is at the time shown.".into();
+            } else {
+                self.open = !self.open;
+            }
+            return;
         }
-        if keys.just_pressed(KeyCode::KeyA) {
-            self.fast = !self.fast;
+        if !self.open || self.running.is_some() {
+            return;
         }
-        if keys.just_pressed(KeyCode::Enter) {
-            self.result.clear();
-            self.running = Some(Run::new(self.days, self.fast));
+        match action {
+            AdvanceAction::Adjust(delta) => {
+                self.days = self.days.saturating_add_signed(delta).clamp(1, 365)
+            }
+            AdvanceAction::Method => self.fast = !self.fast,
+            AdvanceAction::Start => {
+                self.result.clear();
+                self.running = Some(Run::new(self.days, self.fast));
+            }
+            AdvanceAction::Toggle => {}
         }
     }
 
