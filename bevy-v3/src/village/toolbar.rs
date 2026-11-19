@@ -9,6 +9,8 @@ use crate::{
 #[derive(Component, Clone, Copy)]
 enum Action {
     Build,
+    Setup,
+    Library,
     RotatePlacement,
     CancelPlacement,
     ConnectRoad,
@@ -126,6 +128,7 @@ impl Action {
                     && !village.construction.is_placing()
                     && village.construction.gathering.has_selection()
             }
+            Self::Setup | Self::Library => true,
             Self::Build => village.utility_panel.is_none(),
             Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
             Self::ResizeField(_) => {
@@ -196,6 +199,8 @@ impl Action {
         match self {
             Self::Build if village.construction.menu => "Close build".into(),
             Self::Build => "Build".into(),
+            Self::Setup => "Setup".into(),
+            Self::Library => "Saved villages".into(),
             Self::RotatePlacement => "Rotate".into(),
             Self::CancelPlacement => "Cancel placement".into(),
             Self::ConnectRoad if village.connect_road_strokes => "Connected route".into(),
@@ -361,7 +366,7 @@ pub(super) fn install(app: &mut App) {
 }
 
 fn visible(village: &Village, setup: &WorldSetup, saves: &SaveMenu, sound: &SoundSettings) -> bool {
-    village.camp.is_some() && !setup.open && !saves.open && !sound.open
+    !sound.open && (saves.open || (!setup.open && village.camp.is_some()))
 }
 
 fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
@@ -384,6 +389,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Page(false),
                 Action::Page(true),
                 Action::Build,
+                Action::Setup,
+                Action::Library,
                 Action::Recipes,
                 Action::Gather,
                 Action::Beds,
@@ -558,7 +565,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
 }
 
 fn handle_buttons(
-    (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
+    (mut setup, mut saves, sound): (ResMut<WorldSetup>, ResMut<SaveMenu>, Res<SoundSettings>),
     (catalog, land): (Res<Catalog>, Res<Land>),
     mut village: ResMut<Village>,
     mut picker: ResMut<PanelPicker>,
@@ -574,8 +581,25 @@ fn handle_buttons(
         picker.open = false;
     }
     for (&action, &interaction) in &buttons {
-        if interaction == Interaction::Pressed && action.available(&village) {
+        if interaction != Interaction::Pressed {
+            continue;
+        }
+        if saves.open {
+            if matches!(action, Action::Library) {
+                library_ui::toggle_library(&mut saves, setup.mode);
+            }
+            continue;
+        }
+        if !setup.open && action.available(&village) {
             match action {
+                Action::Setup => {
+                    setup.open = true;
+                    picker.open = false;
+                }
+                Action::Library => {
+                    library_ui::toggle_library(&mut saves, setup.mode);
+                    picker.open = false;
+                }
                 Action::Build => {
                     village.construction.toggle_build_menu();
                     picker.open = false;
@@ -896,6 +920,9 @@ fn refresh(
     } else {
         Display::None
     };
+    if saves.open {
+        menu.display = Display::None;
+    }
     for (&action, &interaction, children, mut background, mut node) in &mut buttons {
         let show = match action {
             Action::Advance(AdvanceAction::Toggle) => true,
@@ -944,6 +971,11 @@ fn refresh(
             Action::Panel(_) => picker.open,
             _ => true,
         };
+        let show = if saves.open {
+            matches!(action, Action::Library)
+        } else {
+            show
+        };
         node.display = if show { Display::Flex } else { Display::None };
         if !show {
             continue;
@@ -957,6 +989,7 @@ fn refresh(
         };
         if let Ok(mut text) = labels.get_mut(children[0]) {
             let label = match action {
+                Action::Library if saves.open => "Close saved villages".into(),
                 Action::Project(row) => projects[row].clone(),
                 Action::Recipe(row) => recipes[row].clone(),
                 Action::TradeItem(row) => trade_items[row].clone(),

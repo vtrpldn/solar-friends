@@ -14,6 +14,19 @@ fn refresh_library(menu: &mut SaveMenu, directory: &std::path::Path, mode: Mode)
     }
 }
 
+pub(super) fn toggle_library(menu: &mut SaveMenu, mode: Mode) {
+    menu.open = !menu.open;
+    menu.entry = None;
+    menu.delete_request = None;
+    menu.status.clear();
+    if menu.open {
+        match save_library::directory(mode) {
+            Ok(path) => refresh_library(menu, &path, mode),
+            Err(error) => menu.status = error.to_string(),
+        }
+    }
+}
+
 pub(super) fn library_controls(
     (keys, window): (
         Res<ButtonInput<KeyCode>>,
@@ -31,16 +44,7 @@ pub(super) fn library_controls(
         return;
     }
     if keys.just_pressed(KeyCode::F6) {
-        menu.open = !menu.open;
-        menu.entry = None;
-        menu.delete_request = None;
-        menu.status.clear();
-        if menu.open {
-            match save_library::directory(setup.mode) {
-                Ok(path) => refresh_library(&mut menu, &path, setup.mode),
-                Err(error) => menu.status = error.to_string(),
-            }
-        }
+        toggle_library(&mut menu, setup.mode);
     }
     if !menu.open {
         text.clear();

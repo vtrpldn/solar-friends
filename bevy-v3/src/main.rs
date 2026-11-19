@@ -476,8 +476,9 @@ mod tests {
         press_button(&mut app, "Show all projects");
         press_button(&mut app, "Close panel");
 
-        app.world_mut().resource_mut::<WorldSetup>().open = true;
+        press_button(&mut app, "Setup");
         app.world_mut().run_schedule(Update);
+        assert!(app.world().resource::<WorldSetup>().open);
         press_button(&mut app, "Start new village");
         assert!(app.world().resource::<WorldSetup>().open);
         press_button(&mut app, "Resume current village");
