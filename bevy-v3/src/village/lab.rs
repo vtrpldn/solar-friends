@@ -494,16 +494,21 @@ fn lab_inventory(catalog: &Catalog, stock: &Stock, view: &LabView, page: &mut us
     text
 }
 
-fn lab_job_page(jobs: &[String], page: &mut usize, focus: &str) -> String {
+fn lab_job_page(jobs: &[String], page: &mut usize, focus: &str, waiting_only: bool) -> String {
     const ROWS: usize = 9;
     let pages = jobs.len().div_ceil(ROWS).max(1);
     *page = (*page).min(pages - 1);
+    let heading = if waiting_only {
+        "Waiting jobs"
+    } else {
+        "Active jobs"
+    };
     let mut text = format!(
-        "Active jobs · {focus} · Page {} of {pages}\nTab Switch view · Page Up/Down Browse · [ / ] Project\n",
+        "{heading} · {focus} · Page {} of {pages}\nTab Switch view · Page Up/Down Browse · [ / ] Project · W Waiting filter\n",
         *page + 1
     );
     if jobs.is_empty() {
-        text.push_str("\nNo active jobs.");
+        text.push_str("\nNo matching jobs.");
     }
     for job in jobs.iter().skip(*page * ROWS).take(ROWS) {
         text.push('\n');
@@ -521,6 +526,7 @@ struct Playback {
     view: LabView,
     inventory_page: usize,
     job_focus: Option<usize>,
+    waiting_only: bool,
 }
 
 impl Default for Playback {
@@ -534,6 +540,7 @@ impl Default for Playback {
             view: LabView::default(),
             inventory_page: 0,
             job_focus: None,
+            waiting_only: false,
         }
     }
 }
@@ -665,6 +672,10 @@ fn update_lab_window(
         let playback = &mut *playback;
         let details = if playback.view == LabView::Jobs {
             let construction = &village.construction;
+            if keys.just_pressed(KeyCode::KeyW) {
+                playback.waiting_only = !playback.waiting_only;
+                playback.inventory_page = 0;
+            }
             if playback
                 .job_focus
                 .is_some_and(|index| construction.lab_job_site_name(&catalog, index).is_none())
@@ -692,9 +703,19 @@ fn update_lab_window(
                         .map(|name| format!("{name} #{}", index + 1))
                 })
                 .unwrap_or_else(|| "All projects".into());
-            let jobs =
-                construction.lab_jobs(&catalog, &runner.land, village.clock, playback.job_focus);
-            lab_job_page(&jobs, &mut playback.inventory_page, &focus)
+            let jobs = construction.lab_jobs(
+                &catalog,
+                &runner.land,
+                village.clock,
+                playback.job_focus,
+                playback.waiting_only,
+            );
+            lab_job_page(
+                &jobs,
+                &mut playback.inventory_page,
+                &focus,
+                playback.waiting_only,
+            )
         } else {
             lab_inventory(
                 &catalog,

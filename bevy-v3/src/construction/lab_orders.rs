@@ -81,6 +81,7 @@ impl Construction {
         land: &Land,
         clock: f64,
         focus: Option<usize>,
+        waiting_only: bool,
     ) -> Vec<String> {
         let mut jobs = Vec::new();
         let site_name = |index: usize| {
@@ -107,7 +108,15 @@ impl Construction {
                             .as_ref()
                             .is_some_and(|job| job.project == index)
                     })
-                    .count();
+                    .count()
+                    + usize::from(
+                        self.changes
+                            .get(&index)
+                            .is_some_and(|job| job.worker.is_some()),
+                    );
+                if waiting_only && assigned > 0 && plan.pickups == 0 {
+                    continue;
+                }
                 jobs.push(format!(
                     "{} · {} · {assigned} assigned",
                     site_name(index),
@@ -120,16 +129,25 @@ impl Construction {
                 continue;
             }
             let recipe = &catalog.production[&batch.recipe];
+            let status = self.batch_status(batch, recipe, clock);
+            if waiting_only
+                && (batch.phase == crate::production::Phase::Growing
+                    || (batch.worker.is_some() && !status.starts_with("Waiting")))
+            {
+                continue;
+            }
             jobs.push(format!(
                 "{} · {} · {} · {}",
                 site_name(batch.site),
                 recipe.name,
-                self.batch_status(batch, recipe, clock),
+                status,
                 worker_name(batch.worker)
             ));
         }
         for job in &self.farming.jobs {
-            if focus.is_some_and(|site| site != job.site) {
+            if focus.is_some_and(|site| site != job.site)
+                || (waiting_only && job.worker.is_some() && job.pickups == 0)
+            {
                 continue;
             }
             use crate::farming::FarmPhase;
@@ -149,6 +167,7 @@ impl Construction {
         }
         for (&index, job) in &self.gathering.orders {
             if focus.is_none()
+                && (!waiting_only || job.worker.is_none())
                 && let Some(site) = land.site(index)
             {
                 let recipe = &catalog.gathering[site.recipe()];
@@ -170,6 +189,9 @@ impl Construction {
             }
             let destination = site.checked_sub(1).map_or_else(|| "Camp".into(), site_name);
             let worker = (0..self.residents.len()).find(|&index| job.assigned_to(index));
+            if waiting_only && worker.is_some() {
+                continue;
+            }
             jobs.push(format!(
                 "{destination} · {} · {}",
                 job.label(),
