@@ -941,6 +941,36 @@ impl SpeedMeter {
     }
 }
 
+enum LabReplacement {
+    Reload,
+    Checkpoint(PathBuf),
+}
+
+impl LabReplacement {
+    fn load(&self, source: &LabSource, steps: u64, catalog: &Catalog) -> io::Result<Runner> {
+        match self {
+            Self::Reload => source.load(catalog),
+            Self::Checkpoint(path) => Runner::new(
+                Scenario {
+                    steps,
+                    setup: None,
+                    orders: Vec::new(),
+                    stop: LabStop::None,
+                },
+                Some(crate::save::read(path, catalog)?),
+                catalog,
+            ),
+        }
+    }
+
+    fn prompt(&self) -> &'static str {
+        match self {
+            Self::Reload => "Reload scenario?",
+            Self::Checkpoint(_) => "Import village checkpoint?",
+        }
+    }
+}
+
 struct Playback {
     running: bool,
     replaying: bool,
@@ -958,7 +988,7 @@ struct Playback {
     waiting_only: bool,
     farm_site: Option<usize>,
     clear_confirmation: Option<(usize, Option<usize>)>,
-    reload_confirmation: bool,
+    replacement: Option<LabReplacement>,
 }
 
 impl Playback {
@@ -1081,7 +1111,7 @@ impl Default for Playback {
             waiting_only: false,
             farm_site: None,
             clear_confirmation: None,
-            reload_confirmation: false,
+            replacement: None,
         }
     }
 }
@@ -1262,9 +1292,10 @@ fn update_lab_window(
     mut runner: ResMut<Runner>,
     catalog: Res<Catalog>,
     time: Res<Time<bevy::time::Real>>,
-    (keys, mut events): (
+    (keys, mut events, mut files): (
         Res<ButtonInput<KeyCode>>,
         MessageReader<bevy::input::keyboard::KeyboardInput>,
+        MessageReader<bevy::window::FileDragAndDrop>,
     ),
     mut playback: Local<Playback>,
     mut panel: Single<&mut Text>,
@@ -1275,35 +1306,55 @@ fn update_lab_window(
     ),
 ) {
     playback.replaying = replay.is_some();
+    let checkpoint = files
+        .read()
+        .filter_map(|event| match event {
+            bevy::window::FileDragAndDrop::DroppedFile { path_buf, .. } => Some(path_buf),
+            _ => None,
+        })
+        .last();
     if let Some(source) = &source
         && playback.order.is_none()
     {
-        if playback.reload_confirmation && keys.just_pressed(KeyCode::Escape) {
-            playback.reload_confirmation = false;
+        let replacement = if let Some(path) = checkpoint {
+            Some(LabReplacement::Checkpoint(path.clone()))
+        } else if keys.just_pressed(KeyCode::Escape) {
+            playback.replacement = None;
+            None
         } else if keys.just_pressed(KeyCode::F8) {
-            if playback.reload_confirmation {
-                playback.reload_confirmation = false;
-                match source.load(&catalog) {
-                    Ok(reloaded) => {
-                        *runner = reloaded;
+            if let Some(candidate) = playback.replacement.take() {
+                match candidate.load(source, runner.scenario.steps, &catalog) {
+                    Ok(opened) => {
+                        *runner = opened;
                         *playback = Playback::default();
                         *map = map::MapState::default();
-                        playback.notice = "Scenario reloaded at step 0.".into();
+                        playback.notice = match candidate {
+                            LabReplacement::Reload => "Scenario reloaded at step 0.",
+                            LabReplacement::Checkpoint(_) => "Checkpoint imported at step 0.",
+                        }
+                        .into();
                     }
-                    Err(error) => playback.notice = format!("Could not reload scenario · {error}"),
+                    Err(error) => playback.notice = format!("Could not open lab run · {error}"),
                 }
+                None
             } else {
-                playback.running = false;
-                playback.reset_timing();
-                playback.reload_confirmation = true;
+                Some(LabReplacement::Reload)
             }
+        } else {
+            None
+        };
+        if let Some(replacement) = replacement {
+            playback.running = false;
+            playback.reset_timing();
+            playback.replacement = Some(replacement);
         }
-        if playback.reload_confirmation {
+        if let Some(replacement) = &playback.replacement {
             map.visible = false;
             events.clear();
-            panel.set_if_neq(Text::new(
-                "Reload scenario?\nF8 Confirm · Esc Cancel\nThis replaces the current lab run and its unsaved orders.",
-            ));
+            panel.set_if_neq(Text::new(format!(
+                "{}\nF8 Confirm · Esc Cancel\nThis replaces the current lab run and its unsaved orders.",
+                replacement.prompt()
+            )));
             return;
         }
     }
@@ -1621,7 +1672,7 @@ fn update_lab_window(
     }
     let weather = lab_weather(village, &runner.setup);
     let reload_control = if source.is_some() {
-        " · F8 Reload"
+        " · F8 Reload · Drop checkpoint to import"
     } else {
         ""
     };
@@ -2205,6 +2256,7 @@ mod tests {
             .init_resource::<ButtonInput<KeyCode>>()
             .init_resource::<map::MapState>()
             .add_message::<bevy::input::keyboard::KeyboardInput>()
+            .add_message::<bevy::window::FileDragAndDrop>()
             .add_systems(Update, update_lab_window);
         let panel = app.world_mut().spawn(Text::default()).id();
         let key = |app: &mut App, key| {
@@ -2252,6 +2304,7 @@ mod tests {
             .init_resource::<ButtonInput<KeyCode>>()
             .init_resource::<map::MapState>()
             .add_message::<bevy::input::keyboard::KeyboardInput>()
+            .add_message::<bevy::window::FileDragAndDrop>()
             .add_systems(Update, update_lab_window);
         let panel = app.world_mut().spawn(Text::default()).id();
         let press_reload = |app: &mut App| {
@@ -2274,6 +2327,25 @@ mod tests {
         let reloaded = app.world().resource::<Runner>();
         assert_eq!(reloaded.index, 0);
         assert_eq!(reloaded.scenario.steps, 8);
+        let checkpoint = path.with_extension("checkpoint.json");
+        let mut saved: Village = serde_json::from_value(reloaded.initial.clone()).unwrap();
+        saved.clock = 20.0;
+        crate::save::write(&checkpoint, &saved).unwrap();
+        let window = app.world_mut().spawn_empty().id();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+        app.world_mut()
+            .write_message(bevy::window::FileDragAndDrop::DroppedFile {
+                window,
+                path_buf: checkpoint.clone(),
+            });
+        app.update();
+        assert_eq!(app.world().resource::<Runner>().village.clock, 0.0);
+        press_reload(&mut app);
+        assert_eq!(app.world().resource::<Runner>().village.clock, 20.0);
+        assert_eq!(app.world().resource::<Runner>().index, 0);
+        std::fs::remove_file(checkpoint).unwrap();
         std::fs::remove_file(path).unwrap();
     }
 

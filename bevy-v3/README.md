@@ -144,7 +144,7 @@ Verify a lab report with `cargo run --locked --manifest-path bevy-v3/Cargo.toml 
 
 Use `--lab-ui scenario.json [village.json]` to open the native lab window. Press **Space** to run or pause, **J** for one simulation step, or **1–9** to choose a speed from 1× through 1024×. The lab reports achieved speed and indicates when CPU time limits playback. Press **F2** to choose an interval, **F3** to run it, or **Shift+J** to advance one game hour. Intervals stop at the scenario limit or its configured stop condition. Press **F4** to choose an additional pause condition while playing a scenario.
 
-In the native lab, press **O** to enter a JSON order at the current step and **F5** to export a report through the current step. Press **F6** to save the current village as a checkpoint you can pass to a new lab run. The command window pauses the scenario while you type.
+In the native lab, press **O** to enter a JSON order at the current step and **F5** to export a report through the current step. Press **F6** to save the current village as a checkpoint. Drop a checkpoint onto the lab window and press **F8** to open it as a fresh run with the saved village and clock. The command window pauses the scenario while you type.
 
 Press **F8** twice to reload the scenario file and any starting checkpoint. This starts a new run at step 0, so export the current report or save a checkpoint first if you want to keep it.
 
