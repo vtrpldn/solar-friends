@@ -212,25 +212,15 @@ fn camera_controls(
         return;
     };
     if keyboard.just_pressed(KeyCode::Home) {
-        if let Some(camp) = village.camp_focus(&setup)
-            && !keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
-        {
-            view.target = camp;
+        let action = if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+            CameraAction::Reset
         } else {
-            view.target = CAMERA_HOME;
-            view.heading = 0.0;
-            ortho.scale = 1.0;
-        }
+            CameraAction::Camp
+        };
+        apply_camera_action(action, &village, &setup, view, ortho);
     }
     if keyboard.just_pressed(KeyCode::End) {
-        let terrain = village.terrain(&setup);
-        let (center, width) = terrain.river(0.0);
-        let x = if terrain.seed == 0 {
-            -20.0
-        } else {
-            ((center + width + 3.0) / 2.0).ceil() as f32 * 2.0
-        };
-        view.target = Vec3::new(x, terrain.height_at(x, 0.0), 0.0);
+        apply_camera_action(CameraAction::River, &village, &setup, view, ortho);
     }
     let axis = |positive, negative| {
         i32::from(keyboard.any_pressed(positive)) as f32
@@ -287,6 +277,56 @@ fn camera_controls(
     };
     if village.camera_view != Some(saved) {
         village.camera_view = Some(saved);
+    }
+}
+
+#[derive(Clone, Copy)]
+enum CameraAction {
+    Camp,
+    Reset,
+    River,
+    Turn(bool),
+    Zoom(bool),
+}
+
+fn apply_camera_action(
+    action: CameraAction,
+    village: &village::Village,
+    setup: &WorldSetup,
+    camera: &mut VillageCamera,
+    projection: &mut OrthographicProjection,
+) {
+    match action {
+        CameraAction::Camp if let Some(camp) = village.camp_focus(setup) => {
+            camera.target = camp;
+        }
+        CameraAction::Camp | CameraAction::Reset => {
+            camera.target = CAMERA_HOME;
+            camera.heading = 0.0;
+            projection.scale = 1.0;
+        }
+        CameraAction::River => {
+            let terrain = village.terrain(setup);
+            let (center, width) = terrain.river(0.0);
+            let x = if terrain.seed == 0 {
+                -20.0
+            } else {
+                ((center + width + 3.0) / 2.0).ceil() as f32 * 2.0
+            };
+            camera.target = Vec3::new(x, terrain.height_at(x, 0.0), 0.0);
+        }
+        CameraAction::Turn(right) => {
+            let quarter = std::f32::consts::FRAC_PI_2;
+            camera.heading += if right { quarter } else { -quarter };
+        }
+        CameraAction::Zoom(closer) => {
+            let scale = if closer {
+                projection.scale / 1.2
+            } else {
+                projection.scale * 1.2
+            };
+            projection.scale = scale.clamp(1.0 / 6.0, 1.0 / 0.18);
+        }
     }
 }
 
@@ -424,6 +464,27 @@ mod tests {
                 .resource::<village::Village>()
                 .map_input_blocked()
         );
+
+        press_button(&mut app, "View");
+        press_button(&mut app, "Focus river");
+        let camera = app
+            .world_mut()
+            .query::<&VillageCamera>()
+            .single(app.world())
+            .unwrap();
+        assert_eq!(camera.target.z, 0.0);
+        press_button(&mut app, "Rotate right");
+        let camera = app
+            .world_mut()
+            .query::<&VillageCamera>()
+            .single(app.world())
+            .unwrap();
+        assert_eq!(camera.heading, std::f32::consts::FRAC_PI_2);
+        press_button(&mut app, "Zoom in");
+        press_button(&mut app, "Show grid");
+        press_button(&mut app, "Hide grid");
+        press_button(&mut app, "Reset camera");
+        press_button(&mut app, "Close view");
 
         press_button(&mut app, "Map lenses");
         press_button(&mut app, "Other lenses");
