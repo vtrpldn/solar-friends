@@ -455,17 +455,21 @@ impl Utilities {
         accepted
     }
 
-    pub fn purify_water(&mut self, id: usize) {
-        if let Some(node) = self.nodes.get_mut(&id).filter(|node| node.enabled) {
-            transform_water(node, 1, 0, 12.0, 1.0);
-        }
+    pub fn purify_water(&mut self, id: usize) -> f64 {
+        self.nodes
+            .get_mut(&id)
+            .filter(|node| node.enabled)
+            .map_or(0.0, |node| transform_water(node, 1, 0, 12.0, 1.0))
     }
 
-    pub fn service_waste(&mut self, id: usize) {
-        if let Some(node) = self.nodes.get_mut(&id).filter(|node| node.enabled) {
-            self.waste_removed += node.water[2] + node.water[3];
-            node.water[2..].fill(0.0);
-        }
+    pub fn service_waste(&mut self, id: usize) -> f64 {
+        let Some(node) = self.nodes.get_mut(&id).filter(|node| node.enabled) else {
+            return 0.0;
+        };
+        let removed = node.water[2] + node.water[3];
+        self.waste_removed += removed;
+        node.water[2..].fill(0.0);
+        removed
     }
 
     pub fn camp_water(&self) -> Option<[f64; 4]> {
@@ -991,9 +995,11 @@ impl Utilities {
                     pumping.push(id)
                 }
                 "well" if node.powered => {
-                    transform_water(node, 1, 0, 25.0 * hours * node.service_factor, 1.0)
+                    transform_water(node, 1, 0, 25.0 * hours * node.service_factor, 1.0);
                 }
-                "wetland" => transform_water(node, 2, 1, 10.0 * hours, 0.85),
+                "wetland" => {
+                    transform_water(node, 2, 1, 10.0 * hours, 0.85);
+                }
                 "banana_treatment" | "biodigester" => {
                     let used = (8.0 * hours).min(node.water[3]);
                     node.water[3] -= used;
@@ -1480,13 +1486,14 @@ impl WaterAccount {
     }
 }
 
-fn transform_water(node: &mut Node, from: usize, to: usize, volume: f64, retained: f64) {
+fn transform_water(node: &mut Node, from: usize, to: usize, volume: f64, retained: f64) -> f64 {
     let amount = node.water[from]
         .min(volume)
         .min((node.capacity[to] - node.water[to]) / retained)
         .max(0.0);
     node.water[from] -= amount;
     node.water[to] += amount * retained;
+    amount
 }
 
 fn distance(a: IVec2, b: IVec2) -> f64 {

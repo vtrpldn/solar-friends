@@ -597,9 +597,26 @@ impl Construction {
             1.0
         };
         job.work += f64::from(dt) * boost;
+        let name = super::resident_work::NAMES[worker];
         match job.action {
-            WaterAction::Purify if job.work >= 30.0 => self.utilities.purify_water(id),
-            WaterAction::Sanitation if job.work >= 45.0 => self.utilities.service_waste(id),
+            WaterAction::Purify if job.work >= 30.0 => {
+                let liters = self.utilities.purify_water(id);
+                if liters > EPSILON {
+                    self.record_event(
+                        clock,
+                        format!("{name} purified {liters:.1} L of drinking water."),
+                    );
+                }
+            }
+            WaterAction::Sanitation if job.work >= 45.0 => {
+                let liters = self.utilities.service_waste(id);
+                if liters > EPSILON {
+                    self.record_event(
+                        clock,
+                        format!("{name} removed {liters:.1} L of waste for off-site treatment."),
+                    );
+                }
+            }
             _ => return false,
         }
         true
@@ -736,5 +753,23 @@ mod tests {
         assert!(town.water_jobs.is_empty());
         assert_eq!(amount(&town, 0), 47.0);
         assert_eq!(town.utilities.potable_at(0), 40.0);
+        assert!(
+            town.event_log(0, "")
+                .1
+                .contains("purified 12.0 L of drinking water")
+        );
+
+        assert!(town.utilities.receive_sewage(0, 7.5));
+        town.queue_water(0, WaterAction::Sanitation).unwrap();
+        for step in 900..1_900 {
+            town.tick_water_work(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
+        }
+        assert!(town.water_jobs.is_empty());
+        assert_eq!(town.utilities.water_site(0).unwrap().levels[3], 0.0);
+        assert!(
+            town.event_log(0, "")
+                .1
+                .contains("removed 7.5 L of waste for off-site treatment")
+        );
     }
 }
