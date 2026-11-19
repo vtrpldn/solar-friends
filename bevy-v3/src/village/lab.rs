@@ -279,6 +279,42 @@ const RUN_INTERVALS: [(f64, &str); 6] = [
     (365.0, "365 days"),
 ];
 
+struct TrendSample {
+    step: u64,
+    cash_centavos: u64,
+    potable_liters: f64,
+    minimum_hydration: f64,
+    food_units: u32,
+}
+
+#[derive(Default)]
+struct TrendHistory {
+    hour: Option<u64>,
+    omitted: u64,
+    samples: std::collections::VecDeque<TrendSample>,
+}
+
+impl TrendHistory {
+    fn record(&mut self, step: u64, village: &Village) {
+        let hour = (village.clock / crate::weather::HOUR) as u64;
+        if self.hour == Some(hour) {
+            return;
+        }
+        self.hour = Some(hour);
+        if self.samples.len() == SAMPLE_LIMIT {
+            self.samples.pop_front();
+            self.omitted = self.omitted.saturating_add(1);
+        }
+        self.samples.push_back(TrendSample {
+            step,
+            cash_centavos: village.stock.balance(),
+            potable_liters: village.construction.utilities.stored_drinking_water(),
+            minimum_hydration: village.construction.minimum_hydration(),
+            food_units: village.stock.available("food"),
+        });
+    }
+}
+
 #[derive(Resource)]
 struct Runner {
     scenario: Scenario,
@@ -292,6 +328,7 @@ struct Runner {
     index: u64,
     next_order: usize,
     samples: Vec<Sample>,
+    trends: TrendHistory,
     outcomes: Vec<Outcome>,
     reason: Option<&'static str>,
     stride: u64,
@@ -364,6 +401,7 @@ impl Runner {
             index: 0,
             next_order: 0,
             samples: Vec::new(),
+            trends: TrendHistory::default(),
             outcomes: Vec::new(),
             reason: None,
             stride,
@@ -452,6 +490,7 @@ impl Runner {
             .village
             .construction
             .lab_stop_reason(self.scenario.stop, self.village.clock);
+        self.trends.record(self.index, &self.village);
         if self.done() || self.index.is_multiple_of(self.stride) {
             self.samples.push(Sample {
                 step: self.index,
@@ -903,16 +942,18 @@ fn lab_environment(village: &Village, setup: &WorldSetup) -> String {
     )
 }
 
-fn lab_trends(samples: &[Sample], catalog: &Catalog) -> String {
+fn lab_trends(history: &TrendHistory, catalog: &Catalog) -> String {
     use std::fmt::Write as _;
+    const DISPLAY_HOURS: usize = 240;
+    let retained = history.samples.len();
+    let charts = retained.min(DISPLAY_HOURS);
+    let samples: Vec<_> = history.samples.iter().skip(retained - charts).collect();
     let Some((first, last)) = samples.first().zip(samples.last()) else {
         return "Simulation trends\nNo samples yet.".into();
     };
     let mut text = format!(
-        "Simulation trends · {} samples · Steps {}–{}\nTab Switch view",
-        samples.len(),
-        first.step,
-        last.step
+        "Simulation trends · {retained} hourly samples retained · {} older omitted\nCharts · Latest {charts} samples · Steps {}–{} · Tab Switch view",
+        history.omitted, first.step, last.step
     );
     let food_mass = catalog.materials["food"].mass;
     for (label, unit, values) in [
@@ -939,7 +980,7 @@ fn lab_trends(samples: &[Sample], catalog: &Catalog) -> String {
             "kg",
             samples
                 .iter()
-                .map(|s| f64::from(*s.inventory.get("food").unwrap_or(&0)) * food_mass)
+                .map(|s| f64::from(s.food_units) * food_mass)
                 .collect(),
         ),
     ] {
@@ -2232,7 +2273,7 @@ fn update_lab_window(
         } else if playback.view == LabView::Residents {
             lab_resident_view(&mut runner, &catalog, &keys, playback)
         } else if playback.view == LabView::Trends {
-            lab_trends(&runner.samples, &catalog)
+            lab_trends(&runner.trends, &catalog)
         } else if playback.view == LabView::Events {
             let (pages, text) = village
                 .construction
@@ -2489,15 +2530,36 @@ mod tests {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{"steps":2}"#).unwrap();
         let mut runner = run(scenario, None, &catalog).unwrap();
-        runner.samples[0].cash_centavos = 100;
-        runner.samples[1].cash_centavos = 300;
-        runner.samples[2].cash_centavos = 200;
-        let trends = lab_trends(&runner.samples, &catalog);
-        assert!(trends.contains("3 samples · Steps 0–2"));
+        let mut history = TrendHistory::default();
+        let mut step = 0;
+        let mut record = |history: &mut TrendHistory, village: &mut Village, balance| {
+            village.clock = step as f64 * crate::weather::HOUR + 0.01;
+            village
+                .stock
+                .debit(village.stock.balance(), crate::stock::CashKind::Materials);
+            village.stock.credit(balance, crate::stock::CashKind::Sales);
+            history.record(step, village);
+            history.record(step + 1, village);
+            step += 1;
+        };
+        for balance in [100, 300, 200] {
+            record(&mut history, &mut runner.village, balance);
+        }
+        let trends = lab_trends(&history, &catalog);
+        assert!(trends.contains("3 hourly samples retained"));
+        assert!(trends.contains("Steps 0–2"));
         assert!(trends.contains("Savings · 2.0 R$ · range 1.0–3.0\n-+-\n--+\n---\n+--"));
         assert!(trends.contains("Clean water"));
         assert!(trends.contains("Lowest hydration"));
         assert!(trends.contains("Food ingredients"));
+        for _ in 0..SAMPLE_LIMIT {
+            record(&mut history, &mut runner.village, 200);
+        }
+        assert_eq!(history.samples.len(), SAMPLE_LIMIT);
+        assert_eq!(history.omitted, 3);
+        let trends = lab_trends(&history, &catalog);
+        assert!(trends.contains("Latest 240 samples"));
+        assert!(trends.contains("3 older omitted"));
     }
 
     #[test]
