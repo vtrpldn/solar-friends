@@ -17,6 +17,17 @@ enum Change {
     Demolish,
 }
 
+const BUILDING_HISTORY_LIMIT: usize = 64;
+
+#[derive(Deserialize, Serialize)]
+pub(super) struct DismantledBuilding {
+    clock: f64,
+    key: String,
+    kind: Change,
+    recovered: BTreeMap<String, u32>,
+    lost: BTreeMap<String, u32>,
+}
+
 #[derive(Deserialize, Serialize)]
 pub(super) struct ChangeJob {
     kind: Change,
@@ -43,6 +54,20 @@ pub(crate) enum ProjectAction {
 }
 
 impl Construction {
+    pub(crate) fn valid_building_history(&self, catalog: &Catalog, clock: f64) -> bool {
+        self.building_history.len() <= BUILDING_HISTORY_LIMIT
+            && self.building_history.iter().all(|entry| {
+                (0.0..=clock).contains(&entry.clock)
+                    && catalog.projects.contains_key(&entry.key)
+                    && matches!(entry.kind, Change::Salvage | Change::Demolish)
+                    && entry
+                        .recovered
+                        .keys()
+                        .chain(entry.lost.keys())
+                        .all(|id| catalog.materials.contains_key(id))
+            })
+    }
+
     pub fn working_change(&self, worker: usize) -> bool {
         self.changes.values().any(|job| job.worker == Some(worker))
     }
@@ -376,6 +401,7 @@ impl Construction {
         catalog: &Catalog,
         stock: &mut Stock,
         site: ConstructionSite,
+        clock: f64,
         dt: f32,
     ) {
         let changes: Vec<_> = self.changes.keys().copied().collect();
@@ -436,20 +462,23 @@ impl Construction {
                         }
                     }
                 }
-                let returned: BTreeMap<_, _> = installed
-                    .into_iter()
-                    .map(|(id, amount)| {
-                        let keep = if matches!(id.as_str(), "goats" | "hens" | "bees") {
-                            amount
-                        } else if kind == Change::Salvage {
-                            amount / 2
-                        } else {
-                            0
-                        };
-                        (id, keep)
-                    })
-                    .filter(|(_, units)| *units > 0)
-                    .collect();
+                let mut returned = BTreeMap::new();
+                let mut lost = BTreeMap::new();
+                for (id, amount) in installed {
+                    let keep = if matches!(id.as_str(), "goats" | "hens" | "bees") {
+                        amount
+                    } else if kind == Change::Salvage {
+                        amount / 2
+                    } else {
+                        0
+                    };
+                    if keep > 0 {
+                        returned.insert(id.clone(), keep);
+                    }
+                    if amount > keep {
+                        lost.insert(id, amount - keep);
+                    }
+                }
                 let returned_units: u64 = returned.values().map(|units| u64::from(*units)).sum();
                 let (used, capacity) = self.storage(catalog, stock);
                 let lost_storage =
@@ -466,11 +495,22 @@ impl Construction {
                 if !stock.sandbox {
                     stock.receive(&returned);
                 }
+                self.building_history.push_back(DismantledBuilding {
+                    clock,
+                    key: plan.key.clone(),
+                    kind,
+                    recovered: returned,
+                    lost,
+                });
+                if self.building_history.len() > BUILDING_HISTORY_LIMIT {
+                    self.building_history.pop_front();
+                }
                 self.remove_project(index);
                 self.status = format!(
                     "{} dismantled. Recovered supplies are in stores.",
                     definition.name
                 );
+                self.record_event(clock, self.status.clone());
                 continue;
             }
             let parcel = &self.plans[index];
@@ -582,7 +622,7 @@ mod tests {
         obstacle.position = destination;
         construction.plans.push(obstacle);
         for _ in 0..2_000 {
-            construction.tick_changes(&catalog, &mut stock, site, 0.1);
+            construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
             if construction.status == "Another project occupies that space." {
                 break;
             }
@@ -593,7 +633,7 @@ mod tests {
         assert!(construction.changes[&0].target.is_some());
         construction.plans.pop();
         for _ in 0..2_000 {
-            construction.tick_changes(&catalog, &mut stock, site, 0.1);
+            construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
             if construction.changes.is_empty() {
                 break;
             }
@@ -635,7 +675,7 @@ mod tests {
         construction.plans[0].delivered = construction.plans[0].loads;
         construction.begin_change(&catalog, 0, Change::Salvage, None);
         for _ in 0..2_000 {
-            construction.tick_changes(&catalog, &mut stock, site, 0.1);
+            construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
             if construction.plans[0].removed {
                 break;
             }
@@ -643,5 +683,13 @@ mod tests {
         }
         assert!(construction.plans[0].removed);
         assert_eq!(stock.available("wood"), 32);
+        let json = serde_json::to_string(&construction).unwrap();
+        let saved: Construction = serde_json::from_str(&json).unwrap();
+        assert!(saved.valid_building_history(&catalog, 42.0));
+        assert!(!saved.valid_building_history(&catalog, 41.0));
+        let entry = &saved.building_history[0];
+        assert_eq!(entry.key, "gathering");
+        assert_eq!(entry.recovered["wood"], 4);
+        assert_eq!(entry.lost["wood"], 4);
     }
 }

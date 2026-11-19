@@ -142,6 +142,8 @@ pub struct Construction {
     #[serde(default)]
     events: events::VillageEvents,
     #[serde(default)]
+    building_history: VecDeque<lifecycle::DismantledBuilding>,
+    #[serde(default)]
     pub foundations: Arc<Vec<Foundation>>,
     #[serde(default)]
     market: Market,
@@ -260,6 +262,7 @@ impl Default for Construction {
             slow_sandbox: false,
             plans: Vec::new(),
             events: events::VillageEvents::default(),
+            building_history: VecDeque::new(),
             foundations: Arc::default(),
             market: Market::default(),
             trade: Trade::default(),
@@ -1753,7 +1756,7 @@ impl Construction {
             clock.seconds,
             crate::market::fare_cents(clock.round_trip_km),
         );
-        self.tick_changes(catalog, stock, site, dt);
+        self.tick_changes(catalog, stock, site, clock.seconds, dt);
         self.tick_water_work(catalog, stock, site, clock.seconds, dt);
         self.tick_upkeep(catalog, stock, site, dt);
         self.restock_upkeep(catalog, stock, site.land, clock);

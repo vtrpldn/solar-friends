@@ -575,6 +575,9 @@ impl Village {
         self.construction.valid_save(catalog, &self.stock)
             && self
                 .construction
+                .valid_building_history(catalog, self.clock)
+            && self
+                .construction
                 .gathering
                 .valid_save(&Land::generate(setup))
     }
