@@ -1,5 +1,6 @@
 use crate::{audio::SoundSettings, utilities::NetworkView};
 mod build_menu;
+mod building_lighting;
 mod building_preview;
 mod cultivation_surface;
 mod diagnostics;
@@ -72,6 +73,7 @@ impl Plugin for VillagePlugin {
         toolbar::install(app);
         guide::install(app);
         library_ui::install(app);
+        building_lighting::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()

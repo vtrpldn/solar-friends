@@ -1440,6 +1440,11 @@ impl Construction {
         matches!(self.plans[project].key.as_str(), "field" | "garden")
     }
 
+    pub fn project_kind<'a>(&self, catalog: &'a Catalog, project: usize) -> Option<&'a str> {
+        let plan = self.plans.get(project)?;
+        (!plan.removed).then(|| catalog.projects[&plan.key].kind.as_str())
+    }
+
     pub fn is_fire_circle(&self, project: usize) -> bool {
         self.plans[project].key == "fire-circle"
     }
