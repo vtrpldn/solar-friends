@@ -714,11 +714,22 @@ impl Construction {
                 && !stock.sandbox
             {
                 let lost = crate::food::discard_expired(lots, clock);
+                let spoiled = !lost.is_empty();
                 stock.record_spoilage(catalog, &lost);
                 for (id, lost) in lost {
                     if let Some(quantity) = job.output.get_mut(&id) {
                         *quantity = quantity.saturating_sub(lost);
                     }
+                }
+                if spoiled && job.output.values().all(|&units| units == 0) {
+                    if let Some(worker) = job.worker {
+                        let resident = &mut self.residents[worker];
+                        if resident.health.task.is_none() && !resident.town_work.active() {
+                            resident.path.clear();
+                        }
+                    }
+                    self.farming.jobs.remove(job_index);
+                    continue;
                 }
             }
             let job = &self.farming.jobs[job_index];
@@ -1262,6 +1273,18 @@ mod resize_tests {
         );
         assert_eq!(full_stock.available("greens"), initial);
         assert_eq!(village.farming.jobs[0].output["greens"], total);
+
+        // A fully spoiled harvest should release its bed even while a haul
+        // is waiting to retry an inaccessible route.
+        let mut blocked: Construction =
+            serde_json::from_str(&serde_json::to_string(&village).unwrap()).unwrap();
+        let after_expiry = 90.0 * crate::weather::DAY;
+        let job = &mut blocked.farming.jobs[0];
+        job.worker = None;
+        job.retry = after_expiry + 5.0;
+        blocked.tick_farm_jobs(&catalog, &mut full_stock, ground, after_expiry, 0.1);
+        assert!(blocked.farming.jobs.is_empty());
+        assert_eq!(full_stock.available("greens"), initial);
 
         village.tick_farm_jobs(&catalog, &mut stock, ground, 0.0, 0.1);
         let first_load = stock.available("greens") - initial;
