@@ -8,6 +8,7 @@ use bevy::{
 
 use crate::{
     arrival::{MAP_START, ROAD_END, road_center, road_width, world_position},
+    catalog::Catalog,
     setup::WorldSetup,
     terrain::{Terrain, land_random, noise},
     village::Village,
@@ -16,6 +17,9 @@ use crate::{
 const STOCK: Vec2 = Vec2::new(32.0, -13.0);
 const EARTH: usize = 8;
 const STONE: usize = 9;
+const FIRST_FORAGE_MODEL: usize = 10;
+const LAST_FORAGE_MODEL: usize = 14;
+const FIRST_DEPLETED_FORAGE_MODEL: usize = 23;
 const WILD_BAMBOO: usize = 12;
 const TREES: [&[usize]; 3] = [&[0, 1, 2, 3], &[4, 5], &[6, 7]];
 
@@ -26,7 +30,7 @@ impl Plugin for LandPlugin {
         embedded_asset!(app, "land.glb");
         app.init_resource::<Land>()
             .add_systems(PreUpdate, generate_land)
-            .add_systems(PostUpdate, (draw_land, hide_felled_trees).chain());
+            .add_systems(PostUpdate, (draw_land, update_harvested_land).chain());
     }
 }
 
@@ -60,7 +64,10 @@ struct Candidate {
 }
 
 #[derive(Component)]
-struct LandDetail(Option<usize>);
+struct LandDetail {
+    site: Option<usize>,
+    depleted: bool,
+}
 
 impl Land {
     pub fn occupied(&self, cell: IVec2) -> bool {
@@ -382,7 +389,10 @@ fn draw_land(
                 .with_label(GltfAssetLabel::Scene(plant.model).to_string()),
         );
         commands.spawn((
-            LandDetail(index),
+            LandDetail {
+                site: index,
+                depleted: false,
+            },
             SceneRoot(scene),
             Transform::from_xyz(x, terrain.height_at(x, z), z)
                 .with_rotation(Quat::from_rotation_y(plant.yaw))
@@ -390,15 +400,42 @@ fn draw_land(
         ));
     }
 }
-fn hide_felled_trees(village: Res<Village>, mut models: Query<(&LandDetail, &mut Visibility)>) {
-    for (detail, mut visibility) in &mut models {
-        let visible = if detail.0.is_some_and(|site| village.tree_felled(site)) {
+fn update_harvested_land(
+    land: Res<Land>,
+    setup: Res<WorldSetup>,
+    village: Res<Village>,
+    catalog: Res<Catalog>,
+    assets: Res<AssetServer>,
+    mut models: Query<(&mut LandDetail, &mut SceneRoot, &mut Visibility)>,
+) {
+    let in_village = !setup.open && village.camp.is_some();
+    for (mut detail, mut scene, mut visibility) in &mut models {
+        let Some(index) = detail.site else {
+            continue;
+        };
+        let visible = if in_village && village.tree_felled(index) {
             Visibility::Hidden
         } else {
             Visibility::Inherited
         };
-        if *visibility != visible {
-            *visibility = visible;
+        visibility.set_if_neq(visible);
+        let Some(site) = land
+            .site(index)
+            .filter(|site| (FIRST_FORAGE_MODEL..=LAST_FORAGE_MODEL).contains(&site.model))
+        else {
+            continue;
+        };
+        let limit = catalog.gathering[site.recipe()].gather_limit;
+        let depleted = in_village && village.forage_depleted(index, limit);
+        if detail.depleted != depleted {
+            let index = if depleted {
+                FIRST_DEPLETED_FORAGE_MODEL + site.model - FIRST_FORAGE_MODEL
+            } else {
+                site.model
+            };
+            let path = AssetPath::from_path_buf(embedded_path!("land.glb")).with_source("embedded");
+            scene.0 = assets.load(path.with_label(GltfAssetLabel::Scene(index).to_string()));
+            detail.depleted = depleted;
         }
     }
 }

@@ -65,6 +65,12 @@ impl Gathering {
         self.markers.get(&index).is_some_and(|site| site.removed)
     }
 
+    pub fn forage_depleted(&self, index: usize, limit: u32, clock: f64) -> bool {
+        self.markers
+            .get(&index)
+            .is_some_and(|state| clock < state.ready || (limit > 0 && state.extracted >= limit))
+    }
+
     pub fn select(&mut self, land: &Land, index: Option<usize>) {
         self.selected = index.filter(|index| land.site(*index).is_some() && !self.felled(*index));
         self.notice.clear();

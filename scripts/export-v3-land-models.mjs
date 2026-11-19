@@ -8,6 +8,8 @@ const ids = [
   "forage-wood", "forage-bamboo", "forage-grass", "forage-stone",
   "landscape-7", "landscape-0", "bunchgrass", "campo", "mandacaru",
   "macambira", "produce-crates", "garden-bench",
+  "forage-fruit-gathered", "forage-wood-gathered", "forage-bamboo-gathered",
+  "forage-grass-gathered", "forage-stone-gathered",
 ];
 await exportModels(ids.map((id) => [id, compactModel(createAsset(id))]),
   new URL("../bevy-v3/src/land.glb", import.meta.url));

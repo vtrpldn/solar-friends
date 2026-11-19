@@ -534,6 +534,12 @@ impl Village {
         self.construction.gathering.felled(index)
     }
 
+    pub fn forage_depleted(&self, index: usize, limit: u32) -> bool {
+        self.construction
+            .gathering
+            .forage_depleted(index, limit, self.clock)
+    }
+
     pub fn valid_save(&self, catalog: &Catalog) -> bool {
         let Some(setup) = &self.setup else {
             return false;
