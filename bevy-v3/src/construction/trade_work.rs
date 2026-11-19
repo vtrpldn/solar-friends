@@ -78,11 +78,11 @@ impl Construction {
                         "At camp · Waiting for storage".into()
                     }
                     Some(trip) if trip.boarded => {
-                        let returning = trip.elapsed >= trip.duration * 0.5;
-                        let phase = if returning {
-                            "Returning"
-                        } else {
-                            "Driving to town"
+                        use crate::arrival::{TownDrivePhase, town_drive_phase};
+                        let phase = match town_drive_phase(trip.elapsed, trip.duration) {
+                            TownDrivePhase::Outbound => "Driving to town",
+                            TownDrivePhase::Away => "In town",
+                            TownDrivePhase::Inbound => "Returning",
                         };
                         let minutes = ((trip.duration - trip.elapsed) * 60.0 / crate::weather::HOUR)
                             .ceil() as u64;
@@ -686,7 +686,13 @@ mod tests {
         assert!(
             village.trade_queue_labels(&catalog)[0]
                 .label
-                .contains("Returning · 15 game min")
+                .contains("In town · 15 game min")
+        );
+        village.trip.as_mut().unwrap().elapsed = 50.0;
+        assert!(
+            village.trade_queue_labels(&catalog)[0]
+                .label
+                .contains("Returning · 8 game min")
         );
         village.trip.as_mut().unwrap().elapsed = 66.0;
         assert!(

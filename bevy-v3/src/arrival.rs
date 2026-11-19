@@ -58,21 +58,40 @@ pub fn car_door(index: usize) -> IVec2 {
     IVec2::new(if index == 0 { 30 } else { 35 }, 32 + (PARK_Z / 2.0) as i32)
 }
 
-pub fn town_vehicle_pose(elapsed: f64, duration: f64, vehicle: usize) -> Pose {
-    const DRIVE: f64 = 18.0;
-    let parked = vehicle_pose(ARRIVAL_DURATION, vehicle);
-    if elapsed >= DRIVE && elapsed < duration - DRIVE {
-        return Pose {
-            visible: false,
-            ..parked
-        };
-    }
-    let outgoing = elapsed < DRIVE;
-    let t = if outgoing {
-        elapsed / DRIVE
+const TOWN_DRIVE_SECONDS: f64 = 18.0;
+
+pub(crate) enum TownDrivePhase {
+    Outbound,
+    Away,
+    Inbound,
+}
+
+pub(crate) fn town_drive_phase(elapsed: f64, duration: f64) -> TownDrivePhase {
+    if elapsed < TOWN_DRIVE_SECONDS {
+        TownDrivePhase::Outbound
+    } else if elapsed < duration - TOWN_DRIVE_SECONDS {
+        TownDrivePhase::Away
     } else {
-        (elapsed - duration + DRIVE) / DRIVE
-    } as f32;
+        TownDrivePhase::Inbound
+    }
+}
+
+pub fn town_vehicle_pose(elapsed: f64, duration: f64, vehicle: usize) -> Pose {
+    let parked = vehicle_pose(ARRIVAL_DURATION, vehicle);
+    let (outgoing, t) = match town_drive_phase(elapsed, duration) {
+        TownDrivePhase::Outbound => (true, elapsed / TOWN_DRIVE_SECONDS),
+        TownDrivePhase::Away => {
+            return Pose {
+                visible: false,
+                ..parked
+            };
+        }
+        TownDrivePhase::Inbound => (
+            false,
+            (elapsed - duration + TOWN_DRIVE_SECONDS) / TOWN_DRIVE_SECONDS,
+        ),
+    };
+    let t = t as f32;
     let smooth = t * t * (3.0 - 2.0 * t);
     let fraction = if outgoing { smooth } else { 1.0 - smooth };
     let z = PARK_Z + (MAP_START - 8.0 - PARK_Z) * fraction;
