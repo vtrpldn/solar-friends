@@ -762,6 +762,14 @@ impl Construction {
             }
             orders.sort_unstable_by(|a, b| b.cmp(a));
             for index in orders {
+                let order = &self.trade.orders[index];
+                if order.buying && order.quantity == 0 {
+                    let name = &catalog.materials[&order.material].name;
+                    self.record_event(
+                        clock.seconds,
+                        format!("Town pickup returned with no usable {name}."),
+                    );
+                }
                 self.trade.finish_trip(index, stock, space);
                 self.removed_trade_order(index);
             }

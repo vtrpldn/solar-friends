@@ -415,7 +415,9 @@ impl Trade {
         } else {
             stock.receive(&goods);
         }
-        self.purchases = self.purchases.saturating_add(1);
+        if order.quantity > 0 {
+            self.purchases = self.purchases.saturating_add(1);
+        }
         Some(order)
     }
 
@@ -427,7 +429,7 @@ impl Trade {
             return false;
         }
         let order = self.orders.remove(index).expect("completed town trip");
-        if order.buying || order.spoiled {
+        if (order.buying || order.spoiled) && order.quantity > 0 {
             let goods = BTreeMap::from([(order.material, order.quantity)]);
             if let Some(lots) = order.food {
                 stock.receive_with_lots(&goods, lots);
@@ -722,6 +724,42 @@ mod tests {
             assert_eq!(stock.available(id), 1);
             assert_eq!(stock.pantry.lots[id][0].expires, 200.0);
             assert_eq!(stock.pantry.spoiled[id], 1);
+        }
+    }
+
+    #[test]
+    fn a_fully_spoiled_purchase_unloads_without_counting_as_fulfilled() {
+        let catalog = Catalog::default();
+        for freight in [false, true] {
+            let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+            let mut market = Market::default();
+            let mut trade = Trade::default();
+            let original = stock.available("milk");
+            trade
+                .buy(
+                    &catalog,
+                    &mut stock,
+                    &mut market,
+                    "milk",
+                    (0.0, 12, freight),
+                )
+                .unwrap();
+            let clock = crate::weather::DAY * 2.0;
+            trade.age_shipments(&catalog, &mut stock, &mut market, clock, &[0]);
+            if freight {
+                assert_eq!(
+                    trade.receive_goods(&mut stock, 0, clock).unwrap().quantity,
+                    0
+                );
+            } else {
+                market.depart(&mut stock, trade.orders[0].fare);
+                assert_eq!(trade.orders[0].quantity, 0);
+                assert!(trade.finish_trip(0, &mut stock, 0));
+            }
+            assert_eq!(trade.purchases, 0);
+            assert_eq!(stock.available("milk"), original);
+            assert!(trade.orders.is_empty() && trade.delivery.is_none());
+            assert_eq!(market.committed_fares(), 0);
         }
     }
 
