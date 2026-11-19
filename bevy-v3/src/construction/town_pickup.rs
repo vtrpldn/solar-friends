@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use super::*;
 
-use crate::economy_reference::FREIGHT_CAPACITY;
+use crate::{
+    arrival::{TownDrivePhase, town_drive_phase},
+    economy_reference::FREIGHT_CAPACITY,
+};
 
 pub(super) type PickupManifest = BTreeMap<usize, BTreeMap<String, u32>>;
 
@@ -632,7 +635,10 @@ impl Construction {
                 trip.as_ref().is_some_and(|trip| {
                     trip.market_order
                         && trip.return_purchase.is_none()
-                        && trip.elapsed < trip.duration * 0.5
+                        && !matches!(
+                            town_drive_phase(trip.elapsed, trip.duration),
+                            TownDrivePhase::Inbound
+                        )
                         && orders
                             .get(trip.project)
                             .is_some_and(|order| !order.buying && !order.settled)
@@ -740,7 +746,10 @@ impl Construction {
             self.upkeep
                 .record_distance(trip.vehicle, clock.round_trip_km);
         }
-        if trip.elapsed >= trip.duration * 0.5 {
+        if matches!(
+            town_drive_phase(trip.elapsed, trip.duration),
+            TownDrivePhase::Inbound
+        ) {
             for index in trip.trade_orders() {
                 self.trade.settle(index, stock);
             }
@@ -1082,7 +1091,7 @@ mod tests {
     }
 
     #[test]
-    fn purchase_added_to_an_outbound_sale_returns_with_no_additional_fuel() {
+    fn purchase_added_before_the_return_drive_needs_no_additional_fuel() {
         let catalog = Catalog::default();
         let setup = WorldSetup::default();
         let terrain = setup.terrain();
@@ -1108,6 +1117,14 @@ mod tests {
         village.residents[outgoing.driver].path.clear();
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
         assert!(village.trip.unwrap().boarded);
+        village.tick_trip(
+            &catalog,
+            &mut stock,
+            site,
+            clock,
+            (outgoing.duration * 0.6) as f32,
+        );
+        assert_eq!(village.trade.receipts, 0);
 
         let selected = Trade::tradable(&catalog)[village.trade.selected].0;
         let price = (catalog.materials[selected].price * 100.0).round() as u64;
@@ -1133,6 +1150,15 @@ mod tests {
 
         village = serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
         assert!(village.sale_trip_for_return_purchase().is_none());
+        village.tick_trip(
+            &catalog,
+            &mut stock,
+            site,
+            clock,
+            (outgoing.duration * 0.3) as f32,
+        );
+        assert_eq!(village.trade.receipts, 1);
+        assert_eq!(village.trade.purchases, 0);
         village.tick_trip(
             &catalog,
             &mut stock,
