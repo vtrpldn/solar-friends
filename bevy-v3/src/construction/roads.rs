@@ -65,6 +65,8 @@ impl Construction {
                 rotation: 0,
                 loads: catalog.loads(definition),
                 delivered: 0,
+                staged: 0,
+                depot: None,
                 work: 0.0,
                 pickups: 0,
                 fare: 0,

@@ -385,6 +385,9 @@ impl Construction {
     }
 
     fn remove_project(&mut self, index: usize) {
+        self.clear_haul_depot(index);
+        self.plans[index].staged = 0;
+        self.plans[index].depot = None;
         self.plans[index].removed = true;
         for resident in &mut self.residents {
             if resident.home == Some(index) {
@@ -512,6 +515,9 @@ impl Construction {
                             }
                         }
                     }
+                    self.clear_haul_depot(index);
+                    self.plans[index].staged = 0;
+                    self.plans[index].depot = None;
                     self.plans[index].position = target.position;
                     self.plans[index].size = target.size;
                     self.plans[index].rotation = target.rotation;

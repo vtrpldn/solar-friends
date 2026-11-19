@@ -82,19 +82,29 @@ impl Construction {
         } else if plan.pickups > 0 {
             format!("{} town pickup(s) pending", plan.pickups)
         } else if plan.delivered < plan.loads {
-            let in_transit =
-                self.residents
-                    .iter()
-                    .filter(|worker| {
-                        worker.assignment.as_ref().is_some_and(|job| {
-                            job.project == index && job.activity == Activity::Carry
-                        })
-                    })
-                    .count();
-            format!(
+            let mut in_transit = 0;
+            let mut staged = plan.staged;
+            for job in self
+                .residents
+                .iter()
+                .filter_map(|worker| worker.assignment.as_ref())
+            {
+                if job.project == index && job.activity == Activity::Carry {
+                    in_transit += job.haul.loads();
+                    if matches!(job.haul, Haul::FromDepot { .. }) {
+                        staged = staged.saturating_sub(job.haul.loads());
+                    }
+                }
+            }
+            let mut status = format!(
                 "{}/{} loads delivered · {in_transit} in transit",
                 plan.delivered, plan.loads
-            )
+            );
+            if staged > 0 {
+                use std::fmt::Write;
+                let _ = write!(status, " · {staged} at nearby storage");
+            }
+            status
         } else {
             let progress = 100.0 * plan.work / def.work;
             let builders =

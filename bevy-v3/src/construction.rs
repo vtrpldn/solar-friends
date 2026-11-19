@@ -198,6 +198,10 @@ struct Blueprint {
     rotation: u8,
     loads: u32,
     delivered: u32,
+    #[serde(default)]
+    staged: u32,
+    #[serde(default)]
+    depot: Option<usize>,
     work: f64,
     #[serde(default)]
     pickups: u32,
@@ -227,12 +231,44 @@ enum Activity {
     Build,
 }
 
+#[derive(Clone, Copy, Default, Deserialize, Serialize)]
+enum Haul {
+    #[default]
+    Direct,
+    Stage {
+        depot: usize,
+        loads: u32,
+    },
+    FromDepot {
+        depot: usize,
+        loads: u32,
+    },
+}
+
+impl Haul {
+    fn depot(self) -> Option<usize> {
+        match self {
+            Self::Direct => None,
+            Self::Stage { depot, .. } | Self::FromDepot { depot, .. } => Some(depot),
+        }
+    }
+
+    fn loads(self) -> u32 {
+        match self {
+            Self::Direct => 1,
+            Self::Stage { loads, .. } | Self::FromDepot { loads, .. } => loads,
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize)]
 struct Assignment {
     project: usize,
     spot: IVec2,
     activity: Activity,
     to_site: VecDeque<Vec2>,
+    #[serde(default)]
+    haul: Haul,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -903,6 +939,8 @@ impl Construction {
             rotation,
             loads: catalog.loads(definition),
             delivered: 0,
+            staged: 0,
+            depot: None,
             work: 0.0,
             pickups: 0,
             fare: 0,
@@ -1563,7 +1601,8 @@ impl Construction {
         {
             return false;
         }
-        self.plans.len() <= 128 * 128
+        self.valid_haul_reservations()
+            && self.plans.len() <= 128 * 128
             && self.plans.iter().all(|plan| {
                 catalog.projects.get(&plan.key).is_some_and(|definition| {
                     plan.rotation <= 3
@@ -1579,6 +1618,10 @@ impl Construction {
                             amount <= 100_000 && catalog.materials.contains_key(id)
                         })
                         && plan.loads == catalog.loads_for(plan.materials(catalog))
+                        && plan.staged <= plan.loads.saturating_sub(plan.delivered)
+                        && plan.depot.map_or(plan.staged == 0, |depot| {
+                            self.valid_haul_depot(catalog, depot)
+                        })
                         && plan.delivered <= plan.loads
                         && (plan.pickups == 0 || plan.delivered == 0 && plan.work == 0.0)
                         && (0.0..=definition.work).contains(&plan.work)
@@ -1597,6 +1640,22 @@ impl Construction {
                     && worker.path.iter().copied().all(in_bounds)
                     && worker.assignment.as_ref().is_none_or(|job| {
                         job.project < self.plans.len()
+                            && match job.haul {
+                                Haul::Direct => true,
+                                Haul::Stage { depot, loads } | Haul::FromDepot { depot, loads } => {
+                                    let limit = if matches!(job.haul, Haul::Stage { .. }) {
+                                        4
+                                    } else {
+                                        2
+                                    };
+                                    self.plans[job.project].depot == Some(depot)
+                                        && (1..=limit).contains(&loads)
+                                        && matches!(
+                                            job.activity,
+                                            Activity::Carry | Activity::Collect
+                                        )
+                                }
+                            }
                             && job.to_site.len() <= 128 * 128
                             && job.to_site.iter().copied().all(in_bounds)
                     })
@@ -1826,10 +1885,22 @@ impl Construction {
                     job.activity = Activity::Carry;
                 }
                 Activity::Carry => {
-                    project.delivered += 1;
+                    match job.haul {
+                        Haul::Stage { loads, .. } => {
+                            project.staged += loads;
+                            continue;
+                        }
+                        Haul::FromDepot { loads, .. } => {
+                            project.staged -= loads;
+                            project.delivered += loads;
+                        }
+                        Haul::Direct => project.delivered += 1,
+                    }
+                    job.haul = Haul::Direct;
                     if project.delivered < project.loads {
                         continue;
                     }
+                    project.depot = None;
                     job.activity = Activity::Build;
                 }
                 Activity::Walk => job.activity = Activity::Build,
@@ -1909,21 +1980,27 @@ impl Construction {
                 .filter_map(|worker| worker.assignment.as_ref().filter(|job| job.project == id))
                 .collect();
             let limit = construction_crew_limit(definition, project.size);
-            if crew.len() >= limit
-                || (project.delivered < project.loads
-                    && project.delivered + crew.len() as u32 >= project.loads)
-            {
+            if crew.len() >= limit {
                 continue;
             }
             let hauling = project.delivered < project.loads;
             let supply = SUPPLY_SPOTS[index];
-            let start = if hauling { supply.as_vec2() } else { position };
-            let mut spots = build_perimeter(project.position, project.size);
-            spots.sort_by(|a, b| {
-                a.as_vec2()
-                    .distance_squared(start)
-                    .total_cmp(&b.as_vec2().distance_squared(start))
-            });
+            let reserved = |from_depot| {
+                crew.iter()
+                    .filter(|job| {
+                        matches!(job.activity, Activity::Collect | Activity::Carry)
+                            && matches!(job.haul, Haul::FromDepot { .. }) == from_depot
+                    })
+                    .map(|job| job.haul.loads())
+                    .sum::<u32>()
+            };
+            let available_staged = project.staged.saturating_sub(reserved(true));
+            let available_at_camp = project
+                .loads
+                .saturating_sub(project.delivered + project.staged + reserved(false));
+            if hauling && available_staged == 0 && available_at_camp == 0 {
+                continue;
+            }
             let path = |from, to| {
                 route(
                     from,
@@ -1932,6 +2009,46 @@ impl Construction {
                     access_road,
                 )
             };
+            let depot = if hauling {
+                self.haul_depots(catalog, id).into_iter().find_map(|depot| {
+                    let storage = &self.plans[depot];
+                    let from = if available_staged > 0 {
+                        position
+                    } else {
+                        supply.as_vec2()
+                    };
+                    resident_work::project_access_points(storage, catalog, from)
+                        .into_iter()
+                        .find_map(|cell| path(from, cell).map(|route| (depot, cell, route)))
+                })
+            } else {
+                None
+            };
+            let (haul, start) = match &depot {
+                Some((depot, cell, _)) if available_staged > 0 => (
+                    Haul::FromDepot {
+                        depot: *depot,
+                        loads: available_staged.min(2),
+                    },
+                    cell.as_vec2(),
+                ),
+                Some((depot, cell, _)) => (
+                    Haul::Stage {
+                        depot: *depot,
+                        loads: available_at_camp.min(4),
+                    },
+                    cell.as_vec2(),
+                ),
+                None if hauling && available_at_camp > 0 => (Haul::Direct, supply.as_vec2()),
+                None if hauling => continue,
+                None => (Haul::Direct, position),
+            };
+            let mut spots = build_perimeter(project.position, project.size);
+            spots.sort_by(|a, b| {
+                a.as_vec2()
+                    .distance_squared(start)
+                    .total_cmp(&b.as_vec2().distance_squared(start))
+            });
             let Some((spot, to_site)) = spots
                 .into_iter()
                 .filter(|spot| !crew.iter().any(|worker| worker.spot == *spot))
@@ -1939,14 +2056,27 @@ impl Construction {
             else {
                 continue;
             };
-            let (path, to_site, activity) = if hauling {
-                let Some(to_supply) = path(position, supply) else {
-                    continue;
-                };
-                (to_supply, to_site, Activity::Collect)
-            } else {
-                (to_site, VecDeque::new(), Activity::Walk)
+            let (path, to_site, activity) = match (hauling, depot) {
+                (true, Some((_, _, to_depot))) => match haul {
+                    Haul::Stage { .. } => {
+                        let Some(to_supply) = path(position, supply) else {
+                            continue;
+                        };
+                        (to_supply, to_depot, Activity::Collect)
+                    }
+                    _ => (to_depot, to_site, Activity::Collect),
+                },
+                (true, None) => {
+                    let Some(to_supply) = path(position, supply) else {
+                        continue;
+                    };
+                    (to_supply, to_site, Activity::Collect)
+                }
+                (false, _) => (to_site, VecDeque::new(), Activity::Walk),
             };
+            if let Haul::Stage { depot, .. } | Haul::FromDepot { depot, .. } = haul {
+                self.plans[id].depot = Some(depot);
+            }
             let worker = &mut self.residents[index];
             worker.path = path;
             worker.assignment = Some(Assignment {
@@ -1954,9 +2084,94 @@ impl Construction {
                 spot,
                 to_site,
                 activity,
+                haul,
             });
             return;
         }
+    }
+
+    fn valid_haul_depot(&self, catalog: &Catalog, depot: usize) -> bool {
+        self.plans.get(depot).is_some_and(|plan| {
+            !plan.removed
+                && catalog.projects.get(&plan.key).is_some_and(|definition| {
+                    plan.work >= definition.work
+                        && matches!(
+                            definition.kind.as_str(),
+                            "warehouse" | "covered-storage" | "supply-5"
+                        )
+                })
+        })
+    }
+
+    fn valid_haul_reservations(&self) -> bool {
+        let mut counts = BTreeMap::<usize, (u64, u64)>::new();
+        for job in self
+            .residents
+            .iter()
+            .filter_map(|worker| worker.assignment.as_ref())
+        {
+            if matches!(job.activity, Activity::Carry | Activity::Collect) {
+                let (from_camp, from_depot) = counts.entry(job.project).or_default();
+                let loads = u64::from(job.haul.loads());
+                if matches!(job.haul, Haul::FromDepot { .. }) {
+                    *from_depot += loads;
+                } else {
+                    *from_camp += loads;
+                }
+            }
+        }
+        counts.into_iter().all(|(index, (camp, depot))| {
+            self.plans.get(index).is_some_and(|plan| {
+                depot <= u64::from(plan.staged)
+                    && camp + u64::from(plan.staged) + u64::from(plan.delivered)
+                        <= u64::from(plan.loads)
+            })
+        })
+    }
+
+    fn clear_haul_depot(&mut self, index: usize) {
+        for project in &mut self.plans {
+            if project.depot == Some(index) {
+                project.depot = None;
+                project.staged = 0;
+            }
+        }
+        for resident in &mut self.residents {
+            if resident
+                .assignment
+                .as_ref()
+                .is_some_and(|job| job.haul.depot() == Some(index))
+            {
+                resident.assignment = None;
+                resident.path.clear();
+            }
+        }
+    }
+
+    fn haul_depots(&self, catalog: &Catalog, index: usize) -> Vec<usize> {
+        let project = &self.plans[index];
+        if let Some(depot) = project.depot {
+            return vec![depot];
+        }
+        let origin = STOCKPILE.as_vec2();
+        let target = project.position.as_vec2();
+        let mut candidates: Vec<_> = self
+            .plans
+            .iter()
+            .enumerate()
+            .filter_map(|(id, plan)| {
+                let location = plan.position.as_vec2();
+                let distance = location.distance(target);
+                (id != index
+                    && !self.changes.contains_key(&id)
+                    && self.valid_haul_depot(catalog, id)
+                    && distance < 8.0
+                    && origin.distance(location) + distance < origin.distance(target) * 1.35)
+                    .then_some((id, distance))
+            })
+            .collect();
+        candidates.sort_by(|a, b| a.1.total_cmp(&b.1));
+        candidates.into_iter().map(|(id, _)| id).collect()
     }
 
     fn blocked(
@@ -2533,6 +2748,66 @@ mod tests {
         assert!(saw_transit && saw_assembly);
         assert_eq!(construction.finished_models(&catalog).count(), 1);
         assert_eq!(construction.plans[0].delivered, loads);
+        assert_eq!(stock.available("wood"), 28);
+    }
+
+    #[test]
+    fn residents_stage_loads_at_nearby_storage_before_delivering_them() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut construction = Construction {
+            selection: Some("gathering".into()),
+            ..default()
+        };
+        let mut depot = construction.proposed_site(&catalog, "warehouse", IVec2::new(39, 31));
+        depot.work = catalog.projects["warehouse"].work;
+        depot.delivered = depot.loads;
+        construction.plans.push(depot);
+        construction.plan(&catalog, &mut stock, site, IVec2::new(44, 36), clock);
+        assert_eq!(construction.plans.len(), 2);
+
+        let mut saw_staging = false;
+        let mut saw_depot_delivery = false;
+        for _ in 0..8_000 {
+            construction.tick(&catalog, &mut stock, site, clock, 0.1);
+            let target = &construction.plans[1];
+            if target.staged > 0 && !saw_staging {
+                assert_eq!(target.delivered, 0);
+                assert!(
+                    construction
+                        .project_status(&catalog, 1)
+                        .contains("at nearby storage")
+                );
+                let json = serde_json::to_string(&construction).unwrap();
+                construction = serde_json::from_str(&json).unwrap();
+                assert!(construction.valid_save(&catalog, &stock));
+                saw_staging = true;
+            }
+            saw_depot_delivery |= construction.residents.iter().any(|worker| {
+                worker.assignment.as_ref().is_some_and(|job| {
+                    job.activity == Activity::Carry && matches!(job.haul, Haul::FromDepot { .. })
+                })
+            });
+            if construction.finished_models(&catalog).count() == 2 {
+                break;
+            }
+        }
+        assert!(saw_staging && saw_depot_delivery);
+        assert_eq!(construction.finished_models(&catalog).count(), 2);
+        assert_eq!(construction.plans[1].staged, 0);
         assert_eq!(stock.available("wood"), 28);
     }
 
