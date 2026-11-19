@@ -10,6 +10,7 @@ enum BuildButton {
     PreviousPage,
     NextPage,
     Search,
+    ConstructionPolicy,
     Close,
 }
 
@@ -54,6 +55,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         ))
         .with_children(|panel| {
             panel.spawn((Text::new("Blueprints"), ui_font(&assets, 20.0)));
+            button(panel, &assets, BuildButton::ConstructionPolicy, "");
             panel
                 .spawn(Node {
                     column_gap: px(5),
@@ -111,12 +113,17 @@ fn select(
     if visible(&setup, &village, &saves, &sound) {
         for (button, state) in &buttons {
             if *state == Interaction::Pressed {
+                let sandbox = village.stock.sandbox;
                 let build = &mut village.construction;
                 match *button {
                     BuildButton::Blueprint(row) => build.pick_build_row(&catalog, row),
                     BuildButton::Category => build.change_build_category(false),
                     BuildButton::PreviousPage => build.turn_build_page(&catalog, false),
                     BuildButton::NextPage => build.turn_build_page(&catalog, true),
+                    BuildButton::ConstructionPolicy if sandbox => {
+                        build.toggle_sandbox_construction()
+                    }
+                    BuildButton::ConstructionPolicy => build.toggle_auto_buy(),
                     BuildButton::Search => build.toggle_build_search(),
                     BuildButton::Close => build.toggle_build_menu(),
                 }
@@ -159,19 +166,31 @@ fn refresh(
             Interaction::Hovered => Color::srgb_u8(83, 110, 76),
             Interaction::Pressed => Color::srgb_u8(101, 126, 84),
         };
-        if let BuildButton::Blueprint(index) = *button {
-            let name = names.get(index);
-            node.display = if name.is_some() {
-                Display::Flex
-            } else {
-                Display::None
-            };
-            if let Some(name) = name
-                && let Some(child) = children.first()
-                && let Ok(mut text) = labels.get_mut(*child)
-            {
-                text.set_if_neq(Text::new(format!("{}  {name}", index + 1)));
+        let label = match *button {
+            BuildButton::Blueprint(index) => {
+                let name = names.get(index);
+                node.display = if name.is_some() {
+                    Display::Flex
+                } else {
+                    Display::None
+                };
+                name.map(|name| format!("{}  {name}", index + 1))
             }
+            BuildButton::ConstructionPolicy => Some(
+                if village.stock.sandbox {
+                    village.construction.sandbox_status()
+                } else {
+                    village.construction.auto_buy_status()
+                }
+                .into(),
+            ),
+            _ => None,
+        };
+        if let Some(label) = label
+            && let Some(child) = children.first()
+            && let Ok(mut text) = labels.get_mut(*child)
+        {
+            text.set_if_neq(Text::new(label));
         }
     }
 }

@@ -1528,14 +1528,14 @@ fn show_hud(
     };
     let speed = SPEEDS[village.speed].1;
     let stock = if village.stock.sandbox {
-        format!("Sandbox · {}", village.construction.sandbox_status())
+        format!("Sandbox · I {}", village.construction.sandbox_status())
     } else {
         format!(
             "R${:.2} · {} timber · {} meals · {}",
             village.stock.balance() as f64 / 100.0,
             village.stock.available("wood"),
             village.stock.available("meals"),
-            village.construction.auto_buy_status(),
+            format_args!("U {}", village.construction.auto_buy_status()),
         )
     };
     let mut label = format!(

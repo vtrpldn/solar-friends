@@ -504,9 +504,9 @@ impl Construction {
 
     pub fn auto_buy_status(&self) -> &'static str {
         if self.market.auto_buy_off {
-            "U Auto-buy off"
+            "Auto-buy off"
         } else {
-            "U Auto-buy on"
+            "Auto-buy on"
         }
     }
 
@@ -539,9 +539,9 @@ impl Construction {
 
     pub fn sandbox_status(&self) -> &'static str {
         if self.slow_sandbox {
-            "I Instant build off"
+            "Instant build off"
         } else {
-            "I Instant build on"
+            "Instant build on"
         }
     }
 

@@ -446,6 +446,11 @@ mod tests {
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .reset_all();
+        press_button(&mut app, "Build");
+        press_button(&mut app, "Auto-buy on");
+        press_button(&mut app, "Auto-buy off");
+        press_button(&mut app, "Close build");
+
         press_button(&mut app, "Pause");
         assert!(app.world().resource::<village::Village>().is_paused());
         press_button(&mut app, "Resume");
