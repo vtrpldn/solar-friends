@@ -269,6 +269,9 @@ impl Construction {
                 };
                 self.market.depart(stock, fare);
                 trip.boarded = true;
+                if !stock.sandbox {
+                    self.record_opening_town_trip();
+                }
             }
             return false;
         }

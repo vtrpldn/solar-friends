@@ -1527,7 +1527,7 @@ fn step(
         .tick(catalog, &mut town.stock, site, clock, dt as f32, raining);
     if !town.stock.sandbox {
         town.construction
-            .update_opening_milestones(catalog, town.clock);
+            .update_opening_milestones(catalog, town.clock, town.stock.balance());
     }
     town.construction
         .tick_leisure(catalog, setup, &town.stock, site, town.clock, dt as f32);
@@ -1653,7 +1653,7 @@ fn show_hud(
     }
     if village.camp.is_some()
         && !village.stock.sandbox
-        && let Some(status) = village.construction.opening_milestones_status()
+        && let Some(status) = village.construction.opening_milestones_status(&catalog)
     {
         label.push('\n');
         label.push_str(&status);
