@@ -20,6 +20,7 @@ mod navigation;
 mod production;
 mod resident_animation;
 mod residents;
+mod river_scenery;
 mod save;
 mod save_library;
 mod setup;
@@ -208,6 +209,15 @@ fn update_land(
                 .with_rotation(Quat::from_euler(EulerRot::XYZ, 0.0, rock.yaw, 0.1)),
         ));
     }
+    river_scenery::spawn_banks(
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+        &terrain,
+        setup.biome() == 2,
+        rock_mesh,
+        &rock_materials,
+    );
     commands.spawn((
         LandMesh,
         RiverMesh(rocks),
