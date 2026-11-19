@@ -1,6 +1,6 @@
 // Export the authored V2 construction data for the standalone Bevy game.
 import { readFile, writeFile } from "node:fs/promises";
-import { MATERIALS, PROCESSES, createWeekend } from "../web/v02/weekend/simulation.js";
+import { MATERIALS, PROCESSES, PROJECTS, createWeekend } from "../web/v02/weekend/simulation.js";
 import { buildingCategory, inBuildCategory } from "../web/v02/weekend/build-categories.js";
 import { buyerFor, supplierFor } from "../web/v02/weekend/local-market.js";
 import { materialMeasure, physicalUnit } from "../web/v02/weekend/material-measures.js";
@@ -58,6 +58,16 @@ const projects = Object.fromEntries(buildOptions
     },
   ]));
 
+// Keep the existing desktop construction duration for saved in-progress pens.
+const emptyGoatPen = PROJECTS["goat-pasture-empty"];
+projects["goat-pasture-empty"] = {
+  ...projects.goat_pasture,
+  name: emptyGoatPen.name,
+  description: "Build the pen first. Stock it later with two goats from village supplies.",
+  model: buildingScenes.indexOf(emptyGoatPen.asset),
+  materials: emptyGoatPen.materials,
+};
+
 const gathering = Object.fromEntries(Object.entries(PROCESSES)
   .filter(([, recipe]) => recipe.deposit || recipe.gathering || recipe.kind === "wild-tree"));
 
@@ -87,6 +97,15 @@ for (const [kind, ration] of Object.entries(ANIMAL_RATIONS)) {
     handcraft: false,
   };
 }
+
+production["stock-goats"] = {
+  name: "Stock pen with two goats",
+  kind: "goat_pasture",
+  input: { goats: 2 },
+  output: {},
+  work: ANIMAL_RATIONS.goat_pasture.work,
+  handcraft: false,
+};
 
 const transport = ECONOMY_REFERENCE.transport;
 const rustFloat = value => Number.isInteger(value) ? value.toFixed(1) : String(value);

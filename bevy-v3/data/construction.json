@@ -1809,30 +1809,6 @@
       "campEssential": false,
       "repeatable": true
     },
-    "goat-pasture-empty": {
-      "name": "Empty goat pen",
-      "description": "Build the pen first. Stock it later with two goats from village supplies.",
-      "model": 171,
-      "constructionModels": [
-        94,
-        95
-      ],
-      "kind": "goat_pasture",
-      "size": [
-        6,
-        5
-      ],
-      "materials": {
-        "bamboo": 10,
-        "tiles": 3,
-        "hardware": 2,
-        "plumbing": 1
-      },
-      "work": 396,
-      "category": "Animals",
-      "campEssential": false,
-      "repeatable": true
-    },
     "apiary": {
       "name": "Stingless bee apiary",
       "description": "Stingless bee apiary. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
@@ -2886,6 +2862,30 @@
       "category": "Food & farming",
       "campEssential": false,
       "repeatable": true
+    },
+    "goat-pasture-empty": {
+      "name": "Empty goat pen",
+      "description": "Build the pen first. Stock it later with two goats from village supplies.",
+      "model": 171,
+      "constructionModels": [
+        94,
+        95
+      ],
+      "kind": "goat_pasture",
+      "size": [
+        6,
+        5
+      ],
+      "materials": {
+        "bamboo": 10,
+        "tiles": 3,
+        "hardware": 2,
+        "plumbing": 1
+      },
+      "work": 396,
+      "category": "Animals",
+      "campEssential": false,
+      "repeatable": true
     }
   },
   "gathering": {
@@ -3545,21 +3545,21 @@
       "work": 25,
       "handcraft": false
     },
-    "stock-goats": {
-      "name": "Stock pen with two goats",
-      "kind": "goat_pasture",
-      "input": {
-        "goats": 2
-      },
-      "output": {},
-      "work": 35,
-      "handcraft": false
-    },
     "care-goat_pasture": {
       "name": "Feed and water animals",
       "kind": "goat_pasture",
       "input": {
         "fodder": 3
+      },
+      "output": {},
+      "work": 35,
+      "handcraft": false
+    },
+    "stock-goats": {
+      "name": "Stock pen with two goats",
+      "kind": "goat_pasture",
+      "input": {
+        "goats": 2
       },
       "output": {},
       "work": 35,
