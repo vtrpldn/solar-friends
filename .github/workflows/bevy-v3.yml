@@ -37,26 +37,35 @@ jobs:
       - run: cargo fmt --manifest-path bevy-v3/Cargo.toml --check
       - run: cargo clippy --locked --manifest-path bevy-v3/Cargo.toml --all-targets -- -D warnings
       - run: cargo test --locked --manifest-path bevy-v3/Cargo.toml
-      - name: Run the standalone simulation tool
+      - run: cargo build --locked --manifest-path bevy-v3/Cargo.toml
+      - name: Package the macOS desktop game
+        run: >-
+          bash scripts/package-bevy-macos.sh
+          bevy-v3/target/debug/solar-friends-v3
+          "dist/solar-friends-v3-macos-$(uname -m).zip"
+      - name: Run and replay a village from the packaged app
         run: |
-          cargo build --locked --manifest-path bevy-v3/Cargo.toml
           standalone=$(mktemp -d)
-          cp bevy-v3/target/debug/solar-friends-v3 "$standalone/"
+          ditto -x -k "dist/solar-friends-v3-macos-$(uname -m).zip" "$standalone"
           cd "$standalone"
+          codesign --verify --strict "Solar Friends V3.app"
+          game="./Solar Friends V3.app/Contents/MacOS/solar-friends-v3"
           cat > scenario.json <<'JSON'
           {
-            "steps": 20000,
+            "steps": 22000,
             "orders": [
               {"step": 0, "order": {"type": "build", "key": "gathering", "x": 40, "z": 36}},
+              {"step": 0, "order": {"type": "buy", "material": "wood", "freight": true}},
               {"step": 8000, "order": {"type": "move", "site": 1, "x": 49, "z": 36}},
               {"step": 12000, "order": {"type": "salvage", "site": 1}}
             ]
           }
           JSON
-          ./solar-friends-v3 --lab scenario.json > report.json
+          "$game" --lab scenario.json > report.json
           jq -e '
-            .end_step == 20000
+            .end_step == 22000
             and .orders == [
+              {"step": 0, "error": null},
               {"step": 0, "error": null},
               {"step": 8000, "error": null},
               {"step": 12000, "error": null}
@@ -70,14 +79,11 @@ jobs:
               "key": "gathering", "kind": "Salvage", "recovered": {"wood": 4},
               "lost": {"hardware": 1, "wood": 4}
             }]
-            and .village.stock.materials.wood == 32
+            and .village.construction.trade.purchases == 1
+            and .village.construction.trade.delivery == null
+            and .village.stock.materials.wood == 44
           ' report.json
-          ./solar-friends-v3 --lab-replay report.json
-      - name: Package the macOS desktop game
-        run: >-
-          bash scripts/package-bevy-macos.sh
-          bevy-v3/target/debug/solar-friends-v3
-          "dist/solar-friends-v3-macos-$(uname -m).zip"
+          "$game" --lab-replay report.json
       - uses: actions/upload-artifact@v4
         with:
           name: solar-friends-v3-macos

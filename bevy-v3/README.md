@@ -62,7 +62,7 @@ Regenerate the build catalog models with `node scripts/export-v3-building-models
 
 ## macOS desktop bundle
 
-The Bevy desktop CI job uploads a macOS app archive after the standalone simulation check. Unzip it and open **Solar Friends V3.app**.
+The Bevy desktop CI job extracts the macOS app archive, runs and replays a village scenario with the packaged executable, then uploads the archive. Unzip it and open **Solar Friends V3.app**.
 
 To package a local build from the repository root:
 
