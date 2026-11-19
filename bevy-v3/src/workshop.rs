@@ -1,5 +1,9 @@
+use std::collections::{HashMap, HashSet};
+
 use bevy::{
+    asset::RenderAssetUsages,
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit},
+    mesh::{Indices, PrimitiveTopology},
     prelude::*,
     render::view::screenshot::{Screenshot, ScreenshotCaptured},
     scene::{SceneInstance, SceneSpawner},
@@ -17,7 +21,7 @@ struct Workshop {
     zoom: f32,
     target: Vec3,
     scale_figure: bool,
-    clay: bool,
+    surface: Surface,
     night: bool,
     guides: bool,
     export_notice: String,
@@ -29,11 +33,42 @@ struct WorkshopModel;
 #[derive(Component)]
 struct ScaleFigure;
 
-#[derive(Resource)]
-struct ClayMaterial(Handle<StandardMaterial>);
+#[derive(Clone, Copy)]
+enum Surface {
+    Materials,
+    Clay,
+    Wireframe,
+}
 
-#[derive(Component)]
-struct OriginalMaterial(Handle<StandardMaterial>);
+impl Surface {
+    fn next(self) -> Self {
+        match self {
+            Self::Materials => Self::Clay,
+            Self::Clay => Self::Wireframe,
+            Self::Wireframe => Self::Materials,
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::Materials => "Materials",
+            Self::Clay => "Clay",
+            Self::Wireframe => "Wireframe",
+        }
+    }
+}
+
+#[derive(Resource)]
+struct SurfaceMaterials {
+    clay: Handle<StandardMaterial>,
+    wire: Handle<StandardMaterial>,
+}
+
+#[derive(Clone, Component)]
+struct OriginalSurface {
+    mesh: Handle<Mesh>,
+    material: Handle<StandardMaterial>,
+}
 
 const DEFAULT_ELEVATION: f32 = 37.72;
 
@@ -67,7 +102,7 @@ pub fn run() {
         zoom: 1.0,
         target: Vec3::Y,
         scale_figure: false,
-        clay: false,
+        surface: Surface::Materials,
         night: false,
         guides: false,
         export_notice: String::new(),
@@ -96,11 +131,18 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.insert_resource(ClayMaterial(materials.add(StandardMaterial {
-        base_color: Color::srgb_u8(213, 198, 164),
-        perceptual_roughness: 1.0,
-        ..default()
-    })));
+    commands.insert_resource(SurfaceMaterials {
+        clay: materials.add(StandardMaterial {
+            base_color: Color::srgb_u8(213, 198, 164),
+            perceptual_roughness: 1.0,
+            ..default()
+        }),
+        wire: materials.add(StandardMaterial {
+            base_color: Color::srgb_u8(66, 104, 92),
+            unlit: true,
+            ..default()
+        }),
+    });
     commands.spawn((
         Camera3d::default(),
         Projection::Orthographic(OrthographicProjection::default_3d()),
@@ -162,7 +204,7 @@ fn controls(
         workshop.guides = !workshop.guides;
     }
     if keys.just_pressed(KeyCode::KeyM) {
-        workshop.clay = !workshop.clay;
+        workshop.surface = workshop.surface.next();
     }
     if keys.just_pressed(KeyCode::KeyH) {
         workshop.scale_figure = !workshop.scale_figure;
@@ -272,7 +314,7 @@ fn show_model(
         ambient.brightness = 350.0;
         "Day"
     };
-    let surface = if workshop.clay { "Clay" } else { "Materials" };
+    let surface = workshop.surface.label();
     text.set_if_neq(Text::new(format!(
         "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure · Home Reset · F5 Export PNG\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
@@ -299,33 +341,92 @@ fn show_scale_figure(
 }
 
 type SurfaceScene = Or<(With<WorkshopModel>, With<ScaleFigure>)>;
+type Wireframes = HashMap<AssetId<Mesh>, Handle<Mesh>>;
+type SurfaceMesh<'a> = (
+    &'a mut Mesh3d,
+    &'a mut MeshMaterial3d<StandardMaterial>,
+    Option<&'a OriginalSurface>,
+);
+
+fn wireframe_mesh(source: &Mesh) -> Option<Mesh> {
+    if source.primitive_topology() != PrimitiveTopology::TriangleList {
+        return None;
+    }
+    let positions = source.attribute(Mesh::ATTRIBUTE_POSITION)?.clone();
+    let vertices: Vec<_> = source.indices().map_or_else(
+        || (0..source.count_vertices()).collect(),
+        |indices| indices.iter().collect(),
+    );
+    let mut seen = HashSet::new();
+    let mut lines = Vec::new();
+    for triangle in vertices.as_chunks::<3>().0 {
+        for (a, b) in [
+            (triangle[0], triangle[1]),
+            (triangle[1], triangle[2]),
+            (triangle[2], triangle[0]),
+        ] {
+            if a != b && seen.insert((a.min(b), a.max(b))) {
+                lines.extend([a as u32, b as u32]);
+            }
+        }
+    }
+    if lines.is_empty() {
+        return None;
+    }
+    let mut wire = Mesh::new(PrimitiveTopology::LineList, RenderAssetUsages::default());
+    wire.insert_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+    wire.insert_indices(Indices::U32(lines));
+    Some(wire)
+}
 
 fn apply_surface(
     mut commands: Commands,
     workshop: Res<Workshop>,
-    clay: Res<ClayMaterial>,
+    surfaces: Res<SurfaceMaterials>,
     spawner: Res<SceneSpawner>,
     scenes: Query<&SceneInstance, SurfaceScene>,
-    mut materials: Query<(
-        &mut MeshMaterial3d<StandardMaterial>,
-        Option<&OriginalMaterial>,
-    )>,
+    mut scene_meshes: Query<SurfaceMesh>,
+    (mut meshes, mut wireframes): (ResMut<Assets<Mesh>>, Local<Wireframes>),
 ) {
     for instance in &scenes {
         for entity in spawner.iter_instance_entities(**instance) {
-            let Ok((mut material, original)) = materials.get_mut(entity) else {
+            let Ok((mut mesh, mut material, original)) = scene_meshes.get_mut(entity) else {
                 continue;
             };
-            if workshop.clay && original.is_none() {
-                commands
-                    .entity(entity)
-                    .insert(OriginalMaterial(material.0.clone()));
-                material.0 = clay.0.clone();
-            } else if !workshop.clay
-                && let Some(original) = original
-            {
-                material.0 = original.0.clone();
-                commands.entity(entity).remove::<OriginalMaterial>();
+            let captured;
+            let original = match original {
+                Some(saved) => saved,
+                None if matches!(workshop.surface, Surface::Materials) => continue,
+                None => {
+                    captured = OriginalSurface {
+                        mesh: mesh.0.clone(),
+                        material: material.0.clone(),
+                    };
+                    commands.entity(entity).insert(captured.clone());
+                    &captured
+                }
+            };
+            let (target_mesh, target_material) = match workshop.surface {
+                Surface::Materials => (&original.mesh, &original.material),
+                Surface::Clay => (&original.mesh, &surfaces.clay),
+                Surface::Wireframe => {
+                    let id = original.mesh.id();
+                    if let std::collections::hash_map::Entry::Vacant(entry) = wireframes.entry(id)
+                        && let Some(wire) = meshes.get(id).and_then(wireframe_mesh)
+                    {
+                        entry.insert(meshes.add(wire));
+                    }
+                    let Some(wire) = wireframes.get(&id) else {
+                        continue;
+                    };
+                    (wire, &surfaces.wire)
+                }
+            };
+            if &mesh.0 != target_mesh {
+                mesh.0 = target_mesh.clone();
+            }
+            if &material.0 != target_material {
+                material.0 = target_material.clone();
             }
         }
     }
@@ -387,7 +488,7 @@ fn capture_preview(
         "model_rotation_degrees": u16::from(workshop.rotation) * 90,
         "metres_per_cell": 2,
         "scale_figure": workshop.scale_figure,
-        "surface": if workshop.clay { "clay" } else { "materials" },
+        "surface": workshop.surface.label().to_ascii_lowercase(),
         "light": if workshop.night { "night" } else { "day" },
         "camera": {
             "projection": "orthographic",
@@ -475,6 +576,31 @@ fn draw_guides(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn wireframe_keeps_one_copy_of_each_triangle_edge() {
+        let mut mesh = Mesh::new(
+            PrimitiveTopology::TriangleList,
+            RenderAssetUsages::default(),
+        );
+        mesh.insert_attribute(
+            Mesh::ATTRIBUTE_POSITION,
+            vec![
+                [0.0_f32, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [1.0, 1.0, 0.0],
+            ],
+        );
+        mesh.insert_indices(Indices::U16(vec![0, 1, 2, 2, 1, 3]));
+        let wire = wireframe_mesh(&mesh).unwrap();
+        assert_eq!(wire.primitive_topology(), PrimitiveTopology::LineList);
+        assert_eq!(wire.count_vertices(), 4);
+        assert_eq!(
+            wire.indices().unwrap().iter().collect::<Vec<_>>(),
+            [0, 1, 1, 2, 2, 0, 1, 3, 3, 2]
+        );
+    }
 
     #[test]
     fn scale_figure_uses_the_rotated_footprint_edge() {
