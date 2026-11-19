@@ -371,7 +371,12 @@ impl Worker {
         let distance = offset.length();
         let pace = if carrying { 0.72 } else { 0.95 };
         let fatigue = if self.health.energy < 35.0 { 0.8 } else { 1.0 };
-        self.speed = (self.speed + dt * 1.8).min(pace * fatigue);
+        let braking = if self.path.len() == 1 {
+            (distance * 2.0).clamp(0.25, 1.0)
+        } else {
+            1.0
+        };
+        self.speed = (self.speed + dt * 1.8).min(pace * fatigue * braking);
         let step = self.speed * dt;
         if distance > 0.001 {
             self.yaw = offset.x.atan2(offset.y);
@@ -2753,6 +2758,27 @@ mod tests {
         village.priority = Some(0);
         village.assign(0, &catalog, &terrain, &land, camp);
         assert_eq!(village.residents[0].assignment.take().unwrap().project, 0);
+    }
+
+    #[test]
+    fn residents_brake_for_the_destination_but_not_intermediate_waypoints() {
+        let mut construction = Construction::default();
+        let worker = &mut construction.residents[0];
+        let destination = Vec2::new(0.25, 0.0);
+        worker.position = Vec2::ZERO;
+        worker.speed = 0.95;
+        worker.path = VecDeque::from([destination, Vec2::X]);
+        worker.move_along_path(0.1, false);
+        let through_speed = worker.speed;
+        worker.position = Vec2::ZERO;
+        worker.path = VecDeque::from([destination]);
+        worker.move_along_path(0.1, false);
+        assert_eq!(worker.speed, through_speed * 0.5);
+        for _ in 0..20 {
+            worker.move_along_path(0.1, false);
+        }
+        assert_eq!(worker.position, destination);
+        assert!(worker.path.is_empty());
     }
 
     #[test]
