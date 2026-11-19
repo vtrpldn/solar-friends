@@ -106,6 +106,10 @@ struct Node {
     demanding: bool,
     #[serde(skip)]
     drawing_power: bool,
+    #[serde(skip)]
+    generation_kw: f64,
+    #[serde(skip)]
+    demand_kw: f64,
     #[serde(default)]
     cold_storage: bool,
     #[serde(default)]
@@ -234,6 +238,8 @@ impl Utilities {
             service_factor: full_service(),
             demanding: false,
             drawing_power: false,
+            generation_kw: 0.0,
+            demand_kw: 0.0,
             cold_storage: false,
             cooling_paused: false,
             maintain_fresh: true,
@@ -265,6 +271,8 @@ impl Utilities {
                 service_factor: full_service(),
                 demanding: false,
                 drawing_power: false,
+                generation_kw: 0.0,
+                demand_kw: 0.0,
                 cold_storage: false,
                 cooling_paused: false,
                 maintain_fresh: matches!(facility.kind, "well" | "water-storage"),
@@ -626,6 +634,8 @@ impl Utilities {
             && let Some(node) = self.nodes.get_mut(&(building + 1))
         {
             node.enabled = !enabled;
+            node.generation_kw = 0.0;
+            node.demand_kw = 0.0;
             if matches!(node.kind.as_str(), "well" | "rain-barrel") {
                 self.rebuild_rain_catchments();
             }
@@ -1016,6 +1026,38 @@ impl Utilities {
             .filter_map(|(&id, node)| (node.enabled && !node.powered).then_some(id))
     }
 
+    pub fn power_site_summary(&self, id: usize) -> Option<String> {
+        use std::fmt::Write;
+        let node = self.nodes.get(&id)?;
+        if id != 0 && !node.matches_view(NetworkView::Power) {
+            return None;
+        }
+        let mut status = if node.enabled {
+            let mut status = format!(
+                "{:.3} kW generated · {:.3} kW requested",
+                node.generation_kw, node.demand_kw
+            );
+            if node.demand_kw > 0.0 {
+                status.push_str(if node.powered {
+                    " · Supplied"
+                } else {
+                    " · Needs power"
+                });
+            }
+            status
+        } else {
+            String::from("Switched off")
+        };
+        if node.battery > 0.0 {
+            let _ = write!(
+                status,
+                " · Battery {:.3}/{:.2} kWh",
+                node.charge, node.battery
+            );
+        }
+        Some(status)
+    }
+
     pub fn power_summary(&self) -> String {
         let stored = self.stored_energy();
         let capacity: f64 = self.nodes.values().map(|node| node.battery).sum();
@@ -1141,7 +1183,7 @@ impl Utilities {
             .map(|node| node.location)
             .collect();
         let mut demand = Vec::new();
-        for (&id, node) in &self.nodes {
+        for (&id, node) in &mut self.nodes {
             if !node.enabled {
                 continue;
             }
@@ -1151,7 +1193,8 @@ impl Utilities {
                 _ => 0.0,
             };
             let circuit = circuits.entry(circuit_of(id)).or_default();
-            circuit.generation += output * node.service_factor;
+            node.generation_kw = output * node.service_factor;
+            circuit.generation += node.generation_kw;
             circuit.capacity += node.battery;
             circuit.stored += node.charge;
             let mut kw = match node.kind.as_str() {
@@ -1180,6 +1223,7 @@ impl Utilities {
             if node.cold_storage && !node.cooling_paused {
                 kw += 0.08;
             }
+            node.demand_kw = kw;
             demand.push((circuit_of(id), priority(&node.kind), id, kw));
         }
         demand.sort_by_key(|&(circuit, priority, id, _)| (circuit, priority, id));
@@ -2341,6 +2385,46 @@ mod tests {
         assert!(utilities.nodes[&2].powered);
         assert!(!utilities.nodes[&1].powered);
         assert_eq!(stock.balance(), balance - 6);
+    }
+
+    #[test]
+    fn hydro_readings_show_generation_and_battery_charge_at_night() {
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &Catalog::default());
+        let mut utilities = Utilities::default();
+        utilities.sync(std::iter::once(Facility {
+            id: 1,
+            kind: "hydro",
+            location: IVec2::new(25, 36),
+            size: IVec2::ONE,
+            batteries: 1,
+            panels: 0,
+            working: false,
+        }));
+        let terrain = setup.terrain();
+        utilities.electricity(
+            &mut stock,
+            0,
+            PowerStep {
+                sun: 0.0,
+                cloud: 0.0,
+                flow: 8_000.0,
+                rainfall: 0.0,
+                hours: 1.0,
+                terrain: &terrain,
+            },
+        );
+        assert!(utilities.power_link_exists(0, 1));
+        let reading = utilities.power_site_summary(1).unwrap();
+        assert!(reading.contains("0.003 kW generated"));
+        assert!(reading.contains("Battery 0.003/4.00 kWh"));
+        utilities.toggle(0);
+        assert!(
+            utilities
+                .power_site_summary(1)
+                .unwrap()
+                .starts_with("Switched off")
+        );
     }
 
     #[test]

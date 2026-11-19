@@ -672,6 +672,13 @@ impl Construction {
             self.connection_site_name(catalog, from),
             self.connection_site_name(catalog, to),
         );
+        if let Some(status) = self.utilities.power_site_summary(to) {
+            let _ = write!(
+                text,
+                "\n{} · {status}",
+                self.connection_site_name(catalog, to)
+            );
+        }
         if let Some(job) = self.active_connection(from, to, None)
             && let WaterAction::InstallCable { required, .. } = job.action
         {
