@@ -49,10 +49,29 @@ struct Lineup {
     night: bool,
     frozen: bool,
     clock: f32,
+    poses_open: bool,
 }
 
 #[derive(Component)]
 struct Controls;
+
+#[derive(Component, Clone, Copy)]
+enum PreviewControl {
+    Poses,
+    Pose(usize),
+    View,
+    Light,
+    Freeze,
+}
+
+#[derive(Component)]
+struct PoseMenu;
+
+#[derive(Component)]
+struct Scrubber;
+
+#[derive(Component)]
+struct ScrubProgress;
 
 #[derive(Component)]
 struct Nameplate(Vec3);
@@ -83,7 +102,13 @@ pub fn run(initial_pose: Option<&str>) {
     .insert_resource(Lineup { pose, ..default() })
     .init_resource::<GlobalAmbientLight>()
     .add_systems(Startup, setup)
-    .add_systems(Update, (controls, position_nameplates));
+    .add_systems(
+        Update,
+        (
+            (preview_input, controls, preview_state).chain(),
+            position_nameplates,
+        ),
+    );
     register_opening_models(&mut app);
     app.run();
 }
@@ -143,19 +168,147 @@ fn setup(
             },
         ));
     }
-    commands.spawn((
-        Controls,
-        Text::default(),
-        ui_font(&assets, 18.),
-        BackgroundColor(Color::srgba(0.08, 0.14, 0.11, 0.91)),
-        Node {
-            position_type: PositionType::Absolute,
-            top: px(48),
-            left: px(16),
-            padding: UiRect::all(px(14)),
-            ..default()
-        },
-    ));
+    commands
+        .spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                top: px(48),
+                left: px(16),
+                max_width: percent(95),
+                flex_direction: FlexDirection::Column,
+                row_gap: px(7),
+                padding: UiRect::all(px(12)),
+                ..default()
+            },
+            GlobalZIndex(1),
+            BackgroundColor(Color::srgba(0.08, 0.14, 0.11, 0.91)),
+        ))
+        .with_children(|panel| {
+            panel.spawn((Controls, Text::default(), ui_font(&assets, 17.)));
+            panel
+                .spawn(Node {
+                    column_gap: px(6),
+                    row_gap: px(5),
+                    flex_wrap: FlexWrap::Wrap,
+                    align_items: AlignItems::Center,
+                    ..default()
+                })
+                .with_children(|row| {
+                    for (label, action) in [
+                        ("Choose pose", PreviewControl::Poses),
+                        ("Change view", PreviewControl::View),
+                        ("Change light", PreviewControl::Light),
+                        ("Freeze / play", PreviewControl::Freeze),
+                    ] {
+                        preview_button(row, &assets, label, action);
+                    }
+                    row.spawn((Text::new("Time"), ui_font(&assets, 15.)));
+                    row.spawn((
+                        Scrubber,
+                        Button,
+                        bevy::ui::RelativeCursorPosition::default(),
+                        Node {
+                            width: px(156),
+                            height: px(14),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                    ))
+                    .with_child((
+                        ScrubProgress,
+                        Node {
+                            width: percent(0),
+                            height: percent(100),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb_u8(196, 208, 146)),
+                        bevy::picking::Pickable::IGNORE,
+                    ));
+                });
+            panel
+                .spawn((
+                    PoseMenu,
+                    Node {
+                        display: Display::None,
+                        width: px(525),
+                        max_width: percent(100),
+                        flex_wrap: FlexWrap::Wrap,
+                        column_gap: px(6),
+                        row_gap: px(5),
+                        ..default()
+                    },
+                ))
+                .with_children(|menu| {
+                    for (index, (name, _)) in POSES.iter().enumerate() {
+                        preview_button(menu, &assets, name, PreviewControl::Pose(index));
+                    }
+                });
+        });
+}
+
+fn preview_button(
+    parent: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    label: &str,
+    action: PreviewControl,
+) {
+    parent
+        .spawn((
+            Button,
+            action,
+            Node {
+                padding: UiRect::axes(px(9), px(4)),
+                ..default()
+            },
+            BackgroundColor(Color::srgb_u8(62, 83, 65)),
+        ))
+        .with_child((Text::new(label), ui_font(assets, 15.)));
+}
+
+fn preview_input(
+    mut lineup: ResMut<Lineup>,
+    keys: Res<ButtonInput<KeyCode>>,
+    buttons: Query<(&Interaction, &PreviewControl), Changed<Interaction>>,
+    scrubber: Single<(&Interaction, &bevy::ui::RelativeCursorPosition), With<Scrubber>>,
+) {
+    if keys.just_pressed(KeyCode::Escape) {
+        lineup.poses_open = false;
+    }
+    for (&interaction, &action) in &buttons {
+        if interaction != Interaction::Pressed {
+            continue;
+        }
+        match action {
+            PreviewControl::Poses => lineup.poses_open = !lineup.poses_open,
+            PreviewControl::Pose(index) => {
+                lineup.pose = index;
+                lineup.poses_open = false;
+            }
+            PreviewControl::View => lineup.view = (lineup.view + 1) % 3,
+            PreviewControl::Light => lineup.night = !lineup.night,
+            PreviewControl::Freeze => lineup.frozen = !lineup.frozen,
+        }
+    }
+    let (interaction, cursor) = *scrubber;
+    if *interaction == Interaction::Pressed
+        && let Some(point) = cursor.normalized
+    {
+        lineup.clock = ((point.x + 0.5).clamp(0., 1.) * 360.).round() / 20.;
+        lineup.frozen = true;
+    }
+}
+
+fn preview_state(
+    lineup: Res<Lineup>,
+    mut menu: Single<&mut Node, (With<PoseMenu>, Without<ScrubProgress>)>,
+    mut progress: Single<&mut Node, (With<ScrubProgress>, Without<PoseMenu>)>,
+) {
+    menu.display = if lineup.poses_open {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    progress.width = percent((lineup.clock / 18.).min(1.) * 100.);
 }
 
 fn position_nameplates(
@@ -213,7 +366,7 @@ fn controls(
         };
         lineup.frozen = true;
     } else if !lineup.frozen {
-        lineup.clock = (lineup.clock + time.delta_secs().min(0.05)).rem_euclid(18.);
+        lineup.clock += time.delta_secs().min(0.05);
     }
     let (name, motion) = POSES[lineup.pose];
     let (view, yaw) = [
