@@ -279,6 +279,8 @@ pub struct Worker {
     pub position: Vec2,
     pub yaw: f32,
     speed: f32,
+    #[serde(skip)]
+    crowded: bool,
     path: VecDeque<Vec2>,
     assignment: Option<Assignment>,
     experience: f64,
@@ -336,6 +338,7 @@ impl Default for Construction {
                     position: Vec2::new(x, z),
                     yaw: 0.0,
                     speed: 0.0,
+                    crowded: false,
                     path: VecDeque::new(),
                     assignment: None,
                     experience: 0.0,
@@ -377,7 +380,7 @@ impl Worker {
             1.0
         };
         self.speed = (self.speed + dt * 1.8).min(pace * fatigue * braking);
-        let step = self.speed * dt;
+        let step = self.speed * dt * if self.crowded { 0.65 } else { 1.0 };
         if distance > 0.001 {
             self.yaw = offset.x.atan2(offset.y);
         }
@@ -391,6 +394,23 @@ impl Worker {
 }
 
 impl Construction {
+    pub fn refresh_resident_crowding(&mut self) {
+        let present: [Option<Vec2>; 5] = std::array::from_fn(|index| {
+            (!self.driver_away(index) && !self.away_for_work(index))
+                .then_some(self.residents[index].position)
+        });
+        for (index, resident) in self.residents.iter_mut().enumerate() {
+            resident.crowded = present[index].is_some_and(|position| {
+                present.iter().enumerate().any(|(other, point)| {
+                    index != other
+                        && point.is_some_and(|point| {
+                            position.distance_squared(point) < 0.75_f32.powi(2)
+                        })
+                })
+            });
+        }
+    }
+
     pub fn protects_terrain(&self, cell: IVec2) -> bool {
         self.plans.iter().any(|plan| {
             !plan.removed
@@ -2758,6 +2778,23 @@ mod tests {
         village.priority = Some(0);
         village.assign(0, &catalog, &terrain, &land, camp);
         assert_eq!(village.residents[0].assignment.take().unwrap().project, 0);
+    }
+
+    #[test]
+    fn residents_slow_down_when_another_resident_is_close() {
+        let mut village = Construction::default();
+        village.residents[0].position = Vec2::ZERO;
+        village.residents[1].position = Vec2::Y * 0.5;
+        village.refresh_resident_crowding();
+        let worker = &mut village.residents[0];
+        worker.path.push_back(Vec2::X * 5.0);
+        worker.move_along_path(1.0, false);
+        assert!((worker.position.x - 0.95 * 0.65).abs() < 1e-6);
+        village.residents[1].position = Vec2::Y * 3.0;
+        village.refresh_resident_crowding();
+        let worker = &mut village.residents[0];
+        worker.move_along_path(1.0, false);
+        assert!((worker.position.x - 0.95 * 1.65).abs() < 1e-6);
     }
 
     #[test]

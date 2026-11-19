@@ -1494,6 +1494,7 @@ fn step(
     dt: f64,
 ) {
     town.clock += dt;
+    town.construction.refresh_resident_crowding();
     town.stock.update_finance_clock(town.clock);
     town.construction
         .tick_services(catalog, setup, &mut town.stock, town.clock, dt);
