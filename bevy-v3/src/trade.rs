@@ -292,14 +292,14 @@ impl Trade {
         catalog: &Catalog,
         stock: &mut Stock,
         market: &mut Market,
-        (clock, distance, space, freight): (f64, u32, u64, bool),
-    ) {
+        (clock, distance, space, freight, shared): (f64, u32, u64, bool, bool),
+    ) -> Option<usize> {
         if stock.sandbox
             || self.household_restock_off
             || clock < self.next_pantry_check
             || !crate::market::town_is_open(clock)
         {
-            return;
+            return None;
         }
         self.next_pantry_check = clock + 10.0;
         let forecast = self.pantry_forecast(stock, clock);
@@ -308,12 +308,14 @@ impl Trade {
             .saturating_add(self.incoming_servings(clock))
             >= forecast.target
         {
-            return;
+            return None;
         }
         let free = space.saturating_sub(self.inbound());
         let ingredients = &catalog.materials["food"];
         let transport = if freight {
             crate::market::freight_cents(distance)
+        } else if shared {
+            0
         } else {
             crate::market::fare_cents(distance)
         };
@@ -324,15 +326,24 @@ impl Trade {
         } else {
             0
         };
+        let order = self.orders.len();
         if cost + already_reserved <= self.pantry_purchase.allowance_cents
             && u64::from(ingredients.pack) <= free
             && self
-                .buy(catalog, stock, market, "food", (clock, distance, freight))
+                .buy_with_fare(
+                    catalog,
+                    stock,
+                    market,
+                    "food",
+                    (clock, distance, freight, transport),
+                )
                 .is_ok()
         {
             self.pantry_purchase.day = day;
             self.pantry_purchase.reserved_cents = already_reserved + cost;
+            return shared.then_some(order);
         }
+        None
     }
 
     pub(crate) fn set_pantry_policy(
@@ -874,7 +885,12 @@ mod tests {
         assert_eq!(forecast.served, 1);
         assert_eq!(forecast.target, 23);
         assert!(forecast.at_risk >= 22.0);
-        trade.maintain_pantry(&catalog, &mut stock, &mut market, (0.0, 12, 500, false));
+        trade.maintain_pantry(
+            &catalog,
+            &mut stock,
+            &mut market,
+            (0.0, 12, 500, false, false),
+        );
         assert_eq!(trade.orders.len(), 1);
         assert_eq!(trade.orders[0].material, "food");
     }
@@ -892,14 +908,14 @@ mod tests {
                 &catalog,
                 &mut stock,
                 &mut market,
-                (opening - 1.0, 12, 500, freight),
+                (opening - 1.0, 12, 500, freight, false),
             );
             assert!(trade.delivery.is_none() && trade.orders.is_empty());
             trade.maintain_pantry(
                 &catalog,
                 &mut stock,
                 &mut market,
-                (opening + 1.0, 12, 500, freight),
+                (opening + 1.0, 12, 500, freight, false),
             );
             assert_eq!(trade.delivery.is_some(), freight);
             assert_eq!(trade.orders.len(), usize::from(!freight));
@@ -916,11 +932,21 @@ mod tests {
         trade
             .set_pantry_policy(true, Some(14), Some(cost - 1))
             .unwrap();
-        trade.maintain_pantry(&catalog, &mut stock, &mut market, (0.0, 12, 500, true));
+        trade.maintain_pantry(
+            &catalog,
+            &mut stock,
+            &mut market,
+            (0.0, 12, 500, true, false),
+        );
         assert!(trade.delivery.is_none());
 
         trade.set_pantry_policy(true, None, Some(cost)).unwrap();
-        trade.maintain_pantry(&catalog, &mut stock, &mut market, (11.0, 12, 500, true));
+        trade.maintain_pantry(
+            &catalog,
+            &mut stock,
+            &mut market,
+            (11.0, 12, 500, true, false),
+        );
         assert_eq!(trade.delivery.as_ref().unwrap().material, "food");
         assert!(trade.orders.is_empty());
         assert_eq!(trade.pantry_purchase.reserved_cents, cost);
@@ -936,12 +962,22 @@ mod tests {
         let cost = 4_800 + crate::market::fare_cents(12);
         trade.pantry_controls(11, (cost * 2) as i64 - 15_000, false);
         for clock in [0.0, 11.0, 22.0] {
-            trade.maintain_pantry(&catalog, &mut stock, &mut market, (clock, 12, 500, false));
+            trade.maintain_pantry(
+                &catalog,
+                &mut stock,
+                &mut market,
+                (clock, 12, 500, false, false),
+            );
         }
         assert_eq!(trade.orders.len(), 2);
         assert_eq!(trade.pantry_purchase.reserved_cents, cost * 2);
         assert_eq!(market.committed_fares(), crate::market::fare_cents(12) * 2);
-        trade.maintain_pantry(&catalog, &mut stock, &mut market, (3_200.0, 12, 500, false));
+        trade.maintain_pantry(
+            &catalog,
+            &mut stock,
+            &mut market,
+            (3_200.0, 12, 500, false, false),
+        );
         assert_eq!(trade.orders.len(), 3);
         assert_eq!(trade.pantry_purchase.reserved_cents, cost);
         let save = serde_json::to_string(&trade).unwrap();

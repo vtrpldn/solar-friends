@@ -2085,7 +2085,10 @@ impl Construction {
         if !self.supplier_construction
             || (self.construction_delivery.is_none() && !self.seed_freight_active())
         {
-            self.trade.maintain_pantry(
+            let shared_trip = (!self.supplier_construction)
+                .then(|| self.sale_trip_for_return_purchase())
+                .flatten();
+            let purchase = self.trade.maintain_pantry(
                 catalog,
                 stock,
                 &mut self.market,
@@ -2094,8 +2097,12 @@ impl Construction {
                     clock.round_trip_km,
                     space,
                     self.supplier_construction,
+                    shared_trip.is_some(),
                 ),
             );
+            if let Some((slot, order)) = shared_trip.zip(purchase) {
+                self.attach_return_purchase(slot, order);
+            }
         }
         self.trade.auto_sell(
             catalog,

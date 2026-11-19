@@ -1750,6 +1750,28 @@ mod tests {
     }
 
     #[test]
+    fn automatic_pantry_purchase_shares_the_sale_trip_on_a_food_only_budget() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps": 2500,
+            "orders": [
+                {"step": 0, "order": {"type": "food-policy", "enabled": false}},
+                {"step": 0, "order": {"type": "sell", "material": "wood"}},
+                {"step": 100, "order": {"type": "food-policy", "enabled": true, "reserve_half_days": 14, "allowance_cents": 4800}}
+            ]
+        }"#).unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        assert!(runner.outcomes.iter().all(|order| order.error.is_none()));
+        assert_eq!(runner.village.construction.trade.receipts, 1);
+        assert_eq!(runner.village.construction.trade.purchases, 1);
+        let report = serde_json::to_value(runner.report()).unwrap();
+        assert_eq!(
+            report["village"]["construction"]["opening"]["town_trips"],
+            1
+        );
+    }
+
+    #[test]
     fn scripted_automatic_sales_respect_reserves_and_replay() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{

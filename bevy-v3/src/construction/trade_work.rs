@@ -370,10 +370,7 @@ impl Construction {
                 .buy_on_return_trip(catalog, stock, &mut self.market, material, clock.seconds)
                 .is_ok()
             {
-                [&mut self.trip, &mut self.second_trip][slot]
-                    .as_mut()
-                    .expect("outbound sale trip")
-                    .return_purchase = Some(index);
+                self.attach_return_purchase(slot, index);
                 return Ok(true);
             }
         }
@@ -386,6 +383,13 @@ impl Construction {
                 (clock.seconds, clock.round_trip_km, freight),
             )
             .map(|()| false)
+    }
+
+    pub(super) fn attach_return_purchase(&mut self, slot: usize, order: usize) {
+        [&mut self.trip, &mut self.second_trip][slot]
+            .as_mut()
+            .expect("outbound sale trip")
+            .return_purchase = Some(order);
     }
 
     pub fn place_trade_order(
