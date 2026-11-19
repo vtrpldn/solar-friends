@@ -532,16 +532,23 @@ impl Construction {
         } else {
             "Leave"
         };
+        let stage = if bed.harvest_expired(clock) {
+            "Harvest expired"
+        } else {
+            bed.stage.label()
+        };
         let mut label = format!(
-            "Bed {}/{} · {} · {} ({:.0}%)\nMoisture {:.0}% · Fertility {:.0}% · {:.1} kg harvest estimate\nDensity {:.1}× · {} · {} residues",
+            "Bed {}/{} · {} · {} ({:.0}%)\nMoisture {:.0}% · Fertility {:.0}% · {:.1} kg harvest estimate\nDrought loss {:.0}% · {:.1} L irrigation applied\nDensity {:.1}× · {} · {} residues",
             index + 1,
             plot.beds.len(),
             bed.crop.label(),
-            bed.stage.label(),
+            stage,
             bed.growth * 100.0,
             bed.moisture * 100.0,
             bed.fertility * 100.0,
             bed.yield_kg(clock),
+            bed.drought_damage() * 100.0,
+            bed.irrigated_liters,
             bed.density,
             irrigation,
             residues,

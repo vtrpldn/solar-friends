@@ -101,6 +101,8 @@ pub struct Bed {
     progress_seconds: f64,
     drought_seconds: f64,
     damage: f64,
+    #[serde(default)]
+    pub irrigated_liters: f64,
     stress: f64,
     ripe_at: f64,
     residue_kg: f64,
@@ -301,6 +303,7 @@ impl Bed {
             progress_seconds: 0.0,
             drought_seconds: 0.0,
             damage: 0.0,
+            irrigated_liters: 0.0,
             stress: 0.0,
             ripe_at: 0.0,
             residue_kg: 0.0,
@@ -323,6 +326,14 @@ impl Bed {
 
     fn standing(&self) -> bool {
         matches!(self.stage, Stage::Growing | Stage::Harvestable)
+    }
+
+    pub fn drought_damage(&self) -> f64 {
+        self.damage
+    }
+
+    pub fn harvest_expired(&self, clock: f64) -> bool {
+        self.stage == Stage::Harvestable && self.harvest_factor(clock) == 0.0
     }
 
     fn harvest_factor(&self, clock: f64) -> f64 {
@@ -452,6 +463,7 @@ impl Bed {
         } else {
             0.0
         };
+        self.irrigated_liters += irrigated;
         self.moisture =
             (self.moisture + (rain + irrigated - demand) / (area * 16.0)).clamp(0.0, 1.0);
         if !self.standing() {
@@ -510,6 +522,8 @@ impl Farming {
                         && bed.dimensions.x == 1.2
                         && bed.dimensions.y >= 1.0
                         && [0.5, 1.0, 1.5].contains(&bed.density)
+                        && bed.irrigated_liters.is_finite()
+                        && bed.irrigated_liters >= 0.0
                         && [bed.moisture, bed.fertility, bed.growth]
                             .iter()
                             .all(|value| (0.0..=1.0).contains(value))
@@ -552,6 +566,7 @@ mod tests {
         assert_eq!(seeds["greens_seed"], 2);
         assert_eq!(work, 58.0);
         plot.finish(&job, 0.0, false);
+        let mut withdrawn = 0.0;
         for hour in 1..=45 * 24 + 1 {
             let dt = DAY / 24.0;
             plot.beds[0].tick(
@@ -563,10 +578,15 @@ mod tests {
                     sheltered: true,
                     sandbox: false,
                 },
-                |_| true,
+                |amount| {
+                    withdrawn += amount;
+                    true
+                },
             );
         }
         assert!(plot.beds[0].stage == Stage::Harvestable);
+        assert!(withdrawn > 0.0);
+        assert_eq!(plot.beds[0].irrigated_liters, withdrawn);
         job.action = FarmAction::Harvest;
         let output = plot.finish(&job, 45.5 * DAY, false);
         assert_eq!(output["greens"], 9);

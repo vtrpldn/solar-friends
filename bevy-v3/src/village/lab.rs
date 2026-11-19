@@ -101,7 +101,7 @@ pub(crate) fn replay_file(path: &Path) -> io::Result<()> {
 }
 
 fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Result<u64> {
-    let Some(version @ 1..=4) = expected.get("version").and_then(serde_json::Value::as_u64) else {
+    let Some(version @ 1..=5) = expected.get("version").and_then(serde_json::Value::as_u64) else {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
             "Unsupported lab report version.",
@@ -128,19 +128,35 @@ fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Resu
         serde_json::from_slice(&serde_json::to_vec(&report.report())?)?;
     actual["initial"] = serde_json::Value::Null;
     actual["scenario"] = serde_json::Value::Null;
-    if version < 4 {
+    if version < 5 {
         actual["version"] = version.into();
-        if let Some(samples) = actual["samples"].as_array_mut() {
-            for sample in samples {
-                let fields = sample.as_object_mut().expect("sample object");
-                fields.remove("inventory");
-                fields.remove("spoiled");
-                if version < 3 {
-                    fields.remove("weather");
+        if let Some(plots) = actual
+            .pointer_mut("/village/construction/farming/plots")
+            .and_then(serde_json::Value::as_object_mut)
+        {
+            for plot in plots.values_mut() {
+                if let Some(beds) = plot["beds"].as_array_mut() {
+                    for bed in beds {
+                        bed.as_object_mut()
+                            .expect("bed object")
+                            .remove("irrigated_liters");
+                    }
                 }
-                if version == 1 {
-                    fields.remove("watershed");
-                }
+            }
+        }
+    }
+    if version < 4
+        && let Some(samples) = actual["samples"].as_array_mut()
+    {
+        for sample in samples {
+            let fields = sample.as_object_mut().expect("sample object");
+            fields.remove("inventory");
+            fields.remove("spoiled");
+            if version < 3 {
+                fields.remove("weather");
+            }
+            if version == 1 {
+                fields.remove("watershed");
             }
         }
     }
@@ -393,7 +409,7 @@ impl Runner {
 
     fn report(&self) -> Report<'_> {
         Report {
-            version: 4,
+            version: 5,
             scenario: &self.scenario,
             initial: &self.initial,
             step_seconds: STEP,
