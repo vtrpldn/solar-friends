@@ -884,7 +884,7 @@ impl Construction {
             .find_map(|cell| self.resident_route(catalog, site, from, cell))
     }
 
-    pub(super) fn maintain_water(&mut self, catalog: &Catalog, sandbox: bool) {
+    pub(super) fn maintain_water(&mut self, catalog: &Catalog, sandbox: bool, clock: f64) {
         let ids = self.utilities.water_ids().collect::<Vec<_>>();
         for id in ids {
             if self.water_jobs.contains_key(&id) {
@@ -904,6 +904,7 @@ impl Construction {
                         && plot.beds.iter().any(|bed| {
                             bed.irrigation
                                 && matches!(bed.stage, Stage::Growing | Stage::Harvestable)
+                                && !bed.harvest_expired(clock)
                         })
                 });
             let crop_or_grove = irrigate
@@ -1038,7 +1039,7 @@ impl Construction {
         clock: f64,
         dt: f32,
     ) {
-        self.maintain_water(catalog, stock.sandbox);
+        self.maintain_water(catalog, stock.sandbox, clock);
         self.tick_water_group(catalog, stock, site, clock, dt, None);
     }
 
@@ -1396,10 +1397,10 @@ mod tests {
         stock.receive(&catalog.production["cook_greens"].input);
         town.queue_batch(&catalog, &mut stock, 0, "cook_greens");
 
-        town.maintain_water(&catalog, false);
+        town.maintain_water(&catalog, false, 0.0);
         assert!(!town.water_jobs.contains_key(&1));
         assert!(town.utilities.set_water_policy(1, false, true));
-        town.maintain_water(&catalog, false);
+        town.maintain_water(&catalog, false, 0.0);
         assert!(matches!(
             town.water_jobs[&1].action,
             WaterAction::Sanitation
@@ -1407,7 +1408,7 @@ mod tests {
 
         town.water_jobs.remove(&1);
         assert_eq!(town.utilities.service_waste(1), 24.0);
-        town.maintain_water(&catalog, false);
+        town.maintain_water(&catalog, false, 0.0);
         assert!(matches!(
             town.water_jobs[&1].action,
             WaterAction::Carry { channel: 0, .. }
@@ -1465,6 +1466,33 @@ mod tests {
     }
 
     #[test]
+    fn automatic_irrigation_skips_expired_harvests() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut town = Construction::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut garden = town.proposed_site(&catalog, "garden", IVec2::new(44, 36));
+        garden.work = catalog.projects["garden"].work;
+        town.plans.push(garden);
+        town.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        town.tick_crops(&catalog, &setup, 0.0, 0.0);
+        let bed = &mut town.farming.plots.get_mut(&0).unwrap().beds[0];
+        bed.stage = Stage::Harvestable;
+        bed.irrigation = true;
+        let after_expiry = 100.0 * crate::weather::DAY;
+        assert!(bed.harvest_expired(after_expiry));
+
+        town.maintain_water(&catalog, false, after_expiry);
+        assert!(!town.water_jobs.contains_key(&1));
+
+        town.maintain_water(&catalog, false, 0.0);
+        assert!(matches!(
+            town.water_jobs[&1].action,
+            WaterAction::Carry { channel: 1, .. }
+        ));
+    }
+
+    #[test]
     fn an_orchard_with_split_water_reserves_requests_a_full_irrigation_dose() {
         let catalog = Catalog::default();
         let setup = WorldSetup::default();
@@ -1478,7 +1506,7 @@ mod tests {
         town.utilities.deliver_water(1, 1, 2.0);
         town.queue_batch(&catalog, &mut stock, 0, "fruit");
 
-        town.maintain_water(&catalog, false);
+        town.maintain_water(&catalog, false, 0.0);
 
         assert!(matches!(
             town.water_jobs[&1].action,

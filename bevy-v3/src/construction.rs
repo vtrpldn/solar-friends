@@ -2163,7 +2163,7 @@ impl Construction {
         );
         self.tick_shifts(catalog, stock, site, clock, dt);
         self.tick_trip(catalog, stock, site, clock, dt);
-        self.maintain_water(catalog, stock.sandbox);
+        self.maintain_water(catalog, stock.sandbox, clock.seconds);
         self.expire_batch_food(catalog, stock, site, clock.seconds);
         let urgent = self.residents.iter().any(|resident| {
             resident.health.levels[Need::Hunger as usize] < 15.0
