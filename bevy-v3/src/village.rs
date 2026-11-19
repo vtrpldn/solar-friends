@@ -1921,7 +1921,7 @@ fn animate_arrival(
                     .resident_visual_position(index, &catalog);
                 crate::arrival::Pose {
                     position: world_position(position.x, position.y),
-                    yaw: village.construction.resident_visual_yaw(index),
+                    yaw: village.construction.resident_visual_yaw(index, &catalog),
                     step_height: 0.0,
                     visible: visible
                         && !village.construction.driver_away(index)

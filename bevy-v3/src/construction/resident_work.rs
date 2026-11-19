@@ -1028,10 +1028,50 @@ impl Construction {
         private.then_some((task, plan))
     }
 
+    fn resident_service_anchor(&self, index: usize, catalog: &Catalog) -> Option<(Vec2, f32)> {
+        let worker = &self.residents[index];
+        if !worker.path.is_empty() {
+            return None;
+        }
+        let site = if let Some(task) = &worker.health.task {
+            (task.kind == Need::Hygiene && task.elapsed > 0.0 && !task.returning)
+                .then_some(task.facility?)?
+                .checked_sub(1)?
+        } else {
+            self.production
+                .jobs
+                .iter()
+                .find(|job| {
+                    job.worker == Some(index) && job.phase == crate::production::Phase::Work
+                })?
+                .site
+        };
+        let plan = self.plans.get(site)?;
+        let definition = &catalog.projects[&plan.key];
+        let offset_m = match definition.kind.as_str() {
+            "workshop" => Vec2::new(-0.2, 1.87),
+            "kitchen" => Vec2::new(-1.55, 1.87),
+            "wash-station" => Vec2::new(0.0, 0.52),
+            _ => return None,
+        };
+        let entrance = building_entrance(plan, definition)?.as_vec2();
+        if entrance.distance_squared(worker.position) >= 0.36 {
+            return None;
+        }
+        let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
+        let angle = f32::from(plan.rotation) * std::f32::consts::FRAC_PI_2;
+        let anchor = center + Vec2::from_angle(-angle).rotate(offset_m * 0.5);
+        let inward = center - anchor;
+        Some((anchor, inward.x.atan2(inward.y)))
+    }
+
     pub fn resident_visual_position(&self, index: usize, catalog: &Catalog) -> (Vec2, bool) {
         let position = self.residents[index].position;
         let Some((task, plan)) = self.private_visit(index, catalog) else {
-            return (position, true);
+            let anchor = self
+                .resident_service_anchor(index, catalog)
+                .map_or(position, |(point, _)| point);
+            return (anchor, true);
         };
         let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
         let remaining = task.duration - task.elapsed;
@@ -1040,7 +1080,10 @@ impl Construction {
         (position.lerp(center, transition), visible)
     }
 
-    pub fn resident_visual_yaw(&self, index: usize) -> f32 {
+    pub fn resident_visual_yaw(&self, index: usize, catalog: &Catalog) -> f32 {
+        if let Some((_, yaw)) = self.resident_service_anchor(index, catalog) {
+            return yaw;
+        }
         let worker = &self.residents[index];
         let Some(task) = worker
             .health
@@ -1778,8 +1821,14 @@ mod tests {
             });
         }
         assert!(matches!(village.resident_motion(0, &catalog), Motion::Look));
-        assert_eq!(village.resident_visual_yaw(0), std::f32::consts::FRAC_PI_2);
-        assert_eq!(village.resident_visual_yaw(1), -std::f32::consts::FRAC_PI_2);
+        assert_eq!(
+            village.resident_visual_yaw(0, &catalog),
+            std::f32::consts::FRAC_PI_2
+        );
+        assert_eq!(
+            village.resident_visual_yaw(1, &catalog),
+            -std::f32::consts::FRAC_PI_2
+        );
         for worker in &mut village.residents[..2] {
             worker.health.task.as_mut().unwrap().elapsed = 1.;
         }
@@ -1813,6 +1862,43 @@ mod tests {
             reason: "I need rest".into(),
         });
         assert!(matches!(village.resident_motion(1, &catalog), Motion::Chat));
+    }
+
+    #[test]
+    fn washing_uses_the_rotated_station_anchor_only_after_arrival() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        let station =
+            Construction::proposal(&catalog, "wash-station", IVec2::splat(40), IVec2::ONE, 1);
+        let entrance = building_entrance(&station, &catalog.projects["wash-station"])
+            .unwrap()
+            .as_vec2();
+        let center = station.position.as_vec2() + (station.size.as_vec2() - Vec2::ONE) * 0.5;
+        village.plans.push(station);
+        village.residents[0].position = entrance;
+        village.residents[0].health.task = Some(NeedTask {
+            kind: Need::Hygiene,
+            facility: Some(1),
+            elapsed: 0.,
+            started_at: None,
+            duration: 14.,
+            water: 0.,
+            returning: false,
+            partner: None,
+            conversation: None,
+        });
+        assert_eq!(
+            village.resident_visual_position(0, &catalog),
+            (entrance, true)
+        );
+        village.residents[0].health.task.as_mut().unwrap().elapsed = 1.;
+        let (anchor, visible) = village.resident_visual_position(0, &catalog);
+        assert!(visible && anchor.abs_diff_eq(center + Vec2::X * 0.26, 0.00001));
+        assert_eq!(
+            village.resident_visual_yaw(0, &catalog),
+            -std::f32::consts::FRAC_PI_2
+        );
+        assert_eq!(village.residents[0].position, entrance);
     }
 
     #[test]
