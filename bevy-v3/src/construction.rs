@@ -1881,11 +1881,13 @@ impl Construction {
                         && (plan.delivered == plan.loads || plan.work == 0.0)
                 })
             })
-            && self.residents.iter().all(|worker| {
+            && self.residents.iter().enumerate().all(|(index, worker)| {
                 let in_bounds = |point: Vec2| {
                     point.cmpge(Vec2::splat(-31.0)).all() && point.cmple(Vec2::splat(94.0)).all()
                 };
                 worker.health.valid()
+                    && worker.town_work.valid()
+                    && !(worker.town_work.active() && self.driver_booked(index))
                     && worker.craft.valid()
                     && worker.leisure.valid()
                     && in_bounds(worker.position)

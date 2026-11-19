@@ -46,6 +46,12 @@ impl TownWork {
             .is_some_and(|shift| shift.phase == Commute::Away)
     }
 
+    pub fn valid(&self) -> bool {
+        self.shift.as_ref().is_none_or(|shift| {
+            !self.booked && self.last_day.is_some() && shift.until.is_finite() && shift.until >= 0.0
+        })
+    }
+
     pub fn status(&self) -> &'static str {
         match self.shift.as_ref().map(|shift| shift.phase) {
             Some(Commute::Outbound) => "Walking to the bus",

@@ -1772,6 +1772,39 @@ mod tests {
     }
 
     #[test]
+    fn an_away_day_shift_resumes_and_pays_wages_once() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(
+            r#"{
+            "steps": 1500,
+            "orders": [
+                {"step": 0, "order": {"type": "outside", "resident": 1, "enabled": true}}
+            ]
+        }"#,
+        )
+        .unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        assert!(runner.outcomes[0].error.is_none());
+        assert!(runner.village.construction.away_for_work(0));
+
+        let path = std::env::temp_dir().join(format!(
+            "solar-shift-checkpoint-{}.json",
+            std::process::id()
+        ));
+        runner.checkpoint(&path).unwrap();
+        let loaded = crate::save::read(&path, &catalog);
+        std::fs::remove_file(path).unwrap();
+
+        let scenario = serde_json::from_str(r#"{"steps":15000}"#).unwrap();
+        let resumed = run(scenario, Some(loaded.unwrap()), &catalog).unwrap();
+        assert!(!resumed.village.construction.away_for_work(0));
+        let stock = serde_json::to_value(&resumed.village.stock).unwrap();
+        assert_eq!(stock["ledger"]["TownWages"], 16_000);
+        assert_eq!(stock["ledger"]["Commuting"], -800);
+        assert!(resumed.village.valid_save(&catalog));
+    }
+
+    #[test]
     fn scripted_automatic_sales_respect_reserves_and_replay() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{
