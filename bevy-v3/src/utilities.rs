@@ -102,6 +102,8 @@ struct Node {
     #[serde(default = "full_service")]
     service_factor: f64,
     demanding: bool,
+    #[serde(skip)]
+    drawing_power: bool,
     #[serde(default)]
     cold_storage: bool,
     #[serde(default)]
@@ -222,6 +224,7 @@ impl Utilities {
             solar_upgrade: false,
             service_factor: full_service(),
             demanding: false,
+            drawing_power: false,
             cold_storage: false,
             cooling_paused: false,
             maintain_fresh: true,
@@ -252,6 +255,7 @@ impl Utilities {
                 solar_upgrade: false,
                 service_factor: full_service(),
                 demanding: false,
+                drawing_power: false,
                 cold_storage: false,
                 cooling_paused: false,
                 maintain_fresh: matches!(facility.kind, "well" | "water-storage"),
@@ -1191,6 +1195,7 @@ impl Utilities {
                 *available += deficit;
             }
             let node = self.nodes.get_mut(&id).expect("demand site");
+            node.drawing_power = kw > 0.0;
             node.powered = *available + 1e-9 >= required;
             if node.powered {
                 *available = (*available - required).max(0.0);
@@ -1284,10 +1289,14 @@ impl Utilities {
                     ground.groundwater -= extraction;
                     node.water[1] += extraction;
                 }
-                "water-pump" if node.powered && node.water[1] < node.capacity[1] - 0.01 => {
+                "water-pump"
+                    if node.drawing_power
+                        && node.powered
+                        && node.water[1] < node.capacity[1] - 0.01 =>
+                {
                     pumping.push(id)
                 }
-                "well" if node.powered => {
+                "well" if node.drawing_power && node.powered => {
                     transform_water(node, 1, 0, 25.0 * hours * node.service_factor, 1.0);
                 }
                 "wetland" => {
@@ -2000,6 +2009,35 @@ mod tests {
                 .unwrap()
                 .contains("Cold storage off")
         );
+    }
+
+    #[test]
+    fn a_pump_requires_allocated_power_before_it_can_draw_from_a_well() {
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &Catalog::default());
+        let mut utilities = Utilities::default();
+        utilities.sync(
+            [(1, "groundwater-well"), (2, "water-pump")]
+                .into_iter()
+                .map(|(id, kind)| Facility {
+                    id,
+                    kind,
+                    location: IVec2::new(48 + id as i32, 36),
+                    size: IVec2::ONE,
+                    batteries: 0,
+                    panels: 0,
+                    working: false,
+                }),
+        );
+
+        utilities.tick(&setup, &mut stock, 0, 0.1, 0.1);
+        assert!(utilities.nodes[&1].water[1] > 0.0);
+        assert_eq!(utilities.nodes[&2].water[1], 0.0);
+        assert_eq!(utilities.grid_import_kw, 0.0);
+
+        utilities.tick(&setup, &mut stock, 0, 0.2, 0.1);
+        assert!(utilities.nodes[&2].water[1] > 0.0);
+        assert!((utilities.grid_import_kw - 0.18).abs() < 1e-9);
     }
 
     #[test]
