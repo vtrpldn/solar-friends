@@ -74,16 +74,34 @@ impl Construction {
                 let direction = if order.buying { "Buy" } else { "Sell" };
                 let trip = self.active_trips().find(|trip| trip.covers_order(index));
                 let status = match trip {
-                    Some(_) if order.settled => "Paid",
-                    Some(_) if order.spoiled => "Spoiled",
-                    Some(trip) if trip.boarded => "In transit",
-                    Some(_) => "Booked",
-                    None if order.hold_for_pickup => "Held for pickup",
-                    None => "Queued",
+                    Some(trip) if trip.boarded && trip.elapsed >= trip.duration => {
+                        "At camp · Waiting for storage".into()
+                    }
+                    Some(trip) if trip.boarded => {
+                        let returning = trip.elapsed >= trip.duration * 0.5;
+                        let phase = if returning {
+                            "Returning"
+                        } else {
+                            "Driving to town"
+                        };
+                        let minutes = ((trip.duration - trip.elapsed) * 60.0 / crate::weather::HOUR)
+                            .ceil() as u64;
+                        format!("{phase} · {minutes} game min to camp")
+                    }
+                    Some(_) => "Booked · Driver walking to car".into(),
+                    None if order.hold_for_pickup => "Held for pickup".into(),
+                    None => "Queued".into(),
+                };
+                let outcome = if order.settled {
+                    " · Paid"
+                } else if order.spoiled {
+                    " · Spoiled"
+                } else {
+                    ""
                 };
                 TradeQueueRow {
                     label: format!(
-                        "{direction} · {} · {} · {status}",
+                        "{direction} · {} · {} · {status}{outcome}",
                         item.name,
                         item.quantity_text(u64::from(order.quantity))
                     ),
@@ -662,6 +680,20 @@ mod tests {
         assert_eq!(village.trip.unwrap().project, 0);
         assert_eq!(village.market.committed_fares(), fare);
         assert!(village.valid_save(&catalog, &stock));
+        let trip = village.trip.as_mut().unwrap();
+        trip.boarded = true;
+        trip.elapsed = 33.0;
+        assert!(
+            village.trade_queue_labels(&catalog)[0]
+                .label
+                .contains("Returning · 15 game min")
+        );
+        village.trip.as_mut().unwrap().elapsed = 66.0;
+        assert!(
+            village.trade_queue_labels(&catalog)[0]
+                .label
+                .contains("Waiting for storage")
+        );
     }
 
     #[test]
