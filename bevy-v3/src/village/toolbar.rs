@@ -694,7 +694,9 @@ fn handle_buttons(
                 Action::TerrainRadius(forward) => village.terrain_editor.cycle_radius(forward),
                 Action::UndoTerrain => village.terrain_editor.undo(),
                 Action::Advance(action) => {
-                    village.advance.apply(action);
+                    if village.advance.apply(action) {
+                        village.paused = true;
+                    }
                     picker.open = false;
                 }
                 Action::ResizeField(delta) if village.construction.placing_field() => {

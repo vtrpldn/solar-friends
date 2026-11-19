@@ -491,6 +491,14 @@ mod tests {
         press_button(&mut app, "Show all projects");
         press_button(&mut app, "Close panel");
 
+        press_button(&mut app, "Advance days");
+        press_button(&mut app, "+7 day(s)");
+        press_button(&mut app, "Start advance");
+        press_button(&mut app, "Stop advance");
+        assert!(app.world().resource::<village::Village>().is_paused());
+        assert!(!app.world().resource::<village::Village>().advance_open());
+        press_button(&mut app, "Resume");
+
         let save_dir =
             std::env::temp_dir().join(format!("solar-v3-ui-save-{}", std::process::id()));
         app.world_mut()

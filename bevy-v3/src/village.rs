@@ -895,8 +895,10 @@ fn village_input(
     if village.camp.is_some()
         && !village.terrain_editor.open
         && keyboard.get_just_pressed().len() > 0
+        && village.advance.controls(&keyboard)
     {
-        village.advance.controls(&keyboard);
+        village.paused = true;
+        return;
     }
     if village.advance.open {
         return;
@@ -1369,6 +1371,7 @@ fn advance_days(
         step(&mut village, &catalog, &setup, site, run.dt);
         if run.record_step() {
             village.advance.done();
+            village.paused = true;
             return;
         }
         if started.elapsed() >= std::time::Duration::from_millis(12) {

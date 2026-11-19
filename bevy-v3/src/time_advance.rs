@@ -37,9 +37,9 @@ pub(crate) enum AdvanceAction {
 }
 
 impl Advance {
-    pub fn controls(&mut self, keys: &ButtonInput<KeyCode>) {
-        if keys.just_pressed(KeyCode::KeyL) {
-            self.apply(AdvanceAction::Toggle);
+    pub fn controls(&mut self, keys: &ButtonInput<KeyCode>) -> bool {
+        if keys.just_pressed(KeyCode::KeyL) && self.apply(AdvanceAction::Toggle) {
+            return true;
         }
         let increment = if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
             7
@@ -56,19 +56,22 @@ impl Advance {
                 self.apply(action);
             }
         }
+        false
     }
 
-    pub fn apply(&mut self, action: AdvanceAction) {
+    pub fn apply(&mut self, action: AdvanceAction) -> bool {
         if matches!(action, AdvanceAction::Toggle) {
             if self.running.take().is_some() {
-                self.result = "Advance stopped. The village is at the time shown.".into();
+                self.open = false;
+                self.result = "Advance stopped. The village is paused.".into();
+                return true;
             } else {
                 self.open = !self.open;
             }
-            return;
+            return false;
         }
         if !self.open || self.running.is_some() {
-            return;
+            return false;
         }
         match action {
             AdvanceAction::Adjust(delta) => {
@@ -81,11 +84,13 @@ impl Advance {
             }
             AdvanceAction::Toggle => {}
         }
+        false
     }
 
     pub fn done(&mut self) {
         self.running = None;
-        self.result = format!("Advanced {} day(s).", self.days);
+        self.open = false;
+        self.result = format!("Advanced {} day(s). The village is paused.", self.days);
     }
 
     pub fn status(&self) -> String {
@@ -97,7 +102,11 @@ impl Advance {
             );
         }
         if !self.open {
-            return "L Advance days".into();
+            return if self.result.is_empty() {
+                "L Advance days".into()
+            } else {
+                format!("{} · L Advance days", self.result)
+            };
         }
         let method = if self.fast {
             "Fast approximate"
