@@ -1395,6 +1395,22 @@ impl Construction {
                     *quantity = quantity.saturating_sub(units);
                 }
             }
+            if good.values().all(|&units| units == 0) {
+                if let Some(worker) = job.worker {
+                    let resident = &mut self.residents[worker];
+                    if resident.health.task.is_none() && !resident.town_work.active() {
+                        resident.path.clear();
+                    }
+                }
+                self.production.jobs.remove(index);
+                self.production.notice = if outbound {
+                    "All reserved ingredients spoiled."
+                } else {
+                    "The finished batch spoiled before reaching stores."
+                }
+                .into();
+                continue;
+            }
             if !outbound {
                 job.delivered_output = Some(good);
                 continue;
@@ -1632,6 +1648,43 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn fully_spoiled_kitchen_batches_release_the_site_without_a_route() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let mut kitchen = village.proposed_site(&catalog, "kitchen", IVec2::new(44, 36));
+        kitchen.work = catalog.projects["kitchen"].work;
+        village.plans.push(kitchen);
+        let recipe = &catalog.production["cook_greens"];
+        let after_expiry = 90.0 * DAY;
+
+        for phase in [Phase::Pickup, Phase::Return] {
+            stock.receive(&recipe.input);
+            village.queue_batch(&catalog, &mut stock, 0, "cook_greens");
+            let job = &mut village.production.jobs[0];
+            job.phase = phase;
+            job.retry_at = after_expiry + 5.0;
+            job.waiting_for_access = true;
+            if phase == Phase::Return {
+                job.food_input = None;
+                job.food_output =
+                    Some(crate::food::fresh(&recipe.output, 0.0, &Default::default()));
+            }
+            village.expire_batch_food(&catalog, &mut stock, site, after_expiry);
+            assert!(village.production.jobs.is_empty());
+        }
+    }
 
     #[test]
     fn bulky_production_returns_in_multiple_conserved_loads() {
