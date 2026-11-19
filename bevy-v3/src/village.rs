@@ -1522,8 +1522,9 @@ fn step(
         seconds: town.clock,
         round_trip_km: setup.round_trip_km(),
     };
+    let raining = weather_at(town.clock, setup.biome(), setup.seed()).rain > 0.05;
     town.construction
-        .tick(catalog, &mut town.stock, site, clock, dt as f32);
+        .tick(catalog, &mut town.stock, site, clock, dt as f32, raining);
     if !town.stock.sandbox {
         town.construction
             .update_opening_milestones(catalog, town.clock);
@@ -2244,7 +2245,7 @@ mod tests {
         for _ in 0..200 {
             village
                 .construction
-                .tick(&catalog, &mut village.stock, site, clock, 0.1);
+                .tick(&catalog, &mut village.stock, site, clock, 0.1, false);
         }
 
         let path =
@@ -2256,10 +2257,10 @@ mod tests {
         for _ in 0..2_000 {
             village
                 .construction
-                .tick(&catalog, &mut village.stock, site, clock, 0.1);
+                .tick(&catalog, &mut village.stock, site, clock, 0.1, false);
             resumed
                 .construction
-                .tick(&catalog, &mut resumed.stock, site, clock, 0.1);
+                .tick(&catalog, &mut resumed.stock, site, clock, 0.1, false);
         }
         assert_eq!(
             serde_json::to_value(village).unwrap(),

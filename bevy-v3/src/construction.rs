@@ -1804,6 +1804,7 @@ impl Construction {
         site: ConstructionSite,
         clock: TownClock,
         dt: f32,
+        raining: bool,
     ) {
         let ConstructionSite {
             terrain,
@@ -1882,6 +1883,12 @@ impl Construction {
                 }
             }
             let tools_in_repair = self.repairing(catalog, "carpentry-tools");
+            let building_in_rain = raining
+                && self.residents[index]
+                    .assignment
+                    .as_ref()
+                    .is_some_and(|job| job.activity == Activity::Build);
+            let rain = self.opening_rain_factor(catalog, building_in_rain, stock.sandbox);
             let worker = &mut self.residents[index];
             let Some(mut job) = worker.assignment.take() else {
                 continue;
@@ -1951,6 +1958,7 @@ impl Construction {
                             * experience
                             * efficiency
                             * hunger
+                            * rain
                             * worker.health.hydration_factor())
                     .min(catalog.projects[&project.key].work);
                     if project.work >= catalog.projects[&project.key].work {
@@ -2364,7 +2372,7 @@ mod tests {
                 seconds: f64::from(step) / 10.0,
                 round_trip_km: 12,
             };
-            construction.tick(&catalog, &mut stock, site, clock, 0.1);
+            construction.tick(&catalog, &mut stock, site, clock, 0.1, false);
             if construction.production.jobs.is_empty() {
                 break;
             }
@@ -2398,7 +2406,7 @@ mod tests {
                 seconds: f64::from(step) / 10.0,
                 round_trip_km: 12,
             };
-            construction.tick(&catalog, &mut stock, site, clock, 0.1);
+            construction.tick(&catalog, &mut stock, site, clock, 0.1, false);
             if construction.gathering.orders.is_empty() {
                 break;
             }
@@ -2436,7 +2444,7 @@ mod tests {
                 break;
             }
             assert_eq!(construction.plans[0].delivered, 0);
-            construction.tick(&catalog, &mut stock, site, clock, 0.1);
+            construction.tick(&catalog, &mut stock, site, clock, 0.1, false);
         }
         assert_eq!(construction.plans[0].pickups, 0);
         assert_eq!(stock.balance(), 872_824);
@@ -2713,7 +2721,7 @@ mod tests {
     }
 
     #[test]
-    fn exhausted_builders_stop_and_hungry_builders_work_more_slowly() {
+    fn construction_respects_builder_needs_and_opening_rain() {
         let setup = WorldSetup::default();
         let catalog = Catalog::default();
         let camp = IVec2::new(36, 36);
@@ -2728,12 +2736,18 @@ mod tests {
             seconds: 0.0,
             round_trip_km: 12,
         };
-        let work_in_one_tick = |energy, food| {
+        let work_in_one_tick = |energy, food, raining, sheltered| {
             let mut stock = Stock::for_start(&setup, &catalog);
             let mut village = Construction::default();
             let mut plan = village.proposed_site(&catalog, "gathering", IVec2::new(44, 36));
             plan.delivered = plan.loads;
             village.plans.push(plan);
+            if sheltered {
+                let mut shelter = village.proposed_site(&catalog, "shelter", IVec2::new(42, 40));
+                shelter.work = catalog.projects["shelter"].work;
+                shelter.delivered = shelter.loads;
+                village.plans.push(shelter);
+            }
             for resident in &mut village.residents {
                 resident.health.energy = 0.0;
             }
@@ -2747,13 +2761,15 @@ mod tests {
                 to_site: VecDeque::new(),
                 haul: Haul::Direct,
             });
-            village.tick(&catalog, &mut stock, site, clock, 1.0);
+            village.tick(&catalog, &mut stock, site, clock, 1.0, raining);
             village.plans[0].work
         };
-        let normal = work_in_one_tick(75.0, 80.0);
+        let normal = work_in_one_tick(75.0, 80.0, false, false);
         assert!(normal > 0.0);
-        assert!((work_in_one_tick(75.0, 10.0) / normal - 0.65).abs() < 1e-8);
-        assert_eq!(work_in_one_tick(24.0, 80.0), 0.0);
+        assert!((work_in_one_tick(75.0, 10.0, false, false) / normal - 0.65).abs() < 1e-8);
+        assert_eq!(work_in_one_tick(24.0, 80.0, false, false), 0.0);
+        assert!((work_in_one_tick(75.0, 80.0, true, false) / normal - 0.8).abs() < 1e-8);
+        assert_eq!(work_in_one_tick(75.0, 80.0, true, true), normal);
     }
 
     #[test]
@@ -2799,6 +2815,7 @@ mod tests {
                     round_trip_km: 12,
                 },
                 0.1,
+                false,
             );
             let status = construction.project_status(&catalog, 0);
             saw_transit |= status.contains("loads delivered · 1 in transit")
@@ -2852,7 +2869,7 @@ mod tests {
         let mut depot_delivery = None;
         let mut saw_resident_staging_label = false;
         for _ in 0..8_000 {
-            construction.tick(&catalog, &mut stock, site, clock, 0.1);
+            construction.tick(&catalog, &mut stock, site, clock, 0.1, false);
             let resident_status = construction.resident_status(&catalog, &stock, 0);
             saw_resident_staging_label |= resident_status
                 .lines()
@@ -2905,7 +2922,7 @@ mod tests {
         assert_eq!(interrupted.plans[1].staged, 0);
         assert!(interrupted.valid_save(&catalog, &stock));
         for _ in 0..8_000 {
-            interrupted.tick(&catalog, &mut stock, site, clock, 0.1);
+            interrupted.tick(&catalog, &mut stock, site, clock, 0.1, false);
             if interrupted.finished_models(&catalog).count() == 1 {
                 break;
             }

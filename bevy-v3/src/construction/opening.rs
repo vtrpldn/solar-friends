@@ -12,27 +12,10 @@ impl Construction {
         if self.opening.gathering && self.opening.shelter && self.opening.supplies {
             return;
         }
-        let complete = |matches: fn(&str, &str) -> bool| {
-            self.plans.iter().any(|plan| {
-                let definition = &catalog.projects[&plan.key];
-                !plan.removed
-                    && plan.work >= definition.work
-                    && matches(&plan.key, &definition.kind)
-            })
-        };
+        let complete = |matches| self.completed_opening_project(catalog, matches);
         let reached = [
             complete(|key, kind| key == "gathering" || matches!(kind, "square" | "community-hall")),
-            complete(|_, kind| {
-                matches!(
-                    kind,
-                    "shed"
-                        | "rain-shelter"
-                        | "home"
-                        | "reading-room"
-                        | "community-hall"
-                        | "outdoor-classroom"
-                )
-            }),
+            complete(opening_shelter),
             complete(|key, kind| {
                 key == "tarp-stores" || matches!(kind, "warehouse" | "covered-storage")
             }),
@@ -59,6 +42,34 @@ impl Construction {
         }
     }
 
+    pub(super) fn opening_rain_factor(
+        &self,
+        catalog: &Catalog,
+        raining: bool,
+        sandbox: bool,
+    ) -> f64 {
+        if raining
+            && !sandbox
+            && !(self.opening.gathering && self.opening.shelter && self.opening.supplies)
+            && !self.completed_opening_project(catalog, opening_shelter)
+        {
+            0.8
+        } else {
+            1.0
+        }
+    }
+
+    fn completed_opening_project(
+        &self,
+        catalog: &Catalog,
+        matches: fn(&str, &str) -> bool,
+    ) -> bool {
+        self.plans.iter().any(|plan| {
+            let definition = &catalog.projects[&plan.key];
+            !plan.removed && plan.work >= definition.work && matches(&plan.key, &definition.kind)
+        })
+    }
+
     pub fn opening_milestones_status(&self) -> Option<String> {
         let goals = [
             (self.opening.gathering, "Gathering place"),
@@ -71,6 +82,13 @@ impl Construction {
             .collect();
         (!pending.is_empty()).then(|| format!("First camp · {}", pending.join(" · ")))
     }
+}
+
+fn opening_shelter(_: &str, kind: &str) -> bool {
+    matches!(
+        kind,
+        "shed" | "rain-shelter" | "home" | "reading-room" | "community-hall" | "outdoor-classroom"
+    )
 }
 
 #[cfg(test)]
