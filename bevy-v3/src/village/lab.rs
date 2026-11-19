@@ -861,6 +861,9 @@ fn order_label(order: &LabOrder) -> String {
         } => {
             format!("Reserve {essentials} for essentials and {production} for production")
         }
+        LabOrder::InstantBuild { enabled } => {
+            format!("{} instant build", toggle_label(*enabled))
+        }
         LabOrder::BuildingPower { site, enabled } => {
             format!("{} power at project #{site}", toggle_label(*enabled))
         }
@@ -1786,6 +1789,42 @@ mod tests {
         let recorded =
             serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
         assert_eq!(verify_report(recorded, &catalog).unwrap(), 1);
+    }
+
+    #[test]
+    fn sandbox_instant_build_orders_replay_both_construction_modes() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "setup":{"mode":"Sandbox","seed":42,"biome":0,"landscape":1,"water":1,"savings":1,"supplies":1},
+            "steps":1,
+            "orders":[
+                {"step":0,"order":{"type":"instant-build","enabled":false}},
+                {"step":0,"order":{"type":"instant-build","enabled":false}},
+                {"step":0,"order":{"type":"build","key":"home-cottage","x":44,"z":36}},
+                {"step":0,"order":{"type":"instant-build","enabled":true}},
+                {"step":0,"order":{"type":"build","key":"home-cottage","x":49,"z":36}}
+            ]
+        }"#).unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        assert!(
+            runner
+                .outcomes
+                .iter()
+                .all(|outcome| outcome.error.is_none())
+        );
+        let report = serde_json::to_value(runner.report()).unwrap();
+        let plans = &report["village"]["construction"]["plans"];
+        let required_work = catalog.projects["home-cottage"].work;
+        assert!(plans[0]["work"].as_f64().unwrap() < required_work);
+        assert_eq!(plans[1]["work"].as_f64().unwrap(), required_work);
+        assert_eq!(
+            verify_report(
+                serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap(),
+                &catalog
+            )
+            .unwrap(),
+            1
+        );
     }
 
     #[test]

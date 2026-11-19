@@ -115,6 +115,9 @@ pub(crate) enum LabOrder {
         essentials: u8,
         production: u8,
     },
+    InstantBuild {
+        enabled: bool,
+    },
     BuildingPower {
         site: usize,
         enabled: bool,
@@ -406,6 +409,12 @@ impl Construction {
         match order {
             LabOrder::TerrainReset | LabOrder::TerrainStroke { .. } => {
                 return Err("Terrain edits require a village.".into());
+            }
+            LabOrder::InstantBuild { enabled } => {
+                if !stock.sandbox {
+                    return Err("Instant build is only available in Sandbox.".into());
+                }
+                self.slow_sandbox = !enabled;
             }
             LabOrder::Build {
                 key,
