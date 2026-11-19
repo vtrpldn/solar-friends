@@ -1721,9 +1721,10 @@ impl Construction {
                 total.saturating_add(project.fare.saturating_mul(u64::from(trips)))
             });
         let fares = self.farming.jobs.iter().fold(fares, |total, job| {
-            let paid = self.active_trips().any(|trip| {
-                trip.boarded && trip.project == job.site && trip.farm_bed == Some(job.bed)
-            });
+            let paid = job.seed_freight_eta.is_some()
+                || self.active_trips().any(|trip| {
+                    trip.boarded && trip.project == job.site && trip.farm_bed == Some(job.bed)
+                });
             total.saturating_add(
                 job.fare
                     .saturating_mul(u64::from(job.pickups.saturating_sub(u32::from(paid)))),
@@ -1756,10 +1757,12 @@ impl Construction {
                 && if trip.market_order {
                     trip.farm_bed.is_none() && self.trade.orders.get(trip.project).is_some()
                 } else if let Some(bed) = trip.farm_bed {
-                    self.farming
-                        .jobs
-                        .iter()
-                        .any(|job| job.site == trip.project && job.bed == bed && job.pickups > 0)
+                    self.farming.jobs.iter().any(|job| {
+                        job.site == trip.project
+                            && job.bed == bed
+                            && job.pickups > 0
+                            && job.seed_freight_eta.is_none()
+                    })
                 } else {
                     self.plans
                         .get(trip.project)
@@ -1808,7 +1811,16 @@ impl Construction {
                             && target.rotation <= 3
                     })
             });
-        if !self.valid_construction_delivery(catalog)
+        let seed_freight = self
+            .farming
+            .jobs
+            .iter()
+            .filter(|job| job.seed_freight_eta.is_some())
+            .count();
+        if seed_freight > 1
+            || (seed_freight > 0
+                && (self.construction_delivery.is_some() || self.trade.delivery.is_some()))
+            || !self.valid_construction_delivery(catalog)
             || !self.valid_pickup_manifests(catalog)
             || !self.logistics_policy.valid()
             || !self.work_policy.valid()
@@ -2070,7 +2082,9 @@ impl Construction {
             self.record_event(clock.seconds, message);
         }
         let space = self.storage_space(catalog, stock);
-        if !self.supplier_construction || self.construction_delivery.is_none() {
+        if !self.supplier_construction
+            || (self.construction_delivery.is_none() && !self.seed_freight_active())
+        {
             self.trade.maintain_pantry(
                 catalog,
                 stock,

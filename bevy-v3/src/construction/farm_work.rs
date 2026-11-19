@@ -2,7 +2,7 @@ use super::*;
 use crate::{
     farming::{CropClimate, FarmAction, FarmJob, FarmPhase, Plot, Stage},
     setup::WorldSetup,
-    weather::{growing_season, weather_at},
+    weather::{HOUR, growing_season, weather_at},
 };
 
 #[derive(Clone, Copy)]
@@ -385,6 +385,7 @@ impl Construction {
             waiting_for_access: false,
             pickups,
             fare,
+            seed_freight_eta: None,
         });
         Ok(())
     }
@@ -515,7 +516,7 @@ impl Construction {
         clock: f64,
     ) -> String {
         if job.pickups > 0 {
-            return "Waiting for seed delivery".into();
+            return seed_delivery_status(job, clock);
         }
         if self.farm_route_blocked(job, clock) {
             return "Waiting for access".into();
@@ -627,7 +628,8 @@ impl Construction {
             .find(|job| job.site == site && job.bed == index)
         {
             if job.pickups > 0 {
-                label.push_str("\nWaiting for seed pickup");
+                label.push('\n');
+                label.push_str(&seed_delivery_status(job, clock));
             } else {
                 label.push_str(&format!(
                     "\nWork queued · {:.0}%",
@@ -960,6 +962,18 @@ impl BedAccess {
     fn cost_from(self, point: Vec2) -> f32 {
         self.outside.distance(point) + self.aisle.distance(self.work)
     }
+}
+
+fn seed_delivery_status(job: &FarmJob, clock: f64) -> String {
+    job.seed_freight_eta.map_or_else(
+        || "Waiting for seed delivery".into(),
+        |eta| {
+            format!(
+                "Seed freight · {:.1}h remaining",
+                ((eta - clock) / HOUR).max(0.0)
+            )
+        },
+    )
 }
 
 #[cfg(test)]

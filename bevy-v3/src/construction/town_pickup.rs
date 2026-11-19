@@ -131,6 +131,7 @@ impl Construction {
             self.logistics_policy.urgent = false;
         }
         let freight_unaffordable = self.tick_construction_delivery(catalog, stock, clock);
+        let seed_freight_unaffordable = self.tick_seed_freight(stock, clock);
         if !crate::market::town_is_open(clock.seconds) {
             return;
         }
@@ -140,9 +141,13 @@ impl Construction {
             .filter(|&vehicle| !self.active_trips().any(|trip| trip.vehicle == vehicle))
             .collect();
         for vehicle in available {
-            let Some(trip) =
-                self.dispatch_trip(catalog, site, clock, vehicle, freight_unaffordable)
-            else {
+            let Some(trip) = self.dispatch_trip(
+                catalog,
+                site,
+                clock,
+                vehicle,
+                (freight_unaffordable, seed_freight_unaffordable),
+            ) else {
                 continue;
             };
             let slot = usize::from(self.trip.is_some());
@@ -152,6 +157,65 @@ impl Construction {
             self.set_trip(slot, Some(trip));
             self.upkeep.dispatch_vehicle(vehicle);
         }
+    }
+
+    pub(super) fn seed_freight_active(&self) -> bool {
+        self.farming
+            .jobs
+            .iter()
+            .any(|job| job.seed_freight_eta.is_some())
+    }
+
+    fn tick_seed_freight(&mut self, stock: &mut Stock, clock: TownClock) -> bool {
+        if let Some(job) = self
+            .farming
+            .jobs
+            .iter_mut()
+            .find(|job| job.seed_freight_eta.is_some())
+        {
+            if job.seed_freight_eta.is_some_and(|eta| eta <= clock.seconds) {
+                job.seed_freight_eta = None;
+                job.pickups -= 1;
+                self.record_event(
+                    clock.seconds,
+                    "Supplier delivered seeds for planting.".into(),
+                );
+            }
+            return false;
+        }
+        if !self.supplier_construction
+            || self.construction_delivery.is_some()
+            || self.trade.delivery.is_some()
+            || !crate::market::town_is_open(clock.seconds)
+        {
+            return false;
+        }
+        let Some(index) = self.farming.jobs.iter().position(|job| {
+            job.pickups > 0
+                && !self.active_trips().any(|trip| {
+                    !trip.market_order && trip.project == job.site && trip.farm_bed == Some(job.bed)
+                })
+        }) else {
+            return false;
+        };
+        let job = &mut self.farming.jobs[index];
+        let freight = crate::market::freight_cents(clock.round_trip_km);
+        if stock
+            .balance()
+            .saturating_sub(self.market.committed_fares().saturating_sub(job.fare))
+            < freight
+        {
+            return true;
+        }
+        self.market.release_fare(job.fare);
+        stock.debit(freight, crate::stock::CashKind::Freight);
+        job.seed_freight_eta =
+            Some(clock.seconds + 6.0 * crate::weather::HOUR + trip_seconds(clock.round_trip_km));
+        self.record_event(
+            clock.seconds,
+            "Supplier dispatched seeds for planting.".into(),
+        );
+        false
     }
 
     pub fn supplier_construction(&self) -> bool {
@@ -328,6 +392,7 @@ impl Construction {
         }
         if !self.supplier_construction
             || self.trade.delivery.is_some()
+            || self.seed_freight_active()
             || !crate::market::town_is_open(clock.seconds)
             || self.pending_dispatch_cargo(catalog).is_some_and(|cargo| {
                 !self
@@ -860,7 +925,7 @@ impl Construction {
         site: ConstructionSite,
         clock: TownClock,
         vehicle: usize,
-        freight_unaffordable: bool,
+        (freight_unaffordable, seed_freight_unaffordable): (bool, bool),
     ) -> Option<TownTrip> {
         let booked = |project, bed| {
             self.active_trips()
@@ -883,7 +948,12 @@ impl Construction {
             .farming
             .jobs
             .iter()
-            .find(|job| job.pickups > 0 && !booked(job.site, Some(job.bed)))
+            .find(|job| {
+                job.pickups > 0
+                    && job.seed_freight_eta.is_none()
+                    && (!self.supplier_construction || seed_freight_unaffordable)
+                    && !booked(job.site, Some(job.bed))
+            })
             .map(|job| (job.site, Some(job.bed)));
         let pickup = construction.or(farming);
         let order = self
@@ -972,6 +1042,52 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn seed_freight_replaces_the_pickup_fare_and_waits_for_arrival() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        let mut clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let fare = crate::market::fare_cents(clock.round_trip_km);
+        let freight = crate::market::freight_cents(clock.round_trip_km);
+        let balance = stock.balance();
+        assert!(village.market.hold_fare(&stock, fare));
+        village.farming.jobs.push(crate::farming::FarmJob {
+            site: 0,
+            bed: 0,
+            action: crate::farming::FarmAction::Plant,
+            worker: None,
+            phase: crate::farming::FarmPhase::Pickup,
+            work: 0.0,
+            required: 10.0,
+            inputs: BTreeMap::from([("greens_seed".into(), 2)]),
+            output: BTreeMap::new(),
+            food_output: None,
+            retry: 0.0,
+            waiting_for_access: false,
+            pickups: 1,
+            fare,
+            seed_freight_eta: None,
+        });
+        village.toggle_supplier_construction();
+        assert!(!village.tick_seed_freight(&mut stock, clock));
+        assert!(village.seed_freight_active());
+        assert_eq!(village.market.committed_fares(), 0);
+        assert_eq!(stock.balance(), balance - freight);
+
+        let mut restored: Construction =
+            serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        assert_eq!(restored.farming.jobs[0].pickups, 1);
+        clock.seconds = restored.farming.jobs[0].seed_freight_eta.unwrap();
+        assert!(!restored.tick_seed_freight(&mut stock, clock));
+        assert_eq!(restored.farming.jobs[0].pickups, 0);
+        assert!(!restored.seed_freight_active());
+        assert_eq!(stock.balance(), balance - freight);
+    }
 
     #[test]
     fn town_pickup_leaves_booked_workers_free_during_the_shift_window() {

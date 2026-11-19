@@ -210,6 +210,8 @@ pub struct FarmJob {
     pub pickups: u32,
     #[serde(default)]
     pub fare: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seed_freight_eta: Option<f64>,
 }
 
 impl Plot {
@@ -622,6 +624,13 @@ impl Farming {
                 .is_some_and(|plot| job.bed < plot.beds.len())
                 && (0.0..=job.required).contains(&job.work)
                 && job.worker.is_none_or(|id| id < 5)
+                && job.seed_freight_eta.is_none_or(|eta| {
+                    eta.is_finite()
+                        && eta >= 0.0
+                        && job.pickups > 0
+                        && job.worker.is_none()
+                        && job.action == FarmAction::Plant
+                })
         })
     }
 }
@@ -648,6 +657,7 @@ mod tests {
             waiting_for_access: false,
             pickups: 0,
             fare: 0,
+            seed_freight_eta: None,
         };
         plot.finish(&job, 0.0, false);
         job.action = FarmAction::Plant;

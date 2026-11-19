@@ -329,6 +329,7 @@ mod tests {
             waiting_for_access: false,
             pickups: 1,
             fare: 776,
+            seed_freight_eta: None,
         });
         assert_eq!(
             village.inventory(&catalog, &stock, &Land::default())[material],
