@@ -15,7 +15,7 @@ import { ECONOMY_REFERENCE, GRID_TARIFF, STARTING_CAPITAL, tripEstimate } from "
 import { TRADE_RULES } from "../web/v02/weekend/physical-trade.js";
 import { DELIVERY_LIMITS } from "../web/v02/weekend/deliveries.js";
 
-import { buildingScenes, buildOptions, constructionScene } from "./v3-building-scene-ids.mjs";
+import { buildingScenes, buildOptions, constructionScene, workshopModels } from "./v3-building-scene-ids.mjs";
 
 const startingVillage = createWeekend();
 const materials = Object.fromEntries(Object.entries(MATERIALS).map(([id, material]) => [
@@ -127,6 +127,7 @@ const json = data => JSON.stringify(data, null, 2) + "\n";
 const exports = {
   "data/construction.json": json({ materials, projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS, workshopComparison: buildingScenes.indexOf("workshop-comparison") }),
   "data/crops.json": json(CROPS),
+  "data/workshop.json": json(workshopModels),
   "src/economy_reference.rs": economy,
 };
 for (const [name, serialized] of Object.entries(exports)) {

@@ -166,7 +166,7 @@ fn standalone_scene(source: &Glb, model: usize) -> io::Result<Vec<u8>> {
 
 pub(super) fn export_selected(
     keys: Res<ButtonInput<KeyCode>>,
-    catalog: Res<Catalog>,
+    catalog: Res<WorkshopCatalog>,
     mut workshop: ResMut<Workshop>,
     pending: Query<(), With<Screenshot>>,
     sprite_capture: Option<Res<sprites::SpriteCapture>>,
@@ -180,9 +180,9 @@ pub(super) fn export_selected(
     {
         return;
     }
-    let id = &workshop.projects[workshop.selected];
+    let id = &workshop.assets[workshop.selected];
     let result = (|| -> io::Result<_> {
-        let model = catalog.projects[id].model;
+        let model = catalog.0[id].model;
         let source = Glb::parse(SOURCE)?;
         let bytes = standalone_scene(&source, model)?;
         let stamp = std::time::SystemTime::now()
@@ -203,6 +203,23 @@ pub(super) fn export_selected(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_workshop_asset_has_a_valid_standalone_scene() {
+        let source = Glb::parse(SOURCE).unwrap();
+        let catalog = WorkshopCatalog::default();
+        for (asset, model) in &catalog.0 {
+            let bytes = standalone_scene(&source, model.model)
+                .unwrap_or_else(|error| panic!("{asset}: {error}"));
+            let exported = Glb::parse(&bytes).unwrap();
+            assert_eq!(
+                exported.document["scenes"].as_array().unwrap().len(),
+                1,
+                "{asset}"
+            );
+            assert!(!exported.binary.is_empty(), "{asset}");
+        }
+    }
 
     #[test]
     fn exports_only_the_selected_scene_and_preserves_its_geometry_buffers() {

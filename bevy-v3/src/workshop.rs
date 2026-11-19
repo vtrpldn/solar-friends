@@ -1,7 +1,7 @@
 mod model_export;
 mod sprites;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use bevy::{
     asset::RenderAssetUsages,
@@ -15,8 +15,29 @@ use bevy::{
 use crate::{catalog::Catalog, ui_font::ui_font, village::building_model};
 
 #[derive(Resource)]
+struct WorkshopCatalog(BTreeMap<String, WorkshopAsset>);
+
+#[derive(serde::Deserialize)]
+struct WorkshopAsset {
+    name: String,
+    category: String,
+    size: [i32; 2],
+    model: usize,
+    revision: u32,
+}
+
+impl Default for WorkshopCatalog {
+    fn default() -> Self {
+        Self(
+            serde_json::from_str(include_str!("../data/workshop.json"))
+                .expect("bundled Workshop catalog"),
+        )
+    }
+}
+
+#[derive(Resource)]
 struct Workshop {
-    projects: Vec<String>,
+    assets: Vec<String>,
     selected: usize,
     heading: f32,
     elevation: f32,
@@ -45,11 +66,11 @@ impl Workshop {
         self.target = Vec3::Y;
     }
 
-    fn viewport_height(&self, catalog: &Catalog) -> f32 {
+    fn viewport_height(&self, catalog: &WorkshopCatalog) -> f32 {
         if self.together {
             30.0 * self.zoom
         } else {
-            viewport_height(&catalog.projects[&self.projects[self.selected]], self.zoom)
+            viewport_height(&catalog.0[&self.assets[self.selected]], self.zoom)
         }
     }
 }
@@ -61,22 +82,22 @@ struct AssetSearch {
 }
 
 impl AssetSearch {
-    fn matching(&self, projects: &[String], catalog: &Catalog) -> Vec<usize> {
+    fn matching(&self, assets: &[String], catalog: &WorkshopCatalog) -> Vec<usize> {
         let query = self.query.trim().to_lowercase();
-        projects
+        assets
             .iter()
             .enumerate()
             .filter_map(|(index, id)| {
-                let model = &catalog.projects[id];
+                let model = &catalog.0[id];
                 (model.name.to_lowercase().contains(&query) || id.contains(&query)).then_some(index)
             })
             .collect()
     }
 
-    fn label(&self, projects: &[String], catalog: &Catalog) -> String {
+    fn label(&self, assets: &[String], catalog: &WorkshopCatalog) -> String {
         use std::fmt::Write as _;
         const ROWS: usize = 9;
-        let matches = self.matching(projects, catalog);
+        let matches = self.matching(assets, catalog);
         let mut label = format!(
             "Find an asset · {}▏\nUp/Down Select · Enter Open · Esc Cancel\n",
             self.query
@@ -87,7 +108,7 @@ impl AssetSearch {
         let start = self.row / ROWS * ROWS;
         for (row, &index) in matches.iter().enumerate().skip(start).take(ROWS) {
             let marker = if row == self.row { "> " } else { "  " };
-            let model = &catalog.projects[&projects[index]];
+            let model = &catalog.0[&assets[index]];
             let _ = write!(label, "\n{marker}{} · {}", model.name, model.category);
         }
         label
@@ -154,8 +175,9 @@ fn orbit_camera(heading: f32, elevation: f32, target: Vec3) -> Transform {
 
 pub fn run() {
     let catalog = Catalog::default();
-    let mut projects: Vec<_> = catalog.projects.keys().cloned().collect();
-    projects.sort_by(|a, b| catalog.projects[a].name.cmp(&catalog.projects[b].name));
+    let models = WorkshopCatalog::default();
+    let mut assets: Vec<_> = models.0.keys().cloned().collect();
+    assets.sort_by(|a, b| models.0[a].name.cmp(&models.0[b].name));
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -166,8 +188,9 @@ pub fn run() {
     }))
     .add_plugins(crate::ui_font::UiFontPlugin)
     .insert_resource(catalog)
+    .insert_resource(models)
     .insert_resource(Workshop {
-        projects,
+        assets,
         selected: 0,
         heading: 0.0,
         elevation: DEFAULT_ELEVATION,
@@ -281,7 +304,7 @@ fn controls(
         Res<AccumulatedMouseMotion>,
         Res<AccumulatedMouseScroll>,
     ),
-    (catalog, window): (Res<Catalog>, Single<&Window>),
+    (catalog, window): (Res<WorkshopCatalog>, Single<&Window>),
     mut workshop: ResMut<Workshop>,
 ) {
     if !pending.is_empty() || sprite_capture.is_some() || workshop.show_proof {
@@ -311,7 +334,7 @@ fn controls(
         } else {
             text.clear();
         }
-        let matches = search.matching(&workshop.projects, &catalog);
+        let matches = search.matching(&workshop.assets, &catalog);
         if keys.just_pressed(KeyCode::ArrowDown) {
             search.row = (search.row + 1).min(matches.len().saturating_sub(1));
         } else if keys.just_pressed(KeyCode::ArrowUp) {
@@ -333,7 +356,7 @@ fn controls(
         workshop.export_notice.clear();
         return;
     }
-    let len = workshop.projects.len();
+    let len = workshop.assets.len();
     if keys.just_pressed(KeyCode::ArrowRight) {
         workshop.together = false;
         workshop.selected = (workshop.selected + 1) % len;
@@ -398,7 +421,7 @@ fn controls(
     }
 }
 
-fn viewport_height(project: &crate::catalog::Project, zoom: f32) -> f32 {
+fn viewport_height(project: &WorkshopAsset, zoom: f32) -> f32 {
     let footprint = project.size[0].max(project.size[1]) as f32 * 2.0;
     footprint.mul_add(1.4, 4.0) * zoom
 }
@@ -413,7 +436,8 @@ fn lighting(night: bool) -> (f32, Color, f32, &'static str) {
 
 fn show_model(
     mut commands: Commands,
-    (assets, catalog, workshop): (Res<AssetServer>, Res<Catalog>, Res<Workshop>),
+    (assets, models, workshop): (Res<AssetServer>, Res<WorkshopCatalog>, Res<Workshop>),
+    catalog: Res<Catalog>,
     mut preview: Local<Option<(usize, Entity)>>,
     (mut light, mut ambient): (
         Single<&mut DirectionalLight, With<InspectionLight>>,
@@ -425,7 +449,7 @@ fn show_model(
     if !workshop.is_changed() {
         return;
     }
-    let project = &catalog.projects[&workshop.projects[workshop.selected]];
+    let project = &models.0[&workshop.assets[workshop.selected]];
     let model = if workshop.together {
         catalog.workshop_comparison
     } else {
@@ -460,7 +484,7 @@ fn show_model(
     **transform = orbit_camera(workshop.heading, workshop.elevation, workshop.target);
     if let Projection::Orthographic(ortho) = &mut **projection {
         ortho.scaling_mode = bevy::camera::ScalingMode::FixedVertical {
-            viewport_height: workshop.viewport_height(&catalog),
+            viewport_height: workshop.viewport_height(&models),
         };
     }
     light.shadows_enabled = !matches!(workshop.surface, Surface::Wireframe);
@@ -469,7 +493,7 @@ fn show_model(
     light.color = color;
     ambient.brightness = brightness;
     if let Some(search) = &workshop.search {
-        text.set_if_neq(Text::new(search.label(&workshop.projects, &catalog)));
+        text.set_if_neq(Text::new(search.label(&workshop.assets, &models)));
         return;
     }
     if workshop.show_proof {
@@ -498,20 +522,20 @@ fn show_model(
     let surface = workshop.surface.label();
     text.set_if_neq(Text::new(format!(
         "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · V View together · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure{roof} · Home Reset · F5 Export PNG · F6 Sprite sheet · F7 Sprite Proof · F8 Export 3D source\n{}",
-        project.name, workshop.selected + 1, workshop.projects.len(),
+        project.name, workshop.selected + 1, workshop.assets.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
 }
 
 fn show_scale_figure(
     workshop: Res<Workshop>,
-    catalog: Res<Catalog>,
+    catalog: Res<WorkshopCatalog>,
     mut figure: Single<(&mut Transform, &mut Visibility), With<ScaleFigure>>,
 ) {
     if !workshop.is_changed() {
         return;
     }
-    let project = &catalog.projects[&workshop.projects[workshop.selected]];
+    let project = &catalog.0[&workshop.assets[workshop.selected]];
     let (figure_transform, visibility) = &mut *figure;
     figure_transform.translation = scale_figure_position(project.size, workshop.rotation);
     **visibility = if workshop.scale_figure && !workshop.show_proof && !workshop.together {
@@ -642,7 +666,7 @@ fn apply_surface(
 
 fn capture_preview(
     (mut commands, keys): (Commands, Res<ButtonInput<KeyCode>>),
-    (mut workshop, catalog): (ResMut<Workshop>, Res<Catalog>),
+    (mut workshop, catalog): (ResMut<Workshop>, Res<WorkshopCatalog>),
     mut panel: Single<&mut Node, With<Text>>,
     pending: Query<(), With<Screenshot>>,
     scene: Query<(&SceneInstance, Option<&WorkshopModel>, Option<&ScaleFigure>)>,
@@ -679,7 +703,7 @@ fn capture_preview(
             .map_err(std::io::Error::other)?;
         let dir = save.with_file_name("workshop");
         std::fs::create_dir_all(&dir)?;
-        let model = &workshop.projects[workshop.selected];
+        let model = &workshop.assets[workshop.selected];
         let light = if workshop.night { "night" } else { "day" };
         Ok(dir.join(format!("{model}-{light}-{}.png", stamp.as_nanos())))
     });
@@ -690,12 +714,13 @@ fn capture_preview(
             return;
         }
     };
-    let id = &workshop.projects[workshop.selected];
-    let project = &catalog.projects[id];
+    let id = &workshop.assets[workshop.selected];
+    let project = &catalog.0[id];
     let mut metadata = serde_json::json!({
         "schema": "solar-friends.v3.workshop-preview.v1",
         "project": id,
         "model": project.model,
+        "asset_revision": project.revision,
         "footprint_cells": project.size,
         "model_rotation_degrees": u16::from(workshop.rotation) * 90,
         "metres_per_cell": 2,
@@ -747,14 +772,14 @@ fn scale_figure_position(size: [i32; 2], rotation: u8) -> Vec3 {
 
 fn draw_guides(
     workshop: Res<Workshop>,
-    catalog: Res<Catalog>,
+    catalog: Res<WorkshopCatalog>,
     pending: Query<(), With<Screenshot>>,
     mut gizmos: Gizmos,
 ) {
     if !workshop.guides || workshop.show_proof || !pending.is_empty() {
         return;
     }
-    let project = &catalog.projects[&workshop.projects[workshop.selected]];
+    let project = &catalog.0[&workshop.assets[workshop.selected]];
     let [mut x, mut z] = project.size.map(|cells| cells as f32);
     if !workshop.rotation.is_multiple_of(2) {
         std::mem::swap(&mut x, &mut z);
@@ -799,10 +824,10 @@ mod tests {
 
     #[test]
     fn asset_search_matches_the_display_name_or_catalog_key() {
-        let catalog = Catalog::default();
-        let ids = vec!["gathering".into(), "home-cottage".into(), "shed".into()];
+        let catalog = WorkshopCatalog::default();
+        let ids = vec!["tree".into(), "home-cottage".into(), "shed".into()];
         let search = AssetSearch {
-            query: " GaThEr ".into(),
+            query: " ShAdE ".into(),
             row: 0,
         };
         assert_eq!(search.matching(&ids, &catalog), [0]);

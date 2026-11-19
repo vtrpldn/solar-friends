@@ -40,7 +40,7 @@ function workshopComparison() {
 const models = buildingScenes.map((id) => {
   if (id === "workshop-comparison") return [id, workshopComparison()];
   if (id === "greenhouse") return [id, bareGreenhouse()];
-  const model = createAsset(id);
+  const model = createAsset(id === "workshop-greenhouse" ? "greenhouse" : id);
   model.getObjectByName("optional-rooftop-solar")?.removeFromParent();
   const roof = model.userData.exteriorOnly
     ? null

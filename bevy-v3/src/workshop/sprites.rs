@@ -103,10 +103,11 @@ fn framing(points: impl Iterator<Item = Vec3>) -> f32 {
     48.0 / fit
 }
 
-fn placement(id: &str, size: [i32; 2], light: &str, ppm: f32) -> serde_json::Value {
+fn placement(id: &str, size: [i32; 2], revision: u32, light: &str, ppm: f32) -> serde_json::Value {
     serde_json::json!({
         "schema": "solar-friends.v3.sprite-study.v1",
         "asset": id,
+        "revision": revision,
         "light": light,
         "units": "metres",
         "cellMetres": 2,
@@ -144,7 +145,7 @@ fn sheet_path(id: &str, light: &str) -> std::io::Result<std::path::PathBuf> {
 pub(super) fn start(
     (mut commands, keys): (Commands, Res<ButtonInput<KeyCode>>),
     (pending, capture): (Query<(), With<Screenshot>>, Option<Res<SpriteCapture>>),
-    (mut workshop, catalog, assets): (ResMut<Workshop>, Res<Catalog>, Res<AssetServer>),
+    (mut workshop, catalog, assets): (ResMut<Workshop>, Res<WorkshopCatalog>, Res<AssetServer>),
     (meshes, mut images): (Res<Assets<Mesh>>, ResMut<Assets<Image>>),
     model: Query<(&SceneInstance, &GlobalTransform), With<WorkshopModel>>,
     scene_mesh: Query<PreviewMesh>,
@@ -164,7 +165,7 @@ pub(super) fn start(
         workshop.show_proof = false;
         return;
     }
-    let id = &workshop.projects[workshop.selected];
+    let id = &workshop.assets[workshop.selected];
     let light = if workshop.night { "night" } else { "day" };
     let destination = if proof {
         Destination::Proof
@@ -236,7 +237,7 @@ pub(super) fn start(
         points.extend(local);
     }
     let ppm = framing(points.into_iter());
-    let project = &catalog.projects[id];
+    let project = &catalog.0[id];
     let mut frames = Vec::new();
     for turn in 0..TURNS {
         let layer = RenderLayers::layer(FIRST_LAYER + turn);
@@ -299,7 +300,7 @@ pub(super) fn start(
     commands.insert_resource(SpriteCapture {
         frames,
         destination,
-        placement: placement(id, project.size, light, ppm),
+        placement: placement(id, project.size, project.revision, light, ppm),
         warmup: None,
         started: std::time::Instant::now(),
         light: light_entity,
@@ -391,7 +392,7 @@ pub(super) fn progress(
         }
     }
     workshop.proof = Some(SpriteProof {
-        asset: workshop.projects[workshop.selected].clone(),
+        asset: workshop.assets[workshop.selected].clone(),
         night: workshop.night,
         image: images.add(image),
         placement: capture.placement.clone(),
@@ -459,6 +460,7 @@ mod tests {
         let info = placement(
             "test",
             [3, 8],
+            1,
             "day",
             framing([Vec3::new(2.0, 0.0, 1.0)].into_iter()),
         );

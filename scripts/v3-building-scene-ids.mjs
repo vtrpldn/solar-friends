@@ -20,3 +20,16 @@ export const buildingScenes = [...new Set([
   "goat-pasture-empty",
   "workshop-comparison",
 ])];
+
+
+// Append the inspection catalog without moving any gameplay scene.
+const workshopOverrides = new Map([["greenhouse", "workshop-greenhouse"]]);
+for (const { id } of ASSETS) {
+  const scene = workshopOverrides.get(id) ?? id;
+  if (!buildingScenes.includes(scene)) buildingScenes.push(scene);
+}
+
+export const workshopModels = Object.fromEntries(ASSETS.map(({ id, name, category, footprint, revision }) => [
+  id,
+  { name, category, size: footprint, model: buildingScenes.indexOf(workshopOverrides.get(id) ?? id), revision: revision ?? 1 },
+]));
