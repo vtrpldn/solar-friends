@@ -403,15 +403,21 @@ impl Utilities {
             .map(|(&id, node)| (id, node.location, node.size))
     }
 
-    pub fn toilets(&self, waste: f64) -> impl Iterator<Item = (usize, IVec2, IVec2)> + '_ {
+    fn plumbed_toilets(&self) -> impl Iterator<Item = (usize, &Node)> {
         self.nodes
             .iter()
-            .filter(move |(_, node)| {
-                node.enabled
-                    && matches!(node.kind.as_str(), "eco_toilet" | "home")
-                    && node.capacity[3] - node.water[3] >= waste
-            })
-            .map(|(&id, node)| (id, node.location, node.size))
+            .filter(|(_, node)| node.enabled && matches!(node.kind.as_str(), "eco_toilet" | "home"))
+            .map(|(&id, node)| (id, node))
+    }
+
+    pub fn toilets(&self, waste: f64) -> impl Iterator<Item = (usize, IVec2, IVec2)> + '_ {
+        self.plumbed_toilets()
+            .filter(move |(_, node)| node.capacity[3] - node.water[3] >= waste)
+            .map(|(id, node)| (id, node.location, node.size))
+    }
+
+    fn sewage_blocks_toilets(&self) -> bool {
+        self.plumbed_toilets().next().is_some() && self.toilets(1.5).next().is_none()
     }
 
     pub fn can_irrigate(&self, plot: usize, amount: f64) -> bool {
@@ -818,7 +824,9 @@ impl Utilities {
         } else {
             format!("{fresh:.1} L potable")
         };
-        let sanitation = if sanitation_waiting > 0 {
+        let sanitation = if self.sewage_blocks_toilets() {
+            "Sewage tanks too full for toilets · Service tanks or add treatment".into()
+        } else if sanitation_waiting > 0 {
             format!("{sanitation_waiting} residents need care")
         } else if self.toilets(1.5).next().is_none() {
             "Camp latrine fallback".into()
@@ -2017,6 +2025,35 @@ fn capacity(kind: &str) -> [f64; 4] {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn sanitation_warns_when_no_enabled_toilet_can_take_a_full_visit() {
+        let mut utilities = Utilities::default();
+        utilities.sync(
+            [(1, "eco_toilet"), (2, "home")]
+                .into_iter()
+                .map(|(id, kind)| Facility {
+                    id,
+                    kind,
+                    location: IVec2::new(48 + id as i32, 36),
+                    size: IVec2::ONE,
+                    batteries: 0,
+                    panels: 0,
+                    working: false,
+                }),
+        );
+        assert!(utilities.receive_sewage(1, 15.0));
+        assert!(utilities.receive_sewage(2, 14.5));
+        assert!(!utilities.sewage_blocks_toilets());
+        utilities.toggle(1);
+        assert!(
+            utilities
+                .service_overview(0, 1, 0.0, false)
+                .contains("Sewage tanks too full for toilets")
+        );
+        utilities.service_waste(1);
+        assert!(!utilities.sewage_blocks_toilets());
+    }
+
     #[test]
     fn irrigation_uses_one_tank_per_dose() {
         let mut utilities = Utilities::default();
