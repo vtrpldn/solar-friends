@@ -439,6 +439,34 @@ mod tests {
             .expect("button interaction") = Interaction::None;
     }
 
+    fn river_vertex_colors(app: &mut App) -> Vec<[f32; 4]> {
+        use bevy::mesh::VertexAttributeValues;
+
+        let world = app.world_mut();
+        let (mesh, river) = world
+            .query::<(&Mesh3d, &RiverMesh)>()
+            .single(world)
+            .expect("one river");
+        assert_eq!(river.0.len(), 8);
+        let meshes = world.resource::<Assets<Mesh>>();
+        let mesh = meshes.get(&mesh.0).expect("river mesh");
+        let Some(VertexAttributeValues::Float32x4(colors)) = mesh.attribute(Mesh::ATTRIBUTE_COLOR)
+        else {
+            panic!("the river update must color the rendered mesh");
+        };
+        assert_eq!(colors.len(), mesh.count_vertices());
+        colors.clone()
+    }
+
+    fn simulate_river_frame(app: &mut App) {
+        let world = app.world_mut();
+        world
+            .resource_mut::<Time<Fixed>>()
+            .advance_by(std::time::Duration::from_millis(100));
+        world.run_schedule(FixedUpdate);
+        world.run_schedule(PostUpdate);
+    }
+
     #[test]
     fn bevy_update_enters_a_village_and_places_a_camp() {
         let mut app = App::new();
@@ -512,8 +540,14 @@ mod tests {
 
         press_button(&mut app, "Pause");
         assert!(app.world().resource::<village::Village>().is_paused());
+        let paused_water = river_vertex_colors(&mut app);
+        simulate_river_frame(&mut app);
+        assert_eq!(river_vertex_colors(&mut app), paused_water);
+
         press_button(&mut app, "Resume");
         assert!(!app.world().resource::<village::Village>().is_paused());
+        simulate_river_frame(&mut app);
+        assert_ne!(river_vertex_colors(&mut app), paused_water);
 
         press_button(&mut app, "1×");
         press_button(&mut app, "4×");
