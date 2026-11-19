@@ -1,6 +1,6 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
-use super::Runner;
+use super::{LabOrder, Runner};
 use crate::{
     arrival::{MAP_START, ROAD_END, road_center, road_width, world_position},
     catalog::Catalog,
@@ -11,6 +11,60 @@ pub(super) struct MapState {
     pub visible: bool,
     pub selected: Option<usize>,
     pub resource: Option<usize>,
+    pub blueprint: Option<(String, u8)>,
+    placement: Option<IVec2>,
+}
+
+impl MapState {
+    pub fn build_order(
+        &mut self,
+        catalog: &Catalog,
+        keys: &ButtonInput<KeyCode>,
+    ) -> Option<LabOrder> {
+        if keys.any_just_pressed([KeyCode::KeyB, KeyCode::Escape]) {
+            self.placement = None;
+            if self.blueprint.take().is_none() && keys.just_pressed(KeyCode::KeyB) {
+                self.blueprint = Some(("gathering".into(), 0));
+            }
+            return None;
+        }
+        let (key, rotation) = self.blueprint.as_mut()?;
+        if keys.just_pressed(KeyCode::KeyR) {
+            *rotation = (*rotation + 1) % 4;
+        }
+        if keys.just_pressed(KeyCode::BracketRight) {
+            if let Some(next) = catalog
+                .projects
+                .keys()
+                .find(|next| *next > key)
+                .or_else(|| catalog.projects.keys().next())
+            {
+                key.clone_from(next);
+            }
+        } else if keys.just_pressed(KeyCode::BracketLeft)
+            && let Some(previous) = catalog
+                .projects
+                .keys()
+                .rev()
+                .find(|previous| *previous < key)
+                .or_else(|| catalog.projects.keys().next_back())
+        {
+            key.clone_from(previous);
+        }
+        let cell = self.placement.take()?;
+        Some(LabOrder::Build {
+            key: key.clone(),
+            x: cell.x,
+            z: cell.y,
+            rotation: *rotation,
+            size: None,
+        })
+    }
+
+    pub fn cancel_build(&mut self) {
+        self.blueprint = None;
+        self.placement = None;
+    }
 }
 
 pub(super) fn draw(
@@ -87,26 +141,32 @@ pub(super) fn draw(
             window.height() * 0.5 - cursor.y,
         );
         if (screen - center).abs().cmple(Vec2::splat(side * 0.5)).all() {
-            map.selected = projects()
-                .filter_map(|(index, position, size, _)| {
-                    let delta = (screen - point(position)).abs();
-                    let marker = (size * scale * 0.5).max(Vec2::splat(4.0));
-                    delta
-                        .cmple(marker)
-                        .all()
-                        .then_some((index, delta.length_squared()))
-                })
-                .min_by(|a, b| a.1.total_cmp(&b.1))
-                .map(|(index, _)| index);
-            map.resource = if map.selected.is_some() {
-                None
+            if map.blueprint.is_some() {
+                let offset = (screen - center) / scale;
+                let cell = (Vec2::new(offset.x, -offset.y) * 0.5 + Vec2::splat(32.0)).round();
+                map.placement = Some(cell.as_ivec2());
             } else {
-                resources()
-                    .map(|(index, position)| (index, screen.distance_squared(position)))
-                    .filter(|(_, distance)| *distance <= 16.0)
+                map.selected = projects()
+                    .filter_map(|(index, position, size, _)| {
+                        let delta = (screen - point(position)).abs();
+                        let marker = (size * scale * 0.5).max(Vec2::splat(4.0));
+                        delta
+                            .cmple(marker)
+                            .all()
+                            .then_some((index, delta.length_squared()))
+                    })
                     .min_by(|a, b| a.1.total_cmp(&b.1))
-                    .map(|(index, _)| index)
-            };
+                    .map(|(index, _)| index);
+                map.resource = if map.selected.is_some() {
+                    None
+                } else {
+                    resources()
+                        .map(|(index, position)| (index, screen.distance_squared(position)))
+                        .filter(|(_, distance)| *distance <= 16.0)
+                        .min_by(|a, b| a.1.total_cmp(&b.1))
+                        .map(|(index, _)| index)
+                };
+            }
         }
     }
     for (index, position) in resources() {

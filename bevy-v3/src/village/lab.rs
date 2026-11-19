@@ -1028,6 +1028,18 @@ fn update_lab_window(
         playback.inventory_page = 0;
     }
     map.visible = playback.view == LabView::Map;
+    if !map.visible || playback.replaying || reached_end(&runner) {
+        map.cancel_build();
+    } else if let Some(order) = map.build_order(&catalog, &keys) {
+        playback.notice = match runner.submit(&catalog, order) {
+            Ok(()) => runner
+                .outcomes
+                .last()
+                .and_then(|outcome| outcome.error.clone())
+                .unwrap_or_else(|| "Blueprint placed.".into()),
+            Err(error) => error.into(),
+        };
+    }
     if keys.just_pressed(KeyCode::PageDown) {
         playback.inventory_page = playback.inventory_page.saturating_add(1);
     } else if keys.just_pressed(KeyCode::PageUp) {
@@ -1081,6 +1093,7 @@ fn update_lab_window(
     if playback.view == LabView::Map
         && !playback.replaying
         && !runner.done()
+        && map.blueprint.is_none()
         && keys.just_pressed(KeyCode::KeyG)
         && let Some(index) = map.resource
     {
@@ -1202,13 +1215,28 @@ fn update_lab_window(
                         .and_then(|site| map::resource_status(&runner, &catalog, site))
                 })
                 .unwrap_or_else(|| "Click a project or resource to inspect it".into());
-            let gather = if map.resource.is_some() && !playback.replaying && !runner.done() {
+            let gather = if map.resource.is_some()
+                && !playback.replaying
+                && !runner.done()
+                && map.blueprint.is_none()
+            {
                 " · G Queue gathering"
             } else {
                 ""
             };
+            let build = if let Some((key, rotation)) = &map.blueprint {
+                format!(
+                    "\nPlace {} · {}° · [ / ] Blueprint · R Rotate · Esc Cancel",
+                    catalog.projects[key].name,
+                    u16::from(*rotation) * 90
+                )
+            } else if !playback.replaying && !runner.done() {
+                " · B Build".into()
+            } else {
+                String::new()
+            };
             format!(
-                "Village map · {selection}\nTab Switch view · Enter Inspect selected jobs{gather}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources"
+                "Village map · {selection}\nTab Switch view · Enter Inspect selected jobs{gather}{build}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources"
             )
         } else {
             lab_inventory(
