@@ -118,7 +118,8 @@ struct Garden {
     terrain: Terrain,
     connections: HashMap<String, Connection>,
     library: Vec<String>,
-    search: Option<super::AssetSearch>,
+    search: super::AssetSearch,
+    catalog_open: bool,
     coordinates: Option<String>,
     target: Vec3,
     bearing: f32,
@@ -367,7 +368,8 @@ fn run_garden(path: Option<PathBuf>, night: bool, study: Option<&str>) {
         terrain: Terrain::default(),
         connections: HashMap::new(),
         library,
-        search: None,
+        search: super::AssetSearch::default(),
+        catalog_open: false,
         coordinates: None,
         target: Vec3::ZERO,
         bearing: HOME_BEARING,
@@ -539,7 +541,7 @@ fn update_garden_buttons(
         } else {
             Color::srgb_u8(62, 83, 65)
         };
-        let editing_text = garden.search.is_some() || garden.coordinates.is_some();
+        let editing_text = garden.catalog_open || garden.coordinates.is_some();
         let selected_prop = garden.selected.is_some() && garden.pending.is_none();
         let visible = !editing_text
             && match action {
@@ -584,8 +586,12 @@ fn display_asset_picker(
     mut overlay: Single<&mut Visibility, With<GardenText>>,
 ) {
     if garden.is_changed() {
-        picker.update(garden.search.as_ref(), &garden.library, &models);
-        **overlay = if garden.search.is_some() {
+        picker.update(
+            garden.catalog_open.then_some(&garden.search),
+            &garden.library,
+            &models,
+        );
+        **overlay = if garden.catalog_open {
             Visibility::Hidden
         } else {
             Visibility::Inherited
@@ -678,7 +684,7 @@ fn edit(
     }
     if (pressed(F2) || clicked_action(GardenAction::Position))
         && garden.selected.is_some()
-        && garden.search.is_none()
+        && !garden.catalog_open
         && garden.pending.is_none()
     {
         garden.coordinates = Some(String::new());
@@ -687,15 +693,19 @@ fn edit(
         return;
     }
     if (pressed(Slash) || clicked_action(GardenAction::Catalog))
-        && garden.search.is_none()
+        && !garden.catalog_open
         && garden.pending.is_none()
     {
-        garden.search = Some(super::AssetSearch::default());
+        garden.catalog_open = true;
         typing.clear();
         return;
     }
-    if let Some(mut search) = garden.search.take() {
+    if garden.catalog_open {
+        let mut search = std::mem::take(&mut garden.search);
         if pressed(Escape) || picker.clicked(asset_picker::Action::Close) {
+            search.choosing_category = false;
+            garden.search = search;
+            garden.catalog_open = false;
             typing.clear();
             return;
         }
@@ -709,7 +719,7 @@ fn edit(
         }
         if search.choosing_category {
             typing.clear();
-            garden.search = Some(search);
+            garden.search = search;
             return;
         }
         let enter = pressed(Enter) || pressed(NumpadEnter);
@@ -726,6 +736,8 @@ fn edit(
         let clicked_row = picker.selected().map(|offset| search.page_start() + offset);
         let selected_row = clicked_row.or(enter.then_some(search.row));
         if let Some(&index) = selected_row.and_then(|row| matches.get(row)) {
+            garden.search = search;
+            garden.catalog_open = false;
             let asset = garden.library[index].clone();
             if let Some(index) = garden
                 .layout
@@ -768,7 +780,7 @@ fn edit(
         } else if pressed(ArrowUp) {
             search.row = search.row.saturating_sub(1);
         }
-        garden.search = Some(search);
+        garden.search = search;
         return;
     }
     typing.clear();
@@ -1048,7 +1060,8 @@ fn import_scene(
             garden.focus_on_load = true;
             garden.selected = None;
             garden.pending = None;
-            garden.search = None;
+            garden.search.choosing_category = false;
+            garden.catalog_open = false;
             garden.coordinates = None;
             garden.status = format!("Imported {}", path.display());
         }

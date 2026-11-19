@@ -193,7 +193,7 @@ pub(super) fn tick(
     mut actors: Query<(Entity, &GardenProp, &mut Transform, &mut RehearsalPose)>,
 ) {
     use KeyCode::*;
-    if garden.search.is_some() || garden.coordinates.is_some() {
+    if garden.catalog_open || garden.coordinates.is_some() {
         return;
     }
     let click = |action| {
@@ -459,7 +459,8 @@ mod tests {
                 terrain: Terrain::default(),
                 connections: HashMap::new(),
                 library: vec![],
-                search: None,
+                search: default(),
+                catalog_open: false,
                 coordinates: None,
                 target: Vec3::ZERO,
                 bearing: 0.,
