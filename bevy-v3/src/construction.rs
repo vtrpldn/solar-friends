@@ -964,33 +964,12 @@ impl Construction {
         draw_footprint(ground.terrain, position, proposal.size, tint, gizmos);
         let show_access = status.is_ok() && !matches!(key, "road" | "bridge");
         if show_access {
-            let center = position.as_vec2() + (proposal.size.as_vec2() - Vec2::ONE) * 0.5;
-            let heading =
-                [Vec2::Y, Vec2::X, Vec2::NEG_Y, Vec2::NEG_X][usize::from(proposal.rotation)];
-            let front =
-                center + heading * ((heading.abs().dot(proposal.size.as_vec2()) + 1.0) * 0.5);
-            let spots: Vec<_> = build_perimeter(position, proposal.size)
+            let entrance = building_entrance(&proposal, definition);
+            let spots = build_perimeter(position, proposal.size)
                 .into_iter()
                 .filter(|&cell| {
                     !self.blocked(catalog, ground.terrain, ground.land, ground.camp, cell)
-                })
-                .collect();
-            let entrance = matches!(
-                definition.kind.as_str(),
-                "home" | "workshop" | "kitchen" | "wash-station" | "eco_toilet"
-            )
-            .then(|| {
-                spots
-                    .iter()
-                    .copied()
-                    .filter(|spot| (spot.as_vec2() - front).dot(heading).abs() < 0.1)
-                    .min_by(|a, b| {
-                        a.as_vec2()
-                            .distance_squared(front)
-                            .total_cmp(&b.as_vec2().distance_squared(front))
-                    })
-            })
-            .flatten();
+                });
             for cell in spots {
                 let Vec2 { x, y: z } = world_position(cell.x as f32, cell.y as f32);
                 let y = ground.terrain.height_at(x, z) + 0.15;
@@ -1121,6 +1100,21 @@ impl Construction {
                 }
                 if !bridge && !riverside && near_river(Vec2::new(column as f32, row as f32), 1.0) {
                     return Some("Keep projects back from the riverbank.");
+                }
+            }
+        }
+        if !road && !bridge {
+            for (index, existing) in self.plans.iter().enumerate() {
+                if existing.removed || ignore == Some(index) {
+                    continue;
+                }
+                if let Some(entrance) =
+                    building_entrance(existing, &catalog.projects[&existing.key])
+                    && entrance.cmpge(start).all()
+                    && entrance.cmplt(end).all()
+                    && !self.blocked(catalog, terrain, land, camp, entrance)
+                {
+                    return Some("Keep the existing building's entrance clear.");
                 }
             }
         }
@@ -1909,6 +1903,25 @@ impl Construction {
     }
 }
 
+fn building_entrance(plan: &Blueprint, definition: &Project) -> Option<IVec2> {
+    if !matches!(
+        definition.kind.as_str(),
+        "home" | "workshop" | "kitchen" | "wash-station" | "eco_toilet"
+    ) && !plan.key.starts_with("canvas-tent")
+    {
+        return None;
+    }
+    let start = plan.position;
+    let end = start + plan.size;
+    let middle = start + (plan.size - IVec2::ONE) / 2;
+    Some(match plan.rotation {
+        0 => IVec2::new(middle.x, end.y),
+        1 => IVec2::new(end.x, middle.y),
+        2 => IVec2::new(middle.x, start.y - 1),
+        _ => IVec2::new(start.x - 1, middle.y),
+    })
+}
+
 fn build_perimeter(position: IVec2, size: IVec2) -> Vec<IVec2> {
     let mut spots = Vec::new();
     for z in 0..size.y {
@@ -2110,6 +2123,43 @@ mod tests {
             village.status,
             "Leave a walking route from the supplies to the work site."
         );
+    }
+
+    #[test]
+    fn placing_over_an_open_entrance_is_rejected_but_a_road_keeps_it_open() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut village = Construction {
+            selection: Some("home-cottage".into()),
+            rotation: 1,
+            ..default()
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village.plan(&catalog, &mut stock, site, IVec2::new(44, 36), clock);
+        let entrance =
+            building_entrance(&village.plans[0], &catalog.projects["home-cottage"]).unwrap();
+        village.selection = Some("fire-circle".into());
+        village.plan(&catalog, &mut stock, site, entrance, clock);
+        assert_eq!(village.plans.len(), 1);
+        assert_eq!(
+            village.status,
+            "Keep the existing building's entrance clear."
+        );
+        village.selection = Some("road".into());
+        village.plan(&catalog, &mut stock, site, entrance, clock);
+        assert_eq!(village.plans.len(), 2);
     }
 
     #[test]
