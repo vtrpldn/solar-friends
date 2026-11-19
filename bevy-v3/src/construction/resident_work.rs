@@ -100,6 +100,22 @@ impl Construction {
             );
         }
         for index in 0..self.residents.len() {
+            let health = &self.residents[index].health;
+            if health
+                .task
+                .as_ref()
+                .is_some_and(|task| matches!(task.kind, Need::Hygiene | Need::Social | Need::Fun))
+                && [Need::Hunger, Need::Bladder, Need::Bowels, Need::Hydration]
+                    .into_iter()
+                    .any(|need| {
+                        health.levels[need as usize] < 10.0
+                            && (need != Need::Hunger || stock.has_meal())
+                    })
+            {
+                self.interrupt_optional_need(index, clock);
+            }
+        }
+        for index in 0..self.residents.len() {
             if self.residents[index].health.task.is_some() {
                 self.step_need(index, catalog, stock, site, clock, dt);
             } else if self.residents[index].health.retry_at <= clock
@@ -119,6 +135,30 @@ impl Construction {
                 self.choose_need(index, catalog, stock, site, clock);
                 self.residents[index].health.retry_at = clock + 3.0;
             }
+        }
+    }
+
+    fn interrupt_optional_need(&mut self, index: usize, clock: f64) {
+        let partner = self.residents[index]
+            .health
+            .task
+            .as_ref()
+            .and_then(|task| task.partner);
+        let partner = partner.filter(|&other| {
+            other != index
+                && self.residents[other]
+                    .health
+                    .task
+                    .as_ref()
+                    .is_some_and(|task| task.kind == Need::Social && task.partner == Some(index))
+        });
+        for id in [Some(index), partner].into_iter().flatten() {
+            let worker = &mut self.residents[id];
+            worker.health.task = None;
+            worker.health.retry_at = clock;
+            worker.path.clear();
+            worker.paused_waypoint = None;
+            worker.route_retry_ticks = 0;
         }
     }
 
@@ -1325,6 +1365,38 @@ mod tests {
         assert_eq!(saved.residents[0].home, Some(1));
         saved.clear_home(0);
         assert!(saved.residents[0].home.is_none());
+    }
+
+    #[test]
+    fn urgent_thirst_interrupts_a_conversation_for_both_residents() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        village.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        village.start_conversation(
+            &catalog,
+            &stock,
+            [(0, VecDeque::new()), (1, VecDeque::new())],
+        );
+        village.residents[0].health.levels[Need::Hydration as usize] = 9.0;
+        village.tick_health(&catalog, &setup, &mut stock, site, 0.0, 0.1);
+
+        assert!(
+            village.residents[0]
+                .health
+                .task
+                .as_ref()
+                .is_some_and(|task| task.kind == Need::Hydration)
+        );
+        assert!(village.residents[1].health.task.is_none());
     }
 
     #[test]
