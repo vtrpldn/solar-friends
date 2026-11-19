@@ -430,8 +430,6 @@ impl Action {
                 AdvanceAction::Toggle if village.advance.open => "Close advance".into(),
                 AdvanceAction::Toggle => "Advance days".into(),
                 AdvanceAction::Adjust(days) => format!("{days:+} day(s)"),
-                AdvanceAction::Method if village.advance.fast => "Fast approximate".into(),
-                AdvanceAction::Method => "Exact replay".into(),
                 AdvanceAction::Start => "Start advance".into(),
                 AdvanceAction::Digit(_) | AdvanceAction::Backspace => String::new(),
             },
@@ -826,7 +824,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     AdvanceAction::Adjust(-1),
                     AdvanceAction::Adjust(1),
                     AdvanceAction::Adjust(7),
-                    AdvanceAction::Method,
                     AdvanceAction::Start,
                 ] {
                     spawn_button(menu, &assets, Action::Advance(action));
@@ -1579,7 +1576,7 @@ fn refresh(
     };
     let show_selected_project =
         !picker.open && Action::SelectedProject(ProjectAction::Salvage).available(&village);
-    let show_advance = Action::Advance(AdvanceAction::Method).available(&village);
+    let show_advance = Action::Advance(AdvanceAction::Adjust(1)).available(&village);
     let show_terrain = Action::TerrainBrush(Brush::Raise).available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);

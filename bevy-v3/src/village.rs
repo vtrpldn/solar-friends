@@ -2109,7 +2109,7 @@ fn advance_days(
     };
     let started = std::time::Instant::now();
     loop {
-        step(&mut village, &catalog, &setup, site, run.dt);
+        step(&mut village, &catalog, &setup, site, SIMULATION_STEP);
         if run.record_step() {
             village.advance.done();
             village.checkpoint_advance();

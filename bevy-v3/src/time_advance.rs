@@ -6,7 +6,6 @@ pub struct Advance {
     pub open: bool,
     days: u16,
     day_entry: Option<u16>,
-    pub fast: bool,
     pub running: Option<Run>,
     result: String,
 }
@@ -14,7 +13,6 @@ pub struct Advance {
 pub struct Run {
     total: u64,
     steps: u64,
-    pub dt: f64,
 }
 
 impl Default for Advance {
@@ -23,7 +21,6 @@ impl Default for Advance {
             open: false,
             days: 1,
             day_entry: None,
-            fast: false,
             running: None,
             result: String::new(),
         }
@@ -36,7 +33,6 @@ pub(crate) enum AdvanceAction {
     Adjust(i16),
     Digit(u16),
     Backspace,
-    Method,
     Start,
 }
 
@@ -74,7 +70,6 @@ impl Advance {
             (KeyCode::BracketLeft, AdvanceAction::Adjust(-increment)),
             (KeyCode::BracketRight, AdvanceAction::Adjust(increment)),
             (KeyCode::Backspace, AdvanceAction::Backspace),
-            (KeyCode::KeyA, AdvanceAction::Method),
             (KeyCode::Enter, AdvanceAction::Start),
             (KeyCode::NumpadEnter, AdvanceAction::Start),
         ]
@@ -114,12 +109,11 @@ impl Advance {
             AdvanceAction::Backspace => {
                 self.day_entry = Some(self.selected_days() / 10);
             }
-            AdvanceAction::Method => self.fast = !self.fast,
             AdvanceAction::Start if self.can_start() => {
                 self.days = self.selected_days();
                 self.day_entry = None;
                 self.result.clear();
-                self.running = Some(Run::new(self.days, self.fast));
+                self.running = Some(Run::new(self.days));
             }
             AdvanceAction::Toggle | AdvanceAction::Start => {}
         }
@@ -144,7 +138,7 @@ impl Advance {
         self.running
             .as_ref()
             .map_or(f64::from(self.selected_days()), |run| {
-                (run.total - run.steps) as f64 * run.dt / DAY
+                (run.total - run.steps) as f64 * SIMULATION_STEP / DAY
             })
     }
 
@@ -164,34 +158,23 @@ impl Advance {
                 format!("{} · {shortcut} Advance days", self.result)
             };
         }
-        let method = if self.fast {
-            "Fast approximate"
-        } else {
-            "Exact replay"
-        };
         let entry_status = if self.can_start() {
             "Enter Start"
         } else {
             "Choose 1–365 days"
         };
         format!(
-            "Advance {} day(s) · {method}\nType days or use [ / ] · Shift ±7 · A Method · {entry_status} · L Close",
+            "Advance {} day(s)\nType days or use [ / ] · Shift ±7 · {entry_status} · L Close",
             self.selected_days(),
         )
     }
 }
 
 impl Run {
-    fn new(days: u16, fast: bool) -> Self {
-        let dt = if fast {
-            10.0 * SIMULATION_STEP
-        } else {
-            SIMULATION_STEP
-        };
+    fn new(days: u16) -> Self {
         Self {
-            total: (f64::from(days) * DAY / dt).round() as u64,
+            total: (f64::from(days) * DAY / SIMULATION_STEP).round() as u64,
             steps: 0,
-            dt,
         }
     }
 
@@ -220,15 +203,6 @@ mod tests {
         assert_eq!(advance.remaining_days(), 365.0);
         advance.apply(AdvanceAction::Start);
         let run = advance.running.as_ref().unwrap();
-        assert_eq!(run.total as f64 * run.dt, 365.0 * DAY);
-    }
-
-    #[test]
-    fn both_methods_advance_the_same_days_with_different_step_sizes() {
-        let exact = Run::new(3, false);
-        let fast = Run::new(3, true);
-        assert_eq!(exact.total, 10 * fast.total);
-        assert_eq!(exact.total as f64 * exact.dt, 3.0 * DAY);
-        assert_eq!(fast.total as f64 * fast.dt, 3.0 * DAY);
+        assert_eq!(run.total as f64 * SIMULATION_STEP, 365.0 * DAY);
     }
 }
