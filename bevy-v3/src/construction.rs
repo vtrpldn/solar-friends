@@ -445,14 +445,31 @@ impl Construction {
         self.status.clear();
     }
 
+    pub fn rotate_placement(&mut self) {
+        self.rotation = (self.rotation + 1) % 4;
+    }
+
+    pub fn cancel_placement(&mut self) {
+        self.selection = None;
+        self.moving = None;
+        self.status.clear();
+    }
+
+    pub fn placing_field(&self) -> bool {
+        self.selection.as_deref() == Some("field")
+    }
+
+    pub fn resize_field_placement(&mut self, delta: IVec2) {
+        self.field_size = (self.field_size + delta).clamp(IVec2::splat(2), IVec2::splat(32));
+    }
+
     pub fn input(&mut self, keyboard: &ButtonInput<KeyCode>, catalog: &Catalog) {
         if self.moving.is_some() {
             if keyboard.just_pressed(KeyCode::KeyR) {
-                self.rotation = (self.rotation + 1) % 4;
+                self.rotate_placement();
             }
             if keyboard.just_pressed(KeyCode::KeyB) {
-                self.moving = None;
-                self.status.clear();
+                self.cancel_placement();
             }
             return;
         }
@@ -473,13 +490,13 @@ impl Construction {
         if let Some(index) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key)) {
             self.pick_build_row(catalog, index);
         }
-        if self.selection.as_deref() == Some("field")
+        if self.placing_field()
             && let Some(delta) = field_size_input(keyboard)
         {
-            self.field_size = (self.field_size + delta).clamp(IVec2::splat(2), IVec2::splat(32));
+            self.resize_field_placement(delta);
         }
         if self.selection.is_some() && keyboard.just_pressed(KeyCode::KeyR) {
-            self.rotation = (self.rotation + 1) % 4;
+            self.rotate_placement();
         }
     }
 

@@ -4,6 +4,9 @@ use crate::construction::{TradeOrder, TradePolicy};
 #[derive(Component, Clone, Copy)]
 enum Action {
     Build,
+    RotatePlacement,
+    CancelPlacement,
+    ResizeField(IVec2),
     Pause,
     Speed,
     Guide,
@@ -57,6 +60,8 @@ impl Action {
         }
         match self {
             Self::Build => village.utility_panel.is_none(),
+            Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
+            Self::ResizeField(_) => village.construction.placing_field(),
             Self::Pause => true,
             Self::Speed => {
                 !village.construction.menu
@@ -119,6 +124,13 @@ impl Action {
         match self {
             Self::Build if village.construction.menu => "Close build".into(),
             Self::Build => "Build".into(),
+            Self::RotatePlacement => "Rotate".into(),
+            Self::CancelPlacement => "Cancel placement".into(),
+            Self::ResizeField(delta) => format!(
+                "{} {}",
+                if delta.x != 0 { "Width" } else { "Depth" },
+                if delta.x + delta.y > 0 { "+" } else { "−" }
+            ),
             Self::Pause if village.paused => "Resume".into(),
             Self::Pause => "Pause".into(),
             Self::Speed => format!("{}×", SPEEDS[village.speed].1),
@@ -247,6 +259,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Page(false),
                 Action::Page(true),
                 Action::Build,
+                Action::RotatePlacement,
+                Action::CancelPlacement,
                 Action::Manage,
                 Action::ClosePanel,
                 Action::Pause,
@@ -272,6 +286,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 BackgroundColor(Color::srgb_u8(31, 45, 35)),
             ))
             .with_children(|menu| {
+                for delta in [IVec2::NEG_X, IVec2::X, IVec2::NEG_Y, IVec2::Y] {
+                    spawn_button(menu, &assets, Action::ResizeField(delta));
+                }
                 for (panel, _) in Action::PANELS {
                     spawn_button(menu, &assets, Action::Panel(panel));
                 }
@@ -381,6 +398,9 @@ fn handle_buttons(
                     village.construction.toggle_build_menu();
                     picker.open = false;
                 }
+                Action::RotatePlacement => village.construction.rotate_placement(),
+                Action::CancelPlacement => village.construction.cancel_placement(),
+                Action::ResizeField(delta) => village.construction.resize_field_placement(delta),
                 Action::Pause => village.paused = !village.paused,
                 Action::Speed => village.speed = (village.speed + 1) % SPEEDS.len(),
                 Action::Guide => {
@@ -544,6 +564,7 @@ fn refresh(
     if toolbar.display == Display::None {
         return;
     }
+    let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
     let show_trade = !picker.open && Action::TradeItem(0).available(&village);
     let trade_items = if show_trade {
@@ -575,7 +596,8 @@ fn refresh(
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
     picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.0));
-    menu.display = if show_projects
+    menu.display = if show_field_size
+        || show_projects
         || show_residents
         || show_finances
         || show_pantry
@@ -594,7 +616,11 @@ fn refresh(
             Action::Page(_) if village.utility_panel == Some(UtilityPanel::Residents) => {
                 show_residents && home_pages > 1
             }
-            Action::Page(_) | Action::ClosePanel => action.available(&village),
+            Action::Page(_)
+            | Action::ClosePanel
+            | Action::RotatePlacement
+            | Action::CancelPlacement
+            | Action::ResizeField(_) => action.available(&village),
             Action::Project(row) => projects.get(row).is_some(),
             Action::TradeItem(row) => trade_items.get(row).is_some(),
             Action::Trade(_) | Action::TradePolicy(_) => show_trade,
