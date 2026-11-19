@@ -1158,7 +1158,7 @@ mod upgrade_tests {
     use super::*;
 
     #[test]
-    fn residents_choose_preferred_production_from_the_available_queue() {
+    fn residents_prioritize_food_when_the_village_is_hungry_then_use_preferences() {
         let catalog = Catalog::default();
         let mut setup = WorldSetup::default();
         setup.mode = crate::setup::Mode::Sandbox;
@@ -1170,22 +1170,30 @@ mod upgrade_tests {
             land: &land,
             camp,
         };
-        let mut stock = Stock::for_start(&setup, &catalog);
-        let mut village = Construction::default();
-        for (key, recipe, cell) in [
-            ("grove", "bananas", IVec2::new(44, 36)),
-            ("orchard", "fruit", IVec2::new(50, 36)),
-        ] {
-            let mut plan = village.proposed_site(&catalog, key, cell);
-            plan.work = catalog.projects[key].work;
-            plan.delivered = plan.loads;
-            let index = village.plans.len();
-            village.plans.push(plan);
-            village.queue_batch(&catalog, &mut stock, index, recipe);
+        for (food_level, expected_site) in [(80.0, 1), (10.0, 0)] {
+            let mut stock = Stock::for_start(&setup, &catalog);
+            let mut village = Construction::default();
+            village.residents[1].health.levels[Need::Hunger as usize] = food_level;
+            for (key, recipe, cell) in [
+                ("coop", "eggs", IVec2::new(44, 36)),
+                ("supply-0", "wood", IVec2::new(50, 36)),
+            ] {
+                let mut plan = village.proposed_site(&catalog, key, cell);
+                plan.work = catalog.projects[key].work;
+                plan.delivered = plan.loads;
+                let index = village.plans.len();
+                village.plans.push(plan);
+                village.queue_batch(&catalog, &mut stock, index, recipe);
+            }
+            village.tick_production(&catalog, &mut stock, site, 0.0, 0.1);
+            let job = village
+                .production
+                .jobs
+                .iter()
+                .find(|job| job.worker == Some(0))
+                .unwrap();
+            assert_eq!(job.site, expected_site);
         }
-        village.assign_producers(&catalog, &stock, site, 0.0);
-        assert_eq!(village.production.jobs[1].worker, Some(0));
-        assert_ne!(village.production.jobs[0].worker, Some(0));
     }
 
     #[test]
