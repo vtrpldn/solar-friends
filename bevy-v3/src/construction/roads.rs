@@ -251,6 +251,51 @@ mod tests {
     use crate::setup::WorldSetup;
 
     #[test]
+    fn finishing_and_removing_a_bridge_opens_and_closes_the_crossing() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction::default();
+        let definition = &catalog.projects["bridge"];
+        let bridge = (28..44)
+            .flat_map(|z| (-10..75).map(move |x| IVec2::new(x, z)))
+            .map(|cell| village.proposed_site(&catalog, "bridge", cell))
+            .find(|plan| {
+                village
+                    .placement_error(
+                        &terrain,
+                        &land,
+                        camp,
+                        plan,
+                        definition,
+                        (&catalog, false, None),
+                    )
+                    .is_none()
+            })
+            .expect("a bridge site spanning the default river");
+        let from = (bridge.position - IVec2::X).as_vec2();
+        let to = bridge.position + IVec2::X * bridge.size.x;
+        let deck = bridge.position + IVec2::X * (bridge.size.x / 2);
+        village.plans.push(bridge);
+        assert!(village.resident_route(&catalog, site, from, to).is_none());
+
+        village.plans[0].work = definition.work;
+        let route = village.resident_route(&catalog, site, from, to).unwrap();
+        assert!(route.contains(&deck.as_vec2()));
+        assert_eq!(route.back().copied(), Some(to.as_vec2()));
+
+        village.remove_project(0);
+        assert!(village.resident_route(&catalog, site, from, to).is_none());
+    }
+
+    #[test]
     fn completed_bridges_raise_residents_to_the_deck_and_ramps() {
         let catalog = Catalog::default();
         let terrain = WorldSetup::default().terrain();
