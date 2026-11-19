@@ -4,6 +4,7 @@ mod garden_terrain;
 
 pub mod lineup;
 mod model_export;
+pub mod navigation;
 mod sprites;
 
 use std::collections::{BTreeMap, HashMap, HashSet};

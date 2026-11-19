@@ -174,11 +174,21 @@ fn write_layout(path: &Path, layout: &Layout) -> io::Result<()> {
     crate::save::atomic_write(path, &bytes, MAX_SCENE_BYTES)
 }
 
-pub fn run(path: Option<PathBuf>, night: bool) {
+fn biome_landscape(biome: &str) -> Vec<Prop> {
+    let mut landscapes: HashMap<String, Vec<Prop>> =
+        serde_json::from_str(include_str!("../../data/asset-garden-biomes.json"))
+            .expect("bundled V2 biome landscapes");
+    landscapes.remove(biome).expect("known biome landscape")
+}
+
+pub fn run(path: Option<PathBuf>, night: bool, study: bool) {
     let models = WorkshopCatalog::default();
     let gallery = Layout::decode(GALLERY, &models).expect("bundled V2 gallery");
     let mut persistence = String::new();
-    let mut autosave = if path.is_none() {
+    let mut autosave = if study {
+        persistence = "Biome study. Ctrl/Cmd+S exports the scene.".into();
+        None
+    } else if path.is_none() {
         match crate::save::location(crate::setup::Mode::Sandbox) {
             Ok(path) => Some(path.with_file_name("asset-garden.json")),
             Err(error) => {
@@ -193,7 +203,14 @@ pub fn run(path: Option<PathBuf>, night: bool) {
     let opened = path.as_deref().or(autosave.as_deref());
     let loaded = opened
         .map(|file| read_layout(file, &models))
-        .unwrap_or_else(|| Ok(gallery.clone()))
+        .unwrap_or_else(|| {
+            let mut layout = gallery.clone();
+            if study {
+                layout.biome = "mata-atlantica".into();
+                layout.props = biome_landscape(&layout.biome);
+            }
+            Ok(layout)
+        })
         .or_else(|error| {
             if error.kind() == io::ErrorKind::NotFound && path.is_none() {
                 read_layout(Path::new("solar-friends-asset-garden.json"), &models)
@@ -488,11 +505,8 @@ fn edit(
         return;
     }
     if pressed(KeyL) && garden.pending.is_none() && garden.layout.biome != "flat" {
-        let landscapes: HashMap<String, Vec<Prop>> =
-            serde_json::from_str(include_str!("../../data/asset-garden-biomes.json"))
-                .expect("bundled V2 biome landscapes");
         garden.edit();
-        garden.layout.props = landscapes[&garden.layout.biome].clone();
+        garden.layout.props = biome_landscape(&garden.layout.biome);
         garden.selected = None;
         return;
     }

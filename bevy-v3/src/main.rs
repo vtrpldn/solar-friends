@@ -59,12 +59,19 @@ fn main() {
     }
     if option
         .as_deref()
+        .is_some_and(|flag| flag == "--biome-landscapes")
+    {
+        workshop::garden::run(None, false, true);
+        return;
+    }
+    if option
+        .as_deref()
         .is_some_and(|flag| flag == "--asset-garden")
     {
         let first = args.next();
         let night = first.as_deref().is_some_and(|arg| arg == "--night");
         let path = if night { args.next() } else { first };
-        workshop::garden::run(path.map(std::path::PathBuf::from), night);
+        workshop::garden::run(path.map(std::path::PathBuf::from), night, false);
         return;
     }
     if option.as_deref().is_some_and(|flag| flag == "--workshop") {
@@ -119,6 +126,7 @@ fn main() {
     }))
     .add_plugins((
         WorldSetupPlugin,
+        workshop::navigation::ArtToolsPlugin,
         village::VillagePlugin,
         ui_font::UiFontPlugin,
         audio::VillageAudio,

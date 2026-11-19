@@ -181,3 +181,5 @@ Press **N** for the night view, or start with `--asset-garden --night` followed 
 ### Resident lineup
 
 Pass `--residents` to view the six resident rigs and V2’s 31 poses. Pass a pose name as the next argument to start with it. Use **Up/Down** to select a pose, **V** to switch between front, side, and back, and **N** to change the light. Press **Space** to freeze, **Left/Right** to scrub, or **Home** to reset time. Hold **Shift** while scrubbing to step by half a second.
+
+The game menu opens the 3D inspector, Asset Garden, biome landscapes, and resident animations in separate windows. You can also pass `--biome-landscapes` to start a Mata Atlântica study with its own scene. Export that scene with **Ctrl/Cmd+S** to keep your changes.
