@@ -777,6 +777,7 @@ fn lab_order_page(runner: &Runner, page: &mut usize) -> String {
 fn order_label(order: &LabOrder) -> String {
     use crate::farming::FarmAction;
     match order {
+        LabOrder::Copy { site, x, z } => format!("Copy project #{site} to ({x}, {z})"),
         LabOrder::TerrainReset => "Reset terrain heights".into(),
         LabOrder::TerrainStroke { points, .. } => {
             format!("Shape terrain at {} points", points.len())
@@ -1746,6 +1747,32 @@ mod tests {
         let report =
             serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
         assert_eq!(verify_report(report, &catalog).unwrap(), 1);
+    }
+
+    #[test]
+    fn blueprint_copy_replays_with_the_original_dimensions_and_rotation() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps": 1,
+            "orders": [
+                {"step":0,"order":{"type":"build","key":"field","x":44,"z":36,"size":[3,2],"rotation":1}},
+                {"step":0,"order":{"type":"copy","site":1,"x":49,"z":36}}
+            ]
+        }"#).unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        assert!(
+            runner
+                .outcomes
+                .iter()
+                .all(|outcome| outcome.error.is_none())
+        );
+        let report = serde_json::to_value(runner.report()).unwrap();
+        let projects = &report["village"]["construction"]["plans"];
+        assert_eq!(projects[1]["rotation"], 1);
+        assert_eq!(projects[1]["size"], projects[0]["size"]);
+        let recorded =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(recorded, &catalog).unwrap(), 1);
     }
 
     #[test]

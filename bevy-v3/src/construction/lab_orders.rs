@@ -15,6 +15,11 @@ pub(crate) enum LabOrder {
         #[serde(default)]
         size: Option<[i32; 2]>,
     },
+    Copy {
+        site: usize,
+        x: i32,
+        z: i32,
+    },
     TerrainReset,
     TerrainStroke {
         brush: crate::terrain::Brush,
@@ -424,6 +429,25 @@ impl Construction {
                 if let Some(error) = error {
                     return Err(error);
                 }
+            }
+            LabOrder::Copy { site, x, z } => {
+                let project = site
+                    .checked_sub(1)
+                    .and_then(|index| self.plans.get(index))
+                    .filter(|project| !project.removed)
+                    .ok_or("Choose an existing project to copy.")?;
+                if !stock.sandbox && !catalog.projects[&project.key].repeatable {
+                    return Err("This blueprint cannot be repeated in Story.".into());
+                }
+                let copy = LabOrder::Build {
+                    key: project.key.clone(),
+                    x: *x,
+                    z: *z,
+                    rotation: project.rotation,
+                    size: (project.key == "field")
+                        .then(|| rotated_size(project.size, project.rotation).to_array()),
+                };
+                return self.lab_order(catalog, stock, ground, clock, &copy, richness);
             }
             LabOrder::Road { start, end } => {
                 if start
