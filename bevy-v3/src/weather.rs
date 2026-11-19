@@ -176,6 +176,7 @@ fn sunlight(
     mut sun: Single<(&mut DirectionalLight, &mut Transform)>,
     mut ambient: ResMut<GlobalAmbientLight>,
     mut sky: ResMut<ClearColor>,
+    mut fog: Single<&mut DistanceFog, With<VillageCamera>>,
 ) {
     let seconds = if setup.open { 400.0 } else { village.seconds() };
     let weather = weather_at(seconds, setup.biome(), setup.seed());
@@ -198,6 +199,12 @@ fn sunlight(
         0.08 + daylight * (0.63 - cloud * 0.12),
         0.12 + daylight * (0.68 - cloud * 0.15),
         0.22 + daylight * (0.68 - cloud * 0.16),
+    );
+    let daylight_fog = Color::srgb_u8(203, 213, 172).to_srgba();
+    fog.color = Color::Srgba(
+        sky.0
+            .to_srgba()
+            .mix(&daylight_fog, daylight * (1.0 - cloud * 0.65)),
     );
 }
 

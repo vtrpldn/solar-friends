@@ -39,6 +39,8 @@ use setup::{WorldSetup, WorldSetupPlugin};
 
 const CAMERA_HOME: Vec3 = Vec3::new(-26.0, 3.0, -12.0);
 const CAMERA_HEIGHT: f32 = 40.0;
+const CAMERA_DISTANCE: f32 = 512.0;
+const CAMERA_FAR: f32 = CAMERA_DISTANCE + 512.0;
 const CAMERA_POLAR_LIMITS: std::ops::RangeInclusive<f32> = 0.25..=std::f32::consts::PI * 0.46;
 
 fn default_camera_polar() -> f32 {
@@ -120,7 +122,7 @@ struct VillageCamera {
 }
 
 fn camera_transform(target: Vec3, heading: f32, polar: f32) -> Transform {
-    let radius = Vec3::new(32.0, 35.0, 32.0).length();
+    let radius = CAMERA_DISTANCE;
     let horizontal = radius * polar.sin() * std::f32::consts::FRAC_1_SQRT_2;
     let offset =
         Quat::from_rotation_y(heading) * Vec3::new(horizontal, radius * polar.cos(), horizontal);
@@ -134,8 +136,17 @@ fn setup_scene(mut commands: Commands) {
             scaling_mode: bevy::camera::ScalingMode::FixedVertical {
                 viewport_height: CAMERA_HEIGHT,
             },
+            far: CAMERA_FAR,
             ..OrthographicProjection::default_3d()
         }),
+        DistanceFog {
+            color: Color::srgb_u8(203, 213, 172),
+            falloff: FogFalloff::Linear {
+                start: CAMERA_DISTANCE + 70.0,
+                end: CAMERA_DISTANCE + 220.0,
+            },
+            ..default()
+        },
         VillageCamera {
             target: CAMERA_HOME,
             heading: 0.0,
@@ -149,6 +160,14 @@ fn setup_scene(mut commands: Commands) {
             shadows_enabled: true,
             ..default()
         },
+        bevy::light::CascadeShadowConfigBuilder {
+            num_cascades: 3,
+            minimum_distance: CAMERA_DISTANCE - 384.0,
+            first_cascade_far_bound: CAMERA_DISTANCE - 80.0,
+            maximum_distance: CAMERA_DISTANCE + 384.0,
+            ..default()
+        }
+        .build(),
         Transform::from_xyz(-40.0, 65.0, 27.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
 }
@@ -513,6 +532,24 @@ mod tests {
             .advance_by(std::time::Duration::from_millis(100));
         world.run_schedule(FixedUpdate);
         world.run_schedule(PostUpdate);
+    }
+
+    #[test]
+    fn shallow_orthographic_views_keep_the_plot_inside_the_clip_planes() {
+        let polar = *CAMERA_POLAR_LIMITS.end();
+        let heading = 0.0;
+        for target in [Vec3::new(-124.0, 0.0, -124.0), Vec3::new(124.0, 0.0, 124.0)] {
+            let camera = camera_transform(target, heading, polar);
+            for x in [-128.0, 128.0] {
+                for z in [-128.0, 128.0] {
+                    for height in [-32.0, 32.0] {
+                        let depth =
+                            (Vec3::new(x, height, z) - camera.translation).dot(*camera.forward());
+                        assert!((0.0..CAMERA_FAR).contains(&depth), "terrain depth {depth}");
+                    }
+                }
+            }
+        }
     }
 
     #[test]
