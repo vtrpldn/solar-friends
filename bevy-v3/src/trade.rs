@@ -24,6 +24,8 @@ pub struct Trade {
     #[serde(skip)]
     pub page: usize,
     #[serde(skip)]
+    pub queue_page: Option<usize>,
+    #[serde(skip)]
     pub notice: String,
     next_scan: f64,
     #[serde(default)]
@@ -396,16 +398,13 @@ impl Trade {
         true
     }
 
-    pub fn cancel_last(
+    pub fn cancel_order(
         &mut self,
         stock: &mut Stock,
         market: &mut Market,
-        active: &[usize],
+        index: usize,
     ) -> Option<usize> {
-        let index = (0..self.orders.len())
-            .rev()
-            .find(|index| !active.contains(index))?;
-        let order = self.orders.remove(index).expect("queued order");
+        let order = self.orders.remove(index)?;
         if order.buying {
             market.cancel_pack(
                 stock,

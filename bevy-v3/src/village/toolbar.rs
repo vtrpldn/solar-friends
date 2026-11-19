@@ -56,6 +56,8 @@ enum Action {
     FacilityIrrigation,
     SelectedProject(ProjectAction),
     TradeItem(usize),
+    TradeQueue,
+    TradeQueued(usize),
     Trade(TradeOrder),
     TradePolicy(TradePolicy),
     ProjectFilter,
@@ -221,7 +223,11 @@ impl Action {
                 village.utility_panel == Some(UtilityPanel::Upkeep)
             }
             Self::SelectedProject(_) => village.utility_panel.is_none(),
-            Self::TradeItem(_) | Self::Trade(_) | Self::TradePolicy(_) => village.trade_open(),
+            Self::TradeItem(_)
+            | Self::TradeQueue
+            | Self::TradeQueued(_)
+            | Self::Trade(_)
+            | Self::TradePolicy(_) => village.trade_open(),
             Self::InventorySearch => false,
             Self::InventoryView => village.utility_panel == Some(UtilityPanel::Inventory),
             Self::Project(_) | Self::ProjectFilter => {
@@ -407,6 +413,11 @@ impl Action {
                 ProjectAction::Demolish => "Demolish",
             }
             .into(),
+            Self::TradeQueue if village.construction.trade.queue_page.is_some() => {
+                "Browse materials".into()
+            }
+            Self::TradeQueue => "View orders".into(),
+            Self::TradeQueued(_) => String::new(),
             Self::Trade(TradeOrder::Buy { freight: false }) => "Buy for pickup".into(),
             Self::Trade(TradeOrder::Buy { freight: true }) => "Buy for delivery".into(),
             Self::Trade(TradeOrder::Sell) => "Reserve sale".into(),
@@ -759,6 +770,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::ListedHome(row));
                 }
                 spawn_button(menu, &assets, Action::ProjectFilter);
+                spawn_button(menu, &assets, Action::TradeQueue);
                 for order in [
                     TradeOrder::Buy { freight: false },
                     TradeOrder::Buy { freight: true },
@@ -789,6 +801,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::Project(row));
                     spawn_button(menu, &assets, Action::Recipe(row));
                     spawn_button(menu, &assets, Action::TradeItem(row));
+                    spawn_button(menu, &assets, Action::TradeQueued(row));
                 }
                 menu.spawn((
                     RecipeDetails,
@@ -812,7 +825,11 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
 fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action: Action) {
     let trade_button = matches!(
         action,
-        Action::TradeItem(_) | Action::Trade(_) | Action::TradePolicy(_)
+        Action::TradeItem(_)
+            | Action::TradeQueue
+            | Action::TradeQueued(_)
+            | Action::Trade(_)
+            | Action::TradePolicy(_)
     );
     let (vertical_padding, font_size) = if trade_button { (4, 15.0) } else { (7, 17.0) };
     parent
@@ -1005,6 +1022,12 @@ fn handle_buttons(
                     village.construction.page_trade(&catalog, forward)
                 }
                 Action::Page(forward) => village.change_panel_page(&catalog, &land, forward),
+                Action::TradeQueue if !picker.open => village.construction.toggle_trade_queue(),
+                Action::TradeQueued(row) if !picker.open => {
+                    let town = &mut *village;
+                    town.construction
+                        .cancel_trade_queue_row(&mut town.stock, row);
+                }
                 Action::TradeItem(row) if !picker.open => {
                     village.construction.select_trade_row(&catalog, row)
                 }
@@ -1180,6 +1203,8 @@ fn handle_buttons(
                 | Action::Farm(_)
                 | Action::SelectedProject(_)
                 | Action::TradeItem(_)
+                | Action::TradeQueue
+                | Action::TradeQueued(_)
                 | Action::Trade(_)
                 | Action::TradePolicy(_)
                 | Action::ProjectFilter
@@ -1269,7 +1294,13 @@ fn refresh(
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
     let show_trade = !picker.open && Action::TradeItem(0).available(&village);
-    let trade_items = if show_trade {
+    let show_trade_queue = show_trade && village.construction.trade.queue_page.is_some();
+    let trade_queue = if show_trade_queue {
+        village.construction.trade_queue_labels(&catalog)
+    } else {
+        Vec::new()
+    };
+    let trade_items = if show_trade && !show_trade_queue {
         village.construction.trade_page_labels(&catalog)
     } else {
         Vec::new()
@@ -1371,7 +1402,11 @@ fn refresh(
                         .project_action_available(&catalog, action)
             }
             Action::TradeItem(row) => trade_items.get(row).is_some(),
-            Action::Trade(_) | Action::TradePolicy(_) => show_trade,
+            Action::TradeQueue => show_trade,
+            Action::TradeQueued(row) => trade_queue
+                .get(row)
+                .is_some_and(|(_, can_cancel)| *can_cancel),
+            Action::Trade(_) | Action::TradePolicy(_) => show_trade && !show_trade_queue,
             Action::ProjectFilter => show_projects,
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => show_residents || show_finances,
@@ -1456,6 +1491,7 @@ fn refresh(
                     format!("Irrigation · {}", policy.label())
                 }),
                 Action::TradeItem(row) => trade_items[row].clone(),
+                Action::TradeQueued(row) => format!("Cancel {}", trade_queue[row].0),
                 Action::ListedHome(row) => {
                     let (home, name, occupants, beds) = homes[row];
                     format!("{name} #{} · {occupants}/{beds} beds", home + 1)

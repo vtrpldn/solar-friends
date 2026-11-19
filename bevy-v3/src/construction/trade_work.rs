@@ -23,11 +23,84 @@ pub(crate) enum TradePolicy {
 
 impl Construction {
     pub fn page_trade(&mut self, catalog: &Catalog, forward: bool) {
+        if let Some(page) = self.trade.queue_page {
+            let pages = self.trade_queue_pages();
+            self.trade.queue_page =
+                Some((page.min(pages - 1) + if forward { 1 } else { pages - 1 }) % pages);
+            return;
+        }
         let pages = Trade::tradable(catalog)
             .len()
             .div_ceil(PAGE_KEYS.len())
             .max(1);
         self.trade.page = (self.trade.page + if forward { 1 } else { pages - 1 }) % pages;
+    }
+
+    fn trade_queue_pages(&self) -> usize {
+        self.trade.orders.len().div_ceil(PAGE_KEYS.len()).max(1)
+    }
+
+    pub fn toggle_trade_queue(&mut self) {
+        self.trade.queue_page = self.trade.queue_page.is_none().then_some(0);
+        self.trade.notice.clear();
+    }
+
+    fn trade_queue_offset(&self) -> Option<usize> {
+        self.trade
+            .queue_page
+            .map(|page| page.min(self.trade_queue_pages() - 1) * PAGE_KEYS.len())
+    }
+
+    pub fn trade_queue_labels(&self, catalog: &Catalog) -> Vec<(String, bool)> {
+        let Some(offset) = self.trade_queue_offset() else {
+            return Vec::new();
+        };
+        self.trade
+            .orders
+            .iter()
+            .enumerate()
+            .skip(offset)
+            .take(PAGE_KEYS.len())
+            .map(|(index, order)| {
+                let item = &catalog.materials[&order.material];
+                let direction = if order.buying { "Buy" } else { "Sell" };
+                let trip = self
+                    .active_trips()
+                    .find(|trip| trip.market_order && trip.project == index);
+                let status = match trip {
+                    Some(trip) if trip.boarded => "In transit",
+                    Some(_) => "Booked",
+                    None => "Queued",
+                };
+                (
+                    format!(
+                        "{direction} · {} · {} · {status}",
+                        item.name,
+                        item.quantity_text(u64::from(order.quantity))
+                    ),
+                    trip.is_none(),
+                )
+            })
+            .collect()
+    }
+
+    pub fn cancel_trade_queue_row(&mut self, stock: &mut Stock, row: usize) {
+        let Some(offset) = self.trade_queue_offset() else {
+            return;
+        };
+        if row < PAGE_KEYS.len() {
+            self.cancel_queued_trade(stock, offset + row);
+        }
+    }
+
+    fn cancel_queued_trade(&mut self, stock: &mut Stock, index: usize) {
+        if self.booked_trade_orders().contains(&index) {
+            self.trade.notice = "This order is already booked.".into();
+            return;
+        }
+        if let Some(index) = self.trade.cancel_order(stock, &mut self.market, index) {
+            self.removed_trade_order(index);
+        }
     }
 
     pub fn trade_page_labels(&self, catalog: &Catalog) -> Vec<String> {
@@ -61,8 +134,18 @@ impl Construction {
         keys: &ButtonInput<KeyCode>,
         clock: TownClock,
     ) {
+        if keys.just_pressed(KeyCode::KeyO) {
+            self.toggle_trade_queue();
+            return;
+        }
         if keys.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
             self.page_trade(catalog, keys.just_pressed(KeyCode::PageDown));
+        }
+        if self.trade.queue_page.is_some() {
+            if let Some(row) = PAGE_KEYS.iter().position(|key| keys.just_pressed(*key)) {
+                self.cancel_trade_queue_row(stock, row);
+            }
+            return;
         }
         if let Some(row) = PAGE_KEYS.iter().position(|key| keys.just_pressed(*key)) {
             self.select_trade_row(catalog, row);
@@ -212,16 +295,41 @@ impl Construction {
             }
             TradeOrder::Cancel => {
                 let active = self.booked_trade_orders();
-                if let Some(index) = self.trade.cancel_last(stock, &mut self.market, &active) {
-                    self.removed_trade_order(index);
+                if let Some(index) = (0..self.trade.orders.len())
+                    .rev()
+                    .find(|index| !active.contains(index))
+                {
+                    self.cancel_queued_trade(stock, index);
                 }
             }
         }
     }
 
     pub fn trade_status(&self, catalog: &Catalog, stock: &Stock, clock: TownClock) -> String {
+        if let Some(offset) = self.trade_queue_offset() {
+            let mut display = format!(
+                "Town trade orders · {}/{} · Page Up/Down · O Browse materials",
+                offset / PAGE_KEYS.len() + 1,
+                self.trade_queue_pages(),
+            );
+            let rows = self.trade_queue_labels(catalog);
+            if rows.is_empty() {
+                display.push_str("\nNo pickup or sale orders.");
+            }
+            for (index, (label, can_cancel)) in rows.into_iter().enumerate() {
+                if can_cancel {
+                    display.push_str(&format!("\n{} Cancel {label}", index + 1));
+                } else {
+                    display.push_str(&format!("\n{label}"));
+                }
+            }
+            if !self.trade.notice.is_empty() {
+                display.push_str(&format!("\n{}", self.trade.notice));
+            }
+            return display;
+        }
         let options = Trade::tradable(catalog);
-        let mut display = String::from("Town trade · Page Up/Down · 1–8 Select\n");
+        let mut display = String::from("Town trade · Page Up/Down · 1–8 Select · O Orders\n");
         for (index, &(id, item)) in options
             .iter()
             .skip(self.trade.page * PAGE_KEYS.len())
@@ -340,6 +448,57 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn canceling_a_specific_queue_row_keeps_booked_orders_and_reindexes_the_trip() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let before = stock.available("wood");
+        let fare = fare_cents(clock.round_trip_km);
+        let sold = village
+            .trade
+            .reserve(
+                &catalog,
+                &mut stock,
+                &mut village.market,
+                "wood",
+                (0, fare, 0),
+            )
+            .unwrap();
+        village
+            .buy_from_town(&catalog, &mut stock, clock, "wood", false)
+            .unwrap();
+        village.trip = Some(TownTrip {
+            project: 1,
+            farm_bed: None,
+            market_order: true,
+            driver: 0,
+            vehicle: 0,
+            elapsed: 0.0,
+            duration: 66.0,
+            boarded: false,
+        });
+        village.toggle_trade_queue();
+        let rows = village.trade_queue_labels(&catalog);
+        assert!(rows[0].1 && rows[0].0.contains("Queued"));
+        assert!(!rows[1].1 && rows[1].0.contains("Booked"));
+        village.cancel_trade_queue_row(&mut stock, 1);
+        assert_eq!(village.trade.orders.len(), 2);
+        assert_eq!(stock.available("wood"), before - sold);
+
+        village.cancel_trade_queue_row(&mut stock, 0);
+        assert_eq!(stock.available("wood"), before);
+        assert_eq!(village.trade.orders.len(), 1);
+        assert!(village.trade.orders[0].buying);
+        assert_eq!(village.trip.unwrap().project, 0);
+        assert_eq!(village.market.committed_fares(), fare);
+        assert!(village.valid_save(&catalog, &stock));
+    }
 
     #[test]
     fn trade_panel_distinguishes_freight_arrival_from_unloading() {
