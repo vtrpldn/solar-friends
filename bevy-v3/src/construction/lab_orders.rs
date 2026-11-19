@@ -72,6 +72,9 @@ pub(crate) enum LabOrder {
         #[serde(default)]
         recurring: bool,
     },
+    SupplyTransport {
+        freight: bool,
+    },
     FoodPolicy {
         enabled: bool,
         #[serde(skip_serializing_if = "Option::is_none")]
@@ -579,6 +582,7 @@ impl Construction {
                     work.booked = *enabled;
                 }
             }
+            LabOrder::SupplyTransport { freight } => self.supplier_construction = *freight,
             LabOrder::FoodPolicy {
                 enabled,
                 reserve_half_days,

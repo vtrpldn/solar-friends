@@ -815,6 +815,13 @@ fn order_label(order: &LabOrder) -> String {
             "{} town work for resident {resident}",
             toggle_label(*enabled)
         ),
+        LabOrder::SupplyTransport { freight } => {
+            if *freight {
+                "Use supplier freight for automatic supplies".into()
+            } else {
+                "Use resident pickup for automatic supplies".into()
+            }
+        }
         LabOrder::FoodPolicy { enabled, .. } => {
             format!("{} food restocking", toggle_label(*enabled))
         }
@@ -1653,6 +1660,28 @@ mod tests {
         let report =
             serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
         assert_eq!(verify_report(report, &catalog).unwrap(), 120);
+    }
+
+    #[test]
+    fn scripted_pantry_freight_arrives_without_a_driver_and_replays() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps": 10000,
+            "orders": [
+                {"step": 0, "order": {"type": "supply-transport", "freight": true}},
+                {"step": 0, "order": {"type": "food-policy", "enabled": true, "reserve_half_days": 14, "allowance_cents": 10000}}
+            ]
+        }"#).unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        assert!(runner.outcomes.iter().all(|order| order.error.is_none()));
+        let construction = &runner.village.construction;
+        assert_eq!(construction.trade.purchases, 1);
+        assert!(construction.trade.delivery.is_none());
+        assert!(construction.trade.orders.is_empty());
+        assert!(construction.car_trip(0).is_none() && construction.car_trip(1).is_none());
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 10000);
     }
 
     #[test]
