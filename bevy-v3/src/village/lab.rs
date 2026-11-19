@@ -840,6 +840,12 @@ fn order_label(order: &LabOrder) -> String {
             format!("Reserve {essentials} for essentials and {production} for production")
         }
         LabOrder::Grid { enabled } => format!("{} grid power", toggle_label(*enabled)),
+        LabOrder::InstallConnection { from, to, channel } => match channel {
+            Some(channel) => {
+                format!("Install water connection #{from} → #{to} · channel {channel}")
+            }
+            None => format!("Install power connection #{from} ↔ #{to}"),
+        },
         LabOrder::CollectWater { site } => format!("Collect river water for site #{site}"),
         LabOrder::CarryWater {
             source,

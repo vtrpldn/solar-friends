@@ -100,6 +100,12 @@ pub(crate) enum LabOrder {
     Grid {
         enabled: bool,
     },
+    InstallConnection {
+        from: usize,
+        to: usize,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        channel: Option<usize>,
+    },
     CollectWater {
         site: usize,
     },
@@ -621,6 +627,10 @@ impl Construction {
                     .set_reservations(*essentials, *production)?;
             }
             LabOrder::Grid { enabled } => self.utilities.grid_off = !enabled,
+            LabOrder::InstallConnection { from, to, channel } => match channel {
+                Some(channel) => self.queue_water_connection(stock, *from, *to, *channel)?,
+                None => self.queue_power_connection(stock, *from, *to)?,
+            },
             LabOrder::CollectWater { site } => self.queue_water(
                 *site,
                 WaterAction::Carry {
