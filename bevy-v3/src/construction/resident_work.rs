@@ -855,6 +855,11 @@ impl Construction {
         Conversation::interest(interests[count % interests.len()])
     }
 
+    pub(crate) fn camp_is_reachable(&self, catalog: &Catalog, site: ConstructionSite) -> bool {
+        self.resident_route(catalog, site, STOCKPILE.as_vec2(), site.camp + IVec2::Y)
+            .is_some()
+    }
+
     pub(super) fn resident_route(
         &self,
         catalog: &Catalog,

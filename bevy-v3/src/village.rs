@@ -1238,6 +1238,7 @@ fn read_camp_pointer(
 }
 
 const CAMP_OFFSET: IVec2 = IVec2::new(-1, -3);
+const CAMP_ACCESS_ERROR: &str = "Choose somewhere reachable from the supplies.";
 const CAMP_SIZE: IVec2 = IVec2::new(5, 4);
 
 fn camp_placement_error(
@@ -1959,13 +1960,27 @@ fn village_input(
         village.camp_error = Some(error);
         return;
     }
+    if preset.is_none()
+        && !village.construction.camp_is_reachable(
+            &catalog,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &land,
+                camp: cell,
+            },
+        )
+    {
+        village.camp_error = Some(CAMP_ACCESS_ERROR);
+        return;
+    }
     village.camp_error = None;
     village.camp = Some(cell);
     let clock = village.clock;
     village.stock.update_finance_clock(clock);
-    village
-        .construction
-        .record_event(clock, "Camp is ready.".into());
+    village.construction.record_event(
+        clock,
+        "Camp is ready. Choose what your community needs first.".into(),
+    );
     camera.target = spawn_tents(&mut commands, &assets, &setup, cell);
 }
 
@@ -2685,6 +2700,8 @@ fn show_hud(
     }
 }
 
+type CampPreview = Option<(IVec2, Option<&'static str>)>;
+
 fn draw_blueprints(
     setup: Res<WorldSetup>,
     village: Res<Village>,
@@ -2692,10 +2709,11 @@ fn draw_blueprints(
     pointer: Res<CampPointer>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut gizmos: Gizmos,
-    (mut map_notice, mut land_lens, mut grid): (
+    (mut map_notice, mut land_lens, mut grid, mut camp_preview): (
         ResMut<MapNotice>,
         Local<land_lens::LandLens>,
         Local<crate::terrain::TerrainGrid>,
+        Local<CampPreview>,
     ),
 ) {
     let mut notice = None;
@@ -2866,7 +2884,24 @@ fn draw_blueprints(
         && let Some(hit) = pointer.hovered
     {
         let terrain = village.terrain(&setup);
-        let issue = camp_placement_error(&terrain, &land, hit.cell, false);
+        if setup.is_changed()
+            || land.is_changed()
+            || camp_preview.is_none_or(|(cell, _)| cell != hit.cell)
+        {
+            let issue = camp_placement_error(&terrain, &land, hit.cell, false).or_else(|| {
+                (!village.construction.camp_is_reachable(
+                    &catalog,
+                    ConstructionSite {
+                        terrain: &terrain,
+                        land: &land,
+                        camp: hit.cell,
+                    },
+                ))
+                .then_some(CAMP_ACCESS_ERROR)
+            });
+            *camp_preview = Some((hit.cell, issue));
+        }
+        let issue = camp_preview.and_then(|(_, issue)| issue);
         let tint = if issue.is_some() {
             Color::srgb_u8(240, 105, 96)
         } else {
@@ -2880,6 +2915,8 @@ fn draw_blueprints(
             &mut gizmos,
         );
         notice = Some(issue.unwrap_or("Click to pitch camp here.").into());
+    } else {
+        *camp_preview = None;
     }
     map_notice.set_if_neq(MapNotice(notice, available));
 }

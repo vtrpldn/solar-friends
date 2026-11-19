@@ -3066,6 +3066,14 @@ mod tests {
             selection: Some("fire-circle".into()),
             ..default()
         };
+        assert!(village.camp_is_reachable(&catalog, site));
+        assert!(!village.camp_is_reachable(
+            &catalog,
+            ConstructionSite {
+                camp: IVec2::new(-24, 36),
+                ..site
+            },
+        ));
         let clock = TownClock {
             seconds: 0.0,
             round_trip_km: 12,
