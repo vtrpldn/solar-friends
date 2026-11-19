@@ -146,6 +146,52 @@ enum InspectionAction {
     Roof,
     Reset,
     Rotate(u8),
+    Model,
+    Proof,
+    Sheet,
+    Placement,
+    Source,
+}
+
+#[derive(bevy::ecs::system::SystemParam)]
+struct InspectionInput<'w, 's> {
+    keys: Res<'w, ButtonInput<KeyCode>>,
+    buttons: Query<'w, 's, (&'static Interaction, &'static InspectionAction), Changed<Interaction>>,
+}
+
+impl InspectionInput<'_, '_> {
+    fn clicked(&self, action: InspectionAction) -> bool {
+        self.buttons
+            .iter()
+            .any(|(&interaction, &button)| interaction == Interaction::Pressed && button == action)
+    }
+}
+
+fn show_inspection_actions(
+    workshop: Res<Workshop>,
+    mut buttons: Query<(&InspectionAction, &mut Node)>,
+) {
+    for (action, mut node) in &mut buttons {
+        let available = match action {
+            InspectionAction::Model => workshop.show_proof,
+            InspectionAction::Proof => !workshop.show_proof && !workshop.together,
+            InspectionAction::Sheet | InspectionAction::Placement | InspectionAction::Source => {
+                !workshop.together
+            }
+            InspectionAction::Roof => {
+                !workshop.show_proof && !workshop.together && workshop.roof_available
+            }
+            InspectionAction::Figure | InspectionAction::Rotate(_) => {
+                !workshop.show_proof && !workshop.together
+            }
+            _ => !workshop.show_proof,
+        };
+        node.display = if available {
+            Display::Flex
+        } else {
+            Display::None
+        };
+    }
 }
 
 #[derive(Component)]
@@ -256,6 +302,7 @@ pub fn run(asset: Option<&str>) {
             sprites::progress,
             sprites::show_proof,
             model_export::export_selected,
+            show_inspection_actions,
             draw_guides,
         )
             .chain(),
@@ -337,6 +384,11 @@ fn setup(
         ))
         .with_children(|toolbar| {
             for (label, action) in [
+                ("3D model", InspectionAction::Model),
+                ("Sprite proof", InspectionAction::Proof),
+                ("4-view PNG", InspectionAction::Sheet),
+                ("Placement JSON", InspectionAction::Placement),
+                ("3D source", InspectionAction::Source),
                 ("View together", InspectionAction::Together),
                 ("Lighting", InspectionAction::Light),
                 ("Surface", InspectionAction::Surface),
@@ -365,8 +417,8 @@ fn setup(
 }
 
 fn controls(
-    (keys, mut text): (
-        Res<ButtonInput<KeyCode>>,
+    (input, mut text): (
+        InspectionInput,
         MessageReader<bevy::input::keyboard::KeyboardInput>,
     ),
     time: Res<Time>,
@@ -380,9 +432,9 @@ fn controls(
         Res<AccumulatedMouseScroll>,
     ),
     (catalog, window): (Res<WorkshopCatalog>, Single<&Window>),
-    buttons: Query<(&Interaction, &InspectionAction), Changed<Interaction>>,
     mut workshop: ResMut<Workshop>,
 ) {
+    let keys = &input.keys;
     if !pending.is_empty() || sprite_capture.is_some() || workshop.show_proof {
         return;
     }
@@ -426,12 +478,7 @@ fn controls(
         return;
     }
     text.clear();
-    let click = |action| {
-        buttons
-            .iter()
-            .any(|(&i, &a)| i == Interaction::Pressed && a == action)
-    };
-    if keys.just_pressed(KeyCode::KeyV) || click(InspectionAction::Together) {
+    if keys.just_pressed(KeyCode::KeyV) || input.clicked(InspectionAction::Together) {
         workshop.together = !workshop.together;
         workshop.reset_camera();
         workshop.export_notice.clear();
@@ -445,32 +492,34 @@ fn controls(
         workshop.together = false;
         workshop.selected = (workshop.selected + len - 1) % len;
     }
-    if keys.just_pressed(KeyCode::KeyG) || click(InspectionAction::Grid) {
+    if keys.just_pressed(KeyCode::KeyG) || input.clicked(InspectionAction::Grid) {
         workshop.guides = !workshop.guides;
     }
-    if keys.just_pressed(KeyCode::KeyM) || click(InspectionAction::Surface) {
+    if keys.just_pressed(KeyCode::KeyM) || input.clicked(InspectionAction::Surface) {
         workshop.surface = workshop.surface.next();
     }
     if !workshop.together
         && workshop.roof_available
-        && (keys.just_pressed(KeyCode::KeyT) || click(InspectionAction::Roof))
+        && (keys.just_pressed(KeyCode::KeyT) || input.clicked(InspectionAction::Roof))
     {
         workshop.roof_visible = !workshop.roof_visible;
     }
-    if !workshop.together && (keys.just_pressed(KeyCode::KeyH) || click(InspectionAction::Figure)) {
+    if !workshop.together
+        && (keys.just_pressed(KeyCode::KeyH) || input.clicked(InspectionAction::Figure))
+    {
         workshop.scale_figure = !workshop.scale_figure;
     }
-    if keys.just_pressed(KeyCode::KeyN) || click(InspectionAction::Light) {
+    if keys.just_pressed(KeyCode::KeyN) || input.clicked(InspectionAction::Light) {
         workshop.night = !workshop.night;
     }
-    if keys.just_pressed(KeyCode::Home) || click(InspectionAction::Reset) {
+    if keys.just_pressed(KeyCode::Home) || input.clicked(InspectionAction::Reset) {
         workshop.reset_camera();
     }
     if !workshop.together && keys.just_pressed(KeyCode::KeyR) {
         workshop.rotation = (workshop.rotation + 1) % 4;
     }
     if !workshop.together {
-        for (&interaction, &action) in &buttons {
+        for (&interaction, &action) in &input.buttons {
             if interaction == Interaction::Pressed
                 && let InspectionAction::Rotate(turn) = action
             {
@@ -776,7 +825,7 @@ fn capture_preview(
         return;
     }
     for (mut panel, toolbar) in &mut panels {
-        panel.display = if toolbar && (workshop.show_proof || workshop.search.is_some()) {
+        panel.display = if toolbar && workshop.search.is_some() {
             Display::None
         } else {
             Display::Flex

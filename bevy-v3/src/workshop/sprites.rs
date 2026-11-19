@@ -25,6 +25,7 @@ pub(super) struct SpriteCapture {
 
 enum Destination {
     File(std::path::PathBuf),
+    Placement(std::path::PathBuf),
     Proof,
 }
 
@@ -143,7 +144,7 @@ fn sheet_path(id: &str, light: &str) -> std::io::Result<std::path::PathBuf> {
 }
 
 pub(super) fn start(
-    (mut commands, keys): (Commands, Res<ButtonInput<KeyCode>>),
+    (mut commands, input): (Commands, InspectionInput),
     (pending, capture): (Query<(), With<Screenshot>>, Option<Res<SpriteCapture>>),
     (mut workshop, catalog, assets): (ResMut<Workshop>, Res<WorkshopCatalog>, Res<AssetServer>),
     (meshes, mut images): (Res<Assets<Mesh>>, ResMut<Assets<Image>>),
@@ -151,9 +152,12 @@ pub(super) fn start(
     scene_mesh: Query<PreviewMesh>,
     spawner: Res<SceneSpawner>,
 ) {
-    let proof = keys.just_pressed(KeyCode::F7);
-    let export = keys.just_pressed(KeyCode::F6);
-    if !(proof || export)
+    let toggle_proof = input.keys.just_pressed(KeyCode::F7);
+    let proof = toggle_proof || input.clicked(InspectionAction::Proof);
+    let export = input.keys.just_pressed(KeyCode::F6) || input.clicked(InspectionAction::Sheet);
+    let export_placement = input.clicked(InspectionAction::Placement);
+    let show_model = input.clicked(InspectionAction::Model);
+    if !(proof || export || export_placement || show_model)
         || workshop.together
         || workshop.search.is_some()
         || capture.is_some()
@@ -161,7 +165,7 @@ pub(super) fn start(
     {
         return;
     }
-    if proof && workshop.show_proof {
+    if workshop.show_proof && (toggle_proof || show_model) {
         workshop.show_proof = false;
         return;
     }
@@ -171,6 +175,7 @@ pub(super) fn start(
         Destination::Proof
     } else {
         match sheet_path(id, light) {
+            Ok(path) if export_placement => Destination::Placement(path.with_extension("json")),
             Ok(path) => Destination::File(path),
             Err(error) => {
                 workshop.export_notice = format!("Could not prepare sprite export · {error}");
@@ -185,6 +190,9 @@ pub(super) fn start(
     {
         match destination {
             Destination::Proof => workshop.show_proof = true,
+            Destination::Placement(path) => {
+                workshop.export_notice = placement_notice(&cached.placement, &path);
+            }
             Destination::File(path) => {
                 workshop.export_notice = export_notice(image, &cached.placement, &path);
             }
@@ -238,6 +246,11 @@ pub(super) fn start(
     }
     let ppm = framing(points.into_iter());
     let project = &catalog.0[id];
+    let placement = placement(id, project.size, project.revision, light, ppm);
+    if let Destination::Placement(path) = destination {
+        workshop.export_notice = placement_notice(&placement, &path);
+        return;
+    }
     let mut frames = Vec::new();
     for turn in 0..TURNS {
         let layer = RenderLayers::layer(FIRST_LAYER + turn);
@@ -300,7 +313,7 @@ pub(super) fn start(
     commands.insert_resource(SpriteCapture {
         frames,
         destination,
-        placement: placement(id, project.size, project.revision, light, ppm),
+        placement,
         warmup: None,
         started: std::time::Instant::now(),
         light: light_entity,
@@ -390,6 +403,9 @@ pub(super) fn progress(
         Destination::File(path) => {
             workshop.export_notice = export_notice(&image, &capture.placement, path);
         }
+        Destination::Placement(_) => {
+            unreachable!("placement exports do not start a sprite capture")
+        }
     }
     workshop.proof = Some(SpriteProof {
         asset: workshop.assets[workshop.selected].clone(),
@@ -434,6 +450,17 @@ fn sheet_image(capture: &SpriteCapture) -> Image {
     )
 }
 
+fn write_placement(placement: &serde_json::Value, path: &std::path::Path) -> std::io::Result<()> {
+    crate::save::atomic_write(path, &serde_json::to_vec_pretty(placement)?, 8192)
+}
+
+fn placement_notice(placement: &serde_json::Value, path: &std::path::Path) -> String {
+    match write_placement(placement, path) {
+        Ok(()) => format!("Saved sprite placement JSON · {}", path.display()),
+        Err(error) => format!("Placement export failed · {error}"),
+    }
+}
+
 fn export_notice(image: &Image, placement: &serde_json::Value, path: &std::path::Path) -> String {
     let write = || -> std::io::Result<()> {
         image
@@ -442,8 +469,7 @@ fn export_notice(image: &Image, placement: &serde_json::Value, path: &std::path:
             .map_err(std::io::Error::other)?
             .save(path)
             .map_err(std::io::Error::other)?;
-        let metadata = serde_json::to_vec_pretty(placement)?;
-        crate::save::atomic_write(&path.with_extension("json"), &metadata, 8192)
+        write_placement(placement, &path.with_extension("json"))
     };
     match write() {
         Ok(()) => format!("Saved sprite sheet and placement JSON · {}", path.display()),

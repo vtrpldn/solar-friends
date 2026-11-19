@@ -165,16 +165,15 @@ fn standalone_scene(source: &Glb, model: usize) -> io::Result<Vec<u8>> {
 }
 
 pub(super) fn export_selected(
-    keys: Res<ButtonInput<KeyCode>>,
+    input: InspectionInput,
     catalog: Res<WorkshopCatalog>,
     mut workshop: ResMut<Workshop>,
     pending: Query<(), With<Screenshot>>,
     sprite_capture: Option<Res<sprites::SpriteCapture>>,
 ) {
-    if !keys.just_pressed(KeyCode::F8)
+    if !(input.keys.just_pressed(KeyCode::F8) || input.clicked(InspectionAction::Source))
         || workshop.together
         || workshop.search.is_some()
-        || workshop.show_proof
         || !pending.is_empty()
         || sprite_capture.is_some()
     {
