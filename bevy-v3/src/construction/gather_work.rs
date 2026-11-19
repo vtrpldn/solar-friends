@@ -120,11 +120,12 @@ impl Construction {
                     }
                     GatherPhase::Return => {
                         let output = self.gathering.orders[&index].remaining_output(&recipe.output);
-                        let load = super::production_work::production_load(catalog, output);
-                        let units: u64 = load.values().map(|&units| u64::from(units)).sum();
-                        if (load.is_empty() && output.values().any(|&units| units > 0))
-                            || self.storage_space(catalog, stock) < units
-                        {
+                        let load = super::production_work::production_load_with_limit(
+                            catalog,
+                            output,
+                            self.storage_space(catalog, stock),
+                        );
+                        if load.is_empty() && output.values().any(|&units| units > 0) {
                             continue;
                         }
                         let mut remaining = output.clone();
@@ -372,6 +373,31 @@ mod tests {
             fresh_stock.pantry.lots["food"]
                 .iter()
                 .any(|lot| lot.expires == expiry)
+        );
+
+        let mut partial: Construction = serde_json::from_slice(&saved).unwrap();
+        partial.residents[0].path.clear();
+        partial.residents[0].position = SUPPLY_SPOTS[0].as_vec2();
+        let mut partial_stock = stock.clone();
+        let free = partial.storage_space(&catalog, &partial_stock);
+        partial_stock.receive(&BTreeMap::from([("stone".into(), free as u32 - 1)]));
+        partial.tick_gathering(
+            &catalog,
+            &mut partial_stock,
+            site,
+            expiry - 1.0,
+            0.1,
+            WorkGroup::Essentials,
+        );
+        assert_eq!(partial_stock.available("food"), initial + 1);
+        let pending = &partial.gathering.orders[&index];
+        assert_eq!(
+            pending.remaining_output(&recipe.output)["food"],
+            recipe.output["food"] - 1
+        );
+        assert_eq!(
+            pending.food_output.as_ref().unwrap()["food"][0].expires,
+            expiry
         );
 
         village = serde_json::from_slice(&saved).unwrap();
