@@ -187,8 +187,11 @@ struct GardenSun;
 #[derive(Component)]
 struct Streetlamp;
 
-#[derive(Component)]
-struct PlacementPreview(usize);
+#[derive(Component, PartialEq, Eq)]
+struct PlacementPreview {
+    model: usize,
+    shared_inverter: bool,
+}
 
 fn read_layout(path: &Path, models: &WorkshopCatalog) -> io::Result<Layout> {
     let bytes = crate::save::read_bytes(path, MAX_SCENE_BYTES)?;
@@ -808,14 +811,25 @@ fn style_placement_preview(
     }
 }
 
-struct PreviewHeight {
+#[derive(Clone, Copy)]
+struct ProposedPlacement {
+    height: f32,
+    shared_inverter: bool,
+}
+
+struct CachedPlacement {
     biome: String,
     props: Vec<Prop>,
     prop: Prop,
-    height: f32,
+    placement: ProposedPlacement,
 }
 
-fn preview_height(layout: &Layout, prop: &Prop, models: &WorkshopCatalog, center: Vec2) -> f32 {
+fn proposed_placement(
+    layout: &Layout,
+    prop: &Prop,
+    models: &WorkshopCatalog,
+    center: Vec2,
+) -> ProposedPlacement {
     let mut candidate = layout.clone();
     if let Some(existing) = candidate
         .props
@@ -826,7 +840,27 @@ fn preview_height(layout: &Layout, prop: &Prop, models: &WorkshopCatalog, center
     } else {
         candidate.props.push(prop.clone());
     }
-    Terrain::proposed_height(&candidate, models, center)
+    let shared_inverter = prop.asset == "solar_farm"
+        && uses_shared_inverter(connections(&candidate.props, models).get(&prop.id));
+    ProposedPlacement {
+        height: Terrain::proposed_height(&candidate, models, center),
+        shared_inverter,
+    }
+}
+
+fn uses_shared_inverter(connection: Option<&Connection>) -> bool {
+    connection.is_some_and(|connection| !connection.leader)
+}
+
+fn prop_scene(assets: &AssetServer, model: usize, shared_inverter: bool) -> SceneRoot {
+    if shared_inverter {
+        let path = AssetPath::from_path_buf(embedded_path!("connected-solar-farm.glb"))
+            .with_source("embedded")
+            .with_label("Scene0");
+        SceneRoot(assets.load(path))
+    } else {
+        building_model(assets, model)
+    }
 }
 
 fn preview(
@@ -836,7 +870,7 @@ fn preview(
     assets: Res<AssetServer>,
     mut existing: Query<(Entity, &PlacementPreview, &mut Transform)>,
     mut props: Query<(&GardenProp, &mut Visibility)>,
-    mut surface: Local<Option<PreviewHeight>>,
+    mut surface: Local<Option<CachedPlacement>>,
 ) {
     let moving = garden
         .pending
@@ -853,43 +887,50 @@ fn preview(
     let pending = garden.pending.as_ref().map(|(prop, _)| {
         let model = models.0[&prop.asset].model;
         let mut center = prop.center(&models);
-        center.y = if !prop.fits(&models) {
-            garden.terrain.height(center.x, center.z)
+        let placement = if !prop.fits(&models) {
+            ProposedPlacement {
+                height: garden.terrain.height(center.x, center.z),
+                shared_inverter: false,
+            }
         } else if let Some(cached) = surface.as_ref().filter(|cached| {
             cached.prop == *prop
                 && cached.biome == garden.layout.biome
                 && cached.props == garden.layout.props
         }) {
-            cached.height
+            cached.placement
         } else {
-            let height = preview_height(&garden.layout, prop, &models, center.xz());
-            *surface = Some(PreviewHeight {
+            let placement = proposed_placement(&garden.layout, prop, &models, center.xz());
+            *surface = Some(CachedPlacement {
                 biome: garden.layout.biome.clone(),
                 props: garden.layout.props.clone(),
                 prop: prop.clone(),
-                height,
+                placement,
             });
-            height
+            placement
         };
+        center.y = placement.height;
         let transform = Transform::from_translation(center)
             .with_rotation(Quat::from_rotation_y((prop.rotation as f32).to_radians()));
-        (model, transform)
+        (
+            PlacementPreview {
+                model,
+                shared_inverter: placement.shared_inverter,
+            },
+            transform,
+        )
     });
     for (entity, marker, mut transform) in &mut existing {
-        if let Some((model, target)) = pending
-            && marker.0 == model
+        if let Some((preview, target)) = &pending
+            && marker == preview
         {
-            transform.set_if_neq(target);
+            transform.set_if_neq(*target);
             return;
         }
         commands.entity(entity).despawn();
     }
-    if let Some((model, transform)) = pending {
-        commands.spawn((
-            PlacementPreview(model),
-            building_model(&assets, model),
-            transform,
-        ));
+    if let Some((preview, transform)) = pending {
+        let scene = prop_scene(&assets, preview.model, preview.shared_inverter);
+        commands.spawn((preview, scene, transform));
     }
 }
 
@@ -920,10 +961,7 @@ fn render(
         for prop in &garden.layout.props {
             let model = models.0[&prop.asset].model;
             let shared_inverter = prop.asset == "solar_farm"
-                && garden
-                    .connections
-                    .get(&prop.id)
-                    .is_some_and(|connection| !connection.leader);
+                && uses_shared_inverter(garden.connections.get(&prop.id));
             let mut center = prop.center(&models);
             center.y = garden.terrain.height(center.x, center.z);
             let transform = Transform::from_translation(center)
@@ -946,13 +984,8 @@ fn render(
             let resident = rehearsal::resident_model(&prop.asset);
             let scene = if let Some((_, scene)) = resident {
                 crate::village::opening_model(&assets, scene)
-            } else if shared_inverter {
-                let path = AssetPath::from_path_buf(embedded_path!("connected-solar-farm.glb"))
-                    .with_source("embedded")
-                    .with_label("Scene0");
-                SceneRoot(assets.load(path))
             } else {
-                building_model(&assets, model)
+                prop_scene(&assets, model, shared_inverter)
             };
             let mut entity = commands.spawn((
                 GardenProp {
@@ -1186,11 +1219,39 @@ mod tests {
         };
         let center = next.center(&models).xz();
         let before = Terrain::new(&layout, &models).height(center.x, center.y);
-        let preview = preview_height(&layout, &next, &models, center);
+        let preview = proposed_placement(&layout, &next, &models, center).height;
         layout.props.push(next);
         let committed = Terrain::new(&layout, &models).height(center.x, center.y);
         assert!((preview - before).abs() > 0.01);
         assert_eq!(preview, committed);
+    }
+
+    #[test]
+    fn solar_preview_switches_to_the_shared_inverter_model_on_edge_contact() {
+        let models = WorkshopCatalog::default();
+        let layout = Layout::decode(
+            r#"{"format":"solar-friends-scene","version":1,"props":[{"id":"one","asset":"solar_farm","column":40,"row":40,"rotation":0}]}"#,
+            &models,
+        ).unwrap();
+        let base = &layout.props[0];
+        let [width, depth] = base.size(&models);
+        let mut next = Prop {
+            id: "two".into(),
+            column: base.column + width,
+            ..base.clone()
+        };
+        assert!(
+            proposed_placement(&layout, &next, &models, next.center(&models).xz()).shared_inverter
+        );
+        next.row += depth;
+        assert!(
+            !proposed_placement(&layout, &next, &models, next.center(&models).xz()).shared_inverter
+        );
+        next.column -= width;
+        next.row = base.row + 1;
+        assert!(
+            !proposed_placement(&layout, &next, &models, next.center(&models).xz()).shared_inverter
+        );
     }
 
     #[test]
