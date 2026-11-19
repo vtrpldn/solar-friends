@@ -2,7 +2,7 @@ use crate::{
     catalog::ProductionRecipe,
     production::{
         Batch, Phase,
-        growth::{Conditions, Growth},
+        growth::{Conditions, Growth, Irrigation},
     },
     setup::WorldSetup,
     weather::{DAY, growing_season, weather_at},
@@ -61,20 +61,8 @@ impl Construction {
         if keyboard.just_pressed(KeyCode::KeyB) {
             self.production.open = false;
         }
-        let Some(index) = self.production.selected else {
-            return;
-        };
-        let recipes = self.recipes(catalog, index);
-        if keyboard.just_pressed(KeyCode::KeyT)
-            && recipes.iter().any(|(_, recipe)| {
-                recipe
-                    .biology
-                    .as_ref()
-                    .is_some_and(|bio| bio.care.is_some())
-            })
-        {
-            let ground = self.production.growing_sites.entry(index).or_default();
-            ground.irrigation = ground.irrigation.cycle();
+        if keyboard.just_pressed(KeyCode::KeyT) {
+            self.cycle_facility_irrigation(catalog);
         }
         if keyboard.just_pressed(KeyCode::KeyC) {
             self.toggle_recipes(catalog);
@@ -87,6 +75,34 @@ impl Construction {
         }
         if let Some(row) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key)) {
             self.queue_recipe_row(catalog, stock, row);
+        }
+    }
+
+    fn selected_irrigation_site(&self, catalog: &Catalog) -> Option<usize> {
+        self.production.selected.filter(|&index| {
+            self.recipes(catalog, index).iter().any(|(_, recipe)| {
+                recipe
+                    .biology
+                    .as_ref()
+                    .is_some_and(|biology| biology.care.is_some())
+            })
+        })
+    }
+
+    pub fn facility_irrigation(&self, catalog: &Catalog) -> Option<Irrigation> {
+        let index = self.selected_irrigation_site(catalog)?;
+        Some(
+            self.production
+                .growing_sites
+                .get(&index)
+                .map_or_else(Irrigation::default, |ground| ground.irrigation),
+        )
+    }
+
+    pub fn cycle_facility_irrigation(&mut self, catalog: &Catalog) {
+        if let Some(index) = self.selected_irrigation_site(catalog) {
+            let ground = self.production.growing_sites.entry(index).or_default();
+            ground.irrigation = ground.irrigation.cycle();
         }
     }
 

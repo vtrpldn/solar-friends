@@ -49,6 +49,7 @@ enum Action {
     Farm(FarmControl),
     Recipe(usize),
     RecipePage(bool),
+    FacilityIrrigation,
     SelectedProject(ProjectAction),
     TradeItem(usize),
     Trade(TradeOrder),
@@ -142,7 +143,7 @@ impl Action {
                     && !village.construction.production.open
             }
             Self::Recipes => village.utility_panel.is_none() && !village.construction.menu,
-            Self::Recipe(_) | Self::RecipePage(_) => {
+            Self::Recipe(_) | Self::RecipePage(_) | Self::FacilityIrrigation => {
                 village.utility_panel.is_none()
                     && village.construction.production.open
                     && !village.construction.menu
@@ -340,7 +341,9 @@ impl Action {
             Self::Page(true) => "Next page".into(),
             Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
             Self::ProjectFilter => "Show underway".into(),
-            Self::Project(_) | Self::TradeItem(_) | Self::Recipe(_) => String::new(),
+            Self::Project(_) | Self::TradeItem(_) | Self::Recipe(_) | Self::FacilityIrrigation => {
+                String::new()
+            }
             Self::Recipes if village.construction.production.open => "Close recipes".into(),
             Self::Recipes => "Recipes".into(),
             Self::Gather => "Gather resource".into(),
@@ -718,6 +721,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::TradePolicy(policy));
                 }
+                spawn_button(menu, &assets, Action::FacilityIrrigation);
                 spawn_button(menu, &assets, Action::RecipePage(false));
                 spawn_button(menu, &assets, Action::RecipePage(true));
                 for row in 0..crate::construction::PAGE_KEYS.len() {
@@ -1037,6 +1041,9 @@ fn handle_buttons(
                     village.construction.toggle_recipes(&catalog);
                     picker.open = false;
                 }
+                Action::FacilityIrrigation if !picker.open => {
+                    village.construction.cycle_facility_irrigation(&catalog);
+                }
                 Action::RecipePage(forward) if !picker.open => {
                     village.construction.page_recipes(&catalog, forward)
                 }
@@ -1065,6 +1072,7 @@ fn handle_buttons(
                 | Action::Project(_)
                 | Action::Recipe(_)
                 | Action::RecipePage(_)
+                | Action::FacilityIrrigation
                 | Action::Farm(_)
                 | Action::SelectedProject(_)
                 | Action::TradeItem(_)
@@ -1131,6 +1139,9 @@ fn refresh(
     let show_lenses = Action::LensPage.available(&village);
     let show_beds = !picker.open && Action::Farm(FarmControl::NextBed).available(&village);
     let show_recipes = !picker.open && Action::RecipePage(true).available(&village);
+    let irrigation = show_recipes
+        .then(|| village.construction.facility_irrigation(&catalog))
+        .flatten();
     let recipes = if show_recipes {
         village.construction.recipe_page_labels(&catalog)
     } else {
@@ -1230,6 +1241,7 @@ fn refresh(
                 action.available(&village) && village.construction.has_recipes(&catalog)
             }
             Action::RecipePage(_) => show_recipes,
+            Action::FacilityIrrigation => irrigation.is_some(),
             Action::Beds | Action::Gather => action.available(&village),
             Action::Farm(_) => show_beds,
             Action::Recipe(row) => recipes.get(row).is_some(),
@@ -1306,6 +1318,9 @@ fn refresh(
                 Action::Library if saves.open => "Close saved villages".into(),
                 Action::Project(row) => projects[row].clone(),
                 Action::Recipe(row) => recipes[row].clone(),
+                Action::FacilityIrrigation => irrigation.map_or_else(String::new, |policy| {
+                    format!("Irrigation · {}", policy.label())
+                }),
                 Action::TradeItem(row) => trade_items[row].clone(),
                 Action::ListedHome(row) => {
                     let (home, name, occupants, beds) = homes[row];
