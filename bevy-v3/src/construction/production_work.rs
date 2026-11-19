@@ -592,6 +592,9 @@ impl Construction {
             {
                 "Waiting for greywater storage".into()
             }
+            Phase::Pickup if job.recipe == "stock-goats" => "Collecting goats from supplies".into(),
+            Phase::Approach if job.recipe == "stock-goats" => "Leading goats to the pen".into(),
+            Phase::Work if job.recipe == "stock-goats" => "Settling goats in the pen".into(),
             Phase::Pickup => "Collecting ingredients".into(),
             Phase::Approach => "Bringing ingredients".into(),
             Phase::Work if job.using_biogas => {
@@ -646,7 +649,11 @@ impl Construction {
         let index = self.production.selected?;
         let site = self.plans.get(index)?;
         let definition = &catalog.projects[&site.key];
-        let name = &definition.name;
+        let name = if self.installed_goats(catalog, index).is_some() {
+            &catalog.projects["goat_pasture"].name
+        } else {
+            &definition.name
+        };
         let recipes = self.recipes(catalog, index);
         if site.removed {
             return None;
@@ -700,6 +707,9 @@ impl Construction {
                 text.push_str(" · Ready to use");
             }
             match definition.kind.as_str() {
+                "goat_pasture" if self.empty_goat_pen(index) && active_job.is_none() => {
+                    text.push_str("\nEmpty · C Recipes to stock with two goats");
+                }
                 "home" => {
                     let capacity = definition.beds.unwrap_or(2);
                     let assigned = self
@@ -2267,7 +2277,19 @@ mod upgrade_tests {
         stock.receive(goats);
         let before = stock.available("goats");
         village.production.selected = Some(0);
+        assert!(
+            village
+                .selected_production(&catalog, &stock, 0.0)
+                .unwrap()
+                .contains("Empty · C Recipes")
+        );
         village.queue_recipe_row(&catalog, &mut stock, 0);
+        assert!(
+            village
+                .selected_production(&catalog, &stock, 0.0)
+                .unwrap()
+                .contains("Collecting goats from supplies")
+        );
         assert_eq!(stock.available("goats"), before - 2);
         assert!(village.empty_goat_pen(0));
         for step in 0..4_000 {
@@ -2278,6 +2300,12 @@ mod upgrade_tests {
         }
         assert!(village.production.jobs.is_empty());
         assert_eq!(village.installed_goats(&catalog, 0), Some(goats));
+        assert!(
+            village
+                .selected_production(&catalog, &stock, 0.0)
+                .unwrap()
+                .starts_with("Goat pen #1")
+        );
         assert!(
             village
                 .batch_inputs(&catalog, &stock, 0, "stock-goats")
