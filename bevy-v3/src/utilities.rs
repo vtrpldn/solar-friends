@@ -1029,9 +1029,9 @@ impl Utilities {
     }
 
     pub fn power_shortages(&self) -> impl Iterator<Item = usize> + '_ {
-        self.nodes
-            .iter()
-            .filter_map(|(&id, node)| (node.enabled && !node.powered).then_some(id))
+        self.nodes.iter().filter_map(|(&id, node)| {
+            (node.enabled && node.demand_kw > 0.0 && !node.powered).then_some(id)
+        })
     }
 
     pub fn power_site_summary(&self, id: usize) -> Option<String> {
@@ -1074,6 +1074,13 @@ impl Utilities {
         let stored = self.stored_energy();
         let capacity: f64 = self.nodes.values().map(|node| node.battery).sum();
         let grid = if self.grid_off { "off" } else { "on" };
+        let local_share = if self.used_kwh > 0.0 {
+            let percent = (1.0 - self.grid_import_total / self.used_kwh).clamp(0.0, 1.0) * 100.0;
+            format!("{percent:.0}% since arrival")
+        } else {
+            "No usage yet".into()
+        };
+        let shortages = self.power_shortages().count();
         let billing = if sandbox {
             String::from("Free in Sandbox")
         } else {
@@ -1085,7 +1092,7 @@ impl Utilities {
             )
         };
         format!(
-            "Power · {:.2} kW solar/hydro · {:.2} kW demand\nBattery {stored:.2}/{capacity:.2} kWh · {:.2} kW grid\nGrid {grid} · {GRID_CAPACITY:.0} kW backup · O Switch grid\n{billing}",
+            "Power · {:.2} kW solar/hydro · {:.2} kW demand\nLocal energy share · {local_share} · Buildings without power {shortages}\nBattery {stored:.2}/{capacity:.2} kWh · 90% charging efficiency · {:.2} kW grid\nGrid {grid} · {GRID_CAPACITY:.0} kW backup · O Switch grid\n{billing}",
             self.generation_kw, self.demand_kw, self.grid_import_kw
         )
     }
@@ -2481,6 +2488,11 @@ mod tests {
         setup.mode = crate::setup::Mode::Sandbox;
         let mut stock = Stock::for_start(&setup, &Catalog::default());
         let mut utilities = Utilities::default();
+        assert!(
+            utilities
+                .power_summary(true)
+                .contains("Local energy share · No usage yet")
+        );
         utilities.sync(std::iter::once(Facility {
             id: 1,
             kind: "workshop",
@@ -2508,6 +2520,11 @@ mod tests {
         assert!((utilities.grid_import_total - 0.45).abs() < 1e-9);
         assert_eq!(utilities.grid_debt_cents, 0.0);
         assert!(utilities.power_summary(true).contains("Free in Sandbox"));
+        assert!(
+            utilities
+                .power_summary(true)
+                .contains("Local energy share · 0% since arrival")
+        );
         assert_eq!(stock.balance(), balance);
     }
 
