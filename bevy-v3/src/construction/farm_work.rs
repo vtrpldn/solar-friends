@@ -871,12 +871,26 @@ mod resize_tests {
         assert_eq!(village.farming.jobs.len(), 1);
         village.residents[0].position = (corner - IVec2::X).as_vec2();
         let mut reached_bed = false;
+        let mut detoured = false;
         for step in 0..1_800 {
             village.refresh_resident_crowding(&catalog, ground);
             village.tick_farm_jobs(&catalog, &mut stock, ground, f64::from(step) * 0.1, 0.1);
             let Some(job) = village.farming.jobs.first() else {
                 break;
             };
+            if !detoured && job.phase == FarmPhase::Walk && village.residents[0].path.len() > 4 {
+                let path = &village.residents[0].path;
+                let blocked = *path.front().unwrap();
+                let aisle: Vec<_> = path.iter().rev().take(3).copied().collect();
+                let obstacle = village.proposed_site(&catalog, "supply-5", blocked.as_ivec2());
+                village.plans.push(obstacle);
+                village.refresh_resident_crowding(&catalog, ground);
+                let route = &village.residents[0].path;
+                assert!(!route.contains(&blocked));
+                assert!(route.iter().rev().take(3).copied().eq(aisle));
+                detoured = true;
+                continue;
+            }
             if job.phase == FarmPhase::Work {
                 let position = village.residents[0].position;
                 assert!(position.x > corner.x as f32 + 1.0);
@@ -891,6 +905,7 @@ mod resize_tests {
             }
         }
         assert!(reached_bed);
+        assert!(detoured);
         assert!(village.farming.jobs.is_empty());
         assert!(village.farming.plots[&0].beds[24].stage == Stage::Prepared);
         let worker_cell = village.residents[0].position.round().as_ivec2();
