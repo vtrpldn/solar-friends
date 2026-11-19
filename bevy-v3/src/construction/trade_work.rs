@@ -504,9 +504,10 @@ impl Construction {
             ""
         };
         display.push_str(&format!(
-            "{} · Pack {pack} at R${:.2} · Supplier has {available} today\nPickup total R${:.2}{pickup_note} · Freight total R${:.2}\n",
+            "{} · Pack {pack} at R${:.2} · {} has {available} today\nPickup total R${:.2}{pickup_note} · Freight total R${:.2}\n",
             item.name,
             price as f64 / 100.0,
+            item.supplier_name,
             (price + pickup) as f64 / 100.0,
             (price + freight) as f64 / 100.0,
         ));

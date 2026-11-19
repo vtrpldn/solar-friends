@@ -21,6 +21,8 @@ pub struct Material {
     pub pack: u32,
     pub price: f64,
     pub supplier: u32,
+    #[serde(rename = "supplierName")]
+    pub supplier_name: String,
     unit: MaterialUnit,
     pub equipment: bool,
     pub mass: f64,
