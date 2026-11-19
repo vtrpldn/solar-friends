@@ -21,6 +21,21 @@ struct Scenario {
     stop: LabStop,
 }
 
+// Keep the editable orders at the top level, where existing scenarios put them.
+#[derive(Serialize)]
+struct ScenarioExport<'a> {
+    #[serde(flatten)]
+    scenario: &'a Scenario,
+    initial: &'a serde_json::Value,
+}
+
+#[derive(Deserialize)]
+struct ScenarioInput {
+    #[serde(flatten)]
+    scenario: Scenario,
+    initial: Option<Village>,
+}
+
 #[derive(Deserialize, Serialize)]
 struct ScheduledOrder {
     step: u64,
@@ -93,8 +108,23 @@ fn load_inputs(
     save: Option<&Path>,
     catalog: &Catalog,
 ) -> io::Result<(Scenario, Option<Village>)> {
-    let input = crate::save::read_bytes(scenario, 1024 * 1024)?;
-    let scenario: Scenario = serde_json::from_slice(&input)?;
+    let input = crate::save::read_bytes(scenario, 2 * crate::save::MAX_BYTES)?;
+    let ScenarioInput { scenario, initial } = serde_json::from_slice(&input)?;
+    if let Some(village) = initial {
+        if save.is_some() {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "This scenario already includes its starting village.",
+            ));
+        }
+        if !village.valid_save(catalog) {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "Invalid starting village.",
+            ));
+        }
+        return Ok((scenario, Some(village)));
+    }
     if scenario.setup.is_some() && save.is_some() {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
@@ -557,6 +587,14 @@ impl Runner {
             .map_err(io::Error::other)?;
         Ok(crate::save::location(self.setup.mode)?
             .with_file_name(format!("lab-{kind}-{}.json", nonce.as_nanos())))
+    }
+
+    fn write_scenario(&self, path: &Path) -> io::Result<()> {
+        let bytes = serde_json::to_vec_pretty(&ScenarioExport {
+            scenario: &self.scenario,
+            initial: &self.initial,
+        })?;
+        crate::save::atomic_write(path, &bytes, 2 * crate::save::MAX_BYTES)
     }
 
     fn export(&self) -> io::Result<std::path::PathBuf> {
@@ -1358,6 +1396,15 @@ fn update_lab_window(
                 Err(error) => format!("Could not save checkpoint · {error}"),
             };
         }
+        if keys.just_pressed(KeyCode::F7) && !playback.replaying {
+            playback.notice = match runner.output_path("scenario").and_then(|path| {
+                runner.write_scenario(&path)?;
+                Ok(path)
+            }) {
+                Ok(path) => format!("Scenario saved to {}", path.display()),
+                Err(error) => format!("Could not save scenario · {error}"),
+            };
+        }
         if keys.just_pressed(KeyCode::F5) {
             playback.notice = match runner.export() {
                 Ok(path) => format!("Report saved to {}", path.display()),
@@ -1498,6 +1545,11 @@ fn update_lab_window(
         },
     );
     let interval_controls = playback.interval_controls();
+    let scenario_control = if playback.replaying {
+        ""
+    } else {
+        " · F7 Save scenario"
+    };
     if playback.view != LabView::Overview {
         let playback = &mut *playback;
         let details = if playback.view == LabView::Jobs {
@@ -1614,7 +1666,7 @@ fn update_lab_window(
             )
         };
         panel.set_if_neq(Text::new(format!(
-            "Simulation lab · {status} · Step {} / {} · {}\nSpace Run/Pause · J Single step · 1–9 Speed · {order_control}F5 Report · F6 Checkpoint\n{interval_controls}{}\n\n{details}",
+            "Simulation lab · {status} · Step {} / {} · {}\nSpace Run/Pause · J Single step · 1–9 Speed · {order_control}F5 Report · F6 Checkpoint{scenario_control}\n{interval_controls}{}\n\n{details}",
             runner.index, limit, playback.speed_label(), playback.notice,
         )));
         return;
@@ -1633,7 +1685,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint{reload_control} · Tab Browse lab views\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint{scenario_control}{reload_control} · Tab Browse lab views\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         limit,
         village.clock,
@@ -2154,6 +2206,39 @@ mod tests {
         playback.set_speed(0);
         assert_eq!(playback.speed_label(), "Target 1×");
         assert_eq!(playback.debt, 0.0);
+    }
+
+    #[test]
+    fn an_exported_scenario_preserves_its_start_and_live_orders() {
+        let catalog = Catalog::default();
+        let source = serde_json::from_str(r#"{"steps": 4}"#).unwrap();
+        let initial = run(source, None, &catalog).unwrap().village;
+        let mut runner = Runner::new(
+            serde_json::from_str(r#"{"steps": 2}"#).unwrap(),
+            Some(initial),
+            &catalog,
+        )
+        .unwrap();
+        runner
+            .submit(&catalog, LabOrder::Grid { enabled: false })
+            .unwrap();
+        while !runner.done() {
+            runner.advance(&catalog);
+        }
+
+        let path = std::env::temp_dir().join(format!(
+            "solar-lab-scenario-export-{}.json",
+            std::process::id()
+        ));
+        runner.write_scenario(&path).unwrap();
+        assert!(load_inputs(&path, Some(&path), &catalog).is_err());
+        let (scenario, initial) = load_inputs(&path, None, &catalog).unwrap();
+        std::fs::remove_file(path).unwrap();
+        let reopened = run(scenario, initial, &catalog).unwrap();
+        assert_eq!(
+            serde_json::to_vec(&runner.report()).unwrap(),
+            serde_json::to_vec(&reopened.report()).unwrap()
+        );
     }
 
     #[test]
