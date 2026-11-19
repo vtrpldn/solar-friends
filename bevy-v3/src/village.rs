@@ -1520,6 +1520,14 @@ fn show_hud(
     if village.camp.is_some() {
         label.push('\n');
         label.push_str(&village.advance.status());
+        if village.advance.open && village.advance.running.is_none() {
+            label.push_str(&village.construction.advance_milestones(
+                &catalog,
+                &setup,
+                village.clock,
+                village.advance.days,
+            ));
+        }
     }
     if village.terrain_editor.open {
         label.push('\n');

@@ -51,6 +51,27 @@ impl Pen {
         ration.days * (self.feed / f64::from(ration.fodder)).min(self.water / ration.water)
     }
 
+    pub fn next_unit_days(&self, ration: &AnimalRation) -> Option<f64> {
+        if self.available() >= ration.batch * 2 {
+            return None;
+        }
+        let needed = (1.0 - self.pending).max(0.0) / ration.daily_output;
+        let recovered_after = (100.0 - self.health) / 5.0;
+        let during_recovery = recovered_after * (self.health + 2.5 * recovered_after) / 100.0;
+        let days = if needed == 0.0 {
+            0.0
+        } else if needed <= during_recovery {
+            200.0 * needed / ((self.health.powi(2) + 1000.0 * needed).sqrt() + self.health)
+        } else {
+            recovered_after + needed - during_recovery
+        };
+        Some(if days <= self.fed_days(ration) {
+            days
+        } else {
+            f64::INFINITY
+        })
+    }
+
     pub fn available(&self) -> u32 {
         self.lots.iter().map(|lot| lot.units).sum()
     }

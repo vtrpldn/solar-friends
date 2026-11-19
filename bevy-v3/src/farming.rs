@@ -384,6 +384,22 @@ impl Bed {
         Ok((input, (self.area() * work).ceil()))
     }
 
+    fn growing_condition(&self) -> f64 {
+        (self.moisture / 0.4).min(1.0) * (0.3 + 0.7 * self.fertility)
+            / (1.0 + (self.density - 1.0).max(0.0))
+    }
+
+    pub fn harvest_forecast(&self, clock: f64, season: f64) -> Option<f64> {
+        match self.stage {
+            Stage::Harvestable if self.harvest_factor(clock) > 0.0 => Some(0.0),
+            Stage::Growing => {
+                let rate = self.growing_condition() * season;
+                (rate > 0.0).then(|| (1.0 - self.growth) * self.crop.days() / rate)
+            }
+            _ => None,
+        }
+    }
+
     pub fn tick(&mut self, climate: CropClimate, mut use_water: impl FnMut(f64) -> bool) {
         let CropClimate {
             clock,
@@ -445,8 +461,7 @@ impl Bed {
             self.stage = Stage::Failed;
             return;
         }
-        let condition = (self.moisture / 0.4).min(1.0) * (0.3 + 0.7 * self.fertility)
-            / (1.0 + (self.density - 1.0).max(0.0));
+        let condition = self.growing_condition();
         self.progress_seconds += dt;
         self.stress += dt * (1.0 - condition);
         if self.stage == Stage::Growing {

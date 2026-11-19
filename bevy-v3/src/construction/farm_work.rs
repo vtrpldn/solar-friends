@@ -25,6 +25,94 @@ fn work_priority(action: FarmAction) -> u8 {
 }
 
 impl Construction {
+    pub fn advance_milestones(
+        &self,
+        catalog: &Catalog,
+        setup: &WorldSetup,
+        clock: f64,
+        days: u16,
+    ) -> String {
+        use std::fmt::Write;
+        if setup.mode == crate::setup::Mode::Sandbox {
+            return String::new();
+        }
+        let season = growing_season(clock, setup.biome());
+        let mut events = Vec::new();
+        for (&site, plot) in &self.farming.plots {
+            let project = &self.plans[site];
+            let rate = if project.key == "greenhouse" {
+                1.0
+            } else {
+                season
+            };
+            for (index, bed) in plot.beds.iter().enumerate() {
+                if let Some(remaining) = bed.harvest_forecast(clock, rate) {
+                    let name = &catalog.projects[&project.key].name;
+                    events.push((
+                        remaining,
+                        format!(
+                            "{} · {name} #{} bed {} ready to harvest",
+                            bed.crop.label(),
+                            site + 1,
+                            index + 1
+                        ),
+                    ));
+                }
+            }
+        }
+        for (&site, pen) in &self.livestock.animals {
+            let project = &catalog.projects[&self.plans[site].key];
+            let Some(ration) = catalog.animal_rations.get(&project.kind) else {
+                continue;
+            };
+            let name = &project.name;
+            let available = pen.available();
+            let product = &catalog.materials[&ration.product].name;
+            if available > 0 {
+                events.push((
+                    0.0,
+                    format!(
+                        "{name} #{} · {available} {product} ready to collect",
+                        site + 1
+                    ),
+                ));
+            }
+            if let Some(remaining) = pen.next_unit_days(ration) {
+                events.push((
+                    remaining,
+                    format!("{name} #{} · Next unit of {product}", site + 1),
+                ));
+            }
+        }
+        events.sort_by(|left, right| {
+            left.0
+                .total_cmp(&right.0)
+                .then_with(|| left.1.cmp(&right.1))
+        });
+        let mut label = String::from("\nUpcoming harvests and animal produce");
+        if events.is_empty() {
+            label.push_str("\nNo upcoming milestones.");
+        }
+        for (remaining, event) in events.into_iter().take(8) {
+            let when = if !remaining.is_finite() {
+                "Needs feed and water".into()
+            } else if remaining == 0.0 {
+                "Now".into()
+            } else if remaining < 1.0 {
+                format!("About {:.0}h", (remaining * 24.0).ceil())
+            } else {
+                format!("About {remaining:.1} days")
+            };
+            let outside = if remaining.is_finite() && remaining > f64::from(days) {
+                " · After advance"
+            } else {
+                ""
+            };
+            let _ = write!(label, "\n{when} · {event}{outside}");
+        }
+        label
+    }
+
     pub fn tick_crops(&mut self, catalog: &Catalog, setup: &WorldSetup, clock: f64, dt: f64) {
         let weather = weather_at(clock, setup.biome(), setup.seed());
         let season = growing_season(clock, setup.biome());
