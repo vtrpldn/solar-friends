@@ -654,6 +654,7 @@ enum LabView {
     Orders,
     Events,
     Map,
+    Trends,
 }
 
 impl LabView {
@@ -666,9 +667,84 @@ impl LabView {
             Self::Beds => Self::Orders,
             Self::Orders => Self::Events,
             Self::Events => Self::Map,
-            Self::Map => Self::Overview,
+            Self::Map => Self::Trends,
+            Self::Trends => Self::Overview,
         }
     }
+}
+
+fn lab_trends(samples: &[Sample], catalog: &Catalog) -> String {
+    use std::fmt::Write as _;
+    let Some((first, last)) = samples.first().zip(samples.last()) else {
+        return "Simulation trends\nNo samples yet.".into();
+    };
+    let mut text = format!(
+        "Simulation trends · {} samples · Steps {}–{}\nTab Switch view",
+        samples.len(),
+        first.step,
+        last.step
+    );
+    let food_mass = catalog.materials["food"].mass;
+    for (label, unit, values) in [
+        (
+            "Savings",
+            "R$",
+            samples
+                .iter()
+                .map(|s| s.cash_centavos as f64 / 100.0)
+                .collect::<Vec<_>>(),
+        ),
+        (
+            "Clean water",
+            "L",
+            samples.iter().map(|s| s.potable_liters).collect(),
+        ),
+        (
+            "Lowest hydration",
+            "%",
+            samples.iter().map(|s| s.minimum_hydration).collect(),
+        ),
+        (
+            "Food ingredients",
+            "kg",
+            samples
+                .iter()
+                .map(|s| f64::from(*s.inventory.get("food").unwrap_or(&0)) * food_mass)
+                .collect(),
+        ),
+    ] {
+        let (low, high) = values
+            .iter()
+            .fold((f64::INFINITY, f64::NEG_INFINITY), |(low, high), &value| {
+                (low.min(value), high.max(value))
+            });
+        let width = values.len().min(40);
+        const ROWS: usize = 4;
+        let levels: Vec<_> = (0..width)
+            .map(|column| {
+                let value = values[column * (values.len() - 1) / (width - 1).max(1)];
+                if high > low {
+                    ((value - low) / (high - low) * (ROWS - 1) as f64).round() as usize
+                } else {
+                    0
+                }
+            })
+            .collect();
+        let latest = values[values.len() - 1];
+        let _ = write!(
+            text,
+            "\n\n{label} · {latest:.1} {unit} · range {low:.1}–{high:.1}"
+        );
+        for row in (0..ROWS).rev() {
+            text.push('\n');
+            text.extend(
+                levels
+                    .iter()
+                    .map(|&level| if row == level { '+' } else { '-' }),
+            );
+        }
+    }
+    text
 }
 
 const INVENTORY_ROWS: usize = 12;
@@ -1626,6 +1702,8 @@ fn update_lab_window(
             lab_bed_page(&mut runner, &catalog, &keys, playback)
         } else if playback.view == LabView::Orders {
             lab_order_page(&runner, &mut playback.inventory_page)
+        } else if playback.view == LabView::Trends {
+            lab_trends(&runner.samples, &catalog)
         } else if playback.view == LabView::Events {
             let (pages, text) = village
                 .construction
@@ -1732,6 +1810,22 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn trends_show_retained_steps_and_resource_ranges() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{"steps":2}"#).unwrap();
+        let mut runner = run(scenario, None, &catalog).unwrap();
+        runner.samples[0].cash_centavos = 100;
+        runner.samples[1].cash_centavos = 300;
+        runner.samples[2].cash_centavos = 200;
+        let trends = lab_trends(&runner.samples, &catalog);
+        assert!(trends.contains("3 samples · Steps 0–2"));
+        assert!(trends.contains("Savings · 2.0 R$ · range 1.0–3.0\n-+-\n--+\n---\n+--"));
+        assert!(trends.contains("Clean water"));
+        assert!(trends.contains("Lowest hydration"));
+        assert!(trends.contains("Food ingredients"));
+    }
 
     #[test]
     fn a_scripted_road_stroke_builds_a_connected_route_and_replays() {
