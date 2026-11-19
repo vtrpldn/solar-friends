@@ -856,6 +856,20 @@ mod tests {
         let accounted = 9.0 + plot.remainders[0] + bed.residue_kg + bed.mass.field_loss_kg;
         assert!((accounted - bed.mass.seeds_kg - bed.mass.grown_kg).abs() < 1e-9);
         assert!((plot.remainders[0] - 0.6).abs() < 1e-9);
+
+        // A job queued while the crop was ripe can finish after the window closes.
+        job.action = FarmAction::Plant;
+        plot.finish(&catalog, &job, 46.0 * DAY, true);
+        let expired = 60.0 * DAY;
+        assert!(plot.beds[0].harvest_expired(expired));
+        let remainder = plot.remainders[0];
+        let previous_loss = plot.beds[0].mass.field_loss_kg;
+        job.action = FarmAction::Harvest;
+        let output = plot.finish(&catalog, &job, expired, false);
+        assert!(!output.contains_key("greens"));
+        assert_eq!(plot.remainders[0], remainder);
+        assert!(plot.beds[0].stage == Stage::Harvested);
+        assert!(plot.beds[0].mass.field_loss_kg > previous_loss);
     }
 
     #[test]

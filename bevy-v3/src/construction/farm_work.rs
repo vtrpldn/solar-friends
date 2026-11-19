@@ -557,6 +557,15 @@ impl Construction {
         if job.pickups > 0 {
             return seed_delivery_status(job, clock);
         }
+        if job.action == FarmAction::Harvest
+            && matches!(
+                job.phase,
+                FarmPhase::Pickup | FarmPhase::Walk | FarmPhase::Work
+            )
+            && self.farming.plots[&job.site].beds[job.bed].harvest_expired(clock)
+        {
+            return "Harvest expired · Job will clear the bed".into();
+        }
         if self.farm_route_blocked(job, clock) {
             return "Waiting for access".into();
         }
