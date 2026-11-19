@@ -1,3 +1,4 @@
+use super::garden_terrain::{BIOMES, Terrain};
 use super::{WorkshopCatalog, building_model, ui_font};
 use bevy::{
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll},
@@ -9,17 +10,17 @@ use std::{
     path::PathBuf,
 };
 
-const CELLS: i32 = 96;
-const WIDTH: f32 = CELLS as f32 * 2.0;
+pub(super) const CELLS: i32 = 96;
+pub(super) const WIDTH: f32 = CELLS as f32 * 2.0;
 const GALLERY: &str = include_str!("../../data/asset-garden.json");
 
 #[derive(Clone, Deserialize, Serialize)]
-struct Layout {
+pub(super) struct Layout {
     format: String,
     version: u32,
     #[serde(default = "flat_biome")]
-    biome: String,
-    props: Vec<Prop>,
+    pub(super) biome: String,
+    pub(super) props: Vec<Prop>,
 }
 
 fn flat_biome() -> String {
@@ -27,16 +28,16 @@ fn flat_biome() -> String {
 }
 
 #[derive(Clone, Deserialize, Serialize)]
-struct Prop {
+pub(super) struct Prop {
     id: String,
-    asset: String,
+    pub(super) asset: String,
     column: i32,
     row: i32,
     rotation: i32,
 }
 
 impl Prop {
-    fn size(&self, models: &WorkshopCatalog) -> [i32; 2] {
+    pub(super) fn size(&self, models: &WorkshopCatalog) -> [i32; 2] {
         let [width, depth] = models.0[&self.asset].size;
         if self.rotation % 180 == 0 {
             [width, depth]
@@ -45,7 +46,7 @@ impl Prop {
         }
     }
 
-    fn center(&self, models: &WorkshopCatalog) -> Vec3 {
+    pub(super) fn center(&self, models: &WorkshopCatalog) -> Vec3 {
         let [width, depth] = self.size(models);
         Vec3::new(
             (2 * self.column + width - CELLS) as f32,
@@ -54,7 +55,7 @@ impl Prop {
         )
     }
 
-    fn fits(&self, models: &WorkshopCatalog) -> bool {
+    pub(super) fn fits(&self, models: &WorkshopCatalog) -> bool {
         let [width, depth] = self.size(models);
         (0..=CELLS - width).contains(&self.column) && (0..=CELLS - depth).contains(&self.row)
     }
@@ -66,8 +67,8 @@ impl Layout {
         if scene.format != "solar-friends-scene" || scene.version != 1 || scene.props.len() > 1000 {
             return Err("Expected a V2 Asset Garden scene with up to 1,000 props.".into());
         }
-        if scene.biome != "flat" {
-            return Err("This Asset Garden preview currently supports flat terrain.".into());
+        if !BIOMES.contains(&scene.biome.as_str()) {
+            return Err("Unknown terrain biome.".into());
         }
         let mut ids = HashSet::new();
         for prop in &scene.props {
@@ -89,13 +90,15 @@ impl Layout {
 struct Garden {
     layout: Layout,
     gallery: Layout,
-    past: Vec<Layout>,
-    future: Vec<Layout>,
+    past: Vec<Vec<Prop>>,
+    future: Vec<Vec<Prop>>,
     selected: Option<usize>,
     pending: Option<(Prop, bool)>,
     file: PathBuf,
     status: String,
     redraw: bool,
+    terrain_dirty: bool,
+    terrain: Terrain,
     target: Vec3,
     bearing: f32,
     zoom: f32,
@@ -107,9 +110,10 @@ impl Garden {
         if self.past.len() == 100 {
             self.past.remove(0);
         }
-        self.past.push(self.layout.clone());
+        self.past.push(self.layout.props.clone());
         self.future.clear();
         self.redraw = true;
+        self.terrain_dirty = true;
     }
 }
 
@@ -120,6 +124,8 @@ struct GardenProp {
 }
 #[derive(Component)]
 struct GardenText;
+#[derive(Component)]
+struct GardenGround;
 
 pub fn run(path: Option<PathBuf>) {
     let models = WorkshopCatalog::default();
@@ -155,13 +161,15 @@ pub fn run(path: Option<PathBuf>) {
         selected: None,
         pending: None,
         redraw: true,
+        terrain_dirty: true,
+        terrain: Terrain::default(),
         target: Vec3::ZERO,
         bearing: std::f32::consts::FRAC_PI_4,
         zoom: 1.0,
         grid: false,
     })
     .add_systems(Startup, setup)
-    .add_systems(Update, (edit, render).chain());
+    .add_systems(Update, (edit, update_terrain, render).chain());
     crate::village::register_building_models(&mut app);
     app.run();
 }
@@ -190,8 +198,13 @@ fn setup(
         Transform::from_xyz(-8., 12., 6.).looking_at(Vec3::ZERO, Vec3::Y),
     ));
     commands.spawn((
-        Mesh3d(meshes.add(Plane3d::default().mesh().size(WIDTH, WIDTH))),
-        MeshMaterial3d(materials.add(Color::srgb_u8(105, 128, 94))),
+        GardenGround,
+        Mesh3d(meshes.add(Terrain::default().mesh("flat"))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            perceptual_roughness: 1.,
+            cull_mode: None,
+            ..default()
+        })),
     ));
     commands.spawn((
         GardenText,
@@ -258,10 +271,7 @@ fn edit(
     let cell = window
         .cursor_position()
         .and_then(|pixel| camera.viewport_to_world(global, pixel).ok())
-        .and_then(|ray| {
-            ray.intersect_plane(Vec3::ZERO, InfinitePlane3d::new(Vec3::Y))
-                .map(|t| ray.get_point(t))
-        })
+        .and_then(|ray| garden.terrain.surface(ray))
         .map(|point| {
             (
                 ((point.x + WIDTH / 2.) / 2.).floor() as i32,
@@ -290,7 +300,7 @@ fn edit(
             garden.past.pop()
         };
         if let Some(snapshot) = snapshot {
-            let previous = std::mem::replace(&mut garden.layout, snapshot);
+            let previous = std::mem::replace(&mut garden.layout.props, snapshot);
             if redo {
                 garden.past.push(previous);
             } else {
@@ -299,7 +309,27 @@ fn edit(
             garden.selected = None;
             garden.pending = None;
             garden.redraw = true;
+            garden.terrain_dirty = true;
         }
+    }
+    if pressed(KeyB) && garden.pending.is_none() {
+        let current = BIOMES
+            .iter()
+            .position(|&biome| biome == garden.layout.biome)
+            .unwrap_or_default();
+        garden.layout.biome = BIOMES[(current + 1) % BIOMES.len()].into();
+        garden.terrain_dirty = true;
+        garden.redraw = true;
+        return;
+    }
+    if pressed(KeyL) && garden.pending.is_none() && garden.layout.biome != "flat" {
+        let landscapes: HashMap<String, Vec<Prop>> =
+            serde_json::from_str(include_str!("../../data/asset-garden-biomes.json"))
+                .expect("bundled V2 biome landscapes");
+        garden.edit();
+        garden.layout.props = landscapes[&garden.layout.biome].clone();
+        garden.selected = None;
+        return;
     }
     if pressed(Escape) {
         garden.pending = None;
@@ -337,7 +367,7 @@ fn edit(
     }
     if pressed(F5) {
         garden.edit();
-        garden.layout = garden.gallery.clone();
+        garden.layout.props = garden.gallery.props.clone();
         garden.selected = None;
     }
     let Some(index) = garden.selected else {
@@ -371,6 +401,21 @@ fn edit(
     }
 }
 
+fn update_terrain(
+    mut garden: ResMut<Garden>,
+    models: Res<WorkshopCatalog>,
+    ground: Single<&Mesh3d, With<GardenGround>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+) {
+    if garden.terrain_dirty {
+        garden.terrain_dirty = false;
+        garden.terrain = Terrain::new(&garden.layout, &models);
+        if let Some(mesh) = meshes.get_mut(&ground.0) {
+            *mesh = garden.terrain.mesh(&garden.layout.biome);
+        }
+    }
+}
+
 fn render(
     mut commands: Commands,
     mut garden: ResMut<Garden>,
@@ -392,7 +437,9 @@ fn render(
         let mut loading = false;
         for prop in &garden.layout.props {
             let model = models.0[&prop.asset].model;
-            let transform = Transform::from_translation(prop.center(&models))
+            let mut center = prop.center(&models);
+            center.y = garden.terrain.height(center.x, center.z);
+            let transform = Transform::from_translation(center)
                 .with_rotation(Quat::from_rotation_y((prop.rotation as f32).to_radians()));
             if let Some((entity, existing_model, mut existing_transform)) =
                 displayed.remove(prop.id.as_str())
@@ -426,9 +473,11 @@ fn render(
     let highlighted = garden.pending.as_ref().map(|(prop, _)| prop).or(selection);
     if let Some(prop) = highlighted {
         let [width, depth] = prop.size(&models);
+        let mut center = prop.center(&models);
+        center.y = garden.terrain.height(center.x, center.z);
         gizmos.rect(
             Isometry3d::new(
-                prop.center(&models) + Vec3::Y * 0.05,
+                center + Vec3::Y * 0.05,
                 Quat::from_rotation_x(std::f32::consts::FRAC_PI_2),
             ),
             Vec2::new(width as f32, depth as f32) * 2.,
@@ -440,20 +489,15 @@ fn render(
         );
     }
     if garden.grid {
-        let radius = WIDTH / 2.;
+        let color = Color::srgba(0.1, 0.24, 0.13, 0.45);
+        let surface = |x, z| Vec3::new(x, garden.terrain.height(x, z) + 0.025, z);
         for index in 0..=CELLS {
-            let a = index as f32 * 2. - radius;
-            let color = Color::srgba(0.1, 0.24, 0.13, 0.45);
-            gizmos.line(
-                Vec3::new(a, 0.02, -radius),
-                Vec3::new(a, 0.02, radius),
-                color,
-            );
-            gizmos.line(
-                Vec3::new(-radius, 0.02, a),
-                Vec3::new(radius, 0.02, a),
-                color,
-            );
+            let a = index as f32 * 2. - WIDTH / 2.;
+            for segment in 0..CELLS {
+                let b = segment as f32 * 2. - WIDTH / 2.;
+                gizmos.line(surface(a, b), surface(a, b + 2.), color);
+                gizmos.line(surface(b, a), surface(b + 2., a), color);
+            }
         }
     }
     let label = highlighted.map_or_else(
@@ -469,8 +513,9 @@ fn render(
         },
     );
     text.0 = format!(
-        "Asset Garden  ·  {} props\n{label}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nClick/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save\n{}",
+        "Asset Garden  ·  {} props  ·  {}\n{label}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nClick/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save\n{}",
         garden.layout.props.len(),
+        garden.layout.biome,
         garden.status
     );
 }

@@ -1,4 +1,5 @@
 pub mod garden;
+mod garden_terrain;
 
 mod model_export;
 mod sprites;
