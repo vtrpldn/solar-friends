@@ -648,12 +648,9 @@ fn edit(
         return;
     }
     if clicked {
-        let filter = |entity| selectable.contains(entity);
-        let settings = MeshRayCastSettings::default().with_filter(&filter);
         garden.selected = ray
-            .and_then(|ray| raycast.cast_ray(ray, &settings).first())
-            .and_then(|(entity, _)| selectable.get(*entity).ok())
-            .and_then(|mesh| roots.get(mesh.0).ok())
+            .and_then(|ray| prop_under_pointer(ray, &mut raycast, &selectable))
+            .and_then(|entity| roots.get(entity).ok())
             .and_then(|root| {
                 garden
                     .layout
@@ -788,6 +785,17 @@ fn update_terrain(
             *mesh = garden.terrain.mesh(&garden.layout.biome);
         }
     }
+}
+
+fn prop_under_pointer(
+    ray: Ray3d,
+    raycast: &mut MeshRayCast,
+    selectable: &Query<&SelectableProp>,
+) -> Option<Entity> {
+    let filter = |entity| selectable.contains(entity);
+    let settings = MeshRayCastSettings::default().with_filter(&filter);
+    let (entity, _) = raycast.cast_ray(ray, &settings).first()?;
+    selectable.get(*entity).ok().map(|mesh| mesh.0)
 }
 
 fn mark_selectable_meshes(
@@ -1222,6 +1230,51 @@ fn update_lighting(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn mesh_picking_selects_the_front_prop_and_ignores_the_preview() {
+        use bevy::camera::{primitives::Aabb, visibility::SetViewVisibility};
+        use bevy::ecs::system::RunSystemOnce;
+
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins);
+        let world = app.world_mut();
+        let mut meshes = Assets::<Mesh>::default();
+        let mesh = meshes.add(Cuboid::new(2., 2., 2.));
+        world.insert_resource(meshes);
+        let near = world.spawn_empty().id();
+        let far = world.spawn_empty().id();
+        let ghost = world.spawn_empty().id();
+        let mut near_mesh = None;
+        for (root, height) in [(near, 4.), (far, 0.), (ghost, 8.)] {
+            let mut entity = world.spawn((
+                Mesh3d(mesh.clone()),
+                GlobalTransform::from_xyz(0., height, 0.),
+                InheritedVisibility::VISIBLE,
+                ViewVisibility::HIDDEN,
+                Aabb::from_min_max(Vec3::splat(-1.), Vec3::ONE),
+            ));
+            entity.get_mut::<ViewVisibility>().unwrap().set_visible();
+            if root != ghost {
+                entity.insert(SelectableProp(root));
+            }
+            if root == near {
+                near_mesh = Some(entity.id());
+            }
+        }
+        let pick = |mut raycast: MeshRayCast, selectable: Query<&SelectableProp>| {
+            prop_under_pointer(
+                Ray3d::new(Vec3::Y * 15., Dir3::NEG_Y),
+                &mut raycast,
+                &selectable,
+            )
+        };
+        assert_eq!(world.run_system_once(pick).unwrap(), Some(near));
+        world
+            .entity_mut(near_mesh.unwrap())
+            .insert(ViewVisibility::HIDDEN);
+        assert_eq!(world.run_system_once(pick).unwrap(), Some(far));
+    }
 
     #[test]
     fn v2_gallery_covers_the_standalone_catalog() {
