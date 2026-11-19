@@ -1,9 +1,19 @@
+use std::collections::BTreeSet;
+
 use super::*;
 
 #[derive(Deserialize, Serialize)]
 pub(super) struct ConstructionDelivery {
     site: usize,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    additional_sites: Vec<usize>,
     eta: f64,
+}
+
+impl ConstructionDelivery {
+    fn sites(&self) -> impl Iterator<Item = usize> + '_ {
+        std::iter::once(self.site).chain(self.additional_sites.iter().copied())
+    }
 }
 
 impl Construction {
@@ -56,7 +66,7 @@ impl Construction {
     pub(super) fn construction_delivery_at(&self, site: usize) -> bool {
         self.construction_delivery
             .as_ref()
-            .is_some_and(|order| order.site == site)
+            .is_some_and(|order| order.sites().any(|id| id == site))
     }
 
     pub(super) fn valid_construction_delivery(&self) -> bool {
@@ -64,23 +74,26 @@ impl Construction {
             order.eta.is_finite()
                 && order.eta >= 0.0
                 && self.trade.delivery.is_none()
-                && !self.active_trips().any(|trip| {
-                    !trip.market_order && trip.farm_bed.is_none() && trip.project == order.site
-                })
-                && self.plans.get(order.site).is_some_and(|plan| {
-                    !plan.removed && plan.pickups > 0 && plan.fare == 0 && plan.purchase.is_some()
+                && order.sites().collect::<BTreeSet<_>>().len() == 1 + order.additional_sites.len()
+                && order.sites().all(|site| {
+                    !self.active_trips().any(|trip| {
+                        !trip.market_order && trip.farm_bed.is_none() && trip.project == site
+                    }) && self.plans.get(site).is_some_and(|plan| {
+                        !plan.removed
+                            && plan.pickups > 0
+                            && plan.fare == 0
+                            && plan.purchase.is_some()
+                    })
                 })
         })
     }
 
-    fn fits_construction_freight(catalog: &Catalog, plan: &Blueprint) -> bool {
-        let Some(purchase) = &plan.purchase else {
-            return false;
-        };
+    fn construction_cargo(catalog: &Catalog, plan: &Blueprint) -> Option<(f64, f64)> {
+        let purchase = plan.purchase.as_ref()?;
         if purchase.trips != plan.pickups {
-            return false;
+            return None;
         }
-        let cargo = purchase
+        purchase
             .units
             .iter()
             .try_fold((0.0, 0.0), |(mass, volume), (id, &units)| {
@@ -89,8 +102,12 @@ impl Construction {
                     mass + item.mass * f64::from(units),
                     volume + item.volume * f64::from(units),
                 ))
-            });
-        cargo.is_some_and(|(mass, volume)| mass <= 5000.0 && volume <= 12.0)
+            })
+    }
+
+    fn fits_construction_freight(catalog: &Catalog, plan: &Blueprint) -> bool {
+        Self::construction_cargo(catalog, plan)
+            .is_some_and(|(mass, volume)| mass <= 5000.0 && volume <= 12.0)
     }
 
     fn tick_construction_delivery(
@@ -101,9 +118,11 @@ impl Construction {
     ) {
         if let Some(delivery) = &self.construction_delivery {
             if clock.seconds >= delivery.eta {
-                let plan = &mut self.plans[delivery.site];
-                plan.pickups = 0;
-                plan.purchase = None;
+                for site in delivery.sites() {
+                    let plan = &mut self.plans[site];
+                    plan.pickups = 0;
+                    plan.purchase = None;
+                }
                 self.construction_delivery = None;
                 self.record_event(clock.seconds, "Construction supplies delivered.".into());
             }
@@ -115,17 +134,31 @@ impl Construction {
         {
             return;
         }
-        let Some((site, plan)) = self.plans.iter().enumerate().find(|(index, plan)| {
-            !plan.removed
-                && plan.pickups > 0
-                && Self::fits_construction_freight(catalog, plan)
-                && !self.active_trips().any(|trip| {
-                    !trip.market_order && trip.farm_bed.is_none() && trip.project == *index
+        let mut sites = Vec::new();
+        let mut reserved = 0;
+        let (mut mass, mut volume) = (0.0, 0.0);
+        for (index, plan) in self.plans.iter().enumerate() {
+            if plan.removed
+                || plan.pickups == 0
+                || self.active_trips().any(|trip| {
+                    !trip.market_order && trip.farm_bed.is_none() && trip.project == index
                 })
-        }) else {
+            {
+                continue;
+            }
+            if let Some((kg, cubic_metres)) = Self::construction_cargo(catalog, plan)
+                && mass + kg <= 5000.0
+                && volume + cubic_metres <= 12.0
+            {
+                sites.push(index);
+                mass += kg;
+                volume += cubic_metres;
+                reserved += plan.fare * u64::from(plan.pickups);
+            }
+        }
+        let Some((&site, additional_sites)) = sites.split_first() else {
             return;
         };
-        let reserved = plan.fare * u64::from(plan.pickups);
         let freight = crate::market::freight_cents(clock.round_trip_km);
         if stock
             .balance()
@@ -136,9 +169,12 @@ impl Construction {
         }
         self.market.release_fare(reserved);
         stock.debit(freight, crate::stock::CashKind::Freight);
-        self.plans[site].fare = 0;
+        for site in sites.iter().copied() {
+            self.plans[site].fare = 0;
+        }
         self.construction_delivery = Some(ConstructionDelivery {
             site,
+            additional_sites: additional_sites.to_vec(),
             eta: clock.seconds + 6.0 * crate::weather::HOUR + trip_seconds(clock.round_trip_km),
         });
         self.record_event(
@@ -341,10 +377,21 @@ mod tests {
         Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
             .unwrap();
         village.plans.push(plan);
+        let mut second = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
+        Construction::reserve_project(
+            &mut village.market,
+            &mut stock,
+            &catalog,
+            &mut second,
+            clock,
+        )
+        .unwrap();
+        village.plans.push(second);
         village.toggle_supplier_construction();
         let before = stock.balance();
         village.tick_construction_delivery(&catalog, &mut stock, clock);
         assert!(village.construction_delivery_at(0));
+        assert!(village.construction_delivery_at(1));
         assert_eq!(village.market.committed_fares(), 0);
         assert_eq!(stock.balance(), before - crate::market::freight_cents(12));
         assert!(village.valid_save(&catalog, &stock));
@@ -360,6 +407,7 @@ mod tests {
             },
         );
         assert_eq!(village.plans[0].pickups, 0);
+        assert_eq!(village.plans[1].pickups, 0);
         assert!(village.construction_delivery.is_none());
         assert_eq!(stock.balance(), before - crate::market::freight_cents(12));
         assert!(village.valid_save(&catalog, &stock));
