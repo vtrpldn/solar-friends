@@ -1,6 +1,7 @@
 use super::*;
 use crate::{
-    construction::{ProjectAction, TradeOrder, TradePolicy},
+    construction::{FarmControl, ProjectAction, TradeOrder, TradePolicy},
+    farming::FarmAction,
     terrain::Brush,
     time_advance::AdvanceAction,
 };
@@ -28,6 +29,8 @@ enum Action {
     Page(bool),
     Project(usize),
     Recipes,
+    Beds,
+    Farm(FarmControl),
     Recipe(usize),
     RecipePage(bool),
     SelectedProject(ProjectAction),
@@ -98,6 +101,18 @@ impl Action {
                 false
             }
             Self::Advance(_) => false,
+            Self::Beds => {
+                village.utility_panel.is_none()
+                    && !village.construction.menu
+                    && !village.construction.production.open
+                    && village.construction.has_selected_plot()
+            }
+            Self::Farm(_) => {
+                village.utility_panel.is_none()
+                    && village.construction.farming.open
+                    && !village.construction.menu
+                    && !village.construction.production.open
+            }
             Self::Recipes => village.utility_panel.is_none() && !village.construction.menu,
             Self::Recipe(_) | Self::RecipePage(_) => {
                 village.utility_panel.is_none()
@@ -222,6 +237,22 @@ impl Action {
             Self::Project(_) | Self::TradeItem(_) | Self::Recipe(_) => String::new(),
             Self::Recipes if village.construction.production.open => "Close recipes".into(),
             Self::Recipes => "Recipes".into(),
+            Self::Beds if village.construction.farming.open => "Close beds".into(),
+            Self::Beds => "Beds".into(),
+            Self::Farm(action) => match action {
+                FarmControl::NextBed => "Next bed",
+                FarmControl::Irrigation => "Toggle irrigation",
+                FarmControl::Residues => "Toggle residue collection",
+                FarmControl::Crop => "Change crop",
+                FarmControl::Density => "Change density",
+                FarmControl::Work(FarmAction::Prepare) => "Prepare soil",
+                FarmControl::Work(FarmAction::Plant) => "Sow",
+                FarmControl::Work(FarmAction::Harvest) => "Harvest",
+                FarmControl::Work(FarmAction::Clear) => "Clear bed",
+                FarmControl::Work(FarmAction::Amend) => "Amend soil",
+                FarmControl::Work(FarmAction::Collect) => "Collect residues",
+            }
+            .into(),
             Self::RecipePage(false) => "Previous recipes".into(),
             Self::RecipePage(true) => "Next recipes".into(),
             Self::SelectedProject(action) => match action {
@@ -342,6 +373,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Page(true),
                 Action::Build,
                 Action::Recipes,
+                Action::Beds,
                 Action::RotatePlacement,
                 Action::CancelPlacement,
                 Action::ConnectRoad,
@@ -391,6 +423,28 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     ProjectAction::Demolish,
                 ] {
                     spawn_button(menu, &assets, Action::SelectedProject(action));
+                }
+                for action in [
+                    FarmControl::NextBed,
+                    FarmControl::Irrigation,
+                    FarmControl::Residues,
+                    FarmControl::Crop,
+                    FarmControl::Density,
+                ]
+                .into_iter()
+                .chain(
+                    [
+                        FarmAction::Prepare,
+                        FarmAction::Plant,
+                        FarmAction::Harvest,
+                        FarmAction::Clear,
+                        FarmAction::Amend,
+                        FarmAction::Collect,
+                    ]
+                    .into_iter()
+                    .map(FarmControl::Work),
+                ) {
+                    spawn_button(menu, &assets, Action::Farm(action));
                 }
                 for brush in [Brush::Raise, Brush::Lower, Brush::Flatten, Brush::Smooth] {
                     spawn_button(menu, &assets, Action::TerrainBrush(brush));
@@ -660,10 +714,27 @@ fn handle_buttons(
                     town.construction
                         .queue_recipe_row(&catalog, &mut town.stock, row);
                 }
+                Action::Beds => {
+                    village.construction.toggle_beds();
+                    picker.open = false;
+                }
+                Action::Farm(action) if !picker.open => {
+                    let town = &mut *village;
+                    town.construction.apply_farm_control(
+                        &catalog,
+                        &mut town.stock,
+                        action,
+                        TownClock {
+                            seconds: town.clock,
+                            round_trip_km: setup.round_trip_km(),
+                        },
+                    );
+                }
                 Action::Panel(_)
                 | Action::Project(_)
                 | Action::Recipe(_)
                 | Action::RecipePage(_)
+                | Action::Farm(_)
                 | Action::SelectedProject(_)
                 | Action::TradeItem(_)
                 | Action::Trade(_)
@@ -716,6 +787,7 @@ fn refresh(
     if toolbar.display == Display::None {
         return;
     }
+    let show_beds = !picker.open && Action::Farm(FarmControl::NextBed).available(&village);
     let show_recipes = !picker.open && Action::RecipePage(true).available(&village);
     let recipes = if show_recipes {
         village.construction.recipe_page_labels(&catalog)
@@ -761,7 +833,8 @@ fn refresh(
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
     picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.0));
-    menu.display = if show_recipes
+    menu.display = if show_beds
+        || show_recipes
         || show_selected_project
         || show_advance
         || show_terrain
@@ -803,6 +876,8 @@ fn refresh(
                 action.available(&village) && village.construction.has_recipes(&catalog)
             }
             Action::RecipePage(_) => show_recipes,
+            Action::Beds => action.available(&village),
+            Action::Farm(_) => show_beds,
             Action::Recipe(row) => recipes.get(row).is_some(),
             Action::SelectedProject(action) => {
                 show_selected_project

@@ -1,6 +1,7 @@
 mod chains_lens;
 mod events;
 mod farm_work;
+pub(crate) use farm_work::FarmControl;
 mod food_lens;
 mod gather_work;
 mod inventory;

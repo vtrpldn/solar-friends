@@ -5,6 +5,16 @@ use crate::{
     weather::{growing_season, weather_at},
 };
 
+#[derive(Clone, Copy)]
+pub(crate) enum FarmControl {
+    NextBed,
+    Irrigation,
+    Residues,
+    Crop,
+    Density,
+    Work(FarmAction),
+}
+
 fn work_priority(action: FarmAction) -> u8 {
     match action {
         FarmAction::Harvest => 0,
@@ -68,7 +78,7 @@ impl Construction {
             return;
         }
         if keyboard.just_pressed(KeyCode::KeyK) {
-            self.farming.open = !self.farming.open;
+            self.toggle_beds();
         }
         if !self.farming.open {
             return;
@@ -85,40 +95,19 @@ impl Construction {
                 };
             return;
         }
-        let plot = self.farming.plots.get_mut(&site).expect("selected plot");
-        if keyboard.just_pressed(KeyCode::Tab) {
-            self.farming.bed = (self.farming.bed + 1) % plot.beds.len();
-            self.farming.notice.clear();
-        }
-        let index = self.farming.bed.min(plot.beds.len() - 1);
-        let bed = &mut plot.beds[index];
-        if keyboard.just_pressed(KeyCode::KeyT) {
-            bed.irrigation = !bed.irrigation;
-        }
-        if keyboard.just_pressed(KeyCode::KeyZ) {
-            bed.collect_residues = !bed.collect_residues;
-        }
-        if self
-            .farming
-            .jobs
-            .iter()
-            .any(|job| job.site == site && job.bed == index)
-        {
-            return;
-        }
-        if bed.editable() {
-            if keyboard.just_pressed(KeyCode::KeyX) {
-                bed.crop = bed.crop.next();
-            }
-            if keyboard.just_pressed(KeyCode::KeyY) {
-                bed.density = if bed.density == 1.5 {
-                    0.5
-                } else {
-                    bed.density + 0.5
-                };
+        let actions = [
+            (KeyCode::Tab, FarmControl::NextBed),
+            (KeyCode::KeyT, FarmControl::Irrigation),
+            (KeyCode::KeyZ, FarmControl::Residues),
+            (KeyCode::KeyX, FarmControl::Crop),
+            (KeyCode::KeyY, FarmControl::Density),
+        ];
+        for (key, action) in actions {
+            if keyboard.just_pressed(key) {
+                self.apply_farm_control(catalog, stock, action, clock);
             }
         }
-        let keys = [
+        let jobs = [
             FarmAction::Prepare,
             FarmAction::Plant,
             FarmAction::Harvest,
@@ -126,17 +115,70 @@ impl Construction {
             FarmAction::Amend,
             FarmAction::Collect,
         ];
-        let Some(action) = PAGE_KEYS
+        if let Some(action) = PAGE_KEYS
             .iter()
-            .take(keys.len())
-            .position(|key| keyboard.just_pressed(*key))
-            .map(|index| keys[index])
-        else {
+            .zip(jobs)
+            .find_map(|(key, action)| keyboard.just_pressed(*key).then_some(action))
+        {
+            self.apply_farm_control(catalog, stock, FarmControl::Work(action), clock);
+        }
+    }
+
+    pub fn has_selected_plot(&self) -> bool {
+        self.production.selected.is_some_and(|site| {
+            self.farming.plots.contains_key(&site) && !self.changes.contains_key(&site)
+        })
+    }
+
+    pub fn toggle_beds(&mut self) {
+        if self.has_selected_plot() && !self.menu && !self.production.open {
+            self.farming.open = !self.farming.open;
+        }
+    }
+
+    pub fn apply_farm_control(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        action: FarmControl,
+        clock: TownClock,
+    ) {
+        if !self.farming.open || self.menu || self.production.open || !self.has_selected_plot() {
+            return;
+        }
+        let Some(site) = self.production.selected else {
             return;
         };
-        match self.queue_bed_job(catalog, stock, (site, index, action), clock) {
-            Ok(()) => self.farming.notice.clear(),
-            Err(error) => self.farming.notice = error,
+        let plot = self.farming.plots.get_mut(&site).expect("selected plot");
+        let index = self.farming.bed.min(plot.beds.len() - 1);
+        let bed = &mut plot.beds[index];
+        let busy = self
+            .farming
+            .jobs
+            .iter()
+            .any(|job| job.site == site && job.bed == index);
+        match action {
+            FarmControl::NextBed => {
+                self.farming.bed = (self.farming.bed + 1) % plot.beds.len();
+                self.farming.notice.clear();
+            }
+            FarmControl::Irrigation => bed.irrigation = !bed.irrigation,
+            FarmControl::Residues => bed.collect_residues = !bed.collect_residues,
+            FarmControl::Crop if !busy && bed.editable() => bed.crop = bed.crop.next(),
+            FarmControl::Density if !busy && bed.editable() => {
+                bed.density = if bed.density == 1.5 {
+                    0.5
+                } else {
+                    bed.density + 0.5
+                };
+            }
+            FarmControl::Work(action) if !busy => {
+                match self.queue_bed_job(catalog, stock, (site, index, action), clock) {
+                    Ok(()) => self.farming.notice.clear(),
+                    Err(error) => self.farming.notice = error,
+                }
+            }
+            _ => {}
         }
     }
 
