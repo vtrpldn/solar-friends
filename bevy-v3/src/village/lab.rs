@@ -1985,7 +1985,7 @@ fn update_lab_window(
     if playback.view == LabView::Map
         && !playback.replaying
         && !runner.done()
-        && let Some((order, success)) = map.service_order(&runner, &keys)
+        && let Some((order, success)) = map.service_order(&runner, &catalog, &keys)
     {
         playback.notice = match runner.submit(&catalog, order) {
             Ok(()) => runner
@@ -2146,9 +2146,11 @@ fn update_lab_window(
             } else {
                 String::new()
             };
-            let water = map.water_details(&runner, !playback.replaying && !runner.done());
+            let editable = !playback.replaying && !runner.done();
+            let water = map.water_details(&runner, editable);
+            let project = map.project_details(&runner, &catalog, editable);
             format!(
-                "Village map · {selection}\nTab Switch view · Drag Pan · Scroll Zoom · Home Camp · Enter Inspect jobs{gather}{build}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources{water}"
+                "Village map · {selection}\nTab Switch view · Drag Pan · Scroll Zoom · Home Camp · Enter Inspect jobs{gather}{build}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources{project}{water}"
             )
         } else {
             lab_inventory(

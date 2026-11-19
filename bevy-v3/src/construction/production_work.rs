@@ -49,7 +49,7 @@ impl Construction {
             .then_some(&catalog.production["stock-goats"].input)
     }
 
-    pub(super) fn recipes<'a>(
+    pub(crate) fn recipes<'a>(
         &self,
         catalog: &'a Catalog,
         index: usize,

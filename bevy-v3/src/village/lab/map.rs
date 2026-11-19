@@ -15,6 +15,7 @@ pub(super) struct MapState {
     dragging: bool,
     pub selected: Option<usize>,
     pub resource: Option<usize>,
+    recipe: usize,
     pub blueprint: Option<(String, u8)>,
     placement: Option<IVec2>,
     field_size: Option<IVec2>,
@@ -87,8 +88,9 @@ impl MapState {
     }
 
     pub fn service_order(
-        &self,
+        &mut self,
         runner: &Runner,
+        catalog: &Catalog,
         keys: &ButtonInput<KeyCode>,
     ) -> Option<(LabOrder, &'static str)> {
         if self.blueprint.is_some() {
@@ -100,6 +102,43 @@ impl MapState {
                     resource: index + 1,
                 },
                 "Gathering queued.",
+            ));
+        }
+        let construction = &runner.village.construction;
+        if let Some(index) = self.selected {
+            let recipes = construction.recipes(catalog, index);
+            if !recipes.is_empty() {
+                self.recipe = self.recipe.min(recipes.len() - 1);
+                if keys.just_pressed(KeyCode::BracketRight) {
+                    self.recipe = (self.recipe + 1) % recipes.len();
+                } else if keys.just_pressed(KeyCode::BracketLeft) {
+                    self.recipe = (self.recipe + recipes.len() - 1) % recipes.len();
+                }
+                if keys.just_pressed(KeyCode::KeyK) {
+                    return Some((
+                        LabOrder::Produce {
+                            site: index + 1,
+                            recipe: recipes[self.recipe].0.clone(),
+                        },
+                        "Production batch queued.",
+                    ));
+                }
+            }
+        } else if keys.just_pressed(KeyCode::KeyU) {
+            return Some((
+                LabOrder::Grid {
+                    enabled: construction.utilities.grid_off,
+                },
+                "Grid setting updated.",
+            ));
+        } else if keys.just_pressed(KeyCode::KeyF) && !runner.village.stock.sandbox {
+            return Some((
+                LabOrder::FoodPolicy {
+                    enabled: construction.trade.household_restock_off,
+                    reserve_half_days: None,
+                    allowance_cents: None,
+                },
+                "Food restocking setting updated.",
             ));
         }
         let site = self.selected.map_or(0, |index| index + 1);
@@ -129,6 +168,44 @@ impl MapState {
         .into_iter()
         .find(|(key, _)| keys.just_pressed(*key))
         .map(|(_, order)| (order, "Water service queued."))
+    }
+
+    pub fn project_details(&self, runner: &Runner, catalog: &Catalog, editable: bool) -> String {
+        if self.resource.is_some() || self.blueprint.is_some() {
+            return String::new();
+        }
+        let construction = &runner.village.construction;
+        if let Some(index) = self.selected {
+            let recipes = construction.recipes(catalog, index);
+            let Some((_, recipe)) = recipes.get(self.recipe.min(recipes.len().saturating_sub(1)))
+            else {
+                return String::new();
+            };
+            let controls = if editable {
+                " · [ / ] Choose recipe · K Queue batch"
+            } else {
+                ""
+            };
+            format!("\nProduction · {}{controls}", recipe.name)
+        } else {
+            let grid = if construction.utilities.grid_off {
+                "Disconnected"
+            } else {
+                "Connected"
+            };
+            let grid_control = if editable { " · U Toggle" } else { "" };
+            let mut text = format!("\nGrid · {grid}{grid_control}");
+            if !runner.village.stock.sandbox {
+                let restocking = if construction.trade.household_restock_off {
+                    "Off"
+                } else {
+                    "On"
+                };
+                let food_control = if editable { " · F Toggle" } else { "" };
+                text.push_str(&format!(" · Food restocking {restocking}{food_control}"));
+            }
+            text
+        }
     }
 
     pub fn water_details(&self, runner: &Runner, editable: bool) -> String {
@@ -378,6 +455,7 @@ pub(super) fn draw(
                 map.placement = Some(cell);
             }
         } else if clicked {
+            map.recipe = 0;
             map.selected = projects()
                 .filter_map(|(index, position, size, _)| {
                     let delta = (screen - point(position)).abs();
@@ -467,6 +545,25 @@ pub(super) fn resource_status(runner: &Runner, catalog: &Catalog, index: usize) 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn camp_controls_issue_replayable_grid_and_food_orders() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{"steps":2}"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        let mut map = MapState::default();
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::KeyU);
+        let (order, _) = map.service_order(&runner, &catalog, &keys).unwrap();
+        runner.submit(&catalog, order).unwrap();
+        keys.reset_all();
+        keys.press(KeyCode::KeyF);
+        let (order, _) = map.service_order(&runner, &catalog, &keys).unwrap();
+        runner.submit(&catalog, order).unwrap();
+        let status = map.project_details(&runner, &catalog, true);
+        assert!(status.contains("Disconnected"));
+        assert!(status.contains("Food restocking Off"));
+    }
 
     #[test]
     fn map_paths_clip_crossing_lines_and_hide_offscreen_lines() {
