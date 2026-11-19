@@ -520,8 +520,17 @@ impl Village {
         self.advance_checkpoint = true;
     }
 
+    fn planning_pause(&self) -> bool {
+        self.utility_panel.is_some()
+            || (self.construction.menu && !self.construction.placing_project())
+    }
+
     pub fn is_paused(&self) -> bool {
-        self.paused || self.advance.open || self.terrain_editor.open || self.planning_roads()
+        self.paused
+            || self.planning_pause()
+            || self.advance.open
+            || self.terrain_editor.open
+            || self.planning_roads()
     }
 
     pub fn motion(&self, index: usize) -> Motion {
@@ -1644,7 +1653,11 @@ fn show_hud(
             .construction
             .instructions(&catalog, village.stock.sandbox)
     };
-    let speed = SPEEDS[village.speed].1;
+    let speed = if village.planning_pause() {
+        "Paused".into()
+    } else {
+        format!("{}×", SPEEDS[village.speed].1)
+    };
     let stock = if village.stock.sandbox {
         format!(
             "Sandbox · I {}\nWater {water:.0} L ({})",
@@ -1663,7 +1676,7 @@ fn show_hud(
         )
     };
     let mut label = format!(
-        "Day {day}   {hour:02}:{:02}   {speed}×\n{stock}\n{controls}",
+        "Day {day}   {hour:02}:{:02}   {speed}\n{stock}\n{controls}",
         minute % 60
     );
     if let Some(notice) = &placement.0 {

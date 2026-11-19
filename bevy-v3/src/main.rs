@@ -666,6 +666,17 @@ mod tests {
 
         press_button(&mut app, "Manage");
         press_button(&mut app, "Finances");
+        assert!(app.world().resource::<village::Village>().is_paused());
+        let planning_water = river_vertex_colors(&mut app);
+        simulate_river_frame(&mut app);
+        assert_eq!(river_vertex_colors(&mut app), planning_water);
+        press_button(&mut app, "Stay paused on close");
+        press_button(&mut app, "Close panel");
+        assert!(app.world().resource::<village::Village>().is_paused());
+        press_button(&mut app, "Resume");
+        assert!(!app.world().resource::<village::Village>().is_paused());
+        press_button(&mut app, "Manage");
+        press_button(&mut app, "Finances");
         press_button(&mut app, "Bento");
         press_button(&mut app, "Toggle day shift");
         press_button(&mut app, "Toggle weekday shifts");
@@ -698,6 +709,7 @@ mod tests {
 
         press_button(&mut app, "Close panel");
         assert!(!app.world().resource::<village::Village>().trade_open());
+        assert!(!app.world().resource::<village::Village>().is_paused());
 
         press_button(&mut app, "Manage");
         press_button(&mut app, "Pantry");
