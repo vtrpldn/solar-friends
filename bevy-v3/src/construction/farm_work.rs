@@ -490,7 +490,53 @@ impl Construction {
         Ok(())
     }
 
-    pub fn farm_status(&self, clock: f64) -> Option<String> {
+    pub(super) fn farm_job_status(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        job: &FarmJob,
+        clock: f64,
+    ) -> String {
+        if job.pickups > 0 {
+            return "Waiting for seed delivery".into();
+        }
+        if let Some(worker) = job.worker.map(|index| &self.residents[index]) {
+            if worker.paused_waypoint.is_some()
+                || (matches!(job.phase, FarmPhase::Work | FarmPhase::CollectOutput)
+                    && job.retry > clock)
+            {
+                return "Waiting for access".into();
+            }
+            if job.phase == FarmPhase::Return && worker.path.is_empty() {
+                let load = super::production_work::production_load(catalog, &job.output);
+                if load.is_empty() && job.output.values().any(|&units| units > 0) {
+                    return "Waiting for transport · Harvest exceeds hand-carry capacity".into();
+                }
+                if !self.farm_load_fits(catalog, stock, &load) {
+                    return "Waiting for storage space".into();
+                }
+            }
+        }
+        match job.phase {
+            FarmPhase::Pickup => "Collecting supplies".into(),
+            FarmPhase::Walk => "Walking to the bed".into(),
+            FarmPhase::Work => format!("{:.0}% worked", 100.0 * job.work / job.required),
+            FarmPhase::Return => "Returning to stores".into(),
+            FarmPhase::CollectOutput => "Returning for the next harvest load".into(),
+        }
+    }
+
+    fn farm_load_fits(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        load: &BTreeMap<String, u32>,
+    ) -> bool {
+        let units: u64 = load.values().map(|&units| u64::from(units)).sum();
+        self.storage_space(catalog, stock) >= units
+    }
+
+    pub fn farm_status(&self, catalog: &Catalog, stock: &Stock, clock: f64) -> Option<String> {
         let site = self.production.selected?;
         let plot = self.farming.plots.get(&site)?;
         if !self.farming.open {
@@ -498,12 +544,15 @@ impl Construction {
         }
         let index = self.farming.bed.min(plot.beds.len() - 1);
         let mut label = self.bed_status(site, index, clock)?;
-        if !self
+        if let Some(job) = self
             .farming
             .jobs
             .iter()
-            .any(|job| job.site == site && job.bed == index)
+            .find(|job| job.site == site && job.bed == index)
         {
+            label.push('\n');
+            label.push_str(&self.farm_job_status(catalog, stock, job, clock));
+        } else {
             label.push_str("\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect");
         }
         label.push_str("\nTab Bed · X Crop · Y Density · T Water · Z Residues · K Close");
@@ -673,8 +722,7 @@ impl Construction {
                     if load.is_empty() && job.output.values().any(|&units| units > 0) {
                         continue;
                     }
-                    let units = load.values().map(|&units| u64::from(units)).sum();
-                    if self.storage_space(catalog, stock) < units {
+                    if !self.farm_load_fits(catalog, stock, &load) {
                         continue;
                     }
                     let job = &mut self.farming.jobs[job_index];
@@ -994,6 +1042,17 @@ mod resize_tests {
         job.food_output = Some(crate::food::fresh(&job.output, 0.0, &Default::default()));
         village.residents[0].position = SUPPLY_SPOTS[0].as_vec2();
         village.residents[0].path.clear();
+        let free_space = village.storage_space(&catalog, &stock) as u32;
+        let mut full_stock = stock.clone();
+        full_stock.receive(&BTreeMap::from([("stone".into(), free_space)]));
+        village.tick_farm_jobs(&catalog, &mut full_stock, ground, 0.0, 0.1);
+        assert_eq!(
+            village.farm_job_status(&catalog, &full_stock, &village.farming.jobs[0], 0.0),
+            "Waiting for storage space"
+        );
+        assert_eq!(full_stock.available("greens"), initial);
+        assert_eq!(village.farming.jobs[0].output["greens"], total);
+
         village.tick_farm_jobs(&catalog, &mut stock, ground, 0.0, 0.1);
         let first_load = stock.available("greens") - initial;
         assert!((1..total).contains(&first_load));

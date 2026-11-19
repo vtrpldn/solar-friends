@@ -1870,7 +1870,10 @@ fn show_hud(
         label.push('\n');
         label.push_str(notice);
     }
-    if let Some(farm) = village.construction.farm_status(village.clock) {
+    if let Some(farm) = village
+        .construction
+        .farm_status(&catalog, &village.stock, village.clock)
+    {
         label.push('\n');
         label.push_str(&farm);
     }

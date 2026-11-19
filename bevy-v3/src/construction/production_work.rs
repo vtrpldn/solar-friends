@@ -547,7 +547,7 @@ impl Construction {
         {
             return reason;
         }
-        if matches!(job.phase, Phase::Work | Phase::Return)
+        if (job.phase == Phase::Work || (job.phase == Phase::Return && !job.returning_to_site))
             && self.batch_storage_full(catalog, stock, job, clock)
         {
             return "Waiting for storage space".into();

@@ -172,20 +172,13 @@ impl Construction {
             ));
         }
         for job in &self.farming.jobs {
-            if focus.is_some_and(|site| site != job.site)
-                || (waiting_only && job.worker.is_some() && job.pickups == 0)
-            {
+            if focus.is_some_and(|site| site != job.site) {
                 continue;
             }
-            use crate::farming::FarmPhase;
-            let status = match job.phase {
-                FarmPhase::Pickup if job.pickups > 0 => "Waiting for seed delivery".to_owned(),
-                FarmPhase::Pickup => "Collecting supplies".to_owned(),
-                FarmPhase::Walk => "Walking to the bed".to_owned(),
-                FarmPhase::Work => format!("{:.0}% worked", 100.0 * job.work / job.required),
-                FarmPhase::Return => "Returning to stores".to_owned(),
-                FarmPhase::CollectOutput => "Returning for the next harvest load".to_owned(),
-            };
+            let status = self.farm_job_status(catalog, stock, job, clock);
+            if waiting_only && job.worker.is_some() && !status.starts_with("Waiting") {
+                continue;
+            }
             jobs.push(format!(
                 "{} · Bed {} · {status} · {}",
                 site_name(job.site),
