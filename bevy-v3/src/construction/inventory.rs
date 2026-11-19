@@ -129,10 +129,7 @@ impl Construction {
                 continue;
             }
             if let Some(site) = land.site(index) {
-                let output = job
-                    .remaining
-                    .as_ref()
-                    .unwrap_or(&catalog.gathering[site.recipe()].output);
+                let output = job.remaining_output(&catalog.gathering[site.recipe()].output);
                 record_output(
                     &mut ledger,
                     catalog,

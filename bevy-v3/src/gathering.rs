@@ -24,6 +24,17 @@ pub struct GatherJob {
     pub phase: GatherPhase,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub remaining: Option<BTreeMap<String, u32>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub food_output: Option<crate::food::FoodLots>,
+}
+
+impl GatherJob {
+    pub fn remaining_output<'a>(
+        &'a self,
+        recipe_output: &'a BTreeMap<String, u32>,
+    ) -> &'a BTreeMap<String, u32> {
+        self.remaining.as_ref().unwrap_or(recipe_output)
+    }
 }
 
 #[derive(PartialEq, Eq, Deserialize, Serialize)]
@@ -243,6 +254,7 @@ impl Gathering {
                 retry_at: 0.0,
                 phase: GatherPhase::Approach,
                 remaining: None,
+                food_output: None,
             },
         );
     }
@@ -280,6 +292,10 @@ impl Gathering {
                                         .get(id)
                                         .is_some_and(|&total| quantity <= total)
                             })
+                    })
+                    && job.food_output.as_ref().is_none_or(|lots| {
+                        matches!(job.phase, GatherPhase::Return | GatherPhase::CollectOutput)
+                            && crate::food::valid_cargo(lots, job.remaining_output(&recipe.output))
                     })
             })
     }

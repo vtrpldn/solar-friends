@@ -20,6 +20,12 @@ impl Construction {
                 continue;
             };
             let recipe = &catalog.gathering[resource.recipe()];
+            if self.reservation_pass.is_none()
+                && !stock.sandbox
+                && self.expire_gathered_food(catalog, stock, index, &recipe.output, clock)
+            {
+                continue;
+            }
             if clock < self.gathering.orders[&index].retry_at {
                 continue;
             }
@@ -56,25 +62,25 @@ impl Construction {
                         if job.work < recipe.work {
                             continue;
                         }
-                        let Some(path) = route(
+                        let path = route(
                             worker.position,
                             SUPPLY_SPOTS[worker_index],
                             |cell| self.blocked(catalog, terrain, land, camp, cell),
                             access_road,
-                        ) else {
-                            self.gathering
-                                .orders
-                                .get_mut(&index)
-                                .expect("queued job")
-                                .retry_at = clock + 5.0;
-                            continue;
-                        };
-                        self.residents[worker_index].path = path;
-                        self.gathering
-                            .orders
-                            .get_mut(&index)
-                            .expect("queued job")
-                            .phase = GatherPhase::Return;
+                        );
+                        let job = self.gathering.orders.get_mut(&index).expect("queued job");
+                        let food = crate::food::fresh(&recipe.output, clock, &BTreeMap::new());
+                        if !food.is_empty() {
+                            job.food_output = Some(food);
+                        }
+                        if let Some(path) = path {
+                            self.residents[worker_index].path = path;
+                            job.phase = GatherPhase::Return;
+                        } else {
+                            job.phase = GatherPhase::CollectOutput;
+                            job.remaining = Some(recipe.output.clone());
+                            job.retry_at = clock + 5.0;
+                        }
                         self.gathering.gathered(
                             index,
                             resource.recipe() == "fell_tree",
@@ -83,10 +89,7 @@ impl Construction {
                         );
                     }
                     GatherPhase::Return => {
-                        let output = self.gathering.orders[&index]
-                            .remaining
-                            .as_ref()
-                            .unwrap_or(&recipe.output);
+                        let output = self.gathering.orders[&index].remaining_output(&recipe.output);
                         let load = super::production_work::production_load(catalog, output);
                         let units: u64 = load.values().map(|&units| u64::from(units)).sum();
                         if (load.is_empty() && output.values().any(|&units| units > 0))
@@ -96,11 +99,18 @@ impl Construction {
                         }
                         let mut remaining = output.clone();
                         crate::market::subtract_cargo(&mut remaining, &load);
-                        stock.receive(&load);
+                        let job = self.gathering.orders.get_mut(&index).expect("queued job");
+                        if let Some(lots) = &mut job.food_output {
+                            stock.receive_with_lots(
+                                &load,
+                                super::production_work::take_load_lots(lots, &load),
+                            );
+                        } else {
+                            stock.receive(&load);
+                        }
                         if remaining.is_empty() {
                             self.gathering.orders.remove(&index);
                         } else {
-                            let job = self.gathering.orders.get_mut(&index).expect("queued job");
                             job.remaining = Some(remaining);
                             job.phase = GatherPhase::CollectOutput;
                         }
@@ -161,6 +171,34 @@ impl Construction {
             }
         }
     }
+    fn expire_gathered_food(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        index: usize,
+        recipe_output: &BTreeMap<String, u32>,
+        clock: f64,
+    ) -> bool {
+        let job = self.gathering.orders.get_mut(&index).expect("queued job");
+        let Some(lots) = &mut job.food_output else {
+            return false;
+        };
+        let expired = crate::food::discard_expired(lots, clock);
+        if expired.is_empty() {
+            return false;
+        }
+        stock.record_spoilage(catalog, &expired);
+        let remaining = job.remaining.get_or_insert_with(|| recipe_output.clone());
+        crate::market::subtract_cargo(remaining, &expired);
+        if remaining.is_empty() {
+            if let Some(worker) = job.worker {
+                self.residents[worker].path.clear();
+            }
+            self.gathering.orders.remove(&index);
+            return true;
+        }
+        false
+    }
 }
 
 fn gather_approaches(resource: &crate::land::Site) -> Vec<IVec2> {
@@ -190,4 +228,85 @@ fn route_to_gather_site(
     approaches
         .into_iter()
         .find_map(|cell| route(from, cell, &mut blocked, access_road))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::setup::WorldSetup;
+
+    #[test]
+    fn gathered_food_keeps_its_harvest_expiry_across_a_save() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::generate(&setup);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let (index, resource, approach) = land
+            .sites()
+            .filter(|(_, resource)| resource.recipe() == "gather-wild-fruit")
+            .find_map(|(index, resource)| {
+                let route = route_to_gather_site(resource, SUPPLY_SPOTS[0].as_vec2(), |cell| {
+                    village.blocked(&catalog, &terrain, &land, camp, cell)
+                })?;
+                Some((index, resource, *route.back()?))
+            })
+            .expect("a reachable wild fruit site");
+        village
+            .gathering
+            .queue_resource(
+                &catalog,
+                &land,
+                index,
+                (terrain.seed, setup.richness(), 0.0),
+            )
+            .unwrap();
+        village.residents[0].position = approach;
+        let recipe = &catalog.gathering[resource.recipe()];
+        let job = village.gathering.orders.get_mut(&index).unwrap();
+        job.worker = Some(0);
+        job.phase = GatherPhase::Work;
+        job.work = recipe.work;
+        let harvested_at = 2.0 * crate::weather::HOUR;
+        village.tick_gathering(&catalog, &mut stock, site, harvested_at, 0.1);
+        let job = &village.gathering.orders[&index];
+        assert!(job.phase == GatherPhase::Return);
+        let expiry = job.food_output.as_ref().unwrap()["food"][0].expires;
+        assert_eq!(expiry, harvested_at + 3.0 * crate::weather::DAY);
+        assert!(village.gathering.valid_save(&land, &catalog));
+        let saved = serde_json::to_vec(&village).unwrap();
+
+        let initial = stock.available("food");
+        let mut fresh: Construction = serde_json::from_slice(&saved).unwrap();
+        fresh.residents[0].path.clear();
+        fresh.residents[0].position = SUPPLY_SPOTS[0].as_vec2();
+        let mut fresh_stock = stock.clone();
+        fresh.tick_gathering(&catalog, &mut fresh_stock, site, expiry - 1.0, 0.1);
+        assert_eq!(
+            fresh_stock.available("food"),
+            initial + recipe.output["food"]
+        );
+        assert!(
+            fresh_stock.pantry.lots["food"]
+                .iter()
+                .any(|lot| lot.expires == expiry)
+        );
+
+        village = serde_json::from_slice(&saved).unwrap();
+        village.tick_gathering(&catalog, &mut stock, site, expiry, 0.1);
+        assert!(village.gathering.orders.is_empty());
+        assert!(village.residents[0].path.is_empty());
+        assert_eq!(stock.available("food"), initial);
+        assert_eq!(
+            stock.pantry.spoiled["food"],
+            u64::from(recipe.output["food"])
+        );
+    }
 }

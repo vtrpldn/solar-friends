@@ -362,6 +362,23 @@ impl Pantry {
     }
 }
 
+pub fn valid_cargo(lots: &FoodLots, amounts: &BTreeMap<String, u32>) -> bool {
+    lots.iter().all(|(id, list)| {
+        shelf(id).is_some()
+            && list
+                .iter()
+                .all(|lot| lot.units > 0 && lot.expires.is_finite() && lot.expires >= 0.0)
+    }) && FOODS.iter().all(|(id, _)| {
+        let recorded: u64 = lots
+            .get(*id)
+            .into_iter()
+            .flatten()
+            .map(|lot| u64::from(lot.units))
+            .sum();
+        recorded == u64::from(amounts.get(*id).copied().unwrap_or(0))
+    })
+}
+
 pub fn fresh(
     amounts: &BTreeMap<String, u32>,
     clock: f64,
