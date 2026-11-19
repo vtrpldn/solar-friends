@@ -188,6 +188,29 @@ impl Construction {
                 .is_some_and(|index| self.residents[index].waiting_for_route())
     }
 
+    pub fn power_shortage_summary(&self, catalog: &Catalog) -> String {
+        use std::fmt::Write;
+        const VISIBLE_SHORTAGES: usize = 4;
+        let mut shortages = self.utilities.power_shortages().peekable();
+        if shortages.peek().is_none() {
+            return String::new();
+        }
+        let mut text = String::from("\nWaiting for power");
+        for id in shortages.by_ref().take(VISIBLE_SHORTAGES) {
+            if let Some(plan) = id.checked_sub(1).and_then(|index| self.plans.get(index)) {
+                let name = &catalog.projects[&plan.key].name;
+                let _ = write!(text, "\n{name} #{id}");
+            } else {
+                text.push_str("\nCamp");
+            }
+        }
+        let remaining = shortages.count();
+        if remaining > 0 {
+            let _ = write!(text, "\n{remaining} more");
+        }
+        text
+    }
+
     pub fn waste_tank_summary(&self, catalog: &Catalog) -> String {
         use std::fmt::Write;
         const VISIBLE_WARNINGS: usize = 4;

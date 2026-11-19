@@ -1943,6 +1943,7 @@ fn show_hud(
         Some(UtilityPanel::Power) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.power_summary());
+            label.push_str(&village.construction.power_shortage_summary(&catalog));
         }
         Some(UtilityPanel::Projects) => {
             label.push('\n');

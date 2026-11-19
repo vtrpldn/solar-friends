@@ -709,9 +709,7 @@ impl Utilities {
         sandbox: bool,
     ) -> String {
         let enabled = || self.nodes.values().filter(|node| node.enabled);
-        let shortage = enabled()
-            .filter(|node| node.demanding && !node.powered)
-            .count();
+        let shortage = self.power_shortages().count();
         let power = if shortage > 0 {
             format!("{shortage} buildings undersupplied")
         } else if self.grid_import_kw > 0.0 {
@@ -768,10 +766,17 @@ impl Utilities {
             .fold(0.0, |total, node| total + node.water[0])
     }
 
+    pub fn power_shortages(&self) -> impl Iterator<Item = usize> + '_ {
+        self.nodes
+            .iter()
+            .filter_map(|(&id, node)| (node.enabled && !node.powered).then_some(id))
+    }
+
     pub fn power_summary(&self) -> String {
         let stored = self.stored_energy();
+        let capacity: f64 = self.nodes.values().map(|node| node.battery).sum();
         format!(
-            "Power · {:.2} kW solar/hydro · {:.2} kW demand\n{stored:.2} kWh stored · {:.2} kW grid · R${:.2} used\nGrid {} · O Switch grid",
+            "Power · {:.2} kW solar/hydro · {:.2} kW demand\nBattery {stored:.2}/{capacity:.2} kWh · {:.2} kW grid · R${:.2} used\nGrid {} · O Switch grid",
             self.generation_kw,
             self.demand_kw,
             self.grid_import_kw,
@@ -1385,10 +1390,8 @@ impl Utilities {
                         ("Switched off", Color::srgb_u8(147, 146, 140))
                     } else if node.powered {
                         ("Powered", Color::srgb_u8(136, 220, 148))
-                    } else if node.demanding {
-                        ("Waiting for power", Color::srgb_u8(222, 112, 96))
                     } else {
-                        ("Idle", Color::srgb_u8(147, 146, 140))
+                        ("Waiting for power", Color::srgb_u8(222, 112, 96))
                     };
                     (color, state)
                 }
@@ -1691,8 +1694,14 @@ mod tests {
         utilities.tick(&setup, &mut stock, 0, 1.0, 0.1);
         assert_eq!(utilities.powered_cold_storage(), 80.0);
         assert_eq!(utilities.demand_kw, 0.08);
-        utilities.toggle_cooling(0);
+        assert!(utilities.power_shortages().next().is_none());
+        utilities.grid_off = true;
         utilities.tick(&setup, &mut stock, 0, 2.0, 0.1);
+        assert_eq!(utilities.power_shortages().collect::<Vec<_>>(), [1]);
+
+        utilities.toggle_cooling(0);
+        utilities.tick(&setup, &mut stock, 0, 3.0, 0.1);
+        assert!(utilities.power_shortages().next().is_none());
         assert_eq!(utilities.powered_cold_storage(), 0.0);
         assert_eq!(utilities.installed_cold_storage(), 80.0);
         assert_eq!(utilities.demand_kw, 0.0);
