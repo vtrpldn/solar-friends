@@ -892,28 +892,49 @@ impl Construction {
         let duration = trip_seconds(clock.round_trip_km);
         let allowance = (5.0 * duration / crate::weather::DAY).max(0.5);
         self.utilities.ensure_camp();
-        let (driver, path, water) = (0..self.residents.len())
+        let buying_food = market_order && {
+            let order = &self.trade.orders[project];
+            order.buying && matches!(order.material.as_str(), "food" | "meals")
+        };
+        let mut drivers: Vec<_> = (0..self.residents.len())
             .rev()
             .filter(|&index| {
-                self.free_for_leisure(index) && !self.booked_shift_due(index, clock.seconds)
-            })
-            .find_map(|index| {
-                let path =
-                    self.resident_route(catalog, site, self.residents[index].position, door)?;
-                let needed = (allowance - self.residents[index].health.drinking_water).max(0.0);
-                let water = if needed > 0.0 {
-                    let (source, _, _) =
-                        self.utilities
-                            .water_sources_with(needed)
-                            .find(|&(id, _, _)| {
-                                id == 0 || self.water_route(index, catalog, site, id).is_some()
-                            })?;
-                    Some((source, needed))
+                let health = &self.residents[index].health;
+                let needs_met = if buying_food {
+                    [Need::Bladder, Need::Bowels, Need::Hygiene]
+                        .iter()
+                        .all(|need| health.levels[*need as usize] > 10.0)
                 } else {
-                    None
+                    health.levels.iter().all(|level| *level > 25.0)
                 };
-                Some((index, path, water))
-            })?;
+                health.energy > 35.0
+                    && needs_met
+                    && self.free_for_leisure(index)
+                    && !self.booked_shift_due(index, clock.seconds)
+            })
+            .collect();
+        drivers.sort_by(|&a, &b| {
+            self.residents[b]
+                .health
+                .energy
+                .total_cmp(&self.residents[a].health.energy)
+        });
+        let (driver, path, water) = drivers.into_iter().find_map(|index| {
+            let path = self.resident_route(catalog, site, self.residents[index].position, door)?;
+            let needed = (allowance - self.residents[index].health.drinking_water).max(0.0);
+            let water = if needed > 0.0 {
+                let (source, _, _) =
+                    self.utilities
+                        .water_sources_with(needed)
+                        .find(|&(id, _, _)| {
+                            id == 0 || self.water_route(index, catalog, site, id).is_some()
+                        })?;
+                Some((source, needed))
+            } else {
+                None
+            };
+            Some((index, path, water))
+        })?;
         if let Some((source, needed)) = water {
             assert!(self.utilities.drink(source, needed));
             self.residents[driver].health.drinking_water += needed;
@@ -970,8 +991,11 @@ mod tests {
         assert!(village.active_trips().next().is_none());
 
         clock.seconds = 3.0 * crate::weather::HOUR;
+        village.residents[0].health.energy = 100.0;
+        village.residents[0].health.levels[Need::Hydration as usize] = 25.0;
+        village.residents[1].health.energy = 99.0;
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
-        assert!(village.active_trips().next().is_some());
+        assert_eq!(village.active_trips().next().unwrap().driver, 1);
     }
 
     #[test]
