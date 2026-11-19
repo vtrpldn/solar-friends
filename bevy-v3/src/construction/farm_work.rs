@@ -641,7 +641,7 @@ impl Construction {
             bed.stage.label()
         };
         let mut label = format!(
-            "Bed {}/{} · {} · {} ({:.0}%)\nMoisture {:.0}% · Fertility {:.0}% · {:.1} kg harvest estimate\nDrought loss {:.0}%\nWater totals · {:.1} L rain · {:.1} L irrigation · {:.1} L evaporated · {:.1} L drained\nDensity {:.1}× · {} · {} residues",
+            "Bed {}/{} · {} · {} ({:.0}%)\nMoisture {:.0}% · Fertility {:.0}% · {:.1} kg harvest estimate\nDrought loss {:.0}% · Ground cover {:.0}%\nSoil · {:.1} kg residues · {:.1} kg compost · {:.1} kg organic matter\nWater totals · {:.1} L rain · {:.1} L irrigation · {:.1} L evaporated · {:.1} L drained\nDensity {:.1}× · {} · {} residues",
             index + 1,
             plot.beds.len(),
             bed.crop.label(),
@@ -651,6 +651,10 @@ impl Construction {
             bed.fertility * 100.0,
             bed.yield_kg(clock),
             bed.drought_damage() * 100.0,
+            bed.ground_cover() * 100.0,
+            bed.residue_kg,
+            bed.amendment_kg,
+            bed.soil_organic_kg,
             bed.rain_liters,
             bed.irrigated_liters,
             bed.evaporated_liters,
@@ -1345,6 +1349,8 @@ mod resize_tests {
             let planted = &mut village.farming.plots.get_mut(&0).unwrap().beds[0];
             planted.stage = Stage::Growing;
             planted.crop = Crop::Beans;
+            planted.rain_liters = 12.0;
+            planted.soil_organic_kg = 0.5;
             let offset = planted.offset;
             let angle = f32::from(rotation) * std::f32::consts::FRAC_PI_2;
             let orientation = Mat2::from_angle(-angle);
@@ -1364,6 +1370,8 @@ mod resize_tests {
                 .find(|bed| bed.stage == Stage::Growing)
                 .unwrap();
             assert!(bed.crop == Crop::Beans);
+            assert_eq!(bed.rain_liters, 12.0);
+            assert_eq!(bed.soil_organic_kg, 0.5);
             assert!(center(new_size, bed.offset).abs_diff_eq(old_world, 1e-5));
 
             // Put a standing crop in a bed which did not exist in the original footprint.

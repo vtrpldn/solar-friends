@@ -173,8 +173,12 @@ pub struct Bed {
     pub drained_liters: f64,
     stress: f64,
     ripe_at: f64,
-    residue_kg: f64,
-    amendment_kg: f64,
+    pub(crate) residue_kg: f64,
+    pub(crate) amendment_kg: f64,
+    #[serde(default)]
+    pub(crate) soil_organic_kg: f64,
+    #[serde(default)]
+    pub(crate) decomposed_gas_kg: f64,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
@@ -407,6 +411,8 @@ impl Bed {
             ripe_at: 0.0,
             residue_kg: 0.0,
             amendment_kg: 0.0,
+            soil_organic_kg: 0.0,
+            decomposed_gas_kg: 0.0,
         }
     }
 
@@ -518,6 +524,10 @@ impl Bed {
         }
     }
 
+    pub(crate) fn ground_cover(&self) -> f64 {
+        (self.residue_kg / (self.area() * 0.5)).min(1.0)
+    }
+
     pub fn tick(&mut self, climate: CropClimate, mut use_water: impl FnMut(f64) -> bool) {
         let CropClimate {
             clock,
@@ -533,12 +543,14 @@ impl Bed {
         let amendment_decay = self.amendment_kg * -(-days / 30.0).exp_m1();
         self.residue_kg -= residue_decay;
         self.amendment_kg -= amendment_decay;
-        self.fertility =
-            (self.fertility + (residue_decay + amendment_decay) / (area * 8.0)).min(1.0);
+        let decomposed = residue_decay + amendment_decay;
+        self.soil_organic_kg += decomposed * 0.2;
+        self.decomposed_gas_kg += decomposed * 0.8;
+        self.fertility = (self.fertility + decomposed / (area * 8.0)).min(1.0);
         if sandbox {
             return;
         }
-        let cover = (self.residue_kg / (area * 0.5)).min(1.0);
+        let cover = self.ground_cover();
         let water = if self.standing() {
             self.crop.water() * self.density
         } else {
@@ -630,9 +642,11 @@ impl Farming {
                             bed.rain_liters,
                             bed.evaporated_liters,
                             bed.drained_liters,
+                            bed.soil_organic_kg,
+                            bed.decomposed_gas_kg,
                         ]
                         .into_iter()
-                        .all(|liters| liters.is_finite() && liters >= 0.0)
+                        .all(|amount| amount.is_finite() && amount >= 0.0)
                         && [bed.moisture, bed.fertility, bed.growth]
                             .iter()
                             .all(|value| (0.0..=1.0).contains(value))
@@ -657,6 +671,28 @@ impl Farming {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn decomposing_residues_and_compost_follow_v2_mass_fractions() {
+        let mut bed = Bed::new(Vec2::ZERO, 4.0);
+        bed.residue_kg = 6.0;
+        bed.amendment_kg = 3.0;
+        bed.tick(
+            CropClimate {
+                clock: DAY,
+                dt: DAY,
+                rain: 0.0,
+                season: 1.0,
+                sheltered: false,
+                sandbox: false,
+            },
+            |_| false,
+        );
+        let decomposed = 9.0 - bed.residue_kg - bed.amendment_kg;
+        assert!(decomposed > 0.0);
+        assert!((bed.soil_organic_kg - decomposed * 0.2).abs() < 1e-9);
+        assert!((bed.decomposed_gas_kg - decomposed * 0.8).abs() < 1e-9);
+    }
 
     #[test]
     fn crop_water_is_accounted_for_through_rain_irrigation_and_drainage() {
