@@ -350,7 +350,7 @@ impl Action {
             Self::Pause if village.planning_pause() => "Stay paused on close".into(),
             Self::Pause if village.paused => "Resume".into(),
             Self::Pause => "Pause".into(),
-            Self::Speed => format!("{}×", SPEEDS[village.speed].1),
+            Self::Speed => village.speed_label(),
             Self::Guide if village.guide.open() => "Close guide".into(),
             Self::Guide => "Guide".into(),
             Self::Lenses if village.lenses.open => "Close lenses".into(),

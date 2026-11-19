@@ -922,6 +922,18 @@ impl Construction {
             .is_some_and(|task| matches!(task.kind, Need::Rest | Need::Sleep) && task.elapsed > 0.0)
     }
 
+    pub(crate) fn all_residents_unavailable(&self) -> bool {
+        self.residents.iter().enumerate().all(|(index, resident)| {
+            resident
+                .health
+                .task
+                .as_ref()
+                .is_some_and(|task| task.kind == Need::Sleep && task.elapsed > 0.0)
+                || self.away_for_work(index)
+                || self.driver_away(index)
+        })
+    }
+
     pub(super) fn resident_action(
         &self,
         catalog: &Catalog,
@@ -1172,6 +1184,29 @@ pub(super) fn approach_points(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn automatic_speed_requires_every_resident_to_be_asleep_or_away() {
+        let mut village = Construction::default();
+        assert!(!village.all_residents_unavailable());
+        for resident in &mut village.residents {
+            resident.health.task = Some(crate::residents::NeedTask {
+                kind: Need::Sleep,
+                facility: None,
+                elapsed: 1.0,
+                duration: 100.0,
+                water: 0.0,
+                returning: false,
+                partner: None,
+                conversation: None,
+            });
+        }
+        assert!(village.all_residents_unavailable());
+        village.residents[0].health.task.as_mut().unwrap().elapsed = 0.0;
+        assert!(!village.all_residents_unavailable());
+        village.residents[0].health.task = None;
+        assert!(!village.all_residents_unavailable());
+    }
 
     #[test]
     fn a_shared_concern_records_one_memory_for_each_resident() {

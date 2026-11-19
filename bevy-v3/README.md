@@ -18,6 +18,8 @@ Press F for the three-day forecast, P for power, V for water, and N to see what 
 
 With the build menu closed, click a natural resource and press G to assign it for gathering, extraction, or felling. Output enters inventory when the resident brings it back.
 
+The clock switches to 64× while all five residents are asleep or away in town. It returns to your selected speed as soon as one is available.
+
 Click a completed workbench, workshop, or kitchen and press C to open its recipes. Residents bring inputs to the building and carry the finished batch back to stores.
 
 Select a completed field, garden, or greenhouse and press K to manage its beds. Prepare the soil, sow a crop, and return to harvest when it is ripe. Bed settings cover crop, density, irrigation, and residues.

@@ -58,6 +58,7 @@ const SPEEDS: [(KeyCode, u8); 4] = [
     (KeyCode::Digit3, 8),
     (KeyCode::Digit4, 16),
 ];
+const UNAVAILABLE_SPEED: u8 = 64;
 pub(crate) const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 const CAMP_SITES: [(KeyCode, IVec2); 3] = [
     (KeyCode::Digit1, IVec2::new(28, 31)),
@@ -534,6 +535,24 @@ impl Village {
             || self.advance.open
             || self.terrain_editor.open
             || self.planning_roads()
+    }
+
+    fn effective_speed(&self) -> u8 {
+        if self.camp.is_some() && !self.is_paused() && self.construction.all_residents_unavailable()
+        {
+            UNAVAILABLE_SPEED
+        } else {
+            SPEEDS[self.speed].1
+        }
+    }
+
+    fn speed_label(&self) -> String {
+        let speed = self.effective_speed();
+        if speed == UNAVAILABLE_SPEED {
+            format!("{speed}× Auto")
+        } else {
+            format!("{speed}×")
+        }
     }
 
     pub fn motion(&self, index: usize) -> Motion {
@@ -1481,7 +1500,13 @@ fn advance_clock(
         land: &land,
         camp,
     };
-    for _ in 0..SPEEDS[village.speed].1 {
+    let mut budget = UNAVAILABLE_SPEED;
+    loop {
+        let cost = UNAVAILABLE_SPEED / village.effective_speed();
+        if budget < cost {
+            break;
+        }
+        budget -= cost;
         step(&mut village, &catalog, &setup, site, time.delta_secs_f64());
     }
 }
@@ -1661,7 +1686,7 @@ fn show_hud(
     let speed = if village.planning_pause() {
         "Paused".into()
     } else {
-        format!("{}×", SPEEDS[village.speed].1)
+        village.speed_label()
     };
     let stock = if village.stock.sandbox {
         format!(
