@@ -155,10 +155,10 @@ impl Market {
         catalog.materials[id].supplier.saturating_sub(used)
     }
 
-    pub fn buy_pack(
-        &mut self,
+    pub fn quote_pack(
+        &self,
         catalog: &Catalog,
-        stock: &mut Stock,
+        stock: &Stock,
         id: &str,
         (day, fare, freight): (u64, u64, bool),
     ) -> Result<(u32, u64), &'static str> {
@@ -184,6 +184,17 @@ impl Market {
         if stock.balance().saturating_sub(self.committed_fares) < price + fare {
             return Err("Shared savings cannot cover the order and transport.");
         }
+        Ok((quantity, price))
+    }
+
+    pub fn buy_pack(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        id: &str,
+        (day, fare, freight): (u64, u64, bool),
+    ) -> Result<(u32, u64), &'static str> {
+        let (quantity, price) = self.quote_pack(catalog, stock, id, (day, fare, freight))?;
         let entry = self
             .suppliers
             .entry(id.into())

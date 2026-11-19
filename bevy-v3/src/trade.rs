@@ -221,6 +221,16 @@ impl Trade {
         self.buy_with_fare(catalog, stock, market, id, (clock, 0, false, 0))
     }
 
+    pub fn purchase_slot(&self, freight: bool) -> Result<(), &'static str> {
+        if freight && self.delivery.is_some() {
+            return Err("A freight order is already on the way.");
+        }
+        if !freight && self.orders.len() >= 32 {
+            return Err("The town order queue is full.");
+        }
+        Ok(())
+    }
+
     fn buy_with_fare(
         &mut self,
         catalog: &Catalog,
@@ -229,12 +239,7 @@ impl Trade {
         id: &str,
         (clock, distance, freight, fare): (f64, u32, bool, u64),
     ) -> Result<(), &'static str> {
-        if freight && self.delivery.is_some() {
-            return Err("A freight order is already on the way.");
-        }
-        if !freight && self.orders.len() >= 32 {
-            return Err("The town order queue is full.");
-        }
+        self.purchase_slot(freight)?;
         let day = pantry_day(clock);
         let (quantity, cents) = market.buy_pack(catalog, stock, id, (day, fare, freight))?;
         let food = food::fresh(

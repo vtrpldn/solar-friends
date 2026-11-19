@@ -310,14 +310,14 @@ impl Construction {
         }
     }
 
-    pub(super) fn buy_from_town(
-        &mut self,
+    fn check_town_purchase(
+        &self,
         catalog: &Catalog,
-        stock: &mut Stock,
+        stock: &Stock,
         clock: TownClock,
         material: &str,
         freight: bool,
-    ) -> Result<bool, &'static str> {
+    ) -> Result<(), &'static str> {
         let item = catalog.materials.get(material).ok_or("Unknown material.")?;
         if !town_is_open(clock.seconds) {
             return Err("Town is closed. Order between 07:00 and 18:00.");
@@ -328,6 +328,18 @@ impl Construction {
         if u64::from(item.pack) + self.trade.inbound() > self.storage_space(catalog, stock) {
             return Err("There is not enough storage for another pack.");
         }
+        self.trade.purchase_slot(freight)
+    }
+
+    pub(super) fn buy_from_town(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        clock: TownClock,
+        material: &str,
+        freight: bool,
+    ) -> Result<bool, &'static str> {
+        self.check_town_purchase(catalog, stock, clock, material, freight)?;
         if !freight && let Some(slot) = self.sale_trip_for_return_purchase() {
             let index = self.trade.orders.len();
             if self
@@ -479,8 +491,23 @@ impl Construction {
             display
                 .push_str("Supplier stock renews tomorrow. Paid orders keep their allocation.\n");
         }
-        if !town_is_open(clock.seconds) {
-            display.push_str("Town closed · Opens at 07:00\n");
+        let issue = |fare, freight| {
+            self.check_town_purchase(catalog, stock, clock, id, freight)?;
+            self.market
+                .quote_pack(catalog, stock, id, (day, fare, freight))?;
+            Ok::<_, &'static str>(())
+        };
+        match (issue(pickup, false), issue(freight, true)) {
+            (Err(pickup), Err(freight)) if pickup == freight => {
+                display.push_str(&format!("Purchases unavailable · {pickup}\n"));
+            }
+            (pickup, freight) => {
+                for (method, result) in [("Pickup", pickup), ("Freight", freight)] {
+                    if let Err(reason) = result {
+                        display.push_str(&format!("{method} unavailable · {reason}\n"));
+                    }
+                }
+            }
         }
         let quote = match self.trade.quote(catalog, stock, id, day, 0) {
             Ok((qty, cents)) => format!(
@@ -638,6 +665,11 @@ mod tests {
             village
                 .trade_status(&catalog, &stock, clock)
                 .contains("h remaining")
+        );
+        assert!(
+            village
+                .trade_status(&catalog, &stock, clock)
+                .contains("Freight unavailable · A freight order is already on the way.")
         );
 
         clock.seconds = village.trade.delivery.as_ref().unwrap().eta;
