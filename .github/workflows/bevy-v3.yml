@@ -31,3 +31,20 @@ jobs:
       - run: cargo fmt --manifest-path bevy-v3/Cargo.toml --check
       - run: cargo clippy --locked --manifest-path bevy-v3/Cargo.toml --all-targets -- -D warnings
       - run: cargo test --locked --manifest-path bevy-v3/Cargo.toml
+      - name: Run the standalone simulation tool
+        run: |
+          cargo build --locked --manifest-path bevy-v3/Cargo.toml
+          standalone=$(mktemp -d)
+          cp bevy-v3/target/debug/solar-friends-v3 "$standalone/"
+          cd "$standalone"
+          cat > scenario.json <<'JSON'
+          {
+            "steps": 1200,
+            "orders": [
+              {"step": 0, "order": {"type": "build", "key": "gathering", "x": 40, "z": 36}}
+            ]
+          }
+          JSON
+          ./solar-friends-v3 --lab scenario.json > report.json
+          jq -e '.end_step == 1200 and .orders == [{"step": 0, "error": null}]' report.json
+          ./solar-friends-v3 --lab-replay report.json
