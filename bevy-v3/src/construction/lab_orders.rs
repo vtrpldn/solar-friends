@@ -15,6 +15,19 @@ pub(crate) enum LabOrder {
         #[serde(default)]
         size: Option<[i32; 2]>,
     },
+    Move {
+        site: usize,
+        x: i32,
+        z: i32,
+        #[serde(default)]
+        rotation: u8,
+    },
+    Salvage {
+        site: usize,
+    },
+    Demolish {
+        site: usize,
+    },
     Produce {
         site: usize,
         recipe: String,
@@ -273,6 +286,17 @@ impl Construction {
         Some(catalog.projects[&plan.key].name.as_str())
     }
 
+    fn lab_change_site(&self, site: usize) -> Result<usize, String> {
+        let index = site
+            .checked_sub(1)
+            .filter(|&index| self.plans.get(index).is_some_and(|plan| !plan.removed))
+            .ok_or("Choose an existing building by its project number.")?;
+        if self.changes.contains_key(&index) {
+            return Err("A change is already queued for this project.".into());
+        }
+        Ok(index)
+    }
+
     pub(crate) fn lab_order(
         &mut self,
         catalog: &Catalog,
@@ -310,6 +334,41 @@ impl Construction {
                 self.selection = None;
                 self.field_size = original_size;
                 if self.plans.len() == previous {
+                    return Err(self.status.clone());
+                }
+            }
+            LabOrder::Move {
+                site,
+                x,
+                z,
+                rotation,
+            } => {
+                let index = self.lab_change_site(*site)?;
+                if *rotation > 3 || !(-30..94).contains(x) || !(-30..94).contains(z) {
+                    return Err("Choose a valid destination and rotation.".into());
+                }
+                if let Some(issue) = self.can_change(index) {
+                    return Err(issue.into());
+                }
+                let previous_rotation = self.rotation;
+                let previous_move = self.moving;
+                self.rotation = *rotation;
+                self.queue_move(catalog, stock, ground, IVec2::new(*x, *z), index);
+                self.rotation = previous_rotation;
+                self.moving = previous_move;
+                if !self.changes.contains_key(&index) {
+                    return Err(self.status.clone());
+                }
+            }
+            LabOrder::Salvage { site } | LabOrder::Demolish { site } => {
+                let index = self.lab_change_site(*site)?;
+                let action = if matches!(order, LabOrder::Salvage { .. }) {
+                    ProjectAction::Salvage
+                } else {
+                    ProjectAction::Demolish
+                };
+                self.request_project_action(catalog, stock, index, action);
+                if !self.changes.contains_key(&index) && !self.plans[index].removed {
                     return Err(self.status.clone());
                 }
             }

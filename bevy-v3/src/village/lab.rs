@@ -692,6 +692,9 @@ fn order_label(order: &LabOrder) -> String {
     use crate::farming::FarmAction;
     match order {
         LabOrder::Build { key, x, z, .. } => format!("Build {key} at ({x}, {z})"),
+        LabOrder::Move { site, x, z, .. } => format!("Move project #{site} to ({x}, {z})"),
+        LabOrder::Salvage { site } => format!("Salvage project #{site}"),
+        LabOrder::Demolish { site } => format!("Demolish project #{site}"),
         LabOrder::Produce { site, recipe } => format!("Produce {recipe} at project #{site}"),
         LabOrder::Gather { resource } => format!("Gather at resource #{resource}"),
         LabOrder::Buy { material, freight } => {

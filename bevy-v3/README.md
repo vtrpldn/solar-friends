@@ -81,7 +81,7 @@ An example scenario with one construction order:
 }
 ```
 
-Order types include `build`, `produce`, `buy`, `sell`, `bed`, `configure-bed`, `outside`, `food-policy`, `grid`, `collect-water`, `purify`, and `service-water`. Project, bed, and resident numbers start at 1. Use site 0 for the camp water facility. Build coordinates use map cells, rotation takes 0–3 quarter turns, and fields accept a `size` pair in cells.
+Order types include `build`, `move`, `salvage`, `demolish`, `produce`, `buy`, `sell`, `bed`, `configure-bed`, `outside`, `food-policy`, `grid`, `collect-water`, `purify`, and `service-water`. Project, bed, and resident numbers start at 1. Use site 0 for the camp water facility. Build and move coordinates use map cells, rotation takes 0–3 quarter turns, and fields accept a `size` pair in cells.
 
 Set `"stop"` in the scenario to `"harvest"`, `"crop-failed"`, `"hydration"`, `"water"`, or `"blocked"` to stop at that condition. The blocked condition detects production jobs waiting for a navigable route. The report includes the actual end step and a final sample.
 

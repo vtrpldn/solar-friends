@@ -165,6 +165,16 @@ impl Construction {
         let Some(index) = self.production.selected else {
             return;
         };
+        self.request_project_action(catalog, stock, index, action);
+    }
+
+    pub(super) fn request_project_action(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        index: usize,
+        action: ProjectAction,
+    ) {
         let project = &self.plans[index];
         if matches!(action, ProjectAction::Prioritize) {
             self.priority = Some(index);
@@ -209,7 +219,7 @@ impl Construction {
         }
     }
 
-    fn can_change(&self, index: usize) -> Option<&'static str> {
+    pub(super) fn can_change(&self, index: usize) -> Option<&'static str> {
         if self.upkeep.servicing(index) {
             return Some("Wait for the resident to finish servicing this asset.");
         }
