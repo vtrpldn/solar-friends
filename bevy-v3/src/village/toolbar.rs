@@ -739,6 +739,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Build,
                 Action::Setup,
                 Action::View,
+                Action::Forecast,
                 Action::Library,
                 Action::Sound,
                 Action::Recipes,
@@ -1110,16 +1111,13 @@ fn handle_buttons(
                     }
                 }
                 Action::GridOverlay if picker.view_open => village.show_grid = !village.show_grid,
-                Action::Forecast if picker.view_open => {
-                    village.show_forecast = !village.show_forecast
-                }
+                Action::Forecast => village.show_forecast = !village.show_forecast,
                 Action::Diagnostics if picker.view_open => {
                     village.save_notice = diagnostics::copy_notice(&village, &catalog, &window);
                 }
                 Action::Camera(_)
                 | Action::CameraControls
                 | Action::GridOverlay
-                | Action::Forecast
                 | Action::Diagnostics => {}
                 Action::CampPreset(index) => pointer.preset = Some(CAMP_SITES[index].1),
                 Action::Setup => {
@@ -1753,13 +1751,15 @@ fn refresh(
             Action::PantryFromStores => !picker.open && !show_view && action.available(&village),
             _ => true,
         };
-        let show = if matches!(
+        let show = if matches!(action, Action::Forecast) {
+            if parent.parent() == *menu_id {
+                show_view
+            } else {
+                !show_view && !picker.open && action.available(&village)
+            }
+        } else if matches!(
             action,
-            Action::Camera(_)
-                | Action::CameraControls
-                | Action::GridOverlay
-                | Action::Forecast
-                | Action::Diagnostics
+            Action::Camera(_) | Action::CameraControls | Action::GridOverlay | Action::Diagnostics
         ) {
             show_view
         } else {

@@ -947,6 +947,14 @@ mod tests {
         );
         press_button(&mut app, "Close view");
 
+        press_button(&mut app, "Show forecast");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Day 3 ·"))
+        );
+        press_button(&mut app, "Hide forecast");
         press_button(&mut app, "Map lenses");
         press_button(&mut app, "Other lenses");
         press_button(&mut app, "Material chains");
