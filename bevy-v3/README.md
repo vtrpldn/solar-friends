@@ -122,6 +122,8 @@ Set `"stop"` in the scenario to `"harvest"`, `"crop-failed"`, `"hydration"`, `"w
 
 `{"type":"carry-water","source":1,"site":0,"channel":"irrigation"}` queues a resident to carry water from project 1 to the camp reservoir. Channels are `drinking`, `irrigation`, `greywater`, and `sewage`.
 
+Use `{"type":"terrain-stroke","brush":"raise","points":[[40,24],[42,24]]}` to shape terrain. Supply 1–256 brush samples as world coordinates in meters. Brushes are `raise`, `lower`, `flatten`, and `smooth`. Flatten samples the grade at the first point. The same terrain protections apply as in the desktop editor.
+
 `{"type":"road","start":[44,36],"end":[46,37]}` plans a connected route in one order. Residents still haul materials and build each tile.
 
 `{"type":"work-priority","group":"construction","level":3}` sets a priority from 0 (low) to 3 (highest). Groups are `essentials`, `maintenance`, `production`, and `construction`. Use `{"type":"worker-reservations","essentials":1,"production":2}` to reserve workers, up to five in total.

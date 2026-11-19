@@ -103,7 +103,8 @@ impl Foundation {
     }
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) enum Brush {
     #[default]
     Raise,
@@ -282,6 +283,35 @@ impl TerrainEditor {
     #[cfg(test)]
     pub fn stroke(&mut self, terrain: &Terrain, point: Vec3, occupied: impl Fn(IVec2) -> bool) {
         self.stroke_path(terrain, &[point], occupied);
+    }
+
+    pub(crate) fn scripted_stroke(
+        &mut self,
+        terrain: &Terrain,
+        brush: Brush,
+        points: &[[f32; 2]],
+        occupied: impl Fn(IVec2) -> bool,
+    ) -> Result<(), String> {
+        let inside = -(HALF_WIDTH as f32)..=HALF_WIDTH as f32;
+        if !(1..=256).contains(&points.len())
+            || points
+                .iter()
+                .flatten()
+                .any(|coordinate| !inside.contains(coordinate))
+        {
+            return Err("Choose 1–256 terrain points inside the plot.".into());
+        }
+        let samples: Vec<_> = points
+            .iter()
+            .map(|&[x, z]| Vec3::new(x, terrain.height_at(x, z), z))
+            .collect();
+        self.select_brush(brush);
+        let before = self.revision;
+        self.stroke_path(terrain, &samples, occupied);
+        if self.revision == before {
+            return Err(self.status.into());
+        }
+        Ok(())
     }
 
     pub fn stroke_path(

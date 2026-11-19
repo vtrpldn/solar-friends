@@ -420,18 +420,23 @@ impl Runner {
                 seconds: self.village.clock,
                 round_trip_km: self.setup.round_trip_km(),
             };
-            let error = self
-                .village
-                .construction
-                .lab_order(
+            let result = match &order.order {
+                LabOrder::TerrainStroke { brush, points } => self
+                    .village
+                    .terrain_editor
+                    .scripted_stroke(&self.terrain, *brush, points, |cell| {
+                        self.village.construction.protects_terrain(cell)
+                    }),
+                order => self.village.construction.lab_order(
                     catalog,
                     &mut self.village.stock,
                     ground,
                     clock,
-                    &order.order,
+                    order,
                     self.setup.richness(),
-                )
-                .err();
+                ),
+            };
+            let error = result.err();
             self.outcomes.push(Outcome {
                 step: self.index,
                 error,
@@ -768,6 +773,9 @@ fn lab_order_page(runner: &Runner, page: &mut usize) -> String {
 fn order_label(order: &LabOrder) -> String {
     use crate::farming::FarmAction;
     match order {
+        LabOrder::TerrainStroke { points, .. } => {
+            format!("Shape terrain at {} points", points.len())
+        }
         LabOrder::Build { key, x, z, .. } => format!("Build {key} at ({x}, {z})"),
         LabOrder::Road {
             start: [x, z],
@@ -1657,6 +1665,27 @@ mod tests {
         let report =
             serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
         assert_eq!(verify_report(report, &catalog).unwrap(), 8000);
+    }
+
+    #[test]
+    fn terrain_strokes_change_the_saved_land_and_replay() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps": 10,
+            "orders": [
+                {"step": 0, "order": {"type": "terrain-stroke", "brush": "raise", "points": [[40,24],[42,24]]}},
+                {"step": 1, "order": {"type": "terrain-stroke", "brush": "raise", "points": [[300,24]]}}
+            ]
+        }"#).unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        assert!(runner.outcomes[0].error.is_none());
+        assert!(runner.outcomes[1].error.is_some());
+        assert!(
+            runner.terrain.elevation(40.0, 24.0) > runner.setup.terrain().elevation(40.0, 24.0)
+        );
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 10);
     }
 
     #[test]
