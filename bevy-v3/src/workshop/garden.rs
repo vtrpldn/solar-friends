@@ -207,6 +207,7 @@ enum GardenAction {
     Night,
     RestoreGallery,
     Export,
+    Import,
 }
 #[derive(Component)]
 struct SelectableProp(Entity);
@@ -477,6 +478,7 @@ fn setup(
                 ("Redo", GardenAction::Redo),
                 ("Restore gallery", GardenAction::RestoreGallery),
                 ("Export scene", GardenAction::Export),
+                ("Import scene", GardenAction::Import),
                 ("Gallery", GardenAction::Gallery),
                 ("Whole plot", GardenAction::Overview),
                 ("Turn left", GardenAction::TurnLeft),
@@ -533,7 +535,8 @@ fn update_garden_buttons(
                 | GardenAction::Grid
                 | GardenAction::Night
                 | GardenAction::RestoreGallery
-                | GardenAction::Export => true,
+                | GardenAction::Export
+                | GardenAction::Import => true,
                 GardenAction::LoadLandscape => garden.layout.biome != "flat",
                 GardenAction::Rotate => selected_prop || garden.pending.is_some(),
                 GardenAction::Cancel => garden.pending.is_some(),
@@ -940,8 +943,10 @@ fn import_scene(
     window: Single<Entity, With<bevy::window::PrimaryWindow>>,
     models: Res<WorkshopCatalog>,
     mut garden: ResMut<Garden>,
+    buttons: Query<(&Interaction, &GardenAction), Changed<Interaction>>,
+    _main_thread: bevy::ecs::system::NonSendMarker,
 ) {
-    let Some(path) = dropped
+    let dropped_path = dropped
         .read()
         .filter_map(|event| match event {
             FileDragAndDrop::DroppedFile {
@@ -951,10 +956,24 @@ fn import_scene(
             _ => None,
         })
         .last()
-    else {
+        .cloned();
+    let clicked_import = buttons.iter().any(|(&interaction, &action)| {
+        interaction == Interaction::Pressed && action == GardenAction::Import
+    });
+    let path = dropped_path.or_else(|| {
+        if clicked_import {
+            rfd::FileDialog::new()
+                .set_title("Import Solar Friends scene")
+                .add_filter("Scene JSON", &["json"])
+                .pick_file()
+        } else {
+            None
+        }
+    });
+    let Some(path) = path else {
         return;
     };
-    match read_layout(path, &models) {
+    match read_layout(&path, &models) {
         Ok(layout) => {
             garden.edit();
             garden.layout = layout;

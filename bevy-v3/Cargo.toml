@@ -7,5 +7,6 @@ publish = false
 [dependencies]
 bevy = { version = "0.18", default-features = false, features = ["3d", "ui"] }
 glam = { version = "0.30", features = ["serde"] }
+rfd = "0.17"
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
