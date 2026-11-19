@@ -358,7 +358,7 @@ impl Action {
             Self::GridOverlay => "Show grid".into(),
             Self::Forecast if village.show_forecast => "Hide forecast".into(),
             Self::Forecast => "Show forecast".into(),
-            Self::Diagnostics => "Export bug report".into(),
+            Self::Diagnostics => "Copy bug report".into(),
             Self::Camera(action) => match action {
                 crate::CameraAction::Camp => "Focus camp",
                 crate::CameraAction::Reset => "Reset camera",
@@ -1021,7 +1021,7 @@ fn handle_buttons(
                     village.show_forecast = !village.show_forecast
                 }
                 Action::Diagnostics if picker.view_open => {
-                    village.save_notice = diagnostics::export_notice(&village, &catalog, &window);
+                    village.save_notice = diagnostics::copy_notice(&village, &catalog, &window);
                 }
                 Action::Camera(_)
                 | Action::GridOverlay
