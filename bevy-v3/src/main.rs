@@ -999,5 +999,11 @@ mod tests {
         app.world_mut().run_schedule(Update);
         assert!(!app.world().resource::<WorldSetup>().open);
         assert!(app.world().resource::<village::Village>().camp.is_none());
+
+        app.world_mut().resource_mut::<WorldSetup>().mode = setup::Mode::Sandbox;
+        app.update();
+        let sandbox = app.world().resource::<village::Village>();
+        assert_eq!(sandbox.camp, Some(IVec2::new(36, 36)));
+        assert!(matches!(sandbox.mode(), Some(setup::Mode::Sandbox)));
     }
 }

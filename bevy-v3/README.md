@@ -28,7 +28,7 @@ A completed coop or goat pen can store feed and drinking water, then produce egg
 
 Story reserves cash for town pickup when a blueprint needs materials beyond current stock. Press U to toggle automatic ordering.
 
-In Sandbox, materials are unlimited. Press I to toggle instant building.
+Sandbox skips the arrival and pitches camp in the clearing when it is free. If the clearing is occupied, choose your campsite immediately. Materials are unlimited. Press I to toggle instant building.
 
 In Story, press H for finances and paid town shifts. Book one day shift or turn on repeating weekday work for a selected resident. Wages reach village savings when the resident returns. Press Tab in Finances to open town trade, buy for pickup or freight, quote and reserve a sale, or set an automatic sale policy. Households can restock food automatically. Tab again to inspect food expiry and cold-storage use. Dried provisions keep longer, and powered cold storage slows aging for the food that fits.
 

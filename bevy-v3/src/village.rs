@@ -61,10 +61,11 @@ const SPEEDS: [(KeyCode, u8); 4] = [
 const UNAVAILABLE_SPEED: u8 = 64;
 const LIVE_STEP_BUDGET: std::time::Duration = std::time::Duration::from_millis(8);
 pub(crate) const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
+const CLEARING_CAMP: IVec2 = IVec2::new(36, 36);
 const CAMP_SITES: [(KeyCode, IVec2); 3] = [
     (KeyCode::Digit1, IVec2::new(28, 31)),
     (KeyCode::Digit2, IVec2::new(33, -9)),
-    (KeyCode::Digit3, IVec2::new(36, 36)),
+    (KeyCode::Digit3, CLEARING_CAMP),
 ];
 
 pub struct VillagePlugin;
@@ -899,12 +900,23 @@ fn village_input(
             commands.entity(entity).despawn();
         }
         if new_world {
+            let sandbox = setup.mode == Mode::Sandbox;
+            let camp = (sandbox
+                && camp_placement_error(&setup.terrain(), &land, CLEARING_CAMP, true).is_none())
+            .then_some(CLEARING_CAMP);
             *village = Village {
                 session_serial: village.session_serial.wrapping_add(1),
                 setup: Some(setup.session()),
                 stock: Stock::for_start(&setup, &catalog),
+                arrival_time: if sandbox { ARRIVAL_DURATION } else { 0.0 },
+                camp,
                 ..default()
             };
+            if camp.is_some() {
+                village
+                    .construction
+                    .record_event(0.0, "Camp is ready.".into());
+            }
         }
         village.rebuild_scene = false;
         camera.target = Vec3::new(0.0, 2.0, -86.0);
