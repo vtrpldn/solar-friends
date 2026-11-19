@@ -1987,20 +1987,29 @@ impl Construction {
         camp: IVec2,
     ) {
         let position = self.residents[index].position;
-        let candidates = self
-            .priority
-            .into_iter()
-            .chain((0..self.plans.len()).filter(|index| Some(*index) != self.priority));
+        let profile = &catalog.residents[index];
+        let mut candidates: Vec<_> = self
+            .plans
+            .iter()
+            .enumerate()
+            .filter_map(|(id, project)| {
+                let definition = &catalog.projects[&project.key];
+                (!project.removed
+                    && !self.changes.contains_key(&id)
+                    && project.pickups == 0
+                    && project.work < definition.work)
+                    .then_some(id)
+            })
+            .collect();
+        candidates.sort_by_key(|&id| {
+            let key = &self.plans[id].key;
+            let preference = 3 * u8::from(profile.aspiration.key == *key)
+                + 2 * u8::from(profile.strengths.contains(key));
+            (self.priority != Some(id), std::cmp::Reverse(preference))
+        });
         for id in candidates {
             let project = &self.plans[id];
             let definition = &catalog.projects[&project.key];
-            if project.removed
-                || self.changes.contains_key(&id)
-                || project.pickups > 0
-                || project.work >= definition.work
-            {
-                continue;
-            }
             let crew: Vec<_> = self
                 .residents
                 .iter()
@@ -2718,6 +2727,29 @@ mod tests {
         );
         assert_eq!(construction.finished_models(&catalog).count(), 1);
         assert_eq!(stock.available("wood"), 36);
+    }
+
+    #[test]
+    fn residents_prefer_their_aspiration_unless_the_player_prioritizes_another_build() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let mut village = Construction::default();
+        for (key, cell) in [
+            ("gathering", IVec2::new(44, 36)),
+            ("orchard", IVec2::new(49, 36)),
+        ] {
+            let mut plan = village.proposed_site(&catalog, key, cell);
+            plan.delivered = plan.loads;
+            village.plans.push(plan);
+        }
+        village.assign(0, &catalog, &terrain, &land, camp);
+        assert_eq!(village.residents[0].assignment.take().unwrap().project, 1);
+        village.priority = Some(0);
+        village.assign(0, &catalog, &terrain, &land, camp);
+        assert_eq!(village.residents[0].assignment.take().unwrap().project, 0);
     }
 
     #[test]
