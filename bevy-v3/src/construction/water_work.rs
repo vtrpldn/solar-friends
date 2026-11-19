@@ -446,7 +446,20 @@ impl Construction {
             .map(WaterJob::label)
     }
 
-    fn waiting_for_water_supply(&self, target: usize, job: &WaterJob) -> Option<&'static str> {
+    fn water_job_wait(&self, target: usize, job: &WaterJob) -> Option<&'static str> {
+        if let WaterAction::Carry { channel, .. } = job.action
+            && !matches!(job.phase, WaterPhase::Deliver)
+            && self
+                .utilities
+                .water_site(target)
+                .is_some_and(|site| site.space(channel) <= EPSILON)
+        {
+            return Some(if matches!(job.phase, WaterPhase::Staged(_)) {
+                "Destination full · Sealed water waiting beside the reservoir"
+            } else {
+                "Waiting for space at the destination"
+            });
+        }
         if !matches!(job.phase, WaterPhase::Approach) {
             return None;
         }
@@ -477,7 +490,7 @@ impl Construction {
     }
 
     pub(super) fn water_route_blocked(&self, target: usize, job: &WaterJob, clock: f64) -> bool {
-        self.waiting_for_water_supply(target, job).is_none()
+        self.water_job_wait(target, job).is_none()
             && ((job.waiting_for_access && job.retry > clock)
                 || job
                     .worker
@@ -493,7 +506,7 @@ impl Construction {
         if self.water_route_blocked(target, job, clock) {
             "Waiting for access"
         } else {
-            self.waiting_for_water_supply(target, job)
+            self.water_job_wait(target, job)
                 .unwrap_or_else(|| job.label())
         }
     }
@@ -1071,6 +1084,13 @@ impl Construction {
             }
             return false;
         }
+        if self.water_job_wait(id, job).is_some() {
+            if let Some(worker) = job.worker.take() {
+                self.residents[worker].path.clear();
+            }
+            job.waiting_for_access = false;
+            return false;
+        }
         let worker = if let Some(worker) = job.worker {
             worker
         } else {
@@ -1080,18 +1100,6 @@ impl Construction {
             if self.reservation_pass.is_none() {
                 job.retry = clock + 3.0;
                 job.waiting_for_access = false;
-            }
-            if let (WaterAction::Carry { channel, .. }, WaterPhase::Staged(_)) =
-                (job.action, job.phase)
-                && !self
-                    .utilities
-                    .water_site(id)
-                    .is_some_and(|node| node.space(channel) > EPSILON)
-            {
-                return false;
-            }
-            if self.waiting_for_water_supply(id, job).is_some() {
-                return false;
             }
             let mut attempted_route = false;
             let picked = (0..self.residents.len())
@@ -1496,6 +1504,12 @@ mod tests {
             setup.richness(),
         )
         .unwrap();
+        town.utilities.deliver_water(0, 1, 60.0);
+        assert_eq!(
+            town.water_job_status(0, &town.water_jobs[&0], 0.0),
+            "Waiting for space at the destination"
+        );
+        town.utilities.take_water(Some(0), 1, 60.0);
         for cell in approach_points(IVec2::new(42, -13), IVec2::ONE, town.residents[0].position) {
             let obstacle = town.proposed_site(&catalog, "supply-5", cell);
             town.plans.push(obstacle);
@@ -1529,6 +1543,10 @@ mod tests {
         }
         assert_eq!(amount(&town, 0), 60.0);
         assert_eq!(town.water_jobs[&0].carried, 10.0);
+        assert!(
+            town.water_job_status(0, &town.water_jobs[&0], 40.0)
+                .starts_with("Destination full")
+        );
         assert!(!town.working_water(0));
         let json = serde_json::to_string(&town).unwrap();
         let mut town: Construction = serde_json::from_str(&json).unwrap();
