@@ -202,6 +202,7 @@ fn update_land(
 }
 
 fn animate_river(
+    setup: Res<WorldSetup>,
     village: Res<village::Village>,
     river: Query<&Mesh3d, With<RiverMesh>>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -217,7 +218,7 @@ fn animate_river(
     {
         mesh.insert_attribute(
             Mesh::ATTRIBUTE_COLOR,
-            terrain::river_colors(frame as f64 / 12.0),
+            terrain::river_colors(frame as f64 / 12.0, setup.seed()),
         );
         *previous = Some(key);
     }

@@ -521,7 +521,7 @@ impl Terrain {
             let z = f64::from(row) - HALF_WIDTH;
             let (center, width) = self.river(z);
             for column in 0..RIVER_COLUMNS {
-                let lateral = (2.0 * f64::from(column) / f64::from(RIVER_COLUMNS - 1)) - 1.0;
+                let lateral = river_lateral(column);
                 let x = center + width * lateral;
                 positions.push([x as f32, 0.05, z as f32]);
                 if row < CELLS * 2 && column < RIVER_COLUMNS - 1 {
@@ -538,7 +538,7 @@ impl Terrain {
             }
         }
         surface_mesh(positions, indices)
-            .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, river_colors(0.0))
+            .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, river_colors(0.0, self.seed))
     }
 
     pub fn river_bank_mesh(&self, extra: f64, height: f32) -> Mesh {
@@ -560,7 +560,12 @@ impl Terrain {
     }
 }
 
-pub fn river_colors(seconds: f64) -> Vec<[f32; 4]> {
+fn river_lateral(column: u32) -> f64 {
+    let across = f64::from(column) / f64::from(RIVER_COLUMNS - 1);
+    ((across - 0.5) * std::f64::consts::PI).sin()
+}
+
+pub fn river_colors(seconds: f64, seed: u32) -> Vec<[f32; 4]> {
     let deep = Color::srgb_u8(58, 110, 127).to_linear();
     let shallow = Color::srgb_u8(108, 160, 150).to_linear();
     let ripple = Color::srgb_u8(161, 195, 185).to_linear();
@@ -568,13 +573,18 @@ pub fn river_colors(seconds: f64) -> Vec<[f32; 4]> {
     for row in 0..=CELLS * 2 {
         let downstream = f64::from(row) - seconds * 0.38;
         for column in 0..RIVER_COLUMNS {
-            let across = f64::from(column) / f64::from(RIVER_COLUMNS - 1);
-            let edge = (across * 2.0 - 1.0).abs();
+            let lateral = river_lateral(column);
+            let across = (lateral + 1.0) * 0.5;
+            let edge = lateral.abs();
             let crest = (downstream * 0.83 + (across * 9.0 + downstream * 0.13).sin()).sin();
             let streak = (across * 19.0 + downstream * 0.29).cos().max(0.0);
+            let bank = ((edge - 0.94) / 0.06).clamp(0.0, 1.0);
+            let edge_flow = noise(lateral * 4.2, downstream * 0.32, seed);
+            let bank_foam = bank * bank * (3.0 - 2.0 * bank) * (0.08 + edge_flow * 0.13);
+            let foam = crest.max(0.0).powi(4) * streak * 0.23 + bank_foam;
             let tint = deep
                 .mix(&shallow, edge.powi(2) as f32)
-                .mix(&ripple, (crest.max(0.0).powi(4) * streak * 0.23) as f32);
+                .mix(&ripple, foam as f32);
             colors.push([tint.red, tint.green, tint.blue, 1.0]);
         }
     }
