@@ -17,6 +17,9 @@ enum Action {
     ListedHome(usize),
     Shift(bool),
     Ledger,
+    PantryBatches,
+    PantryPriority,
+    PantryPolicy(i8, i64, bool),
     Grid,
     Water(WaterCommand),
     AutomaticUpkeep,
@@ -79,6 +82,14 @@ impl Action {
                 village.utility_panel,
                 Some(UtilityPanel::Residents | UtilityPanel::Finances)
             ),
+            Self::PantryBatches => village.utility_panel == Some(UtilityPanel::Pantry),
+            Self::PantryPriority | Self::PantryPolicy(..) => {
+                village.utility_panel == Some(UtilityPanel::Pantry)
+                    && village.pantry_batch_page.is_none()
+            }
+            Self::Page(_) if village.utility_panel == Some(UtilityPanel::Pantry) => {
+                village.pantry_batch_page.is_some()
+            }
             Self::Shift(_) | Self::Ledger => village.utility_panel == Some(UtilityPanel::Finances),
             Self::Home(_) | Self::ListedHome(_) => {
                 village.utility_panel == Some(UtilityPanel::Residents)
@@ -131,6 +142,16 @@ impl Action {
             Self::Shift(true) => "Toggle weekday shifts".into(),
             Self::Ledger if village.finance_history_open => "Close ledger".into(),
             Self::Ledger => "Open ledger".into(),
+            Self::PantryBatches if village.pantry_batch_page.is_some() => {
+                "Close food batches".into()
+            }
+            Self::PantryBatches => "Food batches".into(),
+            Self::PantryPriority => "Change food priority".into(),
+            Self::PantryPolicy(_, _, true) => "Toggle food restock".into(),
+            Self::PantryPolicy(-1, _, false) => "Reserve −1".into(),
+            Self::PantryPolicy(1, _, false) => "Reserve +1".into(),
+            Self::PantryPolicy(_, budget, false) if budget < 0 => "Budget −R$25".into(),
+            Self::PantryPolicy(_, _, false) => "Budget +R$25".into(),
             Self::Grid if village.construction.utilities.grid_off => "Connect grid".into(),
             Self::Grid => "Disconnect grid".into(),
             Self::Water(command) => match command {
@@ -241,6 +262,17 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::Shift(false));
                 spawn_button(menu, &assets, Action::Shift(true));
                 spawn_button(menu, &assets, Action::Ledger);
+                spawn_button(menu, &assets, Action::PantryBatches);
+                spawn_button(menu, &assets, Action::PantryPriority);
+                for (reserve, budget, toggle) in [
+                    (-1, 0, false),
+                    (1, 0, false),
+                    (0, -2_500, false),
+                    (0, 2_500, false),
+                    (0, 0, true),
+                ] {
+                    spawn_button(menu, &assets, Action::PantryPolicy(reserve, budget, toggle));
+                }
                 spawn_button(menu, &assets, Action::Grid);
                 for command in [
                     WaterCommand::Camp { source: true },
@@ -388,6 +420,18 @@ fn handle_buttons(
                     let town = &mut *village;
                     town.water_panel.apply(command, &mut town.construction);
                 }
+                Action::PantryBatches if !picker.open => {
+                    village.pantry_batch_page = village.pantry_batch_page.is_none().then_some(0);
+                }
+                Action::PantryPriority if !picker.open => {
+                    village.stock.pantry.priority = village.stock.pantry.priority.next();
+                }
+                Action::PantryPolicy(reserve, budget, toggle) if !picker.open => {
+                    village
+                        .construction
+                        .trade
+                        .pantry_controls(reserve, budget, toggle);
+                }
                 Action::Panel(_)
                 | Action::Project(_)
                 | Action::ProjectFilter
@@ -396,6 +440,9 @@ fn handle_buttons(
                 | Action::ListedHome(_)
                 | Action::Shift(_)
                 | Action::Ledger
+                | Action::PantryBatches
+                | Action::PantryPriority
+                | Action::PantryPolicy(..)
                 | Action::Grid
                 | Action::Water(_)
                 | Action::AutomaticUpkeep
@@ -436,6 +483,7 @@ fn refresh(
         return;
     }
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
+    let show_pantry = !picker.open && Action::PantryBatches.available(&village);
     let show_finances = !picker.open && Action::Ledger.available(&village);
     let show_power = !picker.open && Action::Grid.available(&village);
     let show_water = !picker.open && Action::Water(WaterCommand::River).available(&village);
@@ -462,6 +510,7 @@ fn refresh(
     menu.display = if show_projects
         || show_residents
         || show_finances
+        || show_pantry
         || show_power
         || show_upkeep
         || show_water
@@ -482,6 +531,9 @@ fn refresh(
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => show_residents || show_finances,
             Action::Shift(_) | Action::Ledger => show_finances,
+            Action::PantryBatches | Action::PantryPriority | Action::PantryPolicy(..) => {
+                show_pantry && action.available(&village)
+            }
             Action::Home(_) => show_residents,
             Action::Grid => show_power,
             Action::Water(_) => show_water,

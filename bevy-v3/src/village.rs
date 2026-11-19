@@ -387,6 +387,14 @@ impl Village {
 
     fn change_panel_page(&mut self, catalog: &Catalog, forward: bool) {
         let (pages, page) = match self.utility_panel {
+            Some(UtilityPanel::Pantry) => {
+                let Some(page) = &mut self.pantry_batch_page else {
+                    return;
+                };
+                let pages = self.stock.pantry.batches(catalog, *page).0;
+                *page = (*page).min(pages - 1);
+                (pages, page)
+            }
             Some(UtilityPanel::Finances) if self.finance_history_open => (
                 self.stock.finance_history(self.finance_history_page).0,
                 &mut self.finance_history_page,
@@ -933,16 +941,9 @@ fn village_input(
                 town.pantry_batch_page = town.pantry_batch_page.is_none().then_some(0);
                 return;
             }
-            if let Some(page) = town.pantry_batch_page {
+            if town.pantry_batch_page.is_some() {
                 if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
-                    let pages = town.stock.pantry.batches(&catalog, page).0;
-                    let page = page.min(pages - 1);
-                    let next = if keyboard.just_pressed(KeyCode::PageDown) {
-                        (page + 1) % pages
-                    } else {
-                        (page + pages - 1) % pages
-                    };
-                    town.pantry_batch_page = Some(next);
+                    town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
                 }
                 return;
             }
