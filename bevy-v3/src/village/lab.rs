@@ -370,6 +370,27 @@ impl Runner {
         Ok(())
     }
 
+    fn latest_bed_outcome(&self, site: usize, bed: usize) -> Option<&Outcome> {
+        self.scenario
+            .orders
+            .iter()
+            .zip(&self.outcomes)
+            .rev()
+            .find_map(|(scheduled, outcome)| match &scheduled.order {
+                LabOrder::Bed {
+                    site: target,
+                    bed: number,
+                    ..
+                }
+                | LabOrder::ConfigureBed {
+                    site: target,
+                    bed: number,
+                    ..
+                } if *target == site && *number == bed => Some(outcome),
+                _ => None,
+            })
+    }
+
     fn report(&self) -> Report<'_> {
         Report {
             version: 4,
@@ -676,9 +697,18 @@ fn lab_bed_page(
     let name = construction
         .lab_job_site_name(catalog, site)
         .unwrap_or("Cultivation");
-    let details = construction
+    let mut details = construction
         .bed_status(site, index, runner.village.clock)
         .unwrap_or_else(|| "No beds.".into());
+    if let Some(outcome) = runner.latest_bed_outcome(site + 1, index + 1) {
+        use std::fmt::Write as _;
+        let result = outcome.error.as_deref().unwrap_or("Accepted");
+        let _ = write!(
+            details,
+            "\nLast bed order · Step {} · {result}",
+            outcome.step
+        );
+    }
     let controls = if runner.done() {
         ""
     } else {
@@ -1057,7 +1087,12 @@ mod tests {
         keys.press(KeyCode::ControlLeft);
         keys.press(KeyCode::ShiftLeft);
         keys.press(KeyCode::Digit1);
-        lab_bed_page(&mut runner, &catalog, &keys, &mut playback);
+        let first = lab_bed_page(&mut runner, &catalog, &keys, &mut playback);
+        assert!(first.contains("Last bed order · Step 0 · Finish the current bed job"));
+        keys.reset_all();
+        playback.inventory_page = 1;
+        let second = lab_bed_page(&mut runner, &catalog, &keys, &mut playback);
+        assert!(second.contains("Last bed order · Step 0 · Accepted"));
         let count = runner.village.construction.farming.plots[&0].beds.len();
         assert!(count > 1);
         assert_eq!(runner.outcomes.len(), 2 + count);
