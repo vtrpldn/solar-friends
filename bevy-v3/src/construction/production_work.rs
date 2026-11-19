@@ -31,6 +31,7 @@ impl Construction {
         self.production.selected = index;
         self.production.open = false;
         self.production.page = 0;
+        self.production.craft_destination = 0;
         self.production.notice.clear();
     }
 
@@ -72,12 +73,90 @@ impl Construction {
         if !self.production.open || self.menu {
             return;
         }
+        if let Some(source) = self.production.selected {
+            let (job, destinations) = self.craft_destinations(catalog, source);
+            if let Some(job) = job
+                && !destinations.is_empty()
+            {
+                let mut cursor = self
+                    .production
+                    .craft_destination
+                    .min(destinations.len() - 1);
+                if keyboard.just_pressed(KeyCode::BracketRight) {
+                    cursor = (cursor + 1) % destinations.len();
+                } else if keyboard.just_pressed(KeyCode::BracketLeft) {
+                    cursor = (cursor + destinations.len() - 1) % destinations.len();
+                }
+                self.production.craft_destination = cursor;
+                if keyboard.just_pressed(KeyCode::KeyM)
+                    && !keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+                {
+                    self.move_craft_job(catalog, stock, job, destinations[cursor]);
+                    return;
+                }
+            }
+        }
         if keyboard.any_just_pressed([KeyCode::PageDown, KeyCode::PageUp]) {
             self.page_recipes(catalog, keyboard.just_pressed(KeyCode::PageDown));
         }
         if let Some(row) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key)) {
             self.queue_recipe_row(catalog, stock, row);
         }
+    }
+
+    fn craft_destinations(&self, catalog: &Catalog, source: usize) -> (Option<usize>, Vec<usize>) {
+        let Some(job) = self.production.jobs.iter().position(|job| {
+            job.site == source
+                && job.phase != Phase::Return
+                && catalog.production[&job.recipe].craft.is_some()
+        }) else {
+            return (None, Vec::new());
+        };
+        let recipe = &catalog.production[&self.production.jobs[job].recipe];
+        let destinations = self
+            .plans
+            .iter()
+            .enumerate()
+            .filter_map(|(id, plan)| {
+                let definition = &catalog.projects[&plan.key];
+                (id != source
+                    && !plan.removed
+                    && plan.work >= definition.work
+                    && definition.kind == recipe.kind
+                    && !self.changes.contains_key(&id)
+                    && self.utilities.enabled(id)
+                    && !self.production.jobs.iter().any(|job| job.site == id))
+                .then_some(id)
+            })
+            .collect();
+        (Some(job), destinations)
+    }
+
+    fn move_craft_job(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        index: usize,
+        destination: usize,
+    ) {
+        let job = &mut self.production.jobs[index];
+        if let Some(worker) = job.worker.take() {
+            self.residents[worker].path.clear();
+        }
+        job.site = destination;
+        job.phase = Phase::Pickup;
+        job.retry_at = 0.0;
+        job.waiting_for_access = false;
+        stock
+            .equipment
+            .release(|worker, task| self.active_tool_task(worker, task));
+        self.select_project(Some(destination));
+        self.production.open = true;
+        self.production.notice = format!(
+            "Job moved to {} #{}.",
+            catalog.projects[&self.plans[destination].key].name,
+            destination + 1
+        );
     }
 
     fn selected_irrigation_site(&self, catalog: &Catalog) -> Option<usize> {
@@ -530,6 +609,27 @@ impl Construction {
                     self.production.page + 1,
                     pages
                 ));
+            }
+            let (craft, destinations) = self.craft_destinations(catalog, index);
+            if craft.is_some() {
+                if let Some(&destination) = destinations.get(
+                    self.production
+                        .craft_destination
+                        .min(destinations.len().saturating_sub(1)),
+                ) {
+                    use std::fmt::Write;
+                    let workspace = &catalog.projects[&self.plans[destination].key].name;
+                    let _ = write!(
+                        text,
+                        "\nM Move unfinished job to {workspace} #{}",
+                        destination + 1
+                    );
+                    if destinations.len() > 1 {
+                        text.push_str(" · [ / ] Choose workspace");
+                    }
+                } else {
+                    text.push_str("\nNo other free, enabled workspace");
+                }
             }
             text.push_str("\nC Close recipes");
         } else if !recipes.is_empty() && !self.menu {
@@ -1229,6 +1329,47 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn recipe_controls_move_unfinished_craft_work_without_resetting_progress() {
+        let catalog = Catalog::default();
+        let mut setup = WorldSetup::default();
+        setup.mode = crate::setup::Mode::Sandbox;
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        for x in 44..47 {
+            let mut shop = village.proposed_site(&catalog, "supply-5", IVec2::new(x, 36));
+            shop.work = catalog.projects["supply-5"].work;
+            shop.delivered = shop.loads;
+            village.plans.push(shop);
+        }
+        stock.receive(&BTreeMap::from([("carpentry-tools".into(), 1)]));
+        village.queue_batch(&catalog, &mut stock, 0, "craft_garden-tools");
+        assert_eq!(
+            village.production.jobs.len(),
+            1,
+            "{}",
+            village.production.notice
+        );
+        village.production.jobs[0].work = 7.0;
+        village.production.jobs[0].worker = Some(0);
+        village.residents[0].path.push_back(Vec2::new(45.0, 36.0));
+        village.select_project(Some(0));
+        village.toggle_recipes(&catalog);
+        let mut keyboard = ButtonInput::default();
+        keyboard.press(KeyCode::BracketRight);
+        village.production_input(&catalog, &mut stock, &keyboard);
+        keyboard.reset_all();
+        keyboard.press(KeyCode::KeyM);
+        village.production_input(&catalog, &mut stock, &keyboard);
+        let job = &village.production.jobs[0];
+        assert_eq!(job.site, 2);
+        assert_eq!(job.work, 7.0);
+        assert!(job.worker.is_none());
+        assert!(job.phase == Phase::Pickup);
+        assert!(village.residents[0].path.is_empty());
+        assert_eq!(village.production.selected, Some(2));
+    }
 
     #[test]
     fn powered_workshop_doubles_machine_work_and_gives_residents_experience() {

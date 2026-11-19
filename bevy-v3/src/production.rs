@@ -14,6 +14,8 @@ pub struct Production {
     #[serde(skip)]
     pub page: usize,
     #[serde(skip)]
+    pub craft_destination: usize,
+    #[serde(skip)]
     pub notice: String,
     #[serde(default)]
     pub kitchen_policy: kitchen::KitchenPolicy,
