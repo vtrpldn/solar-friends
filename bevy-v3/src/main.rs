@@ -730,6 +730,19 @@ mod tests {
             .test_directory = Some(save_dir.clone());
         app.update();
 
+        press_button(&mut app, "Continue last autosave");
+        assert!(app.world().resource::<WorldSetup>().open);
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| {
+                    text.0
+                        .contains("The autosave was preserved. Open Saved villages")
+                })
+        );
+        press_button(&mut app, "Saved villages");
+        press_button(&mut app, "Close saved villages");
         press_button(&mut app, "Town   ·   Drive");
         assert!(
             app.world_mut()

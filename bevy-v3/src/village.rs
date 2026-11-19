@@ -934,6 +934,11 @@ fn save_controls(
                 saves.attached = named_slot.map(|id| (setup.mode, id, loaded.session_serial));
                 *village = loaded;
             }
+            Err(error) if resume => {
+                village.save_notice = format!(
+                    "Could not continue the autosave: {error}\nThe autosave was preserved. Open Saved villages to load a named village."
+                );
+            }
             Err(error) => village.save_notice = format!("Could not load village: {error}"),
         }
     } else if keyboard.just_pressed(KeyCode::F5) && !setup.open && village.setup.is_some() {
