@@ -226,8 +226,8 @@ impl Construction {
             {
                 continue;
             }
-            let carrying =
-                self.resident_motion(index) == crate::resident_animation::Motion::CarryWalk;
+            let carrying = self.resident_motion(index, catalog)
+                == crate::resident_animation::Motion::CarryWalk;
             let color = if carrying {
                 Color::srgb_u8(255, 151, 85)
             } else {

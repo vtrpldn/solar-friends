@@ -829,9 +829,9 @@ impl Village {
         }
     }
 
-    pub fn motion(&self, index: usize) -> Motion {
+    pub fn motion(&self, index: usize, catalog: &Catalog) -> Motion {
         if self.camp.is_some() {
-            return self.construction.resident_motion(index);
+            return self.construction.resident_motion(index, catalog);
         }
         if self.arrival_time < ARRIVAL_DURATION && resident_pose(self.arrival_time, index).visible {
             let now = resident_pose(self.arrival_time, index).position;
@@ -1917,11 +1917,15 @@ fn animate_arrival(
         let pose = match *actor {
             ArrivalActor::Resident(index) if village.camp.is_some() => {
                 let worker = village.construction.worker(index);
+                let (position, visible) = village
+                    .construction
+                    .resident_visual_position(index, &catalog);
                 crate::arrival::Pose {
-                    position: world_position(worker.position.x, worker.position.y),
+                    position: world_position(position.x, position.y),
                     yaw: worker.yaw,
                     step_height: 0.0,
-                    visible: !village.construction.driver_away(index)
+                    visible: visible
+                        && !village.construction.driver_away(index)
                         && !village.construction.resident_sleeping(index)
                         && !village.construction.away_for_work(index),
                 }

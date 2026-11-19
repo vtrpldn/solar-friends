@@ -1016,7 +1016,31 @@ impl Construction {
         }
     }
 
-    pub fn resident_motion(&self, index: usize) -> Motion {
+    fn private_visit(&self, index: usize, catalog: &Catalog) -> Option<(&NeedTask, &Blueprint)> {
+        let worker = &self.residents[index];
+        let task = worker.health.task.as_ref()?;
+        if !worker.path.is_empty() || task.elapsed <= 0.0 {
+            return None;
+        }
+        let plan = self.plans.get(task.facility?.checked_sub(1)?)?;
+        let private = matches!(task.kind, Need::Bladder | Need::Bowels)
+            || (task.kind == Need::Hygiene && catalog.projects[&plan.key].kind == "home");
+        private.then_some((task, plan))
+    }
+
+    pub fn resident_visual_position(&self, index: usize, catalog: &Catalog) -> (Vec2, bool) {
+        let position = self.residents[index].position;
+        let Some((task, plan)) = self.private_visit(index, catalog) else {
+            return (position, true);
+        };
+        let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
+        let remaining = task.duration - task.elapsed;
+        let transition = task.elapsed.min(remaining).clamp(0.0, 1.0) as f32;
+        let visible = task.elapsed <= 1.0 || remaining <= 1.0;
+        (position.lerp(center, transition), visible)
+    }
+
+    pub fn resident_motion(&self, index: usize, catalog: &Catalog) -> Motion {
         let worker = &self.residents[index];
         if let Some(task) = &worker.health.task {
             if !worker.path.is_empty() {
@@ -1026,14 +1050,19 @@ impl Construction {
                     Motion::Walk
                 };
             }
+            if self.private_visit(index, catalog).is_some() {
+                return Motion::DuckWalk;
+            }
             return match task.kind {
                 Need::Hunger | Need::Hydration => Motion::Eat,
+                Need::Hygiene if task.facility.is_none() => Motion::Bathe,
                 Need::Hygiene => Motion::Wash,
+                Need::Bladder => Motion::Pee,
+                Need::Bowels => Motion::Toilet,
                 Need::Social => Motion::Chat,
                 Need::Fun => recreation_activity(&self.plans, task).0,
                 Need::Sleep | Need::Rest => Motion::Rest,
                 Need::FilterWater | Need::FetchWater => Motion::Work,
-                _ => Motion::Idle,
             };
         }
         if let Some(job) = &worker.assignment {
@@ -1080,7 +1109,7 @@ impl Construction {
             .find(|job| job.worker == Some(index))
         {
             return match job.phase {
-                crate::farming::FarmPhase::Work => Motion::Work,
+                crate::farming::FarmPhase::Work => Motion::Tend,
                 crate::farming::FarmPhase::Return if !job.output.is_empty() => Motion::CarryWalk,
                 crate::farming::FarmPhase::Walk if !job.inputs.is_empty() => Motion::CarryWalk,
                 _ => Motion::Walk,
@@ -1680,6 +1709,50 @@ mod tests {
     }
 
     #[test]
+    fn private_visits_hide_residents_between_entry_and_exit() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        village
+            .plans
+            .push(village.proposed_site(&catalog, "eco_toilet", IVec2::splat(40)));
+        let original = Vec2::new(40., 38.);
+        village.residents[0].position = original;
+        village.residents[0].health.task = Some(NeedTask {
+            kind: Need::Bowels,
+            facility: Some(1),
+            elapsed: 0.5,
+            started_at: None,
+            duration: 10.,
+            water: 0.,
+            returning: false,
+            partner: None,
+            conversation: None,
+        });
+        assert!(matches!(
+            village.resident_motion(0, &catalog),
+            Motion::DuckWalk
+        ));
+        let (position, visible) = village.resident_visual_position(0, &catalog);
+        assert!(visible && position.y > original.y);
+        village.residents[0].health.task.as_mut().unwrap().elapsed = 4.;
+        assert!(!village.resident_visual_position(0, &catalog).1);
+        village.residents[0].health.task.as_mut().unwrap().elapsed = 9.5;
+        assert_eq!(
+            village.resident_visual_position(0, &catalog),
+            (position, true)
+        );
+        village.residents[0].health.task.as_mut().unwrap().facility = None;
+        assert_eq!(
+            village.resident_visual_position(0, &catalog),
+            (original, true)
+        );
+        assert!(matches!(
+            village.resident_motion(0, &catalog),
+            Motion::Toilet
+        ));
+    }
+
+    #[test]
     fn a_resident_needing_fun_visits_a_finished_reading_room() {
         let setup = WorldSetup::default();
         let catalog = Catalog::default();
@@ -1704,7 +1777,7 @@ mod tests {
         village.residents[0].path.clear();
         village.residents[0].position = Vec2::new(42.0, 36.0);
         assert!(village.recreation_spot_taken(1, IVec2::new(42, 36)));
-        assert!(matches!(village.resident_motion(0), Motion::Read));
+        assert!(matches!(village.resident_motion(0, &catalog), Motion::Read));
         assert_eq!(village.resident_action(&catalog, 0), "Reading for a while");
         village.step_need(0, &catalog, &mut stock, site, 22.0, 22.0);
         assert!(
