@@ -64,7 +64,7 @@ fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>, current: A
 }
 
 #[derive(Component)]
-struct ArtTools;
+pub(super) struct ArtTools;
 
 #[derive(Component)]
 struct LaunchStatus;

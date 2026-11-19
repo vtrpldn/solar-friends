@@ -135,6 +135,21 @@ struct InspectionCamera;
 struct InspectionText;
 
 #[derive(Component)]
+struct InspectionToolbar;
+
+#[derive(Component, Clone, Copy, PartialEq, Eq)]
+enum InspectionAction {
+    Together,
+    Light,
+    Surface,
+    Grid,
+    Figure,
+    Roof,
+    Reset,
+    Rotate(u8),
+}
+
+#[derive(Component)]
 struct InspectionLight;
 
 #[derive(Component)]
@@ -307,6 +322,47 @@ fn setup(
         },
         BackgroundColor(Color::srgb_u8(31, 45, 35)),
     ));
+    commands
+        .spawn((
+            InspectionToolbar,
+            Node {
+                position_type: PositionType::Absolute,
+                left: px(12),
+                right: px(12),
+                bottom: px(12),
+                flex_wrap: FlexWrap::Wrap,
+                column_gap: px(6),
+                row_gap: px(4),
+                ..default()
+            },
+        ))
+        .with_children(|toolbar| {
+            for (label, action) in [
+                ("View together", InspectionAction::Together),
+                ("Lighting", InspectionAction::Light),
+                ("Surface", InspectionAction::Surface),
+                ("Grid", InspectionAction::Grid),
+                ("Scale figure", InspectionAction::Figure),
+                ("Roof", InspectionAction::Roof),
+                ("Reset camera", InspectionAction::Reset),
+                ("0°", InspectionAction::Rotate(0)),
+                ("90°", InspectionAction::Rotate(1)),
+                ("180°", InspectionAction::Rotate(2)),
+                ("270°", InspectionAction::Rotate(3)),
+            ] {
+                toolbar
+                    .spawn((
+                        Button,
+                        action,
+                        Node {
+                            padding: UiRect::axes(px(9), px(5)),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                    ))
+                    .with_child((Text::new(label), ui_font(&assets, 15.)));
+            }
+        });
 }
 
 fn controls(
@@ -325,6 +381,7 @@ fn controls(
         Res<AccumulatedMouseScroll>,
     ),
     (catalog, window): (Res<WorkshopCatalog>, Single<&Window>),
+    buttons: Query<(&Interaction, &InspectionAction), Changed<Interaction>>,
     mut workshop: ResMut<Workshop>,
 ) {
     if !pending.is_empty() || sprite_capture.is_some() || workshop.show_proof {
@@ -370,7 +427,12 @@ fn controls(
         return;
     }
     text.clear();
-    if keys.just_pressed(KeyCode::KeyV) {
+    let click = |action| {
+        buttons
+            .iter()
+            .any(|(&i, &a)| i == Interaction::Pressed && a == action)
+    };
+    if keys.just_pressed(KeyCode::KeyV) || click(InspectionAction::Together) {
         workshop.together = !workshop.together;
         workshop.reset_camera();
         workshop.export_notice.clear();
@@ -384,26 +446,38 @@ fn controls(
         workshop.together = false;
         workshop.selected = (workshop.selected + len - 1) % len;
     }
-    if keys.just_pressed(KeyCode::KeyG) {
+    if keys.just_pressed(KeyCode::KeyG) || click(InspectionAction::Grid) {
         workshop.guides = !workshop.guides;
     }
-    if keys.just_pressed(KeyCode::KeyM) {
+    if keys.just_pressed(KeyCode::KeyM) || click(InspectionAction::Surface) {
         workshop.surface = workshop.surface.next();
     }
-    if !workshop.together && workshop.roof_available && keys.just_pressed(KeyCode::KeyT) {
+    if !workshop.together
+        && workshop.roof_available
+        && (keys.just_pressed(KeyCode::KeyT) || click(InspectionAction::Roof))
+    {
         workshop.roof_visible = !workshop.roof_visible;
     }
-    if !workshop.together && keys.just_pressed(KeyCode::KeyH) {
+    if !workshop.together && (keys.just_pressed(KeyCode::KeyH) || click(InspectionAction::Figure)) {
         workshop.scale_figure = !workshop.scale_figure;
     }
-    if keys.just_pressed(KeyCode::KeyN) {
+    if keys.just_pressed(KeyCode::KeyN) || click(InspectionAction::Light) {
         workshop.night = !workshop.night;
     }
-    if keys.just_pressed(KeyCode::Home) {
+    if keys.just_pressed(KeyCode::Home) || click(InspectionAction::Reset) {
         workshop.reset_camera();
     }
     if !workshop.together && keys.just_pressed(KeyCode::KeyR) {
         workshop.rotation = (workshop.rotation + 1) % 4;
+    }
+    if !workshop.together {
+        for (&interaction, &action) in &buttons {
+            if interaction == Interaction::Pressed
+                && let InspectionAction::Rotate(turn) = action
+            {
+                workshop.rotation = turn;
+            }
+        }
     }
     let tilt =
         i8::from(keys.pressed(KeyCode::ArrowUp)) - i8::from(keys.pressed(KeyCode::ArrowDown));
@@ -684,10 +758,16 @@ fn apply_surface(
     }
 }
 
+type InspectionChrome = Or<(
+    With<InspectionText>,
+    With<InspectionToolbar>,
+    With<navigation::ArtTools>,
+)>;
+
 fn capture_preview(
     (mut commands, keys): (Commands, Res<ButtonInput<KeyCode>>),
     (mut workshop, catalog): (ResMut<Workshop>, Res<WorkshopCatalog>),
-    mut panel: Single<&mut Node, With<InspectionText>>,
+    mut panels: Query<(&mut Node, Has<InspectionToolbar>), InspectionChrome>,
     pending: Query<(), With<Screenshot>>,
     scene: Query<(&SceneInstance, Option<&WorkshopModel>, Option<&ScaleFigure>)>,
     sprite_capture: Option<Res<sprites::SpriteCapture>>,
@@ -696,7 +776,13 @@ fn capture_preview(
     if !pending.is_empty() || sprite_capture.is_some() {
         return;
     }
-    panel.display = Display::Flex;
+    for (mut panel, toolbar) in &mut panels {
+        panel.display = if toolbar && (workshop.show_proof || workshop.search.is_some()) {
+            Display::None
+        } else {
+            Display::Flex
+        };
+    }
     if workshop.together
         || workshop.show_proof
         || workshop.search.is_some()
@@ -756,7 +842,9 @@ fn capture_preview(
             "viewport_height_metres": viewport_height(project, workshop.zoom),
         }
     });
-    panel.display = Display::None;
+    for (mut panel, _) in &mut panels {
+        panel.display = Display::None;
+    }
     commands.spawn(Screenshot::primary_window()).observe(
         move |event: On<ScreenshotCaptured>, mut workshop: ResMut<Workshop>| {
             let result = event
