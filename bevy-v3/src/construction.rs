@@ -352,6 +352,16 @@ impl Default for Construction {
 }
 
 impl Worker {
+    fn work_multiplier(&self, profile: &crate::catalog::Profile, project: &str) -> f64 {
+        let skill = if profile.strengths.iter().any(|key| key == project) {
+            1.25
+        } else {
+            1.0
+        };
+        let experience = 1.0 + (self.experience / 10_000.0).clamp(0.0, 0.15);
+        skill * experience * self.health.hydration_factor()
+    }
+
     fn move_along_path(&mut self, dt: f32, carrying: bool) {
         let Some(&next) = self.path.front() else {
             self.speed = 0.0;
@@ -1935,9 +1945,8 @@ impl Construction {
                         })
                         .count();
                     let worker = &mut self.residents[index];
-                    let skilled = catalog.residents[index].strengths.contains(&project.key);
-                    let skill = if skilled { 1.25 } else { 1.0 };
-                    let experience = 1.0 + (worker.experience / 10_000.0).min(0.15);
+                    let work_multiplier =
+                        worker.work_multiplier(&catalog.residents[index], &project.key);
                     let efficiency = construction_crew_efficiency(crew + 1);
                     let hunger = if worker.health.levels[Need::Hunger as usize] < 15.0 {
                         0.65
@@ -1952,15 +1961,8 @@ impl Construction {
                         tools_in_repair,
                     );
                     project.work = (project.work
-                        + f64::from(dt)
-                            * skill
-                            * tools
-                            * experience
-                            * efficiency
-                            * hunger
-                            * rain
-                            * worker.health.hydration_factor())
-                    .min(catalog.projects[&project.key].work);
+                        + f64::from(dt) * work_multiplier * tools * efficiency * hunger * rain)
+                        .min(catalog.projects[&project.key].work);
                     if project.work >= catalog.projects[&project.key].work {
                         self.events.record(
                             clock.seconds,

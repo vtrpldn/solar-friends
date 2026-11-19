@@ -833,14 +833,27 @@ impl Construction {
                         )
                     });
                     let seconds = f64::from(dt);
-                    let rate = recipe.craft.as_ref().map_or(boost, |craft| {
-                        let worker = &mut self.residents[worker_index];
+                    let worker = &mut self.residents[worker_index];
+                    let rate = if let Some(craft) = &recipe.craft {
                         worker.craft.practice(worker_index, craft.skill, seconds)
                             * worker.health.hydration_factor()
-                    });
+                    } else {
+                        let power = if recipe.kind == "workshop" && self.utilities.powered(job.site)
+                        {
+                            2.0
+                        } else {
+                            1.0
+                        };
+                        boost
+                            * power
+                            * worker.work_multiplier(
+                                &catalog.residents[worker_index],
+                                &self.plans[job.site].key,
+                            )
+                    };
                     job.work = (job.work + seconds * rate).min(recipe.work);
-                    let health = &mut self.residents[worker_index].health;
-                    health.energy = (health.energy - seconds * 0.12).max(0.0);
+                    worker.experience += seconds;
+                    worker.health.energy = (worker.health.energy - seconds * 0.12).max(0.0);
                     if !stock.sandbox
                         && job.growth.is_none()
                         && let Some(biology) = &recipe.biology
@@ -1178,6 +1191,37 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn powered_workshop_doubles_machine_work_and_gives_residents_experience() {
+        let catalog = Catalog::default();
+        let mut setup = WorldSetup::default();
+        setup.mode = crate::setup::Mode::Sandbox;
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let mut workshop = village.proposed_site(&catalog, "workshop", IVec2::new(44, 36));
+        workshop.work = catalog.projects["workshop"].work;
+        workshop.delivered = workshop.loads;
+        village.plans.push(workshop);
+        village.queue_batch(&catalog, &mut stock, 0, "frames");
+        village.production.jobs[0].worker = Some(1);
+        village.production.jobs[0].phase = Phase::Work;
+        village.tick_services(&catalog, &setup, &mut stock, 1.0, 1.0);
+        assert!(village.utilities.powered(0));
+        let expected =
+            2.0 * village.residents[1].work_multiplier(&catalog.residents[1], "workshop");
+        village.tick_production(&catalog, &mut stock, site, 1.0, 1.0);
+        assert_eq!(village.production.jobs[0].work, expected);
+        assert_eq!(village.residents[1].experience, 1.0);
+    }
 
     #[test]
     fn residents_prioritize_food_when_the_village_is_hungry_then_use_preferences() {
