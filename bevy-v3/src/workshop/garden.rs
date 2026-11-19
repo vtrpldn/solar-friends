@@ -205,6 +205,8 @@ enum GardenAction {
     ZoomOut,
     Grid,
     Night,
+    RestoreGallery,
+    Export,
 }
 #[derive(Component)]
 struct SelectableProp(Entity);
@@ -230,6 +232,17 @@ fn read_layout(path: &Path, models: &WorkshopCatalog) -> io::Result<Layout> {
 fn write_layout(path: &Path, layout: &Layout) -> io::Result<()> {
     let bytes = serde_json::to_vec_pretty(layout).map_err(io::Error::other)?;
     crate::save::atomic_write(path, &bytes, MAX_SCENE_BYTES)
+}
+
+fn export_layout(layout: &Layout) -> io::Result<PathBuf> {
+    let stamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(io::Error::other)?
+        .as_nanos();
+    let directory = crate::save::location(crate::setup::Mode::Story)?.with_file_name("workshop");
+    let path = directory.join(format!("solar-friends-v02-scene-{stamp}.json"));
+    write_layout(&path, layout)?;
+    Ok(path)
 }
 
 fn biome_landscape(biome: &str) -> Vec<Prop> {
@@ -462,6 +475,8 @@ fn setup(
                 ("Cancel placement", GardenAction::Cancel),
                 ("Undo", GardenAction::Undo),
                 ("Redo", GardenAction::Redo),
+                ("Restore gallery", GardenAction::RestoreGallery),
+                ("Export scene", GardenAction::Export),
                 ("Gallery", GardenAction::Gallery),
                 ("Whole plot", GardenAction::Overview),
                 ("Turn left", GardenAction::TurnLeft),
@@ -516,7 +531,9 @@ fn update_garden_buttons(
                 | GardenAction::ZoomIn
                 | GardenAction::ZoomOut
                 | GardenAction::Grid
-                | GardenAction::Night => true,
+                | GardenAction::Night
+                | GardenAction::RestoreGallery
+                | GardenAction::Export => true,
                 GardenAction::LoadLandscape => garden.layout.biome != "flat",
                 GardenAction::Rotate => selected_prop || garden.pending.is_some(),
                 GardenAction::Cancel => garden.pending.is_some(),
@@ -735,6 +752,12 @@ fn edit(
                 ((point.z + WIDTH / 2.) / 2.).floor() as i32,
             )
         });
+    if clicked_action(GardenAction::Export) {
+        garden.status = match export_layout(&garden.layout) {
+            Ok(path) => format!("Exported scene to {}", path.display()),
+            Err(error) => format!("Could not export scene: {error}"),
+        };
+    }
     if modifier && pressed(KeyS) {
         garden.persistence = match write_layout(&garden.file, &garden.layout) {
             Ok(()) => format!("Saved scene to {}", garden.file.display()),
@@ -799,6 +822,15 @@ fn edit(
         }
         _ => {}
     }
+    if pressed(F5) || clicked_action(GardenAction::RestoreGallery) {
+        garden.edit();
+        garden.layout.props = garden.gallery.props.clone();
+        garden.selected = None;
+        garden.pending = None;
+        garden.focus_on_load = true;
+        garden.status = "Gallery restored. Undo returns to your previous scene.".into();
+        return;
+    }
     if pressed(Escape)
         || clicked_action(GardenAction::Cancel)
         || clicked_action(GardenAction::Clear)
@@ -848,12 +880,6 @@ fn edit(
                     .iter()
                     .position(|prop| prop.id == root.id)
             });
-    }
-    if pressed(F5) {
-        garden.edit();
-        garden.layout.props = garden.gallery.props.clone();
-        garden.selected = None;
-        garden.focus_on_load = true;
     }
     let Some(index) = garden.selected else {
         return;
