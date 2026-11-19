@@ -563,6 +563,11 @@ impl Construction {
                 .iter()
                 .any(|job| self.production_route_blocked(job, clock))
                 || self
+                    .farming
+                    .jobs
+                    .iter()
+                    .any(|job| self.farm_route_blocked(job, clock))
+                || self
                     .residents
                     .iter()
                     .any(|worker| worker.health.task.is_none() && worker.waiting_for_route()))

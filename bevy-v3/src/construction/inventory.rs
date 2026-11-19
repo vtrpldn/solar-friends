@@ -307,6 +307,7 @@ mod tests {
             output: Default::default(),
             food_output: None,
             retry: 0.0,
+            waiting_for_access: false,
             pickups: 1,
             fare: 776,
         });

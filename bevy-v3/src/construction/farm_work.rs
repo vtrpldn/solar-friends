@@ -373,6 +373,7 @@ impl Construction {
             output: Default::default(),
             food_output: None,
             retry: 0.0,
+            waiting_for_access: false,
             pickups,
             fare,
         });
@@ -490,6 +491,13 @@ impl Construction {
         Ok(())
     }
 
+    pub(super) fn farm_route_blocked(&self, job: &FarmJob, clock: f64) -> bool {
+        (job.waiting_for_access && job.retry > clock)
+            || job
+                .worker
+                .is_some_and(|worker| self.residents[worker].waiting_for_route())
+    }
+
     pub(super) fn farm_job_status(
         &self,
         catalog: &Catalog,
@@ -500,21 +508,19 @@ impl Construction {
         if job.pickups > 0 {
             return "Waiting for seed delivery".into();
         }
-        if let Some(worker) = job.worker.map(|index| &self.residents[index]) {
-            if worker.paused_waypoint.is_some()
-                || (matches!(job.phase, FarmPhase::Work | FarmPhase::CollectOutput)
-                    && job.retry > clock)
-            {
-                return "Waiting for access".into();
+        if self.farm_route_blocked(job, clock) {
+            return "Waiting for access".into();
+        }
+        if let Some(worker) = job.worker.map(|index| &self.residents[index])
+            && job.phase == FarmPhase::Return
+            && worker.path.is_empty()
+        {
+            let load = super::production_work::production_load(catalog, &job.output);
+            if load.is_empty() && job.output.values().any(|&units| units > 0) {
+                return "Waiting for transport · Harvest exceeds hand-carry capacity".into();
             }
-            if job.phase == FarmPhase::Return && worker.path.is_empty() {
-                let load = super::production_work::production_load(catalog, &job.output);
-                if load.is_empty() && job.output.values().any(|&units| units > 0) {
-                    return "Waiting for transport · Harvest exceeds hand-carry capacity".into();
-                }
-                if !self.farm_load_fits(catalog, stock, &load) {
-                    return "Waiting for storage space".into();
-                }
+            if !self.farm_load_fits(catalog, stock, &load) {
+                return "Waiting for storage space".into();
             }
         }
         match job.phase {
@@ -655,8 +661,9 @@ impl Construction {
             let Some(index) = job.worker else {
                 continue;
             };
+            self.farming.jobs[job_index].waiting_for_access = false;
             let worker = &mut self.residents[index];
-            let phase = job.phase;
+            let phase = self.farming.jobs[job_index].phase;
             worker.move_along_path(dt, matches!(phase, FarmPhase::Walk | FarmPhase::Return));
             if !worker.path.is_empty() {
                 continue;
@@ -703,7 +710,7 @@ impl Construction {
                     let Some(mut path) =
                         self.path_from_bed(catalog, site, job, aisle.work, SUPPLY_SPOTS[index])
                     else {
-                        self.farming.jobs[job_index].retry = clock + 5.0;
+                        self.wait_for_farm_access(job_index, clock);
                         continue;
                     };
                     let job = &mut self.farming.jobs[job_index];
@@ -768,7 +775,7 @@ impl Construction {
                             self.farming.jobs[job_index].phase = FarmPhase::Return;
                         }
                     } else {
-                        self.farming.jobs[job_index].retry = clock + 5.0;
+                        self.wait_for_farm_access(job_index, clock);
                     }
                 }
             }
@@ -788,9 +795,10 @@ impl Construction {
             .collect();
         waiting.sort_unstable();
         for (_, index) in waiting {
-            self.try_farm_worker(index, catalog, site);
-            if self.reservation_pass.is_none() {
-                self.farming.jobs[index].retry = clock + 1.0;
+            self.try_farm_worker(index, catalog, site, clock);
+            let job = &mut self.farming.jobs[index];
+            if self.reservation_pass.is_none() && !job.waiting_for_access {
+                job.retry = clock + 1.0;
             }
         }
     }
@@ -798,7 +806,13 @@ impl Construction {
     fn release_farm_worker(&mut self, job: usize, clock: f64) {
         self.farming.jobs[job].worker = None;
         self.farming.jobs[job].phase = FarmPhase::Pickup;
-        self.farming.jobs[job].retry = clock + 5.0;
+        self.wait_for_farm_access(job, clock);
+    }
+
+    fn wait_for_farm_access(&mut self, index: usize, clock: f64) {
+        let job = &mut self.farming.jobs[index];
+        job.waiting_for_access = true;
+        job.retry = clock + 5.0;
     }
 
     fn bed_aisles(&self, job: &FarmJob) -> Vec<BedAccess> {
@@ -885,35 +899,42 @@ impl Construction {
         })
     }
 
-    fn try_farm_worker(&mut self, job: usize, catalog: &Catalog, site: ConstructionSite) {
-        if self.farming.jobs[job].inputs.is_empty() {
-            for (index, worker) in self.residents.iter().enumerate() {
-                if self.work_candidate(index) {
-                    let Some(path) =
-                        self.path_to_bed(catalog, site, &self.farming.jobs[job], worker.position)
-                    else {
-                        continue;
-                    };
-                    self.farming.jobs[job].worker = Some(index);
-                    self.farming.jobs[job].phase = FarmPhase::Walk;
-                    self.residents[index].path = path;
-                    return;
-                }
+    fn try_farm_worker(
+        &mut self,
+        index: usize,
+        catalog: &Catalog,
+        site: ConstructionSite,
+        clock: f64,
+    ) {
+        let job = &self.farming.jobs[index];
+        let direct = job.inputs.is_empty();
+        let mut attempted = false;
+        for (worker, resident) in self.residents.iter().enumerate() {
+            if !self.work_candidate(worker) {
+                continue;
             }
+            attempted = true;
+            let path = if direct {
+                self.path_to_bed(catalog, site, job, resident.position)
+            } else {
+                self.resident_route(catalog, site, resident.position, SUPPLY_SPOTS[worker])
+            };
+            let Some(path) = path else { continue };
+            let job = &mut self.farming.jobs[index];
+            job.worker = Some(worker);
+            job.waiting_for_access = false;
+            if direct {
+                job.phase = FarmPhase::Walk;
+            }
+            self.residents[worker].path = path;
             return;
         }
-        for (index, worker) in self.residents.iter().enumerate() {
-            if !self.work_candidate(index) {
-                continue;
+        if self.reservation_pass.is_none() {
+            if attempted {
+                self.wait_for_farm_access(index, clock);
+            } else {
+                self.farming.jobs[index].waiting_for_access = false;
             }
-            let Some(path) =
-                self.resident_route(catalog, site, worker.position, SUPPLY_SPOTS[index])
-            else {
-                continue;
-            };
-            self.farming.jobs[job].worker = Some(index);
-            self.residents[index].path = path;
-            break;
         }
     }
 }
@@ -970,9 +991,38 @@ mod resize_tests {
         village.farm_input(&catalog, &mut stock, &input, ground, clock);
         assert_eq!(village.farming.jobs.len(), 1);
         village.residents[0].position = (corner - IVec2::X).as_vec2();
+        assert!(
+            village
+                .lab_stop_reason(super::super::LabStop::Blocked, 0.0)
+                .is_none()
+        );
+        let aisles = village.bed_aisles(&village.farming.jobs[0]);
+        for aisle in aisles {
+            let obstacle = village.proposed_site(&catalog, "supply-5", aisle.anchor);
+            village.plans.push(obstacle);
+        }
+        village.tick_farm_jobs(&catalog, &mut stock, ground, 0.0, 0.1);
+        assert!(village.farming.jobs[0].worker.is_none());
+        assert_eq!(
+            village.lab_stop_reason(super::super::LabStop::Blocked, 0.0),
+            Some("A job is waiting for access.")
+        );
+        assert_eq!(
+            village.farm_job_status(&catalog, &stock, &village.farming.jobs[0], 0.0),
+            "Waiting for access"
+        );
+        village.plans.truncate(1);
+        village.tick_farm_jobs(&catalog, &mut stock, ground, 5.0, 0.1);
+        assert!(village.farming.jobs[0].worker.is_some());
+        assert!(
+            village
+                .lab_stop_reason(super::super::LabStop::Blocked, 5.0)
+                .is_none()
+        );
+
         let mut reached_bed = false;
         let mut detoured = false;
-        for step in 0..1_800 {
+        for step in 51..1_800 {
             village.refresh_resident_crowding(&catalog, ground);
             village.tick_farm_jobs(&catalog, &mut stock, ground, f64::from(step) * 0.1, 0.1);
             let Some(job) = village.farming.jobs.first() else {
