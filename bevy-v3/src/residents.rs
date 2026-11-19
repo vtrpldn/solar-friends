@@ -127,6 +127,10 @@ impl Health {
             let rate = profile.rates.get(name).copied().unwrap_or(1.0);
             self.levels[index] = (self.levels[index] - rates[index] * dt * rate * scale).max(0.0);
         }
+        if asleep {
+            let fun = &mut self.levels[Need::Fun as usize];
+            *fun = (*fun + dt * 0.04).min(100.0);
+        }
         let water = daily_drinking_liters(temperature, working);
         let hydration = &mut self.levels[Need::Hydration as usize];
         if sandbox {

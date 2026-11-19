@@ -94,6 +94,9 @@ impl Construction {
     ) {
         let temperature = weather_at(clock, setup.biome(), setup.seed()).temperature;
         for index in 0..self.residents.len() {
+            if self.away_for_work(index) {
+                continue;
+            }
             let working = self.resident_working(index);
             let resident = &mut self.residents[index];
             let aspiration = &catalog.residents[index].aspiration;
@@ -1437,6 +1440,47 @@ mod tests {
         assert_eq!(saved.residents[0].home, Some(1));
         saved.clear_home(0);
         assert!(saved.residents[0].home.is_none());
+    }
+
+    #[test]
+    fn sleep_restores_fun_and_town_work_pauses_village_needs() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        village.residents[0].health.task = Some(NeedTask {
+            kind: Need::Sleep,
+            facility: None,
+            elapsed: 1.0,
+            started_at: None,
+            duration: 1000.0,
+            water: 0.0,
+            returning: false,
+            partner: None,
+            conversation: None,
+        });
+        village.residents[1].town_work.shift = Some(crate::town_work::Shift {
+            phase: crate::town_work::Commute::Away,
+            full_day: true,
+            fare_due: false,
+            until: 1000.0,
+        });
+        let fun = village.residents[0].health.levels[Need::Fun as usize];
+        let away_levels = village.residents[1].health.levels;
+        let away_energy = village.residents[1].health.energy;
+
+        village.tick_health(&catalog, &setup, &mut stock, site, 0.0, 1.0);
+
+        assert!(village.residents[0].health.levels[Need::Fun as usize] > fun);
+        assert_eq!(village.residents[1].health.levels, away_levels);
+        assert_eq!(village.residents[1].health.energy, away_energy);
     }
 
     #[test]
