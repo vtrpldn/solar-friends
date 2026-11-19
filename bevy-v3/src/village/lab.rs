@@ -65,6 +65,8 @@ struct Report<'a> {
     initial: &'a serde_json::Value,
     step_seconds: f64,
     end_step: u64,
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    partial: bool,
     stop_reason: Option<&'static str>,
     samples: &'a [Sample],
     orders: &'a [Outcome],
@@ -122,7 +124,19 @@ fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Resu
             "Invalid starting village.",
         ));
     }
-    let report = run(serde_json::from_value(scenario)?, Some(village), catalog)?;
+    let scenario: Scenario = serde_json::from_value(scenario)?;
+    let limit = if expected["partial"] == true {
+        expected["end_step"]
+            .as_u64()
+            .filter(|step| *step < scenario.steps)
+            .ok_or_else(|| io::Error::other("Invalid partial report end step."))?
+    } else {
+        scenario.steps
+    };
+    let mut report = Runner::new(scenario, Some(village), catalog)?;
+    while report.index < limit && !report.done() {
+        report.advance(catalog);
+    }
     let end_step = report.index;
     let mut actual: serde_json::Value =
         serde_json::from_slice(&serde_json::to_vec(&report.report())?)?;
@@ -425,6 +439,7 @@ impl Runner {
             initial: &self.initial,
             step_seconds: STEP,
             end_step: self.index,
+            partial: !self.done(),
             stop_reason: self.reason,
             samples: &self.samples,
             orders: &self.outcomes,
@@ -923,7 +938,7 @@ fn update_lab_window(
                 Err(error) => format!("Could not save checkpoint · {error}"),
             };
         }
-        if keys.just_pressed(KeyCode::F5) && runner.done() {
+        if keys.just_pressed(KeyCode::F5) {
             playback.notice = match runner.export() {
                 Ok(path) => format!("Report saved to {}", path.display()),
                 Err(error) => format!("Could not export report · {error}"),
@@ -1107,6 +1122,28 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn partial_reports_replay_through_the_exported_step_only() {
+        let catalog = Catalog::default();
+        let scenario = Scenario {
+            steps: 5_000,
+            orders: vec![ScheduledOrder {
+                step: 2,
+                order: LabOrder::Grid { enabled: false },
+            }],
+            stop: LabStop::None,
+        };
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        runner.advance(&catalog);
+        assert!(!runner.done());
+        assert!(runner.outcomes.is_empty());
+        let report: serde_json::Value =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(report["partial"], true);
+        assert_eq!(report["scenario"]["steps"], 5_000);
+        assert_eq!(verify_report(report, &catalog).unwrap(), 1);
+    }
 
     #[test]
     fn a_lab_checkpoint_restores_the_current_village_for_a_new_run() {
