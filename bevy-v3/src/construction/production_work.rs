@@ -259,6 +259,7 @@ impl Construction {
             phase: Phase::Pickup,
             work: 0.0,
             retry_at: 0.0,
+            waiting_for_access: false,
             water_to_deliver: 0.0,
             food_input,
             food_output: None,
@@ -359,6 +360,9 @@ impl Construction {
         recipe: &ProductionRecipe,
         clock: f64,
     ) -> String {
+        if job.waiting_for_access && job.retry_at > clock {
+            return "Waiting for access".into();
+        }
         match job.phase {
             Phase::Pickup | Phase::Approach | Phase::Work
                 if recipe.water > 0.0
@@ -673,10 +677,13 @@ impl Construction {
     ) {
         self.expire_batch_food(catalog, stock, site, clock);
         for index in (0..self.production.jobs.len()).rev() {
-            let job = &self.production.jobs[index];
-            if job.phase == Phase::Growing || clock < job.retry_at {
+            if self.production.jobs[index].phase == Phase::Growing
+                || clock < self.production.jobs[index].retry_at
+            {
                 continue;
             }
+            self.production.jobs[index].waiting_for_access = false;
+            let job = &self.production.jobs[index];
             let Some(worker_index) = job.worker else {
                 self.assign_producer(index, catalog, site, stock);
                 self.production.jobs[index].retry_at = clock + 1.0;
@@ -713,6 +720,7 @@ impl Construction {
                         .find_map(|cell| path(position, cell))
                     else {
                         self.production.jobs[index].retry_at = clock + 5.0;
+                        self.production.jobs[index].waiting_for_access = true;
                         continue;
                     };
                     self.residents[worker_index].path = path;
@@ -829,6 +837,7 @@ impl Construction {
                         access_road,
                     ) else {
                         self.production.jobs[index].retry_at = clock + 5.0;
+                        self.production.jobs[index].waiting_for_access = true;
                         continue;
                     };
                     if let Some(ration) = animal
@@ -1006,6 +1015,7 @@ impl Construction {
                 access_road,
             )
         };
+        let mut route_blocked = false;
         for (index, resident) in self.residents.iter().enumerate() {
             if resident.assignment.is_some()
                 || self.gathering.workers_at_site(index)
@@ -1041,6 +1051,7 @@ impl Construction {
                     self.production.jobs[job].worker = Some(index);
                     return;
                 }
+                route_blocked = true;
                 continue;
             }
             let supply = SUPPLY_SPOTS[index];
@@ -1049,15 +1060,18 @@ impl Construction {
                     .into_iter()
                     .all(|cell| path(supply.as_vec2(), cell).is_none())
             {
+                route_blocked = true;
                 continue;
             }
             let Some(path) = path(resident.position, supply) else {
+                route_blocked = true;
                 continue;
             };
             self.residents[index].path = path;
             self.production.jobs[job].worker = Some(index);
             return;
         }
+        self.production.jobs[job].waiting_for_access = route_blocked;
     }
 }
 

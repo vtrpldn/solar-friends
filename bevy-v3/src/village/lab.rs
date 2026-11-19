@@ -101,7 +101,7 @@ pub(crate) fn replay_file(path: &Path) -> io::Result<()> {
 }
 
 fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Result<u64> {
-    let Some(version @ 1..=5) = expected.get("version").and_then(serde_json::Value::as_u64) else {
+    let Some(version @ 1..=6) = expected.get("version").and_then(serde_json::Value::as_u64) else {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
             "Unsupported lab report version.",
@@ -128,19 +128,30 @@ fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Resu
         serde_json::from_slice(&serde_json::to_vec(&report.report())?)?;
     actual["initial"] = serde_json::Value::Null;
     actual["scenario"] = serde_json::Value::Null;
-    if version < 5 {
+    if version < 6 {
         actual["version"] = version.into();
-        if let Some(plots) = actual
+        if let Some(jobs) = actual
+            .pointer_mut("/village/construction/production/jobs")
+            .and_then(serde_json::Value::as_array_mut)
+        {
+            for job in jobs {
+                job.as_object_mut()
+                    .expect("production job")
+                    .remove("waiting_for_access");
+            }
+        }
+    }
+    if version < 5
+        && let Some(plots) = actual
             .pointer_mut("/village/construction/farming/plots")
             .and_then(serde_json::Value::as_object_mut)
-        {
-            for plot in plots.values_mut() {
-                if let Some(beds) = plot["beds"].as_array_mut() {
-                    for bed in beds {
-                        bed.as_object_mut()
-                            .expect("bed object")
-                            .remove("irrigated_liters");
-                    }
+    {
+        for plot in plots.values_mut() {
+            if let Some(beds) = plot["beds"].as_array_mut() {
+                for bed in beds {
+                    bed.as_object_mut()
+                        .expect("bed object")
+                        .remove("irrigated_liters");
                 }
             }
         }
@@ -409,7 +420,7 @@ impl Runner {
 
     fn report(&self) -> Report<'_> {
         Report {
-            version: 5,
+            version: 6,
             scenario: &self.scenario,
             initial: &self.initial,
             step_seconds: STEP,

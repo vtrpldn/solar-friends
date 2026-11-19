@@ -70,6 +70,7 @@ pub(crate) enum LabStop {
     None,
     Harvest,
     CropFailed,
+    Blocked,
     Hydration,
     Water,
 }
@@ -412,6 +413,12 @@ impl Construction {
                         "A crop has failed or expired."
                     })
             }
+            LabStop::Blocked => self
+                .production
+                .jobs
+                .iter()
+                .any(|job| job.waiting_for_access && job.retry_at > clock)
+                .then_some("A job is waiting for access."),
             LabStop::Hydration => {
                 (self.minimum_hydration() < 20.0).then_some("A resident has urgent thirst.")
             }
