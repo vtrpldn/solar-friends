@@ -1654,6 +1654,13 @@ fn show_hud(
                     .projects_panel(&catalog, village.projects_page, village.open_projects_only)
                     .1,
             );
+            if let Some(freight) = village
+                .construction
+                .construction_freight_status(village.clock)
+            {
+                label.push('\n');
+                label.push_str(&freight);
+            }
         }
         Some(UtilityPanel::Inventory) => {
             use std::fmt::Write;

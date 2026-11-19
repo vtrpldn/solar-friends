@@ -69,6 +69,15 @@ impl Construction {
             .is_some_and(|order| order.sites().any(|id| id == site))
     }
 
+    pub fn construction_freight_status(&self, clock: f64) -> Option<String> {
+        let delivery = self.construction_delivery.as_ref()?;
+        let hours = (delivery.eta - clock).max(0.0) / crate::weather::HOUR;
+        let projects = delivery.sites().count();
+        Some(format!(
+            "Construction freight · {projects} project(s) · {hours:.1}h remaining"
+        ))
+    }
+
     pub(super) fn valid_construction_delivery(&self) -> bool {
         self.construction_delivery.as_ref().is_none_or(|order| {
             order.eta.is_finite()
@@ -392,6 +401,14 @@ mod tests {
         village.tick_construction_delivery(&catalog, &mut stock, clock);
         assert!(village.construction_delivery_at(0));
         assert!(village.construction_delivery_at(1));
+        assert!(
+            village
+                .construction_freight_status(0.0)
+                .unwrap()
+                .contains("2 project(s)")
+        );
+        let (_, stores) = village.inventory_panel(&catalog, &stock, 0, false, "pipe");
+        assert!(stores.contains("in transit"));
         assert_eq!(village.market.committed_fares(), 0);
         assert_eq!(stock.balance(), before - crate::market::freight_cents(12));
         assert!(village.valid_save(&catalog, &stock));

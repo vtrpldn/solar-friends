@@ -263,6 +263,10 @@ impl Construction {
                 catalog.materials[&order.material].name, hours
             ));
         }
+        if let Some(freight) = self.construction_freight_status(clock.seconds) {
+            display.push('\n');
+            display.push_str(&freight);
+        }
         let restock = if self.trade.household_restock_off {
             "off"
         } else {

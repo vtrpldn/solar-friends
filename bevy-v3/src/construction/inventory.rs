@@ -49,7 +49,17 @@ impl Construction {
             } else {
                 Location::Reserved
             };
-            record(&mut ledger, plan.materials(catalog), location);
+            if self.construction_delivery_at(index)
+                && let Some(purchase) = &plan.purchase
+            {
+                for (id, &amount) in plan.materials(catalog) {
+                    let cargo = purchase.units.get(id).copied().unwrap_or(0).min(amount);
+                    add(&mut ledger, id, cargo, Location::Transit);
+                    add(&mut ledger, id, amount - cargo, location);
+                }
+            } else {
+                record(&mut ledger, plan.materials(catalog), location);
+            }
             for (recipe, installed) in [
                 ("cold_storage", self.utilities.has_cold_storage(index)),
                 ("solar_upgrade", self.utilities.has_rooftop_solar(index)),
