@@ -81,6 +81,21 @@ impl LensPicker {
         }
     }
 
+    pub(super) fn has_filter(&self) -> bool {
+        matches!(self.active, Some(MapLens::Chains | MapLens::Water))
+    }
+
+    pub(super) fn adjust_filter(&mut self, material_count: usize, forward: bool) -> bool {
+        let (index, count) = match self.active {
+            Some(MapLens::Chains) if material_count > 0 => (&mut self.material, material_count),
+            Some(MapLens::Water) => (&mut self.liquid, 4),
+            _ => return false,
+        };
+        *index = (*index + if forward { 1 } else { count - 1 }) % count;
+        self.network_site = None;
+        true
+    }
+
     pub(super) fn controls(&mut self, keys: &ButtonInput<KeyCode>, material_count: usize) -> bool {
         let shift = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
         if shift && keys.just_pressed(KeyCode::KeyL) {
@@ -103,26 +118,11 @@ impl LensPicker {
             }
             return true;
         }
-        if shift {
-            let filter = match self.active {
-                Some(MapLens::Chains) if material_count > 0 => {
-                    Some((&mut self.material, material_count))
-                }
-                Some(MapLens::Water) => Some((&mut self.liquid, 4)),
-                _ => None,
-            };
-            if let Some((index, count)) = filter {
-                if keys.just_pressed(KeyCode::PageUp) {
-                    *index = (*index + count - 1) % count;
-                    self.network_site = None;
-                    return true;
-                }
-                if keys.just_pressed(KeyCode::PageDown) {
-                    *index = (*index + 1) % count;
-                    self.network_site = None;
-                    return true;
-                }
-            }
+        if shift
+            && keys.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown])
+            && self.adjust_filter(material_count, keys.just_pressed(KeyCode::PageDown))
+        {
+            return true;
         }
         let shortcuts = [
             (

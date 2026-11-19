@@ -425,6 +425,14 @@ mod tests {
                 .map_input_blocked()
         );
 
+        press_button(&mut app, "Map lenses");
+        press_button(&mut app, "Other lenses");
+        press_button(&mut app, "Material chains");
+        press_button(&mut app, "Next filter");
+        press_button(&mut app, "Previous filter");
+        press_button(&mut app, "Map lenses");
+        press_button(&mut app, "Clear lens");
+
         press_button(&mut app, "Manage");
         press_button(&mut app, "Finances");
         press_button(&mut app, "Bento");
