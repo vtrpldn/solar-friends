@@ -372,6 +372,10 @@ impl Worker {
     }
 
     fn move_along_path(&mut self, dt: f32, carrying: bool) {
+        self.move_with_pace(dt, carrying, 1.0);
+    }
+
+    fn move_with_pace(&mut self, dt: f32, carrying: bool, pace_boost: f32) {
         let Some(&next) = self.path.front() else {
             self.speed = 0.0;
             return;
@@ -385,7 +389,8 @@ impl Worker {
         } else {
             1.0
         };
-        self.speed = (self.speed + dt * 1.8).min(pace * self.walking_pace * fatigue * braking);
+        self.speed =
+            (self.speed + dt * 1.8).min(pace * self.walking_pace * fatigue * braking * pace_boost);
         let step = self.speed * dt * if self.crowded { 0.65 } else { 1.0 };
         if distance > 0.001 {
             self.yaw = offset.x.atan2(offset.y);
@@ -404,6 +409,7 @@ impl Worker {
                 straight
             };
         }
+        self.health.energy = (self.health.energy - f64::from(dt) * 0.025).max(0.0);
     }
 
     fn sidestep_is_clear(&self, side: Vec2, next: Vec2) -> bool {
@@ -2914,6 +2920,7 @@ mod tests {
             worker.health.energy = 34.0;
             worker.move_along_path(1.0, carrying);
             assert!((worker.position.x - pace * 0.8).abs() < 1e-6);
+            assert_eq!(worker.health.energy, 34.0 - 0.025);
             worker.health.energy = 35.0;
             worker.move_along_path(1.0, carrying);
             assert!((worker.position.x - pace * 1.8).abs() < 1e-6);

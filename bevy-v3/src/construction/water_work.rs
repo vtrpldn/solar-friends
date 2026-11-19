@@ -484,7 +484,7 @@ impl Construction {
         } else {
             1.0
         };
-        self.residents[worker].move_along_path(dt * boost as f32, carrying);
+        self.residents[worker].move_with_pace(dt, carrying, boost as f32);
         if !self.residents[worker].path.is_empty() {
             return false;
         }
