@@ -4,7 +4,7 @@ use super::{resident_work::approach_points, *};
 
 const LOAD: f64 = 12.0;
 const EPSILON: f64 = 0.00001;
-const CHANNELS: [&str; 4] = ["Drinking", "Irrigation", "Greywater", "Sewage"];
+pub(super) const CHANNELS: [&str; 4] = ["Drinking", "Irrigation", "Greywater", "Sewage"];
 
 #[derive(Clone, Copy, Deserialize, Serialize)]
 pub enum WaterAction {
@@ -691,12 +691,20 @@ mod tests {
         let amount = |town: &Construction, id| town.utilities.water_site(id).unwrap().levels[1];
         assert_eq!(town.utilities.deliver_water(1, 1, 20.0), 20.0);
         town.residents[0].position = Vec2::new(41.0, -13.0);
-        town.queue_water(
-            0,
-            WaterAction::Carry {
-                source: Some(1),
-                channel: 1,
+        let order = serde_json::from_str(
+            r#"{"type":"carry-water","source":1,"site":0,"channel":"irrigation"}"#,
+        )
+        .unwrap();
+        town.lab_order(
+            &catalog,
+            &mut stock,
+            site,
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: setup.round_trip_km(),
             },
+            &order,
+            setup.richness(),
         )
         .unwrap();
         for cell in approach_points(IVec2::new(42, -13), IVec2::ONE, town.residents[0].position) {

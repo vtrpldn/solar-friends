@@ -77,6 +77,11 @@ pub(crate) enum LabOrder {
     CollectWater {
         site: usize,
     },
+    CarryWater {
+        source: usize,
+        site: usize,
+        channel: LabWaterChannel,
+    },
     Purify {
         site: usize,
     },
@@ -88,6 +93,21 @@ pub(crate) enum LabOrder {
         fresh: bool,
         enabled: bool,
     },
+}
+
+#[derive(Clone, Copy, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub(crate) enum LabWaterChannel {
+    Drinking,
+    Irrigation,
+    Greywater,
+    Sewage,
+}
+
+impl LabWaterChannel {
+    pub(crate) fn label(self) -> &'static str {
+        water_work::CHANNELS[self as usize]
+    }
 }
 
 #[derive(Clone, Copy, Default, Deserialize, Serialize)]
@@ -513,6 +533,17 @@ impl Construction {
                 WaterAction::Carry {
                     source: None,
                     channel: 1,
+                },
+            )?,
+            LabOrder::CarryWater {
+                source,
+                site,
+                channel,
+            } => self.queue_water(
+                *site,
+                WaterAction::Carry {
+                    source: Some(*source),
+                    channel: *channel as usize,
                 },
             )?,
             LabOrder::Purify { site } => self.queue_water(*site, WaterAction::Purify)?,

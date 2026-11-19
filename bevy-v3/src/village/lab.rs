@@ -812,6 +812,16 @@ fn order_label(order: &LabOrder) -> String {
         LabOrder::FoodPolicy { enabled } => format!("{} food restocking", toggle_label(*enabled)),
         LabOrder::Grid { enabled } => format!("{} grid power", toggle_label(*enabled)),
         LabOrder::CollectWater { site } => format!("Collect river water for site #{site}"),
+        LabOrder::CarryWater {
+            source,
+            site,
+            channel,
+        } => {
+            format!(
+                "Carry {} water from site #{source} to site #{site}",
+                channel.label().to_lowercase()
+            )
+        }
         LabOrder::Purify { site } => format!("Purify water at site #{site}"),
         LabOrder::ServiceWater { site } => format!("Service wastewater at site #{site}"),
         LabOrder::WaterPolicy {
