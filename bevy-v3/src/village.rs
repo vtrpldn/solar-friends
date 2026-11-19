@@ -2345,6 +2345,14 @@ fn show_hud(
         label.push('\n');
         label.push_str(&progress);
     }
+    if village.camp.is_some()
+        && village.utility_panel.is_none()
+        && !village.construction.is_placing()
+        && let Some(event) = village.construction.latest_event()
+    {
+        label.push('\n');
+        label.push_str(event);
+    }
     if let Some(natural) =
         village
             .construction

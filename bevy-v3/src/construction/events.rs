@@ -39,6 +39,10 @@ impl VillageEvents {
 }
 
 impl Construction {
+    pub(crate) fn latest_event(&self) -> Option<&str> {
+        self.events.0.front().map(|event| event.text.as_str())
+    }
+
     pub fn record_event(&mut self, clock: f64, text: String) {
         self.events.record(clock, text);
     }
