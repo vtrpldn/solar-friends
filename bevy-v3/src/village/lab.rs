@@ -102,7 +102,30 @@ pub(crate) fn replay_file(path: &Path) -> io::Result<()> {
     Ok(())
 }
 
-fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Result<u64> {
+#[derive(Resource)]
+struct Replay {
+    expected: Option<serde_json::Value>,
+    version: u64,
+    limit: u64,
+}
+
+fn verify_report(expected: serde_json::Value, catalog: &Catalog) -> io::Result<u64> {
+    let (mut runner, mut replay) = prepare_replay(expected, catalog)?;
+    while runner.index < replay.limit && !runner.done() {
+        runner.advance(catalog);
+    }
+    compare_replay(
+        &runner,
+        replay.expected.take().expect("replay report"),
+        replay.version,
+    )?;
+    Ok(runner.index)
+}
+
+fn prepare_replay(
+    mut expected: serde_json::Value,
+    catalog: &Catalog,
+) -> io::Result<(Runner, Replay)> {
     let Some(version @ 1..=6) = expected.get("version").and_then(serde_json::Value::as_u64) else {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
@@ -133,13 +156,20 @@ fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Resu
     } else {
         scenario.steps
     };
-    let mut report = Runner::new(scenario, Some(village), catalog)?;
-    while report.index < limit && !report.done() {
-        report.advance(catalog);
-    }
-    let end_step = report.index;
+    let runner = Runner::new(scenario, Some(village), catalog)?;
+    Ok((
+        runner,
+        Replay {
+            expected: Some(expected),
+            version,
+            limit,
+        },
+    ))
+}
+
+fn compare_replay(runner: &Runner, expected: serde_json::Value, version: u64) -> io::Result<()> {
     let mut actual: serde_json::Value =
-        serde_json::from_slice(&serde_json::to_vec(&report.report())?)?;
+        serde_json::from_slice(&serde_json::to_vec(&runner.report())?)?;
     actual["initial"] = serde_json::Value::Null;
     actual["scenario"] = serde_json::Value::Null;
     if version < 6 {
@@ -203,7 +233,7 @@ fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Resu
             "Replay diverged from the recorded results.",
         ));
     }
-    Ok(end_step)
+    Ok(())
 }
 
 const STEP: f64 = 0.1;
@@ -479,8 +509,24 @@ pub(crate) fn run_ui(scenario: &Path, save: Option<&Path>) -> io::Result<()> {
     let catalog = Catalog::default();
     let (scenario, village) = load_inputs(scenario, save, &catalog)?;
     let runner = Runner::new(scenario, village, &catalog)?;
-    App::new()
-        .insert_resource(catalog)
+    open_lab(catalog, runner, None);
+    Ok(())
+}
+
+pub(crate) fn replay_ui(path: &Path) -> io::Result<()> {
+    let bytes = crate::save::read_bytes(path, 3 * crate::save::MAX_BYTES)?;
+    let catalog = Catalog::default();
+    let (runner, replay) = prepare_replay(serde_json::from_slice(&bytes)?, &catalog)?;
+    open_lab(catalog, runner, Some(replay));
+    Ok(())
+}
+
+fn open_lab(catalog: Catalog, runner: Runner, replay: Option<Replay>) {
+    let mut app = App::new();
+    if let Some(replay) = replay {
+        app.insert_resource(replay);
+    }
+    app.insert_resource(catalog)
         .insert_resource(runner)
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
@@ -493,7 +539,6 @@ pub(crate) fn run_ui(scenario: &Path, save: Option<&Path>) -> io::Result<()> {
         .add_systems(Startup, setup_lab_window)
         .add_systems(Update, update_lab_window)
         .run();
-    Ok(())
 }
 
 fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
@@ -679,6 +724,7 @@ fn toggle_label(enabled: bool) -> &'static str {
 
 struct Playback {
     running: bool,
+    replaying: bool,
     speed: usize,
     debt: f64,
     order: Option<String>,
@@ -695,6 +741,7 @@ impl Default for Playback {
     fn default() -> Self {
         Self {
             running: false,
+            replaying: false,
             speed: 2,
             debt: 0.0,
             order: None,
@@ -754,6 +801,7 @@ fn lab_bed_page(
     let all_beds = keys.any_pressed([KeyCode::ControlLeft, KeyCode::ControlRight]);
     let mut orders = Vec::new();
     if !runner.done()
+        && !playback.replaying
         && let Some(bed) = plots[&site].beds.get(index)
     {
         let beds = if all_beds {
@@ -869,7 +917,7 @@ fn lab_bed_page(
         details.push('\n');
         details.push_str(instruction);
     }
-    let controls = if runner.done() {
+    let controls = if runner.done() || playback.replaying {
         ""
     } else {
         "\nShift+1 Prepare · +2 Plant · +3 Harvest · +4 Clear · +5 Amend · +6 Collect\nX Crop · Y Density · T Irrigation · Z Residues\nHold Ctrl to apply an order to every bed in the plot"
@@ -890,7 +938,13 @@ fn update_lab_window(
     ),
     mut playback: Local<Playback>,
     mut panel: Single<&mut Text>,
+    mut replay: Option<ResMut<Replay>>,
 ) {
+    playback.replaying = replay.is_some();
+    let limit = replay
+        .as_ref()
+        .map_or(runner.scenario.steps, |replay| replay.limit);
+    let reached_end = |runner: &Runner| runner.index >= limit || runner.done();
     if let Some(mut order) = playback.order.take() {
         if keys.just_pressed(KeyCode::Escape) {
             events.clear();
@@ -922,7 +976,7 @@ fn update_lab_window(
         }
     } else {
         events.clear();
-        if keys.just_pressed(KeyCode::KeyO) && !runner.done() {
+        if keys.just_pressed(KeyCode::KeyO) && !reached_end(&runner) && !playback.replaying {
             playback.running = false;
             playback.debt = 0.0;
             playback.notice.clear();
@@ -980,33 +1034,56 @@ fn update_lab_window(
             playback.debt = 0.0;
         }
     }
-    if keys.just_pressed(KeyCode::Space) && !runner.done() {
+    if keys.just_pressed(KeyCode::Space) && !reached_end(&runner) {
         playback.running = !playback.running;
         playback.debt = 0.0;
     }
-    if keys.just_pressed(KeyCode::KeyJ) && !playback.running {
+    if keys.just_pressed(KeyCode::KeyJ) && !playback.running && !reached_end(&runner) {
         runner.advance(&catalog);
     }
     if playback.running {
         let speed = f64::from(rates[playback.speed]);
         playback.debt = (playback.debt + time.delta_secs_f64().min(0.25) * speed).min(speed * 2.0);
         let start = std::time::Instant::now();
-        while playback.debt >= STEP && !runner.done() && start.elapsed().as_millis() < 8 {
+        while playback.debt >= STEP && !reached_end(&runner) && start.elapsed().as_millis() < 8 {
             runner.advance(&catalog);
             playback.debt -= STEP;
         }
     }
-    if runner.done() {
+    if reached_end(&runner) {
         playback.running = false;
+        if let Some(replay) = replay.as_deref_mut()
+            && let Some(expected) = replay.expected.take()
+        {
+            playback.notice = match compare_replay(&runner, expected, replay.version) {
+                Ok(()) => format!("Replay matched through step {}.", runner.index),
+                Err(error) => error.to_string(),
+            };
+        }
     }
     let village = &runner.village;
-    let status = runner.reason.unwrap_or(if runner.done() {
-        "Scenario complete"
-    } else if playback.running {
-        "Running"
+    let status = if playback.replaying {
+        if reached_end(&runner) {
+            "Replay ended"
+        } else if playback.running {
+            "Replaying"
+        } else {
+            "Replay paused"
+        }
     } else {
-        "Paused"
-    });
+        runner.reason.unwrap_or(if runner.done() {
+            "Scenario complete"
+        } else if playback.running {
+            "Running"
+        } else {
+            "Paused"
+        })
+    };
+    let order_control = if playback.replaying {
+        ""
+    } else {
+        "O Enter order · "
+    };
     let last = runner.outcomes.last().map_or_else(
         || "No scheduled orders processed".into(),
         |order| {
@@ -1084,8 +1161,8 @@ fn update_lab_window(
             )
         };
         panel.set_if_neq(Text::new(format!(
-            "Simulation lab · {status} · Step {} / {}\nSpace Run/Pause · J Single step · O Enter order · F5 Report · F6 Checkpoint\n{}\n\n{details}",
-            runner.index, runner.scenario.steps, playback.notice,
+            "Simulation lab · {status} · Step {} / {}\nSpace Run/Pause · J Single step · {order_control}F5 Report · F6 Checkpoint\n{}\n\n{details}",
+            runner.index, limit, playback.notice,
         )));
         return;
     }
@@ -1098,9 +1175,9 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export report · F6 Checkpoint · Tab Browse lab views\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\n{order_control}F5 Export report · F6 Checkpoint · Tab Browse lab views\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
-        runner.scenario.steps,
+        limit,
         village.clock,
         rates[playback.speed],
         playback.notice,

@@ -48,7 +48,10 @@ fn main() {
         return;
     }
     if let Some(flag) = option.as_deref()
-        && (flag == "--lab" || flag == "--lab-replay" || flag == "--lab-ui")
+        && (flag == "--lab"
+            || flag == "--lab-replay"
+            || flag == "--lab-replay-ui"
+            || flag == "--lab-ui")
     {
         let path = args.next().map(std::path::PathBuf::from);
         let save = args.next().map(std::path::PathBuf::from);
@@ -57,11 +60,12 @@ fn main() {
                 village::lab::run_file(&path, save.as_deref())
             }
             (Some(path), None, None, Some("--lab-replay")) => village::lab::replay_file(&path),
+            (Some(path), None, None, Some("--lab-replay-ui")) => village::lab::replay_ui(&path),
             (Some(path), save, None, Some("--lab-ui")) => {
                 village::lab::run_ui(&path, save.as_deref())
             }
             _ => Err(std::io::Error::other(
-                "Usage: solar-friends-v3 --lab or --lab-ui scenario.json [village.json], or --lab-replay report.json",
+                "Usage: solar-friends-v3 --lab or --lab-ui scenario.json [village.json], or --lab-replay or --lab-replay-ui report.json",
             )),
         };
         if let Err(error) = result {
