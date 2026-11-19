@@ -1588,6 +1588,15 @@ fn show_hud(
             "\nP Power · V Water · N Residents · H Finances · F4 Terrain · F7 Maintenance · F8 Events · F10 Stores · F11 Projects · Shift+L Map lenses · Shift+G Grid",
         );
     }
+    if village.camp.is_some()
+        && village.utility_panel.is_none()
+        && !village.construction.menu
+        && !village.advance.open
+        && !village.terrain_editor.open
+    {
+        label.push('\n');
+        label.push_str(&village.construction.basic_needs_overview(&village.stock));
+    }
     match village.utility_panel {
         Some(UtilityPanel::Power) => {
             label.push('\n');

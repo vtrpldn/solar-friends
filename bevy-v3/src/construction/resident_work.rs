@@ -13,6 +13,38 @@ use super::*;
 pub(super) const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 
 impl Construction {
+    pub fn basic_needs_overview(&self, stock: &Stock) -> String {
+        let present = self
+            .residents
+            .iter()
+            .enumerate()
+            .filter(|(index, _)| !self.away_for_work(*index) && !self.driver_away(*index));
+        let thirsty = present
+            .clone()
+            .filter(|(_, resident)| resident.health.levels[Need::Hydration as usize] < 30.0)
+            .count();
+        let sanitation = present
+            .filter(|(_, resident)| {
+                [Need::Bladder, Need::Bowels, Need::Hygiene]
+                    .into_iter()
+                    .any(|need| resident.health.levels[need as usize] < 30.0)
+            })
+            .count();
+        let services = self
+            .utilities
+            .service_overview(thirsty, sanitation, stock.sandbox);
+        let portions = stock.food_portions();
+        let food = if stock.sandbox {
+            "Unlimited".into()
+        } else if portions == 0 {
+            "No ready food".into()
+        } else {
+            let days = f64::from(portions) / (self.residents.len() as f64 * 3.0);
+            format!("{portions} portions · {days:.1} days estimated")
+        };
+        format!("{services}\nFood · {food}")
+    }
+
     pub fn tick_health(
         &mut self,
         catalog: &Catalog,

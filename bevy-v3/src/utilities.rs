@@ -606,6 +606,54 @@ impl Utilities {
         (!status.is_empty()).then_some(status)
     }
 
+    pub fn service_overview(
+        &self,
+        thirsty: usize,
+        sanitation_waiting: usize,
+        sandbox: bool,
+    ) -> String {
+        let enabled = || self.nodes.values().filter(|node| node.enabled);
+        let shortage = enabled()
+            .filter(|node| node.demanding && !node.powered)
+            .count();
+        let power = if shortage > 0 {
+            format!("{shortage} buildings undersupplied")
+        } else if self.grid_import_kw > 0.0 {
+            format!("{:.2} kW grid backup", self.grid_import_kw)
+        } else if self.demand_kw > 0.0 {
+            "Demand supplied".into()
+        } else {
+            "No demand".into()
+        };
+        let fresh: f64 = enabled()
+            .filter(|node| !matches!(node.kind.as_str(), "coop" | "goat_pasture"))
+            .map(|node| node.water[0])
+            .sum();
+        let water = if sandbox {
+            "Sandbox".into()
+        } else if thirsty > 0 {
+            format!("{fresh:.1} L potable · {thirsty} thirsty")
+        } else if fresh < 0.5 {
+            "No drinking water".into()
+        } else {
+            format!("{fresh:.1} L potable")
+        };
+        let sanitation = if sanitation_waiting > 0 {
+            format!("{sanitation_waiting} residents need care")
+        } else if self.toilets(1.5).next().is_none() {
+            "Camp latrine fallback".into()
+        } else if enabled().any(|node| {
+            (2..4).any(|channel| {
+                node.capacity[channel] > 0.0 && node.water[channel] >= 0.9 * node.capacity[channel]
+            })
+        }) {
+            "Waste tanks filling".into()
+        } else {
+            "Toilet capacity available".into()
+        };
+        format!("Power · {power}\nWater · {water} · Sanitation · {sanitation}")
+    }
+
     pub fn power_summary(&self) -> String {
         let stored: f64 = self.nodes.values().map(|node| node.charge).sum();
         format!(
