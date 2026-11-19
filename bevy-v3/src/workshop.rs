@@ -28,6 +28,8 @@ struct Workshop {
     guides: bool,
     export_notice: String,
     search: Option<AssetSearch>,
+    proof: Option<sprites::SpriteProof>,
+    show_proof: bool,
 }
 
 #[derive(Default)]
@@ -156,8 +158,10 @@ pub fn run() {
         guides: false,
         export_notice: String::new(),
         search: None,
+        proof: None,
+        show_proof: false,
     })
-    .add_systems(Startup, setup)
+    .add_systems(Startup, (setup, sprites::setup_proof))
     .add_systems(
         Update,
         (
@@ -168,6 +172,7 @@ pub fn run() {
             capture_preview,
             sprites::start,
             sprites::progress,
+            sprites::show_proof,
             draw_guides,
         )
             .chain(),
@@ -252,7 +257,7 @@ fn controls(
     (catalog, window): (Res<Catalog>, Single<&Window>),
     mut workshop: ResMut<Workshop>,
 ) {
-    if !pending.is_empty() || sprite_capture.is_some() {
+    if !pending.is_empty() || sprite_capture.is_some() || workshop.show_proof {
         return;
     }
     if keys.just_pressed(KeyCode::Slash) && workshop.search.is_none() {
@@ -401,11 +406,16 @@ fn show_model(
         *preview = Some((project.model, entity));
     }
     if let Some((_, entity)) = *preview {
-        commands
-            .entity(entity)
-            .insert(Transform::from_rotation(Quat::from_rotation_y(
+        commands.entity(entity).insert((
+            Transform::from_rotation(Quat::from_rotation_y(
                 f32::from(workshop.rotation) * std::f32::consts::FRAC_PI_2,
-            )));
+            )),
+            if workshop.show_proof {
+                Visibility::Hidden
+            } else {
+                Visibility::Visible
+            },
+        ));
     }
     let (transform, projection) = &mut *camera;
     **transform = orbit_camera(workshop.heading, workshop.elevation, workshop.target);
@@ -423,9 +433,16 @@ fn show_model(
         text.set_if_neq(Text::new(search.label(&workshop.projects, &catalog)));
         return;
     }
+    if workshop.show_proof {
+        text.set_if_neq(Text::new(format!(
+            "{} · Sprite Proof · {mode}\n0° · 90° · 180° · 270°\nF6 Export sheet · F7 Return to model\n{}",
+            project.name, workshop.export_notice
+        )));
+        return;
+    }
     let surface = workshop.surface.label();
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure · Home Reset · F5 Export PNG · F6 Sprite sheet\n{}",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure · Home Reset · F5 Export PNG · F6 Sprite sheet · F7 Sprite Proof\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
@@ -442,7 +459,7 @@ fn show_scale_figure(
     let project = &catalog.projects[&workshop.projects[workshop.selected]];
     let (figure_transform, visibility) = &mut *figure;
     figure_transform.translation = scale_figure_position(project.size, workshop.rotation);
-    **visibility = if workshop.scale_figure {
+    **visibility = if workshop.scale_figure && !workshop.show_proof {
         Visibility::Visible
     } else {
         Visibility::Hidden
@@ -554,7 +571,7 @@ fn capture_preview(
         return;
     }
     panel.display = Display::Flex;
-    if workshop.search.is_some() || !keys.just_pressed(KeyCode::F5) {
+    if workshop.show_proof || workshop.search.is_some() || !keys.just_pressed(KeyCode::F5) {
         return;
     }
     let ready = |model| {
@@ -647,7 +664,7 @@ fn draw_guides(
     pending: Query<(), With<Screenshot>>,
     mut gizmos: Gizmos,
 ) {
-    if !workshop.guides || !pending.is_empty() {
+    if !workshop.guides || workshop.show_proof || !pending.is_empty() {
         return;
     }
     let project = &catalog.projects[&workshop.projects[workshop.selected]];

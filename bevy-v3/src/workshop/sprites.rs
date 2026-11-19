@@ -14,11 +14,60 @@ const TURNS: usize = 4;
 #[derive(Resource)]
 pub(super) struct SpriteCapture {
     frames: Vec<Frame>,
-    path: std::path::PathBuf,
+    destination: Destination,
     placement: serde_json::Value,
     warmup: Option<u8>,
     started: std::time::Instant,
     light: Entity,
+}
+
+enum Destination {
+    File(std::path::PathBuf),
+    Proof,
+}
+
+pub(super) struct SpriteProof {
+    asset: String,
+    night: bool,
+    image: Handle<Image>,
+    placement: serde_json::Value,
+}
+
+#[derive(Component)]
+pub(super) struct ProofPanel;
+
+pub(super) fn setup_proof(mut commands: Commands) {
+    commands.spawn((
+        ProofPanel,
+        ImageNode::default(),
+        Node {
+            display: Display::None,
+            position_type: PositionType::Absolute,
+            left: vw(4.0),
+            top: vh(32.0),
+            width: vw(92.0),
+            aspect_ratio: Some(TURNS as f32),
+            ..default()
+        },
+        BackgroundColor(Color::srgb_u8(40, 54, 43)),
+    ));
+}
+
+pub(super) fn show_proof(
+    workshop: Res<Workshop>,
+    mut proof: Single<(&mut Node, &mut ImageNode), With<ProofPanel>>,
+) {
+    let (node, image) = &mut *proof;
+    if workshop.show_proof
+        && let Some(sheet) = &workshop.proof
+    {
+        node.display = Display::Flex;
+        if image.image != sheet.image {
+            image.image = sheet.image.clone();
+        }
+    } else {
+        node.display = Display::None;
+    }
 }
 
 struct Frame {
@@ -76,6 +125,17 @@ fn placement(id: &str, size: [i32; 2], light: &str, ppm: f32) -> serde_json::Val
 
 type PreviewMesh<'a> = (&'a Mesh3d, &'a GlobalTransform, Option<&'a OriginalSurface>);
 
+fn sheet_path(id: &str, light: &str) -> std::io::Result<std::path::PathBuf> {
+    crate::save::location(crate::setup::Mode::Story).and_then(|save| {
+        let stamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(std::io::Error::other)?;
+        let dir = save.with_file_name("workshop");
+        std::fs::create_dir_all(&dir)?;
+        Ok(dir.join(format!("{id}-{light}-sprites-{}.png", stamp.as_nanos())))
+    })
+}
+
 pub(super) fn start(
     (mut commands, keys): (Commands, Res<ButtonInput<KeyCode>>),
     (pending, capture): (Query<(), With<Screenshot>>, Option<Res<SpriteCapture>>),
@@ -85,11 +145,39 @@ pub(super) fn start(
     scene_mesh: Query<PreviewMesh>,
     spawner: Res<SceneSpawner>,
 ) {
-    if !keys.just_pressed(KeyCode::F6)
-        || workshop.search.is_some()
-        || capture.is_some()
-        || !pending.is_empty()
+    let proof = keys.just_pressed(KeyCode::F7);
+    let export = keys.just_pressed(KeyCode::F6);
+    if !(proof || export) || workshop.search.is_some() || capture.is_some() || !pending.is_empty() {
+        return;
+    }
+    if proof && workshop.show_proof {
+        workshop.show_proof = false;
+        return;
+    }
+    let id = &workshop.projects[workshop.selected];
+    let light = if workshop.night { "night" } else { "day" };
+    let destination = if proof {
+        Destination::Proof
+    } else {
+        match sheet_path(id, light) {
+            Ok(path) => Destination::File(path),
+            Err(error) => {
+                workshop.export_notice = format!("Could not prepare sprite export · {error}");
+                return;
+            }
+        }
+    };
+    if let Some(cached) = &workshop.proof
+        && cached.asset == *id
+        && cached.night == workshop.night
+        && let Some(image) = images.get(&cached.image)
     {
+        match destination {
+            Destination::Proof => workshop.show_proof = true,
+            Destination::File(path) => {
+                workshop.export_notice = export_notice(image, &cached.placement, &path);
+            }
+        }
         return;
     }
     let Ok((instance, root)) = model.single() else {
@@ -123,23 +211,6 @@ pub(super) fn start(
             })
             .flatten(),
     );
-    let id = &workshop.projects[workshop.selected];
-    let light = if workshop.night { "night" } else { "day" };
-    let path = crate::save::location(crate::setup::Mode::Story).and_then(|save| {
-        let stamp = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map_err(std::io::Error::other)?;
-        let dir = save.with_file_name("workshop");
-        std::fs::create_dir_all(&dir)?;
-        Ok(dir.join(format!("{id}-{light}-sprites-{}.png", stamp.as_nanos())))
-    });
-    let path = match path {
-        Ok(path) => path,
-        Err(error) => {
-            workshop.export_notice = format!("Could not prepare sprite export · {error}");
-            return;
-        }
-    };
     let project = &catalog.projects[id];
     let mut frames = Vec::new();
     for turn in 0..TURNS {
@@ -202,7 +273,7 @@ pub(super) fn start(
         .id();
     commands.insert_resource(SpriteCapture {
         frames,
-        path,
+        destination,
         placement: placement(id, project.size, light, ppm),
         warmup: None,
         started: std::time::Instant::now(),
@@ -214,7 +285,7 @@ pub(super) fn start(
 pub(super) fn progress(
     mut commands: Commands,
     capture: Option<ResMut<SpriteCapture>>,
-    mut workshop: ResMut<Workshop>,
+    (mut workshop, mut images): (ResMut<Workshop>, ResMut<Assets<Image>>),
     instances: Query<(&SceneInstance, &SpriteModel)>,
     spawner: Res<SceneSpawner>,
 ) {
@@ -283,13 +354,22 @@ pub(super) fn progress(
     if !capture.frames.iter().all(|frame| frame.pixels.is_some()) {
         return;
     }
-    workshop.export_notice = match write_sheet(&capture) {
-        Ok(()) => format!(
-            "Saved sprite sheet and placement JSON · {}",
-            capture.path.display()
-        ),
-        Err(error) => format!("Sprite export failed · {error}"),
-    };
+    let image = sheet_image(&capture);
+    match &capture.destination {
+        Destination::Proof => {
+            workshop.show_proof = true;
+            workshop.export_notice.clear();
+        }
+        Destination::File(path) => {
+            workshop.export_notice = export_notice(&image, &capture.placement, path);
+        }
+    }
+    workshop.proof = Some(SpriteProof {
+        asset: workshop.projects[workshop.selected].clone(),
+        night: workshop.night,
+        image: images.add(image),
+        placement: capture.placement.clone(),
+    });
     finish(&mut commands, &capture);
 }
 
@@ -305,7 +385,7 @@ fn finish(commands: &mut Commands, capture: &SpriteCapture) {
     commands.remove_resource::<SpriteCapture>();
 }
 
-fn write_sheet(capture: &SpriteCapture) -> std::io::Result<()> {
+fn sheet_image(capture: &SpriteCapture) -> Image {
     let stride = SIZE as usize * 4;
     let mut bytes = Vec::with_capacity(stride * TURNS * SIZE as usize);
     for row in 0..SIZE as usize {
@@ -323,14 +403,25 @@ fn write_sheet(capture: &SpriteCapture) -> std::io::Result<()> {
         TextureDimension::D2,
         bytes,
         TextureFormat::Rgba8UnormSrgb,
-        RenderAssetUsages::MAIN_WORLD,
+        RenderAssetUsages::default(),
     )
-    .try_into_dynamic()
-    .map_err(std::io::Error::other)?
-    .save(&capture.path)
-    .map_err(std::io::Error::other)?;
-    let metadata = serde_json::to_vec_pretty(&capture.placement)?;
-    crate::save::atomic_write(&capture.path.with_extension("json"), &metadata, 8192)
+}
+
+fn export_notice(image: &Image, placement: &serde_json::Value, path: &std::path::Path) -> String {
+    let write = || -> std::io::Result<()> {
+        image
+            .clone()
+            .try_into_dynamic()
+            .map_err(std::io::Error::other)?
+            .save(path)
+            .map_err(std::io::Error::other)?;
+        let metadata = serde_json::to_vec_pretty(placement)?;
+        crate::save::atomic_write(&path.with_extension("json"), &metadata, 8192)
+    };
+    match write() {
+        Ok(()) => format!("Saved sprite sheet and placement JSON · {}", path.display()),
+        Err(error) => format!("Sprite export failed · {error}"),
+    }
 }
 
 #[cfg(test)]
