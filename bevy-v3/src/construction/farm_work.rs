@@ -190,8 +190,20 @@ impl Construction {
                 sheltered,
                 sandbox: setup.mode == crate::setup::Mode::Sandbox,
             };
-            for bed in &mut plot.beds {
-                bed.tick(climate, |amount| self.utilities.irrigate(index, amount));
+            // Step every bed before advancing the plot again. The beds share
+            // one tank, so running one bed through the whole interval changes
+            // which other beds receive water.
+            let mut remaining = dt;
+            while remaining > 1e-8 {
+                let interval = remaining.min(HOUR);
+                let climate = CropClimate {
+                    dt: interval,
+                    ..climate
+                };
+                for bed in &mut plot.beds {
+                    bed.tick(climate, |amount| self.utilities.irrigate(index, amount));
+                }
+                remaining -= interval;
             }
             if !climate.sandbox
                 && let Some(warning) = plot.update_warning(clock)
@@ -1003,6 +1015,29 @@ pub(super) fn seed_delivery_status(job: &FarmJob, clock: f64) -> String {
 mod resize_tests {
     use super::*;
     use crate::farming::{Crop, Stage};
+
+    #[test]
+    fn beds_can_request_irrigation_midway_through_a_long_step() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut village = Construction::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut garden = village.proposed_site(&catalog, "garden", IVec2::new(44, 36));
+        garden.work = catalog.projects["garden"].work;
+        village.plans.push(garden);
+        village.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        village.tick_crops(&catalog, &setup, 0.0, 0.0);
+        village.utilities.deliver_water(1, 1, 12.0);
+        let bed = &mut village.farming.plots.get_mut(&0).unwrap().beds[0];
+        bed.stage = Stage::Growing;
+        bed.moisture = 0.751;
+        bed.irrigation = true;
+
+        // The first hour is dry and takes the bed below its refill threshold.
+        village.tick_crops(&catalog, &setup, 8.0 * HOUR, 4.0 * HOUR);
+
+        assert!(village.farming.plots[&0].beds[0].irrigated_liters > 0.0);
+    }
 
     #[test]
     fn outdoor_beds_receive_rain_at_the_step_midpoint() {
