@@ -510,12 +510,20 @@ impl Construction {
             }
         }
         let quote = match self.trade.quote(catalog, stock, id, day, 0) {
-            Ok((qty, cents)) => format!(
-                "{} for R${:.2} · Fuel R${:.2}",
-                item.quantity_text(u64::from(qty)),
-                cents as f64 / 100.0,
-                fare_cents(clock.round_trip_km) as f64 / 100.0
-            ),
+            Ok((qty, cents)) => {
+                let fare = fare_cents(clock.round_trip_km);
+                let net = (cents as f64 - fare as f64) / 100.0;
+                let after_fuel = if net < 0.0 {
+                    format!("-R${:.2}", -net)
+                } else {
+                    format!("R${net:.2}")
+                };
+                format!(
+                    "{} · R${:.2} gross · {after_fuel} after dedicated fuel",
+                    item.quantity_text(u64::from(qty)),
+                    cents as f64 / 100.0,
+                )
+            }
             Err(error) => error.into(),
         };
         display.push_str(&format!(
@@ -647,6 +655,32 @@ mod tests {
         assert_eq!(village.trip.unwrap().project, 0);
         assert_eq!(village.market.committed_fares(), fare);
         assert!(village.valid_save(&catalog, &stock));
+    }
+
+    #[test]
+    fn sale_quote_shows_a_loss_after_dedicated_fuel() {
+        let catalog = Catalog::default();
+        let stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        village.trade.selected = Trade::tradable(&catalog)
+            .iter()
+            .position(|&(id, _)| id == "wood")
+            .unwrap();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 500,
+        };
+        let (_, gross) = village.trade.quote(&catalog, &stock, "wood", 0, 0).unwrap();
+        let loss = fare_cents(clock.round_trip_km) - gross;
+        assert!(
+            village
+                .trade_status(&catalog, &stock, clock)
+                .contains(&format!(
+                    "R${:.2} gross · -R${:.2} after dedicated fuel",
+                    gross as f64 / 100.0,
+                    loss as f64 / 100.0,
+                ))
+        );
     }
 
     #[test]
