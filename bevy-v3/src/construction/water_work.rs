@@ -785,6 +785,12 @@ impl Construction {
                 }
             }
         }
+        if let Some((area, roof)) = utilities.rain_catchment(target) {
+            let _ = write!(text, "\nRain catchment · {area:.0} m²");
+            if let Some(roof) = roof {
+                let _ = write!(text, " · Includes roof #{roof}");
+            }
+        }
         let selected_job =
             source.and_then(|from| self.active_connection(from, target, Some(channel)));
         let selected_waiting = selected_job.is_none()

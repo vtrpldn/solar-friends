@@ -50,6 +50,8 @@ pub struct Utilities {
     #[serde(skip)]
     links: Vec<Pipe>,
     #[serde(skip)]
+    rain_catchments: BTreeMap<usize, (f64, Option<usize>)>,
+    #[serde(skip)]
     power_links: Vec<(usize, usize)>,
     #[serde(skip)]
     power_circuits: BTreeMap<usize, usize>,
@@ -276,6 +278,7 @@ impl Utilities {
 
     fn rebuild_topology(&mut self) {
         self.links = self.connections();
+        self.rebuild_rain_catchments();
         self.power_links = self.power_tree();
         for &(a, b) in &self.installed_power_links {
             if !self.power_link_exists(a, b) {
@@ -611,6 +614,9 @@ impl Utilities {
             && let Some(node) = self.nodes.get_mut(&(building + 1))
         {
             node.enabled = !enabled;
+            if matches!(node.kind.as_str(), "well" | "rain-barrel") {
+                self.rebuild_rain_catchments();
+            }
         }
     }
 
@@ -1226,13 +1232,13 @@ impl Utilities {
         }
     }
 
-    fn process_water(&mut self, terrain: &Terrain, water_factor: f64, rain: f64, hours: f64) {
-        let Some(ground) = &mut self.ground else {
-            return;
-        };
-        let mut pumping = Vec::new();
+    pub fn rain_catchment(&self, id: usize) -> Option<(f64, Option<usize>)> {
+        self.rain_catchments.get(&id).copied()
+    }
+
+    fn rebuild_rain_catchments(&mut self) {
         let mut claimed = HashSet::new();
-        let catchments: Vec<_> = self
+        self.rain_catchments = self
             .nodes
             .iter()
             .filter_map(|(&index, node)| {
@@ -1258,13 +1264,23 @@ impl Utilities {
                     });
                 if let Some((&id, roof)) = roof {
                     claimed.insert(id);
-                    Some((index, area + f64::from(roof.size.x * roof.size.y * 4)))
+                    Some((
+                        index,
+                        (area + f64::from(roof.size.x * roof.size.y * 4), Some(id)),
+                    ))
                 } else {
-                    Some((index, area))
+                    Some((index, (area, None)))
                 }
             })
             .collect();
-        for (id, area) in catchments {
+    }
+
+    fn process_water(&mut self, terrain: &Terrain, water_factor: f64, rain: f64, hours: f64) {
+        let Some(ground) = &mut self.ground else {
+            return;
+        };
+        let mut pumping = Vec::new();
+        for (&id, &(area, _)) in &self.rain_catchments {
             let node = self.nodes.get_mut(&id).expect("rain catchment");
             let total = area * rain * hours;
             let collected = (total * 0.8).min(node.capacity[1] - node.water[1]).max(0.0);
@@ -2009,6 +2025,37 @@ mod tests {
                 .unwrap()
                 .contains("Cold storage off")
         );
+    }
+
+    #[test]
+    fn a_roof_feeds_one_collector_and_reassigns_when_the_well_switches_off() {
+        let mut utilities = Utilities::default();
+        let facility = |id, kind, x| Facility {
+            id,
+            kind,
+            location: IVec2::new(x, 36),
+            size: IVec2::new(2, 2),
+            batteries: 0,
+            panels: 0,
+            working: false,
+        };
+        utilities.sync(
+            [
+                facility(1, "well", 42),
+                facility(2, "rain-barrel", 44),
+                facility(3, "home", 43),
+            ]
+            .into_iter(),
+        );
+        assert_eq!(utilities.rain_catchment(1), Some((32.0, Some(3))));
+        assert_eq!(utilities.rain_catchment(2), Some((1.0, None)));
+
+        utilities.toggle(0);
+        assert_eq!(utilities.rain_catchment(1), None);
+        assert_eq!(utilities.rain_catchment(2), Some((17.0, Some(3))));
+
+        utilities.sync(std::iter::once(facility(3, "home", 55)));
+        assert_eq!(utilities.rain_catchment(2), Some((1.0, None)));
     }
 
     #[test]
