@@ -378,7 +378,7 @@ fn run_garden(path: Option<PathBuf>, night: bool, study: Option<&str>) {
     .add_observer(light_new_props)
     .add_observer(mark_selectable_meshes)
     .add_observer(style_placement_preview)
-    .add_systems(Startup, (setup, asset_picker::setup))
+    .add_systems(Startup, (setup, asset_picker::setup_garden))
     .add_systems(
         Update,
         (
@@ -614,7 +614,7 @@ fn edit(
     mut pointer: Local<Option<(Vec2, bool)>>,
     buttons: Query<&Interaction, GardenButton>,
     action_buttons: Query<(&Interaction, &GardenAction), Changed<Interaction>>,
-    picker: asset_picker::PickerInput,
+    (picker, categories): (asset_picker::PickerInput, Res<asset_picker::Categories>),
     mut raycast: MeshRayCast,
     selectable: Query<&SelectableProp>,
     roots: Query<&GardenProp>,
@@ -697,6 +697,19 @@ fn edit(
     if let Some(mut search) = garden.search.take() {
         if pressed(Escape) || picker.clicked(asset_picker::Action::Close) {
             typing.clear();
+            return;
+        }
+        if picker.clicked(asset_picker::Action::CategoryMenu) {
+            search.choosing_category = !search.choosing_category;
+        }
+        if let Some(index) = picker.category() {
+            search.category = (index != 0).then(|| categories.0[index].clone());
+            search.choosing_category = false;
+            search.row = 0;
+        }
+        if search.choosing_category {
+            typing.clear();
+            garden.search = Some(search);
             return;
         }
         let enter = pressed(Enter) || pressed(NumpadEnter);

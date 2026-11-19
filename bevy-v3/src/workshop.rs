@@ -85,6 +85,8 @@ impl Workshop {
 #[derive(Default)]
 struct AssetSearch {
     query: String,
+    category: Option<String>,
+    choosing_category: bool,
     row: usize,
 }
 
@@ -96,9 +98,13 @@ impl AssetSearch {
             .enumerate()
             .filter_map(|(index, id)| {
                 let model = &catalog.0[id];
-                (model.name.to_lowercase().contains(&query)
-                    || id.contains(&query)
-                    || model.category.to_lowercase().contains(&query))
+                (self
+                    .category
+                    .as_ref()
+                    .is_none_or(|category| *category == model.category)
+                    && (model.name.to_lowercase().contains(&query)
+                        || id.contains(&query)
+                        || model.category.to_lowercase().contains(&query)))
                 .then_some(index)
             })
             .collect()
@@ -985,13 +991,28 @@ mod tests {
         let ids = vec!["tree".into(), "home-cottage".into(), "shed".into()];
         let search = AssetSearch {
             query: " ShAdE ".into(),
-            row: 0,
+            ..default()
         };
         assert_eq!(search.matching(&ids, &catalog), [0]);
         let search = AssetSearch {
             query: "home-cott".into(),
-            row: 0,
+            ..default()
         };
+        assert_eq!(search.matching(&ids, &catalog), [1]);
+    }
+
+    #[test]
+    fn asset_category_and_text_filters_apply_together() {
+        let catalog = WorkshopCatalog::default();
+        let ids = vec!["tree".into(), "home-cottage".into(), "shed".into()];
+        let mut search = AssetSearch {
+            category: Some(catalog.0["tree"].category.clone()),
+            ..default()
+        };
+        assert_eq!(search.matching(&ids, &catalog), [0]);
+        search.query = "home-cott".into();
+        assert!(search.matching(&ids, &catalog).is_empty());
+        search.category = None;
         assert_eq!(search.matching(&ids, &catalog), [1]);
     }
 

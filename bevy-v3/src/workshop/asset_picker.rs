@@ -15,6 +15,8 @@ pub(super) enum Action {
     Previous,
     Next,
     Close,
+    CategoryMenu,
+    Category(usize),
 }
 
 #[derive(bevy::ecs::system::SystemParam)]
@@ -27,6 +29,18 @@ impl PickerInput<'_, '_> {
         self.buttons
             .iter()
             .any(|(&interaction, &button)| interaction == Interaction::Pressed && button == action)
+    }
+
+    pub(super) fn category(&self) -> Option<usize> {
+        self.buttons.iter().find_map(|(&interaction, &button)| {
+            if interaction == Interaction::Pressed
+                && let Action::Category(index) = button
+            {
+                Some(index)
+            } else {
+                None
+            }
+        })
     }
 
     pub(super) fn selected(&self) -> Option<usize> {
@@ -48,7 +62,31 @@ pub(super) struct Picker;
 #[derive(Component)]
 pub(super) struct Heading;
 
-pub(super) fn setup(mut commands: Commands, assets: Res<AssetServer>) {
+#[derive(Resource)]
+pub(super) struct Categories(pub Vec<String>);
+
+pub(super) fn setup(commands: Commands, assets: Res<AssetServer>) {
+    spawn_picker(commands, &assets, &[]);
+}
+
+pub(super) fn setup_garden(
+    mut commands: Commands,
+    assets: Res<AssetServer>,
+    catalog: Res<WorkshopCatalog>,
+) {
+    let unique: std::collections::BTreeSet<_> = catalog
+        .0
+        .values()
+        .map(|asset| asset.category.clone())
+        .collect();
+    let categories: Vec<_> = std::iter::once("All categories".to_owned())
+        .chain(unique)
+        .collect();
+    spawn_picker(commands.reborrow(), &assets, &categories);
+    commands.insert_resource(Categories(categories));
+}
+
+fn spawn_picker(mut commands: Commands, assets: &AssetServer, categories: &[String]) {
     commands
         .spawn((
             Picker,
@@ -68,9 +106,24 @@ pub(super) fn setup(mut commands: Commands, assets: Res<AssetServer>) {
             BackgroundColor(Color::srgb_u8(31, 45, 35)),
         ))
         .with_children(|panel| {
-            panel.spawn((Heading, Text::default(), ui_font(&assets, 16.)));
+            panel.spawn((Heading, Text::default(), ui_font(assets, 16.)));
+            if !categories.is_empty() {
+                button(panel, assets, Action::CategoryMenu, "All categories");
+                panel
+                    .spawn(Node {
+                        flex_wrap: FlexWrap::Wrap,
+                        column_gap: px(5),
+                        row_gap: px(4),
+                        ..default()
+                    })
+                    .with_children(|row| {
+                        for (index, label) in categories.iter().enumerate() {
+                            button(row, assets, Action::Category(index), label);
+                        }
+                    });
+            }
             for offset in 0..PAGE_SIZE {
-                button(panel, &assets, Action::Asset(offset), "");
+                button(panel, assets, Action::Asset(offset), "");
             }
             panel
                 .spawn(Node {
@@ -78,9 +131,9 @@ pub(super) fn setup(mut commands: Commands, assets: Res<AssetServer>) {
                     ..default()
                 })
                 .with_children(|row| {
-                    button(row, &assets, Action::Previous, "Previous page");
-                    button(row, &assets, Action::Next, "Next page");
-                    button(row, &assets, Action::Close, "Close");
+                    button(row, assets, Action::Previous, "Previous page");
+                    button(row, assets, Action::Next, "Next page");
+                    button(row, assets, Action::Close, "Close");
                 });
         });
 }
@@ -154,7 +207,7 @@ impl PickerView<'_, '_> {
             .set_if_neq(Text::new(format!("Find asset · {query}\n{results}")));
         for (action, children, mut node, mut background) in &mut self.buttons {
             let visible = match *action {
-                Action::Asset(offset) => {
+                Action::Asset(offset) if !search.choosing_category => {
                     let row = start + offset;
                     if let Some(&index) = matches.get(row) {
                         let model = &catalog.0[&assets[index]];
@@ -174,8 +227,18 @@ impl PickerView<'_, '_> {
                         false
                     }
                 }
-                Action::Previous => page > 1,
-                Action::Next => page < pages,
+                Action::Asset(_) => false,
+                Action::CategoryMenu => {
+                    if let Ok(mut label) = self.labels.get_mut(children[0]) {
+                        label.set_if_neq(Text::new(
+                            search.category.as_deref().unwrap_or("All categories"),
+                        ));
+                    }
+                    true
+                }
+                Action::Category(_) => search.choosing_category,
+                Action::Previous => !search.choosing_category && page > 1,
+                Action::Next => !search.choosing_category && page < pages,
                 Action::Close => true,
             };
             node.display = if visible {
