@@ -24,16 +24,56 @@ pub fn route(
     mut blocked: impl FnMut(IVec2) -> bool,
     road: impl Fn(IVec2) -> bool,
 ) -> Option<VecDeque<Vec2>> {
-    let start = (from + Vec2::splat(0.5)).floor().as_ivec2();
-    let start_index = cell_index(start)?;
-    let goal = cell_index(to)?;
+    cell_index(to)?;
     if blocked(to) {
         return None;
     }
-    let estimate = |cell: IVec2| {
-        let distance = (cell - to).abs();
-        (distance.x + distance.y) * 13
+    search(
+        from,
+        |cell| cell == to,
+        |cell| {
+            let distance = (cell - to).abs();
+            (distance.x + distance.y) * 13
+        },
+        blocked,
+        road,
+    )
+}
+
+pub fn reaches_any(from: Vec2, targets: &[IVec2], mut blocked: impl FnMut(IVec2) -> bool) -> bool {
+    let goals: Vec<_> = targets
+        .iter()
+        .copied()
+        .filter(|&cell| cell_index(cell).is_some() && !blocked(cell))
+        .collect();
+    let Some(first) = goals.first().copied() else {
+        return false;
     };
+    let (minimum, maximum) = goals.iter().fold((first, first), |(low, high), &cell| {
+        (low.min(cell), high.max(cell))
+    });
+    search(
+        from,
+        |cell| goals.contains(&cell),
+        |cell| {
+            let delta = (cell - cell.clamp(minimum, maximum)).abs();
+            (delta.x + delta.y) * 13
+        },
+        blocked,
+        |_| false,
+    )
+    .is_some()
+}
+
+fn search(
+    from: Vec2,
+    goal: impl Fn(IVec2) -> bool,
+    estimate: impl Fn(IVec2) -> i32,
+    mut blocked: impl FnMut(IVec2) -> bool,
+    road: impl Fn(IVec2) -> bool,
+) -> Option<VecDeque<Vec2>> {
+    let start = (from + Vec2::splat(0.5)).floor().as_ivec2();
+    let start_index = cell_index(start)?;
     let mut distance = vec![i32::MAX; WIDTH * WIDTH];
     let mut parent = vec![None; WIDTH * WIDTH];
     let mut queue = BinaryHeap::new();
@@ -45,19 +85,19 @@ pub fn route(
         if queued_cost != cost {
             continue;
         }
-        if current == goal {
+        let position = grid_cell(current);
+        if goal(position) {
             let mut path = VecDeque::new();
-            let mut node = goal;
+            let mut node = current;
             while let Some(parent_index) = parent[node] {
                 path.push_front(grid_cell(node).as_vec2());
                 node = parent_index;
             }
-            if path.is_empty() && from != to.as_vec2() {
-                path.push_back(to.as_vec2());
+            if path.is_empty() && from != position.as_vec2() {
+                path.push_back(position.as_vec2());
             }
             return Some(path);
         }
-        let position = grid_cell(current);
         for direction in [IVec2::X, IVec2::NEG_X, IVec2::Y, IVec2::NEG_Y] {
             let next = position + direction;
             let Some(index) = cell_index(next) else {

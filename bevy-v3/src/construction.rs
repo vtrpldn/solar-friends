@@ -1124,6 +1124,30 @@ impl Construction {
                 }
             }
         }
+        if !road {
+            let targets = if bridge {
+                let along = if blueprint.rotation.is_multiple_of(2) {
+                    IVec2::X
+                } else {
+                    IVec2::Y
+                };
+                vec![start - along, start + along * blueprint.size.max_element()]
+            } else {
+                build_perimeter(start, blueprint.size)
+            };
+            let accessible =
+                crate::navigation::reaches_any(SUPPLY_SPOTS[2].as_vec2(), &targets, |cell| {
+                    (cell.cmpge(start).all() && cell.cmplt(end).all())
+                        || self.blocked(catalog, terrain, land, camp, cell)
+                });
+            if !accessible {
+                return Some(if bridge {
+                    "Keep one bridge end reachable from the village."
+                } else {
+                    "Leave a walking route from the supplies to the work site."
+                });
+            }
+        }
         None
     }
 
@@ -2058,6 +2082,34 @@ mod tests {
         assert_eq!(construction.plans[0].pickups, 0);
         assert_eq!(stock.balance(), 872_824);
         assert!(construction.valid_save(&catalog, &stock));
+    }
+
+    #[test]
+    fn a_blueprint_across_the_river_requires_a_completed_crossing() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut village = Construction {
+            selection: Some("fire-circle".into()),
+            ..default()
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village.plan(&catalog, &mut stock, site, IVec2::new(-24, 36), clock);
+        assert!(village.plans.is_empty());
+        assert_eq!(
+            village.status,
+            "Leave a walking route from the supplies to the work site."
+        );
     }
 
     #[test]
