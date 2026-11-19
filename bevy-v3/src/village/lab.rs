@@ -799,35 +799,45 @@ fn lab_job_page(jobs: &[String], page: &mut usize, focus: &str, waiting_only: bo
     text
 }
 
-fn lab_order_page(runner: &Runner, page: &mut usize) -> String {
+const ORDER_ROWS: usize = 9;
+
+fn lab_order_page(runner: &Runner, page: &mut usize, selected_row: Option<usize>) -> String {
     use std::fmt::Write as _;
-    const ROWS: usize = 9;
     let count = runner.scenario.orders.len();
-    let pages = count.div_ceil(ROWS).max(1);
+    let pages = count.div_ceil(ORDER_ROWS).max(1);
     *page = (*page).min(pages - 1);
     let mut text = format!(
         "Scenario orders · Page {} of {pages}\nTab Switch view · Page Up/Down Browse\n",
         *page + 1
     );
+    if selected_row.is_some() {
+        text.push_str("↑/↓ Select · Delete Remove scheduled order\n");
+    }
     if count == 0 {
         text.push_str("\nNo scenario orders.");
     }
-    for (index, scheduled) in runner
+    for (row, (index, scheduled)) in runner
         .scenario
         .orders
         .iter()
         .enumerate()
         .rev()
-        .skip(*page * ROWS)
-        .take(ROWS)
+        .skip(*page * ORDER_ROWS)
+        .take(ORDER_ROWS)
+        .enumerate()
     {
+        let marker = if selected_row == Some(row) {
+            "› "
+        } else {
+            ""
+        };
         let action = order_label(&scheduled.order);
         let result = runner.outcomes.get(index).map_or("Scheduled", |outcome| {
             outcome.error.as_deref().unwrap_or("Accepted")
         });
         let _ = write!(
             text,
-            "\n#{} · Step {} · {action} · {result}",
+            "\n{marker}#{} · Step {} · {action} · {result}",
             index + 1,
             scheduled.step
         );
@@ -1015,6 +1025,7 @@ struct Playback {
     notice: String,
     view: LabView,
     inventory_page: usize,
+    order_row: usize,
     job_focus: Option<usize>,
     waiting_only: bool,
     farm_site: Option<usize>,
@@ -1138,6 +1149,7 @@ impl Default for Playback {
             notice: String::new(),
             view: LabView::default(),
             inventory_page: 0,
+            order_row: 0,
             job_focus: None,
             waiting_only: false,
             farm_site: None,
@@ -1568,6 +1580,35 @@ fn update_lab_window(
             Err(error) => error.into(),
         };
     }
+    if playback.view == LabView::Orders && !playback.replaying && !runner.done() {
+        let count = runner.scenario.orders.len();
+        let page = playback
+            .inventory_page
+            .min(count.div_ceil(ORDER_ROWS).saturating_sub(1));
+        playback.inventory_page = page;
+        let offset = page * ORDER_ROWS;
+        let rows = (count - offset).min(ORDER_ROWS);
+        if keys.just_pressed(KeyCode::PageDown) || keys.just_pressed(KeyCode::PageUp) {
+            playback.order_row = 0;
+        } else if keys.just_pressed(KeyCode::ArrowDown) {
+            playback.order_row += 1;
+        } else if keys.just_pressed(KeyCode::ArrowUp) {
+            playback.order_row = playback.order_row.saturating_sub(1);
+        }
+        playback.order_row = playback.order_row.min(rows.saturating_sub(1));
+        if keys.just_pressed(KeyCode::Delete) && rows > 0 {
+            let index = count - 1 - offset - playback.order_row;
+            if index < runner.next_order {
+                playback.notice = "Only scheduled orders can be removed.".into();
+            } else if playback.running {
+                playback.notice = "Pause the scenario before removing an order.".into();
+            } else {
+                runner.scenario.orders.remove(index);
+                playback.order_row = playback.order_row.min(rows.saturating_sub(2));
+                playback.notice = format!("Removed order #{}.", index + 1);
+            }
+        }
+    }
     let village = &runner.village;
     let status = if playback.replaying {
         if reached_end(&runner) {
@@ -1659,7 +1700,11 @@ fn update_lab_window(
         } else if playback.view == LabView::Beds {
             lab_bed_page(&mut runner, &catalog, &keys, playback)
         } else if playback.view == LabView::Orders {
-            lab_order_page(&runner, &mut playback.inventory_page)
+            lab_order_page(
+                &runner,
+                &mut playback.inventory_page,
+                (!playback.replaying && !runner.done()).then_some(playback.order_row),
+            )
         } else if playback.view == LabView::Events {
             let (pages, text) = village
                 .construction
@@ -2426,6 +2471,55 @@ mod tests {
     }
 
     #[test]
+    fn desktop_orders_view_removes_pending_orders_and_preserves_history() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(
+            r#"{"steps":5,"orders":[
+            {"step":0,"order":{"type":"grid","enabled":false}},
+            {"step":2,"order":{"type":"grid","enabled":true}},
+            {"step":3,"order":{"type":"grid","enabled":false}}
+        ]}"#,
+        )
+        .unwrap();
+        let runner = Runner::new(scenario, None, &catalog).unwrap();
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .insert_resource(catalog)
+            .insert_resource(runner)
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<map::MapState>()
+            .add_message::<bevy::input::keyboard::KeyboardInput>()
+            .add_message::<bevy::window::FileDragAndDrop>()
+            .add_systems(Update, update_lab_window);
+        app.world_mut().spawn(Text::default());
+        let key = |app: &mut App, key| {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.reset_all();
+            keys.press(key);
+            app.update();
+        };
+        for _ in 0..5 {
+            key(&mut app, KeyCode::Tab);
+        }
+        key(&mut app, KeyCode::ArrowDown);
+        key(&mut app, KeyCode::Delete);
+        key(&mut app, KeyCode::Delete);
+        let runner = app.world().resource::<Runner>();
+        assert_eq!(
+            runner
+                .scenario
+                .orders
+                .iter()
+                .map(|order| order.step)
+                .collect::<Vec<_>>(),
+            [0, 3]
+        );
+        assert_eq!(runner.outcomes.len(), 1);
+        assert_eq!(runner.next_order, 1);
+        assert!(runner.village.construction.utilities.grid_off);
+    }
+
+    #[test]
     fn desktop_lab_reloads_an_edited_scenario_only_after_confirmation() {
         let path =
             std::env::temp_dir().join(format!("solar-lab-reload-{}.json", std::process::id()));
@@ -2591,7 +2685,7 @@ mod tests {
         runner
             .submit(&catalog, LabOrder::Grid { enabled: true })
             .unwrap();
-        let history = lab_order_page(&runner, &mut 0);
+        let history = lab_order_page(&runner, &mut 0, None);
         assert!(history.contains("#2 · Step 1 · Enable grid power · Accepted"));
         assert!(history.contains("#1 · Step 1 · Disable grid power · Accepted"));
         assert!(history.find("#2").unwrap() < history.find("#1").unwrap());
