@@ -1595,7 +1595,11 @@ fn show_hud(
         && !village.terrain_editor.open
     {
         label.push('\n');
-        label.push_str(&village.construction.basic_needs_overview(&village.stock));
+        label.push_str(
+            &village
+                .construction
+                .basic_needs_overview(&village.stock, weather.temperature),
+        );
     }
     match village.utility_panel {
         Some(UtilityPanel::Power) => {

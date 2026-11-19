@@ -13,7 +13,18 @@ use super::*;
 pub(super) const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 
 impl Construction {
-    pub fn basic_needs_overview(&self, stock: &Stock) -> String {
+    fn resident_working(&self, index: usize) -> bool {
+        self.residents[index]
+            .assignment
+            .as_ref()
+            .is_some_and(|job| job.activity != Activity::Walk)
+            || self.gathering.workers_at_site(index)
+            || self.production.has_worker(index)
+            || self.farming.has_worker(index)
+            || self.changes.values().any(|job| job.worker == Some(index))
+    }
+
+    pub fn basic_needs_overview(&self, stock: &Stock, temperature: f64) -> String {
         let present = self
             .residents
             .iter()
@@ -23,6 +34,12 @@ impl Construction {
             .clone()
             .filter(|(_, resident)| resident.health.levels[Need::Hydration as usize] < 30.0)
             .count();
+        let daily_water = present
+            .clone()
+            .map(|(index, _)| {
+                crate::residents::daily_drinking_liters(temperature, self.resident_working(index))
+            })
+            .sum();
         let sanitation = present
             .filter(|(_, resident)| {
                 [Need::Bladder, Need::Bowels, Need::Hygiene]
@@ -30,9 +47,9 @@ impl Construction {
                     .any(|need| resident.health.levels[need as usize] < 30.0)
             })
             .count();
-        let services = self
-            .utilities
-            .service_overview(thirsty, sanitation, stock.sandbox);
+        let services =
+            self.utilities
+                .service_overview(thirsty, sanitation, daily_water, stock.sandbox);
         let portions = stock.food_portions();
         let food = if stock.sandbox {
             "Unlimited".into()
@@ -55,15 +72,9 @@ impl Construction {
         dt: f32,
     ) {
         let temperature = weather_at(clock, setup.biome(), setup.seed()).temperature;
-        for (index, resident) in self.residents.iter_mut().enumerate() {
-            let working = resident
-                .assignment
-                .as_ref()
-                .is_some_and(|job| job.activity != Activity::Walk)
-                || self.gathering.workers_at_site(index)
-                || self.production.has_worker(index)
-                || self.farming.has_worker(index)
-                || self.changes.values().any(|job| job.worker == Some(index));
+        for index in 0..self.residents.len() {
+            let working = self.resident_working(index);
+            let resident = &mut self.residents[index];
             let aspiration = &catalog.residents[index].aspiration;
             if !resident.health.mind.fulfilled
                 && self.plans.iter().any(|plan| {

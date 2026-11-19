@@ -610,6 +610,7 @@ impl Utilities {
         &self,
         thirsty: usize,
         sanitation_waiting: usize,
+        daily_water: f64,
         sandbox: bool,
     ) -> String {
         let enabled = || self.nodes.values().filter(|node| node.enabled);
@@ -635,6 +636,10 @@ impl Utilities {
             format!("{fresh:.1} L potable · {thirsty} thirsty")
         } else if fresh < 0.5 {
             "No drinking water".into()
+        } else if daily_water > 0.0 {
+            let hours = fresh / daily_water * 24.0;
+            let warning = if hours < 6.0 { " · Low reserve" } else { "" };
+            format!("{fresh:.1} L potable · {hours:.1}h estimated{warning}")
         } else {
             format!("{fresh:.1} L potable")
         };
@@ -648,8 +653,10 @@ impl Utilities {
             })
         }) {
             "Waste tanks filling".into()
+        } else if self.wash_sources().next().is_none() {
+            "No stocked washing facility".into()
         } else {
-            "Toilet capacity available".into()
+            "Toilet and washing capacity available".into()
         };
         format!("Power · {power}\nWater · {water} · Sanitation · {sanitation}")
     }

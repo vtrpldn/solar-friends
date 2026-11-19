@@ -56,6 +56,11 @@ impl Default for Health {
     }
 }
 
+pub fn daily_drinking_liters(temperature: f64, working: bool) -> f64 {
+    let heat = ((temperature - 25.0) / 20.0).clamp(0.0, 0.5);
+    2.5 * (1.0 + if working { 0.5 } else { 0.0 } + heat)
+}
+
 impl Health {
     pub fn new(index: usize) -> Self {
         let index = index as f64;
@@ -113,8 +118,7 @@ impl Health {
             let rate = profile.rates.get(name).copied().unwrap_or(1.0);
             self.levels[index] = (self.levels[index] - rates[index] * dt * rate * scale).max(0.0);
         }
-        let heat = ((temperature - 25.0) / 20.0).clamp(0.0, 0.5);
-        let water = 2.5 * (1.0 + if working { 0.5 } else { 0.0 } + heat);
+        let water = daily_drinking_liters(temperature, working);
         self.levels[Need::Hydration as usize] = if sandbox {
             100.0
         } else {
