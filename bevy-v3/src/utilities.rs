@@ -608,6 +608,10 @@ impl Utilities {
             .is_some_and(|node| node.cold_storage)
     }
 
+    pub fn installed_cold_storage(&self) -> f64 {
+        self.nodes.values().filter(|node| node.cold_storage).count() as f64 * 80.0
+    }
+
     pub fn powered_cold_storage(&self) -> f64 {
         self.nodes
             .values()
@@ -1611,6 +1615,7 @@ mod tests {
         utilities.toggle_cooling(0);
         utilities.tick(&setup, &mut stock, 0, 2.0, 0.1);
         assert_eq!(utilities.powered_cold_storage(), 0.0);
+        assert_eq!(utilities.installed_cold_storage(), 80.0);
         assert_eq!(utilities.demand_kw, 0.0);
         assert!(utilities.powered(0));
         let save = serde_json::to_string(&utilities).unwrap();

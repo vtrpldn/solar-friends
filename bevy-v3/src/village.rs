@@ -1961,6 +1961,7 @@ fn show_hud(
             label.push_str(&village.stock.pantry.status(
                 &catalog,
                 village.construction.utilities.powered_cold_storage(),
+                village.construction.utilities.installed_cold_storage(),
             ));
             label.push('\n');
             label.push_str(

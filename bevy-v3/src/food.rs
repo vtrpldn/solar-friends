@@ -270,7 +270,7 @@ impl Pantry {
         forecast
     }
 
-    pub fn status(&self, catalog: &Catalog, capacity: f64) -> String {
+    pub fn status(&self, catalog: &Catalog, capacity: f64, installed: f64) -> String {
         let remaining = self
             .lots
             .values()
@@ -299,8 +299,13 @@ impl Pantry {
             })
             .sum();
         let spoiled: u64 = self.spoiled.values().copied().fold(0, u64::saturating_add);
+        let cooling = if capacity < installed {
+            "\nSome cooling is off or unpowered. Unchilled food ages normally."
+        } else {
+            ""
+        };
         format!(
-            "{remaining}\n{spoiled} units spoiled · {used:.1}/{capacity:.0} L cooled\nCooling: {} · T Change priority",
+            "{remaining}\n{spoiled} units spoiled · {used:.1}/{capacity:.0} L cooled ({installed:.0} L installed){cooling}\nCooling: {} · T Change priority",
             self.priority.label()
         )
     }
