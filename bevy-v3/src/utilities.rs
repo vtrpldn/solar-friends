@@ -265,20 +265,20 @@ impl Utilities {
             node.demanding = facility.working;
         }
         if changed {
-            self.links = self.connections();
-            self.power_links = self.power_tree();
-            for &(a, b) in &self.installed_power_links {
-                if !self
-                    .power_links
-                    .iter()
-                    .any(|&(x, y)| (x.min(y), x.max(y)) == (a, b))
-                {
-                    self.power_links.push((a, b));
-                }
-            }
-            self.rebuild_power_circuits();
-            self.topology_valid = true;
+            self.rebuild_topology();
         }
+    }
+
+    fn rebuild_topology(&mut self) {
+        self.links = self.connections();
+        self.power_links = self.power_tree();
+        for &(a, b) in &self.installed_power_links {
+            if !self.power_link_exists(a, b) {
+                self.power_links.push((a, b));
+            }
+        }
+        self.rebuild_power_circuits();
+        self.topology_valid = true;
     }
 
     pub fn remove_facility(&mut self, building: usize) {
@@ -866,6 +866,49 @@ impl Utilities {
             (cell.cmpge(node.location).all() && cell.cmplt(node.location + node.size).all())
                 .then_some(id)
         })
+    }
+
+    pub fn is_manual_link(&self, row: usize, power: bool) -> bool {
+        if power {
+            self.power_link(row)
+                .is_some_and(|(a, b, _)| self.installed_power_links.contains(&(a.min(b), a.max(b))))
+        } else {
+            self.links
+                .get(row)
+                .or_else(|| self.links.last())
+                .is_some_and(|pipe| {
+                    self.installed_water_links
+                        .contains(&(pipe.from, pipe.to, pipe.channel))
+                })
+        }
+    }
+
+    pub fn remove_manual_link(&mut self, row: usize, power: bool) {
+        let removed = if power {
+            self.power_link(row).is_some_and(|(a, b, _)| {
+                let key = (a.min(b), a.max(b));
+                let removed = self.installed_power_links.remove(&key);
+                if removed {
+                    self.disabled_power_links.remove(&key);
+                }
+                removed
+            })
+        } else {
+            self.links
+                .get(row)
+                .or_else(|| self.links.last())
+                .is_some_and(|pipe| {
+                    let key = (pipe.from, pipe.to, pipe.channel);
+                    let removed = self.installed_water_links.remove(&key);
+                    if removed {
+                        self.disabled_water_links.remove(&key);
+                    }
+                    removed
+                })
+        };
+        if removed {
+            self.rebuild_topology();
+        }
     }
 
     pub fn power_link_count(&self) -> usize {
@@ -1978,6 +2021,16 @@ mod tests {
         loaded.tick(&setup, &mut stock, 0, 6.0, 0.1);
         assert!(loaded.power_link_exists(6, 0));
         assert!(loaded.powered(0));
+
+        let manual = (0..loaded.power_link_count())
+            .find(|&row| loaded.is_manual_link(row, true))
+            .unwrap();
+        loaded.remove_manual_link(manual, true);
+        loaded.tick(&setup, &mut stock, 0, 7.0, 0.1);
+        assert!(!loaded.power_link_exists(0, 6));
+        assert!(!loaded.powered(0));
+        loaded.remove_manual_link(link, true);
+        assert!(loaded.power_link_exists(1, 6));
     }
 
     #[test]

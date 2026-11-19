@@ -484,6 +484,34 @@ impl Village {
         }
     }
 
+    fn can_remove_selected_utility_link(&self) -> bool {
+        match self.utility_panel {
+            Some(UtilityPanel::Power) => self
+                .construction
+                .utilities
+                .is_manual_link(self.power_link, true),
+            Some(UtilityPanel::Water) => self
+                .construction
+                .utilities
+                .is_manual_link(self.water_link, false),
+            _ => false,
+        }
+    }
+
+    fn remove_selected_utility_link(&mut self) {
+        match self.utility_panel {
+            Some(UtilityPanel::Power) => self
+                .construction
+                .utilities
+                .remove_manual_link(self.power_link, true),
+            Some(UtilityPanel::Water) => self
+                .construction
+                .utilities
+                .remove_manual_link(self.water_link, false),
+            _ => {}
+        }
+    }
+
     fn toggle_selected_utility_link(&mut self) {
         match self.utility_panel {
             Some(UtilityPanel::Water) => self

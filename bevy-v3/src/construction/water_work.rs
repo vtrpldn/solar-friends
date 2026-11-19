@@ -1000,6 +1000,11 @@ mod tests {
         }
         assert!(town.utilities.water_link_exists(1, 2, 1));
         assert!(town.utilities.water_site(2).unwrap().levels[1] > 0.0);
+        let row = (0..town.utilities.water_link_count())
+            .find(|&row| town.utilities.is_manual_link(row, false))
+            .unwrap();
+        town.utilities.remove_manual_link(row, false);
+        assert!(!town.utilities.water_link_exists(1, 2, 1));
     }
 
     #[test]
