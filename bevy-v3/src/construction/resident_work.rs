@@ -33,6 +33,21 @@ fn latrine_sites(terrain: &Terrain, camp: IVec2, index: usize) -> impl Iterator<
     })
 }
 
+fn recreation_activity(plans: &[Blueprint], task: &NeedTask) -> (Motion, &'static str) {
+    match task
+        .facility
+        .and_then(|id| id.checked_sub(1))
+        .and_then(|id| plans.get(id))
+        .map(|plan| plan.key.as_str())
+    {
+        Some("fire-circle") => (Motion::FireSit, "Sitting by the fire"),
+        Some("reading-room" | "outdoor-classroom" | "community-hall") => {
+            (Motion::Read, "Reading for a while")
+        }
+        _ => (Motion::Stretch, "Taking a stretching break"),
+    }
+}
+
 impl Construction {
     fn resident_working(&self, index: usize) -> bool {
         self.residents[index]
@@ -946,7 +961,11 @@ impl Construction {
                 levels[Need::Fun as usize] = 95.0;
                 health.mind.remember(
                     MemoryKind::Personal,
-                    format!("Took a break. {}", catalog.residents[index].reflection),
+                    format!(
+                        "{}. {}",
+                        recreation_activity(&self.plans, &task).1,
+                        catalog.residents[index].reflection,
+                    ),
                     clock,
                     None,
                 );
@@ -1011,16 +1030,7 @@ impl Construction {
                 Need::Hunger | Need::Hydration => Motion::Eat,
                 Need::Hygiene => Motion::Wash,
                 Need::Social => Motion::Chat,
-                Need::Fun => match task
-                    .facility
-                    .and_then(|id| id.checked_sub(1))
-                    .and_then(|id| self.plans.get(id))
-                    .map(|plan| plan.key.as_str())
-                {
-                    Some("fire-circle") => Motion::FireSit,
-                    Some("reading-room" | "outdoor-classroom" | "community-hall") => Motion::Read,
-                    _ => Motion::Stretch,
-                },
+                Need::Fun => recreation_activity(&self.plans, task).0,
                 Need::Sleep | Need::Rest => Motion::Rest,
                 Need::FilterWater | Need::FetchWater => Motion::Work,
                 _ => Motion::Idle,
@@ -1125,7 +1135,15 @@ impl Construction {
         } else if self.driver_away(index) {
             "In town"
         } else if let Some(task) = &worker.health.task {
-            task.kind.label()
+            if task.kind == Need::Fun {
+                if worker.path.is_empty() {
+                    recreation_activity(&self.plans, task).1
+                } else {
+                    "Walking to a recreation spot"
+                }
+            } else {
+                task.kind.label()
+            }
         } else if let Some(job) = &worker.assignment {
             match job.activity {
                 Activity::Collect => "Collecting materials",
@@ -1627,7 +1645,7 @@ mod tests {
         let catalog = Catalog::default();
         let terrain = setup.terrain();
         let land = Land::default();
-        let stock = Stock::for_start(&setup, &catalog);
+        let mut stock = Stock::for_start(&setup, &catalog);
         let mut village = Construction::default();
         let site = ConstructionSite {
             terrain: &terrain,
@@ -1647,6 +1665,13 @@ mod tests {
         village.residents[0].position = Vec2::new(42.0, 36.0);
         assert!(village.recreation_spot_taken(1, IVec2::new(42, 36)));
         assert!(matches!(village.resident_motion(0), Motion::Read));
+        assert_eq!(village.resident_action(&catalog, 0), "Reading for a while");
+        village.step_need(0, &catalog, &mut stock, site, 22.0, 22.0);
+        assert!(
+            village.residents[0].health.mind.memories[0]
+                .text
+                .starts_with("Reading for a while.")
+        );
     }
 
     #[test]
