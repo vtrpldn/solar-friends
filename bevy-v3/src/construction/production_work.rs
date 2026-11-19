@@ -1114,6 +1114,58 @@ mod upgrade_tests {
     use super::*;
 
     #[test]
+    fn access_stop_marks_failed_routes_but_ignores_normal_retry() {
+        use crate::construction::LabStop;
+
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction::default();
+        let mut house = village.proposed_site(&catalog, "home-cottage", IVec2::new(44, 36));
+        house.work = catalog.projects["home-cottage"].work;
+        let entrances = perimeter(house.position, house.size, camp.as_vec2());
+        village.plans.push(house);
+        village.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        village.queue_batch(&catalog, &mut stock, 0, "solar_upgrade");
+
+        village.tick_production(&catalog, &mut stock, site, 0.0, 0.1);
+        assert!(village.production.jobs[0].worker.is_some());
+        assert_eq!(village.lab_stop_reason(LabStop::Blocked, 0.0), None);
+        let worker = village.production.jobs[0].worker.unwrap();
+        village.residents[worker].path.clear();
+
+        for cell in entrances {
+            let mut obstruction = village.proposed_site(&catalog, "fire-circle", cell);
+            obstruction.work = catalog.projects["fire-circle"].work;
+            village.plans.push(obstruction);
+        }
+        village.tick_production(&catalog, &mut stock, site, 1.0, 0.1);
+        assert_eq!(
+            village.lab_stop_reason(LabStop::Blocked, 1.0),
+            Some("A job is waiting for access.")
+        );
+        let job = &village.production.jobs[0];
+        assert_eq!(
+            village.batch_status(job, &catalog.production["solar_upgrade"], 1.0),
+            "Waiting for access"
+        );
+
+        village.plans.truncate(1);
+        village.tick_production(&catalog, &mut stock, site, 6.0, 0.1);
+        assert_eq!(village.lab_stop_reason(LabStop::Blocked, 6.0), None);
+        assert!(village.production.jobs[0].phase == Phase::Approach);
+    }
+
+    #[test]
     fn sandbox_schedules_perennial_harvests_and_livestock_without_duplicates() {
         let catalog = Catalog::default();
         let setup = WorldSetup::default();
