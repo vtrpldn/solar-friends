@@ -2624,10 +2624,9 @@ fn draw_blueprints(
             && pointer.terrain_stroke.len() > 1
         {
             gizmos.linestrip(
-                pointer
-                    .terrain_stroke
-                    .iter()
-                    .map(|point| *point + Vec3::Y * 0.18),
+                pointer.terrain_stroke.iter().map(|point| {
+                    Vec3::new(point.x, terrain.height_at(point.x, point.z) + 0.18, point.z)
+                }),
                 Color::srgb_u8(255, 225, 160),
             );
         }
