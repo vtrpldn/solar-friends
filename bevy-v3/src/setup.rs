@@ -519,8 +519,7 @@ fn setup_input(
             && !village.advance_open()
             && !village.planning_roads()
         {
-            if village.editing_terrain() {
-                village.close_terrain_tools();
+            if village.dismiss_game_view() {
                 return;
             }
             if let Err(error) = crate::village::save_session(&saves, &village, &catalog) {

@@ -814,7 +814,14 @@ mod tests {
                     .iter(app.world())
                     .any(|text| text.0.contains(heading))
             );
-            press_button(&mut app, "Close panel");
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::Escape);
+            app.world_mut().run_schedule(Update);
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .reset(KeyCode::Escape);
+            assert!(!app.world().resource::<WorldSetup>().open);
         }
         assert_eq!(
             app.world().resource::<village::Village>().camp,

@@ -415,10 +415,28 @@ impl Village {
         self.terrain_editor.open
     }
 
-    pub(crate) fn close_terrain_tools(&mut self) {
+    pub(crate) fn dismiss_game_view(&mut self) -> bool {
+        if self.budget_entry.take().is_some() {
+            return true;
+        }
         if self.terrain_editor.open {
             self.terrain_editor.toggle();
+        } else if self.editing_inventory {
+            self.editing_inventory = false;
+        } else if self.construction.editing_search {
+            self.construction.toggle_build_search();
+        } else if self.construction.is_placing() {
+            self.construction.cancel_placement();
+        } else if self.construction.production.selected.is_some() {
+            self.construction.clear_selected_project();
+        } else if self.utility_panel.take().is_some() {
+            self.pantry_batch_page = None;
+        } else if self.construction.menu {
+            self.construction.toggle_build_menu();
+        } else {
+            return false;
         }
+        true
     }
 
     pub fn map_input_blocked(&self) -> bool {
@@ -1402,9 +1420,7 @@ fn village_input(
         village.budget_entry = None;
     }
     if let Some((target, entry)) = &mut village.budget_entry {
-        if keyboard.just_pressed(KeyCode::Escape) {
-            village.budget_entry = None;
-        } else if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
+        if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
             let target = *target;
             let amount = entry
                 .parse::<u64>()
