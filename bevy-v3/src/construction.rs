@@ -1110,22 +1110,34 @@ impl Construction {
             footprint(cell) || self.blocked_ignoring(catalog, terrain, land, camp, cell, ignore)
         };
         if !road && !bridge {
+            let lost_route = |targets: &[IVec2]| {
+                crate::navigation::route_to_any(source, targets, existing_blocked)
+                    .is_some_and(|path| path.iter().any(|point| footprint(point.as_ivec2())))
+                    && crate::navigation::route_to_any(source, targets, proposed_blocked).is_none()
+            };
+            for door in [camp, camp + IVec2::new(2, 0)] {
+                if lost_route(&[door]) {
+                    return Some("Keep the camp tent entrances reachable from the supplies.");
+                }
+            }
             for (index, existing) in self.plans.iter().enumerate() {
-                if existing.removed || ignore == Some(index) {
-                    continue;
-                }
-                let Some(entrance) = building_entrance(existing, &catalog.projects[&existing.key])
-                else {
-                    continue;
-                };
-                if footprint(entrance) && !existing_blocked(entrance) {
-                    return Some("Keep the existing building's entrance clear.");
-                }
-                if let Some(path) = route(source, entrance, existing_blocked, access_road)
-                    && path.iter().any(|point| footprint(point.as_ivec2()))
-                    && route(source, entrance, proposed_blocked, access_road).is_none()
+                if existing.removed
+                    || ignore == Some(index)
+                    || matches!(existing.key.as_str(), "road" | "bridge")
                 {
-                    return Some("Keep a walking route to the existing building's entrance.");
+                    continue;
+                }
+                if let Some(entrance) =
+                    building_entrance(existing, &catalog.projects[&existing.key])
+                {
+                    if footprint(entrance) && !existing_blocked(entrance) {
+                        return Some("Keep the existing building's entrance clear.");
+                    }
+                    if lost_route(&[entrance]) {
+                        return Some("Keep a walking route to the existing building's entrance.");
+                    }
+                } else if lost_route(&build_perimeter(existing.position, existing.size)) {
+                    return Some("Keep a walking route to the existing work site.");
                 }
             }
         }
@@ -1140,7 +1152,8 @@ impl Construction {
             } else {
                 build_perimeter(start, blueprint.size)
             };
-            let accessible = crate::navigation::reaches_any(source, &targets, proposed_blocked);
+            let accessible =
+                crate::navigation::route_to_any(source, &targets, proposed_blocked).is_some();
             if !accessible {
                 return Some(if bridge {
                     "Keep one bridge end reachable from the village."
@@ -2217,6 +2230,42 @@ mod tests {
         assert_eq!(
             village.status,
             "Keep a walking route to the existing building's entrance."
+        );
+    }
+
+    #[test]
+    fn a_blueprint_preserves_the_last_work_spot_of_an_existing_project() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.sandbox = true;
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut village = Construction {
+            selection: Some("fire-circle".into()),
+            ..default()
+        };
+        let center = IVec2::new(47, 36);
+        village.plan(&catalog, &mut stock, site, center, clock);
+        for side in [IVec2::X, IVec2::NEG_X, IVec2::Y] {
+            let obstacle = village.proposed_site(&catalog, "fire-circle", center + side);
+            village.plans.push(obstacle);
+        }
+        village.selection = Some("fire-circle".into());
+        village.plan(&catalog, &mut stock, site, center - IVec2::Y, clock);
+        assert_eq!(village.plans.len(), 4);
+        assert_eq!(
+            village.status,
+            "Keep a walking route to the existing work site."
         );
     }
 

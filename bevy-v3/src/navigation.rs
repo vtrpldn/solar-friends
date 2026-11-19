@@ -40,15 +40,17 @@ pub fn route(
     )
 }
 
-pub fn reaches_any(from: Vec2, targets: &[IVec2], mut blocked: impl FnMut(IVec2) -> bool) -> bool {
+pub fn route_to_any(
+    from: Vec2,
+    targets: &[IVec2],
+    mut blocked: impl FnMut(IVec2) -> bool,
+) -> Option<VecDeque<Vec2>> {
     let goals: Vec<_> = targets
         .iter()
         .copied()
         .filter(|&cell| cell_index(cell).is_some() && !blocked(cell))
         .collect();
-    let Some(first) = goals.first().copied() else {
-        return false;
-    };
+    let first = goals.first().copied()?;
     let (minimum, maximum) = goals.iter().fold((first, first), |(low, high), &cell| {
         (low.min(cell), high.max(cell))
     });
@@ -62,7 +64,6 @@ pub fn reaches_any(from: Vec2, targets: &[IVec2], mut blocked: impl FnMut(IVec2)
         blocked,
         |_| false,
     )
-    .is_some()
 }
 
 fn search(
