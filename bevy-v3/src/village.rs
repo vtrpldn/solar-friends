@@ -420,6 +420,15 @@ impl Village {
         *page = (*page + if forward { 1 } else { pages - 1 }) % pages;
     }
 
+    #[cfg(test)]
+    pub(crate) fn trade_test_state(&self) -> (u64, usize, bool) {
+        (
+            self.stock.balance(),
+            self.construction.trade.orders.len(),
+            self.construction.trade.delivery.is_some(),
+        )
+    }
+
     pub fn trade_open(&self) -> bool {
         self.utility_panel == Some(UtilityPanel::Trade)
     }

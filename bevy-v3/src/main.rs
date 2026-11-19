@@ -433,6 +433,27 @@ mod tests {
         press_button(&mut app, "Manage");
         press_button(&mut app, "Trade");
         assert!(app.world().resource::<village::Village>().trade_open());
+        let trade_state = |app: &App| {
+            app.world()
+                .resource::<village::Village>()
+                .trade_test_state()
+        };
+        let (balance, orders, delivery) = trade_state(&app);
+        press_button(&mut app, "Buy for pickup");
+        let (remaining, queued, _) = trade_state(&app);
+        assert_eq!(queued, orders + 1);
+        assert!(remaining < balance);
+        press_button(&mut app, "Cancel last order");
+        assert_eq!(trade_state(&app), (balance, orders, delivery));
+
+        assert!(!delivery);
+        press_button(&mut app, "Buy for delivery");
+        let (remaining, queued, delivery) = trade_state(&app);
+        assert_eq!(queued, orders);
+        assert!(remaining < balance && delivery);
+        press_button(&mut app, "Buy for delivery");
+        assert_eq!(trade_state(&app), (remaining, queued, delivery));
+
         press_button(&mut app, "Close panel");
         assert!(!app.world().resource::<village::Village>().trade_open());
 
