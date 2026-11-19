@@ -641,7 +641,12 @@ impl Construction {
         }
     }
 
-    pub(super) fn cancel_boarding_pickup(&mut self, mut trip: TownTrip, project: usize) {
+    pub(super) fn cancel_boarding_pickup(
+        &mut self,
+        mut trip: TownTrip,
+        project: usize,
+        stock: &Stock,
+    ) {
         let slot = usize::from(!self.trip.is_some_and(|first| first.vehicle == trip.vehicle));
         let manifest = &mut self.pickup_manifests[trip.vehicle];
         manifest.remove(&project);
@@ -649,6 +654,19 @@ impl Construction {
             if trip.project == project {
                 trip.project = next;
             }
+            self.set_trip(slot, Some(trip));
+        } else if let Some(sale) = trip.extra_orders().next() {
+            let order = &mut self.trade.orders[sale];
+            if order.fare == 0 {
+                // Canceling the pickup just released this fare.
+                let fare = self.plans[project].fare;
+                assert!(self.market.hold_fare(stock, fare));
+                order.fare = fare;
+                order.hold_for_pickup = false;
+            }
+            trip.project = sale;
+            trip.market_order = true;
+            trip.exports &= !(1 << sale);
             self.set_trip(slot, Some(trip));
         } else {
             self.set_trip(slot, None);
@@ -1482,6 +1500,35 @@ mod tests {
             assert_eq!(canceled_village.pickup_manifests[trip.vehicle].len(), 1);
             assert_eq!(canceled_village.market.committed_fares(), fare);
             assert!(canceled_village.valid_save(&catalog, &canceled_stock));
+
+            canceled_village
+                .reserve_town_sale(&catalog, &mut canceled_stock, clock, "wood", true)
+                .unwrap();
+            let mut retained_trip = canceled_village.trip.unwrap();
+            canceled_village.add_trip_exports(&catalog, &mut retained_trip);
+            canceled_village.trip = Some(retained_trip);
+            canceled_village.request_project_action(
+                &catalog,
+                &mut canceled_stock,
+                remaining,
+                ProjectAction::Salvage,
+            );
+            let sale_trip = canceled_village.trip.unwrap();
+            assert!(sale_trip.market_order);
+            assert_eq!(sale_trip.trade_orders().collect::<Vec<_>>(), vec![0]);
+            assert_eq!(canceled_village.market.committed_fares(), fare);
+            assert!(canceled_village.valid_save(&catalog, &canceled_stock));
+            canceled_village.residents[sale_trip.driver].path.clear();
+            canceled_village.tick_trip(&catalog, &mut canceled_stock, site, clock, 0.1);
+            canceled_village.tick_trip(
+                &catalog,
+                &mut canceled_stock,
+                site,
+                clock,
+                sale_trip.duration as f32 + 1.0,
+            );
+            assert_eq!(canceled_village.trade.receipts, 1);
+            assert_eq!(canceled_village.market.committed_fares(), 0);
         }
         village.residents[trip.driver].path.clear();
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
