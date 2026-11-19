@@ -36,6 +36,7 @@ pub struct SlotInfo {
     pub id: u64,
     pub name: String,
     pub recovery: bool,
+    updated: Option<u64>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -83,24 +84,27 @@ impl SaveMenu {
             lines.push("Tab Switch mode · F6 Close".into());
         } else {
             let start = self.selected / 8 * 8;
+            let now = timestamp();
             for (index, row) in self.rows.iter().enumerate().skip(start).take(8) {
-                lines.push(format!(
-                    "{}{}{}",
-                    if index == self.selected { "› " } else { "  " },
-                    row.name,
-                    if row.recovery {
-                        " · recovery copy"
-                    } else {
-                        ""
-                    },
-                ));
+                let selected = if index == self.selected { "› " } else { "  " };
+                let mut label = format!("{selected}{}", row.name);
+                if let Some(updated) = row.updated {
+                    use std::fmt::Write;
+                    let _ = write!(label, " · Saved {}", saved_age(now, updated));
+                }
+                if row.recovery {
+                    label.push_str(" · recovery copy");
+                }
+                lines.push(label);
             }
             lines.push("↑ / ↓ Select · Enter Load · N New · R Rename".into());
             lines.push("E Export · P Recover · Delete Remove".into());
             lines.push("Tab Switch mode · F6 Close".into());
         }
-        if self.delete_request.is_some() {
-            lines.push("Press Delete again to remove this save.".into());
+        if let Some(slot) = self.delete_request
+            && let Some(row) = self.rows.iter().find(|row| row.id == slot)
+        {
+            lines.push(format!("Press Delete again to remove “{}”.", row.name));
         }
         if !self.status.is_empty() {
             lines.push(self.status.clone());
@@ -141,31 +145,23 @@ pub fn list(directory: &Path, mode: Mode) -> io::Result<Vec<SlotInfo>> {
         if path.extension().and_then(|extension| extension.to_str()) != Some("json") {
             continue;
         }
-        let slot = match read_slot(directory, id, mode) {
-            Ok(slot) => slot,
-            Err(_) => {
-                rows.push((
-                    0,
-                    SlotInfo {
-                        id,
-                        name: format!("Unreadable village {id}"),
-                        recovery: false,
-                    },
-                ));
-                continue;
-            }
-        };
-        rows.push((
-            slot.updated,
-            SlotInfo {
+        rows.push(match read_slot(directory, id, mode) {
+            Ok(slot) => SlotInfo {
                 id,
                 name: slot.name,
                 recovery: slot.previous.is_some(),
+                updated: Some(slot.updated),
             },
-        ));
+            Err(_) => SlotInfo {
+                id,
+                name: format!("Unreadable village {id}"),
+                recovery: false,
+                updated: None,
+            },
+        });
     }
-    rows.sort_by_key(|(time, _)| std::cmp::Reverse(*time));
-    Ok(rows.into_iter().map(|(_, row)| row).collect())
+    rows.sort_by_key(|row| std::cmp::Reverse((row.updated, row.id)));
+    Ok(rows)
 }
 
 pub fn create(directory: &Path, mode: Mode, name: &str, village: &Village) -> io::Result<u64> {
@@ -295,6 +291,19 @@ fn clean_name(name: &str) -> io::Result<String> {
         return Err(io::Error::other("give your village a name"));
     }
     Ok(cleaned)
+}
+
+fn saved_age(now: u64, updated: u64) -> String {
+    let seconds = now.saturating_sub(updated) / 1_000_000_000;
+    let (count, unit) = match seconds {
+        0 => return "just now".into(),
+        1..=59 => (seconds, "second"),
+        60..=3_599 => (seconds / 60, "minute"),
+        3_600..=86_399 => (seconds / 3_600, "hour"),
+        _ => (seconds / 86_400, "day"),
+    };
+    let plural = if count == 1 { "" } else { "s" };
+    format!("{count} {unit}{plural} ago")
 }
 
 fn timestamp() -> u64 {
