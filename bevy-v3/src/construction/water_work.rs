@@ -1279,6 +1279,11 @@ mod tests {
             }]
             .into_iter(),
         );
+        let camp = town.utilities.water_site(0).unwrap();
+        assert!(camp.maintain_fresh && camp.maintain_sanitation);
+        assert!(town.utilities.water_site(1).unwrap().maintain_fresh);
+        assert!(town.utilities.set_water_policy(0, true, false));
+        assert!(town.utilities.set_water_policy(1, true, false));
         let amount = |town: &Construction, id| town.utilities.water_site(id).unwrap().levels[1];
         assert_eq!(town.utilities.deliver_water(1, 1, 20.0), 20.0);
         town.residents[0].position = Vec2::new(41.0, -13.0);

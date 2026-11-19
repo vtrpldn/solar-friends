@@ -224,8 +224,8 @@ impl Utilities {
             demanding: false,
             cold_storage: false,
             cooling_paused: false,
-            maintain_fresh: false,
-            maintain_sanitation: false,
+            maintain_fresh: true,
+            maintain_sanitation: true,
         });
     }
 
@@ -254,8 +254,9 @@ impl Utilities {
                 demanding: false,
                 cold_storage: false,
                 cooling_paused: false,
-                maintain_fresh: false,
-                maintain_sanitation: false,
+                maintain_fresh: matches!(facility.kind, "well" | "water-storage"),
+                maintain_sanitation: capacity(facility.kind)[3] > 0.0
+                    && !matches!(facility.kind, "biodigester" | "banana_treatment"),
             });
             if node.location != facility.location || node.size != facility.size {
                 node.location = facility.location;
