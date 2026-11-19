@@ -100,6 +100,7 @@ enum Action {
     CancelUtilityInstallation,
     NextUtilityInstallation,
     AutomaticUpkeep,
+    UpkeepJob(usize),
     UpkeepBudget { restock: bool },
 }
 
@@ -287,7 +288,7 @@ impl Action {
                         .next()
                         .is_some()
             }
-            Self::AutomaticUpkeep | Self::UpkeepBudget { .. } => {
+            Self::AutomaticUpkeep | Self::UpkeepBudget { .. } | Self::UpkeepJob(_) => {
                 village.utility_panel == Some(UtilityPanel::Upkeep)
             }
             Self::SelectedProject(_) => village.utility_panel.is_none(),
@@ -335,6 +336,9 @@ impl Action {
             }
             Self::Page(_) if village.utility_panel == Some(UtilityPanel::Finances) => {
                 village.finance_history_open
+            }
+            Self::Page(_) if village.utility_panel == Some(UtilityPanel::Upkeep) => {
+                village.construction.upkeep_pages() > 1
             }
             Self::Page(_) => matches!(
                 village.utility_panel,
@@ -626,6 +630,7 @@ impl Action {
                     "off"
                 }
             ),
+            Self::UpkeepJob(_) => String::new(),
             Self::UpkeepBudget { restock: false } => budget_label(
                 village,
                 BudgetTarget::MaintenanceParts,
@@ -917,6 +922,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::NextWasteTank);
                 spawn_button(menu, &assets, Action::InstallWaterLink);
                 spawn_button(menu, &assets, Action::AutomaticUpkeep);
+                for row in 0..Construction::UPKEEP_ROWS {
+                    spawn_button(menu, &assets, Action::UpkeepJob(row));
+                }
                 for restock in [false, true] {
                     spawn_button(menu, &assets, Action::UpkeepBudget { restock });
                 }
@@ -1183,6 +1191,7 @@ fn handle_buttons(
                         UtilityPanel::Projects => village.projects_page = 0,
                         UtilityPanel::Inventory => village.inventory_page = 0,
                         UtilityPanel::Events => village.event_page = 0,
+                        UtilityPanel::Upkeep => village.upkeep_page = 0,
                         UtilityPanel::Residents => picker.home_page = 0,
                         _ => {}
                     }
@@ -1282,6 +1291,15 @@ fn handle_buttons(
                 }
                 Action::AutomaticUpkeep if !picker.open => {
                     village.construction.toggle_automatic_upkeep()
+                }
+                Action::UpkeepJob(row) if !picker.open => {
+                    let page = village.upkeep_page;
+                    if let Some(point) = village.construction.focus_upkeep_job(page, row) {
+                        let terrain = village.terrain(&setup);
+                        camera.target =
+                            Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+                        village.utility_panel = None;
+                    }
                 }
                 Action::UpkeepBudget { restock } if !picker.open => {
                     let target = if restock {
@@ -1473,6 +1491,7 @@ fn handle_buttons(
                 | Action::CancelUtilityInstallation
                 | Action::NextUtilityInstallation
                 | Action::AutomaticUpkeep
+                | Action::UpkeepJob(_)
                 | Action::UpkeepBudget { .. } => {}
             }
         }
@@ -1556,6 +1575,13 @@ fn refresh(
     let show_power = !picker.open && Action::Grid.available(&village);
     let show_water = !picker.open && Action::Water(WaterCommand::River).available(&village);
     let show_upkeep = !picker.open && Action::AutomaticUpkeep.available(&village);
+    let upkeep_jobs = if show_upkeep {
+        village
+            .construction
+            .upkeep_job_labels(&catalog, village.upkeep_page)
+    } else {
+        Vec::new()
+    };
     let show_residents = !picker.open && Action::Home(true).available(&village);
     let projects = if show_projects {
         village.construction.project_page_labels(
@@ -1688,6 +1714,7 @@ fn refresh(
             Action::Water(_) | Action::InstallWaterLink => show_water,
             Action::NextWasteTank => show_water && action.available(&village),
             Action::AutomaticUpkeep | Action::UpkeepBudget { .. } => show_upkeep,
+            Action::UpkeepJob(row) => upkeep_jobs.get(row).is_some(),
             Action::Panel(_) => picker.open,
             Action::ResourcePanel(_) => !picker.open && !show_view && action.available(&village),
             _ => true,
@@ -1763,6 +1790,7 @@ fn refresh(
                 ),
                 Action::Library if saves.open => "Close saved villages".into(),
                 Action::Project(row) => projects[row].clone(),
+                Action::UpkeepJob(row) => upkeep_jobs[row].clone(),
                 Action::Recipe(row) => recipes[row].clone(),
                 Action::MoveCraft => craft_workspace
                     .as_ref()

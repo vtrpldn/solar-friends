@@ -358,7 +358,39 @@ impl Construction {
             }))
     }
 
-    pub fn upkeep_status(&self, catalog: &Catalog) -> String {
+    pub const UPKEEP_ROWS: usize = 4;
+
+    pub fn upkeep_pages(&self) -> usize {
+        self.upkeep.jobs.len().div_ceil(Self::UPKEEP_ROWS).max(1)
+    }
+
+    fn upkeep_page_jobs(&self, page: usize) -> impl Iterator<Item = (&usize, &Service)> {
+        self.upkeep
+            .jobs
+            .iter()
+            .skip(page.min(self.upkeep_pages() - 1) * Self::UPKEEP_ROWS)
+            .take(Self::UPKEEP_ROWS)
+    }
+
+    pub fn upkeep_job_labels(&self, catalog: &Catalog, page: usize) -> Vec<String> {
+        self.upkeep_page_jobs(page)
+            .map(|(&index, _)| {
+                format!(
+                    "Find {} #{}",
+                    catalog.projects[&self.plans[index].key].name,
+                    index + 1
+                )
+            })
+            .collect()
+    }
+
+    pub fn focus_upkeep_job(&mut self, page: usize, row: usize) -> Option<Vec2> {
+        let index = *self.upkeep_page_jobs(page).nth(row)?.0;
+        self.select_project(Some(index));
+        self.selected_project_center()
+    }
+
+    pub fn upkeep_status(&self, catalog: &Catalog, page: usize) -> String {
         let u = &self.upkeep;
         let setting = if u.automatic { "on" } else { "off" };
         let mut text = format!(
@@ -383,8 +415,18 @@ impl Construction {
                 car.kilometers
             ));
         }
-        for (&index, job) in u.jobs.iter().take(6) {
-            let name = &catalog.projects[&self.plans[index].key].name;
+        let page = page.min(self.upkeep_pages() - 1);
+        if !u.jobs.is_empty() {
+            text.push_str(&format!(
+                "\n{} building jobs · Page {}/{}",
+                u.jobs.len(),
+                page + 1,
+                self.upkeep_pages()
+            ));
+        }
+        for (&index, job) in self.upkeep_page_jobs(page) {
+            let definition = &catalog.projects[&self.plans[index].key];
+            let name = &definition.name;
             let status = if job.worker.is_some() {
                 format!("{:.0}% complete", job.work / job.kind.duration() * 100.0)
             } else {
@@ -395,6 +437,20 @@ impl Construction {
                 index + 1,
                 job.kind.label()
             ));
+            let supplies = parts(job.kind, Some(definition), catalog)
+                .iter()
+                .map(|(id, &count)| {
+                    let item = &catalog.materials[id];
+                    format!("{} {}", item.quantity_text(u64::from(count)), item.name)
+                })
+                .collect::<Vec<_>>()
+                .join(" · ");
+            let supply_status = if job.parts_paid {
+                "Reserved"
+            } else {
+                "Required"
+            };
+            text.push_str(&format!("\n{supply_status} · {supplies}"));
         }
         if let Some(index) = self.production.selected
             && let Some(asset) = u.assets.get(&index)
@@ -924,6 +980,10 @@ mod tests {
         village.tick_upkeep(&catalog, &mut stock, site, 0.1);
         assert!(village.upkeep.jobs[&0].worker.is_none());
         assert_eq!(stock.available("tools"), tools);
+        assert_eq!(village.upkeep_pages(), 1);
+        assert_eq!(village.upkeep_job_labels(&catalog, 0).len(), 1);
+        assert!(village.upkeep_status(&catalog, 0).contains("Required ·"));
+        assert!(village.focus_upkeep_job(0, 0).is_some());
 
         village.upkeep.budget = 20_000;
         for _ in 0..6_000 {

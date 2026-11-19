@@ -188,6 +188,8 @@ pub struct Village {
     #[serde(skip)]
     projects_page: usize,
     #[serde(skip)]
+    upkeep_page: usize,
+    #[serde(skip)]
     guide: guide::Guide,
     #[serde(skip)]
     lenses: LensPicker,
@@ -725,9 +727,10 @@ impl Village {
                 self.construction.event_log(self.event_page, "F8 Close").0,
                 &mut self.event_page,
             ),
+            Some(UtilityPanel::Upkeep) => (self.construction.upkeep_pages(), &mut self.upkeep_page),
             _ => return,
         };
-        *page = (*page + if forward { 1 } else { pages - 1 }) % pages;
+        *page = ((*page).min(pages - 1) + if forward { 1 } else { pages - 1 }) % pages;
     }
 
     #[cfg(test)]
@@ -1707,10 +1710,14 @@ fn village_input(
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Upkeep) {
                 None
             } else {
+                town.upkeep_page = 0;
                 Some(UtilityPanel::Upkeep)
             };
         }
         if town.utility_panel == Some(UtilityPanel::Upkeep) {
+            if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
+                town.change_panel_page(&catalog, &land, keyboard.just_pressed(KeyCode::PageDown));
+            }
             if let Some(hit) = pointer.clicked {
                 town.construction.select_facility(hit.cell);
             }
@@ -2418,7 +2425,11 @@ fn show_hud(
         }
         Some(UtilityPanel::Upkeep) => {
             label.push('\n');
-            label.push_str(&village.construction.upkeep_status(&catalog));
+            label.push_str(
+                &village
+                    .construction
+                    .upkeep_status(&catalog, village.upkeep_page),
+            );
         }
         Some(UtilityPanel::Water) => {
             label.push('\n');
