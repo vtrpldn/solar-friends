@@ -22,6 +22,8 @@ pub struct SaveMenu {
     pub delete_request: Option<u64>,
     pub attached: Option<(Mode, u64, u64)>,
     pub next_autosave: f64,
+    #[cfg(test)]
+    pub test_directory: Option<PathBuf>,
 }
 
 pub struct NameEntry {
@@ -47,6 +49,14 @@ struct Slot {
 }
 
 impl SaveMenu {
+    pub fn directory(&self, mode: Mode) -> io::Result<PathBuf> {
+        #[cfg(test)]
+        if let Some(path) = &self.test_directory {
+            return Ok(path.clone());
+        }
+        directory(mode)
+    }
+
     pub fn label(&self) -> String {
         let mut lines = vec!["Saved villages".to_owned()];
         if let Some(entry) = &self.entry {

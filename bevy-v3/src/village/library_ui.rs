@@ -20,7 +20,7 @@ pub(super) fn toggle_library(menu: &mut SaveMenu, mode: Mode) {
     menu.delete_request = None;
     menu.status.clear();
     if menu.open {
-        match save_library::directory(mode) {
+        match menu.directory(mode) {
             Ok(path) => refresh_library(menu, &path, mode),
             Err(error) => menu.status = error.to_string(),
         }
@@ -232,7 +232,7 @@ pub(super) fn library_controls(
                 .into_iter()
                 .find_map(|(key, action)| keys.just_pressed(key).then_some(action))
         });
-    let Ok(path) = save_library::directory(setup.mode) else {
+    let Ok(path) = menu.directory(setup.mode) else {
         return;
     };
     if let Some(mut entry) = menu.entry.take() {
@@ -382,7 +382,8 @@ pub(super) fn autosave_named(
         return;
     }
     menu.next_autosave = time.elapsed_secs_f64() + 3.0;
-    let result = save_library::directory(mode)
+    let result = menu
+        .directory(mode)
         .and_then(|path| save_library::autosave(&path, id, mode, &village, &catalog));
     if let Err(error) = result {
         village.save_notice = format!("Named autosave stopped: {error}");

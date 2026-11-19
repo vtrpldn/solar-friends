@@ -476,6 +476,49 @@ mod tests {
         press_button(&mut app, "Show all projects");
         press_button(&mut app, "Close panel");
 
+        let save_dir =
+            std::env::temp_dir().join(format!("solar-v3-ui-save-{}", std::process::id()));
+        app.world_mut()
+            .resource_mut::<save_library::SaveMenu>()
+            .test_directory = Some(save_dir.clone());
+        press_button(&mut app, "Saved villages");
+        press_button(&mut app, "Name current village");
+        app.world_mut()
+            .resource_mut::<save_library::SaveMenu>()
+            .entry
+            .as_mut()
+            .unwrap()
+            .text = "Test village".into();
+        press_button(&mut app, "Confirm name");
+        press_button(&mut app, "Rename");
+        app.world_mut()
+            .resource_mut::<save_library::SaveMenu>()
+            .entry
+            .as_mut()
+            .unwrap()
+            .text = "Renamed test village".into();
+        press_button(&mut app, "Confirm name");
+        press_button(&mut app, "Close saved villages");
+        press_button(&mut app, "Saved villages");
+        press_button(&mut app, "› Renamed test village");
+        press_button(&mut app, "Load village");
+        assert!(!app.world().resource::<save_library::SaveMenu>().open);
+        press_button(&mut app, "Saved villages");
+        press_button(&mut app, "Remove save");
+        assert_eq!(
+            app.world().resource::<save_library::SaveMenu>().rows.len(),
+            1
+        );
+        press_button(&mut app, "Confirm removal");
+        assert!(
+            app.world()
+                .resource::<save_library::SaveMenu>()
+                .rows
+                .is_empty()
+        );
+        press_button(&mut app, "Close saved villages");
+        std::fs::remove_dir_all(save_dir).unwrap();
+
         press_button(&mut app, "Setup");
         app.world_mut().run_schedule(Update);
         assert!(app.world().resource::<WorldSetup>().open);
