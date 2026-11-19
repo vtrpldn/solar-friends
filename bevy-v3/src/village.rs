@@ -1443,6 +1443,7 @@ fn spawn_tents(
 fn animate_arrival(
     time: Res<Time>,
     setup: Res<WorldSetup>,
+    saves: Res<SaveMenu>,
     mut village: ResMut<Village>,
     mut actors: Query<(&ArrivalActor, &mut Transform, &mut Visibility)>,
     mut tents: Query<&mut Visibility, (With<VillageEntity>, Without<ArrivalActor>)>,
@@ -1453,7 +1454,7 @@ fn animate_arrival(
     if village.arrival_time >= ARRIVAL_DURATION && !setup.is_changed() && !village.is_changed() {
         return;
     }
-    if village.arrival_time < ARRIVAL_DURATION {
+    if village.arrival_time < ARRIVAL_DURATION && !village.is_paused() && !saves.open {
         village.arrival_time = (village.arrival_time + time.delta_secs()).min(ARRIVAL_DURATION);
     }
     let terrain = village.terrain(&setup);
@@ -2280,6 +2281,30 @@ fn outdoor_animation_time(seconds: f64) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn opening_the_guide_pauses_story_arrival() {
+        let mut app = App::new();
+        app.insert_resource(WorldSetup::default().session())
+            .init_resource::<Village>()
+            .init_resource::<SaveMenu>()
+            .init_resource::<Time>()
+            .add_systems(Update, animate_arrival);
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_secs(1));
+        app.update();
+        let arrived = app.world().resource::<Village>().arrival_time;
+        assert_eq!(arrived, 1.0);
+
+        app.world_mut().resource_mut::<Village>().guide.toggle();
+        app.update();
+        assert_eq!(app.world().resource::<Village>().arrival_time, arrived);
+
+        app.world_mut().resource_mut::<Village>().guide.toggle();
+        app.update();
+        assert_eq!(app.world().resource::<Village>().arrival_time, 2.0);
+    }
 
     #[test]
     fn named_save_preserves_and_restores_previous_snapshot() {
