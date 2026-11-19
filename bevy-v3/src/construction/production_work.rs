@@ -698,6 +698,16 @@ impl Construction {
         dt: f32,
     ) {
         self.expire_batch_food(catalog, stock, site, clock);
+        for job in &mut self.production.jobs {
+            if matches!(job.phase, Phase::Pickup | Phase::Harvest | Phase::Work)
+                && let Some(worker) = job.worker
+                && self.residents[worker].health.energy < 25.0
+            {
+                self.residents[worker].path.clear();
+                job.worker = None;
+                job.retry_at = clock;
+            }
+        }
         self.assign_producers(catalog, stock, site, clock);
         for index in (0..self.production.jobs.len()).rev() {
             if self.production.jobs[index].phase == Phase::Growing
@@ -824,6 +834,8 @@ impl Construction {
                             * worker.health.hydration_factor()
                     });
                     job.work = (job.work + seconds * rate).min(recipe.work);
+                    let health = &mut self.residents[worker_index].health;
+                    health.energy = (health.energy - seconds * 0.12).max(0.0);
                     if !stock.sandbox
                         && job.growth.is_none()
                         && let Some(biology) = &recipe.biology
@@ -1046,6 +1058,8 @@ impl Construction {
             });
             for &job in &jobs {
                 if self.production.jobs[job].worker.is_none()
+                    && (self.residents[index].health.energy >= 25.0
+                        || self.production.jobs[job].phase == Phase::Return)
                     && self.try_assign_producer(job, index, catalog, site, stock)
                 {
                     self.production.jobs[job].waiting_for_access = false;
@@ -1112,7 +1126,7 @@ impl Construction {
             return false;
         }
         let supply = SUPPLY_SPOTS[index];
-        let assigned_path = if phase == Phase::Harvest {
+        let assigned_path = if matches!(phase, Phase::Harvest | Phase::Work) {
             project_access_points(project, catalog, resident.position)
                 .into_iter()
                 .find_map(|cell| path(resident.position, cell))
@@ -1193,6 +1207,24 @@ mod upgrade_tests {
                 .find(|job| job.worker == Some(0))
                 .unwrap();
             assert_eq!(job.site, expected_site);
+            let job = village
+                .production
+                .jobs
+                .iter_mut()
+                .find(|job| job.site == expected_site)
+                .unwrap();
+            job.phase = Phase::Work;
+            job.work = 5.0;
+            village.residents[0].health.energy = 24.0;
+            village.tick_production(&catalog, &mut stock, site, 2.0, 0.1);
+            let job = village
+                .production
+                .jobs
+                .iter()
+                .find(|job| job.site == expected_site)
+                .unwrap();
+            assert!(job.worker.is_some_and(|worker| worker != 0));
+            assert_eq!(job.work, 5.0);
         }
     }
 
