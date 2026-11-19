@@ -115,6 +115,10 @@ pub(crate) enum LabOrder {
         essentials: u8,
         production: u8,
     },
+    BuildingPower {
+        site: usize,
+        enabled: bool,
+    },
     Grid {
         enabled: bool,
     },
@@ -709,6 +713,16 @@ impl Construction {
             } => {
                 self.work_policy
                     .set_reservations(*essentials, *production)?;
+            }
+            LabOrder::BuildingPower { site, enabled } => {
+                let index = site.checked_sub(1).ok_or("Project numbers start at 1.")?;
+                let current = self
+                    .utilities
+                    .building_switch(index)
+                    .ok_or("Choose a completed building with a power switch.")?;
+                if current != *enabled {
+                    self.utilities.toggle(index);
+                }
             }
             LabOrder::Grid { enabled } => self.utilities.grid_off = !enabled,
             LabOrder::InstallConnection { from, to, channel } => match channel {

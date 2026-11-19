@@ -861,6 +861,9 @@ fn order_label(order: &LabOrder) -> String {
         } => {
             format!("Reserve {essentials} for essentials and {production} for production")
         }
+        LabOrder::BuildingPower { site, enabled } => {
+            format!("{} power at project #{site}", toggle_label(*enabled))
+        }
         LabOrder::Grid { enabled } => format!("{} grid power", toggle_label(*enabled)),
         LabOrder::InstallConnection { from, to, channel } => match channel {
             Some(channel) => {
@@ -1790,13 +1793,17 @@ mod tests {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{
             "setup":{"mode":"Sandbox","seed":42,"biome":0,"landscape":1,"water":1,"savings":1,"supplies":1},
-            "steps":1,
+            "steps":2,
             "orders":[
                 {"step":0,"order":{"type":"build","key":"home-cottage","x":44,"z":36}},
-                {"step":0,"order":{"type":"assign-home","resident":1,"home":1}},
-                {"step":0,"order":{"type":"assign-home","resident":2,"home":1}},
-                {"step":0,"order":{"type":"assign-home","resident":1}},
-                {"step":0,"order":{"type":"assign-home","resident":2,"home":1}}
+                {"step":1,"order":{"type":"building-power","site":1,"enabled":false}},
+                {"step":1,"order":{"type":"building-power","site":1,"enabled":false}},
+                {"step":1,"order":{"type":"assign-home","resident":1,"home":1}},
+                {"step":1,"order":{"type":"building-power","site":1,"enabled":true}},
+                {"step":1,"order":{"type":"assign-home","resident":1,"home":1}},
+                {"step":1,"order":{"type":"assign-home","resident":2,"home":1}},
+                {"step":1,"order":{"type":"assign-home","resident":1}},
+                {"step":1,"order":{"type":"assign-home","resident":2,"home":1}}
             ]
         }"#).unwrap();
         let runner = run(scenario, None, &catalog).unwrap();
@@ -1807,11 +1814,21 @@ mod tests {
             .collect();
         assert_eq!(
             errors,
-            [None, None, Some("This home has no free beds."), None, None]
+            [
+                None,
+                None,
+                None,
+                Some("Reopen this home before assigning residents."),
+                None,
+                None,
+                Some("This home has no free beds."),
+                None,
+                None
+            ]
         );
         let report =
             serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
-        assert_eq!(verify_report(report, &catalog).unwrap(), 1);
+        assert_eq!(verify_report(report, &catalog).unwrap(), 2);
     }
 
     #[test]

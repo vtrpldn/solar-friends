@@ -122,6 +122,8 @@ Set `"stop"` in the scenario to `"harvest"`, `"crop-failed"`, `"hydration"`, `"w
 
 `{"type":"carry-water","source":1,"site":0,"channel":"irrigation"}` queues a resident to carry water from project 1 to the camp reservoir. Channels are `drinking`, `irrigation`, `greywater`, and `sewage`.
 
+Use `{"type":"building-power","site":1,"enabled":false}` to switch off a completed facility with a power switch. Set `enabled` to `true` to reopen it.
+
 Use `{"type":"assign-home","resident":1,"home":1}` to assign a resident to a completed home with a free bed. Omit `home` to clear the assignment.
 
 Use `{"type":"copy","site":1,"x":49,"z":36}` to place another copy of a blueprint with the source project's rotation and field dimensions. Use `{"type":"resize-field","site":1,"size":[4,3]}` to resize a field using its unrotated width and depth.
