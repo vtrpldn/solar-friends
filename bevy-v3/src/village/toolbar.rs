@@ -58,6 +58,7 @@ enum Action {
     TradeItem(usize),
     TradeQueue,
     TradeQueued(usize),
+    HoldTradeQueued(usize),
     Trade(TradeOrder),
     TradePolicy(TradePolicy),
     ProjectFilter,
@@ -226,6 +227,7 @@ impl Action {
             Self::TradeItem(_)
             | Self::TradeQueue
             | Self::TradeQueued(_)
+            | Self::HoldTradeQueued(_)
             | Self::Trade(_)
             | Self::TradePolicy(_) => village.trade_open(),
             Self::InventorySearch => false,
@@ -417,10 +419,15 @@ impl Action {
                 "Browse materials".into()
             }
             Self::TradeQueue => "View orders".into(),
-            Self::TradeQueued(_) => String::new(),
+            Self::TradeQueued(_) | Self::HoldTradeQueued(_) => String::new(),
             Self::Trade(TradeOrder::Buy { freight: false }) => "Buy for pickup".into(),
             Self::Trade(TradeOrder::Buy { freight: true }) => "Buy for delivery".into(),
-            Self::Trade(TradeOrder::Sell) => "Reserve sale".into(),
+            Self::Trade(TradeOrder::Sell {
+                hold_for_pickup: false,
+            }) => "Reserve sale".into(),
+            Self::Trade(TradeOrder::Sell {
+                hold_for_pickup: true,
+            }) => "Sell on shared trip".into(),
             Self::Trade(TradeOrder::Cancel) => "Cancel last order".into(),
             Self::TradePolicy(policy) => match policy {
                 TradePolicy::HouseholdRestock => "Toggle household restock",
@@ -774,7 +781,12 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for order in [
                     TradeOrder::Buy { freight: false },
                     TradeOrder::Buy { freight: true },
-                    TradeOrder::Sell,
+                    TradeOrder::Sell {
+                        hold_for_pickup: false,
+                    },
+                    TradeOrder::Sell {
+                        hold_for_pickup: true,
+                    },
                     TradeOrder::Cancel,
                 ] {
                     spawn_button(menu, &assets, Action::Trade(order));
@@ -802,6 +814,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::Recipe(row));
                     spawn_button(menu, &assets, Action::TradeItem(row));
                     spawn_button(menu, &assets, Action::TradeQueued(row));
+                    spawn_button(menu, &assets, Action::HoldTradeQueued(row));
                 }
                 menu.spawn((
                     RecipeDetails,
@@ -828,6 +841,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
         Action::TradeItem(_)
             | Action::TradeQueue
             | Action::TradeQueued(_)
+            | Action::HoldTradeQueued(_)
             | Action::Trade(_)
             | Action::TradePolicy(_)
     );
@@ -1023,6 +1037,14 @@ fn handle_buttons(
                 }
                 Action::Page(forward) => village.change_panel_page(&catalog, &land, forward),
                 Action::TradeQueue if !picker.open => village.construction.toggle_trade_queue(),
+                Action::HoldTradeQueued(row) if !picker.open => {
+                    let town = &mut *village;
+                    town.construction.toggle_trade_queue_hold(
+                        &town.stock,
+                        row,
+                        setup.round_trip_km(),
+                    );
+                }
                 Action::TradeQueued(row) if !picker.open => {
                     let town = &mut *village;
                     town.construction
@@ -1205,6 +1227,7 @@ fn handle_buttons(
                 | Action::TradeItem(_)
                 | Action::TradeQueue
                 | Action::TradeQueued(_)
+                | Action::HoldTradeQueued(_)
                 | Action::Trade(_)
                 | Action::TradePolicy(_)
                 | Action::ProjectFilter
@@ -1403,9 +1426,10 @@ fn refresh(
             }
             Action::TradeItem(row) => trade_items.get(row).is_some(),
             Action::TradeQueue => show_trade,
-            Action::TradeQueued(row) => trade_queue
+            Action::TradeQueued(row) => trade_queue.get(row).is_some_and(|entry| entry.can_cancel),
+            Action::HoldTradeQueued(row) => trade_queue
                 .get(row)
-                .is_some_and(|(_, can_cancel)| *can_cancel),
+                .is_some_and(|entry| entry.held.is_some()),
             Action::Trade(_) | Action::TradePolicy(_) => show_trade && !show_trade_queue,
             Action::ProjectFilter => show_projects,
             Action::ListedHome(row) => homes.get(row).is_some(),
@@ -1491,7 +1515,11 @@ fn refresh(
                     format!("Irrigation · {}", policy.label())
                 }),
                 Action::TradeItem(row) => trade_items[row].clone(),
-                Action::TradeQueued(row) => format!("Cancel {}", trade_queue[row].0),
+                Action::TradeQueued(row) => format!("Cancel {}", trade_queue[row].label),
+                Action::HoldTradeQueued(row) if trade_queue[row].held == Some(true) => {
+                    format!("Order {} · Allow own trip", row + 1)
+                }
+                Action::HoldTradeQueued(row) => format!("Order {} · Hold for pickup", row + 1),
                 Action::ListedHome(row) => {
                     let (home, name, occupants, beds) = homes[row];
                     format!("{name} #{} · {occupants}/{beds} beds", home + 1)

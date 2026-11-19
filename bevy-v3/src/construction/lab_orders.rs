@@ -46,6 +46,8 @@ pub(crate) enum LabOrder {
     },
     Sell {
         material: String,
+        #[serde(default)]
+        hold_for_pickup: bool,
     },
     Bed {
         site: usize,
@@ -421,14 +423,14 @@ impl Construction {
             LabOrder::Buy { material, freight } => {
                 self.buy_from_town(catalog, stock, clock, material, *freight)?;
             }
-            LabOrder::Sell { material } => {
+            LabOrder::Sell {
+                material,
+                hold_for_pickup,
+            } => {
                 if !catalog.materials.contains_key(material) {
                     return Err("Unknown material.".into());
                 }
-                let day = ((540.0 + clock.seconds * 0.45) / 1440.0).floor() as u64;
-                let fare = crate::market::fare_cents(clock.round_trip_km);
-                self.trade
-                    .reserve(catalog, stock, &mut self.market, material, (day, fare, 0))?;
+                self.reserve_town_sale(catalog, stock, clock, material, *hold_for_pickup)?;
             }
             LabOrder::Bed { site, bed, action } => {
                 let site = site.checked_sub(1).ok_or("Project numbers start at 1.")?;

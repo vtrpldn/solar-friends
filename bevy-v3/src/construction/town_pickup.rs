@@ -630,7 +630,7 @@ impl Construction {
             .iter()
             .enumerate()
             .find_map(|(index, order)| {
-                ((ready || order.buying)
+                ((order.buying || (ready && !order.hold_for_pickup))
                     && !self.active_trips().any(|trip| trip.covers_order(index)))
                 .then_some(index)
             });
@@ -666,6 +666,49 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn a_held_sale_waits_for_a_shared_trip_without_reserving_fuel() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village
+            .reserve_town_sale(&catalog, &mut stock, clock, "wood", true)
+            .unwrap();
+        assert_eq!(village.market.committed_fares(), 0);
+        village.toggle_trade_queue();
+        village.toggle_trade_queue_hold(&stock, 0, 12);
+        let fare = crate::market::fare_cents(12);
+        assert_eq!(village.market.committed_fares(), fare);
+        village.toggle_trade_queue_hold(&stock, 0, 12);
+        assert_eq!(village.market.committed_fares(), 0);
+
+        village = serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        assert!(village.valid_save(&catalog, &stock));
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.active_trips().next().is_none());
+        village
+            .buy_from_town(&catalog, &mut stock, clock, "wood", false)
+            .unwrap();
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        let trip = village.trip.unwrap();
+        assert_eq!(trip.project, 1);
+        assert_eq!(trip.extra_orders().collect::<Vec<_>>(), vec![0]);
+        assert_eq!(village.market.committed_fares(), fare);
+        assert!(village.valid_save(&catalog, &stock));
+    }
 
     #[test]
     fn outbound_sales_share_a_pickup_fare_and_survive_a_save() {

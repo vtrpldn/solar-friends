@@ -704,7 +704,16 @@ fn order_label(order: &LabOrder) -> String {
             let transport = if *freight { "freight" } else { "pickup" };
             format!("Buy {material} by {transport}")
         }
-        LabOrder::Sell { material } => format!("Sell {material}"),
+        LabOrder::Sell {
+            material,
+            hold_for_pickup,
+        } => {
+            if *hold_for_pickup {
+                format!("Sell {material} on a shared trip")
+            } else {
+                format!("Sell {material}")
+            }
+        }
         LabOrder::Bed { site, bed, action } => {
             let action = match action {
                 FarmAction::Prepare => "Prepare",

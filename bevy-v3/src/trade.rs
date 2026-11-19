@@ -68,6 +68,8 @@ pub struct Shipment {
     #[serde(default)]
     pub spoiled: bool,
     #[serde(default)]
+    pub hold_for_pickup: bool,
+    #[serde(default)]
     food: Option<FoodLots>,
 }
 
@@ -186,6 +188,7 @@ impl Trade {
             settled: false,
             buying: false,
             spoiled: false,
+            hold_for_pickup: false,
             food: Some(food),
         });
         Ok(quantity)
@@ -235,6 +238,7 @@ impl Trade {
                 settled: false,
                 buying: true,
                 spoiled: false,
+                hold_for_pickup: false,
                 food: Some(food),
             });
         }
@@ -592,6 +596,7 @@ impl Trade {
                     (order.quantity > 0 || order.buying || order.spoiled)
                         && order.quantity <= item.pack
                         && order.fare <= 10_000
+                        && (!order.hold_for_pickup || (!order.buying && order.fare == 0))
                 })
             })
             && self.policies.keys().all(|id| {

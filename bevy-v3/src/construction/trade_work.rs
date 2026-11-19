@@ -5,7 +5,7 @@ use super::*;
 #[derive(Clone, Copy)]
 pub(crate) enum TradeOrder {
     Buy { freight: bool },
-    Sell,
+    Sell { hold_for_pickup: bool },
     Cancel,
 }
 
@@ -19,6 +19,14 @@ pub(crate) enum TradePolicy {
     MinimumLoad,
     DispatchWait,
     DispatchNow,
+}
+
+const ORDER_ROWS: usize = 4;
+
+pub(crate) struct TradeQueueRow {
+    pub label: String,
+    pub can_cancel: bool,
+    pub held: Option<bool>,
 }
 
 impl Construction {
@@ -37,7 +45,7 @@ impl Construction {
     }
 
     fn trade_queue_pages(&self) -> usize {
-        self.trade.orders.len().div_ceil(PAGE_KEYS.len()).max(1)
+        self.trade.orders.len().div_ceil(ORDER_ROWS).max(1)
     }
 
     pub fn toggle_trade_queue(&mut self) {
@@ -48,10 +56,10 @@ impl Construction {
     fn trade_queue_offset(&self) -> Option<usize> {
         self.trade
             .queue_page
-            .map(|page| page.min(self.trade_queue_pages() - 1) * PAGE_KEYS.len())
+            .map(|page| page.min(self.trade_queue_pages() - 1) * ORDER_ROWS)
     }
 
-    pub fn trade_queue_labels(&self, catalog: &Catalog) -> Vec<(String, bool)> {
+    pub fn trade_queue_labels(&self, catalog: &Catalog) -> Vec<TradeQueueRow> {
         let Some(offset) = self.trade_queue_offset() else {
             return Vec::new();
         };
@@ -60,7 +68,7 @@ impl Construction {
             .iter()
             .enumerate()
             .skip(offset)
-            .take(PAGE_KEYS.len())
+            .take(ORDER_ROWS)
             .map(|(index, order)| {
                 let item = &catalog.materials[&order.material];
                 let direction = if order.buying { "Buy" } else { "Sell" };
@@ -68,16 +76,18 @@ impl Construction {
                 let status = match trip {
                     Some(trip) if trip.boarded => "In transit",
                     Some(_) => "Booked",
+                    None if order.hold_for_pickup => "Held for pickup",
                     None => "Queued",
                 };
-                (
-                    format!(
+                TradeQueueRow {
+                    label: format!(
                         "{direction} · {} · {} · {status}",
                         item.name,
                         item.quantity_text(u64::from(order.quantity))
                     ),
-                    trip.is_none(),
-                )
+                    can_cancel: trip.is_none(),
+                    held: (trip.is_none() && !order.buying).then_some(order.hold_for_pickup),
+                }
             })
             .collect()
     }
@@ -86,9 +96,67 @@ impl Construction {
         let Some(offset) = self.trade_queue_offset() else {
             return;
         };
-        if row < PAGE_KEYS.len() {
+        if row < ORDER_ROWS {
             self.cancel_queued_trade(stock, offset + row);
         }
+    }
+
+    pub fn toggle_trade_queue_hold(&mut self, stock: &Stock, row: usize, distance: u32) {
+        let Some(offset) = self.trade_queue_offset() else {
+            return;
+        };
+        let index = offset + row;
+        if row >= ORDER_ROWS || self.booked_trade_orders().contains(&index) {
+            return;
+        }
+        let Some(order) = self
+            .trade
+            .orders
+            .get_mut(index)
+            .filter(|order| !order.buying)
+        else {
+            return;
+        };
+        if order.hold_for_pickup {
+            let fare = fare_cents(distance);
+            if !self.market.hold_fare(stock, fare) {
+                self.trade.notice = "Shared savings cannot cover the trip fuel.".into();
+                return;
+            }
+            order.fare = fare;
+            order.hold_for_pickup = false;
+            self.trade.notice = "This sale can now send a dedicated trip.".into();
+        } else {
+            self.market.release_fare(order.fare);
+            order.fare = 0;
+            order.hold_for_pickup = true;
+            self.trade.notice = "This sale will wait for a shared trip.".into();
+        }
+    }
+
+    pub(super) fn reserve_town_sale(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        clock: TownClock,
+        material: &str,
+        hold_for_pickup: bool,
+    ) -> Result<u32, &'static str> {
+        let day = ((540.0 + clock.seconds * 0.45) / 1440.0).floor() as u64;
+        let fare = if hold_for_pickup {
+            0
+        } else {
+            fare_cents(clock.round_trip_km)
+        };
+        let quantity =
+            self.trade
+                .reserve(catalog, stock, &mut self.market, material, (day, fare, 0))?;
+        self.trade
+            .orders
+            .back_mut()
+            .expect("reserved sale")
+            .hold_for_pickup = hold_for_pickup;
+        Ok(quantity)
     }
 
     fn cancel_queued_trade(&mut self, stock: &mut Stock, index: usize) {
@@ -141,7 +209,11 @@ impl Construction {
         }
         if self.trade.queue_page.is_some() {
             if let Some(row) = PAGE_KEYS.iter().position(|key| keys.just_pressed(*key)) {
-                self.cancel_trade_queue_row(stock, row);
+                if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+                    self.toggle_trade_queue_hold(stock, row, clock.round_trip_km);
+                } else {
+                    self.cancel_trade_queue_row(stock, row);
+                }
             }
             return;
         }
@@ -162,7 +234,14 @@ impl Construction {
             );
         }
         if keys.just_pressed(KeyCode::Enter) {
-            self.place_trade_order(catalog, stock, clock, TradeOrder::Sell);
+            self.place_trade_order(
+                catalog,
+                stock,
+                clock,
+                TradeOrder::Sell {
+                    hold_for_pickup: keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]),
+                },
+            );
         }
         if keys.just_pressed(KeyCode::Backspace) {
             self.place_trade_order(catalog, stock, clock, TradeOrder::Cancel);
@@ -277,14 +356,12 @@ impl Construction {
                     Err(error) => error.into(),
                 };
             }
-            TradeOrder::Sell => {
-                let day = ((540.0 + clock.seconds * 0.45) / 1440.0).floor() as u64;
-                let fare = fare_cents(clock.round_trip_km);
+            TradeOrder::Sell { hold_for_pickup } => {
                 self.trade.notice =
-                    match self
-                        .trade
-                        .reserve(catalog, stock, &mut self.market, id, (day, fare, 0))
-                    {
+                    match self.reserve_town_sale(catalog, stock, clock, id, hold_for_pickup) {
+                        Ok(quantity) if hold_for_pickup => {
+                            format!("{quantity} {} held for a shared trip.", definition.name)
+                        }
                         Ok(quantity) => {
                             format!("{quantity} {} reserved for town.", definition.name)
                         }
@@ -307,19 +384,25 @@ impl Construction {
         if let Some(offset) = self.trade_queue_offset() {
             let mut display = format!(
                 "Town trade orders · {}/{} · Page Up/Down · O Browse materials",
-                offset / PAGE_KEYS.len() + 1,
+                offset / ORDER_ROWS + 1,
                 self.trade_queue_pages(),
             );
             let rows = self.trade_queue_labels(catalog);
             if rows.is_empty() {
                 display.push_str("\nNo pickup or sale orders.");
             }
-            for (index, (label, can_cancel)) in rows.into_iter().enumerate() {
-                if can_cancel {
-                    display.push_str(&format!("\n{} Cancel {label}", index + 1));
-                } else {
-                    display.push_str(&format!("\n{label}"));
-                }
+            for (index, row) in rows.into_iter().enumerate() {
+                let hint = match (row.can_cancel, row.held) {
+                    (true, Some(true)) => {
+                        format!("{} Cancel · Shift {} Allow own trip", index + 1, index + 1)
+                    }
+                    (true, Some(false)) => {
+                        format!("{} Cancel · Shift {} Hold", index + 1, index + 1)
+                    }
+                    (true, None) => format!("{} Cancel", index + 1),
+                    _ => String::new(),
+                };
+                display.push_str(&format!("\n{} {hint}", row.label));
             }
             if !self.trade.notice.is_empty() {
                 display.push_str(&format!("\n{}", self.trade.notice));
@@ -398,7 +481,7 @@ impl Construction {
         ));
         let (used, maximum) = self.storage(catalog, stock);
         display.push_str(&format!(
-            "\nI Buy for pickup · D Order freight\nStorage {used}/{maximum} units · {} fulfilled purchases",
+            "\nI Buy for pickup · D Order freight · Shift Enter Sell on shared trip\nStorage {used}/{maximum} units · {} fulfilled purchases",
             self.trade.purchases,
         ));
         if let Some(order) = &self.trade.delivery {
@@ -484,8 +567,8 @@ mod tests {
         });
         village.toggle_trade_queue();
         let rows = village.trade_queue_labels(&catalog);
-        assert!(rows[0].1 && rows[0].0.contains("Queued"));
-        assert!(!rows[1].1 && rows[1].0.contains("Booked"));
+        assert!(rows[0].can_cancel && rows[0].label.contains("Queued"));
+        assert!(!rows[1].can_cancel && rows[1].label.contains("Booked"));
         village.cancel_trade_queue_row(&mut stock, 1);
         assert_eq!(village.trade.orders.len(), 2);
         assert_eq!(stock.available("wood"), before - sold);
