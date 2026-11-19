@@ -1,3 +1,4 @@
+mod asset_picker;
 pub mod collection;
 pub mod garden;
 mod garden_connections;
@@ -151,6 +152,7 @@ enum InspectionAction {
     Sheet,
     Placement,
     Source,
+    FindAsset,
 }
 
 #[derive(bevy::ecs::system::SystemParam)]
@@ -289,7 +291,7 @@ pub fn run(asset: Option<&str>) {
         show_proof: false,
         together: false,
     })
-    .add_systems(Startup, (setup, sprites::setup_proof))
+    .add_systems(Startup, (setup, sprites::setup_proof, asset_picker::setup))
     .add_systems(
         Update,
         (
@@ -304,6 +306,7 @@ pub fn run(asset: Option<&str>) {
             sprites::show_proof,
             model_export::export_selected,
             show_inspection_actions,
+            asset_picker::display,
             draw_guides,
         )
             .chain(),
@@ -390,6 +393,7 @@ fn setup(
                 ("4-view PNG", InspectionAction::Sheet),
                 ("Placement JSON", InspectionAction::Placement),
                 ("3D source", InspectionAction::Source),
+                ("Find asset", InspectionAction::FindAsset),
                 ("View together", InspectionAction::Together),
                 ("Lighting", InspectionAction::Light),
                 ("Surface", InspectionAction::Surface),
@@ -434,18 +438,21 @@ fn controls(
     ),
     (catalog, window): (Res<WorkshopCatalog>, Single<&Window>),
     mut workshop: ResMut<Workshop>,
+    picker: asset_picker::PickerInput,
 ) {
     let keys = &input.keys;
     if !pending.is_empty() || sprite_capture.is_some() || workshop.show_proof {
         return;
     }
-    if keys.just_pressed(KeyCode::Slash) && workshop.search.is_none() {
+    if workshop.search.is_none()
+        && (keys.just_pressed(KeyCode::Slash) || input.clicked(InspectionAction::FindAsset))
+    {
         workshop.search = Some(AssetSearch::default());
         text.clear();
         return;
     }
     if let Some(mut search) = workshop.search.take() {
-        if keys.just_pressed(KeyCode::Escape) {
+        if keys.just_pressed(KeyCode::Escape) || picker.clicked(asset_picker::Action::Close) {
             text.clear();
             return;
         }
@@ -464,16 +471,33 @@ fn controls(
             text.clear();
         }
         let matches = search.matching(&workshop.assets, &catalog);
-        if keys.just_pressed(KeyCode::ArrowDown) {
+        let picked = picker
+            .selected()
+            .and_then(|offset| matches.get(search.page_start() + offset))
+            .or_else(|| {
+                keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter])
+                    .then(|| matches.get(search.row))
+                    .flatten()
+            });
+        if let Some(&index) = picked {
+            workshop.selected = index;
+            workshop.together = false;
+            workshop.reset_camera();
+            return;
+        }
+        if picker.clicked(asset_picker::Action::Next) || keys.just_pressed(KeyCode::PageDown) {
+            let next = search.page_start() + asset_picker::PAGE_SIZE;
+            if next < matches.len() {
+                search.row = next;
+            }
+        } else if picker.clicked(asset_picker::Action::Previous)
+            || keys.just_pressed(KeyCode::PageUp)
+        {
+            search.row = search.page_start().saturating_sub(asset_picker::PAGE_SIZE);
+        } else if keys.just_pressed(KeyCode::ArrowDown) {
             search.row = (search.row + 1).min(matches.len().saturating_sub(1));
         } else if keys.just_pressed(KeyCode::ArrowUp) {
             search.row = search.row.saturating_sub(1);
-        } else if keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter])
-            && let Some(&index) = matches.get(search.row)
-        {
-            workshop.selected = index;
-            workshop.together = false;
-            return;
         }
         workshop.search = Some(search);
         return;
@@ -635,10 +659,6 @@ fn show_model(
     light.illuminance = illuminance;
     light.color = color;
     ambient.brightness = brightness;
-    if let Some(search) = &workshop.search {
-        text.set_if_neq(Text::new(search.label(&workshop.assets, &models)));
-        return;
-    }
     if workshop.show_proof {
         text.set_if_neq(Text::new(format!(
             "{} · Sprite Proof · {mode}\n0° · 90° · 180° · 270°\nN Lighting · F6 Export sheet · F7 Return to model\n{}",
@@ -816,7 +836,7 @@ type InspectionChrome = Or<(
 fn capture_preview(
     (mut commands, keys): (Commands, Res<ButtonInput<KeyCode>>),
     (mut workshop, catalog): (ResMut<Workshop>, Res<WorkshopCatalog>),
-    mut panels: Query<(&mut Node, Has<InspectionToolbar>), InspectionChrome>,
+    mut panels: Query<(&mut Node, Has<navigation::ArtTools>), InspectionChrome>,
     pending: Query<(), With<Screenshot>>,
     scene: Query<(&SceneInstance, Option<&WorkshopModel>, Option<&ScaleFigure>)>,
     sprite_capture: Option<Res<sprites::SpriteCapture>>,
@@ -825,8 +845,8 @@ fn capture_preview(
     if !pending.is_empty() || sprite_capture.is_some() {
         return;
     }
-    for (mut panel, toolbar) in &mut panels {
-        panel.display = if toolbar && workshop.search.is_some() {
+    for (mut panel, navigation) in &mut panels {
+        panel.display = if !navigation && workshop.search.is_some() {
             Display::None
         } else {
             Display::Flex
