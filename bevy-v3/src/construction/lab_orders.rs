@@ -202,6 +202,34 @@ impl Construction {
         jobs
     }
 
+    pub(crate) fn lab_map_projects<'a>(
+        &'a self,
+        catalog: &'a Catalog,
+    ) -> impl Iterator<Item = (usize, Vec2, Vec2, bool)> + 'a {
+        self.plans.iter().enumerate().filter_map(|(index, plan)| {
+            if plan.removed {
+                return None;
+            }
+            let size = plan.size.as_vec2();
+            let center = plan.position.as_vec2() + (size - Vec2::ONE) * 0.5;
+            Some((
+                index,
+                world_position(center.x, center.y),
+                size * 2.0,
+                plan.work >= catalog.projects[&plan.key].work,
+            ))
+        })
+    }
+
+    pub(crate) fn lab_map_project_status(&self, catalog: &Catalog, index: usize) -> Option<String> {
+        let name = self.lab_job_site_name(catalog, index)?;
+        Some(format!(
+            "{name} #{} · {}",
+            index + 1,
+            self.project_status(catalog, index)
+        ))
+    }
+
     pub(crate) fn lab_job_sites(&self) -> impl Iterator<Item = usize> + '_ {
         self.plans
             .iter()

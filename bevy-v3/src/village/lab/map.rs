@@ -4,16 +4,20 @@ use super::Runner;
 use crate::{arrival::world_position, catalog::Catalog};
 
 #[derive(Resource, Default, PartialEq)]
-pub(super) struct MapVisible(pub bool);
+pub(super) struct MapState {
+    pub visible: bool,
+    pub selected: Option<usize>,
+}
 
 pub(super) fn draw(
-    visible: Res<MapVisible>,
+    mut map: ResMut<MapState>,
+    mouse: Res<ButtonInput<MouseButton>>,
     runner: Res<Runner>,
     catalog: Res<Catalog>,
     window: Single<&Window, With<PrimaryWindow>>,
     mut gizmos: Gizmos,
 ) {
-    if !visible.0 {
+    if !map.visible {
         return;
     }
     let side = (window.height() - 230.0)
@@ -40,30 +44,47 @@ pub(super) fn draw(
     }
 
     let construction = &runner.village.construction;
-    for (built, models) in [
-        (
-            true,
-            construction.finished_models(&catalog).collect::<Vec<_>>(),
-        ),
-        (
-            false,
-            construction
-                .construction_models(&catalog)
-                .collect::<Vec<_>>(),
-        ),
-    ] {
-        let tint = if built {
+    let projects = || construction.lab_map_projects(&catalog);
+    if map
+        .selected
+        .is_some_and(|selected| !projects().any(|(index, ..)| index == selected))
+    {
+        map.selected = None;
+    }
+    if mouse.just_pressed(MouseButton::Left)
+        && let Some(cursor) = window.cursor_position()
+    {
+        let screen = Vec2::new(
+            cursor.x - window.width() * 0.5,
+            window.height() * 0.5 - cursor.y,
+        );
+        if (screen - center).abs().cmple(Vec2::splat(side * 0.5)).all() {
+            map.selected = projects()
+                .filter_map(|(index, position, size, _)| {
+                    let delta = (screen - point(position)).abs();
+                    let marker = (size * scale * 0.5).max(Vec2::splat(4.0));
+                    delta
+                        .cmple(marker)
+                        .all()
+                        .then_some((index, delta.length_squared()))
+                })
+                .min_by(|a, b| a.1.total_cmp(&b.1))
+                .map(|(index, _)| index);
+        }
+    }
+    for (index, position, size, built) in projects() {
+        let tint = if map.selected == Some(index) {
+            Color::srgb_u8(255, 255, 255)
+        } else if built {
             Color::srgb_u8(171, 225, 162)
         } else {
             Color::srgb_u8(247, 197, 106)
         };
-        for (_, _, position, _) in models {
-            gizmos.rect_2d(
-                Isometry2d::from_translation(point(position)),
-                Vec2::splat(6.0),
-                tint,
-            );
-        }
+        gizmos.rect_2d(
+            Isometry2d::from_translation(point(position)),
+            (size * scale).max(Vec2::splat(6.0)),
+            tint,
+        );
     }
     let camp = world_position(runner.camp.x as f32, runner.camp.y as f32);
     gizmos.circle_2d(

@@ -539,7 +539,7 @@ fn open_lab(catalog: Catalog, runner: Runner, replay: Option<Replay>) {
         }))
         .add_plugins(crate::ui_font::UiFontPlugin)
         .add_systems(Startup, setup_lab_window)
-        .init_resource::<map::MapVisible>()
+        .init_resource::<map::MapState>()
         .add_systems(Update, (update_lab_window, map::draw).chain())
         .run();
 }
@@ -943,7 +943,7 @@ fn update_lab_window(
     ),
     mut playback: Local<Playback>,
     mut panel: Single<&mut Text>,
-    (mut replay, mut map): (Option<ResMut<Replay>>, ResMut<map::MapVisible>),
+    (mut replay, mut map): (Option<ResMut<Replay>>, ResMut<map::MapState>),
 ) {
     playback.replaying = replay.is_some();
     let limit = replay
@@ -1005,7 +1005,7 @@ fn update_lab_window(
         }
     }
     if let Some(order) = &playback.order {
-        map.set_if_neq(map::MapVisible(false));
+        map.visible = false;
         panel.set_if_neq(Text::new(format!(
             "Order at step {}\nEnter Submit · Esc Cancel\n\nExample {{\"type\":\"grid\",\"enabled\":false}}\n\n{order}▏\n{}",
             runner.index, playback.notice
@@ -1017,7 +1017,15 @@ fn update_lab_window(
         playback.inventory_page = 0;
         playback.clear_confirmation = None;
     }
-    map.set_if_neq(map::MapVisible(playback.view == LabView::Map));
+    if playback.view == LabView::Map
+        && keys.just_pressed(KeyCode::Enter)
+        && let Some(project) = map.selected
+    {
+        playback.view = LabView::Jobs;
+        playback.job_focus = Some(project);
+        playback.inventory_page = 0;
+    }
+    map.visible = playback.view == LabView::Map;
     if keys.just_pressed(KeyCode::PageDown) {
         playback.inventory_page = playback.inventory_page.saturating_add(1);
     } else if keys.just_pressed(KeyCode::PageUp) {
@@ -1160,7 +1168,17 @@ fn update_lab_window(
             playback.inventory_page = playback.inventory_page.min(pages - 1);
             text
         } else if playback.view == LabView::Map {
-            "Village map\nTab Switch view\nBlue Camp · Cream Residents · Green Completed · Gold Construction".into()
+            let selection = map
+                .selected
+                .and_then(|project| {
+                    village
+                        .construction
+                        .lab_map_project_status(&catalog, project)
+                })
+                .unwrap_or_else(|| "Click a project to inspect it".into());
+            format!(
+                "Village map · {selection}\nTab Switch view · Enter Inspect selected jobs\nBlue Camp · Cream Residents · Green Completed · Gold Construction"
+            )
         } else {
             lab_inventory(
                 &catalog,
@@ -1254,7 +1272,7 @@ mod tests {
             .insert_resource(runner)
             .insert_resource(replay)
             .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<map::MapVisible>()
+            .init_resource::<map::MapState>()
             .add_message::<bevy::input::keyboard::KeyboardInput>()
             .add_systems(Update, update_lab_window);
         let panel = app.world_mut().spawn(Text::default()).id();
