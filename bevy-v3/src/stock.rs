@@ -52,6 +52,8 @@ pub struct Stock {
 
 #[derive(Clone, Default, Deserialize, Serialize)]
 struct CashFlow {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    opening_cents: Option<u64>,
     started_day: Option<u64>,
     day: u64,
     operating: BTreeMap<u64, i64>,
@@ -117,7 +119,12 @@ impl Stock {
             cash: settings.starting_cash(),
             centavos: 0,
             ledger: BTreeMap::new(),
-            cash_flow: CashFlow::default(),
+            cash_flow: CashFlow {
+                opening_cents: (settings.mode != Mode::Sandbox)
+                    .then(|| u64::from(settings.starting_cash()) * 100),
+                minute: 540,
+                ..CashFlow::default()
+            },
             sandbox: settings.mode == Mode::Sandbox,
             pantry: Pantry::default(),
             processing: BTreeMap::new(),
@@ -434,6 +441,14 @@ impl Stock {
             page + 1,
             pages
         );
+        if let Some(opening) = self.cash_flow.opening_cents {
+            display.push_str(&format!(
+                "\nRecords began Day 1 · 09:00 · Opening savings R${:.2}",
+                opening as f64 / 100.0
+            ));
+        } else if !self.sandbox {
+            display.push_str("\nOpening savings are unavailable for this save.");
+        }
         for entry in self.cash_flow.recent.iter().skip(page * ROWS).take(ROWS) {
             use std::fmt::Write;
             let day = entry.minute / 1440 + 1;
@@ -569,6 +584,7 @@ mod finance_tests {
         assert_eq!(high, available + 56.0);
         assert!((mean - 4.0 / 3.0).abs() < 1e-9);
         let (_, history) = stock.finance_history(0);
+        assert!(history.contains("Records began Day 1 · 09:00 · Opening savings R$10000.00"));
         assert!(
             stock
                 .finance_summary(committed)
@@ -578,6 +594,7 @@ mod finance_tests {
         assert!(history.contains("Day 2 · 09:00 · Grid electricity, daily total · R$-4.00"));
         let save = serde_json::to_string(&stock).unwrap();
         let restored: Stock = serde_json::from_str(&save).unwrap();
+        assert_eq!(restored.finance_history(0).1, history);
         assert_eq!(
             restored.cash_forecast(committed),
             Some((days, low, high, mean))
