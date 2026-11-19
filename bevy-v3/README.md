@@ -54,6 +54,8 @@ Press F4 after pitching camp to edit terrain. Use 1–4 for Raise, Lower, Flatte
 
 Press F5 to save the current village and F9 to reload it. Press F6 to name, load, rename, recover, or export villages. An active named village autosaves and retains its previous snapshot. Story and Sandbox have separate save files under `Solar Friends V3` in the local application data directory.
 
+Use **Tab** or the mode button in Saved villages to browse the other mode. Loading a village switches the game to that village's mode.
+
 The opening models are embedded in the executable. To regenerate them after changing the source artwork, run `npm ci` and `node scripts/export-v3-opening-models.mjs` from the repository root.
 
 Refresh the construction data with `node scripts/export-v3-catalog.mjs`.

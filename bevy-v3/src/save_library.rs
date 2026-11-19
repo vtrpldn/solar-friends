@@ -15,6 +15,7 @@ const SLOT_BYTES: u64 = save::MAX_BYTES * 2 + 16 * 1024;
 #[derive(Resource, Default)]
 pub struct SaveMenu {
     pub open: bool,
+    pub browse_mode: Mode,
     pub selected: usize,
     pub rows: Vec<SlotInfo>,
     pub entry: Option<NameEntry>,
@@ -60,18 +61,26 @@ impl SaveMenu {
     pub fn directory(&self, mode: Mode) -> io::Result<PathBuf> {
         #[cfg(test)]
         if let Some(path) = &self.test_directory {
-            return Ok(path.clone());
+            return Ok(match mode {
+                Mode::Story => path.clone(),
+                Mode::Sandbox => path.join("sandbox"),
+            });
         }
         directory(mode)
     }
 
     pub fn label(&self) -> String {
-        let mut lines = vec!["Saved villages".to_owned()];
+        let mode = match self.browse_mode {
+            Mode::Story => "Story",
+            Mode::Sandbox => "Sandbox",
+        };
+        let mut lines = vec![format!("Saved villages · {mode}")];
         if let Some(entry) = &self.entry {
             lines.push(format!("Village name: {}_", entry.text));
             lines.push("Enter Confirm · Escape Cancel".into());
         } else if self.rows.is_empty() {
-            lines.push("N Name the current village · F6 Close".into());
+            lines.push("No named villages in this mode.".into());
+            lines.push("Tab Switch mode · F6 Close".into());
         } else {
             let start = self.selected / 8 * 8;
             for (index, row) in self.rows.iter().enumerate().skip(start).take(8) {
@@ -87,7 +96,8 @@ impl SaveMenu {
                 ));
             }
             lines.push("↑ / ↓ Select · Enter Load · N New · R Rename".into());
-            lines.push("E Export · P Recover · Delete Remove · F6 Close".into());
+            lines.push("E Export · P Recover · Delete Remove".into());
+            lines.push("Tab Switch mode · F6 Close".into());
         }
         if self.delete_request.is_some() {
             lines.push("Press Delete again to remove this save.".into());

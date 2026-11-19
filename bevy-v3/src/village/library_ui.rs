@@ -20,6 +20,8 @@ pub(super) fn toggle_library(menu: &mut SaveMenu, mode: Mode) {
     menu.delete_request = None;
     menu.status.clear();
     if menu.open {
+        menu.browse_mode = mode;
+        menu.rows.clear();
         match menu.directory(mode) {
             Ok(path) => refresh_library(menu, &path, mode),
             Err(error) => menu.status = error.to_string(),
@@ -32,6 +34,7 @@ const ROWS: usize = 8;
 #[derive(Component, Clone, Copy)]
 pub(super) enum LibraryAction {
     Row(usize),
+    SwitchMode,
     Previous,
     Next,
     New,
@@ -74,6 +77,7 @@ fn spawn_library(mut commands: Commands, assets: Res<AssetServer>) {
         ))
         .with_children(|panel| {
             for action in (0..ROWS).map(LibraryAction::Row).chain([
+                LibraryAction::SwitchMode,
                 LibraryAction::Previous,
                 LibraryAction::Next,
                 LibraryAction::New,
@@ -121,6 +125,10 @@ fn library_label(action: LibraryAction, menu: &SaveMenu, may_create: bool) -> Op
             let selected = if index == menu.selected { "› " } else { "" };
             format!("{selected}{}", slot.name)
         }
+        SwitchMode => match menu.browse_mode {
+            Mode::Story => "Browse Sandbox saves".into(),
+            Mode::Sandbox => "Browse Story saves".into(),
+        },
         Previous if menu.selected > 0 => "Previous".into(),
         Next if menu.selected + 1 < menu.rows.len() => "Next".into(),
         New if may_create => "Name current village".into(),
@@ -164,7 +172,11 @@ fn show_library(
         return;
     }
     for (&action, children, interaction, mut node, mut background) in &mut buttons {
-        let label = library_label(action, &menu, !setup.open && village.mode().is_some());
+        let label = library_label(
+            action,
+            &menu,
+            !setup.open && village.mode() == Some(menu.browse_mode),
+        );
         node.display = if label.is_some() {
             Display::Flex
         } else {
@@ -221,6 +233,7 @@ pub(super) fn library_controls(
     use LibraryAction::*;
     let keys_to_actions = [
         (KeyCode::Escape, Cancel),
+        (KeyCode::Tab, SwitchMode),
         (KeyCode::ArrowUp, Previous),
         (KeyCode::ArrowDown, Next),
         (KeyCode::KeyN, New),
@@ -237,7 +250,12 @@ pub(super) fn library_controls(
         .iter()
         .find_map(|(&action, interaction)| {
             (*interaction == Interaction::Pressed
-                && library_label(action, &menu, !setup.open && village.mode().is_some()).is_some())
+                && library_label(
+                    action,
+                    &menu,
+                    !setup.open && village.mode() == Some(menu.browse_mode),
+                )
+                .is_some())
             .then_some(action)
         })
         .or_else(|| {
@@ -245,7 +263,24 @@ pub(super) fn library_controls(
                 .into_iter()
                 .find_map(|(key, action)| keys.just_pressed(key).then_some(action))
         });
-    let Ok(path) = menu.directory(setup.mode) else {
+    if matches!(action, Some(SwitchMode)) && menu.entry.is_none() {
+        let mode = match menu.browse_mode {
+            Mode::Story => Mode::Sandbox,
+            Mode::Sandbox => Mode::Story,
+        };
+        menu.browse_mode = mode;
+        menu.rows.clear();
+        menu.selected = 0;
+        menu.delete_request = None;
+        menu.status.clear();
+        match menu.directory(mode) {
+            Ok(path) => refresh_library(&mut menu, &path, mode),
+            Err(error) => menu.status = error.to_string(),
+        }
+        return;
+    }
+    let mode = menu.browse_mode;
+    let Ok(path) = menu.directory(mode) else {
         return;
     };
     if let Some(mut entry) = menu.entry.take() {
@@ -273,22 +308,22 @@ pub(super) fn library_controls(
         }
         if matches!(action, Some(Confirm)) {
             let result = if let Some(slot) = entry.rename {
-                save_library::rename(&path, slot, setup.mode, &entry.text).map(|()| slot)
-            } else if village.mode() != Some(setup.mode) || setup.open {
+                save_library::rename(&path, slot, mode, &entry.text).map(|()| slot)
+            } else if village.mode() != Some(mode) || setup.open {
                 Err(std::io::Error::other(
                     "enter a village before creating a named save",
                 ))
             } else {
-                save_library::create(&path, setup.mode, &entry.text, &village)
+                save_library::create(&path, mode, &entry.text, &village)
             };
             match result {
                 Ok(id) => {
                     if entry.rename.is_none() {
-                        menu.attached = Some((setup.mode, id, village.session_serial));
+                        menu.attached = Some((mode, id, village.session_serial));
                         menu.next_autosave = time.elapsed_secs_f64() + 3.0;
                     }
                     menu.status = "Village saved.".into();
-                    refresh_library(&mut menu, &path, setup.mode);
+                    refresh_library(&mut menu, &path, mode);
                     menu.selected = menu.rows.iter().position(|row| row.id == id).unwrap_or(0);
                 }
                 Err(error) => {
@@ -318,7 +353,7 @@ pub(super) fn library_controls(
         menu.selected = (menu.selected + 1).min(menu.rows.len().saturating_sub(1));
         menu.delete_request = None;
     }
-    if matches!(action, Some(New)) && !setup.open && village.mode().is_some() {
+    if matches!(action, Some(New)) && !setup.open && village.mode() == Some(menu.browse_mode) {
         menu.entry = Some(NameEntry {
             text: String::new(),
             rename: None,
@@ -336,9 +371,9 @@ pub(super) fn library_controls(
         });
     } else if matches!(action, Some(Load | Recover)) {
         let restored = if matches!(action, Some(Load)) {
-            save_library::load(&path, slot, setup.mode, &catalog)
+            save_library::load(&path, slot, mode, &catalog)
         } else {
-            save_library::recover(&path, slot, setup.mode, &catalog)
+            save_library::recover(&path, slot, mode, &catalog)
         };
         match restored {
             Ok(mut loaded) => {
@@ -346,7 +381,7 @@ pub(super) fn library_controls(
                 loaded.rebuild_scene = true;
                 loaded.session_serial = village.session_serial.wrapping_add(1);
                 loaded.save_notice = "Named village loaded.".into();
-                menu.attached = Some((setup.mode, slot, loaded.session_serial));
+                menu.attached = Some((mode, slot, loaded.session_serial));
                 menu.next_autosave = time.elapsed_secs_f64() + 3.0;
                 menu.open = false;
                 *village = loaded;
@@ -354,7 +389,7 @@ pub(super) fn library_controls(
             Err(error) => menu.status = format!("Could not open saved village: {error}"),
         }
     } else if matches!(action, Some(Export)) {
-        menu.status = match save_library::export(&path, slot, setup.mode, &catalog) {
+        menu.status = match save_library::export(&path, slot, mode, &catalog) {
             Ok(file) => format!("Exported to {}", file.display()),
             Err(error) => format!("Could not export village: {error}"),
         };
@@ -363,11 +398,14 @@ pub(super) fn library_controls(
             menu.delete_request = None;
             match save_library::remove(&path, slot) {
                 Ok(()) => {
-                    if menu.attached.is_some_and(|(_, id, _)| id == slot) {
+                    if menu
+                        .attached
+                        .is_some_and(|(attached_mode, id, _)| attached_mode == mode && id == slot)
+                    {
                         menu.attached = None;
                     }
                     menu.status = "Saved village removed.".into();
-                    refresh_library(&mut menu, &path, setup.mode);
+                    refresh_library(&mut menu, &path, mode);
                 }
                 Err(error) => menu.status = format!("Could not remove saved village: {error}"),
             }

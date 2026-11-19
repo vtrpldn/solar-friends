@@ -990,7 +990,7 @@ mod tests {
                 .is_empty()
         );
         press_button(&mut app, "Close saved villages");
-        std::fs::remove_dir_all(save_dir).unwrap();
+        std::fs::remove_dir_all(&save_dir).unwrap();
 
         press_button(&mut app, "Setup");
         app.world_mut().run_schedule(Update);
@@ -1017,5 +1017,35 @@ mod tests {
         let sandbox = app.world().resource::<village::Village>();
         assert_eq!(sandbox.camp, Some(IVec2::new(36, 36)));
         assert!(matches!(sandbox.mode(), Some(setup::Mode::Sandbox)));
+
+        press_button(&mut app, "Saved villages");
+        press_button(&mut app, "Name current village");
+        app.world_mut()
+            .resource_mut::<save_library::SaveMenu>()
+            .entry
+            .as_mut()
+            .unwrap()
+            .text = "Sandbox test village".into();
+        press_button(&mut app, "Confirm name");
+        press_button(&mut app, "Close saved villages");
+        press_button(&mut app, "Setup");
+        app.world_mut().resource_mut::<WorldSetup>().mode = setup::Mode::Story;
+        app.update();
+        press_button(&mut app, "Saved villages");
+        assert!(
+            app.world()
+                .resource::<save_library::SaveMenu>()
+                .rows
+                .is_empty()
+        );
+        press_button(&mut app, "Browse Sandbox saves");
+        press_button(&mut app, "› Sandbox test village");
+        press_button(&mut app, "Load village");
+        assert!(matches!(
+            app.world().resource::<WorldSetup>().mode,
+            setup::Mode::Sandbox
+        ));
+        assert!(!app.world().resource::<WorldSetup>().open);
+        std::fs::remove_dir_all(save_dir).unwrap();
     }
 }
