@@ -56,6 +56,8 @@ pub struct Utilities {
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     disabled_power_links: BTreeSet<(usize, usize)>,
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    installed_power_links: BTreeSet<(usize, usize)>,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     disabled_water_links: BTreeSet<(usize, usize, usize)>,
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     installed_water_links: BTreeSet<(usize, usize, usize)>,
@@ -265,6 +267,15 @@ impl Utilities {
         if changed {
             self.links = self.connections();
             self.power_links = self.power_tree();
+            for &(a, b) in &self.installed_power_links {
+                if !self
+                    .power_links
+                    .iter()
+                    .any(|&(x, y)| (x.min(y), x.max(y)) == (a, b))
+                {
+                    self.power_links.push((a, b));
+                }
+            }
             self.rebuild_power_circuits();
             self.topology_valid = true;
         }
@@ -274,6 +285,8 @@ impl Utilities {
         let id = building + 1;
         if let Some(node) = self.nodes.remove(&id) {
             self.disabled_power_links
+                .retain(|&(a, b)| a != id && b != id);
+            self.installed_power_links
                 .retain(|&(a, b)| a != id && b != id);
             self.disabled_water_links
                 .retain(|&(from, to, _)| from != id && to != id);
@@ -297,6 +310,7 @@ impl Utilities {
             && self
                 .disabled_power_links
                 .iter()
+                .chain(&self.installed_power_links)
                 .all(|&(a, b)| a < b && self.nodes.contains_key(&a) && self.nodes.contains_key(&b))
             && self.nodes.iter().all(|(id, node)| {
                 (*id == 0 && node.kind == "camp" || *id > 0 && valid_building(*id - 1, &node.kind))
@@ -834,6 +848,26 @@ impl Utilities {
             .contains(&(pipe.from, pipe.to, pipe.channel))
     }
 
+    pub fn power_link_exists(&self, from: usize, to: usize) -> bool {
+        let endpoints = (from.min(to), from.max(to));
+        self.power_links
+            .iter()
+            .any(|&(a, b)| (a.min(b), a.max(b)) == endpoints)
+    }
+
+    pub fn install_power_link(&mut self, from: usize, to: usize) {
+        self.installed_power_links
+            .insert((from.min(to), from.max(to)));
+        self.topology_valid = false;
+    }
+
+    pub fn power_at(&self, cell: IVec2) -> Option<usize> {
+        self.nodes.iter().find_map(|(&id, node)| {
+            (cell.cmpge(node.location).all() && cell.cmplt(node.location + node.size).all())
+                .then_some(id)
+        })
+    }
+
     pub fn power_link_count(&self) -> usize {
         self.power_links.len()
     }
@@ -861,16 +895,24 @@ impl Utilities {
     }
 
     fn rebuild_power_circuits(&mut self) {
-        self.power_circuits.clear();
-        for &(from, to) in &self.power_links {
-            // The tree visits the parent before each child.
-            let circuit = if self.power_link_open(from, to) {
-                self.power_circuits.get(&from).copied().unwrap_or(from)
-            } else {
-                to
-            };
-            self.power_circuits.insert(to, circuit);
+        fn root(parents: &BTreeMap<usize, usize>, mut node: usize) -> usize {
+            while let Some(&parent) = parents.get(&node) {
+                node = parent;
+            }
+            node
         }
+
+        let mut parents = BTreeMap::new();
+        for &(from, to) in &self.power_links {
+            if self.power_link_open(from, to) {
+                let a = root(&parents, from);
+                let b = root(&parents, to);
+                if a != b {
+                    parents.insert(a.max(b), a.min(b));
+                }
+            }
+        }
+        self.power_circuits = parents.keys().map(|&id| (id, root(&parents, id))).collect();
     }
 
     pub fn power_shortages(&self) -> impl Iterator<Item = usize> + '_ {
@@ -1921,6 +1963,21 @@ mod tests {
         restored.toggle_power_link(link);
         restored.tick(&setup, &mut stock, 0, 4.0, 0.1);
         assert!(restored.powered(0));
+
+        restored.toggle_power_link(link);
+        restored.install_power_link(6, 0);
+        restored.sync(std::iter::empty());
+        restored.tick(&setup, &mut stock, 0, 5.0, 0.1);
+        assert_eq!(restored.power_link(link), Some((1, 6, false)));
+        assert!(restored.power_link_exists(0, 6));
+        assert!(restored.powered(0));
+
+        let mut loaded: Utilities =
+            serde_json::from_str(&serde_json::to_string(&restored).unwrap()).unwrap();
+        loaded.sync(std::iter::empty());
+        loaded.tick(&setup, &mut stock, 0, 6.0, 0.1);
+        assert!(loaded.power_link_exists(6, 0));
+        assert!(loaded.powered(0));
     }
 
     #[test]

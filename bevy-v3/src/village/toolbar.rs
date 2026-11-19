@@ -86,6 +86,7 @@ enum Action {
     Water(WaterCommand),
     NextWasteTank,
     InstallWaterLink,
+    InstallPowerLink,
     NextPowerShortage,
     UtilityLinkPage(bool),
     ToggleUtilityLink,
@@ -234,6 +235,7 @@ impl Action {
                     && self.facility_switch(village).is_some()
             }
             Self::UtilityLinkPage(_) | Self::ToggleUtilityLink => village.utility_link_count() > 0,
+            Self::InstallPowerLink => village.utility_panel == Some(UtilityPanel::Power),
             Self::NextPowerShortage => {
                 village.utility_panel == Some(UtilityPanel::Power)
                     && village
@@ -551,6 +553,7 @@ impl Action {
             Self::Cooling => "Resume cooling".into(),
             Self::NextWasteTank => "Next waste tank".into(),
             Self::InstallWaterLink => "Install water connection".into(),
+            Self::InstallPowerLink => "Install power connection".into(),
             Self::NextPowerShortage => "Next building without power".into(),
             Self::UtilityLinkPage(false) => "Previous connection".into(),
             Self::UtilityLinkPage(true) => "Next connection".into(),
@@ -810,6 +813,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::PantryPolicy(reserve, budget, toggle));
                 }
                 spawn_button(menu, &assets, Action::Grid);
+                spawn_button(menu, &assets, Action::InstallPowerLink);
                 spawn_button(menu, &assets, Action::NextPowerShortage);
                 spawn_button(menu, &assets, Action::UtilityLinkPage(false));
                 spawn_button(menu, &assets, Action::UtilityLinkPage(true));
@@ -1199,6 +1203,9 @@ fn handle_buttons(
                 Action::NextPowerShortage if !picker.open => {
                     village.focus_next_power_shortage(&setup, camera)
                 }
+                Action::InstallPowerLink if !picker.open => {
+                    village.queue_selected_power_connection()
+                }
                 Action::InstallWaterLink if !picker.open => {
                     village.queue_selected_water_connection()
                 }
@@ -1351,6 +1358,7 @@ fn handle_buttons(
                 | Action::Water(_)
                 | Action::NextWasteTank
                 | Action::InstallWaterLink
+                | Action::InstallPowerLink
                 | Action::NextPowerShortage
                 | Action::UtilityLinkPage(_)
                 | Action::ToggleUtilityLink
@@ -1551,7 +1559,7 @@ fn refresh(
             | Action::AutoCook
             | Action::CookingTarget { .. } => show_pantry && action.available(&village),
             Action::Home(_) => show_residents,
-            Action::Grid => show_power,
+            Action::Grid | Action::InstallPowerLink => show_power,
             Action::NextPowerShortage => show_power && action.available(&village),
             Action::UtilityLinkPage(_) | Action::ToggleUtilityLink => {
                 (show_power || show_water) && action.available(&village)

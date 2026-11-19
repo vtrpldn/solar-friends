@@ -210,6 +210,12 @@ pub struct Village {
     #[serde(skip)]
     power_link: usize,
     #[serde(skip)]
+    power_source: usize,
+    #[serde(skip)]
+    power_target: usize,
+    #[serde(skip)]
+    power_notice: String,
+    #[serde(skip)]
     water_link: usize,
     #[serde(skip)]
     connect_road_strokes: bool,
@@ -429,6 +435,17 @@ impl Village {
             self.lenses.network_site = Some(id);
             camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
         }
+    }
+
+    fn queue_selected_power_connection(&mut self) {
+        self.power_notice = match self.construction.queue_power_connection(
+            &mut self.stock,
+            self.power_source,
+            self.power_target,
+        ) {
+            Ok(()) => "Power connection queued.".into(),
+            Err(reason) => reason.into(),
+        };
     }
 
     fn queue_selected_water_connection(&mut self) {
@@ -1472,6 +1489,29 @@ fn village_input(
             return;
         }
         if town.utility_panel == Some(UtilityPanel::Power) {
+            let shift = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+            let endpoint = if keyboard.just_pressed(KeyCode::KeyC) {
+                Some(0)
+            } else {
+                pointer
+                    .clicked
+                    .and_then(|hit| town.construction.utilities.power_at(hit.cell))
+            };
+            if let Some(id) = endpoint {
+                if shift {
+                    town.power_source = id;
+                } else {
+                    town.power_target = id;
+                }
+                town.power_notice.clear();
+                if shift || keyboard.just_pressed(KeyCode::KeyC) {
+                    return;
+                }
+            }
+            if keyboard.just_pressed(KeyCode::KeyU) {
+                town.queue_selected_power_connection();
+                return;
+            }
             if keyboard.any_just_pressed([KeyCode::BracketLeft, KeyCode::BracketRight]) {
                 town.move_utility_link(keyboard.just_pressed(KeyCode::BracketRight));
             }
@@ -2031,6 +2071,15 @@ fn show_hud(
                 village.power_link,
                 true,
             ));
+            label.push_str(&village.construction.power_installation_summary(
+                &catalog,
+                village.power_source,
+                village.power_target,
+            ));
+            if !village.power_notice.is_empty() {
+                label.push('\n');
+                label.push_str(&village.power_notice);
+            }
             label.push_str(&village.construction.power_shortage_summary(&catalog));
         }
         Some(UtilityPanel::Projects) => {
