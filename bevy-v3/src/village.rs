@@ -696,7 +696,7 @@ impl Village {
                 let Some(page) = &mut self.pantry_batch_page else {
                     return;
                 };
-                let pages = self.stock.pantry.batches(catalog, *page).0;
+                let pages = self.stock.pantry.batches(catalog, page.saturating_sub(1)).0 + 1;
                 *page = (*page).min(pages - 1);
                 (pages, page)
             }
@@ -2537,13 +2537,12 @@ fn show_hud(
             label.push('\n');
             if village.stock.sandbox {
                 label.push_str("Food batches · Unlimited food · No spoilage\nR Pantry");
-            } else {
+            } else if village.pantry_batch_page == Some(0) {
                 label.push_str(
                     &village
                         .stock
                         .pantry
-                        .batches(&catalog, village.pantry_batch_page.unwrap_or_default())
-                        .1,
+                        .shelves(&catalog, |id| village.stock.available(id)),
                 );
                 label.push('\n');
                 label.push_str(&village.construction.pantry_commitments(
@@ -2551,6 +2550,13 @@ fn show_hud(
                     &village.stock,
                     &land,
                 ));
+                label.push_str("\nR Pantry · Tab Finances");
+            } else {
+                let page = village
+                    .pantry_batch_page
+                    .unwrap_or_default()
+                    .saturating_sub(1);
+                label.push_str(&village.stock.pantry.batches(&catalog, page).1);
                 label.push_str("\nTab Finances");
             }
         }

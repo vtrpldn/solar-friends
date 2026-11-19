@@ -328,6 +328,59 @@ impl Pantry {
         (!foods.is_empty()).then(|| format!("Use within one day · {}", foods.join(", ")))
     }
 
+    pub fn shelves(&self, catalog: &Catalog, owned: impl Fn(&str) -> u32) -> String {
+        use std::fmt::Write;
+        let mut text = String::from("On the shelves · Page Down for individual batches");
+        for (id, days) in FOODS {
+            let item = &catalog.materials[id];
+            let variants: &[bool] = if id == "meals" {
+                &[false, true]
+            } else {
+                &[false]
+            };
+            for &preserved in variants {
+                let mut available = 0u64;
+                let mut chilled = 0u64;
+                let mut expiry = None::<f64>;
+                for lot in self
+                    .lots
+                    .get(id)
+                    .into_iter()
+                    .flatten()
+                    .filter(|lot| lot.preserved == preserved)
+                {
+                    available += u64::from(lot.units);
+                    if lot.chilled {
+                        chilled += u64::from(lot.units);
+                    }
+                    expiry = Some(expiry.map_or(lot.expires, |previous| previous.min(lot.expires)));
+                }
+                if !self.initialized && !preserved {
+                    available = u64::from(owned(id));
+                    expiry = (available > 0).then_some(self.clock + days * DAY);
+                }
+                let name = match (id, preserved) {
+                    ("meals", true) => "Dried provisions",
+                    ("meals", false) => "Fresh meals",
+                    _ => &item.name,
+                };
+                let _ = write!(
+                    text,
+                    "\n{name} · {} available",
+                    item.quantity_text(available)
+                );
+                if let Some(expiry) = expiry {
+                    let days = ((expiry - self.clock) / DAY).max(0.0);
+                    let _ = write!(text, " · Use within {days:.1}d");
+                }
+                if !preserved {
+                    let _ = write!(text, " · {} chilled", item.quantity_text(chilled));
+                }
+            }
+        }
+        text
+    }
+
     pub fn batches(&self, catalog: &Catalog, page: usize) -> (usize, String) {
         use std::fmt::Write;
 

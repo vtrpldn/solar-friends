@@ -1053,6 +1053,24 @@ mod tests {
         press_button(&mut app, "Dried target 2.0d +");
         press_button(&mut app, "Dried target 2.5d −");
         press_button(&mut app, "Automatic cooking on");
+        press_button(&mut app, "Food batches");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| {
+                    text.0.contains("On the shelves") && text.0.contains("Dried provisions")
+                })
+        );
+        press_button(&mut app, "Next page");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Food batches · 1/"))
+        );
+        press_button(&mut app, "Previous page");
+        press_button(&mut app, "Close food batches");
         press_button(&mut app, "Close panel");
 
         press_button(&mut app, "Manage");
