@@ -431,6 +431,10 @@ mod tests {
         press_button(&mut app, "Next filter");
         press_button(&mut app, "Previous filter");
         press_button(&mut app, "Map lenses");
+        press_button(&mut app, "Power");
+        press_button(&mut app, "Next facility");
+        press_button(&mut app, "Previous facility");
+        press_button(&mut app, "Map lenses");
         press_button(&mut app, "Clear lens");
 
         press_button(&mut app, "Manage");

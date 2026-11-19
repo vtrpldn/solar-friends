@@ -31,6 +31,7 @@ enum Action {
     Lens(usize),
     LensPage,
     LensFilter(bool),
+    LensSite(bool),
     ClearLens,
     Manage,
     Panel(UtilityPanel),
@@ -161,6 +162,7 @@ impl Action {
             }
             Self::Lenses | Self::Lens(_) | Self::LensPage | Self::ClearLens => false,
             Self::LensFilter(_) => village.lenses.has_filter(),
+            Self::LensSite(_) => village.lenses.network_view().is_some(),
             Self::Guide | Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad => true,
             Self::Manage => !village.construction.menu && !village.construction.is_placing(),
             Self::Panel(
@@ -261,6 +263,8 @@ impl Action {
             Self::Lenses if village.lenses.open => "Close lenses".into(),
             Self::Lenses => "Map lenses".into(),
             Self::LensPage => "Other lenses".into(),
+            Self::LensSite(false) => "Previous facility".into(),
+            Self::LensSite(true) => "Next facility".into(),
             Self::LensFilter(false) => "Previous filter".into(),
             Self::LensFilter(true) => "Next filter".into(),
             Self::ClearLens => "Clear lens".into(),
@@ -443,6 +447,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Lenses,
                 Action::LensFilter(false),
                 Action::LensFilter(true),
+                Action::LensSite(false),
+                Action::LensSite(true),
             ] {
                 spawn_button(row, &assets, action);
             }
@@ -719,6 +725,9 @@ fn handle_buttons(
                     }
                 }
                 Action::LensPage => village.lenses.turn_page(),
+                Action::LensSite(forward) => {
+                    village.focus_network_site(&setup, &mut camera, forward)
+                }
                 Action::LensFilter(forward) => {
                     village
                         .lenses
@@ -1009,7 +1018,7 @@ fn refresh(
         let show = match action {
             Action::Lens(row) => show_lenses && row < village.lenses.choices().len(),
             Action::LensPage | Action::ClearLens => show_lenses,
-            Action::LensFilter(_) => action.available(&village),
+            Action::LensFilter(_) | Action::LensSite(_) => action.available(&village),
             Action::Advance(AdvanceAction::Toggle) => true,
             Action::Volume { .. } => false,
             Action::Advance(_) => show_advance,

@@ -369,6 +369,26 @@ impl Village {
         };
     }
 
+    fn focus_network_site(
+        &mut self,
+        setup: &WorldSetup,
+        camera: &mut VillageCamera,
+        forward: bool,
+    ) {
+        let Some(view) = self.lenses.network_view() else {
+            return;
+        };
+        if let Some((id, point)) =
+            self.construction
+                .utilities
+                .focus_lens_site(view, self.lenses.network_site, forward)
+        {
+            let terrain = self.terrain(setup);
+            self.lenses.network_site = Some(id);
+            camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+        }
+    }
+
     fn focus_project_row(
         &mut self,
         catalog: &Catalog,
@@ -818,19 +838,11 @@ fn village_input(
         return;
     }
 
-    if let Some(view) = village.lenses.network_view()
+    if village.lenses.network_view().is_some()
         && keyboard.any_pressed([KeyCode::ControlLeft, KeyCode::ControlRight])
         && keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown])
     {
-        if let Some((id, point)) = village.construction.utilities.focus_lens_site(
-            view,
-            village.lenses.network_site,
-            keyboard.just_pressed(KeyCode::PageDown),
-        ) {
-            let terrain = village.terrain(&setup);
-            village.lenses.network_site = Some(id);
-            camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
-        }
+        village.focus_network_site(&setup, camera, keyboard.just_pressed(KeyCode::PageDown));
         return;
     }
 
