@@ -292,7 +292,14 @@ fn run_garden(path: Option<PathBuf>, night: bool, study: Option<&str>) {
             ..default()
         }),
     )
-    .add_plugins(crate::ui_font::UiFontPlugin)
+    .add_plugins((
+        crate::ui_font::UiFontPlugin,
+        super::navigation::ArtNavigationPlugin(if study.is_some() {
+            super::navigation::ArtTool::Biomes
+        } else {
+            super::navigation::ArtTool::Garden
+        }),
+    ))
     .insert_resource(models)
     .init_resource::<GlobalAmbientLight>()
     .init_resource::<rehearsal::Rehearsal>()
@@ -395,7 +402,7 @@ fn setup(
         BackgroundColor(Color::srgba(0.07, 0.12, 0.1, 0.91)),
         Node {
             position_type: PositionType::Absolute,
-            top: px(12),
+            top: px(48),
             left: px(12),
             padding: UiRect::all(px(12)),
             ..default()
@@ -420,6 +427,7 @@ fn edit(
     scroll: Res<AccumulatedMouseScroll>,
     mut typing: MessageReader<bevy::input::keyboard::KeyboardInput>,
     mut pointer: Local<Option<(Vec2, bool)>>,
+    navigation: Query<&Interaction, With<super::navigation::ArtTool>>,
     mut raycast: MeshRayCast,
     selectable: Query<&SelectableProp>,
     roots: Query<&GardenProp>,
@@ -431,7 +439,14 @@ fn edit(
     let pressed = |key| keys.just_pressed(key);
     let cursor = window.cursor_position();
     if mouse.just_pressed(MouseButton::Left) {
-        *pointer = cursor.map(|origin| (origin, false));
+        *pointer = if navigation
+            .iter()
+            .any(|interaction| *interaction != Interaction::None)
+        {
+            None
+        } else {
+            cursor.map(|origin| (origin, false))
+        };
     }
     if let (Some((origin, moved)), Some(cursor)) = (&mut *pointer, cursor) {
         *moved |= origin.distance_squared(cursor) > 36.;

@@ -132,6 +132,9 @@ struct WorkshopModel;
 struct InspectionCamera;
 
 #[derive(Component)]
+struct InspectionText;
+
+#[derive(Component)]
 struct InspectionLight;
 
 #[derive(Component)]
@@ -199,7 +202,10 @@ pub fn run(asset: Option<&str>) {
         }),
         ..default()
     }))
-    .add_plugins(crate::ui_font::UiFontPlugin)
+    .add_plugins((
+        crate::ui_font::UiFontPlugin,
+        navigation::ArtNavigationPlugin(navigation::ArtTool::Workshop),
+    ))
     .insert_resource(catalog)
     .insert_resource(models)
     .insert_resource(Workshop {
@@ -289,12 +295,13 @@ fn setup(
         Visibility::Hidden,
     ));
     commands.spawn((
+        InspectionText,
         Text::default(),
         ui_font(&assets, 18.0),
         Node {
             position_type: PositionType::Absolute,
             left: px(24),
-            top: px(24),
+            top: px(48),
             padding: UiRect::all(px(16)),
             ..default()
         },
@@ -457,7 +464,7 @@ fn show_model(
         ResMut<GlobalAmbientLight>,
     ),
     mut camera: Single<(&mut Transform, &mut Projection), With<InspectionCamera>>,
-    mut text: Single<&mut Text>,
+    mut text: Single<&mut Text, With<InspectionText>>,
 ) {
     if !workshop.is_changed() {
         return;
@@ -680,7 +687,7 @@ fn apply_surface(
 fn capture_preview(
     (mut commands, keys): (Commands, Res<ButtonInput<KeyCode>>),
     (mut workshop, catalog): (ResMut<Workshop>, Res<WorkshopCatalog>),
-    mut panel: Single<&mut Node, With<Text>>,
+    mut panel: Single<&mut Node, With<InspectionText>>,
     pending: Query<(), With<Screenshot>>,
     scene: Query<(&SceneInstance, Option<&WorkshopModel>, Option<&ScaleFigure>)>,
     sprite_capture: Option<Res<sprites::SpriteCapture>>,

@@ -75,7 +75,11 @@ pub fn run(initial_pose: Option<&str>) {
         }),
         ..default()
     }))
-    .add_plugins((crate::ui_font::UiFontPlugin, ResidentAnimationPlugin))
+    .add_plugins((
+        crate::ui_font::UiFontPlugin,
+        ResidentAnimationPlugin,
+        super::navigation::ArtNavigationPlugin(super::navigation::ArtTool::Residents),
+    ))
     .insert_resource(Lineup { pose, ..default() })
     .init_resource::<GlobalAmbientLight>()
     .add_systems(Startup, setup)
@@ -146,7 +150,7 @@ fn setup(
         BackgroundColor(Color::srgba(0.08, 0.14, 0.11, 0.91)),
         Node {
             position_type: PositionType::Absolute,
-            top: px(16),
+            top: px(48),
             left: px(16),
             padding: UiRect::all(px(14)),
             ..default()

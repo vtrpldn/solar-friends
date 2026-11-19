@@ -10,6 +10,59 @@ impl Plugin for ArtToolsPlugin {
     }
 }
 
+pub(super) struct ArtNavigationPlugin(pub ArtTool);
+
+impl Plugin for ArtNavigationPlugin {
+    fn build(&self, app: &mut App) {
+        let current = self.0;
+        app.add_systems(
+            Startup,
+            move |commands: Commands, assets: Res<AssetServer>| {
+                spawn_navigation(commands, assets, current);
+            },
+        )
+        .add_systems(Update, open_tool);
+    }
+}
+
+fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>, current: ArtTool) {
+    commands
+        .spawn((
+            ArtTools,
+            Node {
+                position_type: PositionType::Absolute,
+                left: px(12),
+                top: px(8),
+                right: px(12),
+                column_gap: px(6),
+                flex_wrap: FlexWrap::Wrap,
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            GlobalZIndex(1),
+        ))
+        .with_children(|bar| {
+            for tool in [ArtTool::Game].into_iter().chain(ArtTool::ALL) {
+                let mut item = bar.spawn((
+                    Node {
+                        padding: UiRect::axes(px(10), px(5)),
+                        ..default()
+                    },
+                    BackgroundColor(if tool == current {
+                        Color::srgb_u8(103, 123, 85)
+                    } else {
+                        Color::srgb_u8(62, 83, 65)
+                    }),
+                ));
+                if tool != current {
+                    item.insert((Button, tool));
+                }
+                item.with_child((Text::new(tool.label()), ui_font(&assets, 15.)));
+            }
+            bar.spawn((LaunchStatus, Text::default(), ui_font(&assets, 14.)));
+        });
+}
+
 #[derive(Component)]
 struct ArtTools;
 
@@ -40,7 +93,7 @@ impl ArtTool {
             Self::Game => "Game menu",
             Self::Collection => "Collection",
             Self::Workshop => "3D inspector",
-            Self::Garden => "Asset Garden",
+            Self::Garden => "Scene editor",
             Self::Biomes => "Biome landscapes",
             Self::Residents => "Resident animations",
         }
