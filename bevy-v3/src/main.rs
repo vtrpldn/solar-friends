@@ -98,7 +98,7 @@ fn main() {
         wildlife::WildlifePlugin,
     ))
     .add_systems(Startup, setup_scene)
-    .add_systems(PostUpdate, update_land)
+    .add_systems(PostUpdate, (update_land, animate_river).chain())
     .run();
 }
 
@@ -143,6 +143,9 @@ struct LandMesh;
 
 #[derive(Component)]
 struct GroundMesh;
+
+#[derive(Component)]
+struct RiverMesh;
 
 type LandDrawKey = (WorldSetup, Option<IVec2>, (u64, u64, usize));
 
@@ -189,12 +192,35 @@ fn update_land(
     }
     commands.spawn((
         LandMesh,
+        RiverMesh,
         Mesh3d(meshes.add(terrain.river_mesh())),
         MeshMaterial3d(materials.add(StandardMaterial {
             perceptual_roughness: 0.35,
             ..default()
         })),
     ));
+}
+
+fn animate_river(
+    village: Res<village::Village>,
+    river: Query<&Mesh3d, With<RiverMesh>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut previous: Local<Option<(AssetId<Mesh>, u64)>>,
+) {
+    let Ok(river) = river.single() else {
+        return;
+    };
+    let frame = (village.seconds() * 12.0).floor() as u64;
+    let key = (river.0.id(), frame);
+    if *previous != Some(key)
+        && let Some(mesh) = meshes.get_mut(&river.0)
+    {
+        mesh.insert_attribute(
+            Mesh::ATTRIBUTE_COLOR,
+            terrain::river_colors(frame as f64 / 12.0),
+        );
+        *previous = Some(key);
+    }
 }
 
 fn pointer_over_ui(ui: &Query<&Interaction>) -> bool {
@@ -425,7 +451,7 @@ mod tests {
             wildlife::WildlifePlugin,
         ))
         .add_systems(Startup, setup_scene)
-        .add_systems(PostUpdate, update_land);
+        .add_systems(PostUpdate, (update_land, animate_river).chain());
         app.finish();
         app.cleanup();
         app.update();

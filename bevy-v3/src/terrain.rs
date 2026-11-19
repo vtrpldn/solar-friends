@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use crate::arrival::{MAP_START, ROAD_END, road_center, road_width, world_position};
 
 const CELLS: u32 = 128;
+const RIVER_COLUMNS: u32 = 9;
 const HALF_WIDTH: f64 = 128.0;
 
 #[derive(Default)]
@@ -514,35 +515,30 @@ impl Terrain {
     }
 
     pub fn river_mesh(&self) -> Mesh {
-        const ACROSS: u32 = 5;
         let mut positions = Vec::new();
-        let mut colors = Vec::new();
         let mut indices = Vec::new();
-        let deep = Color::srgb_u8(58, 110, 127).to_linear();
-        let shallow = Color::srgb_u8(108, 160, 150).to_linear();
         for row in 0..=CELLS * 2 {
             let z = f64::from(row) - HALF_WIDTH;
             let (center, width) = self.river(z);
-            for column in 0..ACROSS {
-                let lateral = (2.0 * f64::from(column) / f64::from(ACROSS - 1)) - 1.0;
+            for column in 0..RIVER_COLUMNS {
+                let lateral = (2.0 * f64::from(column) / f64::from(RIVER_COLUMNS - 1)) - 1.0;
                 let x = center + width * lateral;
                 positions.push([x as f32, 0.05, z as f32]);
-                let tint = deep.mix(&shallow, lateral.abs().powi(2) as f32);
-                colors.push([tint.red, tint.green, tint.blue, 1.0]);
-                if row < CELLS * 2 && column < ACROSS - 1 {
-                    let a = row * ACROSS + column;
+                if row < CELLS * 2 && column < RIVER_COLUMNS - 1 {
+                    let a = row * RIVER_COLUMNS + column;
                     indices.extend_from_slice(&[
                         a,
-                        a + ACROSS,
+                        a + RIVER_COLUMNS,
                         a + 1,
-                        a + ACROSS,
-                        a + ACROSS + 1,
+                        a + RIVER_COLUMNS,
+                        a + RIVER_COLUMNS + 1,
                         a + 1,
                     ]);
                 }
             }
         }
-        surface_mesh(positions, indices).with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
+        surface_mesh(positions, indices)
+            .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, river_colors(0.0))
     }
 
     pub fn river_bank_mesh(&self, extra: f64, height: f32) -> Mesh {
@@ -562,6 +558,27 @@ impl Terrain {
         }
         surface_mesh(positions, indices)
     }
+}
+
+pub fn river_colors(seconds: f64) -> Vec<[f32; 4]> {
+    let deep = Color::srgb_u8(58, 110, 127).to_linear();
+    let shallow = Color::srgb_u8(108, 160, 150).to_linear();
+    let ripple = Color::srgb_u8(161, 195, 185).to_linear();
+    let mut colors = Vec::with_capacity(((CELLS * 2 + 1) * RIVER_COLUMNS) as usize);
+    for row in 0..=CELLS * 2 {
+        let downstream = f64::from(row) - seconds * 0.38;
+        for column in 0..RIVER_COLUMNS {
+            let across = f64::from(column) / f64::from(RIVER_COLUMNS - 1);
+            let edge = (across * 2.0 - 1.0).abs();
+            let crest = (downstream * 0.83 + (across * 9.0 + downstream * 0.13).sin()).sin();
+            let streak = (across * 19.0 + downstream * 0.29).cos().max(0.0);
+            let tint = deep
+                .mix(&shallow, edge.powi(2) as f32)
+                .mix(&ripple, (crest.max(0.0).powi(4) * streak * 0.23) as f32);
+            colors.push([tint.red, tint.green, tint.blue, 1.0]);
+        }
+    }
+    colors
 }
 
 fn surface_mesh(positions: Vec<[f32; 3]>, indices: Vec<u32>) -> Mesh {
